@@ -66,7 +66,6 @@ TypedValue* fg_array_change_key_case(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_change_key_case", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -129,7 +128,6 @@ TypedValue* fg_array_chunk(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_chunk", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -165,7 +163,6 @@ TypedValue* fg_array_combine(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_combine", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -200,7 +197,6 @@ TypedValue* fg_array_count_values(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_count_values", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -236,7 +232,6 @@ TypedValue* fg_array_fill_keys(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_fill_keys", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -272,7 +267,6 @@ TypedValue* fg_array_filter(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_filter", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -307,7 +301,6 @@ TypedValue* fg_array_flip(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_flip", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -333,7 +326,6 @@ TypedValue* fg_array_key_exists(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_array_key_exists((args-0), (args-1))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 2);
@@ -343,7 +335,6 @@ TypedValue* fg_array_key_exists(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_key_exists", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -396,7 +387,6 @@ TypedValue* fg_array_keys(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_keys", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -447,7 +437,6 @@ TypedValue* fg_array_map(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_map", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -497,7 +486,6 @@ TypedValue* fg_array_merge_recursive(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_merge_recursive", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -547,7 +535,6 @@ TypedValue* fg_array_merge(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_merge", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -597,7 +584,6 @@ TypedValue* fg_array_replace_recursive(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_replace_recursive", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -647,7 +633,6 @@ TypedValue* fg_array_replace(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_replace", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -674,7 +659,6 @@ TypedValue* fg_array_multisort(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       Array extraArgs;
       {
@@ -697,7 +681,6 @@ TypedValue* fg_array_multisort(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_multisort", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -750,7 +733,6 @@ TypedValue* fg_array_pad(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_pad", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -785,7 +767,6 @@ TypedValue* fg_array_product(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_product", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -836,7 +817,6 @@ TypedValue* fg_array_push(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_push", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -888,7 +868,6 @@ TypedValue* fg_array_rand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_rand", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -925,7 +904,6 @@ TypedValue* fg_array_reduce(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_reduce", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -977,7 +955,6 @@ TypedValue* fg_array_reverse(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_reverse", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1030,7 +1007,6 @@ TypedValue* fg_array_search(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_search", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1095,7 +1071,6 @@ TypedValue* fg_array_slice(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_slice", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1149,7 +1124,6 @@ TypedValue* fg_array_splice(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_splice", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1184,7 +1158,6 @@ TypedValue* fg_array_sum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_sum", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1236,7 +1209,6 @@ TypedValue* fg_array_unique(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_unique", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1264,7 +1236,6 @@ TypedValue* fg_array_unshift(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL) {
-      rv._count = 0;
       rv.m_type = KindOfInt64;
       Array extraArgs;
       {
@@ -1287,7 +1258,6 @@ TypedValue* fg_array_unshift(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_unshift", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1322,7 +1292,6 @@ TypedValue* fg_array_values(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_values", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1349,7 +1318,6 @@ TypedValue* fg_array_walk_recursive(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_array_walk_recursive((args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 3);
@@ -1359,7 +1327,6 @@ TypedValue* fg_array_walk_recursive(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_walk_recursive", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1386,7 +1353,6 @@ TypedValue* fg_array_walk(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_array_walk((args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 3);
@@ -1396,7 +1362,6 @@ TypedValue* fg_array_walk(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("array_walk", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1424,7 +1389,6 @@ TypedValue* fg_compact(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       Array extraArgs;
       {
@@ -1448,7 +1412,6 @@ TypedValue* fg_compact(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("compact", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1473,7 +1436,6 @@ TypedValue* fg_shuffle(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_shuffle((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -1483,7 +1445,6 @@ TypedValue* fg_shuffle(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("shuffle", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1507,7 +1468,6 @@ long fh_count(TypedValue* var, bool recursive) asm("_ZN4HPHP7f_countERKNS_7Varia
 TypedValue * fg1_count(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_count(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToBooleanInPlace(args-1);
   rv->m_data.num = (int64_t)fh_count((args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
@@ -1520,7 +1480,6 @@ TypedValue* fg_count(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean)) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_count((args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
         frame_free_locals_no_this_inl(ar, 2);
@@ -1536,7 +1495,6 @@ TypedValue* fg_count(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("count", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1571,7 +1529,6 @@ TypedValue* fg_hphp_get_iterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_get_iterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1606,7 +1563,6 @@ TypedValue* fg_hphp_get_mutable_iterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_get_mutable_iterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1631,7 +1587,6 @@ bool fh_in_array(TypedValue* needle, TypedValue* haystack, bool strict) asm("_ZN
 TypedValue * fg1_in_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_in_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-2);
   rv->m_data.num = (fh_in_array((args-0), (args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
@@ -1644,7 +1599,6 @@ TypedValue* fg_in_array(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_in_array((args-0), (args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -1660,7 +1614,6 @@ TypedValue* fg_in_array(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("in_array", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1698,7 +1651,6 @@ TypedValue* fg_range(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("range", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1749,7 +1701,6 @@ TypedValue* fg_array_diff(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_diff", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1801,7 +1752,6 @@ TypedValue* fg_array_udiff(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_udiff", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1852,7 +1802,6 @@ TypedValue* fg_array_diff_assoc(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_diff_assoc", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1904,7 +1853,6 @@ TypedValue* fg_array_diff_uassoc(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_diff_uassoc", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1956,7 +1904,6 @@ TypedValue* fg_array_udiff_assoc(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_udiff_assoc", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2009,7 +1956,6 @@ TypedValue* fg_array_udiff_uassoc(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_udiff_uassoc", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2060,7 +2006,6 @@ TypedValue* fg_array_diff_key(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_diff_key", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2112,7 +2057,6 @@ TypedValue* fg_array_diff_ukey(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_diff_ukey", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2163,7 +2107,6 @@ TypedValue* fg_array_intersect(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_intersect", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2215,7 +2158,6 @@ TypedValue* fg_array_uintersect(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_uintersect", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2266,7 +2208,6 @@ TypedValue* fg_array_intersect_assoc(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_intersect_assoc", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2318,7 +2259,6 @@ TypedValue* fg_array_intersect_uassoc(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_intersect_uassoc", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2370,7 +2310,6 @@ TypedValue* fg_array_uintersect_assoc(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_uintersect_assoc", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2423,7 +2362,6 @@ TypedValue* fg_array_uintersect_uassoc(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_uintersect_uassoc", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2474,7 +2412,6 @@ TypedValue* fg_array_intersect_key(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_intersect_key", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2526,7 +2463,6 @@ TypedValue* fg_array_intersect_ukey(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("array_intersect_ukey", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2551,7 +2487,6 @@ bool fh_sort(TypedValue* array, int sort_flags, bool use_collator) asm("_ZN4HPHP
 TypedValue * fg1_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -2575,7 +2510,6 @@ TypedValue* fg_sort(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || (args-1)->m_type == KindOfInt64)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_sort((args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -2591,7 +2525,6 @@ TypedValue* fg_sort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("sort", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2616,7 +2549,6 @@ bool fh_rsort(TypedValue* array, int sort_flags, bool use_collator) asm("_ZN4HPH
 TypedValue * fg1_rsort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_rsort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -2640,7 +2572,6 @@ TypedValue* fg_rsort(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || (args-1)->m_type == KindOfInt64)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_rsort((args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -2656,7 +2587,6 @@ TypedValue* fg_rsort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("rsort", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2681,7 +2611,6 @@ bool fh_asort(TypedValue* array, int sort_flags, bool use_collator) asm("_ZN4HPH
 TypedValue * fg1_asort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_asort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -2705,7 +2634,6 @@ TypedValue* fg_asort(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || (args-1)->m_type == KindOfInt64)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_asort((args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -2721,7 +2649,6 @@ TypedValue* fg_asort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("asort", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2746,7 +2673,6 @@ bool fh_arsort(TypedValue* array, int sort_flags, bool use_collator) asm("_ZN4HP
 TypedValue * fg1_arsort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_arsort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -2770,7 +2696,6 @@ TypedValue* fg_arsort(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || (args-1)->m_type == KindOfInt64)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_arsort((args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -2786,7 +2711,6 @@ TypedValue* fg_arsort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("arsort", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2810,7 +2734,6 @@ bool fh_ksort(TypedValue* array, int sort_flags) asm("_ZN4HPHP7f_ksortERKNS_14VR
 TypedValue * fg1_ksort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ksort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-1);
   rv->m_data.num = (fh_ksort((args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
@@ -2823,7 +2746,6 @@ TypedValue* fg_ksort(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ksort((args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2839,7 +2761,6 @@ TypedValue* fg_ksort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ksort", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2863,7 +2784,6 @@ bool fh_krsort(TypedValue* array, int sort_flags) asm("_ZN4HPHP8f_krsortERKNS_14
 TypedValue * fg1_krsort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_krsort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-1);
   rv->m_data.num = (fh_krsort((args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
@@ -2876,7 +2796,6 @@ TypedValue* fg_krsort(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_krsort((args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2892,7 +2811,6 @@ TypedValue* fg_krsort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("krsort", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2918,7 +2836,6 @@ TypedValue* fg_usort(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_usort((args-0), (args-1))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 2);
@@ -2928,7 +2845,6 @@ TypedValue* fg_usort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("usort", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2954,7 +2870,6 @@ TypedValue* fg_uasort(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_uasort((args-0), (args-1))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 2);
@@ -2964,7 +2879,6 @@ TypedValue* fg_uasort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("uasort", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2990,7 +2904,6 @@ TypedValue* fg_uksort(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_uksort((args-0), (args-1))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 2);
@@ -3000,7 +2913,6 @@ TypedValue* fg_uksort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("uksort", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3035,7 +2947,6 @@ TypedValue* fg_natsort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("natsort", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3070,7 +2981,6 @@ TypedValue* fg_natcasesort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("natcasesort", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3095,7 +3005,6 @@ TypedValue* fg_i18n_loc_get_default(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfString;
       fh_i18n_loc_get_default((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3106,7 +3015,6 @@ TypedValue* fg_i18n_loc_get_default(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("i18n_loc_get_default", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3129,7 +3037,6 @@ bool fh_i18n_loc_set_default(Value* locale) asm("_ZN4HPHP22f_i18n_loc_set_defaul
 TypedValue * fg1_i18n_loc_set_default(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_i18n_loc_set_default(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_i18n_loc_set_default((Value*)(args-0))) ? 1LL : 0LL;
@@ -3142,7 +3049,6 @@ TypedValue* fg_i18n_loc_set_default(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_i18n_loc_set_default((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -3158,7 +3064,6 @@ TypedValue* fg_i18n_loc_set_default(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("i18n_loc_set_default", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3182,7 +3087,6 @@ bool fh_i18n_loc_set_attribute(long attr, long val) asm("_ZN4HPHP24f_i18n_loc_se
 TypedValue * fg1_i18n_loc_set_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_i18n_loc_set_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -3200,7 +3104,6 @@ TypedValue* fg_i18n_loc_set_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_i18n_loc_set_attribute((long)(args[-0].m_data.num), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -3216,7 +3119,6 @@ TypedValue* fg_i18n_loc_set_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("i18n_loc_set_attribute", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3239,7 +3141,6 @@ bool fh_i18n_loc_set_strength(long strength) asm("_ZN4HPHP23f_i18n_loc_set_stren
 TypedValue * fg1_i18n_loc_set_strength(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_i18n_loc_set_strength(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (fh_i18n_loc_set_strength((long)(args[-0].m_data.num))) ? 1LL : 0LL;
@@ -3252,7 +3153,6 @@ TypedValue* fg_i18n_loc_set_strength(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_i18n_loc_set_strength((long)(args[-0].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -3268,7 +3168,6 @@ TypedValue* fg_i18n_loc_set_strength(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("i18n_loc_set_strength", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3302,7 +3201,6 @@ TypedValue* fg_i18n_loc_get_error_code(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("i18n_loc_get_error_code", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

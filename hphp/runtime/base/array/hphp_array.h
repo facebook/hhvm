@@ -240,36 +240,6 @@ public:
   void uksort(CVarRef cmp_function);
   void usort(CVarRef cmp_function);
   void uasort(CVarRef cmp_function);
-
-  // Assembly linkage
-  static uint32_t getMaskOff() {
-    return (uintptr_t)&((HphpArray*)0)->m_tableMask;
-  }
-
-  static uint32_t getDataOff() {
-    return (uintptr_t)&((HphpArray*)0)->m_data;
-  }
-
-  static uint32_t getHashOff() {
-    return (uintptr_t)&((HphpArray*)0)->m_hash;
-  }
-
-  static uint32_t getElmSize() {
-    return sizeof(Elm);
-  }
-
-  static uint32_t getElmKeyOff() {
-    return offsetof(Elm, key);
-  }
-
-  static uint32_t getElmHashOff() {
-    return offsetof(Elm, hash);
-  }
-
-  static uint32_t getElmDataOff() {
-    return offsetof(Elm, data);
-  }
-
   void dumpDebugInfo() const;
 
   // Used in Elm's data.m_type field to denote an invalid Elm.
@@ -283,30 +253,31 @@ public:
      * It is critical that when we return &data to clients, that they not
      * read or write the _count field! */
     union {
-      int64_t       ikey;
+      int64_t ikey;
       StringData* key;
     };
-    union {
-      struct {
-        Value v;
-        int32_t hash;  // hash == 0 ? ikey is integer key: key is string key
-        DataType m_type;
-      };
-      TypedValue  data; // data.m_type != KindOfTombstone ? <value> : <invalid>
-    };
+    // We store values here, but also some information local to this array:
+    // data.m_aux.u_hash contains either 0 (for an int key) or a string
+    // hashcode; the high bit is the int/string key descriminator.
+    // data.m_type == KindOfTombstone if this is an empty slot in the
+    // array (e.g. after a key is deleted).
+    TypedValue data;
     bool hasStrKey() const {
-      return hash != 0;
+      return data.m_aux.u_hash != 0;
     }
     bool hasIntKey() const {
-      return hash == 0;
+      return data.m_aux.u_hash == 0;
+    }
+    int32_t hash() const {
+      return data.m_aux.u_hash;
     }
     void setStrKey(StringData* k, strhash_t h) {
       key = k;
-      hash = int32_t(h) | 0x80000000;
+      data.m_aux.u_hash = int32_t(h) | 0x80000000;
     }
     void setIntKey(int64_t k) {
       ikey = k;
-      hash = 0;
+      data.m_aux.u_hash = 0;
     }
   };
 

@@ -42,7 +42,6 @@ TypedValue* tg_18WaitableWaitHandle___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_18WaitableWaitHandle___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -55,7 +54,6 @@ TypedValue* tg_18WaitableWaitHandle___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("WaitableWaitHandle::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -80,7 +78,6 @@ TypedValue* tg_18WaitableWaitHandle_getContextIdx(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_18WaitableWaitHandle_getContextIdx((this_));
         frame_free_locals_inl(ar, 0);
@@ -93,7 +90,6 @@ TypedValue* tg_18WaitableWaitHandle_getContextIdx(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("WaitableWaitHandle::getContextIdx");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -119,7 +115,6 @@ TypedValue* tg_18WaitableWaitHandle_getCreator(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_18WaitableWaitHandle_getCreator((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -133,7 +128,6 @@ TypedValue* tg_18WaitableWaitHandle_getCreator(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("WaitableWaitHandle::getCreator");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -159,7 +153,6 @@ TypedValue* tg_18WaitableWaitHandle_getParents(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_18WaitableWaitHandle_getParents((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -173,7 +166,6 @@ TypedValue* tg_18WaitableWaitHandle_getParents(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("WaitableWaitHandle::getParents");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -199,7 +191,6 @@ TypedValue* tg_18WaitableWaitHandle_getStackTrace(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_18WaitableWaitHandle_getStackTrace((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -213,7 +204,6 @@ TypedValue* tg_18WaitableWaitHandle_getStackTrace(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("WaitableWaitHandle::getStackTrace");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

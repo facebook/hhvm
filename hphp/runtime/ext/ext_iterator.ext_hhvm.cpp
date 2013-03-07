@@ -41,7 +41,6 @@ Value* fh_hphp_recursiveiteratoriterator___construct(Value* _rv, Value* obj, Val
 TypedValue * fg1_hphp_recursiveiteratoriterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_recursiveiteratoriterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-3)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-3);
@@ -66,7 +65,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator___construct(HPHP::VM::ActRec *ar) 
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_hphp_recursiveiteratoriterator___construct((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num), (long)(args[-3].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -83,7 +81,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator___construct(HPHP::VM::ActRec *ar) 
       throw_wrong_arguments_nr("hphp_recursiveiteratoriterator___construct", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -107,7 +104,6 @@ Value* fh_hphp_recursiveiteratoriterator_getinneriterator(Value* _rv, Value* obj
 TypedValue * fg1_hphp_recursiveiteratoriterator_getinneriterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_recursiveiteratoriterator_getinneriterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursiveiteratoriterator_getinneriterator((Value*)(rv), (Value*)(args-0));
@@ -121,7 +117,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator_getinneriterator(HPHP::VM::ActRec 
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_hphp_recursiveiteratoriterator_getinneriterator((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -138,7 +133,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator_getinneriterator(HPHP::VM::ActRec 
       throw_wrong_arguments_nr("hphp_recursiveiteratoriterator_getinneriterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -189,7 +183,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator_current(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_recursiveiteratoriterator_current", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -240,7 +233,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator_key(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_recursiveiteratoriterator_key", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -263,7 +255,6 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_next(TypedValue* rv, HPHP::VM::A
 TypedValue * fg1_hphp_recursiveiteratoriterator_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursiveiteratoriterator_next((Value*)(args-0));
@@ -277,7 +268,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator_next(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_recursiveiteratoriterator_next((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -293,7 +283,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator_next(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_recursiveiteratoriterator_next", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -316,7 +305,6 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_rewind(TypedValue* rv, HPHP::VM:
 TypedValue * fg1_hphp_recursiveiteratoriterator_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursiveiteratoriterator_rewind((Value*)(args-0));
@@ -330,7 +318,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator_rewind(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_recursiveiteratoriterator_rewind((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -346,7 +333,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator_rewind(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_recursiveiteratoriterator_rewind", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -369,7 +355,6 @@ bool fh_hphp_recursiveiteratoriterator_valid(Value* obj) asm("_ZN4HPHP38f_hphp_r
 TypedValue * fg1_hphp_recursiveiteratoriterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_recursiveiteratoriterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_recursiveiteratoriterator_valid((Value*)(args-0))) ? 1LL : 0LL;
@@ -382,7 +367,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator_valid(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_recursiveiteratoriterator_valid((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -398,7 +382,6 @@ TypedValue* fg_hphp_recursiveiteratoriterator_valid(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_recursiveiteratoriterator_valid", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -422,7 +405,6 @@ bool fh_hphp_directoryiterator___construct(Value* obj, Value* path) asm("_ZN4HPH
 TypedValue * fg1_hphp_directoryiterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_directoryiterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -440,7 +422,6 @@ TypedValue* fg_hphp_directoryiterator___construct(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_directoryiterator___construct((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -456,7 +437,6 @@ TypedValue* fg_hphp_directoryiterator___construct(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_directoryiterator___construct", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -507,7 +487,6 @@ TypedValue* fg_hphp_directoryiterator_key(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_directoryiterator_key", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -530,7 +509,6 @@ TypedValue * fg1_hphp_directoryiterator_next(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue * fg1_hphp_directoryiterator_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_hphp_directoryiterator_next((Value*)(args-0));
@@ -544,7 +522,6 @@ TypedValue* fg_hphp_directoryiterator_next(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_directoryiterator_next((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -560,7 +537,6 @@ TypedValue* fg_hphp_directoryiterator_next(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_directoryiterator_next", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -583,7 +559,6 @@ TypedValue * fg1_hphp_directoryiterator_rewind(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue * fg1_hphp_directoryiterator_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_hphp_directoryiterator_rewind((Value*)(args-0));
@@ -597,7 +572,6 @@ TypedValue* fg_hphp_directoryiterator_rewind(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_directoryiterator_rewind((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -613,7 +587,6 @@ TypedValue* fg_hphp_directoryiterator_rewind(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_directoryiterator_rewind", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -637,7 +610,6 @@ TypedValue * fg1_hphp_directoryiterator_seek(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue * fg1_hphp_directoryiterator_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -656,7 +628,6 @@ TypedValue* fg_hphp_directoryiterator_seek(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_directoryiterator_seek((Value*)(args-0), (long)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -672,7 +643,6 @@ TypedValue* fg_hphp_directoryiterator_seek(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_directoryiterator_seek", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -723,7 +693,6 @@ TypedValue* fg_hphp_directoryiterator_current(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_directoryiterator_current", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -747,7 +716,6 @@ Value* fh_hphp_directoryiterator___tostring(Value* _rv, Value* obj) asm("_ZN4HPH
 TypedValue * fg1_hphp_directoryiterator___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_directoryiterator___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_directoryiterator___tostring((Value*)(rv), (Value*)(args-0));
@@ -761,7 +729,6 @@ TypedValue* fg_hphp_directoryiterator___tostring(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_directoryiterator___tostring((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -778,7 +745,6 @@ TypedValue* fg_hphp_directoryiterator___tostring(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_directoryiterator___tostring", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -801,7 +767,6 @@ bool fh_hphp_directoryiterator_valid(Value* obj) asm("_ZN4HPHP30f_hphp_directory
 TypedValue * fg1_hphp_directoryiterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_directoryiterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_directoryiterator_valid((Value*)(args-0))) ? 1LL : 0LL;
@@ -814,7 +779,6 @@ TypedValue* fg_hphp_directoryiterator_valid(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_directoryiterator_valid((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -830,7 +794,6 @@ TypedValue* fg_hphp_directoryiterator_valid(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_directoryiterator_valid", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -853,7 +816,6 @@ bool fh_hphp_directoryiterator_isdot(Value* obj) asm("_ZN4HPHP30f_hphp_directory
 TypedValue * fg1_hphp_directoryiterator_isdot(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_directoryiterator_isdot(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_directoryiterator_isdot((Value*)(args-0))) ? 1LL : 0LL;
@@ -866,7 +828,6 @@ TypedValue* fg_hphp_directoryiterator_isdot(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_directoryiterator_isdot((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -882,7 +843,6 @@ TypedValue* fg_hphp_directoryiterator_isdot(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_directoryiterator_isdot", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -907,7 +867,6 @@ bool fh_hphp_recursivedirectoryiterator___construct(Value* obj, Value* path, lon
 TypedValue * fg1_hphp_recursivedirectoryiterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_recursivedirectoryiterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -928,7 +887,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator___construct(HPHP::VM::ActRec *ar)
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_recursivedirectoryiterator___construct((Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -944,7 +902,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator___construct(HPHP::VM::ActRec *ar)
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator___construct", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -995,7 +952,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_key(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator_key", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1018,7 +974,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_next(TypedValue* rv, HPHP::VM::
 TypedValue * fg1_hphp_recursivedirectoryiterator_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursivedirectoryiterator_next((Value*)(args-0));
@@ -1032,7 +987,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_next(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_recursivedirectoryiterator_next((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1048,7 +1002,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_next(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator_next", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1071,7 +1024,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_rewind(TypedValue* rv, HPHP::VM
 TypedValue * fg1_hphp_recursivedirectoryiterator_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursivedirectoryiterator_rewind((Value*)(args-0));
@@ -1085,7 +1037,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_rewind(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_recursivedirectoryiterator_rewind((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1101,7 +1052,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_rewind(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator_rewind", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1125,7 +1075,6 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_seek(TypedValue* rv, HPHP::VM::
 TypedValue * fg1_hphp_recursivedirectoryiterator_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -1144,7 +1093,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_seek(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_recursivedirectoryiterator_seek((Value*)(args-0), (long)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -1160,7 +1108,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_seek(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator_seek", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1211,7 +1158,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_current(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator_current", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1235,7 +1181,6 @@ Value* fh_hphp_recursivedirectoryiterator___tostring(Value* _rv, Value* obj) asm
 TypedValue * fg1_hphp_recursivedirectoryiterator___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_recursivedirectoryiterator___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursivedirectoryiterator___tostring((Value*)(rv), (Value*)(args-0));
@@ -1249,7 +1194,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator___tostring(HPHP::VM::ActRec *ar) 
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_recursivedirectoryiterator___tostring((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1266,7 +1210,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator___tostring(HPHP::VM::ActRec *ar) 
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator___tostring", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1289,7 +1232,6 @@ bool fh_hphp_recursivedirectoryiterator_valid(Value* obj) asm("_ZN4HPHP39f_hphp_
 TypedValue * fg1_hphp_recursivedirectoryiterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_recursivedirectoryiterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_recursivedirectoryiterator_valid((Value*)(args-0))) ? 1LL : 0LL;
@@ -1302,7 +1244,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_valid(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_recursivedirectoryiterator_valid((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1318,7 +1259,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_valid(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator_valid", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1341,7 +1281,6 @@ bool fh_hphp_recursivedirectoryiterator_haschildren(Value* obj) asm("_ZN4HPHP45f
 TypedValue * fg1_hphp_recursivedirectoryiterator_haschildren(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_recursivedirectoryiterator_haschildren(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_recursivedirectoryiterator_haschildren((Value*)(args-0))) ? 1LL : 0LL;
@@ -1354,7 +1293,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_haschildren(HPHP::VM::ActRec *ar)
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_recursivedirectoryiterator_haschildren((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1370,7 +1308,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_haschildren(HPHP::VM::ActRec *ar)
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator_haschildren", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1394,7 +1331,6 @@ Value* fh_hphp_recursivedirectoryiterator_getchildren(Value* _rv, Value* obj) as
 TypedValue * fg1_hphp_recursivedirectoryiterator_getchildren(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_recursivedirectoryiterator_getchildren(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursivedirectoryiterator_getchildren((Value*)(rv), (Value*)(args-0));
@@ -1408,7 +1344,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_getchildren(HPHP::VM::ActRec *ar)
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_hphp_recursivedirectoryiterator_getchildren((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1425,7 +1360,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_getchildren(HPHP::VM::ActRec *ar)
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator_getchildren", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1449,7 +1383,6 @@ Value* fh_hphp_recursivedirectoryiterator_getsubpath(Value* _rv, Value* obj) asm
 TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursivedirectoryiterator_getsubpath((Value*)(rv), (Value*)(args-0));
@@ -1463,7 +1396,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_getsubpath(HPHP::VM::ActRec *ar) 
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_recursivedirectoryiterator_getsubpath((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1480,7 +1412,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_getsubpath(HPHP::VM::ActRec *ar) 
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator_getsubpath", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1504,7 +1435,6 @@ Value* fh_hphp_recursivedirectoryiterator_getsubpathname(Value* _rv, Value* obj)
 TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpathname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpathname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursivedirectoryiterator_getsubpathname((Value*)(rv), (Value*)(args-0));
@@ -1518,7 +1448,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_getsubpathname(HPHP::VM::ActRec *
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_recursivedirectoryiterator_getsubpathname((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1535,7 +1464,6 @@ TypedValue* fg_hphp_recursivedirectoryiterator_getsubpathname(HPHP::VM::ActRec *
       throw_wrong_arguments_nr("hphp_recursivedirectoryiterator_getsubpathname", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1573,7 +1501,6 @@ TypedValue* tg_20MutableArrayIterator___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_20MutableArrayIterator___construct((this_), (args-0));
         frame_free_locals_inl(ar, 1);
@@ -1586,7 +1513,6 @@ TypedValue* tg_20MutableArrayIterator___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MutableArrayIterator::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1624,7 +1550,6 @@ TypedValue* tg_20MutableArrayIterator_currentRef(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MutableArrayIterator::currentRef");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1662,7 +1587,6 @@ TypedValue* tg_20MutableArrayIterator_current(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MutableArrayIterator::current");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1700,7 +1624,6 @@ TypedValue* tg_20MutableArrayIterator_key(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MutableArrayIterator::key");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1725,7 +1648,6 @@ TypedValue* tg_20MutableArrayIterator_next(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_20MutableArrayIterator_next((this_));
         frame_free_locals_inl(ar, 0);
@@ -1738,7 +1660,6 @@ TypedValue* tg_20MutableArrayIterator_next(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MutableArrayIterator::next");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1763,7 +1684,6 @@ TypedValue* tg_20MutableArrayIterator_valid(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_20MutableArrayIterator_valid((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -1776,7 +1696,6 @@ TypedValue* tg_20MutableArrayIterator_valid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MutableArrayIterator::valid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

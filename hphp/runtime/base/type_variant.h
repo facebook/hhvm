@@ -77,10 +77,10 @@ class MutableArrayIter;
 #ifdef HHVM_GC
 typedef GCRootTracker<Variant> VariantBase;
 #else
-struct VariantBase {};
+typedef TypedValue VariantBase;
 #endif
 
-class Variant : VariantBase {
+class Variant : private VariantBase {
  public:
   friend class Array;
   friend class VariantVectorBase;
@@ -89,30 +89,10 @@ class Variant : VariantBase {
   friend class c_StableMap;
 
   /**
-   * Variant does not formally derive from Countable, however it has a
-   * _count field and implements all of the methods from Countable.
-   */
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
-
-  /**
    * setUninitNull occurs frequently; use this version where possible.
    */
   inline void setUninitNull() {
-    static_assert(offsetof(Variant, _count) == 8     &&
-                  offsetof(Variant, m_type) == 12    &&
-                  sizeof(_count) == sizeof(uint32_t) &&
-                  sizeof(m_type) == sizeof(uint32_t),
-                  "Bad offset or size for _count or m_type");
-    /**
-     * One qword store is faster than two dword stores, and gcc can't figure it
-     * out. Note that there are no endianness assumptions: while m_typeAndCount
-     * is a "split" integer field, we're writing all 0's to it so byte order
-     * doesn't matter.
-     *
-     * The dance with the union is needed to explain to g++ 4.4 that the
-     * store through m_countAndTypeUnion aliases _count and m_type.
-     */
-    m_countAndTypeUnion = 0;
+    m_type = KindOfUninit;
     assert(!isInitialized());
   }
 
@@ -121,7 +101,7 @@ class Variant : VariantBase {
   }
 
   enum NullInit { nullInit };
-  Variant(NullInit) { _count = 0; m_type = KindOfNull; }
+  Variant(NullInit) { m_type = KindOfNull; }
   enum NoInit { noInit };
   Variant(NoInit) {}
 
@@ -141,24 +121,26 @@ class Variant : VariantBase {
    * Variant being able to take many other external types, messing up those
    * operator overloads.
    */
-  Variant(bool    v) : _count(0), m_type(KindOfBoolean) { m_data.num = v;}
-  Variant(int     v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
+  Variant(bool    v) { m_type = KindOfBoolean; m_data.num = v; }
+  Variant(int     v) { m_type = KindOfInt64; m_data.num = v; }
   // The following two overloads will accept int64_t whether it's
   // implemented as long or long long.
-  Variant(long   v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
-  Variant(long long v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
-  Variant(uint64_t  v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
+  Variant(long   v) { m_type = KindOfInt64; m_data.num = v; }
+  Variant(long long v) { m_type = KindOfInt64; m_data.num = v; }
+  Variant(uint64_t  v) { m_type = KindOfInt64; m_data.num = v; }
 
-  Variant(double  v) : _count(0), m_type(KindOfDouble ) { m_data.dbl = v;}
+  Variant(double  v) { m_type = KindOfDouble; m_data.dbl = v; }
 
   Variant(litstr  v);
   Variant(const std::string &v);
-  Variant(const StaticString &v) : _count(0), m_type(KindOfStaticString) {
+  Variant(const StaticString &v) {
+    m_type = KindOfStaticString;
     StringData *s = v.get();
     assert(s);
     m_data.pstr = s;
   }
-  Variant(const StaticArray &v) : _count(0), m_type(KindOfArray) {
+  Variant(const StaticArray &v) {
+    m_type = KindOfArray;
     ArrayData *a = v.get();
     assert(a);
     m_data.parr = a;
@@ -173,7 +155,7 @@ class Variant : VariantBase {
   Variant(RefData *r);
 
   // Move ctor for strings
-  Variant(String&& v) : _count(0) {
+  Variant(String&& v) {
     StringData *s = v.get();
     if (LIKELY(s != nullptr)) {
       m_data.pstr = s;
@@ -187,7 +169,8 @@ class Variant : VariantBase {
   }
 
   // Move ctor for arrays
-  Variant(Array&& v) : _count(0), m_type(KindOfArray) {
+  Variant(Array&& v) {
+    m_type = KindOfArray;
     ArrayData *a = v.get();
     if (LIKELY(a != nullptr)) {
       m_data.parr = a;
@@ -198,7 +181,8 @@ class Variant : VariantBase {
   }
 
   // Move ctor for objects
-  Variant(Object&& v) : _count(0), m_type(KindOfObject) {
+  Variant(Object&& v) {
+    m_type = KindOfObject;
     ObjectData *pobj = v.get();
     if (pobj) {
       m_data.pobj = pobj;
@@ -233,7 +217,7 @@ class Variant : VariantBase {
 #endif
 
   // Move ctor
-  Variant(Variant&& v) : _count(0) {
+  Variant(Variant&& v) {
     const Variant *other =
       UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pref->var() : &v;
     assert(this != other);
@@ -252,7 +236,7 @@ class Variant : VariantBase {
 
     Variant goner(noInit);
     goner.m_data = lhs.m_data;
-    goner.m_countAndTypeUnion = lhs.m_countAndTypeUnion;
+    goner.m_type = lhs.m_type;;
 
     lhs.m_data = rhs.m_data;
     lhs.m_type = rhs.m_type == KindOfUninit ? KindOfNull : rhs.m_type;
@@ -266,12 +250,10 @@ class Variant : VariantBase {
   inline ALWAYS_INLINE static void destructDataImpl(RefData* d, DataType t);
   friend class VarNR;
   // This helper is only used to construct VarNR
-  static const int NR_FLAG = 1 << 29;
-  void initForVarNR(DataType dt) { _count = NR_FLAG; m_type = dt; }
+  void initForVarNR(DataType dt) { m_aux.u_varNrFlag = NR_FLAG; m_type = dt; }
 
  public:
-  bool isVarNR() const { return _count == NR_FLAG; }
-  void setVarNR() const { _count = NR_FLAG; }
+  bool isVarNR() const { return m_aux.u_varNrFlag == NR_FLAG; }
 
   /**
    * Break bindings and set to null.
@@ -446,7 +428,7 @@ class Variant : VariantBase {
       if (t->m_type == KindOfObject) return t->m_data.pobj;
     }
     throw_call_non_object();
-    return 0;
+    return nullptr;
   }
 
   /**
@@ -1107,11 +1089,13 @@ class Variant : VariantBase {
    */
   int64_t *getInt64Data() const {
     assert(getType() == KindOfInt64);
-    return m_type == KindOfRef ? &m_data.pref->var()->m_data.num : &m_data.num;
+    return m_type == KindOfRef ? &m_data.pref->var()->m_data.num :
+                     const_cast<int64_t*>(&m_data.num);
   }
   double *getDoubleData() const {
     assert(getType() == KindOfDouble);
-    return m_type == KindOfRef ? &m_data.pref->var()->m_data.dbl : &m_data.dbl;
+    return m_type == KindOfRef ? &m_data.pref->var()->m_data.dbl :
+                     const_cast<double*>(&m_data.dbl);
   }
   StringData *getStringData() const {
     assert(getType() == KindOfString || getType() == KindOfStaticString);
@@ -1160,8 +1144,7 @@ class Variant : VariantBase {
   ObjectData *getArrayAccess() const;
   void callOffsetUnset(CVarRef key);
   int64_t getNumData() const { return m_data.num; }
-  bool isStatic() const { return _count == RefCountStaticValue; }
-  void setEvalScalar() const;
+  void setEvalScalar();
 
   void setToDefaultObject();
 
@@ -1237,29 +1220,6 @@ class Variant : VariantBase {
     return *(String*)acc;
   }
 
-  /**
-   * The order of the data members is significant. The _count field must
-   * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
-   */
- protected:
-  mutable union Data {
-    int64_t        num;
-    double       dbl;
-    StringData  *pstr;
-    ArrayData   *parr;
-    ObjectData  *pobj;
-    RefData     *pref; // shared data between strongly bound Variants
-  } m_data;
- protected:
-  union {
-    // Anonymous: just use _count, m_type
-    struct {
-      mutable int32_t _count;
-      mutable DataType m_type;
-    };
-    uint64_t m_countAndTypeUnion;
-  };
-
  private:
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
   bool isObjectConvertable() {
@@ -1313,13 +1273,13 @@ class Variant : VariantBase {
     }
     Variant scopy(noInit);
     scopy.m_data = self->m_data;
-    scopy.m_countAndTypeUnion = self->m_countAndTypeUnion;
+    scopy.m_type = self->m_type;
 
     const DataType otype = other->m_type;
     if (UNLIKELY(otype == KindOfUninit)) {
       self->m_type = KindOfNull;
     } else {
-      const Data odata = other->m_data;
+      const Value odata = other->m_data;
       if (IS_REFCOUNTED_TYPE(otype)) {
         odata.pstr->incRefCount();
       }
@@ -1361,7 +1321,6 @@ public:
     v.m_data.pref->incRefCount();
     m_data.pref = v.m_data.pref;
     m_type = KindOfRef;
-    _count = 0;
   }
 
   inline ALWAYS_INLINE void constructValHelper(CVarRef v) {
@@ -1371,7 +1330,6 @@ public:
     if (IS_REFCOUNTED_TYPE(other->m_type)) {
       other->m_data.pstr->incRefCount();
     }
-    _count = 0;
     m_type = other->m_type != KindOfUninit ? other->m_type : KindOfNull;
     m_data = other->m_data;
   }
@@ -1398,7 +1356,6 @@ public:
 
   inline ALWAYS_INLINE
   void constructWithRefHelper(CVarRef v, const ArrayData *arr) {
-    _count = 0;
     setWithRefHelper(v, arr, false);
   }
 
@@ -1451,43 +1408,7 @@ private:
   Array  toArrayHelper() const;
   Object toObjectHelper() const;
 
-  static void compileTimeAssertions() {
-    static_assert(offsetof(Variant,m_data) == offsetof(TypedValue,m_data),
-                  "Offset of m_data must be equal in Variant and TypedValue");
-    static_assert(offsetof(Variant,_count) == offsetof(TypedValue,_count),
-                  "Offset of _count must be equal in Variant and TypedValue");
-    static_assert(offsetof(Variant,m_type) == offsetof(TypedValue,m_type),
-                  "Offset of m_type must be equal in Variant and TypedValue");
-    static_assert(offsetof(Variant,_count) == FAST_REFCOUNT_OFFSET,
-                  "Offset of _count in Variant must be FAST_REFCOUNT_OFFSET");
-  }
   DataType convertToNumeric(int64_t *lval, double *dval) const;
-};
-
-class VariantVectorBase {
-public:
-  ~VariantVectorBase();
-  Variant &operator[](int i) {
-    return ((Variant*)(this+1))[i];
-  }
-  void pushWithRef(CVarRef v);
-protected:
-  union {
-    int           m_size;
-    TypedValue    force_alignment;
-  };
-};
-
-template <int num>
-class VariantVector : public VariantVectorBase {
-public:
-  VariantVector() { m_size = 0; }
-  VariantVector(int n) {
-    m_size = n;
-    memset(m_elems, 0, n * sizeof(TypedValue));
-  }
-protected:
-  TypedValue    m_elems[num];
 };
 
 class RefResultValue {

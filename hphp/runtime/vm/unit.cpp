@@ -682,14 +682,14 @@ void Unit::initialMerge() {
               StringData* s = (StringData*)((char*)obj - (int)k);
               TypedValue* v = (TypedValue*)m_mergeInfo->mergeableData(ix + 1);
               ix += sizeof(TypedValue) / sizeof(void*);
-              v->_count = TargetCache::allocConstant(s);
+              v->m_aux.u_cacheHandle = TargetCache::allocConstant(s);
               break;
             }
             case UnitMergeKindGlobal: {
               StringData* s = (StringData*)((char*)obj - (int)k);
               TypedValue* v = (TypedValue*)m_mergeInfo->mergeableData(ix + 1);
               ix += sizeof(TypedValue) / sizeof(void*);
-              v->_count = TargetCache::GlobalCache::alloc(s);
+              v->m_aux.u_cacheHandle = TargetCache::GlobalCache::alloc(s);
               break;
             }
           }
@@ -1017,7 +1017,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable_define);
           StringData* name = (StringData*)((char*)obj - (int)k);
           TypedValue *v = (TypedValue*)mi->mergeableData(ix + 1);
-          mergeCns(getDataRef<TypedValue>(tcbase, v->_count), v, name);
+          mergeCns(getDataRef<TypedValue>(tcbase, v->m_aux.u_cacheHandle), v, name);
           ix += 1 + sizeof(TypedValue) / sizeof(void*);
           obj = mi->mergeableObj(ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
@@ -1030,7 +1030,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable_global);
           StringData* name = (StringData*)((char*)obj - (int)k);
           TypedValue *v = (TypedValue*)mi->mergeableData(ix + 1);
-          setGlobal(&getDataRef<char>(tcbase, v->_count), v, name);
+          setGlobal(&getDataRef<char>(tcbase, v->m_aux.u_cacheHandle), v, name);
           ix += 1 + sizeof(TypedValue) / sizeof(void*);
           obj = mi->mergeableObj(ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);

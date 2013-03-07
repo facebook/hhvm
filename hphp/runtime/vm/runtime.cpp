@@ -470,9 +470,8 @@ void deepInitHelper(TypedValue* propVec, const TypedValue* propData,
   const TypedValue* src = propData;
   for (; src != propData + nProps; ++src, ++dst) {
     *dst = *src;
-    // _count is set to 1 for properties that need "deep" initialization,
-    // otherwise _count is set to 0
-    if (src->_count) {
+    // m_aux.u_deepInit is true for properties that need "deep" initialization
+    if (src->m_aux.u_deepInit) {
       dst->m_data.pstr->incRefCount();
       collectionDeepCopyTV(dst);
     }

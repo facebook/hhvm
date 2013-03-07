@@ -49,7 +49,6 @@ TypedValue* tg1_10UConverter___construct(TypedValue* rv, HPHP::VM::ActRec* ar, i
 TypedValue* tg1_10UConverter___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 2
@@ -78,7 +77,6 @@ TypedValue* tg_10UConverter___construct(HPHP::VM::ActRec *ar) {
       if (count <= 2LL) {
         if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           String defVal0 = "utf-8";
           String defVal1 = "utf-8";
@@ -99,7 +97,6 @@ TypedValue* tg_10UConverter___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -137,7 +134,6 @@ TypedValue* tg_10UConverter___destruct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::__destruct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -163,7 +159,6 @@ TypedValue* tg_10UConverter_getSourceEncoding(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_10UConverter_getSourceEncoding((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -177,7 +172,6 @@ TypedValue* tg_10UConverter_getSourceEncoding(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::getSourceEncoding");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -199,7 +193,6 @@ TypedValue* tg1_10UConverter_setSourceEncoding(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue* tg1_10UConverter_setSourceEncoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_10UConverter_setSourceEncoding((this_), (Value*)(args-0));
@@ -215,7 +208,6 @@ TypedValue* tg_10UConverter_setSourceEncoding(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_10UConverter_setSourceEncoding((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -234,7 +226,6 @@ TypedValue* tg_10UConverter_setSourceEncoding(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::setSourceEncoding");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -260,7 +251,6 @@ TypedValue* tg_10UConverter_getDestinationEncoding(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_10UConverter_getDestinationEncoding((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -274,7 +264,6 @@ TypedValue* tg_10UConverter_getDestinationEncoding(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::getDestinationEncoding");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -296,7 +285,6 @@ TypedValue* tg1_10UConverter_setDestinationEncoding(TypedValue* rv, HPHP::VM::Ac
 TypedValue* tg1_10UConverter_setDestinationEncoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_10UConverter_setDestinationEncoding((this_), (Value*)(args-0));
@@ -312,7 +300,6 @@ TypedValue* tg_10UConverter_setDestinationEncoding(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_10UConverter_setDestinationEncoding((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -331,7 +318,6 @@ TypedValue* tg_10UConverter_setDestinationEncoding(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::setDestinationEncoding");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -356,7 +342,6 @@ TypedValue* tg_10UConverter_getSourceType(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_10UConverter_getSourceType((this_));
         frame_free_locals_inl(ar, 0);
@@ -369,7 +354,6 @@ TypedValue* tg_10UConverter_getSourceType(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::getSourceType");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -394,7 +378,6 @@ TypedValue* tg_10UConverter_getDestinationType(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_10UConverter_getDestinationType((this_));
         frame_free_locals_inl(ar, 0);
@@ -407,7 +390,6 @@ TypedValue* tg_10UConverter_getDestinationType(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::getDestinationType");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -433,7 +415,6 @@ TypedValue* tg_10UConverter_getSubstChars(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_10UConverter_getSubstChars((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -447,7 +428,6 @@ TypedValue* tg_10UConverter_getSubstChars(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::getSubstChars");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -469,7 +449,6 @@ bool th_10UConverter_setSubstChars(ObjectData* this_, Value* chars) asm("_ZN4HPH
 TypedValue* tg1_10UConverter_setSubstChars(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_10UConverter_setSubstChars(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_10UConverter_setSubstChars((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -484,7 +463,6 @@ TypedValue* tg_10UConverter_setSubstChars(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_10UConverter_setSubstChars((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -503,7 +481,6 @@ TypedValue* tg_10UConverter_setSubstChars(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::setSubstChars");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -569,7 +546,6 @@ TypedValue* tg_10UConverter_fromUCallback(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::fromUCallback");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -635,7 +611,6 @@ TypedValue* tg_10UConverter_toUCallback(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::toUCallback");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -701,7 +676,6 @@ TypedValue* tg_10UConverter_convert(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::convert");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -772,7 +746,6 @@ TypedValue* tg_10UConverter_transcode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("UConverter::transcode", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -797,7 +770,6 @@ TypedValue* tg_10UConverter_getErrorCode(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_10UConverter_getErrorCode((this_));
         frame_free_locals_inl(ar, 0);
@@ -810,7 +782,6 @@ TypedValue* tg_10UConverter_getErrorCode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::getErrorCode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -836,7 +807,6 @@ TypedValue* tg_10UConverter_getErrorMessage(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_10UConverter_getErrorMessage((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -850,7 +820,6 @@ TypedValue* tg_10UConverter_getErrorMessage(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("UConverter::getErrorMessage");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -873,7 +842,6 @@ Value* th_10UConverter_reasonText(Value* _rv, char const* cls_, long reason) asm
 TypedValue* tg1_10UConverter_reasonText(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue* tg1_10UConverter_reasonText(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
   th_10UConverter_reasonText((Value*)(rv), ("UConverter"), (long)(args[-0].m_data.num));
@@ -887,7 +855,6 @@ TypedValue* tg_10UConverter_reasonText(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_10UConverter_reasonText((Value*)(&(rv)), ("UConverter"), (long)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -904,7 +871,6 @@ TypedValue* tg_10UConverter_reasonText(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("UConverter::reasonText", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -928,7 +894,6 @@ TypedValue* tg_10UConverter_getAvailable(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       th_10UConverter_getAvailable((Value*)(&(rv)), ("UConverter"));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -939,7 +904,6 @@ TypedValue* tg_10UConverter_getAvailable(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("UConverter::getAvailable", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -962,7 +926,6 @@ Value* th_10UConverter_getAliases(Value* _rv, char const* cls_, Value* encoding)
 TypedValue* tg1_10UConverter_getAliases(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue* tg1_10UConverter_getAliases(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
   th_10UConverter_getAliases((Value*)(rv), ("UConverter"), (Value*)(args-0));
@@ -976,7 +939,6 @@ TypedValue* tg_10UConverter_getAliases(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_10UConverter_getAliases((Value*)(&(rv)), ("UConverter"), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -993,7 +955,6 @@ TypedValue* tg_10UConverter_getAliases(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("UConverter::getAliases", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1017,7 +978,6 @@ TypedValue* tg_10UConverter_getStandards(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       th_10UConverter_getStandards((Value*)(&(rv)), ("UConverter"));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1028,7 +988,6 @@ TypedValue* tg_10UConverter_getStandards(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("UConverter::getStandards", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

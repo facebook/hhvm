@@ -71,7 +71,6 @@ TypedValue* fg_bzopen(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("bzopen", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -122,7 +121,6 @@ TypedValue* fg_bzflush(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("bzflush", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -146,7 +144,6 @@ Value* fh_bzerrstr(Value* _rv, Value* bz) asm("_ZN4HPHP10f_bzerrstrERKNS_6Object
 TypedValue * fg1_bzerrstr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_bzerrstr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_bzerrstr((Value*)(rv), (Value*)(args-0));
@@ -160,7 +157,6 @@ TypedValue* fg_bzerrstr(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_bzerrstr((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -177,7 +173,6 @@ TypedValue* fg_bzerrstr(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("bzerrstr", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -228,7 +223,6 @@ TypedValue* fg_bzerror(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("bzerror", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -251,7 +245,6 @@ long fh_bzerrno(Value* bz) asm("_ZN4HPHP9f_bzerrnoERKNS_6ObjectE");
 TypedValue * fg1_bzerrno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_bzerrno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_bzerrno((Value*)(args-0));
@@ -264,7 +257,6 @@ TypedValue* fg_bzerrno(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_bzerrno((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -280,7 +272,6 @@ TypedValue* fg_bzerrno(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("bzerrno", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -347,7 +338,6 @@ TypedValue* fg_bzcompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("bzcompress", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -409,7 +399,6 @@ TypedValue* fg_bzdecompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("bzdecompress", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

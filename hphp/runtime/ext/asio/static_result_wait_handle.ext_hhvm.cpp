@@ -51,7 +51,6 @@ TypedValue* tg_22StaticResultWaitHandle___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_22StaticResultWaitHandle___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -64,7 +63,6 @@ TypedValue* tg_22StaticResultWaitHandle___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StaticResultWaitHandle::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -89,7 +87,6 @@ TypedValue* tg_22StaticResultWaitHandle_create(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       th_22StaticResultWaitHandle_create((Value*)(&(rv)), ("StaticResultWaitHandle"), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -100,7 +97,6 @@ TypedValue* tg_22StaticResultWaitHandle_create(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("StaticResultWaitHandle::create", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

@@ -38,7 +38,6 @@ Value* fh_xml_parser_create(Value* _rv, Value* encoding) asm("_ZN4HPHP19f_xml_pa
 TypedValue * fg1_xml_parser_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_parser_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
   fh_xml_parser_create((Value*)(rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
@@ -52,7 +51,6 @@ TypedValue* fg_xml_parser_create(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_xml_parser_create((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -69,7 +67,6 @@ TypedValue* fg_xml_parser_create(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("xml_parser_create", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -92,7 +89,6 @@ bool fh_xml_parser_free(Value* parser) asm("_ZN4HPHP17f_xml_parser_freeERKNS_6Ob
 TypedValue * fg1_xml_parser_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_parser_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xml_parser_free((Value*)(args-0))) ? 1LL : 0LL;
@@ -105,7 +101,6 @@ TypedValue* fg_xml_parser_free(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_parser_free((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -121,7 +116,6 @@ TypedValue* fg_xml_parser_free(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_parser_free", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -146,7 +140,6 @@ long fh_xml_parse(Value* parser, Value* data, bool is_final) asm("_ZN4HPHP11f_xm
 TypedValue * fg1_xml_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   switch (count) {
   default: // count >= 3
@@ -172,7 +165,6 @@ TypedValue* fg_xml_parse(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_xml_parse((Value*)(args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true));
         frame_free_locals_no_this_inl(ar, 3);
@@ -188,7 +180,6 @@ TypedValue* fg_xml_parse(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_parse", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -214,7 +205,6 @@ long fh_xml_parse_into_struct(Value* parser, Value* data, TypedValue* values, Ty
 TypedValue * fg1_xml_parse_into_struct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_parse_into_struct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   switch (count) {
   default: // count >= 4
@@ -238,7 +228,6 @@ TypedValue* fg_xml_parse_into_struct(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         VRefParamValue defVal3 = null;
         rv.m_data.num = (int64_t)fh_xml_parse_into_struct((Value*)(args-0), (Value*)(args-1), (args-2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
@@ -255,7 +244,6 @@ TypedValue* fg_xml_parse_into_struct(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_parse_into_struct", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -280,7 +268,6 @@ Value* fh_xml_parser_create_ns(Value* _rv, Value* encoding, Value* separator) as
 TypedValue * fg1_xml_parser_create_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_parser_create_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 2
@@ -305,7 +292,6 @@ TypedValue* fg_xml_parser_create_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_xml_parser_create_ns((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -322,7 +308,6 @@ TypedValue* fg_xml_parser_create_ns(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("xml_parser_create_ns", 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -379,7 +364,6 @@ TypedValue* fg_xml_parser_get_option(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_parser_get_option", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -404,7 +388,6 @@ bool fh_xml_parser_set_option(Value* parser, int option, TypedValue* value) asm(
 TypedValue * fg1_xml_parser_set_option(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_parser_set_option(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -422,7 +405,6 @@ TypedValue* fg_xml_parser_set_option(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_parser_set_option((Value*)(args-0), (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -438,7 +420,6 @@ TypedValue* fg_xml_parser_set_option(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_parser_set_option", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -462,7 +443,6 @@ bool fh_xml_set_character_data_handler(Value* parser, TypedValue* handler) asm("
 TypedValue * fg1_xml_set_character_data_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_set_character_data_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xml_set_character_data_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -475,7 +455,6 @@ TypedValue* fg_xml_set_character_data_handler(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_set_character_data_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -491,7 +470,6 @@ TypedValue* fg_xml_set_character_data_handler(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_set_character_data_handler", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -515,7 +493,6 @@ bool fh_xml_set_default_handler(Value* parser, TypedValue* handler) asm("_ZN4HPH
 TypedValue * fg1_xml_set_default_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_set_default_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xml_set_default_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -528,7 +505,6 @@ TypedValue* fg_xml_set_default_handler(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_set_default_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -544,7 +520,6 @@ TypedValue* fg_xml_set_default_handler(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_set_default_handler", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -569,7 +544,6 @@ bool fh_xml_set_element_handler(Value* parser, TypedValue* start_element_handler
 TypedValue * fg1_xml_set_element_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_set_element_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xml_set_element_handler((Value*)(args-0), (args-1), (args-2))) ? 1LL : 0LL;
@@ -582,7 +556,6 @@ TypedValue* fg_xml_set_element_handler(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_set_element_handler((Value*)(args-0), (args-1), (args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -598,7 +571,6 @@ TypedValue* fg_xml_set_element_handler(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_set_element_handler", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -622,7 +594,6 @@ bool fh_xml_set_processing_instruction_handler(Value* parser, TypedValue* handle
 TypedValue * fg1_xml_set_processing_instruction_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_set_processing_instruction_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xml_set_processing_instruction_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -635,7 +606,6 @@ TypedValue* fg_xml_set_processing_instruction_handler(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_set_processing_instruction_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -651,7 +621,6 @@ TypedValue* fg_xml_set_processing_instruction_handler(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_set_processing_instruction_handler", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -675,7 +644,6 @@ bool fh_xml_set_start_namespace_decl_handler(Value* parser, TypedValue* handler)
 TypedValue * fg1_xml_set_start_namespace_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_set_start_namespace_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xml_set_start_namespace_decl_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -688,7 +656,6 @@ TypedValue* fg_xml_set_start_namespace_decl_handler(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_set_start_namespace_decl_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -704,7 +671,6 @@ TypedValue* fg_xml_set_start_namespace_decl_handler(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_set_start_namespace_decl_handler", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -728,7 +694,6 @@ bool fh_xml_set_end_namespace_decl_handler(Value* parser, TypedValue* handler) a
 TypedValue * fg1_xml_set_end_namespace_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_set_end_namespace_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xml_set_end_namespace_decl_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -741,7 +706,6 @@ TypedValue* fg_xml_set_end_namespace_decl_handler(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_set_end_namespace_decl_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -757,7 +721,6 @@ TypedValue* fg_xml_set_end_namespace_decl_handler(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_set_end_namespace_decl_handler", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -781,7 +744,6 @@ bool fh_xml_set_unparsed_entity_decl_handler(Value* parser, TypedValue* handler)
 TypedValue * fg1_xml_set_unparsed_entity_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_set_unparsed_entity_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xml_set_unparsed_entity_decl_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -794,7 +756,6 @@ TypedValue* fg_xml_set_unparsed_entity_decl_handler(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_set_unparsed_entity_decl_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -810,7 +771,6 @@ TypedValue* fg_xml_set_unparsed_entity_decl_handler(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_set_unparsed_entity_decl_handler", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -834,7 +794,6 @@ bool fh_xml_set_external_entity_ref_handler(Value* parser, TypedValue* handler) 
 TypedValue * fg1_xml_set_external_entity_ref_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_set_external_entity_ref_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xml_set_external_entity_ref_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -847,7 +806,6 @@ TypedValue* fg_xml_set_external_entity_ref_handler(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_set_external_entity_ref_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -863,7 +821,6 @@ TypedValue* fg_xml_set_external_entity_ref_handler(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_set_external_entity_ref_handler", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -887,7 +844,6 @@ bool fh_xml_set_notation_decl_handler(Value* parser, TypedValue* handler) asm("_
 TypedValue * fg1_xml_set_notation_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_set_notation_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xml_set_notation_decl_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -900,7 +856,6 @@ TypedValue* fg_xml_set_notation_decl_handler(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_set_notation_decl_handler((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -916,7 +871,6 @@ TypedValue* fg_xml_set_notation_decl_handler(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_set_notation_decl_handler", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -940,7 +894,6 @@ bool fh_xml_set_object(Value* parser, TypedValue* object) asm("_ZN4HPHP16f_xml_s
 TypedValue * fg1_xml_set_object(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_set_object(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xml_set_object((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -953,7 +906,6 @@ TypedValue* fg_xml_set_object(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xml_set_object((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -969,7 +921,6 @@ TypedValue* fg_xml_set_object(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_set_object", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -992,7 +943,6 @@ long fh_xml_get_current_byte_index(Value* parser) asm("_ZN4HPHP28f_xml_get_curre
 TypedValue * fg1_xml_get_current_byte_index(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_get_current_byte_index(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_xml_get_current_byte_index((Value*)(args-0));
@@ -1005,7 +955,6 @@ TypedValue* fg_xml_get_current_byte_index(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_xml_get_current_byte_index((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1021,7 +970,6 @@ TypedValue* fg_xml_get_current_byte_index(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_get_current_byte_index", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1044,7 +992,6 @@ long fh_xml_get_current_column_number(Value* parser) asm("_ZN4HPHP31f_xml_get_cu
 TypedValue * fg1_xml_get_current_column_number(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_get_current_column_number(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_xml_get_current_column_number((Value*)(args-0));
@@ -1057,7 +1004,6 @@ TypedValue* fg_xml_get_current_column_number(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_xml_get_current_column_number((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1073,7 +1019,6 @@ TypedValue* fg_xml_get_current_column_number(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_get_current_column_number", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1096,7 +1041,6 @@ long fh_xml_get_current_line_number(Value* parser) asm("_ZN4HPHP29f_xml_get_curr
 TypedValue * fg1_xml_get_current_line_number(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_get_current_line_number(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_xml_get_current_line_number((Value*)(args-0));
@@ -1109,7 +1053,6 @@ TypedValue* fg_xml_get_current_line_number(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_xml_get_current_line_number((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1125,7 +1068,6 @@ TypedValue* fg_xml_get_current_line_number(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_get_current_line_number", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1148,7 +1090,6 @@ long fh_xml_get_error_code(Value* parser) asm("_ZN4HPHP20f_xml_get_error_codeERK
 TypedValue * fg1_xml_get_error_code(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_get_error_code(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_xml_get_error_code((Value*)(args-0));
@@ -1161,7 +1102,6 @@ TypedValue* fg_xml_get_error_code(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_xml_get_error_code((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1177,7 +1117,6 @@ TypedValue* fg_xml_get_error_code(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_get_error_code", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1201,7 +1140,6 @@ Value* fh_xml_error_string(Value* _rv, int code) asm("_ZN4HPHP18f_xml_error_stri
 TypedValue * fg1_xml_error_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xml_error_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
   fh_xml_error_string((Value*)(rv), (int)(args[-0].m_data.num));
@@ -1215,7 +1153,6 @@ TypedValue* fg_xml_error_string(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_xml_error_string((Value*)(&(rv)), (int)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1232,7 +1169,6 @@ TypedValue* fg_xml_error_string(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xml_error_string", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1256,7 +1192,6 @@ Value* fh_utf8_decode(Value* _rv, Value* data) asm("_ZN4HPHP13f_utf8_decodeERKNS
 TypedValue * fg1_utf8_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_utf8_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
   fh_utf8_decode((Value*)(rv), (Value*)(args-0));
@@ -1270,7 +1205,6 @@ TypedValue* fg_utf8_decode(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_utf8_decode((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1287,7 +1221,6 @@ TypedValue* fg_utf8_decode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("utf8_decode", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1311,7 +1244,6 @@ Value* fh_utf8_encode(Value* _rv, Value* data) asm("_ZN4HPHP13f_utf8_encodeERKNS
 TypedValue * fg1_utf8_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_utf8_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
   fh_utf8_encode((Value*)(rv), (Value*)(args-0));
@@ -1325,7 +1257,6 @@ TypedValue* fg_utf8_encode(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_utf8_encode((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1342,7 +1273,6 @@ TypedValue* fg_utf8_encode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("utf8_encode", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

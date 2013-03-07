@@ -55,7 +55,7 @@ inline bool tvIsPlausible(const TypedValue* tv) {
 
 inline bool tvWillBeReleased(TypedValue* tv) {
   return IS_REFCOUNTED_TYPE(tv->m_type) &&
-         tv->m_data.pind->_count <= 1;
+         tv->m_data.pstr->getCount() <= 1;
 }
 
 // Assumes 'tv' is live

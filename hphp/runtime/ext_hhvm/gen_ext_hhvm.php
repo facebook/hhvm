@@ -211,28 +211,23 @@ function emitExtCall($obj, $ext_hhvm_cpp, $indent, $prefix) {
   $func_call_suffix = ";\n" . copyAndReturnRV($indent, $obj);
   if (!isTypeCppReturnByRef($obj->returnType)) {
     if ($obj->returnType == 'bool') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfBoolean;' . "\n");
       $func_call_prefix = 'rv.m_data.num = (';
       $func_call_suffix = ") ? 1LL : 0LL;\n" . copyAndReturnRV($indent, $obj);
     } else if ($obj->returnType == 'int') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfInt64;' . "\n");
       $func_call_prefix = 'rv.m_data.num = (int64_t)';
       $func_call_suffix = ";\n" . copyAndReturnRV($indent, $obj);
     } else if ($obj->returnType == 'long') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfInt64;' . "\n");
       $func_call_prefix = 'rv.m_data.num = (int64_t)';
       $func_call_suffix = ";\n" . copyAndReturnRV($indent, $obj);
     } else if ($obj->returnType == 'double') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfDouble;' . "\n");
       $func_call_prefix = 'rv.m_data.dbl = ';
       $func_call_suffix = ";\n" . copyAndReturnRV($indent, $obj);
     } else if ($obj->returnType == 'void') {
       fwrite($ext_hhvm_cpp, $indent . 'rv.m_data.num = 0LL;' . "\n");
-      fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfNull;' . "\n");
       $func_call_prefix = '';
       $func_call_suffix = ";\n" . copyAndReturnRV($indent, $obj);
@@ -242,19 +237,16 @@ function emitExtCall($obj, $ext_hhvm_cpp, $indent, $prefix) {
     }
   } else {
     if ($obj->returnType == 'HPHP::String') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfString;' . "\n");
       $func_call_prefix = '';
       $func_call_suffix = ";\n" . $indent . 'if (rv.m_data.num == 0LL) ' .
         'rv.m_type = KindOfNull;' . "\n" . copyAndReturnRV($indent, $obj);
     } else if ($obj->returnType == 'HPHP::Array') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfArray;' . "\n");
       $func_call_prefix = '';
       $func_call_suffix = ";\n" . $indent . 'if (rv.m_data.num == 0LL) ' .
         'rv.m_type = KindOfNull;' . "\n" . copyAndReturnRV($indent, $obj);
     } else if ($obj->returnType == 'HPHP::Object') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfObject;' . "\n");
       $func_call_prefix = '';
       $func_call_suffix = ";\n" . $indent . 'if (rv.m_data.num == 0LL) ' .
@@ -583,28 +575,23 @@ function emitSlowPathHelper($obj, $ext_hhvm_cpp, $indent, $prefix) {
   $func_call_suffix = ";\n";
   if (!isTypeCppReturnByRef($obj->returnType)) {
     if ($obj->returnType == 'bool') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv->_count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv->m_type = KindOfBoolean;' . "\n");
       $func_call_prefix = 'rv->m_data.num = (';
       $func_call_suffix = ") ? 1LL : 0LL;\n" . $indent . "return rv;\n";
     } else if ($obj->returnType == 'int') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv->_count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv->m_type = KindOfInt64;' . "\n");
       $func_call_prefix = 'rv->m_data.num = (int64_t)';
       $func_call_suffix = ";\n" . $indent . "return rv;\n";
     } else if ($obj->returnType == 'long') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv->_count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv->m_type = KindOfInt64;' . "\n");
       $func_call_prefix = 'rv->m_data.num = (int64_t)';
       $func_call_suffix = ";\n" . $indent . "return rv;\n";
     } else if ($obj->returnType == 'double') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv->_count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv->m_type = KindOfDouble;' . "\n");
       $func_call_prefix = 'rv->m_data.dbl = ';
       $func_call_suffix = ";\n" . $indent . "return rv;\n";
     } else if ($obj->returnType == 'void') {
       fwrite($ext_hhvm_cpp, $indent . 'rv->m_data.num = 0LL;' . "\n");
-      fwrite($ext_hhvm_cpp, $indent . 'rv->_count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv->m_type = KindOfNull;' . "\n");
       $func_call_prefix = '';
       $func_call_suffix = ";\n" . $indent . "return rv;\n";
@@ -614,19 +601,16 @@ function emitSlowPathHelper($obj, $ext_hhvm_cpp, $indent, $prefix) {
     }
   } else {
     if ($obj->returnType == 'HPHP::String') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv->_count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv->m_type = KindOfString;' . "\n");
       $func_call_prefix = '';
       $func_call_suffix = ";\n" . $indent . 'if (rv->m_data.num == 0LL) ' .
         'rv->m_type = KindOfNull;' . "\n" . $indent . 'return rv;' . "\n";
     } else if ($obj->returnType == 'HPHP::Array') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv->_count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv->m_type = KindOfArray;' . "\n");
       $func_call_prefix = '';
       $func_call_suffix = ";\n" . $indent . 'if (rv->m_data.num == 0LL) ' .
         'rv->m_type = KindOfNull;' . "\n" . $indent . 'return rv;' . "\n";
     } else if ($obj->returnType == 'HPHP::Object') {
-      fwrite($ext_hhvm_cpp, $indent . 'rv->_count = 0;' . "\n");
       fwrite($ext_hhvm_cpp, $indent . 'rv->m_type = KindOfObject;' . "\n");
       $func_call_prefix = '';
       $func_call_suffix = ";\n" . $indent . 'if (rv->m_data.num == 0LL)' .
@@ -809,7 +793,6 @@ function phase2() {
         $indent = substr($indent, 2);
         fwrite($ext_hhvm_cpp, $indent . '}' . "\n");
         fwrite($ext_hhvm_cpp, $indent . 'rv.m_data.num = 0LL;' . "\n");
-        fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
         fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfNull;' . "\n");
         fwrite($ext_hhvm_cpp, copyAndReturnRV($indent, $obj));
       }
@@ -956,7 +939,6 @@ function phase2() {
         }
         if ($needsNullReturn) {
           fwrite($ext_hhvm_cpp, $indent . 'rv.m_data.num = 0LL;' . "\n");
-          fwrite($ext_hhvm_cpp, $indent . 'rv._count = 0;' . "\n");
           fwrite($ext_hhvm_cpp, $indent . 'rv.m_type = KindOfNull;' . "\n");
           fwrite($ext_hhvm_cpp, copyAndReturnRV($indent, $obj));
         }

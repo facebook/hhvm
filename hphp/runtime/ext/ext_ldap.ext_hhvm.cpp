@@ -77,7 +77,6 @@ TypedValue* fg_ldap_connect(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("ldap_connect", 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -134,7 +133,6 @@ TypedValue* fg_ldap_explode_dn(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_explode_dn", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -185,7 +183,6 @@ TypedValue* fg_ldap_dn2ufn(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_dn2ufn", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -209,7 +206,6 @@ Value* fh_ldap_err2str(Value* _rv, int errnum) asm("_ZN4HPHP14f_ldap_err2strEi")
 TypedValue * fg1_ldap_err2str(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_err2str(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
   fh_ldap_err2str((Value*)(rv), (int)(args[-0].m_data.num));
@@ -223,7 +219,6 @@ TypedValue* fg_ldap_err2str(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_ldap_err2str((Value*)(&(rv)), (int)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -240,7 +235,6 @@ TypedValue* fg_ldap_err2str(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_err2str", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -265,7 +259,6 @@ bool fh_ldap_add(Value* link, Value* dn, Value* entry) asm("_ZN4HPHP10f_ldap_add
 TypedValue * fg1_ldap_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-2);
@@ -286,7 +279,6 @@ TypedValue* fg_ldap_add(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_add((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -302,7 +294,6 @@ TypedValue* fg_ldap_add(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_add", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -327,7 +318,6 @@ bool fh_ldap_mod_add(Value* link, Value* dn, Value* entry) asm("_ZN4HPHP14f_ldap
 TypedValue * fg1_ldap_mod_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_mod_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-2);
@@ -348,7 +338,6 @@ TypedValue* fg_ldap_mod_add(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_mod_add((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -364,7 +353,6 @@ TypedValue* fg_ldap_mod_add(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_mod_add", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -389,7 +377,6 @@ bool fh_ldap_mod_del(Value* link, Value* dn, Value* entry) asm("_ZN4HPHP14f_ldap
 TypedValue * fg1_ldap_mod_del(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_mod_del(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-2);
@@ -410,7 +397,6 @@ TypedValue* fg_ldap_mod_del(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_mod_del((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -426,7 +412,6 @@ TypedValue* fg_ldap_mod_del(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_mod_del", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -451,7 +436,6 @@ bool fh_ldap_mod_replace(Value* link, Value* dn, Value* entry) asm("_ZN4HPHP18f_
 TypedValue * fg1_ldap_mod_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_mod_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-2);
@@ -472,7 +456,6 @@ TypedValue* fg_ldap_mod_replace(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_mod_replace((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -488,7 +471,6 @@ TypedValue* fg_ldap_mod_replace(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_mod_replace", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -513,7 +495,6 @@ bool fh_ldap_modify(Value* link, Value* dn, Value* entry) asm("_ZN4HPHP13f_ldap_
 TypedValue * fg1_ldap_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-2);
@@ -534,7 +515,6 @@ TypedValue* fg_ldap_modify(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_modify((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -550,7 +530,6 @@ TypedValue* fg_ldap_modify(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_modify", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -575,7 +554,6 @@ bool fh_ldap_bind(Value* link, Value* bind_rdn, Value* bind_password) asm("_ZN4H
 TypedValue * fg1_ldap_bind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_bind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -602,7 +580,6 @@ TypedValue* fg_ldap_bind(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_bind((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -618,7 +595,6 @@ TypedValue* fg_ldap_bind(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_bind", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -642,7 +618,6 @@ bool fh_ldap_set_rebind_proc(Value* link, TypedValue* callback) asm("_ZN4HPHP22f
 TypedValue * fg1_ldap_set_rebind_proc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_set_rebind_proc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_ldap_set_rebind_proc((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -655,7 +630,6 @@ TypedValue* fg_ldap_set_rebind_proc(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_set_rebind_proc((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -671,7 +645,6 @@ TypedValue* fg_ldap_set_rebind_proc(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_set_rebind_proc", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -696,7 +669,6 @@ bool fh_ldap_sort(Value* link, Value* result, Value* sortfilter) asm("_ZN4HPHP11
 TypedValue * fg1_ldap_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -717,7 +689,6 @@ TypedValue* fg_ldap_sort(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_sort((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -733,7 +704,6 @@ TypedValue* fg_ldap_sort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_sort", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -756,7 +726,6 @@ bool fh_ldap_start_tls(Value* link) asm("_ZN4HPHP16f_ldap_start_tlsERKNS_6Object
 TypedValue * fg1_ldap_start_tls(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_start_tls(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_ldap_start_tls((Value*)(args-0))) ? 1LL : 0LL;
@@ -769,7 +738,6 @@ TypedValue* fg_ldap_start_tls(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_start_tls((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -785,7 +753,6 @@ TypedValue* fg_ldap_start_tls(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_start_tls", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -808,7 +775,6 @@ bool fh_ldap_unbind(Value* link) asm("_ZN4HPHP13f_ldap_unbindERKNS_6ObjectE");
 TypedValue * fg1_ldap_unbind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_unbind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_ldap_unbind((Value*)(args-0))) ? 1LL : 0LL;
@@ -821,7 +787,6 @@ TypedValue* fg_ldap_unbind(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_unbind((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -837,7 +802,6 @@ TypedValue* fg_ldap_unbind(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_unbind", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -862,7 +826,6 @@ bool fh_ldap_get_option(Value* link, int option, TypedValue* retval) asm("_ZN4HP
 TypedValue * fg1_ldap_get_option(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_get_option(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -880,7 +843,6 @@ TypedValue* fg_ldap_get_option(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_get_option((Value*)(args-0), (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -896,7 +858,6 @@ TypedValue* fg_ldap_get_option(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_get_option", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -921,7 +882,6 @@ bool fh_ldap_set_option(TypedValue* link, int option, TypedValue* newval) asm("_
 TypedValue * fg1_ldap_set_option(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_set_option(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-1);
   rv->m_data.num = (fh_ldap_set_option((args-0), (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
@@ -934,7 +894,6 @@ TypedValue* fg_ldap_set_option(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_set_option((args-0), (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -950,7 +909,6 @@ TypedValue* fg_ldap_set_option(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_set_option", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -973,7 +931,6 @@ bool fh_ldap_close(Value* link) asm("_ZN4HPHP12f_ldap_closeERKNS_6ObjectE");
 TypedValue * fg1_ldap_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_ldap_close((Value*)(args-0))) ? 1LL : 0LL;
@@ -986,7 +943,6 @@ TypedValue* fg_ldap_close(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_close((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1002,7 +958,6 @@ TypedValue* fg_ldap_close(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_close", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1083,7 +1038,6 @@ TypedValue* fg_ldap_list(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_list", count, 3, 8, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 8);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1164,7 +1118,6 @@ TypedValue* fg_ldap_read(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_read", count, 3, 8, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 8);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1245,7 +1198,6 @@ TypedValue* fg_ldap_search(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_search", count, 3, 8, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 8);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1272,7 +1224,6 @@ bool fh_ldap_rename(Value* link, Value* dn, Value* newrdn, Value* newparent, boo
 TypedValue * fg1_ldap_rename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_rename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-4)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-4);
@@ -1299,7 +1250,6 @@ TypedValue* fg_ldap_rename(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfBoolean && IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_rename((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (bool)(args[-4].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -1315,7 +1265,6 @@ TypedValue* fg_ldap_rename(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_rename", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1339,7 +1288,6 @@ bool fh_ldap_delete(Value* link, Value* dn) asm("_ZN4HPHP13f_ldap_deleteERKNS_6O
 TypedValue * fg1_ldap_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1357,7 +1305,6 @@ TypedValue* fg_ldap_delete(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_delete((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1373,7 +1320,6 @@ TypedValue* fg_ldap_delete(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_delete", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1438,7 +1384,6 @@ TypedValue* fg_ldap_compare(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_compare", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1461,7 +1406,6 @@ long fh_ldap_errno(Value* link) asm("_ZN4HPHP12f_ldap_errnoERKNS_6ObjectE");
 TypedValue * fg1_ldap_errno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_errno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_ldap_errno((Value*)(args-0));
@@ -1474,7 +1418,6 @@ TypedValue* fg_ldap_errno(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_ldap_errno((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1490,7 +1433,6 @@ TypedValue* fg_ldap_errno(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_errno", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1514,7 +1456,6 @@ Value* fh_ldap_error(Value* _rv, Value* link) asm("_ZN4HPHP12f_ldap_errorERKNS_6
 TypedValue * fg1_ldap_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_ldap_error((Value*)(rv), (Value*)(args-0));
@@ -1528,7 +1469,6 @@ TypedValue* fg_ldap_error(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_ldap_error((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1545,7 +1485,6 @@ TypedValue* fg_ldap_error(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_error", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1602,7 +1541,6 @@ TypedValue* fg_ldap_get_dn(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_get_dn", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1626,7 +1564,6 @@ long fh_ldap_count_entries(Value* link, Value* result) asm("_ZN4HPHP20f_ldap_cou
 TypedValue * fg1_ldap_count_entries(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_count_entries(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -1644,7 +1581,6 @@ TypedValue* fg_ldap_count_entries(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_ldap_count_entries((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -1660,7 +1596,6 @@ TypedValue* fg_ldap_count_entries(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_count_entries", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1717,7 +1652,6 @@ TypedValue* fg_ldap_get_entries(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_get_entries", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1774,7 +1708,6 @@ TypedValue* fg_ldap_first_entry(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_first_entry", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1831,7 +1764,6 @@ TypedValue* fg_ldap_next_entry(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_next_entry", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1856,7 +1788,6 @@ Value* fh_ldap_get_attributes(Value* _rv, Value* link, Value* result_entry) asm(
 TypedValue * fg1_ldap_get_attributes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_get_attributes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -1875,7 +1806,6 @@ TypedValue* fg_ldap_get_attributes(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_ldap_get_attributes((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1892,7 +1822,6 @@ TypedValue* fg_ldap_get_attributes(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_get_attributes", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1949,7 +1878,6 @@ TypedValue* fg_ldap_first_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_first_attribute", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2006,7 +1934,6 @@ TypedValue* fg_ldap_next_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_next_attribute", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2063,7 +1990,6 @@ TypedValue* fg_ldap_first_reference(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_first_reference", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2120,7 +2046,6 @@ TypedValue* fg_ldap_next_reference(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_next_reference", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2145,7 +2070,6 @@ bool fh_ldap_parse_reference(Value* link, Value* result_entry, TypedValue* refer
 TypedValue * fg1_ldap_parse_reference(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_parse_reference(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -2163,7 +2087,6 @@ TypedValue* fg_ldap_parse_reference(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_parse_reference((Value*)(args-0), (Value*)(args-1), (args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -2179,7 +2102,6 @@ TypedValue* fg_ldap_parse_reference(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_parse_reference", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2207,7 +2129,6 @@ bool fh_ldap_parse_result(Value* link, Value* result, TypedValue* errcode, Typed
 TypedValue * fg1_ldap_parse_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_parse_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 6
@@ -2235,7 +2156,6 @@ TypedValue* fg_ldap_parse_result(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 6LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         VRefParamValue defVal3 = null;
         VRefParamValue defVal4 = null;
@@ -2254,7 +2174,6 @@ TypedValue* fg_ldap_parse_result(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_parse_result", count, 3, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2277,7 +2196,6 @@ bool fh_ldap_free_result(Value* result) asm("_ZN4HPHP18f_ldap_free_resultERKNS_6
 TypedValue * fg1_ldap_free_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ldap_free_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_ldap_free_result((Value*)(args-0))) ? 1LL : 0LL;
@@ -2290,7 +2208,6 @@ TypedValue* fg_ldap_free_result(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ldap_free_result((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -2306,7 +2223,6 @@ TypedValue* fg_ldap_free_result(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_free_result", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2367,7 +2283,6 @@ TypedValue* fg_ldap_get_values_len(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_get_values_len", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2428,7 +2343,6 @@ TypedValue* fg_ldap_get_values(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ldap_get_values", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

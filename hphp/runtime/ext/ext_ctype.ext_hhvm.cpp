@@ -39,7 +39,6 @@ TypedValue* fg_ctype_alnum(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ctype_alnum((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -49,7 +48,6 @@ TypedValue* fg_ctype_alnum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ctype_alnum", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -74,7 +72,6 @@ TypedValue* fg_ctype_alpha(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ctype_alpha((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -84,7 +81,6 @@ TypedValue* fg_ctype_alpha(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ctype_alpha", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -109,7 +105,6 @@ TypedValue* fg_ctype_cntrl(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ctype_cntrl((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -119,7 +114,6 @@ TypedValue* fg_ctype_cntrl(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ctype_cntrl", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -144,7 +138,6 @@ TypedValue* fg_ctype_digit(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ctype_digit((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -154,7 +147,6 @@ TypedValue* fg_ctype_digit(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ctype_digit", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -179,7 +171,6 @@ TypedValue* fg_ctype_graph(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ctype_graph((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -189,7 +180,6 @@ TypedValue* fg_ctype_graph(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ctype_graph", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -214,7 +204,6 @@ TypedValue* fg_ctype_lower(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ctype_lower((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -224,7 +213,6 @@ TypedValue* fg_ctype_lower(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ctype_lower", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -249,7 +237,6 @@ TypedValue* fg_ctype_print(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ctype_print((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -259,7 +246,6 @@ TypedValue* fg_ctype_print(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ctype_print", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -284,7 +270,6 @@ TypedValue* fg_ctype_punct(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ctype_punct((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -294,7 +279,6 @@ TypedValue* fg_ctype_punct(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ctype_punct", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -319,7 +303,6 @@ TypedValue* fg_ctype_space(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ctype_space((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -329,7 +312,6 @@ TypedValue* fg_ctype_space(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ctype_space", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -354,7 +336,6 @@ TypedValue* fg_ctype_upper(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ctype_upper((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -364,7 +345,6 @@ TypedValue* fg_ctype_upper(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ctype_upper", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -389,7 +369,6 @@ TypedValue* fg_ctype_xdigit(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ctype_xdigit((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -399,7 +378,6 @@ TypedValue* fg_ctype_xdigit(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ctype_xdigit", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

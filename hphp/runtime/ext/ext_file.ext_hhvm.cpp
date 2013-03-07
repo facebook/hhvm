@@ -84,7 +84,6 @@ TypedValue* fg_fopen(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fopen", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -141,7 +140,6 @@ TypedValue* fg_popen(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("popen", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -164,7 +162,6 @@ bool fh_fclose(Value* handle) asm("_ZN4HPHP8f_fcloseERKNS_6ObjectE");
 TypedValue * fg1_fclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_fclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_fclose((Value*)(args-0))) ? 1LL : 0LL;
@@ -177,7 +174,6 @@ TypedValue* fg_fclose(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_fclose((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -193,7 +189,6 @@ TypedValue* fg_fclose(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fclose", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -244,7 +239,6 @@ TypedValue* fg_pclose(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pclose", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -310,7 +304,6 @@ TypedValue* fg_fseek(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fseek", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -333,7 +326,6 @@ bool fh_rewind(Value* handle) asm("_ZN4HPHP8f_rewindERKNS_6ObjectE");
 TypedValue * fg1_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_rewind((Value*)(args-0))) ? 1LL : 0LL;
@@ -346,7 +338,6 @@ TypedValue* fg_rewind(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_rewind((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -362,7 +353,6 @@ TypedValue* fg_rewind(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("rewind", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -413,7 +403,6 @@ TypedValue* fg_ftell(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ftell", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -436,7 +425,6 @@ bool fh_feof(Value* handle) asm("_ZN4HPHP6f_feofERKNS_6ObjectE");
 TypedValue * fg1_feof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_feof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_feof((Value*)(args-0))) ? 1LL : 0LL;
@@ -449,7 +437,6 @@ TypedValue* fg_feof(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_feof((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -465,7 +452,6 @@ TypedValue* fg_feof(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("feof", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -516,7 +502,6 @@ TypedValue* fg_fstat(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fstat", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -573,7 +558,6 @@ TypedValue* fg_fread(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fread", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -624,7 +608,6 @@ TypedValue* fg_fgetc(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fgetc", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -686,7 +669,6 @@ TypedValue* fg_fgets(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fgets", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -753,7 +735,6 @@ TypedValue* fg_fgetss(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fgetss", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -838,7 +819,6 @@ TypedValue* fg_fscanf(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("fscanf", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -889,7 +869,6 @@ TypedValue* fg_fpassthru(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fpassthru", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -955,7 +934,6 @@ TypedValue* fg_fwrite(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fwrite", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1021,7 +999,6 @@ TypedValue* fg_fputs(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fputs", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1106,7 +1083,6 @@ TypedValue* fg_fprintf(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("fprintf", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1167,7 +1143,6 @@ TypedValue* fg_vfprintf(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("vfprintf", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1190,7 +1165,6 @@ bool fh_fflush(Value* handle) asm("_ZN4HPHP8f_fflushERKNS_6ObjectE");
 TypedValue * fg1_fflush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_fflush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_fflush((Value*)(args-0))) ? 1LL : 0LL;
@@ -1203,7 +1177,6 @@ TypedValue* fg_fflush(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_fflush((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1219,7 +1192,6 @@ TypedValue* fg_fflush(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fflush", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1243,7 +1215,6 @@ bool fh_ftruncate(Value* handle, long size) asm("_ZN4HPHP11f_ftruncateERKNS_6Obj
 TypedValue * fg1_ftruncate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ftruncate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -1261,7 +1232,6 @@ TypedValue* fg_ftruncate(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_ftruncate((Value*)(args-0), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1277,7 +1247,6 @@ TypedValue* fg_ftruncate(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ftruncate", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1302,7 +1271,6 @@ bool fh_flock(Value* handle, int operation, TypedValue* wouldblock) asm("_ZN4HPH
 TypedValue * fg1_flock(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_flock(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -1326,7 +1294,6 @@ TypedValue* fg_flock(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         VRefParamValue defVal2 = null;
         rv.m_data.num = (fh_flock((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
@@ -1343,7 +1310,6 @@ TypedValue* fg_flock(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("flock", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1418,7 +1384,6 @@ TypedValue* fg_fputcsv(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fputcsv", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1494,7 +1459,6 @@ TypedValue* fg_fgetcsv(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fgetcsv", count, 1, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1570,7 +1534,6 @@ TypedValue* fg_file_get_contents(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("file_get_contents", count, 1, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1637,7 +1600,6 @@ TypedValue* fg_file_put_contents(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("file_put_contents", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1703,7 +1665,6 @@ TypedValue* fg_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("file", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1769,7 +1730,6 @@ TypedValue* fg_readfile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("readfile", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1793,7 +1753,6 @@ bool fh_move_uploaded_file(Value* filename, Value* destination) asm("_ZN4HPHP20f
 TypedValue * fg1_move_uploaded_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_move_uploaded_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1811,7 +1770,6 @@ TypedValue* fg_move_uploaded_file(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_move_uploaded_file((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1827,7 +1785,6 @@ TypedValue* fg_move_uploaded_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("move_uploaded_file", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1894,7 +1851,6 @@ TypedValue* fg_parse_ini_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("parse_ini_file", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1961,7 +1917,6 @@ TypedValue* fg_parse_ini_string(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("parse_ini_string", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2012,7 +1967,6 @@ TypedValue* fg_parse_hdf_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("parse_hdf_file", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2063,7 +2017,6 @@ TypedValue* fg_parse_hdf_string(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("parse_hdf_string", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2087,7 +2040,6 @@ bool fh_write_hdf_file(Value* data, Value* filename) asm("_ZN4HPHP16f_write_hdf_
 TypedValue * fg1_write_hdf_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_write_hdf_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -2105,7 +2057,6 @@ TypedValue* fg_write_hdf_file(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfArray) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_write_hdf_file((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2121,7 +2072,6 @@ TypedValue* fg_write_hdf_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("write_hdf_file", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2145,7 +2095,6 @@ Value* fh_write_hdf_string(Value* _rv, Value* data) asm("_ZN4HPHP18f_write_hdf_s
 TypedValue * fg1_write_hdf_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_write_hdf_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToArrayInPlace(args-0);
   fh_write_hdf_string((Value*)(rv), (Value*)(args-0));
@@ -2159,7 +2108,6 @@ TypedValue* fg_write_hdf_string(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfArray) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_write_hdf_string((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2176,7 +2124,6 @@ TypedValue* fg_write_hdf_string(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("write_hdf_string", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2238,7 +2185,6 @@ TypedValue* fg_md5_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("md5_file", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2300,7 +2246,6 @@ TypedValue* fg_sha1_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("sha1_file", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2324,7 +2269,6 @@ bool fh_chmod(Value* filename, long mode) asm("_ZN4HPHP7f_chmodERKNS_6StringEl")
 TypedValue * fg1_chmod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_chmod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -2342,7 +2286,6 @@ TypedValue* fg_chmod(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_chmod((Value*)(args-0), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2358,7 +2301,6 @@ TypedValue* fg_chmod(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("chmod", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2382,7 +2324,6 @@ bool fh_chown(Value* filename, TypedValue* user) asm("_ZN4HPHP7f_chownERKNS_6Str
 TypedValue * fg1_chown(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_chown(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_chown((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -2395,7 +2336,6 @@ TypedValue* fg_chown(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_chown((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2411,7 +2351,6 @@ TypedValue* fg_chown(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("chown", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2435,7 +2374,6 @@ bool fh_lchown(Value* filename, TypedValue* user) asm("_ZN4HPHP8f_lchownERKNS_6S
 TypedValue * fg1_lchown(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_lchown(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_lchown((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -2448,7 +2386,6 @@ TypedValue* fg_lchown(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_lchown((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2464,7 +2401,6 @@ TypedValue* fg_lchown(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("lchown", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2488,7 +2424,6 @@ bool fh_chgrp(Value* filename, TypedValue* group) asm("_ZN4HPHP7f_chgrpERKNS_6St
 TypedValue * fg1_chgrp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_chgrp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_chgrp((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -2501,7 +2436,6 @@ TypedValue* fg_chgrp(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_chgrp((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2517,7 +2451,6 @@ TypedValue* fg_chgrp(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("chgrp", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2541,7 +2474,6 @@ bool fh_lchgrp(Value* filename, TypedValue* group) asm("_ZN4HPHP8f_lchgrpERKNS_6
 TypedValue * fg1_lchgrp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_lchgrp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_lchgrp((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -2554,7 +2486,6 @@ TypedValue* fg_lchgrp(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_lchgrp((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2570,7 +2501,6 @@ TypedValue* fg_lchgrp(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("lchgrp", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2595,7 +2525,6 @@ bool fh_touch(Value* filename, long mtime, long atime) asm("_ZN4HPHP7f_touchERKN
 TypedValue * fg1_touch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_touch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -2622,7 +2551,6 @@ TypedValue* fg_touch(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_touch((Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -2638,7 +2566,6 @@ TypedValue* fg_touch(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("touch", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2663,7 +2590,6 @@ bool fh_copy(Value* source, Value* dest, TypedValue* context) asm("_ZN4HPHP6f_co
 TypedValue * fg1_copy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_copy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -2687,7 +2613,6 @@ TypedValue* fg_copy(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         Variant defVal2;
         rv.m_data.num = (fh_copy((Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
@@ -2704,7 +2629,6 @@ TypedValue* fg_copy(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("copy", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2729,7 +2653,6 @@ bool fh_rename(Value* oldname, Value* newname, TypedValue* context) asm("_ZN4HPH
 TypedValue * fg1_rename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_rename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -2753,7 +2676,6 @@ TypedValue* fg_rename(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         Variant defVal2;
         rv.m_data.num = (fh_rename((Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
@@ -2770,7 +2692,6 @@ TypedValue* fg_rename(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("rename", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2795,7 +2716,6 @@ TypedValue* fg_umask(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfInt64;
       rv.m_data.num = (int64_t)fh_umask((count > 0) ? (args-0) : (TypedValue*)(&null_variant));
       frame_free_locals_no_this_inl(ar, 1);
@@ -2805,7 +2725,6 @@ TypedValue* fg_umask(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("umask", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2829,7 +2748,6 @@ bool fh_unlink(Value* filename, TypedValue* context) asm("_ZN4HPHP8f_unlinkERKNS
 TypedValue * fg1_unlink(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_unlink(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
@@ -2843,7 +2761,6 @@ TypedValue* fg_unlink(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         Variant defVal1;
         rv.m_data.num = (fh_unlink((Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1))) ? 1LL : 0LL;
@@ -2860,7 +2777,6 @@ TypedValue* fg_unlink(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("unlink", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2884,7 +2800,6 @@ bool fh_link(Value* target, Value* link) asm("_ZN4HPHP6f_linkERKNS_6StringES2_")
 TypedValue * fg1_link(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_link(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -2902,7 +2817,6 @@ TypedValue* fg_link(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_link((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2918,7 +2832,6 @@ TypedValue* fg_link(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("link", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2942,7 +2855,6 @@ bool fh_symlink(Value* target, Value* link) asm("_ZN4HPHP9f_symlinkERKNS_6String
 TypedValue * fg1_symlink(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_symlink(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -2960,7 +2872,6 @@ TypedValue* fg_symlink(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_symlink((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2976,7 +2887,6 @@ TypedValue* fg_symlink(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("symlink", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3001,7 +2911,6 @@ Value* fh_basename(Value* _rv, Value* path, Value* suffix) asm("_ZN4HPHP10f_base
 TypedValue * fg1_basename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_basename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   switch (count) {
   default: // count >= 2
@@ -3025,7 +2934,6 @@ TypedValue* fg_basename(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_basename((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3042,7 +2950,6 @@ TypedValue* fg_basename(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("basename", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3067,7 +2974,6 @@ bool fh_fnmatch(Value* pattern, Value* filename, int flags) asm("_ZN4HPHP9f_fnma
 TypedValue * fg1_fnmatch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_fnmatch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -3093,7 +2999,6 @@ TypedValue* fg_fnmatch(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_fnmatch((Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -3109,7 +3014,6 @@ TypedValue* fg_fnmatch(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fnmatch", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3171,7 +3075,6 @@ TypedValue* fg_glob(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("glob", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3228,7 +3131,6 @@ TypedValue* fg_tempnam(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("tempnam", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3262,7 +3164,6 @@ TypedValue* fg_tmpfile(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("tmpfile", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3313,7 +3214,6 @@ TypedValue* fg_fileperms(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fileperms", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3364,7 +3264,6 @@ TypedValue* fg_fileinode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fileinode", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3415,7 +3314,6 @@ TypedValue* fg_filesize(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("filesize", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3466,7 +3364,6 @@ TypedValue* fg_fileowner(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fileowner", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3517,7 +3414,6 @@ TypedValue* fg_filegroup(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("filegroup", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3568,7 +3464,6 @@ TypedValue* fg_fileatime(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fileatime", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3619,7 +3514,6 @@ TypedValue* fg_filemtime(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("filemtime", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3670,7 +3564,6 @@ TypedValue* fg_filectime(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("filectime", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3721,7 +3614,6 @@ TypedValue* fg_filetype(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("filetype", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3772,7 +3664,6 @@ TypedValue* fg_linkinfo(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("linkinfo", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3795,7 +3686,6 @@ bool fh_is_writable(Value* filename) asm("_ZN4HPHP13f_is_writableERKNS_6StringE"
 TypedValue * fg1_is_writable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_is_writable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_is_writable((Value*)(args-0))) ? 1LL : 0LL;
@@ -3808,7 +3698,6 @@ TypedValue* fg_is_writable(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_is_writable((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -3824,7 +3713,6 @@ TypedValue* fg_is_writable(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("is_writable", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3847,7 +3735,6 @@ bool fh_is_writeable(Value* filename) asm("_ZN4HPHP14f_is_writeableERKNS_6String
 TypedValue * fg1_is_writeable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_is_writeable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_is_writeable((Value*)(args-0))) ? 1LL : 0LL;
@@ -3860,7 +3747,6 @@ TypedValue* fg_is_writeable(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_is_writeable((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -3876,7 +3762,6 @@ TypedValue* fg_is_writeable(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("is_writeable", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3899,7 +3784,6 @@ bool fh_is_readable(Value* filename) asm("_ZN4HPHP13f_is_readableERKNS_6StringE"
 TypedValue * fg1_is_readable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_is_readable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_is_readable((Value*)(args-0))) ? 1LL : 0LL;
@@ -3912,7 +3796,6 @@ TypedValue* fg_is_readable(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_is_readable((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -3928,7 +3811,6 @@ TypedValue* fg_is_readable(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("is_readable", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3951,7 +3833,6 @@ bool fh_is_executable(Value* filename) asm("_ZN4HPHP15f_is_executableERKNS_6Stri
 TypedValue * fg1_is_executable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_is_executable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_is_executable((Value*)(args-0))) ? 1LL : 0LL;
@@ -3964,7 +3845,6 @@ TypedValue* fg_is_executable(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_is_executable((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -3980,7 +3860,6 @@ TypedValue* fg_is_executable(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("is_executable", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4003,7 +3882,6 @@ bool fh_is_file(Value* filename) asm("_ZN4HPHP9f_is_fileERKNS_6StringE");
 TypedValue * fg1_is_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_is_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_is_file((Value*)(args-0))) ? 1LL : 0LL;
@@ -4016,7 +3894,6 @@ TypedValue* fg_is_file(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_is_file((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -4032,7 +3909,6 @@ TypedValue* fg_is_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("is_file", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4055,7 +3931,6 @@ bool fh_is_dir(Value* filename) asm("_ZN4HPHP8f_is_dirERKNS_6StringE");
 TypedValue * fg1_is_dir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_is_dir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_is_dir((Value*)(args-0))) ? 1LL : 0LL;
@@ -4068,7 +3943,6 @@ TypedValue* fg_is_dir(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_is_dir((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -4084,7 +3958,6 @@ TypedValue* fg_is_dir(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("is_dir", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4107,7 +3980,6 @@ bool fh_is_link(Value* filename) asm("_ZN4HPHP9f_is_linkERKNS_6StringE");
 TypedValue * fg1_is_link(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_is_link(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_is_link((Value*)(args-0))) ? 1LL : 0LL;
@@ -4120,7 +3992,6 @@ TypedValue* fg_is_link(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_is_link((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -4136,7 +4007,6 @@ TypedValue* fg_is_link(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("is_link", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4159,7 +4029,6 @@ bool fh_is_uploaded_file(Value* filename) asm("_ZN4HPHP18f_is_uploaded_fileERKNS
 TypedValue * fg1_is_uploaded_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_is_uploaded_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_is_uploaded_file((Value*)(args-0))) ? 1LL : 0LL;
@@ -4172,7 +4041,6 @@ TypedValue* fg_is_uploaded_file(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_is_uploaded_file((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -4188,7 +4056,6 @@ TypedValue* fg_is_uploaded_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("is_uploaded_file", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4211,7 +4078,6 @@ bool fh_file_exists(Value* filename) asm("_ZN4HPHP13f_file_existsERKNS_6StringE"
 TypedValue * fg1_file_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_file_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_file_exists((Value*)(args-0))) ? 1LL : 0LL;
@@ -4224,7 +4090,6 @@ TypedValue* fg_file_exists(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_file_exists((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -4240,7 +4105,6 @@ TypedValue* fg_file_exists(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("file_exists", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4291,7 +4155,6 @@ TypedValue* fg_stat(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stat", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4342,7 +4205,6 @@ TypedValue* fg_lstat(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("lstat", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4366,7 +4228,6 @@ TypedValue* fg_clearstatcache(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       fh_clearstatcache();
       frame_free_locals_no_this_inl(ar, 0);
@@ -4376,7 +4237,6 @@ TypedValue* fg_clearstatcache(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("clearstatcache", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4427,7 +4287,6 @@ TypedValue* fg_readlink(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("readlink", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4478,7 +4337,6 @@ TypedValue* fg_realpath(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("realpath", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4540,7 +4398,6 @@ TypedValue* fg_pathinfo(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pathinfo", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4591,7 +4448,6 @@ TypedValue* fg_disk_free_space(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("disk_free_space", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4642,7 +4498,6 @@ TypedValue* fg_diskfreespace(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("diskfreespace", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4693,7 +4548,6 @@ TypedValue* fg_disk_total_space(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("disk_total_space", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4719,7 +4573,6 @@ bool fh_mkdir(Value* pathname, long mode, bool recursive, TypedValue* context) a
 TypedValue * fg1_mkdir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_mkdir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -4748,7 +4601,6 @@ TypedValue* fg_mkdir(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         Variant defVal3;
         rv.m_data.num = (fh_mkdir((Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0777), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false), (count > 3) ? (args-3) : (TypedValue*)(&defVal3))) ? 1LL : 0LL;
@@ -4765,7 +4617,6 @@ TypedValue* fg_mkdir(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mkdir", count, 1, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4789,7 +4640,6 @@ bool fh_rmdir(Value* dirname, TypedValue* context) asm("_ZN4HPHP7f_rmdirERKNS_6S
 TypedValue * fg1_rmdir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_rmdir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
@@ -4803,7 +4653,6 @@ TypedValue* fg_rmdir(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         Variant defVal1;
         rv.m_data.num = (fh_rmdir((Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1))) ? 1LL : 0LL;
@@ -4820,7 +4669,6 @@ TypedValue* fg_rmdir(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("rmdir", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4844,7 +4692,6 @@ Value* fh_dirname(Value* _rv, Value* path) asm("_ZN4HPHP9f_dirnameERKNS_6StringE
 TypedValue * fg1_dirname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_dirname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
   fh_dirname((Value*)(rv), (Value*)(args-0));
@@ -4858,7 +4705,6 @@ TypedValue* fg_dirname(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_dirname((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -4875,7 +4721,6 @@ TypedValue* fg_dirname(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dirname", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4909,7 +4754,6 @@ TypedValue* fg_getcwd(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("getcwd", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4932,7 +4776,6 @@ bool fh_chdir(Value* directory) asm("_ZN4HPHP7f_chdirERKNS_6StringE");
 TypedValue * fg1_chdir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_chdir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_chdir((Value*)(args-0))) ? 1LL : 0LL;
@@ -4945,7 +4788,6 @@ TypedValue* fg_chdir(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_chdir((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -4961,7 +4803,6 @@ TypedValue* fg_chdir(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("chdir", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4984,7 +4825,6 @@ bool fh_chroot(Value* directory) asm("_ZN4HPHP8f_chrootERKNS_6StringE");
 TypedValue * fg1_chroot(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_chroot(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_chroot((Value*)(args-0))) ? 1LL : 0LL;
@@ -4997,7 +4837,6 @@ TypedValue* fg_chroot(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_chroot((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -5013,7 +4852,6 @@ TypedValue* fg_chroot(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("chroot", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5064,7 +4902,6 @@ TypedValue* fg_dir(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dir", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5118,7 +4955,6 @@ TypedValue* fg_opendir(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("opendir", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5169,7 +5005,6 @@ TypedValue* fg_readdir(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("readdir", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5192,7 +5027,6 @@ TypedValue * fg1_rewinddir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
 TypedValue * fg1_rewinddir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_rewinddir((Value*)(args-0));
@@ -5206,7 +5040,6 @@ TypedValue* fg_rewinddir(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_rewinddir((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -5222,7 +5055,6 @@ TypedValue* fg_rewinddir(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("rewinddir", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5288,7 +5120,6 @@ TypedValue* fg_scandir(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("scandir", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5311,7 +5142,6 @@ TypedValue * fg1_closedir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) _
 TypedValue * fg1_closedir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_closedir((Value*)(args-0));
@@ -5325,7 +5155,6 @@ TypedValue* fg_closedir(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_closedir((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -5341,7 +5170,6 @@ TypedValue* fg_closedir(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("closedir", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

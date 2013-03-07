@@ -51,7 +51,6 @@ TypedValue* tg_7Closure___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_7Closure___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -64,7 +63,6 @@ TypedValue* tg_7Closure___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Closure::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -113,7 +111,6 @@ TypedValue* tg_7Closure___invoke(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Closure::__invoke");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -148,7 +145,6 @@ TypedValue* tg_12DummyClosure___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_12DummyClosure___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -161,7 +157,6 @@ TypedValue* tg_12DummyClosure___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DummyClosure::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

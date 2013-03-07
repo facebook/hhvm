@@ -38,7 +38,6 @@ Value* fh_hphp_get_extension_info(Value* _rv, Value* name) asm("_ZN4HPHP25f_hphp
 TypedValue * fg1_hphp_get_extension_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_get_extension_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
   fh_hphp_get_extension_info((Value*)(rv), (Value*)(args-0));
@@ -52,7 +51,6 @@ TypedValue* fg_hphp_get_extension_info(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_hphp_get_extension_info((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -69,7 +67,6 @@ TypedValue* fg_hphp_get_extension_info(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_get_extension_info", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -96,7 +93,6 @@ TypedValue* fg_hphp_get_method_info(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       fh_hphp_get_method_info((Value*)(&(rv)), (args-0), (args-1));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -107,7 +103,6 @@ TypedValue* fg_hphp_get_method_info(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_get_method_info", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -133,7 +128,6 @@ TypedValue* fg_hphp_get_closure_info(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       fh_hphp_get_closure_info((Value*)(&(rv)), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -144,7 +138,6 @@ TypedValue* fg_hphp_get_closure_info(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_get_closure_info", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -180,7 +173,6 @@ TypedValue* fg_hphp_get_class_constant(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_get_class_constant", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -206,7 +198,6 @@ TypedValue* fg_hphp_get_class_info(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       fh_hphp_get_class_info((Value*)(&(rv)), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -217,7 +208,6 @@ TypedValue* fg_hphp_get_class_info(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_get_class_info", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -241,7 +231,6 @@ Value* fh_hphp_get_function_info(Value* _rv, Value* name) asm("_ZN4HPHP24f_hphp_
 TypedValue * fg1_hphp_get_function_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_get_function_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
   fh_hphp_get_function_info((Value*)(rv), (Value*)(args-0));
@@ -255,7 +244,6 @@ TypedValue* fg_hphp_get_function_info(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_hphp_get_function_info((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -272,7 +260,6 @@ TypedValue* fg_hphp_get_function_info(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_get_function_info", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -329,7 +316,6 @@ TypedValue* fg_hphp_invoke(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_invoke", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -391,7 +377,6 @@ TypedValue* fg_hphp_invoke_method(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_invoke_method", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -415,7 +400,6 @@ bool fh_hphp_instanceof(Value* obj, Value* name) asm("_ZN4HPHP17f_hphp_instanceo
 TypedValue * fg1_hphp_instanceof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_instanceof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -433,7 +417,6 @@ TypedValue* fg_hphp_instanceof(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_instanceof((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -449,7 +432,6 @@ TypedValue* fg_hphp_instanceof(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_instanceof", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -474,7 +456,6 @@ Value* fh_hphp_create_object(Value* _rv, Value* name, Value* params) asm("_ZN4HP
 TypedValue * fg1_hphp_create_object(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_create_object(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-1)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-1);
@@ -493,7 +474,6 @@ TypedValue* fg_hphp_create_object(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_hphp_create_object((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -510,7 +490,6 @@ TypedValue* fg_hphp_create_object(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_create_object", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -571,7 +550,6 @@ TypedValue* fg_hphp_get_property(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_get_property", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -597,7 +575,6 @@ TypedValue * fg1_hphp_set_property(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
 TypedValue * fg1_hphp_set_property(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -619,7 +596,6 @@ TypedValue* fg_hphp_set_property(HPHP::VM::ActRec *ar) {
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_set_property((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (args-3));
         frame_free_locals_no_this_inl(ar, 4);
@@ -635,7 +611,6 @@ TypedValue* fg_hphp_set_property(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_set_property", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -692,7 +667,6 @@ TypedValue* fg_hphp_get_static_property(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_get_static_property", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -717,7 +691,6 @@ TypedValue * fg1_hphp_set_static_property(TypedValue* rv, HPHP::VM::ActRec* ar, 
 TypedValue * fg1_hphp_set_static_property(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -736,7 +709,6 @@ TypedValue* fg_hphp_set_static_property(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_set_static_property((Value*)(args-0), (Value*)(args-1), (args-2));
         frame_free_locals_no_this_inl(ar, 3);
@@ -752,7 +724,6 @@ TypedValue* fg_hphp_set_static_property(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_set_static_property", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -776,7 +747,6 @@ Value* fh_hphp_get_original_class_name(Value* _rv, Value* name) asm("_ZN4HPHP30f
 TypedValue * fg1_hphp_get_original_class_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_get_original_class_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
   fh_hphp_get_original_class_name((Value*)(rv), (Value*)(args-0));
@@ -790,7 +760,6 @@ TypedValue* fg_hphp_get_original_class_name(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_get_original_class_name((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -807,7 +776,6 @@ TypedValue* fg_hphp_get_original_class_name(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_get_original_class_name", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -831,7 +799,6 @@ TypedValue* fg_hphp_scalar_typehints_enabled(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_hphp_scalar_typehints_enabled()) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 0);
@@ -841,7 +808,6 @@ TypedValue* fg_hphp_scalar_typehints_enabled(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_scalar_typehints_enabled", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

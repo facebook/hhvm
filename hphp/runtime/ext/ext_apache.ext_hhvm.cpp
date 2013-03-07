@@ -76,7 +76,6 @@ TypedValue* fg_apache_note(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("apache_note", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -101,7 +100,6 @@ TypedValue* fg_apache_request_headers(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       fh_apache_request_headers((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -112,7 +110,6 @@ TypedValue* fg_apache_request_headers(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("apache_request_headers", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -137,7 +134,6 @@ TypedValue* fg_apache_response_headers(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       fh_apache_response_headers((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -148,7 +144,6 @@ TypedValue* fg_apache_response_headers(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("apache_response_headers", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -173,7 +168,6 @@ bool fh_apache_setenv(Value* variable, Value* value, bool walk_to_top) asm("_ZN4
 TypedValue * fg1_apache_setenv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_apache_setenv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -199,7 +193,6 @@ TypedValue* fg_apache_setenv(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_apache_setenv((Value*)(args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -215,7 +208,6 @@ TypedValue* fg_apache_setenv(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("apache_setenv", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -240,7 +232,6 @@ TypedValue* fg_getallheaders(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       fh_getallheaders((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -251,7 +242,6 @@ TypedValue* fg_getallheaders(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("getallheaders", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -274,7 +264,6 @@ bool fh_virtual(Value* filename) asm("_ZN4HPHP9f_virtualERKNS_6StringE");
 TypedValue * fg1_virtual(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_virtual(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_virtual((Value*)(args-0))) ? 1LL : 0LL;
@@ -287,7 +276,6 @@ TypedValue* fg_virtual(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_virtual((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -303,7 +291,6 @@ TypedValue* fg_virtual(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("virtual", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -337,7 +324,6 @@ TypedValue* fg_apache_get_config(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("apache_get_config", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -371,7 +357,6 @@ TypedValue* fg_apache_get_scoreboard(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("apache_get_scoreboard", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -405,7 +390,6 @@ TypedValue* fg_apache_get_rewrite_rules(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("apache_get_rewrite_rules", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

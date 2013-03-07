@@ -39,7 +39,6 @@ Value* fh_hphp_splfileinfo___construct(Value* _rv, Value* obj, Value* file_name)
 TypedValue * fg1_hphp_splfileinfo___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -58,7 +57,6 @@ TypedValue* fg_hphp_splfileinfo___construct(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_hphp_splfileinfo___construct((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -75,7 +73,6 @@ TypedValue* fg_hphp_splfileinfo___construct(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo___construct", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -98,7 +95,6 @@ long fh_hphp_splfileinfo_getatime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_
 TypedValue * fg1_hphp_splfileinfo_getatime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getatime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileinfo_getatime((Value*)(args-0));
@@ -111,7 +107,6 @@ TypedValue* fg_hphp_splfileinfo_getatime(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileinfo_getatime((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -127,7 +122,6 @@ TypedValue* fg_hphp_splfileinfo_getatime(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getatime", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -152,7 +146,6 @@ Value* fh_hphp_splfileinfo_getbasename(Value* _rv, Value* obj, Value* suffix) as
 TypedValue * fg1_hphp_splfileinfo_getbasename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getbasename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -171,7 +164,6 @@ TypedValue* fg_hphp_splfileinfo_getbasename(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_splfileinfo_getbasename((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -188,7 +180,6 @@ TypedValue* fg_hphp_splfileinfo_getbasename(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getbasename", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -211,7 +202,6 @@ long fh_hphp_splfileinfo_getctime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_
 TypedValue * fg1_hphp_splfileinfo_getctime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getctime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileinfo_getctime((Value*)(args-0));
@@ -224,7 +214,6 @@ TypedValue* fg_hphp_splfileinfo_getctime(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileinfo_getctime((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -240,7 +229,6 @@ TypedValue* fg_hphp_splfileinfo_getctime(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getctime", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -265,7 +253,6 @@ Value* fh_hphp_splfileinfo_getfileinfo(Value* _rv, Value* obj, Value* class_name
 TypedValue * fg1_hphp_splfileinfo_getfileinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getfileinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -284,7 +271,6 @@ TypedValue* fg_hphp_splfileinfo_getfileinfo(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_hphp_splfileinfo_getfileinfo((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -301,7 +287,6 @@ TypedValue* fg_hphp_splfileinfo_getfileinfo(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getfileinfo", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -325,7 +310,6 @@ Value* fh_hphp_splfileinfo_getfilename(Value* _rv, Value* obj) asm("_ZN4HPHP30f_
 TypedValue * fg1_hphp_splfileinfo_getfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileinfo_getfilename((Value*)(rv), (Value*)(args-0));
@@ -339,7 +323,6 @@ TypedValue* fg_hphp_splfileinfo_getfilename(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_splfileinfo_getfilename((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -356,7 +339,6 @@ TypedValue* fg_hphp_splfileinfo_getfilename(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getfilename", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -379,7 +361,6 @@ long fh_hphp_splfileinfo_getgroup(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_
 TypedValue * fg1_hphp_splfileinfo_getgroup(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getgroup(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileinfo_getgroup((Value*)(args-0));
@@ -392,7 +373,6 @@ TypedValue* fg_hphp_splfileinfo_getgroup(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileinfo_getgroup((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -408,7 +388,6 @@ TypedValue* fg_hphp_splfileinfo_getgroup(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getgroup", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -431,7 +410,6 @@ long fh_hphp_splfileinfo_getinode(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_
 TypedValue * fg1_hphp_splfileinfo_getinode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getinode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileinfo_getinode((Value*)(args-0));
@@ -444,7 +422,6 @@ TypedValue* fg_hphp_splfileinfo_getinode(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileinfo_getinode((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -460,7 +437,6 @@ TypedValue* fg_hphp_splfileinfo_getinode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getinode", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -484,7 +460,6 @@ Value* fh_hphp_splfileinfo_getlinktarget(Value* _rv, Value* obj) asm("_ZN4HPHP32
 TypedValue * fg1_hphp_splfileinfo_getlinktarget(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getlinktarget(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileinfo_getlinktarget((Value*)(rv), (Value*)(args-0));
@@ -498,7 +473,6 @@ TypedValue* fg_hphp_splfileinfo_getlinktarget(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_splfileinfo_getlinktarget((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -515,7 +489,6 @@ TypedValue* fg_hphp_splfileinfo_getlinktarget(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getlinktarget", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -538,7 +511,6 @@ long fh_hphp_splfileinfo_getmtime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_
 TypedValue * fg1_hphp_splfileinfo_getmtime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getmtime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileinfo_getmtime((Value*)(args-0));
@@ -551,7 +523,6 @@ TypedValue* fg_hphp_splfileinfo_getmtime(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileinfo_getmtime((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -567,7 +538,6 @@ TypedValue* fg_hphp_splfileinfo_getmtime(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getmtime", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -590,7 +560,6 @@ long fh_hphp_splfileinfo_getowner(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_
 TypedValue * fg1_hphp_splfileinfo_getowner(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getowner(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileinfo_getowner((Value*)(args-0));
@@ -603,7 +572,6 @@ TypedValue* fg_hphp_splfileinfo_getowner(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileinfo_getowner((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -619,7 +587,6 @@ TypedValue* fg_hphp_splfileinfo_getowner(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getowner", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -643,7 +610,6 @@ Value* fh_hphp_splfileinfo_getpath(Value* _rv, Value* obj) asm("_ZN4HPHP26f_hphp
 TypedValue * fg1_hphp_splfileinfo_getpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileinfo_getpath((Value*)(rv), (Value*)(args-0));
@@ -657,7 +623,6 @@ TypedValue* fg_hphp_splfileinfo_getpath(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_splfileinfo_getpath((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -674,7 +639,6 @@ TypedValue* fg_hphp_splfileinfo_getpath(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getpath", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -699,7 +663,6 @@ Value* fh_hphp_splfileinfo_getpathinfo(Value* _rv, Value* obj, Value* class_name
 TypedValue * fg1_hphp_splfileinfo_getpathinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getpathinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -718,7 +681,6 @@ TypedValue* fg_hphp_splfileinfo_getpathinfo(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_hphp_splfileinfo_getpathinfo((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -735,7 +697,6 @@ TypedValue* fg_hphp_splfileinfo_getpathinfo(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getpathinfo", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -759,7 +720,6 @@ Value* fh_hphp_splfileinfo_getpathname(Value* _rv, Value* obj) asm("_ZN4HPHP30f_
 TypedValue * fg1_hphp_splfileinfo_getpathname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getpathname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileinfo_getpathname((Value*)(rv), (Value*)(args-0));
@@ -773,7 +733,6 @@ TypedValue* fg_hphp_splfileinfo_getpathname(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_splfileinfo_getpathname((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -790,7 +749,6 @@ TypedValue* fg_hphp_splfileinfo_getpathname(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getpathname", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -813,7 +771,6 @@ long fh_hphp_splfileinfo_getperms(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_
 TypedValue * fg1_hphp_splfileinfo_getperms(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getperms(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileinfo_getperms((Value*)(args-0));
@@ -826,7 +783,6 @@ TypedValue* fg_hphp_splfileinfo_getperms(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileinfo_getperms((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -842,7 +798,6 @@ TypedValue* fg_hphp_splfileinfo_getperms(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getperms", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -893,7 +848,6 @@ TypedValue* fg_hphp_splfileinfo_getrealpath(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getrealpath", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -916,7 +870,6 @@ long fh_hphp_splfileinfo_getsize(Value* obj) asm("_ZN4HPHP26f_hphp_splfileinfo_g
 TypedValue * fg1_hphp_splfileinfo_getsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_getsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileinfo_getsize((Value*)(args-0));
@@ -929,7 +882,6 @@ TypedValue* fg_hphp_splfileinfo_getsize(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileinfo_getsize((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -945,7 +897,6 @@ TypedValue* fg_hphp_splfileinfo_getsize(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_getsize", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -969,7 +920,6 @@ Value* fh_hphp_splfileinfo_gettype(Value* _rv, Value* obj) asm("_ZN4HPHP26f_hphp
 TypedValue * fg1_hphp_splfileinfo_gettype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_gettype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileinfo_gettype((Value*)(rv), (Value*)(args-0));
@@ -983,7 +933,6 @@ TypedValue* fg_hphp_splfileinfo_gettype(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_splfileinfo_gettype((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1000,7 +949,6 @@ TypedValue* fg_hphp_splfileinfo_gettype(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_gettype", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1023,7 +971,6 @@ bool fh_hphp_splfileinfo_isdir(Value* obj) asm("_ZN4HPHP24f_hphp_splfileinfo_isd
 TypedValue * fg1_hphp_splfileinfo_isdir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_isdir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_splfileinfo_isdir((Value*)(args-0))) ? 1LL : 0LL;
@@ -1036,7 +983,6 @@ TypedValue* fg_hphp_splfileinfo_isdir(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_splfileinfo_isdir((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1052,7 +998,6 @@ TypedValue* fg_hphp_splfileinfo_isdir(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_isdir", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1075,7 +1020,6 @@ bool fh_hphp_splfileinfo_isexecutable(Value* obj) asm("_ZN4HPHP31f_hphp_splfilei
 TypedValue * fg1_hphp_splfileinfo_isexecutable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_isexecutable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_splfileinfo_isexecutable((Value*)(args-0))) ? 1LL : 0LL;
@@ -1088,7 +1032,6 @@ TypedValue* fg_hphp_splfileinfo_isexecutable(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_splfileinfo_isexecutable((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1104,7 +1047,6 @@ TypedValue* fg_hphp_splfileinfo_isexecutable(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_isexecutable", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1127,7 +1069,6 @@ bool fh_hphp_splfileinfo_isfile(Value* obj) asm("_ZN4HPHP25f_hphp_splfileinfo_is
 TypedValue * fg1_hphp_splfileinfo_isfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_isfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_splfileinfo_isfile((Value*)(args-0))) ? 1LL : 0LL;
@@ -1140,7 +1081,6 @@ TypedValue* fg_hphp_splfileinfo_isfile(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_splfileinfo_isfile((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1156,7 +1096,6 @@ TypedValue* fg_hphp_splfileinfo_isfile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_isfile", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1179,7 +1118,6 @@ bool fh_hphp_splfileinfo_islink(Value* obj) asm("_ZN4HPHP25f_hphp_splfileinfo_is
 TypedValue * fg1_hphp_splfileinfo_islink(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_islink(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_splfileinfo_islink((Value*)(args-0))) ? 1LL : 0LL;
@@ -1192,7 +1130,6 @@ TypedValue* fg_hphp_splfileinfo_islink(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_splfileinfo_islink((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1208,7 +1145,6 @@ TypedValue* fg_hphp_splfileinfo_islink(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_islink", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1231,7 +1167,6 @@ bool fh_hphp_splfileinfo_isreadable(Value* obj) asm("_ZN4HPHP29f_hphp_splfileinf
 TypedValue * fg1_hphp_splfileinfo_isreadable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_isreadable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_splfileinfo_isreadable((Value*)(args-0))) ? 1LL : 0LL;
@@ -1244,7 +1179,6 @@ TypedValue* fg_hphp_splfileinfo_isreadable(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_splfileinfo_isreadable((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1260,7 +1194,6 @@ TypedValue* fg_hphp_splfileinfo_isreadable(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_isreadable", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1283,7 +1216,6 @@ bool fh_hphp_splfileinfo_iswritable(Value* obj) asm("_ZN4HPHP29f_hphp_splfileinf
 TypedValue * fg1_hphp_splfileinfo_iswritable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_iswritable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_splfileinfo_iswritable((Value*)(args-0))) ? 1LL : 0LL;
@@ -1296,7 +1228,6 @@ TypedValue* fg_hphp_splfileinfo_iswritable(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_splfileinfo_iswritable((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1312,7 +1243,6 @@ TypedValue* fg_hphp_splfileinfo_iswritable(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_iswritable", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1339,7 +1269,6 @@ Value* fh_hphp_splfileinfo_openfile(Value* _rv, Value* obj, Value* open_mode, bo
 TypedValue * fg1_hphp_splfileinfo_openfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo_openfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-2)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-2);
@@ -1361,7 +1290,6 @@ TypedValue* fg_hphp_splfileinfo_openfile(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-2)->m_type == KindOfBoolean && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_hphp_splfileinfo_openfile((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (bool)(args[-2].m_data.num), (args-3));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1378,7 +1306,6 @@ TypedValue* fg_hphp_splfileinfo_openfile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_openfile", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1402,7 +1329,6 @@ TypedValue * fg1_hphp_splfileinfo_setfileclass(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue * fg1_hphp_splfileinfo_setfileclass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1421,7 +1347,6 @@ TypedValue* fg_hphp_splfileinfo_setfileclass(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_splfileinfo_setfileclass((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -1437,7 +1362,6 @@ TypedValue* fg_hphp_splfileinfo_setfileclass(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_setfileclass", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1461,7 +1385,6 @@ TypedValue * fg1_hphp_splfileinfo_setinfoclass(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue * fg1_hphp_splfileinfo_setinfoclass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1480,7 +1403,6 @@ TypedValue* fg_hphp_splfileinfo_setinfoclass(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_splfileinfo_setinfoclass((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -1496,7 +1418,6 @@ TypedValue* fg_hphp_splfileinfo_setinfoclass(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo_setinfoclass", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1520,7 +1441,6 @@ Value* fh_hphp_splfileinfo___tostring(Value* _rv, Value* obj) asm("_ZN4HPHP29f_h
 TypedValue * fg1_hphp_splfileinfo___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileinfo___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileinfo___tostring((Value*)(rv), (Value*)(args-0));
@@ -1534,7 +1454,6 @@ TypedValue* fg_hphp_splfileinfo___tostring(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_splfileinfo___tostring((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1551,7 +1470,6 @@ TypedValue* fg_hphp_splfileinfo___tostring(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileinfo___tostring", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1579,7 +1497,6 @@ Value* fh_hphp_splfileobject___construct(Value* _rv, Value* obj, Value* filename
 TypedValue * fg1_hphp_splfileobject___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-3)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-3);
@@ -1604,7 +1521,6 @@ TypedValue* fg_hphp_splfileobject___construct(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-3)->m_type == KindOfBoolean && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_hphp_splfileobject___construct((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (bool)(args[-3].m_data.num), (args-4));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1621,7 +1537,6 @@ TypedValue* fg_hphp_splfileobject___construct(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject___construct", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1672,7 +1587,6 @@ TypedValue* fg_hphp_splfileobject_current(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_current", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1695,7 +1609,6 @@ bool fh_hphp_splfileobject_eof(Value* obj) asm("_ZN4HPHP24f_hphp_splfileobject_e
 TypedValue * fg1_hphp_splfileobject_eof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_eof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_splfileobject_eof((Value*)(args-0))) ? 1LL : 0LL;
@@ -1708,7 +1621,6 @@ TypedValue* fg_hphp_splfileobject_eof(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_splfileobject_eof((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1724,7 +1636,6 @@ TypedValue* fg_hphp_splfileobject_eof(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_eof", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1747,7 +1658,6 @@ bool fh_hphp_splfileobject_fflush(Value* obj) asm("_ZN4HPHP27f_hphp_splfileobjec
 TypedValue * fg1_hphp_splfileobject_fflush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_fflush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_splfileobject_fflush((Value*)(args-0))) ? 1LL : 0LL;
@@ -1760,7 +1670,6 @@ TypedValue* fg_hphp_splfileobject_fflush(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_splfileobject_fflush((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1776,7 +1685,6 @@ TypedValue* fg_hphp_splfileobject_fflush(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_fflush", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1800,7 +1708,6 @@ Value* fh_hphp_splfileobject_fgetc(Value* _rv, Value* obj) asm("_ZN4HPHP26f_hphp
 TypedValue * fg1_hphp_splfileobject_fgetc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_fgetc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileobject_fgetc((Value*)(rv), (Value*)(args-0));
@@ -1814,7 +1721,6 @@ TypedValue* fg_hphp_splfileobject_fgetc(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_splfileobject_fgetc((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1831,7 +1737,6 @@ TypedValue* fg_hphp_splfileobject_fgetc(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_fgetc", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1896,7 +1801,6 @@ TypedValue* fg_hphp_splfileobject_fgetcsv(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_fgetcsv", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1920,7 +1824,6 @@ Value* fh_hphp_splfileobject_fgets(Value* _rv, Value* obj) asm("_ZN4HPHP26f_hphp
 TypedValue * fg1_hphp_splfileobject_fgets(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_fgets(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileobject_fgets((Value*)(rv), (Value*)(args-0));
@@ -1934,7 +1837,6 @@ TypedValue* fg_hphp_splfileobject_fgets(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_splfileobject_fgets((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1951,7 +1853,6 @@ TypedValue* fg_hphp_splfileobject_fgets(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_fgets", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1976,7 +1877,6 @@ Value* fh_hphp_splfileobject_fgetss(Value* _rv, Value* obj, Value* allowable_tag
 TypedValue * fg1_hphp_splfileobject_fgetss(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_fgetss(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1995,7 +1895,6 @@ TypedValue* fg_hphp_splfileobject_fgetss(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_hphp_splfileobject_fgetss((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2012,7 +1911,6 @@ TypedValue* fg_hphp_splfileobject_fgetss(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_fgetss", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2036,7 +1934,6 @@ bool fh_hphp_splfileobject_flock(Value* obj, TypedValue* wouldblock) asm("_ZN4HP
 TypedValue * fg1_hphp_splfileobject_flock(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_flock(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_splfileobject_flock((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -2049,7 +1946,6 @@ TypedValue* fg_hphp_splfileobject_flock(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_splfileobject_flock((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2065,7 +1961,6 @@ TypedValue* fg_hphp_splfileobject_flock(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_flock", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2088,7 +1983,6 @@ long fh_hphp_splfileobject_fpassthru(Value* obj) asm("_ZN4HPHP30f_hphp_splfileob
 TypedValue * fg1_hphp_splfileobject_fpassthru(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_fpassthru(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileobject_fpassthru((Value*)(args-0));
@@ -2101,7 +1995,6 @@ TypedValue* fg_hphp_splfileobject_fpassthru(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileobject_fpassthru((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2117,7 +2010,6 @@ TypedValue* fg_hphp_splfileobject_fpassthru(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_fpassthru", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2179,7 +2071,6 @@ TypedValue* fg_hphp_splfileobject_fscanf(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_fscanf", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2204,7 +2095,6 @@ long fh_hphp_splfileobject_fseek(Value* obj, long offset, long whence) asm("_ZN4
 TypedValue * fg1_hphp_splfileobject_fseek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_fseek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -2225,7 +2115,6 @@ TypedValue* fg_hphp_splfileobject_fseek(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileobject_fseek((Value*)(args-0), (long)(args[-1].m_data.num), (long)(args[-2].m_data.num));
         frame_free_locals_no_this_inl(ar, 3);
@@ -2241,7 +2130,6 @@ TypedValue* fg_hphp_splfileobject_fseek(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_fseek", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2292,7 +2180,6 @@ TypedValue* fg_hphp_splfileobject_fstat(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_fstat", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2315,7 +2202,6 @@ long fh_hphp_splfileobject_ftell(Value* obj) asm("_ZN4HPHP26f_hphp_splfileobject
 TypedValue * fg1_hphp_splfileobject_ftell(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_ftell(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileobject_ftell((Value*)(args-0));
@@ -2328,7 +2214,6 @@ TypedValue* fg_hphp_splfileobject_ftell(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileobject_ftell((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2344,7 +2229,6 @@ TypedValue* fg_hphp_splfileobject_ftell(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_ftell", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2368,7 +2252,6 @@ bool fh_hphp_splfileobject_ftruncate(Value* obj, long size) asm("_ZN4HPHP30f_hph
 TypedValue * fg1_hphp_splfileobject_ftruncate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_ftruncate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -2386,7 +2269,6 @@ TypedValue* fg_hphp_splfileobject_ftruncate(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_splfileobject_ftruncate((Value*)(args-0), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2402,7 +2284,6 @@ TypedValue* fg_hphp_splfileobject_ftruncate(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_ftruncate", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2427,7 +2308,6 @@ long fh_hphp_splfileobject_fwrite(Value* obj, Value* str, long length) asm("_ZN4
 TypedValue * fg1_hphp_splfileobject_fwrite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_fwrite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -2448,7 +2328,6 @@ TypedValue* fg_hphp_splfileobject_fwrite(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileobject_fwrite((Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num));
         frame_free_locals_no_this_inl(ar, 3);
@@ -2464,7 +2343,6 @@ TypedValue* fg_hphp_splfileobject_fwrite(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_fwrite", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2515,7 +2393,6 @@ TypedValue* fg_hphp_splfileobject_getcvscontrol(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_getcvscontrol", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2538,7 +2415,6 @@ long fh_hphp_splfileobject_getflags(Value* obj) asm("_ZN4HPHP29f_hphp_splfileobj
 TypedValue * fg1_hphp_splfileobject_getflags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_getflags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileobject_getflags((Value*)(args-0));
@@ -2551,7 +2427,6 @@ TypedValue* fg_hphp_splfileobject_getflags(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileobject_getflags((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2567,7 +2442,6 @@ TypedValue* fg_hphp_splfileobject_getflags(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_getflags", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2590,7 +2464,6 @@ long fh_hphp_splfileobject_getmaxlinelen(Value* obj) asm("_ZN4HPHP34f_hphp_splfi
 TypedValue * fg1_hphp_splfileobject_getmaxlinelen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_getmaxlinelen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileobject_getmaxlinelen((Value*)(args-0));
@@ -2603,7 +2476,6 @@ TypedValue* fg_hphp_splfileobject_getmaxlinelen(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileobject_getmaxlinelen((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2619,7 +2491,6 @@ TypedValue* fg_hphp_splfileobject_getmaxlinelen(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_getmaxlinelen", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2642,7 +2513,6 @@ long fh_hphp_splfileobject_key(Value* obj) asm("_ZN4HPHP24f_hphp_splfileobject_k
 TypedValue * fg1_hphp_splfileobject_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_hphp_splfileobject_key((Value*)(args-0));
@@ -2655,7 +2525,6 @@ TypedValue* fg_hphp_splfileobject_key(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_hphp_splfileobject_key((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2671,7 +2540,6 @@ TypedValue* fg_hphp_splfileobject_key(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_key", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2694,7 +2562,6 @@ TypedValue * fg1_hphp_splfileobject_next(TypedValue* rv, HPHP::VM::ActRec* ar, i
 TypedValue * fg1_hphp_splfileobject_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileobject_next((Value*)(args-0));
@@ -2708,7 +2575,6 @@ TypedValue* fg_hphp_splfileobject_next(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_splfileobject_next((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2724,7 +2590,6 @@ TypedValue* fg_hphp_splfileobject_next(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_next", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2747,7 +2612,6 @@ TypedValue * fg1_hphp_splfileobject_rewind(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue * fg1_hphp_splfileobject_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileobject_rewind((Value*)(args-0));
@@ -2761,7 +2625,6 @@ TypedValue* fg_hphp_splfileobject_rewind(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_splfileobject_rewind((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2777,7 +2640,6 @@ TypedValue* fg_hphp_splfileobject_rewind(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_rewind", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2800,7 +2662,6 @@ bool fh_hphp_splfileobject_valid(Value* obj) asm("_ZN4HPHP26f_hphp_splfileobject
 TypedValue * fg1_hphp_splfileobject_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_splfileobject_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_hphp_splfileobject_valid((Value*)(args-0))) ? 1LL : 0LL;
@@ -2813,7 +2674,6 @@ TypedValue* fg_hphp_splfileobject_valid(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_splfileobject_valid((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -2829,7 +2689,6 @@ TypedValue* fg_hphp_splfileobject_valid(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_valid", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2853,7 +2712,6 @@ TypedValue * fg1_hphp_splfileobject_seek(TypedValue* rv, HPHP::VM::ActRec* ar, i
 TypedValue * fg1_hphp_splfileobject_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -2872,7 +2730,6 @@ TypedValue* fg_hphp_splfileobject_seek(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_splfileobject_seek((Value*)(args-0), (long)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -2888,7 +2745,6 @@ TypedValue* fg_hphp_splfileobject_seek(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_seek", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2914,7 +2770,6 @@ TypedValue * fg1_hphp_splfileobject_setcsvcontrol(TypedValue* rv, HPHP::VM::ActR
 TypedValue * fg1_hphp_splfileobject_setcsvcontrol(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -2939,7 +2794,6 @@ TypedValue* fg_hphp_splfileobject_setcsvcontrol(HPHP::VM::ActRec *ar) {
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_splfileobject_setcsvcontrol((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3));
         frame_free_locals_no_this_inl(ar, 4);
@@ -2955,7 +2809,6 @@ TypedValue* fg_hphp_splfileobject_setcsvcontrol(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_setcsvcontrol", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2979,7 +2832,6 @@ TypedValue * fg1_hphp_splfileobject_setflags(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue * fg1_hphp_splfileobject_setflags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -2998,7 +2850,6 @@ TypedValue* fg_hphp_splfileobject_setflags(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_splfileobject_setflags((Value*)(args-0), (long)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -3014,7 +2865,6 @@ TypedValue* fg_hphp_splfileobject_setflags(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_setflags", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3038,7 +2888,6 @@ TypedValue * fg1_hphp_splfileobject_setmaxlinelen(TypedValue* rv, HPHP::VM::ActR
 TypedValue * fg1_hphp_splfileobject_setmaxlinelen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -3057,7 +2906,6 @@ TypedValue* fg_hphp_splfileobject_setmaxlinelen(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_splfileobject_setmaxlinelen((Value*)(args-0), (long)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -3073,7 +2921,6 @@ TypedValue* fg_hphp_splfileobject_setmaxlinelen(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_splfileobject_setmaxlinelen", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

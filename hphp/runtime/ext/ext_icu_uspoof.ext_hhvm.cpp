@@ -51,7 +51,6 @@ TypedValue* tg_12SpoofChecker___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_12SpoofChecker___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -64,7 +63,6 @@ TypedValue* tg_12SpoofChecker___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SpoofChecker::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -87,7 +85,6 @@ bool th_12SpoofChecker_isSuspicious(ObjectData* this_, Value* text, TypedValue* 
 TypedValue* tg1_12SpoofChecker_isSuspicious(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_12SpoofChecker_isSuspicious(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   VRefParamValue defVal1 = null;
@@ -103,7 +100,6 @@ TypedValue* tg_12SpoofChecker_isSuspicious(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           VRefParamValue defVal1 = null;
           rv.m_data.num = (th_12SpoofChecker_isSuspicious((this_), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1))) ? 1LL : 0LL;
@@ -123,7 +119,6 @@ TypedValue* tg_12SpoofChecker_isSuspicious(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SpoofChecker::isSuspicious");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -147,7 +142,6 @@ bool th_12SpoofChecker_areConfusable(ObjectData* this_, Value* s1, Value* s2, Ty
 TypedValue* tg1_12SpoofChecker_areConfusable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_12SpoofChecker_areConfusable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -173,7 +167,6 @@ TypedValue* tg_12SpoofChecker_areConfusable(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           VRefParamValue defVal2 = null;
           rv.m_data.num = (th_12SpoofChecker_areConfusable((this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
@@ -193,7 +186,6 @@ TypedValue* tg_12SpoofChecker_areConfusable(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SpoofChecker::areConfusable");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -215,7 +207,6 @@ TypedValue* tg1_12SpoofChecker_setAllowedLocales(TypedValue* rv, HPHP::VM::ActRe
 TypedValue* tg1_12SpoofChecker_setAllowedLocales(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_12SpoofChecker_setAllowedLocales((this_), (Value*)(args-0));
@@ -231,7 +222,6 @@ TypedValue* tg_12SpoofChecker_setAllowedLocales(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_12SpoofChecker_setAllowedLocales((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -250,7 +240,6 @@ TypedValue* tg_12SpoofChecker_setAllowedLocales(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SpoofChecker::setAllowedLocales");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -272,7 +261,6 @@ TypedValue* tg1_12SpoofChecker_setChecks(TypedValue* rv, HPHP::VM::ActRec* ar, i
 TypedValue* tg1_12SpoofChecker_setChecks(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToInt64InPlace(args-0);
   th_12SpoofChecker_setChecks((this_), (int)(args[-0].m_data.num));
@@ -288,7 +276,6 @@ TypedValue* tg_12SpoofChecker_setChecks(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_12SpoofChecker_setChecks((this_), (int)(args[-0].m_data.num));
           frame_free_locals_inl(ar, 1);
@@ -307,7 +294,6 @@ TypedValue* tg_12SpoofChecker_setChecks(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SpoofChecker::setChecks");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

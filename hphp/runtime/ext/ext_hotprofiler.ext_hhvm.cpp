@@ -38,7 +38,6 @@ TypedValue * fg1_xhprof_enable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
 TypedValue * fg1_xhprof_enable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 2
@@ -63,7 +62,6 @@ TypedValue* fg_xhprof_enable(HPHP::VM::ActRec *ar) {
     if (count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfArray) && (count <= 0 || (args-0)->m_type == KindOfInt64)) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_xhprof_enable((count > 0) ? (int)(args[-0].m_data.num) : (int)(0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
         frame_free_locals_no_this_inl(ar, 2);
@@ -79,7 +77,6 @@ TypedValue* fg_xhprof_enable(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("xhprof_enable", 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -113,7 +110,6 @@ TypedValue* fg_xhprof_disable(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("xhprof_disable", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -137,7 +133,6 @@ TypedValue* fg_xhprof_network_enable(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       fh_xhprof_network_enable();
       frame_free_locals_no_this_inl(ar, 0);
@@ -147,7 +142,6 @@ TypedValue* fg_xhprof_network_enable(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("xhprof_network_enable", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -181,7 +175,6 @@ TypedValue* fg_xhprof_network_disable(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("xhprof_network_disable", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -204,7 +197,6 @@ TypedValue * fg1_xhprof_frame_begin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_xhprof_frame_begin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   fh_xhprof_frame_begin((Value*)(args-0));
@@ -218,7 +210,6 @@ TypedValue* fg_xhprof_frame_begin(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_xhprof_frame_begin((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -234,7 +225,6 @@ TypedValue* fg_xhprof_frame_begin(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xhprof_frame_begin", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -258,7 +248,6 @@ TypedValue* fg_xhprof_frame_end(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       fh_xhprof_frame_end();
       frame_free_locals_no_this_inl(ar, 0);
@@ -268,7 +257,6 @@ TypedValue* fg_xhprof_frame_end(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("xhprof_frame_end", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -325,7 +313,6 @@ TypedValue* fg_xhprof_run_trace(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xhprof_run_trace", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -349,7 +336,6 @@ TypedValue* fg_xhprof_sample_enable(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       fh_xhprof_sample_enable();
       frame_free_locals_no_this_inl(ar, 0);
@@ -359,7 +345,6 @@ TypedValue* fg_xhprof_sample_enable(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("xhprof_sample_enable", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -393,7 +378,6 @@ TypedValue* fg_xhprof_sample_disable(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("xhprof_sample_disable", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -418,7 +402,6 @@ TypedValue* fg_fb_setprofile(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       fh_fb_setprofile((args-0));
       frame_free_locals_no_this_inl(ar, 1);
@@ -428,7 +411,6 @@ TypedValue* fg_fb_setprofile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fb_setprofile", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

@@ -51,7 +51,6 @@ TypedValue* tg_24SetResultToRefWaitHandle___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_24SetResultToRefWaitHandle___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -64,7 +63,6 @@ TypedValue* tg_24SetResultToRefWaitHandle___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SetResultToRefWaitHandle::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -88,7 +86,6 @@ Value* th_24SetResultToRefWaitHandle_create(Value* _rv, char const* cls_, Value*
 TypedValue* tg1_24SetResultToRefWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue* tg1_24SetResultToRefWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   th_24SetResultToRefWaitHandle_create((Value*)(rv), ("SetResultToRefWaitHandle"), (Value*)(args-0), (args-1));
@@ -102,7 +99,6 @@ TypedValue* tg_24SetResultToRefWaitHandle_create(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_24SetResultToRefWaitHandle_create((Value*)(&(rv)), ("SetResultToRefWaitHandle"), (Value*)(args-0), (args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -119,7 +115,6 @@ TypedValue* tg_24SetResultToRefWaitHandle_create(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("SetResultToRefWaitHandle::create", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

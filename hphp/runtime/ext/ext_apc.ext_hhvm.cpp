@@ -40,7 +40,6 @@ bool fh_apc_add(Value* key, TypedValue* var, long ttl, long cache_id) asm("_ZN4H
 TypedValue * fg1_apc_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_apc_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -67,7 +66,6 @@ TypedValue* fg_apc_add(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_apc_add((Value*)(args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -83,7 +81,6 @@ TypedValue* fg_apc_add(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("apc_add", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -109,7 +106,6 @@ bool fh_apc_store(Value* key, TypedValue* var, long ttl, long cache_id) asm("_ZN
 TypedValue * fg1_apc_store(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_apc_store(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -136,7 +132,6 @@ TypedValue* fg_apc_store(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_apc_store((Value*)(args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -152,7 +147,6 @@ TypedValue* fg_apc_store(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("apc_store", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -207,7 +201,6 @@ TypedValue* fg_apc_fetch(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("apc_fetch", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -259,7 +252,6 @@ TypedValue* fg_apc_delete(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("apc_delete", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -322,7 +314,6 @@ TypedValue* fg_apc_cache_info(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("apc_cache_info", 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -345,7 +336,6 @@ bool fh_apc_clear_cache(long cache_id) asm("_ZN4HPHP17f_apc_clear_cacheEl");
 TypedValue * fg1_apc_clear_cache(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_apc_clear_cache(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (fh_apc_clear_cache((count > 0) ? (long)(args[-0].m_data.num) : (long)(0))) ? 1LL : 0LL;
@@ -358,7 +348,6 @@ TypedValue* fg_apc_clear_cache(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfInt64)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_apc_clear_cache((count > 0) ? (long)(args[-0].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -374,7 +363,6 @@ TypedValue* fg_apc_clear_cache(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("apc_clear_cache", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -445,7 +433,6 @@ TypedValue* fg_apc_inc(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("apc_inc", count, 1, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -516,7 +503,6 @@ TypedValue* fg_apc_dec(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("apc_dec", count, 1, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -542,7 +528,6 @@ bool fh_apc_cas(Value* key, long old_cas, long new_cas, long cache_id) asm("_ZN4
 TypedValue * fg1_apc_cas(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_apc_cas(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -571,7 +556,6 @@ TypedValue* fg_apc_cas(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_apc_cas((Value*)(args-0), (long)(args[-1].m_data.num), (long)(args[-2].m_data.num), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -587,7 +571,6 @@ TypedValue* fg_apc_cas(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("apc_cas", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -639,7 +622,6 @@ TypedValue* fg_apc_exists(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("apc_exists", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

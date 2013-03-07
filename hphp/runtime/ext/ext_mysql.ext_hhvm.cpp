@@ -102,7 +102,6 @@ TypedValue* fg_mysql_connect(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_connect", 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -175,7 +174,6 @@ TypedValue* fg_mysql_async_connect_start(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_async_connect_start", 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -200,7 +198,6 @@ TypedValue* fg_mysql_async_connect_completed(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_mysql_async_connect_completed((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -210,7 +207,6 @@ TypedValue* fg_mysql_async_connect_completed(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_async_connect_completed", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -234,7 +230,6 @@ bool fh_mysql_async_query_start(Value* query, TypedValue* link_identifier) asm("
 TypedValue * fg1_mysql_async_query_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_mysql_async_query_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_mysql_async_query_start((Value*)(args-0), (args-1))) ? 1LL : 0LL;
@@ -247,7 +242,6 @@ TypedValue* fg_mysql_async_query_start(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_mysql_async_query_start((Value*)(args-0), (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -263,7 +257,6 @@ TypedValue* fg_mysql_async_query_start(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_async_query_start", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -298,7 +291,6 @@ TypedValue* fg_mysql_async_query_result(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_async_query_result", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -323,7 +315,6 @@ TypedValue* fg_mysql_async_query_completed(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_mysql_async_query_completed((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -333,7 +324,6 @@ TypedValue* fg_mysql_async_query_completed(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_async_query_completed", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -385,7 +375,6 @@ TypedValue* fg_mysql_async_fetch_array(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_async_fetch_array", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -437,7 +426,6 @@ TypedValue* fg_mysql_async_wait_actionable(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_async_wait_actionable", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -520,7 +508,6 @@ TypedValue* fg_mysql_pconnect(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_pconnect", 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -613,7 +600,6 @@ TypedValue* fg_mysql_connect_with_db(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_connect_with_db", 8, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 8);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -701,7 +687,6 @@ TypedValue* fg_mysql_pconnect_with_db(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_pconnect_with_db", 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -725,7 +710,6 @@ Value* fh_mysql_escape_string(Value* _rv, Value* unescaped_string) asm("_ZN4HPHP
 TypedValue * fg1_mysql_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_mysql_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
   fh_mysql_escape_string((Value*)(rv), (Value*)(args-0));
@@ -739,7 +723,6 @@ TypedValue* fg_mysql_escape_string(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_mysql_escape_string((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -756,7 +739,6 @@ TypedValue* fg_mysql_escape_string(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_escape_string", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -810,7 +792,6 @@ TypedValue* fg_mysql_real_escape_string(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_real_escape_string", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -846,7 +827,6 @@ TypedValue* fg_mysql_errno(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_errno", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -882,7 +862,6 @@ TypedValue* fg_mysql_error(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_error", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -918,7 +897,6 @@ TypedValue* fg_mysql_warning_count(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_warning_count", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -942,7 +920,6 @@ bool fh_mysql_set_timeout(int query_timeout_ms, TypedValue* link_identifier) asm
 TypedValue * fg1_mysql_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_mysql_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
   Variant defVal1;
@@ -956,7 +933,6 @@ TypedValue* fg_mysql_set_timeout(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 2LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfInt64)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         Variant defVal1;
         rv.m_data.num = (fh_mysql_set_timeout((count > 0) ? (int)(args[-0].m_data.num) : (int)(-1), (count > 1) ? (args-1) : (TypedValue*)(&defVal1))) ? 1LL : 0LL;
@@ -973,7 +949,6 @@ TypedValue* fg_mysql_set_timeout(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_set_timeout", 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1027,7 +1002,6 @@ TypedValue* fg_mysql_query(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_query", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1081,7 +1055,6 @@ TypedValue* fg_mysql_multi_query(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_multi_query", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1106,7 +1079,6 @@ TypedValue* fg_mysql_next_result(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       Variant defVal0;
       rv.m_data.num = (fh_mysql_next_result((count > 0) ? (args-0) : (TypedValue*)(&defVal0))) ? 1LL : 0LL;
@@ -1117,7 +1089,6 @@ TypedValue* fg_mysql_next_result(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_next_result", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1142,7 +1113,6 @@ TypedValue* fg_mysql_more_results(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       Variant defVal0;
       rv.m_data.num = (fh_mysql_more_results((count > 0) ? (args-0) : (TypedValue*)(&defVal0))) ? 1LL : 0LL;
@@ -1153,7 +1123,6 @@ TypedValue* fg_mysql_more_results(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_more_results", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1189,7 +1158,6 @@ TypedValue* fg_mysql_fetch_result(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_fetch_result", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1243,7 +1211,6 @@ TypedValue* fg_mysql_unbuffered_query(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_unbuffered_query", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1279,7 +1246,6 @@ TypedValue* fg_mysql_list_dbs(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_list_dbs", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1333,7 +1299,6 @@ TypedValue* fg_mysql_list_tables(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_list_tables", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1369,7 +1334,6 @@ TypedValue* fg_mysql_list_processes(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mysql_list_processes", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1404,7 +1368,6 @@ TypedValue* fg_mysql_num_fields(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_num_fields", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1439,7 +1402,6 @@ TypedValue* fg_mysql_num_rows(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_num_rows", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1474,7 +1436,6 @@ TypedValue* fg_mysql_free_result(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_free_result", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1498,7 +1459,6 @@ bool fh_mysql_data_seek(TypedValue* result, int row) asm("_ZN4HPHP17f_mysql_data
 TypedValue * fg1_mysql_data_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_mysql_data_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-1);
   rv->m_data.num = (fh_mysql_data_seek((args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
@@ -1511,7 +1471,6 @@ TypedValue* fg_mysql_data_seek(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_mysql_data_seek((args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1527,7 +1486,6 @@ TypedValue* fg_mysql_data_seek(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_data_seek", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1562,7 +1520,6 @@ TypedValue* fg_mysql_fetch_row(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_fetch_row", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1597,7 +1554,6 @@ TypedValue* fg_mysql_fetch_assoc(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_fetch_assoc", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1649,7 +1605,6 @@ TypedValue* fg_mysql_fetch_array(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_fetch_array", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1684,7 +1639,6 @@ TypedValue* fg_mysql_fetch_lengths(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_fetch_lengths", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1752,7 +1706,6 @@ TypedValue* fg_mysql_fetch_object(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_fetch_object", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1805,7 +1758,6 @@ TypedValue* fg_mysql_result(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_result", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1857,7 +1809,6 @@ TypedValue* fg_mysql_fetch_field(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_fetch_field", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1881,7 +1832,6 @@ bool fh_mysql_field_seek(TypedValue* result, int field) asm("_ZN4HPHP18f_mysql_f
 TypedValue * fg1_mysql_field_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_mysql_field_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-1);
   rv->m_data.num = (fh_mysql_field_seek((args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
@@ -1894,7 +1844,6 @@ TypedValue* fg_mysql_field_seek(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_mysql_field_seek((args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1910,7 +1859,6 @@ TypedValue* fg_mysql_field_seek(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_field_seek", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1962,7 +1910,6 @@ TypedValue* fg_mysql_field_name(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_field_name", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2014,7 +1961,6 @@ TypedValue* fg_mysql_field_table(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_field_table", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2066,7 +2012,6 @@ TypedValue* fg_mysql_field_len(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_field_len", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2118,7 +2063,6 @@ TypedValue* fg_mysql_field_type(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_field_type", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2170,7 +2114,6 @@ TypedValue* fg_mysql_field_flags(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("mysql_field_flags", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

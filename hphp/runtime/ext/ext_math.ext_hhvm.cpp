@@ -64,7 +64,6 @@ TypedValue* fg_min(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("min", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -114,7 +113,6 @@ TypedValue* fg_max(HPHP::VM::ActRec *ar) {
       throw_missing_arguments_nr("max", count+1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -149,7 +147,6 @@ TypedValue* fg_abs(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("abs", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -174,7 +171,6 @@ double fh_round(TypedValue* val, long precision, long mode) asm("_ZN4HPHP7f_roun
 TypedValue * fg1_round(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_round(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   switch (count) {
   default: // count >= 3
@@ -198,7 +194,6 @@ TypedValue* fg_round(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64)) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_round((args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(1));
         frame_free_locals_no_this_inl(ar, 3);
@@ -214,7 +209,6 @@ TypedValue* fg_round(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("round", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -275,7 +269,6 @@ TypedValue* fg_base_convert(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("base_convert", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -311,7 +304,6 @@ TypedValue* fg_pow(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pow", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -336,7 +328,6 @@ TypedValue* fg_srand(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       fh_srand((count > 0) ? (args-0) : (TypedValue*)(&null_variant));
       frame_free_locals_no_this_inl(ar, 1);
@@ -346,7 +337,6 @@ TypedValue* fg_srand(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("srand", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -370,7 +360,6 @@ long fh_rand(long min, long max) asm("_ZN4HPHP6f_randEll");
 TypedValue * fg1_rand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_rand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   switch (count) {
   default: // count >= 2
@@ -394,7 +383,6 @@ TypedValue* fg_rand(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (count <= 0 || (args-0)->m_type == KindOfInt64)) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_rand((count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(RAND_MAX));
         frame_free_locals_no_this_inl(ar, 2);
@@ -410,7 +398,6 @@ TypedValue* fg_rand(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("rand", 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -435,7 +422,6 @@ TypedValue* fg_mt_srand(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       fh_mt_srand((count > 0) ? (args-0) : (TypedValue*)(&null_variant));
       frame_free_locals_no_this_inl(ar, 1);
@@ -445,7 +431,6 @@ TypedValue* fg_mt_srand(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("mt_srand", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

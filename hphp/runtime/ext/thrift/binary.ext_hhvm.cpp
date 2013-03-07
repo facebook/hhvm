@@ -42,7 +42,6 @@ TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, HPHP::VM::ActRec* 
 TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-5)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-5);
@@ -73,7 +72,6 @@ TypedValue* fg_thrift_protocol_write_binary(HPHP::VM::ActRec *ar) {
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfObject && (args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_thrift_protocol_write_binary((Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num), (Value*)(args-3), (int)(args[-4].m_data.num), (bool)(args[-5].m_data.num));
         frame_free_locals_no_this_inl(ar, 6);
@@ -89,7 +87,6 @@ TypedValue* fg_thrift_protocol_write_binary(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("thrift_protocol_write_binary", count, 6, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -150,7 +147,6 @@ TypedValue* fg_thrift_protocol_read_binary(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("thrift_protocol_read_binary", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

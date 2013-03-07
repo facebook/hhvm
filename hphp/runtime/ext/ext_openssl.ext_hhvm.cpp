@@ -39,7 +39,6 @@ bool fh_openssl_csr_export_to_file(TypedValue* csr, Value* outfilename, bool not
 TypedValue * fg1_openssl_csr_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_csr_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -62,7 +61,6 @@ TypedValue* fg_openssl_csr_export_to_file(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_csr_export_to_file((args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -78,7 +76,6 @@ TypedValue* fg_openssl_csr_export_to_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_csr_export_to_file", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -103,7 +100,6 @@ bool fh_openssl_csr_export(TypedValue* csr, TypedValue* out, bool notext) asm("_
 TypedValue * fg1_openssl_csr_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_csr_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-2);
   rv->m_data.num = (fh_openssl_csr_export((args-0), (args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
@@ -116,7 +112,6 @@ TypedValue* fg_openssl_csr_export(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_csr_export((args-0), (args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -132,7 +127,6 @@ TypedValue* fg_openssl_csr_export(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_csr_export", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -167,7 +161,6 @@ TypedValue* fg_openssl_csr_get_public_key(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_csr_get_public_key", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -219,7 +212,6 @@ TypedValue* fg_openssl_csr_get_subject(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_csr_get_subject", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -273,7 +265,6 @@ TypedValue* fg_openssl_csr_new(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_csr_new", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -340,7 +331,6 @@ TypedValue* fg_openssl_csr_sign(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_csr_sign", count, 4, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -374,7 +364,6 @@ TypedValue* fg_openssl_error_string(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("openssl_error_string", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -400,7 +389,6 @@ bool fh_openssl_open(Value* sealed_data, TypedValue* open_data, Value* env_key, 
 TypedValue * fg1_openssl_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -418,7 +406,6 @@ TypedValue* fg_openssl_open(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_open((Value*)(args-0), (args-1), (Value*)(args-2), (args-3))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -434,7 +421,6 @@ TypedValue* fg_openssl_open(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_open", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -461,7 +447,6 @@ bool fh_openssl_pkcs12_export_to_file(TypedValue* x509, Value* filename, TypedVa
 TypedValue * fg1_openssl_pkcs12_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_pkcs12_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 5
@@ -484,7 +469,6 @@ TypedValue* fg_openssl_pkcs12_export_to_file(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_pkcs12_export_to_file((args-0), (Value*)(args-1), (args-2), (Value*)(args-3), (count > 4) ? (args-4) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -500,7 +484,6 @@ TypedValue* fg_openssl_pkcs12_export_to_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkcs12_export_to_file", count, 4, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -527,7 +510,6 @@ bool fh_openssl_pkcs12_export(TypedValue* x509, TypedValue* out, TypedValue* pri
 TypedValue * fg1_openssl_pkcs12_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_pkcs12_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-3);
   rv->m_data.num = (fh_openssl_pkcs12_export((args-0), (args-1), (args-2), (Value*)(args-3), (count > 4) ? (args-4) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
@@ -540,7 +522,6 @@ TypedValue* fg_openssl_pkcs12_export(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if (IS_STRING_TYPE((args-3)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_pkcs12_export((args-0), (args-1), (args-2), (Value*)(args-3), (count > 4) ? (args-4) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -556,7 +537,6 @@ TypedValue* fg_openssl_pkcs12_export(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkcs12_export", count, 4, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -581,7 +561,6 @@ bool fh_openssl_pkcs12_read(Value* pkcs12, TypedValue* certs, Value* pass) asm("
 TypedValue * fg1_openssl_pkcs12_read(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_pkcs12_read(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -599,7 +578,6 @@ TypedValue* fg_openssl_pkcs12_read(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_pkcs12_read((Value*)(args-0), (args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -615,7 +593,6 @@ TypedValue* fg_openssl_pkcs12_read(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkcs12_read", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -641,7 +618,6 @@ bool fh_openssl_pkcs7_decrypt(Value* infilename, Value* outfilename, TypedValue*
 TypedValue * fg1_openssl_pkcs7_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_pkcs7_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -664,7 +640,6 @@ TypedValue* fg_openssl_pkcs7_decrypt(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_pkcs7_decrypt((Value*)(args-0), (Value*)(args-1), (args-2), (count > 3) ? (args-3) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -680,7 +655,6 @@ TypedValue* fg_openssl_pkcs7_decrypt(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkcs7_decrypt", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -708,7 +682,6 @@ bool fh_openssl_pkcs7_encrypt(Value* infilename, Value* outfilename, TypedValue*
 TypedValue * fg1_openssl_pkcs7_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_pkcs7_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 6
@@ -741,7 +714,6 @@ TypedValue* fg_openssl_pkcs7_encrypt(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 6LL) {
       if ((count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (args-3)->m_type == KindOfArray && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_pkcs7_encrypt((Value*)(args-0), (Value*)(args-1), (args-2), (Value*)(args-3), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(k_OPENSSL_CIPHER_RC2_40))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
@@ -757,7 +729,6 @@ TypedValue* fg_openssl_pkcs7_encrypt(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkcs7_encrypt", count, 4, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -786,7 +757,6 @@ bool fh_openssl_pkcs7_sign(Value* infilename, Value* outfilename, TypedValue* si
 TypedValue * fg1_openssl_pkcs7_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_pkcs7_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 7
@@ -816,7 +786,6 @@ TypedValue* fg_openssl_pkcs7_sign(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 5LL && count <= 7LL) {
       if ((count <= 6 || IS_STRING_TYPE((args-6)->m_type)) && (count <= 5 || (args-5)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_pkcs7_sign((Value*)(args-0), (Value*)(args-1), (args-2), (args-3), (args-4), (count > 5) ? (int)(args[-5].m_data.num) : (int)(k_PKCS7_DETACHED), (count > 6) ? (Value*)(args-6) : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 7);
@@ -832,7 +801,6 @@ TypedValue* fg_openssl_pkcs7_sign(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkcs7_sign", count, 5, 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -913,7 +881,6 @@ TypedValue* fg_openssl_pkcs7_verify(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkcs7_verify", count, 2, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -939,7 +906,6 @@ bool fh_openssl_pkey_export_to_file(TypedValue* key, Value* outfilename, Value* 
 TypedValue * fg1_openssl_pkey_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_pkey_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -963,7 +929,6 @@ TypedValue* fg_openssl_pkey_export_to_file(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && IS_STRING_TYPE((args-1)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_pkey_export_to_file((args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -979,7 +944,6 @@ TypedValue* fg_openssl_pkey_export_to_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkey_export_to_file", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1005,7 +969,6 @@ bool fh_openssl_pkey_export(TypedValue* key, TypedValue* out, Value* passphrase,
 TypedValue * fg1_openssl_pkey_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_pkey_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-2);
   rv->m_data.num = (fh_openssl_pkey_export((args-0), (args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
@@ -1018,7 +981,6 @@ TypedValue* fg_openssl_pkey_export(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type))) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_pkey_export((args-0), (args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -1034,7 +996,6 @@ TypedValue* fg_openssl_pkey_export(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkey_export", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1057,7 +1018,6 @@ TypedValue * fg1_openssl_pkey_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
 TypedValue * fg1_openssl_pkey_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_openssl_pkey_free((Value*)(args-0));
@@ -1071,7 +1031,6 @@ TypedValue* fg_openssl_pkey_free(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_openssl_pkey_free((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1087,7 +1046,6 @@ TypedValue* fg_openssl_pkey_free(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkey_free", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1110,7 +1068,6 @@ TypedValue * fg1_openssl_free_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_openssl_free_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_openssl_free_key((Value*)(args-0));
@@ -1124,7 +1081,6 @@ TypedValue* fg_openssl_free_key(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_openssl_free_key((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1140,7 +1096,6 @@ TypedValue* fg_openssl_free_key(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_free_key", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1164,7 +1119,6 @@ Value* fh_openssl_pkey_get_details(Value* _rv, Value* key) asm("_ZN4HPHP26f_open
 TypedValue * fg1_openssl_pkey_get_details(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_pkey_get_details(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_openssl_pkey_get_details((Value*)(rv), (Value*)(args-0));
@@ -1178,7 +1132,6 @@ TypedValue* fg_openssl_pkey_get_details(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_openssl_pkey_get_details((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1195,7 +1148,6 @@ TypedValue* fg_openssl_pkey_get_details(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkey_get_details", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1247,7 +1199,6 @@ TypedValue* fg_openssl_pkey_get_private(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkey_get_private", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1299,7 +1250,6 @@ TypedValue* fg_openssl_get_privatekey(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_get_privatekey", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1334,7 +1284,6 @@ TypedValue* fg_openssl_pkey_get_public(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_pkey_get_public", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1369,7 +1318,6 @@ TypedValue* fg_openssl_get_publickey(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_get_publickey", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1395,7 +1343,6 @@ TypedValue* fg_openssl_pkey_new(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       fh_openssl_pkey_new((Value*)(&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&null_variant));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1406,7 +1353,6 @@ TypedValue* fg_openssl_pkey_new(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("openssl_pkey_new", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1432,7 +1378,6 @@ bool fh_openssl_private_decrypt(Value* data, TypedValue* decrypted, TypedValue* 
 TypedValue * fg1_openssl_private_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_private_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -1455,7 +1400,6 @@ TypedValue* fg_openssl_private_decrypt(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_private_decrypt((Value*)(args-0), (args-1), (args-2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(k_OPENSSL_PKCS1_PADDING))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -1471,7 +1415,6 @@ TypedValue* fg_openssl_private_decrypt(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_private_decrypt", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1497,7 +1440,6 @@ bool fh_openssl_private_encrypt(Value* data, TypedValue* crypted, TypedValue* ke
 TypedValue * fg1_openssl_private_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_private_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -1520,7 +1462,6 @@ TypedValue* fg_openssl_private_encrypt(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_private_encrypt((Value*)(args-0), (args-1), (args-2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(k_OPENSSL_PKCS1_PADDING))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -1536,7 +1477,6 @@ TypedValue* fg_openssl_private_encrypt(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_private_encrypt", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1562,7 +1502,6 @@ bool fh_openssl_public_decrypt(Value* data, TypedValue* decrypted, TypedValue* k
 TypedValue * fg1_openssl_public_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_public_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -1585,7 +1524,6 @@ TypedValue* fg_openssl_public_decrypt(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_public_decrypt((Value*)(args-0), (args-1), (args-2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(k_OPENSSL_PKCS1_PADDING))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -1601,7 +1539,6 @@ TypedValue* fg_openssl_public_decrypt(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_public_decrypt", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1627,7 +1564,6 @@ bool fh_openssl_public_encrypt(Value* data, TypedValue* crypted, TypedValue* key
 TypedValue * fg1_openssl_public_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_public_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -1650,7 +1586,6 @@ TypedValue* fg_openssl_public_encrypt(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_public_encrypt((Value*)(args-0), (args-1), (args-2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(k_OPENSSL_PKCS1_PADDING))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -1666,7 +1601,6 @@ TypedValue* fg_openssl_public_encrypt(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_public_encrypt", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1725,7 +1659,6 @@ TypedValue* fg_openssl_seal(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_seal", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1751,7 +1684,6 @@ bool fh_openssl_sign(Value* data, TypedValue* signature, TypedValue* priv_key_id
 TypedValue * fg1_openssl_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -1774,7 +1706,6 @@ TypedValue* fg_openssl_sign(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_sign((Value*)(args-0), (args-1), (args-2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(k_OPENSSL_ALGO_SHA1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -1790,7 +1721,6 @@ TypedValue* fg_openssl_sign(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_sign", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1857,7 +1787,6 @@ TypedValue* fg_openssl_verify(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_verify", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1883,7 +1812,6 @@ TypedValue* fg_openssl_x509_check_private_key(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_openssl_x509_check_private_key((args-0), (args-1))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 2);
@@ -1893,7 +1821,6 @@ TypedValue* fg_openssl_x509_check_private_key(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_x509_check_private_key", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1919,7 +1846,6 @@ long fh_openssl_x509_checkpurpose(TypedValue* x509cert, int purpose, Value* cain
 TypedValue * fg1_openssl_x509_checkpurpose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_x509_checkpurpose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   switch (count) {
   default: // count >= 4
@@ -1946,7 +1872,6 @@ TypedValue* fg_openssl_x509_checkpurpose(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || (args-2)->m_type == KindOfArray) && (args-1)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_openssl_x509_checkpurpose((args-0), (int)(args[-1].m_data.num), (count > 2) ? (Value*)(args-2) : (Value*)(&null_array), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string));
         frame_free_locals_no_this_inl(ar, 4);
@@ -1962,7 +1887,6 @@ TypedValue* fg_openssl_x509_checkpurpose(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_x509_checkpurpose", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1987,7 +1911,6 @@ bool fh_openssl_x509_export_to_file(TypedValue* x509, Value* outfilename, bool n
 TypedValue * fg1_openssl_x509_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_x509_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -2010,7 +1933,6 @@ TypedValue* fg_openssl_x509_export_to_file(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_x509_export_to_file((args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -2026,7 +1948,6 @@ TypedValue* fg_openssl_x509_export_to_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_x509_export_to_file", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2051,7 +1972,6 @@ bool fh_openssl_x509_export(TypedValue* x509, TypedValue* output, bool notext) a
 TypedValue * fg1_openssl_x509_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_x509_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-2);
   rv->m_data.num = (fh_openssl_x509_export((args-0), (args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
@@ -2064,7 +1984,6 @@ TypedValue* fg_openssl_x509_export(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_openssl_x509_export((args-0), (args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -2080,7 +1999,6 @@ TypedValue* fg_openssl_x509_export(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_x509_export", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2103,7 +2021,6 @@ TypedValue * fg1_openssl_x509_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
 TypedValue * fg1_openssl_x509_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_openssl_x509_free((Value*)(args-0));
@@ -2117,7 +2034,6 @@ TypedValue* fg_openssl_x509_free(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_openssl_x509_free((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2133,7 +2049,6 @@ TypedValue* fg_openssl_x509_free(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_x509_free", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2185,7 +2100,6 @@ TypedValue* fg_openssl_x509_parse(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_x509_parse", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2220,7 +2134,6 @@ TypedValue* fg_openssl_x509_read(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_x509_read", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2274,7 +2187,6 @@ TypedValue* fg_openssl_random_pseudo_bytes(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_random_pseudo_bytes", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2325,7 +2237,6 @@ TypedValue* fg_openssl_cipher_iv_length(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_cipher_iv_length", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2400,7 +2311,6 @@ TypedValue* fg_openssl_encrypt(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_encrypt", count, 3, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2475,7 +2385,6 @@ TypedValue* fg_openssl_decrypt(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_decrypt", count, 3, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2541,7 +2450,6 @@ TypedValue* fg_openssl_digest(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("openssl_digest", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2565,7 +2473,6 @@ Value* fh_openssl_get_cipher_methods(Value* _rv, bool aliases) asm("_ZN4HPHP28f_
 TypedValue * fg1_openssl_get_cipher_methods(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_get_cipher_methods(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToBooleanInPlace(args-0);
   fh_openssl_get_cipher_methods((Value*)(rv), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
@@ -2579,7 +2486,6 @@ TypedValue* fg_openssl_get_cipher_methods(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_openssl_get_cipher_methods((Value*)(&(rv)), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2596,7 +2502,6 @@ TypedValue* fg_openssl_get_cipher_methods(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("openssl_get_cipher_methods", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2620,7 +2525,6 @@ Value* fh_openssl_get_md_methods(Value* _rv, bool aliases) asm("_ZN4HPHP24f_open
 TypedValue * fg1_openssl_get_md_methods(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_openssl_get_md_methods(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToBooleanInPlace(args-0);
   fh_openssl_get_md_methods((Value*)(rv), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
@@ -2634,7 +2538,6 @@ TypedValue* fg_openssl_get_md_methods(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_openssl_get_md_methods((Value*)(&(rv)), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2651,7 +2554,6 @@ TypedValue* fg_openssl_get_md_methods(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("openssl_get_md_methods", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

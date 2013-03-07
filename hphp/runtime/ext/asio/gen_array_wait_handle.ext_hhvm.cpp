@@ -51,7 +51,6 @@ TypedValue* tg_18GenArrayWaitHandle___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_18GenArrayWaitHandle___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -64,7 +63,6 @@ TypedValue* tg_18GenArrayWaitHandle___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("GenArrayWaitHandle::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -87,7 +85,6 @@ Value* th_18GenArrayWaitHandle_create(Value* _rv, char const* cls_, Value* depen
 TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToArrayInPlace(args-0);
   th_18GenArrayWaitHandle_create((Value*)(rv), ("GenArrayWaitHandle"), (Value*)(args-0));
@@ -101,7 +98,6 @@ TypedValue* tg_18GenArrayWaitHandle_create(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfArray) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_18GenArrayWaitHandle_create((Value*)(&(rv)), ("GenArrayWaitHandle"), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -118,7 +114,6 @@ TypedValue* tg_18GenArrayWaitHandle_create(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("GenArrayWaitHandle::create", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

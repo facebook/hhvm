@@ -39,7 +39,6 @@ Value* th_8DateTime_add(Value* _rv, ObjectData* this_, Value* interval) asm("_ZN
 TypedValue* tg1_8DateTime_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8DateTime_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   th_8DateTime_add((Value*)(rv), (this_), (Value*)(args-0));
@@ -55,7 +54,6 @@ TypedValue* tg_8DateTime_add(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_8DateTime_add((Value*)(&(rv)), (this_), (Value*)(args-0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -75,7 +73,6 @@ TypedValue* tg_8DateTime_add(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::add");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -108,7 +105,6 @@ TypedValue* tg1_8DateTime___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue* tg1_8DateTime___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 2
@@ -136,7 +132,6 @@ TypedValue* tg_8DateTime___construct(HPHP::VM::ActRec *ar) {
       if (count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfObject) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           String defVal0 = "now";
           th_8DateTime___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&defVal0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_object));
@@ -156,7 +151,6 @@ TypedValue* tg_8DateTime___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -181,7 +175,6 @@ Value* th_8DateTime_createFromFormat(Value* _rv, char const* cls_, Value* format
 TypedValue* tg1_8DateTime_createFromFormat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue* tg1_8DateTime_createFromFormat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 3
@@ -208,7 +201,6 @@ TypedValue* tg_8DateTime_createFromFormat(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfObject) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_8DateTime_createFromFormat((Value*)(&(rv)), ("DateTime"), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_object));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -225,7 +217,6 @@ TypedValue* tg_8DateTime_createFromFormat(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("DateTime::createFromFormat", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -249,7 +240,6 @@ Value* th_8DateTime_diff(Value* _rv, ObjectData* this_, Value* datetime2, bool a
 TypedValue* tg1_8DateTime_diff(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8DateTime_diff(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 2
@@ -275,7 +265,6 @@ TypedValue* tg_8DateTime_diff(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfObject) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_8DateTime_diff((Value*)(&(rv)), (this_), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -295,7 +284,6 @@ TypedValue* tg_8DateTime_diff(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::diff");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -318,7 +306,6 @@ Value* th_8DateTime_format(Value* _rv, ObjectData* this_, Value* format) asm("_Z
 TypedValue* tg1_8DateTime_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8DateTime_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
   th_8DateTime_format((Value*)(rv), (this_), (Value*)(args-0));
@@ -334,7 +321,6 @@ TypedValue* tg_8DateTime_format(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_8DateTime_format((Value*)(&(rv)), (this_), (Value*)(args-0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -354,7 +340,6 @@ TypedValue* tg_8DateTime_format(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::format");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -378,7 +363,6 @@ TypedValue* tg_8DateTime_getLastErrors(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       th_8DateTime_getLastErrors((Value*)(&(rv)), ("DateTime"));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -389,7 +373,6 @@ TypedValue* tg_8DateTime_getLastErrors(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("DateTime::getLastErrors", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -414,7 +397,6 @@ TypedValue* tg_8DateTime_getOffset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_8DateTime_getOffset((this_));
         frame_free_locals_inl(ar, 0);
@@ -427,7 +409,6 @@ TypedValue* tg_8DateTime_getOffset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::getOffset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -452,7 +433,6 @@ TypedValue* tg_8DateTime_getTimestamp(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_8DateTime_getTimestamp((this_));
         frame_free_locals_inl(ar, 0);
@@ -465,7 +445,6 @@ TypedValue* tg_8DateTime_getTimestamp(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::getTimestamp");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -503,7 +482,6 @@ TypedValue* tg_8DateTime_getTimezone(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::getTimezone");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -526,7 +504,6 @@ Value* th_8DateTime_modify(Value* _rv, ObjectData* this_, Value* modify) asm("_Z
 TypedValue* tg1_8DateTime_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8DateTime_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
   th_8DateTime_modify((Value*)(rv), (this_), (Value*)(args-0));
@@ -542,7 +519,6 @@ TypedValue* tg_8DateTime_modify(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_8DateTime_modify((Value*)(&(rv)), (this_), (Value*)(args-0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -562,7 +538,6 @@ TypedValue* tg_8DateTime_modify(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::modify");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -587,7 +562,6 @@ Value* th_8DateTime_setDate(Value* _rv, ObjectData* this_, long year, long month
 TypedValue* tg1_8DateTime_setDate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8DateTime_setDate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -611,7 +585,6 @@ TypedValue* tg_8DateTime_setDate(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 3LL) {
         if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_8DateTime_setDate((Value*)(&(rv)), (this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (long)(args[-2].m_data.num));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -631,7 +604,6 @@ TypedValue* tg_8DateTime_setDate(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::setDate");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -656,7 +628,6 @@ Value* th_8DateTime_setISODate(Value* _rv, ObjectData* this_, long year, long we
 TypedValue* tg1_8DateTime_setISODate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8DateTime_setISODate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 3
@@ -685,7 +656,6 @@ TypedValue* tg_8DateTime_setISODate(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_8DateTime_setISODate((Value*)(&(rv)), (this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (count > 2) ? (long)(args[-2].m_data.num) : (long)(1));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -705,7 +675,6 @@ TypedValue* tg_8DateTime_setISODate(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::setISODate");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -730,7 +699,6 @@ Value* th_8DateTime_setTime(Value* _rv, ObjectData* this_, long hour, long minut
 TypedValue* tg1_8DateTime_setTime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8DateTime_setTime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 3
@@ -759,7 +727,6 @@ TypedValue* tg_8DateTime_setTime(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_8DateTime_setTime((Value*)(&(rv)), (this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -779,7 +746,6 @@ TypedValue* tg_8DateTime_setTime(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::setTime");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -802,7 +768,6 @@ Value* th_8DateTime_setTimestamp(Value* _rv, ObjectData* this_, long unixtimesta
 TypedValue* tg1_8DateTime_setTimestamp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8DateTime_setTimestamp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToInt64InPlace(args-0);
   th_8DateTime_setTimestamp((Value*)(rv), (this_), (long)(args[-0].m_data.num));
@@ -818,7 +783,6 @@ TypedValue* tg_8DateTime_setTimestamp(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_8DateTime_setTimestamp((Value*)(&(rv)), (this_), (long)(args[-0].m_data.num));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -838,7 +802,6 @@ TypedValue* tg_8DateTime_setTimestamp(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::setTimestamp");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -861,7 +824,6 @@ Value* th_8DateTime_setTimezone(Value* _rv, ObjectData* this_, Value* timezone) 
 TypedValue* tg1_8DateTime_setTimezone(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8DateTime_setTimezone(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   th_8DateTime_setTimezone((Value*)(rv), (this_), (Value*)(args-0));
@@ -877,7 +839,6 @@ TypedValue* tg_8DateTime_setTimezone(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_8DateTime_setTimezone((Value*)(&(rv)), (this_), (Value*)(args-0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -897,7 +858,6 @@ TypedValue* tg_8DateTime_setTimezone(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::setTimezone");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -920,7 +880,6 @@ Value* th_8DateTime_sub(Value* _rv, ObjectData* this_, Value* interval) asm("_ZN
 TypedValue* tg1_8DateTime_sub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8DateTime_sub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   th_8DateTime_sub((Value*)(rv), (this_), (Value*)(args-0));
@@ -936,7 +895,6 @@ TypedValue* tg_8DateTime_sub(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_8DateTime_sub((Value*)(&(rv)), (this_), (Value*)(args-0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -956,7 +914,6 @@ TypedValue* tg_8DateTime_sub(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTime::sub");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -988,7 +945,6 @@ TypedValue* tg1_12DateTimeZone___construct(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue* tg1_12DateTimeZone___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_12DateTimeZone___construct((this_), (Value*)(args-0));
@@ -1004,7 +960,6 @@ TypedValue* tg_12DateTimeZone___construct(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_12DateTimeZone___construct((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -1023,7 +978,6 @@ TypedValue* tg_12DateTimeZone___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTimeZone::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1049,7 +1003,6 @@ TypedValue* tg_12DateTimeZone_getLocation(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_12DateTimeZone_getLocation((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1063,7 +1016,6 @@ TypedValue* tg_12DateTimeZone_getLocation(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTimeZone::getLocation");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1089,7 +1041,6 @@ TypedValue* tg_12DateTimeZone_getName(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_12DateTimeZone_getName((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1103,7 +1054,6 @@ TypedValue* tg_12DateTimeZone_getName(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTimeZone::getName");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1125,7 +1075,6 @@ long th_12DateTimeZone_getOffset(ObjectData* this_, Value* datetime) asm("_ZN4HP
 TypedValue* tg1_12DateTimeZone_getOffset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_12DateTimeZone_getOffset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)th_12DateTimeZone_getOffset((this_), (Value*)(args-0));
@@ -1140,7 +1089,6 @@ TypedValue* tg_12DateTimeZone_getOffset(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
-          rv._count = 0;
           rv.m_type = KindOfInt64;
           rv.m_data.num = (int64_t)th_12DateTimeZone_getOffset((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -1159,7 +1107,6 @@ TypedValue* tg_12DateTimeZone_getOffset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTimeZone::getOffset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1185,7 +1132,6 @@ TypedValue* tg_12DateTimeZone_getTransitions(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_12DateTimeZone_getTransitions((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1199,7 +1145,6 @@ TypedValue* tg_12DateTimeZone_getTransitions(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateTimeZone::getTransitions");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1223,7 +1168,6 @@ TypedValue* tg_12DateTimeZone_listAbbreviations(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       th_12DateTimeZone_listAbbreviations((Value*)(&(rv)), ("DateTimeZone"));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1234,7 +1178,6 @@ TypedValue* tg_12DateTimeZone_listAbbreviations(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("DateTimeZone::listAbbreviations", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1258,7 +1201,6 @@ TypedValue* tg_12DateTimeZone_listIdentifiers(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       th_12DateTimeZone_listIdentifiers((Value*)(&(rv)), ("DateTimeZone"));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1269,7 +1211,6 @@ TypedValue* tg_12DateTimeZone_listIdentifiers(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("DateTimeZone::listIdentifiers", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1301,7 +1242,6 @@ TypedValue* tg1_12DateInterval___construct(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue* tg1_12DateInterval___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_12DateInterval___construct((this_), (Value*)(args-0));
@@ -1317,7 +1257,6 @@ TypedValue* tg_12DateInterval___construct(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_12DateInterval___construct((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -1336,7 +1275,6 @@ TypedValue* tg_12DateInterval___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateInterval::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1375,7 +1313,6 @@ TypedValue* tg_12DateInterval___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateInterval::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1415,7 +1352,6 @@ TypedValue* tg_12DateInterval___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateInterval::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1438,7 +1374,6 @@ Value* th_12DateInterval_createFromDateString(Value* _rv, char const* cls_, Valu
 TypedValue* tg1_12DateInterval_createFromDateString(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue* tg1_12DateInterval_createFromDateString(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
   th_12DateInterval_createFromDateString((Value*)(rv), ("DateInterval"), (Value*)(args-0));
@@ -1452,7 +1387,6 @@ TypedValue* tg_12DateInterval_createFromDateString(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_12DateInterval_createFromDateString((Value*)(&(rv)), ("DateInterval"), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1469,7 +1403,6 @@ TypedValue* tg_12DateInterval_createFromDateString(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("DateInterval::createFromDateString", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1492,7 +1425,6 @@ Value* th_12DateInterval_format(Value* _rv, ObjectData* this_, Value* format) as
 TypedValue* tg1_12DateInterval_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_12DateInterval_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
   th_12DateInterval_format((Value*)(rv), (this_), (Value*)(args-0));
@@ -1508,7 +1440,6 @@ TypedValue* tg_12DateInterval_format(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_12DateInterval_format((Value*)(&(rv)), (this_), (Value*)(args-0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1528,7 +1459,6 @@ TypedValue* tg_12DateInterval_format(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DateInterval::format");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

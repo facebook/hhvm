@@ -48,7 +48,6 @@ TypedValue* tg1_9Memcached___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue* tg1_9Memcached___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_9Memcached___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
@@ -64,7 +63,6 @@ TypedValue* tg_9Memcached___construct(HPHP::VM::ActRec *ar) {
       if (count <= 1LL) {
         if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_9Memcached___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
           frame_free_locals_inl(ar, 1);
@@ -83,7 +81,6 @@ TypedValue* tg_9Memcached___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -107,7 +104,6 @@ bool th_9Memcached_add(ObjectData* this_, Value* key, TypedValue* value, int exp
 TypedValue* tg1_9Memcached_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -132,7 +128,6 @@ TypedValue* tg_9Memcached_add(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_add((this_), (Value*)(args-0), (args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -151,7 +146,6 @@ TypedValue* tg_9Memcached_add(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::add");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -176,7 +170,6 @@ bool th_9Memcached_addByKey(ObjectData* this_, Value* server_key, Value* key, Ty
 TypedValue* tg1_9Memcached_addByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_addByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -204,7 +197,6 @@ TypedValue* tg_9Memcached_addByKey(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 3LL && count <= 4LL) {
         if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_addByKey((this_), (Value*)(args-0), (Value*)(args-1), (args-2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 4);
@@ -223,7 +215,6 @@ TypedValue* tg_9Memcached_addByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::addByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -247,7 +238,6 @@ bool th_9Memcached_addServer(ObjectData* this_, Value* host, int port, int weigh
 TypedValue* tg1_9Memcached_addServer(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_addServer(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -275,7 +265,6 @@ TypedValue* tg_9Memcached_addServer(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_addServer((this_), (Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -294,7 +283,6 @@ TypedValue* tg_9Memcached_addServer(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::addServer");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -316,7 +304,6 @@ bool th_9Memcached_addServers(ObjectData* this_, Value* servers) asm("_ZN4HPHP11
 TypedValue* tg1_9Memcached_addServers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_addServers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToArrayInPlace(args-0);
   rv->m_data.num = (th_9Memcached_addServers((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -331,7 +318,6 @@ TypedValue* tg_9Memcached_addServers(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfArray) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_addServers((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -350,7 +336,6 @@ TypedValue* tg_9Memcached_addServers(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::addServers");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -373,7 +358,6 @@ bool th_9Memcached_append(ObjectData* this_, Value* key, Value* value) asm("_ZN4
 TypedValue* tg1_9Memcached_append(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_append(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -393,7 +377,6 @@ TypedValue* tg_9Memcached_append(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_append((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -412,7 +395,6 @@ TypedValue* tg_9Memcached_append(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::append");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -436,7 +418,6 @@ bool th_9Memcached_appendByKey(ObjectData* this_, Value* server_key, Value* key,
 TypedValue* tg1_9Memcached_appendByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_appendByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -459,7 +440,6 @@ TypedValue* tg_9Memcached_appendByKey(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 3LL) {
         if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_appendByKey((this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -478,7 +458,6 @@ TypedValue* tg_9Memcached_appendByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::appendByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -503,7 +482,6 @@ bool th_9Memcached_cas(ObjectData* this_, double cas_token, Value* key, TypedVal
 TypedValue* tg1_9Memcached_cas(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_cas(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -531,7 +509,6 @@ TypedValue* tg_9Memcached_cas(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 3LL && count <= 4LL) {
         if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfDouble) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_cas((this_), (args[-0].m_data.dbl), (Value*)(args-1), (args-2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 4);
@@ -550,7 +527,6 @@ TypedValue* tg_9Memcached_cas(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::cas");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -576,7 +552,6 @@ bool th_9Memcached_casByKey(ObjectData* this_, double cas_token, Value* server_k
 TypedValue* tg1_9Memcached_casByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_casByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 5
@@ -607,7 +582,6 @@ TypedValue* tg_9Memcached_casByKey(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 4LL && count <= 5LL) {
         if ((count <= 4 || (args-4)->m_type == KindOfInt64) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfDouble) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_casByKey((this_), (args[-0].m_data.dbl), (Value*)(args-1), (Value*)(args-2), (args-3), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 5);
@@ -626,7 +600,6 @@ TypedValue* tg_9Memcached_casByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::casByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -692,7 +665,6 @@ TypedValue* tg_9Memcached_decrement(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::decrement");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -715,7 +687,6 @@ bool th_9Memcached_delete(ObjectData* this_, Value* key, int time) asm("_ZN4HPHP
 TypedValue* tg1_9Memcached_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 2
@@ -740,7 +711,6 @@ TypedValue* tg_9Memcached_delete(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_delete((this_), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -759,7 +729,6 @@ TypedValue* tg_9Memcached_delete(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::delete");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -783,7 +752,6 @@ bool th_9Memcached_deleteByKey(ObjectData* this_, Value* server_key, Value* key,
 TypedValue* tg1_9Memcached_deleteByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_deleteByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -811,7 +779,6 @@ TypedValue* tg_9Memcached_deleteByKey(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_deleteByKey((this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -830,7 +797,6 @@ TypedValue* tg_9Memcached_deleteByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::deleteByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -868,7 +834,6 @@ TypedValue* tg_9Memcached_fetch(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::fetch");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -906,7 +871,6 @@ TypedValue* tg_9Memcached_fetchAll(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::fetchAll");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -928,7 +892,6 @@ bool th_9Memcached_flush(ObjectData* this_, int delay) asm("_ZN4HPHP11c_Memcache
 TypedValue* tg1_9Memcached_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (th_9Memcached_flush((this_), (count > 0) ? (int)(args[-0].m_data.num) : (int)(0))) ? 1LL : 0LL;
@@ -943,7 +906,6 @@ TypedValue* tg_9Memcached_flush(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 1LL) {
         if ((count <= 0 || (args-0)->m_type == KindOfInt64)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_flush((this_), (count > 0) ? (int)(args[-0].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -962,7 +924,6 @@ TypedValue* tg_9Memcached_flush(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::flush");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1021,7 +982,6 @@ TypedValue* tg_9Memcached_get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1092,7 +1052,6 @@ TypedValue* tg_9Memcached_getByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1116,7 +1075,6 @@ bool th_9Memcached_getDelayed(ObjectData* this_, Value* keys, bool with_cas, Typ
 TypedValue* tg1_9Memcached_getDelayed(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_getDelayed(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -1142,7 +1100,6 @@ TypedValue* tg_9Memcached_getDelayed(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 3LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfArray) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_getDelayed((this_), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (args-2) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -1161,7 +1118,6 @@ TypedValue* tg_9Memcached_getDelayed(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getDelayed");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1186,7 +1142,6 @@ bool th_9Memcached_getDelayedByKey(ObjectData* this_, Value* server_key, Value* 
 TypedValue* tg1_9Memcached_getDelayedByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_getDelayedByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -1215,7 +1170,6 @@ TypedValue* tg_9Memcached_getDelayedByKey(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 4LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (args-1)->m_type == KindOfArray && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_getDelayedByKey((this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false), (count > 3) ? (args-3) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 4);
@@ -1234,7 +1188,6 @@ TypedValue* tg_9Memcached_getDelayedByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getDelayedByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1304,7 +1257,6 @@ TypedValue* tg_9Memcached_getMulti(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getMulti");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1378,7 +1330,6 @@ TypedValue* tg_9Memcached_getMultiByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getMultiByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1433,7 +1384,6 @@ TypedValue* tg_9Memcached_getOption(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getOption");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1458,7 +1408,6 @@ TypedValue* tg_9Memcached_getResultCode(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_9Memcached_getResultCode((this_));
         frame_free_locals_inl(ar, 0);
@@ -1471,7 +1420,6 @@ TypedValue* tg_9Memcached_getResultCode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getResultCode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1497,7 +1445,6 @@ TypedValue* tg_9Memcached_getResultMessage(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_9Memcached_getResultMessage((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1511,7 +1458,6 @@ TypedValue* tg_9Memcached_getResultMessage(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getResultMessage");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1566,7 +1512,6 @@ TypedValue* tg_9Memcached_getServerByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getServerByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1592,7 +1537,6 @@ TypedValue* tg_9Memcached_getServerList(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_9Memcached_getServerList((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1606,7 +1550,6 @@ TypedValue* tg_9Memcached_getServerList(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getServerList");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1644,7 +1587,6 @@ TypedValue* tg_9Memcached_getStats(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getStats");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1682,7 +1624,6 @@ TypedValue* tg_9Memcached_getVersion(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::getVersion");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1748,7 +1689,6 @@ TypedValue* tg_9Memcached_increment(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::increment");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1771,7 +1711,6 @@ bool th_9Memcached_prepend(ObjectData* this_, Value* key, Value* value) asm("_ZN
 TypedValue* tg1_9Memcached_prepend(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_prepend(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1791,7 +1730,6 @@ TypedValue* tg_9Memcached_prepend(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_prepend((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -1810,7 +1748,6 @@ TypedValue* tg_9Memcached_prepend(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::prepend");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1834,7 +1771,6 @@ bool th_9Memcached_prependByKey(ObjectData* this_, Value* server_key, Value* key
 TypedValue* tg1_9Memcached_prependByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_prependByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -1857,7 +1793,6 @@ TypedValue* tg_9Memcached_prependByKey(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 3LL) {
         if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_prependByKey((this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -1876,7 +1811,6 @@ TypedValue* tg_9Memcached_prependByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::prependByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1900,7 +1834,6 @@ bool th_9Memcached_replace(ObjectData* this_, Value* key, TypedValue* value, int
 TypedValue* tg1_9Memcached_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -1925,7 +1858,6 @@ TypedValue* tg_9Memcached_replace(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_replace((this_), (Value*)(args-0), (args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -1944,7 +1876,6 @@ TypedValue* tg_9Memcached_replace(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::replace");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1969,7 +1900,6 @@ bool th_9Memcached_replaceByKey(ObjectData* this_, Value* server_key, Value* key
 TypedValue* tg1_9Memcached_replaceByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_replaceByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -1997,7 +1927,6 @@ TypedValue* tg_9Memcached_replaceByKey(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 3LL && count <= 4LL) {
         if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_replaceByKey((this_), (Value*)(args-0), (Value*)(args-1), (args-2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 4);
@@ -2016,7 +1945,6 @@ TypedValue* tg_9Memcached_replaceByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::replaceByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2040,7 +1968,6 @@ bool th_9Memcached_set(ObjectData* this_, Value* key, TypedValue* value, int exp
 TypedValue* tg1_9Memcached_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -2065,7 +1992,6 @@ TypedValue* tg_9Memcached_set(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_set((this_), (Value*)(args-0), (args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -2084,7 +2010,6 @@ TypedValue* tg_9Memcached_set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2109,7 +2034,6 @@ bool th_9Memcached_setByKey(ObjectData* this_, Value* server_key, Value* key, Ty
 TypedValue* tg1_9Memcached_setByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_setByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -2137,7 +2061,6 @@ TypedValue* tg_9Memcached_setByKey(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 3LL && count <= 4LL) {
         if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_setByKey((this_), (Value*)(args-0), (Value*)(args-1), (args-2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 4);
@@ -2156,7 +2079,6 @@ TypedValue* tg_9Memcached_setByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::setByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2179,7 +2101,6 @@ bool th_9Memcached_setMulti(ObjectData* this_, Value* items, int expiration) asm
 TypedValue* tg1_9Memcached_setMulti(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_setMulti(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 2
@@ -2204,7 +2125,6 @@ TypedValue* tg_9Memcached_setMulti(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfArray) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_setMulti((this_), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -2223,7 +2143,6 @@ TypedValue* tg_9Memcached_setMulti(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::setMulti");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2247,7 +2166,6 @@ bool th_9Memcached_setMultiByKey(ObjectData* this_, Value* server_key, Value* it
 TypedValue* tg1_9Memcached_setMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_setMultiByKey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -2275,7 +2193,6 @@ TypedValue* tg_9Memcached_setMultiByKey(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfArray && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_setMultiByKey((this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -2294,7 +2211,6 @@ TypedValue* tg_9Memcached_setMultiByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::setMultiByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2317,7 +2233,6 @@ bool th_9Memcached_setOption(ObjectData* this_, int option, TypedValue* value) a
 TypedValue* tg1_9Memcached_setOption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9Memcached_setOption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (th_9Memcached_setOption((this_), (int)(args[-0].m_data.num), (args-1))) ? 1LL : 0LL;
@@ -2332,7 +2247,6 @@ TypedValue* tg_9Memcached_setOption(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9Memcached_setOption((this_), (int)(args[-0].m_data.num), (args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -2351,7 +2265,6 @@ TypedValue* tg_9Memcached_setOption(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Memcached::setOption");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

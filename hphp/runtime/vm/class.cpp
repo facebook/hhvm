@@ -825,7 +825,6 @@ Class::PropInitVec* Class::initPropsImpl() const {
   {
     TypedValue tv;
     tv.m_data.parr = &propArr;
-    tv._count = 0;
     tv.m_type = KindOfArray;
     args->nvAppend(&tv);
     propArr.decRefCount();
@@ -833,7 +832,6 @@ Class::PropInitVec* Class::initPropsImpl() const {
   {
     TypedValue tv;
     tv.m_data.pobj = sentinel;
-    tv._count = 0;
     tv.m_type = KindOfObject;
     args->nvAppend(&tv);
     sentinel->decRefCount();
@@ -870,13 +868,13 @@ Class::PropInitVec* Class::initPropsImpl() const {
   for (PropInitVec::iterator it = propVec->begin();
        it != propVec->end(); ++it, ++slot) {
     TypedValue* tv = &(*it);
-    // We set the TypedValue::_count field to 1 if the property requires
-    // "deep" initialization, otherwise we set it to 0.
+    // We set TypedValue::m_aux.u_deepInit to true if the property requires
+    // "deep" initialization.
     if (m_declProperties[slot].m_attrs & AttrDeepInit) {
-      tv->_count = 1;
+      tv->m_aux.u_deepInit = true;
     } else {
       tvAsVariant(tv).setEvalScalar();
-      tv->_count = 0;
+      tv->m_aux.u_deepInit = false;
     }
   }
   // Free the args array.  propArr is allocated on the stack so it better be
@@ -1023,7 +1021,6 @@ TypedValue* Class::initSPropsImpl() const {
       {
         TypedValue tv;
         tv.m_data.parr = &nvtWrapper;
-        tv._count = 0;
         tv.m_type = KindOfArray;
         args->nvAppend(&tv);
       }
@@ -1174,7 +1171,6 @@ TypedValue* Class::clsCnsGet(const StringData* clsCnsName) const {
       m_constants[clsCnsInd].m_class->lookupMethod(sd86cinit);
     TypedValue tv;
     tv.m_data.pstr = (StringData*)clsCnsName;
-    tv._count = 0;
     tv.m_type = KindOfString;
     g_vmContext->invokeFunc(clsCns, meth86cinit,
                             CREATE_VECTOR1(tvAsCVarRef(&tv)), nullptr,

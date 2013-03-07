@@ -51,7 +51,6 @@ TypedValue* tg_22ContinuationWaitHandle___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_22ContinuationWaitHandle___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -64,7 +63,6 @@ TypedValue* tg_22ContinuationWaitHandle___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("ContinuationWaitHandle::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -88,7 +86,6 @@ Value* th_22ContinuationWaitHandle_start(Value* _rv, char const* cls_, Value* co
 TypedValue* tg1_22ContinuationWaitHandle_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue* tg1_22ContinuationWaitHandle_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 2
@@ -112,7 +109,6 @@ TypedValue* tg_22ContinuationWaitHandle_start(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_22ContinuationWaitHandle_start((Value*)(&(rv)), ("ContinuationWaitHandle"), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -129,7 +125,6 @@ TypedValue* tg_22ContinuationWaitHandle_start(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ContinuationWaitHandle::start", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -153,7 +148,6 @@ TypedValue* tg_22ContinuationWaitHandle_markCurrentAsSucceeded(HPHP::VM::ActRec 
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       th_22ContinuationWaitHandle_markCurrentAsSucceeded(("ContinuationWaitHandle"), (args-0));
       frame_free_locals_no_this_inl(ar, 1);
@@ -163,7 +157,6 @@ TypedValue* tg_22ContinuationWaitHandle_markCurrentAsSucceeded(HPHP::VM::ActRec 
       throw_wrong_arguments_nr("ContinuationWaitHandle::markCurrentAsSucceeded", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -186,7 +179,6 @@ TypedValue* tg_22ContinuationWaitHandle_markCurrentAsTailCall(HPHP::VM::ActRec *
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       th_22ContinuationWaitHandle_markCurrentAsTailCall(("ContinuationWaitHandle"));
       frame_free_locals_no_this_inl(ar, 0);
@@ -196,7 +188,6 @@ TypedValue* tg_22ContinuationWaitHandle_markCurrentAsTailCall(HPHP::VM::ActRec *
       throw_toomany_arguments_nr("ContinuationWaitHandle::markCurrentAsTailCall", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -222,7 +213,6 @@ TypedValue* tg_22ContinuationWaitHandle_getPrivData(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_22ContinuationWaitHandle_getPrivData((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -236,7 +226,6 @@ TypedValue* tg_22ContinuationWaitHandle_getPrivData(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("ContinuationWaitHandle::getPrivData");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -258,7 +247,6 @@ TypedValue* tg1_22ContinuationWaitHandle_setPrivData(TypedValue* rv, HPHP::VM::A
 TypedValue* tg1_22ContinuationWaitHandle_setPrivData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   th_22ContinuationWaitHandle_setPrivData((this_), (Value*)(args-0));
@@ -274,7 +262,6 @@ TypedValue* tg_22ContinuationWaitHandle_setPrivData(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_22ContinuationWaitHandle_setPrivData((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -293,7 +280,6 @@ TypedValue* tg_22ContinuationWaitHandle_setPrivData(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("ContinuationWaitHandle::setPrivData");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

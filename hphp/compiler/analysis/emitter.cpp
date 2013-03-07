@@ -3649,7 +3649,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             // Key.
             assert(key->isScalar());
             TypedValue tvKey;
-            tvKey._count = 0;
             if (key->is(Expression::KindOfConstantExpression)) {
               ConstantExpressionPtr c(
                 static_pointer_cast<ConstantExpression>(key));
@@ -6681,7 +6680,6 @@ StringData* EmitterVisitor::newClosureName() {
 void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
   assert(val->isScalar());
   tvVal.m_type = KindOfUninit;
-  tvVal._count = 0;
   switch (val->getKindOf()) {
     case Expression::KindOfConstantExpression: {
       ConstantExpressionPtr ce(static_pointer_cast<ConstantExpression>(val));

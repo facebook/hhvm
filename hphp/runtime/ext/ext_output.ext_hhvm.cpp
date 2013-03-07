@@ -38,7 +38,6 @@ TypedValue * fg1_hphp_crash_log(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_hphp_crash_log(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -57,7 +56,6 @@ TypedValue* fg_hphp_crash_log(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_crash_log((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -73,7 +71,6 @@ TypedValue* fg_hphp_crash_log(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_crash_log", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -98,7 +95,6 @@ TypedValue* fg_hphp_get_status(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       fh_hphp_get_status((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -109,7 +105,6 @@ TypedValue* fg_hphp_get_status(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_get_status", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -160,7 +155,6 @@ TypedValue* fg_hphp_get_timers(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_get_timers", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -211,7 +205,6 @@ TypedValue* fg_hphp_output_global_state(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_output_global_state", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -235,7 +228,6 @@ TypedValue* fg_hphp_instruction_counter(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfInt64;
       rv.m_data.num = (int64_t)fh_hphp_instruction_counter();
       frame_free_locals_no_this_inl(ar, 0);
@@ -245,7 +237,6 @@ TypedValue* fg_hphp_instruction_counter(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_instruction_counter", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -279,7 +270,6 @@ TypedValue* fg_hphp_get_hardware_counters(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_get_hardware_counters", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -302,7 +292,6 @@ bool fh_hphp_set_hardware_events(Value* events) asm("_ZN4HPHP26f_hphp_set_hardwa
 TypedValue * fg1_hphp_set_hardware_events(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_set_hardware_events(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   String defVal0 = null;
@@ -316,7 +305,6 @@ TypedValue* fg_hphp_set_hardware_events(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         String defVal0 = null;
         rv.m_data.num = (fh_hphp_set_hardware_events((count > 0) ? (Value*)(args-0) : (Value*)(&defVal0))) ? 1LL : 0LL;
@@ -333,7 +321,6 @@ TypedValue* fg_hphp_set_hardware_events(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_set_hardware_events", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -357,7 +344,6 @@ TypedValue* fg_hphp_clear_hardware_events(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       fh_hphp_clear_hardware_events();
       frame_free_locals_no_this_inl(ar, 0);
@@ -367,7 +353,6 @@ TypedValue* fg_hphp_clear_hardware_events(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_clear_hardware_events", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

@@ -75,13 +75,15 @@ static VarNR ToKey(CVarRef v) { return v.toKey(); }
 ///////////////////////////////////////////////////////////////////////////////
 // private implementations
 
-Variant::Variant(litstr  v) : _count(0), m_type(KindOfString) {
+Variant::Variant(litstr  v) {
+  m_type = KindOfString;
   m_data.pstr = NEW(StringData)(v);
   m_data.pstr->incRefCount();
 }
 
 HOT_FUNC
-Variant::Variant(CStrRef v) : _count(0), m_type(KindOfString) {
+Variant::Variant(CStrRef v) {
+  m_type = KindOfString;
   StringData *s = v.get();
   if (s) {
     m_data.pstr = s;
@@ -95,7 +97,8 @@ Variant::Variant(CStrRef v) : _count(0), m_type(KindOfString) {
   }
 }
 
-Variant::Variant(const std::string & v) : _count(0), m_type(KindOfString) {
+Variant::Variant(const std::string & v) {
+  m_type = KindOfString;
   StringData *s = NEW(StringData)(v.c_str(), v.size(), CopyString);
   assert(s);
   m_data.pstr = s;
@@ -103,7 +106,8 @@ Variant::Variant(const std::string & v) : _count(0), m_type(KindOfString) {
 }
 
 HOT_FUNC
-Variant::Variant(CArrRef v) : _count(0), m_type(KindOfArray) {
+Variant::Variant(CArrRef v) {
+  m_type = KindOfArray;
   ArrayData *a = v.get();
   if (a) {
     m_data.parr = a;
@@ -114,7 +118,8 @@ Variant::Variant(CArrRef v) : _count(0), m_type(KindOfArray) {
 }
 
 HOT_FUNC
-Variant::Variant(CObjRef v) : _count(0), m_type(KindOfObject) {
+Variant::Variant(CObjRef v) {
+  m_type = KindOfObject;
   ObjectData *o = v.get();
   if (o) {
     m_data.pobj = o;
@@ -125,7 +130,8 @@ Variant::Variant(CObjRef v) : _count(0), m_type(KindOfObject) {
 }
 
 HOT_FUNC
-Variant::Variant(StringData *v) : _count(0), m_type(KindOfString) {
+Variant::Variant(StringData *v) {
+  m_type = KindOfString;
   if (v) {
     m_data.pstr = v;
     if (v->isStatic()) {
@@ -138,7 +144,8 @@ Variant::Variant(StringData *v) : _count(0), m_type(KindOfString) {
   }
 }
 
-Variant::Variant(ArrayData *v) : _count(0), m_type(KindOfArray) {
+Variant::Variant(ArrayData *v) {
+  m_type = KindOfArray;
   if (v) {
     m_data.parr = v;
     v->incRefCount();
@@ -147,7 +154,8 @@ Variant::Variant(ArrayData *v) : _count(0), m_type(KindOfArray) {
   }
 }
 
-Variant::Variant(ObjectData *v) : _count(0), m_type(KindOfObject) {
+Variant::Variant(ObjectData *v) {
+  m_type = KindOfObject;
   if (v) {
     m_data.pobj = v;
     v->incRefCount();
@@ -156,7 +164,8 @@ Variant::Variant(ObjectData *v) : _count(0), m_type(KindOfObject) {
   }
 }
 
-Variant::Variant(RefData *r) : _count(0), m_type(KindOfRef) {
+Variant::Variant(RefData *r) {
+  m_type = KindOfRef;
   if (r) {
     m_data.pref = r;
   } else {
@@ -185,7 +194,7 @@ Variant::Variant(CVarWithRefBind v) {
  * This is safe because we have compile time assertions that guarantee that
  * the _count field will always be exactly FAST_REFCOUNT_OFFSET bytes from
  * the beginning of the object for the StringData, ArrayData, ObjectData,
- * and Variant classes.
+ * and RefData classes.
  */
 
 HOT_FUNC
@@ -3419,7 +3428,7 @@ void Variant::remove(CVarRef key) {
   removeImpl(key);
 }
 
-void Variant::setEvalScalar() const {
+void Variant::setEvalScalar() {
   switch (m_type) {
   case KindOfString: {
     StringData *pstr = m_data.pstr;
@@ -3868,18 +3877,6 @@ void Variant::dump() const {
   VariableSerializer vs(VariableSerializer::VarDump);
   String ret(vs.serialize(*this, true));
   printf("Variant: %s", ret.c_str());
-}
-
-VariantVectorBase::~VariantVectorBase() {
-  Variant *e = (Variant*)(this + 1);
-  while (m_size--) {
-    if (IS_REFCOUNTED_TYPE(e->m_type)) e->destructImpl();
-    e++;
-  }
-}
-
-void VariantVectorBase::pushWithRef(CVarRef v) {
-  (*this)[m_size++].constructWithRefHelper(v, 0);
 }
 
 VarNR::VarNR(CStrRef v) {

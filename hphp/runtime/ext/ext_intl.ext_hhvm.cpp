@@ -38,7 +38,6 @@ TypedValue* fg_intl_get_error_code(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfInt64;
       rv.m_data.num = (int64_t)fh_intl_get_error_code();
       frame_free_locals_no_this_inl(ar, 0);
@@ -48,7 +47,6 @@ TypedValue* fg_intl_get_error_code(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("intl_get_error_code", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -73,7 +71,6 @@ TypedValue* fg_intl_get_error_message(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfString;
       fh_intl_get_error_message((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -84,7 +81,6 @@ TypedValue* fg_intl_get_error_message(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("intl_get_error_message", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -108,7 +104,6 @@ Value* fh_intl_error_name(Value* _rv, long error_code) asm("_ZN4HPHP17f_intl_err
 TypedValue * fg1_intl_error_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_intl_error_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
   fh_intl_error_name((Value*)(rv), (long)(args[-0].m_data.num));
@@ -122,7 +117,6 @@ TypedValue* fg_intl_error_name(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_intl_error_name((Value*)(&(rv)), (long)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -139,7 +133,6 @@ TypedValue* fg_intl_error_name(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("intl_error_name", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -162,7 +155,6 @@ bool fh_intl_is_failure(long error_code) asm("_ZN4HPHP17f_intl_is_failureEl");
 TypedValue * fg1_intl_is_failure(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_intl_is_failure(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (fh_intl_is_failure((long)(args[-0].m_data.num))) ? 1LL : 0LL;
@@ -175,7 +167,6 @@ TypedValue* fg_intl_is_failure(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_intl_is_failure((long)(args[-0].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -191,7 +182,6 @@ TypedValue* fg_intl_is_failure(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("intl_is_failure", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -244,7 +234,6 @@ TypedValue* fg_collator_asort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_asort", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -302,7 +291,6 @@ TypedValue* fg_collator_compare(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_compare", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -353,7 +341,6 @@ TypedValue* fg_collator_create(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_create", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -405,7 +392,6 @@ TypedValue* fg_collator_get_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_get_attribute", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -440,7 +426,6 @@ TypedValue* fg_collator_get_error_code(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_get_error_code", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -475,7 +460,6 @@ TypedValue* fg_collator_get_error_message(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_get_error_message", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -527,7 +511,6 @@ TypedValue* fg_collator_get_locale(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_get_locale", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -562,7 +545,6 @@ TypedValue* fg_collator_get_strength(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_get_strength", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -620,7 +602,6 @@ TypedValue* fg_collator_set_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_set_attribute", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -672,7 +653,6 @@ TypedValue* fg_collator_set_strength(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_set_strength", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -708,7 +688,6 @@ TypedValue* fg_collator_sort_with_sort_keys(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_sort_with_sort_keys", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -761,7 +740,6 @@ TypedValue* fg_collator_sort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("collator_sort", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -832,7 +810,6 @@ TypedValue* fg_idn_to_ascii(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("idn_to_ascii", count, 1, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -903,7 +880,6 @@ TypedValue* fg_idn_to_unicode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("idn_to_unicode", count, 1, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -974,7 +950,6 @@ TypedValue* fg_idn_to_utf8(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("idn_to_utf8", count, 1, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1008,7 +983,6 @@ TypedValue* tg1_8Collator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue* tg1_8Collator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_8Collator___construct((this_), (Value*)(args-0));
@@ -1024,7 +998,6 @@ TypedValue* tg_8Collator___construct(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_8Collator___construct((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -1043,7 +1016,6 @@ TypedValue* tg_8Collator___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1066,7 +1038,6 @@ bool th_8Collator_asort(ObjectData* this_, TypedValue* arr, long sort_flag) asm(
 TypedValue* tg1_8Collator_asort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8Collator_asort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-1);
   rv->m_data.num = (th_8Collator_asort((this_), (args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_Collator$$SORT_REGULAR))) ? 1LL : 0LL;
@@ -1081,7 +1052,6 @@ TypedValue* tg_8Collator_asort(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_8Collator_asort((this_), (args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_Collator$$SORT_REGULAR))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -1100,7 +1070,6 @@ TypedValue* tg_8Collator_asort(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::asort");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1161,7 +1130,6 @@ TypedValue* tg_8Collator_compare(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::compare");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1211,7 +1179,6 @@ TypedValue* tg_8Collator_create(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("Collator::create", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1233,7 +1200,6 @@ long th_8Collator_getattribute(ObjectData* this_, long attr) asm("_ZN4HPHP10c_Co
 TypedValue* tg1_8Collator_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8Collator_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (int64_t)th_8Collator_getattribute((this_), (long)(args[-0].m_data.num));
@@ -1248,7 +1214,6 @@ TypedValue* tg_8Collator_getattribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfInt64;
           rv.m_data.num = (int64_t)th_8Collator_getattribute((this_), (long)(args[-0].m_data.num));
           frame_free_locals_inl(ar, 1);
@@ -1267,7 +1232,6 @@ TypedValue* tg_8Collator_getattribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::getattribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1292,7 +1256,6 @@ TypedValue* tg_8Collator_geterrorcode(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_8Collator_geterrorcode((this_));
         frame_free_locals_inl(ar, 0);
@@ -1305,7 +1268,6 @@ TypedValue* tg_8Collator_geterrorcode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::geterrorcode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1331,7 +1293,6 @@ TypedValue* tg_8Collator_geterrormessage(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_8Collator_geterrormessage((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1345,7 +1306,6 @@ TypedValue* tg_8Collator_geterrormessage(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::geterrormessage");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1368,7 +1328,6 @@ Value* th_8Collator_getlocale(Value* _rv, ObjectData* this_, long type) asm("_ZN
 TypedValue* tg1_8Collator_getlocale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8Collator_getlocale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
   th_8Collator_getlocale((Value*)(rv), (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0));
@@ -1384,7 +1343,6 @@ TypedValue* tg_8Collator_getlocale(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 1LL) {
         if ((count <= 0 || (args-0)->m_type == KindOfInt64)) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_8Collator_getlocale((Value*)(&(rv)), (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1404,7 +1362,6 @@ TypedValue* tg_8Collator_getlocale(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::getlocale");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1429,7 +1386,6 @@ TypedValue* tg_8Collator_getstrength(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_8Collator_getstrength((this_));
         frame_free_locals_inl(ar, 0);
@@ -1442,7 +1398,6 @@ TypedValue* tg_8Collator_getstrength(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::getstrength");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1465,7 +1420,6 @@ bool th_8Collator_setattribute(ObjectData* this_, long attr, long val) asm("_ZN4
 TypedValue* tg1_8Collator_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8Collator_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -1485,7 +1439,6 @@ TypedValue* tg_8Collator_setattribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_8Collator_setattribute((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -1504,7 +1457,6 @@ TypedValue* tg_8Collator_setattribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::setattribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1526,7 +1478,6 @@ bool th_8Collator_setstrength(ObjectData* this_, long strength) asm("_ZN4HPHP10c
 TypedValue* tg1_8Collator_setstrength(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8Collator_setstrength(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (th_8Collator_setstrength((this_), (long)(args[-0].m_data.num))) ? 1LL : 0LL;
@@ -1541,7 +1492,6 @@ TypedValue* tg_8Collator_setstrength(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_8Collator_setstrength((this_), (long)(args[-0].m_data.num))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -1560,7 +1510,6 @@ TypedValue* tg_8Collator_setstrength(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::setstrength");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1586,7 +1535,6 @@ TypedValue* tg_8Collator_sortwithsortkeys(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_8Collator_sortwithsortkeys((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -1599,7 +1547,6 @@ TypedValue* tg_8Collator_sortwithsortkeys(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::sortwithsortkeys");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1622,7 +1569,6 @@ bool th_8Collator_sort(ObjectData* this_, TypedValue* arr, long sort_flag) asm("
 TypedValue* tg1_8Collator_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8Collator_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-1);
   rv->m_data.num = (th_8Collator_sort((this_), (args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_Collator$$SORT_REGULAR))) ? 1LL : 0LL;
@@ -1637,7 +1583,6 @@ TypedValue* tg_8Collator_sort(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfInt64)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_8Collator_sort((this_), (args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_Collator$$SORT_REGULAR))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -1656,7 +1601,6 @@ TypedValue* tg_8Collator_sort(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Collator::sort");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1691,7 +1635,6 @@ TypedValue* tg_6Locale___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_6Locale___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -1704,7 +1647,6 @@ TypedValue* tg_6Locale___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Locale::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1739,7 +1681,6 @@ TypedValue* tg_10Normalizer___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_10Normalizer___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -1752,7 +1693,6 @@ TypedValue* tg_10Normalizer___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Normalizer::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1813,7 +1753,6 @@ TypedValue* tg_10Normalizer_isnormalized(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("Normalizer::isnormalized", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1874,7 +1813,6 @@ TypedValue* tg_10Normalizer_normalize(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("Normalizer::normalize", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

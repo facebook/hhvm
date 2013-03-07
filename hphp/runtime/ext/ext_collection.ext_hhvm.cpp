@@ -51,7 +51,6 @@ TypedValue* tg_6Vector___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_6Vector___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -64,7 +63,6 @@ TypedValue* tg_6Vector___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -89,7 +87,6 @@ TypedValue* tg_6Vector_isEmpty(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_6Vector_isEmpty((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -102,7 +99,6 @@ TypedValue* tg_6Vector_isEmpty(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::isEmpty");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -127,7 +123,6 @@ TypedValue* tg_6Vector_count(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_6Vector_count((this_));
         frame_free_locals_inl(ar, 0);
@@ -140,7 +135,6 @@ TypedValue* tg_6Vector_count(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::count");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -179,7 +173,6 @@ TypedValue* tg_6Vector_at(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::at");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -218,7 +211,6 @@ TypedValue* tg_6Vector_get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -246,7 +238,6 @@ TypedValue* tg_6Vector_put(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 2LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_6Vector_put((Value*)(&(rv)), (this_), (args-0), (args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -260,7 +251,6 @@ TypedValue* tg_6Vector_put(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::put");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -286,7 +276,6 @@ TypedValue* tg_6Vector_clear(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_6Vector_clear((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -300,7 +289,6 @@ TypedValue* tg_6Vector_clear(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::clear");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -326,7 +314,6 @@ TypedValue* tg_6Vector_contains(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_6Vector_contains((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -339,7 +326,6 @@ TypedValue* tg_6Vector_contains(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::contains");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -366,7 +352,6 @@ TypedValue* tg_6Vector_append(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_6Vector_append((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -380,7 +365,6 @@ TypedValue* tg_6Vector_append(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::append");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -407,7 +391,6 @@ TypedValue* tg_6Vector_add(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_6Vector_add((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -421,7 +404,6 @@ TypedValue* tg_6Vector_add(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::add");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -459,7 +441,6 @@ TypedValue* tg_6Vector_pop(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::pop");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -486,7 +467,6 @@ TypedValue* tg_6Vector_resize(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_6Vector_resize((this_), (args-0), (args-1));
         frame_free_locals_inl(ar, 2);
@@ -499,7 +479,6 @@ TypedValue* tg_6Vector_resize(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::resize");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -525,7 +504,6 @@ TypedValue* tg_6Vector_toArray(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_6Vector_toArray((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -539,7 +517,6 @@ TypedValue* tg_6Vector_toArray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::toArray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -565,7 +542,6 @@ TypedValue* tg_6Vector_getIterator(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_6Vector_getIterator((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -579,7 +555,6 @@ TypedValue* tg_6Vector_getIterator(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::getIterator");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -605,7 +580,6 @@ TypedValue* tg_6Vector_sort(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 1LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         Variant defVal0;
         th_6Vector_sort((this_), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
@@ -619,7 +593,6 @@ TypedValue* tg_6Vector_sort(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::sort");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -644,7 +617,6 @@ TypedValue* tg_6Vector_reverse(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_6Vector_reverse((this_));
         frame_free_locals_inl(ar, 0);
@@ -657,7 +629,6 @@ TypedValue* tg_6Vector_reverse(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::reverse");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -685,7 +656,6 @@ TypedValue* tg_6Vector_splice(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 3LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         Variant defVal1;
         Variant defVal2;
@@ -700,7 +670,6 @@ TypedValue* tg_6Vector_splice(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::splice");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -726,7 +695,6 @@ TypedValue* tg_6Vector_linearSearch(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_6Vector_linearSearch((this_), (args-0));
         frame_free_locals_inl(ar, 1);
@@ -739,7 +707,6 @@ TypedValue* tg_6Vector_linearSearch(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::linearSearch");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -764,7 +731,6 @@ TypedValue* tg_6Vector_shuffle(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_6Vector_shuffle((this_));
         frame_free_locals_inl(ar, 0);
@@ -777,7 +743,6 @@ TypedValue* tg_6Vector_shuffle(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::shuffle");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -803,7 +768,6 @@ TypedValue* tg_6Vector___toString(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_6Vector___toString((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -817,7 +781,6 @@ TypedValue* tg_6Vector___toString(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::__toString");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -856,7 +819,6 @@ TypedValue* tg_6Vector___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -896,7 +858,6 @@ TypedValue* tg_6Vector___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -922,7 +883,6 @@ TypedValue* tg_6Vector___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_6Vector___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -935,7 +895,6 @@ TypedValue* tg_6Vector___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -974,7 +933,6 @@ TypedValue* tg_6Vector___unset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Vector::__unset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -999,7 +957,6 @@ TypedValue* tg_6Vector_fromArray(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       th_6Vector_fromArray((Value*)(&(rv)), ("Vector"), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1010,7 +967,6 @@ TypedValue* tg_6Vector_fromArray(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("Vector::fromArray", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1035,7 +991,6 @@ TypedValue* tg_6Vector_fromVector(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       th_6Vector_fromVector((Value*)(&(rv)), ("Vector"), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1046,7 +1001,6 @@ TypedValue* tg_6Vector_fromVector(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("Vector::fromVector", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1073,7 +1027,6 @@ TypedValue* tg_6Vector_slice(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       Variant defVal2;
       th_6Vector_slice((Value*)(&(rv)), ("Vector"), (args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
@@ -1085,7 +1038,6 @@ TypedValue* tg_6Vector_slice(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("Vector::slice", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1120,7 +1072,6 @@ TypedValue* tg_14VectorIterator___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_14VectorIterator___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -1133,7 +1084,6 @@ TypedValue* tg_14VectorIterator___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("VectorIterator::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1171,7 +1121,6 @@ TypedValue* tg_14VectorIterator_current(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("VectorIterator::current");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1209,7 +1158,6 @@ TypedValue* tg_14VectorIterator_key(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("VectorIterator::key");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1234,7 +1182,6 @@ TypedValue* tg_14VectorIterator_valid(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_14VectorIterator_valid((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -1247,7 +1194,6 @@ TypedValue* tg_14VectorIterator_valid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("VectorIterator::valid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1272,7 +1218,6 @@ TypedValue* tg_14VectorIterator_next(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_14VectorIterator_next((this_));
         frame_free_locals_inl(ar, 0);
@@ -1285,7 +1230,6 @@ TypedValue* tg_14VectorIterator_next(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("VectorIterator::next");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1310,7 +1254,6 @@ TypedValue* tg_14VectorIterator_rewind(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_14VectorIterator_rewind((this_));
         frame_free_locals_inl(ar, 0);
@@ -1323,7 +1266,6 @@ TypedValue* tg_14VectorIterator_rewind(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("VectorIterator::rewind");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1358,7 +1300,6 @@ TypedValue* tg_3Map___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_3Map___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -1371,7 +1312,6 @@ TypedValue* tg_3Map___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1396,7 +1336,6 @@ TypedValue* tg_3Map_isEmpty(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_3Map_isEmpty((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -1409,7 +1348,6 @@ TypedValue* tg_3Map_isEmpty(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::isEmpty");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1434,7 +1372,6 @@ TypedValue* tg_3Map_count(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_3Map_count((this_));
         frame_free_locals_inl(ar, 0);
@@ -1447,7 +1384,6 @@ TypedValue* tg_3Map_count(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::count");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1486,7 +1422,6 @@ TypedValue* tg_3Map_at(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::at");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1525,7 +1460,6 @@ TypedValue* tg_3Map_get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1553,7 +1487,6 @@ TypedValue* tg_3Map_put(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 2LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_3Map_put((Value*)(&(rv)), (this_), (args-0), (args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1567,7 +1500,6 @@ TypedValue* tg_3Map_put(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::put");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1593,7 +1525,6 @@ TypedValue* tg_3Map_clear(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_3Map_clear((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1607,7 +1538,6 @@ TypedValue* tg_3Map_clear(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::clear");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1633,7 +1563,6 @@ TypedValue* tg_3Map_contains(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_3Map_contains((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -1646,7 +1575,6 @@ TypedValue* tg_3Map_contains(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::contains");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1673,7 +1601,6 @@ TypedValue* tg_3Map_remove(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_3Map_remove((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1687,7 +1614,6 @@ TypedValue* tg_3Map_remove(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::remove");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1714,7 +1640,6 @@ TypedValue* tg_3Map_discard(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_3Map_discard((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1728,7 +1653,6 @@ TypedValue* tg_3Map_discard(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::discard");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1754,7 +1678,6 @@ TypedValue* tg_3Map_toArray(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_3Map_toArray((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1768,7 +1691,6 @@ TypedValue* tg_3Map_toArray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::toArray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1794,7 +1716,6 @@ TypedValue* tg_3Map_copyAsArray(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_3Map_copyAsArray((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1808,7 +1729,6 @@ TypedValue* tg_3Map_copyAsArray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::copyAsArray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1834,7 +1754,6 @@ TypedValue* tg_3Map_toKeysArray(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_3Map_toKeysArray((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1848,7 +1767,6 @@ TypedValue* tg_3Map_toKeysArray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::toKeysArray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1874,7 +1792,6 @@ TypedValue* tg_3Map_values(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_3Map_values((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1888,7 +1805,6 @@ TypedValue* tg_3Map_values(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::values");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1914,7 +1830,6 @@ TypedValue* tg_3Map_toValuesArray(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_3Map_toValuesArray((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1928,7 +1843,6 @@ TypedValue* tg_3Map_toValuesArray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::toValuesArray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1955,7 +1869,6 @@ TypedValue* tg_3Map_updateFromArray(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_3Map_updateFromArray((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1969,7 +1882,6 @@ TypedValue* tg_3Map_updateFromArray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::updateFromArray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1996,7 +1908,6 @@ TypedValue* tg_3Map_updateFromIterable(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_3Map_updateFromIterable((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2010,7 +1921,6 @@ TypedValue* tg_3Map_updateFromIterable(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::updateFromIterable");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2037,7 +1947,6 @@ TypedValue* tg_3Map_differenceByKey(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_3Map_differenceByKey((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2051,7 +1960,6 @@ TypedValue* tg_3Map_differenceByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::differenceByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2077,7 +1985,6 @@ TypedValue* tg_3Map_getIterator(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_3Map_getIterator((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2091,7 +1998,6 @@ TypedValue* tg_3Map_getIterator(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::getIterator");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2117,7 +2023,6 @@ TypedValue* tg_3Map___toString(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_3Map___toString((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2131,7 +2036,6 @@ TypedValue* tg_3Map___toString(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::__toString");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2170,7 +2074,6 @@ TypedValue* tg_3Map___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2210,7 +2113,6 @@ TypedValue* tg_3Map___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2236,7 +2138,6 @@ TypedValue* tg_3Map___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_3Map___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -2249,7 +2150,6 @@ TypedValue* tg_3Map___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2288,7 +2188,6 @@ TypedValue* tg_3Map___unset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Map::__unset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2313,7 +2212,6 @@ TypedValue* tg_3Map_fromArray(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       th_3Map_fromArray((Value*)(&(rv)), ("Map"), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2324,7 +2222,6 @@ TypedValue* tg_3Map_fromArray(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("Map::fromArray", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2349,7 +2246,6 @@ TypedValue* tg_3Map_fromIterable(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       th_3Map_fromIterable((Value*)(&(rv)), ("Map"), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2360,7 +2256,6 @@ TypedValue* tg_3Map_fromIterable(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("Map::fromIterable", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2395,7 +2290,6 @@ TypedValue* tg_11MapIterator___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_11MapIterator___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -2408,7 +2302,6 @@ TypedValue* tg_11MapIterator___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MapIterator::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2446,7 +2339,6 @@ TypedValue* tg_11MapIterator_current(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MapIterator::current");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2484,7 +2376,6 @@ TypedValue* tg_11MapIterator_key(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MapIterator::key");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2509,7 +2400,6 @@ TypedValue* tg_11MapIterator_valid(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_11MapIterator_valid((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -2522,7 +2412,6 @@ TypedValue* tg_11MapIterator_valid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MapIterator::valid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2547,7 +2436,6 @@ TypedValue* tg_11MapIterator_next(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_11MapIterator_next((this_));
         frame_free_locals_inl(ar, 0);
@@ -2560,7 +2448,6 @@ TypedValue* tg_11MapIterator_next(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MapIterator::next");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2585,7 +2472,6 @@ TypedValue* tg_11MapIterator_rewind(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_11MapIterator_rewind((this_));
         frame_free_locals_inl(ar, 0);
@@ -2598,7 +2484,6 @@ TypedValue* tg_11MapIterator_rewind(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("MapIterator::rewind");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2633,7 +2518,6 @@ TypedValue* tg_9StableMap___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_9StableMap___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -2646,7 +2530,6 @@ TypedValue* tg_9StableMap___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2671,7 +2554,6 @@ TypedValue* tg_9StableMap_isEmpty(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9StableMap_isEmpty((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -2684,7 +2566,6 @@ TypedValue* tg_9StableMap_isEmpty(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::isEmpty");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2709,7 +2590,6 @@ TypedValue* tg_9StableMap_count(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_9StableMap_count((this_));
         frame_free_locals_inl(ar, 0);
@@ -2722,7 +2602,6 @@ TypedValue* tg_9StableMap_count(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::count");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2761,7 +2640,6 @@ TypedValue* tg_9StableMap_at(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::at");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2800,7 +2678,6 @@ TypedValue* tg_9StableMap_get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2828,7 +2705,6 @@ TypedValue* tg_9StableMap_put(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 2LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_9StableMap_put((Value*)(&(rv)), (this_), (args-0), (args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2842,7 +2718,6 @@ TypedValue* tg_9StableMap_put(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::put");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2868,7 +2743,6 @@ TypedValue* tg_9StableMap_clear(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_9StableMap_clear((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2882,7 +2756,6 @@ TypedValue* tg_9StableMap_clear(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::clear");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2908,7 +2781,6 @@ TypedValue* tg_9StableMap_contains(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9StableMap_contains((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -2921,7 +2793,6 @@ TypedValue* tg_9StableMap_contains(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::contains");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2948,7 +2819,6 @@ TypedValue* tg_9StableMap_remove(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_9StableMap_remove((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2962,7 +2832,6 @@ TypedValue* tg_9StableMap_remove(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::remove");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2989,7 +2858,6 @@ TypedValue* tg_9StableMap_discard(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_9StableMap_discard((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3003,7 +2871,6 @@ TypedValue* tg_9StableMap_discard(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::discard");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3029,7 +2896,6 @@ TypedValue* tg_9StableMap_toArray(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_9StableMap_toArray((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3043,7 +2909,6 @@ TypedValue* tg_9StableMap_toArray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::toArray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3069,7 +2934,6 @@ TypedValue* tg_9StableMap_copyAsArray(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_9StableMap_copyAsArray((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3083,7 +2947,6 @@ TypedValue* tg_9StableMap_copyAsArray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::copyAsArray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3109,7 +2972,6 @@ TypedValue* tg_9StableMap_toKeysArray(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_9StableMap_toKeysArray((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3123,7 +2985,6 @@ TypedValue* tg_9StableMap_toKeysArray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::toKeysArray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3149,7 +3010,6 @@ TypedValue* tg_9StableMap_values(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_9StableMap_values((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3163,7 +3023,6 @@ TypedValue* tg_9StableMap_values(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::values");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3189,7 +3048,6 @@ TypedValue* tg_9StableMap_toValuesArray(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_9StableMap_toValuesArray((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3203,7 +3061,6 @@ TypedValue* tg_9StableMap_toValuesArray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::toValuesArray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3230,7 +3087,6 @@ TypedValue* tg_9StableMap_updateFromArray(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_9StableMap_updateFromArray((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3244,7 +3100,6 @@ TypedValue* tg_9StableMap_updateFromArray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::updateFromArray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3271,7 +3126,6 @@ TypedValue* tg_9StableMap_updateFromIterable(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_9StableMap_updateFromIterable((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3285,7 +3139,6 @@ TypedValue* tg_9StableMap_updateFromIterable(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::updateFromIterable");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3312,7 +3165,6 @@ TypedValue* tg_9StableMap_differenceByKey(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_9StableMap_differenceByKey((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3326,7 +3178,6 @@ TypedValue* tg_9StableMap_differenceByKey(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::differenceByKey");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3352,7 +3203,6 @@ TypedValue* tg_9StableMap_getIterator(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_9StableMap_getIterator((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3366,7 +3216,6 @@ TypedValue* tg_9StableMap_getIterator(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::getIterator");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3405,7 +3254,6 @@ TypedValue* tg_9StableMap___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3445,7 +3293,6 @@ TypedValue* tg_9StableMap___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3471,7 +3318,6 @@ TypedValue* tg_9StableMap___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9StableMap___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -3484,7 +3330,6 @@ TypedValue* tg_9StableMap___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3523,7 +3368,6 @@ TypedValue* tg_9StableMap___unset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::__unset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3549,7 +3393,6 @@ TypedValue* tg_9StableMap___toString(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_9StableMap___toString((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3563,7 +3406,6 @@ TypedValue* tg_9StableMap___toString(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMap::__toString");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3588,7 +3430,6 @@ TypedValue* tg_9StableMap_fromArray(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       th_9StableMap_fromArray((Value*)(&(rv)), ("StableMap"), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3599,7 +3440,6 @@ TypedValue* tg_9StableMap_fromArray(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("StableMap::fromArray", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3624,7 +3464,6 @@ TypedValue* tg_9StableMap_fromIterable(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       th_9StableMap_fromIterable((Value*)(&(rv)), ("StableMap"), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3635,7 +3474,6 @@ TypedValue* tg_9StableMap_fromIterable(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("StableMap::fromIterable", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3670,7 +3508,6 @@ TypedValue* tg_17StableMapIterator___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_17StableMapIterator___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -3683,7 +3520,6 @@ TypedValue* tg_17StableMapIterator___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMapIterator::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3721,7 +3557,6 @@ TypedValue* tg_17StableMapIterator_current(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMapIterator::current");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3759,7 +3594,6 @@ TypedValue* tg_17StableMapIterator_key(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMapIterator::key");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3784,7 +3618,6 @@ TypedValue* tg_17StableMapIterator_valid(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_17StableMapIterator_valid((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -3797,7 +3630,6 @@ TypedValue* tg_17StableMapIterator_valid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMapIterator::valid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3822,7 +3654,6 @@ TypedValue* tg_17StableMapIterator_next(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_17StableMapIterator_next((this_));
         frame_free_locals_inl(ar, 0);
@@ -3835,7 +3666,6 @@ TypedValue* tg_17StableMapIterator_next(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMapIterator::next");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3860,7 +3690,6 @@ TypedValue* tg_17StableMapIterator_rewind(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_17StableMapIterator_rewind((this_));
         frame_free_locals_inl(ar, 0);
@@ -3873,7 +3702,6 @@ TypedValue* tg_17StableMapIterator_rewind(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StableMapIterator::rewind");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

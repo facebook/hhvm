@@ -42,7 +42,6 @@ TypedValue* tg_16StaticWaitHandle___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_16StaticWaitHandle___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -55,7 +54,6 @@ TypedValue* tg_16StaticWaitHandle___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("StaticWaitHandle::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

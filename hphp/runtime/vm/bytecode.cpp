@@ -1572,7 +1572,7 @@ bool VMExecutionContext::setCns(StringData* cns, CVarRef val, bool dynamic) {
     raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
     return false;
   }
-  val.setEvalScalar();
+  const_cast<Variant&>(val).setEvalScalar();
   TypedValue* tv = val.getTypedAccessor();
   m_constants.nvSet(cns, tv, false);
   assert(m_constants.nvGet(cns) != nullptr);

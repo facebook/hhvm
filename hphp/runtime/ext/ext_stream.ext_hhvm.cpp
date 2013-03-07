@@ -85,7 +85,6 @@ TypedValue* fg_stream_copy_to_stream(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_copy_to_stream", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -152,7 +151,6 @@ TypedValue* fg_stream_get_contents(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_get_contents", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -219,7 +217,6 @@ TypedValue* fg_stream_get_line(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_get_line", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -244,7 +241,6 @@ TypedValue* fg_stream_get_wrappers(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       fh_stream_get_wrappers((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -255,7 +251,6 @@ TypedValue* fg_stream_get_wrappers(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("stream_get_wrappers", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -279,7 +274,6 @@ bool fh_stream_register_wrapper(Value* protocol, Value* classname) asm("_ZN4HPHP
 TypedValue * fg1_stream_register_wrapper(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_stream_register_wrapper(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -297,7 +291,6 @@ TypedValue* fg_stream_register_wrapper(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_stream_register_wrapper((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -313,7 +306,6 @@ TypedValue* fg_stream_register_wrapper(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_register_wrapper", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -337,7 +329,6 @@ bool fh_stream_wrapper_register(Value* protocol, Value* classname) asm("_ZN4HPHP
 TypedValue * fg1_stream_wrapper_register(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_stream_wrapper_register(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -355,7 +346,6 @@ TypedValue* fg_stream_wrapper_register(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_stream_wrapper_register((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -371,7 +361,6 @@ TypedValue* fg_stream_wrapper_register(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_wrapper_register", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -394,7 +383,6 @@ bool fh_stream_wrapper_restore(Value* protocol) asm("_ZN4HPHP24f_stream_wrapper_
 TypedValue * fg1_stream_wrapper_restore(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_stream_wrapper_restore(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_stream_wrapper_restore((Value*)(args-0))) ? 1LL : 0LL;
@@ -407,7 +395,6 @@ TypedValue* fg_stream_wrapper_restore(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_stream_wrapper_restore((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -423,7 +410,6 @@ TypedValue* fg_stream_wrapper_restore(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_wrapper_restore", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -446,7 +432,6 @@ bool fh_stream_wrapper_unregister(Value* protocol) asm("_ZN4HPHP27f_stream_wrapp
 TypedValue * fg1_stream_wrapper_unregister(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_stream_wrapper_unregister(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (fh_stream_wrapper_unregister((Value*)(args-0))) ? 1LL : 0LL;
@@ -459,7 +444,6 @@ TypedValue* fg_stream_wrapper_unregister(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_stream_wrapper_unregister((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -475,7 +459,6 @@ TypedValue* fg_stream_wrapper_unregister(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_wrapper_unregister", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -530,7 +513,6 @@ TypedValue* fg_stream_select(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_select", count, 4, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -554,7 +536,6 @@ bool fh_stream_set_blocking(Value* stream, int mode) asm("_ZN4HPHP21f_stream_set
 TypedValue * fg1_stream_set_blocking(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_stream_set_blocking(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -572,7 +553,6 @@ TypedValue* fg_stream_set_blocking(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_stream_set_blocking((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -588,7 +568,6 @@ TypedValue* fg_stream_set_blocking(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_set_blocking", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -613,7 +592,6 @@ bool fh_stream_set_timeout(Value* stream, int seconds, int microseconds) asm("_Z
 TypedValue * fg1_stream_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_stream_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -639,7 +617,6 @@ TypedValue* fg_stream_set_timeout(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_stream_set_timeout((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -655,7 +632,6 @@ TypedValue* fg_stream_set_timeout(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_set_timeout", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -679,7 +655,6 @@ long fh_stream_set_write_buffer(Value* stream, int buffer) asm("_ZN4HPHP25f_stre
 TypedValue * fg1_stream_set_write_buffer(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_stream_set_write_buffer(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -697,7 +672,6 @@ TypedValue* fg_stream_set_write_buffer(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_stream_set_write_buffer((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -713,7 +687,6 @@ TypedValue* fg_stream_set_write_buffer(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_set_write_buffer", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -779,7 +752,6 @@ TypedValue* fg_stream_socket_accept(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_socket_accept", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -854,7 +826,6 @@ TypedValue* fg_stream_socket_server(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_socket_server", count, 1, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -934,7 +905,6 @@ TypedValue* fg_stream_socket_client(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_socket_client", count, 1, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -991,7 +961,6 @@ TypedValue* fg_stream_socket_get_name(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_socket_get_name", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1052,7 +1021,6 @@ TypedValue* fg_stream_socket_pair(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_socket_pair", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1123,7 +1091,6 @@ TypedValue* fg_stream_socket_recvfrom(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_socket_recvfrom", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1194,7 +1161,6 @@ TypedValue* fg_stream_socket_sendto(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_socket_sendto", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1218,7 +1184,6 @@ bool fh_stream_socket_shutdown(Value* stream, int how) asm("_ZN4HPHP24f_stream_s
 TypedValue * fg1_stream_socket_shutdown(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_stream_socket_shutdown(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -1236,7 +1201,6 @@ TypedValue* fg_stream_socket_shutdown(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_stream_socket_shutdown((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1252,7 +1216,6 @@ TypedValue* fg_stream_socket_shutdown(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("stream_socket_shutdown", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

@@ -785,7 +785,7 @@ void CodeGenerator::cgCallHelper(Asm& a,
   // by value.  In that case we need to rightshift the packed m_type
   // enum to occupy the low 32bits of the dest register.
   if (dstReg1 != InvalidReg) {
-    // dstReg1 contains m_type and _count but we're expecting just the
+    // dstReg1 contains m_type and m_aux, but we're expecting just the
     // type in the lower 32 bits, so shift the 2nd result register.
     a.      shrq (kTypeShiftBits, reg::rdx);
   }
@@ -2332,7 +2332,7 @@ static void emitAssertFlagsNonNegative(CodeGenerator::Asm& as) {
 }
 
 static void emitAssertRefCount(CodeGenerator::Asm& as, PhysReg base) {
-  as.cmpl(HPHP::RefCountStaticValue, base[TVOFF(_count)]);
+  as.cmpl(HPHP::RefCountStaticValue, base[FAST_REFCOUNT_OFFSET]);
   ifThen(as, CC_NBE, [&] { as.int3(); });
 }
 
@@ -2341,7 +2341,7 @@ static void emitIncRef(CodeGenerator::Asm& as, PhysReg base) {
     emitAssertRefCount(as, base);
   }
   // emit incref
-  as.addl(1, base[TVOFF(_count)]);
+  as.addl(1, base[FAST_REFCOUNT_OFFSET]);
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     // Assert that the ref count is greater than zero
     emitAssertFlagsNonNegative(as);
@@ -2355,7 +2355,7 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
     if (!type.needsStaticBitCheck()) {
       emitIncRef(m_as, base);
     } else {
-      m_as.cmpl(RefCountStaticValue, base[TVOFF(_count)]);
+      m_as.cmpl(RefCountStaticValue, base[FAST_REFCOUNT_OFFSET]);
       ifThen(m_as, CC_NE, [&] { emitIncRef(m_as, base); });
     }
   };
@@ -2557,7 +2557,7 @@ Address CodeGenerator::cgCheckStaticBit(Type type,
     m_as.cmp_imm32_reg32(RefCountStaticValue, reg);
   } else {
     // reg has the data pointer
-    m_as.cmp_imm32_disp_reg32(RefCountStaticValue, TVOFF(_count), reg);
+    m_as.cmp_imm32_disp_reg32(RefCountStaticValue, FAST_REFCOUNT_OFFSET, reg);
   }
 
   Address addrToPatch = m_as.code.frontier;
@@ -2604,7 +2604,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
       emitAssertRefCount(m_as, dataReg);
     }
     // Load _count in scratchReg
-    m_as.load_reg64_disp_reg32(dataReg, TVOFF(_count), scratchReg);
+    m_as.load_reg64_disp_reg32(dataReg, FAST_REFCOUNT_OFFSET, scratchReg);
 
     // Check for RefCountStaticValue
     patchStaticCheck = cgCheckStaticBit(type, scratchReg,
@@ -2620,7 +2620,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
       // Assert that the ref count is greater than zero
       emitAssertFlagsNonNegative(m_as);
     }
-    m_as.store_reg32_disp_reg64(scratchReg, TVOFF(_count), dataReg);
+    m_as.store_reg32_disp_reg64(scratchReg, FAST_REFCOUNT_OFFSET, dataReg);
 
   } else {
     // Can't use scratch reg, so emit code that operates directly in
@@ -2644,7 +2644,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
 
     // If there's an exit, emit jump to it if _count would get down to 0
     if (exit) {
-      m_as.cmp_imm32_disp_reg32(1, TVOFF(_count), dataReg);
+      m_as.cmp_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, dataReg);
       emitFwdJcc(CC_E, exit);
     }
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -2652,7 +2652,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
     }
 
     // Decrement _count
-    m_as.sub_imm32_disp_reg32(1, TVOFF(_count), dataReg);
+    m_as.sub_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, dataReg);
 
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       // Assert that the ref count is not less than zero
@@ -4482,7 +4482,7 @@ void CodeGenerator::cgFillContThis(IRInstruction* inst) {
   m_as.loadq(contReg[CONTOFF(m_obj)], scratch);
   m_as.testq(scratch, scratch);
   ifThen(m_as, CC_NZ, [&] {
-    m_as.addl(1, scratch[TVOFF(_count)]);
+    m_as.addl(1, scratch[FAST_REFCOUNT_OFFSET]);
     m_as.storeq(scratch, baseReg[offset + TVOFF(m_data)]);
     m_as.storel(KindOfObject, baseReg[offset + TVOFF(m_type)]);
   });

@@ -39,7 +39,6 @@ TypedValue* fg_pdo_drivers(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       fh_pdo_drivers((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -50,7 +49,6 @@ TypedValue* fg_pdo_drivers(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("pdo_drivers", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -87,7 +85,6 @@ TypedValue* tg1_3PDO___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
 TypedValue* tg1_3PDO___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 4
@@ -121,7 +118,6 @@ TypedValue* tg_3PDO___construct(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 4LL) {
         if ((count <= 3 || (args-3)->m_type == KindOfArray) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_3PDO___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
           frame_free_locals_inl(ar, 4);
@@ -140,7 +136,6 @@ TypedValue* tg_3PDO___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -206,7 +201,6 @@ TypedValue* tg_3PDO_prepare(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::prepare");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -231,7 +225,6 @@ TypedValue* tg_3PDO_begintransaction(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_3PDO_begintransaction((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -244,7 +237,6 @@ TypedValue* tg_3PDO_begintransaction(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::begintransaction");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -269,7 +261,6 @@ TypedValue* tg_3PDO_commit(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_3PDO_commit((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -282,7 +273,6 @@ TypedValue* tg_3PDO_commit(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::commit");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -307,7 +297,6 @@ TypedValue* tg_3PDO_rollback(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_3PDO_rollback((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -320,7 +309,6 @@ TypedValue* tg_3PDO_rollback(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::rollback");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -343,7 +331,6 @@ bool th_3PDO_setattribute(ObjectData* this_, long attribute, TypedValue* value) 
 TypedValue* tg1_3PDO_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_3PDO_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (th_3PDO_setattribute((this_), (long)(args[-0].m_data.num), (args-1))) ? 1LL : 0LL;
@@ -358,7 +345,6 @@ TypedValue* tg_3PDO_setattribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_3PDO_setattribute((this_), (long)(args[-0].m_data.num), (args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -377,7 +363,6 @@ TypedValue* tg_3PDO_setattribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::setattribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -432,7 +417,6 @@ TypedValue* tg_3PDO_getattribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::getattribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -487,7 +471,6 @@ TypedValue* tg_3PDO_exec(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::exec");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -542,7 +525,6 @@ TypedValue* tg_3PDO_lastinsertid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::lastinsertid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -580,7 +562,6 @@ TypedValue* tg_3PDO_errorcode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::errorcode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -606,7 +587,6 @@ TypedValue* tg_3PDO_errorinfo(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_3PDO_errorinfo((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -620,7 +600,6 @@ TypedValue* tg_3PDO_errorinfo(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::errorinfo");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -675,7 +654,6 @@ TypedValue* tg_3PDO_query(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::query");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -741,7 +719,6 @@ TypedValue* tg_3PDO_quote(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::quote");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -779,7 +756,6 @@ TypedValue* tg_3PDO___wakeup(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::__wakeup");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -817,7 +793,6 @@ TypedValue* tg_3PDO___sleep(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDO::__sleep");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -841,7 +816,6 @@ TypedValue* tg_3PDO_getavailabledrivers(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       th_3PDO_getavailabledrivers((Value*)(&(rv)), ("PDO"));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -852,7 +826,6 @@ TypedValue* tg_3PDO_getavailabledrivers(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("PDO::getavailabledrivers", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -887,7 +860,6 @@ TypedValue* tg_12PDOStatement___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_12PDOStatement___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -900,7 +872,6 @@ TypedValue* tg_12PDOStatement___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -955,7 +926,6 @@ TypedValue* tg_12PDOStatement_execute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::execute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1027,7 +997,6 @@ TypedValue* tg_12PDOStatement_fetch(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::fetch");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1085,7 +1054,6 @@ TypedValue* tg_12PDOStatement_fetchobject(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::fetchobject");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1140,7 +1108,6 @@ TypedValue* tg_12PDOStatement_fetchcolumn(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::fetchcolumn");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1201,7 +1168,6 @@ TypedValue* tg_12PDOStatement_fetchall(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::fetchall");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1225,7 +1191,6 @@ bool th_12PDOStatement_bindvalue(ObjectData* this_, TypedValue* paramno, TypedVa
 TypedValue* tg1_12PDOStatement_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_12PDOStatement_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-2);
   rv->m_data.num = (th_12PDOStatement_bindvalue((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR))) ? 1LL : 0LL;
@@ -1240,7 +1205,6 @@ TypedValue* tg_12PDOStatement_bindvalue(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_12PDOStatement_bindvalue((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -1259,7 +1223,6 @@ TypedValue* tg_12PDOStatement_bindvalue(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::bindvalue");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1285,7 +1248,6 @@ bool th_12PDOStatement_bindparam(ObjectData* this_, TypedValue* paramno, TypedVa
 TypedValue* tg1_12PDOStatement_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_12PDOStatement_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 5
@@ -1313,7 +1275,6 @@ TypedValue* tg_12PDOStatement_bindparam(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 5LL) {
         if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           Variant defVal4;
           rv.m_data.num = (th_12PDOStatement_bindparam((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (args-4) : (TypedValue*)(&defVal4))) ? 1LL : 0LL;
@@ -1333,7 +1294,6 @@ TypedValue* tg_12PDOStatement_bindparam(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::bindparam");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1359,7 +1319,6 @@ bool th_12PDOStatement_bindcolumn(ObjectData* this_, TypedValue* paramno, TypedV
 TypedValue* tg1_12PDOStatement_bindcolumn(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_12PDOStatement_bindcolumn(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 5
@@ -1387,7 +1346,6 @@ TypedValue* tg_12PDOStatement_bindcolumn(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 5LL) {
         if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           Variant defVal4;
           rv.m_data.num = (th_12PDOStatement_bindcolumn((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (args-4) : (TypedValue*)(&defVal4))) ? 1LL : 0LL;
@@ -1407,7 +1365,6 @@ TypedValue* tg_12PDOStatement_bindcolumn(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::bindcolumn");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1432,7 +1389,6 @@ TypedValue* tg_12PDOStatement_rowcount(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_12PDOStatement_rowcount((this_));
         frame_free_locals_inl(ar, 0);
@@ -1445,7 +1401,6 @@ TypedValue* tg_12PDOStatement_rowcount(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::rowcount");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1483,7 +1438,6 @@ TypedValue* tg_12PDOStatement_errorcode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::errorcode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1509,7 +1463,6 @@ TypedValue* tg_12PDOStatement_errorinfo(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_12PDOStatement_errorinfo((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1523,7 +1476,6 @@ TypedValue* tg_12PDOStatement_errorinfo(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::errorinfo");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1579,7 +1531,6 @@ TypedValue* tg_12PDOStatement_setattribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::setattribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1634,7 +1585,6 @@ TypedValue* tg_12PDOStatement_getattribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::getattribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1659,7 +1609,6 @@ TypedValue* tg_12PDOStatement_columncount(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_12PDOStatement_columncount((this_));
         frame_free_locals_inl(ar, 0);
@@ -1672,7 +1621,6 @@ TypedValue* tg_12PDOStatement_columncount(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::columncount");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1727,7 +1675,6 @@ TypedValue* tg_12PDOStatement_getcolumnmeta(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::getcolumnmeta");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1751,7 +1698,6 @@ bool th_12PDOStatement_setfetchmode(ObjectData* this_, int64_t _argc, long mode,
 TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
   Array extraArgs;
@@ -1779,7 +1725,6 @@ TypedValue* tg_12PDOStatement_setfetchmode(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           Array extraArgs;
           {
@@ -1811,7 +1756,6 @@ TypedValue* tg_12PDOStatement_setfetchmode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::setfetchmode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1836,7 +1780,6 @@ TypedValue* tg_12PDOStatement_nextrowset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_12PDOStatement_nextrowset((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -1849,7 +1792,6 @@ TypedValue* tg_12PDOStatement_nextrowset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::nextrowset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1874,7 +1816,6 @@ TypedValue* tg_12PDOStatement_closecursor(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_12PDOStatement_closecursor((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -1887,7 +1828,6 @@ TypedValue* tg_12PDOStatement_closecursor(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::closecursor");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1925,7 +1865,6 @@ TypedValue* tg_12PDOStatement_debugdumpparams(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::debugdumpparams");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1963,7 +1902,6 @@ TypedValue* tg_12PDOStatement_current(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::current");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2001,7 +1939,6 @@ TypedValue* tg_12PDOStatement_key(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::key");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2039,7 +1976,6 @@ TypedValue* tg_12PDOStatement_next(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::next");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2077,7 +2013,6 @@ TypedValue* tg_12PDOStatement_rewind(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::rewind");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2115,7 +2050,6 @@ TypedValue* tg_12PDOStatement_valid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::valid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2153,7 +2087,6 @@ TypedValue* tg_12PDOStatement___wakeup(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::__wakeup");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2191,7 +2124,6 @@ TypedValue* tg_12PDOStatement___sleep(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("PDOStatement::__sleep");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

@@ -220,8 +220,8 @@ private:
   static void compileTimeAssertions() {
     static_assert(offsetof(SharedVar, m_data) == offsetof(TypedValue, m_data),
                   "Offset of m_data must be equal in SharedVar and TypedValue");
-    static_assert(offsetof(SharedVar, m_count) == offsetof(TypedValue, _count),
-                  "Offset of m_count must be equal SharedVar and TypedValue");
+    static_assert(offsetof(SharedVar, m_count) == offsetof(TypedValue, m_aux),
+                  "Offset of m_count must equal offset of TV.m_aux");
     static_assert(offsetof(SharedVar, m_type) == offsetof(TypedValue, m_type),
                   "Offset of m_type must be equal in SharedVar and TypedValue");
   }

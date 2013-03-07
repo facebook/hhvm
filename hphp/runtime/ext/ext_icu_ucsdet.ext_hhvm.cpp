@@ -51,7 +51,6 @@ TypedValue* tg_16EncodingDetector___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_16EncodingDetector___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -64,7 +63,6 @@ TypedValue* tg_16EncodingDetector___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("EncodingDetector::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -86,7 +84,6 @@ TypedValue* tg1_16EncodingDetector_setText(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue* tg1_16EncodingDetector_setText(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_16EncodingDetector_setText((this_), (Value*)(args-0));
@@ -102,7 +99,6 @@ TypedValue* tg_16EncodingDetector_setText(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_16EncodingDetector_setText((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -121,7 +117,6 @@ TypedValue* tg_16EncodingDetector_setText(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("EncodingDetector::setText");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -143,7 +138,6 @@ TypedValue* tg1_16EncodingDetector_setDeclaredEncoding(TypedValue* rv, HPHP::VM:
 TypedValue* tg1_16EncodingDetector_setDeclaredEncoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_16EncodingDetector_setDeclaredEncoding((this_), (Value*)(args-0));
@@ -159,7 +153,6 @@ TypedValue* tg_16EncodingDetector_setDeclaredEncoding(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_16EncodingDetector_setDeclaredEncoding((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -178,7 +171,6 @@ TypedValue* tg_16EncodingDetector_setDeclaredEncoding(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("EncodingDetector::setDeclaredEncoding");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -204,7 +196,6 @@ TypedValue* tg_16EncodingDetector_detect(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_16EncodingDetector_detect((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -218,7 +209,6 @@ TypedValue* tg_16EncodingDetector_detect(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("EncodingDetector::detect");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -244,7 +234,6 @@ TypedValue* tg_16EncodingDetector_detectAll(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_16EncodingDetector_detectAll((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -258,7 +247,6 @@ TypedValue* tg_16EncodingDetector_detectAll(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("EncodingDetector::detectAll");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -293,7 +281,6 @@ TypedValue* tg_13EncodingMatch___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_13EncodingMatch___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -306,7 +293,6 @@ TypedValue* tg_13EncodingMatch___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("EncodingMatch::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -331,7 +317,6 @@ TypedValue* tg_13EncodingMatch_isValid(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_13EncodingMatch_isValid((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -344,7 +329,6 @@ TypedValue* tg_13EncodingMatch_isValid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("EncodingMatch::isValid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -370,7 +354,6 @@ TypedValue* tg_13EncodingMatch_getEncoding(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_13EncodingMatch_getEncoding((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -384,7 +367,6 @@ TypedValue* tg_13EncodingMatch_getEncoding(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("EncodingMatch::getEncoding");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -409,7 +391,6 @@ TypedValue* tg_13EncodingMatch_getConfidence(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_13EncodingMatch_getConfidence((this_));
         frame_free_locals_inl(ar, 0);
@@ -422,7 +403,6 @@ TypedValue* tg_13EncodingMatch_getConfidence(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("EncodingMatch::getConfidence");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -448,7 +428,6 @@ TypedValue* tg_13EncodingMatch_getLanguage(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_13EncodingMatch_getLanguage((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -462,7 +441,6 @@ TypedValue* tg_13EncodingMatch_getLanguage(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("EncodingMatch::getLanguage");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -488,7 +466,6 @@ TypedValue* tg_13EncodingMatch_getUTF8(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_13EncodingMatch_getUTF8((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -502,7 +479,6 @@ TypedValue* tg_13EncodingMatch_getUTF8(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("EncodingMatch::getUTF8");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

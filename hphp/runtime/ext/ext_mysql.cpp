@@ -1221,7 +1221,7 @@ bool f_mysql_async_query_start(CStrRef query, CVarRef link_identifier) {
     return false;
   }
   Variant ret = php_mysql_do_query_general(query, link_identifier, true, true);
-  if (ret.m_type != KindOfInt64) {
+  if (ret.getRawType() != KindOfInt64) {
     raise_warning("runtime/ext_mysql: unexpected return from "
                   "php_mysql_do_query_general");
     return false;

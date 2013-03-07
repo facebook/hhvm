@@ -673,7 +673,6 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
         StringData* sd = NEW(StringData)(y, strlen(y), CopyString);
         sd->incRefCount();
         value->m_data.pstr = sd;
-        value->_count = 0;
         value->m_type = KindOfString;
       }
     }
@@ -1448,7 +1447,6 @@ static inline void SetPropStdclass(TypedValue* base, TypedValue* key,
   decRefStr(keySD);
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
-  /* dont set _count; base could be an inner variant */
   base->m_data.pobj = obj;
 }
 
@@ -1524,7 +1522,6 @@ static inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
   obj->incRefCount();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
-  base->_count = 0;
   base->m_data.pobj = obj;
 
   StringData* keySD = prepareKey(key);
@@ -1613,7 +1610,6 @@ static inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
   obj->incRefCount();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
-  base->_count = 0;
   base->m_data.pobj = obj;
 
   StringData* keySD = prepareKey(key);

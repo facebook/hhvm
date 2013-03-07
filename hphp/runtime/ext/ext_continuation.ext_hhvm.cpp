@@ -41,7 +41,6 @@ Value* fh_hphp_create_continuation(Value* _rv, Value* clsname, Value* funcname, 
 TypedValue * fg1_hphp_create_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_create_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 4
@@ -71,7 +70,6 @@ TypedValue* fg_hphp_create_continuation(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfArray) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_hphp_create_continuation((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -88,7 +86,6 @@ TypedValue* fg_hphp_create_continuation(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_create_continuation", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -113,7 +110,6 @@ TypedValue * fg1_hphp_pack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_hphp_pack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -132,7 +128,6 @@ TypedValue* fg_hphp_pack_continuation(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_pack_continuation((Value*)(args-0), (long)(args[-1].m_data.num), (args-2));
         frame_free_locals_no_this_inl(ar, 3);
@@ -148,7 +143,6 @@ TypedValue* fg_hphp_pack_continuation(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_pack_continuation", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -171,7 +165,6 @@ TypedValue * fg1_hphp_unpack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, 
 TypedValue * fg1_hphp_unpack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_hphp_unpack_continuation((Value*)(args-0));
@@ -185,7 +178,6 @@ TypedValue* fg_hphp_unpack_continuation(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphp_unpack_continuation((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -201,7 +193,6 @@ TypedValue* fg_hphp_unpack_continuation(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_unpack_continuation", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -240,7 +231,6 @@ TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 6
@@ -277,7 +267,6 @@ TypedValue* tg_12Continuation___construct(HPHP::VM::ActRec *ar) {
       if (count >= 4LL && count <= 6LL) {
         if ((count <= 5 || (args-5)->m_type == KindOfArray) && IS_STRING_TYPE((args-3)->m_type) && (args-2)->m_type == KindOfBoolean && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           Variant defVal4;
           th_12Continuation___construct((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (bool)(args[-2].m_data.num), (Value*)(args-3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (Value*)(args-5) : (Value*)(&null_array));
@@ -297,7 +286,6 @@ TypedValue* tg_12Continuation___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -320,7 +308,6 @@ TypedValue* tg1_12Continuation_update(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue* tg1_12Continuation_update(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToInt64InPlace(args-0);
   th_12Continuation_update((this_), (long)(args[-0].m_data.num), (args-1));
@@ -336,7 +323,6 @@ TypedValue* tg_12Continuation_update(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if ((args-0)->m_type == KindOfInt64) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_12Continuation_update((this_), (long)(args[-0].m_data.num), (args-1));
           frame_free_locals_inl(ar, 2);
@@ -355,7 +341,6 @@ TypedValue* tg_12Continuation_update(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::update");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -380,7 +365,6 @@ TypedValue* tg_12Continuation_done(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_12Continuation_done((this_));
         frame_free_locals_inl(ar, 0);
@@ -393,7 +377,6 @@ TypedValue* tg_12Continuation_done(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::done");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -418,7 +401,6 @@ TypedValue* tg_12Continuation_getLabel(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_12Continuation_getLabel((this_));
         frame_free_locals_inl(ar, 0);
@@ -431,7 +413,6 @@ TypedValue* tg_12Continuation_getLabel(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::getLabel");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -456,7 +437,6 @@ TypedValue* tg_12Continuation_num_args(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_12Continuation_num_args((this_));
         frame_free_locals_inl(ar, 0);
@@ -469,7 +449,6 @@ TypedValue* tg_12Continuation_num_args(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::num_args");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -495,7 +474,6 @@ TypedValue* tg_12Continuation_get_args(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_12Continuation_get_args((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -509,7 +487,6 @@ TypedValue* tg_12Continuation_get_args(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::get_args");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -564,7 +541,6 @@ TypedValue* tg_12Continuation_get_arg(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::get_arg");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -602,7 +578,6 @@ TypedValue* tg_12Continuation_current(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::current");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -627,7 +602,6 @@ TypedValue* tg_12Continuation_key(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_12Continuation_key((this_));
         frame_free_locals_inl(ar, 0);
@@ -640,7 +614,6 @@ TypedValue* tg_12Continuation_key(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::key");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -665,7 +638,6 @@ TypedValue* tg_12Continuation_next(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_12Continuation_next((this_));
         frame_free_locals_inl(ar, 0);
@@ -678,7 +650,6 @@ TypedValue* tg_12Continuation_next(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::next");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -703,7 +674,6 @@ TypedValue* tg_12Continuation_rewind(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_12Continuation_rewind((this_));
         frame_free_locals_inl(ar, 0);
@@ -716,7 +686,6 @@ TypedValue* tg_12Continuation_rewind(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::rewind");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -741,7 +710,6 @@ TypedValue* tg_12Continuation_valid(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_12Continuation_valid((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -754,7 +722,6 @@ TypedValue* tg_12Continuation_valid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::valid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -780,7 +747,6 @@ TypedValue* tg_12Continuation_send(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_12Continuation_send((this_), (args-0));
         frame_free_locals_inl(ar, 1);
@@ -793,7 +759,6 @@ TypedValue* tg_12Continuation_send(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::send");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -819,7 +784,6 @@ TypedValue* tg_12Continuation_raise(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_12Continuation_raise((this_), (args-0));
         frame_free_locals_inl(ar, 1);
@@ -832,7 +796,6 @@ TypedValue* tg_12Continuation_raise(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::raise");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -857,7 +820,6 @@ TypedValue* tg_12Continuation_raised(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_12Continuation_raised((this_));
         frame_free_locals_inl(ar, 0);
@@ -870,7 +832,6 @@ TypedValue* tg_12Continuation_raised(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::raised");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -908,7 +869,6 @@ TypedValue* tg_12Continuation_receive(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::receive");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -934,7 +894,6 @@ TypedValue* tg_12Continuation_getOrigFuncName(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_12Continuation_getOrigFuncName((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -948,7 +907,6 @@ TypedValue* tg_12Continuation_getOrigFuncName(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::getOrigFuncName");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -986,7 +944,6 @@ TypedValue* tg_12Continuation___clone(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("Continuation::__clone");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1021,7 +978,6 @@ TypedValue* tg_17DummyContinuation___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_17DummyContinuation___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -1034,7 +990,6 @@ TypedValue* tg_17DummyContinuation___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DummyContinuation::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1072,7 +1027,6 @@ TypedValue* tg_17DummyContinuation_current(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DummyContinuation::current");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1097,7 +1051,6 @@ TypedValue* tg_17DummyContinuation_key(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_17DummyContinuation_key((this_));
         frame_free_locals_inl(ar, 0);
@@ -1110,7 +1063,6 @@ TypedValue* tg_17DummyContinuation_key(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DummyContinuation::key");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1135,7 +1087,6 @@ TypedValue* tg_17DummyContinuation_next(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_17DummyContinuation_next((this_));
         frame_free_locals_inl(ar, 0);
@@ -1148,7 +1099,6 @@ TypedValue* tg_17DummyContinuation_next(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DummyContinuation::next");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1173,7 +1123,6 @@ TypedValue* tg_17DummyContinuation_rewind(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_17DummyContinuation_rewind((this_));
         frame_free_locals_inl(ar, 0);
@@ -1186,7 +1135,6 @@ TypedValue* tg_17DummyContinuation_rewind(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DummyContinuation::rewind");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1211,7 +1159,6 @@ TypedValue* tg_17DummyContinuation_valid(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_17DummyContinuation_valid((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -1224,7 +1171,6 @@ TypedValue* tg_17DummyContinuation_valid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DummyContinuation::valid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

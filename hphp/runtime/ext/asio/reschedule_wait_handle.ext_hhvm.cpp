@@ -51,7 +51,6 @@ TypedValue* tg_20RescheduleWaitHandle___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_20RescheduleWaitHandle___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -64,7 +63,6 @@ TypedValue* tg_20RescheduleWaitHandle___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("RescheduleWaitHandle::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -88,7 +86,6 @@ Value* th_20RescheduleWaitHandle_create(Value* _rv, char const* cls_, int queue,
 TypedValue* tg1_20RescheduleWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue* tg1_20RescheduleWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -107,7 +104,6 @@ TypedValue* tg_20RescheduleWaitHandle_create(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         th_20RescheduleWaitHandle_create((Value*)(&(rv)), ("RescheduleWaitHandle"), (int)(args[-0].m_data.num), (int)(args[-1].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -124,7 +120,6 @@ TypedValue* tg_20RescheduleWaitHandle_create(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("RescheduleWaitHandle::create", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

@@ -38,7 +38,6 @@ bool fh_hphpd_install_user_command(Value* cmd, Value* clsname) asm("_ZN4HPHP28f_
 TypedValue * fg1_hphpd_install_user_command(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphpd_install_user_command(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -56,7 +55,6 @@ TypedValue* fg_hphpd_install_user_command(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphpd_install_user_command((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -72,7 +70,6 @@ TypedValue* fg_hphpd_install_user_command(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphpd_install_user_command", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -97,7 +94,6 @@ TypedValue* fg_hphpd_get_user_commands(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       fh_hphpd_get_user_commands((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -108,7 +104,6 @@ TypedValue* fg_hphpd_get_user_commands(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphpd_get_user_commands", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -131,7 +126,6 @@ TypedValue * fg1_hphpd_break(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
 TypedValue * fg1_hphpd_break(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToBooleanInPlace(args-0);
   fh_hphpd_break((count > 0) ? (bool)(args[-0].m_data.num) : (bool)(true));
@@ -145,7 +139,6 @@ TypedValue* fg_hphpd_break(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_hphpd_break((count > 0) ? (bool)(args[-0].m_data.num) : (bool)(true));
         frame_free_locals_no_this_inl(ar, 1);
@@ -161,7 +154,6 @@ TypedValue* fg_hphpd_break(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphpd_break", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -214,7 +206,6 @@ TypedValue* fg_hphpd_get_client(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphpd_get_client", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -271,7 +262,6 @@ TypedValue* fg_hphpd_client_ctrl(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphpd_client_ctrl", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -308,7 +298,6 @@ TypedValue* tg_20DebuggerProxyCmdUser___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_20DebuggerProxyCmdUser___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -321,7 +310,6 @@ TypedValue* tg_20DebuggerProxyCmdUser___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerProxyCmdUser::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -346,7 +334,6 @@ TypedValue* tg_20DebuggerProxyCmdUser_isLocal(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_20DebuggerProxyCmdUser_isLocal((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -359,7 +346,6 @@ TypedValue* tg_20DebuggerProxyCmdUser_isLocal(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerProxyCmdUser::isLocal");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -414,7 +400,6 @@ TypedValue* tg_20DebuggerProxyCmdUser_send(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerProxyCmdUser::send");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -449,7 +434,6 @@ TypedValue* tg_21DebuggerClientCmdUser___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_21DebuggerClientCmdUser___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -462,7 +446,6 @@ TypedValue* tg_21DebuggerClientCmdUser___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -487,7 +470,6 @@ TypedValue* tg_21DebuggerClientCmdUser_quit(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_21DebuggerClientCmdUser_quit((this_));
         frame_free_locals_inl(ar, 0);
@@ -500,7 +482,6 @@ TypedValue* tg_21DebuggerClientCmdUser_quit(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::quit");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -524,7 +505,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_print(TypedValue* rv, HPHP::VM::ActRec* 
 TypedValue* tg1_21DebuggerClientCmdUser_print(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   Array extraArgs;
@@ -553,7 +533,6 @@ TypedValue* tg_21DebuggerClientCmdUser_print(HPHP::VM::ActRec *ar) {
       if (count >= 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
@@ -585,7 +564,6 @@ TypedValue* tg_21DebuggerClientCmdUser_print(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::print");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -609,7 +587,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_help(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue* tg1_21DebuggerClientCmdUser_help(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   Array extraArgs;
@@ -638,7 +615,6 @@ TypedValue* tg_21DebuggerClientCmdUser_help(HPHP::VM::ActRec *ar) {
       if (count >= 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
@@ -670,7 +646,6 @@ TypedValue* tg_21DebuggerClientCmdUser_help(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::help");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -694,7 +669,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_info(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue* tg1_21DebuggerClientCmdUser_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   Array extraArgs;
@@ -723,7 +697,6 @@ TypedValue* tg_21DebuggerClientCmdUser_info(HPHP::VM::ActRec *ar) {
       if (count >= 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
@@ -755,7 +728,6 @@ TypedValue* tg_21DebuggerClientCmdUser_info(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::info");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -779,7 +751,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_output(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue* tg1_21DebuggerClientCmdUser_output(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   Array extraArgs;
@@ -808,7 +779,6 @@ TypedValue* tg_21DebuggerClientCmdUser_output(HPHP::VM::ActRec *ar) {
       if (count >= 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
@@ -840,7 +810,6 @@ TypedValue* tg_21DebuggerClientCmdUser_output(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::output");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -864,7 +833,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_error(TypedValue* rv, HPHP::VM::ActRec* 
 TypedValue* tg1_21DebuggerClientCmdUser_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   Array extraArgs;
@@ -893,7 +861,6 @@ TypedValue* tg_21DebuggerClientCmdUser_error(HPHP::VM::ActRec *ar) {
       if (count >= 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
@@ -925,7 +892,6 @@ TypedValue* tg_21DebuggerClientCmdUser_error(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::error");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -950,7 +916,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_code(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue* tg1_21DebuggerClientCmdUser_code(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 4
@@ -984,7 +949,6 @@ TypedValue* tg_21DebuggerClientCmdUser_code(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 4LL) {
         if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_21DebuggerClientCmdUser_code((this_), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0));
           frame_free_locals_inl(ar, 4);
@@ -1003,7 +967,6 @@ TypedValue* tg_21DebuggerClientCmdUser_code(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::code");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1086,7 +1049,6 @@ TypedValue* tg_21DebuggerClientCmdUser_ask(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::ask");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1109,7 +1071,6 @@ Value* th_21DebuggerClientCmdUser_wrap(Value* _rv, ObjectData* this_, Value* str
 TypedValue* tg1_21DebuggerClientCmdUser_wrap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_21DebuggerClientCmdUser_wrap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
   th_21DebuggerClientCmdUser_wrap((Value*)(rv), (this_), (Value*)(args-0));
@@ -1125,7 +1086,6 @@ TypedValue* tg_21DebuggerClientCmdUser_wrap(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_21DebuggerClientCmdUser_wrap((Value*)(&(rv)), (this_), (Value*)(args-0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1145,7 +1105,6 @@ TypedValue* tg_21DebuggerClientCmdUser_wrap(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::wrap");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1167,7 +1126,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpTitle(TypedValue* rv, HPHP::VM::ActR
 TypedValue* tg1_21DebuggerClientCmdUser_helpTitle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_21DebuggerClientCmdUser_helpTitle((this_), (Value*)(args-0));
@@ -1183,7 +1141,6 @@ TypedValue* tg_21DebuggerClientCmdUser_helpTitle(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_21DebuggerClientCmdUser_helpTitle((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -1202,7 +1159,6 @@ TypedValue* tg_21DebuggerClientCmdUser_helpTitle(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::helpTitle");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1227,7 +1183,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpCmds(TypedValue* rv, HPHP::VM::ActRe
 TypedValue* tg1_21DebuggerClientCmdUser_helpCmds(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1261,7 +1216,6 @@ TypedValue* tg_21DebuggerClientCmdUser_helpCmds(HPHP::VM::ActRec *ar) {
       if (count >= 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           Array extraArgs;
           {
@@ -1293,7 +1247,6 @@ TypedValue* tg_21DebuggerClientCmdUser_helpCmds(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::helpCmds");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1315,7 +1268,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpBody(TypedValue* rv, HPHP::VM::ActRe
 TypedValue* tg1_21DebuggerClientCmdUser_helpBody(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_21DebuggerClientCmdUser_helpBody((this_), (Value*)(args-0));
@@ -1331,7 +1283,6 @@ TypedValue* tg_21DebuggerClientCmdUser_helpBody(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_21DebuggerClientCmdUser_helpBody((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -1350,7 +1301,6 @@ TypedValue* tg_21DebuggerClientCmdUser_helpBody(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::helpBody");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1372,7 +1322,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpSection(TypedValue* rv, HPHP::VM::Ac
 TypedValue* tg1_21DebuggerClientCmdUser_helpSection(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_21DebuggerClientCmdUser_helpSection((this_), (Value*)(args-0));
@@ -1388,7 +1337,6 @@ TypedValue* tg_21DebuggerClientCmdUser_helpSection(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_21DebuggerClientCmdUser_helpSection((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -1407,7 +1355,6 @@ TypedValue* tg_21DebuggerClientCmdUser_helpSection(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::helpSection");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1429,7 +1376,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_tutorial(TypedValue* rv, HPHP::VM::ActRe
 TypedValue* tg1_21DebuggerClientCmdUser_tutorial(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_21DebuggerClientCmdUser_tutorial((this_), (Value*)(args-0));
@@ -1445,7 +1391,6 @@ TypedValue* tg_21DebuggerClientCmdUser_tutorial(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_21DebuggerClientCmdUser_tutorial((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -1464,7 +1409,6 @@ TypedValue* tg_21DebuggerClientCmdUser_tutorial(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::tutorial");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1490,7 +1434,6 @@ TypedValue* tg_21DebuggerClientCmdUser_getCode(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_21DebuggerClientCmdUser_getCode((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1504,7 +1447,6 @@ TypedValue* tg_21DebuggerClientCmdUser_getCode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::getCode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1530,7 +1472,6 @@ TypedValue* tg_21DebuggerClientCmdUser_getCommand(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_21DebuggerClientCmdUser_getCommand((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1544,7 +1485,6 @@ TypedValue* tg_21DebuggerClientCmdUser_getCommand(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::getCommand");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1567,7 +1507,6 @@ bool th_21DebuggerClientCmdUser_arg(ObjectData* this_, int index, Value* str) as
 TypedValue* tg1_21DebuggerClientCmdUser_arg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_21DebuggerClientCmdUser_arg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1587,7 +1526,6 @@ TypedValue* tg_21DebuggerClientCmdUser_arg(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_21DebuggerClientCmdUser_arg((this_), (int)(args[-0].m_data.num), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -1606,7 +1544,6 @@ TypedValue* tg_21DebuggerClientCmdUser_arg(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::arg");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1631,7 +1568,6 @@ TypedValue* tg_21DebuggerClientCmdUser_argCount(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_21DebuggerClientCmdUser_argCount((this_));
         frame_free_locals_inl(ar, 0);
@@ -1644,7 +1580,6 @@ TypedValue* tg_21DebuggerClientCmdUser_argCount(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::argCount");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1667,7 +1602,6 @@ Value* th_21DebuggerClientCmdUser_argValue(Value* _rv, ObjectData* this_, int in
 TypedValue* tg1_21DebuggerClientCmdUser_argValue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_21DebuggerClientCmdUser_argValue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
   th_21DebuggerClientCmdUser_argValue((Value*)(rv), (this_), (int)(args[-0].m_data.num));
@@ -1683,7 +1617,6 @@ TypedValue* tg_21DebuggerClientCmdUser_argValue(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_21DebuggerClientCmdUser_argValue((Value*)(&(rv)), (this_), (int)(args[-0].m_data.num));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1703,7 +1636,6 @@ TypedValue* tg_21DebuggerClientCmdUser_argValue(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::argValue");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1726,7 +1658,6 @@ Value* th_21DebuggerClientCmdUser_lineRest(Value* _rv, ObjectData* this_, int in
 TypedValue* tg1_21DebuggerClientCmdUser_lineRest(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_21DebuggerClientCmdUser_lineRest(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
   th_21DebuggerClientCmdUser_lineRest((Value*)(rv), (this_), (int)(args[-0].m_data.num));
@@ -1742,7 +1673,6 @@ TypedValue* tg_21DebuggerClientCmdUser_lineRest(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_21DebuggerClientCmdUser_lineRest((Value*)(&(rv)), (this_), (int)(args[-0].m_data.num));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1762,7 +1692,6 @@ TypedValue* tg_21DebuggerClientCmdUser_lineRest(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::lineRest");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1788,7 +1717,6 @@ TypedValue* tg_21DebuggerClientCmdUser_args(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_21DebuggerClientCmdUser_args((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1802,7 +1730,6 @@ TypedValue* tg_21DebuggerClientCmdUser_args(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::args");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1857,7 +1784,6 @@ TypedValue* tg_21DebuggerClientCmdUser_send(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::send");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1912,7 +1838,6 @@ TypedValue* tg_21DebuggerClientCmdUser_xend(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::xend");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1950,7 +1875,6 @@ TypedValue* tg_21DebuggerClientCmdUser_getCurrentLocation(HPHP::VM::ActRec *ar) 
       throw_instance_method_fatal("DebuggerClientCmdUser::getCurrentLocation");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1988,7 +1912,6 @@ TypedValue* tg_21DebuggerClientCmdUser_getStackTrace(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::getStackTrace");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2013,7 +1936,6 @@ TypedValue* tg_21DebuggerClientCmdUser_getFrame(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_21DebuggerClientCmdUser_getFrame((this_));
         frame_free_locals_inl(ar, 0);
@@ -2026,7 +1948,6 @@ TypedValue* tg_21DebuggerClientCmdUser_getFrame(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::getFrame");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2048,7 +1969,6 @@ TypedValue* tg1_21DebuggerClientCmdUser_printFrame(TypedValue* rv, HPHP::VM::Act
 TypedValue* tg1_21DebuggerClientCmdUser_printFrame(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToInt64InPlace(args-0);
   th_21DebuggerClientCmdUser_printFrame((this_), (int)(args[-0].m_data.num));
@@ -2064,7 +1984,6 @@ TypedValue* tg_21DebuggerClientCmdUser_printFrame(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_21DebuggerClientCmdUser_printFrame((this_), (int)(args[-0].m_data.num));
           frame_free_locals_inl(ar, 1);
@@ -2083,7 +2002,6 @@ TypedValue* tg_21DebuggerClientCmdUser_printFrame(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::printFrame");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2109,7 +2027,6 @@ TypedValue* tg_21DebuggerClientCmdUser_addCompletion(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_21DebuggerClientCmdUser_addCompletion((this_), (args-0));
         frame_free_locals_inl(ar, 1);
@@ -2122,7 +2039,6 @@ TypedValue* tg_21DebuggerClientCmdUser_addCompletion(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClientCmdUser::addCompletion");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2157,7 +2073,6 @@ TypedValue* tg_14DebuggerClient___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_14DebuggerClient___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -2170,7 +2085,6 @@ TypedValue* tg_14DebuggerClient___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClient::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2195,7 +2109,6 @@ TypedValue* tg_14DebuggerClient_getState(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_14DebuggerClient_getState((this_));
         frame_free_locals_inl(ar, 0);
@@ -2208,7 +2121,6 @@ TypedValue* tg_14DebuggerClient_getState(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClient::getState");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2247,7 +2159,6 @@ TypedValue* tg_14DebuggerClient_init(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClient::init");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2287,7 +2198,6 @@ TypedValue* tg_14DebuggerClient_processCmd(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DebuggerClient::processCmd");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

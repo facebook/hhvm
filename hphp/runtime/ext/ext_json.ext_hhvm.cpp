@@ -41,7 +41,6 @@ TypedValue* fg_json_encode(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
-      rv._count = 0;
       rv.m_type = KindOfString;
       Variant defVal1 = 0;
       fh_json_encode((Value*)(&(rv)), (args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
@@ -53,7 +52,6 @@ TypedValue* fg_json_encode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("json_encode", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -119,7 +117,6 @@ TypedValue* fg_json_decode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("json_decode", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

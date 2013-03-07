@@ -497,8 +497,8 @@ public:
   }
 
   static void compileTimeAssertions() {
-    static_assert(offsetof(String, m_px) == offsetof(Value, m_data),
-                  "Offset of m_px in String must be offset of m_data in Value");
+    static_assert(offsetof(String, m_px) == offsetof(TypedValue, m_data),
+                  "Offset of m_px in String must be offset of m_data in TV");
     BOOST_STATIC_ASSERT((offsetof(String, m_px) == kExpectedMPxOffset));
   }
 };

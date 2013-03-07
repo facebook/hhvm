@@ -128,7 +128,7 @@ void HphpArray::postSort(bool resetKeys) {
   } else {
     for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
       Elm* e = &m_data[pos];
-      ElmInd* ei = findForNewInsert(e->hasIntKey() ? e->ikey : e->hash);
+      ElmInd* ei = findForNewInsert(e->hasIntKey() ? e->ikey : e->hash());
       *ei = pos;
     }
   }

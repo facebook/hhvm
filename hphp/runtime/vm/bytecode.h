@@ -635,7 +635,6 @@ public:
     assert(m_top != m_elms);
     m_top--;
     m_top->m_data.num = 0;
-    m_top->_count = 0;
     m_top->m_type = KindOfUninit;
   }
 
@@ -644,7 +643,6 @@ public:
     assert(m_top != m_elms);                                                  \
     m_top--;                                                                  \
     m_top->m_data.field = value;                                              \
-    m_top->_count = 0;                                                        \
     m_top->m_type = type;                                                     \
   }
   PUSH_METHOD(True, KindOfBoolean, num, 1)
@@ -655,7 +653,6 @@ public:
     assert(m_top != m_elms);                                                  \
     m_top--;                                                                  \
     m_top->m_data.field = arg;                                                \
-    m_top->_count = 0;                                                        \
     m_top->m_type = type;                                                     \
   }
   PUSH_METHOD_ARG(Int, KindOfInt64, num, int64_t, i)
@@ -667,7 +664,6 @@ public:
     assert(m_top != m_elms);
     m_top--;
     m_top->m_data.pstr = s;
-    m_top->_count = 0;
     m_top->m_type = KindOfString;
   }
 
@@ -682,7 +678,6 @@ public:
     assert(m_top != m_elms);
     m_top--;
     m_top->m_data.parr = a;
-    m_top->_count = 0;
     m_top->m_type = KindOfArray;
   }
 
@@ -702,7 +697,6 @@ public:
     assert(m_top != m_elms);
     m_top--;
     m_top->m_data.pobj = o;
-    m_top->_count = 0;
     m_top->m_type = KindOfObject;
   }
 
@@ -773,7 +767,6 @@ public:
     assert(m_top != m_elms);
     m_top--;
     m_top->m_data.pcls = clss;
-    m_top->_count = 0;
     m_top->m_type = KindOfClass;
   }
 };

@@ -50,7 +50,6 @@ TypedValue* tg1_7SQLite3___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64
 TypedValue* tg1_7SQLite3___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 3
@@ -80,7 +79,6 @@ TypedValue* tg_7SQLite3___construct(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 3LL) {
         if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_7SQLite3___construct((this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
           frame_free_locals_inl(ar, 3);
@@ -99,7 +97,6 @@ TypedValue* tg_7SQLite3___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -123,7 +120,6 @@ TypedValue* tg1_7SQLite3_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
 TypedValue* tg1_7SQLite3_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 3
@@ -153,7 +149,6 @@ TypedValue* tg_7SQLite3_open(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 3LL) {
         if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_7SQLite3_open((this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
           frame_free_locals_inl(ar, 3);
@@ -172,7 +167,6 @@ TypedValue* tg_7SQLite3_open(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::open");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -194,7 +188,6 @@ bool th_7SQLite3_busytimeout(ObjectData* this_, long msecs) asm("_ZN4HPHP9c_SQLi
 TypedValue* tg1_7SQLite3_busytimeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_7SQLite3_busytimeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (th_7SQLite3_busytimeout((this_), (long)(args[-0].m_data.num))) ? 1LL : 0LL;
@@ -209,7 +202,6 @@ TypedValue* tg_7SQLite3_busytimeout(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_7SQLite3_busytimeout((this_), (long)(args[-0].m_data.num))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -228,7 +220,6 @@ TypedValue* tg_7SQLite3_busytimeout(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::busytimeout");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -253,7 +244,6 @@ TypedValue* tg_7SQLite3_close(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_7SQLite3_close((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -266,7 +256,6 @@ TypedValue* tg_7SQLite3_close(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::close");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -288,7 +277,6 @@ bool th_7SQLite3_exec(ObjectData* this_, Value* sql) asm("_ZN4HPHP9c_SQLite36t_e
 TypedValue* tg1_7SQLite3_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_7SQLite3_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_7SQLite3_exec((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -303,7 +291,6 @@ TypedValue* tg_7SQLite3_exec(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_7SQLite3_exec((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -322,7 +309,6 @@ TypedValue* tg_7SQLite3_exec(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::exec");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -348,7 +334,6 @@ TypedValue* tg_7SQLite3_version(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         th_7SQLite3_version((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -362,7 +347,6 @@ TypedValue* tg_7SQLite3_version(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::version");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -387,7 +371,6 @@ TypedValue* tg_7SQLite3_lastinsertrowid(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_7SQLite3_lastinsertrowid((this_));
         frame_free_locals_inl(ar, 0);
@@ -400,7 +383,6 @@ TypedValue* tg_7SQLite3_lastinsertrowid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::lastinsertrowid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -425,7 +407,6 @@ TypedValue* tg_7SQLite3_lasterrorcode(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_7SQLite3_lasterrorcode((this_));
         frame_free_locals_inl(ar, 0);
@@ -438,7 +419,6 @@ TypedValue* tg_7SQLite3_lasterrorcode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::lasterrorcode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -464,7 +444,6 @@ TypedValue* tg_7SQLite3_lasterrormsg(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_7SQLite3_lasterrormsg((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -478,7 +457,6 @@ TypedValue* tg_7SQLite3_lasterrormsg(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::lasterrormsg");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -500,7 +478,6 @@ bool th_7SQLite3_loadextension(ObjectData* this_, Value* extension) asm("_ZN4HPH
 TypedValue* tg1_7SQLite3_loadextension(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_7SQLite3_loadextension(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_7SQLite3_loadextension((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -515,7 +492,6 @@ TypedValue* tg_7SQLite3_loadextension(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_7SQLite3_loadextension((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -534,7 +510,6 @@ TypedValue* tg_7SQLite3_loadextension(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::loadextension");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -559,7 +534,6 @@ TypedValue* tg_7SQLite3_changes(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_7SQLite3_changes((this_));
         frame_free_locals_inl(ar, 0);
@@ -572,7 +546,6 @@ TypedValue* tg_7SQLite3_changes(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::changes");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -595,7 +568,6 @@ Value* th_7SQLite3_escapestring(Value* _rv, ObjectData* this_, Value* sql) asm("
 TypedValue* tg1_7SQLite3_escapestring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_7SQLite3_escapestring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
   th_7SQLite3_escapestring((Value*)(rv), (this_), (Value*)(args-0));
@@ -611,7 +583,6 @@ TypedValue* tg_7SQLite3_escapestring(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_7SQLite3_escapestring((Value*)(&(rv)), (this_), (Value*)(args-0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -631,7 +602,6 @@ TypedValue* tg_7SQLite3_escapestring(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::escapestring");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -686,7 +656,6 @@ TypedValue* tg_7SQLite3_prepare(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::prepare");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -741,7 +710,6 @@ TypedValue* tg_7SQLite3_query(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::query");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -807,7 +775,6 @@ TypedValue* tg_7SQLite3_querysingle(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::querysingle");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -831,7 +798,6 @@ bool th_7SQLite3_createfunction(ObjectData* this_, Value* name, TypedValue* call
 TypedValue* tg1_7SQLite3_createfunction(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_7SQLite3_createfunction(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -856,7 +822,6 @@ TypedValue* tg_7SQLite3_createfunction(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_7SQLite3_createfunction((this_), (Value*)(args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -875,7 +840,6 @@ TypedValue* tg_7SQLite3_createfunction(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::createfunction");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -900,7 +864,6 @@ bool th_7SQLite3_createaggregate(ObjectData* this_, Value* name, TypedValue* ste
 TypedValue* tg1_7SQLite3_createaggregate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_7SQLite3_createaggregate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -925,7 +888,6 @@ TypedValue* tg_7SQLite3_createaggregate(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 3LL && count <= 4LL) {
         if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_7SQLite3_createaggregate((this_), (Value*)(args-0), (args-1), (args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 4);
@@ -944,7 +906,6 @@ TypedValue* tg_7SQLite3_createaggregate(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::createaggregate");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -969,7 +930,6 @@ bool th_7SQLite3_openblob(ObjectData* this_, Value* table, Value* column, long r
 TypedValue* tg1_7SQLite3_openblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_7SQLite3_openblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -1000,7 +960,6 @@ TypedValue* tg_7SQLite3_openblob(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 3LL && count <= 4LL) {
         if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_7SQLite3_openblob((this_), (Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 4);
@@ -1019,7 +978,6 @@ TypedValue* tg_7SQLite3_openblob(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3::openblob");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1052,7 +1010,6 @@ TypedValue* tg1_11SQLite3Stmt___construct(TypedValue* rv, HPHP::VM::ActRec* ar, 
 TypedValue* tg1_11SQLite3Stmt___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1073,7 +1030,6 @@ TypedValue* tg_11SQLite3Stmt___construct(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_11SQLite3Stmt___construct((this_), (Value*)(args-0), (Value*)(args-1));
           frame_free_locals_inl(ar, 2);
@@ -1092,7 +1048,6 @@ TypedValue* tg_11SQLite3Stmt___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Stmt::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1117,7 +1072,6 @@ TypedValue* tg_11SQLite3Stmt_paramcount(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_11SQLite3Stmt_paramcount((this_));
         frame_free_locals_inl(ar, 0);
@@ -1130,7 +1084,6 @@ TypedValue* tg_11SQLite3Stmt_paramcount(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Stmt::paramcount");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1155,7 +1108,6 @@ TypedValue* tg_11SQLite3Stmt_close(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_11SQLite3Stmt_close((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -1168,7 +1120,6 @@ TypedValue* tg_11SQLite3Stmt_close(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Stmt::close");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1193,7 +1144,6 @@ TypedValue* tg_11SQLite3Stmt_reset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_11SQLite3Stmt_reset((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -1206,7 +1156,6 @@ TypedValue* tg_11SQLite3Stmt_reset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Stmt::reset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1231,7 +1180,6 @@ TypedValue* tg_11SQLite3Stmt_clear(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_11SQLite3Stmt_clear((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -1244,7 +1192,6 @@ TypedValue* tg_11SQLite3Stmt_clear(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Stmt::clear");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1268,7 +1215,6 @@ bool th_11SQLite3Stmt_bindparam(ObjectData* this_, TypedValue* name, TypedValue*
 TypedValue* tg1_11SQLite3Stmt_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_11SQLite3Stmt_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-2);
   rv->m_data.num = (th_11SQLite3Stmt_bindparam((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(k_SQLITE3_TEXT))) ? 1LL : 0LL;
@@ -1283,7 +1229,6 @@ TypedValue* tg_11SQLite3Stmt_bindparam(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_11SQLite3Stmt_bindparam((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(k_SQLITE3_TEXT))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -1302,7 +1247,6 @@ TypedValue* tg_11SQLite3Stmt_bindparam(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Stmt::bindparam");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1326,7 +1270,6 @@ bool th_11SQLite3Stmt_bindvalue(ObjectData* this_, TypedValue* name, TypedValue*
 TypedValue* tg1_11SQLite3Stmt_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_11SQLite3Stmt_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-2);
   rv->m_data.num = (th_11SQLite3Stmt_bindvalue((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(k_SQLITE3_TEXT))) ? 1LL : 0LL;
@@ -1341,7 +1284,6 @@ TypedValue* tg_11SQLite3Stmt_bindvalue(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_11SQLite3Stmt_bindvalue((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(k_SQLITE3_TEXT))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -1360,7 +1302,6 @@ TypedValue* tg_11SQLite3Stmt_bindvalue(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Stmt::bindvalue");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1398,7 +1339,6 @@ TypedValue* tg_11SQLite3Stmt_execute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Stmt::execute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1433,7 +1373,6 @@ TypedValue* tg_13SQLite3Result___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_13SQLite3Result___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -1446,7 +1385,6 @@ TypedValue* tg_13SQLite3Result___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Result::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1471,7 +1409,6 @@ TypedValue* tg_13SQLite3Result_numcolumns(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_13SQLite3Result_numcolumns((this_));
         frame_free_locals_inl(ar, 0);
@@ -1484,7 +1421,6 @@ TypedValue* tg_13SQLite3Result_numcolumns(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Result::numcolumns");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1507,7 +1443,6 @@ Value* th_13SQLite3Result_columnname(Value* _rv, ObjectData* this_, long column)
 TypedValue* tg1_13SQLite3Result_columnname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_13SQLite3Result_columnname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
   th_13SQLite3Result_columnname((Value*)(rv), (this_), (long)(args[-0].m_data.num));
@@ -1523,7 +1458,6 @@ TypedValue* tg_13SQLite3Result_columnname(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_13SQLite3Result_columnname((Value*)(&(rv)), (this_), (long)(args[-0].m_data.num));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1543,7 +1477,6 @@ TypedValue* tg_13SQLite3Result_columnname(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Result::columnname");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1565,7 +1498,6 @@ long th_13SQLite3Result_columntype(ObjectData* this_, long column) asm("_ZN4HPHP
 TypedValue* tg1_13SQLite3Result_columntype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_13SQLite3Result_columntype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (int64_t)th_13SQLite3Result_columntype((this_), (long)(args[-0].m_data.num));
@@ -1580,7 +1512,6 @@ TypedValue* tg_13SQLite3Result_columntype(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfInt64;
           rv.m_data.num = (int64_t)th_13SQLite3Result_columntype((this_), (long)(args[-0].m_data.num));
           frame_free_locals_inl(ar, 1);
@@ -1599,7 +1530,6 @@ TypedValue* tg_13SQLite3Result_columntype(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Result::columntype");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1654,7 +1584,6 @@ TypedValue* tg_13SQLite3Result_fetcharray(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Result::fetcharray");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1679,7 +1608,6 @@ TypedValue* tg_13SQLite3Result_reset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_13SQLite3Result_reset((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -1692,7 +1620,6 @@ TypedValue* tg_13SQLite3Result_reset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Result::reset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1717,7 +1644,6 @@ TypedValue* tg_13SQLite3Result_finalize(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_13SQLite3Result_finalize((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -1730,7 +1656,6 @@ TypedValue* tg_13SQLite3Result_finalize(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SQLite3Result::finalize");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

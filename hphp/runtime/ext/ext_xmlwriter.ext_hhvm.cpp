@@ -48,7 +48,6 @@ TypedValue* fg_xmlwriter_open_memory(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("xmlwriter_open_memory", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -72,7 +71,6 @@ Value* fh_xmlwriter_open_uri(Value* _rv, Value* uri) asm("_ZN4HPHP20f_xmlwriter_
 TypedValue * fg1_xmlwriter_open_uri(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_open_uri(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
   fh_xmlwriter_open_uri((Value*)(rv), (Value*)(args-0));
@@ -86,7 +84,6 @@ TypedValue* fg_xmlwriter_open_uri(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_xmlwriter_open_uri((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -103,7 +100,6 @@ TypedValue* fg_xmlwriter_open_uri(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_open_uri", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -127,7 +123,6 @@ bool fh_xmlwriter_set_indent_string(Value* xmlwriter, Value* indentstring) asm("
 TypedValue * fg1_xmlwriter_set_indent_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_set_indent_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -145,7 +140,6 @@ TypedValue* fg_xmlwriter_set_indent_string(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_set_indent_string((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -161,7 +155,6 @@ TypedValue* fg_xmlwriter_set_indent_string(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_set_indent_string", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -185,7 +178,6 @@ bool fh_xmlwriter_set_indent(Value* xmlwriter, bool indent) asm("_ZN4HPHP22f_xml
 TypedValue * fg1_xmlwriter_set_indent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_set_indent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-1);
@@ -203,7 +195,6 @@ TypedValue* fg_xmlwriter_set_indent(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfBoolean && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_set_indent((Value*)(args-0), (bool)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -219,7 +210,6 @@ TypedValue* fg_xmlwriter_set_indent(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_set_indent", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -245,7 +235,6 @@ bool fh_xmlwriter_start_document(Value* xmlwriter, Value* version, Value* encodi
 TypedValue * fg1_xmlwriter_start_document(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_document(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -277,7 +266,6 @@ TypedValue* fg_xmlwriter_start_document(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         String defVal1 = "1.0";
         rv.m_data.num = (fh_xmlwriter_start_document((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string))) ? 1LL : 0LL;
@@ -294,7 +282,6 @@ TypedValue* fg_xmlwriter_start_document(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_document", count, 1, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -318,7 +305,6 @@ bool fh_xmlwriter_start_element(Value* xmlwriter, Value* name) asm("_ZN4HPHP25f_
 TypedValue * fg1_xmlwriter_start_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -336,7 +322,6 @@ TypedValue* fg_xmlwriter_start_element(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_start_element((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -352,7 +337,6 @@ TypedValue* fg_xmlwriter_start_element(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_element", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -378,7 +362,6 @@ bool fh_xmlwriter_start_element_ns(Value* xmlwriter, Value* prefix, Value* name,
 TypedValue * fg1_xmlwriter_start_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -402,7 +385,6 @@ TypedValue* fg_xmlwriter_start_element_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_start_element_ns((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -418,7 +400,6 @@ TypedValue* fg_xmlwriter_start_element_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_element_ns", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -445,7 +426,6 @@ bool fh_xmlwriter_write_element_ns(Value* xmlwriter, Value* prefix, Value* name,
 TypedValue * fg1_xmlwriter_write_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 5
@@ -477,7 +457,6 @@ TypedValue* fg_xmlwriter_write_element_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_element_ns((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -493,7 +472,6 @@ TypedValue* fg_xmlwriter_write_element_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_element_ns", count, 4, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -518,7 +496,6 @@ bool fh_xmlwriter_write_element(Value* xmlwriter, Value* name, Value* content) a
 TypedValue * fg1_xmlwriter_write_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -544,7 +521,6 @@ TypedValue* fg_xmlwriter_write_element(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_element((Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -560,7 +536,6 @@ TypedValue* fg_xmlwriter_write_element(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_element", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -583,7 +558,6 @@ bool fh_xmlwriter_end_element(Value* xmlwriter) asm("_ZN4HPHP23f_xmlwriter_end_e
 TypedValue * fg1_xmlwriter_end_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_end_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_end_element((Value*)(args-0))) ? 1LL : 0LL;
@@ -596,7 +570,6 @@ TypedValue* fg_xmlwriter_end_element(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_end_element((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -612,7 +585,6 @@ TypedValue* fg_xmlwriter_end_element(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_end_element", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -635,7 +607,6 @@ bool fh_xmlwriter_full_end_element(Value* xmlwriter) asm("_ZN4HPHP28f_xmlwriter_
 TypedValue * fg1_xmlwriter_full_end_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_full_end_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_full_end_element((Value*)(args-0))) ? 1LL : 0LL;
@@ -648,7 +619,6 @@ TypedValue* fg_xmlwriter_full_end_element(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_full_end_element((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -664,7 +634,6 @@ TypedValue* fg_xmlwriter_full_end_element(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_full_end_element", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -690,7 +659,6 @@ bool fh_xmlwriter_start_attribute_ns(Value* xmlwriter, Value* prefix, Value* nam
 TypedValue * fg1_xmlwriter_start_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -714,7 +682,6 @@ TypedValue* fg_xmlwriter_start_attribute_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_start_attribute_ns((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -730,7 +697,6 @@ TypedValue* fg_xmlwriter_start_attribute_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_attribute_ns", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -754,7 +720,6 @@ bool fh_xmlwriter_start_attribute(Value* xmlwriter, Value* name) asm("_ZN4HPHP27
 TypedValue * fg1_xmlwriter_start_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -772,7 +737,6 @@ TypedValue* fg_xmlwriter_start_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_start_attribute((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -788,7 +752,6 @@ TypedValue* fg_xmlwriter_start_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_attribute", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -815,7 +778,6 @@ bool fh_xmlwriter_write_attribute_ns(Value* xmlwriter, Value* prefix, Value* nam
 TypedValue * fg1_xmlwriter_write_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-4)->m_type)) {
     tvCastToStringInPlace(args-4);
@@ -842,7 +804,6 @@ TypedValue* fg_xmlwriter_write_attribute_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if (IS_STRING_TYPE((args-4)->m_type) && IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_attribute_ns((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (Value*)(args-4))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -858,7 +819,6 @@ TypedValue* fg_xmlwriter_write_attribute_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_attribute_ns", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -883,7 +843,6 @@ bool fh_xmlwriter_write_attribute(Value* xmlwriter, Value* name, Value* value) a
 TypedValue * fg1_xmlwriter_write_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -904,7 +863,6 @@ TypedValue* fg_xmlwriter_write_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_attribute((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -920,7 +878,6 @@ TypedValue* fg_xmlwriter_write_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_attribute", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -943,7 +900,6 @@ bool fh_xmlwriter_end_attribute(Value* xmlwriter) asm("_ZN4HPHP25f_xmlwriter_end
 TypedValue * fg1_xmlwriter_end_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_end_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_end_attribute((Value*)(args-0))) ? 1LL : 0LL;
@@ -956,7 +912,6 @@ TypedValue* fg_xmlwriter_end_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_end_attribute((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -972,7 +927,6 @@ TypedValue* fg_xmlwriter_end_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_end_attribute", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -995,7 +949,6 @@ bool fh_xmlwriter_start_cdata(Value* xmlwriter) asm("_ZN4HPHP23f_xmlwriter_start
 TypedValue * fg1_xmlwriter_start_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_start_cdata((Value*)(args-0))) ? 1LL : 0LL;
@@ -1008,7 +961,6 @@ TypedValue* fg_xmlwriter_start_cdata(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_start_cdata((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1024,7 +976,6 @@ TypedValue* fg_xmlwriter_start_cdata(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_cdata", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1048,7 +999,6 @@ bool fh_xmlwriter_write_cdata(Value* xmlwriter, Value* content) asm("_ZN4HPHP23f
 TypedValue * fg1_xmlwriter_write_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1066,7 +1016,6 @@ TypedValue* fg_xmlwriter_write_cdata(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_cdata((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1082,7 +1031,6 @@ TypedValue* fg_xmlwriter_write_cdata(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_cdata", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1105,7 +1053,6 @@ bool fh_xmlwriter_end_cdata(Value* xmlwriter) asm("_ZN4HPHP21f_xmlwriter_end_cda
 TypedValue * fg1_xmlwriter_end_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_end_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_end_cdata((Value*)(args-0))) ? 1LL : 0LL;
@@ -1118,7 +1065,6 @@ TypedValue* fg_xmlwriter_end_cdata(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_end_cdata((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1134,7 +1080,6 @@ TypedValue* fg_xmlwriter_end_cdata(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_end_cdata", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1157,7 +1102,6 @@ bool fh_xmlwriter_start_comment(Value* xmlwriter) asm("_ZN4HPHP25f_xmlwriter_sta
 TypedValue * fg1_xmlwriter_start_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_start_comment((Value*)(args-0))) ? 1LL : 0LL;
@@ -1170,7 +1114,6 @@ TypedValue* fg_xmlwriter_start_comment(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_start_comment((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1186,7 +1129,6 @@ TypedValue* fg_xmlwriter_start_comment(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_comment", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1210,7 +1152,6 @@ bool fh_xmlwriter_write_comment(Value* xmlwriter, Value* content) asm("_ZN4HPHP2
 TypedValue * fg1_xmlwriter_write_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1228,7 +1169,6 @@ TypedValue* fg_xmlwriter_write_comment(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_comment((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1244,7 +1184,6 @@ TypedValue* fg_xmlwriter_write_comment(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_comment", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1267,7 +1206,6 @@ bool fh_xmlwriter_end_comment(Value* xmlwriter) asm("_ZN4HPHP23f_xmlwriter_end_c
 TypedValue * fg1_xmlwriter_end_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_end_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_end_comment((Value*)(args-0))) ? 1LL : 0LL;
@@ -1280,7 +1218,6 @@ TypedValue* fg_xmlwriter_end_comment(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_end_comment((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1296,7 +1233,6 @@ TypedValue* fg_xmlwriter_end_comment(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_end_comment", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1319,7 +1255,6 @@ bool fh_xmlwriter_end_document(Value* xmlwriter) asm("_ZN4HPHP24f_xmlwriter_end_
 TypedValue * fg1_xmlwriter_end_document(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_end_document(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_end_document((Value*)(args-0))) ? 1LL : 0LL;
@@ -1332,7 +1267,6 @@ TypedValue* fg_xmlwriter_end_document(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_end_document((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1348,7 +1282,6 @@ TypedValue* fg_xmlwriter_end_document(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_end_document", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1372,7 +1305,6 @@ bool fh_xmlwriter_start_pi(Value* xmlwriter, Value* target) asm("_ZN4HPHP20f_xml
 TypedValue * fg1_xmlwriter_start_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1390,7 +1322,6 @@ TypedValue* fg_xmlwriter_start_pi(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_start_pi((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1406,7 +1337,6 @@ TypedValue* fg_xmlwriter_start_pi(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_pi", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1431,7 +1361,6 @@ bool fh_xmlwriter_write_pi(Value* xmlwriter, Value* target, Value* content) asm(
 TypedValue * fg1_xmlwriter_write_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -1452,7 +1381,6 @@ TypedValue* fg_xmlwriter_write_pi(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_pi((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -1468,7 +1396,6 @@ TypedValue* fg_xmlwriter_write_pi(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_pi", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1491,7 +1418,6 @@ bool fh_xmlwriter_end_pi(Value* xmlwriter) asm("_ZN4HPHP18f_xmlwriter_end_piERKN
 TypedValue * fg1_xmlwriter_end_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_end_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_end_pi((Value*)(args-0))) ? 1LL : 0LL;
@@ -1504,7 +1430,6 @@ TypedValue* fg_xmlwriter_end_pi(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_end_pi((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1520,7 +1445,6 @@ TypedValue* fg_xmlwriter_end_pi(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_end_pi", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1544,7 +1468,6 @@ bool fh_xmlwriter_text(Value* xmlwriter, Value* content) asm("_ZN4HPHP16f_xmlwri
 TypedValue * fg1_xmlwriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1562,7 +1485,6 @@ TypedValue* fg_xmlwriter_text(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_text((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1578,7 +1500,6 @@ TypedValue* fg_xmlwriter_text(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_text", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1602,7 +1523,6 @@ bool fh_xmlwriter_write_raw(Value* xmlwriter, Value* content) asm("_ZN4HPHP21f_x
 TypedValue * fg1_xmlwriter_write_raw(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_raw(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1620,7 +1540,6 @@ TypedValue* fg_xmlwriter_write_raw(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_raw((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1636,7 +1555,6 @@ TypedValue* fg_xmlwriter_write_raw(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_raw", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1662,7 +1580,6 @@ bool fh_xmlwriter_start_dtd(Value* xmlwriter, Value* qualifiedname, Value* publi
 TypedValue * fg1_xmlwriter_start_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -1692,7 +1609,6 @@ TypedValue* fg_xmlwriter_start_dtd(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_start_dtd((Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -1708,7 +1624,6 @@ TypedValue* fg_xmlwriter_start_dtd(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_dtd", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1735,7 +1650,6 @@ bool fh_xmlwriter_write_dtd(Value* xmlwriter, Value* name, Value* publicid, Valu
 TypedValue * fg1_xmlwriter_write_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 5
@@ -1769,7 +1683,6 @@ TypedValue* fg_xmlwriter_write_dtd(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 5LL) {
       if ((count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && (count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_dtd((Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -1785,7 +1698,6 @@ TypedValue* fg_xmlwriter_write_dtd(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_dtd", count, 2, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1809,7 +1721,6 @@ bool fh_xmlwriter_start_dtd_element(Value* xmlwriter, Value* qualifiedname) asm(
 TypedValue * fg1_xmlwriter_start_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1827,7 +1738,6 @@ TypedValue* fg_xmlwriter_start_dtd_element(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_start_dtd_element((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1843,7 +1753,6 @@ TypedValue* fg_xmlwriter_start_dtd_element(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_dtd_element", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1868,7 +1777,6 @@ bool fh_xmlwriter_write_dtd_element(Value* xmlwriter, Value* name, Value* conten
 TypedValue * fg1_xmlwriter_write_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -1889,7 +1797,6 @@ TypedValue* fg_xmlwriter_write_dtd_element(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_dtd_element((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -1905,7 +1812,6 @@ TypedValue* fg_xmlwriter_write_dtd_element(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_dtd_element", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1928,7 +1834,6 @@ bool fh_xmlwriter_end_dtd_element(Value* xmlwriter) asm("_ZN4HPHP27f_xmlwriter_e
 TypedValue * fg1_xmlwriter_end_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_end_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_end_dtd_element((Value*)(args-0))) ? 1LL : 0LL;
@@ -1941,7 +1846,6 @@ TypedValue* fg_xmlwriter_end_dtd_element(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_end_dtd_element((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1957,7 +1861,6 @@ TypedValue* fg_xmlwriter_end_dtd_element(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_end_dtd_element", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1981,7 +1884,6 @@ bool fh_xmlwriter_start_dtd_attlist(Value* xmlwriter, Value* name) asm("_ZN4HPHP
 TypedValue * fg1_xmlwriter_start_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1999,7 +1901,6 @@ TypedValue* fg_xmlwriter_start_dtd_attlist(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_start_dtd_attlist((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -2015,7 +1916,6 @@ TypedValue* fg_xmlwriter_start_dtd_attlist(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_dtd_attlist", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2040,7 +1940,6 @@ bool fh_xmlwriter_write_dtd_attlist(Value* xmlwriter, Value* name, Value* conten
 TypedValue * fg1_xmlwriter_write_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -2061,7 +1960,6 @@ TypedValue* fg_xmlwriter_write_dtd_attlist(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_dtd_attlist((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -2077,7 +1975,6 @@ TypedValue* fg_xmlwriter_write_dtd_attlist(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_dtd_attlist", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2100,7 +1997,6 @@ bool fh_xmlwriter_end_dtd_attlist(Value* xmlwriter) asm("_ZN4HPHP27f_xmlwriter_e
 TypedValue * fg1_xmlwriter_end_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_end_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_end_dtd_attlist((Value*)(args-0))) ? 1LL : 0LL;
@@ -2113,7 +2009,6 @@ TypedValue* fg_xmlwriter_end_dtd_attlist(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_end_dtd_attlist((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -2129,7 +2024,6 @@ TypedValue* fg_xmlwriter_end_dtd_attlist(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_end_dtd_attlist", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2154,7 +2048,6 @@ bool fh_xmlwriter_start_dtd_entity(Value* xmlwriter, Value* name, bool isparam) 
 TypedValue * fg1_xmlwriter_start_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_start_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-2);
@@ -2175,7 +2068,6 @@ TypedValue* fg_xmlwriter_start_dtd_entity(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfBoolean && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_start_dtd_entity((Value*)(args-0), (Value*)(args-1), (bool)(args[-2].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -2191,7 +2083,6 @@ TypedValue* fg_xmlwriter_start_dtd_entity(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_start_dtd_entity", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2220,7 +2111,6 @@ bool fh_xmlwriter_write_dtd_entity(Value* xmlwriter, Value* name, Value* content
 TypedValue * fg1_xmlwriter_write_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_write_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 7
@@ -2261,7 +2151,6 @@ TypedValue* fg_xmlwriter_write_dtd_entity(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 7LL) {
       if ((count <= 6 || IS_STRING_TYPE((args-6)->m_type)) && (count <= 5 || IS_STRING_TYPE((args-5)->m_type)) && (count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && (count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_write_dtd_entity((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string), (count > 5) ? (Value*)(args-5) : (Value*)(&null_string), (count > 6) ? (Value*)(args-6) : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 7);
@@ -2277,7 +2166,6 @@ TypedValue* fg_xmlwriter_write_dtd_entity(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_write_dtd_entity", count, 3, 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2300,7 +2188,6 @@ bool fh_xmlwriter_end_dtd_entity(Value* xmlwriter) asm("_ZN4HPHP26f_xmlwriter_en
 TypedValue * fg1_xmlwriter_end_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_end_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_end_dtd_entity((Value*)(args-0))) ? 1LL : 0LL;
@@ -2313,7 +2200,6 @@ TypedValue* fg_xmlwriter_end_dtd_entity(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_end_dtd_entity((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -2329,7 +2215,6 @@ TypedValue* fg_xmlwriter_end_dtd_entity(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_end_dtd_entity", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2352,7 +2237,6 @@ bool fh_xmlwriter_end_dtd(Value* xmlwriter) asm("_ZN4HPHP19f_xmlwriter_end_dtdER
 TypedValue * fg1_xmlwriter_end_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_end_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_xmlwriter_end_dtd((Value*)(args-0))) ? 1LL : 0LL;
@@ -2365,7 +2249,6 @@ TypedValue* fg_xmlwriter_end_dtd(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_xmlwriter_end_dtd((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -2381,7 +2264,6 @@ TypedValue* fg_xmlwriter_end_dtd(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_end_dtd", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2443,7 +2325,6 @@ TypedValue* fg_xmlwriter_flush(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_flush", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2468,7 +2349,6 @@ Value* fh_xmlwriter_output_memory(Value* _rv, Value* xmlwriter, bool flush) asm(
 TypedValue * fg1_xmlwriter_output_memory(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_xmlwriter_output_memory(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   switch (count) {
   default: // count >= 2
@@ -2492,7 +2372,6 @@ TypedValue* fg_xmlwriter_output_memory(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_xmlwriter_output_memory((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2509,7 +2388,6 @@ TypedValue* fg_xmlwriter_output_memory(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("xmlwriter_output_memory", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2546,7 +2424,6 @@ TypedValue* tg_9XMLWriter___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_9XMLWriter___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -2559,7 +2436,6 @@ TypedValue* tg_9XMLWriter___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2584,7 +2460,6 @@ TypedValue* tg_9XMLWriter_openMemory(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_openMemory((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -2597,7 +2472,6 @@ TypedValue* tg_9XMLWriter_openMemory(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::openMemory");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2619,7 +2493,6 @@ bool th_9XMLWriter_openURI(ObjectData* this_, Value* uri) asm("_ZN4HPHP11c_XMLWr
 TypedValue* tg1_9XMLWriter_openURI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_openURI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_openURI((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -2634,7 +2507,6 @@ TypedValue* tg_9XMLWriter_openURI(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_openURI((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -2653,7 +2525,6 @@ TypedValue* tg_9XMLWriter_openURI(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::openURI");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2675,7 +2546,6 @@ bool th_9XMLWriter_setIndentString(ObjectData* this_, Value* indentstring) asm("
 TypedValue* tg1_9XMLWriter_setIndentString(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_setIndentString(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_setIndentString((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -2690,7 +2560,6 @@ TypedValue* tg_9XMLWriter_setIndentString(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_setIndentString((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -2709,7 +2578,6 @@ TypedValue* tg_9XMLWriter_setIndentString(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::setIndentString");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2731,7 +2599,6 @@ bool th_9XMLWriter_setIndent(ObjectData* this_, bool indent) asm("_ZN4HPHP11c_XM
 TypedValue* tg1_9XMLWriter_setIndent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_setIndent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_setIndent((this_), (bool)(args[-0].m_data.num))) ? 1LL : 0LL;
@@ -2746,7 +2613,6 @@ TypedValue* tg_9XMLWriter_setIndent(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfBoolean) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_setIndent((this_), (bool)(args[-0].m_data.num))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -2765,7 +2631,6 @@ TypedValue* tg_9XMLWriter_setIndent(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::setIndent");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2789,7 +2654,6 @@ bool th_9XMLWriter_startDocument(ObjectData* this_, Value* version, Value* encod
 TypedValue* tg1_9XMLWriter_startDocument(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_startDocument(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -2820,7 +2684,6 @@ TypedValue* tg_9XMLWriter_startDocument(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 3LL) {
         if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           String defVal0 = "1.0";
           rv.m_data.num = (th_9XMLWriter_startDocument((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&defVal0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string))) ? 1LL : 0LL;
@@ -2840,7 +2703,6 @@ TypedValue* tg_9XMLWriter_startDocument(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startDocument");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2862,7 +2724,6 @@ bool th_9XMLWriter_startElement(ObjectData* this_, Value* name) asm("_ZN4HPHP11c
 TypedValue* tg1_9XMLWriter_startElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_startElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_startElement((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -2877,7 +2738,6 @@ TypedValue* tg_9XMLWriter_startElement(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_startElement((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -2896,7 +2756,6 @@ TypedValue* tg_9XMLWriter_startElement(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startElement");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2920,7 +2779,6 @@ bool th_9XMLWriter_startElementNS(ObjectData* this_, Value* prefix, Value* name,
 TypedValue* tg1_9XMLWriter_startElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_startElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -2943,7 +2801,6 @@ TypedValue* tg_9XMLWriter_startElementNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 3LL) {
         if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_startElementNS((this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -2962,7 +2819,6 @@ TypedValue* tg_9XMLWriter_startElementNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startElementNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2987,7 +2843,6 @@ bool th_9XMLWriter_writeElementNS(ObjectData* this_, Value* prefix, Value* name,
 TypedValue* tg1_9XMLWriter_writeElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writeElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -3018,7 +2873,6 @@ TypedValue* tg_9XMLWriter_writeElementNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 3LL && count <= 4LL) {
         if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writeElementNS((this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 4);
@@ -3037,7 +2891,6 @@ TypedValue* tg_9XMLWriter_writeElementNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writeElementNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3060,7 +2913,6 @@ bool th_9XMLWriter_writeElement(ObjectData* this_, Value* name, Value* content) 
 TypedValue* tg1_9XMLWriter_writeElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writeElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 2
@@ -3085,7 +2937,6 @@ TypedValue* tg_9XMLWriter_writeElement(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writeElement((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -3104,7 +2955,6 @@ TypedValue* tg_9XMLWriter_writeElement(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writeElement");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3129,7 +2979,6 @@ TypedValue* tg_9XMLWriter_endElement(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_endElement((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -3142,7 +2991,6 @@ TypedValue* tg_9XMLWriter_endElement(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::endElement");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3167,7 +3015,6 @@ TypedValue* tg_9XMLWriter_fullEndElement(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_fullEndElement((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -3180,7 +3027,6 @@ TypedValue* tg_9XMLWriter_fullEndElement(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::fullEndElement");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3204,7 +3050,6 @@ bool th_9XMLWriter_startAttributens(ObjectData* this_, Value* prefix, Value* nam
 TypedValue* tg1_9XMLWriter_startAttributens(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_startAttributens(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -3227,7 +3072,6 @@ TypedValue* tg_9XMLWriter_startAttributens(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 3LL) {
         if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_startAttributens((this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -3246,7 +3090,6 @@ TypedValue* tg_9XMLWriter_startAttributens(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startAttributens");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3268,7 +3111,6 @@ bool th_9XMLWriter_startAttribute(ObjectData* this_, Value* name) asm("_ZN4HPHP1
 TypedValue* tg1_9XMLWriter_startAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_startAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_startAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -3283,7 +3125,6 @@ TypedValue* tg_9XMLWriter_startAttribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_startAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -3302,7 +3143,6 @@ TypedValue* tg_9XMLWriter_startAttribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startAttribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3327,7 +3167,6 @@ bool th_9XMLWriter_writeAttributeNS(ObjectData* this_, Value* prefix, Value* nam
 TypedValue* tg1_9XMLWriter_writeAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writeAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -3353,7 +3192,6 @@ TypedValue* tg_9XMLWriter_writeAttributeNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 4LL) {
         if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writeAttributeNS((this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 4);
@@ -3372,7 +3210,6 @@ TypedValue* tg_9XMLWriter_writeAttributeNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writeAttributeNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3395,7 +3232,6 @@ bool th_9XMLWriter_writeAttribute(ObjectData* this_, Value* name, Value* value) 
 TypedValue* tg1_9XMLWriter_writeAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writeAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -3415,7 +3251,6 @@ TypedValue* tg_9XMLWriter_writeAttribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writeAttribute((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -3434,7 +3269,6 @@ TypedValue* tg_9XMLWriter_writeAttribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writeAttribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3459,7 +3293,6 @@ TypedValue* tg_9XMLWriter_endAttribute(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_endAttribute((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -3472,7 +3305,6 @@ TypedValue* tg_9XMLWriter_endAttribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::endAttribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3497,7 +3329,6 @@ TypedValue* tg_9XMLWriter_startCData(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_startCData((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -3510,7 +3341,6 @@ TypedValue* tg_9XMLWriter_startCData(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startCData");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3532,7 +3362,6 @@ bool th_9XMLWriter_writeCData(ObjectData* this_, Value* content) asm("_ZN4HPHP11
 TypedValue* tg1_9XMLWriter_writeCData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writeCData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_writeCData((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -3547,7 +3376,6 @@ TypedValue* tg_9XMLWriter_writeCData(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writeCData((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -3566,7 +3394,6 @@ TypedValue* tg_9XMLWriter_writeCData(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writeCData");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3591,7 +3418,6 @@ TypedValue* tg_9XMLWriter_endCData(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_endCData((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -3604,7 +3430,6 @@ TypedValue* tg_9XMLWriter_endCData(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::endCData");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3629,7 +3454,6 @@ TypedValue* tg_9XMLWriter_startComment(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_startComment((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -3642,7 +3466,6 @@ TypedValue* tg_9XMLWriter_startComment(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startComment");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3664,7 +3487,6 @@ bool th_9XMLWriter_writeComment(ObjectData* this_, Value* content) asm("_ZN4HPHP
 TypedValue* tg1_9XMLWriter_writeComment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writeComment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_writeComment((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -3679,7 +3501,6 @@ TypedValue* tg_9XMLWriter_writeComment(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writeComment((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -3698,7 +3519,6 @@ TypedValue* tg_9XMLWriter_writeComment(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writeComment");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3723,7 +3543,6 @@ TypedValue* tg_9XMLWriter_endComment(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_endComment((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -3736,7 +3555,6 @@ TypedValue* tg_9XMLWriter_endComment(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::endComment");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3761,7 +3579,6 @@ TypedValue* tg_9XMLWriter_endDocument(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_endDocument((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -3774,7 +3591,6 @@ TypedValue* tg_9XMLWriter_endDocument(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::endDocument");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3796,7 +3612,6 @@ bool th_9XMLWriter_startPI(ObjectData* this_, Value* target) asm("_ZN4HPHP11c_XM
 TypedValue* tg1_9XMLWriter_startPI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_startPI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_startPI((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -3811,7 +3626,6 @@ TypedValue* tg_9XMLWriter_startPI(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_startPI((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -3830,7 +3644,6 @@ TypedValue* tg_9XMLWriter_startPI(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startPI");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3853,7 +3666,6 @@ bool th_9XMLWriter_writePI(ObjectData* this_, Value* target, Value* content) asm
 TypedValue* tg1_9XMLWriter_writePI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writePI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -3873,7 +3685,6 @@ TypedValue* tg_9XMLWriter_writePI(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writePI((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -3892,7 +3703,6 @@ TypedValue* tg_9XMLWriter_writePI(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writePI");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3917,7 +3727,6 @@ TypedValue* tg_9XMLWriter_endPI(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_endPI((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -3930,7 +3739,6 @@ TypedValue* tg_9XMLWriter_endPI(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::endPI");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3952,7 +3760,6 @@ bool th_9XMLWriter_text(ObjectData* this_, Value* content) asm("_ZN4HPHP11c_XMLW
 TypedValue* tg1_9XMLWriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_text((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -3967,7 +3774,6 @@ TypedValue* tg_9XMLWriter_text(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_text((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -3986,7 +3792,6 @@ TypedValue* tg_9XMLWriter_text(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::text");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4008,7 +3813,6 @@ bool th_9XMLWriter_writeRaw(ObjectData* this_, Value* content) asm("_ZN4HPHP11c_
 TypedValue* tg1_9XMLWriter_writeRaw(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writeRaw(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_writeRaw((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -4023,7 +3827,6 @@ TypedValue* tg_9XMLWriter_writeRaw(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writeRaw((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -4042,7 +3845,6 @@ TypedValue* tg_9XMLWriter_writeRaw(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writeRaw");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4066,7 +3868,6 @@ bool th_9XMLWriter_startDTD(ObjectData* this_, Value* qualifiedname, Value* publ
 TypedValue* tg1_9XMLWriter_startDTD(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_startDTD(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -4095,7 +3896,6 @@ TypedValue* tg_9XMLWriter_startDTD(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 3LL) {
         if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_startDTD((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -4114,7 +3914,6 @@ TypedValue* tg_9XMLWriter_startDTD(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startDTD");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4139,7 +3938,6 @@ bool th_9XMLWriter_writeDTD(ObjectData* this_, Value* name, Value* publicid, Val
 TypedValue* tg1_9XMLWriter_writeDTD(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writeDTD(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -4172,7 +3970,6 @@ TypedValue* tg_9XMLWriter_writeDTD(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 4LL) {
         if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writeDTD((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 4);
@@ -4191,7 +3988,6 @@ TypedValue* tg_9XMLWriter_writeDTD(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writeDTD");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4213,7 +4009,6 @@ bool th_9XMLWriter_startDTDElement(ObjectData* this_, Value* qualifiedname) asm(
 TypedValue* tg1_9XMLWriter_startDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_startDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_startDTDElement((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -4228,7 +4023,6 @@ TypedValue* tg_9XMLWriter_startDTDElement(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_startDTDElement((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -4247,7 +4041,6 @@ TypedValue* tg_9XMLWriter_startDTDElement(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startDTDElement");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4270,7 +4063,6 @@ bool th_9XMLWriter_writeDTDElement(ObjectData* this_, Value* name, Value* conten
 TypedValue* tg1_9XMLWriter_writeDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writeDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -4290,7 +4082,6 @@ TypedValue* tg_9XMLWriter_writeDTDElement(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writeDTDElement((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -4309,7 +4100,6 @@ TypedValue* tg_9XMLWriter_writeDTDElement(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writeDTDElement");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4334,7 +4124,6 @@ TypedValue* tg_9XMLWriter_endDTDElement(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_endDTDElement((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -4347,7 +4136,6 @@ TypedValue* tg_9XMLWriter_endDTDElement(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::endDTDElement");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4369,7 +4157,6 @@ bool th_9XMLWriter_startDTDAttlist(ObjectData* this_, Value* name) asm("_ZN4HPHP
 TypedValue* tg1_9XMLWriter_startDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_startDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_9XMLWriter_startDTDAttlist((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -4384,7 +4171,6 @@ TypedValue* tg_9XMLWriter_startDTDAttlist(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_startDTDAttlist((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -4403,7 +4189,6 @@ TypedValue* tg_9XMLWriter_startDTDAttlist(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startDTDAttlist");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4426,7 +4211,6 @@ bool th_9XMLWriter_writeDTDAttlist(ObjectData* this_, Value* name, Value* conten
 TypedValue* tg1_9XMLWriter_writeDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writeDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -4446,7 +4230,6 @@ TypedValue* tg_9XMLWriter_writeDTDAttlist(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writeDTDAttlist((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -4465,7 +4248,6 @@ TypedValue* tg_9XMLWriter_writeDTDAttlist(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writeDTDAttlist");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4490,7 +4272,6 @@ TypedValue* tg_9XMLWriter_endDTDAttlist(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_endDTDAttlist((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -4503,7 +4284,6 @@ TypedValue* tg_9XMLWriter_endDTDAttlist(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::endDTDAttlist");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4526,7 +4306,6 @@ bool th_9XMLWriter_startDTDEntity(ObjectData* this_, Value* name, bool isparam) 
 TypedValue* tg1_9XMLWriter_startDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_startDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-1);
@@ -4546,7 +4325,6 @@ TypedValue* tg_9XMLWriter_startDTDEntity(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if ((args-1)->m_type == KindOfBoolean && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_startDTDEntity((this_), (Value*)(args-0), (bool)(args[-1].m_data.num))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -4565,7 +4343,6 @@ TypedValue* tg_9XMLWriter_startDTDEntity(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::startDTDEntity");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4592,7 +4369,6 @@ bool th_9XMLWriter_writeDTDEntity(ObjectData* this_, Value* name, Value* content
 TypedValue* tg1_9XMLWriter_writeDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_writeDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 6
@@ -4632,7 +4408,6 @@ TypedValue* tg_9XMLWriter_writeDTDEntity(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 6LL) {
         if ((count <= 5 || IS_STRING_TYPE((args-5)->m_type)) && (count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && (count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_9XMLWriter_writeDTDEntity((this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string), (count > 5) ? (Value*)(args-5) : (Value*)(&null_string))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 6);
@@ -4651,7 +4426,6 @@ TypedValue* tg_9XMLWriter_writeDTDEntity(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::writeDTDEntity");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4676,7 +4450,6 @@ TypedValue* tg_9XMLWriter_endDTDEntity(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_endDTDEntity((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -4689,7 +4462,6 @@ TypedValue* tg_9XMLWriter_endDTDEntity(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::endDTDEntity");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4714,7 +4486,6 @@ TypedValue* tg_9XMLWriter_endDTD(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9XMLWriter_endDTD((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -4727,7 +4498,6 @@ TypedValue* tg_9XMLWriter_endDTD(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::endDTD");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4782,7 +4552,6 @@ TypedValue* tg_9XMLWriter_flush(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::flush");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4805,7 +4574,6 @@ Value* th_9XMLWriter_outputMemory(Value* _rv, ObjectData* this_, bool flush) asm
 TypedValue* tg1_9XMLWriter_outputMemory(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_9XMLWriter_outputMemory(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToBooleanInPlace(args-0);
   th_9XMLWriter_outputMemory((Value*)(rv), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(true));
@@ -4821,7 +4589,6 @@ TypedValue* tg_9XMLWriter_outputMemory(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 1LL) {
         if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_9XMLWriter_outputMemory((Value*)(&(rv)), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(true));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -4841,7 +4608,6 @@ TypedValue* tg_9XMLWriter_outputMemory(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("XMLWriter::outputMemory");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

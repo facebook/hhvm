@@ -77,7 +77,6 @@ TypedValue* fg_iconv_mime_encode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("iconv_mime_encode", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -144,7 +143,6 @@ TypedValue* fg_iconv_mime_decode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("iconv_mime_decode", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -211,7 +209,6 @@ TypedValue* fg_iconv_mime_decode_headers(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("iconv_mime_decode_headers", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -264,7 +261,6 @@ TypedValue* fg_iconv_get_encoding(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("iconv_get_encoding", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -288,7 +284,6 @@ bool fh_iconv_set_encoding(Value* type, Value* charset) asm("_ZN4HPHP20f_iconv_s
 TypedValue * fg1_iconv_set_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_iconv_set_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -306,7 +301,6 @@ TypedValue* fg_iconv_set_encoding(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_iconv_set_encoding((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -322,7 +316,6 @@ TypedValue* fg_iconv_set_encoding(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("iconv_set_encoding", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -383,7 +376,6 @@ TypedValue* fg_iconv(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("iconv", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -445,7 +437,6 @@ TypedValue* fg_iconv_strlen(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("iconv_strlen", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -516,7 +507,6 @@ TypedValue* fg_iconv_strpos(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("iconv_strpos", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -582,7 +572,6 @@ TypedValue* fg_iconv_strrpos(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("iconv_strrpos", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -653,7 +642,6 @@ TypedValue* fg_iconv_substr(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("iconv_substr", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -678,7 +666,6 @@ Value* fh_ob_iconv_handler(Value* _rv, Value* contents, int status) asm("_ZN4HPH
 TypedValue * fg1_ob_iconv_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_ob_iconv_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -697,7 +684,6 @@ TypedValue* fg_ob_iconv_handler(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_ob_iconv_handler((Value*)(&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -714,7 +700,6 @@ TypedValue* fg_ob_iconv_handler(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ob_iconv_handler", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

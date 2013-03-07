@@ -275,7 +275,7 @@ typeCanBeStatic(DataType t) {
 //   May short-circuit this check if the type is known to be
 //   static already.
 struct IfCountNotStatic {
-  typedef CondBlock<TVOFF(_count),
+  typedef CondBlock<FAST_REFCOUNT_OFFSET,
                     RefCountStaticValue,
                     CC_Z> NonStaticCondBlock;
   NonStaticCondBlock *m_cb; // might be null
@@ -890,7 +890,7 @@ TranslatorX64::emitIncRef(PhysReg base, DataType dtype) {
   }
   assert(m_regMap.getInfo(base));
   SpaceRecorder sr("_IncRef", a);
-  assert(sizeof(((Cell*)nullptr)->_count == sizeof(int32_t)));
+  assert(sizeof(Countable) == sizeof(int32_t));
   { // if !static then
     IfCountNotStatic ins(a, base, dtype);
     /*
@@ -898,7 +898,7 @@ TranslatorX64::emitIncRef(PhysReg base, DataType dtype) {
      * compact, it only writes the low-order 8 bits of eflags, causing a
      * partial dependency for any downstream flags-dependent code.
      */
-    a.    add_imm32_disp_reg32(1, TVOFF(_count), base);
+    a.    add_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, base);
   } // endif
 }
 
@@ -913,7 +913,7 @@ TranslatorX64::emitIncRefGenericRegSafe(PhysReg base,
                                 tmpReg);
     { // if !static
       IfCountNotStatic ins(a, tmpReg);
-      a.  add_imm32_disp_reg32(1, TVOFF(_count), tmpReg);
+      a.  add_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, tmpReg);
     } // endif
   } // endif
 }
@@ -1017,7 +1017,7 @@ void TranslatorX64::emitDecRef(Asm& a,
   SpaceRecorder sr("_DecRef", a);
   { // if !static
     IfCountNotStatic ins(a, rDatum, type);
-    a.    sub_imm32_disp_reg32(1, TVOFF(_count), rDatum);
+    a.    sub_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, rDatum);
 
     assert(type >= 0 && type < MaxNumDataTypes);
     if (&a == &this->astubs) {
@@ -1224,9 +1224,9 @@ void TranslatorX64::emitGenericDecRefHelpers() {
    * possible to share the code for both decref helpers.
    */
   m_dtorGenericStubRegs = a.code.frontier;
-  a.    cmpl   (RefCountStaticValue, rdi[TVOFF(_count)]);
+  a.    cmpl   (RefCountStaticValue, rdi[FAST_REFCOUNT_OFFSET]);
   jccBlock<CC_Z>(a, [&] {
-    a.  subl   (1, rdi[TVOFF(_count)]);
+    a.  subl   (1, rdi[FAST_REFCOUNT_OFFSET]);
     release.jcc8(a, CC_Z);
   });
   a.    ret    ();
@@ -7345,7 +7345,7 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
         const int thisOff = cellsToBytes(genLocals - thisId - 1);
         // We don't have to check for a static refcount since we
         // know it's an Object
-        a.add_imm32_disp_reg32(1, TVOFF(_count), r(rScratch));
+        a.add_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, r(rScratch));
         a.store_reg64_disp_reg64(r(rScratch), thisOff + TVOFF(m_data), r(rDest));
         a.store_imm32_disp_reg(KindOfObject, thisOff + TVOFF(m_type), r(rDest));
       }
@@ -9330,12 +9330,12 @@ TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
   if (i.noCtor) {
     // If we're not running the constructor, just incref the object once and
     // don't set up the ActRec.
-    a.add_imm32_disp_reg32(1, TVOFF(_count), rax);
+    a.add_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, rax);
     return;
   } else {
     // Incref the object twice: once for the stack and once for $this in the
     // ActRec.
-    a.add_imm32_disp_reg32(2, TVOFF(_count), rax);
+    a.add_imm32_disp_reg32(2, FAST_REFCOUNT_OFFSET, rax);
   }
   emitVStackStore(a, i, rVmFp, arOff + AROFF(m_savedRbp));
   emitVStackStoreImm(a, i, int64_t(cls->getCtor()), arOff + AROFF(m_func));
@@ -11562,9 +11562,9 @@ void TranslatorX64::emitFreeLocalsHelpers() {
   moveToAlign(a, kNonFallthroughAlign);
 asm_label(a, release);
   a.    loadq  (rIter[TVOFF(m_data)], rData);
-  a.    cmpl   (RefCountStaticValue, rData[TVOFF(_count)]);
+  a.    cmpl   (RefCountStaticValue, rData[FAST_REFCOUNT_OFFSET]);
   jccBlock<CC_Z>(a, [&] {
-    a.  subl   (1, rData[TVOFF(_count)]);
+    a.  subl   (1, rData[FAST_REFCOUNT_OFFSET]);
     a.  jz8    (doRelease);
   });
   a.    ret    ();

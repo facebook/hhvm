@@ -76,7 +76,6 @@ TypedValue* fg_readgzfile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("readgzfile", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -138,7 +137,6 @@ TypedValue* fg_gzfile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("gzfile", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -200,7 +198,6 @@ TypedValue* fg_gzcompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("gzcompress", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -262,7 +259,6 @@ TypedValue* fg_gzuncompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("gzuncompress", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -324,7 +320,6 @@ TypedValue* fg_gzdeflate(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("gzdeflate", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -386,7 +381,6 @@ TypedValue* fg_gzinflate(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("gzinflate", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -453,7 +447,6 @@ TypedValue* fg_gzencode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("gzencode", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -504,7 +497,6 @@ TypedValue* fg_gzdecode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("gzdecode", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -530,7 +522,6 @@ Value* fh_gzopen(Value* _rv, Value* filename, Value* mode, bool use_include_path
 TypedValue * fg1_gzopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_gzopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 3
@@ -557,7 +548,6 @@ TypedValue* fg_gzopen(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_gzopen((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -574,7 +564,6 @@ TypedValue* fg_gzopen(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("gzopen", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -636,7 +625,6 @@ TypedValue* fg_qlzcompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("qlzcompress", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -698,7 +686,6 @@ TypedValue* fg_qlzuncompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("qlzuncompress", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -749,7 +736,6 @@ TypedValue* fg_sncompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("sncompress", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -800,7 +786,6 @@ TypedValue* fg_snuncompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("snuncompress", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -851,7 +836,6 @@ TypedValue* fg_nzcompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("nzcompress", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -902,7 +886,6 @@ TypedValue* fg_nzuncompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("nzuncompress", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -953,7 +936,6 @@ TypedValue* fg_lz4compress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("lz4compress", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1004,7 +986,6 @@ TypedValue* fg_lz4hccompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("lz4hccompress", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1055,7 +1036,6 @@ TypedValue* fg_lz4uncompress(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("lz4uncompress", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

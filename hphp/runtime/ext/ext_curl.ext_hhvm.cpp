@@ -65,7 +65,6 @@ TypedValue* fg_curl_init(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("curl_init", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -116,7 +115,6 @@ TypedValue* fg_curl_copy_handle(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_copy_handle", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -167,7 +165,6 @@ TypedValue* fg_curl_version(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("curl_version", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -192,7 +189,6 @@ bool fh_curl_setopt(Value* ch, int option, TypedValue* value) asm("_ZN4HPHP13f_c
 TypedValue * fg1_curl_setopt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_curl_setopt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -210,7 +206,6 @@ TypedValue* fg_curl_setopt(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_curl_setopt((Value*)(args-0), (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -226,7 +221,6 @@ TypedValue* fg_curl_setopt(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_setopt", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -250,7 +244,6 @@ bool fh_curl_setopt_array(Value* ch, Value* options) asm("_ZN4HPHP19f_curl_setop
 TypedValue * fg1_curl_setopt_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_curl_setopt_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-1);
@@ -268,7 +261,6 @@ TypedValue* fg_curl_setopt_array(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_curl_setopt_array((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -284,7 +276,6 @@ TypedValue* fg_curl_setopt_array(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_setopt_array", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -346,7 +337,6 @@ TypedValue* fg_fb_curl_getopt(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fb_curl_getopt", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -397,7 +387,6 @@ TypedValue* fg_curl_exec(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_exec", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -459,7 +448,6 @@ TypedValue* fg_curl_getinfo(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_getinfo", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -510,7 +498,6 @@ TypedValue* fg_curl_errno(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_errno", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -561,7 +548,6 @@ TypedValue* fg_curl_error(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_error", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -612,7 +598,6 @@ TypedValue* fg_curl_close(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_close", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -637,7 +622,6 @@ TypedValue* fg_curl_multi_init(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       fh_curl_multi_init((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -648,7 +632,6 @@ TypedValue* fg_curl_multi_init(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("curl_multi_init", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -705,7 +688,6 @@ TypedValue* fg_curl_multi_add_handle(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_multi_add_handle", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -762,7 +744,6 @@ TypedValue* fg_curl_multi_remove_handle(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_multi_remove_handle", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -814,7 +795,6 @@ TypedValue* fg_curl_multi_exec(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_multi_exec", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -876,7 +856,6 @@ TypedValue* fg_curl_multi_select(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_multi_select", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -933,7 +912,6 @@ TypedValue* fg_fb_curl_multi_fdset(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("fb_curl_multi_fdset", count, 4, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -984,7 +962,6 @@ TypedValue* fg_curl_multi_getcontent(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_multi_getcontent", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1038,7 +1015,6 @@ TypedValue* fg_curl_multi_info_read(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_multi_info_read", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1089,7 +1065,6 @@ TypedValue* fg_curl_multi_close(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("curl_multi_close", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1114,7 +1089,6 @@ TypedValue * fg1_evhttp_set_cache(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_evhttp_set_cache(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 3
@@ -1141,7 +1115,6 @@ TypedValue* fg_evhttp_set_cache(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_evhttp_set_cache((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(80));
         frame_free_locals_no_this_inl(ar, 3);
@@ -1157,7 +1130,6 @@ TypedValue* fg_evhttp_set_cache(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("evhttp_set_cache", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1224,7 +1196,6 @@ TypedValue* fg_evhttp_get(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("evhttp_get", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1295,7 +1266,6 @@ TypedValue* fg_evhttp_post(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("evhttp_post", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1362,7 +1332,6 @@ TypedValue* fg_evhttp_async_get(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("evhttp_async_get", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1433,7 +1402,6 @@ TypedValue* fg_evhttp_async_post(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("evhttp_async_post", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1484,7 +1452,6 @@ TypedValue* fg_evhttp_recv(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("evhttp_recv", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

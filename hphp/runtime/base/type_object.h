@@ -240,8 +240,8 @@ public:
 
  private:
   static void compileTimeAssertions() {
-    static_assert(offsetof(Object, m_px) == offsetof(Value, m_data),
-                  "Offset of m_px in Object must be offset of m_data in Value");
+    static_assert(offsetof(Object, m_px) == offsetof(TypedValue, m_data),
+                  "Offset of m_px in Object must be offset of m_data in TV");
   }
 };
 

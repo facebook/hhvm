@@ -748,8 +748,10 @@ emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
 
 static inline void
 emitStoreInvalid(X64Assembler& a, int disp, PhysReg dest) {
+  static_assert(sizeof(((TypedValue*)0)->m_aux) == sizeof(int32_t),
+                "emitStoreInvalid assumes m_aux is dword sized.");
   a.    storeq (0xfacefacefaceface,     dest[disp + TVOFF(m_data)]);
-  a.    storel ((signed int)0xfaceface, dest[disp + TVOFF(_count)]);
+  a.    storel ((signed int)0xfaceface, dest[disp + TVOFF(m_aux)]);
   a.    storel (KindOfInvalid,          dest[disp + TVOFF(m_type)]);
 }
 
@@ -757,7 +759,7 @@ static inline void
 emitStoreUninitNull(X64Assembler& a,
                     int disp,
                     PhysReg dest) {
-  // OK to leave garbage in m_data, _count.
+  // OK to leave garbage in m_data, m_aux.
   a.    store_imm32_disp_reg(KindOfUninit, disp + TVOFF(m_type), dest);
 }
 
@@ -766,7 +768,7 @@ emitStoreNull(X64Assembler& a,
               int disp,
               PhysReg dest) {
   a.    store_imm32_disp_reg(KindOfNull, disp + TVOFF(m_type), dest);
-  // It's ok to leave garbage in m_data, _count for KindOfNull.
+  // It's ok to leave garbage in m_data, m_aux for KindOfNull.
 }
 
 static inline void
@@ -785,8 +787,7 @@ emitCopyTo(X64Assembler& a,
            int destOff,
            PhysReg scratch) {
   assert(src != scratch);
-  // This is roughly how gcc compiles this.
-  // Blow off _count.
+  // This is roughly how gcc compiles this.  Blow off m_aux.
   auto s64 = r64(scratch);
   auto s32 = r32(scratch);
   a.    loadq  (src[srcOff + TVOFF(m_data)], s64);

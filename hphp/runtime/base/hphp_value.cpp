@@ -51,7 +51,7 @@ std::string tname(DataType t) {
   }
 }
 
-std::string TypedValue::pretty() const  {
+std::string TypedValue::pretty() const {
   char buf[20];
   sprintf(buf, "0x%lx", long(m_data.num));
   return Trace::prettyNode(tname(m_type).c_str(), std::string(buf));

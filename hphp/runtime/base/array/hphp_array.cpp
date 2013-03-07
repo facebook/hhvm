@@ -202,7 +202,7 @@ void HphpArray::dumpDebugInfo() const {
         String k = Util::escapeStringForCPP(elms[i].key->data(),
                                             elms[i].key->size());
         fprintf(stderr, "  [%3d] hash=0x%016x key=\"%s\" data=(%.*s)\n",
-               int(i), elms[i].hash, k.data(), s.size()-1, s.data());
+                int(i), elms[i].hash(), k.data(), s.size()-1, s.data());
       } else {
         fprintf(stderr, "  [%3d] ind=%" PRId64 " data.m_type=(%.*s)\n", int(i),
                elms[i].ikey, s.size()-1, s.data());
@@ -441,7 +441,7 @@ static bool hitStringKey(const HphpArray::Elm* e, const StringData* s,
   // Therefore the assertion below must hold.
   assert(e->data.m_type != HphpArray::KindOfTombstone);
 
-  if (e->hash != hash) {
+  if (e->hash() != hash) {
     return false;
   }
   if (e->key == s) {
@@ -807,7 +807,7 @@ void HphpArray::grow() {
       if (e->data.m_type == KindOfTombstone) {
         continue;
       }
-      ElmInd* ei = findForNewInsert(e->hasIntKey() ? e->ikey : e->hash);
+      ElmInd* ei = findForNewInsert(e->hasIntKey() ? e->ikey : e->hash());
       *ei = pos;
     }
 #ifdef DEBUG
@@ -823,7 +823,7 @@ void HphpArray::compact(bool renumber /* = false */) {
     // below.
     assert(m_pos <= ssize_t(m_lastE));
     Elm* e = &(m_data[(ElmInd)m_pos]);
-    mPos.hash = e->hasIntKey() ? 0 : e->hash;
+    mPos.hash = e->hasIntKey() ? 0 : e->hash();
     mPos.key = e->key;
   } else {
     // Silence compiler warnings.
@@ -835,7 +835,7 @@ void HphpArray::compact(bool renumber /* = false */) {
     ElmInd ei = r.front()->m_pos;
     if (ei != ElmIndEmpty) {
       Elm* e = &m_data[ei];
-      siKeys.push_back(ElmKey(e->hash, e->key));
+      siKeys.push_back(ElmKey(e->hash(), e->key));
     }
   }
   if (renumber) {
@@ -867,7 +867,7 @@ void HphpArray::compact(bool renumber /* = false */) {
       toE->ikey = m_nextKI;
       ++m_nextKI;
     }
-    ElmInd* ie = findForNewInsert(toE->hasIntKey() ? toE->ikey : toE->hash);
+    ElmInd* ie = findForNewInsert(toE->hasIntKey() ? toE->ikey : toE->hash());
     *ie = toPos;
     ++frPos;
   }
@@ -1468,11 +1468,11 @@ inline ALWAYS_INLINE HphpArray* HphpArray::copyImpl(HphpArray* target) const {
       Elm* e = &elms[pos];
       Elm* te = &targetElms[pos];
       if (e->data.m_type != KindOfTombstone) {
-        te->hash = e->hash;
         te->key = e->key;
+        te->data.m_aux = e->data.m_aux;
         if (te->hasStrKey()) te->key->incRefCount();
         tvDupFlattenVars(&e->data, &te->data, this);
-        te->hash = e->hash;
+        assert(te->hash() == e->hash()); // ensure not clobbered.
       } else {
         // Tombstone.
         te->setIntKey(0);
@@ -1614,7 +1614,7 @@ ArrayData* HphpArray::pop(Variant& value) {
     assert(e->data.m_type != KindOfTombstone);
     value = tvAsCVarRef(&e->data);
     ElmInd* ei = e->hasStrKey()
-        ? a->findForInsert(e->key, e->hash)
+        ? a->findForInsert(e->key, e->hash())
         : a->findForInsert(e->ikey);
     a->erase(ei, true);
   } else {
@@ -1641,7 +1641,7 @@ ArrayData* HphpArray::dequeue(Variant& value) {
     Elm* e = &elms[pos];
     value = tvAsCVarRef(&e->data);
     a->erase(e->hasStrKey() ?
-             a->findForInsert(e->key, e->hash) :
+             a->findForInsert(e->key, e->hash()) :
              a->findForInsert(e->ikey));
     a->compact(true);
   } else {

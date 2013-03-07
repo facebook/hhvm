@@ -65,7 +65,6 @@ TypedValue* fg_imap_8bit(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_8bit", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -99,7 +98,6 @@ TypedValue* fg_imap_alerts(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("imap_alerts", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -125,7 +123,6 @@ bool fh_imap_append(Value* imap_stream, Value* mailbox, Value* message, Value* o
 TypedValue * fg1_imap_append(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_append(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -154,7 +151,6 @@ TypedValue* fg_imap_append(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_append((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&empty_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -170,7 +166,6 @@ TypedValue* fg_imap_append(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_append", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -221,7 +216,6 @@ TypedValue* fg_imap_base64(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_base64", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -272,7 +266,6 @@ TypedValue* fg_imap_binary(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_binary", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -338,7 +331,6 @@ TypedValue* fg_imap_body(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_body", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -399,7 +391,6 @@ TypedValue* fg_imap_bodystruct(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_bodystruct", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -450,7 +441,6 @@ TypedValue* fg_imap_check(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_check", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -476,7 +466,6 @@ bool fh_imap_clearflag_full(Value* imap_stream, Value* sequence, Value* flag, lo
 TypedValue * fg1_imap_clearflag_full(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_clearflag_full(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -505,7 +494,6 @@ TypedValue* fg_imap_clearflag_full(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_clearflag_full((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -521,7 +509,6 @@ TypedValue* fg_imap_clearflag_full(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_clearflag_full", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -545,7 +532,6 @@ bool fh_imap_close(Value* imap_stream, long flag) asm("_ZN4HPHP12f_imap_closeERK
 TypedValue * fg1_imap_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 2
@@ -568,7 +554,6 @@ TypedValue* fg_imap_close(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_close((Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -584,7 +569,6 @@ TypedValue* fg_imap_close(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_close", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -608,7 +592,6 @@ bool fh_imap_createmailbox(Value* imap_stream, Value* mailbox) asm("_ZN4HPHP20f_
 TypedValue * fg1_imap_createmailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_createmailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -626,7 +609,6 @@ TypedValue* fg_imap_createmailbox(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_createmailbox((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -642,7 +624,6 @@ TypedValue* fg_imap_createmailbox(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_createmailbox", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -667,7 +648,6 @@ bool fh_imap_delete(Value* imap_stream, Value* msg_number, long options) asm("_Z
 TypedValue * fg1_imap_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -693,7 +673,6 @@ TypedValue* fg_imap_delete(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_delete((Value*)(args-0), (Value*)(args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -709,7 +688,6 @@ TypedValue* fg_imap_delete(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_delete", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -733,7 +711,6 @@ bool fh_imap_deletemailbox(Value* imap_stream, Value* mailbox) asm("_ZN4HPHP20f_
 TypedValue * fg1_imap_deletemailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_deletemailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -751,7 +728,6 @@ TypedValue* fg_imap_deletemailbox(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_deletemailbox((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -767,7 +743,6 @@ TypedValue* fg_imap_deletemailbox(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_deletemailbox", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -801,7 +776,6 @@ TypedValue* fg_imap_errors(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("imap_errors", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -824,7 +798,6 @@ bool fh_imap_expunge(Value* imap_stream) asm("_ZN4HPHP14f_imap_expungeERKNS_6Obj
 TypedValue * fg1_imap_expunge(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_expunge(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_imap_expunge((Value*)(args-0))) ? 1LL : 0LL;
@@ -837,7 +810,6 @@ TypedValue* fg_imap_expunge(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_expunge((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -853,7 +825,6 @@ TypedValue* fg_imap_expunge(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_expunge", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -919,7 +890,6 @@ TypedValue* fg_imap_fetch_overview(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_fetch_overview", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -989,7 +959,6 @@ TypedValue* fg_imap_fetchbody(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_fetchbody", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1055,7 +1024,6 @@ TypedValue* fg_imap_fetchheader(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_fetchheader", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1121,7 +1089,6 @@ TypedValue* fg_imap_fetchstructure(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_fetchstructure", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1145,7 +1112,6 @@ bool fh_imap_gc(Value* imap_stream, long caches) asm("_ZN4HPHP9f_imap_gcERKNS_6O
 TypedValue * fg1_imap_gc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_gc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -1163,7 +1129,6 @@ TypedValue* fg_imap_gc(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_gc((Value*)(args-0), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -1179,7 +1144,6 @@ TypedValue* fg_imap_gc(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_gc", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1236,7 +1200,6 @@ TypedValue* fg_imap_get_quota(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_get_quota", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1293,7 +1256,6 @@ TypedValue* fg_imap_get_quotaroot(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_get_quotaroot", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1350,7 +1312,6 @@ TypedValue* fg_imap_getacl(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_getacl", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1411,7 +1372,6 @@ TypedValue* fg_imap_getmailboxes(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_getmailboxes", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1472,7 +1432,6 @@ TypedValue* fg_imap_getsubscribed(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_getsubscribed", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1548,7 +1507,6 @@ TypedValue* fg_imap_header(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_header", count, 2, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1624,7 +1582,6 @@ TypedValue* fg_imap_headerinfo(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_headerinfo", count, 2, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1675,7 +1632,6 @@ TypedValue* fg_imap_headers(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_headers", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1709,7 +1665,6 @@ TypedValue* fg_imap_last_error(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("imap_last_error", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1770,7 +1725,6 @@ TypedValue* fg_imap_list(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_list", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1831,7 +1785,6 @@ TypedValue* fg_imap_listmailbox(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_listmailbox", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1896,7 +1849,6 @@ TypedValue* fg_imap_listscan(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_listscan", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1957,7 +1909,6 @@ TypedValue* fg_imap_listsubscribed(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_listsubscribed", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2018,7 +1969,6 @@ TypedValue* fg_imap_lsub(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_lsub", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2075,7 +2025,6 @@ TypedValue* fg_imap_mail_compose(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_mail_compose", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2101,7 +2050,6 @@ bool fh_imap_mail_copy(Value* imap_stream, Value* msglist, Value* mailbox, long 
 TypedValue * fg1_imap_mail_copy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_mail_copy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -2130,7 +2078,6 @@ TypedValue* fg_imap_mail_copy(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_mail_copy((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -2146,7 +2093,6 @@ TypedValue* fg_imap_mail_copy(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_mail_copy", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2172,7 +2118,6 @@ bool fh_imap_mail_move(Value* imap_stream, Value* msglist, Value* mailbox, long 
 TypedValue * fg1_imap_mail_move(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_mail_move(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -2201,7 +2146,6 @@ TypedValue* fg_imap_mail_move(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_mail_move((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -2217,7 +2161,6 @@ TypedValue* fg_imap_mail_move(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_mail_move", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2246,7 +2189,6 @@ bool fh_imap_mail(Value* to, Value* subject, Value* message, Value* additional_h
 TypedValue * fg1_imap_mail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_mail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 7
@@ -2287,7 +2229,6 @@ TypedValue* fg_imap_mail(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 7LL) {
       if ((count <= 6 || IS_STRING_TYPE((args-6)->m_type)) && (count <= 5 || IS_STRING_TYPE((args-5)->m_type)) && (count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && (count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_mail((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&empty_string), (count > 4) ? (Value*)(args-4) : (Value*)(&empty_string), (count > 5) ? (Value*)(args-5) : (Value*)(&empty_string), (count > 6) ? (Value*)(args-6) : (Value*)(&empty_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 7);
@@ -2303,7 +2244,6 @@ TypedValue* fg_imap_mail(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_mail", count, 3, 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2354,7 +2294,6 @@ TypedValue* fg_imap_mailboxmsginfo(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_mailboxmsginfo", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2405,7 +2344,6 @@ TypedValue* fg_imap_mime_header_decode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_mime_header_decode", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2462,7 +2400,6 @@ TypedValue* fg_imap_msgno(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_msgno", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2513,7 +2450,6 @@ TypedValue* fg_imap_num_msg(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_num_msg", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2564,7 +2500,6 @@ TypedValue* fg_imap_num_recent(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_num_recent", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2639,7 +2574,6 @@ TypedValue* fg_imap_open(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_open", count, 3, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2662,7 +2596,6 @@ bool fh_imap_ping(Value* imap_stream) asm("_ZN4HPHP11f_imap_pingERKNS_6ObjectE")
 TypedValue * fg1_imap_ping(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_ping(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_imap_ping((Value*)(args-0))) ? 1LL : 0LL;
@@ -2675,7 +2608,6 @@ TypedValue* fg_imap_ping(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_ping((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -2691,7 +2623,6 @@ TypedValue* fg_imap_ping(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_ping", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2742,7 +2673,6 @@ TypedValue* fg_imap_qprint(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_qprint", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2767,7 +2697,6 @@ bool fh_imap_renamemailbox(Value* imap_stream, Value* old_mbox, Value* new_mbox)
 TypedValue * fg1_imap_renamemailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_renamemailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -2788,7 +2717,6 @@ TypedValue* fg_imap_renamemailbox(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_renamemailbox((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -2804,7 +2732,6 @@ TypedValue* fg_imap_renamemailbox(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_renamemailbox", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2830,7 +2757,6 @@ bool fh_imap_reopen(Value* imap_stream, Value* mailbox, long options, long retri
 TypedValue * fg1_imap_reopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_reopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -2860,7 +2786,6 @@ TypedValue* fg_imap_reopen(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_reopen((Value*)(args-0), (Value*)(args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -2876,7 +2801,6 @@ TypedValue* fg_imap_reopen(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_reopen", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2933,7 +2857,6 @@ TypedValue* fg_imap_rfc822_parse_adrlist(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_rfc822_parse_adrlist", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2995,7 +2918,6 @@ TypedValue* fg_imap_rfc822_parse_headers(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_rfc822_parse_headers", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3056,7 +2978,6 @@ TypedValue* fg_imap_rfc822_write_address(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_rfc822_write_address", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3083,7 +3004,6 @@ bool fh_imap_savebody(Value* imap_stream, TypedValue* file, long msg_number, Val
 TypedValue * fg1_imap_savebody(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_savebody(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 5
@@ -3113,7 +3033,6 @@ TypedValue* fg_imap_savebody(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (args-2)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_savebody((Value*)(args-0), (args-1), (long)(args[-2].m_data.num), (count > 3) ? (Value*)(args-3) : (Value*)(&empty_string), (count > 4) ? (long)(args[-4].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -3129,7 +3048,6 @@ TypedValue* fg_imap_savebody(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_savebody", count, 3, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3194,7 +3112,6 @@ TypedValue* fg_imap_scanmailbox(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_scanmailbox", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3265,7 +3182,6 @@ TypedValue* fg_imap_search(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_search", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3290,7 +3206,6 @@ bool fh_imap_set_quota(Value* imap_stream, Value* quota_root, long quota_limit) 
 TypedValue * fg1_imap_set_quota(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_set_quota(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -3311,7 +3226,6 @@ TypedValue* fg_imap_set_quota(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_set_quota((Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -3327,7 +3241,6 @@ TypedValue* fg_imap_set_quota(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_set_quota", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3353,7 +3266,6 @@ bool fh_imap_setacl(Value* imap_stream, Value* mailbox, Value* id, Value* rights
 TypedValue * fg1_imap_setacl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_setacl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -3377,7 +3289,6 @@ TypedValue* fg_imap_setacl(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_setacl((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -3393,7 +3304,6 @@ TypedValue* fg_imap_setacl(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_setacl", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3419,7 +3329,6 @@ bool fh_imap_setflag_full(Value* imap_stream, Value* sequence, Value* flag, long
 TypedValue * fg1_imap_setflag_full(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_setflag_full(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -3448,7 +3357,6 @@ TypedValue* fg_imap_setflag_full(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_setflag_full((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -3464,7 +3372,6 @@ TypedValue* fg_imap_setflag_full(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_setflag_full", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3544,7 +3451,6 @@ TypedValue* fg_imap_sort(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_sort", count, 3, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3610,7 +3516,6 @@ TypedValue* fg_imap_status(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_status", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3634,7 +3539,6 @@ bool fh_imap_subscribe(Value* imap_stream, Value* mailbox) asm("_ZN4HPHP16f_imap
 TypedValue * fg1_imap_subscribe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_subscribe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -3652,7 +3556,6 @@ TypedValue* fg_imap_subscribe(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_subscribe((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -3668,7 +3571,6 @@ TypedValue* fg_imap_subscribe(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_subscribe", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3730,7 +3632,6 @@ TypedValue* fg_imap_thread(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_thread", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3792,7 +3693,6 @@ TypedValue* fg_imap_timeout(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_timeout", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3849,7 +3749,6 @@ TypedValue* fg_imap_uid(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_uid", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3874,7 +3773,6 @@ bool fh_imap_undelete(Value* imap_stream, Value* msg_number, long flags) asm("_Z
 TypedValue * fg1_imap_undelete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_undelete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -3900,7 +3798,6 @@ TypedValue* fg_imap_undelete(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_undelete((Value*)(args-0), (Value*)(args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -3916,7 +3813,6 @@ TypedValue* fg_imap_undelete(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_undelete", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3940,7 +3836,6 @@ bool fh_imap_unsubscribe(Value* imap_stream, Value* mailbox) asm("_ZN4HPHP18f_im
 TypedValue * fg1_imap_unsubscribe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_imap_unsubscribe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -3958,7 +3853,6 @@ TypedValue* fg_imap_unsubscribe(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_imap_unsubscribe((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -3974,7 +3868,6 @@ TypedValue* fg_imap_unsubscribe(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_unsubscribe", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4025,7 +3918,6 @@ TypedValue* fg_imap_utf7_decode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_utf7_decode", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4076,7 +3968,6 @@ TypedValue* fg_imap_utf7_encode(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_utf7_encode", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4127,7 +4018,6 @@ TypedValue* fg_imap_utf8(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("imap_utf8", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

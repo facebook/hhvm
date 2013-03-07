@@ -39,7 +39,6 @@ TypedValue* fg_magickgetcopyright(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfString;
       fh_magickgetcopyright((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -50,7 +49,6 @@ TypedValue* fg_magickgetcopyright(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("magickgetcopyright", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -75,7 +73,6 @@ TypedValue* fg_magickgethomeurl(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfString;
       fh_magickgethomeurl((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -86,7 +83,6 @@ TypedValue* fg_magickgethomeurl(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("magickgethomeurl", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -111,7 +107,6 @@ TypedValue* fg_magickgetpackagename(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfString;
       fh_magickgetpackagename((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -122,7 +117,6 @@ TypedValue* fg_magickgetpackagename(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("magickgetpackagename", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -146,7 +140,6 @@ TypedValue* fg_magickgetquantumdepth(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfDouble;
       rv.m_data.dbl = fh_magickgetquantumdepth();
       frame_free_locals_no_this_inl(ar, 0);
@@ -156,7 +149,6 @@ TypedValue* fg_magickgetquantumdepth(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("magickgetquantumdepth", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -181,7 +173,6 @@ TypedValue* fg_magickgetreleasedate(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfString;
       fh_magickgetreleasedate((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -192,7 +183,6 @@ TypedValue* fg_magickgetreleasedate(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("magickgetreleasedate", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -215,7 +205,6 @@ double fh_magickgetresourcelimit(int resource_type) asm("_ZN4HPHP24f_magickgetre
 TypedValue * fg1_magickgetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToInt64InPlace(args-0);
   rv->m_data.dbl = fh_magickgetresourcelimit((int)(args[-0].m_data.num));
@@ -228,7 +217,6 @@ TypedValue* fg_magickgetresourcelimit(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetresourcelimit((int)(args[-0].m_data.num));
         frame_free_locals_no_this_inl(ar, 1);
@@ -244,7 +232,6 @@ TypedValue* fg_magickgetresourcelimit(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetresourcelimit", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -269,7 +256,6 @@ TypedValue* fg_magickgetversion(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfArray;
       fh_magickgetversion((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -280,7 +266,6 @@ TypedValue* fg_magickgetversion(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("magickgetversion", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -304,7 +289,6 @@ TypedValue* fg_magickgetversionnumber(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfInt64;
       rv.m_data.num = (int64_t)fh_magickgetversionnumber();
       frame_free_locals_no_this_inl(ar, 0);
@@ -314,7 +298,6 @@ TypedValue* fg_magickgetversionnumber(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("magickgetversionnumber", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -339,7 +322,6 @@ TypedValue* fg_magickgetversionstring(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfString;
       fh_magickgetversionstring((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -350,7 +332,6 @@ TypedValue* fg_magickgetversionstring(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("magickgetversionstring", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -374,7 +355,6 @@ Value* fh_magickqueryconfigureoption(Value* _rv, Value* option) asm("_ZN4HPHP28f
 TypedValue * fg1_magickqueryconfigureoption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickqueryconfigureoption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
   fh_magickqueryconfigureoption((Value*)(rv), (Value*)(args-0));
@@ -388,7 +368,6 @@ TypedValue* fg_magickqueryconfigureoption(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickqueryconfigureoption((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -405,7 +384,6 @@ TypedValue* fg_magickqueryconfigureoption(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickqueryconfigureoption", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -429,7 +407,6 @@ Value* fh_magickqueryconfigureoptions(Value* _rv, Value* pattern) asm("_ZN4HPHP2
 TypedValue * fg1_magickqueryconfigureoptions(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickqueryconfigureoptions(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
   fh_magickqueryconfigureoptions((Value*)(rv), (Value*)(args-0));
@@ -443,7 +420,6 @@ TypedValue* fg_magickqueryconfigureoptions(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickqueryconfigureoptions((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -460,7 +436,6 @@ TypedValue* fg_magickqueryconfigureoptions(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickqueryconfigureoptions", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -484,7 +459,6 @@ Value* fh_magickqueryfonts(Value* _rv, Value* pattern) asm("_ZN4HPHP18f_magickqu
 TypedValue * fg1_magickqueryfonts(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickqueryfonts(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
   fh_magickqueryfonts((Value*)(rv), (Value*)(args-0));
@@ -498,7 +472,6 @@ TypedValue* fg_magickqueryfonts(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickqueryfonts((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -515,7 +488,6 @@ TypedValue* fg_magickqueryfonts(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickqueryfonts", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -539,7 +511,6 @@ Value* fh_magickqueryformats(Value* _rv, Value* pattern) asm("_ZN4HPHP20f_magick
 TypedValue * fg1_magickqueryformats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickqueryformats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
   fh_magickqueryformats((Value*)(rv), (Value*)(args-0));
@@ -553,7 +524,6 @@ TypedValue* fg_magickqueryformats(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickqueryformats((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -570,7 +540,6 @@ TypedValue* fg_magickqueryformats(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickqueryformats", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -594,7 +563,6 @@ bool fh_magicksetresourcelimit(int resource_type, double limit) asm("_ZN4HPHP24f
 TypedValue * fg1_magicksetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetresourcelimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -612,7 +580,6 @@ TypedValue* fg_magicksetresourcelimit(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetresourcelimit((int)(args[-0].m_data.num), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -628,7 +595,6 @@ TypedValue* fg_magicksetresourcelimit(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetresourcelimit", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -653,7 +619,6 @@ TypedValue* fg_newdrawingwand(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       fh_newdrawingwand((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -664,7 +629,6 @@ TypedValue* fg_newdrawingwand(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("newdrawingwand", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -689,7 +653,6 @@ TypedValue* fg_newmagickwand(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfObject;
       fh_newmagickwand((Value*)(&(rv)));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -700,7 +663,6 @@ TypedValue* fg_newmagickwand(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("newmagickwand", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -724,7 +686,6 @@ Value* fh_newpixeliterator(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP18f_newpixe
 TypedValue * fg1_newpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_newpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_newpixeliterator((Value*)(rv), (Value*)(args-0));
@@ -738,7 +699,6 @@ TypedValue* fg_newpixeliterator(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_newpixeliterator((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -755,7 +715,6 @@ TypedValue* fg_newpixeliterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("newpixeliterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -783,7 +742,6 @@ Value* fh_newpixelregioniterator(Value* _rv, Value* mgck_wnd, int x, int y, int 
 TypedValue * fg1_newpixelregioniterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_newpixelregioniterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -811,7 +769,6 @@ TypedValue* fg_newpixelregioniterator(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_newpixelregioniterator((Value*)(&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (int)(args[-3].m_data.num), (int)(args[-4].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -828,7 +785,6 @@ TypedValue* fg_newpixelregioniterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("newpixelregioniterator", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -852,7 +808,6 @@ Value* fh_newpixelwand(Value* _rv, Value* imagemagick_col_str) asm("_ZN4HPHP14f_
 TypedValue * fg1_newpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_newpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
   fh_newpixelwand((Value*)(rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
@@ -866,7 +821,6 @@ TypedValue* fg_newpixelwand(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_newpixelwand((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -883,7 +837,6 @@ TypedValue* fg_newpixelwand(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("newpixelwand", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -907,7 +860,6 @@ Value* fh_newpixelwandarray(Value* _rv, int num_pxl_wnds) asm("_ZN4HPHP19f_newpi
 TypedValue * fg1_newpixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_newpixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToInt64InPlace(args-0);
   fh_newpixelwandarray((Value*)(rv), (int)(args[-0].m_data.num));
@@ -921,7 +873,6 @@ TypedValue* fg_newpixelwandarray(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_newpixelwandarray((Value*)(&(rv)), (int)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -938,7 +889,6 @@ TypedValue* fg_newpixelwandarray(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("newpixelwandarray", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -962,7 +912,6 @@ Value* fh_newpixelwands(Value* _rv, int num_pxl_wnds) asm("_ZN4HPHP15f_newpixelw
 TypedValue * fg1_newpixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_newpixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToInt64InPlace(args-0);
   fh_newpixelwands((Value*)(rv), (int)(args[-0].m_data.num));
@@ -976,7 +925,6 @@ TypedValue* fg_newpixelwands(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_newpixelwands((Value*)(&(rv)), (int)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -993,7 +941,6 @@ TypedValue* fg_newpixelwands(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("newpixelwands", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1016,7 +963,6 @@ TypedValue * fg1_destroydrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_destroydrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_destroydrawingwand((Value*)(args-0));
@@ -1030,7 +976,6 @@ TypedValue* fg_destroydrawingwand(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_destroydrawingwand((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1046,7 +991,6 @@ TypedValue* fg_destroydrawingwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("destroydrawingwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1069,7 +1013,6 @@ TypedValue * fg1_destroymagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
 TypedValue * fg1_destroymagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_destroymagickwand((Value*)(args-0));
@@ -1083,7 +1026,6 @@ TypedValue* fg_destroymagickwand(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_destroymagickwand((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1099,7 +1041,6 @@ TypedValue* fg_destroymagickwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("destroymagickwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1122,7 +1063,6 @@ TypedValue * fg1_destroypixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_destroypixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_destroypixeliterator((Value*)(args-0));
@@ -1136,7 +1076,6 @@ TypedValue* fg_destroypixeliterator(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_destroypixeliterator((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1152,7 +1091,6 @@ TypedValue* fg_destroypixeliterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("destroypixeliterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1175,7 +1113,6 @@ TypedValue * fg1_destroypixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_destroypixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_destroypixelwand((Value*)(args-0));
@@ -1189,7 +1126,6 @@ TypedValue* fg_destroypixelwand(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_destroypixelwand((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1205,7 +1141,6 @@ TypedValue* fg_destroypixelwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("destroypixelwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1228,7 +1163,6 @@ TypedValue * fg1_destroypixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue * fg1_destroypixelwandarray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToArrayInPlace(args-0);
   fh_destroypixelwandarray((Value*)(args-0));
@@ -1242,7 +1176,6 @@ TypedValue* fg_destroypixelwandarray(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfArray) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_destroypixelwandarray((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1258,7 +1191,6 @@ TypedValue* fg_destroypixelwandarray(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("destroypixelwandarray", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1281,7 +1213,6 @@ TypedValue * fg1_destroypixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
 TypedValue * fg1_destroypixelwands(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToArrayInPlace(args-0);
   fh_destroypixelwands((Value*)(args-0));
@@ -1295,7 +1226,6 @@ TypedValue* fg_destroypixelwands(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfArray) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_destroypixelwands((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1311,7 +1241,6 @@ TypedValue* fg_destroypixelwands(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("destroypixelwands", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1336,7 +1265,6 @@ TypedValue* fg_isdrawingwand(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_isdrawingwand((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -1346,7 +1274,6 @@ TypedValue* fg_isdrawingwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("isdrawingwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1371,7 +1298,6 @@ TypedValue* fg_ismagickwand(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ismagickwand((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -1381,7 +1307,6 @@ TypedValue* fg_ismagickwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ismagickwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1406,7 +1331,6 @@ TypedValue* fg_ispixeliterator(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ispixeliterator((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -1416,7 +1340,6 @@ TypedValue* fg_ispixeliterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ispixeliterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1441,7 +1364,6 @@ TypedValue* fg_ispixelwand(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_ispixelwand((args-0))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -1451,7 +1373,6 @@ TypedValue* fg_ispixelwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("ispixelwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1474,7 +1395,6 @@ TypedValue * fg1_cleardrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_cleardrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_cleardrawingwand((Value*)(args-0));
@@ -1488,7 +1408,6 @@ TypedValue* fg_cleardrawingwand(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_cleardrawingwand((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1504,7 +1423,6 @@ TypedValue* fg_cleardrawingwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("cleardrawingwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1527,7 +1445,6 @@ TypedValue * fg1_clearmagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
 TypedValue * fg1_clearmagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_clearmagickwand((Value*)(args-0));
@@ -1541,7 +1458,6 @@ TypedValue* fg_clearmagickwand(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_clearmagickwand((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1557,7 +1473,6 @@ TypedValue* fg_clearmagickwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("clearmagickwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1580,7 +1495,6 @@ TypedValue * fg1_clearpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_clearpixeliterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_clearpixeliterator((Value*)(args-0));
@@ -1594,7 +1508,6 @@ TypedValue* fg_clearpixeliterator(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_clearpixeliterator((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1610,7 +1523,6 @@ TypedValue* fg_clearpixeliterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("clearpixeliterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1633,7 +1545,6 @@ TypedValue * fg1_clearpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_clearpixelwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_clearpixelwand((Value*)(args-0));
@@ -1647,7 +1558,6 @@ TypedValue* fg_clearpixelwand(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_clearpixelwand((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1663,7 +1573,6 @@ TypedValue* fg_clearpixelwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("clearpixelwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1687,7 +1596,6 @@ Value* fh_clonedrawingwand(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP18f_clonedra
 TypedValue * fg1_clonedrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_clonedrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_clonedrawingwand((Value*)(rv), (Value*)(args-0));
@@ -1701,7 +1609,6 @@ TypedValue* fg_clonedrawingwand(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_clonedrawingwand((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1718,7 +1625,6 @@ TypedValue* fg_clonedrawingwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("clonedrawingwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1742,7 +1648,6 @@ Value* fh_clonemagickwand(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP17f_clonemag
 TypedValue * fg1_clonemagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_clonemagickwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_clonemagickwand((Value*)(rv), (Value*)(args-0));
@@ -1756,7 +1661,6 @@ TypedValue* fg_clonemagickwand(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_clonemagickwand((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1773,7 +1677,6 @@ TypedValue* fg_clonemagickwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("clonemagickwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1797,7 +1700,6 @@ Value* fh_wandgetexception(Value* _rv, Value* wnd) asm("_ZN4HPHP18f_wandgetexcep
 TypedValue * fg1_wandgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_wandgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_wandgetexception((Value*)(rv), (Value*)(args-0));
@@ -1811,7 +1713,6 @@ TypedValue* fg_wandgetexception(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_wandgetexception((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1828,7 +1729,6 @@ TypedValue* fg_wandgetexception(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("wandgetexception", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1852,7 +1752,6 @@ Value* fh_wandgetexceptionstring(Value* _rv, Value* wnd) asm("_ZN4HPHP24f_wandge
 TypedValue * fg1_wandgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_wandgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_wandgetexceptionstring((Value*)(rv), (Value*)(args-0));
@@ -1866,7 +1765,6 @@ TypedValue* fg_wandgetexceptionstring(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_wandgetexceptionstring((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1883,7 +1781,6 @@ TypedValue* fg_wandgetexceptionstring(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("wandgetexceptionstring", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1906,7 +1803,6 @@ long fh_wandgetexceptiontype(Value* wnd) asm("_ZN4HPHP22f_wandgetexceptiontypeER
 TypedValue * fg1_wandgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_wandgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_wandgetexceptiontype((Value*)(args-0));
@@ -1919,7 +1815,6 @@ TypedValue* fg_wandgetexceptiontype(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_wandgetexceptiontype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -1935,7 +1830,6 @@ TypedValue* fg_wandgetexceptiontype(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("wandgetexceptiontype", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1958,7 +1852,6 @@ bool fh_wandhasexception(Value* wnd) asm("_ZN4HPHP18f_wandhasexceptionERKNS_6Obj
 TypedValue * fg1_wandhasexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_wandhasexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_wandhasexception((Value*)(args-0))) ? 1LL : 0LL;
@@ -1971,7 +1864,6 @@ TypedValue* fg_wandhasexception(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_wandhasexception((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -1987,7 +1879,6 @@ TypedValue* fg_wandhasexception(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("wandhasexception", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2016,7 +1907,6 @@ TypedValue * fg1_drawaffine(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
 TypedValue * fg1_drawaffine(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-6)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-6);
@@ -2050,7 +1940,6 @@ TypedValue* fg_drawaffine(HPHP::VM::ActRec *ar) {
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawaffine((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (args[-5].m_data.dbl), (args[-6].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 7);
@@ -2066,7 +1955,6 @@ TypedValue* fg_drawaffine(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawaffine", count, 7, 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2092,7 +1980,6 @@ TypedValue * fg1_drawannotation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_drawannotation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -2117,7 +2004,6 @@ TypedValue* fg_drawannotation(HPHP::VM::ActRec *ar) {
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawannotation((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (Value*)(args-3));
         frame_free_locals_no_this_inl(ar, 4);
@@ -2133,7 +2019,6 @@ TypedValue* fg_drawannotation(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawannotation", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2162,7 +2047,6 @@ TypedValue * fg1_drawarc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __
 TypedValue * fg1_drawarc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-6)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-6);
@@ -2196,7 +2080,6 @@ TypedValue* fg_drawarc(HPHP::VM::ActRec *ar) {
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawarc((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (args[-5].m_data.dbl), (args[-6].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 7);
@@ -2212,7 +2095,6 @@ TypedValue* fg_drawarc(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawarc", count, 7, 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2236,7 +2118,6 @@ TypedValue * fg1_drawbezier(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
 TypedValue * fg1_drawbezier(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-1);
@@ -2255,7 +2136,6 @@ TypedValue* fg_drawbezier(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawbezier((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -2271,7 +2151,6 @@ TypedValue* fg_drawbezier(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawbezier", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2298,7 +2177,6 @@ TypedValue * fg1_drawcircle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
 TypedValue * fg1_drawcircle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-4)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-4);
@@ -2326,7 +2204,6 @@ TypedValue* fg_drawcircle(HPHP::VM::ActRec *ar) {
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawcircle((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 5);
@@ -2342,7 +2219,6 @@ TypedValue* fg_drawcircle(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawcircle", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2368,7 +2244,6 @@ TypedValue * fg1_drawcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
 TypedValue * fg1_drawcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-3)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-3);
@@ -2393,7 +2268,6 @@ TypedValue* fg_drawcolor(HPHP::VM::ActRec *ar) {
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawcolor((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (int)(args[-3].m_data.num));
         frame_free_locals_no_this_inl(ar, 4);
@@ -2409,7 +2283,6 @@ TypedValue* fg_drawcolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawcolor", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2433,7 +2306,6 @@ TypedValue * fg1_drawcomment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
 TypedValue * fg1_drawcomment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -2452,7 +2324,6 @@ TypedValue* fg_drawcomment(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawcomment((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -2468,7 +2339,6 @@ TypedValue* fg_drawcomment(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawcomment", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2497,7 +2367,6 @@ bool fh_drawcomposite(Value* drw_wnd, int composite_operator, double x, double y
 TypedValue * fg1_drawcomposite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawcomposite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-6)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-6);
@@ -2530,7 +2399,6 @@ TypedValue* fg_drawcomposite(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfObject && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_drawcomposite((Value*)(args-0), (int)(args[-1].m_data.num), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (args[-5].m_data.dbl), (Value*)(args-6))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 7);
@@ -2546,7 +2414,6 @@ TypedValue* fg_drawcomposite(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawcomposite", count, 7, 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2575,7 +2442,6 @@ TypedValue * fg1_drawellipse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
 TypedValue * fg1_drawellipse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-6)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-6);
@@ -2609,7 +2475,6 @@ TypedValue* fg_drawellipse(HPHP::VM::ActRec *ar) {
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawellipse((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (args[-5].m_data.dbl), (args[-6].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 7);
@@ -2625,7 +2490,6 @@ TypedValue* fg_drawellipse(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawellipse", count, 7, 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2649,7 +2513,6 @@ Value* fh_drawgetclippath(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP17f_drawgetcl
 TypedValue * fg1_drawgetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_drawgetclippath((Value*)(rv), (Value*)(args-0));
@@ -2663,7 +2526,6 @@ TypedValue* fg_drawgetclippath(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_drawgetclippath((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2680,7 +2542,6 @@ TypedValue* fg_drawgetclippath(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetclippath", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2703,7 +2564,6 @@ long fh_drawgetcliprule(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetclipruleERKNS_6O
 TypedValue * fg1_drawgetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_drawgetcliprule((Value*)(args-0));
@@ -2716,7 +2576,6 @@ TypedValue* fg_drawgetcliprule(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_drawgetcliprule((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2732,7 +2591,6 @@ TypedValue* fg_drawgetcliprule(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetcliprule", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2755,7 +2613,6 @@ long fh_drawgetclipunits(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetclipunitsERKNS_
 TypedValue * fg1_drawgetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_drawgetclipunits((Value*)(args-0));
@@ -2768,7 +2625,6 @@ TypedValue* fg_drawgetclipunits(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_drawgetclipunits((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2784,7 +2640,6 @@ TypedValue* fg_drawgetclipunits(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetclipunits", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2808,7 +2663,6 @@ Value* fh_drawgetexception(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP18f_drawgete
 TypedValue * fg1_drawgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_drawgetexception((Value*)(rv), (Value*)(args-0));
@@ -2822,7 +2676,6 @@ TypedValue* fg_drawgetexception(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_drawgetexception((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2839,7 +2692,6 @@ TypedValue* fg_drawgetexception(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetexception", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2863,7 +2715,6 @@ Value* fh_drawgetexceptionstring(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP24f_dr
 TypedValue * fg1_drawgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_drawgetexceptionstring((Value*)(rv), (Value*)(args-0));
@@ -2877,7 +2728,6 @@ TypedValue* fg_drawgetexceptionstring(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_drawgetexceptionstring((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -2894,7 +2744,6 @@ TypedValue* fg_drawgetexceptionstring(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetexceptionstring", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2917,7 +2766,6 @@ long fh_drawgetexceptiontype(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetexceptionty
 TypedValue * fg1_drawgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_drawgetexceptiontype((Value*)(args-0));
@@ -2930,7 +2778,6 @@ TypedValue* fg_drawgetexceptiontype(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_drawgetexceptiontype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2946,7 +2793,6 @@ TypedValue* fg_drawgetexceptiontype(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetexceptiontype", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2969,7 +2815,6 @@ double fh_drawgetfillalpha(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetfillalphaERKN
 TypedValue * fg1_drawgetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_drawgetfillalpha((Value*)(args-0));
@@ -2982,7 +2827,6 @@ TypedValue* fg_drawgetfillalpha(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_drawgetfillalpha((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -2998,7 +2842,6 @@ TypedValue* fg_drawgetfillalpha(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetfillalpha", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3022,7 +2865,6 @@ Value* fh_drawgetfillcolor(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP18f_drawgetf
 TypedValue * fg1_drawgetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_drawgetfillcolor((Value*)(rv), (Value*)(args-0));
@@ -3036,7 +2878,6 @@ TypedValue* fg_drawgetfillcolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_drawgetfillcolor((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3053,7 +2894,6 @@ TypedValue* fg_drawgetfillcolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetfillcolor", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3076,7 +2916,6 @@ double fh_drawgetfillopacity(Value* drw_wnd) asm("_ZN4HPHP20f_drawgetfillopacity
 TypedValue * fg1_drawgetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_drawgetfillopacity((Value*)(args-0));
@@ -3089,7 +2928,6 @@ TypedValue* fg_drawgetfillopacity(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_drawgetfillopacity((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3105,7 +2943,6 @@ TypedValue* fg_drawgetfillopacity(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetfillopacity", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3128,7 +2965,6 @@ long fh_drawgetfillrule(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetfillruleERKNS_6O
 TypedValue * fg1_drawgetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_drawgetfillrule((Value*)(args-0));
@@ -3141,7 +2977,6 @@ TypedValue* fg_drawgetfillrule(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_drawgetfillrule((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3157,7 +2992,6 @@ TypedValue* fg_drawgetfillrule(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetfillrule", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3181,7 +3015,6 @@ Value* fh_drawgetfont(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP13f_drawgetfontER
 TypedValue * fg1_drawgetfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_drawgetfont((Value*)(rv), (Value*)(args-0));
@@ -3195,7 +3028,6 @@ TypedValue* fg_drawgetfont(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_drawgetfont((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3212,7 +3044,6 @@ TypedValue* fg_drawgetfont(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetfont", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3236,7 +3067,6 @@ Value* fh_drawgetfontfamily(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP19f_drawget
 TypedValue * fg1_drawgetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_drawgetfontfamily((Value*)(rv), (Value*)(args-0));
@@ -3250,7 +3080,6 @@ TypedValue* fg_drawgetfontfamily(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_drawgetfontfamily((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3267,7 +3096,6 @@ TypedValue* fg_drawgetfontfamily(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetfontfamily", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3290,7 +3118,6 @@ double fh_drawgetfontsize(Value* drw_wnd) asm("_ZN4HPHP17f_drawgetfontsizeERKNS_
 TypedValue * fg1_drawgetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_drawgetfontsize((Value*)(args-0));
@@ -3303,7 +3130,6 @@ TypedValue* fg_drawgetfontsize(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_drawgetfontsize((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3319,7 +3145,6 @@ TypedValue* fg_drawgetfontsize(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetfontsize", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3342,7 +3167,6 @@ long fh_drawgetfontstretch(Value* drw_wnd) asm("_ZN4HPHP20f_drawgetfontstretchER
 TypedValue * fg1_drawgetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_drawgetfontstretch((Value*)(args-0));
@@ -3355,7 +3179,6 @@ TypedValue* fg_drawgetfontstretch(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_drawgetfontstretch((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3371,7 +3194,6 @@ TypedValue* fg_drawgetfontstretch(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetfontstretch", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3394,7 +3216,6 @@ long fh_drawgetfontstyle(Value* drw_wnd) asm("_ZN4HPHP18f_drawgetfontstyleERKNS_
 TypedValue * fg1_drawgetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_drawgetfontstyle((Value*)(args-0));
@@ -3407,7 +3228,6 @@ TypedValue* fg_drawgetfontstyle(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_drawgetfontstyle((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3423,7 +3243,6 @@ TypedValue* fg_drawgetfontstyle(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetfontstyle", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3446,7 +3265,6 @@ double fh_drawgetfontweight(Value* drw_wnd) asm("_ZN4HPHP19f_drawgetfontweightER
 TypedValue * fg1_drawgetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_drawgetfontweight((Value*)(args-0));
@@ -3459,7 +3277,6 @@ TypedValue* fg_drawgetfontweight(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_drawgetfontweight((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3475,7 +3292,6 @@ TypedValue* fg_drawgetfontweight(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetfontweight", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3498,7 +3314,6 @@ long fh_drawgetgravity(Value* drw_wnd) asm("_ZN4HPHP16f_drawgetgravityERKNS_6Obj
 TypedValue * fg1_drawgetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_drawgetgravity((Value*)(args-0));
@@ -3511,7 +3326,6 @@ TypedValue* fg_drawgetgravity(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_drawgetgravity((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3527,7 +3341,6 @@ TypedValue* fg_drawgetgravity(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetgravity", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3550,7 +3363,6 @@ double fh_drawgetstrokealpha(Value* drw_wnd) asm("_ZN4HPHP20f_drawgetstrokealpha
 TypedValue * fg1_drawgetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_drawgetstrokealpha((Value*)(args-0));
@@ -3563,7 +3375,6 @@ TypedValue* fg_drawgetstrokealpha(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_drawgetstrokealpha((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3579,7 +3390,6 @@ TypedValue* fg_drawgetstrokealpha(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetstrokealpha", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3602,7 +3412,6 @@ bool fh_drawgetstrokeantialias(Value* drw_wnd) asm("_ZN4HPHP24f_drawgetstrokeant
 TypedValue * fg1_drawgetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_drawgetstrokeantialias((Value*)(args-0))) ? 1LL : 0LL;
@@ -3615,7 +3424,6 @@ TypedValue* fg_drawgetstrokeantialias(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_drawgetstrokeantialias((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -3631,7 +3439,6 @@ TypedValue* fg_drawgetstrokeantialias(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetstrokeantialias", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3655,7 +3462,6 @@ Value* fh_drawgetstrokecolor(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP20f_drawge
 TypedValue * fg1_drawgetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_drawgetstrokecolor((Value*)(rv), (Value*)(args-0));
@@ -3669,7 +3475,6 @@ TypedValue* fg_drawgetstrokecolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_drawgetstrokecolor((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3686,7 +3491,6 @@ TypedValue* fg_drawgetstrokecolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetstrokecolor", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3710,7 +3514,6 @@ Value* fh_drawgetstrokedasharray(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP24f_dr
 TypedValue * fg1_drawgetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_drawgetstrokedasharray((Value*)(rv), (Value*)(args-0));
@@ -3724,7 +3527,6 @@ TypedValue* fg_drawgetstrokedasharray(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_drawgetstrokedasharray((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -3741,7 +3543,6 @@ TypedValue* fg_drawgetstrokedasharray(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetstrokedasharray", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3764,7 +3565,6 @@ double fh_drawgetstrokedashoffset(Value* drw_wnd) asm("_ZN4HPHP25f_drawgetstroke
 TypedValue * fg1_drawgetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_drawgetstrokedashoffset((Value*)(args-0));
@@ -3777,7 +3577,6 @@ TypedValue* fg_drawgetstrokedashoffset(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_drawgetstrokedashoffset((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3793,7 +3592,6 @@ TypedValue* fg_drawgetstrokedashoffset(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetstrokedashoffset", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3816,7 +3614,6 @@ long fh_drawgetstrokelinecap(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetstrokelinec
 TypedValue * fg1_drawgetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_drawgetstrokelinecap((Value*)(args-0));
@@ -3829,7 +3626,6 @@ TypedValue* fg_drawgetstrokelinecap(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_drawgetstrokelinecap((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3845,7 +3641,6 @@ TypedValue* fg_drawgetstrokelinecap(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetstrokelinecap", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3868,7 +3663,6 @@ long fh_drawgetstrokelinejoin(Value* drw_wnd) asm("_ZN4HPHP23f_drawgetstrokeline
 TypedValue * fg1_drawgetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_drawgetstrokelinejoin((Value*)(args-0));
@@ -3881,7 +3675,6 @@ TypedValue* fg_drawgetstrokelinejoin(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_drawgetstrokelinejoin((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3897,7 +3690,6 @@ TypedValue* fg_drawgetstrokelinejoin(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetstrokelinejoin", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3920,7 +3712,6 @@ double fh_drawgetstrokemiterlimit(Value* drw_wnd) asm("_ZN4HPHP25f_drawgetstroke
 TypedValue * fg1_drawgetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_drawgetstrokemiterlimit((Value*)(args-0));
@@ -3933,7 +3724,6 @@ TypedValue* fg_drawgetstrokemiterlimit(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_drawgetstrokemiterlimit((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -3949,7 +3739,6 @@ TypedValue* fg_drawgetstrokemiterlimit(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetstrokemiterlimit", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3972,7 +3761,6 @@ double fh_drawgetstrokeopacity(Value* drw_wnd) asm("_ZN4HPHP22f_drawgetstrokeopa
 TypedValue * fg1_drawgetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_drawgetstrokeopacity((Value*)(args-0));
@@ -3985,7 +3773,6 @@ TypedValue* fg_drawgetstrokeopacity(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_drawgetstrokeopacity((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -4001,7 +3788,6 @@ TypedValue* fg_drawgetstrokeopacity(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetstrokeopacity", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4024,7 +3810,6 @@ double fh_drawgetstrokewidth(Value* drw_wnd) asm("_ZN4HPHP20f_drawgetstrokewidth
 TypedValue * fg1_drawgetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_drawgetstrokewidth((Value*)(args-0));
@@ -4037,7 +3822,6 @@ TypedValue* fg_drawgetstrokewidth(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_drawgetstrokewidth((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -4053,7 +3837,6 @@ TypedValue* fg_drawgetstrokewidth(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetstrokewidth", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4076,7 +3859,6 @@ long fh_drawgettextalignment(Value* drw_wnd) asm("_ZN4HPHP22f_drawgettextalignme
 TypedValue * fg1_drawgettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_drawgettextalignment((Value*)(args-0));
@@ -4089,7 +3871,6 @@ TypedValue* fg_drawgettextalignment(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_drawgettextalignment((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -4105,7 +3886,6 @@ TypedValue* fg_drawgettextalignment(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgettextalignment", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4128,7 +3908,6 @@ bool fh_drawgettextantialias(Value* drw_wnd) asm("_ZN4HPHP22f_drawgettextantiali
 TypedValue * fg1_drawgettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_drawgettextantialias((Value*)(args-0))) ? 1LL : 0LL;
@@ -4141,7 +3920,6 @@ TypedValue* fg_drawgettextantialias(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_drawgettextantialias((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -4157,7 +3935,6 @@ TypedValue* fg_drawgettextantialias(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgettextantialias", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4180,7 +3957,6 @@ long fh_drawgettextdecoration(Value* drw_wnd) asm("_ZN4HPHP23f_drawgettextdecora
 TypedValue * fg1_drawgettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_drawgettextdecoration((Value*)(args-0));
@@ -4193,7 +3969,6 @@ TypedValue* fg_drawgettextdecoration(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_drawgettextdecoration((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -4209,7 +3984,6 @@ TypedValue* fg_drawgettextdecoration(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgettextdecoration", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4233,7 +4007,6 @@ Value* fh_drawgettextencoding(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP21f_drawg
 TypedValue * fg1_drawgettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_drawgettextencoding((Value*)(rv), (Value*)(args-0));
@@ -4247,7 +4020,6 @@ TypedValue* fg_drawgettextencoding(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_drawgettextencoding((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -4264,7 +4036,6 @@ TypedValue* fg_drawgettextencoding(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgettextencoding", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4288,7 +4059,6 @@ Value* fh_drawgettextundercolor(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP23f_dra
 TypedValue * fg1_drawgettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_drawgettextundercolor((Value*)(rv), (Value*)(args-0));
@@ -4302,7 +4072,6 @@ TypedValue* fg_drawgettextundercolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_drawgettextundercolor((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -4319,7 +4088,6 @@ TypedValue* fg_drawgettextundercolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgettextundercolor", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4343,7 +4111,6 @@ Value* fh_drawgetvectorgraphics(Value* _rv, Value* drw_wnd) asm("_ZN4HPHP23f_dra
 TypedValue * fg1_drawgetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawgetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_drawgetvectorgraphics((Value*)(rv), (Value*)(args-0));
@@ -4357,7 +4124,6 @@ TypedValue* fg_drawgetvectorgraphics(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_drawgetvectorgraphics((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -4374,7 +4140,6 @@ TypedValue* fg_drawgetvectorgraphics(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawgetvectorgraphics", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4401,7 +4166,6 @@ TypedValue * fg1_drawline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) _
 TypedValue * fg1_drawline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-4)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-4);
@@ -4429,7 +4193,6 @@ TypedValue* fg_drawline(HPHP::VM::ActRec *ar) {
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawline((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 5);
@@ -4445,7 +4208,6 @@ TypedValue* fg_drawline(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawline", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4471,7 +4233,6 @@ TypedValue * fg1_drawmatte(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
 TypedValue * fg1_drawmatte(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-3)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-3);
@@ -4496,7 +4257,6 @@ TypedValue* fg_drawmatte(HPHP::VM::ActRec *ar) {
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawmatte((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (int)(args[-3].m_data.num));
         frame_free_locals_no_this_inl(ar, 4);
@@ -4512,7 +4272,6 @@ TypedValue* fg_drawmatte(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawmatte", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4535,7 +4294,6 @@ TypedValue * fg1_drawpathclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
 TypedValue * fg1_drawpathclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_drawpathclose((Value*)(args-0));
@@ -4549,7 +4307,6 @@ TypedValue* fg_drawpathclose(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathclose((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -4565,7 +4322,6 @@ TypedValue* fg_drawpathclose(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathclose", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4594,7 +4350,6 @@ TypedValue * fg1_drawpathcurvetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, i
 TypedValue * fg1_drawpathcurvetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-6)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-6);
@@ -4628,7 +4383,6 @@ TypedValue* fg_drawpathcurvetoabsolute(HPHP::VM::ActRec *ar) {
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathcurvetoabsolute((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (args[-5].m_data.dbl), (args[-6].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 7);
@@ -4644,7 +4398,6 @@ TypedValue* fg_drawpathcurvetoabsolute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathcurvetoabsolute", count, 7, 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4671,7 +4424,6 @@ TypedValue * fg1_drawpathcurvetoquadraticbezierabsolute(TypedValue* rv, HPHP::VM
 TypedValue * fg1_drawpathcurvetoquadraticbezierabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-4)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-4);
@@ -4699,7 +4451,6 @@ TypedValue* fg_drawpathcurvetoquadraticbezierabsolute(HPHP::VM::ActRec *ar) {
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathcurvetoquadraticbezierabsolute((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 5);
@@ -4715,7 +4466,6 @@ TypedValue* fg_drawpathcurvetoquadraticbezierabsolute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathcurvetoquadraticbezierabsolute", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4742,7 +4492,6 @@ TypedValue * fg1_drawpathcurvetoquadraticbezierrelative(TypedValue* rv, HPHP::VM
 TypedValue * fg1_drawpathcurvetoquadraticbezierrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-4)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-4);
@@ -4770,7 +4519,6 @@ TypedValue* fg_drawpathcurvetoquadraticbezierrelative(HPHP::VM::ActRec *ar) {
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathcurvetoquadraticbezierrelative((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 5);
@@ -4786,7 +4534,6 @@ TypedValue* fg_drawpathcurvetoquadraticbezierrelative(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathcurvetoquadraticbezierrelative", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4811,7 +4558,6 @@ TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothabsolute(TypedValue* rv, HP
 TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -4833,7 +4579,6 @@ TypedValue* fg_drawpathcurvetoquadraticbeziersmoothabsolute(HPHP::VM::ActRec *ar
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathcurvetoquadraticbeziersmoothabsolute((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 3);
@@ -4849,7 +4594,6 @@ TypedValue* fg_drawpathcurvetoquadraticbeziersmoothabsolute(HPHP::VM::ActRec *ar
       throw_wrong_arguments_nr("drawpathcurvetoquadraticbeziersmoothabsolute", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4874,7 +4618,6 @@ TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothrelative(TypedValue* rv, HP
 TypedValue * fg1_drawpathcurvetoquadraticbeziersmoothrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -4896,7 +4639,6 @@ TypedValue* fg_drawpathcurvetoquadraticbeziersmoothrelative(HPHP::VM::ActRec *ar
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathcurvetoquadraticbeziersmoothrelative((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 3);
@@ -4912,7 +4654,6 @@ TypedValue* fg_drawpathcurvetoquadraticbeziersmoothrelative(HPHP::VM::ActRec *ar
       throw_wrong_arguments_nr("drawpathcurvetoquadraticbeziersmoothrelative", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4941,7 +4682,6 @@ TypedValue * fg1_drawpathcurvetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, i
 TypedValue * fg1_drawpathcurvetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-6)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-6);
@@ -4975,7 +4715,6 @@ TypedValue* fg_drawpathcurvetorelative(HPHP::VM::ActRec *ar) {
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathcurvetorelative((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (args[-5].m_data.dbl), (args[-6].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 7);
@@ -4991,7 +4730,6 @@ TypedValue* fg_drawpathcurvetorelative(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathcurvetorelative", count, 7, 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5018,7 +4756,6 @@ TypedValue * fg1_drawpathcurvetosmoothabsolute(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue * fg1_drawpathcurvetosmoothabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-4)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-4);
@@ -5046,7 +4783,6 @@ TypedValue* fg_drawpathcurvetosmoothabsolute(HPHP::VM::ActRec *ar) {
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathcurvetosmoothabsolute((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 5);
@@ -5062,7 +4798,6 @@ TypedValue* fg_drawpathcurvetosmoothabsolute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathcurvetosmoothabsolute", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5089,7 +4824,6 @@ TypedValue * fg1_drawpathcurvetosmoothrelative(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue * fg1_drawpathcurvetosmoothrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-4)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-4);
@@ -5117,7 +4851,6 @@ TypedValue* fg_drawpathcurvetosmoothrelative(HPHP::VM::ActRec *ar) {
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathcurvetosmoothrelative((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 5);
@@ -5133,7 +4866,6 @@ TypedValue* fg_drawpathcurvetosmoothrelative(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathcurvetosmoothrelative", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5163,7 +4895,6 @@ TypedValue * fg1_drawpathellipticarcabsolute(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue * fg1_drawpathellipticarcabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-7)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-7);
@@ -5200,7 +4931,6 @@ TypedValue* fg_drawpathellipticarcabsolute(HPHP::VM::ActRec *ar) {
     if (count == 8LL) {
       if ((args-7)->m_type == KindOfDouble && (args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfBoolean && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathellipticarcabsolute((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (bool)(args[-4].m_data.num), (bool)(args[-5].m_data.num), (args[-6].m_data.dbl), (args[-7].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 8);
@@ -5216,7 +4946,6 @@ TypedValue* fg_drawpathellipticarcabsolute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathellipticarcabsolute", count, 8, 8, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 8);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5246,7 +4975,6 @@ TypedValue * fg1_drawpathellipticarcrelative(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue * fg1_drawpathellipticarcrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-7)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-7);
@@ -5283,7 +5011,6 @@ TypedValue* fg_drawpathellipticarcrelative(HPHP::VM::ActRec *ar) {
     if (count == 8LL) {
       if ((args-7)->m_type == KindOfDouble && (args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfBoolean && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathellipticarcrelative((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (bool)(args[-4].m_data.num), (bool)(args[-5].m_data.num), (args[-6].m_data.dbl), (args[-7].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 8);
@@ -5299,7 +5026,6 @@ TypedValue* fg_drawpathellipticarcrelative(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathellipticarcrelative", count, 8, 8, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 8);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5322,7 +5048,6 @@ TypedValue * fg1_drawpathfinish(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_drawpathfinish(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_drawpathfinish((Value*)(args-0));
@@ -5336,7 +5061,6 @@ TypedValue* fg_drawpathfinish(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathfinish((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -5352,7 +5076,6 @@ TypedValue* fg_drawpathfinish(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathfinish", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5377,7 +5100,6 @@ TypedValue * fg1_drawpathlinetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_drawpathlinetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -5399,7 +5121,6 @@ TypedValue* fg_drawpathlinetoabsolute(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathlinetoabsolute((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 3);
@@ -5415,7 +5136,6 @@ TypedValue* fg_drawpathlinetoabsolute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathlinetoabsolute", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5439,7 +5159,6 @@ TypedValue * fg1_drawpathlinetohorizontalabsolute(TypedValue* rv, HPHP::VM::ActR
 TypedValue * fg1_drawpathlinetohorizontalabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -5458,7 +5177,6 @@ TypedValue* fg_drawpathlinetohorizontalabsolute(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathlinetohorizontalabsolute((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -5474,7 +5192,6 @@ TypedValue* fg_drawpathlinetohorizontalabsolute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathlinetohorizontalabsolute", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5498,7 +5215,6 @@ TypedValue * fg1_drawpathlinetohorizontalrelative(TypedValue* rv, HPHP::VM::ActR
 TypedValue * fg1_drawpathlinetohorizontalrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -5517,7 +5233,6 @@ TypedValue* fg_drawpathlinetohorizontalrelative(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathlinetohorizontalrelative((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -5533,7 +5248,6 @@ TypedValue* fg_drawpathlinetohorizontalrelative(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathlinetohorizontalrelative", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5558,7 +5272,6 @@ TypedValue * fg1_drawpathlinetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_drawpathlinetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -5580,7 +5293,6 @@ TypedValue* fg_drawpathlinetorelative(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathlinetorelative((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 3);
@@ -5596,7 +5308,6 @@ TypedValue* fg_drawpathlinetorelative(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathlinetorelative", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5620,7 +5331,6 @@ TypedValue * fg1_drawpathlinetoverticalabsolute(TypedValue* rv, HPHP::VM::ActRec
 TypedValue * fg1_drawpathlinetoverticalabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -5639,7 +5349,6 @@ TypedValue* fg_drawpathlinetoverticalabsolute(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathlinetoverticalabsolute((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -5655,7 +5364,6 @@ TypedValue* fg_drawpathlinetoverticalabsolute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathlinetoverticalabsolute", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5679,7 +5387,6 @@ TypedValue * fg1_drawpathlinetoverticalrelative(TypedValue* rv, HPHP::VM::ActRec
 TypedValue * fg1_drawpathlinetoverticalrelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -5698,7 +5405,6 @@ TypedValue* fg_drawpathlinetoverticalrelative(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathlinetoverticalrelative((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -5714,7 +5420,6 @@ TypedValue* fg_drawpathlinetoverticalrelative(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathlinetoverticalrelative", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5739,7 +5444,6 @@ TypedValue * fg1_drawpathmovetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_drawpathmovetoabsolute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -5761,7 +5465,6 @@ TypedValue* fg_drawpathmovetoabsolute(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathmovetoabsolute((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 3);
@@ -5777,7 +5480,6 @@ TypedValue* fg_drawpathmovetoabsolute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathmovetoabsolute", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5802,7 +5504,6 @@ TypedValue * fg1_drawpathmovetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_drawpathmovetorelative(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -5824,7 +5525,6 @@ TypedValue* fg_drawpathmovetorelative(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathmovetorelative((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 3);
@@ -5840,7 +5540,6 @@ TypedValue* fg_drawpathmovetorelative(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathmovetorelative", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5863,7 +5562,6 @@ TypedValue * fg1_drawpathstart(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
 TypedValue * fg1_drawpathstart(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_drawpathstart((Value*)(args-0));
@@ -5877,7 +5575,6 @@ TypedValue* fg_drawpathstart(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpathstart((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -5893,7 +5590,6 @@ TypedValue* fg_drawpathstart(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpathstart", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5918,7 +5614,6 @@ TypedValue * fg1_drawpoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
 TypedValue * fg1_drawpoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -5940,7 +5635,6 @@ TypedValue* fg_drawpoint(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpoint((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 3);
@@ -5956,7 +5650,6 @@ TypedValue* fg_drawpoint(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpoint", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5980,7 +5673,6 @@ TypedValue * fg1_drawpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
 TypedValue * fg1_drawpolygon(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-1);
@@ -5999,7 +5691,6 @@ TypedValue* fg_drawpolygon(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpolygon((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -6015,7 +5706,6 @@ TypedValue* fg_drawpolygon(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpolygon", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6039,7 +5729,6 @@ TypedValue * fg1_drawpolyline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
 TypedValue * fg1_drawpolyline(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-1);
@@ -6058,7 +5747,6 @@ TypedValue* fg_drawpolyline(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpolyline((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -6074,7 +5762,6 @@ TypedValue* fg_drawpolyline(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpolyline", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6101,7 +5788,6 @@ TypedValue * fg1_drawrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
 TypedValue * fg1_drawrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-4)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-4);
@@ -6129,7 +5815,6 @@ TypedValue* fg_drawrectangle(HPHP::VM::ActRec *ar) {
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawrectangle((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 5);
@@ -6145,7 +5830,6 @@ TypedValue* fg_drawrectangle(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawrectangle", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6168,7 +5852,6 @@ bool fh_drawrender(Value* drw_wnd) asm("_ZN4HPHP12f_drawrenderERKNS_6ObjectE");
 TypedValue * fg1_drawrender(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawrender(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_drawrender((Value*)(args-0))) ? 1LL : 0LL;
@@ -6181,7 +5864,6 @@ TypedValue* fg_drawrender(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_drawrender((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -6197,7 +5879,6 @@ TypedValue* fg_drawrender(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawrender", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6221,7 +5902,6 @@ TypedValue * fg1_drawrotate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
 TypedValue * fg1_drawrotate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -6240,7 +5920,6 @@ TypedValue* fg_drawrotate(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawrotate((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -6256,7 +5935,6 @@ TypedValue* fg_drawrotate(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawrotate", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6285,7 +5963,6 @@ TypedValue * fg1_drawroundrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_drawroundrectangle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-6)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-6);
@@ -6319,7 +5996,6 @@ TypedValue* fg_drawroundrectangle(HPHP::VM::ActRec *ar) {
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfDouble && (args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawroundrectangle((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (args[-5].m_data.dbl), (args[-6].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 7);
@@ -6335,7 +6011,6 @@ TypedValue* fg_drawroundrectangle(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawroundrectangle", count, 7, 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6360,7 +6035,6 @@ TypedValue * fg1_drawscale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
 TypedValue * fg1_drawscale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -6382,7 +6056,6 @@ TypedValue* fg_drawscale(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawscale((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 3);
@@ -6398,7 +6071,6 @@ TypedValue* fg_drawscale(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawscale", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6422,7 +6094,6 @@ bool fh_drawsetclippath(Value* drw_wnd, Value* clip_path) asm("_ZN4HPHP17f_draws
 TypedValue * fg1_drawsetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawsetclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -6440,7 +6111,6 @@ TypedValue* fg_drawsetclippath(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_drawsetclippath((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -6456,7 +6126,6 @@ TypedValue* fg_drawsetclippath(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetclippath", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6480,7 +6149,6 @@ TypedValue * fg1_drawsetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
 TypedValue * fg1_drawsetcliprule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -6499,7 +6167,6 @@ TypedValue* fg_drawsetcliprule(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetcliprule((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -6515,7 +6182,6 @@ TypedValue* fg_drawsetcliprule(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetcliprule", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6539,7 +6205,6 @@ TypedValue * fg1_drawsetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_drawsetclipunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -6558,7 +6223,6 @@ TypedValue* fg_drawsetclipunits(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetclipunits((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -6574,7 +6238,6 @@ TypedValue* fg_drawsetclipunits(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetclipunits", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6598,7 +6261,6 @@ TypedValue * fg1_drawsetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_drawsetfillalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -6617,7 +6279,6 @@ TypedValue* fg_drawsetfillalpha(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetfillalpha((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -6633,7 +6294,6 @@ TypedValue* fg_drawsetfillalpha(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetfillalpha", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6657,7 +6317,6 @@ TypedValue * fg1_drawsetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_drawsetfillcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -6676,7 +6335,6 @@ TypedValue* fg_drawsetfillcolor(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetfillcolor((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -6692,7 +6350,6 @@ TypedValue* fg_drawsetfillcolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetfillcolor", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6716,7 +6373,6 @@ TypedValue * fg1_drawsetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_drawsetfillopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -6735,7 +6391,6 @@ TypedValue* fg_drawsetfillopacity(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetfillopacity((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -6751,7 +6406,6 @@ TypedValue* fg_drawsetfillopacity(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetfillopacity", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6775,7 +6429,6 @@ bool fh_drawsetfillpatternurl(Value* drw_wnd, Value* fill_url) asm("_ZN4HPHP23f_
 TypedValue * fg1_drawsetfillpatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawsetfillpatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -6793,7 +6446,6 @@ TypedValue* fg_drawsetfillpatternurl(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_drawsetfillpatternurl((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -6809,7 +6461,6 @@ TypedValue* fg_drawsetfillpatternurl(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetfillpatternurl", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6833,7 +6484,6 @@ TypedValue * fg1_drawsetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
 TypedValue * fg1_drawsetfillrule(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -6852,7 +6502,6 @@ TypedValue* fg_drawsetfillrule(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetfillrule((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -6868,7 +6517,6 @@ TypedValue* fg_drawsetfillrule(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetfillrule", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6892,7 +6540,6 @@ bool fh_drawsetfont(Value* drw_wnd, Value* font_file) asm("_ZN4HPHP13f_drawsetfo
 TypedValue * fg1_drawsetfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawsetfont(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -6910,7 +6557,6 @@ TypedValue* fg_drawsetfont(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_drawsetfont((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -6926,7 +6572,6 @@ TypedValue* fg_drawsetfont(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetfont", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6950,7 +6595,6 @@ bool fh_drawsetfontfamily(Value* drw_wnd, Value* font_family) asm("_ZN4HPHP19f_d
 TypedValue * fg1_drawsetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawsetfontfamily(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -6968,7 +6612,6 @@ TypedValue* fg_drawsetfontfamily(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_drawsetfontfamily((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -6984,7 +6627,6 @@ TypedValue* fg_drawsetfontfamily(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetfontfamily", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7008,7 +6650,6 @@ TypedValue * fg1_drawsetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
 TypedValue * fg1_drawsetfontsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -7027,7 +6668,6 @@ TypedValue* fg_drawsetfontsize(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetfontsize((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7043,7 +6683,6 @@ TypedValue* fg_drawsetfontsize(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetfontsize", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7067,7 +6706,6 @@ TypedValue * fg1_drawsetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_drawsetfontstretch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -7086,7 +6724,6 @@ TypedValue* fg_drawsetfontstretch(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetfontstretch((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7102,7 +6739,6 @@ TypedValue* fg_drawsetfontstretch(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetfontstretch", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7126,7 +6762,6 @@ TypedValue * fg1_drawsetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_drawsetfontstyle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -7145,7 +6780,6 @@ TypedValue* fg_drawsetfontstyle(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetfontstyle((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7161,7 +6795,6 @@ TypedValue* fg_drawsetfontstyle(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetfontstyle", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7185,7 +6818,6 @@ TypedValue * fg1_drawsetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
 TypedValue * fg1_drawsetfontweight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -7204,7 +6836,6 @@ TypedValue* fg_drawsetfontweight(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetfontweight((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7220,7 +6851,6 @@ TypedValue* fg_drawsetfontweight(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetfontweight", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7244,7 +6874,6 @@ TypedValue * fg1_drawsetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_drawsetgravity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -7263,7 +6892,6 @@ TypedValue* fg_drawsetgravity(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetgravity((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7279,7 +6907,6 @@ TypedValue* fg_drawsetgravity(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetgravity", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7303,7 +6930,6 @@ TypedValue * fg1_drawsetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_drawsetstrokealpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -7322,7 +6948,6 @@ TypedValue* fg_drawsetstrokealpha(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetstrokealpha((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7338,7 +6963,6 @@ TypedValue* fg_drawsetstrokealpha(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetstrokealpha", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7362,7 +6986,6 @@ TypedValue * fg1_drawsetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_drawsetstrokeantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 2
@@ -7386,7 +7009,6 @@ TypedValue* fg_drawsetstrokeantialias(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetstrokeantialias((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7402,7 +7024,6 @@ TypedValue* fg_drawsetstrokeantialias(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetstrokeantialias", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7426,7 +7047,6 @@ TypedValue * fg1_drawsetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_drawsetstrokecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -7445,7 +7065,6 @@ TypedValue* fg_drawsetstrokecolor(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetstrokecolor((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7461,7 +7080,6 @@ TypedValue* fg_drawsetstrokecolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetstrokecolor", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7485,7 +7103,6 @@ TypedValue * fg1_drawsetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_drawsetstrokedasharray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 2
@@ -7509,7 +7126,6 @@ TypedValue* fg_drawsetstrokedasharray(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfArray) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetstrokedasharray((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7525,7 +7141,6 @@ TypedValue* fg_drawsetstrokedasharray(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetstrokedasharray", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7549,7 +7164,6 @@ TypedValue * fg1_drawsetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, i
 TypedValue * fg1_drawsetstrokedashoffset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -7568,7 +7182,6 @@ TypedValue* fg_drawsetstrokedashoffset(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetstrokedashoffset((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7584,7 +7197,6 @@ TypedValue* fg_drawsetstrokedashoffset(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetstrokedashoffset", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7608,7 +7220,6 @@ TypedValue * fg1_drawsetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_drawsetstrokelinecap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -7627,7 +7238,6 @@ TypedValue* fg_drawsetstrokelinecap(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetstrokelinecap((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7643,7 +7253,6 @@ TypedValue* fg_drawsetstrokelinecap(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetstrokelinecap", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7667,7 +7276,6 @@ TypedValue * fg1_drawsetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue * fg1_drawsetstrokelinejoin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -7686,7 +7294,6 @@ TypedValue* fg_drawsetstrokelinejoin(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetstrokelinejoin((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7702,7 +7309,6 @@ TypedValue* fg_drawsetstrokelinejoin(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetstrokelinejoin", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7726,7 +7332,6 @@ TypedValue * fg1_drawsetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, i
 TypedValue * fg1_drawsetstrokemiterlimit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -7745,7 +7350,6 @@ TypedValue* fg_drawsetstrokemiterlimit(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetstrokemiterlimit((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7761,7 +7365,6 @@ TypedValue* fg_drawsetstrokemiterlimit(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetstrokemiterlimit", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7785,7 +7388,6 @@ TypedValue * fg1_drawsetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_drawsetstrokeopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -7804,7 +7406,6 @@ TypedValue* fg_drawsetstrokeopacity(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetstrokeopacity((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7820,7 +7421,6 @@ TypedValue* fg_drawsetstrokeopacity(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetstrokeopacity", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7844,7 +7444,6 @@ bool fh_drawsetstrokepatternurl(Value* drw_wnd, Value* stroke_url) asm("_ZN4HPHP
 TypedValue * fg1_drawsetstrokepatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawsetstrokepatternurl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -7862,7 +7461,6 @@ TypedValue* fg_drawsetstrokepatternurl(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_drawsetstrokepatternurl((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -7878,7 +7476,6 @@ TypedValue* fg_drawsetstrokepatternurl(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetstrokepatternurl", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7902,7 +7499,6 @@ TypedValue * fg1_drawsetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_drawsetstrokewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -7921,7 +7517,6 @@ TypedValue* fg_drawsetstrokewidth(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetstrokewidth((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7937,7 +7532,6 @@ TypedValue* fg_drawsetstrokewidth(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetstrokewidth", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7961,7 +7555,6 @@ TypedValue * fg1_drawsettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_drawsettextalignment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -7980,7 +7573,6 @@ TypedValue* fg_drawsettextalignment(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsettextalignment((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -7996,7 +7588,6 @@ TypedValue* fg_drawsettextalignment(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsettextalignment", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8020,7 +7611,6 @@ TypedValue * fg1_drawsettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_drawsettextantialias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 2
@@ -8044,7 +7634,6 @@ TypedValue* fg_drawsettextantialias(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsettextantialias((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true));
         frame_free_locals_no_this_inl(ar, 2);
@@ -8060,7 +7649,6 @@ TypedValue* fg_drawsettextantialias(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsettextantialias", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8084,7 +7672,6 @@ TypedValue * fg1_drawsettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue * fg1_drawsettextdecoration(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -8103,7 +7690,6 @@ TypedValue* fg_drawsettextdecoration(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsettextdecoration((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -8119,7 +7705,6 @@ TypedValue* fg_drawsettextdecoration(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsettextdecoration", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8143,7 +7728,6 @@ TypedValue * fg1_drawsettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64
 TypedValue * fg1_drawsettextencoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -8162,7 +7746,6 @@ TypedValue* fg_drawsettextencoding(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsettextencoding((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -8178,7 +7761,6 @@ TypedValue* fg_drawsettextencoding(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsettextencoding", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8202,7 +7784,6 @@ TypedValue * fg1_drawsettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue * fg1_drawsettextundercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -8221,7 +7802,6 @@ TypedValue* fg_drawsettextundercolor(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsettextundercolor((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -8237,7 +7817,6 @@ TypedValue* fg_drawsettextundercolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsettextundercolor", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8261,7 +7840,6 @@ bool fh_drawsetvectorgraphics(Value* drw_wnd, Value* vector_graphics) asm("_ZN4H
 TypedValue * fg1_drawsetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_drawsetvectorgraphics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -8279,7 +7857,6 @@ TypedValue* fg_drawsetvectorgraphics(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_drawsetvectorgraphics((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -8295,7 +7872,6 @@ TypedValue* fg_drawsetvectorgraphics(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetvectorgraphics", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8322,7 +7898,6 @@ TypedValue * fg1_drawsetviewbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_drawsetviewbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-4)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-4);
@@ -8350,7 +7925,6 @@ TypedValue* fg_drawsetviewbox(HPHP::VM::ActRec *ar) {
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawsetviewbox((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 5);
@@ -8366,7 +7940,6 @@ TypedValue* fg_drawsetviewbox(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawsetviewbox", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8390,7 +7963,6 @@ TypedValue * fg1_drawskewx(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
 TypedValue * fg1_drawskewx(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -8409,7 +7981,6 @@ TypedValue* fg_drawskewx(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawskewx((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -8425,7 +7996,6 @@ TypedValue* fg_drawskewx(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawskewx", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8449,7 +8019,6 @@ TypedValue * fg1_drawskewy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
 TypedValue * fg1_drawskewy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -8468,7 +8037,6 @@ TypedValue* fg_drawskewy(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawskewy((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -8484,7 +8052,6 @@ TypedValue* fg_drawskewy(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawskewy", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8509,7 +8076,6 @@ TypedValue * fg1_drawtranslate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
 TypedValue * fg1_drawtranslate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -8531,7 +8097,6 @@ TypedValue* fg_drawtranslate(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawtranslate((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 3);
@@ -8547,7 +8112,6 @@ TypedValue* fg_drawtranslate(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawtranslate", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8570,7 +8134,6 @@ TypedValue * fg1_pushdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
 TypedValue * fg1_pushdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_pushdrawingwand((Value*)(args-0));
@@ -8584,7 +8147,6 @@ TypedValue* fg_pushdrawingwand(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pushdrawingwand((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -8600,7 +8162,6 @@ TypedValue* fg_pushdrawingwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pushdrawingwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8624,7 +8185,6 @@ TypedValue * fg1_drawpushclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_drawpushclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -8643,7 +8203,6 @@ TypedValue* fg_drawpushclippath(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpushclippath((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -8659,7 +8218,6 @@ TypedValue* fg_drawpushclippath(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpushclippath", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8682,7 +8240,6 @@ TypedValue * fg1_drawpushdefs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
 TypedValue * fg1_drawpushdefs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_drawpushdefs((Value*)(args-0));
@@ -8696,7 +8253,6 @@ TypedValue* fg_drawpushdefs(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpushdefs((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -8712,7 +8268,6 @@ TypedValue* fg_drawpushdefs(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpushdefs", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8740,7 +8295,6 @@ TypedValue * fg1_drawpushpattern(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
 TypedValue * fg1_drawpushpattern(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-5)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-5);
@@ -8771,7 +8325,6 @@ TypedValue* fg_drawpushpattern(HPHP::VM::ActRec *ar) {
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfDouble && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpushpattern((Value*)(args-0), (Value*)(args-1), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (args[-5].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 6);
@@ -8787,7 +8340,6 @@ TypedValue* fg_drawpushpattern(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpushpattern", count, 6, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8810,7 +8362,6 @@ TypedValue * fg1_popdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_popdrawingwand(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_popdrawingwand((Value*)(args-0));
@@ -8824,7 +8375,6 @@ TypedValue* fg_popdrawingwand(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_popdrawingwand((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -8840,7 +8390,6 @@ TypedValue* fg_popdrawingwand(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("popdrawingwand", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8863,7 +8412,6 @@ TypedValue * fg1_drawpopclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
 TypedValue * fg1_drawpopclippath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_drawpopclippath((Value*)(args-0));
@@ -8877,7 +8425,6 @@ TypedValue* fg_drawpopclippath(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpopclippath((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -8893,7 +8440,6 @@ TypedValue* fg_drawpopclippath(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpopclippath", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8916,7 +8462,6 @@ TypedValue * fg1_drawpopdefs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
 TypedValue * fg1_drawpopdefs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_drawpopdefs((Value*)(args-0));
@@ -8930,7 +8475,6 @@ TypedValue* fg_drawpopdefs(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpopdefs((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -8946,7 +8490,6 @@ TypedValue* fg_drawpopdefs(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpopdefs", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8969,7 +8512,6 @@ TypedValue * fg1_drawpoppattern(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_drawpoppattern(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_drawpoppattern((Value*)(args-0));
@@ -8983,7 +8525,6 @@ TypedValue* fg_drawpoppattern(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_drawpoppattern((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -8999,7 +8540,6 @@ TypedValue* fg_drawpoppattern(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("drawpoppattern", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9025,7 +8565,6 @@ bool fh_magickadaptivethresholdimage(Value* mgck_wnd, double width, double heigh
 TypedValue * fg1_magickadaptivethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickadaptivethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-3)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-3);
@@ -9049,7 +8588,6 @@ TypedValue* fg_magickadaptivethresholdimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickadaptivethresholdimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -9065,7 +8603,6 @@ TypedValue* fg_magickadaptivethresholdimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickadaptivethresholdimage", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9089,7 +8626,6 @@ bool fh_magickaddimage(Value* mgck_wnd, Value* add_wand) asm("_ZN4HPHP16f_magick
 TypedValue * fg1_magickaddimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickaddimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -9107,7 +8643,6 @@ TypedValue* fg_magickaddimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickaddimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -9123,7 +8658,6 @@ TypedValue* fg_magickaddimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickaddimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9147,7 +8681,6 @@ bool fh_magickaddnoiseimage(Value* mgck_wnd, int noise_type) asm("_ZN4HPHP21f_ma
 TypedValue * fg1_magickaddnoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickaddnoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -9165,7 +8698,6 @@ TypedValue* fg_magickaddnoiseimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickaddnoiseimage((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -9181,7 +8713,6 @@ TypedValue* fg_magickaddnoiseimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickaddnoiseimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9205,7 +8736,6 @@ bool fh_magickaffinetransformimage(Value* mgck_wnd, Value* drw_wnd) asm("_ZN4HPH
 TypedValue * fg1_magickaffinetransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickaffinetransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -9223,7 +8753,6 @@ TypedValue* fg_magickaffinetransformimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickaffinetransformimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -9239,7 +8768,6 @@ TypedValue* fg_magickaffinetransformimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickaffinetransformimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9267,7 +8795,6 @@ bool fh_magickannotateimage(Value* mgck_wnd, Value* drw_wnd, double x, double y,
 TypedValue * fg1_magickannotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickannotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-5)->m_type)) {
     tvCastToStringInPlace(args-5);
@@ -9297,7 +8824,6 @@ TypedValue* fg_magickannotateimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if (IS_STRING_TYPE((args-5)->m_type) && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickannotateimage((Value*)(args-0), (Value*)(args-1), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (Value*)(args-5))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
@@ -9313,7 +8839,6 @@ TypedValue* fg_magickannotateimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickannotateimage", count, 6, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9338,7 +8863,6 @@ Value* fh_magickappendimages(Value* _rv, Value* mgck_wnd, bool stack_vertical) a
 TypedValue * fg1_magickappendimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickappendimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 2
@@ -9362,7 +8886,6 @@ TypedValue* fg_magickappendimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickappendimages((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -9379,7 +8902,6 @@ TypedValue* fg_magickappendimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickappendimages", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9403,7 +8925,6 @@ Value* fh_magickaverageimages(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP21f_magi
 TypedValue * fg1_magickaverageimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickaverageimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_magickaverageimages((Value*)(rv), (Value*)(args-0));
@@ -9417,7 +8938,6 @@ TypedValue* fg_magickaverageimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickaverageimages((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -9434,7 +8954,6 @@ TypedValue* fg_magickaverageimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickaverageimages", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9458,7 +8977,6 @@ bool fh_magickblackthresholdimage(Value* mgck_wnd, Value* threshold_pxl_wnd) asm
 TypedValue * fg1_magickblackthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickblackthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -9476,7 +8994,6 @@ TypedValue* fg_magickblackthresholdimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickblackthresholdimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -9492,7 +9009,6 @@ TypedValue* fg_magickblackthresholdimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickblackthresholdimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9518,7 +9034,6 @@ bool fh_magickblurimage(Value* mgck_wnd, double radius, double sigma, int channe
 TypedValue * fg1_magickblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -9547,7 +9062,6 @@ TypedValue* fg_magickblurimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickblurimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -9563,7 +9077,6 @@ TypedValue* fg_magickblurimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickblurimage", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9589,7 +9102,6 @@ bool fh_magickborderimage(Value* mgck_wnd, Value* bordercolor, double width, dou
 TypedValue * fg1_magickborderimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickborderimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-3)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-3);
@@ -9613,7 +9125,6 @@ TypedValue* fg_magickborderimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickborderimage((Value*)(args-0), (Value*)(args-1), (args[-2].m_data.dbl), (args[-3].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -9629,7 +9140,6 @@ TypedValue* fg_magickborderimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickborderimage", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9654,7 +9164,6 @@ bool fh_magickcharcoalimage(Value* mgck_wnd, double radius, double sigma) asm("_
 TypedValue * fg1_magickcharcoalimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickcharcoalimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -9675,7 +9184,6 @@ TypedValue* fg_magickcharcoalimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickcharcoalimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -9691,7 +9199,6 @@ TypedValue* fg_magickcharcoalimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickcharcoalimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9718,7 +9225,6 @@ bool fh_magickchopimage(Value* mgck_wnd, double width, double height, int x, int
 TypedValue * fg1_magickchopimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickchopimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -9745,7 +9251,6 @@ TypedValue* fg_magickchopimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickchopimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (int)(args[-3].m_data.num), (int)(args[-4].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -9761,7 +9266,6 @@ TypedValue* fg_magickchopimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickchopimage", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9784,7 +9288,6 @@ bool fh_magickclipimage(Value* mgck_wnd) asm("_ZN4HPHP17f_magickclipimageERKNS_6
 TypedValue * fg1_magickclipimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickclipimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickclipimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -9797,7 +9300,6 @@ TypedValue* fg_magickclipimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickclipimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -9813,7 +9315,6 @@ TypedValue* fg_magickclipimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickclipimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9838,7 +9339,6 @@ bool fh_magickclippathimage(Value* mgck_wnd, Value* pathname, bool inside) asm("
 TypedValue * fg1_magickclippathimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickclippathimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-2);
@@ -9859,7 +9359,6 @@ TypedValue* fg_magickclippathimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfBoolean && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickclippathimage((Value*)(args-0), (Value*)(args-1), (bool)(args[-2].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -9875,7 +9374,6 @@ TypedValue* fg_magickclippathimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickclippathimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9899,7 +9397,6 @@ Value* fh_magickcoalesceimages(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP22f_mag
 TypedValue * fg1_magickcoalesceimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickcoalesceimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_magickcoalesceimages((Value*)(rv), (Value*)(args-0));
@@ -9913,7 +9410,6 @@ TypedValue* fg_magickcoalesceimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickcoalesceimages((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -9930,7 +9426,6 @@ TypedValue* fg_magickcoalesceimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickcoalesceimages", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9958,7 +9453,6 @@ bool fh_magickcolorfloodfillimage(Value* mgck_wnd, Value* fillcolor_pxl_wnd, dou
 TypedValue * fg1_magickcolorfloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickcolorfloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-5)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-5);
@@ -9988,7 +9482,6 @@ TypedValue* fg_magickcolorfloodfillimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfObject && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickcolorfloodfillimage((Value*)(args-0), (Value*)(args-1), (args[-2].m_data.dbl), (Value*)(args-3), (int)(args[-4].m_data.num), (int)(args[-5].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
@@ -10004,7 +9497,6 @@ TypedValue* fg_magickcolorfloodfillimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickcolorfloodfillimage", count, 6, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10029,7 +9521,6 @@ bool fh_magickcolorizeimage(Value* mgck_wnd, Value* colorize, Value* opacity_pxl
 TypedValue * fg1_magickcolorizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickcolorizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-2);
@@ -10050,7 +9541,6 @@ TypedValue* fg_magickcolorizeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfObject && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickcolorizeimage((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -10066,7 +9556,6 @@ TypedValue* fg_magickcolorizeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickcolorizeimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10091,7 +9580,6 @@ Value* fh_magickcombineimages(Value* _rv, Value* mgck_wnd, int channel_type) asm
 TypedValue * fg1_magickcombineimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickcombineimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -10110,7 +9598,6 @@ TypedValue* fg_magickcombineimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickcombineimages((Value*)(&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -10127,7 +9614,6 @@ TypedValue* fg_magickcombineimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickcombineimages", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10151,7 +9637,6 @@ bool fh_magickcommentimage(Value* mgck_wnd, Value* comment) asm("_ZN4HPHP20f_mag
 TypedValue * fg1_magickcommentimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickcommentimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -10169,7 +9654,6 @@ TypedValue* fg_magickcommentimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickcommentimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -10185,7 +9669,6 @@ TypedValue* fg_magickcommentimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickcommentimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10212,7 +9695,6 @@ Value* fh_magickcompareimages(Value* _rv, Value* mgck_wnd, Value* reference_wnd,
 TypedValue * fg1_magickcompareimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickcompareimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   switch (count) {
   default: // count >= 4
@@ -10242,7 +9724,6 @@ TypedValue* fg_magickcompareimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickcompareimages((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (int)(args[-2].m_data.num), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -10259,7 +9740,6 @@ TypedValue* fg_magickcompareimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickcompareimages", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10286,7 +9766,6 @@ bool fh_magickcompositeimage(Value* mgck_wnd, Value* composite_wnd, int composit
 TypedValue * fg1_magickcompositeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickcompositeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -10313,7 +9792,6 @@ TypedValue* fg_magickcompositeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickcompositeimage((Value*)(args-0), (Value*)(args-1), (int)(args[-2].m_data.num), (int)(args[-3].m_data.num), (int)(args[-4].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -10329,7 +9807,6 @@ TypedValue* fg_magickcompositeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickcompositeimage", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10357,7 +9834,6 @@ bool fh_magickconstituteimage(Value* mgck_wnd, double columns, double rows, Valu
 TypedValue * fg1_magickconstituteimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickconstituteimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-5)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-5);
@@ -10387,7 +9863,6 @@ TypedValue* fg_magickconstituteimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfArray && (args-4)->m_type == KindOfInt64 && IS_STRING_TYPE((args-3)->m_type) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickconstituteimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (Value*)(args-3), (int)(args[-4].m_data.num), (Value*)(args-5))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
@@ -10403,7 +9878,6 @@ TypedValue* fg_magickconstituteimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickconstituteimage", count, 6, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10427,7 +9901,6 @@ bool fh_magickcontrastimage(Value* mgck_wnd, bool sharpen) asm("_ZN4HPHP21f_magi
 TypedValue * fg1_magickcontrastimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickcontrastimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-1);
@@ -10445,7 +9918,6 @@ TypedValue* fg_magickcontrastimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfBoolean && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickcontrastimage((Value*)(args-0), (bool)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -10461,7 +9933,6 @@ TypedValue* fg_magickcontrastimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickcontrastimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10486,7 +9957,6 @@ bool fh_magickconvolveimage(Value* mgck_wnd, Value* kernel_array, int channel_ty
 TypedValue * fg1_magickconvolveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickconvolveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -10512,7 +9982,6 @@ TypedValue* fg_magickconvolveimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickconvolveimage((Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -10528,7 +9997,6 @@ TypedValue* fg_magickconvolveimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickconvolveimage", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10555,7 +10023,6 @@ bool fh_magickcropimage(Value* mgck_wnd, double width, double height, int x, int
 TypedValue * fg1_magickcropimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickcropimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -10582,7 +10049,6 @@ TypedValue* fg_magickcropimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickcropimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (int)(args[-3].m_data.num), (int)(args[-4].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -10598,7 +10064,6 @@ TypedValue* fg_magickcropimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickcropimage", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10622,7 +10087,6 @@ bool fh_magickcyclecolormapimage(Value* mgck_wnd, int num_positions) asm("_ZN4HP
 TypedValue * fg1_magickcyclecolormapimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickcyclecolormapimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -10640,7 +10104,6 @@ TypedValue* fg_magickcyclecolormapimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickcyclecolormapimage((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -10656,7 +10119,6 @@ TypedValue* fg_magickcyclecolormapimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickcyclecolormapimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10680,7 +10142,6 @@ Value* fh_magickdeconstructimages(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP25f_
 TypedValue * fg1_magickdeconstructimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickdeconstructimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_magickdeconstructimages((Value*)(rv), (Value*)(args-0));
@@ -10694,7 +10155,6 @@ TypedValue* fg_magickdeconstructimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickdeconstructimages((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -10711,7 +10171,6 @@ TypedValue* fg_magickdeconstructimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickdeconstructimages", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10735,7 +10194,6 @@ Value* fh_magickdescribeimage(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP21f_magi
 TypedValue * fg1_magickdescribeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickdescribeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_magickdescribeimage((Value*)(rv), (Value*)(args-0));
@@ -10749,7 +10207,6 @@ TypedValue* fg_magickdescribeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickdescribeimage((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -10766,7 +10223,6 @@ TypedValue* fg_magickdescribeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickdescribeimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10789,7 +10245,6 @@ bool fh_magickdespeckleimage(Value* mgck_wnd) asm("_ZN4HPHP22f_magickdespeckleim
 TypedValue * fg1_magickdespeckleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickdespeckleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickdespeckleimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -10802,7 +10257,6 @@ TypedValue* fg_magickdespeckleimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickdespeckleimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -10818,7 +10272,6 @@ TypedValue* fg_magickdespeckleimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickdespeckleimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10842,7 +10295,6 @@ bool fh_magickdrawimage(Value* mgck_wnd, Value* drw_wnd) asm("_ZN4HPHP17f_magick
 TypedValue * fg1_magickdrawimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickdrawimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -10860,7 +10312,6 @@ TypedValue* fg_magickdrawimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickdrawimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -10876,7 +10327,6 @@ TypedValue* fg_magickdrawimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickdrawimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10899,7 +10349,6 @@ bool fh_magickechoimageblob(Value* mgck_wnd) asm("_ZN4HPHP21f_magickechoimageblo
 TypedValue * fg1_magickechoimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickechoimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickechoimageblob((Value*)(args-0))) ? 1LL : 0LL;
@@ -10912,7 +10361,6 @@ TypedValue* fg_magickechoimageblob(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickechoimageblob((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -10928,7 +10376,6 @@ TypedValue* fg_magickechoimageblob(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickechoimageblob", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10951,7 +10398,6 @@ bool fh_magickechoimagesblob(Value* mgck_wnd) asm("_ZN4HPHP22f_magickechoimagesb
 TypedValue * fg1_magickechoimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickechoimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickechoimagesblob((Value*)(args-0))) ? 1LL : 0LL;
@@ -10964,7 +10410,6 @@ TypedValue* fg_magickechoimagesblob(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickechoimagesblob((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -10980,7 +10425,6 @@ TypedValue* fg_magickechoimagesblob(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickechoimagesblob", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11004,7 +10448,6 @@ bool fh_magickedgeimage(Value* mgck_wnd, double radius) asm("_ZN4HPHP17f_magicke
 TypedValue * fg1_magickedgeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickedgeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -11022,7 +10465,6 @@ TypedValue* fg_magickedgeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickedgeimage((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -11038,7 +10480,6 @@ TypedValue* fg_magickedgeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickedgeimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11063,7 +10504,6 @@ bool fh_magickembossimage(Value* mgck_wnd, double radius, double sigma) asm("_ZN
 TypedValue * fg1_magickembossimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickembossimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -11084,7 +10524,6 @@ TypedValue* fg_magickembossimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickembossimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -11100,7 +10539,6 @@ TypedValue* fg_magickembossimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickembossimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11123,7 +10561,6 @@ bool fh_magickenhanceimage(Value* mgck_wnd) asm("_ZN4HPHP20f_magickenhanceimageE
 TypedValue * fg1_magickenhanceimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickenhanceimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickenhanceimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -11136,7 +10573,6 @@ TypedValue* fg_magickenhanceimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickenhanceimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -11152,7 +10588,6 @@ TypedValue* fg_magickenhanceimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickenhanceimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11175,7 +10610,6 @@ bool fh_magickequalizeimage(Value* mgck_wnd) asm("_ZN4HPHP21f_magickequalizeimag
 TypedValue * fg1_magickequalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickequalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickequalizeimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -11188,7 +10622,6 @@ TypedValue* fg_magickequalizeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickequalizeimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -11204,7 +10637,6 @@ TypedValue* fg_magickequalizeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickequalizeimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11230,7 +10662,6 @@ bool fh_magickevaluateimage(Value* mgck_wnd, int evaluate_op, double constant, i
 TypedValue * fg1_magickevaluateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickevaluateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -11259,7 +10690,6 @@ TypedValue* fg_magickevaluateimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickevaluateimage((Value*)(args-0), (int)(args[-1].m_data.num), (args[-2].m_data.dbl), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -11275,7 +10705,6 @@ TypedValue* fg_magickevaluateimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickevaluateimage", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11299,7 +10728,6 @@ Value* fh_magickflattenimages(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP21f_magi
 TypedValue * fg1_magickflattenimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickflattenimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_magickflattenimages((Value*)(rv), (Value*)(args-0));
@@ -11313,7 +10741,6 @@ TypedValue* fg_magickflattenimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickflattenimages((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -11330,7 +10757,6 @@ TypedValue* fg_magickflattenimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickflattenimages", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11353,7 +10779,6 @@ bool fh_magickflipimage(Value* mgck_wnd) asm("_ZN4HPHP17f_magickflipimageERKNS_6
 TypedValue * fg1_magickflipimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickflipimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickflipimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -11366,7 +10791,6 @@ TypedValue* fg_magickflipimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickflipimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -11382,7 +10806,6 @@ TypedValue* fg_magickflipimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickflipimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11405,7 +10828,6 @@ bool fh_magickflopimage(Value* mgck_wnd) asm("_ZN4HPHP17f_magickflopimageERKNS_6
 TypedValue * fg1_magickflopimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickflopimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickflopimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -11418,7 +10840,6 @@ TypedValue* fg_magickflopimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickflopimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -11434,7 +10855,6 @@ TypedValue* fg_magickflopimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickflopimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11462,7 +10882,6 @@ bool fh_magickframeimage(Value* mgck_wnd, Value* matte_color, double width, doub
 TypedValue * fg1_magickframeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickframeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-5)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-5);
@@ -11492,7 +10911,6 @@ TypedValue* fg_magickframeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickframeimage((Value*)(args-0), (Value*)(args-1), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (int)(args[-4].m_data.num), (int)(args[-5].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
@@ -11508,7 +10926,6 @@ TypedValue* fg_magickframeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickframeimage", count, 6, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11534,7 +10951,6 @@ Value* fh_magickfximage(Value* _rv, Value* mgck_wnd, Value* expression, int chan
 TypedValue * fg1_magickfximage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickfximage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 3
@@ -11561,7 +10977,6 @@ TypedValue* fg_magickfximage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickfximage((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -11578,7 +10993,6 @@ TypedValue* fg_magickfximage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickfximage", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11603,7 +11017,6 @@ bool fh_magickgammaimage(Value* mgck_wnd, double gamma, int channel_type) asm("_
 TypedValue * fg1_magickgammaimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgammaimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -11629,7 +11042,6 @@ TypedValue* fg_magickgammaimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickgammaimage((Value*)(args-0), (args[-1].m_data.dbl), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -11645,7 +11057,6 @@ TypedValue* fg_magickgammaimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgammaimage", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11671,7 +11082,6 @@ bool fh_magickgaussianblurimage(Value* mgck_wnd, double radius, double sigma, in
 TypedValue * fg1_magickgaussianblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgaussianblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -11700,7 +11110,6 @@ TypedValue* fg_magickgaussianblurimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickgaussianblurimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -11716,7 +11125,6 @@ TypedValue* fg_magickgaussianblurimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgaussianblurimage", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11742,7 +11150,6 @@ double fh_magickgetcharheight(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool 
 TypedValue * fg1_magickgetcharheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetcharheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   switch (count) {
   default: // count >= 4
@@ -11771,7 +11178,6 @@ TypedValue* fg_magickgetcharheight(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetcharheight((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
         frame_free_locals_no_this_inl(ar, 4);
@@ -11787,7 +11193,6 @@ TypedValue* fg_magickgetcharheight(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetcharheight", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11813,7 +11218,6 @@ double fh_magickgetcharwidth(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool m
 TypedValue * fg1_magickgetcharwidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetcharwidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   switch (count) {
   default: // count >= 4
@@ -11842,7 +11246,6 @@ TypedValue* fg_magickgetcharwidth(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetcharwidth((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
         frame_free_locals_no_this_inl(ar, 4);
@@ -11858,7 +11261,6 @@ TypedValue* fg_magickgetcharwidth(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetcharwidth", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11882,7 +11284,6 @@ Value* fh_magickgetexception(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP20f_magic
 TypedValue * fg1_magickgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_magickgetexception((Value*)(rv), (Value*)(args-0));
@@ -11896,7 +11297,6 @@ TypedValue* fg_magickgetexception(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetexception((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -11913,7 +11313,6 @@ TypedValue* fg_magickgetexception(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetexception", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11937,7 +11336,6 @@ Value* fh_magickgetexceptionstring(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f
 TypedValue * fg1_magickgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_magickgetexceptionstring((Value*)(rv), (Value*)(args-0));
@@ -11951,7 +11349,6 @@ TypedValue* fg_magickgetexceptionstring(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickgetexceptionstring((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -11968,7 +11365,6 @@ TypedValue* fg_magickgetexceptionstring(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetexceptionstring", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11991,7 +11387,6 @@ long fh_magickgetexceptiontype(Value* mgck_wnd) asm("_ZN4HPHP24f_magickgetexcept
 TypedValue * fg1_magickgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetexceptiontype((Value*)(args-0));
@@ -12004,7 +11399,6 @@ TypedValue* fg_magickgetexceptiontype(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetexceptiontype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -12020,7 +11414,6 @@ TypedValue* fg_magickgetexceptiontype(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetexceptiontype", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12044,7 +11437,6 @@ Value* fh_magickgetfilename(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP19f_magick
 TypedValue * fg1_magickgetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_magickgetfilename((Value*)(rv), (Value*)(args-0));
@@ -12058,7 +11450,6 @@ TypedValue* fg_magickgetfilename(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickgetfilename((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -12075,7 +11466,6 @@ TypedValue* fg_magickgetfilename(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetfilename", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12099,7 +11489,6 @@ Value* fh_magickgetformat(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP17f_magickge
 TypedValue * fg1_magickgetformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_magickgetformat((Value*)(rv), (Value*)(args-0));
@@ -12113,7 +11502,6 @@ TypedValue* fg_magickgetformat(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickgetformat((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -12130,7 +11518,6 @@ TypedValue* fg_magickgetformat(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetformat", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12154,7 +11541,6 @@ Value* fh_magickgetimage(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP16f_magickget
 TypedValue * fg1_magickgetimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimage((Value*)(rv), (Value*)(args-0));
@@ -12168,7 +11554,6 @@ TypedValue* fg_magickgetimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickgetimage((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -12185,7 +11570,6 @@ TypedValue* fg_magickgetimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12209,7 +11593,6 @@ Value* fh_magickgetimagebackgroundcolor(Value* _rv, Value* mgck_wnd) asm("_ZN4HP
 TypedValue * fg1_magickgetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimagebackgroundcolor((Value*)(rv), (Value*)(args-0));
@@ -12223,7 +11606,6 @@ TypedValue* fg_magickgetimagebackgroundcolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickgetimagebackgroundcolor((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -12240,7 +11622,6 @@ TypedValue* fg_magickgetimagebackgroundcolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagebackgroundcolor", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12264,7 +11645,6 @@ Value* fh_magickgetimageblob(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP20f_magic
 TypedValue * fg1_magickgetimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimageblob((Value*)(rv), (Value*)(args-0));
@@ -12278,7 +11658,6 @@ TypedValue* fg_magickgetimageblob(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickgetimageblob((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -12295,7 +11674,6 @@ TypedValue* fg_magickgetimageblob(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageblob", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12319,7 +11697,6 @@ Value* fh_magickgetimageblueprimary(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP27
 TypedValue * fg1_magickgetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimageblueprimary((Value*)(rv), (Value*)(args-0));
@@ -12333,7 +11710,6 @@ TypedValue* fg_magickgetimageblueprimary(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetimageblueprimary((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -12350,7 +11726,6 @@ TypedValue* fg_magickgetimageblueprimary(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageblueprimary", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12374,7 +11749,6 @@ Value* fh_magickgetimagebordercolor(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP27
 TypedValue * fg1_magickgetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimagebordercolor((Value*)(rv), (Value*)(args-0));
@@ -12388,7 +11762,6 @@ TypedValue* fg_magickgetimagebordercolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickgetimagebordercolor((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -12405,7 +11778,6 @@ TypedValue* fg_magickgetimagebordercolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagebordercolor", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12430,7 +11802,6 @@ Value* fh_magickgetimagechannelmean(Value* _rv, Value* mgck_wnd, int channel_typ
 TypedValue * fg1_magickgetimagechannelmean(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagechannelmean(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -12449,7 +11820,6 @@ TypedValue* fg_magickgetimagechannelmean(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetimagechannelmean((Value*)(&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -12466,7 +11836,6 @@ TypedValue* fg_magickgetimagechannelmean(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagechannelmean", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12491,7 +11860,6 @@ Value* fh_magickgetimagecolormapcolor(Value* _rv, Value* mgck_wnd, double index)
 TypedValue * fg1_magickgetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -12510,7 +11878,6 @@ TypedValue* fg_magickgetimagecolormapcolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickgetimagecolormapcolor((Value*)(&(rv)), (Value*)(args-0), (args[-1].m_data.dbl));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -12527,7 +11894,6 @@ TypedValue* fg_magickgetimagecolormapcolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagecolormapcolor", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12550,7 +11916,6 @@ double fh_magickgetimagecolors(Value* mgck_wnd) asm("_ZN4HPHP22f_magickgetimagec
 TypedValue * fg1_magickgetimagecolors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagecolors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_magickgetimagecolors((Value*)(args-0));
@@ -12563,7 +11928,6 @@ TypedValue* fg_magickgetimagecolors(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetimagecolors((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -12579,7 +11943,6 @@ TypedValue* fg_magickgetimagecolors(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagecolors", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12602,7 +11965,6 @@ long fh_magickgetimagecolorspace(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetimag
 TypedValue * fg1_magickgetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetimagecolorspace((Value*)(args-0));
@@ -12615,7 +11977,6 @@ TypedValue* fg_magickgetimagecolorspace(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetimagecolorspace((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -12631,7 +11992,6 @@ TypedValue* fg_magickgetimagecolorspace(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagecolorspace", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12654,7 +12014,6 @@ long fh_magickgetimagecompose(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetimageco
 TypedValue * fg1_magickgetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetimagecompose((Value*)(args-0));
@@ -12667,7 +12026,6 @@ TypedValue* fg_magickgetimagecompose(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetimagecompose((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -12683,7 +12041,6 @@ TypedValue* fg_magickgetimagecompose(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagecompose", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12706,7 +12063,6 @@ long fh_magickgetimagecompression(Value* mgck_wnd) asm("_ZN4HPHP27f_magickgetima
 TypedValue * fg1_magickgetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetimagecompression((Value*)(args-0));
@@ -12719,7 +12075,6 @@ TypedValue* fg_magickgetimagecompression(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetimagecompression((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -12735,7 +12090,6 @@ TypedValue* fg_magickgetimagecompression(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagecompression", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12758,7 +12112,6 @@ double fh_magickgetimagecompressionquality(Value* mgck_wnd) asm("_ZN4HPHP34f_mag
 TypedValue * fg1_magickgetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_magickgetimagecompressionquality((Value*)(args-0));
@@ -12771,7 +12124,6 @@ TypedValue* fg_magickgetimagecompressionquality(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetimagecompressionquality((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -12787,7 +12139,6 @@ TypedValue* fg_magickgetimagecompressionquality(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagecompressionquality", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12810,7 +12161,6 @@ double fh_magickgetimagedelay(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimagede
 TypedValue * fg1_magickgetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_magickgetimagedelay((Value*)(args-0));
@@ -12823,7 +12173,6 @@ TypedValue* fg_magickgetimagedelay(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetimagedelay((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -12839,7 +12188,6 @@ TypedValue* fg_magickgetimagedelay(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagedelay", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12863,7 +12211,6 @@ double fh_magickgetimagedepth(Value* mgck_wnd, int channel_type) asm("_ZN4HPHP21
 TypedValue * fg1_magickgetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   switch (count) {
   default: // count >= 2
@@ -12886,7 +12233,6 @@ TypedValue* fg_magickgetimagedepth(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetimagedepth((Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
         frame_free_locals_no_this_inl(ar, 2);
@@ -12902,7 +12248,6 @@ TypedValue* fg_magickgetimagedepth(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagedepth", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12925,7 +12270,6 @@ long fh_magickgetimagedispose(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetimagedi
 TypedValue * fg1_magickgetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetimagedispose((Value*)(args-0));
@@ -12938,7 +12282,6 @@ TypedValue* fg_magickgetimagedispose(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetimagedispose((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -12954,7 +12297,6 @@ TypedValue* fg_magickgetimagedispose(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagedispose", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12979,7 +12321,6 @@ Value* fh_magickgetimageextrema(Value* _rv, Value* mgck_wnd, int channel_type) a
 TypedValue * fg1_magickgetimageextrema(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageextrema(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   switch (count) {
   default: // count >= 2
@@ -13003,7 +12344,6 @@ TypedValue* fg_magickgetimageextrema(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetimageextrema((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -13020,7 +12360,6 @@ TypedValue* fg_magickgetimageextrema(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageextrema", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13044,7 +12383,6 @@ Value* fh_magickgetimagefilename(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP24f_m
 TypedValue * fg1_magickgetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimagefilename((Value*)(rv), (Value*)(args-0));
@@ -13058,7 +12396,6 @@ TypedValue* fg_magickgetimagefilename(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickgetimagefilename((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -13075,7 +12412,6 @@ TypedValue* fg_magickgetimagefilename(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagefilename", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13099,7 +12435,6 @@ Value* fh_magickgetimageformat(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP22f_mag
 TypedValue * fg1_magickgetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimageformat((Value*)(rv), (Value*)(args-0));
@@ -13113,7 +12448,6 @@ TypedValue* fg_magickgetimageformat(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickgetimageformat((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -13130,7 +12464,6 @@ TypedValue* fg_magickgetimageformat(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageformat", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13153,7 +12486,6 @@ double fh_magickgetimagegamma(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimagega
 TypedValue * fg1_magickgetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_magickgetimagegamma((Value*)(args-0));
@@ -13166,7 +12498,6 @@ TypedValue* fg_magickgetimagegamma(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetimagegamma((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -13182,7 +12513,6 @@ TypedValue* fg_magickgetimagegamma(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagegamma", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13206,7 +12536,6 @@ Value* fh_magickgetimagegreenprimary(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP2
 TypedValue * fg1_magickgetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimagegreenprimary((Value*)(rv), (Value*)(args-0));
@@ -13220,7 +12549,6 @@ TypedValue* fg_magickgetimagegreenprimary(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetimagegreenprimary((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -13237,7 +12565,6 @@ TypedValue* fg_magickgetimagegreenprimary(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagegreenprimary", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13260,7 +12587,6 @@ double fh_magickgetimageheight(Value* mgck_wnd) asm("_ZN4HPHP22f_magickgetimageh
 TypedValue * fg1_magickgetimageheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_magickgetimageheight((Value*)(args-0));
@@ -13273,7 +12599,6 @@ TypedValue* fg_magickgetimageheight(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetimageheight((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -13289,7 +12614,6 @@ TypedValue* fg_magickgetimageheight(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageheight", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13313,7 +12637,6 @@ Value* fh_magickgetimagehistogram(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP25f_
 TypedValue * fg1_magickgetimagehistogram(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagehistogram(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimagehistogram((Value*)(rv), (Value*)(args-0));
@@ -13327,7 +12650,6 @@ TypedValue* fg_magickgetimagehistogram(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetimagehistogram((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -13344,7 +12666,6 @@ TypedValue* fg_magickgetimagehistogram(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagehistogram", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13367,7 +12688,6 @@ long fh_magickgetimageindex(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimageinde
 TypedValue * fg1_magickgetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetimageindex((Value*)(args-0));
@@ -13380,7 +12700,6 @@ TypedValue* fg_magickgetimageindex(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetimageindex((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -13396,7 +12715,6 @@ TypedValue* fg_magickgetimageindex(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageindex", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13419,7 +12737,6 @@ long fh_magickgetimageinterlacescheme(Value* mgck_wnd) asm("_ZN4HPHP31f_magickge
 TypedValue * fg1_magickgetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetimageinterlacescheme((Value*)(args-0));
@@ -13432,7 +12749,6 @@ TypedValue* fg_magickgetimageinterlacescheme(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetimageinterlacescheme((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -13448,7 +12764,6 @@ TypedValue* fg_magickgetimageinterlacescheme(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageinterlacescheme", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13471,7 +12786,6 @@ double fh_magickgetimageiterations(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetim
 TypedValue * fg1_magickgetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_magickgetimageiterations((Value*)(args-0));
@@ -13484,7 +12798,6 @@ TypedValue* fg_magickgetimageiterations(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetimageiterations((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -13500,7 +12813,6 @@ TypedValue* fg_magickgetimageiterations(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageiterations", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13524,7 +12836,6 @@ Value* fh_magickgetimagemattecolor(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f
 TypedValue * fg1_magickgetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimagemattecolor((Value*)(rv), (Value*)(args-0));
@@ -13538,7 +12849,6 @@ TypedValue* fg_magickgetimagemattecolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickgetimagemattecolor((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -13555,7 +12865,6 @@ TypedValue* fg_magickgetimagemattecolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagemattecolor", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13579,7 +12888,6 @@ Value* fh_magickgetimagemimetype(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP24f_m
 TypedValue * fg1_magickgetimagemimetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagemimetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimagemimetype((Value*)(rv), (Value*)(args-0));
@@ -13593,7 +12901,6 @@ TypedValue* fg_magickgetimagemimetype(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickgetimagemimetype((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -13610,7 +12917,6 @@ TypedValue* fg_magickgetimagemimetype(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagemimetype", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13640,7 +12946,6 @@ Value* fh_magickgetimagepixels(Value* _rv, Value* mgck_wnd, int x_offset, int y_
 TypedValue * fg1_magickgetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   if ((args-6)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-6);
@@ -13674,7 +12979,6 @@ TypedValue* fg_magickgetimagepixels(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 7LL) {
       if ((args-6)->m_type == KindOfInt64 && IS_STRING_TYPE((args-5)->m_type) && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetimagepixels((Value*)(&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (Value*)(args-5), (int)(args[-6].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -13691,7 +12995,6 @@ TypedValue* fg_magickgetimagepixels(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagepixels", count, 7, 7, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13716,7 +13019,6 @@ Value* fh_magickgetimageprofile(Value* _rv, Value* mgck_wnd, Value* name) asm("_
 TypedValue * fg1_magickgetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -13735,7 +13037,6 @@ TypedValue* fg_magickgetimageprofile(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickgetimageprofile((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -13752,7 +13053,6 @@ TypedValue* fg_magickgetimageprofile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageprofile", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13776,7 +13076,6 @@ Value* fh_magickgetimageredprimary(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f
 TypedValue * fg1_magickgetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimageredprimary((Value*)(rv), (Value*)(args-0));
@@ -13790,7 +13089,6 @@ TypedValue* fg_magickgetimageredprimary(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetimageredprimary((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -13807,7 +13105,6 @@ TypedValue* fg_magickgetimageredprimary(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageredprimary", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13830,7 +13127,6 @@ long fh_magickgetimagerenderingintent(Value* mgck_wnd) asm("_ZN4HPHP31f_magickge
 TypedValue * fg1_magickgetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetimagerenderingintent((Value*)(args-0));
@@ -13843,7 +13139,6 @@ TypedValue* fg_magickgetimagerenderingintent(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetimagerenderingintent((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -13859,7 +13154,6 @@ TypedValue* fg_magickgetimagerenderingintent(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagerenderingintent", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13883,7 +13177,6 @@ Value* fh_magickgetimageresolution(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f
 TypedValue * fg1_magickgetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimageresolution((Value*)(rv), (Value*)(args-0));
@@ -13897,7 +13190,6 @@ TypedValue* fg_magickgetimageresolution(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetimageresolution((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -13914,7 +13206,6 @@ TypedValue* fg_magickgetimageresolution(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageresolution", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13937,7 +13228,6 @@ double fh_magickgetimagescene(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimagesc
 TypedValue * fg1_magickgetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_magickgetimagescene((Value*)(args-0));
@@ -13950,7 +13240,6 @@ TypedValue* fg_magickgetimagescene(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetimagescene((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -13966,7 +13255,6 @@ TypedValue* fg_magickgetimagescene(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagescene", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13990,7 +13278,6 @@ Value* fh_magickgetimagesignature(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP25f_
 TypedValue * fg1_magickgetimagesignature(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagesignature(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimagesignature((Value*)(rv), (Value*)(args-0));
@@ -14004,7 +13291,6 @@ TypedValue* fg_magickgetimagesignature(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickgetimagesignature((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -14021,7 +13307,6 @@ TypedValue* fg_magickgetimagesignature(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagesignature", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14044,7 +13329,6 @@ long fh_magickgetimagesize(Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetimagesizeE
 TypedValue * fg1_magickgetimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetimagesize((Value*)(args-0));
@@ -14057,7 +13341,6 @@ TypedValue* fg_magickgetimagesize(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetimagesize((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -14073,7 +13356,6 @@ TypedValue* fg_magickgetimagesize(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagesize", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14096,7 +13378,6 @@ long fh_magickgetimagetype(Value* mgck_wnd) asm("_ZN4HPHP20f_magickgetimagetypeE
 TypedValue * fg1_magickgetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetimagetype((Value*)(args-0));
@@ -14109,7 +13390,6 @@ TypedValue* fg_magickgetimagetype(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetimagetype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -14125,7 +13405,6 @@ TypedValue* fg_magickgetimagetype(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagetype", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14148,7 +13427,6 @@ long fh_magickgetimageunits(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimageunit
 TypedValue * fg1_magickgetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetimageunits((Value*)(args-0));
@@ -14161,7 +13439,6 @@ TypedValue* fg_magickgetimageunits(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetimageunits((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -14177,7 +13454,6 @@ TypedValue* fg_magickgetimageunits(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimageunits", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14200,7 +13476,6 @@ long fh_magickgetimagevirtualpixelmethod(Value* mgck_wnd) asm("_ZN4HPHP34f_magic
 TypedValue * fg1_magickgetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetimagevirtualpixelmethod((Value*)(args-0));
@@ -14213,7 +13488,6 @@ TypedValue* fg_magickgetimagevirtualpixelmethod(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetimagevirtualpixelmethod((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -14229,7 +13503,6 @@ TypedValue* fg_magickgetimagevirtualpixelmethod(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagevirtualpixelmethod", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14253,7 +13526,6 @@ Value* fh_magickgetimagewhitepoint(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f
 TypedValue * fg1_magickgetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimagewhitepoint((Value*)(rv), (Value*)(args-0));
@@ -14267,7 +13539,6 @@ TypedValue* fg_magickgetimagewhitepoint(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetimagewhitepoint((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -14284,7 +13555,6 @@ TypedValue* fg_magickgetimagewhitepoint(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagewhitepoint", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14307,7 +13577,6 @@ double fh_magickgetimagewidth(Value* mgck_wnd) asm("_ZN4HPHP21f_magickgetimagewi
 TypedValue * fg1_magickgetimagewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagewidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_magickgetimagewidth((Value*)(args-0));
@@ -14320,7 +13589,6 @@ TypedValue* fg_magickgetimagewidth(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetimagewidth((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -14336,7 +13604,6 @@ TypedValue* fg_magickgetimagewidth(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagewidth", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14360,7 +13627,6 @@ Value* fh_magickgetimagesblob(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP21f_magi
 TypedValue * fg1_magickgetimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetimagesblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_magickgetimagesblob((Value*)(rv), (Value*)(args-0));
@@ -14374,7 +13640,6 @@ TypedValue* fg_magickgetimagesblob(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickgetimagesblob((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -14391,7 +13656,6 @@ TypedValue* fg_magickgetimagesblob(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetimagesblob", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14414,7 +13678,6 @@ long fh_magickgetinterlacescheme(Value* mgck_wnd) asm("_ZN4HPHP26f_magickgetinte
 TypedValue * fg1_magickgetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_magickgetinterlacescheme((Value*)(args-0));
@@ -14427,7 +13690,6 @@ TypedValue* fg_magickgetinterlacescheme(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_magickgetinterlacescheme((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -14443,7 +13705,6 @@ TypedValue* fg_magickgetinterlacescheme(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetinterlacescheme", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14469,7 +13730,6 @@ double fh_magickgetmaxtextadvance(Value* mgck_wnd, Value* drw_wnd, Value* txt, b
 TypedValue * fg1_magickgetmaxtextadvance(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetmaxtextadvance(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   switch (count) {
   default: // count >= 4
@@ -14498,7 +13758,6 @@ TypedValue* fg_magickgetmaxtextadvance(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetmaxtextadvance((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
         frame_free_locals_no_this_inl(ar, 4);
@@ -14514,7 +13773,6 @@ TypedValue* fg_magickgetmaxtextadvance(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetmaxtextadvance", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14538,7 +13796,6 @@ Value* fh_magickgetmimetype(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP19f_magick
 TypedValue * fg1_magickgetmimetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetmimetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_magickgetmimetype((Value*)(rv), (Value*)(args-0));
@@ -14552,7 +13809,6 @@ TypedValue* fg_magickgetmimetype(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickgetmimetype((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -14569,7 +13825,6 @@ TypedValue* fg_magickgetmimetype(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetmimetype", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14592,7 +13847,6 @@ double fh_magickgetnumberimages(Value* mgck_wnd) asm("_ZN4HPHP23f_magickgetnumbe
 TypedValue * fg1_magickgetnumberimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetnumberimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_magickgetnumberimages((Value*)(args-0));
@@ -14605,7 +13859,6 @@ TypedValue* fg_magickgetnumberimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetnumberimages((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -14621,7 +13874,6 @@ TypedValue* fg_magickgetnumberimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetnumberimages", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14645,7 +13897,6 @@ Value* fh_magickgetsamplingfactors(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP26f
 TypedValue * fg1_magickgetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_magickgetsamplingfactors((Value*)(rv), (Value*)(args-0));
@@ -14659,7 +13910,6 @@ TypedValue* fg_magickgetsamplingfactors(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetsamplingfactors((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -14676,7 +13926,6 @@ TypedValue* fg_magickgetsamplingfactors(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetsamplingfactors", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14700,7 +13949,6 @@ Value* fh_magickgetsize(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP15f_magickgets
 TypedValue * fg1_magickgetsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_magickgetsize((Value*)(rv), (Value*)(args-0));
@@ -14714,7 +13962,6 @@ TypedValue* fg_magickgetsize(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetsize((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -14731,7 +13978,6 @@ TypedValue* fg_magickgetsize(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetsize", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14757,7 +14003,6 @@ double fh_magickgetstringheight(Value* mgck_wnd, Value* drw_wnd, Value* txt, boo
 TypedValue * fg1_magickgetstringheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetstringheight(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   switch (count) {
   default: // count >= 4
@@ -14786,7 +14031,6 @@ TypedValue* fg_magickgetstringheight(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetstringheight((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
         frame_free_locals_no_this_inl(ar, 4);
@@ -14802,7 +14046,6 @@ TypedValue* fg_magickgetstringheight(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetstringheight", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14828,7 +14071,6 @@ double fh_magickgetstringwidth(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool
 TypedValue * fg1_magickgetstringwidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetstringwidth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   switch (count) {
   default: // count >= 4
@@ -14857,7 +14099,6 @@ TypedValue* fg_magickgetstringwidth(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgetstringwidth((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
         frame_free_locals_no_this_inl(ar, 4);
@@ -14873,7 +14114,6 @@ TypedValue* fg_magickgetstringwidth(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetstringwidth", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14899,7 +14139,6 @@ double fh_magickgettextascent(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool 
 TypedValue * fg1_magickgettextascent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgettextascent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   switch (count) {
   default: // count >= 4
@@ -14928,7 +14167,6 @@ TypedValue* fg_magickgettextascent(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgettextascent((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
         frame_free_locals_no_this_inl(ar, 4);
@@ -14944,7 +14182,6 @@ TypedValue* fg_magickgettextascent(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgettextascent", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14970,7 +14207,6 @@ double fh_magickgettextdescent(Value* mgck_wnd, Value* drw_wnd, Value* txt, bool
 TypedValue * fg1_magickgettextdescent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgettextdescent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   switch (count) {
   default: // count >= 4
@@ -14999,7 +14235,6 @@ TypedValue* fg_magickgettextdescent(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_magickgettextdescent((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
         frame_free_locals_no_this_inl(ar, 4);
@@ -15015,7 +14250,6 @@ TypedValue* fg_magickgettextdescent(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgettextdescent", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15039,7 +14273,6 @@ Value* fh_magickgetwandsize(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP19f_magick
 TypedValue * fg1_magickgetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickgetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_magickgetwandsize((Value*)(rv), (Value*)(args-0));
@@ -15053,7 +14286,6 @@ TypedValue* fg_magickgetwandsize(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickgetwandsize((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -15070,7 +14302,6 @@ TypedValue* fg_magickgetwandsize(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickgetwandsize", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15093,7 +14324,6 @@ bool fh_magickhasnextimage(Value* mgck_wnd) asm("_ZN4HPHP20f_magickhasnextimageE
 TypedValue * fg1_magickhasnextimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickhasnextimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickhasnextimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -15106,7 +14336,6 @@ TypedValue* fg_magickhasnextimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickhasnextimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -15122,7 +14351,6 @@ TypedValue* fg_magickhasnextimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickhasnextimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15145,7 +14373,6 @@ bool fh_magickhaspreviousimage(Value* mgck_wnd) asm("_ZN4HPHP24f_magickhasprevio
 TypedValue * fg1_magickhaspreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickhaspreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickhaspreviousimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -15158,7 +14385,6 @@ TypedValue* fg_magickhaspreviousimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickhaspreviousimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -15174,7 +14400,6 @@ TypedValue* fg_magickhaspreviousimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickhaspreviousimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15198,7 +14423,6 @@ bool fh_magickimplodeimage(Value* mgck_wnd, double amount) asm("_ZN4HPHP20f_magi
 TypedValue * fg1_magickimplodeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickimplodeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -15216,7 +14440,6 @@ TypedValue* fg_magickimplodeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickimplodeimage((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -15232,7 +14455,6 @@ TypedValue* fg_magickimplodeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickimplodeimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15256,7 +14478,6 @@ bool fh_magicklabelimage(Value* mgck_wnd, Value* label) asm("_ZN4HPHP18f_magickl
 TypedValue * fg1_magicklabelimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicklabelimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -15274,7 +14495,6 @@ TypedValue* fg_magicklabelimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicklabelimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -15290,7 +14510,6 @@ TypedValue* fg_magicklabelimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicklabelimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15317,7 +14536,6 @@ bool fh_magicklevelimage(Value* mgck_wnd, double black_point, double gamma, doub
 TypedValue * fg1_magicklevelimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicklevelimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 5
@@ -15349,7 +14567,6 @@ TypedValue* fg_magicklevelimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfInt64) && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicklevelimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -15365,7 +14582,6 @@ TypedValue* fg_magicklevelimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicklevelimage", count, 4, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15388,7 +14604,6 @@ bool fh_magickmagnifyimage(Value* mgck_wnd) asm("_ZN4HPHP20f_magickmagnifyimageE
 TypedValue * fg1_magickmagnifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickmagnifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickmagnifyimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -15401,7 +14616,6 @@ TypedValue* fg_magickmagnifyimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickmagnifyimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -15417,7 +14631,6 @@ TypedValue* fg_magickmagnifyimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickmagnifyimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15442,7 +14655,6 @@ bool fh_magickmapimage(Value* mgck_wnd, Value* map_wand, bool dither) asm("_ZN4H
 TypedValue * fg1_magickmapimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickmapimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-2);
@@ -15463,7 +14675,6 @@ TypedValue* fg_magickmapimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfBoolean && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickmapimage((Value*)(args-0), (Value*)(args-1), (bool)(args[-2].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -15479,7 +14690,6 @@ TypedValue* fg_magickmapimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickmapimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15507,7 +14717,6 @@ bool fh_magickmattefloodfillimage(Value* mgck_wnd, double opacity, double fuzz, 
 TypedValue * fg1_magickmattefloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickmattefloodfillimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-5)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-5);
@@ -15537,7 +14746,6 @@ TypedValue* fg_magickmattefloodfillimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfObject && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickmattefloodfillimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (Value*)(args-3), (int)(args[-4].m_data.num), (int)(args[-5].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
@@ -15553,7 +14761,6 @@ TypedValue* fg_magickmattefloodfillimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickmattefloodfillimage", count, 6, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15577,7 +14784,6 @@ bool fh_magickmedianfilterimage(Value* mgck_wnd, double radius) asm("_ZN4HPHP25f
 TypedValue * fg1_magickmedianfilterimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickmedianfilterimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -15595,7 +14801,6 @@ TypedValue* fg_magickmedianfilterimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickmedianfilterimage((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -15611,7 +14816,6 @@ TypedValue* fg_magickmedianfilterimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickmedianfilterimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15634,7 +14838,6 @@ bool fh_magickminifyimage(Value* mgck_wnd) asm("_ZN4HPHP19f_magickminifyimageERK
 TypedValue * fg1_magickminifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickminifyimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickminifyimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -15647,7 +14850,6 @@ TypedValue* fg_magickminifyimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickminifyimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -15663,7 +14865,6 @@ TypedValue* fg_magickminifyimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickminifyimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15689,7 +14890,6 @@ bool fh_magickmodulateimage(Value* mgck_wnd, double brightness, double saturatio
 TypedValue * fg1_magickmodulateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickmodulateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-3)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-3);
@@ -15713,7 +14913,6 @@ TypedValue* fg_magickmodulateimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickmodulateimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -15729,7 +14928,6 @@ TypedValue* fg_magickmodulateimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickmodulateimage", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15758,7 +14956,6 @@ Value* fh_magickmontageimage(Value* _rv, Value* mgck_wnd, Value* drw_wnd, Value*
 TypedValue * fg1_magickmontageimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickmontageimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-5)->m_type)) {
     tvCastToStringInPlace(args-5);
@@ -15789,7 +14986,6 @@ TypedValue* fg_magickmontageimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if (IS_STRING_TYPE((args-5)->m_type) && (args-4)->m_type == KindOfInt64 && IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickmontageimage((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (int)(args[-4].m_data.num), (Value*)(args-5));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -15806,7 +15002,6 @@ TypedValue* fg_magickmontageimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickmontageimage", count, 6, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15831,7 +15026,6 @@ Value* fh_magickmorphimages(Value* _rv, Value* mgck_wnd, double number_frames) a
 TypedValue * fg1_magickmorphimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickmorphimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -15850,7 +15044,6 @@ TypedValue* fg_magickmorphimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickmorphimages((Value*)(&(rv)), (Value*)(args-0), (args[-1].m_data.dbl));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -15867,7 +15060,6 @@ TypedValue* fg_magickmorphimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickmorphimages", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15891,7 +15083,6 @@ Value* fh_magickmosaicimages(Value* _rv, Value* mgck_wnd) asm("_ZN4HPHP20f_magic
 TypedValue * fg1_magickmosaicimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickmosaicimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
   fh_magickmosaicimages((Value*)(rv), (Value*)(args-0));
@@ -15905,7 +15096,6 @@ TypedValue* fg_magickmosaicimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickmosaicimages((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -15922,7 +15112,6 @@ TypedValue* fg_magickmosaicimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickmosaicimages", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15948,7 +15137,6 @@ bool fh_magickmotionblurimage(Value* mgck_wnd, double radius, double sigma, doub
 TypedValue * fg1_magickmotionblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickmotionblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-3)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-3);
@@ -15972,7 +15160,6 @@ TypedValue* fg_magickmotionblurimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickmotionblurimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -15988,7 +15175,6 @@ TypedValue* fg_magickmotionblurimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickmotionblurimage", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16013,7 +15199,6 @@ bool fh_magicknegateimage(Value* mgck_wnd, bool only_the_gray, int channel_type)
 TypedValue * fg1_magicknegateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicknegateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -16040,7 +15225,6 @@ TypedValue* fg_magicknegateimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicknegateimage((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -16056,7 +15240,6 @@ TypedValue* fg_magicknegateimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicknegateimage", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16082,7 +15265,6 @@ bool fh_magicknewimage(Value* mgck_wnd, double width, double height, Value* imag
 TypedValue * fg1_magicknewimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicknewimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -16111,7 +15293,6 @@ TypedValue* fg_magicknewimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicknewimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -16127,7 +15308,6 @@ TypedValue* fg_magicknewimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicknewimage", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16150,7 +15330,6 @@ bool fh_magicknextimage(Value* mgck_wnd) asm("_ZN4HPHP17f_magicknextimageERKNS_6
 TypedValue * fg1_magicknextimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicknextimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magicknextimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -16163,7 +15342,6 @@ TypedValue* fg_magicknextimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicknextimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -16179,7 +15357,6 @@ TypedValue* fg_magicknextimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicknextimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16202,7 +15379,6 @@ bool fh_magicknormalizeimage(Value* mgck_wnd) asm("_ZN4HPHP22f_magicknormalizeim
 TypedValue * fg1_magicknormalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicknormalizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magicknormalizeimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -16215,7 +15391,6 @@ TypedValue* fg_magicknormalizeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicknormalizeimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -16231,7 +15406,6 @@ TypedValue* fg_magicknormalizeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicknormalizeimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16255,7 +15429,6 @@ bool fh_magickoilpaintimage(Value* mgck_wnd, double radius) asm("_ZN4HPHP21f_mag
 TypedValue * fg1_magickoilpaintimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickoilpaintimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -16273,7 +15446,6 @@ TypedValue* fg_magickoilpaintimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickoilpaintimage((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -16289,7 +15461,6 @@ TypedValue* fg_magickoilpaintimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickoilpaintimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16315,7 +15486,6 @@ bool fh_magickpaintopaqueimage(Value* mgck_wnd, Value* target_pxl_wnd, Value* fi
 TypedValue * fg1_magickpaintopaqueimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickpaintopaqueimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -16344,7 +15514,6 @@ TypedValue* fg_magickpaintopaqueimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfDouble) && (args-2)->m_type == KindOfObject && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickpaintopaqueimage((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (args[-3].m_data.dbl) : (double)(0.0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -16360,7 +15529,6 @@ TypedValue* fg_magickpaintopaqueimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickpaintopaqueimage", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16386,7 +15554,6 @@ bool fh_magickpainttransparentimage(Value* mgck_wnd, Value* target, double opaci
 TypedValue * fg1_magickpainttransparentimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickpainttransparentimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -16416,7 +15583,6 @@ TypedValue* fg_magickpainttransparentimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfDouble) && (count <= 2 || (args-2)->m_type == KindOfDouble) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickpainttransparentimage((Value*)(args-0), (Value*)(args-1), (count > 2) ? (args[-2].m_data.dbl) : (double)(k_MW_TransparentOpacity), (count > 3) ? (args[-3].m_data.dbl) : (double)(0.0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -16432,7 +15598,6 @@ TypedValue* fg_magickpainttransparentimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickpainttransparentimage", count, 2, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16456,7 +15621,6 @@ bool fh_magickpingimage(Value* mgck_wnd, Value* filename) asm("_ZN4HPHP17f_magic
 TypedValue * fg1_magickpingimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickpingimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -16474,7 +15638,6 @@ TypedValue* fg_magickpingimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickpingimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -16490,7 +15653,6 @@ TypedValue* fg_magickpingimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickpingimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16515,7 +15677,6 @@ bool fh_magickposterizeimage(Value* mgck_wnd, double levels, bool dither) asm("_
 TypedValue * fg1_magickposterizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickposterizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-2);
@@ -16536,7 +15697,6 @@ TypedValue* fg_magickposterizeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfBoolean && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickposterizeimage((Value*)(args-0), (args[-1].m_data.dbl), (bool)(args[-2].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -16552,7 +15712,6 @@ TypedValue* fg_magickposterizeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickposterizeimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16577,7 +15736,6 @@ Value* fh_magickpreviewimages(Value* _rv, Value* mgck_wnd, int preview) asm("_ZN
 TypedValue * fg1_magickpreviewimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickpreviewimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -16596,7 +15754,6 @@ TypedValue* fg_magickpreviewimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magickpreviewimages((Value*)(&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -16613,7 +15770,6 @@ TypedValue* fg_magickpreviewimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickpreviewimages", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16636,7 +15792,6 @@ bool fh_magickpreviousimage(Value* mgck_wnd) asm("_ZN4HPHP21f_magickpreviousimag
 TypedValue * fg1_magickpreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickpreviousimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickpreviousimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -16649,7 +15804,6 @@ TypedValue* fg_magickpreviousimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickpreviousimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -16665,7 +15819,6 @@ TypedValue* fg_magickpreviousimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickpreviousimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16690,7 +15843,6 @@ bool fh_magickprofileimage(Value* mgck_wnd, Value* name, Value* profile) asm("_Z
 TypedValue * fg1_magickprofileimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickprofileimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -16716,7 +15868,6 @@ TypedValue* fg_magickprofileimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickprofileimage((Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -16732,7 +15883,6 @@ TypedValue* fg_magickprofileimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickprofileimage", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16760,7 +15910,6 @@ bool fh_magickquantizeimage(Value* mgck_wnd, double number_colors, int colorspac
 TypedValue * fg1_magickquantizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickquantizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-5)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-5);
@@ -16790,7 +15939,6 @@ TypedValue* fg_magickquantizeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfBoolean && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickquantizeimage((Value*)(args-0), (args[-1].m_data.dbl), (int)(args[-2].m_data.num), (args[-3].m_data.dbl), (bool)(args[-4].m_data.num), (bool)(args[-5].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
@@ -16806,7 +15954,6 @@ TypedValue* fg_magickquantizeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickquantizeimage", count, 6, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16834,7 +15981,6 @@ bool fh_magickquantizeimages(Value* mgck_wnd, double number_colors, int colorspa
 TypedValue * fg1_magickquantizeimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickquantizeimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-5)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-5);
@@ -16864,7 +16010,6 @@ TypedValue* fg_magickquantizeimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfBoolean && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickquantizeimages((Value*)(args-0), (args[-1].m_data.dbl), (int)(args[-2].m_data.num), (args[-3].m_data.dbl), (bool)(args[-4].m_data.num), (bool)(args[-5].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
@@ -16880,7 +16025,6 @@ TypedValue* fg_magickquantizeimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickquantizeimages", count, 6, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16907,7 +16051,6 @@ Value* fh_magickqueryfontmetrics(Value* _rv, Value* mgck_wnd, Value* drw_wnd, Va
 TypedValue * fg1_magickqueryfontmetrics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickqueryfontmetrics(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   switch (count) {
   default: // count >= 4
@@ -16937,7 +16080,6 @@ TypedValue* fg_magickqueryfontmetrics(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_magickqueryfontmetrics((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -16954,7 +16096,6 @@ TypedValue* fg_magickqueryfontmetrics(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickqueryfontmetrics", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -16978,7 +16119,6 @@ bool fh_magickradialblurimage(Value* mgck_wnd, double angle) asm("_ZN4HPHP23f_ma
 TypedValue * fg1_magickradialblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickradialblurimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -16996,7 +16136,6 @@ TypedValue* fg_magickradialblurimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickradialblurimage((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -17012,7 +16151,6 @@ TypedValue* fg_magickradialblurimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickradialblurimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17040,7 +16178,6 @@ bool fh_magickraiseimage(Value* mgck_wnd, double width, double height, int x, in
 TypedValue * fg1_magickraiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickraiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-5)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-5);
@@ -17070,7 +16207,6 @@ TypedValue* fg_magickraiseimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickraiseimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (int)(args[-3].m_data.num), (int)(args[-4].m_data.num), (bool)(args[-5].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
@@ -17086,7 +16222,6 @@ TypedValue* fg_magickraiseimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickraiseimage", count, 6, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17110,7 +16245,6 @@ bool fh_magickreadimage(Value* mgck_wnd, Value* filename) asm("_ZN4HPHP17f_magic
 TypedValue * fg1_magickreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -17128,7 +16262,6 @@ TypedValue* fg_magickreadimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickreadimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -17144,7 +16277,6 @@ TypedValue* fg_magickreadimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickreadimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17168,7 +16300,6 @@ bool fh_magickreadimageblob(Value* mgck_wnd, Value* blob) asm("_ZN4HPHP21f_magic
 TypedValue * fg1_magickreadimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickreadimageblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -17186,7 +16317,6 @@ TypedValue* fg_magickreadimageblob(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickreadimageblob((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -17202,7 +16332,6 @@ TypedValue* fg_magickreadimageblob(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickreadimageblob", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17226,7 +16355,6 @@ bool fh_magickreadimagefile(Value* mgck_wnd, Value* handle) asm("_ZN4HPHP21f_mag
 TypedValue * fg1_magickreadimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickreadimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -17244,7 +16372,6 @@ TypedValue* fg_magickreadimagefile(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickreadimagefile((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -17260,7 +16387,6 @@ TypedValue* fg_magickreadimagefile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickreadimagefile", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17284,7 +16410,6 @@ bool fh_magickreadimages(Value* mgck_wnd, Value* img_filenames_array) asm("_ZN4H
 TypedValue * fg1_magickreadimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickreadimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-1);
@@ -17302,7 +16427,6 @@ TypedValue* fg_magickreadimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickreadimages((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -17318,7 +16442,6 @@ TypedValue* fg_magickreadimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickreadimages", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17342,7 +16465,6 @@ bool fh_magickreducenoiseimage(Value* mgck_wnd, double radius) asm("_ZN4HPHP24f_
 TypedValue * fg1_magickreducenoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickreducenoiseimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -17360,7 +16482,6 @@ TypedValue* fg_magickreducenoiseimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickreducenoiseimage((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -17376,7 +16497,6 @@ TypedValue* fg_magickreducenoiseimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickreducenoiseimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17399,7 +16519,6 @@ bool fh_magickremoveimage(Value* mgck_wnd) asm("_ZN4HPHP19f_magickremoveimageERK
 TypedValue * fg1_magickremoveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickremoveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickremoveimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -17412,7 +16531,6 @@ TypedValue* fg_magickremoveimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickremoveimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -17428,7 +16546,6 @@ TypedValue* fg_magickremoveimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickremoveimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17453,7 +16570,6 @@ Value* fh_magickremoveimageprofile(Value* _rv, Value* mgck_wnd, Value* name) asm
 TypedValue * fg1_magickremoveimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickremoveimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -17472,7 +16588,6 @@ TypedValue* fg_magickremoveimageprofile(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_magickremoveimageprofile((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -17489,7 +16604,6 @@ TypedValue* fg_magickremoveimageprofile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickremoveimageprofile", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17512,7 +16626,6 @@ bool fh_magickremoveimageprofiles(Value* mgck_wnd) asm("_ZN4HPHP27f_magickremove
 TypedValue * fg1_magickremoveimageprofiles(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickremoveimageprofiles(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickremoveimageprofiles((Value*)(args-0))) ? 1LL : 0LL;
@@ -17525,7 +16638,6 @@ TypedValue* fg_magickremoveimageprofiles(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickremoveimageprofiles((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -17541,7 +16653,6 @@ TypedValue* fg_magickremoveimageprofiles(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickremoveimageprofiles", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17568,7 +16679,6 @@ bool fh_magickresampleimage(Value* mgck_wnd, double x_resolution, double y_resol
 TypedValue * fg1_magickresampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickresampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-4)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-4);
@@ -17595,7 +16705,6 @@ TypedValue* fg_magickresampleimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickresampleimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (int)(args[-3].m_data.num), (args[-4].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -17611,7 +16720,6 @@ TypedValue* fg_magickresampleimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickresampleimage", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17634,7 +16742,6 @@ TypedValue * fg1_magickresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64
 TypedValue * fg1_magickresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_magickresetiterator((Value*)(args-0));
@@ -17648,7 +16755,6 @@ TypedValue* fg_magickresetiterator(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_magickresetiterator((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -17664,7 +16770,6 @@ TypedValue* fg_magickresetiterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickresetiterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17691,7 +16796,6 @@ bool fh_magickresizeimage(Value* mgck_wnd, double columns, double rows, int filt
 TypedValue * fg1_magickresizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickresizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-4)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-4);
@@ -17718,7 +16822,6 @@ TypedValue* fg_magickresizeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickresizeimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (int)(args[-3].m_data.num), (args[-4].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -17734,7 +16837,6 @@ TypedValue* fg_magickresizeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickresizeimage", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17759,7 +16861,6 @@ bool fh_magickrollimage(Value* mgck_wnd, int x_offset, int y_offset) asm("_ZN4HP
 TypedValue * fg1_magickrollimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickrollimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -17780,7 +16881,6 @@ TypedValue* fg_magickrollimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickrollimage((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -17796,7 +16896,6 @@ TypedValue* fg_magickrollimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickrollimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17821,7 +16920,6 @@ bool fh_magickrotateimage(Value* mgck_wnd, Value* background, double degrees) as
 TypedValue * fg1_magickrotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickrotateimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -17842,7 +16940,6 @@ TypedValue* fg_magickrotateimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickrotateimage((Value*)(args-0), (Value*)(args-1), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -17858,7 +16955,6 @@ TypedValue* fg_magickrotateimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickrotateimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17883,7 +16979,6 @@ bool fh_magicksampleimage(Value* mgck_wnd, double columns, double rows) asm("_ZN
 TypedValue * fg1_magicksampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksampleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -17904,7 +16999,6 @@ TypedValue* fg_magicksampleimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksampleimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -17920,7 +17014,6 @@ TypedValue* fg_magicksampleimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksampleimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -17945,7 +17038,6 @@ bool fh_magickscaleimage(Value* mgck_wnd, double columns, double rows) asm("_ZN4
 TypedValue * fg1_magickscaleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickscaleimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -17966,7 +17058,6 @@ TypedValue* fg_magickscaleimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickscaleimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -17982,7 +17073,6 @@ TypedValue* fg_magickscaleimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickscaleimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18006,7 +17096,6 @@ bool fh_magickseparateimagechannel(Value* mgck_wnd, int channel_type) asm("_ZN4H
 TypedValue * fg1_magickseparateimagechannel(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickseparateimagechannel(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -18024,7 +17113,6 @@ TypedValue* fg_magickseparateimagechannel(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickseparateimagechannel((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18040,7 +17128,6 @@ TypedValue* fg_magickseparateimagechannel(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickseparateimagechannel", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18064,7 +17151,6 @@ bool fh_magicksetcompressionquality(Value* mgck_wnd, double quality) asm("_ZN4HP
 TypedValue * fg1_magicksetcompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetcompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -18082,7 +17168,6 @@ TypedValue* fg_magicksetcompressionquality(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetcompressionquality((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18098,7 +17183,6 @@ TypedValue* fg_magicksetcompressionquality(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetcompressionquality", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18122,7 +17206,6 @@ bool fh_magicksetfilename(Value* mgck_wnd, Value* filename) asm("_ZN4HPHP19f_mag
 TypedValue * fg1_magicksetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 2
@@ -18145,7 +17228,6 @@ TypedValue* fg_magicksetfilename(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetfilename((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18161,7 +17243,6 @@ TypedValue* fg_magicksetfilename(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetfilename", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18184,7 +17265,6 @@ TypedValue * fg1_magicksetfirstiterator(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_magicksetfirstiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_magicksetfirstiterator((Value*)(args-0));
@@ -18198,7 +17278,6 @@ TypedValue* fg_magicksetfirstiterator(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_magicksetfirstiterator((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -18214,7 +17293,6 @@ TypedValue* fg_magicksetfirstiterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetfirstiterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18238,7 +17316,6 @@ bool fh_magicksetformat(Value* mgck_wnd, Value* format) asm("_ZN4HPHP17f_magicks
 TypedValue * fg1_magicksetformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -18256,7 +17333,6 @@ TypedValue* fg_magicksetformat(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetformat((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18272,7 +17348,6 @@ TypedValue* fg_magicksetformat(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetformat", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18296,7 +17371,6 @@ bool fh_magicksetimage(Value* mgck_wnd, Value* replace_wand) asm("_ZN4HPHP16f_ma
 TypedValue * fg1_magicksetimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -18314,7 +17388,6 @@ TypedValue* fg_magicksetimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18330,7 +17403,6 @@ TypedValue* fg_magicksetimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18354,7 +17426,6 @@ bool fh_magicksetimagebackgroundcolor(Value* mgck_wnd, Value* background_pxl_wnd
 TypedValue * fg1_magicksetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagebackgroundcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -18372,7 +17443,6 @@ TypedValue* fg_magicksetimagebackgroundcolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagebackgroundcolor((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18388,7 +17458,6 @@ TypedValue* fg_magicksetimagebackgroundcolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagebackgroundcolor", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18412,7 +17481,6 @@ bool fh_magicksetimagebias(Value* mgck_wnd, double bias) asm("_ZN4HPHP20f_magick
 TypedValue * fg1_magicksetimagebias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagebias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -18430,7 +17498,6 @@ TypedValue* fg_magicksetimagebias(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagebias((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18446,7 +17513,6 @@ TypedValue* fg_magicksetimagebias(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagebias", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18471,7 +17537,6 @@ bool fh_magicksetimageblueprimary(Value* mgck_wnd, double x, double y) asm("_ZN4
 TypedValue * fg1_magicksetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimageblueprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -18492,7 +17557,6 @@ TypedValue* fg_magicksetimageblueprimary(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimageblueprimary((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -18508,7 +17572,6 @@ TypedValue* fg_magicksetimageblueprimary(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimageblueprimary", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18532,7 +17595,6 @@ bool fh_magicksetimagebordercolor(Value* mgck_wnd, Value* border_pxl_wnd) asm("_
 TypedValue * fg1_magicksetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagebordercolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -18550,7 +17612,6 @@ TypedValue* fg_magicksetimagebordercolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagebordercolor((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18566,7 +17627,6 @@ TypedValue* fg_magicksetimagebordercolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagebordercolor", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18591,7 +17651,6 @@ bool fh_magicksetimagecolormapcolor(Value* mgck_wnd, double index, Value* mapcol
 TypedValue * fg1_magicksetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagecolormapcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-2);
@@ -18612,7 +17671,6 @@ TypedValue* fg_magicksetimagecolormapcolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfObject && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagecolormapcolor((Value*)(args-0), (args[-1].m_data.dbl), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -18628,7 +17686,6 @@ TypedValue* fg_magicksetimagecolormapcolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagecolormapcolor", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18652,7 +17709,6 @@ bool fh_magicksetimagecolorspace(Value* mgck_wnd, int colorspace_type) asm("_ZN4
 TypedValue * fg1_magicksetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagecolorspace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -18670,7 +17726,6 @@ TypedValue* fg_magicksetimagecolorspace(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagecolorspace((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18686,7 +17741,6 @@ TypedValue* fg_magicksetimagecolorspace(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagecolorspace", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18710,7 +17764,6 @@ bool fh_magicksetimagecompose(Value* mgck_wnd, int composite_operator) asm("_ZN4
 TypedValue * fg1_magicksetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagecompose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -18728,7 +17781,6 @@ TypedValue* fg_magicksetimagecompose(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagecompose((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18744,7 +17796,6 @@ TypedValue* fg_magicksetimagecompose(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagecompose", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18768,7 +17819,6 @@ bool fh_magicksetimagecompression(Value* mgck_wnd, int compression_type) asm("_Z
 TypedValue * fg1_magicksetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagecompression(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -18786,7 +17836,6 @@ TypedValue* fg_magicksetimagecompression(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagecompression((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18802,7 +17851,6 @@ TypedValue* fg_magicksetimagecompression(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagecompression", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18826,7 +17874,6 @@ bool fh_magicksetimagecompressionquality(Value* mgck_wnd, double quality) asm("_
 TypedValue * fg1_magicksetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagecompressionquality(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -18844,7 +17891,6 @@ TypedValue* fg_magicksetimagecompressionquality(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagecompressionquality((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18860,7 +17906,6 @@ TypedValue* fg_magicksetimagecompressionquality(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagecompressionquality", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18884,7 +17929,6 @@ bool fh_magicksetimagedelay(Value* mgck_wnd, double delay) asm("_ZN4HPHP21f_magi
 TypedValue * fg1_magicksetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagedelay(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -18902,7 +17946,6 @@ TypedValue* fg_magicksetimagedelay(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagedelay((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -18918,7 +17961,6 @@ TypedValue* fg_magicksetimagedelay(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagedelay", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -18943,7 +17985,6 @@ bool fh_magicksetimagedepth(Value* mgck_wnd, int depth, int channel_type) asm("_
 TypedValue * fg1_magicksetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagedepth(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -18969,7 +18010,6 @@ TypedValue* fg_magicksetimagedepth(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagedepth((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -18985,7 +18025,6 @@ TypedValue* fg_magicksetimagedepth(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagedepth", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19009,7 +18048,6 @@ bool fh_magicksetimagedispose(Value* mgck_wnd, int dispose_type) asm("_ZN4HPHP23
 TypedValue * fg1_magicksetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagedispose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -19027,7 +18065,6 @@ TypedValue* fg_magicksetimagedispose(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagedispose((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -19043,7 +18080,6 @@ TypedValue* fg_magicksetimagedispose(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagedispose", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19067,7 +18103,6 @@ bool fh_magicksetimagefilename(Value* mgck_wnd, Value* filename) asm("_ZN4HPHP24
 TypedValue * fg1_magicksetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagefilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 2
@@ -19090,7 +18125,6 @@ TypedValue* fg_magicksetimagefilename(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagefilename((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -19106,7 +18140,6 @@ TypedValue* fg_magicksetimagefilename(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagefilename", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19130,7 +18163,6 @@ bool fh_magicksetimageformat(Value* mgck_wnd, Value* format) asm("_ZN4HPHP22f_ma
 TypedValue * fg1_magicksetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimageformat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -19148,7 +18180,6 @@ TypedValue* fg_magicksetimageformat(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimageformat((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -19164,7 +18195,6 @@ TypedValue* fg_magicksetimageformat(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimageformat", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19188,7 +18218,6 @@ bool fh_magicksetimagegamma(Value* mgck_wnd, double gamma) asm("_ZN4HPHP21f_magi
 TypedValue * fg1_magicksetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagegamma(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -19206,7 +18235,6 @@ TypedValue* fg_magicksetimagegamma(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagegamma((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -19222,7 +18250,6 @@ TypedValue* fg_magicksetimagegamma(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagegamma", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19247,7 +18274,6 @@ bool fh_magicksetimagegreenprimary(Value* mgck_wnd, double x, double y) asm("_ZN
 TypedValue * fg1_magicksetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagegreenprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -19268,7 +18294,6 @@ TypedValue* fg_magicksetimagegreenprimary(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagegreenprimary((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -19284,7 +18309,6 @@ TypedValue* fg_magicksetimagegreenprimary(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagegreenprimary", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19308,7 +18332,6 @@ bool fh_magicksetimageindex(Value* mgck_wnd, int index) asm("_ZN4HPHP21f_magicks
 TypedValue * fg1_magicksetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimageindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -19326,7 +18349,6 @@ TypedValue* fg_magicksetimageindex(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimageindex((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -19342,7 +18364,6 @@ TypedValue* fg_magicksetimageindex(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimageindex", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19366,7 +18387,6 @@ bool fh_magicksetimageinterlacescheme(Value* mgck_wnd, int interlace_type) asm("
 TypedValue * fg1_magicksetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimageinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -19384,7 +18404,6 @@ TypedValue* fg_magicksetimageinterlacescheme(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimageinterlacescheme((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -19400,7 +18419,6 @@ TypedValue* fg_magicksetimageinterlacescheme(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimageinterlacescheme", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19424,7 +18442,6 @@ bool fh_magicksetimageiterations(Value* mgck_wnd, double iterations) asm("_ZN4HP
 TypedValue * fg1_magicksetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimageiterations(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -19442,7 +18459,6 @@ TypedValue* fg_magicksetimageiterations(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimageiterations((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -19458,7 +18474,6 @@ TypedValue* fg_magicksetimageiterations(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimageiterations", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19482,7 +18497,6 @@ bool fh_magicksetimagemattecolor(Value* mgck_wnd, Value* matte_pxl_wnd) asm("_ZN
 TypedValue * fg1_magicksetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagemattecolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -19500,7 +18514,6 @@ TypedValue* fg_magicksetimagemattecolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagemattecolor((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -19516,7 +18529,6 @@ TypedValue* fg_magicksetimagemattecolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagemattecolor", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19542,7 +18554,6 @@ bool fh_magicksetimageoption(Value* mgck_wnd, Value* format, Value* key, Value* 
 TypedValue * fg1_magicksetimageoption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimageoption(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -19566,7 +18577,6 @@ TypedValue* fg_magicksetimageoption(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimageoption((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -19582,7 +18592,6 @@ TypedValue* fg_magicksetimageoption(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimageoption", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19612,7 +18621,6 @@ bool fh_magicksetimagepixels(Value* mgck_wnd, int x_offset, int y_offset, double
 TypedValue * fg1_magicksetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagepixels(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-7)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-7);
@@ -19648,7 +18656,6 @@ TypedValue* fg_magicksetimagepixels(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 8LL) {
       if ((args-7)->m_type == KindOfArray && (args-6)->m_type == KindOfInt64 && IS_STRING_TYPE((args-5)->m_type) && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagepixels((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (Value*)(args-5), (int)(args[-6].m_data.num), (Value*)(args-7))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 8);
@@ -19664,7 +18671,6 @@ TypedValue* fg_magicksetimagepixels(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagepixels", count, 8, 8, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 8);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19689,7 +18695,6 @@ bool fh_magicksetimageprofile(Value* mgck_wnd, Value* name, Value* profile) asm(
 TypedValue * fg1_magicksetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimageprofile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -19710,7 +18715,6 @@ TypedValue* fg_magicksetimageprofile(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimageprofile((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -19726,7 +18730,6 @@ TypedValue* fg_magicksetimageprofile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimageprofile", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19751,7 +18754,6 @@ bool fh_magicksetimageredprimary(Value* mgck_wnd, double x, double y) asm("_ZN4H
 TypedValue * fg1_magicksetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimageredprimary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -19772,7 +18774,6 @@ TypedValue* fg_magicksetimageredprimary(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimageredprimary((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -19788,7 +18789,6 @@ TypedValue* fg_magicksetimageredprimary(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimageredprimary", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19812,7 +18812,6 @@ bool fh_magicksetimagerenderingintent(Value* mgck_wnd, int rendering_intent) asm
 TypedValue * fg1_magicksetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagerenderingintent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -19830,7 +18829,6 @@ TypedValue* fg_magicksetimagerenderingintent(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagerenderingintent((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -19846,7 +18844,6 @@ TypedValue* fg_magicksetimagerenderingintent(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagerenderingintent", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19871,7 +18868,6 @@ bool fh_magicksetimageresolution(Value* mgck_wnd, double x_resolution, double y_
 TypedValue * fg1_magicksetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimageresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -19892,7 +18888,6 @@ TypedValue* fg_magicksetimageresolution(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimageresolution((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -19908,7 +18903,6 @@ TypedValue* fg_magicksetimageresolution(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimageresolution", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19932,7 +18926,6 @@ bool fh_magicksetimagescene(Value* mgck_wnd, double scene) asm("_ZN4HPHP21f_magi
 TypedValue * fg1_magicksetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagescene(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -19950,7 +18943,6 @@ TypedValue* fg_magicksetimagescene(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagescene((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -19966,7 +18958,6 @@ TypedValue* fg_magicksetimagescene(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagescene", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -19990,7 +18981,6 @@ bool fh_magicksetimagetype(Value* mgck_wnd, int image_type) asm("_ZN4HPHP20f_mag
 TypedValue * fg1_magicksetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagetype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -20008,7 +18998,6 @@ TypedValue* fg_magicksetimagetype(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagetype((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -20024,7 +19013,6 @@ TypedValue* fg_magicksetimagetype(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagetype", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20048,7 +19036,6 @@ bool fh_magicksetimageunits(Value* mgck_wnd, int resolution_type) asm("_ZN4HPHP2
 TypedValue * fg1_magicksetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimageunits(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -20066,7 +19053,6 @@ TypedValue* fg_magicksetimageunits(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimageunits((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -20082,7 +19068,6 @@ TypedValue* fg_magicksetimageunits(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimageunits", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20106,7 +19091,6 @@ bool fh_magicksetimagevirtualpixelmethod(Value* mgck_wnd, int virtual_pixel_meth
 TypedValue * fg1_magicksetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagevirtualpixelmethod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -20124,7 +19108,6 @@ TypedValue* fg_magicksetimagevirtualpixelmethod(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagevirtualpixelmethod((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -20140,7 +19123,6 @@ TypedValue* fg_magicksetimagevirtualpixelmethod(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagevirtualpixelmethod", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20165,7 +19147,6 @@ bool fh_magicksetimagewhitepoint(Value* mgck_wnd, double x, double y) asm("_ZN4H
 TypedValue * fg1_magicksetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetimagewhitepoint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -20186,7 +19167,6 @@ TypedValue* fg_magicksetimagewhitepoint(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetimagewhitepoint((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -20202,7 +19182,6 @@ TypedValue* fg_magicksetimagewhitepoint(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetimagewhitepoint", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20226,7 +19205,6 @@ bool fh_magicksetinterlacescheme(Value* mgck_wnd, int interlace_type) asm("_ZN4H
 TypedValue * fg1_magicksetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetinterlacescheme(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -20244,7 +19222,6 @@ TypedValue* fg_magicksetinterlacescheme(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetinterlacescheme((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -20260,7 +19237,6 @@ TypedValue* fg_magicksetinterlacescheme(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetinterlacescheme", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20283,7 +19259,6 @@ TypedValue * fg1_magicksetlastiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue * fg1_magicksetlastiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_magicksetlastiterator((Value*)(args-0));
@@ -20297,7 +19272,6 @@ TypedValue* fg_magicksetlastiterator(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_magicksetlastiterator((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -20313,7 +19287,6 @@ TypedValue* fg_magicksetlastiterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetlastiterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20337,7 +19310,6 @@ bool fh_magicksetpassphrase(Value* mgck_wnd, Value* passphrase) asm("_ZN4HPHP21f
 TypedValue * fg1_magicksetpassphrase(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetpassphrase(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -20355,7 +19327,6 @@ TypedValue* fg_magicksetpassphrase(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetpassphrase((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -20371,7 +19342,6 @@ TypedValue* fg_magicksetpassphrase(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetpassphrase", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20396,7 +19366,6 @@ bool fh_magicksetresolution(Value* mgck_wnd, double x_resolution, double y_resol
 TypedValue * fg1_magicksetresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetresolution(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -20417,7 +19386,6 @@ TypedValue* fg_magicksetresolution(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetresolution((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -20433,7 +19401,6 @@ TypedValue* fg_magicksetresolution(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetresolution", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20458,7 +19425,6 @@ bool fh_magicksetsamplingfactors(Value* mgck_wnd, double number_factors, Value* 
 TypedValue * fg1_magicksetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetsamplingfactors(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-2);
@@ -20479,7 +19445,6 @@ TypedValue* fg_magicksetsamplingfactors(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetsamplingfactors((Value*)(args-0), (args[-1].m_data.dbl), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -20495,7 +19460,6 @@ TypedValue* fg_magicksetsamplingfactors(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetsamplingfactors", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20520,7 +19484,6 @@ bool fh_magicksetsize(Value* mgck_wnd, int columns, int rows) asm("_ZN4HPHP15f_m
 TypedValue * fg1_magicksetsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -20541,7 +19504,6 @@ TypedValue* fg_magicksetsize(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetsize((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -20557,7 +19519,6 @@ TypedValue* fg_magicksetsize(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetsize", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20582,7 +19543,6 @@ bool fh_magicksetwandsize(Value* mgck_wnd, int columns, int rows) asm("_ZN4HPHP1
 TypedValue * fg1_magicksetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksetwandsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -20603,7 +19563,6 @@ TypedValue* fg_magicksetwandsize(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksetwandsize((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -20619,7 +19578,6 @@ TypedValue* fg_magicksetwandsize(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksetwandsize", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20645,7 +19603,6 @@ bool fh_magicksharpenimage(Value* mgck_wnd, double radius, double sigma, int cha
 TypedValue * fg1_magicksharpenimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksharpenimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 4
@@ -20674,7 +19631,6 @@ TypedValue* fg_magicksharpenimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksharpenimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -20690,7 +19646,6 @@ TypedValue* fg_magicksharpenimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksharpenimage", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20715,7 +19670,6 @@ bool fh_magickshaveimage(Value* mgck_wnd, int columns, int rows) asm("_ZN4HPHP18
 TypedValue * fg1_magickshaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickshaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -20736,7 +19690,6 @@ TypedValue* fg_magickshaveimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickshaveimage((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -20752,7 +19705,6 @@ TypedValue* fg_magickshaveimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickshaveimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20778,7 +19730,6 @@ bool fh_magickshearimage(Value* mgck_wnd, Value* background, double x_shear, dou
 TypedValue * fg1_magickshearimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickshearimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-3)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-3);
@@ -20802,7 +19753,6 @@ TypedValue* fg_magickshearimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickshearimage((Value*)(args-0), (Value*)(args-1), (args[-2].m_data.dbl), (args[-3].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
@@ -20818,7 +19768,6 @@ TypedValue* fg_magickshearimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickshearimage", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20842,7 +19791,6 @@ bool fh_magicksolarizeimage(Value* mgck_wnd, double threshold) asm("_ZN4HPHP21f_
 TypedValue * fg1_magicksolarizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksolarizeimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -20860,7 +19808,6 @@ TypedValue* fg_magicksolarizeimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicksolarizeimage((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -20876,7 +19823,6 @@ TypedValue* fg_magicksolarizeimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksolarizeimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20903,7 +19849,6 @@ bool fh_magickspliceimage(Value* mgck_wnd, double width, double height, int x, i
 TypedValue * fg1_magickspliceimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickspliceimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -20930,7 +19875,6 @@ TypedValue* fg_magickspliceimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickspliceimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (int)(args[-3].m_data.num), (int)(args[-4].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
@@ -20946,7 +19890,6 @@ TypedValue* fg_magickspliceimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickspliceimage", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -20970,7 +19913,6 @@ bool fh_magickspreadimage(Value* mgck_wnd, double radius) asm("_ZN4HPHP19f_magic
 TypedValue * fg1_magickspreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickspreadimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -20988,7 +19930,6 @@ TypedValue* fg_magickspreadimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickspreadimage((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -21004,7 +19945,6 @@ TypedValue* fg_magickspreadimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickspreadimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21030,7 +19970,6 @@ Value* fh_magicksteganoimage(Value* _rv, Value* mgck_wnd, Value* watermark_wand,
 TypedValue * fg1_magicksteganoimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicksteganoimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -21052,7 +19991,6 @@ TypedValue* fg_magicksteganoimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magicksteganoimage((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (int)(args[-2].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -21069,7 +20007,6 @@ TypedValue* fg_magicksteganoimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicksteganoimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21093,7 +20030,6 @@ bool fh_magickstereoimage(Value* mgck_wnd, Value* offset_wand) asm("_ZN4HPHP19f_
 TypedValue * fg1_magickstereoimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickstereoimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -21111,7 +20047,6 @@ TypedValue* fg_magickstereoimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickstereoimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -21127,7 +20062,6 @@ TypedValue* fg_magickstereoimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickstereoimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21150,7 +20084,6 @@ bool fh_magickstripimage(Value* mgck_wnd) asm("_ZN4HPHP18f_magickstripimageERKNS
 TypedValue * fg1_magickstripimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickstripimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_magickstripimage((Value*)(args-0))) ? 1LL : 0LL;
@@ -21163,7 +20096,6 @@ TypedValue* fg_magickstripimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickstripimage((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -21179,7 +20111,6 @@ TypedValue* fg_magickstripimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickstripimage", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21203,7 +20134,6 @@ bool fh_magickswirlimage(Value* mgck_wnd, double degrees) asm("_ZN4HPHP18f_magic
 TypedValue * fg1_magickswirlimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickswirlimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -21221,7 +20151,6 @@ TypedValue* fg_magickswirlimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickswirlimage((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -21237,7 +20166,6 @@ TypedValue* fg_magickswirlimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickswirlimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21262,7 +20190,6 @@ Value* fh_magicktextureimage(Value* _rv, Value* mgck_wnd, Value* texture_wand) a
 TypedValue * fg1_magicktextureimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicktextureimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -21281,7 +20208,6 @@ TypedValue* fg_magicktextureimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magicktextureimage((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -21298,7 +20224,6 @@ TypedValue* fg_magicktextureimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicktextureimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21323,7 +20248,6 @@ bool fh_magickthresholdimage(Value* mgck_wnd, double threshold, int channel_type
 TypedValue * fg1_magickthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickthresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -21349,7 +20273,6 @@ TypedValue* fg_magickthresholdimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickthresholdimage((Value*)(args-0), (args[-1].m_data.dbl), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -21365,7 +20288,6 @@ TypedValue* fg_magickthresholdimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickthresholdimage", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21390,7 +20312,6 @@ bool fh_magicktintimage(Value* mgck_wnd, int tint_pxl_wnd, Value* opacity_pxl_wn
 TypedValue * fg1_magicktintimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicktintimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-2);
@@ -21411,7 +20332,6 @@ TypedValue* fg_magicktintimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfObject && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicktintimage((Value*)(args-0), (int)(args[-1].m_data.num), (Value*)(args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -21427,7 +20347,6 @@ TypedValue* fg_magicktintimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicktintimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21453,7 +20372,6 @@ Value* fh_magicktransformimage(Value* _rv, Value* mgck_wnd, Value* crop, Value* 
 TypedValue * fg1_magicktransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicktransformimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -21475,7 +20393,6 @@ TypedValue* fg_magicktransformimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfObject;
         fh_magicktransformimage((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -21492,7 +20409,6 @@ TypedValue* fg_magicktransformimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicktransformimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21516,7 +20432,6 @@ bool fh_magicktrimimage(Value* mgck_wnd, double fuzz) asm("_ZN4HPHP17f_magicktri
 TypedValue * fg1_magicktrimimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magicktrimimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -21534,7 +20449,6 @@ TypedValue* fg_magicktrimimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magicktrimimage((Value*)(args-0), (args[-1].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -21550,7 +20464,6 @@ TypedValue* fg_magicktrimimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magicktrimimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21578,7 +20491,6 @@ bool fh_magickunsharpmaskimage(Value* mgck_wnd, double radius, double sigma, dou
 TypedValue * fg1_magickunsharpmaskimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickunsharpmaskimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 6
@@ -21613,7 +20525,6 @@ TypedValue* fg_magickunsharpmaskimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 5LL && count <= 6LL) {
       if ((count <= 5 || (args-5)->m_type == KindOfInt64) && (args-4)->m_type == KindOfDouble && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickunsharpmaskimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (args[-4].m_data.dbl), (count > 5) ? (int)(args[-5].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
@@ -21629,7 +20540,6 @@ TypedValue* fg_magickunsharpmaskimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickunsharpmaskimage", count, 5, 6, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 6);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21654,7 +20564,6 @@ bool fh_magickwaveimage(Value* mgck_wnd, double amplitude, double wave_length) a
 TypedValue * fg1_magickwaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickwaveimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-2);
@@ -21675,7 +20584,6 @@ TypedValue* fg_magickwaveimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickwaveimage((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -21691,7 +20599,6 @@ TypedValue* fg_magickwaveimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickwaveimage", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21715,7 +20622,6 @@ bool fh_magickwhitethresholdimage(Value* mgck_wnd, Value* threshold_pxl_wnd) asm
 TypedValue * fg1_magickwhitethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickwhitethresholdimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -21733,7 +20639,6 @@ TypedValue* fg_magickwhitethresholdimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickwhitethresholdimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -21749,7 +20654,6 @@ TypedValue* fg_magickwhitethresholdimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickwhitethresholdimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21773,7 +20677,6 @@ bool fh_magickwriteimage(Value* mgck_wnd, Value* filename) asm("_ZN4HPHP18f_magi
 TypedValue * fg1_magickwriteimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickwriteimage(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -21791,7 +20694,6 @@ TypedValue* fg_magickwriteimage(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickwriteimage((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -21807,7 +20709,6 @@ TypedValue* fg_magickwriteimage(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickwriteimage", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21831,7 +20732,6 @@ bool fh_magickwriteimagefile(Value* mgck_wnd, Value* handle) asm("_ZN4HPHP22f_ma
 TypedValue * fg1_magickwriteimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickwriteimagefile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -21849,7 +20749,6 @@ TypedValue* fg_magickwriteimagefile(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickwriteimagefile((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -21865,7 +20764,6 @@ TypedValue* fg_magickwriteimagefile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickwriteimagefile", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21890,7 +20788,6 @@ bool fh_magickwriteimages(Value* mgck_wnd, Value* filename, bool join_images) as
 TypedValue * fg1_magickwriteimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickwriteimages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 3
@@ -21917,7 +20814,6 @@ TypedValue* fg_magickwriteimages(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickwriteimages((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&empty_string), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
@@ -21933,7 +20829,6 @@ TypedValue* fg_magickwriteimages(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickwriteimages", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -21957,7 +20852,6 @@ bool fh_magickwriteimagesfile(Value* mgck_wnd, Value* handle) asm("_ZN4HPHP23f_m
 TypedValue * fg1_magickwriteimagesfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_magickwriteimagesfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -21975,7 +20869,6 @@ TypedValue* fg_magickwriteimagesfile(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_magickwriteimagesfile((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -21991,7 +20884,6 @@ TypedValue* fg_magickwriteimagesfile(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("magickwriteimagesfile", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22014,7 +20906,6 @@ double fh_pixelgetalpha(Value* pxl_wnd) asm("_ZN4HPHP15f_pixelgetalphaERKNS_6Obj
 TypedValue * fg1_pixelgetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetalpha((Value*)(args-0));
@@ -22027,7 +20918,6 @@ TypedValue* fg_pixelgetalpha(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetalpha((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22043,7 +20933,6 @@ TypedValue* fg_pixelgetalpha(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetalpha", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22066,7 +20955,6 @@ double fh_pixelgetalphaquantum(Value* pxl_wnd) asm("_ZN4HPHP22f_pixelgetalphaqua
 TypedValue * fg1_pixelgetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetalphaquantum((Value*)(args-0));
@@ -22079,7 +20967,6 @@ TypedValue* fg_pixelgetalphaquantum(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetalphaquantum((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22095,7 +20982,6 @@ TypedValue* fg_pixelgetalphaquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetalphaquantum", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22118,7 +21004,6 @@ double fh_pixelgetblack(Value* pxl_wnd) asm("_ZN4HPHP15f_pixelgetblackERKNS_6Obj
 TypedValue * fg1_pixelgetblack(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetblack(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetblack((Value*)(args-0));
@@ -22131,7 +21016,6 @@ TypedValue* fg_pixelgetblack(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetblack((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22147,7 +21031,6 @@ TypedValue* fg_pixelgetblack(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetblack", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22170,7 +21053,6 @@ double fh_pixelgetblackquantum(Value* pxl_wnd) asm("_ZN4HPHP22f_pixelgetblackqua
 TypedValue * fg1_pixelgetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetblackquantum((Value*)(args-0));
@@ -22183,7 +21065,6 @@ TypedValue* fg_pixelgetblackquantum(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetblackquantum((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22199,7 +21080,6 @@ TypedValue* fg_pixelgetblackquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetblackquantum", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22222,7 +21102,6 @@ double fh_pixelgetblue(Value* pxl_wnd) asm("_ZN4HPHP14f_pixelgetblueERKNS_6Objec
 TypedValue * fg1_pixelgetblue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetblue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetblue((Value*)(args-0));
@@ -22235,7 +21114,6 @@ TypedValue* fg_pixelgetblue(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetblue((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22251,7 +21129,6 @@ TypedValue* fg_pixelgetblue(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetblue", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22274,7 +21151,6 @@ double fh_pixelgetbluequantum(Value* pxl_wnd) asm("_ZN4HPHP21f_pixelgetbluequant
 TypedValue * fg1_pixelgetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetbluequantum((Value*)(args-0));
@@ -22287,7 +21163,6 @@ TypedValue* fg_pixelgetbluequantum(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetbluequantum((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22303,7 +21178,6 @@ TypedValue* fg_pixelgetbluequantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetbluequantum", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22327,7 +21201,6 @@ Value* fh_pixelgetcolorasstring(Value* _rv, Value* pxl_wnd) asm("_ZN4HPHP23f_pix
 TypedValue * fg1_pixelgetcolorasstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetcolorasstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_pixelgetcolorasstring((Value*)(rv), (Value*)(args-0));
@@ -22341,7 +21214,6 @@ TypedValue* fg_pixelgetcolorasstring(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_pixelgetcolorasstring((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -22358,7 +21230,6 @@ TypedValue* fg_pixelgetcolorasstring(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetcolorasstring", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22381,7 +21252,6 @@ double fh_pixelgetcolorcount(Value* pxl_wnd) asm("_ZN4HPHP20f_pixelgetcolorcount
 TypedValue * fg1_pixelgetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetcolorcount((Value*)(args-0));
@@ -22394,7 +21264,6 @@ TypedValue* fg_pixelgetcolorcount(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetcolorcount((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22410,7 +21279,6 @@ TypedValue* fg_pixelgetcolorcount(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetcolorcount", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22433,7 +21301,6 @@ double fh_pixelgetcyan(Value* pxl_wnd) asm("_ZN4HPHP14f_pixelgetcyanERKNS_6Objec
 TypedValue * fg1_pixelgetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetcyan((Value*)(args-0));
@@ -22446,7 +21313,6 @@ TypedValue* fg_pixelgetcyan(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetcyan((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22462,7 +21328,6 @@ TypedValue* fg_pixelgetcyan(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetcyan", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22485,7 +21350,6 @@ double fh_pixelgetcyanquantum(Value* pxl_wnd) asm("_ZN4HPHP21f_pixelgetcyanquant
 TypedValue * fg1_pixelgetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetcyanquantum((Value*)(args-0));
@@ -22498,7 +21362,6 @@ TypedValue* fg_pixelgetcyanquantum(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetcyanquantum((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22514,7 +21377,6 @@ TypedValue* fg_pixelgetcyanquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetcyanquantum", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22538,7 +21400,6 @@ Value* fh_pixelgetexception(Value* _rv, Value* pxl_wnd) asm("_ZN4HPHP19f_pixelge
 TypedValue * fg1_pixelgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_pixelgetexception((Value*)(rv), (Value*)(args-0));
@@ -22552,7 +21413,6 @@ TypedValue* fg_pixelgetexception(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_pixelgetexception((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -22569,7 +21429,6 @@ TypedValue* fg_pixelgetexception(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetexception", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22593,7 +21452,6 @@ Value* fh_pixelgetexceptionstring(Value* _rv, Value* pxl_wnd) asm("_ZN4HPHP25f_p
 TypedValue * fg1_pixelgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_pixelgetexceptionstring((Value*)(rv), (Value*)(args-0));
@@ -22607,7 +21465,6 @@ TypedValue* fg_pixelgetexceptionstring(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_pixelgetexceptionstring((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -22624,7 +21481,6 @@ TypedValue* fg_pixelgetexceptionstring(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetexceptionstring", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22647,7 +21503,6 @@ long fh_pixelgetexceptiontype(Value* pxl_wnd) asm("_ZN4HPHP23f_pixelgetexception
 TypedValue * fg1_pixelgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_pixelgetexceptiontype((Value*)(args-0));
@@ -22660,7 +21515,6 @@ TypedValue* fg_pixelgetexceptiontype(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_pixelgetexceptiontype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22676,7 +21530,6 @@ TypedValue* fg_pixelgetexceptiontype(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetexceptiontype", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22699,7 +21552,6 @@ double fh_pixelgetgreen(Value* pxl_wnd) asm("_ZN4HPHP15f_pixelgetgreenERKNS_6Obj
 TypedValue * fg1_pixelgetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetgreen((Value*)(args-0));
@@ -22712,7 +21564,6 @@ TypedValue* fg_pixelgetgreen(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetgreen((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22728,7 +21579,6 @@ TypedValue* fg_pixelgetgreen(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetgreen", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22751,7 +21601,6 @@ double fh_pixelgetgreenquantum(Value* pxl_wnd) asm("_ZN4HPHP22f_pixelgetgreenqua
 TypedValue * fg1_pixelgetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetgreenquantum((Value*)(args-0));
@@ -22764,7 +21613,6 @@ TypedValue* fg_pixelgetgreenquantum(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetgreenquantum((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22780,7 +21628,6 @@ TypedValue* fg_pixelgetgreenquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetgreenquantum", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22803,7 +21650,6 @@ double fh_pixelgetindex(Value* pxl_wnd) asm("_ZN4HPHP15f_pixelgetindexERKNS_6Obj
 TypedValue * fg1_pixelgetindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetindex((Value*)(args-0));
@@ -22816,7 +21662,6 @@ TypedValue* fg_pixelgetindex(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetindex((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22832,7 +21677,6 @@ TypedValue* fg_pixelgetindex(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetindex", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22855,7 +21699,6 @@ double fh_pixelgetmagenta(Value* pxl_wnd) asm("_ZN4HPHP17f_pixelgetmagentaERKNS_
 TypedValue * fg1_pixelgetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetmagenta((Value*)(args-0));
@@ -22868,7 +21711,6 @@ TypedValue* fg_pixelgetmagenta(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetmagenta((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22884,7 +21726,6 @@ TypedValue* fg_pixelgetmagenta(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetmagenta", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22907,7 +21748,6 @@ double fh_pixelgetmagentaquantum(Value* pxl_wnd) asm("_ZN4HPHP24f_pixelgetmagent
 TypedValue * fg1_pixelgetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetmagentaquantum((Value*)(args-0));
@@ -22920,7 +21760,6 @@ TypedValue* fg_pixelgetmagentaquantum(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetmagentaquantum((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22936,7 +21775,6 @@ TypedValue* fg_pixelgetmagentaquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetmagentaquantum", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -22959,7 +21797,6 @@ double fh_pixelgetopacity(Value* pxl_wnd) asm("_ZN4HPHP17f_pixelgetopacityERKNS_
 TypedValue * fg1_pixelgetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetopacity((Value*)(args-0));
@@ -22972,7 +21809,6 @@ TypedValue* fg_pixelgetopacity(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetopacity((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -22988,7 +21824,6 @@ TypedValue* fg_pixelgetopacity(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetopacity", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23011,7 +21846,6 @@ double fh_pixelgetopacityquantum(Value* pxl_wnd) asm("_ZN4HPHP24f_pixelgetopacit
 TypedValue * fg1_pixelgetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetopacityquantum((Value*)(args-0));
@@ -23024,7 +21858,6 @@ TypedValue* fg_pixelgetopacityquantum(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetopacityquantum((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -23040,7 +21873,6 @@ TypedValue* fg_pixelgetopacityquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetopacityquantum", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23064,7 +21896,6 @@ Value* fh_pixelgetquantumcolor(Value* _rv, Value* pxl_wnd) asm("_ZN4HPHP22f_pixe
 TypedValue * fg1_pixelgetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_pixelgetquantumcolor((Value*)(rv), (Value*)(args-0));
@@ -23078,7 +21909,6 @@ TypedValue* fg_pixelgetquantumcolor(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_pixelgetquantumcolor((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -23095,7 +21925,6 @@ TypedValue* fg_pixelgetquantumcolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetquantumcolor", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23118,7 +21947,6 @@ double fh_pixelgetred(Value* pxl_wnd) asm("_ZN4HPHP13f_pixelgetredERKNS_6ObjectE
 TypedValue * fg1_pixelgetred(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetred(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetred((Value*)(args-0));
@@ -23131,7 +21959,6 @@ TypedValue* fg_pixelgetred(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetred((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -23147,7 +21974,6 @@ TypedValue* fg_pixelgetred(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetred", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23170,7 +21996,6 @@ double fh_pixelgetredquantum(Value* pxl_wnd) asm("_ZN4HPHP20f_pixelgetredquantum
 TypedValue * fg1_pixelgetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetredquantum((Value*)(args-0));
@@ -23183,7 +22008,6 @@ TypedValue* fg_pixelgetredquantum(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetredquantum((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -23199,7 +22023,6 @@ TypedValue* fg_pixelgetredquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetredquantum", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23222,7 +22045,6 @@ double fh_pixelgetyellow(Value* pxl_wnd) asm("_ZN4HPHP16f_pixelgetyellowERKNS_6O
 TypedValue * fg1_pixelgetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetyellow((Value*)(args-0));
@@ -23235,7 +22057,6 @@ TypedValue* fg_pixelgetyellow(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetyellow((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -23251,7 +22072,6 @@ TypedValue* fg_pixelgetyellow(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetyellow", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23274,7 +22094,6 @@ double fh_pixelgetyellowquantum(Value* pxl_wnd) asm("_ZN4HPHP23f_pixelgetyellowq
 TypedValue * fg1_pixelgetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfDouble;
   tvCastToObjectInPlace(args-0);
   rv->m_data.dbl = fh_pixelgetyellowquantum((Value*)(args-0));
@@ -23287,7 +22106,6 @@ TypedValue* fg_pixelgetyellowquantum(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfDouble;
         rv.m_data.dbl = fh_pixelgetyellowquantum((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -23303,7 +22121,6 @@ TypedValue* fg_pixelgetyellowquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetyellowquantum", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23327,7 +22144,6 @@ TypedValue * fg1_pixelsetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
 TypedValue * fg1_pixelsetalpha(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -23346,7 +22162,6 @@ TypedValue* fg_pixelsetalpha(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetalpha((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -23362,7 +22177,6 @@ TypedValue* fg_pixelsetalpha(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetalpha", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23386,7 +22200,6 @@ TypedValue * fg1_pixelsetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_pixelsetalphaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -23405,7 +22218,6 @@ TypedValue* fg_pixelsetalphaquantum(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetalphaquantum((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -23421,7 +22233,6 @@ TypedValue* fg_pixelsetalphaquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetalphaquantum", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23445,7 +22256,6 @@ TypedValue * fg1_pixelsetblack(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
 TypedValue * fg1_pixelsetblack(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -23464,7 +22274,6 @@ TypedValue* fg_pixelsetblack(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetblack((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -23480,7 +22289,6 @@ TypedValue* fg_pixelsetblack(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetblack", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23504,7 +22312,6 @@ TypedValue * fg1_pixelsetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_pixelsetblackquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -23523,7 +22330,6 @@ TypedValue* fg_pixelsetblackquantum(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetblackquantum((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -23539,7 +22345,6 @@ TypedValue* fg_pixelsetblackquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetblackquantum", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23563,7 +22368,6 @@ TypedValue * fg1_pixelsetblue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
 TypedValue * fg1_pixelsetblue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -23582,7 +22386,6 @@ TypedValue* fg_pixelsetblue(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetblue((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -23598,7 +22401,6 @@ TypedValue* fg_pixelsetblue(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetblue", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23622,7 +22424,6 @@ TypedValue * fg1_pixelsetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64
 TypedValue * fg1_pixelsetbluequantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -23641,7 +22442,6 @@ TypedValue* fg_pixelsetbluequantum(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetbluequantum((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -23657,7 +22457,6 @@ TypedValue* fg_pixelsetbluequantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetbluequantum", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23681,7 +22480,6 @@ TypedValue * fg1_pixelsetcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
 TypedValue * fg1_pixelsetcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -23700,7 +22498,6 @@ TypedValue* fg_pixelsetcolor(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetcolor((Value*)(args-0), (Value*)(args-1));
         frame_free_locals_no_this_inl(ar, 2);
@@ -23716,7 +22513,6 @@ TypedValue* fg_pixelsetcolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetcolor", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23740,7 +22536,6 @@ TypedValue * fg1_pixelsetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_pixelsetcolorcount(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -23759,7 +22554,6 @@ TypedValue* fg_pixelsetcolorcount(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetcolorcount((Value*)(args-0), (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
@@ -23775,7 +22569,6 @@ TypedValue* fg_pixelsetcolorcount(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetcolorcount", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23799,7 +22592,6 @@ TypedValue * fg1_pixelsetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
 TypedValue * fg1_pixelsetcyan(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -23818,7 +22610,6 @@ TypedValue* fg_pixelsetcyan(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetcyan((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -23834,7 +22625,6 @@ TypedValue* fg_pixelsetcyan(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetcyan", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23858,7 +22648,6 @@ TypedValue * fg1_pixelsetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64
 TypedValue * fg1_pixelsetcyanquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -23877,7 +22666,6 @@ TypedValue* fg_pixelsetcyanquantum(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetcyanquantum((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -23893,7 +22681,6 @@ TypedValue* fg_pixelsetcyanquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetcyanquantum", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23917,7 +22704,6 @@ TypedValue * fg1_pixelsetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
 TypedValue * fg1_pixelsetgreen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -23936,7 +22722,6 @@ TypedValue* fg_pixelsetgreen(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetgreen((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -23952,7 +22737,6 @@ TypedValue* fg_pixelsetgreen(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetgreen", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -23976,7 +22760,6 @@ TypedValue * fg1_pixelsetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_pixelsetgreenquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -23995,7 +22778,6 @@ TypedValue* fg_pixelsetgreenquantum(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetgreenquantum((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -24011,7 +22793,6 @@ TypedValue* fg_pixelsetgreenquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetgreenquantum", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24035,7 +22816,6 @@ TypedValue * fg1_pixelsetindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
 TypedValue * fg1_pixelsetindex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -24054,7 +22834,6 @@ TypedValue* fg_pixelsetindex(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetindex((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -24070,7 +22849,6 @@ TypedValue* fg_pixelsetindex(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetindex", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24094,7 +22872,6 @@ TypedValue * fg1_pixelsetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
 TypedValue * fg1_pixelsetmagenta(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -24113,7 +22890,6 @@ TypedValue* fg_pixelsetmagenta(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetmagenta((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -24129,7 +22905,6 @@ TypedValue* fg_pixelsetmagenta(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetmagenta", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24153,7 +22928,6 @@ TypedValue * fg1_pixelsetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_pixelsetmagentaquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -24172,7 +22946,6 @@ TypedValue* fg_pixelsetmagentaquantum(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetmagentaquantum((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -24188,7 +22961,6 @@ TypedValue* fg_pixelsetmagentaquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetmagentaquantum", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24212,7 +22984,6 @@ TypedValue * fg1_pixelsetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
 TypedValue * fg1_pixelsetopacity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -24231,7 +23002,6 @@ TypedValue* fg_pixelsetopacity(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetopacity((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -24247,7 +23017,6 @@ TypedValue* fg_pixelsetopacity(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetopacity", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24271,7 +23040,6 @@ TypedValue * fg1_pixelsetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_pixelsetopacityquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -24290,7 +23058,6 @@ TypedValue* fg_pixelsetopacityquantum(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetopacityquantum((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -24306,7 +23073,6 @@ TypedValue* fg_pixelsetopacityquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetopacityquantum", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24333,7 +23099,6 @@ TypedValue * fg1_pixelsetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_pixelsetquantumcolor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 5
@@ -24366,7 +23131,6 @@ TypedValue* fg_pixelsetquantumcolor(HPHP::VM::ActRec *ar) {
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfDouble) && (args-3)->m_type == KindOfDouble && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetquantumcolor((Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (args[-3].m_data.dbl), (count > 4) ? (args[-4].m_data.dbl) : (double)(0.0));
         frame_free_locals_no_this_inl(ar, 5);
@@ -24382,7 +23146,6 @@ TypedValue* fg_pixelsetquantumcolor(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetquantumcolor", count, 4, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24406,7 +23169,6 @@ TypedValue * fg1_pixelsetred(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
 TypedValue * fg1_pixelsetred(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -24425,7 +23187,6 @@ TypedValue* fg_pixelsetred(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetred((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -24441,7 +23202,6 @@ TypedValue* fg_pixelsetred(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetred", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24465,7 +23225,6 @@ TypedValue * fg1_pixelsetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_pixelsetredquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -24484,7 +23243,6 @@ TypedValue* fg_pixelsetredquantum(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetredquantum((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -24500,7 +23258,6 @@ TypedValue* fg_pixelsetredquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetredquantum", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24524,7 +23281,6 @@ TypedValue * fg1_pixelsetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_pixelsetyellow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -24543,7 +23299,6 @@ TypedValue* fg_pixelsetyellow(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetyellow((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -24559,7 +23314,6 @@ TypedValue* fg_pixelsetyellow(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetyellow", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24583,7 +23337,6 @@ TypedValue * fg1_pixelsetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue * fg1_pixelsetyellowquantum(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-1)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-1);
@@ -24602,7 +23355,6 @@ TypedValue* fg_pixelsetyellowquantum(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelsetyellowquantum((Value*)(args-0), (args[-1].m_data.dbl));
         frame_free_locals_no_this_inl(ar, 2);
@@ -24618,7 +23370,6 @@ TypedValue* fg_pixelsetyellowquantum(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetyellowquantum", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24642,7 +23393,6 @@ Value* fh_pixelgetiteratorexception(Value* _rv, Value* pxl_iter) asm("_ZN4HPHP27
 TypedValue * fg1_pixelgetiteratorexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetiteratorexception(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_pixelgetiteratorexception((Value*)(rv), (Value*)(args-0));
@@ -24656,7 +23406,6 @@ TypedValue* fg_pixelgetiteratorexception(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_pixelgetiteratorexception((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -24673,7 +23422,6 @@ TypedValue* fg_pixelgetiteratorexception(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetiteratorexception", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24697,7 +23445,6 @@ Value* fh_pixelgetiteratorexceptionstring(Value* _rv, Value* pxl_iter) asm("_ZN4
 TypedValue * fg1_pixelgetiteratorexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetiteratorexceptionstring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
   fh_pixelgetiteratorexceptionstring((Value*)(rv), (Value*)(args-0));
@@ -24711,7 +23458,6 @@ TypedValue* fg_pixelgetiteratorexceptionstring(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         fh_pixelgetiteratorexceptionstring((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -24728,7 +23474,6 @@ TypedValue* fg_pixelgetiteratorexceptionstring(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetiteratorexceptionstring", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24751,7 +23496,6 @@ long fh_pixelgetiteratorexceptiontype(Value* pxl_iter) asm("_ZN4HPHP31f_pixelget
 TypedValue * fg1_pixelgetiteratorexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetiteratorexceptiontype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (int64_t)fh_pixelgetiteratorexceptiontype((Value*)(args-0));
@@ -24764,7 +23508,6 @@ TypedValue* fg_pixelgetiteratorexceptiontype(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_pixelgetiteratorexceptiontype((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -24780,7 +23523,6 @@ TypedValue* fg_pixelgetiteratorexceptiontype(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetiteratorexceptiontype", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24804,7 +23546,6 @@ Value* fh_pixelgetnextiteratorrow(Value* _rv, Value* pxl_iter) asm("_ZN4HPHP25f_
 TypedValue * fg1_pixelgetnextiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelgetnextiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
   fh_pixelgetnextiteratorrow((Value*)(rv), (Value*)(args-0));
@@ -24818,7 +23559,6 @@ TypedValue* fg_pixelgetnextiteratorrow(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfArray;
         fh_pixelgetnextiteratorrow((Value*)(&(rv)), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -24835,7 +23575,6 @@ TypedValue* fg_pixelgetnextiteratorrow(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelgetnextiteratorrow", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24858,7 +23597,6 @@ TypedValue * fg1_pixelresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
 TypedValue * fg1_pixelresetiterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_pixelresetiterator((Value*)(args-0));
@@ -24872,7 +23610,6 @@ TypedValue* fg_pixelresetiterator(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_pixelresetiterator((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -24888,7 +23625,6 @@ TypedValue* fg_pixelresetiterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelresetiterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24912,7 +23648,6 @@ bool fh_pixelsetiteratorrow(Value* pxl_iter, int row) asm("_ZN4HPHP21f_pixelseti
 TypedValue * fg1_pixelsetiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelsetiteratorrow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -24930,7 +23665,6 @@ TypedValue* fg_pixelsetiteratorrow(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_pixelsetiteratorrow((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
@@ -24946,7 +23680,6 @@ TypedValue* fg_pixelsetiteratorrow(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsetiteratorrow", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -24969,7 +23702,6 @@ bool fh_pixelsynciterator(Value* pxl_iter) asm("_ZN4HPHP19f_pixelsynciteratorERK
 TypedValue * fg1_pixelsynciterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_pixelsynciterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (fh_pixelsynciterator((Value*)(args-0))) ? 1LL : 0LL;
@@ -24982,7 +23714,6 @@ TypedValue* fg_pixelsynciterator(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_pixelsynciterator((Value*)(args-0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -24998,7 +23729,6 @@ TypedValue* fg_pixelsynciterator(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("pixelsynciterator", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

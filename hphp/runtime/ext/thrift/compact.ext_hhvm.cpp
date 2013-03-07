@@ -37,7 +37,6 @@ int fh_thrift_protocol_set_compact_version(int version) asm("_ZN4HPHP37f_thrift_
 TypedValue * fg1_thrift_protocol_set_compact_version(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_thrift_protocol_set_compact_version(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfInt64;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (int64_t)fh_thrift_protocol_set_compact_version((int)(args[-0].m_data.num));
@@ -50,7 +49,6 @@ TypedValue* fg_thrift_protocol_set_compact_version(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)fh_thrift_protocol_set_compact_version((int)(args[-0].m_data.num));
         frame_free_locals_no_this_inl(ar, 1);
@@ -66,7 +64,6 @@ TypedValue* fg_thrift_protocol_set_compact_version(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("thrift_protocol_set_compact_version", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -93,7 +90,6 @@ TypedValue * fg1_thrift_protocol_write_compact(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue * fg1_thrift_protocol_write_compact(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   if ((args-4)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-4);
@@ -121,7 +117,6 @@ TypedValue* fg_thrift_protocol_write_compact(HPHP::VM::ActRec *ar) {
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfObject && (args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_thrift_protocol_write_compact((Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num), (Value*)(args-3), (int)(args[-4].m_data.num));
         frame_free_locals_no_this_inl(ar, 5);
@@ -137,7 +132,6 @@ TypedValue* fg_thrift_protocol_write_compact(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("thrift_protocol_write_compact", count, 5, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -194,7 +188,6 @@ TypedValue* fg_thrift_protocol_read_compact(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("thrift_protocol_read_compact", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

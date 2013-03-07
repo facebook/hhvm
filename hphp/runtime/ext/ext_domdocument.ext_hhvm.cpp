@@ -77,7 +77,6 @@ TypedValue* fg_dom_document_create_element(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_create_element", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -112,7 +111,6 @@ TypedValue* fg_dom_document_create_document_fragment(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_create_document_fragment", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -164,7 +162,6 @@ TypedValue* fg_dom_document_create_text_node(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_create_text_node", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -216,7 +213,6 @@ TypedValue* fg_dom_document_create_comment(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_create_comment", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -268,7 +264,6 @@ TypedValue* fg_dom_document_create_cdatasection(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_create_cdatasection", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -331,7 +326,6 @@ TypedValue* fg_dom_document_create_processing_instruction(HPHP::VM::ActRec *ar) 
       throw_wrong_arguments_nr("dom_document_create_processing_instruction", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -383,7 +377,6 @@ TypedValue* fg_dom_document_create_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_create_attribute", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -435,7 +428,6 @@ TypedValue* fg_dom_document_create_entity_reference(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_create_entity_reference", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -487,7 +479,6 @@ TypedValue* fg_dom_document_get_elements_by_tag_name(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_get_elements_by_tag_name", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -550,7 +541,6 @@ TypedValue* fg_dom_document_import_node(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_import_node", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -617,7 +607,6 @@ TypedValue* fg_dom_document_create_element_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_create_element_ns", count, 3, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -675,7 +664,6 @@ TypedValue* fg_dom_document_create_attribute_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_create_attribute_ns", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -733,7 +721,6 @@ TypedValue* fg_dom_document_get_elements_by_tag_name_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_get_elements_by_tag_name_ns", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -785,7 +772,6 @@ TypedValue* fg_dom_document_get_element_by_id(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_get_element_by_id", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -820,7 +806,6 @@ TypedValue* fg_dom_document_normalize_document(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_normalize_document", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -883,7 +868,6 @@ TypedValue* fg_dom_document_save(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_save", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -947,7 +931,6 @@ TypedValue* fg_dom_document_savexml(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_savexml", count, 1, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -982,7 +965,6 @@ TypedValue* fg_dom_document_validate(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_validate", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1034,7 +1016,6 @@ TypedValue* fg_dom_document_xinclude(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_xinclude", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1069,7 +1050,6 @@ TypedValue* fg_dom_document_save_html(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_save_html", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1121,7 +1101,6 @@ TypedValue* fg_dom_document_save_html_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_save_html_file", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1173,7 +1152,6 @@ TypedValue* fg_dom_document_schema_validate_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_schema_validate_file", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1225,7 +1203,6 @@ TypedValue* fg_dom_document_schema_validate_xml(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_schema_validate_xml", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1277,7 +1254,6 @@ TypedValue* fg_dom_document_relaxng_validate_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_relaxng_validate_file", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1329,7 +1305,6 @@ TypedValue* fg_dom_document_relaxng_validate_xml(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_document_relaxng_validate_xml", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1394,7 +1369,6 @@ TypedValue* fg_dom_node_insert_before(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_insert_before", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1452,7 +1426,6 @@ TypedValue* fg_dom_node_replace_child(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_replace_child", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1504,7 +1477,6 @@ TypedValue* fg_dom_node_remove_child(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_remove_child", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1556,7 +1528,6 @@ TypedValue* fg_dom_node_append_child(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_append_child", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1591,7 +1562,6 @@ TypedValue* fg_dom_node_has_child_nodes(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_has_child_nodes", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1643,7 +1613,6 @@ TypedValue* fg_dom_node_clone_node(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_clone_node", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1678,7 +1647,6 @@ TypedValue* fg_dom_node_normalize(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_normalize", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1736,7 +1704,6 @@ TypedValue* fg_dom_node_is_supported(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_is_supported", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1771,7 +1738,6 @@ TypedValue* fg_dom_node_has_attributes(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_has_attributes", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1823,7 +1789,6 @@ TypedValue* fg_dom_node_is_same_node(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_is_same_node", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1875,7 +1840,6 @@ TypedValue* fg_dom_node_lookup_prefix(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_lookup_prefix", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1927,7 +1891,6 @@ TypedValue* fg_dom_node_is_default_namespace(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_is_default_namespace", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1979,7 +1942,6 @@ TypedValue* fg_dom_node_lookup_namespace_uri(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_node_lookup_namespace_uri", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2031,7 +1993,6 @@ TypedValue* fg_dom_nodelist_item(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_nodelist_item", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2083,7 +2044,6 @@ TypedValue* fg_dom_namednodemap_get_named_item(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_namednodemap_get_named_item", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2135,7 +2095,6 @@ TypedValue* fg_dom_namednodemap_item(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_namednodemap_item", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2193,7 +2152,6 @@ TypedValue* fg_dom_namednodemap_get_named_item_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_namednodemap_get_named_item_ns", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2251,7 +2209,6 @@ TypedValue* fg_dom_characterdata_substring_data(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_characterdata_substring_data", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2303,7 +2260,6 @@ TypedValue* fg_dom_characterdata_append_data(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_characterdata_append_data", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2361,7 +2317,6 @@ TypedValue* fg_dom_characterdata_insert_data(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_characterdata_insert_data", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2419,7 +2374,6 @@ TypedValue* fg_dom_characterdata_delete_data(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_characterdata_delete_data", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2481,7 +2435,6 @@ TypedValue* fg_dom_characterdata_replace_data(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_characterdata_replace_data", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2516,7 +2469,6 @@ TypedValue* fg_dom_attr_is_id(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_attr_is_id", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2568,7 +2520,6 @@ TypedValue* fg_dom_element_get_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_get_attribute", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2626,7 +2577,6 @@ TypedValue* fg_dom_element_set_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_set_attribute", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2678,7 +2628,6 @@ TypedValue* fg_dom_element_remove_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_remove_attribute", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2730,7 +2679,6 @@ TypedValue* fg_dom_element_get_attribute_node(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_get_attribute_node", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2782,7 +2730,6 @@ TypedValue* fg_dom_element_set_attribute_node(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_set_attribute_node", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2834,7 +2781,6 @@ TypedValue* fg_dom_element_remove_attribute_node(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_remove_attribute_node", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2886,7 +2832,6 @@ TypedValue* fg_dom_element_get_elements_by_tag_name(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_get_elements_by_tag_name", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2944,7 +2889,6 @@ TypedValue* fg_dom_element_get_attribute_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_get_attribute_ns", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3006,7 +2950,6 @@ TypedValue* fg_dom_element_set_attribute_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_set_attribute_ns", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3064,7 +3007,6 @@ TypedValue* fg_dom_element_remove_attribute_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_remove_attribute_ns", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3122,7 +3064,6 @@ TypedValue* fg_dom_element_get_attribute_node_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_get_attribute_node_ns", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3174,7 +3115,6 @@ TypedValue* fg_dom_element_set_attribute_node_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_set_attribute_node_ns", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3232,7 +3172,6 @@ TypedValue* fg_dom_element_get_elements_by_tag_name_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_get_elements_by_tag_name_ns", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3284,7 +3223,6 @@ TypedValue* fg_dom_element_has_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_has_attribute", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3342,7 +3280,6 @@ TypedValue* fg_dom_element_has_attribute_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_has_attribute_ns", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3400,7 +3337,6 @@ TypedValue* fg_dom_element_set_id_attribute(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_set_id_attribute", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3462,7 +3398,6 @@ TypedValue* fg_dom_element_set_id_attribute_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_set_id_attribute_ns", count, 4, 4, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3520,7 +3455,6 @@ TypedValue* fg_dom_element_set_id_attribute_node(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_element_set_id_attribute_node", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3572,7 +3506,6 @@ TypedValue* fg_dom_text_split_text(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_text_split_text", count, 2, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3607,7 +3540,6 @@ TypedValue* fg_dom_text_is_whitespace_in_element_content(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_text_is_whitespace_in_element_content", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3665,7 +3597,6 @@ TypedValue* fg_dom_xpath_register_ns(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_xpath_register_ns", count, 3, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3728,7 +3659,6 @@ TypedValue* fg_dom_xpath_query(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_xpath_query", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3791,7 +3721,6 @@ TypedValue* fg_dom_xpath_evaluate(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_xpath_evaluate", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3828,7 +3757,6 @@ TypedValue* fg_dom_xpath_register_php_functions(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("dom_xpath_register_php_functions", count, 1, 2, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3865,7 +3793,6 @@ TypedValue* tg_7DOMNode___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_7DOMNode___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -3878,7 +3805,6 @@ TypedValue* tg_7DOMNode___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3933,7 +3859,6 @@ TypedValue* tg_7DOMNode_appendChild(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::appendChild");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3988,7 +3913,6 @@ TypedValue* tg_7DOMNode_cloneNode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::cloneNode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4013,7 +3937,6 @@ TypedValue* tg_7DOMNode_getLineNo(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_7DOMNode_getLineNo((this_));
         frame_free_locals_inl(ar, 0);
@@ -4026,7 +3949,6 @@ TypedValue* tg_7DOMNode_getLineNo(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::getLineNo");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4051,7 +3973,6 @@ TypedValue* tg_7DOMNode_hasAttributes(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_7DOMNode_hasAttributes((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -4064,7 +3985,6 @@ TypedValue* tg_7DOMNode_hasAttributes(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::hasAttributes");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4089,7 +4009,6 @@ TypedValue* tg_7DOMNode_hasChildNodes(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_7DOMNode_hasChildNodes((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -4102,7 +4021,6 @@ TypedValue* tg_7DOMNode_hasChildNodes(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::hasChildNodes");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4170,7 +4088,6 @@ TypedValue* tg_7DOMNode_insertBefore(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::insertBefore");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4192,7 +4109,6 @@ bool th_7DOMNode_isDefaultNamespace(ObjectData* this_, Value* namespaceuri) asm(
 TypedValue* tg1_7DOMNode_isDefaultNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_7DOMNode_isDefaultNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_7DOMNode_isDefaultNamespace((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -4207,7 +4123,6 @@ TypedValue* tg_7DOMNode_isDefaultNamespace(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_7DOMNode_isDefaultNamespace((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -4226,7 +4141,6 @@ TypedValue* tg_7DOMNode_isDefaultNamespace(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::isDefaultNamespace");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4248,7 +4162,6 @@ bool th_7DOMNode_isSameNode(ObjectData* this_, Value* node) asm("_ZN4HPHP9c_DOMN
 TypedValue* tg1_7DOMNode_isSameNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_7DOMNode_isSameNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
   rv->m_data.num = (th_7DOMNode_isSameNode((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -4263,7 +4176,6 @@ TypedValue* tg_7DOMNode_isSameNode(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_7DOMNode_isSameNode((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -4282,7 +4194,6 @@ TypedValue* tg_7DOMNode_isSameNode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::isSameNode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4305,7 +4216,6 @@ bool th_7DOMNode_isSupported(ObjectData* this_, Value* feature, Value* version) 
 TypedValue* tg1_7DOMNode_isSupported(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_7DOMNode_isSupported(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -4325,7 +4235,6 @@ TypedValue* tg_7DOMNode_isSupported(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_7DOMNode_isSupported((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -4344,7 +4253,6 @@ TypedValue* tg_7DOMNode_isSupported(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::isSupported");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4399,7 +4307,6 @@ TypedValue* tg_7DOMNode_lookupNamespaceUri(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::lookupNamespaceUri");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4454,7 +4361,6 @@ TypedValue* tg_7DOMNode_lookupPrefix(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::lookupPrefix");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4479,7 +4385,6 @@ TypedValue* tg_7DOMNode_normalize(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_7DOMNode_normalize((this_));
         frame_free_locals_inl(ar, 0);
@@ -4492,7 +4397,6 @@ TypedValue* tg_7DOMNode_normalize(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::normalize");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4547,7 +4451,6 @@ TypedValue* tg_7DOMNode_removeChild(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::removeChild");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4608,7 +4511,6 @@ TypedValue* tg_7DOMNode_replaceChild(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::replaceChild");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4683,7 +4585,6 @@ TypedValue* tg_7DOMNode_c14n(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::c14n");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4762,7 +4663,6 @@ TypedValue* tg_7DOMNode_c14nfile(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::c14nfile");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4800,7 +4700,6 @@ TypedValue* tg_7DOMNode_getNodePath(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::getNodePath");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4839,7 +4738,6 @@ TypedValue* tg_7DOMNode___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4879,7 +4777,6 @@ TypedValue* tg_7DOMNode___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4905,7 +4802,6 @@ TypedValue* tg_7DOMNode___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_7DOMNode___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -4918,7 +4814,6 @@ TypedValue* tg_7DOMNode___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNode::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4951,7 +4846,6 @@ TypedValue* tg1_7DOMAttr___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64
 TypedValue* tg1_7DOMAttr___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 2
@@ -4977,7 +4871,6 @@ TypedValue* tg_7DOMAttr___construct(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_7DOMAttr___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
           frame_free_locals_inl(ar, 2);
@@ -4996,7 +4889,6 @@ TypedValue* tg_7DOMAttr___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMAttr::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5021,7 +4913,6 @@ TypedValue* tg_7DOMAttr_isId(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_7DOMAttr_isId((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -5034,7 +4925,6 @@ TypedValue* tg_7DOMAttr_isId(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMAttr::isId");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5073,7 +4963,6 @@ TypedValue* tg_7DOMAttr___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMAttr::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5113,7 +5002,6 @@ TypedValue* tg_7DOMAttr___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMAttr::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5139,7 +5027,6 @@ TypedValue* tg_7DOMAttr___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_7DOMAttr___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -5152,7 +5039,6 @@ TypedValue* tg_7DOMAttr___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMAttr::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5187,7 +5073,6 @@ TypedValue* tg_16DOMCharacterData___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_16DOMCharacterData___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -5200,7 +5085,6 @@ TypedValue* tg_16DOMCharacterData___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMCharacterData::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5222,7 +5106,6 @@ bool th_16DOMCharacterData_appendData(ObjectData* this_, Value* arg) asm("_ZN4HP
 TypedValue* tg1_16DOMCharacterData_appendData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_16DOMCharacterData_appendData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_16DOMCharacterData_appendData((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -5237,7 +5120,6 @@ TypedValue* tg_16DOMCharacterData_appendData(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_16DOMCharacterData_appendData((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -5256,7 +5138,6 @@ TypedValue* tg_16DOMCharacterData_appendData(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMCharacterData::appendData");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5279,7 +5160,6 @@ bool th_16DOMCharacterData_deleteData(ObjectData* this_, long offset, long count
 TypedValue* tg1_16DOMCharacterData_deleteData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_16DOMCharacterData_deleteData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -5299,7 +5179,6 @@ TypedValue* tg_16DOMCharacterData_deleteData(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_16DOMCharacterData_deleteData((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -5318,7 +5197,6 @@ TypedValue* tg_16DOMCharacterData_deleteData(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMCharacterData::deleteData");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5341,7 +5219,6 @@ bool th_16DOMCharacterData_insertData(ObjectData* this_, long offset, Value* dat
 TypedValue* tg1_16DOMCharacterData_insertData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_16DOMCharacterData_insertData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -5361,7 +5238,6 @@ TypedValue* tg_16DOMCharacterData_insertData(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_16DOMCharacterData_insertData((this_), (long)(args[-0].m_data.num), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -5380,7 +5256,6 @@ TypedValue* tg_16DOMCharacterData_insertData(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMCharacterData::insertData");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5404,7 +5279,6 @@ bool th_16DOMCharacterData_replaceData(ObjectData* this_, long offset, long coun
 TypedValue* tg1_16DOMCharacterData_replaceData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_16DOMCharacterData_replaceData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -5427,7 +5301,6 @@ TypedValue* tg_16DOMCharacterData_replaceData(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 3LL) {
         if (IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_16DOMCharacterData_replaceData((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (Value*)(args-2))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
@@ -5446,7 +5319,6 @@ TypedValue* tg_16DOMCharacterData_replaceData(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMCharacterData::replaceData");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5470,7 +5342,6 @@ Value* th_16DOMCharacterData_substringData(Value* _rv, ObjectData* this_, long o
 TypedValue* tg1_16DOMCharacterData_substringData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_16DOMCharacterData_substringData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -5491,7 +5362,6 @@ TypedValue* tg_16DOMCharacterData_substringData(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_16DOMCharacterData_substringData((Value*)(&(rv)), (this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -5511,7 +5381,6 @@ TypedValue* tg_16DOMCharacterData_substringData(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMCharacterData::substringData");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5550,7 +5419,6 @@ TypedValue* tg_16DOMCharacterData___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMCharacterData::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5590,7 +5458,6 @@ TypedValue* tg_16DOMCharacterData___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMCharacterData::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5616,7 +5483,6 @@ TypedValue* tg_16DOMCharacterData___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_16DOMCharacterData___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -5629,7 +5495,6 @@ TypedValue* tg_16DOMCharacterData___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMCharacterData::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5661,7 +5526,6 @@ TypedValue* tg1_10DOMComment___construct(TypedValue* rv, HPHP::VM::ActRec* ar, i
 TypedValue* tg1_10DOMComment___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_10DOMComment___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
@@ -5677,7 +5541,6 @@ TypedValue* tg_10DOMComment___construct(HPHP::VM::ActRec *ar) {
       if (count <= 1LL) {
         if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_10DOMComment___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
           frame_free_locals_inl(ar, 1);
@@ -5696,7 +5559,6 @@ TypedValue* tg_10DOMComment___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMComment::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5728,7 +5590,6 @@ TypedValue* tg1_7DOMText___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64
 TypedValue* tg1_7DOMText___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_7DOMText___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
@@ -5744,7 +5605,6 @@ TypedValue* tg_7DOMText___construct(HPHP::VM::ActRec *ar) {
       if (count <= 1LL) {
         if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_7DOMText___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
           frame_free_locals_inl(ar, 1);
@@ -5763,7 +5623,6 @@ TypedValue* tg_7DOMText___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMText::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5788,7 +5647,6 @@ TypedValue* tg_7DOMText_isWhitespaceInElementContent(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_7DOMText_isWhitespaceInElementContent((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -5801,7 +5659,6 @@ TypedValue* tg_7DOMText_isWhitespaceInElementContent(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMText::isWhitespaceInElementContent");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5856,7 +5713,6 @@ TypedValue* tg_7DOMText_splitText(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMText::splitText");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5895,7 +5751,6 @@ TypedValue* tg_7DOMText___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMText::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5935,7 +5790,6 @@ TypedValue* tg_7DOMText___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMText::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5961,7 +5815,6 @@ TypedValue* tg_7DOMText___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_7DOMText___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -5974,7 +5827,6 @@ TypedValue* tg_7DOMText___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMText::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6006,7 +5858,6 @@ TypedValue* tg1_15DOMCDATASection___construct(TypedValue* rv, HPHP::VM::ActRec* 
 TypedValue* tg1_15DOMCDATASection___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_15DOMCDATASection___construct((this_), (Value*)(args-0));
@@ -6022,7 +5873,6 @@ TypedValue* tg_15DOMCDATASection___construct(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_15DOMCDATASection___construct((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -6041,7 +5891,6 @@ TypedValue* tg_15DOMCDATASection___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMCDATASection::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6074,7 +5923,6 @@ TypedValue* tg1_11DOMDocument___construct(TypedValue* rv, HPHP::VM::ActRec* ar, 
 TypedValue* tg1_11DOMDocument___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 2
@@ -6101,7 +5949,6 @@ TypedValue* tg_11DOMDocument___construct(HPHP::VM::ActRec *ar) {
       if (count <= 2LL) {
         if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_11DOMDocument___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
           frame_free_locals_inl(ar, 2);
@@ -6120,7 +5967,6 @@ TypedValue* tg_11DOMDocument___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6175,7 +6021,6 @@ TypedValue* tg_11DOMDocument_createAttribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::createAttribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6236,7 +6081,6 @@ TypedValue* tg_11DOMDocument_createAttributens(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::createAttributens");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6291,7 +6135,6 @@ TypedValue* tg_11DOMDocument_createCDATASection(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::createCDATASection");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6346,7 +6189,6 @@ TypedValue* tg_11DOMDocument_createComment(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::createComment");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6384,7 +6226,6 @@ TypedValue* tg_11DOMDocument_createDocumentFragment(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::createDocumentFragment");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6450,7 +6291,6 @@ TypedValue* tg_11DOMDocument_createElement(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::createElement");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6520,7 +6360,6 @@ TypedValue* tg_11DOMDocument_createElementNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::createElementNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6575,7 +6414,6 @@ TypedValue* tg_11DOMDocument_createEntityReference(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::createEntityReference");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6641,7 +6479,6 @@ TypedValue* tg_11DOMDocument_createProcessingInstruction(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::createProcessingInstruction");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6696,7 +6533,6 @@ TypedValue* tg_11DOMDocument_createTextNode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::createTextNode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6751,7 +6587,6 @@ TypedValue* tg_11DOMDocument_getElementById(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::getElementById");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6806,7 +6641,6 @@ TypedValue* tg_11DOMDocument_getElementsByTagName(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::getElementsByTagName");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6867,7 +6701,6 @@ TypedValue* tg_11DOMDocument_getElementsByTagNameNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::getElementsByTagNameNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6933,7 +6766,6 @@ TypedValue* tg_11DOMDocument_importNode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::importNode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6999,7 +6831,6 @@ TypedValue* tg_11DOMDocument_load(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::load");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7054,7 +6885,6 @@ TypedValue* tg_11DOMDocument_loadHTML(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::loadHTML");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7109,7 +6939,6 @@ TypedValue* tg_11DOMDocument_loadHTMLFile(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::loadHTMLFile");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7175,7 +7004,6 @@ TypedValue* tg_11DOMDocument_loadXML(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::loadXML");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7200,7 +7028,6 @@ TypedValue* tg_11DOMDocument_normalizeDocument(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_11DOMDocument_normalizeDocument((this_));
         frame_free_locals_inl(ar, 0);
@@ -7213,7 +7040,6 @@ TypedValue* tg_11DOMDocument_normalizeDocument(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::normalizeDocument");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7236,7 +7062,6 @@ bool th_11DOMDocument_registerNodeClass(ObjectData* this_, Value* baseclass, Val
 TypedValue* tg1_11DOMDocument_registerNodeClass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_11DOMDocument_registerNodeClass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -7256,7 +7081,6 @@ TypedValue* tg_11DOMDocument_registerNodeClass(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_11DOMDocument_registerNodeClass((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -7275,7 +7099,6 @@ TypedValue* tg_11DOMDocument_registerNodeClass(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::registerNodeClass");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7297,7 +7120,6 @@ bool th_11DOMDocument_relaxNGValidate(ObjectData* this_, Value* filename) asm("_
 TypedValue* tg1_11DOMDocument_relaxNGValidate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_11DOMDocument_relaxNGValidate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_11DOMDocument_relaxNGValidate((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -7312,7 +7134,6 @@ TypedValue* tg_11DOMDocument_relaxNGValidate(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_11DOMDocument_relaxNGValidate((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -7331,7 +7152,6 @@ TypedValue* tg_11DOMDocument_relaxNGValidate(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::relaxNGValidate");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7353,7 +7173,6 @@ bool th_11DOMDocument_relaxNGValidateSource(ObjectData* this_, Value* source) as
 TypedValue* tg1_11DOMDocument_relaxNGValidateSource(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_11DOMDocument_relaxNGValidateSource(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_11DOMDocument_relaxNGValidateSource((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -7368,7 +7187,6 @@ TypedValue* tg_11DOMDocument_relaxNGValidateSource(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_11DOMDocument_relaxNGValidateSource((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -7387,7 +7205,6 @@ TypedValue* tg_11DOMDocument_relaxNGValidateSource(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::relaxNGValidateSource");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7453,7 +7270,6 @@ TypedValue* tg_11DOMDocument_save(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::save");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7491,7 +7307,6 @@ TypedValue* tg_11DOMDocument_saveHTML(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::saveHTML");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7546,7 +7361,6 @@ TypedValue* tg_11DOMDocument_saveHTMLFile(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::saveHTMLFile");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7613,7 +7427,6 @@ TypedValue* tg_11DOMDocument_saveXML(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::saveXML");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7635,7 +7448,6 @@ bool th_11DOMDocument_schemaValidate(ObjectData* this_, Value* filename) asm("_Z
 TypedValue* tg1_11DOMDocument_schemaValidate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_11DOMDocument_schemaValidate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_11DOMDocument_schemaValidate((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -7650,7 +7462,6 @@ TypedValue* tg_11DOMDocument_schemaValidate(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_11DOMDocument_schemaValidate((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -7669,7 +7480,6 @@ TypedValue* tg_11DOMDocument_schemaValidate(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::schemaValidate");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7691,7 +7501,6 @@ bool th_11DOMDocument_schemaValidateSource(ObjectData* this_, Value* source) asm
 TypedValue* tg1_11DOMDocument_schemaValidateSource(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_11DOMDocument_schemaValidateSource(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_11DOMDocument_schemaValidateSource((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -7706,7 +7515,6 @@ TypedValue* tg_11DOMDocument_schemaValidateSource(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_11DOMDocument_schemaValidateSource((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -7725,7 +7533,6 @@ TypedValue* tg_11DOMDocument_schemaValidateSource(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::schemaValidateSource");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7750,7 +7557,6 @@ TypedValue* tg_11DOMDocument_validate(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_11DOMDocument_validate((this_))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 0);
@@ -7763,7 +7569,6 @@ TypedValue* tg_11DOMDocument_validate(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::validate");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7818,7 +7623,6 @@ TypedValue* tg_11DOMDocument_xinclude(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::xinclude");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7857,7 +7661,6 @@ TypedValue* tg_11DOMDocument___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7897,7 +7700,6 @@ TypedValue* tg_11DOMDocument___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7923,7 +7725,6 @@ TypedValue* tg_11DOMDocument___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_11DOMDocument___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -7936,7 +7737,6 @@ TypedValue* tg_11DOMDocument___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocument::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7971,7 +7771,6 @@ TypedValue* tg_19DOMDocumentFragment___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_19DOMDocumentFragment___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -7984,7 +7783,6 @@ TypedValue* tg_19DOMDocumentFragment___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocumentFragment::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8006,7 +7804,6 @@ bool th_19DOMDocumentFragment_appendXML(ObjectData* this_, Value* data) asm("_ZN
 TypedValue* tg1_19DOMDocumentFragment_appendXML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_19DOMDocumentFragment_appendXML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_19DOMDocumentFragment_appendXML((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -8021,7 +7818,6 @@ TypedValue* tg_19DOMDocumentFragment_appendXML(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_19DOMDocumentFragment_appendXML((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -8040,7 +7836,6 @@ TypedValue* tg_19DOMDocumentFragment_appendXML(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocumentFragment::appendXML");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8075,7 +7870,6 @@ TypedValue* tg_15DOMDocumentType___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_15DOMDocumentType___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -8088,7 +7882,6 @@ TypedValue* tg_15DOMDocumentType___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocumentType::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8127,7 +7920,6 @@ TypedValue* tg_15DOMDocumentType___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocumentType::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8167,7 +7959,6 @@ TypedValue* tg_15DOMDocumentType___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocumentType::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8193,7 +7984,6 @@ TypedValue* tg_15DOMDocumentType___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_15DOMDocumentType___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -8206,7 +7996,6 @@ TypedValue* tg_15DOMDocumentType___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMDocumentType::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8240,7 +8029,6 @@ TypedValue* tg1_10DOMElement___construct(TypedValue* rv, HPHP::VM::ActRec* ar, i
 TypedValue* tg1_10DOMElement___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 3
@@ -8270,7 +8058,6 @@ TypedValue* tg_10DOMElement___construct(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 3LL) {
         if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_10DOMElement___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
           frame_free_locals_inl(ar, 3);
@@ -8289,7 +8076,6 @@ TypedValue* tg_10DOMElement___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8312,7 +8098,6 @@ Value* th_10DOMElement_getAttribute(Value* _rv, ObjectData* this_, Value* name) 
 TypedValue* tg1_10DOMElement_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_10DOMElement_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
   th_10DOMElement_getAttribute((Value*)(rv), (this_), (Value*)(args-0));
@@ -8328,7 +8113,6 @@ TypedValue* tg_10DOMElement_getAttribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_10DOMElement_getAttribute((Value*)(&(rv)), (this_), (Value*)(args-0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -8348,7 +8132,6 @@ TypedValue* tg_10DOMElement_getAttribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::getAttribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8403,7 +8186,6 @@ TypedValue* tg_10DOMElement_getAttributeNode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::getAttributeNode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8427,7 +8209,6 @@ Value* th_10DOMElement_getAttributeNodeNS(Value* _rv, ObjectData* this_, Value* 
 TypedValue* tg1_10DOMElement_getAttributeNodeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_10DOMElement_getAttributeNodeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -8448,7 +8229,6 @@ TypedValue* tg_10DOMElement_getAttributeNodeNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_10DOMElement_getAttributeNodeNS((Value*)(&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -8468,7 +8248,6 @@ TypedValue* tg_10DOMElement_getAttributeNodeNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::getAttributeNodeNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8492,7 +8271,6 @@ Value* th_10DOMElement_getAttributeNS(Value* _rv, ObjectData* this_, Value* name
 TypedValue* tg1_10DOMElement_getAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_10DOMElement_getAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -8513,7 +8291,6 @@ TypedValue* tg_10DOMElement_getAttributeNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfString;
           th_10DOMElement_getAttributeNS((Value*)(&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -8533,7 +8310,6 @@ TypedValue* tg_10DOMElement_getAttributeNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::getAttributeNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8556,7 +8332,6 @@ Value* th_10DOMElement_getElementsByTagName(Value* _rv, ObjectData* this_, Value
 TypedValue* tg1_10DOMElement_getElementsByTagName(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_10DOMElement_getElementsByTagName(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
   th_10DOMElement_getElementsByTagName((Value*)(rv), (this_), (Value*)(args-0));
@@ -8572,7 +8347,6 @@ TypedValue* tg_10DOMElement_getElementsByTagName(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_10DOMElement_getElementsByTagName((Value*)(&(rv)), (this_), (Value*)(args-0));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -8592,7 +8366,6 @@ TypedValue* tg_10DOMElement_getElementsByTagName(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::getElementsByTagName");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8616,7 +8389,6 @@ Value* th_10DOMElement_getElementsByTagNameNS(Value* _rv, ObjectData* this_, Val
 TypedValue* tg1_10DOMElement_getElementsByTagNameNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_10DOMElement_getElementsByTagNameNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -8637,7 +8409,6 @@ TypedValue* tg_10DOMElement_getElementsByTagNameNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_10DOMElement_getElementsByTagNameNS((Value*)(&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -8657,7 +8428,6 @@ TypedValue* tg_10DOMElement_getElementsByTagNameNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::getElementsByTagNameNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8679,7 +8449,6 @@ bool th_10DOMElement_hasAttribute(ObjectData* this_, Value* name) asm("_ZN4HPHP1
 TypedValue* tg1_10DOMElement_hasAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_10DOMElement_hasAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_10DOMElement_hasAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -8694,7 +8463,6 @@ TypedValue* tg_10DOMElement_hasAttribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_10DOMElement_hasAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -8713,7 +8481,6 @@ TypedValue* tg_10DOMElement_hasAttribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::hasAttribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8736,7 +8503,6 @@ bool th_10DOMElement_hasAttributeNS(ObjectData* this_, Value* namespaceuri, Valu
 TypedValue* tg1_10DOMElement_hasAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_10DOMElement_hasAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -8756,7 +8522,6 @@ TypedValue* tg_10DOMElement_hasAttributeNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_10DOMElement_hasAttributeNS((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -8775,7 +8540,6 @@ TypedValue* tg_10DOMElement_hasAttributeNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::hasAttributeNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8797,7 +8561,6 @@ bool th_10DOMElement_removeAttribute(ObjectData* this_, Value* name) asm("_ZN4HP
 TypedValue* tg1_10DOMElement_removeAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_10DOMElement_removeAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   rv->m_data.num = (th_10DOMElement_removeAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
@@ -8812,7 +8575,6 @@ TypedValue* tg_10DOMElement_removeAttribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_10DOMElement_removeAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
@@ -8831,7 +8593,6 @@ TypedValue* tg_10DOMElement_removeAttribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::removeAttribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8886,7 +8647,6 @@ TypedValue* tg_10DOMElement_removeAttributeNode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::removeAttributeNode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8947,7 +8707,6 @@ TypedValue* tg_10DOMElement_removeAttributeNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::removeAttributeNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9008,7 +8767,6 @@ TypedValue* tg_10DOMElement_setAttribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::setAttribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9063,7 +8821,6 @@ TypedValue* tg_10DOMElement_setAttributeNode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::setAttributeNode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9118,7 +8875,6 @@ TypedValue* tg_10DOMElement_setAttributeNodeNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::setAttributeNodeNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9183,7 +8939,6 @@ TypedValue* tg_10DOMElement_setAttributeNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::setAttributeNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9244,7 +8999,6 @@ TypedValue* tg_10DOMElement_setIDAttribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::setIDAttribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9305,7 +9059,6 @@ TypedValue* tg_10DOMElement_setIDAttributeNode(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::setIDAttributeNode");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9370,7 +9123,6 @@ TypedValue* tg_10DOMElement_setIDAttributeNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::setIDAttributeNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9409,7 +9161,6 @@ TypedValue* tg_10DOMElement___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9449,7 +9200,6 @@ TypedValue* tg_10DOMElement___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9475,7 +9225,6 @@ TypedValue* tg_10DOMElement___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_10DOMElement___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -9488,7 +9237,6 @@ TypedValue* tg_10DOMElement___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMElement::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9523,7 +9271,6 @@ TypedValue* tg_9DOMEntity___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_9DOMEntity___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -9536,7 +9283,6 @@ TypedValue* tg_9DOMEntity___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMEntity::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9575,7 +9321,6 @@ TypedValue* tg_9DOMEntity___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMEntity::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9615,7 +9360,6 @@ TypedValue* tg_9DOMEntity___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMEntity::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9641,7 +9385,6 @@ TypedValue* tg_9DOMEntity___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_9DOMEntity___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -9654,7 +9397,6 @@ TypedValue* tg_9DOMEntity___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMEntity::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9686,7 +9428,6 @@ TypedValue* tg1_18DOMEntityReference___construct(TypedValue* rv, HPHP::VM::ActRe
 TypedValue* tg1_18DOMEntityReference___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
   th_18DOMEntityReference___construct((this_), (Value*)(args-0));
@@ -9702,7 +9443,6 @@ TypedValue* tg_18DOMEntityReference___construct(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_18DOMEntityReference___construct((this_), (Value*)(args-0));
           frame_free_locals_inl(ar, 1);
@@ -9721,7 +9461,6 @@ TypedValue* tg_18DOMEntityReference___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMEntityReference::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9756,7 +9495,6 @@ TypedValue* tg_11DOMNotation___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_11DOMNotation___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -9769,7 +9507,6 @@ TypedValue* tg_11DOMNotation___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNotation::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9808,7 +9545,6 @@ TypedValue* tg_11DOMNotation___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNotation::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9848,7 +9584,6 @@ TypedValue* tg_11DOMNotation___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNotation::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9874,7 +9609,6 @@ TypedValue* tg_11DOMNotation___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_11DOMNotation___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -9887,7 +9621,6 @@ TypedValue* tg_11DOMNotation___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNotation::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9920,7 +9653,6 @@ TypedValue* tg1_24DOMProcessingInstruction___construct(TypedValue* rv, HPHP::VM:
 TypedValue* tg1_24DOMProcessingInstruction___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 2
@@ -9946,7 +9678,6 @@ TypedValue* tg_24DOMProcessingInstruction___construct(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_24DOMProcessingInstruction___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
           frame_free_locals_inl(ar, 2);
@@ -9965,7 +9696,6 @@ TypedValue* tg_24DOMProcessingInstruction___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMProcessingInstruction::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10004,7 +9734,6 @@ TypedValue* tg_24DOMProcessingInstruction___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMProcessingInstruction::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10044,7 +9773,6 @@ TypedValue* tg_24DOMProcessingInstruction___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMProcessingInstruction::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10070,7 +9798,6 @@ TypedValue* tg_24DOMProcessingInstruction___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_24DOMProcessingInstruction___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -10083,7 +9810,6 @@ TypedValue* tg_24DOMProcessingInstruction___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMProcessingInstruction::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10118,7 +9844,6 @@ TypedValue* tg_15DOMNodeIterator___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_15DOMNodeIterator___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -10131,7 +9856,6 @@ TypedValue* tg_15DOMNodeIterator___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeIterator::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10169,7 +9893,6 @@ TypedValue* tg_15DOMNodeIterator_current(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeIterator::current");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10207,7 +9930,6 @@ TypedValue* tg_15DOMNodeIterator_key(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeIterator::key");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10245,7 +9967,6 @@ TypedValue* tg_15DOMNodeIterator_next(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeIterator::next");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10283,7 +10004,6 @@ TypedValue* tg_15DOMNodeIterator_rewind(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeIterator::rewind");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10321,7 +10041,6 @@ TypedValue* tg_15DOMNodeIterator_valid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeIterator::valid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10356,7 +10075,6 @@ TypedValue* tg_15DOMNamedNodeMap___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_15DOMNamedNodeMap___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -10369,7 +10087,6 @@ TypedValue* tg_15DOMNamedNodeMap___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNamedNodeMap::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10424,7 +10141,6 @@ TypedValue* tg_15DOMNamedNodeMap_getNamedItem(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNamedNodeMap::getNamedItem");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10485,7 +10201,6 @@ TypedValue* tg_15DOMNamedNodeMap_getNamedItemNS(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNamedNodeMap::getNamedItemNS");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10540,7 +10255,6 @@ TypedValue* tg_15DOMNamedNodeMap_item(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNamedNodeMap::item");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10579,7 +10293,6 @@ TypedValue* tg_15DOMNamedNodeMap___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNamedNodeMap::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10619,7 +10332,6 @@ TypedValue* tg_15DOMNamedNodeMap___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNamedNodeMap::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10645,7 +10357,6 @@ TypedValue* tg_15DOMNamedNodeMap___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_15DOMNamedNodeMap___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -10658,7 +10369,6 @@ TypedValue* tg_15DOMNamedNodeMap___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNamedNodeMap::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10696,7 +10406,6 @@ TypedValue* tg_15DOMNamedNodeMap_getIterator(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNamedNodeMap::getIterator");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10731,7 +10440,6 @@ TypedValue* tg_11DOMNodeList___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_11DOMNodeList___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -10744,7 +10452,6 @@ TypedValue* tg_11DOMNodeList___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeList::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10799,7 +10506,6 @@ TypedValue* tg_11DOMNodeList_item(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeList::item");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10838,7 +10544,6 @@ TypedValue* tg_11DOMNodeList___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeList::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10878,7 +10583,6 @@ TypedValue* tg_11DOMNodeList___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeList::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10904,7 +10608,6 @@ TypedValue* tg_11DOMNodeList___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_11DOMNodeList___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -10917,7 +10620,6 @@ TypedValue* tg_11DOMNodeList___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeList::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10955,7 +10657,6 @@ TypedValue* tg_11DOMNodeList_getIterator(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMNodeList::getIterator");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10990,7 +10691,6 @@ TypedValue* tg_17DOMImplementation___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_17DOMImplementation___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -11003,7 +10703,6 @@ TypedValue* tg_17DOMImplementation___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMImplementation::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11075,7 +10774,6 @@ TypedValue* tg_17DOMImplementation_createDocument(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMImplementation::createDocument");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11147,7 +10845,6 @@ TypedValue* tg_17DOMImplementation_createDocumentType(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMImplementation::createDocumentType");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11170,7 +10867,6 @@ bool th_17DOMImplementation_hasFeature(ObjectData* this_, Value* feature, Value*
 TypedValue* tg1_17DOMImplementation_hasFeature(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_17DOMImplementation_hasFeature(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -11190,7 +10886,6 @@ TypedValue* tg_17DOMImplementation_hasFeature(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_17DOMImplementation_hasFeature((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -11209,7 +10904,6 @@ TypedValue* tg_17DOMImplementation_hasFeature(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMImplementation::hasFeature");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11245,7 +10939,6 @@ TypedValue* tg_8DOMXPath___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_8DOMXPath___construct((this_), (args-0));
         frame_free_locals_inl(ar, 1);
@@ -11258,7 +10951,6 @@ TypedValue* tg_8DOMXPath___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMXPath::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11324,7 +11016,6 @@ TypedValue* tg_8DOMXPath_evaluate(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMXPath::evaluate");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11390,7 +11081,6 @@ TypedValue* tg_8DOMXPath_query(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMXPath::query");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11413,7 +11103,6 @@ bool th_8DOMXPath_registerNamespace(ObjectData* this_, Value* prefix, Value* uri
 TypedValue* tg1_8DOMXPath_registerNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_8DOMXPath_registerNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -11433,7 +11122,6 @@ TypedValue* tg_8DOMXPath_registerNamespace(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_8DOMXPath_registerNamespace((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -11452,7 +11140,6 @@ TypedValue* tg_8DOMXPath_registerNamespace(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMXPath::registerNamespace");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11492,7 +11179,6 @@ TypedValue* tg_8DOMXPath_registerPHPFunctions(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMXPath::registerPHPFunctions");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11531,7 +11217,6 @@ TypedValue* tg_8DOMXPath___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMXPath::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11571,7 +11256,6 @@ TypedValue* tg_8DOMXPath___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMXPath::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11597,7 +11281,6 @@ TypedValue* tg_8DOMXPath___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_8DOMXPath___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -11610,7 +11293,6 @@ TypedValue* tg_8DOMXPath___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("DOMXPath::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

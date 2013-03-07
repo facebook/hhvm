@@ -93,7 +93,6 @@ TypedValue* fg_simplexml_load_string(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("simplexml_load_string", count, 1, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -172,7 +171,6 @@ TypedValue* fg_simplexml_load_file(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("simplexml_load_file", count, 1, 5, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -206,7 +204,6 @@ TypedValue* fg_libxml_get_errors(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("libxml_get_errors", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -240,7 +237,6 @@ TypedValue* fg_libxml_get_last_error(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("libxml_get_last_error", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -264,7 +260,6 @@ TypedValue* fg_libxml_clear_errors(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       fh_libxml_clear_errors();
       frame_free_locals_no_this_inl(ar, 0);
@@ -274,7 +269,6 @@ TypedValue* fg_libxml_clear_errors(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("libxml_clear_errors", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -299,7 +293,6 @@ TypedValue* fg_libxml_use_internal_errors(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_libxml_use_internal_errors((count > 0) ? (args-0) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 1);
@@ -309,7 +302,6 @@ TypedValue* fg_libxml_use_internal_errors(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("libxml_use_internal_errors", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -332,7 +324,6 @@ TypedValue * fg1_libxml_set_streams_context(TypedValue* rv, HPHP::VM::ActRec* ar
 TypedValue * fg1_libxml_set_streams_context(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
   fh_libxml_set_streams_context((Value*)(args-0));
@@ -346,7 +337,6 @@ TypedValue* fg_libxml_set_streams_context(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         fh_libxml_set_streams_context((Value*)(args-0));
         frame_free_locals_no_this_inl(ar, 1);
@@ -362,7 +352,6 @@ TypedValue* fg_libxml_set_streams_context(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("libxml_set_streams_context", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -385,7 +374,6 @@ bool fh_libxml_disable_entity_loader(bool disable) asm("_ZN4HPHP30f_libxml_disab
 TypedValue * fg1_libxml_disable_entity_loader(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_libxml_disable_entity_loader(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-0);
   rv->m_data.num = (fh_libxml_disable_entity_loader((count > 0) ? (bool)(args[-0].m_data.num) : (bool)(true))) ? 1LL : 0LL;
@@ -398,7 +386,6 @@ TypedValue* fg_libxml_disable_entity_loader(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_libxml_disable_entity_loader((count > 0) ? (bool)(args[-0].m_data.num) : (bool)(true))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -414,7 +401,6 @@ TypedValue* fg_libxml_disable_entity_loader(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("libxml_disable_entity_loader", 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -452,7 +438,6 @@ TypedValue* tg1_16SimpleXMLElement___construct(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue* tg1_16SimpleXMLElement___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 5
@@ -490,7 +475,6 @@ TypedValue* tg_16SimpleXMLElement___construct(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 5LL) {
         if ((count <= 4 || (args-4)->m_type == KindOfBoolean) && (count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_16SimpleXMLElement___construct((this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false), (count > 3) ? (Value*)(args-3) : (Value*)(&empty_string), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false));
           frame_free_locals_inl(ar, 5);
@@ -509,7 +493,6 @@ TypedValue* tg_16SimpleXMLElement___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 5);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -535,7 +518,6 @@ TypedValue* tg_16SimpleXMLElement_offsetExists(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_16SimpleXMLElement_offsetExists((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -548,7 +530,6 @@ TypedValue* tg_16SimpleXMLElement_offsetExists(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::offsetExists");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -587,7 +568,6 @@ TypedValue* tg_16SimpleXMLElement_offsetGet(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::offsetGet");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -614,7 +594,6 @@ TypedValue* tg_16SimpleXMLElement_offsetSet(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_16SimpleXMLElement_offsetSet((this_), (args-0), (args-1));
         frame_free_locals_inl(ar, 2);
@@ -627,7 +606,6 @@ TypedValue* tg_16SimpleXMLElement_offsetSet(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::offsetSet");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -653,7 +631,6 @@ TypedValue* tg_16SimpleXMLElement_offsetUnset(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_16SimpleXMLElement_offsetUnset((this_), (args-0));
         frame_free_locals_inl(ar, 1);
@@ -666,7 +643,6 @@ TypedValue* tg_16SimpleXMLElement_offsetUnset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::offsetUnset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -704,7 +680,6 @@ TypedValue* tg_16SimpleXMLElement_getIterator(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::getIterator");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -729,7 +704,6 @@ TypedValue* tg_16SimpleXMLElement_count(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfInt64;
         rv.m_data.num = (int64_t)th_16SimpleXMLElement_count((this_));
         frame_free_locals_inl(ar, 0);
@@ -742,7 +716,6 @@ TypedValue* tg_16SimpleXMLElement_count(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::count");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -797,7 +770,6 @@ TypedValue* tg_16SimpleXMLElement_xpath(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::xpath");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -820,7 +792,6 @@ bool th_16SimpleXMLElement_registerXPathNamespace(ObjectData* this_, Value* pref
 TypedValue* tg1_16SimpleXMLElement_registerXPathNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_16SimpleXMLElement_registerXPathNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -840,7 +811,6 @@ TypedValue* tg_16SimpleXMLElement_registerXPathNamespace(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv._count = 0;
           rv.m_type = KindOfBoolean;
           rv.m_data.num = (th_16SimpleXMLElement_registerXPathNamespace((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
@@ -859,7 +829,6 @@ TypedValue* tg_16SimpleXMLElement_registerXPathNamespace(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::registerXPathNamespace");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -914,7 +883,6 @@ TypedValue* tg_16SimpleXMLElement_asXML(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::asXML");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -937,7 +905,6 @@ Value* th_16SimpleXMLElement_getNamespaces(Value* _rv, ObjectData* this_, bool r
 TypedValue* tg1_16SimpleXMLElement_getNamespaces(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_16SimpleXMLElement_getNamespaces(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToBooleanInPlace(args-0);
   th_16SimpleXMLElement_getNamespaces((Value*)(rv), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
@@ -953,7 +920,6 @@ TypedValue* tg_16SimpleXMLElement_getNamespaces(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 1LL) {
         if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
-          rv._count = 0;
           rv.m_type = KindOfArray;
           th_16SimpleXMLElement_getNamespaces((Value*)(&(rv)), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -973,7 +939,6 @@ TypedValue* tg_16SimpleXMLElement_getNamespaces(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::getNamespaces");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -996,7 +961,6 @@ Value* th_16SimpleXMLElement_getDocNamespaces(Value* _rv, ObjectData* this_, boo
 TypedValue* tg1_16SimpleXMLElement_getDocNamespaces(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_16SimpleXMLElement_getDocNamespaces(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfArray;
   tvCastToBooleanInPlace(args-0);
   th_16SimpleXMLElement_getDocNamespaces((Value*)(rv), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
@@ -1012,7 +976,6 @@ TypedValue* tg_16SimpleXMLElement_getDocNamespaces(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 1LL) {
         if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
-          rv._count = 0;
           rv.m_type = KindOfArray;
           th_16SimpleXMLElement_getDocNamespaces((Value*)(&(rv)), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1032,7 +995,6 @@ TypedValue* tg_16SimpleXMLElement_getDocNamespaces(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::getDocNamespaces");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1056,7 +1018,6 @@ Value* th_16SimpleXMLElement_children(Value* _rv, ObjectData* this_, Value* ns, 
 TypedValue* tg1_16SimpleXMLElement_children(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_16SimpleXMLElement_children(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 2
@@ -1083,7 +1044,6 @@ TypedValue* tg_16SimpleXMLElement_children(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_16SimpleXMLElement_children((Value*)(&(rv)), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&empty_string), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1103,7 +1063,6 @@ TypedValue* tg_16SimpleXMLElement_children(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::children");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1129,7 +1088,6 @@ TypedValue* tg_16SimpleXMLElement_getName(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_16SimpleXMLElement_getName((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1143,7 +1101,6 @@ TypedValue* tg_16SimpleXMLElement_getName(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::getName");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1167,7 +1124,6 @@ Value* th_16SimpleXMLElement_attributes(Value* _rv, ObjectData* this_, Value* ns
 TypedValue* tg1_16SimpleXMLElement_attributes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_16SimpleXMLElement_attributes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfObject;
   switch (count) {
   default: // count >= 2
@@ -1194,7 +1150,6 @@ TypedValue* tg_16SimpleXMLElement_attributes(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-          rv._count = 0;
           rv.m_type = KindOfObject;
           th_16SimpleXMLElement_attributes((Value*)(&(rv)), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&empty_string), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1214,7 +1169,6 @@ TypedValue* tg_16SimpleXMLElement_attributes(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::attributes");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1285,7 +1239,6 @@ TypedValue* tg_16SimpleXMLElement_addChild(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::addChild");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1309,7 +1262,6 @@ TypedValue* tg1_16SimpleXMLElement_addAttribute(TypedValue* rv, HPHP::VM::ActRec
 TypedValue* tg1_16SimpleXMLElement_addAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
-  rv->_count = 0;
   rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 3
@@ -1339,7 +1291,6 @@ TypedValue* tg_16SimpleXMLElement_addAttribute(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 3LL) {
         if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
-          rv._count = 0;
           rv.m_type = KindOfNull;
           th_16SimpleXMLElement_addAttribute((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
           frame_free_locals_inl(ar, 3);
@@ -1358,7 +1309,6 @@ TypedValue* tg_16SimpleXMLElement_addAttribute(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::addAttribute");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1384,7 +1334,6 @@ TypedValue* tg_16SimpleXMLElement___toString(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 0LL) {
-        rv._count = 0;
         rv.m_type = KindOfString;
         th_16SimpleXMLElement___toString((Value*)(&(rv)), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
@@ -1398,7 +1347,6 @@ TypedValue* tg_16SimpleXMLElement___toString(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::__toString");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1437,7 +1385,6 @@ TypedValue* tg_16SimpleXMLElement___get(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::__get");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1477,7 +1424,6 @@ TypedValue* tg_16SimpleXMLElement___set(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::__set");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1503,7 +1449,6 @@ TypedValue* tg_16SimpleXMLElement___isset(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count == 1LL) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (th_16SimpleXMLElement___isset((this_), (args-0))) ? 1LL : 0LL;
         frame_free_locals_inl(ar, 1);
@@ -1516,7 +1461,6 @@ TypedValue* tg_16SimpleXMLElement___isset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::__isset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1555,7 +1499,6 @@ TypedValue* tg_16SimpleXMLElement___unset(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElement::__unset");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1590,7 +1533,6 @@ TypedValue* tg_11LibXMLError___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_11LibXMLError___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -1603,7 +1545,6 @@ TypedValue* tg_11LibXMLError___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("LibXMLError::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1638,7 +1579,6 @@ TypedValue* tg_24SimpleXMLElementIterator___construct(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_data.num = 0LL;
-        rv._count = 0;
         rv.m_type = KindOfNull;
         th_24SimpleXMLElementIterator___construct((this_));
         frame_free_locals_inl(ar, 0);
@@ -1651,7 +1591,6 @@ TypedValue* tg_24SimpleXMLElementIterator___construct(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElementIterator::__construct");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1689,7 +1628,6 @@ TypedValue* tg_24SimpleXMLElementIterator_current(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElementIterator::current");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1727,7 +1665,6 @@ TypedValue* tg_24SimpleXMLElementIterator_key(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElementIterator::key");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1765,7 +1702,6 @@ TypedValue* tg_24SimpleXMLElementIterator_next(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElementIterator::next");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1803,7 +1739,6 @@ TypedValue* tg_24SimpleXMLElementIterator_rewind(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElementIterator::rewind");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1841,7 +1776,6 @@ TypedValue* tg_24SimpleXMLElementIterator_valid(HPHP::VM::ActRec *ar) {
       throw_instance_method_fatal("SimpleXMLElementIterator::valid");
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

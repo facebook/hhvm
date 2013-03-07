@@ -38,7 +38,6 @@ TypedValue* fg_hphp_is_service_thread(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_hphp_is_service_thread()) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 0);
@@ -48,7 +47,6 @@ TypedValue* fg_hphp_is_service_thread(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_is_service_thread", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -72,7 +70,6 @@ TypedValue* fg_hphp_service_thread_started(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       fh_hphp_service_thread_started();
       frame_free_locals_no_this_inl(ar, 0);
@@ -82,7 +79,6 @@ TypedValue* fg_hphp_service_thread_started(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_service_thread_started", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -105,7 +101,6 @@ bool fh_hphp_service_thread_stopped(int timeout) asm("_ZN4HPHP29f_hphp_service_t
 TypedValue * fg1_hphp_service_thread_stopped(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_hphp_service_thread_stopped(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->_count = 0;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
   rv->m_data.num = (fh_hphp_service_thread_stopped((int)(args[-0].m_data.num))) ? 1LL : 0LL;
@@ -118,7 +113,6 @@ TypedValue* fg_hphp_service_thread_stopped(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
-        rv._count = 0;
         rv.m_type = KindOfBoolean;
         rv.m_data.num = (fh_hphp_service_thread_stopped((int)(args[-0].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
@@ -134,7 +128,6 @@ TypedValue* fg_hphp_service_thread_stopped(HPHP::VM::ActRec *ar) {
       throw_wrong_arguments_nr("hphp_service_thread_stopped", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -158,7 +151,6 @@ TypedValue* fg_hphp_thread_is_warmup_enabled(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfBoolean;
       rv.m_data.num = (fh_hphp_thread_is_warmup_enabled()) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 0);
@@ -168,7 +160,6 @@ TypedValue* fg_hphp_thread_is_warmup_enabled(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_thread_is_warmup_enabled", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -192,7 +183,6 @@ TypedValue* fg_hphp_thread_set_warmup_enabled(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_data.num = 0LL;
-      rv._count = 0;
       rv.m_type = KindOfNull;
       fh_hphp_thread_set_warmup_enabled();
       frame_free_locals_no_this_inl(ar, 0);
@@ -202,7 +192,6 @@ TypedValue* fg_hphp_thread_set_warmup_enabled(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_thread_set_warmup_enabled", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -226,7 +215,6 @@ TypedValue* fg_hphp_get_thread_id(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfInt64;
       rv.m_data.num = (int64_t)fh_hphp_get_thread_id();
       frame_free_locals_no_this_inl(ar, 0);
@@ -236,7 +224,6 @@ TypedValue* fg_hphp_get_thread_id(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_get_thread_id", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -260,7 +247,6 @@ TypedValue* fg_hphp_gettid(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv._count = 0;
       rv.m_type = KindOfInt64;
       rv.m_data.num = (int64_t)fh_hphp_gettid();
       frame_free_locals_no_this_inl(ar, 0);
@@ -270,7 +256,6 @@ TypedValue* fg_hphp_gettid(HPHP::VM::ActRec *ar) {
       throw_toomany_arguments_nr("hphp_gettid", 0, 1);
     }
     rv.m_data.num = 0LL;
-    rv._count = 0;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 0);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));

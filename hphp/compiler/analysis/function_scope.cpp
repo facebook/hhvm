@@ -410,46 +410,6 @@ bool FunctionScope::containsReference() const {
   return m_attribute & FileScope::ContainsReference;
 }
 
-void FunctionScope::setContainsThis(bool f /* = true */) {
-  m_containsThis = f;
-
-  BlockScopePtr bs(this->getOuterScope());
-  while (bs && bs->is(BlockScope::FunctionScope)) {
-    FunctionScopePtr fs = static_pointer_cast<FunctionScope>(bs);
-    if (!fs->isClosure()) {
-      break;
-    }
-    fs->setContainsThis(f);
-    bs = bs->getOuterScope();
-  }
-
-  for (auto it = m_clonedTraitOuterScope.begin(); it != m_clonedTraitOuterScope.end(); it++) {
-    (*it)->setContainsThis(f);
-  }
-}
-
-void FunctionScope::setContainsBareThis(bool f, bool ref /* = false */) {
-  if (f) {
-    m_containsBareThis |= ref ? 2 : 1;
-  } else {
-    m_containsBareThis = 0;
-  }
-
-  BlockScopePtr bs(this->getOuterScope());
-  while (bs && bs->is(BlockScope::FunctionScope)) {
-    FunctionScopePtr fs = static_pointer_cast<FunctionScope>(bs);
-    if (!fs->isClosure()) {
-      break;
-    }
-    fs->setContainsBareThis(f, ref);
-    bs = bs->getOuterScope();
-  }
-
-  for (auto it = m_clonedTraitOuterScope.begin(); it != m_clonedTraitOuterScope.end(); it++) {
-    (*it)->setContainsBareThis(f, ref);
-  }
-}
-
 bool FunctionScope::hasImpl() const {
   if (!isUserFunction()) {
     return !isAbstract();

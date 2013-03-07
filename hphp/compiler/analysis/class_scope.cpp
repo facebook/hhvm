@@ -25,7 +25,6 @@
 #include <compiler/analysis/variable_table.h>
 #include <compiler/construct.h>
 #include <compiler/expression/class_constant_expression.h>
-#include <compiler/expression/closure_expression.h>
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/unary_op_expression.h>
@@ -33,7 +32,6 @@
 #include <compiler/option.h>
 #include <compiler/parser/parser.h>
 #include <compiler/statement/interface_statement.h>
-#include <compiler/statement/function_statement.h>
 #include <compiler/statement/method_statement.h>
 #include <compiler/statement/statement_list.h>
 #include <runtime/base/builtin_functions.h>
@@ -447,41 +445,12 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
                              cloneMeth->getModifiers()));
   cloneMeth->resetScope(cloneFuncScope, true);
   cloneFuncScope->setOuterScope(shared_from_this());
-  informClosuresAboutScopeClone(cloneMeth, cloneFuncScope, ar);
 
   cloneMeth->addTraitMethodToScope(ar,
                dynamic_pointer_cast<ClassScope>(shared_from_this()));
 
   return cloneMeth;
 }
-
-void ClassScope::informClosuresAboutScopeClone(
-    ConstructPtr root,
-    FunctionScopePtr outerScope,
-    AnalysisResultPtr ar) {
-
-  if (!root) {
-    return;
-  }
-
-  for (int i = 0; i < root->getKidCount(); i++) {
-    ConstructPtr cons = root->getNthKid(i);
-    ClosureExpressionPtr closure =
-      dynamic_pointer_cast<ClosureExpression>(cons);
-
-    if (!closure) {
-      informClosuresAboutScopeClone(cons, outerScope, ar);
-      continue;
-    }
-
-    FunctionStatementPtr func = closure->getClosureFunction();
-    HPHP::FunctionScopePtr funcScope = func->getFunctionScope();
-    assert(funcScope->isClosure());
-    funcScope->addClonedTraitOuterScope(outerScope);
-    // Don't need to recurse
-  }
-}
-
 
 void ClassScope::addImportTraitMethod(const TraitMethod &traitMethod,
                                       const string &methName) {

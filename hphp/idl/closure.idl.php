@@ -98,30 +98,6 @@ EOT
 
 DefineProperty(
   array(
-    'name'  => 'this',
-    'type'  => Object,
-    'flags' => IsProtected,
-    'desc'  => 'The bound $this for the closure. Could be null.',
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'className',
-    'type'  => String,
-    'flags' => IsProtected,
-    'desc'  => 'The context class for calling $functionName when $this is null',
-  ));
-
-DefineProperty(
-  array(
-    'name'  => 'functionName',
-    'type'  => String,
-    'flags' => IsProtected,
-    'desc'  => 'The function to call on $this (or $className)',
-  ));
-
-DefineProperty(
-  array(
     'name'  => '__static_locals',
     'type'  => String,
     'flags' => IsProtected,

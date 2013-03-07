@@ -397,15 +397,7 @@ static void set_function_info(Array &ret, const VM::Func* func) {
   }
 
   // closure info
-  ret.set(
-    s_is_closure,
-    // TODO(ptarjan) should this be a boolean on the func?
-    func->name()->isame(StringData::GetStaticString("__invoke")) &&
-    func->isMethod() &&
-    func->cls() &&
-    func->cls()->parent() &&
-    func->cls()->parent()->name()->isame(StringData::GetStaticString("Closure"))
-  );
+  ret.set(s_is_closure, func->isClosureBody());
   // Interestingly this isn't the same as calling isGenerator() because calling
   // isGenerator() on the outside function for a generator returns false.
   ret.set(s_is_generator, func->hasGeneratorAsBody());

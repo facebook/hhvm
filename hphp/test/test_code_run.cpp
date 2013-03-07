@@ -24061,7 +24061,7 @@ bool TestCodeRun::TestClosure() {
        "}\n"
        "f();\n");
 
-  MVCRO("<?php\n"
+  MVCR("<?php\n"
        "class Foo {\n"
        "  function bar() {\n"
        "    $abc = 123;\n"
@@ -24072,10 +24072,9 @@ bool TestCodeRun::TestClosure() {
        "  }\n"
        "}\n"
        "$a = Foo::bar();\n"
-       "$a(456);\n",
-       "int(456)\n");
+       "$a(456);\n");
 
-  MVCRO("<?php\n"
+  MVCR("<?php\n"
        "class Foo {\n"
        "  function bar() {\n"
        "    $abc = 123;\n"
@@ -24086,10 +24085,9 @@ bool TestCodeRun::TestClosure() {
        "  }\n"
        "}\n"
        "$a = Foo::bar();\n"
-       "$a(456);\n",
-       "int(456)\n");
+       "$a(456);\n");
 
-  MVCRO("<?php\n"
+  MVCR("<?php\n"
        "class Foo {\n"
        "  function bar() {\n"
        "    $abc = 123;\n"
@@ -24100,8 +24098,7 @@ bool TestCodeRun::TestClosure() {
        "  }\n"
        "}\n"
        "$a = Foo::bar();\n"
-       "$a(456);\n",
-       "int(456)\n");
+       "$a(456);\n");
 
   MVCR("<?php\n"
        "class Foo {\n"
@@ -33221,7 +33218,7 @@ bool TestCodeRun::TestTraits() {
         "$a = Foo::bar();\n"
         "$a(456);\n"
         ,
-        "int(456)\n"
+        "int(123)\n"
        );
 
   MVCRO("<?php\n"
@@ -33238,7 +33235,7 @@ bool TestCodeRun::TestTraits() {
         "$a = Foo::bar();\n"
         "$a(456);\n"
         ,
-        "int(456)\n"
+        "int(123)\n"
        );
 
   MVCRO("<?php\n"
@@ -33255,7 +33252,7 @@ bool TestCodeRun::TestTraits() {
         "$a = Foo::bar();\n"
         "$a(456);\n"
         ,
-        "int(456)\n");
+        "int(123)\n");
 
   MVCRO("<?php\n"
         "trait Too {\n"
@@ -33295,7 +33292,7 @@ bool TestCodeRun::TestTraits() {
         "class Foo { use Too; }\n"
         "Foo::bar();\n"
         ,
-        "string(3) \"Foo\"\n"
+        "string(0) \"\"\n"
         "string(9) \"{closure}\"\n"
        );
 

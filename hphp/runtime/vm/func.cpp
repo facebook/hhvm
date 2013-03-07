@@ -599,7 +599,7 @@ void Func::setCached() {
 }
 
 const Func* Func::getGeneratorBody(const StringData* name) const {
-  if (isMethod()) {
+  if (isNonClosureMethod()) {
     return cls()->lookupMethod(name);
   } else {
     return Unit::lookupFunc(name);
@@ -679,13 +679,9 @@ void FuncEmitter::allocVarId(const StringData* name) {
 }
 
 Id FuncEmitter::lookupVarId(const StringData* name) const {
-  assert(this->hasVar(name));
-  return m_localNames.find(name)->second;
-}
-
-bool FuncEmitter::hasVar(const StringData* name) const {
   assert(name != nullptr);
-  return m_localNames.find(name) != m_localNames.end();
+  assert(m_localNames.find(name) != m_localNames.end());
+  return m_localNames.find(name)->second;
 }
 
 Id FuncEmitter::allocIterator() {

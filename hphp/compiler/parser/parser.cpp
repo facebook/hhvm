@@ -1567,7 +1567,7 @@ void Parser::onClosureStart(Token &name) {
 void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
                        Token &cparams, Token &stmts) {
   Token func, name;
-  onFunction(func, ret, ref, name, params, stmts, 0);
+  onFunction(func, ret, ret, name, params, stmts, 0);
 
   out.reset();
   out->exp = NEW_EXP(ClosureExpression,

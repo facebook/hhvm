@@ -6860,16 +6860,16 @@ VMExecutionContext::createContinuation(ActRec* fp,
   // we enter the generator body.
   ActRec* ar = cont->actRec();
   ar->m_func = genFunc;
-  if (obj.get()) {
-    ObjectData* objData = obj.get();
-    ar->setThis(objData);
-    objData->incRefCount();
-  } else {
-    if (isMethod) {
-      ar->setClass(frameStaticClass(fp));
+  if (isMethod) {
+    if (obj.get()) {
+      ObjectData* objData = obj.get();
+      ar->setThis(objData);
+      objData->incRefCount();
     } else {
-      ar->setThis(nullptr);
+      ar->setClass(frameStaticClass(fp));
     }
+  } else {
+    ar->setThis(nullptr);
   }
   ar->initNumArgs(1);
   ar->setVarEnv(nullptr);
@@ -6955,7 +6955,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   const Func* genFunc = origFunc->getGeneratorBody(genName);
   assert(genFunc != nullptr);
 
-  bool isMethod = origFunc->isMethod();
+  bool isMethod = origFunc->isNonClosureMethod();
   c_Continuation* cont = isMethod ?
     createContinuation<true>(m_fp, getArgs, origFunc, genFunc) :
     createContinuation<false>(m_fp, getArgs, origFunc, genFunc);

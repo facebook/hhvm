@@ -128,16 +128,20 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
       case T_METHOD_C: {
         if (!m_translated.empty()) break;
 
-        ClassScopePtr clsScope = getClassScope();
-        if (clsScope) {
-          m_translated.clear();
+        BlockScopeRawPtr b = getScope();
+        while (b && b->is(BlockScope::FunctionScope)) {
+          b = b->getOuterScope();
+        }
+        m_translated.clear();
+        if (b && b->is(BlockScope::ClassScope)) {
+          ClassScopePtr clsScope = dynamic_pointer_cast<ClassScope>(b);
           if (!clsScope->isTrait()) {
             m_translated = clsScope->getOriginalName();
           }
         }
         if (m_type == T_METHOD_C) {
           if (FunctionScopePtr func = getFunctionScope()) {
-            if (clsScope) {
+            if (b && b->is(BlockScope::ClassScope)) {
               m_translated += "::";
             }
             m_translated += func->getOriginalName();

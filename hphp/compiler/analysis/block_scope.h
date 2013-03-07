@@ -178,7 +178,6 @@ public:
   VariableTablePtr getVariables() { return m_variables;}
   ConstantTablePtr getConstants() { return m_constants;}
   ClassScopeRawPtr getContainingClass();
-  FunctionScopeRawPtr getContainingNonClosureFunction();
   FunctionScopeRawPtr getContainingFunction() const {
     return FunctionScopeRawPtr(is(FunctionScope) ?
                                (HPHP::FunctionScope*)this : 0);

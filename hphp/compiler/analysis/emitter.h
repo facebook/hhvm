@@ -393,29 +393,21 @@ private:
   typedef std::pair<StringData*, bool> ClosureUseVar;  // (name, byRef)
   typedef std::vector<ClosureUseVar> ClosureUseVarVec;
   typedef std::vector<std::pair<Id,IterKind> > PendingIterVec;
-
-  enum class ClosureKind {
-    Function,
-    Class,
-  };
-
   class PostponedMeth {
   public:
     PostponedMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
-                  ClosureUseVarVec* useVars, ClosureKind closureKind)
-        : m_meth(m), m_fe(fe), m_top(top), m_closureUseVars(useVars),
-          m_closureKind(closureKind) {}
+                  ClosureUseVarVec* useVars)
+        : m_meth(m), m_fe(fe), m_top(top), m_closureUseVars(useVars) {}
     MethodStatementPtr m_meth;
     FuncEmitter* m_fe;
     bool m_top;
     ClosureUseVarVec* m_closureUseVars;
-    ClosureKind m_closureKind;
   };
   class PostponedCtor {
   public:
-    PostponedCtor(ConstructPtr s, FuncEmitter* fe)
-      : m_c(s), m_fe(fe) {}
-    ConstructPtr m_c;
+    PostponedCtor(InterfaceStatementPtr is, FuncEmitter* fe)
+      : m_is(is), m_fe(fe) {}
+    InterfaceStatementPtr m_is;
     FuncEmitter* m_fe;
   };
   typedef std::pair<StringData*, ExpressionPtr> NonScalarPair;
@@ -563,8 +555,6 @@ public:
   void emitCGetL2(Emitter& e);
   void emitCGetL3(Emitter& e);
   void emitCGet(Emitter& e);
-  void emitCGetForName(Emitter& e, char* name);
-  void emitClosureUseVars(Emitter& e, int fpiStart, int paramCount, ClosureUseVarVec* useVars);
   void emitVGet(Emitter& e);
   void emitIsset(Emitter& e);
   void emitIsNull(Emitter& e);
@@ -614,9 +604,8 @@ public:
   void emitAssignment(Emitter& e, ExpressionPtr c, int op, bool bind);
   void emitListAssignment(Emitter& e, ListAssignmentPtr lst);
   void postponeMeth(MethodStatementPtr m, FuncEmitter* fe, bool top,
-                    ClosureUseVarVec* useVars = nullptr,
-                    ClosureKind closureKind = ClosureKind::Function);
-  void postponeCtor(ConstructPtr m, FuncEmitter* fe);
+                    ClosureUseVarVec* useVars = nullptr);
+  void postponeCtor(InterfaceStatementPtr m, FuncEmitter* fe);
   void postponePinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void postponeSinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void postponeCinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);

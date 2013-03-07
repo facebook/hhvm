@@ -1,6 +1,6 @@
 <?php
 
-chdir(preg_replace('#/bin/ext_injection.php$#', '/src', realpath(__FILE__)));
+chdir(preg_replace('#/hphp/tools/ext_injection.php$#', '/hphp', realpath(__FILE__)));
 
 // parse all these files
 $inputs = 'find . -name ext_*.cpp | '.
@@ -10,8 +10,10 @@ $files = array();
 exec($inputs, $files);
 
 foreach ($files as $file) {
-  // Skip injection macros for the collection classes
-  if (preg_match("#/ext_collection\\.cpp$#", $file)) {
+  // Skip injection macros for the collection and closure classes
+  $basename = basename($file);
+  if (($basename == 'ext_collection.cpp') ||
+      ($basename == 'ext_closure.cpp')) {
     continue;
   }
 

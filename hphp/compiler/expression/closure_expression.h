@@ -40,12 +40,16 @@ public:
   FunctionStatementPtr getClosureFunction() { return m_func; }
   ExpressionListPtr getClosureVariables() { return m_vars; }
   ExpressionListPtr getClosureValues() { return m_values; }
+  bool hasStaticLocals();
+
 private:
   FunctionStatementPtr m_func;
   ExpressionListPtr m_vars;
   ExpressionListPtr m_values;
 
   static TypePtr s_ClosureType;
+
+  bool hasStaticLocalsImpl(ConstructPtr root);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

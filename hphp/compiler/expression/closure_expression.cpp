@@ -19,6 +19,7 @@
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/simple_variable.h>
 #include <compiler/statement/function_statement.h>
+#include <compiler/statement/static_statement.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/file_scope.h>
@@ -227,6 +228,34 @@ TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     }
   }
   return s_ClosureType;
+}
+
+bool ClosureExpression::hasStaticLocals() {
+  ConstructPtr cons(m_func);
+  return hasStaticLocalsImpl(cons);
+}
+
+bool ClosureExpression::hasStaticLocalsImpl(ConstructPtr root) {
+  if (!root) {
+    return false;
+  }
+  if (root->getFunctionScope() != m_func->getFunctionScope()) {
+    // new scope, new statics
+    return false;
+  }
+
+  for (int i = 0; i < root->getKidCount(); i++) {
+    ConstructPtr cons = root->getNthKid(i);
+    if (StatementPtr s = dynamic_pointer_cast<Statement>(cons)) {
+      if (s->is(Statement::KindOfStaticStatement)) {
+        return true;
+      }
+    }
+    if (hasStaticLocalsImpl(cons)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

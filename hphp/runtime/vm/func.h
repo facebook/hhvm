@@ -194,7 +194,9 @@ struct Func {
 
   bool isPseudoMain() const { return m_name->empty(); }
   bool isBuiltin() const { return (bool)info(); }
-  bool isMethod() const { return (bool)preClass(); }
+  bool isMethod() const {
+    return !isPseudoMain() && (bool)cls();
+  }
   bool isTraitMethod() const {
     PreClass* pcls = preClass();
     return pcls && (pcls->attrs() & AttrTrait);

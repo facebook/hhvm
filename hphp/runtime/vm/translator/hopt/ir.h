@@ -138,6 +138,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *      Mem   hasMemEffects
  *      T     isTerminal
  *      P     passthrough
+ *      K     killsSource
  */
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
@@ -294,7 +295,7 @@ O(DecRefStack,                      ND, S(StkPtr) C(Int),       N|E|Mem|Refs) \
 O(DecRefThis,                       ND, SUnk,                   N|E|Mem|Refs) \
 O(GenericRetDecRefs,         D(StkPtr), S(StkPtr)                             \
                                           S(Gen) C(Int),        E|N|Mem|Refs) \
-O(DecRef,                           ND, S(Gen),             N|E|Mem|CRc|Refs) \
+O(DecRef,                           ND, S(Gen),           N|E|Mem|CRc|Refs|K) \
 O(DecRefMem,                        ND, S(PtrToGen)                           \
                                           C(Int),           N|E|Mem|CRc|Refs) \
 O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
@@ -1435,6 +1436,8 @@ struct IRInstruction {
   bool isTerminal() const;
   bool isPassthrough() const;
   SSATmp* getPassthroughValue() const;
+  bool killsSources() const;
+  bool killsSource(int srcNo) const;
 
   void printDst(std::ostream& ostream) const;
   void printSrc(std::ostream& ostream, uint32_t srcIndex) const;

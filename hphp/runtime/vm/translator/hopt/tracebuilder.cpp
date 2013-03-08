@@ -1281,6 +1281,16 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     cseInsert(inst);
   }
 
+  // if the instruction kills any of its sources, remove them from the
+  // CSE table
+  if (inst->killsSources()) {
+    for (int i = 0; i < inst->getNumSrcs(); ++i) {
+      if (inst->killsSource(i)) {
+        cseKill(inst->getSrc(i));
+      }
+    }
+  }
+
   // save a copy of the current state for each successor.
   if (Block* target = inst->getTaken()) saveState(target);
 }
@@ -1415,6 +1425,10 @@ CSEHash* TraceBuilder::getCSEHashTable(IRInstruction* inst) {
 
 void TraceBuilder::cseInsert(IRInstruction* inst) {
   getCSEHashTable(inst)->insert(inst->getDst());
+}
+
+void TraceBuilder::cseKill(SSATmp* src) {
+  getCSEHashTable(src->getInstruction())->erase(src);
 }
 
 SSATmp* TraceBuilder::cseLookup(IRInstruction* inst) {

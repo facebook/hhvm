@@ -292,6 +292,11 @@ Passthrough
   variable, or some other property that doesn't affect the value of the
   variable itself.
 
+KillsSource
+
+  The instruction might destroy one or more of its sources, so they
+  cannot be safely used after it has executed.
+
 
 Instruction set
 ---------------

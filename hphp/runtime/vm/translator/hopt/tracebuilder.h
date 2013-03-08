@@ -329,6 +329,7 @@ private:
   SSATmp*   optimizeInst(IRInstruction* inst);
   SSATmp*   cseLookup(IRInstruction* inst);
   void      cseInsert(IRInstruction* inst);
+  void      cseKill(SSATmp* src);
   CSEHash*  getCSEHashTable(IRInstruction* inst);
   void      killCse();
   void      killLocals();

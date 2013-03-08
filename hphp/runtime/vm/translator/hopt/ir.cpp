@@ -91,6 +91,7 @@ enum OpcodeFlag : uint64_t {
   NaryDest         = 0x0800, // has 0 or more destinations
   HasExtra         = 0x1000,
   Passthrough      = 0x2000,
+  KillsSources     = 0x4000,
 };
 
 #define NF     0
@@ -105,6 +106,7 @@ enum OpcodeFlag : uint64_t {
 #define Mem    MemEffects
 #define T      Terminal
 #define P      Passthrough
+#define K      KillsSources
 
 #define ND        0
 #define D(n)      HasDest
@@ -141,6 +143,8 @@ struct {
 #undef Er
 #undef Mem
 #undef T
+#undef P
+#undef K
 
 #undef ND
 #undef D
@@ -416,6 +420,19 @@ SSATmp* IRInstruction::getPassthroughValue() const {
   assert(m_op == IncRef || m_op == GuardType || m_op == Mov);
   return getSrc(0);
 }
+
+bool IRInstruction::killsSources() const {
+  return opcodeHasFlags(getOpcode(), KillsSources);
+}
+
+bool IRInstruction::killsSource(int idx) const {
+  if (!killsSources()) return false;
+
+  assert(m_op == DecRef);
+  assert(idx == 0);
+  return true;
+}
+
 bool IRInstruction::mayReenterHelper() const {
   if (isCmpOp(getOpcode())) {
     return cmpOpTypesMayReenter(getOpcode(),

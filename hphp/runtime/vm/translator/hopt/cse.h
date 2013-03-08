@@ -44,6 +44,9 @@ struct CSEHash {
   SSATmp* insert(SSATmp* opnd, IRInstruction* inst) {
     return map[inst] = opnd;
   }
+  void erase(SSATmp* opnd) {
+    map.erase(opnd->getInstruction());
+  }
   void clear() {
     map.clear();
   }

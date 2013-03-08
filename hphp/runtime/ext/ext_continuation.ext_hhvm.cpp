@@ -385,6 +385,44 @@ TypedValue* tg_12Continuation_done(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Continuation::t_getwaithandle()
+_ZN4HPHP14c_Continuation15t_getwaithandleEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_12Continuation_getWaitHandle(Value* _rv, ObjectData* this_) asm("_ZN4HPHP14c_Continuation15t_getwaithandleEv");
+
+TypedValue* tg_12Continuation_getWaitHandle(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_12Continuation_getWaitHandle((Value*)(&(rv)), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Continuation::getWaitHandle", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Continuation::getWaitHandle");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 long HPHP::c_Continuation::t_getlabel()
 _ZN4HPHP14c_Continuation10t_getlabelEv
 

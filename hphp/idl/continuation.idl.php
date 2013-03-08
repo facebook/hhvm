@@ -153,7 +153,7 @@ BeginClass(
   array(
     'name' => 'Continuation',
     'flags' => IsFinal,
-    'ifaces' => array('Iterator'),
+    'ifaces' => array('Iterator', 'Awaitable'),
     'footer' => <<<EOT
   public: void setCalledClass(CStrRef cls) {
     const_assert(!hhvm);
@@ -266,6 +266,16 @@ DefineFunction(
     'name'   => 'done',
     'return' => array(
       'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "getWaitHandle",
+    'desc'   => "Start asynchronous execution of this Continuation and return the wait handle",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
     ),
   ));
 

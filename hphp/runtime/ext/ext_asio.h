@@ -65,6 +65,7 @@ class c_WaitHandle : public ExtObjectData {
   public: c_WaitHandle(VM::Class* cls = c_WaitHandle::s_cls);
   public: ~c_WaitHandle();
   public: void t___construct();
+  public: Object t_getwaithandle();
   public: void t_import();
   public: Variant t_join();
   public: bool t_isfinished();

@@ -187,6 +187,7 @@ BeginClass(
     'name'   => "WaitHandle",
     'desc'   => "A wait handle representing asynchronous operation",
     'flags'  => HasDocComment | IsAbstract | IsCppAbstract,
+    'ifaces' => array('Awaitable'),
   ));
 
 DefineFunction(
@@ -195,6 +196,16 @@ DefineFunction(
     'flags'  => HasDocComment | IsPrivate,
     'return' => array(
       'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "getWaitHandle",
+    'desc'   => "Return this wait handle (for Awaitable interface)",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Object,
     ),
   ));
 

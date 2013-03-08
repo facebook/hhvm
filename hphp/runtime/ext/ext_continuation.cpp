@@ -16,6 +16,7 @@
 */
 
 #include <runtime/ext/ext_continuation.h>
+#include <runtime/ext/ext_asio.h>
 #include <runtime/base/builtin_functions.h>
 
 #include <runtime/ext/ext_spl.h>
@@ -102,6 +103,10 @@ void c_Continuation::t_update(int64_t label, CVarRef value) {
 void c_Continuation::t_done() {
   m_done = true;
   m_value.setNull();
+}
+
+Object c_Continuation::t_getwaithandle() {
+  return m_waitHandle.isNull() ? c_ContinuationWaitHandle::t_start(this) : m_waitHandle;
 }
 
 int64_t c_Continuation::t_getlabel() {

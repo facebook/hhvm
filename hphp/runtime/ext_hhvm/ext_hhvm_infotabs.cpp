@@ -2232,6 +2232,7 @@ TypedValue* fg_lz4compress(VM::ActRec *ar);
 TypedValue* fg_lz4hccompress(VM::ActRec *ar);
 TypedValue* fg_lz4uncompress(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle___construct(VM::ActRec *ar);
+TypedValue* tg_10WaitHandle_getWaitHandle(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_import(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_join(VM::ActRec *ar);
 TypedValue* tg_10WaitHandle_isFinished(VM::ActRec *ar);
@@ -2402,6 +2403,7 @@ VM::Instance* new_Continuation_Instance(VM::Class*);
 TypedValue* tg_12Continuation___construct(VM::ActRec *ar);
 TypedValue* tg_12Continuation_update(VM::ActRec *ar);
 TypedValue* tg_12Continuation_done(VM::ActRec *ar);
+TypedValue* tg_12Continuation_getWaitHandle(VM::ActRec *ar);
 TypedValue* tg_12Continuation_getLabel(VM::ActRec *ar);
 TypedValue* tg_12Continuation_num_args(VM::ActRec *ar);
 TypedValue* tg_12Continuation_get_args(VM::ActRec *ar);
@@ -5232,9 +5234,10 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "lz4uncompress", fg_lz4uncompress, (void *)&fh_lz4uncompress }
 };
 
-static const long long hhbc_ext_method_count_WaitHandle = 9;
+static const long long hhbc_ext_method_count_WaitHandle = 10;
 static const HhbcExtMethodInfo hhbc_ext_methods_WaitHandle[] = {
   { "__construct", tg_10WaitHandle___construct },
+  { "getWaitHandle", tg_10WaitHandle_getWaitHandle },
   { "import", tg_10WaitHandle_import },
   { "join", tg_10WaitHandle_join },
   { "isFinished", tg_10WaitHandle_isFinished },
@@ -5463,11 +5466,12 @@ static const HhbcExtMethodInfo hhbc_ext_methods_TupleIterator[] = {
   { "rewind", tg_13TupleIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Continuation = 18;
+static const long long hhbc_ext_method_count_Continuation = 19;
 static const HhbcExtMethodInfo hhbc_ext_methods_Continuation[] = {
   { "__construct", tg_12Continuation___construct },
   { "update", tg_12Continuation_update },
   { "done", tg_12Continuation_done },
+  { "getWaitHandle", tg_12Continuation_getWaitHandle },
   { "getLabel", tg_12Continuation_getLabel },
   { "num_args", tg_12Continuation_num_args },
   { "get_args", tg_12Continuation_get_args },

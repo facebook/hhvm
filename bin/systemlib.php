@@ -2217,6 +2217,10 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator,
   }
 }
 
+interface Awaitable {
+  public function getWaitHandle();
+}
+
 interface DebuggerCommand {
   /**
    * Called when DebuggerClient needs to auto-complete. Inside this function,

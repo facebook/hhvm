@@ -126,8 +126,6 @@ int64_t ObjectData::o_toInt64() const {
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties
 
-StaticString ssIterator("Iterator");
-static StaticString s_IteratorAggregate("IteratorAggregate");
 static StaticString s_getIterator("getIterator");
 
 Object ObjectData::iterableObject(bool& isIterable,
@@ -138,12 +136,13 @@ Object ObjectData::iterableObject(bool& isIterable,
     return Object(this);
   }
   Object obj(this);
-  while (obj->o_instanceof(s_IteratorAggregate)) {
+  while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
     Variant iterator = obj->o_invoke(s_getIterator, Array());
     if (!iterator.isObject()) break;
-    if (iterator.instanceof(ssIterator)) {
+    ObjectData* o = iterator.getObjectData();
+    if (o->instanceof(SystemLib::s_IteratorClass)) {
       isIterable = true;
-      return iterator.getObjectData();
+      return o;
     }
     obj = iterator.getObjectData();
   }
@@ -775,7 +774,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   Variant ret;
   if (LIKELY(serializer->getType() == VariableSerializer::Serialize ||
              serializer->getType() == VariableSerializer::APCSerialize)) {
-    if (o_instanceof("Serializable")) {
+    if (instanceof(SystemLib::s_SerializableClass)) {
       assert(!isCollection());
       Variant ret =
         const_cast<ObjectData*>(this)->o_invoke(s_serialize, Array(), -1);
@@ -792,7 +791,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
     handleSleep = const_cast<ObjectData*>(this)->php_sleep(ret);
   } else if (UNLIKELY(serializer->getType() ==
                       VariableSerializer::DebuggerSerialize)) {
-    if (o_instanceof("Serializable")) {
+    if (instanceof(SystemLib::s_SerializableClass)) {
       assert(!isCollection());
       try {
         Variant ret =
@@ -847,7 +846,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
       serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
       wanted.serialize(serializer, true);
     } else {
-      if (o_instanceof("Closure")) {
+      if (instanceof(c_Closure::s_cls)) {
         if (serializer->getType() == VariableSerializer::APCSerialize) {
           p_DummyClosure dummy(NEWOBJ(c_DummyClosure));
           serializer->write(dummy);
@@ -857,7 +856,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
         } else {
           throw_fatal("Serialization of Closure is not allowed");
         }
-      } else if (o_instanceof("Continuation")) {
+      } else if (instanceof(c_Continuation::s_cls)) {
         if (serializer->getType() == VariableSerializer::APCSerialize) {
           p_DummyContinuation dummy(NEWOBJ(c_DummyContinuation));
           serializer->write(dummy);
@@ -993,7 +992,7 @@ Variant& ObjectData::___offsetget_lval(Variant key) {
   if (isCollection()) {
     return collectionOffsetGet(this, key);
   } else {
-    if (!o_instanceof("ArrayAccess")) {
+    if (!instanceof(SystemLib::s_ArrayAccessClass)) {
       throw InvalidOperandException("not ArrayAccess objects");
     }
     Variant &v = get_system_globals()->__lvalProxy;

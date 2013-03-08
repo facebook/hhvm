@@ -39,28 +39,17 @@ namespace VM {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_stdclass(LITSTR_INIT("stdclass"));
-static StaticString s_Exception(LITSTR_INIT("Exception"));
-static StaticString s_BadMethodCallException(
-  LITSTR_INIT("BadMethodCallException"));
-static StaticString s_InvalidArgumentException(
-  LITSTR_INIT("InvalidArgumentException"));
-static StaticString s_RuntimeException(LITSTR_INIT("RuntimeException"));
-static StaticString s_OutOfBoundsException(
-  LITSTR_INIT("OutOfBoundsException"));
-static StaticString s_InvalidOperationException(
-  LITSTR_INIT("InvalidOperationException"));
-static StaticString s_Directory(LITSTR_INIT("Directory"));
-static StaticString s_RecursiveDirectoryIterator(
-  LITSTR_INIT("RecursiveDirectoryIterator"));
-static StaticString s_SplFileInfo(LITSTR_INIT("SplFileInfo"));
-static StaticString s_SplFileObject(LITSTR_INIT("SplFileObject"));
-static StaticString s_pinitSentinel(LITSTR_INIT("__pinitSentinel"));
-static StaticString s_resource(LITSTR_INIT("__resource"));
-static StaticString s_DOMException(LITSTR_INIT("DOMException"));
-static StaticString s_PDOException(LITSTR_INIT("PDOException"));
-static StaticString s_SoapFault(LITSTR_INIT("SoapFault"));
-static StaticString s_Continuation(LITSTR_INIT("Continuation"));
+#define STRINGIZE_CLASS_NAME(cls) #cls
+#define pinitSentinel __pinitSentinel
+#define resource __resource
+
+#define SYSTEM_CLASS_STRING(cls)                        \
+  static StaticString s_##cls(LITSTR_INIT(STRINGIZE_CLASS_NAME(cls)));
+SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
+
+#undef resource
+#undef pinitSentinel
+#undef STRINGIZE_CLASS_NAME
 
 class VMClassInfoHook : public ClassInfoHook {
 public:
@@ -200,23 +189,7 @@ void ProcessInit() {
 
   // Stash a pointer to the VM Classes for stdclass, Exception,
   // pinitSentinel and resource
-  INIT_SYSTEMLIB_CLASS_FIELD(stdclass);
-  INIT_SYSTEMLIB_CLASS_FIELD(Exception);
-  INIT_SYSTEMLIB_CLASS_FIELD(BadMethodCallException);
-  INIT_SYSTEMLIB_CLASS_FIELD(InvalidArgumentException);
-  INIT_SYSTEMLIB_CLASS_FIELD(RuntimeException);
-  INIT_SYSTEMLIB_CLASS_FIELD(OutOfBoundsException);
-  INIT_SYSTEMLIB_CLASS_FIELD(InvalidOperationException);
-  INIT_SYSTEMLIB_CLASS_FIELD(Directory);
-  INIT_SYSTEMLIB_CLASS_FIELD(RecursiveDirectoryIterator);
-  INIT_SYSTEMLIB_CLASS_FIELD(SplFileInfo);
-  INIT_SYSTEMLIB_CLASS_FIELD(SplFileObject);
-  INIT_SYSTEMLIB_CLASS_FIELD(pinitSentinel);
-  INIT_SYSTEMLIB_CLASS_FIELD(resource);
-  INIT_SYSTEMLIB_CLASS_FIELD(DOMException);
-  INIT_SYSTEMLIB_CLASS_FIELD(PDOException);
-  INIT_SYSTEMLIB_CLASS_FIELD(SoapFault);
-  INIT_SYSTEMLIB_CLASS_FIELD(Continuation);
+  SYSTEMLIB_CLASSES(INIT_SYSTEMLIB_CLASS_FIELD)
 
 #undef INIT_SYSTEMLIB_CLASS_FIELD
 

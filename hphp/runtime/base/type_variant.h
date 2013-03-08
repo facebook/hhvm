@@ -491,6 +491,7 @@ class Variant : private VariantBase {
   }
   bool isResource() const;
   bool instanceof(CStrRef s) const;
+  bool instanceof(VM::Class* cls) const;
 
   /**
    * This method is for optimizing switch cases with all int literal
@@ -1205,7 +1206,7 @@ class Variant : private VariantBase {
   static ObjectData *GetArrayAccess(TypedValueAccessor acc) {
     assert(acc && acc->m_type == KindOfObject);
     ObjectData *obj = acc->m_data.pobj;
-    if (!obj->o_instanceof("ArrayAccess")) {
+    if (!obj->instanceof(SystemLib::s_ArrayAccessClass)) {
       throw InvalidOperandException("not ArrayAccess objects");
     }
     return obj;

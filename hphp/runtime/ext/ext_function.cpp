@@ -18,6 +18,7 @@
 #include <runtime/ext/ext_function.h>
 #include <runtime/ext/ext_json.h>
 #include <runtime/ext/ext_class.h>
+#include <runtime/ext/ext_closure.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/util/libevent_http_client.h>
 #include <runtime/base/server/http_protocol.h>
@@ -110,7 +111,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
       = StringData::GetStaticString("__invoke");
     const VM::Func* invoke = d->getVMClass()->lookupMethod(sd__invoke);
     if (name.isReferenced()) {
-      if (d->o_instanceof("closure")) {
+      if (d->instanceof(c_Closure::s_cls)) {
         // Hack to stop the mangled name from showing up
         name = "Closure::__invoke";
       } else {

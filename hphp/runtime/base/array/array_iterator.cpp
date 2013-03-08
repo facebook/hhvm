@@ -32,8 +32,6 @@ static StaticString s_valid("valid");
 static StaticString s_next("next");
 static StaticString s_key("key");
 static StaticString s_current("current");
-static StaticString s_Iterator("Iterator");
-static StaticString s_Continuation("Continuation");
 
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayIter
@@ -104,7 +102,7 @@ void ArrayIter::objInit(ObjectData *obj) {
     obj->incRefCount();
   }
   if (!obj->isCollection()) {
-    assert(obj->o_instanceof(s_Iterator));
+    assert(obj->instanceof(SystemLib::s_IteratorClass));
     obj->o_invoke(s_rewind, Array());
   } else {
     if (hasVector()) {

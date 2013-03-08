@@ -483,7 +483,7 @@ bool ArrayData::hasInternalReference(PointerSet &vars,
         return true;
       }
       vars.insert(pobj);
-      if (ds && pobj->o_instanceof("Serializable")) {
+      if (ds && pobj->instanceof(SystemLib::s_SerializableClass)) {
         return true;
       }
       if (pobj->hasInternalReference(vars, ds)) {

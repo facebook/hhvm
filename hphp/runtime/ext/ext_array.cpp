@@ -620,7 +620,7 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
   case KindOfObject:
     {
       Object obj = var.toObject();
-      if (obj.instanceof("Countable")) {
+      if (obj.instanceof(SystemLib::s_CountableClass)) {
         return obj->o_invoke("count", null_array, -1);
       }
     }
@@ -658,13 +658,13 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
 
     ObjectData *obj = iterable.getObjectData();
     Variant iterator;
-    while (obj->o_instanceof(s_IteratorAggregate)) {
+    while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
       iterator = obj->o_invoke(s_getIterator, Array());
       if (!iterator.isObject()) break;
       obj = iterator.getObjectData();
     }
     if (isMutable) {
-      if (obj->o_instanceof(s_Iterator)) {
+      if (obj->instanceof(SystemLib::s_IteratorClass)) {
         throw FatalErrorException("An iterator cannot be used for "
                                   "iteration by reference");
       }
@@ -672,7 +672,7 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
       return create_object(s_MutableArrayIterator,
                            CREATE_VECTOR1(ref(properties)));
     } else {
-      if (obj->o_instanceof(s_Iterator)) {
+      if (obj->instanceof(SystemLib::s_IteratorClass)) {
         return obj;
       }
       return create_object(s_ArrayIterator,

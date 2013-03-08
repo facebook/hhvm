@@ -7131,7 +7131,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContHandle(PC& pc) {
 
   Variant exn = tvAsVariant(m_stack.topTV());
   m_stack.popC();
-  assert(exn.asObjRef().instanceof("exception"));
+  assert(exn.asObjRef().instanceof(SystemLib::s_ExceptionClass));
   throw exn.asObjRef();
 }
 

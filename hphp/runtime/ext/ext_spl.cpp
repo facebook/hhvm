@@ -208,7 +208,7 @@ Variant f_class_uses(CVarRef obj, bool autoload /* = true */) {
 
 Variant f_iterator_apply(CVarRef obj, CVarRef func,
                          CArrRef params /* = null_array */) {
-  if (!obj.instanceof("Traversable")) {
+  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
     return false;
   }
   Object pobj = obj.toObject();
@@ -225,7 +225,7 @@ Variant f_iterator_apply(CVarRef obj, CVarRef func,
 }
 
 Variant f_iterator_count(CVarRef obj) {
-  if (!obj.instanceof("Traversable")) {
+  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
     return false;
   }
   Object pobj = obj.toObject();
@@ -239,7 +239,7 @@ Variant f_iterator_count(CVarRef obj) {
 }
 
 Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
-  if (!obj.instanceof("Traversable")) {
+  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
     return false;
   }
   Array ret(Array::Create());

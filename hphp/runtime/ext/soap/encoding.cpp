@@ -530,7 +530,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, CVarRef data, int style,
   bool add_type = false;
 
   /* Special handling of class SoapVar */
-  if (data.isObject() && data.toObject().instanceof("SoapVar")) {
+  if (data.isObject() && data.toObject().instanceof(c_SoapVar::s_cls)) {
     encodePtr enc;
     c_SoapVar *p = data.toObject().getTyped<c_SoapVar>();
     if (!p->m_ns.empty()) {
@@ -2088,7 +2088,8 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, CVarRef data_, int style,
     return xmlParam;
   }
 
-  if (data.isObject() && data.toObject().instanceof("iterator")) {
+  if (data.isObject() &&
+      data.toObject().instanceof(SystemLib::s_IteratorClass)) {
     array_copy = Array::Create();
     for (ArrayIter iter(data.toObject().get()); iter; ++iter) {
       if (!iter.first().isNull() && iter.first().isString()) {
@@ -3215,7 +3216,7 @@ static encodePtr get_array_type(xmlNodePtr node, CVarRef array,
   for (i = 0;i < count;i++) {
     Variant tmp = iter.second();
 
-    if (tmp.isObject() && tmp.toObject().instanceof("SoapVar")) {
+    if (tmp.isObject() && tmp.toObject().instanceof(c_SoapVar::s_cls)) {
       c_SoapVar *var = tmp.toObject().getTyped<c_SoapVar>();
       cur_type = var->m_type;
       if (!var->m_stype.empty()) {

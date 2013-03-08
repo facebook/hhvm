@@ -743,7 +743,7 @@ bool BaseExecutionContext::onUnhandledException(Object e) {
     Logger::Error("HipHop Fatal error: Uncaught %s", err.data());
   }
 
-  if (e.instanceof("Exception")) {
+  if (e.instanceof(SystemLib::s_ExceptionClass)) {
     // user thrown exception
     if (!m_userExceptionHandlers.empty()) {
       if (!same(f_call_user_func_array

@@ -32,6 +32,34 @@ namespace Eval {
   class PhpFile;
 }
 
+#define SYSTEMLIB_CLASSES(x)                    \
+  x(stdclass)                                   \
+  x(Exception)                                  \
+  x(BadMethodCallException)                     \
+  x(InvalidArgumentException)                   \
+  x(RuntimeException)                           \
+  x(OutOfBoundsException)                       \
+  x(InvalidOperationException)                  \
+  x(pinitSentinel)                              \
+  x(resource)                                   \
+  x(Directory)                                  \
+  x(RecursiveDirectoryIterator)                 \
+  x(RecursiveIteratorIterator)                  \
+  x(DirectoryIterator)                          \
+  x(SplFileInfo)                                \
+  x(SplFileObject)                              \
+  x(DOMException)                               \
+  x(PDOException)                               \
+  x(SoapFault)                                  \
+  x(Continuation)                               \
+  x(Serializable)                               \
+  x(ArrayAccess)                                \
+  x(Iterator)                                   \
+  x(IteratorAggregate)                          \
+  x(JsonSerializable)                           \
+  x(Traversable)                                \
+  x(Countable)                                  \
+
 class SystemLib {
  public:
   static bool s_inited;
@@ -39,23 +67,12 @@ class SystemLib {
   static HPHP::VM::Unit* s_unit;
   static HPHP::VM::Unit* s_nativeFuncUnit;
   static HPHP::VM::Unit* s_nativeClassUnit;
-  static HPHP::VM::Class* s_stdclassClass;
-  static HPHP::VM::Class* s_ExceptionClass;
-  static HPHP::VM::Class* s_BadMethodCallExceptionClass;
-  static HPHP::VM::Class* s_InvalidArgumentExceptionClass;
-  static HPHP::VM::Class* s_RuntimeExceptionClass;
-  static HPHP::VM::Class* s_OutOfBoundsExceptionClass;
-  static HPHP::VM::Class* s_InvalidOperationExceptionClass;
-  static HPHP::VM::Class* s_pinitSentinelClass;
-  static HPHP::VM::Class* s_resourceClass;
-  static HPHP::VM::Class* s_DirectoryClass;
-  static HPHP::VM::Class* s_RecursiveDirectoryIteratorClass;
-  static HPHP::VM::Class* s_SplFileInfoClass;
-  static HPHP::VM::Class* s_SplFileObjectClass;
-  static HPHP::VM::Class* s_DOMExceptionClass;
-  static HPHP::VM::Class* s_PDOExceptionClass;
-  static HPHP::VM::Class* s_SoapFaultClass;
-  static HPHP::VM::Class* s_ContinuationClass;
+
+
+#define DECLARE_SYSTEMLIB_CLASS(cls)       \
+  static HPHP::VM::Class* s_ ## cls ## Class;
+  SYSTEMLIB_CLASSES(DECLARE_SYSTEMLIB_CLASS)
+#undef DECLARE_SYSTEMLIB_CLASS
 
   static HPHP::VM::Func* GetNullFunction();
 

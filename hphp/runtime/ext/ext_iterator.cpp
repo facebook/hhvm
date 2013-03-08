@@ -41,7 +41,7 @@ StaticString
 
 static RecursiveIteratorIterator *
 get_recursiveiteratoriterator(CObjRef obj) {
-  if (!obj->o_instanceof("RecursiveIteratorIterator")) {
+  if (!obj->instanceof(SystemLib::s_RecursiveIteratorIteratorClass)) {
     throw InvalidObjectTypeException(obj->o_getClassName());
   }
   CObjRef rsrc = obj->o_get("rsrc", true, "RecursiveIteratorIterator");
@@ -50,7 +50,7 @@ get_recursiveiteratoriterator(CObjRef obj) {
 
 static RecursiveDirectoryIterator *
 get_recursivedirectoryiterator(CObjRef obj) {
-  if (!obj->o_instanceof("RecursiveDirectoryIterator")) {
+  if (!obj->instanceof(SystemLib::s_RecursiveDirectoryIteratorClass)) {
     throw InvalidObjectTypeException(obj->o_getClassName());
   }
   // SplFileInfo as context -- rsrc is a private property
@@ -60,7 +60,7 @@ get_recursivedirectoryiterator(CObjRef obj) {
 
 static DirectoryIterator *
 get_directoryiterator(CObjRef obj) {
-  if (!obj->o_instanceof("DirectoryIterator")) {
+  if (!obj->instanceof(SystemLib::s_DirectoryIteratorClass)) {
     throw InvalidObjectTypeException(obj->o_getClassName());
   }
   // SplFileInfo as context -- rsrc is a private property
@@ -153,7 +153,7 @@ void RecursiveIteratorIterator::sweep() {
 }
 
 Object f_hphp_recursiveiteratoriterator___construct(CObjRef obj, CObjRef iterator, int64_t mode, int64_t flags) {
-  if (iterator->o_instanceof("RecursiveDirectoryIterator")) {
+  if (iterator->instanceof(SystemLib::s_RecursiveDirectoryIteratorClass)) {
     CVarRef rsrc = iterator->o_get("rsrc", true, "SplFileInfo");
     obj->o_set("rsrc", NEWOBJ(RecursiveIteratorIterator)(rsrc, mode, flags),
                "RecursiveIteratorIterator");

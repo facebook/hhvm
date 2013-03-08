@@ -846,7 +846,7 @@ Variant& Instance::___offsetget_lval(Variant key) {
   if (isCollection()) {
     return collectionOffsetGet(this, key);
   } else {
-    if (!o_instanceof("ArrayAccess")) {
+    if (!instanceof(SystemLib::s_ArrayAccessClass)) {
       throw InvalidOperandException("not ArrayAccess objects");
     }
     static StringData* sd__offsetGet = StringData::GetStaticString("offsetGet");

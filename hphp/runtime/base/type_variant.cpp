@@ -535,6 +535,18 @@ bool Variant::instanceof(CStrRef s) const {
   return false;
 }
 
+HOT_FUNC
+bool Variant::instanceof(VM::Class* cls) const {
+  if (m_type == KindOfObject) {
+    assert(m_data.pobj);
+    return m_data.pobj->instanceof(cls);
+  }
+  if (m_type == KindOfRef) {
+    return m_data.pref->var()->instanceof(cls);
+  }
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // array operations
 
@@ -1918,7 +1930,7 @@ ObjectData *Variant::getArrayAccess() const {
   assert(is(KindOfObject));
   ObjectData *obj = getObjectData();
   assert(obj);
-  if (!obj->o_instanceof("ArrayAccess")) {
+  if (!obj->instanceof(SystemLib::s_ArrayAccessClass)) {
     throw InvalidOperandException("not ArrayAccess objects");
   }
   return obj;
@@ -3793,7 +3805,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
       Object obj;
       try {
         obj = create_object_only(clsName);
-        if (!obj->o_instanceof("Serializable")) {
+        if (!obj->instanceof(SystemLib::s_SerializableClass)) {
           raise_error("%s didn't implement Serializable", clsName.data());
         }
         obj->o_invoke(s_unserialize, CREATE_VECTOR1(serialized), -1);

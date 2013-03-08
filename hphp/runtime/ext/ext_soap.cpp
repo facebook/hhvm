@@ -1184,7 +1184,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
   }
   xmlDocSetRootElement(doc, envelope);
 
-  if (ret.isObject() && ret.toObject()->o_instanceof("SoapFault")) {
+  if (ret.isObject() &&
+      ret.toObject()->instanceof(SystemLib::s_SoapFaultClass)) {
     ObjectData* obj = ret.getObjectData();
 
     char *detail_name;
@@ -1801,7 +1802,7 @@ bool f_use_soap_error_handler(bool handler /* = true */) {
 }
 
 bool f_is_soap_fault(CVarRef fault) {
-  return fault.isObject() && fault.toObject()->o_instanceof("SoapFault");
+  return fault.instanceof(SystemLib::s_SoapFaultClass);
 }
 
 int64_t f__soap_active_version() {
@@ -2156,7 +2157,7 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
         return;
       }
       if (h->retval.isObject() &&
-          h->retval.toObject()->o_instanceof("SoapFault")) {
+          h->retval.getObjectData()->instanceof(SystemLib::s_SoapFaultClass)) {
         send_soap_server_fault(function, h->retval, h);
         return;
       }
@@ -2180,7 +2181,8 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
       send_soap_server_fault(function, e, NULL);
       return;
     }
-    if (retval.isObject() && retval.toObject()->o_instanceof("SoapFault")) {
+    if (retval.isObject() &&
+        retval.toObject()->instanceof(SystemLib::s_SoapFaultClass)) {
       send_soap_server_fault(function, retval, NULL);
       return;
     }

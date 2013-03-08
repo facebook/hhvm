@@ -28,7 +28,6 @@ namespace HPHP {
   HPHP::VM::Instance::newInstance(SystemLib::s_##name##Class)
 
 #define ALLOC_OBJECT_STUB(name)                                           \
-  HPHP::VM::Class* SystemLib::s_##name##Class = nullptr;                  \
   ObjectData* SystemLib::Alloc##name##Object() {                          \
     return ALLOC_OBJECT_STUB_RETURN(name);                                \
   }
@@ -38,20 +37,11 @@ HPHP::Eval::PhpFile* SystemLib::s_phpFile = nullptr;
 HPHP::VM::Unit* SystemLib::s_unit = nullptr;
 HPHP::VM::Unit* SystemLib::s_nativeFuncUnit = nullptr;
 HPHP::VM::Unit* SystemLib::s_nativeClassUnit = nullptr;
-HPHP::VM::Class* SystemLib::s_stdclassClass = nullptr;
-HPHP::VM::Class* SystemLib::s_ExceptionClass = nullptr;
-HPHP::VM::Class* SystemLib::s_BadMethodCallExceptionClass = nullptr;
-HPHP::VM::Class* SystemLib::s_InvalidArgumentExceptionClass = nullptr;
-HPHP::VM::Class* SystemLib::s_RuntimeExceptionClass = nullptr;
-HPHP::VM::Class* SystemLib::s_OutOfBoundsExceptionClass = nullptr;
-HPHP::VM::Class* SystemLib::s_InvalidOperationExceptionClass = nullptr;
-HPHP::VM::Class* SystemLib::s_pinitSentinelClass = nullptr;
-HPHP::VM::Class* SystemLib::s_resourceClass = nullptr;
-HPHP::VM::Class* SystemLib::s_DOMExceptionClass = nullptr;
-HPHP::VM::Class* SystemLib::s_SoapFaultClass = nullptr;
-HPHP::VM::Class* SystemLib::s_ContinuationClass = nullptr;
-HPHP::VM::Class* SystemLib::s_SplFileInfoClass = nullptr;
-HPHP::VM::Class* SystemLib::s_SplFileObjectClass = nullptr;
+
+#define DEFINE_SYSTEMLIB_CLASS(cls)       \
+  HPHP::VM::Class* SystemLib::s_ ## cls ## Class = nullptr;
+SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
+#undef DEFINE_SYSTEMLIB_CLASS
 
 ObjectData* SystemLib::AllocStdClassObject() {
   return HPHP::VM::Instance::newInstance(SystemLib::s_stdclassClass);

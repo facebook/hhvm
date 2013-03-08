@@ -280,7 +280,7 @@ void c_Vector::t_sort(CVarRef col /* = null */) {
       throw e;
     }
     ObjectData* obj = col.getObjectData();
-    if (!obj->o_instanceof("Collator")) {
+    if (!obj->instanceof(c_Collator::s_cls)) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected col to be an instance of Collator"));
       throw e;
@@ -448,7 +448,7 @@ Object c_Vector::ti_fromvector(const char* cls, CVarRef vec) {
     throw e;
   }
   ObjectData* obj = vec.getObjectData();
-  if (!obj->o_instanceof("Vector")) {
+  if (!obj->instanceof(c_Vector::s_cls)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "vec must be an instance of Vector"));
     throw e;
@@ -474,7 +474,7 @@ Variant c_Vector::ti_slice(const char* cls, CVarRef vec, CVarRef offset,
     throw e;
   }
   ObjectData* obj = vec.getObjectData();
-  if (!obj->o_instanceof("Vector")) {
+  if (!obj->instanceof(c_Vector::s_cls)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "vec must be an instance of Vector"));
     throw e;

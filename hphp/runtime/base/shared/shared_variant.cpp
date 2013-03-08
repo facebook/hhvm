@@ -329,7 +329,7 @@ SharedVariant* SharedVariant::convertObj(CVarRef var) {
   }
   setObjAttempted();
   ObjectData *obj = var.getObjectData();
-  if (obj->o_instanceof("Serializable")) {
+  if (obj->instanceof(SystemLib::s_SerializableClass)) {
     // should also check the object itself
     return nullptr;
   }

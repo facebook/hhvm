@@ -22,6 +22,7 @@
 #include <runtime/base/types.h>
 #include <runtime/base/macros.h>
 #include <runtime/base/runtime_error.h>
+#include <system/lib/systemlib.h>
 
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/int.hpp>
@@ -118,11 +119,11 @@ class ObjectData : public CountableNF {
     return (int)(o_attribute >> 13) & 7;
   }
   bool supportsUnsetElem() const {
-    return isCollection() || o_instanceof("arrayaccess");
+    return isCollection() || instanceof(SystemLib::s_ArrayAccessClass);
   }
 
   bool implementsIterator() {
-    return (o_instanceof(ssIterator));
+    return (instanceof(SystemLib::s_IteratorClass));
   }
 
   void setAttributes(int attrs) { o_attribute |= attrs; }
@@ -140,10 +141,8 @@ class ObjectData : public CountableNF {
                          CStrRef context = null_string);
 
   /**
-   * o_instanceof() can be used for both classes and interfaces. Note
-   * that o_instanceof() has not been thoroughly tested with redeclared
-   * classes or classes that have a redeclared ancestor in the inheritance
-   * hierarchy. It is also worth noting that o_instanceof will always return
+   * o_instanceof() can be used for both classes and interfaces.
+   * It is also worth noting that o_instanceof will always return
    * false for classes that are descendents of ResourceData.
    */
   bool o_instanceof(CStrRef s) const;

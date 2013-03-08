@@ -30,7 +30,7 @@ namespace HPHP {
 ImmutableObj::ImmutableObj(ObjectData *obj) {
   // This function assumes the object and object/array down the tree have no
   // internal reference and does not implements serializable interface.
-  assert(!obj->o_instanceof("Serializable"));
+  assert(!obj->instanceof(SystemLib::s_SerializableClass));
   m_cls = obj->o_getClassName()->copy(true);
   Array props;
   ClassInfo::GetArray(obj, props, ClassInfo::GetArrayAll);

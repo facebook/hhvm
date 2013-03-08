@@ -226,7 +226,7 @@ void c_Continuation::call_send(TypedValue* v) {
 
 void c_Continuation::call_raise(ObjectData* e) {
   assert(e);
-  assert(e->o_instanceof("Exception"));
+  assert(e->instanceof(SystemLib::s_ExceptionClass));
 
   const HPHP::VM::Func* func = m_cls->lookupMethod(s_raise.get());
 

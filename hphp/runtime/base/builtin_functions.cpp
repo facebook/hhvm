@@ -1479,7 +1479,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
     try {
       f_call_user_func_array(iter.second(), params);
     } catch (Object& ex) {
-      assert(ex.instanceof(s_exception));
+      assert(ex.instanceof(SystemLib::s_ExceptionClass));
       if (autoloadException.isNull()) {
         autoloadException = ex;
       } else {
@@ -1571,7 +1571,7 @@ inline void throw_exception_unchecked(CObjRef e) {
   throw e;
 }
 void throw_exception(CObjRef e) {
-  if (!e.instanceof(s_exception)) {
+  if (!e.instanceof(SystemLib::s_ExceptionClass)) {
     raise_error("Exceptions must be valid objects derived from the "
                 "Exception base class");
   }

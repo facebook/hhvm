@@ -71,34 +71,23 @@ TypedValue* tg_22ContinuationWaitHandle___construct(HPHP::VM::ActRec *ar) {
 }
 
 /*
-HPHP::Object HPHP::c_ContinuationWaitHandle::ti_start(char const*, HPHP::Object const&, int)
-_ZN4HPHP24c_ContinuationWaitHandle8ti_startEPKcRKNS_6ObjectEi
+HPHP::Object HPHP::c_ContinuationWaitHandle::ti_start(char const*, HPHP::Object const&)
+_ZN4HPHP24c_ContinuationWaitHandle8ti_startEPKcRKNS_6ObjectE
 
 (return value) => rax
 _rv => rdi
 cls_ => rsi
 continuation => rdx
-prio => rcx
 */
 
-Value* th_22ContinuationWaitHandle_start(Value* _rv, char const* cls_, Value* continuation, int prio) asm("_ZN4HPHP24c_ContinuationWaitHandle8ti_startEPKcRKNS_6ObjectEi");
+Value* th_22ContinuationWaitHandle_start(Value* _rv, char const* cls_, Value* continuation) asm("_ZN4HPHP24c_ContinuationWaitHandle8ti_startEPKcRKNS_6ObjectE");
 
 TypedValue* tg1_22ContinuationWaitHandle_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue* tg1_22ContinuationWaitHandle_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
-  switch (count) {
-  default: // count >= 2
-    if ((args-1)->m_type != KindOfInt64) {
-      tvCastToInt64InPlace(args-1);
-    }
-  case 1:
-    break;
-  }
-  if ((args-0)->m_type != KindOfObject) {
-    tvCastToObjectInPlace(args-0);
-  }
-  th_22ContinuationWaitHandle_start((Value*)(rv), ("ContinuationWaitHandle"), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
+  tvCastToObjectInPlace(args-0);
+  th_22ContinuationWaitHandle_start((Value*)(rv), ("ContinuationWaitHandle"), (Value*)(args-0));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -107,26 +96,26 @@ TypedValue* tg_22ContinuationWaitHandle_start(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count >= 1LL && count <= 2LL) {
-      if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        th_22ContinuationWaitHandle_start((Value*)(&(rv)), ("ContinuationWaitHandle"), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
+        th_22ContinuationWaitHandle_start((Value*)(&(rv)), ("ContinuationWaitHandle"), (Value*)(args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
         tg1_22ContinuationWaitHandle_start(&rv, ar, count );
-        frame_free_locals_no_this_inl(ar, 2);
+        frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       }
     } else {
-      throw_wrong_arguments_nr("ContinuationWaitHandle::start", count, 1, 2, 1);
+      throw_wrong_arguments_nr("ContinuationWaitHandle::start", count, 1, 1, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
+    frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

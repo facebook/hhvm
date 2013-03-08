@@ -47,17 +47,11 @@ void c_ContinuationWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation, int prio) {
+Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation) {
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(!continuation.instanceof(SystemLib::s_ContinuationClass))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected continuation to be an instance of Continuation"));
-    throw e;
-  }
-
-  if (UNLIKELY(prio < 0)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected prio to be a non-negative integer"));
     throw e;
   }
 
@@ -78,7 +72,7 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation,
   }
 
   p_ContinuationWaitHandle wh = NEWOBJ(c_ContinuationWaitHandle)();
-  wh->start(cont, static_cast<uint32_t>(prio), depth + 1);
+  wh->start(cont, depth + 1);
   if (UNLIKELY(session->hasOnStartedCallback())) {
     session->onStarted(wh);
   }
@@ -115,7 +109,7 @@ void c_ContinuationWaitHandle::t_setprivdata(CObjRef data) {
   m_privData = data;
 }
 
-void c_ContinuationWaitHandle::start(c_Continuation* continuation, uint32_t prio, uint16_t depth) {
+void c_ContinuationWaitHandle::start(c_Continuation* continuation, uint16_t depth) {
   m_continuation = continuation;
   m_child = nullptr;
   m_privData = nullptr;
@@ -123,21 +117,9 @@ void c_ContinuationWaitHandle::start(c_Continuation* continuation, uint32_t prio
   m_tailCall = false;
   continuation->m_waitHandle = this;
 
-  if (prio == 0) {
-    setState(STATE_SCHEDULED);
-    if (isInContext()) {
-      getContext()->schedule(this);
-    }
-  } else {
-    // TODO: deprecate directly passed non-zero priorities
-    m_child = c_RescheduleWaitHandle::t_create(AsioContext::QUEUE_DEFAULT, prio);
-    try {
-      blockOn(static_cast<c_WaitableWaitHandle*>(m_child.get()));
-    } catch (Object cycle_exception) {
-      // can't create cycle
-      assert(false);
-      throw;
-    }
+  setState(STATE_SCHEDULED);
+  if (isInContext()) {
+    getContext()->schedule(this);
   }
 }
 

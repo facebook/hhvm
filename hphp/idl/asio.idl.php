@@ -522,12 +522,6 @@ DefineFunction(
         'type'   => Object,
         'desc'   => "A Continuation to be started",
       ),
-      array(
-        'name'   => "prio",
-        'type'   => Int32,
-        'desc'   => "Execution priority",
-        'value'  => "0",
-      ),
     ),
   ));
 

@@ -28,7 +28,7 @@ namespace {
 
   void putException(Object& exception_field, ObjectData* new_exception) {
     assert(new_exception);
-    assert(new_exception->o_instanceof("Exception"));
+    assert(new_exception->instanceof(SystemLib::s_ExceptionClass));
 
     if (exception_field.isNull()) {
       exception_field = new_exception;

@@ -96,6 +96,9 @@ public:
   bool instanceof(CStrRef s) const {
     return m_px && m_px->o_instanceof(s);
   }
+  bool instanceof(const VM::Class* cls) const {
+    return m_px && m_px->instanceof(cls);
+  }
   int64_t hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const {
     return m_px ? m_px->o_toInt64() : 0;
   }

@@ -49,7 +49,7 @@ void c_ContinuationWaitHandle::t___construct() {
 
 Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation, int prio) {
   AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(!continuation.instanceof(s_continuation))) {
+  if (UNLIKELY(!continuation.instanceof(SystemLib::s_ContinuationClass))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected continuation to be an instance of Continuation"));
     throw e;

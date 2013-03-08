@@ -50,7 +50,7 @@ Object c_SetResultToRefWaitHandle::ti_create(const char* cls, CObjRef wait_handl
     return wait_handle;
   }
 
-  if (!wait_handle.get()->o_instanceof(c_WaitHandle::q_ClassName)) {
+  if (!wait_handle.get()->instanceof(c_WaitHandle::s_cls)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected wait_handle to be an instance of WaitHandle or null"));
     throw e;

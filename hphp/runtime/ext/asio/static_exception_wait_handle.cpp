@@ -41,7 +41,7 @@ void c_StaticExceptionWaitHandle::t___construct() {
 }
 
 Object c_StaticExceptionWaitHandle::ti_create(const char* cls, CObjRef exception) {
-  if (!exception.instanceof("Exception")) {
+  if (!exception.instanceof(SystemLib::s_ExceptionClass)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected exception to be an instance of Exception"));
     throw e;

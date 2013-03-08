@@ -162,7 +162,7 @@ void c_WaitableWaitHandle::setResult(const TypedValue* result) {
 
 void c_WaitableWaitHandle::setException(ObjectData* exception) {
   assert(exception);
-  assert(exception->o_instanceof("Exception"));
+  assert(exception->instanceof(SystemLib::s_ExceptionClass));
 
   setState(STATE_FAILED);
   tvWriteObject(exception, &m_resultOrException);

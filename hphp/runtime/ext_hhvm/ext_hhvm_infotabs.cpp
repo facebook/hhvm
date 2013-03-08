@@ -2271,7 +2271,6 @@ TypedValue* tg_20RescheduleWaitHandle_create(VM::ActRec *ar);
 VM::Instance* new_Closure_Instance(VM::Class*);
 TypedValue* tg_7Closure___construct(VM::ActRec *ar);
 TypedValue* tg_7Closure___invoke(VM::ActRec *ar);
-TypedValue* tg_7Closure___clone(VM::ActRec *ar);
 VM::Instance* new_DummyClosure_Instance(VM::Class*);
 TypedValue* tg_12DummyClosure___construct(VM::ActRec *ar);
 VM::Instance* new_Vector_Instance(VM::Class*);
@@ -5282,11 +5281,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_RescheduleWaitHandle[] = {
   { "create", tg_20RescheduleWaitHandle_create }
 };
 
-static const long long hhbc_ext_method_count_Closure = 3;
+static const long long hhbc_ext_method_count_Closure = 2;
 static const HhbcExtMethodInfo hhbc_ext_methods_Closure[] = {
   { "__construct", tg_7Closure___construct },
-  { "__invoke", tg_7Closure___invoke },
-  { "__clone", tg_7Closure___clone }
+  { "__invoke", tg_7Closure___invoke }
 };
 
 static const long long hhbc_ext_method_count_DummyClosure = 1;

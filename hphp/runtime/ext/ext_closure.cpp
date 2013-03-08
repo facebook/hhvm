@@ -31,11 +31,6 @@ Variant c_Closure::t___invoke(int _argc, CArrRef _argv) {
   return null;
 }
 
-Variant c_Closure::t___clone() {
-  throw_fatal("Trying to clone an uncloneable object of class Closure");
-  return null;
-}
-
 bool c_Closure::php_sleep(Variant &ret) {
   ret = false;
   return true;

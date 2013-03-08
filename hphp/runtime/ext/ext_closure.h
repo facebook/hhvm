@@ -46,7 +46,6 @@ class c_Closure : public ExtObjectData {
   public: ~c_Closure();
   public: void t___construct();
   public: Variant t___invoke(int _argc, CArrRef _argv = null_array);
-  public: Variant t___clone();
 protected:
   virtual bool php_sleep(Variant &ret);
 };

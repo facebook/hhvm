@@ -122,14 +122,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => '__clone',
-    'return' => array(
-      'type'   => Variant,
-    ),
-  ));
-
 EndClass();
 
 BeginClass(

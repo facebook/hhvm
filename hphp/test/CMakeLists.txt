@@ -10,6 +10,8 @@ auto_sources(files "*.cpp" "")
 list(APPEND CXX_SOURCES ${files})
 list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/genCmpTest.cpp")
 list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/process_init.cpp")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/externals_stubs.cpp")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/global_variables.cpp")
 
 add_definitions(-DHPHPI_PATH="hphpi/hphpi")
 

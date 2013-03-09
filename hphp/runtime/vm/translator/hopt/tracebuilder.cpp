@@ -167,8 +167,8 @@ bool TraceBuilder::isValueAvailable(SSATmp* tmp) const {
 
     if (srcOpcode == LdThis) return true;
 
-    if (srcOpcode == IncRef || srcOpcode == Mov) {
-      tmp = srcInstr->getSrc(0);
+    if (srcInstr->isPassthrough()) {
+      tmp = srcInstr->getPassthroughValue();
     } else {
       return false;
     }

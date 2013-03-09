@@ -431,6 +431,7 @@ private:
     void emitSetOpNewElem();
     void emitIncDecNewElem();
     void emitBindNewElem();
+    void emitSimpleArraySet(SSATmp* key, SSATmp* value);
 
     // Misc Helpers
     void numberStackInputs();
@@ -440,6 +441,7 @@ private:
     SSATmp* checkInitProp(SSATmp* baseAsObj, SSATmp* propAddr, int propOffset,
                           bool warn, bool define);
 
+    bool isSimpleArraySet();
     bool generateMVal() const;
     bool needFirstRatchet() const;
     bool needFinalRatchet() const;

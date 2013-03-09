@@ -216,7 +216,6 @@ HhbcTranslator::VectorTranslator::VectorTranslator(
 }
 
 void HhbcTranslator::VectorTranslator::emit() {
-  PUNT_WITH_TX64(VectorTranslator);
   // Assign stack slots to our stack inputs
   numberStackInputs();
   // Emit the base and every intermediate op
@@ -414,6 +413,12 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
         m_base = m_tb.gen(LdRef, Type::Obj, failedRef, m_base);
       }
       assert(m_base->isA(Type::Obj));
+    } else if (isSimpleArraySet()) {
+      m_base = m_tb.genLdLoc(loc);
+      if (baseType.isBoxed()) {
+        m_base = m_tb.gen(LdRef, Type::Arr, failedRef, m_base);
+      }
+      assert(m_base->isA(Type::Arr));
     } else {
       // Everything else is passed by reference. We don't have to worry about
       // unboxing here, since all the generic helpers understand boxed bases.
@@ -428,6 +433,22 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
       PUNT(emitBaseLCR-R);
     }
   }
+}
+
+// Is the current instruction a 1-element vector, with an Arr base and Int or
+// Str key?
+bool HhbcTranslator::VectorTranslator::isSimpleArraySet() {
+  SSATmp* base = getInput(m_mii.valCount());
+  LocationCode loc = m_ni.immVec.locationCode();
+  if (m_ni.mInstrOp() == OpSetM &&
+      (loc == LL || loc == LC || loc == LR) &&
+      m_ni.immVecM.size() == 1 &&
+      mcodeMaybeArrayKey(m_ni.immVecM[0]) &&
+      base->getType().subtypeOfAny(Type::Arr, Type::BoxedArr)) {
+    SSATmp* key = getInput(m_mii.valCount() + 1);
+    return key->isA(Type::Int) || key->isA(Type::Str);
+  }
+  return false;
 }
 
 void HhbcTranslator::VectorTranslator::emitBaseH() {
@@ -1167,13 +1188,118 @@ static TypedValue nm(TypedValue* base, TypedValue key, Cell val) {      \
 HELPER_TABLE(ELEM)
 #undef ELEM
 
+static inline ArrayData* checkedSet(ArrayData* a, StringData* key,
+                                    CVarRef value, bool copy) {
+  int64_t i;
+  return UNLIKELY(key->isStrictlyInteger(i)) ? a->set(i, value, copy)
+                                             : a->set(key, value, copy);
+}
+
+static inline ArrayData* checkedSet(ArrayData* a, int64_t key,
+                                    CVarRef value, bool copy) {
+  not_reached();
+}
+
+template<KeyType keyType, bool checkForInt, bool setRef>
+static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
+  ArrayData* a, typename KeyTypeTraits<keyType>::rawType key,
+  CVarRef value, RefData* ref) {
+  static_assert(keyType != AnyKey, "AnyKey is not supported in arraySetMImpl");
+  const bool copy = a->getCount() > 1;
+  ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
+                               : a->set(key, value, copy);
+
+  return arrayRefShuffle<setRef>(a, ret, setRef ? ref->tv() : nullptr);
+}
+
+#define HELPER_TABLE_ARRAY_SET(m)                                       \
+  /* name        hot          keyType  checkForInt setRef */            \
+  m(arraySetS,   HOT_FUNC_VM, StrKey,   false,     false)               \
+  m(arraySetSC,  HOT_FUNC_VM, StrKey,    true,     false)               \
+  m(arraySetI,   HOT_FUNC_VM, IntKey,   false,     false)               \
+  m(arraySetSR,  ,            StrKey,   false,      true)               \
+  m(arraySetSiR, ,            StrKey,    true,      true)               \
+  m(arraySetIR,  ,            IntKey,   false,      true)
+
+#define ELEM(nm, hot, keyType, checkForInt, setRef)                     \
+hot                                                                     \
+static typename ShuffleReturn<setRef>::return_type                      \
+nm(ArrayData* a, TypedValue* key, TypedValue value, RefData* ref) {     \
+  return arraySetImpl<keyType, checkForInt, setRef>(                    \
+    a, keyAsRaw<keyType>(key), tvAsCVarRef(&value), ref);               \
+}
+HELPER_TABLE_ARRAY_SET(ELEM)
+#undef ELEM
+
+void HhbcTranslator::VectorTranslator::emitSimpleArraySet(SSATmp* key,
+                                                          SSATmp* value) {
+  assert(key->getType().notBoxed());
+  assert(value->getType().notBoxed());
+  bool checkForInt = false;
+  KeyType keyType;
+  if (key->isA(Type::Int)) {
+    keyType = IntKey;
+  } else {
+    assert(key->isA(Type::Str));
+    keyType = StrKey;
+    if (key->isConst()) {
+      int64_t i;
+      if (key->getValStr()->isStrictlyInteger(i)) {
+        keyType = IntKey;
+        key = cns(i);
+      }
+    } else {
+      checkForInt = true;
+    }
+  }
+  const DynLocation& base = *m_ni.inputs[m_mii.valCount()];
+  bool setRef = base.outerType() == KindOfRef;
+  typedef ArrayData* (*OpFunc)(ArrayData*, TypedValue*, TypedValue, RefData*);
+  BUILD_OPTAB_ARG(HELPER_TABLE_ARRAY_SET(FILL_ROW_HOT),
+                  keyType, checkForInt, setRef);
+
+  // Don't spillStack below because the helper can't throw. It may reenter to
+  // call destructors so it has a sync point in nativecalls.cpp, but exceptions
+  // are swallowed at destructor boundaries right now: #2182869.
+  if (setRef) {
+    SSATmp* box;
+    if (base.location.space == Location::Local) {
+      box = m_tb.genLdLoc(base.location.offset);
+    } else if (base.location.space == Location::Stack) {
+      not_implemented();
+    } else {
+      not_reached();
+    }
+
+    m_tb.gen(ArraySetRef, cns((TCA)opFunc), m_base, key, value, box);
+  } else {
+    SSATmp* newArr = m_tb.gen(ArraySet, cns((TCA)opFunc), m_base, key, value);
+
+    // Update the base's value with the new array
+    if (base.location.space == Location::Local) {
+      m_tb.genStLoc(base.location.offset, newArr, false, false, nullptr);
+    } else if (base.location.space == Location::Stack) {
+      not_implemented();
+    } else {
+      not_reached();
+    }
+  }
+
+  m_result = value;
+}
+
 void HhbcTranslator::VectorTranslator::emitSetElem() {
   const int kValIdx = 0;
   SSATmp* value = getInput(kValIdx);
+  SSATmp* key = getInput(m_iInd);
+
+  if (isSimpleArraySet()) {
+    emitSimpleArraySet(key, value);
+    return;
+  }
 
   // Emit the appropriate helper call.
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, Cell);
-  SSATmp* key = getInput(m_iInd);
   BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed());
   m_ht.spillStack();
   SSATmp* result = m_tb.gen(SetElem, cns((TCA)opFunc), ptr(m_base), key, value);
@@ -1181,6 +1307,7 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
   m_result = ve.valTypeChanged ? result : value;
 }
 #undef HELPER_TABLE
+#undef HELPER_TABLE_ARRAY_SET
 
 void HhbcTranslator::VectorTranslator::emitSetOpElem() {
   SPUNT(__func__);

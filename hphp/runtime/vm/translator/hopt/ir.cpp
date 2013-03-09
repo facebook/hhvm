@@ -21,6 +21,7 @@
 #include <forward_list>
 #include <sstream>
 #include <type_traits>
+#include <boost/algorithm/string.hpp>
 
 #include "folly/Format.h"
 #include "folly/Traits.h"
@@ -380,6 +381,10 @@ bool IRInstruction::consumesReference(int srcNo) const {
     // StProp[NT]|StMem[NT] <base>, <offset>, <value>
     return srcNo == 2;
   }
+  if (m_op == ArraySet || m_op == ArraySetRef) {
+    // Only consumes the reference to its input array
+    return srcNo == 1;
+  }
   return true;
 }
 
@@ -444,9 +449,15 @@ bool IRInstruction::killsSources() const {
 bool IRInstruction::killsSource(int idx) const {
   if (!killsSources()) return false;
 
-  assert(m_op == DecRef);
-  assert(idx == 0);
-  return true;
+  if (m_op == DecRef) {
+    assert(idx == 0);
+    return true;
+  }
+  if (m_op == ArraySet || m_op == ArraySetRef) {
+    // Kills its input array
+    return idx == 1;
+  }
+  not_reached();
 }
 
 bool IRInstruction::mayReenterHelper() const {
@@ -819,8 +830,12 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
     auto ne = c->as<const NamedEntity*>();
     os << "NamedEntity(" << ne << ")";
   } else if (t == Type::TCA) {
-    void* vp = c->as<TCA>();
-    os << folly::format("TCA: {}", vp);
+    TCA tca = c->as<TCA>();
+    char* nameRaw = Util::getNativeFunctionName(tca);
+    SCOPE_EXIT { free(nameRaw); };
+    std::string name(nameRaw);
+    boost::algorithm::trim(name);
+    os << folly::format("TCA: {}({})", tca, name);
   } else if (t == Type::None) {
     os << "None:" << c->as<int64_t>();
   } else if (t.isPtr()) {

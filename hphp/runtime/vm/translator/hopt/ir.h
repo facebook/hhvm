@@ -391,6 +391,15 @@ O(CGetElem,                    D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
+O(ArraySet,                     D(Arr), C(TCA)                                \
+                                          S(Arr)                              \
+                                          S(Int,Str)                          \
+                                          S(Cell),    E|N|PRc|CRc|Refs|Mem|K) \
+O(ArraySetRef,                      ND, C(TCA)                                \
+                                          S(Arr)                              \
+                                          S(Int,Str)                          \
+                                          S(Cell)                             \
+                                          S(BoxedArr),E|N|PRc|CRc|Refs|Mem|K) \
 O(SetElem,                     DVector, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \

@@ -80,10 +80,10 @@ inline unsigned buildBitmask(T c, Args... args) {
 }
 
 // FILL_ROW and BUILD_OPTAB* build up the static table of function pointers
-#define FILL_ROW(nm, ...) do {                          \
-    OpFunc* dest = &optab[buildBitmask(__VA_ARGS__)];   \
-    assert(*dest == nullptr);                           \
-    *dest = nm;                                         \
+#define FILL_ROW(nm, ...) do {                                  \
+    OpFunc* dest = &optab[buildBitmask(__VA_ARGS__)];           \
+    assert(*dest == nullptr);                                   \
+    *dest = (OpFunc)nm;                                         \
   } while (false);
 #define FILL_ROW_HOT(nm, hot, ...) FILL_ROW(nm, __VA_ARGS__)
 

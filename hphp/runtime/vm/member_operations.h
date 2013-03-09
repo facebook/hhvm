@@ -524,6 +524,46 @@ static inline void SetElemNumberish(Cell* value) {
   }
 }
 
+/*
+ * arrayRefShuffle is used by SetElemArray and by helpers for translated code
+ * to do the necessary bookkeeping after mutating an array. The helpers return
+ * an ArrayData* if and only if the base array was not in a php reference. If
+ * the base array was in a reference, that reference may no longer refer to an
+ * array after the set operation, so the helpers don't return anything.
+ */
+template<bool setRef> struct ShuffleReturn {};
+template<> struct ShuffleReturn<true> {
+  typedef void return_type;
+  static void do_return(ArrayData* a) {}
+};
+template<> struct ShuffleReturn<false> {
+  typedef ArrayData* return_type;
+  static ArrayData* do_return(ArrayData* a) { return a; }
+};
+
+template<bool setRef> inline
+typename ShuffleReturn<setRef>::return_type
+arrayRefShuffle(ArrayData* oldData, ArrayData* newData, TypedValue* base) {
+  if (newData == nullptr) {
+    return ShuffleReturn<setRef>::do_return(oldData);
+  }
+
+  newData->incRefCount();
+  if (setRef) {
+    if (base->m_type == KindOfArray && base->m_data.parr == oldData) {
+      base->m_data.parr = newData;
+    } else {
+      // The base was in a reference that was overwritten by the set operation,
+      // so we don't want to store the new ArrayData to it. oldData has already
+      // been decrefed and there's nobody left to care about newData, so decref
+      // newData instead of oldData.
+      oldData = newData;
+    }
+  }
+  decRefArr(oldData);
+  return ShuffleReturn<setRef>::do_return(newData);
+}
+
 static inline ArrayData* SetElemArrayRawKey(ArrayData* a,
                                             int64_t key,
                                             Cell* value,
@@ -570,11 +610,7 @@ static inline void SetElemArray(TypedValue* base, TypedValue* key,
     }
   }
 
-  if (newData != nullptr && newData != a) {
-    newData->incRefCount();
-    decRefArr(a);
-    base->m_data.parr = newData;
-  }
+  arrayRefShuffle<true>(a, newData, base);
 }
 // SetElem() leaves the result in 'value', rather than returning it as in
 // SetOpElem(), because doing so avoids a dup operation that SetOpElem() can't

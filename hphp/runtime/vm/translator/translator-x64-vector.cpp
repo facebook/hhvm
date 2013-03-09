@@ -3153,7 +3153,7 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
 
   recordReentrantCall(i);
   // If we did not used boxed form, we need to tell the register allocator
-  // to associate rax with arrLoc
+  // to associate rax with arrLoc.
   if (!useBoxedForm) {
     // The array_setm helper returns the up-to-date array pointer in rax.
     // Therefore, we can bind rax to arrLoc and mark it as dirty.

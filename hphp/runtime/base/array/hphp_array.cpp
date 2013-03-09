@@ -30,6 +30,7 @@
 #include <util/trace.h>
 #include <util/util.h>
 #include <runtime/base/execution_context.h>
+#include <runtime/vm/member_operations.h>
 #include <runtime/vm/stats.h>
 
 // If PEDANTIC is defined, extra checks are performed to ensure correct
@@ -1762,26 +1763,13 @@ ArrayData* nvCheckedSet(ArrayData* a, StringData* key, TypedValue* value,
          a->nvSet(key, value, copy);
 }
 
-ArrayData* nvCheckedSet(ArrayData* a, int64_t key, TypedValue* value, bool copy) {
+ArrayData* nvCheckedSet(ArrayData* a, int64_t key, TypedValue* value,
+                        bool copy) {
   return a->nvSet(key, value, copy);
 }
 
 void setmDecRef(int64_t i) { /* nop */ }
 void setmDecRef(StringData* sd) { decRefStr(sd); }
-
-static inline ArrayData*
-array_mutate_post(Cell *cell, ArrayData* old, ArrayData* retval) {
-  if (nullptr == retval) {
-    return old;
-  }
-  retval->incRefCount();
-  // TODO Task #1970153: It would be great if there were nvSet()
-  // methods that didn't bump up the refcount so that we didn't
-  // have to decrement it here
-  decRefArr(old);
-  if (cell) cell->m_data.parr = retval;
-  return retval;
-}
 
 template<typename Key, bool DecRefValue, bool CheckInt, bool DecRefKey>
 static inline
@@ -1794,8 +1782,17 @@ array_setm(TypedValue* cell, ArrayData* ad, Key key, TypedValue* value) {
   retval = CheckInt ? nvCheckedSet(ad, key, value, copy) :
            ad->nvSet(key, value, copy);
   if (DecRefKey) setmDecRef(key);
+
+  // TODO Task #1970153: It would be great if there were nvSet()
+  // methods that didn't bump up the refcount so that we didn't
+  // have to decrement it here
   if (DecRefValue) tvRefcountedDecRef(value);
-  return array_mutate_post(cell, ad, retval);
+  if (cell == nullptr) {
+    return arrayRefShuffle<false>(ad, retval, cell);
+  } else {
+    arrayRefShuffle<true>(ad, retval, cell);
+    return nullptr;
+  }
 }
 
 /**

@@ -268,8 +268,10 @@ private:
       case SetProp:
       case SetElem:
       case SetNewElem:
-      case ElemDX:      return true;
-      default:          return false;
+      case ElemDX:
+        return true;
+      default:
+        return false;
     }
   }
 

@@ -909,13 +909,6 @@ class Variant : private VariantBase {
   Variant o_setPublicRef(CStrRef s, CVarRef v);
   Variant &o_lval(CStrRef propName, CVarRef tmpForGet,
                   CStrRef context = null_string);
-  Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
-                       CStrRef context = null_string);
-  Variant o_argval(bool byRef, CStrRef propName, bool error = true,
-      CStrRef context = null_string) const;
-  bool o_empty(CStrRef propName, CStrRef context = null_string) const;
-  bool o_isset(CStrRef propName, CStrRef context = null_string) const;
-  void o_unset(CStrRef propName, CStrRef context = null_string);
 
   Variant o_invoke(CStrRef s, CArrRef params, int64_t hash = -1);
   Variant o_root_invoke(CStrRef s, CArrRef params, int64_t hash = -1);
@@ -969,22 +962,6 @@ class Variant : private VariantBase {
 
   CVarRef appendRef(CVarRef v);
   CVarRef append(RefResult v) { return appendRef(variant(v)); }
-
-  CVarRef setOpEqual(int op, bool key, CVarRef v);
-  CVarRef setOpEqual(int op, int key, CVarRef v) {
-    return setOpEqual(op, (int64_t)key, v);
-  }
-  CVarRef setOpEqual(int op, int64_t key, CVarRef v);
-  CVarRef setOpEqual(int op, double key, CVarRef v);
-  CVarRef setOpEqual(int op, litstr  key, CVarRef v, bool isString = false) {
-    return setOpEqual(op, String(key), v, isString);
-  }
-  CVarRef setOpEqual(int op, CStrRef key, CVarRef v, bool isString = false);
-  CVarRef setOpEqual(int op, CVarRef key, CVarRef v);
-  CVarRef appendOpEqual(int op, CVarRef v);
-
-  template<typename T, int op>
-  T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
 
   void remove(bool    key) { removeImpl(key);}
   void remove(int     key) { removeImpl((int64_t)key);}
@@ -1479,11 +1456,6 @@ inline VRefParam directRef(CVarRef v) {
 */
 class VariantStrongBind { private: Variant m_var; };
 class VariantWithRefBind { private: Variant m_var; };
-
-template<int op> class AssignOp {
-public:
-  static Variant assign(Variant &var, CVarRef val);
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 // VarNR

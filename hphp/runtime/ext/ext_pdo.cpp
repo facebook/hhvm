@@ -26,7 +26,6 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/macros.h>
-#include <runtime/eval/eval.h>
 
 #include <system/lib/systemlib.h>
 

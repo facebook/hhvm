@@ -146,7 +146,6 @@ class ObjectData : public CountableNF {
    * false for classes that are descendents of ResourceData.
    */
   bool o_instanceof(CStrRef s) const;
-  virtual ObjectData *getRedeclaredParent() const { return 0; }
 
   // class info
   CStrRef o_getClassName() const;
@@ -162,15 +161,16 @@ class ObjectData : public CountableNF {
   virtual int64_t  o_toInt64() const;
   virtual double o_toDouble()  const { return o_toInt64();}
 
-  void setDummy();
-
-  virtual void init() {}
-  virtual void destruct();
+  void destruct();
 
   // properties
   virtual Array o_toArray() const;
-  virtual Array o_toIterArray(CStrRef context, bool getRef = false);
-  virtual Array o_getDynamicProperties() const;
+  Array o_toIterArray(CStrRef context, bool getRef = false);
+
+  Array o_getDynamicProperties() const {
+    return o_properties;
+  }
+
   Variant *o_realProp(CStrRef s, int flags,
                       CStrRef context = null_string) const;
   void *o_realPropTyped(CStrRef s, int flags,
@@ -182,7 +182,6 @@ class ObjectData : public CountableNF {
   Variant o_getPublic(CStrRef s, bool error = true);
   Variant o_getUnchecked(CStrRef s, CStrRef context = null_string);
 
-  Variant o_i_set(CStrRef s, CVarRef v);
   Variant o_i_setPublicWithRef(CStrRef s, CVarRef v);
 
   Variant o_set(CStrRef s, CVarRef v);
@@ -195,36 +194,22 @@ class ObjectData : public CountableNF {
   Variant o_setPublic(CStrRef s, CVarRef v);
   Variant o_setPublic(CStrRef s, RefResult v);
   Variant o_setPublicRef(CStrRef s, CVarRef v);
-  Variant o_setPublicWithRef(CStrRef s, CVarRef v);
 
   Variant &o_lval(CStrRef s, CVarRef tmpForGet, CStrRef context = null_string);
-  Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
-                       CStrRef context = null_string) {
-    return o_lval(s, tmpForGet, context);
-  }
   Variant *o_weakLval(CStrRef s, CStrRef context = null_string);
 
   virtual void o_setArray(CArrRef properties);
 
   virtual void o_getArray(Array &props, bool pubOnly = false) const;
-  void o_set(const Array properties);
-  Variant o_argval(bool byRef, CStrRef s, bool error = true,
-      CStrRef context = null_string);
 
-  virtual Variant o_getError(CStrRef prop, CStrRef context);
-  virtual Variant o_setError(CStrRef prop, CStrRef context);
+  Variant o_getError(CStrRef prop, CStrRef context);
+  Variant o_setError(CStrRef prop, CStrRef context);
   /**
    * This is different from o_exists(), which is isset() semantics. This one
    * is property_exists() semantics. ie, accessibility is ignored, and declared
    * but unset properties still return true.
    */
   bool o_propExists(CStrRef s, CStrRef context = null_string);
-
-  /**
-   * This is different from o_exists(), which is isset() semantics; this one
-   * returns true even if the property is set to null.
-   */
-  bool o_propForIteration(CStrRef s, CStrRef context = null_string);
 
   static Object FromArray(ArrayData *properties);
 
@@ -241,16 +226,13 @@ class ObjectData : public CountableNF {
                             INVOKE_FEW_ARGS_DECL_ARGS);
 
   // misc
-  Variant o_throw_fatal(const char *msg);
   void serialize(VariableSerializer *serializer) const;
   virtual void serializeImpl(VariableSerializer *serializer) const;
   bool hasInternalReference(PointerSet &vars, bool ds = false) const;
   virtual void dump() const;
   virtual ObjectData *clone();
 
-  bool o_isset(CStrRef prop, CStrRef context = null_string);
-  bool o_empty(CStrRef prop, CStrRef context = null_string);
-  void o_unset(CStrRef prop, CStrRef context = null_string);
+  Variant offsetGet(Variant key);
 
   // magic methods
   // __construct is handled in a special way
@@ -259,7 +241,6 @@ class ObjectData : public CountableNF {
   virtual Variant t___set(Variant v_name, Variant v_value);
   virtual Variant t___get(Variant v_name);
   virtual Variant *___lval(Variant v_name);
-  virtual Variant &___offsetget_lval(Variant key);
   virtual bool t___isset(Variant v_name);
   virtual Variant t___unset(Variant v_name);
   virtual Variant t___sleep();
@@ -267,13 +248,10 @@ class ObjectData : public CountableNF {
   virtual String t___tostring();
   virtual Variant t___clone();
 
-  template<typename T, int op>
-  T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
-
   static int GetMaxId() ATTRIBUTE_COLD;
  protected:
   virtual bool php_sleep(Variant &ret);
-public:
+ public:
   CArrRef getProperties() const { return o_properties; }
   void initProperties(int nProp);
  private:
@@ -306,9 +284,6 @@ public:
  protected:
   ArrNR         o_properties;    // dynamic properties (VM and hphpc)
   int           o_id;            // a numeric identifier of this object
-
- protected:
-  void          cloneDynamic(ObjectData *orig);
 
  private:
   static void compileTimeAssertions() {

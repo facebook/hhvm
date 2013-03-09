@@ -23,7 +23,6 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/execution_context.h>
 #include <runtime/base/strings.h>
-#include <runtime/eval/eval.h>
 #include <runtime/eval/runtime/file_repository.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/ext/ext_process.h>
@@ -519,12 +518,12 @@ void check_collection_cast_to_array() {
   }
 }
 
-Object create_object(CStrRef s, CArrRef params, bool init /* = true */,
-                     ObjectData *root /* = NULL */) {
-  assert_not_implemented(root == nullptr);
-  const StringData* className = StringData::GetStaticString(s.get());
-  Object o = g_vmContext->createObject((StringData*)className, params, init);
-  return o;
+Object create_object_only(CStrRef s) {
+  return g_vmContext->createObjectOnly(s.get());
+}
+
+Object create_object(CStrRef s, CArrRef params, bool init /* = true */) {
+  return g_vmContext->createObject(s.get(), params, init);
 }
 
 /*

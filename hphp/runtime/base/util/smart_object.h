@@ -91,32 +91,6 @@ public:
   }
 };
 
-template <typename T>
-class SmartInterface : public Object {
-public:
-  SmartInterface() {}
-  SmartInterface(CObjRef obj) : Object(obj) { intf = init(m_px); }
-  SmartInterface(ObjectData *obj) : Object(obj) { intf = init(m_px); }
-  SmartInterface(CVarRef obj) : Object(obj.toObject().get()) {
-    intf = init(m_px);
-  }
-  T* operator->() const { return intf; }
-  CObjRef object() const { return *this; }
-private:
-  T *init(ObjectData *obj) const {
-    T *t = dynamic_cast<T*>(obj);
-    if (!t) {
-      if (ObjectData *parent = obj->getRedeclaredParent()) {
-        return init(parent);
-      }
-      throw InvalidObjectTypeException(m_px->o_getClassName());
-    }
-    return t;
-  }
-
-  T     *intf;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

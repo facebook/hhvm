@@ -164,40 +164,6 @@ Variant &Object::o_lval(CStrRef propName, CVarRef tmpForGet,
   return m_px->o_lval(propName, tmpForGet, context);
 }
 
-Variant &Object::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
-                             CStrRef context /* = null_string */) {
-  if (!m_px) {
-    return const_cast<Variant&>(tmpForGet);
-  }
-  return m_px->o_lval(propName, tmpForGet, context);
-}
-
-bool Object::o_isset(CStrRef propName,
-                     CStrRef context /* = null_string */) const {
-  if (!m_px) return false;
-  return m_px->o_isset(propName, context);
-}
-
-bool Object::o_empty(CStrRef propName,
-                     CStrRef context /* = null_string */) const {
-  if (!m_px) return true;
-  return m_px->o_empty(propName, context);
-}
-
-void Object::o_unset(CStrRef propName,
-                     CStrRef context /* = null_string */) const {
-  if (m_px) m_px->o_unset(propName, context);
-}
-
-Variant Object::o_argval(bool byRef, CStrRef propName,
-    bool error /* = true */, CStrRef context /* = null_string */) {
-  if (!byRef) {
-    return o_get(propName, error, context);
-  } else {
-    return strongBind(o_lval(propName, context));
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // output
 

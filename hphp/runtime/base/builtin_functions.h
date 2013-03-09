@@ -405,6 +405,9 @@ void check_collection_compare(ObjectData* obj);
 void check_collection_compare(ObjectData* obj1, ObjectData* obj2);
 void check_collection_cast_to_array();
 
+Object create_object_only(CStrRef s);
+Object create_object(CStrRef s, const Array &params, bool init = true);
+
 /**
  * Argument count handling.
  *   - When level is 2, it's from constructors that turn these into fatals

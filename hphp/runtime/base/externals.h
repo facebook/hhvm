@@ -52,20 +52,6 @@ extern Variant get_class_var_init(CStrRef s, const char *var);
  * Class/function meta info entirely encoded here as a const char * array.
  */
 extern const char *g_class_map[];
-#if 0
-extern const char *g_source_root;
-extern const char *g_source_info[];
-extern const char *g_source_cls2file[];
-extern const char *g_source_func2file[];
-extern const char *g_paramrtti_map[];
-#endif
-
-/**
- * Dynamically create an object.
- */
-Object create_object(CStrRef s, const Array &params,
-                     bool init = true, ObjectData *root = nullptr);
-extern Object create_object_only(CStrRef s, ObjectData *root = nullptr);
 
 /**
  * Returns a thread local global variable class pointer.

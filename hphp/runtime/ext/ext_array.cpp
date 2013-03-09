@@ -26,7 +26,6 @@
 #include <runtime/base/sort_flags.h>
 #include <runtime/vm/translator/translator.h>
 #include <runtime/vm/translator/translator-inline.h>
-#include <runtime/eval/eval.h>
 #include <runtime/base/array/hphp_array.h>
 #include <util/logger.h>
 

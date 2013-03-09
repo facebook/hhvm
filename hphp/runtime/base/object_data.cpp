@@ -25,6 +25,7 @@
 #include <runtime/ext/ext_closure.h>
 #include <runtime/ext/ext_continuation.h>
 #include <runtime/ext/ext_collection.h>
+#include <runtime/vm/class.h>
 
 #include <system/lib/systemlib.h>
 
@@ -66,13 +67,26 @@ bool ObjectData::instanceof(const HPHP::VM::Class* c) const {
 
 HOT_FUNC
 void ObjectData::destruct() {
+  if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
+    assert(RuntimeOption::EnableObjDestructCall);
+    g_vmContext->m_liveBCObjs.erase(this);
+  }
   if (!noDestruct()) {
     setNoDestruct();
-    CountableHelper h(this);
-    try {
-      t___destruct();
-    } catch (...) {
-      handle_destructor_exception();
+    if (auto meth = m_cls->getDtor()) {
+      // We raise the refcount around the call to __destruct(). This is to
+      // prevent the refcount from going to zero when the destructor returns.
+      CountableHelper h(this);
+      TypedValue retval;
+      tvWriteNull(&retval);
+      try {
+        // Call the destructor method
+        g_vmContext->invokeFunc(&retval, meth, null_array, this);
+      } catch (...) {
+        // Swallow any exceptions that escape the __destruct method
+        handle_destructor_exception();
+      }
+      tvRefcountedDecRef(&retval);
     }
   }
 }
@@ -405,14 +419,6 @@ Variant ObjectData::o_setPublicRef(CStrRef propName, CVarRef v) {
   return o_setPublicImpl<CVarStrongBind>(propName, strongBind(v), false);
 }
 
-Variant ObjectData::o_setPublicWithRef(CStrRef propName, CVarRef v) {
-  return o_setPublicImpl<CVarWithRefBind>(propName, withRefBind(v), false);
-}
-
-Variant ObjectData::o_i_set(CStrRef propName, CVarRef v) {
-  return o_setPublicImpl<CVarRef>(propName, v, true);
-}
-
 Variant ObjectData::o_i_setPublicWithRef(CStrRef propName, CVarRef v) {
   return o_setPublicImpl<CVarWithRefBind>(propName, withRefBind(v), true);
 }
@@ -437,15 +443,6 @@ void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
       CVarRef value = it.secondRef();
       props.lvalAt(key, AccessFlags::Key).setWithRef(value);
     }
-  }
-}
-
-Variant ObjectData::o_argval(bool byRef, CStrRef s,
-    bool error /* = true */, CStrRef context /* = null_string */) {
-  if (byRef) {
-    return strongBind(o_lval(s, context));
-  } else {
-    return o_get(s, error, context);
   }
 }
 
@@ -514,114 +511,81 @@ Array ObjectData::o_toArray() const {
 
 Array ObjectData::o_toIterArray(CStrRef context,
                                 bool getRef /* = false */) {
-  CStrRef object_class = o_getClassName();
-  const ClassInfo *classInfo = ClassInfo::FindClass(object_class);
-  const ClassInfo *contextClassInfo = nullptr;
-  int category;
-
-  if (!classInfo) {
-    return Array::Create();
+  size_t size = m_cls->m_declPropNumAccessible +
+                (o_properties.get() ? o_properties.get()->size() : 0);
+  HphpArray* retval = NEW(HphpArray)(size);
+  VM::Class* ctx = nullptr;
+  if (!context.empty()) {
+    ctx = VM::Unit::lookupClass(context.get());
   }
 
-  Array ret(Array::Create());
+  // Get all declared properties first, bottom-to-top in the inheritance
+  // hierarchy, in declaration order.
+  const VM::Class* klass = m_cls;
+  while (klass != nullptr) {
+    const VM::PreClass::Prop* props = klass->m_preClass->properties();
+    const size_t numProps = klass->m_preClass->numProperties();
 
-  // There are 3 cases:
-  // (1) called from standalone function (this_object == null) or
-  //  the object class is not related to the context class;
-  // (2) the object class is a subclass of the context class or vice versa.
-  // (3) the object class is the same as the context class
-  // For (1), only public properties of the object are accessible.
-  // For (2) and (3), the public/protected properties of the object are
-  // accessible;
-  // any property of the context class is also accessible unless it is
-  // overriden by the object class. (3) is really just an optimization.
-  if (context.empty()) { // null_string is also empty
-    category = 1;
-  } else {
-    contextClassInfo = ClassInfo::FindClass(context);
-    assert(contextClassInfo);
-    if (object_class->isame(context.get())) {
-      category = 3;
-    } else if (classInfo->derivesFrom(context, false) ||
-               contextClassInfo->derivesFrom(object_class, false)) {
-      category = 2;
-    } else {
-      category = 1;
-    }
-  }
-
-  ClassInfo::PropertyVec properties;
-  classInfo->getAllProperties(properties);
-  ClassInfo::PropertyMap contextProperties;
-  if (category == 2) {
-    contextClassInfo->getAllProperties(contextProperties);
-  }
-  Array dynamics = o_getDynamicProperties();
-  for (unsigned int i = 0; i < properties.size(); i++) {
-    ClassInfo::PropertyInfo *prop = properties[i];
-    if (prop->attribute & ClassInfo::IsStatic) continue;
-
-    bool visible = false;
-    switch (category) {
-    case 1:
-      visible = (prop->attribute & ClassInfo::IsPublic);
-      break;
-    case 2:
-      if ((prop->attribute & ClassInfo::IsPrivate) == 0) {
-        visible = true;
-      } else {
-        ClassInfo::PropertyMap::const_iterator iterProp =
-          contextProperties.find(prop->name);
-        if (iterProp != contextProperties.end() &&
-            iterProp->second->owner == contextClassInfo) {
-          visible = true;
+    for (size_t i = 0; i < numProps; ++i) {
+      auto key = const_cast<StringData*>(props[i].name());
+      bool visible, accessible, unset;
+      TypedValue* val = ((VM::Instance*)this)->getProp(
+        ctx, key, visible, accessible, unset);
+      if (accessible && val->m_type != KindOfUninit && !unset) {
+        if (getRef) {
+          if (val->m_type != KindOfRef) {
+            tvBox(val);
+          }
+          retval->nvBind(key, val);
         } else {
-          visible = false;
+          retval->nvSet(key, val, false);
         }
       }
-      break;
-    case 3:
-      if ((prop->attribute & ClassInfo::IsPrivate) == 0 ||
-          prop->owner == classInfo) {
-        visible = true;
-      }
-      break;
-    default:
-      assert(false);
     }
-    if (visible && o_propForIteration(prop->name, context)) {
-      if (getRef) {
-        Variant tmp;
-        Variant &ov = o_lval(prop->name, tmp, context);
-        Variant &av = ret.lvalAt(prop->name, AccessFlags::Key);
-        av.assignRef(ov);
-      } else {
-        ret.set(prop->name, o_getUnchecked(prop->name,
-                                           prop->owner->getName()));
-      }
-    }
-    dynamics.remove(prop->name);
+    klass = klass->m_parent.get();
   }
-  if (!dynamics.empty()) {
-    if (getRef) {
-      for (ArrayIter iter(o_getDynamicProperties()); iter; ++iter) {
-        // Object property names are always strings.
-        String key = iter.first().toString();
-        if (dynamics->exists(key)) {
-          CVarRef value = iter.secondRef();
-          Variant &av = ret.lvalAt(key, AccessFlags::Key);
-          av.assignRef(value);
-        }
-      }
-    } else {
-      ret += dynamics;
-    }
-  }
-  return ret;
-}
 
-Array ObjectData::o_getDynamicProperties() const {
-  return o_properties;
+  // Now get dynamic properties.
+  if (o_properties.get()) {
+    ssize_t iter = o_properties.get()->iter_begin();
+    while (iter != HphpArray::ElmIndEmpty) {
+      TypedValue key;
+      static_cast<HphpArray*>(o_properties.get())->nvGetKey(&key, iter);
+      iter = o_properties.get()->iter_advance(iter);
+
+      // You can get this if you cast an array to object. These properties must
+      // be dynamic because you can't declare a property with a non-string name.
+      if (UNLIKELY(!IS_STRING_TYPE(key.m_type))) {
+        assert(key.m_type == KindOfInt64);
+        TypedValue* val =
+          static_cast<HphpArray*>(o_properties.get())->nvGet(key.m_data.num);
+        if (getRef) {
+          if (val->m_type != KindOfRef) {
+            tvBox(val);
+          }
+          retval->nvBind(key.m_data.num, val);
+        } else {
+          retval->nvSet(key.m_data.num, val, false);
+        }
+        continue;
+      }
+
+      StringData* strKey = key.m_data.pstr;
+      TypedValue* val =
+        static_cast<HphpArray*>(o_properties.get())->nvGet(strKey);
+      if (getRef) {
+        if (val->m_type != KindOfRef) {
+          tvBox(val);
+        }
+        retval->nvBind(strKey, val);
+      } else {
+        retval->nvSet(strKey, val, false);
+      }
+      decRefStr(strKey);
+    }
+  }
+
+  return Array(retval);
 }
 
 Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
@@ -745,11 +709,6 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
   g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
                           nullptr, invName);
   return ret;
-}
-
-Variant ObjectData::o_throw_fatal(const char *msg) {
-  throw_fatal(msg);
-  return null;
 }
 
 bool ObjectData::php_sleep(Variant &ret) {
@@ -900,10 +859,6 @@ ObjectData *ObjectData::clone() {
   return instance->cloneImpl();
 }
 
-void ObjectData::cloneDynamic(ObjectData *orig) {
-  o_properties.asArray() = orig->o_properties;
-}
-
 Variant ObjectData::o_getError(CStrRef prop, CStrRef context) {
   raise_notice("Undefined property: %s::$%s", o_getClassName().data(),
                prop.data());
@@ -912,52 +867,6 @@ Variant ObjectData::o_getError(CStrRef prop, CStrRef context) {
 
 Variant ObjectData::o_setError(CStrRef prop, CStrRef context) {
   return null;
-}
-
-bool ObjectData::o_isset(CStrRef prop, CStrRef context) {
-  if (Variant *t = o_realProp(prop, 0, context)) {
-    if (t->isInitialized()) {
-      return !t->isNull();
-    }
-  }
-  if (getAttribute(UseIsset)) {
-    AttributeClearer a(UseIsset, this);
-    return t___isset(prop);
-  }
-  return false;
-}
-
-bool ObjectData::o_empty(CStrRef prop, CStrRef context) {
-  if (Variant *t = o_realProp(prop, 0, context)) {
-    if (t->isInitialized()) {
-      return empty(*t);
-    }
-  }
-  if (getAttribute(UseIsset)) {
-    {
-      AttributeClearer a(UseIsset, this);
-      if (!t___isset(prop) || !getAttribute(UseGet)) {
-        return true;
-      }
-    }
-    AttributeClearer a(UseGet, this);
-    return empty(t___get(prop));
-  }
-  return true;
-}
-
-void ObjectData::o_unset(CStrRef prop, CStrRef context) {
-  if (Variant *t = o_realProp(prop,
-                              RealPropWrite|RealPropNoDynamic, context)) {
-    unset(*t);
-  } else if (o_properties.asArray().exists(prop, true)) {
-    o_properties.asArray().weakRemove(prop, true);
-  } else if (UNLIKELY(!*prop.data())) {
-    throw_invalid_property_name(prop);
-  } else if (getAttribute(UseUnset)) {
-    AttributeClearer a(UseUnset, this);
-    t___unset(prop);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -988,17 +897,17 @@ Variant *ObjectData::___lval(Variant v_name) {
   return nullptr;
 }
 
-Variant& ObjectData::___offsetget_lval(Variant key) {
-  if (isCollection()) {
-    return collectionOffsetGet(this, key);
-  } else {
-    if (!instanceof(SystemLib::s_ArrayAccessClass)) {
-      throw InvalidOperandException("not ArrayAccess objects");
-    }
-    Variant &v = get_system_globals()->__lvalProxy;
-    v = o_invoke_few_args(s_offsetGet, -1, 1, key);
-    return v;
+Variant ObjectData::offsetGet(Variant key) {
+  assert(instanceof(SystemLib::s_ArrayAccessClass));
+  const VM::Func* method = m_cls->lookupMethod(s_offsetGet.get());
+  assert(method);
+  if (!method) {
+    return null;
   }
+  Variant v;
+  g_vmContext->invokeFunc((TypedValue*)(&v), method,
+                          CREATE_VECTOR1(key), this);
+  return v;
 }
 
 bool ObjectData::t___isset(Variant v_name) {
@@ -1013,12 +922,6 @@ Variant ObjectData::t___unset(Variant v_name) {
 bool ObjectData::o_propExists(CStrRef s, CStrRef context /* = null_string */) {
   Variant *t = o_realProp(s, RealPropExist, context);
   return t;
-}
-
-bool ObjectData::o_propForIteration(CStrRef s,
-                                    CStrRef context /* = null_string */) {
-  Variant *t = o_realProp(s, 0, context);
-  return t && t->isInitialized();
 }
 
 Variant ObjectData::t___sleep() {

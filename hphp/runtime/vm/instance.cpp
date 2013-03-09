@@ -81,26 +81,6 @@ Instance* Instance::newInstanceRaw(Class* cls, int idx) {
   return obj;
 }
 
-void Instance::destructHard(const Func* meth) {
-  static ArrayData* args =
-    ArrayData::GetScalarArray(HphpArray::GetStaticEmptyArray());
-  TypedValue retval;
-  tvWriteNull(&retval);
-  try {
-    // Call the destructor method
-    g_vmContext->invokeFunc(&retval, meth, CArrRef(args), this);
-  } catch (...) {
-    // Swallow any exceptions that escape the __destruct method
-    handle_destructor_exception();
-  }
-  tvRefcountedDecRef(&retval);
-}
-
-void Instance::forgetSweepable() {
-  assert(RuntimeOption::EnableObjDestructCall);
-  g_vmContext->m_liveBCObjs.erase(this);
-}
-
 void Instance::invokeUserMethod(TypedValue* retval, const Func* method,
                                 CArrRef params) {
   g_vmContext->invokeFunc(retval, method, params, this);
@@ -592,83 +572,6 @@ void Instance::raiseUndefProp(const StringData* key) {
                m_cls->name()->data(), key->data());
 }
 
-Array Instance::o_toIterArray(CStrRef context, bool getRef /* = false */) {
-  int size = m_cls->m_declPropNumAccessible +
-               (o_properties.get() != nullptr ? o_properties.get()->size() : 0);
-  HphpArray* retval = NEW(HphpArray)(size);
-  Class* ctx = nullptr;
-  if (!context.empty()) {
-    ctx = Unit::lookupClass(context.get());
-  }
-
-  // Get all declared properties first, bottom-to-top in the inheritance
-  // hierarchy, in declaration order.
-  const Class* klass = m_cls;
-  while (klass != nullptr) {
-    const PreClass::Prop* props = klass->m_preClass->properties();
-    const size_t numProps = klass->m_preClass->numProperties();
-
-    for (size_t i = 0; i < numProps; ++i) {
-      StringData* key = const_cast<StringData*>(props[i].name());
-      bool visible, accessible, unset;
-      TypedValue* val = getProp(ctx, key, visible, accessible, unset);
-      if (accessible && val->m_type != KindOfUninit && !unset) {
-        if (getRef) {
-          if (val->m_type != KindOfRef) {
-            tvBox(val);
-          }
-          retval->nvBind(key, val);
-        } else {
-          retval->nvSet(key, val, false);
-        }
-      }
-    }
-    klass = klass->m_parent.get();
-  }
-
-  // Now get dynamic properties.
-  if (o_properties.get() != nullptr) {
-    ssize_t iter = o_properties.get()->iter_begin();
-    while (iter != HphpArray::ElmIndEmpty) {
-      TypedValue key;
-      static_cast<HphpArray*>(o_properties.get())->nvGetKey(&key, iter);
-      iter = o_properties.get()->iter_advance(iter);
-
-      // You can get this if you cast an array to object. These properties must
-      // be dynamic because you can't declare a property with a non-string name.
-      if (UNLIKELY(!IS_STRING_TYPE(key.m_type))) {
-        assert(key.m_type == KindOfInt64);
-        TypedValue* val =
-          static_cast<HphpArray*>(o_properties.get())->nvGet(key.m_data.num);
-        if (getRef) {
-          if (val->m_type != KindOfRef) {
-            tvBox(val);
-          }
-          retval->nvBind(key.m_data.num, val);
-        } else {
-          retval->nvSet(key.m_data.num, val, false);
-        }
-        continue;
-      }
-
-      StringData* strKey = key.m_data.pstr;
-      TypedValue* val =
-        static_cast<HphpArray*>(o_properties.get())->nvGet(strKey);
-      if (getRef) {
-        if (val->m_type != KindOfRef) {
-          tvBox(val);
-        }
-        retval->nvBind(strKey, val);
-      } else {
-        retval->nvSet(strKey, val, false);
-      }
-      decRefStr(strKey);
-    }
-  }
-
-  return Array(retval);
-}
-
 void Instance::o_setArray(CArrRef properties) {
   for (ArrayIter iter(properties); iter; ++iter) {
     String k = iter.first().toString();
@@ -836,30 +739,6 @@ Variant Instance::t___unset(Variant v_name) {
     return v;
   } else {
     return null;
-  }
-}
-
-DECLARE_THREAD_LOCAL(Variant, __lvalProxy);
-DECLARE_THREAD_LOCAL(Variant, nullProxy);
-
-Variant& Instance::___offsetget_lval(Variant key) {
-  if (isCollection()) {
-    return collectionOffsetGet(this, key);
-  } else {
-    if (!instanceof(SystemLib::s_ArrayAccessClass)) {
-      throw InvalidOperandException("not ArrayAccess objects");
-    }
-    static StringData* sd__offsetGet = StringData::GetStaticString("offsetGet");
-    const Func* method = m_cls->lookupMethod(sd__offsetGet);
-    assert(method);
-    if (method) {
-      Variant *v = __lvalProxy.get();
-      g_vmContext->invokeFunc((TypedValue*)v, method,
-                              CREATE_VECTOR1(key), this);
-      return *v;
-    } else {
-      return *nullProxy.get();
-    }
   }
 }
 

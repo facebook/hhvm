@@ -127,21 +127,17 @@ public:
       }
       return nullptr;
     }
-    while (true) {
-      T *px = dynamic_cast<T*>(cur);
-      if (!px) {
-        cur = cur->getRedeclaredParent();
-        if (cur) continue;
-        if (!badTypeOkay) {
-          throw InvalidObjectTypeException(m_px->o_getClassName());
-        }
-        return nullptr;
+    T *px = dynamic_cast<T*>(cur);
+    if (!px) {
+      if (!badTypeOkay) {
+        throw InvalidObjectTypeException(m_px->o_getClassName());
       }
-
-      // Assert that casting does not adjust the 'this' pointer
-      assert((void*)px == (void*)cur);
-      return px;
+      return nullptr;
     }
+
+    // Assert that casting does not adjust the 'this' pointer
+    assert((void*)px == (void*)cur);
+    return px;
   }
   template<typename T>
   bool is() const {
@@ -196,15 +192,6 @@ public:
   Variant o_setPublicRef(CStrRef s, CVarRef v);
   Variant &o_lval(CStrRef propName, CVarRef tmpForGet,
                   CStrRef context = null_string);
-  Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
-                       CStrRef context = null_string);
-  bool o_isset(CStrRef propName, CStrRef context = null_string) const;
-  bool o_empty(CStrRef propName, CStrRef context = null_string) const;
-  void o_unset(CStrRef propName, CStrRef context = null_string) const;
-  template<typename T, int op>
-  T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
-  Variant o_argval(bool byRef, CStrRef propName, bool error = true,
-      CStrRef context = null_string);
   /**
    * Input/Output
    */

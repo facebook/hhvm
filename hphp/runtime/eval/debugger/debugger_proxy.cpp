@@ -21,7 +21,6 @@
 #include <runtime/eval/debugger/cmd/cmd_machine.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/eval/eval.h>
 #include <runtime/vm/debugger_hook.h>
 #include <util/process.h>
 #include <util/logger.h>

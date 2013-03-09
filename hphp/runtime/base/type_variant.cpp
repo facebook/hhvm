@@ -2262,6 +2262,8 @@ public:
   static const bool CheckParams = true;
 };
 
+DECLARE_THREAD_LOCAL(Variant, __lvalProxy);
+  
 template<typename T>
 Variant& Variant::LvalAtImpl0(
     Variant *self, T key, Variant *tmp, bool blackHole, ACCESSPARAMS_IMPL) {
@@ -2303,12 +2305,13 @@ head:
     if (self->m_data.pobj->isCollection()) {
       return collectionOffsetGet(self->m_data.pobj, Variant(key));
     }
-    Variant *ret = &(self->getArrayAccess()->___offsetget_lval(key));
     if (!blackHole) {
-      *tmp = *ret;
-      ret = tmp;
+      *tmp = self->getArrayAccess()->offsetGet(key);
+      return *tmp;
     }
-    return *ret;
+    Variant& retv = *(__lvalProxy.get());
+    retv = self->getArrayAccess()->offsetGet(key);
+    return retv;
   }
   return lvalInvalid();
 }
@@ -2432,7 +2435,7 @@ Variant &Variant::lvalInvalid() {
 }
 
 Variant &Variant::lvalBlackHole() {
-  Variant &bh = get_system_globals()->__lvalProxy;
+  Variant &bh = *(__lvalProxy.get());
   bh.unset();
   return bh;
 }
@@ -2454,57 +2457,6 @@ Variant Variant::o_getPublic(CStrRef propName, bool error /* = true */) const {
     return m_data.pobj->o_getPublic(propName, error);
   } else if (m_type == KindOfRef) {
     return m_data.pref->var()->o_getPublic(propName, error);
-  } else if (error) {
-    raise_notice("Trying to get property of non-object");
-  }
-  return null_variant;
-}
-
-bool Variant::o_empty(CStrRef propName,
-                      CStrRef context /* = null_string */) const {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_empty(propName, context);
-  }
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_empty(propName, context);
-  }
-  return true;
-}
-
-bool Variant::o_isset(CStrRef propName,
-                      CStrRef context /* = null_string */) const {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_isset(propName, context);
-  }
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_isset(propName, context);
-  }
-  return false;
-}
-
-void Variant::o_unset(CStrRef propName, CStrRef context /* = null_string */) {
-  if (m_type == KindOfObject) {
-    m_data.pobj->o_unset(propName, context);
-  }
-  if (m_type == KindOfRef) {
-    m_data.pref->var()->o_unset(propName, context);
-  }
-}
-
-Variant Variant::o_argval(bool byRef, CStrRef propName,
-    bool error /* = true */, CStrRef context /* = null_string */) const {
-  if (m_type == KindOfObject) {
-    if (byRef) {
-      return strongBind(m_data.pobj->o_lval(propName, context));
-    } else {
-      return m_data.pobj->o_get(propName, error, context);
-    }
-  } else if (m_type == KindOfRef) {
-    if (byRef) {
-      return strongBind(m_data.pref->var()->o_lval(propName, context));
-    } else {
-      return m_data.pref->var()->o_get(propName, error, context);
-    }
   } else if (error) {
     raise_notice("Trying to get property of non-object");
   }
@@ -2628,91 +2580,6 @@ Variant &Variant::o_lval(CStrRef propName, CVarRef tmpForGet,
     return const_cast<Variant&>(tmpForGet);
   }
 }
-
-Variant &Variant::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
-                              CStrRef context /* = null_string */) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_lval(propName, tmpForGet, context);
-  } else if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_unsetLval(propName, tmpForGet, context);
-  } else {
-    return const_cast<Variant&>(tmpForGet);
-  }
-}
-
-#define OPEQUAL(op, l, r)                                               \
-  switch (op) {                                                         \
-  case T_CONCAT_EQUAL: concat_assign((l), r); break;                    \
-  case T_PLUS_EQUAL:   ((l) += r);            break;                    \
-  case T_MINUS_EQUAL:  ((l) -= r);            break;                    \
-  case T_MUL_EQUAL:    ((l) *= r);            break;                    \
-  case T_DIV_EQUAL:    ((l) /= r);            break;                    \
-  case T_MOD_EQUAL:    ((l) %= r);            break;                    \
-  case T_AND_EQUAL:    ((l) &= r);            break;                    \
-  case T_OR_EQUAL:     ((l) |= r);            break;                    \
-  case T_XOR_EQUAL:    ((l) ^= r);            break;                    \
-  case T_SL_EQUAL:     ((l) <<= r);           break;                    \
-  case T_SR_EQUAL:     ((l) >>= r);           break;                    \
-  default:                                                              \
-    throw FatalErrorException(0, "invalid operator %d", op);            \
-  }                                                                     \
-
-#define IMPLEMENT_SETAT_OPEQUAL                                         \
-check_array:                                                            \
-  if (m_type == KindOfArray) {                                          \
-    Variant *cv = nullptr;                                                 \
-    ArrayData *escalated =                                              \
-      m_data.parr->lval(ToKey(key), cv, (m_data.parr->getCount() > 1)); \
-    if (escalated) {                                                    \
-      set(escalated);                                                   \
-    }                                                                   \
-    assert(cv);                                                         \
-    OPEQUAL(op, *cv, v);                                                \
-    return *cv;                                                         \
-  }                                                                     \
-  switch (m_type) {                                                     \
-  case KindOfBoolean:                                                   \
-    if (toBoolean()) {                                                  \
-      throw_bad_type_exception("not array objects");                    \
-      break;                                                            \
-    }                                                                   \
-    /* Fall through */                                                  \
-  case KindOfUninit:                                                    \
-  case KindOfNull:                                                      \
-    set(ArrayData::Create(ToKey(key), null));                           \
-    goto check_array;                                                   \
-  case KindOfRef:                                                       \
-    m_data.pref->var()->setOpEqual(op, key, v);                         \
-    break;                                                              \
-  case KindOfStaticString:                                              \
-  case KindOfString: {                                                  \
-    String s = toString();                                              \
-    if (s.empty()) {                                                    \
-      set(ArrayData::Create(ToKey(key), null));                         \
-      goto check_array;                                                 \
-    }                                                                   \
-    throw_bad_type_exception("not array objects");                      \
-    break;                                                              \
-  }                                                                     \
-  case KindOfObject: {                                                  \
-    ObjectData* obj = m_data.pobj;                                      \
-    if (obj->isCollection()) {                                          \
-      Variant &cv = collectionOffsetGet(obj, key);                      \
-      OPEQUAL(op, cv, v);                                               \
-      return cv;                                                        \
-    } else {                                                            \
-      ObjectData *aa = getArrayAccess();                                \
-      Variant &cv = aa->___offsetget_lval(key);                         \
-      OPEQUAL(op, cv, v);                                               \
-      aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);           \
-      return cv;                                                        \
-    }                                                                   \
-  }                                                                     \
-  default:                                                              \
-    throw_bad_type_exception("not array objects");                      \
-    break;                                                              \
-  }                                                                     \
-  return v;                                                             \
 
 template <typename T>
 inline ALWAYS_INLINE CVarRef Variant::SetImpl(Variant *self, T key,
@@ -2967,235 +2834,6 @@ CVarRef Variant::appendRef(CVarRef v) {
     if (getStringData()->empty()) {
       set(ArrayData::CreateRef(v));
       return v;
-    }
-    // fall through to throw
-  default:
-    throw_bad_type_exception("[] operator not supported for this type");
-  }
-  return v;
-}
-
-CVarRef Variant::setOpEqual(int op, bool key, CVarRef v) {
-  IMPLEMENT_SETAT_OPEQUAL;
-}
-
-CVarRef Variant::setOpEqual(int op, int64_t key, CVarRef v) {
-  IMPLEMENT_SETAT_OPEQUAL;
-}
-
-CVarRef Variant::setOpEqual(int op, double key, CVarRef v) {
-  IMPLEMENT_SETAT_OPEQUAL;
-}
-
-CVarRef Variant::setOpEqual(int op, CStrRef key, CVarRef v,
-                            bool isString /* = false */) {
-check_array:
-  if (m_type == KindOfArray) {
-    Variant *cv = nullptr;
-    ArrayData *escalated;
-    if (isString) {
-      escalated =
-        m_data.parr->lval(key, cv, (m_data.parr->getCount() > 1));
-    } else {
-      escalated =
-        m_data.parr->lval(ToKey(key), cv, (m_data.parr->getCount() > 1));
-    }
-    if (escalated) {
-      set(escalated);
-    }
-    assert(cv);
-    OPEQUAL(op, *cv, v);
-    return *cv;
-  }
-  switch (m_type) {
-  case KindOfBoolean:
-    if (toBoolean()) {
-      throw_bad_type_exception("not array objects");
-      break;
-    }
-    /* Fall through */
-  case KindOfUninit:
-  case KindOfNull:
-    if (isString) {
-      set(ArrayData::Create(key, null));
-    } else {
-      set(ArrayData::Create(ToKey(key), null));
-    }
-    goto check_array;
-  case KindOfRef:
-    return m_data.pref->var()->setOpEqual(op, key, v, isString);
-  case KindOfStaticString:
-  case KindOfString: {
-    String s = toString();
-    if (s.empty()) {
-      if (isString) {
-        set(ArrayData::Create(key, null));
-      } else {
-        set(ArrayData::Create(ToKey(key), null));
-      }
-      goto check_array;
-    }
-    throw_bad_type_exception("not array objects");
-    break;
-  }
-  case KindOfObject: {
-    ObjectData* obj = m_data.pobj;
-    if (obj->isCollection()) {
-      Variant &cv = collectionOffsetGet(obj, key);
-      OPEQUAL(op, cv, v);
-      return cv;
-    } else {
-      ObjectData *aa = getArrayAccess();
-      Variant &cv = aa->___offsetget_lval(key);
-      OPEQUAL(op, cv, v);
-      aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);
-      return cv;
-    }
-  }
-  default:
-    throw_bad_type_exception("not array objects");
-    break;
-  }
-  return v;
-}
-
-CVarRef Variant::setOpEqual(int op, CVarRef key, CVarRef v) {
-check_array:
-  if (m_type == KindOfArray) {
-    Variant *cv = nullptr;
-    VarNR k(ToKey(key));
-    if (k.isNull()) return lvalBlackHole();
-    ArrayData *escalated =
-      m_data.parr->lval(k, cv, (m_data.parr->getCount() > 1));
-    if (escalated) {
-      set(escalated);
-    }
-    assert(cv);
-    OPEQUAL(op, *cv, v);
-    return *cv;
-  }
-  switch (m_type) {
-  case KindOfBoolean:
-    if (toBoolean()) {
-      throw_bad_type_exception("not array objects");
-      break;
-    }
-    /* Fall through */
-  case KindOfUninit:
-  case KindOfNull: {
-    VarNR k(ToKey(key));
-    if (k.isNull()) return lvalBlackHole();
-    set(ArrayData::Create(k, null));
-    goto check_array;
-  }
-  case KindOfRef:
-    return m_data.pref->var()->setOpEqual(op, key, v);
-  case KindOfStaticString:
-  case KindOfString: {
-    String s = toString();
-    if (s.empty()) {
-      VarNR k(ToKey(key));
-      if (k.isNull()) return lvalBlackHole();
-      set(ArrayData::Create(k, null));
-      goto check_array;
-    }
-    throw_bad_type_exception("not array objects");
-    break;
-  }
-  case KindOfObject: {
-    ObjectData* obj = m_data.pobj;
-    if (obj->isCollection()) {
-      Variant &cv = collectionOffsetGet(obj, key);
-      OPEQUAL(op, cv, v);
-      return cv;
-    } else {
-      ObjectData *aa = getArrayAccess();
-      Variant &cv = aa->___offsetget_lval(key);
-      OPEQUAL(op, cv, v);
-      aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);
-      return cv;
-    }
-  }
-  default:
-    throw_bad_type_exception("not array objects");
-    break;
-  }
-  return v;
-}
-
-CVarRef Variant::appendOpEqual(int op, CVarRef v) {
-check_array:
-  if (m_type == KindOfArray) {
-    Variant *cv = nullptr;
-    ArrayData *escalated =
-      m_data.parr->lvalNew(cv, m_data.parr->getCount() > 1);
-    if (escalated) {
-      set(escalated);
-    }
-    assert(cv);
-    switch (op) {
-    case T_CONCAT_EQUAL: return concat_assign((*cv), v);
-    case T_PLUS_EQUAL:   return ((*cv) += v);
-    case T_MINUS_EQUAL:  return ((*cv) -= v);
-    case T_MUL_EQUAL:    return ((*cv) *= v);
-    case T_DIV_EQUAL:    return ((*cv) /= v);
-    case T_MOD_EQUAL:    return ((*cv) %= v);
-    case T_AND_EQUAL:    return ((*cv) &= v);
-    case T_OR_EQUAL:     return ((*cv) |= v);
-    case T_XOR_EQUAL:    return ((*cv) ^= v);
-    case T_SL_EQUAL:     return ((*cv) <<= v);
-    case T_SR_EQUAL:     return ((*cv) >>= v);
-    default:
-      throw FatalErrorException(0, "invalid operator %d", op);
-    }
-    return v;
-  }
-  switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    set(ArrayData::Create());
-    goto check_array;
-  case KindOfBoolean:
-    if (!toBoolean()) {
-      set(ArrayData::Create());
-      goto check_array;
-    } else {
-      throw_bad_type_exception("[] operator not supported for this type");
-    }
-    break;
-  case KindOfRef:
-    m_data.pref->var()->appendOpEqual(op, v);
-    break;
-  case KindOfObject: {
-    if (m_data.pobj->isCollection()) {
-      raise_error("Cannot use [] for reading");
-    }
-    ObjectData *aa = getArrayAccess();
-    Variant &cv = aa->___offsetget_lval(null_variant);
-    switch (op) {
-    case T_CONCAT_EQUAL: concat_assign(cv, v); break;
-    case T_PLUS_EQUAL:   cv += v;              break;
-    case T_MINUS_EQUAL:  cv -= v;              break;
-    case T_MUL_EQUAL:    cv *= v;              break;
-    case T_DIV_EQUAL:    cv /= v;              break;
-    case T_MOD_EQUAL:    cv %= v;              break;
-    case T_AND_EQUAL:    cv &= v;              break;
-    case T_OR_EQUAL:     cv |= v;              break;
-    case T_XOR_EQUAL:    cv ^= v;              break;
-    case T_SL_EQUAL:     cv <<= v;             break;
-    case T_SR_EQUAL:     cv >= v;              break;
-      break;
-    default:
-      throw FatalErrorException(0, "invalid operator %d", op);
-    }
-    aa->o_invoke(s_offsetSet, CREATE_VECTOR2(null_variant, cv));
-    return cv;
-  }
-  case KindOfStaticString:
-  case KindOfString:
-    if (getStringData()->empty()) {
-      set(ArrayData::Create());
-      goto check_array;
     }
     // fall through to throw
   default:
@@ -3865,154 +3503,5 @@ VarNR::VarNR(ObjectData *v) {
   }
 }
 
-template<>
-Variant AssignOp<T_CONCAT_EQUAL>::assign(Variant &var, CVarRef val) {
-  return concat_assign(var, val);
-}
-
-template<>
-Variant AssignOp<T_PLUS_EQUAL>::assign(Variant &var, CVarRef val) {
-  return var += val;
-}
-
-template<>
-Variant AssignOp<T_MINUS_EQUAL>::assign(Variant &var, CVarRef val) {
-  return var -= val;
-}
-
-template<>
-Variant AssignOp<T_MUL_EQUAL>::assign(Variant &var, CVarRef val) {
-  return var *= val;
-}
-
-template<>
-Variant AssignOp<T_DIV_EQUAL>::assign(Variant &var, CVarRef val) {
-  return var /= val;
-}
-
-template<>
-Variant AssignOp<T_MOD_EQUAL>::assign(Variant &var, CVarRef val) {
-  return var %= val;
-}
-
-template<>
-Variant AssignOp<T_AND_EQUAL>::assign(Variant &var, CVarRef val) {
-  return var &= val;
-}
-
-template<>
-Variant AssignOp<T_OR_EQUAL>::assign(Variant &var, CVarRef val) {
-  return var |= val;
-}
-
-template<>
-Variant AssignOp<T_XOR_EQUAL>::assign(Variant &var, CVarRef val) {
-  return var ^= val;
-}
-
-template<>
-Variant AssignOp<T_SL_EQUAL>::assign(Variant &var, CVarRef val) {
-  return var <<= val;
-}
-
-template<>
-Variant AssignOp<T_SR_EQUAL>::assign(Variant &var, CVarRef val) {
-  return var >>= val;
-}
-
-template<>
-Variant AssignOp<T_INC>::assign(Variant &var, CVarRef val) {
-  return val.isNull() ? ++var : var++;
-}
-
-template<>
-Variant AssignOp<T_DEC>::assign(Variant &var, CVarRef val) {
-  return val.isNull() ? --var : var--;
-}
-
-template<typename T, int op>
-T Variant::o_assign_op(CStrRef propName, CVarRef val,
-                       CStrRef context /* = null_string */) {
-  if (LIKELY(m_type == KindOfObject)) {
-  } else if (m_type == KindOfRef) {
-    return (T)m_data.pref->var()->template o_assign_op<T,op>(propName,
-                                                             val, context);
-  } else if (isObjectConvertable()) {
-    setToDefaultObject();
-  } else {
-    // Raise a warning
-    raise_warning("Attempt to assign property of non-object");
-    return T();
-  }
-  return (T)m_data.pobj->template o_assign_op<T,op>(propName, val, context);
-}
-
-template<typename T, int op>
-T Object::o_assign_op(CStrRef propName, CVarRef val,
-                      CStrRef context /* = null_string */) {
-  if (UNLIKELY(!m_px)) {
-    setToDefaultObject();
-  }
-  assert(m_px);
-  return m_px->template o_assign_op<T,op>(propName, val, context);
-}
-
-template<typename T, int op>
-T ObjectData::o_assign_op(CStrRef propName, CVarRef val,
-                          CStrRef context /* = null_string */) {
-  if (UNLIKELY(!*propName.data())) {
-    throw_invalid_property_name(propName);
-  }
-  bool useGet = getAttribute(ObjectData::UseGet);
-  bool useSet = getAttribute(ObjectData::UseSet);
-  int flags = useSet ? ObjectData::RealPropWrite :
-    ObjectData::RealPropCreate | ObjectData::RealPropWrite;
-
-  if (Variant *t = o_realProp(propName, flags, context)) {
-    if (useGet && !t->isInitialized()) {
-      AttributeClearer a(ObjectData::UseGet, this);
-      *t = t___get(propName);
-    }
-
-    return (T)AssignOp<op>::assign(*t, val);
-  }
-
-  assert(useSet);
-  Variant var;
-  if (useGet) {
-    AttributeClearer a(ObjectData::UseGet, this);
-    var = t___get(propName);
-  }
-
-  Variant ret = AssignOp<op>::assign(var, val);
-  AttributeClearer a(ObjectData::UseSet, this);
-  t___set(propName, var);
-  return (T)ret;
-}
-
-#define DECLARE_O_ASSIGN_OP_ONE(C,T,op)                         \
-  template T                                                  \
-  C::o_assign_op<T,op>(CStrRef propName, CVarRef val,           \
-                       CStrRef context /* = null_string */)
-
-#define DECLARE_O_ASSIGN_OP(op)                 \
-  DECLARE_O_ASSIGN_OP_ONE(Object,void,op);      \
-  DECLARE_O_ASSIGN_OP_ONE(Object,Variant,op);   \
-  DECLARE_O_ASSIGN_OP_ONE(Variant,void,op);     \
-  DECLARE_O_ASSIGN_OP_ONE(Variant,Variant,op)
-
-DECLARE_O_ASSIGN_OP(T_CONCAT_EQUAL);
-DECLARE_O_ASSIGN_OP(T_PLUS_EQUAL);
-DECLARE_O_ASSIGN_OP(T_MINUS_EQUAL);
-DECLARE_O_ASSIGN_OP(T_MUL_EQUAL);
-DECLARE_O_ASSIGN_OP(T_DIV_EQUAL);
-DECLARE_O_ASSIGN_OP(T_MOD_EQUAL);
-DECLARE_O_ASSIGN_OP(T_AND_EQUAL);
-DECLARE_O_ASSIGN_OP(T_OR_EQUAL);
-DECLARE_O_ASSIGN_OP(T_XOR_EQUAL);
-DECLARE_O_ASSIGN_OP(T_SL_EQUAL);
-DECLARE_O_ASSIGN_OP(T_SR_EQUAL);
-DECLARE_O_ASSIGN_OP(T_INC);
-DECLARE_O_ASSIGN_OP(T_DEC);
 ///////////////////////////////////////////////////////////////////////////////
 }

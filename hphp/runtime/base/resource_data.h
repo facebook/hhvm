@@ -35,7 +35,6 @@ public:
   void operator delete(void* p) { ::operator delete(p); }
 
   // implementing ObjectData
-  virtual bool o_instanceof(CStrRef s) const { return false;}
   virtual bool isResource() const { return true;}
   virtual String t___tostring();
   virtual int64_t o_toInt64() const { return o_getId();}

@@ -20,6 +20,7 @@
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/class_info.h>
+#include <runtime/base/builtin_functions.h>
 
 #include <util/logger.h>
 

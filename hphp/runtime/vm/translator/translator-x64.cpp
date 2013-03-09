@@ -9697,17 +9697,19 @@ int64_t checkClass(TargetCache::CacheHandle ch, StringData* clsName,
   return false;
 }
 
-static const Func* autoloadMissingFunc(const Func* func, bool safe) {
+static const Func* autoloadMissingFunc(const StringData* funcName,
+                                       TargetCache::CacheHandle ch,
+                                       bool safe) {
   VMRegAnchor _;
-  AutoloadHandler::s_instance->autoloadFunc(func->name()->data());
-  Func* toCall = *(Func**)TargetCache::handleToPtr(func->getCachedOffset());
+  AutoloadHandler::s_instance->autoloadFunc(funcName->data());
+  Func* toCall = *(Func**)TargetCache::handleToPtr(ch);
   /* toCall could be a different function due to renaming */
   if (toCall) {
     return toCall;
   }
   if (!safe) {
     throw_invalid_argument("function: method '%s' not found",
-                           func->name()->data());
+                           funcName->data());
   }
   return SystemLib::GetNullFunction();
 }
@@ -9772,7 +9774,9 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
       a.          test_reg64_reg64(r(funcReg), r(funcReg));
       {
         UnlikelyIfBlock ifNull(CC_Z, a, astubs);
-        EMIT_CALL(astubs, TCA(autoloadMissingFunc), IMM(uintptr_t(func)),
+        EMIT_CALL(astubs, TCA(autoloadMissingFunc),
+                  IMM(uintptr_t(func->name())),
+                  IMM(ch),
                   IMM(safe));
         recordReentrantStubCall(ni, true);
         emitVStackStore(astubs, ni, rax, funcOff);

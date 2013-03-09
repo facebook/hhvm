@@ -19,25 +19,15 @@ HHVM=$HPHP_HOME/hphp/hhvm/hhvm
 HPHP_TOOLS=$HPHP_HOME/hphp/tools/
 
 if [ "$1" = "help" ]; then
-  echo "$0 gen        - Build hphp/system/gen/* files"
   echo "$0 hhvm       - Build hphp/system/runtime/ext/*.ext_hhvm.cpp"
   echo "$0 infotabs   - Build hphp/system/runtime/ext_hhvm/ext_hhvm_infotabs.cpp"
   echo "$0 systemlib  - Build bin/systemlib.php"
-  echo "$0 constants  - Build constants definitions"
+  echo "$0 constants  - Build hphp/system/constants.h"
+  echo "$0 class_map  - Build hphp/system/class_map.cpp"
   echo "$0 license    - Add license headers to all files"
   echo ""
   echo "$0 all  - All of the above in listed order"
   exit 0
-fi
-
-if [ "$1" = "gen" -o "$1" = "all" ]; then
-  [ $VERBOSE -eq 1 ] && echo "Generating hphp/system/gen/* files using hphpc"
-  cd $HPHP_HOME/hphp/system
-  rm -rf gen
-  $HHVM --hphp \
-        --opts=none -t cpp -f sys -o gen \
-        --input-dir . -i `find classes globals -name '*.php'`
-  check_err $? "Failed generating hphp/system/gen/*"
 fi
 
 # $1 - Binary to pull symbols from
@@ -89,6 +79,10 @@ if [ "$1" = "constants" -o "$1" = "all" ]; then
   cd $HPHP_HOME
   [ $VERBOSE -eq 1 ] && echo "Generating hphp/system/constants.h"
   $HHVM hphp/idl/class_map.php hphp/system/constants.h hphp/system/globals/constdef.php
+fi
+
+if [ "$1" = "class_map" -o "$1" = "all" ]; then
+  cd $HPHP_HOME
   [ $VERBOSE -eq 1 ] && echo "Generating hphp/system/class_map.h"
   $HHVM hphp/idl/class_map.php hphp/system/class_map.cpp hphp/system/globals/constdef.php \
 	`find hphp/idl -name '*.idl.php'`

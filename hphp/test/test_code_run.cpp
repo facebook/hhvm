@@ -19439,6 +19439,21 @@ bool TestCodeRun::TestSimpleXML() {
        "var_dump(count($sxml->t->attributes()));\n"
        "foreach ($sxml->bogus as $v) {}");
 
+  MVCR("<?php\n"
+       "class MyElement extends SimpleXMLElement {\n"
+       "  public function asUcWordString() {\n"
+       "    return ucwords((string)$this);\n"
+       "  }\n"
+       "}\n"
+       "$xml = '<foo><bar><baz>now is the time for all good men to come to "
+                              "the aid of their country</baz></bar></foo>';\n"
+       "$s = simplexml_load_string($xml);\n"
+       "var_dump(get_class($s));\n"
+       "$s = simplexml_load_string($xml, 'MyElement');\n"
+       "var_dump(get_class($s));\n"
+       "var_dump($s->bar->baz->asUcWordString());\n"
+       );
+
   return true;
 }
 

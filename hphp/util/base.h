@@ -144,14 +144,6 @@ static const bool use_jemalloc =
 #endif
   ;
 
-static const bool enable_hphp_array =
-#ifdef ENABLE_HPHP_ARRAY
-  true
-#else
-  false
-#endif
-  ;
-
 /**
  * Guard bug-for-bug hphpi compatibility code with this predicate.
  */

@@ -197,7 +197,7 @@ function printDataType($t, $off = 0) {
   switch (typename($t)) {
     case 'bool':   $s = 'KindOfBoolean'; $n = 9; break;
     case 'int':
-    case 'int64':  $s = 'KindOfInt64'; $n = 10; break;
+    case 'int64_t':$s = 'KindOfInt64'; $n = 10; break;
     case 'double': $s = 'KindOfDouble'; $n = 11; break;
     case 'String': $s = 'KindOfString'; $n = 20; break;
     case 'Array':  $s = 'KindOfArray'; $n = 32; break;

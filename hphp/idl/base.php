@@ -35,7 +35,7 @@ $TYPENAMES = array
                         'idlname' => 'Boolean',    'phpname' => 'bool'),
    Int32       => array('name' => 'int',           'enum' => 'Int32',
                         'idlname' => 'Int32',      'phpname' => 'int'),
-   Int64       => array('name' => 'int64',         'enum' => 'Int64',
+   Int64       => array('name' => 'int64_t',       'enum' => 'Int64',
                         'idlname' => 'Int64',      'phpname' => 'int'),
    Double      => array('name' => 'double',        'enum' => 'Double',
                         'idlname' => 'Double',     'phpname' => 'float'),

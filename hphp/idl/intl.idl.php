@@ -15,7 +15,7 @@ DefinePreamble(<<<CPP
 #include <runtime/base/zend/zend_collator.h>
 #include <unicode/ucol.h> // icu
 namespace HPHP {
-extern const int64 q_Collator\$\$SORT_REGULAR;
+extern const int64_t q_Collator\$\$SORT_REGULAR;
 }
 CPP
 );

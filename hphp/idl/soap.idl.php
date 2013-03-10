@@ -618,7 +618,7 @@ BeginClass(
     'footer' => <<<EOT
 
   public: Variant m_value;
-  public: int64   m_type;
+  public: int64_t m_type;
   public: String  m_stype;
   public: String  m_ns;
   public: String  m_name;

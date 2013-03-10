@@ -125,7 +125,7 @@ BeginClass(
                         CStrRef key, CVarRef value, int expiration);
   typedef memcached_return_t (*IncDecOperation)(memcached_st *,
       const char *, size_t, uint32_t, uint64_t *);
-  Variant incDecOperationImpl(IncDecOperation op, CStrRef key, int64 offset);
+  Variant incDecOperationImpl(IncDecOperation op, CStrRef key, int64_t offset);
 
   typedef std::map<std::string, ImplPtr> ImplMap;
   static DECLARE_THREAD_LOCAL(ImplMap, s_persistentMap);

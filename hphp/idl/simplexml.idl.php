@@ -286,7 +286,7 @@ BeginClass(
   bool m_is_children;
   bool m_is_property;
   virtual bool o_toBoolean() const;
-  virtual int64 o_toInt64() const;
+  virtual int64_t o_toInt64() const;
   virtual double o_toDouble() const;
   virtual Array o_toArray() const;
   virtual Variant *___lval(Variant v_name);

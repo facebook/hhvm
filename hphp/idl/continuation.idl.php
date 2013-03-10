@@ -187,7 +187,7 @@ public:
 public:
   Object m_obj;
   Array m_args;
-  int64 m_index;
+  int64_t m_index;
   Variant m_value;
   Variant m_received;
   String m_origFuncName;

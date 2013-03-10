@@ -46,7 +46,7 @@ BeginClass(
                             intl_error &err);
     static bool setSubstChars(String chars, UConverter *cnv, intl_error &err);
     bool setCallback(UConverter *cnv);
-    Variant defaultCallback(int64 reason, VRefParam error);
+    Variant defaultCallback(int64_t reason, VRefParam error);
     static String doConvert(CStrRef str, UConverter *toCnv,
                             UConverter *fromCnv, intl_error &err);
   public:

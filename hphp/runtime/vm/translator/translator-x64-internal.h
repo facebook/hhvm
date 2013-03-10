@@ -748,10 +748,10 @@ emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
 
 static inline void
 emitStoreInvalid(X64Assembler& a, int disp, PhysReg dest) {
-  static_assert(sizeof(((TypedValue*)0)->m_aux) == sizeof(int32_t),
+  static_assert(TypedValueAux::auxSize == sizeof(int32_t),
                 "emitStoreInvalid assumes m_aux is dword sized.");
   a.    storeq (0xfacefacefaceface,     dest[disp + TVOFF(m_data)]);
-  a.    storel ((signed int)0xfaceface, dest[disp + TVOFF(m_aux)]);
+  a.    storel ((signed int)0xfaceface, dest[disp + TypedValueAux::auxOffset]);
   a.    storel (KindOfInvalid,          dest[disp + TVOFF(m_type)]);
 }
 

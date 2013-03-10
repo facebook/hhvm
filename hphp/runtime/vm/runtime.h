@@ -281,7 +281,7 @@ bool checkTv(const TypedValue* tv);
 // always_assert tv is a plausible TypedValue*
 void assertTv(const TypedValue* tv);
 
-void deepInitHelper(TypedValue* propVec, const TypedValue* propData,
+void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps);
 
 } }

@@ -49,19 +49,7 @@ union Value {
   TypedValue *pind; // only for KindOfIndirect
 };
 
-/*
- * This is an auxilary field used to store auxilary data inside TypedValues,
- * in certian contexts.  With this union we can keep track of uses; all of
- * them will be phased out at some point.
- * TODO: t1100154 phase them out so we can get more compact TypedValues.
- */
-enum VarNRFlag { NR_FLAG = 1<<29 };
-union TypedValueAux {
-  int32_t u_hash;        // key type and hash for HphpArray and [Stable]Map
-  VarNRFlag u_varNrFlag; // magic number for asserts in VarNR
-  bool u_deepInit;       // used by Class::initPropsImpl for deep init
-  int32_t u_cacheHandle; // used by unit.cpp to squirrel away cache handles
-};
+enum VarNrFlag { NR_FLAG = 1<<29 };
 
 /*
  * A TypedValue is a descriminated PHP Value.  m_tag describes the contents
@@ -74,10 +62,37 @@ struct TypedValue {
    * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
    */
   Value m_data;
-  TypedValueAux m_aux;
+private:
+  friend struct TypedValueAux;
+  union {
+    int32_t u_hash;        // key type and hash for HphpArray and [Stable]Map
+    VarNrFlag u_varNrFlag; // magic number for asserts in VarNR
+    bool u_deepInit;       // used by Class::initPropsImpl for deep init
+    int32_t u_cacheHandle; // used by unit.cpp to squirrel away cache handles
+  } m_aux;
+public:
   DataType m_type;
 
   std::string pretty() const; // debug formatting. see trace.h
+};
+
+/*
+ * This TypedValue subclass exposes a 32-bit "aux" field somewhere inside it.
+ * For now, access the m_aux field declared in TypedValue, but once we
+ * rearrange TypedValue, the aux field can move down to this struct.
+ * TODO: t1100154 phase this out completely.
+ */
+struct TypedValueAux : TypedValue {
+  static const size_t auxOffset = offsetof(TypedValue, m_aux);
+  static const size_t auxSize = sizeof(m_aux);
+  int32_t& hash() { return m_aux.u_hash; }
+  const int32_t& hash() const { return m_aux.u_hash; }
+  int32_t& cacheHandle() { return m_aux.u_cacheHandle; }
+  const int32_t& cacheHandle() const { return m_aux.u_cacheHandle; }
+  bool& deepInit() { return m_aux.u_deepInit; }
+  const bool& deepInit() const { return m_aux.u_deepInit; }
+  VarNrFlag& varNrFlag() { return m_aux.u_varNrFlag; }
+  const VarNrFlag& varNrFlag() const { return m_aux.u_varNrFlag; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

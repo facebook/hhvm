@@ -867,14 +867,13 @@ Class::PropInitVec* Class::initPropsImpl() const {
   Slot slot = 0;
   for (PropInitVec::iterator it = propVec->begin();
        it != propVec->end(); ++it, ++slot) {
-    TypedValue* tv = &(*it);
-    // We set TypedValue::m_aux.u_deepInit to true if the property requires
-    // "deep" initialization.
+    TypedValueAux* tv = &(*it);
+    // Set deepInit if the property requires "deep" initialization.
     if (m_declProperties[slot].m_attrs & AttrDeepInit) {
-      tv->m_aux.u_deepInit = true;
+      tv->deepInit() = true;
     } else {
       tvAsVariant(tv).setEvalScalar();
-      tv->m_aux.u_deepInit = false;
+      tv->deepInit() = false;
     }
   }
   // Free the args array.  propArr is allocated on the stack so it better be
@@ -1921,8 +1920,10 @@ void Class::setProperties() {
         if (it2 != curPropMap.end()) {
           assert((curPropMap[it2->second].m_attrs
                  & (AttrPublic|AttrProtected|AttrPrivate)) == AttrProtected);
-          m_declPropInit[it2->second] = m_preClass->lookupProp(preProp
-                                        ->name())->val();
+          const TypedValue& tv = m_preClass->lookupProp(preProp->name())->val();
+          TypedValueAux& tvaux = m_declPropInit[it2->second];
+          tvaux.m_data = tv.m_data;
+          tvaux.m_type = tv.m_type;
           copyDeepInitAttr(preProp, &curPropMap[it2->second]);
           break;
         }
@@ -1953,8 +1954,10 @@ void Class::setProperties() {
             prop.m_originalMangledName = preProp->mangledName();
             prop.m_attrs = Attr(prop.m_attrs ^ (AttrProtected|AttrPublic));
           }
-          m_declPropInit[it2->second] = m_preClass->lookupProp(preProp
-                                        ->name())->val();
+          const TypedValue& tv = m_preClass->lookupProp(preProp->name())->val();
+          TypedValueAux& tvaux = m_declPropInit[it2->second];
+          tvaux.m_data = tv.m_data;
+          tvaux.m_type = tv.m_type;
           copyDeepInitAttr(preProp, &curPropMap[it2->second]);
           break;
         }
@@ -2509,7 +2512,7 @@ Class::PropInitVec::allocInRequestArena(const PropInitVec& src) {
   ThreadInfo* info UNUSED = ThreadInfo::s_threadInfo.getNoCheck();
   PropInitVec* p = new (request_arena()) PropInitVec;
   p->m_size = src.size();
-  p->m_data = new (request_arena()) TypedValue[src.size()];
+  p->m_data = new (request_arena()) TypedValueAux[src.size()];
   memcpy(p->m_data, src.m_data, src.size() * sizeof(*p->m_data));
   p->m_smart = true;
   return p;
@@ -2522,7 +2525,7 @@ Class::PropInitVec::operator=(const PropInitVec& piv) {
     unsigned sz = m_size = piv.size();
     if (sz) sz = Util::roundUpToPowerOfTwo(sz);
     free(m_data);
-    m_data = (TypedValue*)malloc(sz * sizeof(*m_data));
+    m_data = (TypedValueAux*)malloc(sz * sizeof(*m_data));
     assert(m_data);
     memcpy(m_data, piv.m_data, piv.size() * sizeof(*m_data));
   }
@@ -2537,7 +2540,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
    */
   if (!m_size || Util::isPowerOfTwo(m_size)) {
     unsigned size = m_size ? m_size * 2 : 1;
-    m_data = (TypedValue*)realloc(m_data, size * sizeof(*m_data));
+    m_data = (TypedValueAux*)realloc(m_data, size * sizeof(*m_data));
     assert(m_data);
   }
   tvDup(&v, &m_data[m_size++]);

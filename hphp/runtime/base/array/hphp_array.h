@@ -261,23 +261,23 @@ public:
     // hashcode; the high bit is the int/string key descriminator.
     // data.m_type == KindOfTombstone if this is an empty slot in the
     // array (e.g. after a key is deleted).
-    TypedValue data;
+    TypedValueAux data;
     bool hasStrKey() const {
-      return data.m_aux.u_hash != 0;
+      return data.hash() != 0;
     }
     bool hasIntKey() const {
-      return data.m_aux.u_hash == 0;
+      return data.hash() == 0;
     }
     int32_t hash() const {
-      return data.m_aux.u_hash;
+      return data.hash();
     }
     void setStrKey(StringData* k, strhash_t h) {
       key = k;
-      data.m_aux.u_hash = int32_t(h) | 0x80000000;
+      data.hash() = int32_t(h) | 0x80000000;
     }
     void setIntKey(int64_t k) {
       ikey = k;
-      data.m_aux.u_hash = 0;
+      data.hash() = 0;
     }
   };
 
@@ -287,7 +287,7 @@ public:
       this->hash = hash;
       this->key = key;
     }
-    int32_t       hash;
+    int32_t hash;
     union {
       StringData* key;
       int64_t ikey;

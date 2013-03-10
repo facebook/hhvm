@@ -680,16 +680,16 @@ void Unit::initialMerge() {
               break;
             case UnitMergeKindDefine: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              TypedValue* v = (TypedValue*)m_mergeInfo->mergeableData(ix + 1);
-              ix += sizeof(TypedValue) / sizeof(void*);
-              v->m_aux.u_cacheHandle = TargetCache::allocConstant(s);
+              auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
+              ix += sizeof(*v) / sizeof(void*);
+              v->cacheHandle() = TargetCache::allocConstant(s);
               break;
             }
             case UnitMergeKindGlobal: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              TypedValue* v = (TypedValue*)m_mergeInfo->mergeableData(ix + 1);
-              ix += sizeof(TypedValue) / sizeof(void*);
-              v->m_aux.u_cacheHandle = TargetCache::GlobalCache::alloc(s);
+              auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
+              ix += sizeof(*v) / sizeof(void*);
+              v->cacheHandle() = TargetCache::GlobalCache::alloc(s);
               break;
             }
           }
@@ -821,11 +821,11 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
       case UnitMergeKindGlobal:
         if (out) {
           out->mergeableObj(oix++) = obj;
-          *(TypedValue*)out->mergeableData(oix) =
-            *(TypedValue*)in->mergeableData(ix);
-          oix += sizeof(TypedValue) / sizeof(void*);
+          *(TypedValueAux*)out->mergeableData(oix) =
+            *(TypedValueAux*)in->mergeableData(ix);
+          oix += sizeof(TypedValueAux) / sizeof(void*);
         }
-        ix += sizeof(TypedValue) / sizeof(void*);
+        ix += sizeof(TypedValueAux) / sizeof(void*);
         break;
 
       case UnitMergeKindReqMod:
@@ -1016,9 +1016,9 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_define);
           StringData* name = (StringData*)((char*)obj - (int)k);
-          TypedValue *v = (TypedValue*)mi->mergeableData(ix + 1);
-          mergeCns(getDataRef<TypedValue>(tcbase, v->m_aux.u_cacheHandle), v, name);
-          ix += 1 + sizeof(TypedValue) / sizeof(void*);
+          auto* v = (TypedValueAux*)mi->mergeableData(ix + 1);
+          mergeCns(getDataRef<TypedValue>(tcbase, v->cacheHandle()), v, name);
+          ix += 1 + sizeof(*v) / sizeof(void*);
           obj = mi->mergeableObj(ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
         } while (k == UnitMergeKindDefine);
@@ -1029,9 +1029,9 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_global);
           StringData* name = (StringData*)((char*)obj - (int)k);
-          TypedValue *v = (TypedValue*)mi->mergeableData(ix + 1);
-          setGlobal(&getDataRef<char>(tcbase, v->m_aux.u_cacheHandle), v, name);
-          ix += 1 + sizeof(TypedValue) / sizeof(void*);
+          auto* v = (TypedValueAux*)mi->mergeableData(ix + 1);
+          setGlobal(&getDataRef<char>(tcbase, v->cacheHandle()), v, name);
+          ix += 1 + sizeof(*v) / sizeof(void*);
           obj = mi->mergeableObj(ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
         } while (k == UnitMergeKindGlobal);
@@ -2352,7 +2352,7 @@ Unit* UnitEmitter::create() {
       } else switch (it->first) {
           case UnitMergeKindDefine:
           case UnitMergeKindGlobal:
-            extra += sizeof(TypedValue) / sizeof(void*);
+            extra += sizeof(TypedValueAux) / sizeof(void*);
             break;
           default:
             break;
@@ -2405,10 +2405,13 @@ Unit* UnitEmitter::create() {
           assert(RuntimeOption::RepoAuthoritative);
           void* name = u->lookupLitstrId(m_mergeableValues[it->second].first);
           mi->mergeableObj(ix++) = (char*)name + (int)it->first;
-          *(TypedValue*)mi->mergeableData(ix) =
-            m_mergeableValues[it->second].second;
-          ix += sizeof(TypedValue) / sizeof(void*);
-          assert(sizeof(TypedValue) % sizeof(void*) == 0);
+          auto& tv = m_mergeableValues[it->second].second;
+          auto* tva = (TypedValueAux*)mi->mergeableData(ix);
+          tva->m_data = tv.m_data;
+          tva->m_type = tv.m_type;
+          // leave tva->m_aux uninitialized
+          ix += sizeof(*tva) / sizeof(void*);
+          assert(sizeof(*tva) % sizeof(void*) == 0);
           break;
         }
         case UnitMergeKindDone:

@@ -123,7 +123,6 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     TypedValue* tv = &m_data[m_size];
     tv->m_data.num = val->m_data.num;
     tv->m_type = val->m_type;
-    tv->m_aux.u_hash = 0;
     ++m_size;
   }
   public: void resize(int64_t sz, TypedValue* val);
@@ -335,27 +334,27 @@ public:
      * hashcode. It is critical that when we return &data to clients, that
      * they not read or write the m_aux field.
      */
-    TypedValue   data;
+    TypedValueAux data;
     union {
       int64_t ikey;
       StringData *skey;
     };
-    inline bool hasStrKey() const { return data.m_aux.u_hash != 0; }
-    inline bool hasIntKey() const { return data.m_aux.u_hash == 0; }
+    inline bool hasStrKey() const { return data.hash() != 0; }
+    inline bool hasIntKey() const { return data.hash() == 0; }
     inline void setStrKey(StringData* k, strhash_t h) {
       skey = k;
       skey->incRefCount();
-      data.m_aux.u_hash = int32_t(h) | 0x80000000;
+      data.hash() = int32_t(h) | 0x80000000;
     }
     inline void setIntKey(int64_t k) {
       ikey = k;
-      data.m_aux.u_hash = 0;
+      data.hash() = 0;
     }
     inline int64_t hashKey() const {
-      return data.m_aux.u_hash == 0 ? ikey : data.m_aux.u_hash;
+      return data.hash() == 0 ? ikey : data.hash();
     }
     inline int32_t hash() const {
-      return data.m_aux.u_hash;
+      return data.hash();
     }
     bool validValue() const {
       return (intptr_t(data.m_type) > 0);
@@ -606,12 +605,12 @@ public:
   class Bucket {
   public:
     Bucket() : ikey(0), pListNext(nullptr), pListLast(nullptr), pNext(nullptr) {
-      data.m_aux.u_hash = 0;
+      data.hash() = 0;
     }
     Bucket(TypedValue* tv) : ikey(0), pListNext(nullptr), pListLast(nullptr),
         pNext(nullptr) {
       tvDup(tv, &data);
-      data.m_aux.u_hash = 0;
+      data.hash() = 0;
     }
     ~Bucket();
     // set the top bit for string hashes to make sure the hash
@@ -625,7 +624,7 @@ public:
      * int, nonzero values contain 31 bits of a string's hashcode.
      * It is critical that when we return &data to clients, that they not
      * read or write the m_aux field! */
-    TypedValue data;
+    TypedValueAux data;
     union {
       int64_t ikey;
       StringData* skey;
@@ -634,22 +633,22 @@ public:
     Bucket* pListLast;
     Bucket* pNext;
 
-    inline bool hasStrKey() const { return data.m_aux.u_hash != 0; }
-    inline bool hasIntKey() const { return data.m_aux.u_hash == 0; }
+    inline bool hasStrKey() const { return data.hash() != 0; }
+    inline bool hasIntKey() const { return data.hash() == 0; }
     inline void setStrKey(StringData* k, strhash_t h) {
       skey = k;
       skey->incRefCount();
-      data.m_aux.u_hash = encodeHash(h);
+      data.hash() = encodeHash(h);
     }
     inline void setIntKey(int64_t k) {
       ikey = k;
-      data.m_aux.u_hash = 0;
+      data.hash() = 0;
     }
     inline int64_t hashKey() const {
-      return data.m_aux.u_hash == 0 ? ikey : data.m_aux.u_hash;
+      return data.hash() == 0 ? ikey : data.hash();
     }
     inline int32_t hash() const {
-      return data.m_aux.u_hash;
+      return data.hash();
     }
 
     /**

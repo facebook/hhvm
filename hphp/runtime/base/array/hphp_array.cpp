@@ -133,7 +133,9 @@ HphpArray::HphpArray(uint size, const TypedValue* values) :
   Elm* data = m_data;
   for (uint i = 0; i < size; i++) {
     assert(hash[i] == HphpArray::ElmIndEmpty);
-    data[i].data = values[size - i - 1];
+    const TypedValue& tv = values[size - i - 1];
+    data[i].data.m_data = tv.m_data;
+    data[i].data.m_type = tv.m_type;
     data[i].setIntKey(i);
     hash[i] = i;
   }
@@ -1469,7 +1471,7 @@ inline ALWAYS_INLINE HphpArray* HphpArray::copyImpl(HphpArray* target) const {
       Elm* te = &targetElms[pos];
       if (e->data.m_type != KindOfTombstone) {
         te->key = e->key;
-        te->data.m_aux = e->data.m_aux;
+        te->data.hash() = e->data.hash();
         if (te->hasStrKey()) te->key->incRefCount();
         tvDupFlattenVars(&e->data, &te->data, this);
         assert(te->hash() == e->hash()); // ensure not clobbered.

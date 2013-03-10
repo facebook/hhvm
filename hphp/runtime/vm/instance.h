@@ -28,7 +28,7 @@
 namespace HPHP {
 namespace VM {
 
-void deepInitHelper(TypedValue*, const TypedValue*, size_t);
+void deepInitHelper(TypedValue*, const TypedValueAux*, size_t);
 
 class Instance : public ObjectData {
   // Do not declare any fields directly in Instance; instead embed them in

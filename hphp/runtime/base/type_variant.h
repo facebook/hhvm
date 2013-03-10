@@ -236,7 +236,7 @@ class Variant : private VariantBase {
 
     Variant goner(noInit);
     goner.m_data = lhs.m_data;
-    goner.m_type = lhs.m_type;;
+    goner.m_type = lhs.m_type;
 
     lhs.m_data = rhs.m_data;
     lhs.m_type = rhs.m_type == KindOfUninit ? KindOfNull : rhs.m_type;
@@ -249,12 +249,8 @@ class Variant : private VariantBase {
   inline ALWAYS_INLINE void destructImpl();
   inline ALWAYS_INLINE static void destructDataImpl(RefData* d, DataType t);
   friend class VarNR;
-  // This helper is only used to construct VarNR
-  void initForVarNR(DataType dt) { m_aux.u_varNrFlag = NR_FLAG; m_type = dt; }
 
  public:
-  bool isVarNR() const { return m_aux.u_varNrFlag == NR_FLAG; }
-
   /**
    * Break bindings and set to null.
    */
@@ -1511,7 +1507,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // VarNR
 
-class VarNR : private TypedValue {
+class VarNR : private TypedValueAux {
 public:
   // Use to hold variant that do not need ref-counting
   explicit VarNR(bool    v) { init(KindOfBoolean); m_data.num = (v?1:0);}
@@ -1542,28 +1538,25 @@ public:
   explicit VarNR(ArrayData *v);
   explicit VarNR(ObjectData *v);
 
-  VarNR(const VarNR &v) : TypedValue(v) {}
+  VarNR(const VarNR &v) : TypedValueAux(v) {}
 
   explicit VarNR() { asVariant()->setUninitNull(); }
 
-#ifdef DEBUG
   ~VarNR() { assert(checkRefCount()); }
-#endif
 
   operator CVarRef() const { return *asVariant(); }
 
   bool isNull() const {
     return asVariant()->isNull();
   }
-
-  bool isVarNR() const {
-    return asVariant()->isVarNR();
-  }
 private:
   VarNR(litstr  v); // not implemented
   VarNR(const std::string & v); // not implemented
 
-  void init(DataType dt) { asVariant()->initForVarNR(dt); }
+  void init(DataType dt) {
+    m_type = dt;
+    if (debug) varNrFlag() = NR_FLAG;
+  }
   const Variant *asVariant() const {
     return (const Variant*)this;
   }
@@ -1573,7 +1566,7 @@ private:
   bool checkRefCount() {
     if (m_type == KindOfRef) return false;
     if (!IS_REFCOUNTED_TYPE(m_type)) return true;
-    if (!isVarNR()) return false;
+    if (varNrFlag() != NR_FLAG) return false;
     switch (m_type) {
     case KindOfArray:
       return m_data.parr->getCount() > 0;

@@ -464,15 +464,15 @@ void assertTv(const TypedValue* tv) {
   always_assert(checkTv(tv));
 }
 
-void deepInitHelper(TypedValue* propVec, const TypedValue* propData,
+void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps) {
-  TypedValue* dst = propVec;
-  const TypedValue* src = propData;
+  auto* dst = propVec;
+  auto* src = propData;
   for (; src != propData + nProps; ++src, ++dst) {
     *dst = *src;
     // m_aux.u_deepInit is true for properties that need "deep" initialization
-    if (src->m_aux.u_deepInit) {
-      dst->m_data.pstr->incRefCount();
+    if (src->deepInit()) {
+      tvIncRef(dst);
       collectionDeepCopyTV(dst);
     }
   }

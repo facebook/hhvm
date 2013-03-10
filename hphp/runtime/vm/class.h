@@ -570,11 +570,13 @@ public:
     static PropInitVec* allocInRequestArena(const PropInitVec& src);
     static size_t dataOff() { return offsetof(PropInitVec, m_data); }
 
-    typedef TypedValue* iterator;
+    typedef TypedValueAux* iterator;
     iterator begin() { return m_data; }
     iterator end() { return m_data + m_size; }
-    TypedValue& operator[](size_t i) { assert(i < m_size); return m_data[i]; }
-    const TypedValue& operator[](size_t i) const {
+    TypedValueAux& operator[](size_t i) {
+      assert(i < m_size); return m_data[i];
+    }
+    const TypedValueAux& operator[](size_t i) const {
       assert(i < m_size); return m_data[i];
     }
     void push_back(const TypedValue& v);
@@ -582,7 +584,7 @@ public:
 
   private:
     PropInitVec(const PropInitVec&);
-    TypedValue* m_data;
+    TypedValueAux* m_data;
     unsigned m_size;
     bool m_smart;
   };

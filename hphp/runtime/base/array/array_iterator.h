@@ -391,7 +391,8 @@ class FullPosRange {
 };
 
 /**
- * MutableArrayIter is used internally within the HipHop runtime
+ * MutableArrayIter is used internally within the HipHop runtime in several
+ * places. Ideally, we should phase it out and use MArrayIter instead.
  */
 class MutableArrayIter : public FullPos {
  public:
@@ -407,7 +408,7 @@ class MutableArrayIter : public FullPos {
 };
 
 /**
- * MArrayIter is used by the VM
+ * MArrayIter is used by the VM to handle the MIter* instructions
  */
 class MArrayIter : public FullPos {
  public:

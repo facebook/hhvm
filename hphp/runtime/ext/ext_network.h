@@ -81,6 +81,8 @@ inline bool f_socket_set_timeout(CObjRef stream, int seconds,
 
 void f_header(CStrRef str, bool replace = true, int http_response_code = 0);
 
+Variant f_http_response_code(int response_code = 0);
+
 Array f_headers_list();
 
 bool f_headers_sent(VRefParam file = null, VRefParam line = null);

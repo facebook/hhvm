@@ -568,6 +568,25 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "http_response_code",
+    'desc'   => "Get and/or Set the HTTP response code.",
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "The current response code.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "response_code",
+        'type'   => Int32,
+        'value'  => "0",
+        'desc'   => "New response code to set.",
+      ),
+    ),
+  )
+);
+
+DefineFunction(
+  array(
     'name'   => "headers_list",
     'desc'   => "headers_list() will return a list of headers to be sent to the browser / client. To determine whether or not these headers have been sent yet, use headers_sent().",
     'flags'  =>  HasDocComment,

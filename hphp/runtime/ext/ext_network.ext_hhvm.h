@@ -198,6 +198,17 @@ http_response_code => rdx
 void fh_header(Value* str, bool replace, int http_response_code) asm("_ZN4HPHP8f_headerERKNS_6StringEbi");
 
 /*
+HPHP::Variant HPHP::f_http_response_code(int)
+_ZN4HPHP20f_http_response_codeEi
+
+(return value) => rax
+_rv => rdi
+response_code => rsi
+*/
+
+TypedValue* fh_http_response_code(TypedValue* _rv, int response_code) asm("_ZN4HPHP20f_http_response_codeEi");
+
+/*
 HPHP::Array HPHP::f_headers_list()
 _ZN4HPHP14f_headers_listEv
 

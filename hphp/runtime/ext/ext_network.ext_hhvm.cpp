@@ -872,6 +872,56 @@ TypedValue* fg_header(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Variant HPHP::f_http_response_code(int)
+_ZN4HPHP20f_http_response_codeEi
+
+(return value) => rax
+_rv => rdi
+response_code => rsi
+*/
+
+TypedValue* fh_http_response_code(TypedValue* _rv, int response_code) asm("_ZN4HPHP20f_http_response_codeEi");
+
+TypedValue * fg1_http_response_code(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_http_response_code(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToInt64InPlace(args-0);
+  fh_http_response_code((rv), (count > 0) ? (int)(args[-0].m_data.num) : (int)(0));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_http_response_code(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      if ((count <= 0 || (args-0)->m_type == KindOfInt64)) {
+        fh_http_response_code((&(rv)), (count > 0) ? (int)(args[-0].m_data.num) : (int)(0));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_http_response_code(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_toomany_arguments_nr("http_response_code", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Array HPHP::f_headers_list()
 _ZN4HPHP14f_headers_listEv
 

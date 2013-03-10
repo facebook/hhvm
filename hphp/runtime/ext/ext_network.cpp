@@ -904,6 +904,25 @@ void f_header(CStrRef str, bool replace /* = true */,
   }
 }
 
+Variant f_http_response_code(int response_code /*= 0 */) {
+  Transport *transport = g_context->getTransport();
+  if (!transport) {
+    raise_warning("Unable to access response code, no transport");
+    return false;
+  }
+
+  int old_code = transport->getResponseCode();
+  if (response_code) {
+    transport->setResponse(response_code, "explicit_header_response_code");
+  }
+
+  if (old_code) {
+    return old_code;
+  }
+
+  return response_code ? true : false;
+}
+
 Array f_headers_list() {
   Transport *transport = g_context->getTransport();
   if (transport) {

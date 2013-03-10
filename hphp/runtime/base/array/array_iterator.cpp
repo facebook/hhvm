@@ -304,20 +304,6 @@ CVarRef ArrayIter::secondRef() {
 ///////////////////////////////////////////////////////////////////////////////
 // FullPos
 
-void FullPos::reset() {
-  ArrayData* container = getContainer();
-  if (container) {
-    container->freeFullPos(*this);
-    assert(!getContainer());
-  }
-  setResetFlag(false);
-  // unprotect the data
-  if (hasAd()) {
-    decRefArr(getAd());
-    setVar(nullptr);
-  }
-}
-
 bool FullPos::end() const {
   return !const_cast<FullPos*>(this)->prepare();
 }
@@ -497,24 +483,13 @@ bool MutableArrayIter::advance() {
   return true;
 }
 
-void MutableArrayIter::begin(Variant& map, Variant* key, Variant& val,
-                             CStrRef context) {
-  try {
-    new (this) MutableArrayIter(map.begin(key, val, context));
-  } catch (...) {
-    setContainer(nullptr);
-    setVar(nullptr);
-    throw;
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // MArrayIter
 
 MArrayIter::MArrayIter(const RefData* ref) {
   m_var = nullptr;
   ref->incRefCount();
-  setVar((Variant*)(ref->tv()));
+  setVar(ref->var());
   assert(hasVar());
   escalateCheck();
   ArrayData* data = cowCheck();
@@ -552,7 +527,7 @@ MArrayIter::~MArrayIter() {
   // unprotect the data
   if (hasVar()) {
     RefData* ref = (RefData*)getVar();
-    if (ref->decRefCount() == 0) ref->release();
+    decRefRef(ref);
   } else if (hasAd()) {
     decRefArr(getAd());
   }

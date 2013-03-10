@@ -284,7 +284,6 @@ class FullPos {
   FullPos() : m_pos(0), m_container(NULL), m_next(NULL) {}
 
  public:
-  void reset();
   void release() { delete this; }
 
   // Returns true if the iterator points past the last element (or if
@@ -392,19 +391,15 @@ class FullPosRange {
 };
 
 /**
- * MutableArrayIter is used by code genereated by HPHPc, and it is also used
- * internally within the HipHop runtime
+ * MutableArrayIter is used internally within the HipHop runtime
  */
 class MutableArrayIter : public FullPos {
  public:
-  MutableArrayIter() { m_var = NULL; }
   MutableArrayIter(const Variant* var, Variant* key, Variant& val);
   MutableArrayIter(ArrayData* data, Variant* key, Variant& val);
   ~MutableArrayIter();
 
   bool advance();
-
-  void begin(Variant& map, Variant* key, Variant& val, CStrRef context);
 
  private:
   Variant* m_key;

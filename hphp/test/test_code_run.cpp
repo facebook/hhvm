@@ -18961,6 +18961,29 @@ bool TestCodeRun::TestDefined() {
        "  var_dump('FOO');"
        "}");
 
+  MVCRO("<?php\n"
+        "abstract class class1 {\n"
+        "  public function getConstViaThis() {\n"
+        "    return defined('static::SOME_CONST') ? static::SOME_CONST : false;\n"
+        "  }\n"
+        "  public static function getConstViaFrame() {\n"
+        "    return defined('static::SOME_CONST') ? static::SOME_CONST : false;\n"
+        "  }\n"
+        "}\n"
+        "\n"
+        "final class class2 extends class1 {\n"
+        "  const SOME_CONST = 2;\n"
+        "}\n"
+        "\n"
+        "$class2 = new class2;\n"
+        "\n"
+        "var_dump($class2->getConstViaThis());\n"
+        "var_dump($class2->getConstViaFrame());\n"
+      ,
+      "int(2)\n"
+      "int(2)\n"
+      );
+
   return true;
 }
 

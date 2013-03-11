@@ -29,3 +29,9 @@ function main() {
   echo "\n";
 }
 main();
+
+function bug() {
+    return defined('static::SOME_CONST');
+}
+
+bug();

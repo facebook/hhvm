@@ -26,8 +26,13 @@
 #include <runtime/ext/ext_misc.h>
 #include <runtime/vm/bytecode.h>
 #include <util/parser/scanner.h>
+#include <runtime/base/class_info.h>
+#include <runtime/vm/translator/translator.h>
+#include <runtime/vm/translator/translator-inline.h>
 
 namespace HPHP {
+
+using VM::Transl::CallerFrame;
 
 // Make sure "tokenizer" gets added to the list of extensions
 IMPLEMENT_DEFAULT_EXTENSION(tokenizer);
@@ -120,7 +125,7 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
     char *constantName = colon + 2;
     String className(data, classNameLen, CopyString);
 
-    // translate "self" or "parent"
+    // translate "self" or "parent" or "static"
     if (className == "self") {
       String this_class = g_vmContext->getContextClassName();
       if (this_class.empty()) {
@@ -135,6 +140,25 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
         throw FatalErrorException("Cannot access parent");
       } else {
         className = parent_class;
+      }
+    } else if (className == "static") {
+      CallerFrame cf;
+      auto ar = cf();
+      if (ar) {
+        HPHP::VM::Class* cls;
+        if (ar->hasThis()) {
+          cls = ar->getThis()->getVMClass();
+        } else if (ar->hasClass()) {
+          cls = ar->getClass();
+        } else {
+          cls = NULL;
+        }
+        if (cls) {
+          className = cls->nameRef();
+        } else {
+          throw FatalErrorException("Cannot access static:: "
+            "when no class scope is active");
+        }
       }
     }
     if (class_exists(className)) { // taking care of volatile class

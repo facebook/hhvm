@@ -176,7 +176,7 @@ SrcKey::trace(const char *fmt, ...) const {
       strlen(curUnit()->filepath()->data()) > 0)
     filepath = curUnit()->filepath()->data();
   Trace::trace("%s:%llx %6d: %20s ",
-               filepath, (unsigned long long)m_funcId,
+               filepath, (unsigned long long)getFuncId(),
                m_offset, s.c_str());
   va_list a;
   va_start(a, fmt);
@@ -203,7 +203,7 @@ SrcKey::pretty() const {
   std::ostringstream result;
   const char* filepath = tl_regState == REGSTATE_CLEAN ?
     curUnit()->filepath()->data() : "unknown";
-  result << filepath << ':' << m_funcId << ':' << m_offset;
+  result << filepath << ':' << getFuncId() << ':' << m_offset;
   return result.str();
 }
 
@@ -3417,7 +3417,7 @@ TransRec::print(uint64_t profCount) const {
            "  stubLen = 0x%x\n"
            "  profCount = %" PRIu64 "\n"
            "  bcMapping = %lu\n",
-           id, md5.toString().c_str(), src.m_funcId, src.offset(),
+           id, md5.toString().c_str(), src.getFuncId(), src.offset(),
            bcStopOffset, kind, getTransKindName(kind), aStart, aLen,
            astubsStart, astubsLen, profCount, bcMapping.size());
 

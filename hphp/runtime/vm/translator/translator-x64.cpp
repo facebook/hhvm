@@ -589,7 +589,7 @@ TranslatorX64::emitRB(X64Assembler& a,
   PhysRegSaver rs(a, toSave | kSpecialCrossTraceRegs);
   int arg = 0;
   emitImmReg(a, t, argNumToRegName[arg++]);
-  emitImmReg(a, sk.m_funcId, argNumToRegName[arg++]);
+  emitImmReg(a, sk.getFuncId(), argNumToRegName[arg++]);
   emitImmReg(a, sk.m_offset, argNumToRegName[arg++]);
   a.    call((TCA)ringbufferEntry);
 }
@@ -1350,7 +1350,7 @@ TranslatorX64::getTranslation(SrcKey sk, bool align,
   curFunc()->validate();
   SKTRACE(2, sk, "getTranslation: curUnit %s funcId %" PRIx64 " offset %d\n",
           curUnit()->filepath()->data(),
-          sk.m_funcId,
+          sk.getFuncId(),
           sk.offset());
   SKTRACE(2, sk, "   funcId: %" PRIx64 "\n",
           curFunc()->getFuncId());
@@ -2434,7 +2434,7 @@ void
 TranslatorX64::emitCondJmp(SrcKey skTaken, SrcKey skNotTaken,
                            ConditionCode cc) {
   // should be true for SrcKeys generated via OpJmpZ/OpJmpNZ
-  assert(skTaken.m_funcId == skNotTaken.m_funcId);
+  assert(skTaken.getFuncId() == skNotTaken.getFuncId());
 
   // reserve space for a smashable jnz/jmp pair; both initially point
   // to our stub.
@@ -2461,12 +2461,12 @@ TranslatorX64::emitCondJmp(SrcKey skTaken, SrcKey skNotTaken,
 
 static void skToName(SrcKey sk, char* name) {
   sprintf(name, "sk_%08lx_%05d",
-          long(sk.m_funcId), sk.offset());
+          long(sk.getFuncId()), sk.offset());
 }
 
 static void skToClusterName(SrcKey sk, char* name) {
   sprintf(name, "skCluster_%08lx_%05d",
-          long(sk.m_funcId), sk.offset());
+          long(sk.getFuncId()), sk.offset());
 }
 
 static void translToName(const TCA tca, char* name) {
@@ -11475,8 +11475,8 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose
   // metadata is not yet visible.
-  TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n", start, sk.m_funcId,
-        sk.m_offset);
+  TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n", 
+      start, sk.getFuncId(), sk.m_offset);
   srcRec.newTranslation(a, astubs, start);
   TRACE(1, "tx64: %zd-byte tracelet\n", a.code.frontier - start);
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {

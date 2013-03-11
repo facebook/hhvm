@@ -72,7 +72,10 @@ extern __thread VMRegState tl_regState;
  * the same contents.
  */
 struct SrcKey {
+  private:
   Func::FuncId m_funcId;
+
+  public:
   Offset m_offset;
 
   SrcKey() : m_funcId(Func::InvalidId), m_offset(0) { }
@@ -88,7 +91,7 @@ struct SrcKey {
 #define CMP(field) \
     if (field < r.field) return -1; \
     if (field > r.field) return 1
-    CMP(m_funcId);
+    CMP(getFuncId());
     CMP(m_offset);
 #undef CMP
     return 0;
@@ -107,7 +110,7 @@ struct SrcKey {
   }
   // Hash function for both hash_map and tbb conventions.
   static size_t hash(const SrcKey &sk) {
-    return HPHP::hash_int64_pair(sk.m_funcId, uint64_t(sk.m_offset));
+    return HPHP::hash_int64_pair(sk.getFuncId(), uint64_t(sk.m_offset));
   }
   size_t operator()(const SrcKey& sk) const {
     return hash(sk);
@@ -121,14 +124,23 @@ struct SrcKey {
   typedef uint64_t AtomicInt;
 
   AtomicInt toAtomicInt() const {
-    return uint64_t(m_funcId) << 32 | uint64_t(m_offset);
+    return uint64_t(getFuncId()) << 32 | uint64_t(m_offset);
   }
 
   static SrcKey fromAtomicInt(AtomicInt in) {
     SrcKey k;
-    k.m_funcId = in >> 32;
+    k.setFuncId(in >> 32);
     k.m_offset = in & 0xffffffff;
     return k;
+  }
+
+  void setFuncId(Func::FuncId id) {
+    assert(id != Func::InvalidId);
+    m_funcId = id;
+  }
+  Func::FuncId getFuncId() const {
+    assert(m_funcId != Func::InvalidId);
+    return m_funcId;
   }
 
   void trace(const char *fmt, ...) const;

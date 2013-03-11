@@ -144,7 +144,10 @@ struct Func {
 #endif
   }
 
-  FuncId getFuncId() const { return m_funcId; }
+  FuncId getFuncId() const { 
+    assert(m_funcId != InvalidId);
+    return m_funcId; 
+  }
   void setFuncId(FuncId id);
   void setNewFuncId();
 

@@ -363,8 +363,6 @@ HPHP::VM::ActRec* vm_get_previous_frame();
 Variant vm_call_user_func(CVarRef function, CArrRef params,
                           bool forwarding = false);
 
-Variant vm_default_invoke_file(bool incOnce);
-
 /**
  * Invoking an arbitrary static method.
  */
@@ -506,20 +504,20 @@ inline Variant f_unserialize(CStrRef str) {
   return unserialize_from_buffer(str.data(), str.size());
 }
 
-class LVariableTable;
 String resolve_include(CStrRef file, const char* currentDir,
                        bool (*tryFile)(CStrRef file, void* ctx), void* ctx);
 Variant include(CStrRef file, bool once = false,
-                LVariableTable* variables = nullptr,
                 const char *currentDir = "",
                 bool raiseNotice = true);
 Variant require(CStrRef file, bool once = false,
-                LVariableTable* variables = nullptr,
                 const char *currentDir = "",
                 bool raiseNotice = true);
 Variant include_impl_invoke(CStrRef file, bool once = false,
-                            LVariableTable* variables = nullptr,
                             const char *currentDir = "");
+Variant invoke_file(CStrRef file, bool once = false,
+                    const char *currentDir = nullptr);
+bool invoke_file_impl(Variant &res, CStrRef path, bool once,
+                      const char *currentDir);
 
 /**
  * For wrapping expressions that have no effect, so to make gcc happy.
@@ -546,10 +544,6 @@ inline const SmartObject<T> &id(const SmartObject<T> &v) { return v; }
  * through copy-constructor elision.
  */
 inline Variant wrap_variant(CVarRef x) { return x; }
-
-inline LVariableTable *lvar_ptr(const LVariableTable &vt) {
-  return const_cast<LVariableTable*>(&vt);
-}
 
 bool function_exists(CStrRef function_name);
 

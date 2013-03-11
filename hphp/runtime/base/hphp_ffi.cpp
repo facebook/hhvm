@@ -23,7 +23,6 @@
 #include <runtime/base/externals.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/program_functions.h>
-#include <runtime/base/variable_table.h>
 #include <runtime/base/thread_init_fini.h>
 
 using namespace HPHP;
@@ -180,14 +179,11 @@ int hphp_ffi_create_object(void **ret, const char *cls, ArrayData *args) {
 }
 
 int hphp_ffi_get_global(void **ret, const char *name) {
-  LVariableTable *g = get_variable_table();
-  Variant result = g->get(name);
-  return hphp_ffi_exportVariant(result, ret);
+  const_assert(false);
 }
 
 void hphp_ffi_set_global(const char *name, Variant *value) {
-  LVariableTable *g = get_variable_table();
-  g->get(name) = *value;
+  const_assert(false);
 }
 
 int hphp_ffi_get_constant(void **ret, const char *constant) {

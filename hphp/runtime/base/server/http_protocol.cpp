@@ -92,15 +92,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   // $_ENV
   process_env_variables(g->GV(_ENV));
   g->GV(_ENV).set("HPHP", 1);
-  switch (getHphpBinaryType()) {
-  case HphpBinary::hhvm:
-    g->GV(_ENV).set("HHVM", 1);
-    if (RuntimeOption::EvalJit) {
-      g->GV(_ENV).set("HHVM_JIT", 1);
-    }
-    break;
-  case HphpBinary::hphpi: g->GV(_ENV).set("HPHPI", 1); break;
-  default: break;
+  g->GV(_ENV).set("HHVM", 1);
+  if (RuntimeOption::EvalJit) {
+    g->GV(_ENV).set("HHVM_JIT", 1);
   }
 
   bool isServer = RuntimeOption::serverExecutionMode();

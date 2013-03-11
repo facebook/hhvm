@@ -332,7 +332,7 @@ void f_spl_autoload(CStrRef class_name,
   bool found = false;
   for (ArrayIter iter(ext); iter; ++iter) {
     String fileName = lClass + iter.second();
-    include(fileName, true, nullptr, "", false);
+    include(fileName, true, "", false);
     if (f_class_exists(class_name, false)) {
       found = true;
       break;

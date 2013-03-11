@@ -111,14 +111,7 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
 bool f_array_walk(VRefParam input, CVarRef funcname,
                   CVarRef userdata = null_variant);
 
-/**
- * LVariableTable parameter is added by HPHP.
- */
 Array f_compact(int _argc, CVarRef varname, CArrRef _argv = null_array);
-Array compact(RVariableTable *variables, int _argc, CVarRef varname,
-              CArrRef _argv = null_array);
-Array compact(LVariableTable *variables, int _argc, CVarRef varname,
-              CArrRef _argv = null_array);
 
 bool f_shuffle(VRefParam array);
 int64_t f_count(CVarRef var, bool recursive = false);

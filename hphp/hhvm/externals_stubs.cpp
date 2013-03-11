@@ -30,23 +30,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-HphpBinary::Type getHphpBinaryType() { return HphpBinary::hhvm; }
-
-Variant invoke_file(CStrRef s,
-                    bool once,
-                    LVariableTable* variables,
-                    const char *currentDir) {
-  assert(!variables); // this LVariableTable is unused in HHVM
-  {
-    Variant r;
-    if (eval_invoke_file_hook(r, s, once, variables, currentDir)) {
-      return r;
-    }
-  }
-  if (s.empty()) return vm_default_invoke_file(once);
-  return throw_missing_file(s.c_str());
-}
-
 Object create_object_only(CStrRef s, ObjectData* root /* = NULL*/) {
   ObjectData *obj = eval_create_object_only_hook(s, root);
   if (UNLIKELY(!obj)) throw_missing_class(s);

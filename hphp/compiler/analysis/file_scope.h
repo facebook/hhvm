@@ -48,8 +48,8 @@ public:
     ContainsDynamicVariable   = 0x001,
     ContainsLDynamicVariable  = 0x002,
     VariableArgument          = 0x004,
-    ContainsExtract           = 0x008, // need special VariableTable
-    ContainsCompact           = 0x010, // need RVariableTable + exists()
+    ContainsExtract           = 0x008, // contains call to extract()
+    ContainsCompact           = 0x010, // contains call to compact()
     ContainsReference         = 0x020, // returns ref or has ref parameters
     ReferenceVariableArgument = 0x040, // like sscanf or fscanf
     ContainsUnset             = 0x080, // need special handling

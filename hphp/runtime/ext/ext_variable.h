@@ -245,8 +245,6 @@ Variant f_unserialize(CStrRef str);
 // variable table
 
 Array f_get_defined_vars();
-Array get_defined_vars(LVariableTable *variables);
-Array get_defined_vars(RVariableTable *variables);
 
 bool f_import_request_variables(CStrRef types, CStrRef prefix = "");
 
@@ -259,13 +257,8 @@ bool f_import_request_variables(CStrRef types, CStrRef prefix = "");
 #define EXTR_IF_EXISTS          6
 #define EXTR_REFS               0x100
 
-/**
- * LVariableTable parameter is added by HPHP.
- */
 int64_t f_extract(CArrRef var_array, int extract_type = EXTR_OVERWRITE,
-                CStrRef prefix = "");
-int extract(LVariableTable *variables, CArrRef var_array,
-            int extract_type = EXTR_OVERWRITE, String prefix = "");
+                  CStrRef prefix = "");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

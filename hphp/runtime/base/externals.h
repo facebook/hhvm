@@ -66,14 +66,6 @@ extern const char *g_paramrtti_map[];
 Object create_object(CStrRef s, const Array &params,
                      bool init = true, ObjectData *root = nullptr);
 extern Object create_object_only(CStrRef s, ObjectData *root = nullptr);
-/**
- * Dynamically include a file.
- */
-class LVariableTable;
-extern Variant invoke_file(CStrRef file, bool once = false,
-                           LVariableTable* variables = nullptr,
-                           const char *currentDir = nullptr);
-extern bool hphp_could_invoke_file(CStrRef file, void*);
 
 /**
  * Returns a thread local global variable class pointer.
@@ -87,7 +79,6 @@ extern Array get_global_state();
 /**
  * Returns a thread local global variable table pointer.
  */
-extern LVariableTable *get_variable_table();
 typedef VM::GlobalNameValueTableWrapper SystemGlobals;
 extern SystemGlobals *get_system_globals();
 

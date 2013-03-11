@@ -560,37 +560,6 @@ Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
   return ret;
 }
 
-template<typename T>
-static void compact(T *variables, Array &ret, CVarRef var) {
-  if (var.isArray()) {
-    CArrRef vars = var.toCArrRef();
-    for (ArrayIter iter(vars); iter; ++iter) {
-      compact(variables, ret, iter.second());
-    }
-  } else {
-    String varname = var.toString();
-    if (!varname.empty() && variables->exists(varname)) {
-      ret.set(varname, variables->get(varname));
-    }
-  }
-}
-
-Array compact(RVariableTable *variables, int _argc, CVarRef varname,
-              CArrRef _argv /* = null_array */) {
-  Array ret = Array::Create();
-  compact(variables, ret, varname);
-  compact(variables, ret, _argv);
-  return ret;
-}
-
-Array compact(LVariableTable *variables, int _argc, CVarRef varname,
-              CArrRef _argv /* = null_array */) {
-  Array ret = Array::Create();
-  compact(variables, ret, varname);
-  compact(variables, ret, _argv);
-  return ret;
-}
-
 static int php_count_recursive(CArrRef array) {
   long cnt = array.size();
   for (ArrayIter iter(array); iter; ++iter) {

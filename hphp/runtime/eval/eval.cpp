@@ -16,7 +16,6 @@
 
 #include <runtime/eval/eval.h>
 #include <runtime/base/hphp_system.h>
-#include <runtime/eval/runtime/file_repository.h>
 
 namespace HPHP {
 
@@ -28,21 +27,6 @@ ObjectData *eval_create_object_only_hook(CStrRef s, ObjectData *root) {
   assert_not_implemented(root == nullptr);
   const StringData* className = StringData::GetStaticString(s.get());
   return g_vmContext->createObjectOnly((StringData*)className);
-}
-bool eval_invoke_file_hook(Variant &res, CStrRef path, bool once,
-                           LVariableTable* variables, const char *currentDir) {
-  bool initial;
-  HPHP::Eval::PhpFile* efile =
-    g_vmContext->lookupPhpFile(path.get(), currentDir, &initial);
-  HPHP::VM::Unit* u = nullptr;
-  if (efile) u = efile->unit();
-  if (u == nullptr) {
-    return false;
-  }
-  if (!once || initial) {
-    g_vmContext->invokeUnit((TypedValue*)(&res), u);
-  }
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

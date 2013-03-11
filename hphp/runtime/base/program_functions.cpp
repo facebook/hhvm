@@ -460,15 +460,9 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 
   process_env_variables(g->GV(_ENV));
   g->GV(_ENV).set("HPHP", 1);
-  switch (getHphpBinaryType()) {
-  case HphpBinary::hhvm:
-    g->GV(_ENV).set("HHVM", 1);
-    if (RuntimeOption::EvalJit) {
-      g->GV(_ENV).set("HHVM_JIT", 1);
-    }
-    break;
-  case HphpBinary::hphpi: g->GV(_ENV).set("HPHPI", 1); break;
-  default: break;
+  g->GV(_ENV).set("HHVM", 1);
+  if (RuntimeOption::EvalJit) {
+    g->GV(_ENV).set("HHVM_JIT", 1);
   }
 
   process_cmd_arguments(argc, argv);
@@ -856,11 +850,7 @@ static int execute_program_impl(int argc, char **argv) {
 #define HPHP_VERSION(v) const char *version = #v;
 #include "../../version"
 
-    switch (getHphpBinaryType()) {
-    case HphpBinary::hhvm: { cout << "HipHop VM"; break; }
-    case HphpBinary::hphpi: { cout << "HipHop Interpreter"; break; }
-    default: { cout << "Compiled by HipHop Compiler"; break; }
-    }
+    cout << "HipHop VM";
     cout << " v" << version << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << VM::Repo::kSchemaId << "\n";
@@ -1239,7 +1229,7 @@ static bool hphp_warmup(ExecutionContext *context,
     ServerStatsHelper ssh("reqinit");
     try {
       if (!reqInitDoc.empty()) {
-        include_impl_invoke(reqInitDoc, true, get_variable_table());
+        include_impl_invoke(reqInitDoc, true);
       }
       if (!reqInitFunc.empty()) {
         invoke(reqInitFunc.c_str(), Array());
@@ -1319,7 +1309,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
         funcRet->assignVal(invoke(cmd.c_str(), funcParams));
       } else {
         if (isServer) hphp_chdir_file(cmd);
-        include_impl_invoke(cmd.c_str(), once, get_variable_table());
+        include_impl_invoke(cmd.c_str(), once);
       }
     } catch (...) {
       handle_invoke_exception(ret, context, errorMsg, error, richErrorMsg);

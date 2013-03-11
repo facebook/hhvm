@@ -137,18 +137,10 @@ Array f_get_defined_vars() {
   }
 }
 
-Array get_defined_vars(LVariableTable *variables) {
-  return variables->getDefinedVars();
-}
-
-Array get_defined_vars(RVariableTable *variables) {
-  return variables->getDefinedVars();
-}
-
 bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {
   throw NotSupportedException(__func__,
-                              "It is bad coding practice to remove scoping "
-                              "of variables just to achieve coding convenience, "
+                              "It is bad coding practice to remove scoping of "
+                              "variables just to achieve coding convenience, "
                               "esp. in a language that encourages global "
                               "variables. This is possible to implement "
                               "though, by declaring those global variables "
@@ -157,7 +149,7 @@ bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {
 }
 
 int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
-                CStrRef prefix /* = "" */) {
+                  CStrRef prefix /* = "" */) {
   bool reference = extract_type & EXTR_REFS;
   extract_type &= ~EXTR_REFS;
 
@@ -206,53 +198,6 @@ int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
       continue;
     }
     g_vmContext->setVar(nameData, iter.nvSecond(), reference);
-    count++;
-  }
-  return count;
-}
-
-int extract(LVariableTable *variables, CArrRef var_array,
-            int extract_type /* = EXTR_OVERWRITE */,
-            String prefix /* = "" */) {
-  bool reference = extract_type & EXTR_REFS;
-  extract_type &= ~EXTR_REFS;
-
-  int count = 0;
-  for (ArrayIter iter(var_array); iter; ++iter) {
-    String name = iter.first();
-
-    switch (extract_type) {
-    case EXTR_SKIP:
-      if (variables->exists(name)) continue;
-      break;
-    case EXTR_IF_EXISTS:
-      if (!variables->exists(name)) continue;
-      break;
-    case EXTR_PREFIX_SAME:
-      if (variables->exists(name)) name = prefix + "_" + name;
-      break;
-    case EXTR_PREFIX_ALL:
-      name = prefix + "_" + name;
-      break;
-    case EXTR_PREFIX_INVALID:
-      if (!name.isValidVariableName()) name = prefix + "_" + name;
-      break;
-    case EXTR_PREFIX_IF_EXISTS:
-      if (!variables->exists(name)) continue;
-      name = prefix + "_" + name;
-      break;
-    default:
-      break;
-    }
-
-    // skip invalid variable names, as in PHP
-    if (!name.isValidVariableName()) continue;
-
-    if (reference) {
-      variables->get(name).assignRef(iter.secondRef());
-    } else {
-      variables->get(name).assignVal(iter.second());
-    }
     count++;
   }
   return count;

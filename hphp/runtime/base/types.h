@@ -584,16 +584,6 @@ public:
 #define ACCESSPARAMS_DECL AccessFlags::Type flags = AccessFlags::None
 #define ACCESSPARAMS_IMPL AccessFlags::Type flags
 
-namespace HphpBinary {
-  enum Type {
-    hphpc,
-    hphpi,
-    hhvm,
-    program,
-    test
-  };
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

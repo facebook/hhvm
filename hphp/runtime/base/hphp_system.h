@@ -33,7 +33,6 @@
 #include <runtime/base/util/smart_object.h>
 #include <runtime/base/list_assignment.h>
 #include <runtime/base/resource_data.h>
-#include <runtime/base/variable_table.h>
 #include <runtime/base/string_util.h>
 #include <util/util.h>
 #include <runtime/base/file/plain_file.h>
@@ -50,7 +49,6 @@ namespace HPHP {
 
 const char* getHphpCompilerVersion();
 const char* getHphpCompilerId();
-HphpBinary::Type getHphpBinaryType();
 
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

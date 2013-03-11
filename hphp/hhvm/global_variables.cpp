@@ -40,7 +40,6 @@ void free_global_variables_after_sweep() {
 }
 
 SystemGlobals*  get_system_globals() { return get_global_variables(); }
-LVariableTable* get_variable_table() { return nullptr; }
 
 VM::GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
   NameValueTable* tab) : NameValueTableWrapper(tab) {

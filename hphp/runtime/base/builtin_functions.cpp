@@ -24,8 +24,8 @@
 #include <runtime/base/execution_context.h>
 #include <runtime/base/strings.h>
 #include <runtime/eval/eval.h>
+#include <runtime/eval/runtime/file_repository.h>
 #include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/eval.h>
 #include <runtime/ext/ext_process.h>
 #include <runtime/ext/ext_class.h>
 #include <runtime/ext/ext_function.h>
@@ -373,21 +373,6 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
   g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
                           nullptr, invName);
   return ret;
-}
-
-Variant vm_default_invoke_file(bool incOnce) {
-  SystemGlobals* g = (SystemGlobals*)get_global_variables();
-  Variant& v_argc = g->GV(argc);
-  Variant& v_argv = g->GV(argv);
-  if (more(v_argc, int64_t(1))) {
-    v_argc--;
-    v_argv.dequeue();
-    String s = toString(v_argv.rvalAt(int64_t(0), AccessFlags::Error));
-    Variant r;
-    if (eval_invoke_file_hook(r, s, incOnce, nullptr, "")) return r;
-    return throw_missing_file(s.c_str());
-  }
-  return true;
 }
 
 Variant f_call_user_func_array(CVarRef function, CArrRef params,
@@ -1172,12 +1157,11 @@ String get_source_filename(litstr path, bool dir_component /* = false */) {
   }
 }
 
-Variant include_impl_invoke(CStrRef file, bool once, LVariableTable* variables,
-                            const char *currentDir) {
+Variant include_impl_invoke(CStrRef file, bool once, const char *currentDir) {
   if (file[0] == '/') {
     if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
       try {
-        return invoke_file(file, once, variables, currentDir);
+        return invoke_file(file, once, currentDir);
       } catch(PhpFileDoesNotExistException &e) {}
     }
 
@@ -1185,11 +1169,55 @@ Variant include_impl_invoke(CStrRef file, bool once, LVariableTable* variables,
                                        string(file.data())));
 
     // Don't try/catch - We want the exception to be passed along
-    return invoke_file(rel_path, once, variables, currentDir);
+    return invoke_file(rel_path, once, currentDir);
   } else {
     // Don't try/catch - We want the exception to be passed along
-    return invoke_file(file, once, variables, currentDir);
+    return invoke_file(file, once, currentDir);
   }
+}
+
+Variant invoke_file(CStrRef s, bool once, const char *currentDir) {
+  Variant r;
+  if (invoke_file_impl(r, s, once, currentDir)) {
+    return r;
+  }
+  if (!s.empty()) {
+    return throw_missing_file(s.c_str());
+  }
+  // The gross hack which follows is here so that "hhvm foo.php" works
+  // the same as "hhvm -f foo.php".
+  // TODO Task #2171414: Find a less hacky way to accomplish this; we probably
+  // should be handling this elsewhere at a higher level rather than within
+  // the bowels of the invoke/include machinery
+  SystemGlobals* g = (SystemGlobals*)get_global_variables();
+  Variant& v_argc = g->GV(argc);
+  Variant& v_argv = g->GV(argv);
+  if (!more(v_argc, int64_t(1))) {
+    return true;
+  }
+  v_argc--;
+  v_argv.dequeue();
+  String s2 = toString(v_argv.rvalAt(int64_t(0), AccessFlags::Error));
+  if (invoke_file_impl(r, s2, once, "")) {
+    return r;
+  }
+  return throw_missing_file(s2.c_str());
+}
+
+bool invoke_file_impl(Variant &res, CStrRef path, bool once,
+                      const char *currentDir) {
+  bool initial;
+  HPHP::Eval::PhpFile* efile =
+    g_vmContext->lookupPhpFile(path.get(), currentDir, &initial);
+  HPHP::VM::Unit* u = nullptr;
+  if (efile) u = efile->unit();
+  if (u == nullptr) {
+    return false;
+  }
+  if (!once || initial) {
+    g_vmContext->invokeUnit((TypedValue*)(&res), u);
+  }
+  return true;
 }
 
 /**
@@ -1200,7 +1228,6 @@ Variant include_impl_invoke(CStrRef file, bool once, LVariableTable* variables,
  */
 struct IncludeImplInvokeContext {
   bool once;
-  LVariableTable* variables;
   const char* currentDir;
 
   Variant returnValue;
@@ -1211,7 +1238,6 @@ static bool include_impl_invoke_context(CStrRef file, void* ctx) {
   bool invoked_file = false;
   try {
     context->returnValue = include_impl_invoke(file, context->once,
-                                               context->variables,
                                                context->currentDir);
     invoked_file = true;
   } catch (PhpFileDoesNotExistException& e) {
@@ -1300,10 +1326,9 @@ String resolve_include(CStrRef file, const char* currentDir,
 }
 
 static Variant include_impl(CStrRef file, bool once,
-                            LVariableTable* variables,
                             const char *currentDir, bool required,
                             bool raiseNotice) {
-  struct IncludeImplInvokeContext ctx = {once, variables, currentDir};
+  struct IncludeImplInvokeContext ctx = {once, currentDir};
   String can_path = resolve_include(file, currentDir,
                                     include_impl_invoke_context, (void*)&ctx);
 
@@ -1324,17 +1349,15 @@ static Variant include_impl(CStrRef file, bool once,
 }
 
 Variant include(CStrRef file, bool once /* = false */,
-                LVariableTable* variables /* = NULL */,
                 const char *currentDir /* = NULL */,
                 bool raiseNotice /*= true*/) {
-  return include_impl(file, once, variables, currentDir, false, raiseNotice);
+  return include_impl(file, once, currentDir, false, raiseNotice);
 }
 
 Variant require(CStrRef file, bool once /* = false */,
-                LVariableTable* variables /* = NULL */,
                 const char *currentDir /* = NULL */,
                 bool raiseNotice /*= true*/) {
-  return include_impl(file, once, variables, currentDir, true, raiseNotice);
+  return include_impl(file, once, currentDir, true, raiseNotice);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

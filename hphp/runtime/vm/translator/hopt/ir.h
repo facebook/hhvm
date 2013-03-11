@@ -633,10 +633,7 @@ inline Opcode queryJmpToQueryOp(Opcode opc) {
  * with potentially expensive-to-repeat operations.  TODO(#2053369)
  */
 inline bool disableBranchFusion(Opcode opc) {
-  return opc == InstanceOf ||
-         opc == NInstanceOf ||
-         opc == InstanceOfBitmask ||
-         opc == NInstanceOfBitmask;
+  return opc == InstanceOf || opc == NInstanceOf;
 }
 
 /*

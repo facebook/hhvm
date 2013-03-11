@@ -201,16 +201,24 @@ static Variant gzinflate(const char *data, int len, int limit /* = 0 */) {
   stream.zalloc = (alloc_func) Z_NULL;
   stream.zfree = (free_func) Z_NULL;
 
-  unsigned long length;
+  unsigned long length = 0;
   int status;
-  unsigned int factor = 4, maxfactor = 16;
+
+  // We reallocate with an expanding factor, but want to start with a
+  // smaller factor on larger strings to hope not to hit the max
+  // string size as fast.
+  unsigned int factor = len < 128 * 1024 * 1024 ? 4 : 2;
+  unsigned int maxfactor = 16;
+
   String str(std::max(plength, (unsigned long)StringData::MaxSmallSize),
              ReserveString);
   do {
-    length = plength ? plength : (unsigned long)len * (1 << factor++);
-    if (length > StringData::MaxSize) {
+    if (length >= StringData::MaxSize) {
       return false;
     }
+
+    length = plength ? plength : (unsigned long)len * (1 << factor++);
+    length = std::min<unsigned long>(length, StringData::MaxSize);
     char* s2 = str.reserve(length).ptr;
 
     stream.next_in = (Bytef *)data;

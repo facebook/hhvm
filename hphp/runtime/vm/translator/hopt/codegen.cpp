@@ -621,6 +621,9 @@ static void shuffleArgs(Asm& a, ArgGroup& args) {
       if (kind == ArgDesc::Addr) {
         // an lea whose src and dest regs are the same
         a.    lea    (srcReg[args[i].getImm().q()], dstReg);
+      } else if (args[i].isZeroExtend()) {
+        // if passing bool as TypedValue.m_data, must zero extend
+        a.    movzbl (rbyte(dstReg), r32(dstReg));
       }
       continue;
     }

@@ -126,7 +126,7 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
     String className(data, classNameLen, CopyString);
 
     // translate "self" or "parent" or "static"
-    if (className == "self") {
+    if (className == s_self) {
       String this_class = g_vmContext->getContextClassName();
       if (this_class.empty()) {
         throw FatalErrorException("Cannot access self:: "
@@ -134,14 +134,14 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
       } else {
         className = this_class;
       }
-    } else if (className == "parent") {
+    } else if (className == s_parent) {
       String parent_class = g_vmContext->getParentContextClassName();
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");
       } else {
         className = parent_class;
       }
-    } else if (className == "static") {
+    } else if (className == s_static) {
       CallerFrame cf;
       auto ar = cf();
       if (ar) {

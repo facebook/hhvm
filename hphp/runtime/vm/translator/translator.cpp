@@ -721,11 +721,11 @@ getDynLocType(const vector<DynLocation*>& inputs,
       // to the targetcache if none exists.
       StringData *sd = curUnit()->lookupLitstrId(ni->imm[0].u_SA);
       assert(sd);
-      const TypedValue* tv = g_vmContext->getCns(sd, true, false);
+      const TypedValue* tv = Unit::lookupPersistentCns(sd);
       if (tv) {
         return RuntimeType(tv->m_type);
       }
-      tv = g_vmContext->getCns(sd);
+      tv = Unit::lookupCns(sd);
       if (tv) {
         ni->outputPredicted = true;
         TRACE(1, "CNS %s: guessing runtime type %d\n", sd->data(), tv->m_type);

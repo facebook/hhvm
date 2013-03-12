@@ -1033,9 +1033,6 @@ public:
   // Called at the end of eval()
   void requestExit();
 
-  // Called when name is bound to a value
-  void defineCns(StringData* name);
-
   // Returns a string with cache usage information
   virtual std::string getUsage();
   virtual size_t getCodeSize();

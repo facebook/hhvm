@@ -5574,21 +5574,31 @@ TranslatorX64::translateColAddElemC(const Tracelet& t,
              A(valLoc));
 }
 
-static void undefCns(const StringData* nm) {
-  VMRegAnchor _;
-  TypedValue *cns = g_vmContext->getCns(const_cast<StringData*>(nm));
-  if (!cns) {
-    if (AutoloadHandler::s_instance->autoloadConstant(StrNR(nm))) {
-      cns = g_vmContext->getCns(const_cast<StringData*>(nm));
+static int64_t undefCns(const TypedValue* tv, const StringData* nm, Cell* c1) {
+  assert(tv->m_type == KindOfUninit);
+  TypedValue *cns = nullptr;
+  if (UNLIKELY(tv->m_data.pref != nullptr)) {
+    ClassInfo::ConstantInfo* ci =
+      (ClassInfo::ConstantInfo*)(void*)tv->m_data.pref;
+    cns = const_cast<Variant&>(ci->getDeferredValue()).asTypedValue();
+    tvReadCell(cns, c1);
+  } else {
+    if (UNLIKELY(TargetCache::s_constants != nullptr)) {
+      cns = TargetCache::s_constants->HphpArray::nvGet(nm);
     }
     if (!cns) {
+      cns = Unit::loadCns(const_cast<StringData*>(nm));
+    }
+    if (UNLIKELY(!cns)) {
       raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
-      g_vmContext->getStack().pushStringNoRc(const_cast<StringData*>(nm));
-      return;
+      c1->m_data.pstr = const_cast<StringData*>(nm);
+      c1->m_type = BitwiseKindOfString;
+    } else {
+      c1->m_type = cns->m_type;
+      c1->m_data = cns->m_data;
     }
   }
-  Cell* c1 = g_vmContext->getStack().allocC();
-  tvReadCell(cns, c1);
+  return c1->m_type;
 }
 
 void TranslatorX64::emitSideExit(Asm& a, const NormalizedInstruction& i,
@@ -5626,36 +5636,37 @@ TranslatorX64::translateCns(const Tracelet& t,
   // be.
   DataType outType = i.outStack->valueType();
   StringData* name = curUnit()->lookupLitstrId(i.imm[0].u_SA);
-  const TypedValue* tv = g_vmContext->getCns(name, true, false);
+  const TypedValue* tv = Unit::lookupPersistentCns(name);
   bool checkDefined = false;
-  if (outType != KindOfInvalid && tv == nullptr &&
-      !RuntimeOption::RepoAuthoritative) {
-    PreConstDepMap::accessor acc;
-    tv = findUniquePreConst(acc, name);
-    if (tv != nullptr) {
-      checkDefined = true;
-      acc->second.srcKeys.insert(t.m_sk);
-      Stats::emitInc(a, Stats::Tx64_CnsFast);
-    } else {
-      // We had a unique value while analyzing but don't anymore. This
-      // should be rare so just punt to keep things simple.
-      punt();
+  if (tv) {
+    // KindOfUninit is for a small number of "dynamic"
+    // system constants
+    checkDefined = tv->m_type == KindOfUninit;
+  } else {
+    if (outType != KindOfInvalid &&
+        !RuntimeOption::RepoAuthoritative) {
+      PreConstDepMap::accessor acc;
+      tv = findUniquePreConst(acc, name);
+      if (tv != nullptr) {
+        checkDefined = true;
+        acc->second.srcKeys.insert(t.m_sk);
+        Stats::emitInc(a, Stats::Tx64_CnsFast);
+      } else {
+        // We had a unique value while analyzing but don't anymore. This
+        // should be rare so just punt to keep things simple.
+        punt();
+      }
     }
   }
   using namespace TargetCache;
   if (tv && tvIsStatic(tv)) {
-    m_regMap.allocOutputRegs(i);
+    ScratchReg ret(m_regMap);
     boost::scoped_ptr<DiamondReturn> astubsRet;
+    m_regMap.invalidate(i.outStack->location);
     if (checkDefined) {
-      size_t bit = allocCnsBit(name);
-      uint8_t mask;
-      CacheHandle ch = bitOffToHandleAndMask(bit, mask);
-      // The 'test' instruction takes a signed immediate and the mask is
-      // unsigned, but everything works out okay because the immediate is
-      // the same size as the other operand. However, we have to sign-extend
-      // the mask to 64 bits to make the assembler happy.
-      int64_t imm = (int64_t)(int8_t)mask;
-      a.testb(imm, rVmTl[ch]);
+      CacheHandle ch = StringData::GetCnsHandle(name);
+      assert(ch);
+      emitCmpTVType(a, KindOfUninit, rVmTl[ch + TVOFF(m_type)]);
       if (!i.next) astubsRet.reset(new DiamondReturn);
       {
         // If we get to the optimistic translation and the constant
@@ -5666,31 +5677,46 @@ TranslatorX64::translateCns(const Tracelet& t,
         // enough that it's not worth the complexity.
         UnlikelyIfBlock ifZero(CC_Z, a, astubs, astubsRet.get());
         Stats::emitInc(astubs, Stats::Tx64_CnsFast, -1);
-        EMIT_CALL(astubs, undefCns, IMM((uintptr_t)name));
+        EMIT_CALL(astubs, undefCns,
+                  RPLUS(rVmTl, ch),
+                  IMM((uintptr_t)name),
+                  A(i.outStack->location));
         recordReentrantStubCall(i);
         if (i.next) {
+          emitMovRegReg(astubs, rax, r(ret));
+          ifZero.reconcileEarly();
+          astubs.cmp_imm32_reg64(outType, r(ret));
+          astubs.je(a.code.frontier);
+          // Now we're definitely exiting.
+          // Save it, and thaw
+          RegAlloc save = m_regMap;
+          m_regMap.defrost();
           emitSideExit(astubs, i, true);
+          m_regMap = save;
         } else {
-          m_regMap.invalidate(i.outStack->location);
+          // DiamondReturn will take care of branching
+          // to the return, below
         }
       }
+    } else {
+      // Its type and value are known at compile-time.
+      assert(tv->m_type == outType ||
+             (IS_STRING_TYPE(tv->m_type) && IS_STRING_TYPE(outType)));
+      // tv is static; no need to incref
     }
-    // Its type and value are known at compile-time.
-    assert(tv->m_type == outType ||
-           (IS_STRING_TYPE(tv->m_type) && IS_STRING_TYPE(outType)));
+    m_regMap.allocOutputRegs(i);
     PhysReg r = getReg(i.outStack->location);
     a.   movq (tv->m_data.num, r);
-    // tv is static; no need to incref
     return;
   }
 
   Stats::emitInc(a, Stats::Tx64_CnsSlow);
-  CacheHandle ch = allocConstant(name);
+  CacheHandle ch = StringData::DefCnsHandle(name, false);
   TRACE(2, "Cns: %s -> ch %" PRId64 "\n", name->data(), ch);
   // Load the constant out of the thread-private tl_targetCaches.
   ScratchReg cns(m_regMap);
   a.    lea_reg64_disp_reg64(rVmTl, ch, r(cns));
-  emitCmpTVType(a, 0, r(cns)[TVOFF(m_type)]);
+  emitCmpTVType(a, KindOfUninit, r(cns)[TVOFF(m_type)]);
   DiamondReturn astubsRet;
   int stackDest = 0 - int(sizeof(Cell)); // popped - pushed
   {
@@ -5698,7 +5724,10 @@ TranslatorX64::translateCns(const Tracelet& t,
     // at least stackDest and tmp are specific to the translation
     // context.
     UnlikelyIfBlock ifb(CC_Z, a, astubs, &astubsRet);
-    EMIT_CALL(astubs, undefCns, IMM((uintptr_t)name));
+    EMIT_CALL(astubs, undefCns,
+              R(r(cns)),
+              IMM((uintptr_t)name),
+              A(i.outStack->location));
     recordReentrantStubCall(i);
     m_regMap.invalidate(i.outStack->location);
   }
@@ -5713,70 +5742,32 @@ TranslatorX64::analyzeDefCns(Tracelet& t,
                              NormalizedInstruction& i) {
   StringData* name = curUnit()->lookupLitstrId(i.imm[0].u_SA);
   /* don't bother to translate if it names a builtin constant */
-  i.m_txFlags = supportedPlan(!g_vmContext->getCns(name, true, false));
-}
-
-typedef void (*defCnsHelper_func_t)(TargetCache::CacheHandle ch, Variant *inout,
-                                    StringData *name, size_t bit);
-template<bool setBit>
-static void defCnsHelper(TargetCache::CacheHandle ch, Variant *inout,
-                         StringData *name, size_t bit) {
-  using namespace TargetCache;
-  TypedValue *tv = (TypedValue*)handleToPtr(ch);
-  if (LIKELY(tv->m_type == KindOfUninit &&
-             inout->isAllowedAsConstantValue())) {
-    inout->setEvalScalar();
-    if (LIKELY(g_vmContext->insertCns(name, (TypedValue*)inout))) {
-      tvDup((TypedValue*)inout, tv);
-      *inout = true;
-      if (setBit) {
-        DEBUG_ONLY bool alreadyDefined = testAndSetBit(bit);
-        assert(!alreadyDefined);
-      }
-      return;
-    }
-    tv = (TypedValue*)&false_varNR;
-  }
-
-  if (tv->m_type != KindOfUninit) {
-    raise_warning(Strings::CONSTANT_ALREADY_DEFINED, name->data());
-  } else {
-    assert(!inout->isAllowedAsConstantValue());
-    raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
-  }
-  *inout = false;
+  i.m_txFlags = supportedPlan(!Unit::lookupPersistentCns(name));
 }
 
 void
 TranslatorX64::translateDefCns(const Tracelet& t,
                                const NormalizedInstruction& i) {
+  using namespace TargetCache;
+
   StringData* name = curUnit()->lookupLitstrId(i.imm[0].u_SA);
+  CacheHandle ch = StringData::DefCnsHandle(name, false);
 
   if (false) {
-    TargetCache::CacheHandle ch = 0;
-    size_t bit = 0;
-    Variant *inout = 0;
-    StringData *name = 0;
-    defCnsHelper<true>(ch, inout, name, bit);
-    defCnsHelper<false>(ch, inout, name, bit);
+    TypedValue *value = 0;
+    Unit::defCnsHelper(ch, value, name);
   }
 
-  using namespace TargetCache;
-  CacheHandle ch = allocConstant(name);
   TRACE(2, "DefCns: %s -> ch %" PRId64 "\n", name->data(), ch);
 
   m_regMap.cleanLoc(i.inputs[0]->location);
-  if (RuntimeOption::RepoAuthoritative) {
-    EMIT_CALL(a, (defCnsHelper_func_t)defCnsHelper<false>,
-               IMM(ch), A(i.inputs[0]->location),
-               IMM((uint64_t)name));
-  } else {
-    EMIT_CALL(a, (defCnsHelper_func_t)defCnsHelper<true>,
-               IMM(ch), A(i.inputs[0]->location),
-               IMM((uint64_t)name), IMM(allocCnsBit(name)));
-  }
+  EMIT_CALL(a, Unit::defCnsHelper,
+            IMM(ch), A(i.inputs[0]->location),
+            IMM((uint64_t)name));
+
   recordReentrantCall(i);
-  m_regMap.invalidate(i.outStack->location);
+  m_regMap.bind(rax, i.outStack->location, i.outStack->outerType(),
+                RegInfo::DIRTY);
 }
 
 void
@@ -9721,7 +9712,8 @@ static const Func* autoloadMissingFunc(const StringData* funcName,
                                        TargetCache::CacheHandle ch,
                                        bool safe) {
   VMRegAnchor _;
-  AutoloadHandler::s_instance->autoloadFunc(funcName->data());
+  AutoloadHandler::s_instance->autoloadFunc(
+    const_cast<StringData*>(funcName));
   Func* toCall = *(Func**)TargetCache::handleToPtr(ch);
   /* toCall could be a different function due to renaming */
   if (toCall) {
@@ -12124,10 +12116,6 @@ void TranslatorX64::recordGdbStub(const X64Assembler& a,
     m_debugInfo.recordStub(rangeFrom(a, start, &a == &astubs ? true : false),
                            name);
   }
-}
-
-void TranslatorX64::defineCns(StringData* name) {
-  TargetCache::fillConstant(name);
 }
 
 size_t TranslatorX64::getCodeSize() {

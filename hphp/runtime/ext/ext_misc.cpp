@@ -109,12 +109,7 @@ Variant f_constant(CStrRef name) {
     raise_warning("Couldn't find constant %s", data);
     return uninit_null();
   } else {
-    TypedValue* cns = g_vmContext->getCns(name.get());
-    if (cns == NULL) {
-      if (AutoloadHandler::s_instance->autoloadConstant(name)) {
-        cns = g_vmContext->getCns(name.get());
-      }
-    }
+    TypedValue* cns = VM::Unit::loadCns(name.get());
     if (cns) return tvAsVariant(cns);
     return uninit_null();
   }
@@ -125,9 +120,7 @@ bool f_define(CStrRef name, CVarRef value,
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
   }
-  // TODO: Once we're inlining constants from hphpc this should
-  // fatal or fail in some other way.
-  return g_vmContext->setCns(name.get(), value, true);
+  return VM::Unit::defCns(name.get(), value.getTypedAccessor());
 }
 
 bool f_defined(CStrRef name, bool autoload /* = true */) {
@@ -146,15 +139,9 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
     }
     return false;
   } else {
-    // system/uniquely defined scalar constant
-    if (ClassInfo::FindConstant(name)) return true;
-    if (g_vmContext->defined(name)) {
-      return true;
-    }
-    if (!autoload || !AutoloadHandler::s_instance->autoloadConstant(name)) {
-      return false;
-    }
-    return g_vmContext->defined(name);
+    return autoload ?
+      VM::Unit::loadCns(name.get()) :
+      VM::Unit::lookupCns(name.get());
   }
 }
 

@@ -4700,18 +4700,13 @@ void CodeGenerator::cgDefCns(IRInstruction* inst) {
   UNUSED SSATmp* cnsName = inst->getSrc(0);
   UNUSED SSATmp* val     = inst->getSrc(1);
   using namespace TargetCache;
-  UNUSED CacheHandle ch = allocConstant((StringData*)cnsName->getValStr());
 #if 0
+  UNUSED CacheHandle ch = allocConstant((StringData*)cnsName->getValStr());
   // ALIA:TODO
   // XXX second param is an inout pointer to a Ref, so we need to pass
   // the pointer to a stack slot
-  if (RuntimeOption::RepoAuthoritative) {
-    EMIT_CALL3(a, defCnsHelper<false>, IMM(ch), A(i.inputs[0]->location),
-               IMM((uint64_t)name));
-  } else {
-    EMIT_CALL4(a, defCnsHelper<true>, IMM(ch), A(i.inputs[0]->location),
-               IMM((uint64_t)name), IMM(allocCnsBit(name)));
-  }
+  EMIT_CALL3(a, defCnsHelper, IMM(ch), A(i.inputs[0]->location),
+             IMM((uint64_t)name));
 #endif
 
   CG_PUNT(DefCns);

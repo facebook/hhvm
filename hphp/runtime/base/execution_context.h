@@ -491,8 +491,6 @@ OPCODES
   void fPushObjMethodImpl(
       VM::Class* cls, StringData* name, ObjectData* obj, int numArgs);
 
-private:
-  HphpArray m_constants;
 public:
   typedef hphp_hash_map<const StringData*, ClassInfo::ConstantInfo*,
                         string_data_hash, string_data_same> ConstInfoMap;
@@ -603,12 +601,6 @@ public:
   CStrRef getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  bool defined(CStrRef name);
-  TypedValue* getCns(StringData* cns, bool system=true, bool dynamic=true);
-  bool setCns(StringData* cns, CVarRef val, bool dynamic = false);
-  inline bool insertCns(StringData* name, TypedValue* value) {
-    return m_constants.nvInsert(name, value);
-  }
   bool renameFunction(const StringData* oldName, const StringData* newName);
   bool isFunctionRenameable(const StringData* name);
   void addRenameableFunctions(ArrayData* arr);

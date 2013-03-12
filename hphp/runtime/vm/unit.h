@@ -50,9 +50,13 @@ enum UnitMergeKind {
   // UnitMergeKindClass is required to be 0 for correctness.
   UnitMergeKindClass = 0,
   UnitMergeKindUniqueDefinedClass = 1,
+  // Top level, scalar defines in the unit
   UnitMergeKindDefine = 2,
-  UnitMergeKindGlobal = 3,
-  // 4 and 5 are available
+  // Top level, scalar defines that will be loaded once
+  // and preserved from request to request
+  UnitMergeKindPersistentDefine = 3,
+  UnitMergeKindGlobal = 4,
+  // 5 is available
   UnitMergeKindReqDoc = 6,
   UnitMergeKindDone = 7,
   // We cannot add more kinds here; this has to fit in 3 bits.
@@ -63,8 +67,7 @@ enum UnitMergeState {
   UnitMergeStateMerging = 1,
   UnitMergeStateMerged = 2,
   UnitMergeStateUniqueFuncs = 4,
-  UnitMergeStateUniqueClasses = 8,
-  UnitMergeStateUniqueDefinedClasses = 16,
+  UnitMergeStateNeedsCompact = 8,
   UnitMergeStateEmpty = 32
 };
 
@@ -489,6 +492,18 @@ struct Unit {
   static Class* defClass(const HPHP::VM::PreClass* preClass,
                          bool failIsFatal = true);
   void defTypedef(Id id);
+
+  static TypedValue* lookupCns(const StringData* cnsName);
+  static TypedValue* lookupPersistentCns(const StringData* cnsName);
+  static TypedValue* loadCns(const StringData* cnsName);
+  static bool defCns(const StringData* cnsName, const TypedValue* value,
+                     bool persistent = false);
+  static uint64_t defCnsHelper(uint64_t ch,
+                               const TypedValue* value,
+                               const StringData* cnsName);
+  static void defDynamicSystemConstant(const StringData* cnsName,
+                                       const void* data);
+  static bool defCnsDynamic(const StringData* cnsName, TypedValue* value);
 
   /*
    * Find the Class* for a defined class corresponding to the name

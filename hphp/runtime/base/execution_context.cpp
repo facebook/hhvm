@@ -72,7 +72,6 @@ BaseExecutionContext::BaseExecutionContext() :
 }
 
 VMExecutionContext::VMExecutionContext() :
-    m_constants(RuntimeOption::EvalConstEstimate),
     m_lambdaCounter(0), m_nesting(0),
     m_injTables(nullptr), m_breakPointFilter(nullptr), m_lastLocFilter(nullptr),
     m_interpreting(false), m_dbgNoBreak(false),
@@ -150,11 +149,6 @@ VMExecutionContext::~VMExecutionContext() {
       decRefStr(const_cast<StringData*>(i->name));
     }
   }
-
-  // Any non-static contents of this array will be swept so the
-  // destructor doesn't need to walk the contents and clean everything
-  // up.
-  m_constants.dropContentsOnFloor();
 }
 
 void BaseExecutionContext::backupSession() {

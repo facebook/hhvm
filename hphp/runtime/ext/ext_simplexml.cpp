@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_simplexml.h>
 #include <runtime/ext/ext_file.h>
+#include <runtime/ext/ext_class.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/util/request_local.h>
 
@@ -239,7 +240,7 @@ Variant f_simplexml_load_string(CStrRef data,
                                 int64_t options /* = 0 */,
                                 CStrRef ns /* = "" */,
                                 bool is_prefix /* = false */) {
-  if (!class_exists(class_name)) {
+  if (!f_class_exists(class_name)) {
     throw_invalid_argument("class %s does not exist", class_name.data());
     return uninit_null();
   }

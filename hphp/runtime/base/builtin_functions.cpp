@@ -66,38 +66,6 @@ StaticString s_failure("failure");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool class_exists(CStrRef class_name, bool autoload /* = true */) {
-  return f_class_exists(class_name, autoload);
-}
-
-String get_static_class_name(CVarRef objOrClassName) {
-  if (objOrClassName.isString()) {
-    return objOrClassName.toString();
-  }
-  if (objOrClassName.isObject()) {
-    return objOrClassName.toObject()->o_getClassName();
-  }
-  raise_error("Class name must be a valid object or a string");
-  return "";
-}
-
-Variant getDynamicConstant(CVarRef v, CStrRef name) {
-  if (isInitialized(v)) return v;
-  if (AutoloadHandler::s_instance->autoloadConstant(name) &&
-      isInitialized(v)) {
-    return v;
-  }
-  raise_notice(Strings::UNDEFINED_CONSTANT,
-               name.c_str(), name.c_str());
-  return name;
-}
-
-String getUndefinedConstant(CStrRef name) {
-  raise_notice(Strings::UNDEFINED_CONSTANT,
-               name.c_str(), name.c_str());
-  return name;
-}
-
 bool array_is_valid_callback(CArrRef arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
@@ -1255,8 +1223,7 @@ class ClassExistsChecker {
 class ConstantExistsChecker {
  public:
   bool operator()(CStrRef name) const {
-    if (ClassInfo::FindConstant(name)) return true;
-    return g_vmContext->defined(name);
+    return VM::Unit::lookupCns(name.get()) != nullptr;
   }
 };
 
@@ -1315,12 +1282,12 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
   }
 }
 
-bool AutoloadHandler::autoloadFunc(CStrRef name) {
+bool AutoloadHandler::autoloadFunc(StringData* name) {
   return !m_map.isNull() &&
     loadFromMap(name, s_function, true, function_exists) != Failure;
 }
 
-bool AutoloadHandler::autoloadConstant(CStrRef name) {
+bool AutoloadHandler::autoloadConstant(StringData* name) {
   return !m_map.isNull() &&
     loadFromMap(name, s_constant, false, ConstantExistsChecker()) != Failure;
 }

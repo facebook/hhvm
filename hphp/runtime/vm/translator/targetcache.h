@@ -43,6 +43,11 @@ extern size_t s_frontier;
 extern size_t s_persistent_frontier;
 extern size_t s_persistent_start;
 
+/*
+ * Array of dynamically defined constants
+ */
+extern __thread HphpArray* s_constants;
+
 static const int kConditionFlagsOff = 0;
 
 /*
@@ -94,7 +99,6 @@ CacheHandle namedAlloc(const StringData* name, int numBytes, int align) {
 }
 
 size_t allocBit();
-size_t allocCnsBit(const StringData* name);
 CacheHandle bitOffToHandleAndMask(size_t bit, uint8_t &mask);
 bool testBit(CacheHandle handle, uint32_t mask);
 bool testBit(size_t bit);
@@ -326,13 +330,9 @@ CacheHandle allocNameDef(const NamedEntity* name);
 /*
  * Constants.
  *
- * The request-private value of a constant. This one is a bit
- * different: we don't record a key, per se, expecting the translation
- * to remember it for us. When the targetcache area gets reset, the
- * translator must call fillConstant again.
+ * The request-private value of a constant.
  */
-CacheHandle allocConstant(StringData* name);
-void fillConstant(StringData* name);
+CacheHandle allocConstant(uint32_t* handlep, bool persistent);
 
 CacheHandle allocClassConstant(StringData* name);
 TypedValue* lookupClassConstant(TypedValue* cache,
@@ -361,7 +361,6 @@ private:
   static inline SPropCache* cacheAtHandle(CacheHandle handle) {
     return (SPropCache*)(uintptr_t(tl_targetCaches) + handle);
   }
-  CacheHandle allocConstantLocked(StringData* name);
 public:
   TypedValue* m_tv;  // public; it is used from TC and we assert the offset
   static CacheHandle alloc(const StringData* sd = nullptr) {

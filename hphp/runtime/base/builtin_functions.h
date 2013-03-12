@@ -238,8 +238,6 @@ bool set_line(int line0, int char0 = 0, int line1 = 0, int char1 = 0);
 // isset/unset
 
 inline bool isInitialized(CVarRef v) { return v.isInitialized();}
-Variant getDynamicConstant(CVarRef v, CStrRef name);
-String getUndefinedConstant(CStrRef name);
 
 inline bool isset(bool v)    { return true; }
 inline bool isset(char v)    { return true; }
@@ -348,8 +346,8 @@ Variant &unsetLval(Array &v, const T &key) {
 
 bool array_is_valid_callback(CArrRef arr);
 
-bool class_exists(CStrRef class_name, bool autoload = true);
-String get_static_class_name(CVarRef objOrClassName);
+Variant f_call_user_func_array(CVarRef function, CArrRef params,
+                               bool bound = false);
 
 const HPHP::VM::Func*
 vm_decode_function(CVarRef function,
@@ -568,8 +566,8 @@ public:
   bool isRunning();
 
   bool invokeHandler(CStrRef className, bool forceSplStack = false);
-  bool autoloadFunc(CStrRef name);
-  bool autoloadConstant(CStrRef name);
+  bool autoloadFunc(StringData* name);
+  bool autoloadConstant(StringData* name);
   bool autoloadType(CStrRef name);
   bool setMap(CArrRef map, CStrRef root);
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);

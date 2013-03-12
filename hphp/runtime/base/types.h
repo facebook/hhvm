@@ -206,8 +206,19 @@ static_assert(KindOfUninit == 0,
               "Several things assume this tag is 0, expecially target cache");
 
 const unsigned int kDataTypeMask = 0x7F;
-
 BOOST_STATIC_ASSERT(MaxNumDataTypes - 1 <= kDataTypeMask);
+
+const unsigned int kNotConstantValueTypeMask = KindOfRef;
+static_assert(kNotConstantValueTypeMask & KindOfArray &&
+              kNotConstantValueTypeMask & KindOfObject &&
+              kNotConstantValueTypeMask & KindOfRef,
+              "DataType & kNotConstantValueTypeMask must be non-zero for "
+              "Array, Object and Ref types");
+static_assert(!(kNotConstantValueTypeMask &
+                (KindOfNull|KindOfBoolean|KindOfInt64|KindOfDouble|
+                 KindOfStaticString|KindOfString)),
+              "DataType & kNotConstantValueTypeMask must be zero for "
+              "null, bool, int, double and string types");
 
 // All DataTypes greater than this value are refcounted.
 const DataType KindOfRefCountThreshold = KindOfStaticString;

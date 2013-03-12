@@ -200,6 +200,7 @@ void ProcessInit() {
     *(info->m_clsPtr) = cls;
   }
 
+  ClassInfo::InitializeSystemConstants();
   Stack::ValidateStackSize();
   SystemLib::s_inited = true;
 

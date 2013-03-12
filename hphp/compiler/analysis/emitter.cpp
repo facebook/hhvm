@@ -1677,7 +1677,9 @@ void EmitterVisitor::visit(FileScopePtr file) {
                 StringData *name;
                 TypedValue tv;
                 if (func->isSimpleDefine(&name, &tv)) {
-                  m_ue.pushMergeableDef(UnitMergeKindDefine, name, tv);
+                  UnitMergeKind k = func->isDefineWithoutImpl(ar) ?
+                    UnitMergeKindPersistentDefine : UnitMergeKindDefine;
+                  m_ue.pushMergeableDef(k, name, tv);
                   visit(s);
                   continue;
                 }

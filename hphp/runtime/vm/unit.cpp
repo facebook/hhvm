@@ -761,6 +761,16 @@ void Unit::loadFunc(const Func *func) {
   const_cast<Func*>(func)->m_cachedOffset = ne->m_cachedFuncOffset;
 }
 
+static void mergeCns(TypedValue& tv, TypedValue *value,
+                     StringData *name) {
+  if (LIKELY(tv.m_type == KindOfUninit)) {
+    tv = *value;
+    return;
+  }
+
+  raise_warning(Strings::CONSTANT_ALREADY_DEFINED, name->data());
+}
+
 static SimpleMutex unitInitLock(false /* reentrant */, RankUnitInit);
 
 void Unit::initialMerge() {
@@ -799,13 +809,13 @@ void Unit::initialMerge() {
        * the pointer will be followed by a TypedValue representing
        * the value being defined/assigned.
        */
-      bool allClassesUnique = true;
+      bool needsCompact = false;
       int ix = m_mergeInfo->m_firstHoistablePreClass;
       int end = m_mergeInfo->m_firstMergeablePreClass;
       while (ix < end) {
         PreClass* pre = (PreClass*)m_mergeInfo->mergeableObj(ix++);
-        if (allClassesUnique) {
-          allClassesUnique = pre->attrs() & AttrUnique;
+        if (pre->attrs() & AttrUnique) {
+          needsCompact = true;
         }
       }
       if (isMergeOnly()) {
@@ -819,8 +829,8 @@ void Unit::initialMerge() {
             case UnitMergeKindDone:
               not_reached();
             case UnitMergeKindClass:
-              if (allClassesUnique) {
-                allClassesUnique = ((PreClass*)obj)->attrs() & AttrUnique;
+              if (((PreClass*)obj)->attrs() & AttrUnique) {
+                needsCompact = true;
               }
               break;
             case UnitMergeKindReqDoc: {
@@ -833,11 +843,18 @@ void Unit::initialMerge() {
               m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
               break;
             }
+            case UnitMergeKindPersistentDefine:
+              needsCompact = true;
             case UnitMergeKindDefine: {
               StringData* s = (StringData*)((char*)obj - (int)k);
               auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
               ix += sizeof(*v) / sizeof(void*);
-              v->cacheHandle() = TargetCache::allocConstant(s);
+              v->cacheHandle() = StringData::DefCnsHandle(
+                s, k == UnitMergeKindPersistentDefine);
+              if (k == UnitMergeKindPersistentDefine) {
+                mergeCns(TargetCache::handleToRef<TypedValue>(v->cacheHandle()),
+                         v, s);
+              }
               break;
             }
             case UnitMergeKindGlobal: {
@@ -851,21 +868,97 @@ void Unit::initialMerge() {
           ix++;
         }
       }
-      if (allClassesUnique) state |= UnitMergeStateUniqueClasses;
+      if (needsCompact) state |= UnitMergeStateNeedsCompact;
     }
     m_mergeState = UnitMergeStateMerged | state;
   }
 }
 
-static void mergeCns(TypedValue& tv, TypedValue *value,
-                     StringData *name) {
-  if (LIKELY(tv.m_type == KindOfUninit &&
-             g_vmContext->insertCns(name, value))) {
-    tvDup(value, &tv);
-    return;
+TypedValue* Unit::lookupCns(const StringData* cnsName) {
+  TargetCache::CacheHandle handle = StringData::GetCnsHandle(cnsName);
+  if (LIKELY(handle != 0)) {
+    TypedValue& tv = TargetCache::handleToRef<TypedValue>(handle);
+    if (LIKELY(tv.m_type != KindOfUninit)) return &tv;
+    if (UNLIKELY(tv.m_data.pref != nullptr)) {
+      ClassInfo::ConstantInfo* ci =
+        (ClassInfo::ConstantInfo*)(void*)tv.m_data.pref;
+      return const_cast<Variant&>(ci->getDeferredValue()).asTypedValue();
+    }
   }
+  if (UNLIKELY(TargetCache::s_constants != nullptr)) {
+    return TargetCache::s_constants->HphpArray::nvGet(cnsName);
+  }
+  return nullptr;
+}
 
-  raise_warning(Strings::CONSTANT_ALREADY_DEFINED, name->data());
+TypedValue* Unit::lookupPersistentCns(const StringData* cnsName) {
+  TargetCache::CacheHandle handle = StringData::GetCnsHandle(cnsName);
+  if (!TargetCache::isPersistentHandle(handle)) return nullptr;
+  return &TargetCache::handleToRef<TypedValue>(handle);
+}
+
+TypedValue* Unit::loadCns(const StringData* cnsName) {
+  TypedValue* tv = lookupCns(cnsName);
+  if (LIKELY(tv != nullptr)) return tv;
+  if (!AutoloadHandler::s_instance->autoloadConstant(
+        const_cast<StringData*>(cnsName))) {
+    return nullptr;
+  }
+  return lookupCns(cnsName);
+}
+
+bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
+                  bool persistent /* = false */) {
+  TargetCache::CacheHandle handle =
+    StringData::DefCnsHandle(cnsName, persistent);
+
+  if (UNLIKELY(handle == 0)) {
+    if (UNLIKELY(!TargetCache::s_constants)) {
+      /*
+       * This only happens when we call define on a non
+       * static string. Not worth presizing or otherwise
+       * optimizing for.
+       */
+      TargetCache::s_constants = NEW(HphpArray)(1);
+      TargetCache::s_constants->incRefCount();
+    }
+    if (TargetCache::s_constants->nvInsert(
+          const_cast<StringData*>(cnsName), const_cast<TypedValue*>(value))) {
+      return true;
+    }
+    raise_warning(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
+    return false;
+  }
+  return defCnsHelper(handle, value, cnsName);
+}
+
+uint64_t Unit::defCnsHelper(uint64_t ch,
+                            const TypedValue *value,
+                            const StringData *cnsName) {
+  TypedValue* cns = &TargetCache::handleToRef<TypedValue>(ch);
+  if (UNLIKELY(cns->m_type != KindOfUninit) ||
+      UNLIKELY(cns->m_data.pref != nullptr)) {
+    raise_warning(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
+  } else if (UNLIKELY(!tvAsCVarRef(value).isAllowedAsConstantValue())) {
+    raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
+  } else {
+    Variant v = tvAsCVarRef(value);
+    v.setEvalScalar();
+    cns->m_data = v.asTypedValue()->m_data;
+    cns->m_type = v.asTypedValue()->m_type;
+    return true;
+  }
+  return false;
+}
+
+void Unit::defDynamicSystemConstant(const StringData* cnsName,
+                                    const void* data) {
+  TargetCache::CacheHandle handle =
+    StringData::DefCnsHandle(cnsName, true);
+  assert(handle);
+  TypedValue* cns = &TargetCache::handleToRef<TypedValue>(handle);
+  assert(cns->m_type == KindOfUninit);
+  cns->m_data.pref = (RefData*)data;
 }
 
 static void setGlobal(void* cacheAddr, TypedValue *value,
@@ -937,13 +1030,15 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
     void* obj = in->mergeableObj(ix);
     assert((uintptr_t(obj) & 1) == 0);
     PreClass* pre = (PreClass*)obj;
-    Class* cls = pre->namedEntity()->clsList();
-    assert(cls && !cls->m_nextClass);
-    assert(cls->preClass() == pre);
-    if (TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
-      delta++;
-    } else if (out) {
-      out->mergeableObj(oix++) = (void*)(uintptr_t(cls) | 1);
+    if (pre->attrs() & AttrUnique) {
+      Class* cls = pre->namedEntity()->clsList();
+      assert(cls && !cls->m_nextClass);
+      assert(cls->preClass() == pre);
+      if (TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
+        delta++;
+      } else if (out) {
+        out->mergeableObj(oix++) = (void*)(uintptr_t(cls) | 1);
+      }
     }
   }
 
@@ -958,19 +1053,26 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
     switch (k) {
       case UnitMergeKindClass: {
         PreClass* pre = (PreClass*)obj;
-        Class* cls = pre->namedEntity()->clsList();
-        assert(cls && !cls->m_nextClass);
-        assert(cls->preClass() == pre);
-        if (TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
-          delta++;
-        } else if (out) {
-          out->mergeableObj(oix++) =
-            (void*)(uintptr_t(cls) | UnitMergeKindUniqueDefinedClass);
+        if (pre->attrs() & AttrUnique) {
+          Class* cls = pre->namedEntity()->clsList();
+          assert(cls && !cls->m_nextClass);
+          assert(cls->preClass() == pre);
+          if (TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
+            delta++;
+          } else if (out) {
+            out->mergeableObj(oix++) =
+              (void*)(uintptr_t(cls) | UnitMergeKindUniqueDefinedClass);
+          }
         }
         break;
       }
       case UnitMergeKindUniqueDefinedClass:
         not_reached();
+
+      case UnitMergeKindPersistentDefine:
+        delta += 1 + sizeof(TypedValueAux) / sizeof(void*);
+        ix += sizeof(TypedValueAux) / sizeof(void*);
+        break;
 
       case UnitMergeKindDefine:
       case UnitMergeKindGlobal:
@@ -1151,6 +1253,17 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
         } while (k == UnitMergeKindUniqueDefinedClass);
         continue;
 
+      case UnitMergeKindPersistentDefine:
+        // will be removed by compactUnitMergeInfo
+        // but could be hit by other threads before
+        // that happens
+        do {
+          ix += 1 + sizeof(TypedValueAux) / sizeof(void*);
+          obj = mi->mergeableObj(ix);
+          k = UnitMergeKind(uintptr_t(obj) & 7);
+        } while (k == UnitMergeKindDefine);
+        continue;
+
       case UnitMergeKindDefine:
         do {
           Stats::inc(Stats::UnitMerge_mergeable);
@@ -1219,11 +1332,9 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
       case UnitMergeKindDone:
         Stats::inc(Stats::UnitMerge_mergeable, -1);
         assert((unsigned)ix == mi->m_mergeablesSize);
-        if (UNLIKELY((m_mergeState & (UnitMergeStateUniqueClasses|
-                                      UnitMergeStateUniqueDefinedClasses)) ==
-                     UnitMergeStateUniqueClasses)) {
+        if (UNLIKELY(m_mergeState & UnitMergeStateNeedsCompact)) {
           SimpleLock lock(unitInitLock);
-          if (m_mergeState & UnitMergeStateUniqueDefinedClasses) return;
+          if (!(m_mergeState & UnitMergeStateNeedsCompact)) return;
           /*
            * All the classes are known to be unique, and we just got
            * here, so all were successfully defined. We can now go
@@ -1255,7 +1366,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
               m_mergeState |= UnitMergeStateEmpty;
             }
           }
-          m_mergeState |= UnitMergeStateUniqueDefinedClasses;
+          m_mergeState &= ~UnitMergeStateNeedsCompact;
           assert(newMi->m_firstMergeablePreClass == newMi->m_mergeablesSize ||
                  isMergeOnly());
         }
@@ -1533,7 +1644,8 @@ Func* Unit::lookupFunc(const StringData* funcName) {
 Func* Unit::loadFunc(const NamedEntity* ne, const StringData* funcName) {
   Func* func = ne->getCachedFunc();
   if (UNLIKELY(!func)) {
-    if (AutoloadHandler::s_instance->autoloadFunc(StrNR(funcName))) {
+    if (AutoloadHandler::s_instance->autoloadFunc(
+          const_cast<StringData*>(funcName))) {
       func = ne->getCachedFunc();
     }
   }
@@ -1868,6 +1980,7 @@ void UnitRepoProxy::InsertUnitMergeableStmt
   query.bindId("@mergeableId", id);
   if (value) {
     assert(kind == UnitMergeKindDefine ||
+           kind == UnitMergeKindPersistentDefine ||
            kind == UnitMergeKindGlobal);
     query.bindTypedValue("@mergeableValue", *value);
   } else {
@@ -1912,6 +2025,7 @@ void UnitRepoProxy::GetUnitMergeablesStmt
           ue.insertMergeableInclude(mergeableIx,
                                     (UnitMergeKind)mergeableKind, mergeableId);
           break;
+        case UnitMergeKindPersistentDefine:
         case UnitMergeKindDefine:
         case UnitMergeKindGlobal: {
           TypedValue mergeableValue; /**/ query.getTypedValue(3,
@@ -2400,6 +2514,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
           break;
         }
         case UnitMergeKindDefine:
+        case UnitMergeKindPersistentDefine:
         case UnitMergeKindGlobal: {
           int ix = m_mergeableStmts[i].second;
           urp.insertUnitMergeable(repoId).insert(
@@ -2495,6 +2610,7 @@ Unit* UnitEmitter::create() {
           break;
         }
       } else switch (it->first) {
+          case UnitMergeKindPersistentDefine:
           case UnitMergeKindDefine:
           case UnitMergeKindGlobal:
             extra += sizeof(TypedValueAux) / sizeof(void*);
@@ -2544,6 +2660,7 @@ Unit* UnitEmitter::create() {
           break;
         }
         case UnitMergeKindDefine:
+        case UnitMergeKindPersistentDefine:
         case UnitMergeKindGlobal: {
           assert(RuntimeOption::RepoAuthoritative);
           void* name = u->lookupLitstrId(m_mergeableValues[it->second].first);

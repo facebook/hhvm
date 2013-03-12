@@ -46,7 +46,7 @@ bool f_function_exists(CStrRef function_name, bool autoload /* = true */) {
   return
     function_exists(function_name) ||
     (autoload &&
-     AutoloadHandler::s_instance->autoloadFunc(function_name) &&
+     AutoloadHandler::s_instance->autoloadFunc(function_name.get()) &&
      function_exists(function_name));
 }
 

@@ -27,6 +27,7 @@
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
+#include <runtime/vm/translator/targetcache.h>
 #include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
@@ -35,9 +36,10 @@ IMPLEMENT_SMART_ALLOCATION_HOT(StringData);
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-// The (void *) value is not used.
-typedef tbb::concurrent_hash_map<const StringData *, void *,
-                                 StringDataHashCompare> StringDataMap;
+// The uint32_t is used to hold TargetCache offsets for constants
+typedef tbb::concurrent_unordered_map<const StringData *, uint32_t,
+                                      string_data_hash,
+                                      string_data_same> StringDataMap;
 static StringDataMap *s_stringDataMap;
 
 size_t StringData::GetStaticStringCount() {
@@ -46,29 +48,31 @@ size_t StringData::GetStaticStringCount() {
 }
 
 StringData *StringData::GetStaticString(const StringData *str) {
-  StringDataMap::const_accessor acc;
   if (UNLIKELY(!s_stringDataMap)) s_stringDataMap = new StringDataMap();
-  if (s_stringDataMap->find(acc, str)) {
-    return const_cast<StringData*>(acc->first);
+  StringDataMap::const_iterator it = s_stringDataMap->find(str);
+  if (it != s_stringDataMap->end()) {
+    return const_cast<StringData*>(it->first);
   }
   // Lookup failed, so do the hard work of creating a StringData with its own
   // copy of the key string, so that the atomic insert() has a permanent key.
   StringData *sd = (StringData*)Util::low_malloc(sizeof(StringData));
   new (sd) StringData(str->data(), str->size(), CopyMalloc);
   sd->setStatic();
-  if (!s_stringDataMap->insert(acc, sd)) {
+  auto pair = s_stringDataMap->insert(
+    std::pair<const StringData*,uint32_t>(sd, 0));
+  if (!pair.second) {
     sd->~StringData();
     Util::low_free(sd);
   }
-  assert(acc->first != nullptr);
-  return const_cast<StringData*>(acc->first);
+  assert(pair.first->first != nullptr);
+  return const_cast<StringData*>(pair.first->first);
 }
 
 StringData* StringData::FindStaticString(const StringData* str) {
-  StringDataMap::const_accessor acc;
   if (UNLIKELY(!s_stringDataMap)) s_stringDataMap = new StringDataMap();
-  if (s_stringDataMap->find(acc, str)) {
-    return const_cast<StringData*>(acc->first);
+  StringDataMap::const_iterator it = s_stringDataMap->find(str);
+  if (it != s_stringDataMap->end()) {
+    return const_cast<StringData*>(it->first);
   }
   return nullptr;
 }
@@ -81,6 +85,57 @@ StringData *StringData::GetStaticString(const std::string &str) {
 StringData *StringData::GetStaticString(const char *str) {
   StackStringData sd(str, strlen(str), AttachLiteral);
   return GetStaticString(&sd);
+}
+
+uint32_t StringData::GetCnsHandle(const StringData* cnsName) {
+  assert(s_stringDataMap);
+  StringDataMap::const_iterator it = s_stringDataMap->find(cnsName);
+  if (it != s_stringDataMap->end()) {
+    return it->second;
+  }
+  return 0;
+}
+
+uint32_t StringData::DefCnsHandle(const StringData* cnsName, bool persistent) {
+  uint32_t val = GetCnsHandle(cnsName);
+  if (val) return val;
+  if (!cnsName->isStatic()) {
+    // Its a dynamic constant, that doesnt correspond to
+    // an already allocated handle. We'll allocate it in
+    // the request local TargetCache::s_constants instead.
+    return 0;
+  }
+  StringDataMap::iterator it = s_stringDataMap->find(cnsName);
+  assert(it != s_stringDataMap->end());
+  if (!it->second) {
+    VM::Transl::TargetCache::allocConstant(&it->second, persistent);
+  }
+  return it->second;
+}
+
+Array StringData::GetConstants() {
+  // Return an array of all defined constants.
+  assert(s_stringDataMap);
+  Array a(VM::Transl::TargetCache::s_constants);
+
+  for (StringDataMap::const_iterator it = s_stringDataMap->begin();
+       it != s_stringDataMap->end(); ++it) {
+    if (it->second) {
+      TypedValue& tv =
+        VM::Transl::TargetCache::handleToRef<TypedValue>(it->second);
+      if (tv.m_type != KindOfUninit) {
+        StrNR key(const_cast<StringData*>(it->first));
+        a.set(key, tvAsVariant(&tv), true);
+      } else if (tv.m_data.pref) {
+        StrNR key(const_cast<StringData*>(it->first));
+        ClassInfo::ConstantInfo* ci =
+          (ClassInfo::ConstantInfo*)(void*)tv.m_data.pref;
+        a.set(key, ci->getDeferredValue(), true);
+      }
+    }
+  }
+
+  return a;
 }
 
 void StringData::initLiteral(const char* data) {

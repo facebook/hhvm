@@ -144,7 +144,7 @@ Array f_get_defined_constants(CVarRef categorize /* = null_variant */) {
     throw NotSupportedException(__func__, "constant categorization not "
                                 "supported");
   }
-  return ClassInfo::GetConstants();
+  return StringData::GetConstants();
 }
 
 String f_get_include_path() {

@@ -470,7 +470,7 @@ class Variant : private VariantBase {
   }
   // Is "define('CONSTANT', <this value>)" legal?
   bool isAllowedAsConstantValue() const {
-    return isNull() || isScalar();
+    return (m_type & kNotConstantValueTypeMask) == 0;
   }
   bool isResource() const;
   bool instanceof(CStrRef s) const;

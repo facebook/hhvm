@@ -95,6 +95,7 @@ undefinedError(const char* msg, const char* name) {
 
 // Targetcache memory. See the comment in targetcache.h
 __thread void* tl_targetCaches = nullptr;
+__thread HphpArray* s_constants = nullptr;
 
 static_assert(kConditionFlagsOff + sizeof(ssize_t) <= 64,
               "kConditionFlagsOff too large");
@@ -193,10 +194,6 @@ static size_t allocBitImpl(const StringData* name, PHPNameSpace ns) {
 
 size_t allocBit() {
   return allocBitImpl(nullptr, NSInvalid);
-}
-
-size_t allocCnsBit(const StringData* name) {
-  return allocBitImpl(name, NSCnsBits);
 }
 
 Handle bitOffToHandleAndMask(size_t bit, uint8_t &mask) {
@@ -353,6 +350,7 @@ static const bool zeroViaMemset = true;
 void
 requestInit() {
   assert(tl_targetCaches);
+  assert(!s_constants);
   TRACE(1, "TargetCache: @%p\n", tl_targetCaches);
   if (zeroViaMemset) {
     TRACE(1, "TargetCache: bzeroing %zd bytes: %p\n", s_frontier,
@@ -366,6 +364,7 @@ requestExit() {
   if (!zeroViaMemset) {
     flush();
   }
+  s_constants = nullptr; // it will be swept
 }
 
 void
@@ -795,23 +794,21 @@ ClassCache::lookup(Handle handle, StringData *name,
  * definition is hooked in the runtime to allocate and update these
  * structures.
  */
-CacheHandle allocConstant(StringData* name) {
-  BOOST_STATIC_ASSERT(KindOfUninit == 0);
-  return namedAlloc<NSConstant>(name, sizeof(TypedValue), sizeof(TypedValue));
+CacheHandle allocConstant(uint32_t* handlep, bool persistent) {
+  if (UNLIKELY(!*handlep)) {
+    Lock l(s_handleMutex);
+    if (!*handlep) {
+      *handlep =
+        allocLocked(persistent, sizeof(TypedValue), sizeof(TypedValue));
+    }
+  }
+  return *handlep;
 }
+
 
 CacheHandle allocStatic() {
-  return namedAlloc<NSInvalid>(nullptr, sizeof(TypedValue*), sizeof(TypedValue*));
-}
-
-void
-fillConstant(StringData* name) {
-  assert(name);
-  Handle ch = allocConstant(name);
-  testAndSetBit(allocCnsBit(name));
-  TypedValue *val = g_vmContext->getCns(name);
-  assert(val);
-  *(TypedValue*)handleToPtr(ch) = *val;
+  return namedAlloc<NSInvalid>(nullptr, sizeof(TypedValue*),
+                               sizeof(TypedValue*));
 }
 
 CacheHandle allocClassConstant(StringData* name) {

@@ -100,12 +100,16 @@ public:
     const char *valueText;
     const void* callback;
 
+    CVarRef getDeferredValue() const;
     Variant getValue() const;
     bool isDeferred() const { return deferred; }
     bool isCallback() const { return callback != nullptr; }
     void setValue(CVarRef value);
     void setStaticValue(CVarRef value);
 
+    bool isDynamic() const {
+      return deferred;
+    }
   private:
     bool deferred;
     Variant value;
@@ -279,6 +283,7 @@ public:
    * Get all statically known system constants
    */
   static Array GetSystemConstants();
+  static void InitializeSystemConstants();
 
   /**
    * Return all methods a class has, including the ones on base classes and

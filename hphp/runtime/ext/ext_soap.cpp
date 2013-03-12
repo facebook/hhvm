@@ -1926,7 +1926,7 @@ void c_SoapServer::t___construct(CVarRef wsdl,
 void c_SoapServer::t_setclass(int _argc, CStrRef name,
                               CArrRef _argv /* = null_array */) {
   SoapServerScope ss(this);
-  if (class_exists(name, true)) {
+  if (f_class_exists(name, true)) {
     m_type = SOAP_CLASS;
     m_soap_class.name = name;
     m_soap_class.argv = _argv;

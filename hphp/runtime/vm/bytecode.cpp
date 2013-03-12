@@ -1515,64 +1515,6 @@ Array VMExecutionContext::getCallerInfo() {
   return result;
 }
 
-bool VMExecutionContext::defined(CStrRef name) {
-  return m_constants.nvGet(name.get()) != nullptr;
-}
-
-TypedValue* VMExecutionContext::getCns(StringData* cns,
-                                       bool system /* = true */,
-                                       bool dynamic /* = true */) {
-  if (dynamic) {
-    TypedValue* tv = m_constants.nvGet(cns);
-    if (tv != nullptr) {
-      return tv;
-    }
-  }
-  if (system) {
-    const ClassInfo::ConstantInfo* ci = ClassInfo::FindConstant(cns->data());
-    if (ci != nullptr) {
-      if (!dynamic) {
-        ConstInfoMap::const_iterator it = m_constInfo.find(cns);
-        if (it != m_constInfo.end()) {
-          // This is a dynamic constant, so don't report it.
-          assert(ci == it->second);
-          return nullptr;
-        }
-      }
-      TypedValue tv;
-      tvWriteUninit(&tv);
-      tvAsVariant(&tv) = ci->getValue();
-      m_constants.nvSet(cns, &tv, false);
-      tvRefcountedDecRef(&tv);
-      return m_constants.nvGet(cns);
-    }
-  }
-  return nullptr;
-}
-
-bool VMExecutionContext::setCns(StringData* cns, CVarRef val, bool dynamic) {
-  if (m_constants.nvGet(cns) != nullptr ||
-      ClassInfo::FindConstant(cns->data()) != nullptr) {
-    raise_warning(Strings::CONSTANT_ALREADY_DEFINED, cns->data());
-    return false;
-  }
-  if (!val.isAllowedAsConstantValue()) {
-    raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
-    return false;
-  }
-  const_cast<Variant&>(val).setEvalScalar();
-  TypedValue* tv = val.getTypedAccessor();
-  m_constants.nvSet(cns, tv, false);
-  assert(m_constants.nvGet(cns) != nullptr);
-  if (RuntimeOption::EvalJit) {
-    if (dynamic) {
-      newPreConst(cns, *tv);
-    }
-    tx64->defineCns(cns);
-  }
-  return true;
-}
-
 void VMExecutionContext::newPreConst(StringData* name,
                                      const TypedValue& val) {
   name->incRefCount();
@@ -2507,7 +2449,7 @@ Array VMExecutionContext::getUserFunctionsInfo() {
 Array VMExecutionContext::getConstantsInfo() {
   // Return an array of all defined constant:value pairs.  This method is used
   // to support get_defined_constants().
-  return Array(m_constants.copy());
+  return Array::Create();
 }
 
 const ClassInfo::MethodInfo* VMExecutionContext::findFunctionInfo(
@@ -2593,7 +2535,7 @@ const ClassInfo* VMExecutionContext::findTraitInfo(CStrRef name) {
 
 const ClassInfo::ConstantInfo* VMExecutionContext::findConstantInfo(
     CStrRef name) {
-  TypedValue* tv = m_constants.nvGet(name.get());
+  TypedValue* tv = Unit::lookupCns(name.get());
   if (tv == nullptr) {
     return nullptr;
   }
@@ -3849,17 +3791,12 @@ inline void OPTBLD_INLINE VMExecutionContext::iopColAddElemC(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopCns(PC& pc) {
   NEXT();
   DECODE_LITSTR(s);
-  TypedValue* cns = getCns(s);
+  TypedValue* cns = Unit::loadCns(s);
   if (cns == nullptr) {
-    if (AutoloadHandler::s_instance->autoloadConstant(StrNR(s))) {
-      cns = getCns(s);
-    }
-    if (!cns) {
-      raise_notice(Strings::UNDEFINED_CONSTANT,
-                   s->data(), s->data());
-      m_stack.pushStaticString(s);
-      return;
-    }
+    raise_notice(Strings::UNDEFINED_CONSTANT,
+                 s->data(), s->data());
+    m_stack.pushStaticString(s);
+    return;
   }
   Cell* c1 = m_stack.allocC();
   tvReadCell(cns, c1);
@@ -3869,8 +3806,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopDefCns(PC& pc) {
   NEXT();
   DECODE_LITSTR(s);
   TypedValue* tv = m_stack.topTV();
-
-  tvAsVariant(tv) = setCns(s, tvAsCVarRef(tv));
+  tvAsVariant(tv) = Unit::defCns(s, tv);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopClsCns(PC& pc) {

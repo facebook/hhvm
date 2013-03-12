@@ -210,14 +210,19 @@ ClassInfo::ConstantInfo::ConstantInfo() :
     valueLen(0), callback(nullptr), deferred(true) {
 }
 
+CVarRef ClassInfo::ConstantInfo::getDeferredValue() const {
+  assert(deferred);
+  if (callback) {
+    CVarRef (*f)()=(CVarRef(*)())callback;
+    return (*f)();
+  }
+  SystemGlobals* g = get_global_variables();
+  return g->stgv_Variant[valueLen];
+}
+
 Variant ClassInfo::ConstantInfo::getValue() const {
   if (deferred) {
-    if (callback) {
-      CVarRef (*f)()=(CVarRef(*)())callback;
-      return (*f)();
-    }
-    SystemGlobals* g = get_global_variables();
-    return g->stgv_Variant[valueLen];
+    return getDeferredValue();
   }
   if (!svalue.empty()) {
     try {
@@ -244,12 +249,28 @@ void ClassInfo::ConstantInfo::setStaticValue(CVarRef v) {
   deferred = false;
 }
 
+void ClassInfo::InitializeSystemConstants() {
+  assert(s_loaded);
+  const ConstantMap &scm = s_systemFuncs->getConstants();
+  for (ConstantMap::const_iterator it = scm.begin(); it != scm.end(); ++it) {
+    ConstantInfo* ci = it->second;
+    if (ci->isDynamic()) {
+      VM::Unit::defDynamicSystemConstant(ci->name.get(), ci);
+    } else {
+      Variant v = ci->getValue();
+      bool DEBUG_ONLY res = VM::Unit::defCns(ci->name.get(),
+                                             v.asTypedValue(), true);
+      assert(res);
+    }
+  }
+}
+
 Array ClassInfo::GetSystemConstants() {
   assert(s_loaded);
   Array res;
   const ConstantMap &scm = s_systemFuncs->getConstants();
   for (ConstantMap::const_iterator it = scm.begin(); it != scm.end(); ++it) {
-    if (it->second->valueLen) {
+    if (!it->second->isDynamic()) {
       res.set(it->second->name, it->second->getValue());
     }
   }

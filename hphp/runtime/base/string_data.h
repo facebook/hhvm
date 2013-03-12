@@ -363,7 +363,9 @@ public:
   static StringData *GetStaticString(const char *str);
   static StringData *GetStaticString(char c);
   static size_t GetStaticStringCount();
-
+  static uint32_t GetCnsHandle(const StringData* cnsName);
+  static uint32_t DefCnsHandle(const StringData* cnsName, bool persistent);
+  static Array GetConstants();
   /**
    * The order of the data members is significant. The _count field must
    * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.

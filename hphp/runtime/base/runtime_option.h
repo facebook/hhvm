@@ -434,7 +434,6 @@ public:
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTCHuge,                   true)                            \
   F(bool, RandomHotFuncs,              false)                           \
-  F(uint32_t, ConstEstimate,           10000)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   /* */                                                                 \
 

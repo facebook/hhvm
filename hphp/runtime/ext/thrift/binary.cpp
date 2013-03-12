@@ -48,7 +48,7 @@ void skip_element(long thrift_typeID, PHPInputTransport& transport);
 // Create a PHP object given a typename and call the ctor, optionally passing up to 2 arguments
 Object createObject(CStrRef obj_typename, int nargs = 0,
                     CVarRef arg1 = null_variant, CVarRef arg2 = null_variant) {
-  if (!class_exists(obj_typename)) {
+  if (!f_class_exists(obj_typename)) {
     raise_warning("runtime/ext_thrift: Class %s does not exist",
                   obj_typename.data());
     return Object();

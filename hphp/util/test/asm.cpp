@@ -555,6 +555,19 @@ test %sil,(%rcx,%rsi,8)
 )");
 }
 
+TEST(Asm, CMov) {
+  Asm a;
+  a.init(10 << 24);
+  a.   test_reg64_reg64(rax, rax);
+  a.   cload_reg64_disp_reg64(CC_Z, rax, 0, rax);
+  a.   cload_reg64_disp_reg32(CC_Z, rax, 0, rax);
+  expect_asm(a, R"(
+test %rax,%rax
+cmove (%rax),%rax
+cmove (%rax),%eax
+)");
+}
+
 TEST(Asm, SimpleLabelTest) {
   Asm a;
   a.init(10 << 24);

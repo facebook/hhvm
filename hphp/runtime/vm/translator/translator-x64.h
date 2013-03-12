@@ -116,7 +116,7 @@ class TranslatorX64 : public Translator
   friend class HPHP::VM::JIT::CodeGenerator;
   friend class HPHP::VM::JIT::HhbcTranslator; // packBitVec()
   friend TCA funcBodyHelper(ActRec* fp);
-  template<int, int, ConditionCode> friend class CondBlock;
+  template<int, int, ConditionCode, class> friend class CondBlock;
   template<ConditionCode, typename smasher> friend class JccBlock;
   template<ConditionCode> friend class IfElseBlock;
   friend class UnlikelyIfBlock;

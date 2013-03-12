@@ -137,6 +137,7 @@ struct RegRIP {
 inline Reg8 rbyte(Reg32 r)     { return Reg8(int(r)); }
 inline Reg8 rbyte(RegNumber r) { return Reg8(int(r)); }
 inline Reg32 r32(Reg8 r)       { return Reg32(int(r)); }
+inline Reg32 r32(Reg32 r)      { return r; }
 inline Reg32 r32(RegNumber r)  { return Reg32(int(r)); }
 inline Reg64 r64(RegNumber r)  { return Reg64(int(r)); }
 
@@ -1619,8 +1620,11 @@ struct X64Assembler {
   //     ir cannot be set to 'sp'
   void emitCMX(X64Instr op, int jcond, RegNumber brName,
                RegNumber irName, int s, int disp,
-               RegNumber rName, bool reverse, ssize_t imm,
-               bool hasImmediate, int opSz = sz::qword,
+               RegNumber rName,
+               bool reverse = false,
+               ssize_t imm = 0,
+               bool hasImmediate = false,
+               int opSz = sz::qword,
                bool ripRelative = false) ALWAYS_INLINE {
     assert(irName != reg::rsp);
 
@@ -1960,8 +1964,17 @@ public:
   // CMOVcc [rbase + off], rdest
   inline void cload_reg64_disp_reg64(ConditionCode cc, RegNumber rbase,
                                      int off, RegNumber rdest) {
-    emitCMX(instr_cmovcc, cc, rbase, reg::noreg, sz::byte, off,
-            rdest, false, 0, false);
+    emitCMX(instr_cmovcc, cc, rbase, reg::noreg, sz::byte, off, rdest,
+            false /*reverse*/);
+
+  }
+  inline void cload_reg64_disp_reg32(ConditionCode cc, RegNumber rbase,
+                                     int off, RegNumber rdest) {
+    emitCMX(instr_cmovcc, cc, rbase, reg::noreg, sz::byte, off, rdest,
+            false /*reverse*/,
+            0 /*imm*/,
+            false /*hasImmediate*/,
+            sz::dword /*opSz*/);
   }
   inline void cmov_reg64_reg64(ConditionCode cc, RegNumber rsrc,
                                RegNumber rdest) {

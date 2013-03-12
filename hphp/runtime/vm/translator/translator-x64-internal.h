@@ -22,12 +22,6 @@
 
 #include <runtime/vm/translator/abi-x64.h>
 
-/*
- * Please don't include this unless your file implements methods of
- * TranslatorX64; you won't like it. It pollutes the namespace, makes
- * "KindOfString" #error, makes your TRACEMOD tx64, and tortures a kitten.
- */
-
 using namespace HPHP::VM::Transl::reg;
 using namespace HPHP::Util;
 using namespace HPHP::Trace;
@@ -39,10 +33,6 @@ namespace Transl {
 
 static const Trace::Module TRACEMOD = Trace::tx64;
 static const DataType BitwiseKindOfString = KindOfString;
-
-#define KindOfString \
-#error You probably do not mean to use KindOfString in this file.
-
 // RAII aids to machine code.
 
 // In shared stubs, we've already made the stack odd by calling
@@ -581,7 +571,8 @@ asm_label(a, likely);
 // a ref-counted cell.
 //
 // It's ok to do reconcilable register operations in the body.
-template<int FieldOffset, int FieldValue, ConditionCode Jcc>
+template<int FieldOffset, int FieldValue, ConditionCode Jcc,
+         typename FieldType>
 struct CondBlock {
   X64Assembler& m_a;
   int m_off;
@@ -591,7 +582,13 @@ struct CondBlock {
   CondBlock(X64Assembler& a, PhysReg reg, int offset = 0)
       : m_a(a), m_off(offset), m_dg(new DiamondGuard(a)) {
     int typeDisp = m_off + FieldOffset;
-    a.   cmp_imm32_disp_reg32(FieldValue, typeDisp, reg);
+    static_assert(sizeof(FieldType) == 1 || sizeof(FieldType) == 4,
+                  "CondBlock of unimplemented field size");
+    if (sizeof(FieldType) == 4) {
+      a. cmpl(FieldValue, reg[typeDisp]);
+    } else if (sizeof(FieldType) == 1) {
+      a. cmpb(FieldValue, reg[typeDisp]);
+    }
     m_jcc8 = a.code.frontier;
     a.   jcc8(Jcc, m_jcc8);
     // ...
@@ -607,15 +604,18 @@ struct CondBlock {
 //   Emits if (IS_REFCOUNTED_TYPE()) { ... }
 typedef CondBlock <TVOFF(m_type),
                    KindOfRefCountThreshold,
-                   CC_LE> IfRefCounted;
+                   CC_LE,
+                   DataType> IfRefCounted;
 
 typedef CondBlock <TVOFF(m_type),
                    KindOfRef,
-                   CC_NZ> IfVariant;
+                   CC_NZ,
+                   DataType> IfVariant;
 
 typedef CondBlock <TVOFF(m_type),
                    KindOfUninit,
-                   CC_Z> UnlessUninit;
+                   CC_Z,
+                   DataType> UnlessUninit;
 
 /*
  * locToRegDisp --
@@ -706,6 +706,76 @@ local_name(const Location& l) {
   return ret;
 }
 
+static_assert(sizeof(DataType) == 4 || sizeof(DataType) == 1,
+              "Your DataType has an unsupported size.");
+static inline Reg8 toByte(const Reg32& x)   { return rbyte(x); }
+static inline Reg8 toByte(const Reg64& x)   { return rbyte(x); }
+static inline Reg8 toByte(PhysReg x)        { return rbyte(x); }
+
+static inline Reg32 toReg32(const Reg64& x) { return r32(x); }
+static inline Reg32 toReg32(PhysReg x)      { return r32(x); }
+
+// For other operand types, let whatever conversions (or compile
+// errors) exist handle it.
+template<typename OpndType>
+static OpndType toByte(const OpndType& x) { return x; }
+template<typename OpndType>
+static OpndType toReg32(const OpndType& x) { return x; }
+
+template<typename OpndType>
+static inline void verifyTVOff(const OpndType& op) { /* nop */ }
+static inline void verifyTVOff(const MemoryRef& mr) {
+  DEBUG_ONLY auto disp = mr.r.disp;
+  // Make sure that we're operating on the m_type field of a
+  // TypedValue*.
+  assert((disp & (sizeof(TypedValue) - 1)) == TVOFF(m_type));
+}
+
+template<typename SrcType, typename OpndType>
+static inline void
+emitTestTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
+  verifyTVOff(src);
+  if (sizeof(DataType) == 4) {
+    a.  testl(src, toReg32(tvOp));
+  } else {
+    a.  testb(src, toByte(tvOp));
+  }
+}
+
+template<typename SrcType, typename OpndType>
+static inline void
+emitLoadTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
+  verifyTVOff(src);
+  if (sizeof(DataType) == 4) {
+    a.  loadl(src, toReg32(tvOp));
+  } else {
+    // Zero extend the type, just in case.
+    a.  loadzbl(src, toReg32(tvOp));
+  }
+}
+
+template<typename SrcType, typename OpndType>
+static inline void
+emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
+  verifyTVOff(src);
+  if (sizeof(DataType) == 4) {
+    a.  cmpl(src, toReg32(tvOp));
+  } else {
+    a.  cmpb(src, toByte(tvOp));
+  }
+}
+
+template<typename DestType, typename OpndType>
+static inline void
+emitStoreTVType(X64Assembler& a, OpndType tvOp, DestType dest) {
+  verifyTVOff(dest);
+  if (sizeof(DataType) == 4) {
+    a.  storel(toReg32(tvOp), dest);
+  } else {
+    a.  storeb(toByte(tvOp), dest);
+  }
+}
+
 // emitDispDeref --
 // emitDeref --
 // emitStoreTypedValue --
@@ -716,19 +786,19 @@ local_name(const Location& l) {
 //
 //   Dereference the var in the cell whose address lives in src into
 //   dest.
-static void
+static inline void
 emitDispDeref(X64Assembler &a, Reg64 src, int disp, Reg64 dest) {
   a.    loadq (src[disp + TVOFF(m_data)], dest);
 }
 
-static void
+static inline void
 emitDeref(X64Assembler &a, PhysReg src, PhysReg dest) {
   emitDispDeref(a, src, 0, dest);
 }
 
-static void
+static inline void
 emitDerefIfVariant(X64Assembler &a, PhysReg reg) {
-  a.cmp_imm32_disp_reg32(KindOfRef, TVOFF(m_type), reg);
+  emitCmpTVType(a, KindOfRef, reg[TVOFF(m_type)]);
   a.cload_reg64_disp_reg64(CC_Z, reg, TVOFF(m_data), reg);
 }
 
@@ -738,7 +808,7 @@ static inline void
 emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
                     int disp, PhysReg dest, bool writeType = true) {
   if (writeType) {
-    a.  store_imm32_disp_reg(type, disp + TVOFF(m_type), dest);
+    emitStoreTVType(a, type, dest[disp + TVOFF(m_type)]);
   }
   if (!IS_NULL_TYPE(type)) {
     assert(val != reg::noreg);
@@ -752,7 +822,7 @@ emitStoreInvalid(X64Assembler& a, int disp, PhysReg dest) {
                 "emitStoreInvalid assumes m_aux is dword sized.");
   a.    storeq (0xfacefacefaceface,     dest[disp + TVOFF(m_data)]);
   a.    storel ((signed int)0xfaceface, dest[disp + TypedValueAux::auxOffset]);
-  a.    storel (KindOfInvalid,          dest[disp + TVOFF(m_type)]);
+  emitStoreTVType(a, KindOfInvalid,     dest[disp + TVOFF(m_type)]);
 }
 
 static inline void
@@ -760,14 +830,14 @@ emitStoreUninitNull(X64Assembler& a,
                     int disp,
                     PhysReg dest) {
   // OK to leave garbage in m_data, m_aux.
-  a.    store_imm32_disp_reg(KindOfUninit, disp + TVOFF(m_type), dest);
+  emitStoreTVType(a, KindOfUninit, dest[disp + TVOFF(m_type)]);
 }
 
 static inline void
 emitStoreNull(X64Assembler& a,
               int disp,
               PhysReg dest) {
-  a.    store_imm32_disp_reg(KindOfNull, disp + TVOFF(m_type), dest);
+  emitStoreTVType(a, KindOfNull, dest[disp + TVOFF(m_type)]);
   // It's ok to leave garbage in m_data, m_aux for KindOfNull.
 }
 
@@ -792,8 +862,8 @@ emitCopyTo(X64Assembler& a,
   auto s32 = r32(scratch);
   a.    loadq  (src[srcOff + TVOFF(m_data)], s64);
   a.    storeq (s64, dest[destOff + TVOFF(m_data)]);
-  a.    loadl  (src[srcOff + TVOFF(m_type)], s32);
-  a.    storel (s32, dest[destOff + TVOFF(m_type)]);
+  emitLoadTVType(a, src[srcOff + TVOFF(m_type)], s32);
+  emitStoreTVType(a, s32, dest[destOff + TVOFF(m_type)]);
 }
 
 /*

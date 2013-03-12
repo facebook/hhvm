@@ -35,6 +35,7 @@
 #include "runtime/vm/translator/targetcache.h"
 #include "runtime/vm/translator/translator-inline.h"
 #include "runtime/vm/translator/translator-x64.h"
+#include "runtime/vm/translator/translator-x64-internal.h"
 #include "runtime/vm/translator/translator.h"
 #include "runtime/vm/translator/types.h"
 #include "runtime/vm/translator/x64-util.h"
@@ -65,7 +66,7 @@ emitDeref(X64Assembler &a, PhysReg src, PhysReg dest) {
 
 /* static */ void
 emitDerefIfVariant(X64Assembler &a, PhysReg reg) {
-  a.cmp_imm32_disp_reg32(HPHP::KindOfRef, TVOFF(m_type), reg);
+  emitCmpTVType(a, HPHP::KindOfRef, reg[TVOFF(m_type)]);
   a.cload_reg64_disp_reg64(CC_Z, reg, 0, reg);
 }
 
@@ -1327,16 +1328,16 @@ ConditionCode CodeGenerator::emitTypeTest(Type type, OpndType src,
   assert(!type.subtypeOf(Type::Cls));
 
   if (type.isString()) {
-    m_as.testl(KindOfStringBit, src);
+    emitTestTVType(m_as, KindOfStringBit, src);
     cc = CC_NZ;
   } else if (type.equals(Type::UncountedInit)) {
-    m_as.testl(KindOfUncountedInitBit, src);
+    emitTestTVType(m_as, KindOfUncountedInitBit, src);
     cc = CC_NZ;
   } else if (type.equals(Type::Uncounted)) {
-    m_as.cmpl(KindOfRefCountThreshold, src);
+    emitCmpTVType(m_as, KindOfRefCountThreshold, src);
     cc = CC_LE;
   } else if (type.equals(Type::Cell)) {
-    m_as.cmpl(KindOfRef, src);
+    emitCmpTVType(m_as, KindOfRef, src);
     cc = CC_L;
   } else if (type.equals(Type::Gen)) {
     return CC_None; // nothing to check
@@ -1344,8 +1345,8 @@ ConditionCode CodeGenerator::emitTypeTest(Type type, OpndType src,
     DataType dataType = type.toDataType();
     assert(dataType == KindOfRef ||
            (dataType >= KindOfUninit && dataType <= KindOfObject));
-    m_as.cmpl(dataType, src);
-    cc = CC_Z;
+    emitCmpTVType(m_as, dataType, src);
+    cc = CC_E;
   }
   return negate ? ccNegate(cc) : cc;
 }
@@ -1765,11 +1766,20 @@ void CodeGenerator::cgUnbox(IRInstruction* inst) {
   PhysReg tmpDstTypeReg = srcValReg == dstTypeReg ? PhysReg(rScratch)
                                                   : dstTypeReg;
 
-  m_as.   cmpq(HPHP::KindOfRef, srcTypeReg);
+  bool useCMov = sizeof(DataType) == 4;
   emitMovRegReg(m_as, srcTypeReg, tmpDstTypeReg);
-  m_as.   cload_reg64_disp_reg64(CC_Z, srcValReg, TVOFF(m_type), tmpDstTypeReg);
   emitMovRegReg(m_as, srcValReg, dstValReg);
-  m_as.   cload_reg64_disp_reg64(CC_Z, srcValReg, TVOFF(m_data), dstValReg);
+  emitCmpTVType(m_as, HPHP::KindOfRef, srcTypeReg);
+  // XXX: hardcodes RefData <-> TypedValue pun.
+  if (useCMov) {
+    m_as.  cload_reg64_disp_reg32(CC_Z, srcValReg, TVOFF(m_type), tmpDstTypeReg);
+    m_as.  cload_reg64_disp_reg64(CC_Z, srcValReg, TVOFF(m_data), dstValReg);
+  } else {
+    ifThen(m_as, CC_E, [&]() {
+      emitLoadTVType(m_as, srcValReg[TVOFF(m_type)], tmpDstTypeReg);
+      m_as.loadq(srcValReg[TVOFF(m_data)], dstValReg);
+    });
+  }
   emitMovRegReg(m_as, tmpDstTypeReg, dstTypeReg);
 }
 
@@ -1829,10 +1839,10 @@ void CodeGenerator::cgRetVal(IRInstruction* inst) {
   // Store return value at the top of the caller's eval stack
   // (a) Store the type
   if (val->getType().needsReg()) {
-    a.    storel (r32(val->getReg(1)), rFp[AROFF(m_r) + TVOFF(m_type)]);
+    emitStoreTVType(a, val->getReg(1), rFp[AROFF(m_r) + TVOFF(m_type)]);
   } else {
-    a.    storel (val->getType().toDataType(),
-                  rFp[AROFF(m_r) + TVOFF(m_type)]);
+    emitStoreTVType(a, val->getType().toDataType(),
+                    rFp[AROFF(m_r) + TVOFF(m_type)]);
   }
 
   // (b) Store the actual value (not necessary when storing Null)
@@ -2682,11 +2692,7 @@ Address CodeGenerator::cgCheckRefCountedType(PhysReg typeReg) {
 
 Address CodeGenerator::cgCheckRefCountedType(PhysReg baseReg,
                                              int64_t offset) {
-
-  m_as.cmp_imm32_disp_reg32(KindOfRefCountThreshold,
-                            offset + TVOFF(m_type),
-                            baseReg);
-
+  emitCmpTVType(m_as, KindOfRefCountThreshold, baseReg[offset + TVOFF(m_type)]);
   Address addrToPatch =  m_as.code.frontier;
   m_as.jcc8(CC_LE, addrToPatch);
 
@@ -3164,7 +3170,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   if (returnType.subtypeOf(Type::Cell)
       || returnType.subtypeOf(Type::BoxedCell)) {
-    m_as.   loadl (returnBase[returnOffset + TVOFF(m_type)], r32(dstType));
+    emitLoadTVType(m_as, returnBase[returnOffset + TVOFF(m_type)], dstType);
     m_as.   loadq (returnBase[returnOffset + TVOFF(m_data)], dstReg);
     emitLoadImm(m_as, KindOfNull, rScratch);
     static_assert(KindOfUninit == 0,
@@ -3382,35 +3388,25 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
   RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
   int stSize = slot.getSize();
   int64_t off = slot.getOffset();
+  auto dest = baseReg[off];
 
   if (value->isConst()) {
     if (stSize == sz::qword) {
-      m_as.store_imm64_disp_reg64(value->getValInt(),
-                                  off,
-                                  baseReg);
+      m_as.storeq(value->getValInt(), dest);
     } else if (stSize == sz::dword) {
-      m_as.store_imm32_disp_reg(value->getValInt(),
-                                  off,
-                                  baseReg);
+      m_as.storel(value->getValInt(), dest);
     } else {
       assert(stSize == sz::byte);
-      m_as.store_imm8_disp_reg(value->getValBool(),
-                               off,
-                               baseReg);
+      m_as.storeb(value->getValBool(), dest);
     }
   } else {
     if (stSize == sz::qword) {
-      m_as.store_reg64_disp_reg64(value->getReg(),
-                                  off,
-                                  baseReg);
+      m_as.storeq(r64(value->getReg()), dest);
     } else if (stSize == sz::dword) {
-      m_as.store_reg32_disp_reg64(value->getReg(),
-                                  off,
-                                  baseReg);
+      m_as.storel(r32(value->getReg()), dest);
     } else {
-      // not supported by our assembler yet
       assert(stSize == sz::byte);
-      not_implemented();
+      m_as.storeb(rbyte(value->getReg()), dest);
     }
   }
 }
@@ -3441,7 +3437,7 @@ void CodeGenerator::cgLoadTypedValue(PhysReg base,
 
   // Load type if it's not dead
   if (typeDstReg != InvalidReg) {
-    m_as.load_reg64_disp_reg32(base, off + TVOFF(m_type), typeDstReg);
+    emitLoadTVType(m_as, base[off + TVOFF(m_type)], typeDstReg);
     if (label) {
       // Check type needed
       emitGuardType(r32(typeDstReg), inst);
@@ -3468,10 +3464,7 @@ void CodeGenerator::cgStoreTypedValue(PhysReg base,
   m_as.store_reg64_disp_reg64(src->getReg(0),
                               off + TVOFF(m_data),
                               base);
-  // store the type
-  m_as.store_reg32_disp_reg64(src->getReg(1),
-                              off + TVOFF(m_type),
-                              base);
+  emitStoreTVType(m_as, src->getReg(1), base[off + TVOFF(m_type)]);
 }
 
 void CodeGenerator::cgStore(PhysReg base,
@@ -3485,9 +3478,7 @@ void CodeGenerator::cgStore(PhysReg base,
   }
   // store the type
   if (genStoreType) {
-    m_as.store_imm32_disp_reg(type.toDataType(),
-                              off + TVOFF(m_type),
-                              base);
+    emitStoreTVType(m_as, type.toDataType(), base[off + TVOFF(m_type)]);
   }
   if (type.isNull()) {
     // no need to store a value for null or uninit
@@ -4488,7 +4479,7 @@ void CodeGenerator::cgFillContThis(IRInstruction* inst) {
   ifThen(m_as, CC_NZ, [&] {
     m_as.addl(1, scratch[FAST_REFCOUNT_OFFSET]);
     m_as.storeq(scratch, baseReg[offset + TVOFF(m_data)]);
-    m_as.storel(KindOfObject, baseReg[offset + TVOFF(m_type)]);
+    emitStoreTVType(m_as, KindOfObject, baseReg[offset + TVOFF(m_type)]);
   });
 }
 

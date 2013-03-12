@@ -40,7 +40,8 @@ struct match_iterator : boost::mpl::eval_if<
   boost::add_const<Value>,
   boost::remove_const<Value> > {};
 
-
+// field_type: provide the type of a struct field.
+#define field_type(strct, fld) decltype(((strct*)0)->fld)
 
 }
 

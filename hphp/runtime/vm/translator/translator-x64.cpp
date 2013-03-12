@@ -52,6 +52,7 @@ typedef __sighandler_t *sighandler_t;
 #include "util/ringbuffer.h"
 #include "util/timer.h"
 #include "util/trace.h"
+#include "util/meta.h"
 #include "util/util.h"
 
 #include "runtime/vm/bytecode.h"
@@ -122,6 +123,9 @@ enum TransPerfCounter {
 #undef TPC
 static __thread int64_t s_perfCounters[tpc_num_counters];
 #define INC_TPC(n) ++s_perfCounters[tpc_ ## n];
+
+#define KindOfString \
+#error You probably do not mean to use KindOfString in this file.
 
 #define NULLCASE() \
   case KindOfUninit: case KindOfNull
@@ -277,7 +281,8 @@ typeCanBeStatic(DataType t) {
 struct IfCountNotStatic {
   typedef CondBlock<FAST_REFCOUNT_OFFSET,
                     RefCountStaticValue,
-                    CC_Z> NonStaticCondBlock;
+                    CC_Z,
+                    field_type(RefData, _count)> NonStaticCondBlock;
   NonStaticCondBlock *m_cb; // might be null
   IfCountNotStatic(X64Assembler& a,
                    PhysReg reg,
@@ -418,7 +423,7 @@ void TranslatorX64::emitTvSetRegSafe(const NormalizedInstruction& i,
     emitDerefIfVariant(a, toPtr);
   }
 
-  a.  loadl  (toPtr[toOffset + TVOFF(m_type)], r32(oldType));
+  emitLoadTVType(a, toPtr[toOffset + TVOFF(m_type)], r32(oldType));
   a.  loadq  (toPtr[toOffset + TVOFF(m_data)], oldData);
   emitStoreTypedValue(a, fromType, from, toOffset, toPtr);
   if (incRefFrom) {
@@ -1212,7 +1217,7 @@ void TranslatorX64::emitGenericDecRefHelpers() {
   emitMovRegReg(a, rVmSp, rdi);
   // fall through
   m_dtorGenericStub = a.code.frontier;
-  a.    loadl  (rdi[TVOFF(m_type)], r32(rScratch));
+  emitLoadTVType(a, rdi[TVOFF(m_type)], r32(rScratch));
   a.    loadq  (rdi[TVOFF(m_data)], rdi);
   // Fall through to the regs stub.
 
@@ -2299,10 +2304,8 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
 
       // rVmFp + rcx points to the count/type fields of the TypedValue we're
       // about to write to.
-      int loopStart = -func->numLocals() * sizeof(TypedValue)
-        + TVOFF(m_type);
-      int loopEnd = -numParams * sizeof(TypedValue)
-        + TVOFF(m_type);
+      int loopStart = -func->numLocals() * sizeof(TypedValue) + TVOFF(m_type);
+      int loopEnd = -numParams * sizeof(TypedValue) + TVOFF(m_type);
 
       emitImmReg(a, loopStart, loopReg);
       emitImmReg(a, KindOfUninit, rdx);
@@ -2324,7 +2327,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
       }
       for (k = numParams; k < func->numLocals(); ++k) {
         locToRegDisp(Location(Location::Local, k), &base, &disp);
-        a.storel (eax, base[disp + TVOFF(m_type)]);
+        emitStoreTVType(a, eax, base[disp + TVOFF(m_type)]);
       }
     }
   }
@@ -2730,7 +2733,7 @@ TranslatorX64::emitStringCheck(X64Assembler& _a,
   // Treat KindOfString and KindOfStaticString identically; they
   // are bitwise identical. This is a port of our IS_STRING_TYPE
   // macro to assembly, and will have to change in sync with it.
-  _a.test_imm32_disp_reg32(KindOfStringBit, offset, base);
+  emitTestTVType(_a, KindOfStringBit, r64(base)[offset]);
 }
 
 void
@@ -2738,7 +2741,7 @@ TranslatorX64::emitCheckUncounted(X64Assembler& a,
                                   PhysReg       baseReg,
                                   int           offset,
                                   SrcRec&       fail) {
-  a.cmp_imm32_disp_reg32(KindOfStaticString, offset, baseReg);
+  emitCmpTVType(a, KindOfStaticString, r64(baseReg)[offset]);
   emitFallbackJmp(a, fail, CC_G);
 }
 
@@ -2747,7 +2750,7 @@ TranslatorX64::emitCheckUncountedInit(X64Assembler& a,
                                       PhysReg       baseReg,
                                       int           offset,
                                       SrcRec&       fail) {
-  a.test_imm32_disp_reg32(KindOfUncountedInitBit, offset, baseReg);
+  emitTestTVType(a, KindOfUncountedInitBit, r64(baseReg)[offset]);
   emitFallbackJmp(a, fail, CC_Z);
 }
 
@@ -2777,7 +2780,7 @@ TranslatorX64::emitTypeCheck(X64Assembler& _a, DataType dt,
       break;
     default:
       assert(IS_REAL_TYPE(dt));
-      _a. cmp_imm32_disp_reg32(dt, offset, base);
+      emitCmpTVType(_a, dt, r64(base)[offset]);
       if (fail) {
         emitFallbackJmp(*fail);
       }
@@ -4809,8 +4812,8 @@ TranslatorX64::translateCGetL(const Tracelet& t,
       ScratchReg rTmp(m_regMap);
       PhysReg localReg = getReg(inputs[0]->location);
       a.store_reg64_disp_reg64(localReg, stackDisp + TVOFF(m_data), stackBase);
-      a.load_reg64_disp_reg32(locBase, locDisp + TVOFF(m_type), r(rTmp));
-      a.store_reg32_disp_reg64(r(rTmp), stackDisp + TVOFF(m_type), stackBase);
+      emitLoadTVType(a, locBase[locDisp + TVOFF(m_type)], r(rTmp));
+      emitStoreTVType(a, r(rTmp), stackBase[stackDisp + TVOFF(m_type)]);
     }
     return;
   }
@@ -5048,8 +5051,8 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
       ScratchReg rTmp(m_regMap);
       locToRegDisp(ni.inputs[rhsIdx]->location, &base, &disp);
       a.store_reg64_disp_reg64(rhsReg, TVOFF(m_data), localReg);
-      a.load_reg64_disp_reg32(base, disp + TVOFF(m_type), r(rTmp));
-      a.store_reg32_disp_reg64(r(rTmp), TVOFF(m_type), localReg);
+      emitLoadTVType(a, base[disp + TVOFF(m_type)], r(rTmp));
+      emitStoreTVType(a, r(rTmp), localReg[TVOFF(m_type)]);
     } else {
       emitStoreTypedValue(a, rhsType, rhsReg, 0, localReg);
     }
@@ -5063,8 +5066,8 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
     locToRegDisp(ni.inputs[locIdx]->location, &locBase, &locDisp);
     ScratchReg rTmp(m_regMap);
     a.store_reg64_disp_reg64(rhsReg, locDisp + TVOFF(m_data), locBase);
-    a.load_reg64_disp_reg32(rhsBase, rhsDisp + TVOFF(m_type), r(rTmp));
-    a.store_reg32_disp_reg64(r(rTmp), locDisp + TVOFF(m_type), locBase);
+    emitLoadTVType(a, rhsBase[rhsDisp + TVOFF(m_type)], r(rTmp));
+    emitStoreTVType(a, r(rTmp), locBase[locDisp + TVOFF(m_type)]);
     m_regMap.swapRegisters(rhsReg, localReg);
     decRefType = oldLocalType;
     m_regMap.markAsClean(ni.inputs[locIdx]->location);
@@ -5686,7 +5689,7 @@ TranslatorX64::translateCns(const Tracelet& t,
   // Load the constant out of the thread-private tl_targetCaches.
   ScratchReg cns(m_regMap);
   a.    lea_reg64_disp_reg64(rVmTl, ch, r(cns));
-  a.    cmp_imm32_disp_reg32(0, TVOFF(m_type), r(cns));
+  emitCmpTVType(a, 0, r(cns)[TVOFF(m_type)]);
   DiamondReturn astubsRet;
   int stackDest = 0 - int(sizeof(Cell)); // popped - pushed
   {
@@ -5793,7 +5796,7 @@ TranslatorX64::translateClsCnsD(const Tracelet& t,
   CacheHandle ch = allocClassConstant(fullName);
   ScratchReg cns(m_regMap);
   a.lea_reg64_disp_reg64(rVmTl, ch, r(cns));
-  a.cmp_imm32_disp_reg32(0, TVOFF(m_type), r(cns));
+  emitCmpTVType(a, 0, r(cns)[TVOFF(m_type)]);
   {
     UnlikelyIfBlock ifNull(CC_Z, a, astubs);
 
@@ -6594,8 +6597,7 @@ void TranslatorX64::emitReturnVal(
         a.  load_reg64_disp_reg64(thisBase, thisOffset, scratch);
         a.  store_reg64_disp_reg64(scratch, dstOffset, dstBase);
       }
-      emitStoreImm(a, KindOfObject,
-                   dstBase, dstOffset + TVOFF(m_type), sz::dword);
+      emitStoreTVType(a, KindOfObject, dstBase[dstOffset + TVOFF(m_type)]);
       return;
     }
     case OpBareThis: {
@@ -6606,7 +6608,7 @@ void TranslatorX64::emitReturnVal(
         JccBlock<CC_NZ> noThis(a);
         a.  mov_imm32_reg32(KindOfObject, scratch);
       }
-      a.   store_reg32_disp_reg64(scratch, dstOffset + TVOFF(m_type), dstBase);
+      emitStoreTVType(a, scratch, dstBase[dstOffset + TVOFF(m_type)]);
       if (thisBase != dstBase || thisOffset != dstOffset) {
         a.  load_reg64_disp_reg64(thisBase, thisOffset, scratch);
         a.  store_reg64_disp_reg64(scratch, dstOffset, dstBase);
@@ -6617,8 +6619,7 @@ void TranslatorX64::emitReturnVal(
       not_reached();
   }
 
-  emitStoreImm(a, tv.m_type,
-               dstBase, dstOffset + TVOFF(m_type), sz::dword);
+  emitStoreTVType(a, tv.m_type, r64(dstBase)[dstOffset + TVOFF(m_type)]);
   if (tv.m_type != KindOfNull) {
     emitStoreImm(a, tv.m_data.num,
                  dstBase, dstOffset, sz::qword);
@@ -6747,7 +6748,7 @@ void TranslatorX64::emitInlineReturn(Location retvalSrcLoc,
       PhysReg base;
       int disp;
       locToRegDisp(m_curNI->inputs[k]->location, &base, &disp);
-      a.    storel (0, base[disp + TVOFF(m_type)]);
+      emitStoreTVType(a, KindOfUninit, base[disp + TVOFF(m_type)]);
     }
   }
 
@@ -7345,7 +7346,7 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
         // know it's an Object
         a.add_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, r(rScratch));
         a.store_reg64_disp_reg64(r(rScratch), thisOff + TVOFF(m_data), r(rDest));
-        a.store_imm32_disp_reg(KindOfObject, thisOff + TVOFF(m_type), r(rDest));
+        emitStoreTVType(a, KindOfObject, r(rDest)[thisOff + TVOFF(m_type)]);
       }
     }
   } else {
@@ -9384,7 +9385,7 @@ TranslatorX64::translateBareThis(const Tracelet &t,
   DiamondReturn astubsRet;
   {
     UnlikelyIfBlock ifThisNull(CC_NZ, a, astubs, &astubsRet);
-    astubs. store_imm32_disp_reg(KindOfNull, TVOFF(m_type) + offset, base);
+    emitStoreTVType(astubs, KindOfNull, base[offset + TVOFF(m_type)]);
     if (i.imm[0].u_OA) {
       EMIT_CALL(astubs, warnNullThis);
       recordReentrantStubCall(i);
@@ -9403,7 +9404,7 @@ TranslatorX64::translateBareThis(const Tracelet &t,
   }
   emitIncRef(out, KindOfObject);
   if (i.outStack->rtt.isVagueValue()) {
-    a. store_imm32_disp_reg(KindOfObject, TVOFF(m_type) + offset, base);
+    emitStoreTVType(a, KindOfObject, base[offset + TVOFF(m_type)]);
     a. store_reg64_disp_reg64(out, TVOFF(m_data) + offset, base);
   } else {
     assert(i.outStack->isObject());
@@ -9445,7 +9446,7 @@ TranslatorX64::translateInitThisLoc(const Tracelet& t,
   a.jnz(astubs.code.frontier); // jnz if_null
 
   // We have a valid $this!
-  a.store_imm32_disp_reg(KindOfObject, offset + TVOFF(m_type), base);
+  emitStoreTVType(a, KindOfObject, base[offset + TVOFF(m_type)]);
   a.store_reg64_disp_reg64(r(thiz), offset + TVOFF(m_data), base);
   emitIncRef(r(thiz), KindOfObject);
 
@@ -9780,11 +9781,10 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
       a.   load_reg64_disp_reg64(base1, TVOFF(m_data) + disp1, r(tmp));
       a.   store_reg64_disp_reg64(r(tmp), TVOFF(m_data) + disp2, base2);
       if (!inDef->rtt.isVagueValue()) {
-        a. store_imm32_disp_reg(inDef->outerType(),
-                                TVOFF(m_type) + disp2, base2);
+        emitStoreTVType(a, inDef->outerType(), base2[disp2 + TVOFF(m_type)]);
       } else {
-        a. load_reg64_disp_reg32(base1, TVOFF(m_type) + disp1, r(tmp));
-        a. store_reg32_disp_reg64(r(tmp), TVOFF(m_type) + disp2, base2);
+        emitLoadTVType(a,  base1[TVOFF(m_type) + disp1], r(tmp));
+        emitStoreTVType(a, r(tmp), base2[disp2 + TVOFF(m_type)]);
       }
     } else {
       PhysReg reg = m_regMap.getReg(inDef->location);
@@ -10065,19 +10065,19 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
         emitStoreTypedValue(a, func->returnType(), rax, disp, base, true);
 
         ifNotZero.Else();
-        a.   storel  (KindOfNull, base[disp + TVOFF(m_type)]);
+        emitStoreTVType(a, KindOfNull, base[disp + TVOFF(m_type)]);
       }
       break;
     case KindOfUnknown:
       emitLea(a, returnBase, returnOffset, rax);
-      a.   loadq  (rax[TVOFF(m_type)], rScratch);
+      emitLoadTVType(a, rax[TVOFF(m_type)], rScratch);
       a.   cmpl   (KindOfUninit, r32(rScratch));
       {
         IfElseBlock<CC_Z> ifNotUninit(a);
         emitCopyToAligned(a, rax, 0, base, disp);
 
         ifNotUninit.Else();
-        a.   storel  (KindOfNull, base[disp + TVOFF(m_type)]);
+        emitStoreTVType(a, KindOfNull, base[disp + TVOFF(m_type)]);
       }
       break;
     default:
@@ -11545,7 +11545,7 @@ asm_label(a, release);
   });
   a.    ret    ();
 asm_label(a, doRelease);
-  a.    storel (0, rIter[TVOFF(m_type)]);
+  emitStoreTVType(a, KindOfUninit, rIter[TVOFF(m_type)]);
   jumpDestructor(a, PhysReg(rType), rax);
 
   m_freeManyLocalsHelper = a.code.frontier;
@@ -11554,7 +11554,7 @@ asm_label(a, doRelease);
   auto emitDecLocal = [&] {
     Label skipDecRef;
 
-    a.  loadl  (rIter[TVOFF(m_type)], rType);
+    emitLoadTVType(a, rIter[TVOFF(m_type)], rType);
     a.  cmpl   (KindOfRefCountThreshold, rType);
     a.  jle8   (skipDecRef);
     a.  call   (release);

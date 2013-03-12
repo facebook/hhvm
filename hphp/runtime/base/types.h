@@ -162,7 +162,7 @@ enum DataType {
   MaxNumDataTypes        = KindOfIndirect + 1, // marker, not a valid type
   MaxNumDataTypesIndex   = 11 + 1,  // 1 + the number of valid DataTypes above
 
-  MaxDataType            = 0x7fffffff, // Allow KindOf* > 11 in HphpArray.
+  MaxDataType            = 0x7f, // Allow KindOf* > 11 in HphpArray.
 
   // Note: KindOfStringBit must be set in KindOfStaticString and KindOfString,
   //       and it must be 0 in any other real DataType.
@@ -172,8 +172,6 @@ enum DataType {
   //       and StaticString, and it must be 0 for any other real DataType.
   KindOfUncountedInitBit = 8,
 };
-BOOST_STATIC_ASSERT((sizeof(DataType) == 4));
-
 
 BOOST_STATIC_ASSERT(KindOfString       & KindOfStringBit);
 BOOST_STATIC_ASSERT(KindOfStaticString & KindOfStringBit);

@@ -1003,7 +1003,7 @@ void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
   }
   a.    lea_reg64_disp_reg64(r(rBase), propOffset, r(rScratch));
   if (doWarn || doDefine) {
-    a.  cmp_imm32_disp_reg32(KindOfUninit, TVOFF(m_type), r(rScratch));
+    emitCmpTVType(a, KindOfUninit, r(rScratch)[TVOFF(m_type)]);
     {
       UnlikelyIfBlock ifUninit(CC_Z, a, astubs);
       if (doWarn) {
@@ -1014,7 +1014,7 @@ void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
         );
       }
       if (doDefine) {
-        astubs.store_imm32_disp_reg(KindOfNull, TVOFF(m_type), r(rScratch));
+        emitStoreTVType(astubs, KindOfNull, r(rScratch)[TVOFF(m_type)]);
       } else {
         emitImmReg(astubs, uintptr_t(&init_null_variant), r(rScratch));
       }

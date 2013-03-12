@@ -25,8 +25,6 @@ namespace HPHP {
 // class macros
 
 #define LITSTR_INIT(str)    (true ? (str) : ("" str "")), (sizeof(str)-1)
-#define NAMSTR(nam, str)    (nam)
-#define NAMVAR(nam, str)    (nam)
 
 #define FORWARD_DECLARE_CLASS(cls)              \
   class c_##cls;                                \
@@ -34,14 +32,6 @@ namespace HPHP {
 
 #define FORWARD_DECLARE_CLASS_BUILTIN(cls)      \
   FORWARD_DECLARE_CLASS(cls)                    \
-
-#define FORWARD_DECLARE_INTERFACE(cls)                  \
-  class c_##cls;                                        \
-  typedef SmartInterface<c_##cls> p_##cls               \
-
-#define FORWARD_DECLARE_GENERIC_INTERFACE(cls)          \
-  class c_##cls;                                        \
-  typedef Object               p_##cls                  \
 
 #define INVOKE_FEW_ARGS_COUNT 6
 
@@ -139,53 +129,10 @@ namespace HPHP {
   IMPLEMENT_CLASS_COMMON(cls)                                           \
   IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(c_##cls)                 \
 
-#define DECLARE_METHOD_INVOKE_HELPERS(methname)
-
-
-//////////////////////////////////////////////////////////////////////////////
-// jump table entries
-
-#define HASH_GUARD(code, f)                                             \
-  if (hash == code && !strcasecmp(s, #f))
-#define HASH_GUARD_STRING(code, f)                                      \
-  if (hash == code && !strcasecmp(s.data(), #f))
-#define HASH_INITIALIZED(code, name, str)                               \
-  if (hash == code && strcmp(s, str) == 0)                              \
-    return isInitialized(name)
-#define HASH_INITIALIZED_NAMSTR(code, str, name, len)                   \
-do { \
-  const char *s1 = s.data();                                            \
-  const char *s2 = str.data();                                          \
-  if ((s1 == s2) ||                                                     \
-      (hash == code && s.length() == len &&                             \
-      memcmp(s1, s2, len) == 0)) return isInitialized(name);            \
-} while (0)
-#define HASH_RETURN(code, name, str)                                    \
-  if (hash == code && strcmp(s, str) == 0) return name
-#define HASH_RETURN_NAMSTR(code, str, name, len)                        \
-do { \
-  const char *s1 = s.data();                                            \
-  const char *s2 = str.data();                                          \
-  if ((s1 == s2) ||                                                     \
-      (hash == code && s.length() == len &&                             \
-      memcmp(s1, s2, len) == 0)) return name;                           \
-} while (0)
-
-#define HASH_SET_STRING(code, name, str, len)                           \
-  if (hash == code && s.length() == len &&                              \
-      memcmp(s.data(), str, len) == 0) { name = v; return null; }
-#define HASH_INDEX(code, str, index)                                    \
-  if (hash == code && strcmp(s, #str) == 0) { return index;}
-
 ///////////////////////////////////////////////////////////////////////////////
 // global variable macros
 
-#define FVF_PREFIX "fvf_"
-
 #define GV(s)   gvm_  ## s
-#define GCI(s)  cim_  ## s
-#define CDEC(s) cdec_ ## s
-#define FVF(s)  fvf_  ## s
 
 ///////////////////////////////////////////////////////////////////////////////
 // code instrumentation or injections

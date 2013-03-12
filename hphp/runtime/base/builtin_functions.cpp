@@ -449,63 +449,6 @@ Variant o_invoke_failed(const char *cls, const char *meth,
   }
 }
 
-Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  switch (count) {
-  case 0: {
-    return Array::Create();
-  }
-  case 1: {
-    return Array(ArrayInit(1).set(a0).create());
-  }
-  case 2: {
-    return Array(ArrayInit(2).set(a0).set(a1).create());
-  }
-  case 3: {
-    return Array(ArrayInit(3).set(a0).set(a1).set(a2).create());
-  }
-#if INVOKE_FEW_ARGS_COUNT > 3
-  case 4: {
-    return Array(ArrayInit(4).set(a0).set(a1).set(a2).
-                              set(a3).create());
-  }
-  case 5: {
-    return Array(ArrayInit(5).set(a0).set(a1).set(a2).
-                              set(a3).set(a4).create());
-  }
-  case 6: {
-    return Array(ArrayInit(6).set(a0).set(a1).set(a2).
-                              set(a3).set(a4).set(a5).create());
-  }
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-  case 7: {
-    return Array(ArrayInit(7).set(a0).set(a1).set(a2).
-                              set(a3).set(a4).set(a5).
-                                    set(a6).create());
-  }
-  case 8: {
-    return Array(ArrayInit(8).set(a0).set(a1).set(a2).
-                              set(a3).set(a4).set(a5).
-                              set(a6).set(a7).create());
-  }
-  case 9: {
-    return Array(ArrayInit(9).set(a0).set(a1).set(a2).
-                              set(a3).set(a4).set(a5).
-                              set(a6).set(a7).set(a8).create());
-  }
-  case 10: {
-    return Array(ArrayInit(10).set(a0).set(a1).set(a2).
-                               set(a3).set(a4).set(a5).
-                               set(a6).set(a7).set(a8).
-                               set(a9).create());
-  }
-#endif
-  default:
-    assert(false);
-  }
-  return null;
-}
-
 void NEVER_INLINE raise_null_object_prop() {
   raise_notice("Trying to get property of non-object");
 }

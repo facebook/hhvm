@@ -382,8 +382,6 @@ Variant invoke_failed(CVarRef func, CArrRef params,
 Variant o_invoke_failed(const char *cls, const char *meth,
                         bool fatal = true);
 
-Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS);
-
 /**
  * When fatal coding errors are transformed to this function call.
  */

@@ -752,11 +752,6 @@ void HhbcTranslator::emitContReceive() {
   push(value);
 }
 
-void HhbcTranslator::emitContRaised() {
-  SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
-  m_tb->genContRaiseCheck(cont, getExitSlowTrace());
-}
-
 void HhbcTranslator::emitContDone() {
   SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
   m_tb->genStRaw(cont, RawMemSlot::ContDone, m_tb->genDefConst(true));

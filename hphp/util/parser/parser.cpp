@@ -247,6 +247,10 @@ void ParserBase::popLabelInfo() {
 
   for (unsigned int i = 0; i < info.gotos.size(); i++) {
     const GotoInfo &gotoInfo = info.gotos[i];
+    if (gotoInfo.label.find(YIELD_LABEL_PREFIX) == 0) {
+      labels.erase(gotoInfo.label);
+      continue;
+    }
     LabelMap::const_iterator iter = info.labels.find(gotoInfo.label);
     if (iter == info.labels.end()) {
       invalidateGoto(gotoInfo.stmt, UndefLabel);
@@ -255,10 +259,6 @@ void ParserBase::popLabelInfo() {
       continue;
     }
     const LabelStmtInfo &labelInfo = iter->second;
-    if (gotoInfo.label.find(YIELD_LABEL_PREFIX) == 0) {
-      labels.erase(gotoInfo.label);
-      continue;
-    }
     int labelScopeId = labelInfo.scopeId;
     bool found = false;
     for (int j = gotoInfo.scopes.size() - 1; j >= 0; j--) {

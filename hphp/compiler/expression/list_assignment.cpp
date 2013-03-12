@@ -75,6 +75,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
     case Expression::KindOfAssignmentExpression:
     case Expression::KindOfExpressionList:
     case Expression::KindOfIncludeExpression:
+    case Expression::KindOfYieldExpression:
       return ListAssignment::Regular;
 
     case Expression::KindOfListAssignment:

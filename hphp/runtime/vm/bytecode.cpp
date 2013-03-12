@@ -7068,17 +7068,9 @@ inline void OPTBLD_INLINE VMExecutionContext::iopPackCont(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopContReceive(PC& pc) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
-  Variant val = cont->t_receive();
-
-  TypedValue* tv = m_stack.allocTV();
-  tvWriteUninit(tv);
-  tvAsVariant(tv) = val;
-}
-
-inline void OPTBLD_INLINE VMExecutionContext::iopContRaised(PC& pc) {
-  NEXT();
-  c_Continuation* cont = frame_continuation(m_fp);
   cont->t_raised();
+  TypedValue* tv = m_stack.allocTV();
+  tvDup(cont->m_received.asTypedValue(), tv);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContDone(PC& pc) {

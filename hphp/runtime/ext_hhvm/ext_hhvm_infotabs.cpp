@@ -191,7 +191,6 @@ TypedValue* fg_get_object_vars(VM::ActRec *ar);
 TypedValue* fg_call_user_method_array(VM::ActRec *ar);
 TypedValue* fg_call_user_method(VM::ActRec *ar);
 TypedValue* fg_hphp_create_continuation(VM::ActRec *ar);
-TypedValue* fg_hphp_pack_continuation(VM::ActRec *ar);
 TypedValue* fg_hphp_unpack_continuation(VM::ActRec *ar);
 TypedValue* fg_ctype_alnum(VM::ActRec *ar);
 TypedValue* fg_ctype_alpha(VM::ActRec *ar);
@@ -2415,8 +2414,6 @@ TypedValue* tg_12Continuation_rewind(VM::ActRec *ar);
 TypedValue* tg_12Continuation_valid(VM::ActRec *ar);
 TypedValue* tg_12Continuation_send(VM::ActRec *ar);
 TypedValue* tg_12Continuation_raise(VM::ActRec *ar);
-TypedValue* tg_12Continuation_raised(VM::ActRec *ar);
-TypedValue* tg_12Continuation_receive(VM::ActRec *ar);
 TypedValue* tg_12Continuation_getOrigFuncName(VM::ActRec *ar);
 TypedValue* tg_12Continuation___clone(VM::ActRec *ar);
 VM::Instance* new_DummyContinuation_Instance(VM::Class*);
@@ -3024,7 +3021,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2209;
+const long long hhbc_ext_funcs_count = 2208;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -3194,7 +3191,6 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "call_user_method_array", fg_call_user_method_array, (void *)&fh_call_user_method_array },
   { "call_user_method", fg_call_user_method, (void *)&fh_call_user_method },
   { "hphp_create_continuation", fg_hphp_create_continuation, (void *)&fh_hphp_create_continuation },
-  { "hphp_pack_continuation", fg_hphp_pack_continuation, (void *)&fh_hphp_pack_continuation },
   { "hphp_unpack_continuation", fg_hphp_unpack_continuation, (void *)&fh_hphp_unpack_continuation },
   { "ctype_alnum", fg_ctype_alnum, (void *)&fh_ctype_alnum },
   { "ctype_alpha", fg_ctype_alpha, (void *)&fh_ctype_alpha },
@@ -5468,7 +5464,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_TupleIterator[] = {
   { "rewind", tg_13TupleIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Continuation = 19;
+static const long long hhbc_ext_method_count_Continuation = 17;
 static const HhbcExtMethodInfo hhbc_ext_methods_Continuation[] = {
   { "__construct", tg_12Continuation___construct },
   { "update", tg_12Continuation_update },
@@ -5485,8 +5481,6 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Continuation[] = {
   { "valid", tg_12Continuation_valid },
   { "send", tg_12Continuation_send },
   { "raise", tg_12Continuation_raise },
-  { "raised", tg_12Continuation_raised },
-  { "receive", tg_12Continuation_receive },
   { "getOrigFuncName", tg_12Continuation_getOrigFuncName },
   { "__clone", tg_12Continuation___clone }
 };

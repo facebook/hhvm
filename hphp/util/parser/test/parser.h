@@ -246,8 +246,9 @@ struct Parser : ParserBase {
     X(base, prop, params);
   }
 
-  void onListAssignment(Token &out, Token &vars, Token *expr) {
-    X(vars, expr);
+  void onListAssignment(Token &out, Token &vars, Token *expr,
+                        bool rhsFirst = false) {
+    X(vars, expr, rhsFirst);
   }
 
   void onAListVar(Token &out, Token *list, Token *var) {
@@ -258,8 +259,9 @@ struct Parser : ParserBase {
     X(list, sublist);
   }
 
-  void onAssign(Token& out, Token& var, Token& expr, bool ref) {
-    X(var, expr, ref);
+  void onAssign(Token& out, Token& var, Token& expr, bool ref,
+                bool rhsFirst = false) {
+    X(var, expr, ref, rhsFirst);
   }
 
   void onAssignNew(Token &out, Token &var, Token &name, Token &args) {
@@ -439,8 +441,8 @@ struct Parser : ParserBase {
     X(expr, checkYield);
   }
 
-  void onYield(Token &out, Token *expr, bool assign) {
-    X(expr, assign);
+  void onYield(Token &out, Token &expr) {
+    X(expr);
   }
 
   void onYieldBreak(Token &out) { X(); }

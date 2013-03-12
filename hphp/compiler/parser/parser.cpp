@@ -42,6 +42,7 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/encaps_list_expression.h>
 #include <compiler/expression/closure_expression.h>
+#include <compiler/expression/yield_expression.h>
 #include <compiler/expression/user_attribute.h>
 
 #include <compiler/statement/function_statement.h>
@@ -115,8 +116,6 @@ extern void create_generator(Parser *_p, Token &out, Token &params,
                              const char *clsname, Token *modifiers,
                              bool getArgs, Token &origGenFunc, bool isHhvm,
                              Token *attr);
-extern void transform_yield(Parser *_p, Token &stmts, int index,
-                            Token *expr, bool assign);
 extern void transform_yield_break(Parser *_p, Token &out);
 
 namespace HPHP {
@@ -563,7 +562,8 @@ void Parser::onExprListElem(Token &out, Token *exprs, Token &expr) {
   out->exp = expList;
 }
 
-void Parser::onListAssignment(Token &out, Token &vars, Token *expr) {
+void Parser::onListAssignment(Token &out, Token &vars, Token *expr,
+                              bool rhsFirst /* = false */) {
   ExpressionListPtr el(dynamic_pointer_cast<ExpressionList>(vars->exp));
   for (int i = 0; i < el->getCount(); i++) {
     if (dynamic_pointer_cast<FunctionCall>((*el)[i])) {
@@ -572,7 +572,7 @@ void Parser::onListAssignment(Token &out, Token &vars, Token *expr) {
   }
   out->exp = NEW_EXP(ListAssignment,
                      dynamic_pointer_cast<ExpressionList>(vars->exp),
-                     expr ? expr->exp : ExpressionPtr());
+                     expr ? expr->exp : ExpressionPtr(), rhsFirst);
 }
 
 void Parser::onAListVar(Token &out, Token *list, Token *var) {
@@ -601,12 +601,13 @@ void Parser::checkAssignThis(Token &var) {
   }
 }
 
-void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref) {
+void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref,
+                      bool rhsFirst /* = false */) {
   if (dynamic_pointer_cast<FunctionCall>(var->exp)) {
     PARSE_ERROR("Can't use return value in write context");
   }
   checkAssignThis(var);
-  out->exp = NEW_EXP(AssignmentExpression, var->exp, expr->exp, ref);
+  out->exp = NEW_EXP(AssignmentExpression, var->exp, expr->exp, ref, rhsFirst);
 }
 
 void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
@@ -1404,14 +1405,14 @@ bool Parser::setIsGenerator() {
   return true;
 }
 
-void Parser::onYield(Token &out, Token *expr, bool assign) {
+void Parser::onYield(Token &out, Token &expr) {
   if (!setIsGenerator()) {
     return;
   }
 
   FunctionContext &funcContext = m_funcContexts.back();
-  int index = ++funcContext.numYields;
-  transform_yield(this, out, index, expr, assign);
+  int label = ++funcContext.numYields;
+  out->exp = NEW_EXP(YieldExpression, expr->exp, label);
 }
 
 void Parser::onYieldBreak(Token &out) {

@@ -593,7 +593,6 @@ MINSTRS
   CASE(UnpackCont) \
   CASE(PackCont) \
   CASE(ContReceive) \
-  CASE(ContRaised) \
   CASE(ContDone) \
   CASE(ContNext) \
   CASE(ContSend) \

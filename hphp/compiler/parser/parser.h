@@ -149,10 +149,12 @@ public:
   void onObjectProperty(Token &out, Token &base, Token &prop);
   void onObjectMethodCall(Token &out, Token &base, Token &prop, Token &params);
 
-  void onListAssignment(Token &out, Token &vars, Token *expr);
+  void onListAssignment(Token &out, Token &vars, Token *expr,
+                        bool rhsFirst = false);
   void onAListVar(Token &out, Token *list, Token *var);
   void onAListSub(Token &out, Token *list, Token &sublist);
-  void onAssign(Token &out, Token &var, Token &expr, bool ref);
+  void onAssign(Token &out, Token &var, Token &expr, bool ref,
+                bool rhsFirst = false);
   void onAssignNew(Token &out, Token &var, Token &name, Token &args);
   void onNewObject(Token &out, Token &name, Token &args);
   void onUnaryOpExp(Token &out, Token &operand, int op, bool front);
@@ -209,7 +211,7 @@ public:
   void onBreak(Token &out, Token *expr);
   void onContinue(Token &out, Token *expr);
   void onReturn(Token &out, Token *expr, bool checkYield = true);
-  void onYield(Token &out, Token *expr, bool assign);
+  void onYield(Token &out, Token &expr);
   void onYieldBreak(Token &out);
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);

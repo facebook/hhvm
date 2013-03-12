@@ -149,33 +149,6 @@ static void prepare_continuation_call(Parser* _p, Token& rhs, const char* cname)
   _p->onCall(rhs, false, fname, empty, NULL, true);
 }
 
-static void on_yield_assign(Parser *_p, Token &out, Token &var, Token *expr) {
-  Token yield;    _p->onYield(yield, expr, true);
-  Token rhs;      prepare_continuation_call(_p, rhs, "receive");
-  Token assign;   _p->onAssign(assign, var, rhs, 0);
-  Token stmt;     _p->onExpStatement(stmt, assign);
-
-  Token stmts0;   _p->onStatementListStart(stmts0);
-  Token stmts1;   _p->addStatement(stmts1, stmts0, yield);
-  Token stmts2;   _p->addStatement(stmts2, stmts1, stmt);
-
-  _p->finishStatement(out, stmts2); out = 1;
-}
-
-static void on_yield_list_assign(Parser *_p, Token &out, Token &var,
-                                 Token *expr) {
-  Token yield;    _p->onYield(yield, expr, true);
-  Token rhs;      prepare_continuation_call(_p, rhs, "receive");
-  Token assign;   _p->onListAssignment(assign, var, &rhs);
-  Token stmt;     _p->onExpStatement(stmt, assign);
-
-  Token stmts0;   _p->onStatementListStart(stmts0);
-  Token stmts1;   _p->addStatement(stmts1, stmts0, yield);
-  Token stmts2;   _p->addStatement(stmts2, stmts1, stmt);
-
-  _p->finishStatement(out, stmts2); out = 1;
-}
-
 void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
   // 1. add prologue and epilogue to original body and store it back to "stmt"
   {
@@ -312,50 +285,6 @@ void create_generator(Parser *_p, Token &out, Token &params,
     out.reset();
     _p->onFunction(out, modifiers, ret, ref, name, params, scont, attr);
     origGenFunc = out;
-  }
-}
-
-void transform_yield(Parser *_p, Token &stmts, int index,
-                     Token *expr, bool assign) {
-  // hphp_pack_continuation(v___cont__, label, value)
-  Token update;
-  {
-    Token name;    name.setText(CONTINUATION_OBJECT_NAME);
-    Token var;     _p->onSynthesizedVariable(var, name);
-    Token param0;  _p->onCallParam(param0, NULL, var, false);
-
-    Token snum;    snum.setText(boost::lexical_cast<std::string>(index));
-    Token num;     _p->onScalar(num, T_LNUMBER, snum);
-    Token param1;  _p->onCallParam(param1, &param0, num, false);
-
-    Token param2;  _p->onCallParam(param2, &param1, *expr, false);
-
-    Token cname;   cname.setText("hphp_pack_continuation");
-    Token call;    _p->onCall(call, false, cname, param2, NULL, true);
-    _p->onExpStatement(update, call);
-  }
-
-  // return
-  Token ret;     _p->onReturn(ret, NULL, false);
-
-  // __yield__N:
-  Token lname;   lname.setText(YIELD_LABEL_PREFIX +
-                               boost::lexical_cast<std::string>(index));
-  Token label;   _p->onLabel(label, lname);
-                 _p->addLabel(lname.text(), _p->getLocation(), &label);
-
-  Token stmts0;  _p->onStatementListStart(stmts0);
-  Token stmts1;  _p->addStatement(stmts1, stmts0, update);
-  Token stmts2;  _p->addStatement(stmts2, stmts1, ret);
-  Token stmts3;  _p->addStatement(stmts3, stmts2, label);
-
-  if (assign) {
-    _p->finishStatement(stmts, stmts3); stmts = 1;
-  } else {
-    Token fcall;  prepare_continuation_call(_p, fcall, "raised");
-    Token fstmt;  _p->onExpStatement(fstmt, fcall);
-    Token stmts4; _p->addStatement(stmts4, stmts3, fstmt);
-    _p->finishStatement(stmts, stmts4); stmts = 1;
   }
 }
 
@@ -1061,10 +990,6 @@ statement:
   | T_RETURN ';'                       { _p->onReturn($$, NULL);}
   | T_RETURN expr ';'                  { _p->onReturn($$, &$2);}
   | T_YIELD T_BREAK ';'                { _p->onYieldBreak($$);}
-  | T_YIELD expr ';'                   { _p->onYield($$, &$2, false);}
-  | variable '=' T_YIELD expr ';'      { on_yield_assign(_p, $$, $1, &$4);}
-  | T_LIST '(' assignment_list ')'
-    '=' T_YIELD expr ';'               { on_yield_list_assign(_p, $$, $3, &$7);}
   | T_GLOBAL global_var_list ';'       { _p->onGlobal($$, $2);}
   | T_STATIC static_var_list ';'       { _p->onStatic($$, $2);}
   | T_ECHO expr_list ';'               { _p->onEcho($$, $2, 0);}
@@ -1095,6 +1020,9 @@ statement:
                                                      _p->getLocation(),
                                                      &$$); }
   | expr ';'                           { _p->onExpStatement($$, $1);}
+  | yield_expr ';'                     { _p->onExpStatement($$, $1);}
+  | yield_assign_expr ';'              { _p->onExpStatement($$, $1);}
+  | yield_list_assign_expr ';'         { _p->onExpStatement($$, $1);}
   | ident ':'                          { _p->onLabel($$, $1);
                                          _p->addLabel($1.text(),
                                                       _p->getLocation(),
@@ -1637,6 +1565,19 @@ expr_list:
 for_expr:
     expr_list                          { $$ = $1;}
   |                                    { $$.reset();}
+;
+
+yield_expr:
+    T_YIELD expr                       { _p->onYield($$, $2);}
+;
+
+yield_assign_expr:
+    variable '=' yield_expr            { _p->onAssign($$, $1, $3, 0, true);}
+;
+
+yield_list_assign_expr:
+    T_LIST '(' assignment_list ')'
+    '=' yield_expr                     { _p->onListAssignment($$, $3, &$6, true);}
 ;
 
 expr:

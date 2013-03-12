@@ -7499,11 +7499,6 @@ void TranslatorX64::translateContReceive(const Tracelet& t,
   emitCopyToStack(a, i, r(rScratch), -1 * (int)sizeof(Cell));
 }
 
-void TranslatorX64::translateContRaised(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
-  emitContRaiseCheck(a, i);
-}
-
 void TranslatorX64::translateContEnter(const Tracelet& t,
                                        const NormalizedInstruction& i) {
   // We're about to execute the generator body, which uses regs
@@ -12383,7 +12378,6 @@ bool TranslatorX64::dumpTCData() {
   SUPPORTED_OP(PackCont) \
   SUPPORTED_OP(ContDone) \
   SUPPORTED_OP(ContReceive) \
-  SUPPORTED_OP(ContRaised) \
   SUPPORTED_OP(ContNext) \
   SUPPORTED_OP(ContSend) \
   SUPPORTED_OP(ContRaise) \

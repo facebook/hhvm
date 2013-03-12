@@ -3643,12 +3643,6 @@ PackCont <label id>    [C]  ->  []
   continuation as the result of the current iteration and the continuation's
   label is set to <label id>.
 
-ContRaised    []  ->  []
-
-  Check for continuation exception. If the continuation in local 0 has a
-  pending exception, this instruction will throw that exception. Otherwise, it
-  does nothing.
-
 ContReceive    []  ->  [C]
 
   Receive continuation value. If the continuation in local 0 has a pending

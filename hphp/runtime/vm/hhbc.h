@@ -556,7 +556,6 @@ enum SetOpOp {
   O(ContExit,        NA,               NOV,             NOV,        CF) \
   O(UnpackCont,      NA,               NOV,             ONE(CV),    NF) \
   O(PackCont,        ONE(IVA),         ONE(CV),         NOV,        NF) \
-  O(ContRaised,      NA,               NOV,             NOV,        NF) \
   O(ContReceive,     NA,               NOV,             ONE(CV),    NF) \
   O(ContDone,        NA,               NOV,             NOV,        NF) \
   O(ContNext,        NA,               NOV,             NOV,        NF) \

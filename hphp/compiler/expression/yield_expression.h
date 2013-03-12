@@ -3,7 +3,6 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
-   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,31 +13,33 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#ifndef __YIELD_EXPRESSION_H__
+#define __YIELD_EXPRESSION_H__
+
+#include <compiler/expression/expression.h>
+
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-/*
-HPHP::Object HPHP::f_hphp_create_continuation(HPHP::String const&, HPHP::String const&, HPHP::String const&, HPHP::Array const&)
-_ZN4HPHP26f_hphp_create_continuationERKNS_6StringES2_S2_RKNS_5ArrayE
+DECLARE_BOOST_TYPES(YieldExpression);
 
-(return value) => rax
-_rv => rdi
-clsname => rsi
-funcname => rdx
-origFuncName => rcx
-args => r8
-*/
+class YieldExpression : public Expression {
+public:
+  YieldExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
+                  ExpressionPtr exp, int label);
 
-Value* fh_hphp_create_continuation(Value* _rv, Value* clsname, Value* funcname, Value* origFuncName, Value* args) asm("_ZN4HPHP26f_hphp_create_continuationERKNS_6StringES2_S2_RKNS_5ArrayE");
+  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
-/*
-void HPHP::f_hphp_unpack_continuation(HPHP::Object const&)
-_ZN4HPHP26f_hphp_unpack_continuationERKNS_6ObjectE
+  ExpressionPtr getExpression() { return m_exp; }
+  int getLabel() { return m_label; }
 
-continuation => rdi
-*/
+private:
+  ExpressionPtr m_exp;
+  int m_label;
+};
 
-void fh_hphp_unpack_continuation(Value* continuation) asm("_ZN4HPHP26f_hphp_unpack_continuationERKNS_6ObjectE");
+///////////////////////////////////////////////////////////////////////////////
+}
 
-
-} // !HPHP
-
+#endif // __YIELD_EXPRESSION_H__

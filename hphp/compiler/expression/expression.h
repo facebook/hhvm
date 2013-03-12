@@ -75,6 +75,7 @@ class Variant;
     x(ConstantExpression, Const),               \
     x(EncapsListExpression, None),              \
     x(ClosureExpression, None),                 \
+    x(YieldExpression, None),                   \
     x(UserAttribute, None)
 
 class Expression : public Construct {

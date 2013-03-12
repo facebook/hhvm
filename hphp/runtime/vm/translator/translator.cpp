@@ -1201,7 +1201,6 @@ static const struct {
   { OpContExit,    {None,             None,         OutNone,           0 }},
   { OpUnpackCont,  {Local,            Stack1,       OutInt64,          1 }},
   { OpPackCont,    {Local|Stack1,     None,         OutNone,          -1 }},
-  { OpContRaised,  {Local,            None,         OutNone,           0 }},
   { OpContReceive, {Local,            Stack1,       OutUnknown,        1 }},
   { OpContDone,    {Local,            None,         OutNone,           0 }},
   { OpContNext,    {None,             None,         OutNone,           0 }},
@@ -1960,7 +1959,6 @@ void Translator::getInputs(Tracelet& t,
       case OpUnpackCont:
       case OpPackCont:
       case OpContReceive:
-      case OpContRaised:
       case OpContDone:
       case OpContSend:
       case OpContRaise:

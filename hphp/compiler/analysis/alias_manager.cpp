@@ -1551,6 +1551,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
               cur = next;
             }
             if (!m_inCall &&
+                !last->is(Expression::KindOfYieldExpression) &&
                 ae->isUnused() && m_accessList.isLast(ae) &&
                 !e->hasAnyContext(Expression::AccessContext |
                                   Expression::ObjectContext |

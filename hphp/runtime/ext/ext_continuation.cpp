@@ -40,11 +40,6 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
   return NULL;
 }
 
-void f_hphp_pack_continuation(CObjRef continuation,
-                              int64_t label, CVarRef value) {
-  throw_fatal("Invalid call hphp_pack_continuation");
-}
-
 void f_hphp_unpack_continuation(CObjRef continuation) {
   throw_fatal("Invalid call hphp_unpack_continuation");
 }
@@ -166,14 +161,6 @@ void c_Continuation::t_raised() {
     m_should_throw = false;
     throw_exception(m_received);
   }
-}
-
-Variant c_Continuation::t_receive() {
-  if (m_should_throw) {
-    m_should_throw = false;
-    throw_exception(m_received);
-  }
-  return m_received;
 }
 
 String c_Continuation::t_getorigfuncname() {

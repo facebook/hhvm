@@ -60,6 +60,7 @@
 #include <compiler/expression/simple_function_call.h>
 #include <compiler/expression/static_member_expression.h>
 #include <compiler/expression/unary_op_expression.h>
+#include <compiler/expression/yield_expression.h>
 
 #include <compiler/statement/break_statement.h>
 #include <compiler/statement/case_statement.h>
@@ -2180,6 +2181,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
         bool retV = false;
         if (m_curFunc->isGenerator()) {
+          // used by yield break
           e.ContExit();
           return false;
         }
@@ -3152,18 +3154,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           inputIsAnObject(0);
           e.UnpackCont();
           return true;
-        } else if (call->isCompilerCallToFunction("hphp_pack_continuation")) {
-          assert(params && params->getCount() == 3);
-          ExpressionPtr label = (*params)[1];
-          Variant lVar;
-          UNUSED bool isScalar = label->getScalarValue(lVar);
-          assert(isScalar && lVar.isInteger());
-
-          visit((*params)[2]);
-          emitConvertToCell(e);
-          inputIsAnObject(1);
-          e.PackCont(lVar.asInt64Val());
-          return false;
         } else if (call->isCompilerCallToFunction("hphp_create_continuation")) {
           assert(params && (params->getCount() == 3 ||
                             params->getCount() == 4));
@@ -3175,15 +3165,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             StringData::GetStaticString(nameVar.getStringData());
           bool callGetArgs = params->getCount() == 4;
           e.CreateCont(callGetArgs, nameStr);
-          return true;
-        } else if (call->isCompilerCallToFunction("hphp_continuation_raised")) {
-          inputIsAnObject(0);
-          e.ContRaised();
-          return false;
-        } else if (
-            call->isCompilerCallToFunction("hphp_continuation_receive")) {
-          inputIsAnObject(0);
-          e.ContReceive();
           return true;
         } else if (call->isCompilerCallToFunction("hphp_continuation_done")) {
           inputIsAnObject(0);
@@ -3836,6 +3817,39 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         return true;
       }
+      case Expression::KindOfYieldExpression: {
+        YieldExpressionPtr y(static_pointer_cast<YieldExpression>(node));
+        assert(m_evalStack.size() == 0);
+
+        // evaluate expression passed to yield
+        visit(y->getExpression());
+        emitConvertToCell(e);
+
+        // pack continuation and set the return label
+        assert(m_evalStack.size() == 1);
+        m_metaInfo.addKnownDataType(
+          KindOfObject, false, m_ue.bcPos(), false, 1);
+        e.PackCont(y->getLabel());
+
+        // transfer control
+        assert(m_evalStack.size() == 0);
+        e.ContExit();
+
+        // emit return label
+        StringData* nName = StringData::GetStaticString(
+          YIELD_LABEL_PREFIX + boost::lexical_cast<std::string>(y->getLabel()));
+        Label& lab = m_gotoLabels[nName];
+        lab.set(e);
+
+        // check for exception and retrieve result
+        assert(m_evalStack.size() == 0);
+        m_metaInfo.addKnownDataType(
+          KindOfObject, false, m_ue.bcPos(), false, 0);
+        e.ContReceive();
+
+        assert(m_evalStack.size() == 1);
+        return true;
+      }
     }
   }
 
@@ -4157,11 +4171,15 @@ void EmitterVisitor::emitVGet(Emitter& e) {
 }
 
 Id EmitterVisitor::emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp) {
-  Id tempLocal = m_curFunc->allocUnnamedLocal();
-  emitVirtualLocal(tempLocal);
   visit(exp);
   emitConvertToCell(e);
-  emitSet(e);
+
+  // HACK: emitVirtualLocal would pollute m_evalStack before visiting exp,
+  //       YieldExpression won't be happy
+  Id tempLocal = m_curFunc->allocUnnamedLocal();
+  e.getUnitEmitter().emitOp(OpSetL);
+  e.getUnitEmitter().emitIVA(tempLocal);
+
   emitPop(e);
   return tempLocal;
 }

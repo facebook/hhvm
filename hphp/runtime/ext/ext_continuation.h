@@ -28,7 +28,6 @@ namespace HPHP {
 FORWARD_DECLARE_CLASS_BUILTIN(Continuation);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 p_Continuation f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
-void f_hphp_pack_continuation(CObjRef continuation, int64_t label, CVarRef value);
 void f_hphp_unpack_continuation(CObjRef continuation);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,7 +62,6 @@ class c_Continuation : public ExtObjectData {
   public: void t_send(CVarRef v);
   public: void t_raise(CVarRef v);
   public: void t_raised();
-  public: Variant t_receive();
   public: String t_getorigfuncname();
   public: Variant t___clone();
 

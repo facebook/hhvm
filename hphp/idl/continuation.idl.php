@@ -79,29 +79,6 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => 'hphp_pack_continuation',
-    'return' => array(
-      'type'   => null,
-    ),
-    'args'   => array(
-      array(
-        'name'   => 'continuation',
-        'type'   => Object,
-      ),
-      array(
-        'name'   => 'label',
-        'type'   => Int64,
-      ),
-      array(
-        'name'   => 'value',
-        'type'   => Variant,
-      ),
-    ),
-    'taint_observer' => false,
-  ));
-
-DefineFunction(
-  array(
     'name'   => 'hphp_unpack_continuation',
     'return' => array(
       'type'   => null,
@@ -386,22 +363,6 @@ DefineFunction(
         'name'   => 'v',
         'type'   => Variant,
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => 'raised',
-    'return' => array(
-      'type'   => null,
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => 'receive',
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 

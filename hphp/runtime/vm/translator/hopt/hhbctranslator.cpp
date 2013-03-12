@@ -762,14 +762,10 @@ void HhbcTranslator::emitContDone() {
 }
 
 void HhbcTranslator::emitContNext() {
-  emitInterpOneOrPunt(Type::None);
-  return;
-  // Task #2140912: Fix and re-enable this
-
   assert(getCurClass());
   SSATmp* cont = m_tb->genLdThis(nullptr);
   m_tb->genContPreNext(cont, getExitSlowTrace());
-  m_tb->genSetPropCell(cont, CONTOFF(m_received), m_tb->genDefUninit());
+  m_tb->genSetPropCell(cont, CONTOFF(m_received), m_tb->genDefInitNull());
 }
 
 void HhbcTranslator::emitContSendImpl(bool raise) {

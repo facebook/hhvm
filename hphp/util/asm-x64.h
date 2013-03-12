@@ -703,16 +703,21 @@ const X64Instr instr_notb =    { { 0xF6,0xF1,0xF1,0x02,0xF1,0xF1 }, 0x0000 };
 const X64Instr instr_neg =     { { 0xF7,0xF1,0xF1,0x03,0xF1,0xF1 }, 0x0000 };
 const X64Instr instr_negb =    { { 0xF6,0xF1,0xF1,0x03,0xF1,0xF1 }, 0x0000 };
 const X64Instr instr_add =     { { 0x01,0x03,0x81,0x00,0x05,0xF1 }, 0x0810 };
+const X64Instr instr_addb =    { { 0x00,0x02,0x80,0x00,0x04,0xF1 }, 0x0810 };
 const X64Instr instr_sub =     { { 0x29,0x2B,0x81,0x05,0x2D,0xF1 }, 0x0810 };
+const X64Instr instr_subb =    { { 0x28,0x2A,0x80,0x05,0x2C,0xF1 }, 0x0810 };
 const X64Instr instr_and =     { { 0x21,0x23,0x81,0x04,0x25,0xF1 }, 0x0810 };
+const X64Instr instr_andb =    { { 0x20,0x22,0x80,0x04,0x24,0xF1 }, 0x0810 };
 const X64Instr instr_or  =     { { 0x09,0x0B,0x81,0x01,0x0D,0xF1 }, 0x0810 };
+const X64Instr instr_orb =     { { 0x08,0x0A,0x80,0x01,0x0C,0xF1 }, 0x0810 };
 const X64Instr instr_xor =     { { 0x31,0x33,0x81,0x06,0x35,0xF1 }, 0x0810 };
-const X64Instr instr_movb =    { { 0x88,0x8A,0xC6,0x00,0xF1,0xB0 }, 0x0610 };
+const X64Instr instr_xorb =    { { 0x30,0x32,0x80,0x06,0x34,0xF1 }, 0x0810 };
 const X64Instr instr_mov =     { { 0x89,0x8B,0xC7,0x00,0xF1,0xB8 }, 0x0600 };
-const X64Instr instr_testb =   { { 0x84,0x84,0xF6,0x00,0xA8,0xF1 }, 0x0810 };
+const X64Instr instr_movb =    { { 0x88,0x8A,0xC6,0x00,0xF1,0xB0 }, 0x0610 };
 const X64Instr instr_test =    { { 0x85,0x85,0xF7,0x00,0xA9,0xF1 }, 0x0800 };
-const X64Instr instr_cmpb =    { { 0x38,0x3A,0x80,0x07,0x3C,0xF1 }, 0x0810 };
+const X64Instr instr_testb =   { { 0x84,0x84,0xF6,0x00,0xA8,0xF1 }, 0x0810 };
 const X64Instr instr_cmp =     { { 0x39,0x3B,0x81,0x07,0x3D,0xF1 }, 0x0810 };
+const X64Instr instr_cmpb =    { { 0x38,0x3A,0x80,0x07,0x3C,0xF1 }, 0x0810 };
 const X64Instr instr_sbb =     { { 0x19,0x1B,0x81,0x03,0x1D,0xF1 }, 0x0810 };
 const X64Instr instr_adc =     { { 0x11,0x13,0x81,0x02,0x15,0xF1 }, 0x0810 };
 const X64Instr instr_lea =     { { 0xF1,0x8D,0xF1,0x00,0xF1,0xF1 }, 0x0000 };
@@ -908,11 +913,22 @@ struct X64Assembler {
    *
    */
 
+#define BYTE_LOAD_OP(name, instr)                                     \
+  void name##b(MemoryRef m, Reg8 r)        { instrMR(instr, m, r); }  \
+  void name##b(IndexedMemoryRef m, Reg8 r) { instrMR(instr, m, r); }
+
 #define LOAD_OP(name, instr)                                          \
   void name##q(MemoryRef m, Reg64 r) { instrMR(instr, m, r); }        \
   void name##l(MemoryRef m, Reg32 r) { instrMR(instr, m, r); }        \
   void name##q(IndexedMemoryRef m, Reg64 r) { instrMR(instr, m, r); } \
-  void name##l(IndexedMemoryRef m, Reg32 r) { instrMR(instr, m, r); }
+  void name##l(IndexedMemoryRef m, Reg32 r) { instrMR(instr, m, r); } \
+  BYTE_LOAD_OP(name, instr##b)
+
+#define BYTE_STORE_OP(name, instr)                                     \
+  void name##b(Reg8 r, MemoryRef m)        { instrRM(instr, r, m); }  \
+  void name##b(Reg8 r, IndexedMemoryRef m) { instrRM(instr, r, m); }  \
+  void name##b(Immed i, MemoryRef m)       { instrIM8(instr, i, m); } \
+  void name##b(Immed i, IndexedMemoryRef m){ instrIM8(instr, i, m); }
 
 #define STORE_OP(name, instr)                                           \
   void name##l(Immed i, MemoryRef m) { instrIM32(instr, i, m); }        \
@@ -920,12 +936,18 @@ struct X64Assembler {
   void name##q(Reg64 r, MemoryRef m) { instrRM(instr, r, m); }          \
   void name##l(Immed i, IndexedMemoryRef m) { instrIM32(instr, i, m); } \
   void name##l(Reg32 r, IndexedMemoryRef m) { instrRM(instr, r, m); }   \
-  void name##q(Reg64 r, IndexedMemoryRef m) { instrRM(instr, r, m); }
+  void name##q(Reg64 r, IndexedMemoryRef m) { instrRM(instr, r, m); }   \
+  BYTE_STORE_OP(name, instr ## b)
+
+#define BYTE_REG_OP(name, instr)                              \
+  void name##b(Reg8 r1, Reg8 r2) { instrRR(instr, r1, r2); }  \
+  void name##b(Immed i, Reg8 r)  { instrIR(instr, i, r); }    \
 
 #define REG_OP(name, instr)                                       \
   void name##q(Reg64 r1, Reg64 r2)   { instrRR(instr, r1, r2); }  \
   void name##l(Reg32 r1, Reg32 r2)   { instrRR(instr, r1, r2); }  \
-  void name##l(Immed i, Reg32 r)     { instrIR(instr, i, r); }
+  void name##l(Immed i, Reg32 r)     { instrIR(instr, i, r); } \
+  BYTE_REG_OP(name, instr##b)
 
   /*
    * For when we a have a memory operand and the operand size is
@@ -972,25 +994,6 @@ struct X64Assembler {
   IMM64_STORE_OP(name, instr)                   \
   IMM64R_OP(name, instr)
 
-#define BYTE_REG_OP(name, instr)                              \
-  void name##b(Reg8 r1, Reg8 r2) { instrRR(instr, r1, r2); }  \
-  void name##b(Immed i, Reg8 r)  { instrIR(instr, i, r); }
-
-#define BYTE_LOAD_OP(name, instr)                                     \
-  void name##b(MemoryRef m, Reg8 r)        { instrMR(instr, m, r); }  \
-  void name##b(IndexedMemoryRef m, Reg8 r) { instrMR(instr, m, r); }
-
-#define BYTE_STORE_OP(name, instr)                                      \
-  void name##b(Reg8 r, MemoryRef m)         { instrRM(instr, r, m); }   \
-  void name##b(Immed i, MemoryRef r)        { instrIM8(instr, i, r); }  \
-  void name##b(Reg8 r, IndexedMemoryRef m)  { instrRM(instr, r, m); }   \
-  void name##b(Immed i, IndexedMemoryRef r) { instrIM8(instr, i, r); }
-
-#define BYTE_OP(name, instr)                    \
-  BYTE_REG_OP(name, instr)                      \
-  BYTE_LOAD_OP(name, instr)                     \
-  BYTE_STORE_OP(name, instr)
-
   // We rename x64's mov to store and load for improved code
   // readability.
   LOAD_OP        (load,  instr_mov)
@@ -1006,21 +1009,15 @@ struct X64Assembler {
   FULL_OP(test,instr_test)
   FULL_OP(cmp, instr_cmp)
 
-  BYTE_REG_OP  (mov,   instr_movb)
-  BYTE_LOAD_OP (load,  instr_movb)
-  BYTE_STORE_OP(store, instr_movb)
-
-  BYTE_OP(test, instr_testb)
-  BYTE_OP(cmp,  instr_cmpb)
-
 #undef IMM64_OP
 #undef IMM64R_OP
 #undef FULL_OP
+#undef REG_OP
 #undef STORE_OP
 #undef LOAD_OP
-#undef BYTE_OP
 #undef BYTE_LOAD_OP
 #undef BYTE_STORE_OP
+#undef BYTE_REG_OP
 
   // 64-bit immediates work with mov to a register.
   void movq(Immed imm, Reg64 r) { instrIR(instr_mov, imm, r); }

@@ -503,6 +503,58 @@ retq
 )");
 }
 
+TEST(Asm, AluBytes) {
+  Asm a;
+  a.init(10 << 24);
+
+#define INSTRS \
+ FROB(cmp)     \
+ FROB(add)     \
+ FROB(sub)     \
+ FROB(and)     \
+ FROB(or)      \
+ FROB(xor)
+
+#define FROB(instr) \
+  a.   instr ## b(sil, al);          \
+  a.   instr ## b(0xf, al);          \
+  a.   instr ## b(sil, rcx[0x10]);   \
+  a.   instr ## b(rsp[0x10], sil);   \
+  a.   instr ## b(rcx[rsi * 8], al); \
+  a.   instr ## b(al, rcx[rsi * 8]);
+
+  INSTRS
+
+#undef FROB
+
+#define FROB(name) \
+#name " %sil,%al\n"          \
+#name " $0xf,%al\n"          \
+#name " %sil,0x10(%rcx)\n"   \
+#name " 0x10(%rsp),%sil\n"   \
+#name " (%rcx,%rsi,8),%al\n" \
+#name " %al,(%rcx,%rsi,8)\n"
+
+  expect_asm(a, "\n" INSTRS "");
+
+#undef FROB
+#undef INSTRS
+
+  // test is asymmetric.
+  a.code.frontier = a.code.base;
+  a.   testb(sil, al);
+  a.   testb(0xf, al);
+  a.   testb(sil, rcx[0x10]);
+  a.   testb(sil, rcx[rsi * 8]);
+
+  expect_asm(a, R"(
+test %sil,%al
+test $0xf,%al
+test %sil,0x10(%rcx)
+test %sil,(%rcx,%rsi,8)
+)");
+}
+
 TEST(Asm, SimpleLabelTest) {
   Asm a;
   a.init(10 << 24);

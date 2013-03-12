@@ -50,6 +50,11 @@ add_definitions(-DHHVM_LIB_PATH_DEFAULT="${HPHP_HOME}/bin")
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DRELEASE=1)
+	add_definitions(-DNDEBUG)
+	message("Generating Release build")
+else()
+	add_definitions(-DDEBUG)
+	message("Generating DEBUG build")
 endif()
 
 if(INFINITE_LOOP_DETECTION)

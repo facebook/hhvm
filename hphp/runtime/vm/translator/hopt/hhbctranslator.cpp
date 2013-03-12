@@ -596,16 +596,6 @@ void HhbcTranslator::emitReqDoc(const StringData* name) {
 //  emitInterpOne(Type::Cell);
 }
 
-void HhbcTranslator::emitReqMod(const StringData* name) {
-//  PUNT(ReqMod);
-  emitReqDoc(name);
-}
-
-void HhbcTranslator::emitReqSrc(const StringData* name) {
-//  PUNT(ReqSrc);
-  emitReqDoc(name);
-}
-
 template<class Lambda>
 SSATmp* HhbcTranslator::emitIterInitCommon(int offset, Lambda genFunc) {
   SSATmp* src = popC();

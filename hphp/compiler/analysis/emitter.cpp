@@ -1697,10 +1697,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
                       FunctionScopeRawPtr ps DEBUG_ONLY =
                         sl->getFunctionScope();
                       assert(ps && ps->inPseudoMain());
-                      UnitMergeKind kind = inc->isPrivateScope() ?
-                        (inc->isDocumentRoot() ?
-                         UnitMergeKindReqMod : UnitMergeKindReqSrc) :
-                        UnitMergeKindReqDoc;
+                      UnitMergeKind kind = UnitMergeKindReqDoc;
                       m_ue.pushMergeableInclude(
                         kind,
                         StringData::GetStaticString(inc->includePath()));
@@ -3248,17 +3245,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             break;
           case T_REQUIRE_ONCE:
             if (ie->isDocumentRoot()) {
-              if (ie->isPrivateScope()) {
-                e.ReqMod();
-              } else {
-                e.ReqDoc();
-              }
+              e.ReqDoc();
             } else {
-              if (ie->isPrivateScope()) {
-                e.ReqSrc();
-              } else {
-                e.ReqOnce();
-              }
+              e.ReqOnce();
             }
             break;
         }

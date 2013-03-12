@@ -6591,14 +6591,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopReqDoc(PC& pc) {
   inclOp(this, pc, InclOpFatal | InclOpOnce | InclOpDocRoot);
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopReqMod(PC& pc) {
-  inclOp(this, pc, InclOpFatal | InclOpOnce | InclOpDocRoot | InclOpLocal);
-}
-
-inline void OPTBLD_INLINE VMExecutionContext::iopReqSrc(PC& pc) {
-  inclOp(this, pc, InclOpFatal | InclOpOnce | InclOpRelative | InclOpLocal);
-}
-
 inline void OPTBLD_INLINE VMExecutionContext::iopEval(PC& pc) {
   NEXT();
   Cell* c1 = m_stack.topC();

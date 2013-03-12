@@ -320,8 +320,6 @@ struct HhbcTranslator {
 
   void emitStaticLocInit(uint32_t varId, uint32_t listStrId);
   void emitReqDoc(const StringData* name);
-  void emitReqMod(const StringData* name);
-  void emitReqSrc(const StringData* name);
 
   // iterators
   void emitIterInit(uint32_t iterId, int targetOffset, uint32_t valLocalId);

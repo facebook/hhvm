@@ -532,11 +532,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2,
           goto def;
         }
         case Expression::KindOfIncludeExpression: {
-          IncludeExpressionPtr inc(spc(IncludeExpression, e2));
-          if (!inc->isPrivateScope()) {
-            return InterfAccess;
-          }
-          goto def;
+          return InterfAccess;
         }
         case Expression::KindOfStaticMemberExpression:
         case Expression::KindOfObjectPropertyExpression:
@@ -2311,9 +2307,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       case Expression::KindOfIncludeExpression:
       {
         IncludeExpressionPtr inc(spc(IncludeExpression, e));
-        if (!inc->isPrivateScope()) {
-          m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
-        }
+        m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
       }
       break;
       case Expression::KindOfArrayElementExpression:

@@ -1065,8 +1065,6 @@ opcodeControlFlowInfo(const Opcode instr) {
     case OpReq:
     case OpReqOnce:
     case OpReqDoc:
-    case OpReqMod:
-    case OpReqSrc:
       return ControlFlowChangesPC;
     default:
       return ControlFlowNone;

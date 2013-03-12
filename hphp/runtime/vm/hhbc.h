@@ -532,8 +532,6 @@ enum SetOpOp {
   O(Req,             NA,               ONE(CV),         ONE(CV),    CF) \
   O(ReqOnce,         NA,               ONE(CV),         ONE(CV),    CF) \
   O(ReqDoc,          NA,               ONE(CV),         ONE(CV),    CF) \
-  O(ReqMod,          NA,               ONE(CV),         ONE(CV),    CF) \
-  O(ReqSrc,          NA,               ONE(CV),         ONE(CV),    CF) \
   O(Eval,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(DefFunc,         ONE(IVA),         NOV,             NOV,        NF) \
   O(DefCls,          ONE(IVA),         NOV,             NOV,        NF) \

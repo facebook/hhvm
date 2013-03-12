@@ -579,8 +579,6 @@ MINSTRS
   CASE(IterNext) \
   CASE(IterNextK) \
   CASE(ReqDoc) \
-  CASE(ReqMod) \
-  CASE(ReqSrc) \
   CASE(DefCls) \
   CASE(DefFunc) \
   CASE(Self) \

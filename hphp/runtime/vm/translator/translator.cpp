@@ -1162,8 +1162,6 @@ static const struct {
   { OpReq,         {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpReqOnce,     {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpReqDoc,      {Stack1,           Stack1,       OutUnknown,        0 }},
-  { OpReqMod,      {Stack1,           Stack1,       OutUnknown,        0 }},
-  { OpReqSrc,      {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpEval,        {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpDefFunc,     {None,             None,         OutNone,           0 }},
   { OpDefCls,      {None,             None,         OutNone,           0 }},
@@ -1465,8 +1463,6 @@ void Translator::analyzeSecondPass(Tracelet& t) {
     if (prevOp == OpString &&
         (ni->m_txFlags & Supported)) {
       switch (op) {
-        case OpReqMod:
-        case OpReqSrc:
         case OpReqDoc:
           /* Dont waste a register on the string */
           prev->outStack = nullptr;
@@ -1495,8 +1491,6 @@ void Translator::analyzeSecondPass(Tracelet& t) {
       NormalizedInstruction* ppp = prev->prev->prev;
       if (ppp && (ppp->m_txFlags & Supported)) {
         switch (ppp->op()) {
-          case OpReqMod:
-          case OpReqSrc:
           case OpReqDoc:
             /*
               We have a require+pop followed by a require or a scalar ret,

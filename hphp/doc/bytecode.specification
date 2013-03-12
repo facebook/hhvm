@@ -3470,16 +3470,6 @@ ReqDoc    [C]  ->  [C]
   As ReqOnce except the string is always taken to be relative to the document
   root (ie SourceRoot).
 
-ReqMod    [C]  ->  [C]
-
-  As ReqDoc except the pseudo-main function inherits an empty variable
-  environment.
-
-ReqSrc    [C]  ->  [C]
-
-  As ReqMod except the path is always taken to be relative to the including
-  file.
-
 Eval    [C]  ->  [C]
 
   Eval. Executes the source code in (string)$1. This instruction eagerly marks

@@ -1072,20 +1072,6 @@ TranslatorX64::irTranslateReqDoc(const Tracelet& t,
   HHIR_EMIT(ReqDoc, name);
 }
 
-void
-TranslatorX64::irTranslateReqMod(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
-  HHIR_EMIT(ReqMod, name);
-}
-
-void
-TranslatorX64::irTranslateReqSrc(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
-  HHIR_EMIT(ReqSrc, name);
-}
-
 void TranslatorX64::irTranslateDefCls(const Tracelet& t,
                                     const NormalizedInstruction& i) {
   int cid = i.imm[0].u_IVA;

@@ -44,12 +44,6 @@ public:
   bool isReqLit() const;
   void setDocumentRoot() { m_documentRoot = true;}
   bool isDocumentRoot() const { return m_documentRoot;}
-  void setPrivateScope() { m_privateScope = true; }
-  bool isPrivateScope() const { return m_privateScope; }
-  void setPrivateInclude() { m_privateInclude = true; }
-  bool isPrivateInclude() const { return m_privateInclude; }
-  void setModule() { m_module = 1; }
-  bool isModule() const { return m_module; }
   std::string includePath() const;
   FileScopeRawPtr getIncludedFile(AnalysisResultConstPtr) const;
 private:
@@ -64,9 +58,6 @@ private:
    * privateInclude means this is the *only* reference to the included file
    */
   unsigned m_documentRoot : 1;
-  unsigned m_privateScope : 1;
-  unsigned m_privateInclude : 1;
-  unsigned m_module : 1;
   unsigned m_depsSet : 1;
   std::string m_include;
 

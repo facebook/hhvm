@@ -8529,16 +8529,6 @@ TranslatorX64::analyzeReqDoc(Tracelet& t, NormalizedInstruction& i) {
 }
 
 void
-TranslatorX64::analyzeReqMod(Tracelet& t, NormalizedInstruction& i) {
-  analyzeReqLit(t, i, InclOpDocRoot | InclOpLocal);
-}
-
-void
-TranslatorX64::analyzeReqSrc(Tracelet& t, NormalizedInstruction& i) {
-  analyzeReqLit(t, i, InclOpRelative | InclOpLocal);
-}
-
-void
 TranslatorX64::translateReqLit(const Tracelet& t,
                                const NormalizedInstruction& i,
                                InclOpFlags flags) {
@@ -8622,18 +8612,6 @@ void
 TranslatorX64::translateReqDoc(const Tracelet& t,
                                const NormalizedInstruction& i) {
   translateReqLit(t, i, InclOpDocRoot);
-}
-
-void
-TranslatorX64::translateReqMod(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-  translateReqLit(t, i, InclOpDocRoot | InclOpLocal);
-}
-
-void
-TranslatorX64::translateReqSrc(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-  translateReqLit(t, i, InclOpRelative | InclOpLocal);
 }
 
 TCA
@@ -11475,7 +11453,7 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose
   // metadata is not yet visible.
-  TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n", 
+  TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n",
       start, sk.getFuncId(), sk.m_offset);
   srcRec.newTranslation(a, astubs, start);
   TRACE(1, "tx64: %zd-byte tracelet\n", a.code.frontier - start);

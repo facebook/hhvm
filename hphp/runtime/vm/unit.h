@@ -53,9 +53,8 @@ enum UnitMergeKind {
   UnitMergeKindUniqueDefinedClass = 1,
   UnitMergeKindDefine = 2,
   UnitMergeKindGlobal = 3,
-  UnitMergeKindReqMod = 4, // used by isMergeKindReq
-  UnitMergeKindReqSrc = 5, // "
-  UnitMergeKindReqDoc = 6, // "
+  // 4 and 5 are available
+  UnitMergeKindReqDoc = 6,
   UnitMergeKindDone = 7,
   // We cannot add more kinds here; this has to fit in 3 bits.
 };
@@ -71,8 +70,7 @@ enum UnitMergeState {
 };
 
 inline bool ALWAYS_INLINE isMergeKindReq(UnitMergeKind k) {
-  return unsigned(k - UnitMergeKindReqMod) <=
-    unsigned(UnitMergeKindReqDoc - UnitMergeKindReqMod);
+  return k == UnitMergeKindReqDoc;
 }
 
 struct UnitMergeInfo {

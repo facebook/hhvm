@@ -39,9 +39,7 @@ IncludeExpression::IncludeExpression
   : UnaryOpExpression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(IncludeExpression),
       exp, op, true),
-    m_documentRoot(false), m_privateScope(false),
-    m_privateInclude(false), m_module(false),
-    m_depsSet(false) {
+    m_documentRoot(false), m_depsSet(false) {
 }
 
 ExpressionPtr IncludeExpression::clone() {
@@ -180,8 +178,7 @@ string IncludeExpression::CheckInclude(ConstructPtr includeExp,
 void IncludeExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   /* m_documentRoot is a bitfield */
   bool dr = m_documentRoot;
-  m_include = CheckInclude(shared_from_this(), m_exp,
-                           dr, m_privateScope && !dr);
+  m_include = CheckInclude(shared_from_this(), m_exp, dr, false);
   m_documentRoot = dr;
   if (!m_include.empty()) ar->parseOnDemand(m_include);
 }
@@ -196,20 +193,12 @@ FileScopeRawPtr IncludeExpression::getIncludedFile(
 }
 
 std::string IncludeExpression::includePath() const {
-  if (m_documentRoot || !m_privateScope) return m_include;
-
-  Variant v;
-  if (m_exp && m_exp->getScalarValue(v) &&
-      v.isString()) {
-    return v.toString()->data();
-  }
-  return "";
+  return m_include;
 }
 
 bool IncludeExpression::isReqLit() const {
   return !m_include.empty() &&
-    m_op == T_REQUIRE_ONCE &&
-    (isDocumentRoot() || isPrivateScope());
+    m_op == T_REQUIRE_ONCE && isDocumentRoot();
 }
 
 bool IncludeExpression::analyzeInclude(AnalysisResultConstPtr ar,
@@ -219,13 +208,6 @@ bool IncludeExpression::analyzeInclude(AnalysisResultConstPtr ar,
   if (!file) {
     Compiler::Error(Compiler::PHPIncludeFileNotFound, self);
     return false;
-  }
-  if (m_module || m_privateInclude) {
-    Lock l(BlockScope::s_constMutex);
-    if (m_module) file->setModule();
-    if (m_privateInclude) {
-      file->setPrivateInclude();
-    }
   }
 
   FunctionScopePtr func = getFunctionScope();
@@ -246,11 +228,10 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
   }
-  if (!m_privateScope) {
-    VariableTablePtr var = getScope()->getVariables();
-    var->setAttribute(VariableTable::ContainsLDynamicVariable);
-    var->forceVariants(ar, VariableTable::AnyVars);
-  }
+
+  VariableTablePtr var = getScope()->getVariables();
+  var->setAttribute(VariableTable::ContainsLDynamicVariable);
+  var->forceVariants(ar, VariableTable::AnyVars);
 
   UnaryOpExpression::analyzeProgram(ar);
 }
@@ -259,8 +240,7 @@ ExpressionPtr IncludeExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     if (m_include.empty()) {
       bool dr = m_documentRoot;
-      m_include = CheckInclude(shared_from_this(), m_exp,
-                               dr, m_privateScope && !dr);
+      m_include = CheckInclude(shared_from_this(), m_exp, dr, false);
       m_documentRoot = dr;
       m_depsSet = false;
     }

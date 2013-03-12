@@ -648,7 +648,6 @@ void Unit::initialMerge() {
         end = m_mergeInfo->m_mergeablesSize;
         while (ix < end) {
           void *obj = m_mergeInfo->mergeableObj(ix);
-          InclOpFlags flags = InclOpDefault;
           UnitMergeKind k = UnitMergeKind(uintptr_t(obj) & 7);
           switch (k) {
             case UnitMergeKindUniqueDefinedClass:
@@ -659,25 +658,16 @@ void Unit::initialMerge() {
                 allClassesUnique = ((PreClass*)obj)->attrs() & AttrUnique;
               }
               break;
-            case UnitMergeKindReqMod:
-              flags = InclOpDocRoot | InclOpLocal;
-              goto inc;
-            case UnitMergeKindReqSrc:
-              flags = InclOpRelative | InclOpLocal;
-              goto inc;
-            case UnitMergeKindReqDoc:
-              flags = InclOpDocRoot;
-              goto inc;
-            inc: {
-                StringData* s = (StringData*)((char*)obj - (int)k);
-                HPHP::Eval::PhpFile* efile =
-                  g_vmContext->lookupIncludeRoot(s, flags, nullptr, this);
-                assert(efile);
-                Unit* unit = efile->unit();
-                unit->initialMerge();
-                m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
-              }
+            case UnitMergeKindReqDoc: {
+              StringData* s = (StringData*)((char*)obj - (int)k);
+              HPHP::Eval::PhpFile* efile =
+                g_vmContext->lookupIncludeRoot(s, InclOpDocRoot, nullptr, this);
+              assert(efile);
+              Unit* unit = efile->unit();
+              unit->initialMerge();
+              m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
               break;
+            }
             case UnitMergeKindDefine: {
               StringData* s = (StringData*)((char*)obj - (int)k);
               auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
@@ -828,8 +818,6 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
         ix += sizeof(TypedValueAux) / sizeof(void*);
         break;
 
-      case UnitMergeKindReqMod:
-      case UnitMergeKindReqSrc:
       case UnitMergeKindReqDoc: {
         Unit *unit = (Unit*)((char*)obj - (int)k);
         void *rep = unit->replaceUnit();
@@ -839,19 +827,6 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
           if (rep == unit) {
             out->mergeableObj(oix++) = obj;
           } else {
-            UnitMergeKind k1 = UnitMergeKind(uintptr_t(rep) & 7);
-            switch (k1) {
-              case UnitMergeKindReqMod:
-              case UnitMergeKindReqSrc:
-                break;
-              case UnitMergeKindReqDoc:
-                if (k != UnitMergeKindReqDoc) {
-                  rep = obj;
-                }
-                break;
-              default:
-                break;
-            }
             out->mergeableObj(oix++) = rep;
           }
         }
@@ -1037,8 +1012,6 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
         } while (k == UnitMergeKindGlobal);
         continue;
 
-      case UnitMergeKindReqMod:
-      case UnitMergeKindReqSrc:
       case UnitMergeKindReqDoc:
         do {
           Stats::inc(Stats::UnitMerge_mergeable);
@@ -1053,18 +1026,16 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
               Stats::inc(Stats::PseudoMain_Reentered);
               TypedValue ret;
               VarEnv* ve = nullptr;
-              if (k == UnitMergeKindReqDoc) {
-                ActRec* fp = g_vmContext->m_fp;
-                if (!fp) {
-                  ve = g_vmContext->m_globalVarEnv;
+              ActRec* fp = g_vmContext->m_fp;
+              if (!fp) {
+                ve = g_vmContext->m_globalVarEnv;
+              } else {
+                if (fp->hasVarEnv()) {
+                  ve = fp->m_varEnv;
                 } else {
-                  if (fp->hasVarEnv()) {
-                    ve = fp->m_varEnv;
-                  } else {
-                    // Nothing to do. If there is no varEnv, the enclosing
-                    // file was called by fb_autoload_map, ReqSrc or ReqMod
-                    // All those cases wanted a local scope.
-                  }
+                  // Nothing to do. If there is no varEnv, the enclosing
+                  // file was called by fb_autoload_map, which wants a
+                  // local scope.
                 }
               }
               g_vmContext->invokeFunc(&ret, unit->getMain(), Array(),
@@ -1728,9 +1699,7 @@ void UnitRepoProxy::InsertUnitMergeableStmt
            kind == UnitMergeKindGlobal);
     query.bindTypedValue("@mergeableValue", *value);
   } else {
-    assert(kind == UnitMergeKindReqMod ||
-           kind == UnitMergeKindReqSrc ||
-           kind == UnitMergeKindReqDoc);
+    assert(kind == UnitMergeKindReqDoc);
     query.bindNull("@mergeableValue");
   }
   query.exec();
@@ -1767,8 +1736,6 @@ void UnitRepoProxy::GetUnitMergeablesStmt
       int mergeableKind;         /**/ query.getInt(1, mergeableKind);
       Id mergeableId;            /**/ query.getInt(2, mergeableId);
       switch (mergeableKind) {
-        case UnitMergeKindReqMod:
-        case UnitMergeKindReqSrc:
         case UnitMergeKindReqDoc:
           ue.insertMergeableInclude(mergeableIx,
                                     (UnitMergeKind)mergeableKind, mergeableId);
@@ -2246,8 +2213,6 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
         case UnitMergeKindUniqueDefinedClass:
           not_reached();
         case UnitMergeKindClass: break;
-        case UnitMergeKindReqMod:
-        case UnitMergeKindReqSrc:
         case UnitMergeKindReqDoc: {
           urp.insertUnitMergeable(repoId).insert(
             txn, usn, i,
@@ -2392,8 +2357,6 @@ Unit* UnitEmitter::create() {
         case UnitMergeKindClass:
           mi->mergeableObj(ix++) = u->m_preClasses[it->second].get();
           break;
-        case UnitMergeKindReqMod:
-        case UnitMergeKindReqSrc:
         case UnitMergeKindReqDoc: {
           assert(RuntimeOption::RepoAuthoritative);
           void* name = u->lookupLitstrId(it->second);

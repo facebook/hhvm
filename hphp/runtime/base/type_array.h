@@ -118,22 +118,6 @@ class Array : protected ArrayBase {
   Array keys(CVarRef search_value = null_variant, bool strict = false) const;
   Array values() const;
 
-  int64_t hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const {
-    return m_px ? noMatch : 0;
-  }
-
-  int64_t hashForStringSwitch(
-      int64_t firstTrueCaseHash,
-      int64_t firstNullCaseHash,
-      int64_t firstFalseCaseHash,
-      int64_t firstZeroCaseHash,
-      int64_t firstHash,
-      int64_t noMatchHash,
-      bool &needsOrder) const {
-    needsOrder = false;
-    return m_px ? noMatchHash : firstNullCaseHash;
-  }
-
   /**
    * Operators
    */

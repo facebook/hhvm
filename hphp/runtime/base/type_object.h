@@ -99,24 +99,6 @@ public:
   bool instanceof(const VM::Class* cls) const {
     return m_px && m_px->instanceof(cls);
   }
-  int64_t hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const {
-    return m_px ? m_px->o_toInt64() : 0;
-  }
-  int64_t hashForStringSwitch(
-      int64_t firstTrueCaseHash,
-      int64_t firstNullCaseHash,
-      int64_t firstFalseCaseHash,
-      int64_t firstZeroCaseHash,
-      int64_t firstHash,
-      int64_t noMatchHash,
-      bool &needsOrder) const {
-    if (!m_px) {
-      needsOrder = false;
-      return firstNullCaseHash;
-    }
-    needsOrder = true;
-    return firstHash;
-  }
 
   template <class T> T& cast() { return *static_cast<T*>(this); }
   template <class T> const T& cast() const {

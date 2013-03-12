@@ -490,25 +490,6 @@ class Variant : private VariantBase {
   bool instanceof(VM::Class* cls) const;
 
   /**
-   * This method is for optimizing switch cases with all int literal
-   * cases. firstNonZero refers to the case statement which is the
-   * first non zero case in the statements. noMatch refers to a case
-   * statement which does NOT exist in the statements.
-   */
-  int64_t hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const;
-
-  static int64_t DoubleHashForIntSwitch(double dbl, int64_t noMatch);
-
-  int64_t hashForStringSwitch(
-      int64_t firstTrueCaseHash,
-      int64_t firstNullCaseHash,
-      int64_t firstFalseCaseHash,
-      int64_t firstZeroCaseHash,
-      int64_t firstHash,
-      int64_t noMatchHash,
-      bool &needsOrder) const;
-
-  /**
    * Whether or not there are at least two variables that are strongly bound.
    */
   bool isReferenced() const {

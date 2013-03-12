@@ -287,16 +287,6 @@ public:
   bool isZero() const { return size() == 1 && rawdata()[0] == '0'; }
   bool isValidVariableName() const;
 
-  int64_t hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const;
-  int64_t hashForStringSwitch(
-      int64_t firstTrueCaseHash,
-      int64_t firstNullCaseHash,
-      int64_t firstFalseCaseHash,
-      int64_t firstZeroCaseHash,
-      int64_t firstHash,
-      int64_t noMatchHash,
-      bool &needsOrder) const;
-
 #ifdef TAINTED
   TaintData& getTaintDataRef() { return m_taint_data; }
   const TaintData& getTaintDataRefConst() const { return m_taint_data; }

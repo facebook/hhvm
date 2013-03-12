@@ -765,49 +765,6 @@ bool StringData::isValidVariableName() const {
   return is_valid_var_name(s.ptr, s.len);
 }
 
-int64_t StringData::hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const {
-  int64_t lval; double dval;
-  DataType ret = isNumericWithVal(lval, dval, 1);
-  switch (ret) {
-  case KindOfNull:
-    // if the string is not a number, it matches 0
-    return 0;
-  case KindOfInt64:
-    return lval;
-  case KindOfDouble:
-    return Variant::DoubleHashForIntSwitch(dval, noMatch);
-  default:
-    break;
-  }
-  assert(false);
-  return 0;
-}
-
-int64_t StringData::hashForStringSwitch(
-    int64_t firstTrueCaseHash,
-    int64_t firstNullCaseHash,
-    int64_t firstFalseCaseHash,
-    int64_t firstZeroCaseHash,
-    int64_t firstHash,
-    int64_t noMatchHash,
-    bool &needsOrder) const {
-  int64_t lval; double dval;
-  DataType ret = isNumericWithVal(lval, dval, 1);
-  needsOrder = false;
-  switch (ret) {
-  case KindOfNull:
-    return empty() ? firstNullCaseHash : hash();
-  case KindOfInt64:
-    return lval;
-  case KindOfDouble:
-    return (int64_t) dval;
-  default:
-    break;
-  }
-  assert(false);
-  return 0;
-}
-
 bool StringData::toBoolean() const {
   return !empty() && !isZero();
 }

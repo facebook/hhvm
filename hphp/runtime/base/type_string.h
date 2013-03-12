@@ -274,32 +274,6 @@ public:
     return m_px ? m_px->isLiteral() : true;
   }
 
-  int64_t hashForIntSwitch(int64_t firstNonZero, int64_t noMatch) const {
-    return m_px ? m_px->hashForIntSwitch(firstNonZero, noMatch) : 0;
-  }
-
-  int64_t hashForStringSwitch(
-      int64_t firstTrueCaseHash,
-      int64_t firstNullCaseHash,
-      int64_t firstFalseCaseHash,
-      int64_t firstZeroCaseHash,
-      int64_t firstHash,
-      int64_t noMatchHash,
-      bool &needsOrder) const {
-    if (!m_px) {
-      needsOrder = false;
-      return firstNullCaseHash;
-    }
-    return m_px->hashForStringSwitch(
-      firstTrueCaseHash,
-      firstNullCaseHash,
-      firstFalseCaseHash,
-      firstZeroCaseHash,
-      firstHash,
-      noMatchHash,
-      needsOrder);
-  }
-
   /**
    * Take a sub-string from start with specified length. Note, read
    * http://www.php.net/substr about meanings of negative start or length.

@@ -98,8 +98,12 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *     DUnbox(N) single dst has unboxed type of src N
  *     DBox(N)   single dst has boxed type of src N
  *     DParam    single dst has type of the instruction's type parameter
- *     DLabel    multiple dests for a DefLabel
+ *     DMulti    multiple dests. type and number depend on instruction
  *     DVector   single dst depends on semantics of the vector instruction
+ *     DStk(x)   up to two dests. x should be another D* macro and indicates
+ *               the type of the first dest, if any. the second (or first,
+ *               depending on the presence of a primary destination), will be
+ *               of type Type::StkPtr. implies ModifiesStack.
  *     DBuiltin  single dst for CallBuiltin. This can return complex data
  *               types such as (Type::Str | Type::Null)
  *
@@ -140,6 +144,11 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *      P     passthrough
  *      K     killsSource
  */
+
+#define O_STK(name, dst, src, flags)            \
+  O(name, dst, src, StkFlags(flags))            \
+  O(name ## Stk, DStk(dst), src, flags)
+
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(GuardType,                    DParam, S(Gen),                C|E|CRc|PRc|P) \
@@ -208,7 +217,7 @@ O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(BoxPtr,            D(PtrToBoxedCell), S(PtrToGen),                   N|Mem) \
 O(LdStack,                      DParam, S(StkPtr) C(Int),                 NF) \
 O(LdLoc,                        DParam, S(StkPtr),                        NF) \
-O(LdStackAddr,             D(PtrToGen), SUnk,                              C) \
+O(LdStackAddr,                  DParam, S(StkPtr) C(Int),                  C) \
 O(LdLocAddr,                    DParam, S(StkPtr),                         C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),               NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
@@ -300,7 +309,7 @@ O(DecRef,                           ND, S(Gen),           N|E|Mem|CRc|Refs|K) \
 O(DecRefMem,                        ND, S(PtrToGen)                           \
                                           C(Int),           N|E|Mem|CRc|Refs) \
 O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
-O(DefLabel,                     DLabel, SUnk,                              E) \
+O(DefLabel,                     DMulti, SUnk,                              E) \
 O(Marker,                           ND, NA,                                E) \
 O(DefFP,                     D(StkPtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(StkPtr) C(Int),                  E) \
@@ -374,7 +383,7 @@ O(CGetProp,                    D(Cell), C(TCA)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
-O(SetProp,                     DVector, C(TCA)                                \
+O_STK(SetProp,                 DVector, C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
                                           S(Gen)                              \
@@ -383,7 +392,7 @@ O(ElemX,                   D(PtrToGen), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
-O(ElemDX,                  D(PtrToGen), C(TCA)                                \
+O_STK(ElemDX,              D(PtrToGen), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
@@ -400,11 +409,11 @@ O(ArraySetRef,                      ND, C(TCA)                                \
                                           S(Int,Str)                          \
                                           S(Cell)                             \
                                           S(BoxedArr),E|N|PRc|CRc|Refs|Mem|K) \
-O(SetElem,                     DVector, C(TCA)                                \
+O_STK(SetElem,                 DVector, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(Cell),           E|N|Mem|Refs|Er) \
-O(SetNewElem,                  DVector, S(PtrToGen) S(Gen),  E|N|Mem|Refs|Er) \
+O_STK(SetNewElem,              DVector, S(PtrToGen) S(Gen),  E|N|Mem|Refs|Er) \
 O(IssetElem,                   D(Bool), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
@@ -747,6 +756,30 @@ inline bool isExitSlow(TraceExitType::ExitType t) {
 
 const char* opcodeName(Opcode opcode);
 
+enum OpcodeFlag : uint64_t {
+  NoFlags          = 0,
+  HasDest          = 1ULL <<  0,
+  CanCSE           = 1ULL <<  1,
+  Essential        = 1ULL <<  2,
+  MemEffects       = 1ULL <<  3,
+  CallsNative      = 1ULL <<  4,
+  ConsumesRC       = 1ULL <<  5,
+  ProducesRC       = 1ULL <<  6,
+  MayModifyRefs    = 1ULL <<  7,
+  Rematerializable = 1ULL <<  8, // TODO: implies HasDest
+  MayRaiseError    = 1ULL <<  9,
+  Terminal         = 1ULL << 10, // has no next instruction
+  NaryDest         = 1ULL << 11, // has 0 or more destinations
+  HasExtra         = 1ULL << 12,
+  Passthrough      = 1ULL << 13,
+  KillsSources     = 1ULL << 14,
+  ModifiesStack    = 1ULL << 15,
+  HasStackVersion  = 1ULL << 16,
+};
+
+bool opcodeHasFlags(Opcode opc, uint64_t flags);
+Opcode getStackModifyingOpcode(Opcode opc);
+
 #define IRT_BOXES(name, bit)                                            \
   IRT(name,             (bit))                                          \
   IRT(Boxed##name,      (bit) << kBoxShift)                             \
@@ -923,8 +956,9 @@ public:
    * value, which allows us to avoid several checks.
    */
   bool isKnownDataType() const {
-    // Calling this function with a non-php type isn't meaningful
-    assert(subtypeOf(Gen));
+    // Calling this function with a type that can't be in a TypedValue isn't
+    // meaningful
+    assert(subtypeOf(Gen | Cls));
     // Str, Arr and Null are technically unions but can each be
     // represented by one data type. Same for a union that consists of
     // nothing but boxed types.
@@ -1479,6 +1513,11 @@ struct IRInstruction {
     m_dst = newDst;
     m_numDsts = newDst ? 1 : 0;
   }
+  /*
+   * Returns the ith dest of this instruction. i == 0 is treated specially: if
+   * the instruction has no dests, getDst(0) will return nullptr, and if the
+   * instruction is not naryDest, getDst(0) will return the single dest.
+   */
   SSATmp*    getDst(unsigned i) const;
   DstRange   getDsts();
   Range<const SSATmp*> getDsts() const;
@@ -1559,6 +1598,12 @@ struct IRInstruction {
   bool killsSources() const;
   bool killsSource(int srcNo) const;
 
+  bool modifiesStack() const;
+  SSATmp* modifiedStkPtr() const;
+  // hasMainDst provides raw access to the HasDest flag, for instructions with
+  // ModifiesStack set.
+  bool hasMainDst() const;
+
   void printDst(std::ostream& ostream) const;
   void printSrc(std::ostream& ostream, uint32_t srcIndex) const;
   void printOpcode(std::ostream& ostream) const;
@@ -1595,10 +1640,10 @@ typedef boost::intrusive::list<IRInstruction, IRInstructionHookOption>
 /*
  * Return the output type from a given IRInstruction.
  *
- * The destination type is always predictable from the types of the
- * inputs and any type parameters to the instruction.
+ * The destination type is always predictable from the types of the inputs, any
+ * type parameters to the instruction, and the id of the dest.
  */
-Type outputType(const IRInstruction*);
+Type outputType(const IRInstruction*, int dstId = 0);
 
 /*
  * Assert that an instruction has operands of allowed types.
@@ -1762,10 +1807,10 @@ private:
 
   // May only be created via IRFactory.  Note that this class is never
   // destructed, so don't add complex members.
-  SSATmp(uint32_t opndId, IRInstruction* i)
+  SSATmp(uint32_t opndId, IRInstruction* i, int dstId = 0)
     : m_inst(i)
     , m_id(opndId)
-    , m_type(outputType(i))
+    , m_type(outputType(i, dstId))
     , m_lastUseId(0)
     , m_useCount(0)
     , m_isSpilled(false)
@@ -1797,12 +1842,24 @@ private:
   };
 };
 
-int vectorBaseIdx(const IRInstruction* inst);
-int vectorKeyIdx(const IRInstruction* inst);
-int vectorValIdx(const IRInstruction* inst);
+int vectorBaseIdx(Opcode opc);
+int vectorKeyIdx(Opcode opc);
+int vectorValIdx(Opcode opc);
+inline int vectorBaseIdx(const IRInstruction* inst) {
+  return vectorBaseIdx(inst->getOpcode());
+}
+inline int vectorKeyIdx(const IRInstruction* inst) {
+  return vectorKeyIdx(inst->getOpcode());
+}
+inline int vectorValIdx(const IRInstruction* inst) {
+  return vectorValIdx(inst->getOpcode());
+}
 
 struct VectorEffects {
-  static bool supported(const IRInstruction* inst);
+  static bool supported(Opcode op);
+  static bool supported(const IRInstruction* inst) {
+    return supported(inst->getOpcode());
+  }
 
   /*
    * VectorEffects::get is used to allow multiple different consumers to deal
@@ -1820,6 +1877,16 @@ struct VectorEffects {
                   StoreLocFunc storeLocValue,
                   SetLocTypeFunc setLocType);
 
+  /*
+   * Given a vector instruction that defines a new StkPtr, attempts to find the
+   * stack value matching the given index. If the index does not match a value
+   * modified by this instruction, false is returned and the 'value' parameter
+   * is set to the next StkPtr in the chain. Otherwise, true is returned and
+   * the 'value' and 'type' parameters are set appropriately.
+   */
+  static bool getStackValue(const IRInstruction* inst, uint32_t index,
+                            SSATmp*& value, Type& type);
+
   VectorEffects(const IRInstruction* inst) {
     int keyIdx = vectorKeyIdx(inst);
     int valIdx = vectorValIdx(inst);
@@ -1827,6 +1894,15 @@ struct VectorEffects {
          inst->getSrc(vectorBaseIdx(inst))->getType(),
          keyIdx == -1 ? Type::None : inst->getSrc(keyIdx)->getType(),
          valIdx == -1 ? Type::None : inst->getSrc(valIdx)->getType());
+  }
+  template<typename Container>
+  VectorEffects(Opcode opc, const Container& srcs) {
+    int keyIdx = vectorKeyIdx(opc);
+    int valIdx = vectorValIdx(opc);
+    init(opc,
+         srcs[vectorBaseIdx(opc)]->getType(),
+         keyIdx == -1 ? Type::None : srcs[keyIdx]->getType(),
+         valIdx == -1 ? Type::None : srcs[valIdx]->getType());
   }
   VectorEffects(Opcode op, Type base, Type key, Type val) {
     init(op, base, key, val);

@@ -130,6 +130,16 @@ static CallMap s_callMap({
 CallMap::CallMap(CallInfoList infos) {
   for (auto const& info : infos) {
     m_map[info.op] = info;
+
+    // Check for opcodes that have a version which modifies the stack,
+    // and add an entry to the table for that one.
+    if (opcodeHasFlags(info.op, HasStackVersion)) {
+      Opcode stkOp = getStackModifyingOpcode(info.op);
+      assert(opcodeHasFlags(stkOp, ModifiesStack));
+      auto& slot = m_map[stkOp];
+      slot = info;
+      slot.op = stkOp;
+    }
   }
 }
 

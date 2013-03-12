@@ -157,7 +157,19 @@ public:
   T* cloneInstruction(const T* inst) {
     T* newInst = new (m_arena) T(m_arena, inst,
                                  IRInstruction::IId(m_nextInstId++));
-    newSSATmp(newInst);
+    if (newInst->modifiesStack()) {
+      assert(newInst->naryDst());
+      // The instruction is an opcode that modifies the stack, returning a new
+      // StkPtr.
+      int numDsts = 1 + (newInst->hasMainDst() ? 1 : 0);
+      SSATmp* dsts = (SSATmp*)m_arena.alloc(numDsts * sizeof(SSATmp));
+      for (int dstNo = 0; dstNo < numDsts; ++dstNo) {
+        new (&dsts[dstNo]) SSATmp(m_nextOpndId++, newInst, dstNo);
+      }
+      newInst->setDsts(numDsts, dsts);
+    } else {
+      newSSATmp(newInst);
+    }
     return newInst;
   }
 

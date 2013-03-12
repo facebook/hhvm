@@ -319,29 +319,30 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
     allocRegToTmp(&m_regs[int(rVmFp)], &dsts[0], 0);
     return;
   }
-  if (dsts[0].isA(Type::StkPtr) && opc != LdRaw) {
-    assert(opc == DefSP || opc == Call || opc == SpillStack ||
-           opc == RetAdjustStack ||
-           opc == NewObj || opc == InterpOne || opc == GenericRetDecRefs ||
-           opc == GuardStk || opc == AssertStk || opc == CastStk ||
-           opc == SetProp || opc == SetElem);
-    allocRegToTmp(&m_regs[int(rVmSp)], &dsts[0], 0);
-    return;
-  }
   if (opc == DefMIStateBase) {
     assert(dsts[0].isA(Type::PtrToCell));
     allocRegToTmp(&m_regs[int(rsp)], &dsts[0], 0);
     return;
   }
 
-  // LdRaw, loading a generator's embedded AR, is the only time we have a
-  // pointer to an AR that is not in rVmFp or rVmSp.
-  assert(!dsts[0].isA(Type::StkPtr) ||
-         (opc == LdRaw &&
-          inst->getSrc(1)->getValInt() == RawMemSlot::ContARPtr));
-
   for (SSATmp& dst : dsts) {
     for (int i = 0, n = dst.numNeededRegs(); i < n; ++i) {
+      if (dst.isA(Type::StkPtr) && opc != LdRaw) {
+        assert(opc == DefSP || opc == Call || opc == SpillStack ||
+               opc == RetAdjustStack ||
+               opc == NewObj || opc == InterpOne || opc == GenericRetDecRefs ||
+               opc == GuardStk || opc == AssertStk || opc == CastStk ||
+               VectorEffects::supported(opc));
+        allocRegToTmp(&m_regs[int(rVmSp)], &dst, 0);
+        continue;
+      }
+
+      // LdRaw, loading a generator's embedded AR, is the only time we have a
+      // pointer to an AR that is not in rVmFp or rVmSp.
+      assert(!dst.isA(Type::StkPtr) ||
+             (opc == LdRaw &&
+              inst->getSrc(1)->getValInt() == RawMemSlot::ContARPtr));
+
       if (!RuntimeOption::EvalHHIRDeadCodeElim || dst.getLastUseId() != 0) {
         allocRegToTmp(&dst, i);
       }

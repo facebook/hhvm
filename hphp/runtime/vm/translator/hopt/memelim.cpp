@@ -264,15 +264,7 @@ private:
   }
 
   static bool isVectorOp(Opcode opc) {
-    switch (opc) {
-      case SetProp:
-      case SetElem:
-      case SetNewElem:
-      case ElemDX:
-        return true;
-      default:
-        return false;
-    }
+    return VectorEffects::supported(opc);
   }
 
   bool isLive(IRInstruction* inst) const {

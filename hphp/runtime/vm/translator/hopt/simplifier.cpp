@@ -72,6 +72,7 @@ static bool isNotInst(SSATmp *tmp) {
 SSATmp* Simplifier::simplify(IRInstruction* inst) {
   SSATmp* src1 = inst->getSrc(0);
   SSATmp* src2 = inst->getSrc(1);
+
   Opcode opc = inst->getOpcode();
   switch (opc) {
   case OpAdd:       return simplifyAdd(src1, src2);

@@ -307,6 +307,10 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
 #define CALL_OPCODE(opcode) \
   void CodeGenerator::cg##opcode(IRInstruction* i) { cgCallNative(i); }
 
+#define CALL_STK_OPCODE(opcode) \
+  CALL_OPCODE(opcode)           \
+  CALL_OPCODE(opcode ## Stk)
+
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
@@ -342,14 +346,14 @@ CALL_OPCODE(RaiseUndefProp)
 CALL_OPCODE(BaseG)
 CALL_OPCODE(PropX)
 CALL_OPCODE(CGetProp)
-CALL_OPCODE(SetProp)
+CALL_STK_OPCODE(SetProp)
 CALL_OPCODE(ElemX)
-CALL_OPCODE(ElemDX)
+CALL_STK_OPCODE(ElemDX)
 CALL_OPCODE(CGetElem)
 CALL_OPCODE(ArraySet)
 CALL_OPCODE(ArraySetRef)
-CALL_OPCODE(SetElem)
-CALL_OPCODE(SetNewElem)
+CALL_STK_OPCODE(SetElem)
+CALL_STK_OPCODE(SetNewElem)
 CALL_OPCODE(IssetElem)
 CALL_OPCODE(EmptyElem)
 
@@ -707,7 +711,7 @@ void CodeGenerator::cgCallNative(IRInstruction* inst) {
   }
   cgCallHelper(m_as,
                addr,
-               info.dest != DestType::None ? inst->getDst() : nullptr,
+               info.dest != DestType::None ? inst->getDst(0) : nullptr,
                info.sync,
                argGroup,
                info.dest);

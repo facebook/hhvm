@@ -2516,7 +2516,8 @@ Trace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
  * Generates a trace exit that can be the target of a conditional
  * control flow instruction at the current bytecode offset.
  */
-Trace* HhbcTranslator::getExitTrace(uint32_t targetBcOff, uint32_t notTakenBcOff) {
+Trace* HhbcTranslator::getExitTrace(uint32_t targetBcOff,
+                                    uint32_t notTakenBcOff) {
   std::vector<SSATmp*> stackValues = getSpillValues();
   return m_tb->genExitTrace(targetBcOff,
                            m_stackDeficit,

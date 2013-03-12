@@ -59,14 +59,27 @@ Type boxReturn(const IRInstruction* inst, int srcId) {
 
 }
 
-Type outputType(const IRInstruction* inst) {
+Type stkReturn(const IRInstruction* inst, int dstId,
+               std::function<Type()> inner) {
+  assert(inst->modifiesStack());
+  if (dstId == 0 && inst->hasMainDst()) {
+    // Return the type of the main dest (if one exists) as dst 0
+    return inner();
+  }
+  // The instruction modifies the stack and this isn't the main dest,
+  // so it's a StkPtr.
+  return Type::StkPtr;
+}
+
+Type outputType(const IRInstruction* inst, int dstId) {
 
 #define D(type)   return Type::type;
 #define DofS(n)   return inst->getSrc(n)->getType();
 #define DUnbox(n) return inst->getSrc(n)->getType().unbox();
 #define DBox(n)   return boxReturn(inst, n);
 #define DParam    return inst->getTypeParam();
-#define DLabel    return Type::None;
+#define DMulti    return Type::None;
+#define DStk(in)  return stkReturn(inst, dstId, [&]{ in not_reached(); });
 #define DVector   return vectorReturn(inst);
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin  return builtinReturn(inst);
@@ -85,7 +98,8 @@ Type outputType(const IRInstruction* inst) {
 #undef DUnbox
 #undef DBox
 #undef DParam
-#undef DLabel
+#undef DMulti
+#undef DStk
 #undef DVector
 #undef ND
 #undef DBuiltin
@@ -213,7 +227,8 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define SNum     S(Int, Bool, Dbl)
 #define SUnk     return;
 #define ND
-#define DLabel
+#define DMulti
+#define DStk(...)
 #define DVector
 #define D(...)
 #define DBuiltin
@@ -246,6 +261,8 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef ND
 #undef D
 #undef DUnbox
+#undef DMulti
+#undef DStk
 #undef DBox
 #undef DofS
 #undef DParam

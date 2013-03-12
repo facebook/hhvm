@@ -60,8 +60,8 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
       i += kSpillStackActRecExtraArgs;
     } else {
       if (t.subtypeOf(Type::Gen)) {
-        IRInstruction* addr = factory->gen(LdStackAddr, sp,
-                                           factory->defConst(offset));
+        IRInstruction* addr = factory->gen(LdStackAddr, Type::PtrToGen,
+                                           sp, factory->defConst(offset));
         block->insert(pos, addr);
         IRInstruction* check = factory->gen(DbgAssertPtr, addr->getDst());
         block->insert(pos, check);
@@ -86,7 +86,8 @@ static void insertAsserts(Trace* trace, IRFactory* factory) {
       }
       if (inst.getOpcode() == Call) {
         SSATmp* sp = inst.getDst();
-        IRInstruction* addr = factory->gen(LdStackAddr, sp, factory->defConst(0));
+        IRInstruction* addr = factory->gen(LdStackAddr, Type::PtrToGen,
+                                           sp, factory->defConst(0));
         insertAfter(&inst, addr);
         insertAfter(addr, factory->gen(DbgAssertPtr, addr->getDst()));
         continue;

@@ -79,25 +79,6 @@ TRACE_SET_MOD(hhir);
 
 namespace {
 
-enum OpcodeFlag : uint64_t {
-  NoFlags          = 0x0000,
-  HasDest          = 0x0001,
-  CanCSE           = 0x0002,
-  Essential        = 0x0004,
-  MemEffects       = 0x0008,
-  CallsNative      = 0x0010,
-  ConsumesRC       = 0x0020,
-  ProducesRC       = 0x0040,
-  MayModifyRefs    = 0x0080,
-  Rematerializable = 0x0100, // TODO: implies HasDest
-  MayRaiseError    = 0x0200,
-  Terminal         = 0x0400, // has no next instruction
-  NaryDest         = 0x0800, // has 0 or more destinations
-  HasExtra         = 0x1000,
-  Passthrough      = 0x2000,
-  KillsSources     = 0x4000,
-};
-
 #define NF     0
 #define C      CanCSE
 #define E      Essential
@@ -111,6 +92,7 @@ enum OpcodeFlag : uint64_t {
 #define T      Terminal
 #define P      Passthrough
 #define K      KillsSources
+#define StkFlags(f) HasStackVersion|(f)
 
 #define ND        0
 #define D(n)      HasDest
@@ -118,8 +100,9 @@ enum OpcodeFlag : uint64_t {
 #define DUnbox(n) HasDest
 #define DBox(n)   HasDest
 #define DParam    HasDest
-#define DLabel    NaryDest
+#define DMulti    NaryDest
 #define DVector   HasDest
+#define DStk(x)   ModifiesStack|(x)
 #define DPtrToParam HasDest
 #define DBuiltin  HasDest
 
@@ -149,6 +132,7 @@ struct {
 #undef T
 #undef P
 #undef K
+#undef StkFlags
 
 #undef ND
 #undef D
@@ -156,7 +140,10 @@ struct {
 #undef DUnbox
 #undef DBox
 #undef DParam
-#undef DLabel
+#undef DMulti
+#undef DVector
+#undef DStk
+#undef DPtrToParam
 #undef DBuiltin
 
 /*
@@ -309,20 +296,31 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
 
 const char* opcodeName(Opcode opcode) { return OpInfo[opcode].name; }
 
-static bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
+bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
   return OpInfo[opcode].flags & flags;
+}
+
+Opcode getStackModifyingOpcode(Opcode opc) {
+  assert(opcodeHasFlags(opc, HasStackVersion));
+  opc = Opcode(opc + 1);
+  assert(opcodeHasFlags(opc, ModifiesStack));
+  return opc;
 }
 
 bool IRInstruction::hasExtra() const {
   return opcodeHasFlags(getOpcode(), HasExtra) && m_extra;
 }
 
+// Instructions with ModifiesStack are always naryDst regardless of
+// the inner dest.
+
 bool IRInstruction::hasDst() const {
-  return opcodeHasFlags(getOpcode(), HasDest);
+  return opcodeHasFlags(getOpcode(), HasDest) &&
+    !opcodeHasFlags(getOpcode(), ModifiesStack);
 }
 
 bool IRInstruction::naryDst() const {
-  return opcodeHasFlags(getOpcode(), NaryDest);
+  return opcodeHasFlags(getOpcode(), NaryDest | ModifiesStack);
 }
 
 bool IRInstruction::isNative() const {
@@ -460,6 +458,22 @@ bool IRInstruction::killsSource(int idx) const {
   not_reached();
 }
 
+bool IRInstruction::modifiesStack() const {
+  return opcodeHasFlags(getOpcode(), ModifiesStack);
+}
+
+SSATmp* IRInstruction::modifiedStkPtr() const {
+  assert(modifiesStack());
+  assert(VectorEffects::supported(this));
+  SSATmp* sp = getDst(hasMainDst() ? 1 : 0);
+  assert(sp->isA(Type::StkPtr));
+  return sp;
+}
+
+bool IRInstruction::hasMainDst() const {
+  return opcodeHasFlags(getOpcode(), HasDest);
+}
+
 bool IRInstruction::mayReenterHelper() const {
   if (isCmpOp(getOpcode())) {
     return cmpOpTypesMayReenter(getOpcode(),
@@ -472,8 +486,10 @@ bool IRInstruction::mayReenterHelper() const {
 }
 
 SSATmp* IRInstruction::getDst(unsigned i) const {
-  assert(naryDst() && i < m_numDsts);
-  return &m_dst[i];
+  if (i == 0 && m_numDsts == 0) return nullptr;
+  assert(i < m_numDsts);
+  assert(naryDst() || i == 0);
+  return hasDst() ? getDst() : &m_dst[i];
 }
 
 DstRange IRInstruction::getDsts() {
@@ -679,13 +695,15 @@ void IRInstruction::printOpcode(std::ostream& os) const {
 }
 
 void IRInstruction::printDst(std::ostream& ostream) const {
-  if (unsigned n = m_numDsts) {
-    for (unsigned i = 0; i < n; ++i) {
-      if (i > 0) ostream << ", ";
-      m_dst->print(ostream, true);
-    }
-    ostream << " = ";
+  if (getNumDsts() == 0) return;
+
+  const char* sep = "";
+  for (const SSATmp& dst : getDsts()) {
+    ostream << sep;
+    dst.print(ostream, true);
+    sep = ", ";
   }
+  ostream << " = ";
 }
 
 void IRInstruction::printSrc(std::ostream& ostream, uint32_t i) const {
@@ -739,8 +757,7 @@ void IRInstruction::print(std::ostream& ostream) const {
     printSrc(ostream, 0);
     SSATmp* offset = getSrc(1);
     if (m_op == StRaw) {
-      RawMemSlot& s =
-        RawMemSlot::Get(RawMemSlot::Kind(offset->getValInt()));
+      RawMemSlot& s = RawMemSlot::Get(RawMemSlot::Kind(offset->getValInt()));
       int64_t offset = s.getOffset();
       if (offset) {
         ostream << " + " << offset;

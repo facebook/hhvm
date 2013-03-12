@@ -297,6 +297,18 @@ KillsSource
   The instruction might destroy one or more of its sources, so they
   cannot be safely used after it has executed.
 
+HasStackVersion
+
+  This instruction has a counterpart that returns a StkPtr in addition to any
+  primary destination. The behavior of the stack-modifying version is otherwise
+  identical.
+
+ModifiesStack
+
+  The instruction modifies the in-memory evaluation stack in the process of
+  performing its primary work. It will have a StkPtr destination in addition to
+  its primary destination.
+
 
 Instruction set
 ---------------
@@ -1150,6 +1162,7 @@ D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
   struct.
 
 D:Vector = SetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:Cell
+D:Vector, D:StkPtr = SetPropStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:Cell
 
   Set property with key S3 in S2 to S4.
 
@@ -1159,6 +1172,7 @@ D:PtrToGen = ElemX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
   modified. S3 should point to an MInstrState struct.
 
 D:PtrToGen = ElemDX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:PtrToGen, D:StkPtr = ElemDXStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
   Like ElemX, but used for intermediate element lookups that may
   modify the base.
@@ -1180,10 +1194,12 @@ ArraySet S0:ConstTCA S1:Arr S2:{Int|Str} S3:Cell S4:BoxedArr
   operation.
 
 D:Vector = SetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
+D:Vector, D:StkPtr = SetElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
 
   Set element with key S2 in S1 to S3.
 
-D:Vector = SetNewElem S0:GenPtr S1:Cell
+D:Vector = SetNewElem S0:PtrToGen S1:Cell
+D:Vector, D:StkPtr = SetNewElemStk S0:PtrToGen S1:Cell
 
   Append the value in S1 to S0.
 

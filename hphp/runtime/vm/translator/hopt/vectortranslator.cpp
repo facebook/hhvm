@@ -31,30 +31,12 @@ TRACE_SET_MOD(hhir);
 using Transl::MInstrState;
 using Transl::mInstrHasUnknownOffsets;
 
-namespace {
-
-// Reduce baseType to a canonical unboxed, non-pointer form, returning (in
-// basePtr and baseBoxed) whether the original type was a pointer or boxed,
-// respectively. Whether or not the type is a pointer and/or boxed must be
-// statically known, unless it's exactly equal to Gen.
-void stripBase(Type& baseType, bool& basePtr, bool& baseBoxed) {
-  assert_not_implemented(baseType.isPtr() || baseType.notPtr());
-  basePtr = baseType.isPtr();
-  baseType = basePtr ? baseType.deref() : baseType;
-  assert_not_implemented(
-    baseType.equals(Type::Gen) || baseType.isBoxed() || baseType.notBoxed());
-  baseBoxed = baseType.isBoxed();
-  baseType = baseBoxed ? baseType.innerType() : baseType;
-}
-
-}
-
-bool VectorEffects::supported(const IRInstruction* inst) {
-  switch (inst->getOpcode()) {
-    case SetProp:
-    case SetElem:
-    case SetNewElem:
-    case ElemDX:
+bool VectorEffects::supported(Opcode op) {
+  switch (op) {
+    case SetProp: case SetPropStk:
+    case SetElem: case SetElemStk:
+    case SetNewElem: case SetNewElemStk:
+    case ElemDX: case ElemDXStk:
       return true;
 
     default:
@@ -83,26 +65,61 @@ void VectorEffects::get(const IRInstruction* inst,
   }
 }
 
+bool VectorEffects::getStackValue(const IRInstruction* inst, uint32_t index,
+                                  SSATmp*& value, Type& type) {
+  SSATmp* base = inst->getSrc(vectorBaseIdx(inst));
+  assert(base->getInstruction()->getOpcode() == LdStackAddr);
+  if (base->getInstruction()->getSrc(1)->getValInt() != index) {
+    value = base->getInstruction()->getSrc(0);
+    assert(value->isA(Type::StkPtr));
+    return false;
+  }
+
+  VectorEffects ve(inst);
+  assert(ve.baseTypeChanged || ve.baseValChanged);
+  value = nullptr;
+  type = ve.baseType.derefIfPtr();
+  return true;
+}
+
+namespace {
+// Reduce baseType to a canonical unboxed, non-pointer form, returning (in
+// basePtr and baseBoxed) whether the original type was a pointer or boxed,
+// respectively. Whether or not the type is a pointer and/or boxed must be
+// statically known, unless it's exactly equal to Gen.
+void stripBase(Type& baseType, bool& basePtr, bool& baseBoxed) {
+  assert_not_implemented(baseType.isPtr() || baseType.notPtr());
+  basePtr = baseType.isPtr();
+  baseType = basePtr ? baseType.deref() : baseType;
+  assert_not_implemented(
+    baseType.equals(Type::Gen) || baseType.isBoxed() || baseType.notBoxed());
+  baseBoxed = baseType.isBoxed();
+  baseType = baseBoxed ? baseType.innerType() : baseType;
+}
+}
+
 void VectorEffects::init(Opcode op, const Type origBase,
                          const Type key, const Type origVal) {
   baseType = origBase;
   bool basePtr, baseBoxed;
   stripBase(baseType, basePtr, baseBoxed);
-  // Every base coming through here should be a pointer or object for now, but
-  // may not be in the future.
-  assert_not_implemented(basePtr || baseType.subtypeOf(Type::Obj));
+  // Only certain types of bases are supported now, but this list may expand in
+  // the future.
+  assert_not_implemented(basePtr ||
+                         baseType.subtypeOfAny(Type::Obj, Type::Arr));
 
   valType = origVal;
   baseTypeChanged = baseValChanged = valTypeChanged = false;
 
   // Canonicalize the op to SetProp or SetElem
   switch (op) {
-    case SetProp:
+    case SetProp: case SetPropStk:
       break;
 
-    case SetElem:
-    case SetNewElem:
-    case ElemDX:
+    case SetElem: case SetElemStk:
+    case SetNewElem: case SetNewElemStk:
+    case ElemDX: case ElemDXStk:
+    case ArraySet:
       op = SetElem;
       break;
 
@@ -125,13 +142,16 @@ void VectorEffects::init(Opcode op, const Type origBase,
     baseValChanged = true;
   }
   if (op == SetElem && baseType.maybe(Type::Arr)) {
-    // possible COW when modifying an array
-    baseValChanged = true;
+    // possible COW when modifying an array, unless the base was boxed. If the
+    // base is a box then the value of the box itself won't change, just what
+    // it points to.
+    baseValChanged = !baseBoxed;
   }
   if (op == SetElem && baseType.maybe(Type::StaticArr)) {
-    // the base might get promoted to a CountedArr
+    // the base might get promoted to a CountedArr. We can ignore the change if
+    // the base is boxed, (for the same reasons as above).
     baseType = baseType | Type::CountedArr;
-    baseValChanged = true;
+    baseValChanged = !baseBoxed;
   }
 
   // Setting an element with a base of one of these types will either succeed
@@ -169,34 +189,37 @@ void VectorEffects::init(Opcode op, const Type origBase,
 }
 
 // vectorBaseIdx returns the src index for inst's base operand.
-int vectorBaseIdx(const IRInstruction* inst) {
-  switch (inst->getOpcode()) {
-    case SetProp: return 2;
-    case SetElem: return 1;
-    case ElemDX:  return 1;
-    case SetNewElem: return 0;
+int vectorBaseIdx(Opcode opc) {
+  switch (opc) {
+    case SetProp: case SetPropStk: return 2;
+    case SetElem: case SetElemStk: return 1;
+    case ElemDX: case ElemDXStk:  return 1;
+    case SetNewElem: case SetNewElemStk: return 0;
+    case ArraySet: return 1;
     default:      not_reached();
   }
 }
 
 // vectorKeyIdx returns the src index for inst's key operand.
-int vectorKeyIdx(const IRInstruction* inst) {
-  switch (inst->getOpcode()) {
-    case SetProp: return 3;
-    case SetElem: return 2;
-    case ElemDX:  return 2;
-    case SetNewElem: return -1;
+int vectorKeyIdx(Opcode opc) {
+  switch (opc) {
+    case SetProp: case SetPropStk: return 3;
+    case SetElem: case SetElemStk: return 2;
+    case ElemDX: case ElemDXStk:  return 2;
+    case SetNewElem: case SetNewElemStk: return -1;
+    case ArraySet: return 2;
     default:      not_reached();
   }
 }
 
 // vectorValIdx returns the src index for inst's value operand.
-int vectorValIdx(const IRInstruction* inst) {
-  switch (inst->getOpcode()) {
-    case SetProp: return 4;
-    case SetElem: return 3;
-    case ElemDX:  return -1;
-    case SetNewElem: return 1;
+int vectorValIdx(Opcode opc) {
+  switch (opc) {
+    case SetProp: case SetPropStk: return 4;
+    case SetElem: case SetElemStk: return 3;
+    case ElemDX: case ElemDXStk:  return -1;
+    case SetNewElem: case SetNewElemStk: return 1;
+    case ArraySet: return 3;
     default:      not_reached();
   }
 }
@@ -213,6 +236,35 @@ HhbcTranslator::VectorTranslator::VectorTranslator(
     , m_base(nullptr)
     , m_result(nullptr)
 {
+}
+
+/* Copy varargs SSATmp*s into a vector */
+template<typename... Srcs>
+static void getSrcs(std::vector<SSATmp*>& srcVec, SSATmp* src, Srcs... srcs) {
+  srcVec.push_back(src);
+  getSrcs(srcVec, srcs...);
+}
+static void getSrcs(std::vector<SSATmp*>& srcVec) {}
+
+template<typename... Srcs>
+SSATmp* HhbcTranslator::VectorTranslator::genStk(Opcode opc, Srcs... srcs) {
+  assert(opcodeHasFlags(opc, HasStackVersion));
+  assert(!opcodeHasFlags(opc, ModifiesStack));
+  std::vector<SSATmp*> srcVec;
+  getSrcs(srcVec, srcs...);
+  SSATmp* base = srcVec[vectorBaseIdx(opc)];
+
+  /* If the base is a pointer to a stack cell and the operation might change
+   * its type and/or value, use the version of the opcode that returns a new
+   * StkPtr. */
+  if (base->getInstruction()->getOpcode() == LdStackAddr) {
+    VectorEffects ve(opc, srcVec);
+    if (ve.baseTypeChanged || ve.baseValChanged) {
+      opc = getStackModifyingOpcode(opc);
+    }
+  }
+
+  return m_tb.gen(opc, srcs...);
 }
 
 void HhbcTranslator::VectorTranslator::emit() {
@@ -244,6 +296,7 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   Type baseType = Type::fromRuntimeType(baseRtt);
   const bool isCGetM = m_ni.mInstrOp() == OpCGetM;
   const bool isSetM = m_ni.mInstrOp() == OpSetM;
+  const bool isSingle = m_ni.immVecM.size() == 1;
 
   assert(baseType.isBoxed() || baseType.notBoxed());
   baseType = baseType.unbox();
@@ -251,20 +304,23 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   // CGetM or SetM with no unknown property offsets
   const bool simpleProp = !mInstrHasUnknownOffsets(m_ni) && (isCGetM || isSetM);
 
+  // SetM with only one element
+  const bool singlePropSet = isSingle && isSetM &&
+    mcodeMaybePropName(m_ni.immVecM[0]);
+
   // Array access with one element in the vector
-  const bool simpleElem = m_ni.immVecM.size() == 1 &&
-    mcodeMaybeArrayKey(m_ni.immVecM[0]);
+  const bool singleElem = isSingle && mcodeMaybeArrayKey(m_ni.immVecM[0]);
 
   // SetM on an array with one vector element
-  const bool simpleArraySet = isSetM && simpleElem;
+  const bool simpleArraySet = isSetM && singleElem;
 
   // CGetM on an array with a base that won't use MInstrState. Str
   // will use tvScratch and baseStrOff and Obj will fatal or use
   // tvRef.
-  const bool simpleArrayGet = isCGetM && simpleElem &&
+  const bool simpleArrayGet = isCGetM && singleElem &&
     baseType.not(Type::Str | Type::Obj);
 
-  if (simpleProp || simpleArraySet || simpleArrayGet) {
+  if (simpleProp || singlePropSet || simpleArraySet || simpleArrayGet) {
     setNoMIState();
   }
 }
@@ -370,68 +426,60 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
 void HhbcTranslator::VectorTranslator::emitBaseLCR() {
   const MInstrAttr& mia = m_mii.getAttr(m_ni.immVec.locationCode());
   const DynLocation& base = *m_ni.inputs[m_iInd];
-  if (mia & MIA_warn) {
-    if (base.rtt.isUninit()) {
-      m_ht.spillStack();
-      LocalId data(base.location.offset);
-      m_tb.gen(RaiseUninitLoc, &data);
+  auto baseType = Type::fromRuntimeType(base.rtt);
+  assert(baseType.isKnownDataType());
+
+  if (baseType.subtypeOfAny(Type::Null, Type::BoxedNull)) {
+    PUNT(emitBaseLCR-NullBase);
+  }
+  if (base.location.isLocal()) {
+    // Check for Uninit and warn/promote to InitNull as appropriate
+    if (baseType.subtypeOf(Type::Uninit)) {
+      if (mia & MIA_warn) {
+        m_ht.spillStack();
+        LocalId data(base.location.offset);
+        m_tb.gen(RaiseUninitLoc, &data);
+      }
+      if (mia & MIA_define) {
+        m_tb.genStLoc(base.location.offset, m_tb.genDefInitNull(),
+                      false, true, nullptr);
+        baseType = Type::InitNull;
+      }
     }
   }
 
-  if (base.location.isLocal()) {
-    uint32_t loc = base.location.offset;
-    auto baseType = m_tb.getLocalType(loc);
-
-    if ((mia & MIA_define) && baseType.subtypeOf(Type::Uninit)) {
-      // Promote Uninit to InitNull before doing anything else
-      m_tb.genStLoc(loc, m_tb.genDefInitNull(), false, true, nullptr);
-      baseType = Type::InitNull;
-    }
-    if (baseType.unbox().isNull()) {
-      // The base local might get promoted to an Array or stdClass for set
-      // operations. Punt for now.
-      PUNT(emitBaseLCR-NullBase);
-    }
-
-    // We should never have a union type for the base with mixed boxes
-    assert(baseType.isBoxed() || baseType.notBoxed());
-
-    // If the base is a box with a type that's changed, we need to bail out of
-    // the tracelet and retranslate. Doing an exit here is a little sketchy
-    // since we may have already emitted instructions with memory effects to
-    // initialize the MInstrState. These particular stores are harmless though,
-    // and the worst outcome here is that we'll ending up doing the stores
-    // twice, once for this instruction and once at the beginning of the
-    // retranslation.
-    Trace* failedRef = baseType.isBoxed() ? m_ht.getExitTrace() : nullptr;
-    if (baseType.unbox().subtypeOf(Type::Obj) &&
-        mcodeMaybePropName(m_ni.immVecM[0])) {
-      // We can pass the base to helpers by value in this case
-      m_base = m_tb.genLdLoc(loc);
-      if (baseType.isBoxed()) {
-        assert(m_base->isA(Type::BoxedObj));
-        m_base = m_tb.gen(LdRef, Type::Obj, failedRef, m_base);
-      }
-      assert(m_base->isA(Type::Obj));
-    } else if (isSimpleArraySet()) {
-      m_base = m_tb.genLdLoc(loc);
-      if (baseType.isBoxed()) {
-        m_base = m_tb.gen(LdRef, Type::Arr, failedRef, m_base);
-      }
-      assert(m_base->isA(Type::Arr));
-    } else {
-      // Everything else is passed by reference. We don't have to worry about
-      // unboxing here, since all the generic helpers understand boxed bases.
-      m_base = m_tb.genLdLocAddr(loc, failedRef);
-      assert(m_base->getType().isPtr());
-    }
+  // If the base is a box with a type that's changed, we need to bail out of
+  // the tracelet and retranslate. Doing an exit here is a little sketchy since
+  // we may have already emitted instructions with memory effects to initialize
+  // the MInstrState. These particular stores are harmless though, and the
+  // worst outcome here is that we'll ending up doing the stores twice, once
+  // for this instruction and once at the beginning of the retranslation.
+  Trace* failedRef = baseType.isBoxed() ? m_ht.getExitTrace() : nullptr;
+  if ((baseType.subtypeOfAny(Type::Obj, Type::BoxedObj) &&
+       mcodeMaybePropName(m_ni.immVecM[0])) ||
+      isSimpleArraySet()) {
+    // In these cases we can pass the base by value, after unboxing if needed.
+    m_base = m_tb.gen(Unbox, failedRef, getInput(m_iInd));
+    assert(m_base->isA(baseType.unbox()));
   } else {
-    // Stack bases require a little more stack magic than we have right
-    // now. Refcounting correctly is tricky too.
-    PUNT(emitBaseLCR-CellBase);
-    if (base.isVariant()) {
-      PUNT(emitBaseLCR-R);
+    // Everything else is passed by reference. We don't have to worry about
+    // unboxing here, since all the generic helpers understand boxed bases.
+    if (baseType.isBoxed()) {
+      SSATmp* box = getInput(m_iInd);
+      assert(box->isA(Type::BoxedCell));
+      // Guard that the inner type hasn't changed
+      m_tb.gen(LdRef, baseType.innerType(), failedRef, box);
     }
+
+    if (base.location.space == Location::Local) {
+      m_base = m_tb.genLdLocAddr(base.location.offset);
+    } else {
+      assert(base.location.space == Location::Stack);
+      m_ht.spillStack();
+      assert(m_stackInputs.count(m_iInd));
+      m_base = m_tb.genLdStackAddr(m_stackInputs[m_iInd]);
+    }
+    assert(m_base->getType().isPtr());
   }
 }
 
@@ -836,8 +884,11 @@ void HhbcTranslator::VectorTranslator::emitElem() {
   typedef TypedValue* (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed(), mia);
   m_ht.spillStack();
-  m_base = m_tb.gen(mia & Define ? ElemDX : ElemX,
-                    cns((TCA)opFunc), ptr(m_base), key, genMisPtr());
+  if (mia & Define) {
+    m_base = genStk(ElemDX, cns((TCA)opFunc), ptr(m_base), key, genMisPtr());
+  } else {
+    m_base = m_tb.gen(ElemX, cns((TCA)opFunc), ptr(m_base), key, genMisPtr());
+  }
 }
 #undef HELPER_TABLE
 
@@ -1039,9 +1090,8 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
   SSATmp* key = getInput(m_iInd);
   BUILD_OPTAB(getKeyTypeS(key), key->isBoxed(), m_base->isA(Type::Obj));
   m_ht.spillStack();
-  SSATmp* result =
-    m_tb.gen(SetProp, cns((TCA)opFunc), CTX(),
-             objOrPtr(m_base), noLitInt(key), value);
+  SSATmp* result = genStk(SetProp, cns((TCA)opFunc), CTX(),
+                          objOrPtr(m_base), noLitInt(key), value);
   VectorEffects ve(result->getInstruction());
   m_result = ve.valTypeChanged ? result : value;
 }
@@ -1233,6 +1283,8 @@ HELPER_TABLE_ARRAY_SET(ELEM)
 
 void HhbcTranslator::VectorTranslator::emitSimpleArraySet(SSATmp* key,
                                                           SSATmp* value) {
+  assert(m_iInd == m_mii.valCount() + 1);
+  const int baseStkIdx = m_mii.valCount();
   assert(key->getType().notBoxed());
   assert(value->getType().notBoxed());
   bool checkForInt = false;
@@ -1262,16 +1314,12 @@ void HhbcTranslator::VectorTranslator::emitSimpleArraySet(SSATmp* key,
   // call destructors so it has a sync point in nativecalls.cpp, but exceptions
   // are swallowed at destructor boundaries right now: #2182869.
   if (setRef) {
-    SSATmp* box;
-    if (base.location.space == Location::Local) {
-      box = m_tb.genLdLoc(base.location.offset);
-    } else if (base.location.space == Location::Stack) {
-      not_implemented();
-    } else {
-      not_reached();
-    }
-
+    assert(base.location.space == Location::Local ||
+           base.location.space == Location::Stack);
+    SSATmp* box = getInput(baseStkIdx);
     m_tb.gen(ArraySetRef, cns((TCA)opFunc), m_base, key, value, box);
+    // Unlike the non-ref case, we don't need to do anything to the stack
+    // because any load of the box will be guarded.
   } else {
     SSATmp* newArr = m_tb.gen(ArraySet, cns((TCA)opFunc), m_base, key, value);
 
@@ -1279,7 +1327,11 @@ void HhbcTranslator::VectorTranslator::emitSimpleArraySet(SSATmp* key,
     if (base.location.space == Location::Local) {
       m_tb.genStLoc(base.location.offset, newArr, false, false, nullptr);
     } else if (base.location.space == Location::Stack) {
-      not_implemented();
+      VectorEffects ve(newArr->getInstruction());
+      assert(ve.baseValChanged);
+      assert(ve.baseType.subtypeOf(Type::Arr));
+      m_ht.extendStack(baseStkIdx, Type::Gen);
+      m_ht.replace(baseStkIdx, newArr);
     } else {
       not_reached();
     }
@@ -1302,7 +1354,7 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, Cell);
   BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed());
   m_ht.spillStack();
-  SSATmp* result = m_tb.gen(SetElem, cns((TCA)opFunc), ptr(m_base), key, value);
+  SSATmp* result = genStk(SetElem, cns((TCA)opFunc), ptr(m_base), key, value);
   VectorEffects ve(result->getInstruction());
   m_result = ve.valTypeChanged ? result : value;
 }

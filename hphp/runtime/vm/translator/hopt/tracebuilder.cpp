@@ -593,16 +593,9 @@ SSATmp* TraceBuilder::genLdLocAsCell(uint32_t id, Trace* exitTrace) {
   return genLdRef(tmp, type.innerType(), exitTrace);
 }
 
-SSATmp* TraceBuilder::genLdLocAddr(uint32_t id, Trace* exitTrace) {
+SSATmp* TraceBuilder::genLdLocAddr(uint32_t id) {
   LocalId baseLocalId(id);
-  Type t = getLocalType(id);
-  if (exitTrace) {
-    // If we have an exitTrace, emit a LdRef for its guard side-effect.
-    assert(t.isBoxed());
-    SSATmp* locVal = genLdLoc(id);
-    gen(LdRef, t.unbox(), exitTrace, locVal);
-  }
-  return gen(LdLocAddr, t.ptr(), &baseLocalId, getFp());
+  return gen(LdLocAddr, getLocalType(id).ptr(), &baseLocalId, getFp());
 }
 
 void TraceBuilder::genStLocAux(uint32_t id, SSATmp* newValue, bool storeType) {
@@ -887,13 +880,21 @@ static SSATmp* getStackValue(SSATmp* sp,
                            type);
     }
 
-  default:
-    break;
+  default: {
+    SSATmp* value;
+    if (VectorEffects::getStackValue(sp->getInstruction(), index,
+                                     value, type)) {
+      return value;
+    } else {
+      // If VectorEffects::getStackValue failed, it returns the next
+      // sp to search in value.
+      return getStackValue(value, index, spansCall, type);
+    }
+  }
   }
 
   // Should not get here!
-  assert(0);
-  return nullptr;
+  not_reached();
 }
 
 void TraceBuilder::genAssertStk(uint32_t id, Type type) {
@@ -927,8 +928,14 @@ SSATmp* TraceBuilder::genDefSP(int32_t spOffset) {
   return gen(DefSP, m_fpValue, genDefConst(spOffset));
 }
 
-SSATmp* TraceBuilder::genLdStackAddr(int64_t index) {
-  return gen(LdStackAddr, m_spValue, genDefConst(index));
+SSATmp* TraceBuilder::genLdStackAddr(SSATmp* sp, int64_t index) {
+  Type type;
+  bool spansCall;
+  UNUSED SSATmp* val = getStackValue(sp, index, spansCall, type);
+  type = type.subtypeOf(Type::None) ? Type::Gen : type;
+  assert(IMPLIES(val != nullptr, val->getType().equals(type)));
+  assert(type.notPtr());
+  return gen(LdStackAddr, type.ptr(), sp, genDefConst(index));
 }
 
 void TraceBuilder::genNativeImpl() {
@@ -1255,7 +1262,6 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   }
 
   if (VectorEffects::supported(inst)) {
-    // TODO: Handle stack cells at some point. t1961007
     VectorEffects::get(inst,
                        [&](uint32_t id, SSATmp* val) { // storeLocalValue
                          setLocalValue(id, val);
@@ -1263,6 +1269,10 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
                        [&](uint32_t id, Type t) { // setLocalType
                          setLocalType(id, t);
                        });
+  }
+
+  if (inst->modifiesStack()) {
+    m_spValue = inst->modifiedStkPtr();
   }
 
   // update the CSE table
@@ -1467,8 +1477,9 @@ SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst) {
   if (inst->getOpcode() != Nop) {
     inst = inst->clone(&m_irFactory);
     appendInstruction(inst);
-    // returns nullptr if instruction has no dest or multiple dests
-    return inst->hasDst() ? inst->getDst() : nullptr;
+    // returns nullptr if instruction has no dest, returns the first
+    // (possibly only) dest otherwise
+    return inst->getDst(0);
   }
   return nullptr;
 }

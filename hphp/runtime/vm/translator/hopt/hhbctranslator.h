@@ -441,6 +441,15 @@ private:
     SSATmp* checkInitProp(SSATmp* baseAsObj, SSATmp* propAddr, int propOffset,
                           bool warn, bool define);
 
+    /*
+     * genStk is a wrapper around TraceBuilder::gen() to deal with instructions
+     * that may modify the stack. It inspects the opcode and the types of the
+     * inputs, replacing the opcode with the version that returns a new StkPtr
+     * if appropriate.
+     */
+    template<typename... Srcs>
+    SSATmp* genStk(Opcode op, Srcs... srcs);
+
     bool isSimpleArraySet();
     bool generateMVal() const;
     bool needFirstRatchet() const;

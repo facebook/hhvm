@@ -165,6 +165,14 @@ class FailedAssertion : public std::exception {
 #define assert_throw_log(e, l)
 #endif
 
+const bool do_assert =
+#ifdef NDEBUG
+  false
+#else
+  true
+#endif
+  ;
+
 //////////////////////////////////////////////////////////////////////
 
 #endif

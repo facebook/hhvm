@@ -85,7 +85,7 @@ public:
   void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value);
 
   SSATmp* genLdLoc(uint32_t id);
-  SSATmp* genLdLocAddr(uint32_t id, Trace* exitTrace = nullptr);
+  SSATmp* genLdLocAddr(uint32_t id);
   void genRaiseUninitLoc(uint32_t id);
 
   /*
@@ -209,7 +209,10 @@ public:
   SSATmp* genLdStack(int32_t stackOff, Type type);
   SSATmp* genDefFP();
   SSATmp* genDefSP(int32_t spOffset);
-  SSATmp* genLdStackAddr(int64_t offset);
+  SSATmp* genLdStackAddr(SSATmp* sp, int64_t offset);
+  SSATmp* genLdStackAddr(int64_t offset) {
+    return genLdStackAddr(m_spValue, offset);
+  }
   void    genVerifyParamType(SSATmp* objClass, SSATmp* className,
                              const Class* constraint, Trace* exitTrace);
 

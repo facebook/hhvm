@@ -453,10 +453,10 @@ MethodCache::hashKey(uintptr_t c) {
  * call.
  */
 HOT_FUNC_VM NEVER_INLINE
-static void methodCacheSlowPath(MethodCache::Pair* mce,
-                                ActRec* ar,
-                                StringData* name,
-                                Class* cls) {
+void methodCacheSlowPath(MethodCache::Pair* mce,
+                         ActRec* ar,
+                         StringData* name,
+                         Class* cls) {
   assert(ar->hasThis());
   assert(ar->getThis()->getVMClass() == cls);
   assert(IMPLIES(mce->m_key, mce->m_value));

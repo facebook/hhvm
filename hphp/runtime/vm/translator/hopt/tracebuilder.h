@@ -184,7 +184,6 @@ public:
                               SSATmp* methodName,
                               SSATmp* baseClass,
                               Trace* slowPathExit);
-  SSATmp* genLdObjMethod(const StringData* methodName, SSATmp* obj);
   SSATmp* genCall(SSATmp* actRec,
                   uint32_t returnBcOffset,
                   SSATmp* func,

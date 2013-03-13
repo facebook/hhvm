@@ -1261,6 +1261,16 @@ void HhbcTranslator::emitNativeImpl() {
   m_hasExit = true;
 }
 
+void HhbcTranslator::emitFPushActRec(SSATmp* func,
+                                     SSATmp* objOrClass,
+                                     int32_t numArgs,
+                                     const StringData* invName) {
+  SSATmp* actRec = m_tb->genDefActRec(func, objOrClass, numArgs, invName);
+  m_evalStack.push(actRec);
+  spillStack(); // TODO(#2036900)
+  m_fpiStack.push(actRec);
+}
+
 void HhbcTranslator::emitFPushCtor(int32_t numParams) {
   TRACE(3, "%u: FPushFuncCtor %d\n", m_bcOff, numParams);
   SSATmp* cls = popA();
@@ -1282,9 +1292,10 @@ void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {
   const NamedEntityPair& nep = lookupNamedEntityPairId(funcId);
   const StringData* name = nep.first;
   const Func* func       = Unit::lookupFunc(nep.second, name);
-  // Translation is only supported if function lookup succeeds
   if (!func) {
-    PUNT(FPushFuncDNull);
+    // function lookup failed so just do the same as FPushFunc
+    emitFPushFunc(numParams, m_tb->genDefConst(name));
+    return;
   }
   func->validate();
 
@@ -1294,15 +1305,11 @@ void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {
     spillStack();  // LdFixedFunc can reenter
   }
   SSATmp* ssaFunc = immutable ? m_tb->genDefConst(func)
-                              : m_tb->gen(LdFixedFunc,
-                                          m_tb->genDefConst(name));
-  SSATmp* actRec  = m_tb->genDefActRec(ssaFunc,
-                                       m_tb->genDefInitNull(),
-                                       numParams,
-                                       nullptr);
-  m_evalStack.push(actRec);
-  spillStack(); // TODO(#2036900)
-  m_fpiStack.push(immutable ? actRec : ssaFunc);
+                              : m_tb->gen(LdFixedFunc, m_tb->genDefConst(name));
+  emitFPushActRec(ssaFunc,
+                  m_tb->genDefInitNull(),
+                  numParams,
+                  nullptr);
 }
 
 void HhbcTranslator::emitFPushFunc(int32_t numParams) {
@@ -1313,15 +1320,15 @@ void HhbcTranslator::emitFPushFunc(int32_t numParams) {
   if (!funcName->isString()) {
     PUNT(FPushFunc_not_Str);
   }
+  emitFPushFunc(numParams, funcName);
+}
 
+void HhbcTranslator::emitFPushFunc(int32_t numParams, SSATmp* funcName) {
   spillStack(); // LdFunc can reenter
-  SSATmp* func = m_tb->gen(LdFunc, funcName);
-  m_fpiStack.push(func);
-  m_evalStack.push(m_tb->genDefActRec(func,
-                                      m_tb->genDefInitNull(),
-                                      numParams,
-                                      nullptr));
-  spillStack(); // TODO(#2036900)
+  emitFPushActRec(m_tb->gen(LdFunc, funcName),
+                  m_tb->genDefInitNull(),
+                  numParams,
+                  nullptr);
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
@@ -1333,13 +1340,13 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
         methodName->data(),
         numParams);
   bool magicCall = false;
-  SSATmp* funcTmp = nullptr;
   const Func* func = HPHP::VM::Transl::lookupImmutableMethod(baseClass,
                                                              methodName,
                                                              magicCall,
                                                          /* staticLookup: */
                                                              false);
-  SSATmp* objOrCls = popC();
+  SSATmp* obj = popC();
+  SSATmp* objOrCls = obj;
 
   if (!func) {
     if (baseClass && !(baseClass->attrs() & AttrInterface)) {
@@ -1360,51 +1367,47 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
          *     given the Object and the method slot, which is the same as func's.
          */
         if (!(func->attrs() & AttrPrivate)) {
-          SSATmp* clsTmp = m_tb->gen(LdObjClass, objOrCls);
-          funcTmp = m_tb->genLdClsMethod(clsTmp, func->methodSlot());
+          SSATmp* clsTmp = m_tb->gen(LdObjClass, obj);
+          SSATmp* funcTmp = m_tb->genLdClsMethod(clsTmp, func->methodSlot());
           if (res == MethodLookup::MethodFoundNoThis) {
-            m_tb->genDecRef(objOrCls);
+            m_tb->genDecRef(obj);
             objOrCls = clsTmp;
           }
+          emitFPushActRec(funcTmp, objOrCls, numParams,
+                          magicCall ? methodName : nullptr);
+          return;
         }
       } else {
+        // method lookup did not find anything
         func = nullptr; // force lookup
       }
     }
   }
 
-  if (func != nullptr && funcTmp == nullptr) {
+  if (func != nullptr) {
     if (func->attrs() & AttrStatic) {
       assert(baseClass);  // This assert may be too strong, but be aggressive
       // static function: store base class into this slot instead of obj
       // and decref the obj that was pushed as the this pointer since
       // the obj won't be in the actrec and thus MethodCache::lookup won't
       // decref it
-      m_tb->genDecRef(objOrCls);
+      m_tb->genDecRef(obj);
       objOrCls = m_tb->genDefConst(baseClass);
     }
-  }
-
-  const StringData* invName = nullptr;
-  if (!funcTmp) {
-    funcTmp = func ? m_tb->genDefConst(func)
-                   : m_tb->genDefNull();
-    if (func && magicCall) {
-      invName = methodName;
-    }
-  }
-  SSATmp* actRec = m_tb->genDefActRec(funcTmp,
-                                      objOrCls,
-                                      numParams,
-                                      invName);
-  m_evalStack.push(actRec);
-  spillStack(); // TODO(#2036900)
-  if (!func) {
-    SSATmp* sp = spillStack();
-    SSATmp* meth = m_tb->genLdObjMethod(methodName, sp);
-    m_fpiStack.push(meth);
+    emitFPushActRec(m_tb->genDefConst(func),
+                    objOrCls,
+                    numParams,
+                    magicCall ? methodName : nullptr);
   } else {
-    m_fpiStack.push(actRec);
+    emitFPushActRec(m_tb->genDefNull(),
+                    obj,
+                    numParams,
+                    nullptr);
+    SSATmp* actRec = spillStack();
+    m_tb->gen(LdObjMethod,
+              m_tb->gen(LdObjClass, obj),
+              m_tb->genDefConst(methodName),
+              actRec);
   }
 }
 
@@ -1433,7 +1436,6 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
     mightNotBeStatic = true;
   }
 
-  SSATmp* actRec;
   if (func) {
     SSATmp* objOrCls;
     if (!mightNotBeStatic) { // definitely static
@@ -1450,10 +1452,10 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
       PUNT(FPushClsMethodD_MightNotBeStatic);
       assert(0);
     }
-    actRec = m_tb->genDefActRec(m_tb->genDefConst<const Func*>(func),
-                                objOrCls,
-                                numParams,
-                                func && magicCall ? methodName : nullptr);
+    emitFPushActRec(m_tb->genDefConst(func),
+                    objOrCls,
+                    numParams,
+                    func && magicCall ? methodName : nullptr);
   } else {
     // lookup static method & class in the target cache
     Trace* exitTrace = getExitSlowTrace();
@@ -1463,57 +1465,46 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
                                 m_tb->genDefConst(methodName),
                                 m_tb->genDefConst(np.second),
                                 exitTrace);
-    actRec = m_tb->genDefActRec(funcClassTmp,
-                                m_tb->genDefInitNull(),
-                                numParams,
-                                nullptr);
+    emitFPushActRec(funcClassTmp,
+                    m_tb->genDefInitNull(),
+                    numParams,
+                    nullptr);
   }
-  m_evalStack.push(actRec);
-  spillStack(); // TODO(#2036900)
-  m_fpiStack.push(actRec);
 }
 
-void HhbcTranslator::emitFPushClsMethodF(int32_t             numParams,
+void HhbcTranslator::emitFPushClsMethodF(int32_t           numParams,
                                          const Class*      cls,
                                          const StringData* methName) {
 
+  assert(cls);
+  assert(methName && methName->isStatic());
 
   Block* exitBlock = getExitSlowTrace()->front();
 
   UNUSED SSATmp* clsVal  = popC();
   UNUSED SSATmp* methVal = popC();
 
-  assert(cls);
-  assert(methName && methName->isStatic());
-
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(cls, methName, magicCall,
                                            true /* staticLookup */);
-  UNUSED ActRec* fp = curFrame();
-  assert(!fp->hasThis() || fp->getThis()->instanceof(cls));
-
-  SSATmp* actRec = nullptr;
   SSATmp* curCtxTmp = m_tb->genLdCtx(getCurFunc());
   if (func) {
     SSATmp*   funcTmp = m_tb->genDefConst(func);
     SSATmp* newCtxTmp = m_tb->gen(GetCtxFwdCall, curCtxTmp, funcTmp);
 
-    actRec = m_tb->genDefActRec(funcTmp, newCtxTmp, numParams,
-                                (magicCall ? methName : nullptr));
+    emitFPushActRec(funcTmp, newCtxTmp, numParams,
+                    (magicCall ? methName : nullptr));
 
   } else {
-    SSATmp*      clsTmp = m_tb->genDefConst(cls);
-    SSATmp* methNameTmp = m_tb->genDefConst(methName);
-    SSATmp*  funcCtxTmp = m_tb->gen(LdClsMethodFCache, exitBlock, clsTmp,
-                                    methNameTmp, curCtxTmp);
-    actRec = m_tb->genDefActRec(funcCtxTmp,
-                                m_tb->genDefInitNull(),
-                                numParams,
-                                (magicCall ? methName : nullptr));
+    SSATmp* funcCtxTmp = m_tb->gen(LdClsMethodFCache, exitBlock,
+                                   m_tb->genDefConst(cls),
+                                   m_tb->genDefConst(methName),
+                                   curCtxTmp);
+    emitFPushActRec(funcCtxTmp,
+                    m_tb->genDefInitNull(),
+                    numParams,
+                    (magicCall ? methName : nullptr));
   }
-  m_evalStack.push(actRec);
-  spillStack(); // TODO(#2036900)
-  m_fpiStack.push(actRec);
 }
 
 void HhbcTranslator::emitFCallArray() {
@@ -1523,20 +1514,25 @@ void HhbcTranslator::emitFCallArray() {
 void HhbcTranslator::emitFCall(uint32_t numParams,
                                Offset returnBcOffset,
                                const Func* callee) {
-  // pop the actrec or func from FPI stack
-  SSATmp* actRecOrFunc = m_fpiStack.pop();
-
   // pop the incoming parameters to the call
   SSATmp* params[numParams];
   for (uint32_t i = 0; i < numParams; i++) {
     params[numParams - i - 1] = popF();
   }
+  SSATmp* actRec = spillStack();
+
+  // pop the DefActRec or NewObj instruction from FPI stack
+  SSATmp* actRecOrNewObj = m_fpiStack.pop();
 
   SSATmp* func = callee ? m_tb->genDefConst(callee) : nullptr;
-  SSATmp* actRec = spillStack();
   if (!func) {
-    if (actRecOrFunc && actRecOrFunc->getType() == Type::Func) {
-      func = actRecOrFunc;
+    IRInstruction* actRecInst = actRecOrNewObj
+                                ? actRecOrNewObj->getInstruction() : nullptr;
+    SSATmp* funcTmp = actRecInst && actRecInst->getOpcode() == DefActRec
+                      ? actRecInst->getSrc(1) : nullptr;
+
+    if (funcTmp && funcTmp->getType() == Type::Func && funcTmp->isConst()) {
+      func = funcTmp;
     } else {
       func = m_tb->genDefNull();
     }

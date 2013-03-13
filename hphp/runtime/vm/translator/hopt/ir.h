@@ -233,7 +233,7 @@ O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),    C|E|N|Er) \
-O(LdObjMethod,                 D(Func), C(Int) CStr S(StkPtr), C|E|N|Refs|Er) \
+O(LdObjMethod,                 D(Func), S(Cls) CStr S(StkPtr), C|E|N|Refs|Er) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                        N    ) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \

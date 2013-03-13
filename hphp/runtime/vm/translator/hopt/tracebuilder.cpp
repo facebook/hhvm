@@ -517,13 +517,6 @@ SSATmp* TraceBuilder::genLdClsMethodCache(SSATmp* className,
              baseClass);
 }
 
-SSATmp* TraceBuilder::genLdObjMethod(const StringData* methodName,
-                                     SSATmp* actRec) {
-  return gen(LdObjMethod,
-             genDefConst<int64_t>(Transl::TargetCache::MethodCache::alloc()),
-             genDefConst<const StringData*>(methodName), actRec);
-}
-
 // TODO(#2058871): move this to hhbctranslator
 void TraceBuilder::genVerifyParamType(SSATmp* objClass,
                                         SSATmp* className,
@@ -775,8 +768,7 @@ SSATmp* TraceBuilder::genDefActRec(SSATmp* func,
              func,
              objOrClass,
              genDefConst<int64_t>(numArgs),
-             invName ?
-               genDefConst<const StringData*>(invName) : genDefInitNull());
+             invName ? genDefConst(invName) : genDefInitNull());
 }
 
 SSATmp* TraceBuilder::genFreeActRec() {

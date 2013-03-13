@@ -245,8 +245,11 @@ struct HhbcTranslator {
   void emitFPassCOp();
   void emitFPassR();
   void emitFPassV();
+  void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
+                       const StringData* invName);
   void emitFPushFuncD(int32_t numParams, int32_t funcId);
   void emitFPushFunc(int32_t numParams);
+  void emitFPushFunc(int32_t numParams, SSATmp* funcName);
   void emitFPushClsMethodD(int32_t numParams,
                            int32_t methodNameStrId,
                            int32_t clssNamedEntityPairId);

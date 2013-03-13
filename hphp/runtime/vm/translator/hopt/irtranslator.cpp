@@ -1114,9 +1114,13 @@ TranslatorX64::irTranslateFPushClsMethodF(const Tracelet& t,
                             classLoc->rtt.valueClass() != nullptr),
                           FPushClsMethodF_unknown);
 
+  auto cls = classLoc->rtt.valueClass();
+  DEBUG_ONLY ActRec* fp = curFrame();
+  assert(!fp->hasThis() || fp->getThis()->instanceof(cls));
+
   HHIR_EMIT(FPushClsMethodF,
             i.imm[0].u_IVA, // # of arguments
-            classLoc->rtt.valueClass(),
+            cls,
             methodLoc->rtt.valueString());
 }
 

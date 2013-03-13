@@ -1614,7 +1614,7 @@ FPushObjMethodD <num params> <litstr id>    [C]  ->  []
       FPushObjMethod   | $2 | $1
       FPushObjMethodD  | $1 | %2
 
-  This x is not an object or if y is not a string, this instruction throws a
+  If x is not an object or if y is not a string, this instruction throws a
   fatal error. Next, this instruction checks if object x has an accessible
   method named y. If it does, this instruction pushes a new entry on the FPI
   stack, initializing it with the number of parameters being passed (given by

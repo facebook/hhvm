@@ -363,6 +363,11 @@ public:
                                  Class* ctx);
 };
 
+void methodCacheSlowPath(MethodCache::Pair* mce,
+                         ActRec* ar,
+                         StringData* name,
+                         Class* cls);
+
 } } } }
 
 #endif

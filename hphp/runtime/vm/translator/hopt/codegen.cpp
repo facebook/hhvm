@@ -324,7 +324,6 @@ CALL_OPCODE(ArrayAdd)
 CALL_OPCODE(Box)
 CALL_OPCODE(CreateCont)
 CALL_OPCODE(FillContLocals)
-CALL_OPCODE(LdObjMethod)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewTuple)
 CALL_OPCODE(PrintStr)
@@ -1832,6 +1831,41 @@ void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
   auto objReg = inst->getSrc(0)->getReg();
 
   emitLdObjClass(m_as, objReg, dstReg);
+}
+
+void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
+  auto dstReg    = inst->getDst()->getReg();
+  auto cls       = inst->getSrc(0);
+  auto clsReg    = cls->getReg();
+  auto name      = inst->getSrc(1);
+  auto actRec    = inst->getSrc(2);
+  auto actRecReg = actRec->getReg();
+  CacheHandle handle = Transl::TargetCache::MethodCache::alloc();
+
+  // lookup in the targetcache
+  assert(MethodCache::kNumLines == 1);
+  if (debug) {
+    MethodCache::Pair p;
+    static_assert(sizeof(p.m_value) == 8,
+                  "MethodCache::Pair::m_value assumed to be 8 bytes");
+    static_assert(sizeof(p.m_key) == 8,
+                  "MethodCache::Pair::m_key assumed to be 8 bytes");
+  }
+
+  // preload handle->m_value
+  m_as.loadq(rVmTl[handle + offsetof(MethodCache::Pair, m_value)], rScratch);
+  m_as.cmpq (rVmTl[handle + offsetof(MethodCache::Pair, m_key)], clsReg);
+  ifThenElse(CC_E, // if handle->key == cls
+             [&] { // then actReg->m_func = handle->value
+               m_as.storeq(rScratch, actRecReg[AROFF(m_func)]);
+             },
+             [&] { // else call slow path helper
+               cgCallHelper(m_as, (TCA)methodCacheSlowPath, dstReg, kSyncPoint,
+                            ArgGroup().addr(rVmTl, handle)
+                                      .ssa(actRec)
+                                      .ssa(name)
+                                      .ssa(cls));
+             });
 }
 
 void CodeGenerator::cgRetVal(IRInstruction* inst) {

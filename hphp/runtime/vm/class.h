@@ -618,8 +618,20 @@ public:
   Avail avail(Class *&parent, bool tryAutoload = false) const;
   Class* classof(const PreClass* preClass) const;
   bool classof(const Class* cls) const {
-    if (UNLIKELY((attrs() & (AttrInterface | AttrTrait)) ||
-                 (cls->attrs() & (AttrInterface | AttrTrait)))) {
+    /*
+      If cls is an interface or trait, we're going to have
+      to do the slow search via classof(PreClass*).
+      Otherwise, if this is not an interface or trait,
+      the classVec check will determine whether its
+      an instance of cls.
+      Otherwise, this is an interface or trait, and cls
+      is not, so we need to return false. But the classVec
+      check can never return true in that case (cls's
+      classVec contains only non-interfaces and non-traits,
+      while this->classVec is either empty, or contains
+      interfaces/traits).
+    */
+    if (UNLIKELY(cls->attrs() & (AttrInterface | AttrTrait))) {
       return (classof(cls->m_preClass.get()) == cls);
     }
     if (m_classVecLen >= cls->m_classVecLen) {

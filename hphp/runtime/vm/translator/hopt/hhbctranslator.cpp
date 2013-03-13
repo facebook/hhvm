@@ -1417,7 +1417,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
   UNUSED const StringData* className = np.first;
   TRACE(3, "%u: FPushClsMethodD %s::%s %d\n", m_bcOff, className->data(),
         methodName->data(), numParams);
-  const Class* baseClass = Unit::lookupClass(np.second);
+  const Class* baseClass = Unit::lookupUniqueClass(np.second);
   bool magicCall = false;
   const Func* func = HPHP::VM::Transl::lookupImmutableMethod(baseClass,
                                                              methodName,
@@ -1944,7 +1944,8 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId,
   assert(!constraintClsName || constraintClsName->isStatic());
   const Func* func = getCurFunc();
   const Class* constraint = (constraintClsName ?
-                             Unit::lookupClass(constraintClsName) : nullptr);
+                             Unit::lookupUniqueClass(constraintClsName) :
+                             nullptr);
   const TypeConstraint& tc = func->params()[paramId].typeConstraint();
   const StringData* tcTypeName = tc.typeName();
 
@@ -2003,7 +2004,7 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
   Class::initInstanceBits();
   const bool haveBit = Class::haveInstanceBit(className);
 
-  Class* const maybeCls = Unit::lookupClass(className);
+  Class* const maybeCls = Unit::lookupUniqueClass(className);
   const bool isNormalClass = maybeCls &&
                              !(maybeCls->attrs() &
                                (AttrTrait | AttrInterface));

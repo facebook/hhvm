@@ -100,7 +100,7 @@ static void recordActRecPush(NormalizedInstruction& i,
   fcall.m_offset = fpi->m_fcallOff;
   assert(isFCallStar(*unit->at(fcall.offset())));
   if (clsName) {
-    const Class* cls = Unit::lookupClass(clsName);
+    const Class* cls = Unit::lookupUniqueClass(clsName);
     bool magic = false;
     const Func* func = lookupImmutableMethod(cls, name, magic, staticCall);
     if (func) {

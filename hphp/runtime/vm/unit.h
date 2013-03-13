@@ -502,6 +502,10 @@ struct Unit {
     return cls;
   }
 
+  static Class *lookupUniqueClass(const StringData *clsName) {
+    return lookupUniqueClass(GetNamedEntity(clsName));
+  }
+
   static Class *lookupClass(const StringData *clsName) {
     Class *cls = *GetNamedEntity(clsName)->clsList();
     if (LIKELY(cls != nullptr)) cls = cls->getCached();

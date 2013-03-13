@@ -681,7 +681,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
       if ((op == OpAGetC && inputs[0]->isString())) {
         const StringData *sd = inputs[0]->rtt.valueString();
         if (sd) {
-          Class *klass = Unit::lookupClass(sd);
+          Class *klass = Unit::lookupUniqueClass(sd);
           TRACE(3, "KindOfClass: derived class \"%s\" from string literal\n",
                 klass ? klass->preClass()->name()->data() : "NULL");
           return RuntimeType(klass);
@@ -1350,7 +1350,7 @@ void Translator::analyzeSecondPass(Tracelet& t) {
       /* new obj with a ctor that takes no args */
       const NamedEntityPair& np =
         curUnit()->lookupNamedEntityPairId(prev->imm[1].u_SA);
-      const Class* cls = Unit::lookupClass(np.second);
+      const Class* cls = Unit::lookupUniqueClass(np.second);
       if (cls && (cls->attrs() & AttrUnique) &&
           Func::isSpecial(cls->getCtor()->name())) {
         /* its the generated 86ctor, so no need to call it */
@@ -1719,8 +1719,8 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
           dl->rtt.valueClass() ? dl->rtt.valueClass()->name() : nullptr;
         // The two classes might not be exactly the same, which is ok
         // as long as metaCls is more derived than rttCls.
-        Class* metaCls = Unit::lookupClass(metaName);
-        Class* rttCls = rttName ? Unit::lookupClass(rttName) : nullptr;
+        Class* metaCls = Unit::lookupUniqueClass(metaName);
+        Class* rttCls = rttName ? Unit::lookupUniqueClass(rttName) : nullptr;
         if (metaCls && rttCls && metaCls != rttCls &&
             !metaCls->classof(rttCls)) {
           // Runtime type is more derived
@@ -1741,7 +1741,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
 
       case Unit::MetaInfo::MVecPropClass: {
         const StringData* metaName = ni->unit()->lookupLitstrId(info.m_data);
-        Class* metaCls = Unit::lookupClass(metaName);
+        Class* metaCls = Unit::lookupUniqueClass(metaName);
         if (metaCls) {
           ni->immVecClasses[arg] = metaCls;
         }

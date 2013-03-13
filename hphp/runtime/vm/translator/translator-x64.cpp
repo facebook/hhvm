@@ -7035,7 +7035,7 @@ TranslatorX64::emitKnownClassCheck(const NormalizedInstruction& i,
                                    RegNumber reg) {
   using namespace TargetCache;
   assert(clsName);
-  Class* klass = Unit::lookupClass(clsName);
+  Class* klass = Unit::lookupUniqueClass(clsName);
   bool guarded = false;
   if (klass) {
     guarded = i.guardedCls;
@@ -8778,7 +8778,7 @@ TranslatorX64::translateFPushClsMethodD(const Tracelet& t,
          cls && cls->isStatic());
   assert(i.inputs.size() == 0);
 
-  const Class* baseClass = Unit::lookupClass(np.second);
+  const Class* baseClass = Unit::lookupUniqueClass(np.second);
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(baseClass, meth, magicCall,
                                            true /* staticLookup */);
@@ -9160,7 +9160,7 @@ void TranslatorX64::translateFPushCtorD(const Tracelet& t,
   using namespace TargetCache;
   int numArgs = i.imm[0].u_IVA;
   const StringData* clsName = curUnit()->lookupLitstrId(i.imm[1].u_SA);
-  Class* cls = Unit::lookupClass(clsName);
+  Class* cls = Unit::lookupUniqueClass(clsName);
   bool fastPath = !RuntimeOption::EnableObjDestructCall &&
     classIsPersistent(cls) &&
     !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait)) &&
@@ -9574,7 +9574,7 @@ TranslatorX64::findCuf(const NormalizedInstruction& ni,
   } else if (sclass->isame(s_static.get())) {
     return nullptr;
   } else {
-    cls = VM::Unit::lookupClass(sclass);
+    cls = VM::Unit::lookupUniqueClass(sclass);
     if (!cls) return nullptr;
   }
 
@@ -10274,7 +10274,7 @@ TranslatorX64::translateVerifyParamType(const Tracelet& t,
   const StringData* clsName;
   if (!isSelfOrParent) {
     clsName = tc.typeName();
-    constraint = Unit::lookupClass(clsName);
+    constraint = Unit::lookupUniqueClass(clsName);
   } else {
     if (tc.isSelf()) {
       tc.selfToClass(curFunc(), &constraint);
@@ -10428,7 +10428,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
     }
 
     const StringData* clsName = curUnit()->lookupLitstrId(i.imm[0].u_SA);
-    Class* maybeCls = Unit::lookupClass(clsName);
+    Class* maybeCls = Unit::lookupUniqueClass(clsName);
 
     // maybeInterface is just used as a hint: If it's a trait/interface now but
     // a class at runtime, InstanceOfDSlowInterface will still do the right

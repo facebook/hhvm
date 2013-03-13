@@ -267,7 +267,7 @@ SSATmp* Simplifier::simplifyGetCtxFwdCall(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
   SSATmp* clsName = inst->getSrc(0);
   if (clsName->isConst()) {
-    const Class* cls = Unit::lookupClass(clsName->getValStr());
+    const Class* cls = Unit::lookupUniqueClass(clsName->getValStr());
     if (cls) {
       if (RuntimeOption::RepoAuthoritative && (cls->attrs() & AttrUnique)) {
         // the class is unique

@@ -1467,10 +1467,12 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
 void CodeGenerator::cgNInstanceOf(IRInstruction* inst) {
   // TODO(#2058865): having NInstanceOf is no better than InstanceOf
   // followed by boolean Not opcode.
-  emitInstanceCheck(inst, inst->getDst()->getReg());
+  PhysReg dstReg = inst->getDst()->getReg();
+  emitInstanceCheck(inst, dstReg);
+  Reg8 dr((int(dstReg)));
   auto& a = m_as;
-  a.    testb   (al, al);
-  a.    setz    (al);
+  a.    testb   (dr, dr);
+  a.    setz    (dr);
 }
 
 void CodeGenerator::cgJmpInstanceOf(IRInstruction* inst) {

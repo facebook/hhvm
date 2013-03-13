@@ -1522,6 +1522,12 @@ void TraceBuilder::optimizeTrace() {
   m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_enableCse && !m_enableSimplification) return;
+  if (m_trace->getBlocks().size() >
+      RuntimeOption::EvalHHIRSimplificationMaxBlocks) {
+    // TODO CSEHash::filter is very slow for large block sizes
+    // t2135219 should address that
+    return;
+  }
   BlockList sortedBlocks = sortCfg(m_trace.get(), m_irFactory);
   IdomVector idoms = findDominators(sortedBlocks);
   clearTrackedState();

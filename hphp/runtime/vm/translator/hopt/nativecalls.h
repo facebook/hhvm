@@ -33,6 +33,7 @@ enum FuncType : unsigned {
   FPtr,
   FSSA,
 };
+
 struct FuncPtr {
   FuncPtr() {}
   FuncPtr(TCA f) : type(FPtr), ptr(f) {}
@@ -43,11 +44,6 @@ struct FuncPtr {
     TCA ptr;
     uint64_t srcIdx;
   };
-};
-
-enum DestType : unsigned {
-  DNone,
-  DSSA,
 };
 
 enum ArgType : unsigned {

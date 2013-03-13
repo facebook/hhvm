@@ -38,6 +38,14 @@ class FailedCodeGen : public std::exception {
 
 struct ArgGroup;
 
+// DestType describes the return type of native helper calls, particularly
+// register assignments
+enum class DestType : unsigned {
+  None,  // return void (no valid registers)
+  SSA,   // return a single-register value
+  TV     // return a TypedValue packed in two registers
+};
+
 enum SyncOptions {
   kNoSyncPoint,
   kSyncPoint,
@@ -121,23 +129,27 @@ private:
                     TCA addr,
                     SSATmp* dst,
                     SyncOptions sync,
-                    ArgGroup& args);
+                    ArgGroup& args,
+                    DestType destType = DestType::SSA);
   void cgCallHelper(Asm& a,
                     TCA addr,
                     PhysReg dstReg,
                     SyncOptions sync,
-                    ArgGroup& args);
+                    ArgGroup& args,
+                    DestType destType = DestType::SSA);
   void cgCallHelper(Asm& a,
                     const Transl::Call& call,
                     PhysReg dstReg,
                     SyncOptions sync,
-                    ArgGroup& args);
+                    ArgGroup& args,
+                    DestType destType = DestType::SSA);
   void cgCallHelper(Asm& a,
                     const Transl::Call& call,
                     PhysReg dstReg0,
                     PhysReg dstReg1,
                     SyncOptions sync,
-                    ArgGroup& args);
+                    ArgGroup& args,
+                    DestType destType = DestType::SSA);
 
   void cgStore(PhysReg base,
                int64_t off,
@@ -416,7 +428,7 @@ struct ArgGroup {
   /*
    * Pass tmp as a TypedValue passed by value.
    */
-  ArgGroup& valueType(SSATmp* tmp) {
+  ArgGroup& typedValue(SSATmp* tmp) {
     return ssa(tmp).type(tmp);
   }
 
@@ -436,11 +448,9 @@ struct ArgGroup {
 private:
   ArgGroup& vectorKeyImpl(SSATmp* key, bool allowInt) {
     if (key->isString() || (allowInt && key->isA(Type::Int))) {
-      ssa(key).none();
-    } else {
-      valueType(key);
+      return ssa(key).none();
     }
-    return *this;
+    return typedValue(key);
   }
 
   std::vector<ArgDesc> m_args;

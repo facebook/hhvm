@@ -70,7 +70,7 @@ void ArrayIter::reset() {
     if (ad) decRefArr(const_cast<ArrayData*>(ad));
     return;
   }
-  ObjectData* obj = getRawObject();
+  ObjectData* obj = getObject();
   m_data = nullptr;
   assert(obj);
   decRefObj(obj);
@@ -83,24 +83,33 @@ void ArrayIter::objInit(ObjectData *obj) {
   if (incRef) {
     obj->incRefCount();
   }
-  if (!obj->isCollection()) {
-    assert(obj->instanceof(SystemLib::s_IteratorClass));
-    obj->o_invoke(s_rewind, Array());
-  } else {
-    if (hasVector()) {
+  switch (getCollectionType()) {
+    case Collection::VectorType: {
       c_Vector* vec = getVector();
       m_versionNumber = vec->getVersionNumber();
       m_pos = 0;
-    } else if (hasMap()) {
+      break;
+    }
+    case Collection::MapType: {
       c_Map* mp = getMap();
       m_versionNumber = mp->getVersionNumber();
       m_pos = mp->iter_begin();
-    } else if (hasStableMap()) {
+      break;
+    }
+    case Collection::StableMapType: {
       c_StableMap* smp = getStableMap();
       m_versionNumber = smp->getVersionNumber();
       m_pos = smp->iter_begin();
-    } else {
-      assert(false);
+      break;
+    }
+    case Collection::TupleType: {
+      m_pos = 0;
+      break;
+    }
+    default: {
+      assert(obj->instanceof(SystemLib::s_IteratorClass));
+      obj->o_invoke(s_rewind, Array());
+      break;
     }
   }
 }
@@ -129,7 +138,7 @@ ArrayIter::~ArrayIter() {
     const ArrayData* ad = getArrayData();
     if (ad) decRefArr(const_cast<ArrayData*>(ad));
   } else {
-    ObjectData* obj = getRawObject();
+    ObjectData* obj = getObject();
     assert(obj);
     decRefObj(obj);
   }
@@ -139,136 +148,169 @@ ArrayIter::~ArrayIter() {
 }
 
 bool ArrayIter::endHelper() {
-  if (hasVector()) {
-    c_Vector* vec = getVector();
-    return m_pos >= vec->t_count();
+  switch (getCollectionType()) {
+    case Collection::VectorType: {
+      c_Vector* vec = getVector();
+      return m_pos >= vec->t_count();
+    }
+    case Collection::MapType: {
+      return m_pos == 0;
+    }
+    case Collection::StableMapType: {
+      return m_pos == 0;
+    }
+    case Collection::TupleType: {
+      c_Tuple* tup = getTuple();
+      return m_pos >= tup->t_count();
+    }
+    default: {
+      ObjectData* obj = getIteratorObj();
+      return !obj->o_invoke(s_valid, Array());
+    }
   }
-  if (hasMap()) {
-    return m_pos == 0;
-  }
-  if (hasStableMap()) {
-    return m_pos == 0;
-  }
-  assert(hasObject());
-  ObjectData* obj = getObject();
-  return !obj->o_invoke(s_valid, Array());
 }
 
 void ArrayIter::nextHelper() {
-  if (hasVector()) {
-    m_pos++;
-    return;
-  }
-  if (hasMap()) {
-    assert(m_pos != 0);
-    c_Map* mp = getMap();
-    if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
-      throw_collection_modified();
+  switch (getCollectionType()) {
+    case Collection::VectorType: {
+      m_pos++;
+      return;
     }
-    m_pos = mp->iter_next(m_pos);
-    return;
-  }
-  if (hasStableMap()) {
-    assert(m_pos != 0);
-    c_StableMap* smp = getStableMap();
-    if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
-      throw_collection_modified();
+    case Collection::MapType: {
+      assert(m_pos != 0);
+      c_Map* mp = getMap();
+      if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
+        throw_collection_modified();
+      }
+      m_pos = mp->iter_next(m_pos);
+      return;
     }
-    m_pos = smp->iter_next(m_pos);
-    return;
+    case Collection::StableMapType: {
+      assert(m_pos != 0);
+      c_StableMap* smp = getStableMap();
+      if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
+        throw_collection_modified();
+      }
+      m_pos = smp->iter_next(m_pos);
+      return;
+    }
+    case Collection::TupleType: {
+      m_pos++;
+      return;
+    }
+    default:
+      ObjectData* obj = getIteratorObj();
+      obj->o_invoke(s_next, Array());
   }
-  assert(hasObject());
-  ObjectData* obj = getObject();
-  obj->o_invoke(s_next, Array());
 }
 
 Variant ArrayIter::firstHelper() {
-  if (hasVector()) {
-    return m_pos;
-  }
-  if (hasMap()) {
-    assert(m_pos != 0);
-    c_Map* mp = getMap();
-    if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
-      throw_collection_modified();
+  switch (getCollectionType()) {
+    case Collection::VectorType: {
+      return m_pos;
     }
-    return mp->iter_key(m_pos);
-  }
-  if (hasStableMap()) {
-    assert(m_pos != 0);
-    c_StableMap* smp = getStableMap();
-    if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
-      throw_collection_modified();
+    case Collection::MapType: {
+      assert(m_pos != 0);
+      c_Map* mp = getMap();
+      if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
+        throw_collection_modified();
+      }
+      return mp->iter_key(m_pos);
     }
-    return smp->iter_key(m_pos);
+    case Collection::StableMapType: {
+      assert(m_pos != 0);
+      c_StableMap* smp = getStableMap();
+      if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
+        throw_collection_modified();
+      }
+      return smp->iter_key(m_pos);
+    }
+    case Collection::TupleType: {
+      return m_pos;
+    }
+    default: {
+      ObjectData* obj = getIteratorObj();
+      return obj->o_invoke(s_key, Array());
+    }
   }
-  assert(hasObject());
-  ObjectData* obj = getObject();
-  return obj->o_invoke(s_key, Array());
 }
 
 HOT_FUNC
 Variant ArrayIter::second() {
-  if (hasVector()) {
-    c_Vector* vec = getVector();
-    if (UNLIKELY(m_versionNumber != vec->getVersionNumber())) {
-      throw_collection_modified();
+  if (hasArrayData()) {
+    assert(m_pos != ArrayData::invalid_index);
+    const ArrayData* ad = getArrayData();
+    assert(ad);
+    return ad->getValue(m_pos);
+  }
+  switch (getCollectionType()) {
+    case Collection::VectorType: {
+      c_Vector* vec = getVector();
+      if (UNLIKELY(m_versionNumber != vec->getVersionNumber())) {
+        throw_collection_modified();
+      }
+      return tvAsCVarRef(vec->at(m_pos));
     }
-    return tvAsCVarRef(vec->at(m_pos));
-  }
-  if (hasMap()) {
-    c_Map* mp = getMap();
-    if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
-      throw_collection_modified();
+    case Collection::MapType: {
+      c_Map* mp = getMap();
+      if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
+        throw_collection_modified();
+      }
+      return mp->iter_value(m_pos);
     }
-    return mp->iter_value(m_pos);
-  }
-  if (hasStableMap()) {
-    c_StableMap* smp = getStableMap();
-    if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
-      throw_collection_modified();
+    case Collection::StableMapType: {
+      c_StableMap* smp = getStableMap();
+      if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
+        throw_collection_modified();
+      }
+      return smp->iter_value(m_pos);
     }
-    return smp->iter_value(m_pos);
+    case Collection::TupleType: {
+      return tvAsCVarRef(getTuple()->at(m_pos));
+    }
+    default: {
+      ObjectData* obj = getIteratorObj();
+      return obj->o_invoke(s_current, Array());
+    }
   }
-  if (hasObject()) {
-    ObjectData* obj = getObject();
-    return obj->o_invoke(s_current, Array());
-  }
-  assert(hasArrayData());
-  assert(m_pos != ArrayData::invalid_index);
-  const ArrayData* ad = getArrayData();
-  assert(ad);
-  return ad->getValue(m_pos);
 }
 
-void ArrayIter::secondHelper(Variant & v) {
-  if (hasVector()) {
-    c_Vector* vec = getVector();
-    if (UNLIKELY(m_versionNumber != vec->getVersionNumber())) {
-      throw_collection_modified();
+void ArrayIter::secondHelper(Variant& v) {
+  switch (getCollectionType()) {
+    case Collection::VectorType: {
+      c_Vector* vec = getVector();
+      if (UNLIKELY(m_versionNumber != vec->getVersionNumber())) {
+        throw_collection_modified();
+      }
+      v = tvAsCVarRef(vec->at(m_pos));
+      break;
     }
-    v = tvAsCVarRef(vec->at(m_pos));
-    return;
-  }
-  if (hasMap()) {
-    c_Map* mp = getMap();
-    if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
-      throw_collection_modified();
+    case Collection::MapType: {
+      c_Map* mp = getMap();
+      if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
+        throw_collection_modified();
+      }
+      v = mp->iter_value(m_pos);
+      break;
     }
-    v = mp->iter_value(m_pos);
-    return;
-  }
-  if (hasStableMap()) {
-    c_StableMap* smp = getStableMap();
-    if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
-      throw_collection_modified();
+    case Collection::StableMapType: {
+      c_StableMap* smp = getStableMap();
+      if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
+        throw_collection_modified();
+      }
+      v = smp->iter_value(m_pos);
+      break;
     }
-    v = smp->iter_value(m_pos);
-    return;
+    case Collection::TupleType: {
+      v = tvAsCVarRef(getTuple()->at(m_pos));
+      break;
+    }
+    default: {
+      ObjectData* obj = getIteratorObj();
+      v = obj->o_invoke(s_current, Array());
+      break;
+    }
   }
-  assert(hasObject());
-  ObjectData* obj = getObject();
-  v = obj->o_invoke(s_current, Array());
 }
 
 HOT_FUNC

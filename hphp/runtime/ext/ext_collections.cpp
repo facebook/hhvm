@@ -129,10 +129,6 @@ void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
   }
 }
 
-Variant c_Vector::t___destruct() {
-  return uninit_null();
-}
-
 void c_Vector::grow() {
   if (m_capacity) {
     m_capacity += m_capacity;
@@ -880,10 +876,6 @@ void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
       throwBadKeyType();
     }
   }
-}
-
-Variant c_Map::t___destruct() {
-  return uninit_null();
 }
 
 Array c_Map::toArrayImpl() const {
@@ -1790,10 +1782,6 @@ void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
       throwBadKeyType();
     }
   }
-}
-
-Variant c_StableMap::t___destruct() {
-  return uninit_null();
 }
 
 Array c_StableMap::toArrayImpl() const {
@@ -2726,6 +2714,231 @@ void c_StableMapIterator::t_rewind() {
   m_pos = smp->iter_begin();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+c_Tuple::c_Tuple(VM::Class* cb) :
+    ExtObjectDataFlags<ObjectData::TupleAttrInit|
+                       ObjectData::UseGet|
+                       ObjectData::UseSet|
+                       ObjectData::UseIsset|
+                       ObjectData::UseUnset>(cb),
+    m_size(0), m_capacity(0) {
+}
+
+c_Tuple::~c_Tuple() {
+  uint sz = m_size;
+  for (uint i = 0; i < sz; ++i) {
+    tvRefcountedDecRef(&getData()[i]);
+  }
+}
+
+void c_Tuple::t___construct() {
+  Object e(SystemLib::AllocRuntimeExceptionObject(
+    "Tuples cannot be created using the new operator"));
+  throw e;
+}
+
+Array c_Tuple::toArrayImpl() const {
+  ArrayInit ai(m_size, ArrayInit::vectorInit);
+  uint sz = m_size;
+  for (uint i = 0; i < sz; ++i) {
+    ai.set(tvAsCVarRef(&getData()[i]));
+  }
+  return ai.create();
+}
+
+Array c_Tuple::o_toArray() const {
+  check_collection_cast_to_array();
+  return toArrayImpl();
+}
+
+ObjectData* c_Tuple::clone() {
+  auto tup = c_Tuple::alloc(m_size);
+  tup->incRefCount();
+  uint sz = tup->m_size = m_size;
+  TypedValue* src = getData();
+  TypedValue* dst = tup->getData();
+  for (int i = 0; i < sz; ++i) {
+    tvDup(&src[i], &dst[i]);
+  }
+  return tup;
+}
+
+bool c_Tuple::t_isempty() {
+  return (m_size == 0);
+}
+
+int64_t c_Tuple::t_count() {
+  return m_size;
+}
+
+Variant c_Tuple::t_at(CVarRef key) {
+  if (key.isInteger()) {
+    return tvAsCVarRef(at(key.toInt64()));
+  }
+  throwBadKeyType();
+  return init_null_variant;
+}
+
+Variant c_Tuple::t_get(CVarRef key) {
+  if (key.isInteger()) {
+    TypedValue* tv = get(key.toInt64());
+    if (tv) {
+      return tvAsCVarRef(tv);
+    } else {
+      return init_null_variant;
+    }
+  }
+  throwBadKeyType();
+  return init_null_variant;
+}
+
+Array c_Tuple::t_toarray() {
+  return toArrayImpl();
+}
+
+Object c_Tuple::t_getiterator() {
+  c_TupleIterator* it = NEWOBJ(c_TupleIterator)();
+  it->m_obj = this;
+  it->m_pos = 0;
+  return it;
+}
+
+void c_Tuple::throwOOB(int64_t key) {
+  throwIntOOB(key, true);
+}
+
+void c_Tuple::throwBadKeyType() {
+  Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+    "Only integer keys may be used with Tuples"));
+  throw e;
+}
+
+TypedValue* c_Tuple::OffsetGet(ObjectData* obj, TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  auto tup = static_cast<c_Tuple*>(obj);
+  if (key->m_type == KindOfInt64) {
+    return tup->at(key->m_data.num);
+  }
+  throwBadKeyType();
+  return NULL;
+}
+
+void c_Tuple::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
+  Object e(SystemLib::AllocRuntimeExceptionObject(
+    "Cannot assign to an element of a Tuple"));
+  throw e;
+}
+
+bool c_Tuple::OffsetIsset(ObjectData* obj, TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  auto tup = static_cast<c_Tuple*>(obj);
+  TypedValue* result;
+  if (key->m_type == KindOfInt64) {
+    result = tup->get(key->m_data.num);
+  } else {
+    throwBadKeyType();
+    result = NULL;
+  }
+  return result ? isset(tvAsCVarRef(result)) : false;
+}
+
+bool c_Tuple::OffsetEmpty(ObjectData* obj, TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  auto tup = static_cast<c_Tuple*>(obj);
+  TypedValue* result;
+  if (key->m_type == KindOfInt64) {
+    result = tup->get(key->m_data.num);
+  } else {
+    throwBadKeyType();
+    result = NULL;
+  }
+  return result ? empty(tvAsCVarRef(result)) : true;
+}
+
+bool c_Tuple::OffsetContains(ObjectData* obj, TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  auto tup = static_cast<c_Tuple*>(obj);
+  if (key->m_type == KindOfInt64) {
+    return tup->contains(key->m_data.num);
+  } else {
+    throwBadKeyType();
+    return false;
+  }
+}
+
+void c_Tuple::OffsetAppend(ObjectData* obj, TypedValue* val) {
+  assert(val->m_type != KindOfRef);
+  auto tup = static_cast<c_Tuple*>(obj);
+  tup->add(val);
+}
+
+void c_Tuple::OffsetUnset(ObjectData* obj, TypedValue* key) {
+  Object e(SystemLib::AllocRuntimeExceptionObject(
+    "Cannot unset element of a Tuple"));
+  throw e;
+}
+
+bool c_Tuple::Equals(ObjectData* obj1, ObjectData* obj2) {
+  auto tup1 = static_cast<c_Tuple*>(obj1);
+  auto tup2 = static_cast<c_Tuple*>(obj2);
+  uint sz = tup1->m_size;
+  if (sz != tup2->m_size) {
+    return false;
+  }
+  TypedValue* data1 = tup1->getData();
+  TypedValue* data2 = tup2->getData();
+  for (uint i = 0; i < sz; ++i) {
+    if (!equal(tvAsCVarRef(&data1[i]),
+               tvAsCVarRef(&data2[i]))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+c_TupleIterator::c_TupleIterator(VM::Class* cb) :
+    ExtObjectData(cb) {
+}
+
+c_TupleIterator::~c_TupleIterator() {
+}
+
+void c_TupleIterator::t___construct() {
+}
+
+Variant c_TupleIterator::t_current() {
+  c_Tuple* tup = m_obj.get();
+  if (!tup->contains(m_pos)) {
+    throw_iterator_not_valid();
+  }
+  return tvAsCVarRef(&tup->getData()[m_pos]);
+}
+
+Variant c_TupleIterator::t_key() {
+  c_Tuple* tup = m_obj.get();
+  if (!tup->contains(m_pos)) {
+    throw_iterator_not_valid();
+  }
+  return m_pos;
+}
+
+bool c_TupleIterator::t_valid() {
+  assert(m_pos >= 0);
+  c_Tuple* tup = m_obj.get();
+  return tup && (m_pos < (ssize_t)tup->m_size);
+}
+
+void c_TupleIterator::t_next() {
+  m_pos++;
+}
+
+void c_TupleIterator::t_rewind() {
+  m_pos = 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 #define COLLECTION_MAGIC_METHODS(cls) \
   String c_##cls::t___tostring() { \
     return #cls; \
@@ -2746,13 +2959,15 @@ void c_StableMapIterator::t_rewind() {
 COLLECTION_MAGIC_METHODS(Vector)
 COLLECTION_MAGIC_METHODS(Map)
 COLLECTION_MAGIC_METHODS(StableMap)
+COLLECTION_MAGIC_METHODS(Tuple)
 
 #undef COLLECTION_MAGIC_METHODS
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());
   int64_t sz = collectionSize(obj);
-  if (obj->getCollectionType() == Collection::VectorType) {
+  if (obj->getCollectionType() == Collection::VectorType ||
+      obj->getCollectionType() == Collection::TupleType) {
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
     serializer->writeArrayHeader(sz, true);
     if (serializer->getType() == VariableSerializer::Serialize ||
@@ -2830,6 +3045,9 @@ void collectionDeepCopyTV(TypedValue* tv) {
         case Collection::StableMapType:
           obj = collectionDeepCopyStableMap(static_cast<c_StableMap*>(obj));
           break;
+        case Collection::TupleType:
+          obj = collectionDeepCopyTuple(static_cast<c_Tuple*>(obj));
+          break;
         default:
           assert(false);
           obj = NULL;
@@ -2839,6 +3057,10 @@ void collectionDeepCopyTV(TypedValue* tv) {
         tv->m_data.pobj->release();
       }
       tv->m_data.pobj = obj;
+      break;
+    }
+    case KindOfRef: {
+      assert(false);
       break;
     }
     default: break;
@@ -2882,18 +3104,29 @@ ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
   return o.detach();
 }
 
-CollectionInit::CollectionInit(int cType, ssize_t nElems) {
+ObjectData* collectionDeepCopyTuple(c_Tuple* tup) {
+  Object o = tup = static_cast<c_Tuple*>(tup->clone());
+  size_t sz = tup->m_size;
+  TypedValue* data = tup->getData();
+  for (size_t i = 0; i < sz; ++i) {
+    collectionDeepCopyTV(&data[i]);
+  }
+  return o.detach();
+}
+
+CollectionInit::CollectionInit(int cType, ssize_t nElms) {
   switch (cType) {
     case Collection::VectorType: m_data = NEWOBJ(c_Vector)(); break;
     case Collection::MapType: m_data = NEWOBJ(c_Map)(); break;
     case Collection::StableMapType: m_data = NEWOBJ(c_StableMap)(); break;
+    case Collection::TupleType: m_data = c_Tuple::alloc(nElms); break;
     default:
       assert(false);
       break;
   }
-  // Reserve enough room for nElems elements in advance
-  if (nElems) {
-    collectionReserve(m_data, nElems);
+  // Reserve enough room for nElms elements in advance
+  if (nElms) {
+    collectionReserve(m_data, nElms);
   }
 }
 

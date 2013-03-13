@@ -3942,20 +3942,21 @@ inline void OPTBLD_INLINE VMExecutionContext::iopAddNewElemV(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopNewCol(PC& pc) {
   NEXT();
   DECODE_IVA(cType);
-  DECODE_IVA(nElems);
+  DECODE_IVA(nElms);
   ObjectData* obj;
   switch (cType) {
     case Collection::VectorType: obj = NEWOBJ(c_Vector)(); break;
     case Collection::MapType: obj = NEWOBJ(c_Map)(); break;
     case Collection::StableMapType: obj = NEWOBJ(c_StableMap)(); break;
+    case Collection::TupleType: obj = c_Tuple::alloc(nElms); break;
     default:
       obj = nullptr;
       raise_error("NewCol: Invalid collection type");
       break;
   }
-  // Reserve enough room for nElems elements in advance
-  if (nElems) {
-    collectionReserve(obj, nElems);
+  // Reserve enough room for nElms elements in advance
+  if (nElms) {
+    collectionReserve(obj, nElms);
   }
   m_stack.pushObject(obj);
 }

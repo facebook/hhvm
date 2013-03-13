@@ -80,19 +80,26 @@ ArrayData* new_tuple(int n, const TypedValue* values) {
 
 #define NEW_COLLECTION_HELPER(name) \
   ObjectData* \
-  new##name##Helper(int nElems) { \
+  new##name##Helper(int nElms) { \
     ObjectData *obj = NEWOBJ(c_##name)(); \
     obj->incRefCount(); \
-    if (nElems) { \
-      collectionReserve(obj, nElems); \
+    if (nElms) { \
+      collectionReserve(obj, nElms); \
     } \
-    TRACE(2, "new" #name "Helper: capacity %d\n", nElems); \
+    TRACE(2, "new" #name "Helper: capacity %d\n", nElms); \
     return obj; \
   }
 
 NEW_COLLECTION_HELPER(Vector)
 NEW_COLLECTION_HELPER(Map)
 NEW_COLLECTION_HELPER(StableMap)
+  
+ObjectData* newTupleHelper(int nElms) {
+  ObjectData *obj = c_Tuple::alloc(nElms);
+  obj->incRefCount();
+  TRACE(2, "newTupleHelper: capacity %d\n", nElms);
+  return obj;
+}
 
 #undef NEW_COLLECTION_HELPER
 
@@ -419,37 +426,58 @@ void collection_setm_wk1_v0(ObjectData* obj, TypedValue* value) {
 
 void collection_setm_ik1_v0(ObjectData* obj, int64_t key, TypedValue* value) {
   assert(obj);
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    c_Vector* vec = static_cast<c_Vector*>(obj);
-    vec->put(key, value);
-  } else if (ct == Collection::MapType) {
-    c_Map* mp = static_cast<c_Map*>(obj);
-    mp->put(key, value);
-  } else if (ct == Collection::StableMapType) {
-    c_StableMap* smp = static_cast<c_StableMap*>(obj);
-    smp->put(key, value);
-  } else {
-    assert(false);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType: {
+      c_Vector* vec = static_cast<c_Vector*>(obj);
+      vec->put(key, value);
+      break;
+    }
+    case Collection::MapType: {
+      c_Map* mp = static_cast<c_Map*>(obj);
+      mp->put(key, value);
+      break;
+    }
+    case Collection::StableMapType: {
+      c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      smp->put(key, value);
+      break;
+    }
+    case Collection::TupleType: {
+      Object e(SystemLib::AllocRuntimeExceptionObject(
+        "Cannot assign to an element of a Tuple"));
+      throw e;
+    }
+    default:
+      assert(false);
   }
   tvRefcountedDecRef(value);
 }
 
 void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
                             TypedValue* value) {
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Only integer keys may be used with Vectors"));
-    throw e;
-  } else if (ct == Collection::MapType) {
-    c_Map* mp = static_cast<c_Map*>(obj);
-    mp->put(key, value);
-  } else if (ct == Collection::StableMapType) {
-    c_StableMap* smp = static_cast<c_StableMap*>(obj);
-    smp->put(key, value);
-  } else {
-    assert(false);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType: {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Only integer keys may be used with Vectors"));
+      throw e;
+    }
+    case Collection::MapType: {
+      c_Map* mp = static_cast<c_Map*>(obj);
+      mp->put(key, value);
+      break;
+    }
+    case Collection::StableMapType: {
+      c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      smp->put(key, value);
+      break;
+    }
+    case Collection::TupleType: {
+      Object e(SystemLib::AllocRuntimeExceptionObject(
+        "Cannot assign to an element of a Tuple"));
+      throw e;
+    }
+    default:
+      assert(false);
   }
   tvRefcountedDecRef(value);
 }

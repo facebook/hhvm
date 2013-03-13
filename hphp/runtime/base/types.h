@@ -298,7 +298,8 @@ enum Type {
   VectorType = 1,
   MapType = 2,
   StableMapType = 3,
-  MaxNumTypes = 4
+  TupleType = 4,
+  MaxNumTypes = 5
 };
 }
 

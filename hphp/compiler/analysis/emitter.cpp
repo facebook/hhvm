@@ -2851,6 +2851,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             cType = Collection::MapType;
           } else if (!strcasecmp(clsName->c_str(), "stablemap")) {
             cType = Collection::StableMapType;
+          } else if (!strcasecmp(clsName->c_str(), "tuple")) {
+            cType = Collection::TupleType;
           } else {
             throw IncludeTimeFatalException(b,
               "Cannot use collection initialization for "

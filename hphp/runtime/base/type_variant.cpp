@@ -27,6 +27,7 @@
 #include <util/parser/hphp.tab.hpp>
 #include <runtime/vm/translator/translator-x64.h>
 #include <runtime/vm/runtime.h>
+#include <runtime/vm/instance.h>
 #include <system/lib/systemlib.h>
 #include <runtime/ext/ext_collections.h>
 
@@ -3260,16 +3261,6 @@ void Variant::unserialize(VariableUnserializer *uns) {
       if (sep != ':') {
         throw Exception("Expected ':' but got '%c'", sep);
       }
-
-      Object obj;
-      try {
-        obj = create_object_only(clsName);
-        obj.get()->clearNoDestruct();
-      } catch (ClassNotFoundException &e) {
-        obj = create_object_only(s_PHP_Incomplete_Class);
-        obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
-      }
-      operator=(obj);
       int64_t size = uns->readInt();
       char sep = uns->readChar();
       if (sep != ':') {
@@ -3279,9 +3270,25 @@ void Variant::unserialize(VariableUnserializer *uns) {
       if (sep != '{') {
         throw Exception("Expected '{' but got '%c'", sep);
       }
+
+      VM::Class* cls = VM::Unit::loadClass(clsName.get());
+      Object obj;
+      if (cls) {
+        if (LIKELY(cls != c_Tuple::s_cls)) {
+          obj = VM::Instance::newInstance(cls);
+        } else {
+          obj = c_Tuple::alloc(size);
+        }
+      } else {
+        obj = VM::Instance::newInstance(
+          SystemLib::s___PHP_Incomplete_ClassClass);
+        obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
+      }
+      operator=(obj);
+
       if (size > 0) {
         if (type == 'O') {
-          // Collection are not allowed
+          // Collections are not allowed
           if (obj->isCollection()) {
             if (size > 0) {
               throw Exception("%s does not support the 'O' serialization "

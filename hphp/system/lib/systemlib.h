@@ -59,6 +59,7 @@ namespace Eval {
   x(JsonSerializable)                           \
   x(Traversable)                                \
   x(Countable)                                  \
+  x(__PHP_Incomplete_Class)                     \
 
 class SystemLib {
  public:

@@ -227,7 +227,6 @@ DefineFunction(
     ),
   ));
 
-
 DefineFunction(
   array(
     'name'   => "contains",
@@ -1550,6 +1549,179 @@ BeginClass(
     'name'   => "StableMapIterator",
     'ifaces' => array('KeyedIterator'),
     'desc'   => "An iterator implementation for iterating over a StableMap.",
+    'flags'  =>  IsFinal | HasDocComment,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__construct",
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "current",
+    'desc'   => "Returns the current value that the iterator points to.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "key",
+    'desc'   => "Returns the current key that the iterator points to.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "valid",
+    'desc'   => "Returns true if the iterator points to a valid value, ".
+                "returns false otherwise.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "next",
+    'desc'   => "Advance this iterator forward one position.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "rewind",
+    'desc'   => "Move this iterator back to the first position.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+EndClass(
+);
+
+///////////////////////////////////////////////////////////////////////////////
+
+BeginClass(
+  array(
+    'name'   => "Tuple",
+    'ifaces' => array('KeyedIterable', 'Countable'),
+    'desc'   => "An ordered fixed-sized container.",
+    'flags'  =>  IsFinal | HasDocComment,
+    'footer' => <<<EOT
+
+ private:
+  int size;
+  int capacity;
+EOT
+,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__construct",
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "isEmpty",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns true if this Tuple is empty, false otherwise.",
+    'return' => array(
+      'type'   => Boolean,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "count",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns the number of values in the Tuple.",
+    'return' => array(
+      'type'   => Int64,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "toArray",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an array containing the values from this Tuple.",
+    'return' => array(
+      'type'   => VariantMap,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "getIterator",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an iterator that points to beginning of this ".
+                "Tuple.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "at",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns the value at the specified key. If the key is ".
+                "not present, an exception is thrown.",
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "get",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns the value at the specified key. If the key is ".
+                "not present, null is returned.",
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+EndClass(
+);
+
+BeginClass(
+  array(
+    'name'   => "TupleIterator",
+    'ifaces' => array('KeyedIterator'),
+    'desc'   => "An iterator implementation for iterating over a Tuple.",
     'flags'  =>  IsFinal | HasDocComment,
   ));
 

@@ -3952,6 +3952,504 @@ TypedValue* tg_17StableMapIterator_rewind(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
+HPHP::VM::Instance* new_Tuple_Instance(HPHP::VM::Class* cls) {
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_Tuple) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_Tuple(cls);
+  return inst;
+}
+
+IMPLEMENT_CLASS(Tuple);
+/*
+void HPHP::c_Tuple::t___construct()
+_ZN4HPHP7c_Tuple13t___constructEv
+
+this_ => rdi
+*/
+
+void th_5Tuple___construct(ObjectData* this_) asm("_ZN4HPHP7c_Tuple13t___constructEv");
+
+TypedValue* tg_5Tuple___construct(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_data.num = 0LL;
+        rv.m_type = KindOfNull;
+        th_5Tuple___construct((this_));
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Tuple::__construct", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Tuple::__construct");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+bool HPHP::c_Tuple::t_isempty()
+_ZN4HPHP7c_Tuple9t_isemptyEv
+
+(return value) => rax
+this_ => rdi
+*/
+
+bool th_5Tuple_isEmpty(ObjectData* this_) asm("_ZN4HPHP7c_Tuple9t_isemptyEv");
+
+TypedValue* tg_5Tuple_isEmpty(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_5Tuple_isEmpty((this_))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Tuple::isEmpty", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Tuple::isEmpty");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+long HPHP::c_Tuple::t_count()
+_ZN4HPHP7c_Tuple7t_countEv
+
+(return value) => rax
+this_ => rdi
+*/
+
+long th_5Tuple_count(ObjectData* this_) asm("_ZN4HPHP7c_Tuple7t_countEv");
+
+TypedValue* tg_5Tuple_count(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfInt64;
+        rv.m_data.num = (int64_t)th_5Tuple_count((this_));
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Tuple::count", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Tuple::count");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Array HPHP::c_Tuple::t_toarray()
+_ZN4HPHP7c_Tuple9t_toarrayEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_5Tuple_toArray(Value* _rv, ObjectData* this_) asm("_ZN4HPHP7c_Tuple9t_toarrayEv");
+
+TypedValue* tg_5Tuple_toArray(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfArray;
+        th_5Tuple_toArray((Value*)(&(rv)), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Tuple::toArray", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Tuple::toArray");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Tuple::t_getiterator()
+_ZN4HPHP7c_Tuple13t_getiteratorEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_5Tuple_getIterator(Value* _rv, ObjectData* this_) asm("_ZN4HPHP7c_Tuple13t_getiteratorEv");
+
+TypedValue* tg_5Tuple_getIterator(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_5Tuple_getIterator((Value*)(&(rv)), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Tuple::getIterator", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Tuple::getIterator");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Variant HPHP::c_Tuple::t_at(HPHP::Variant const&)
+_ZN4HPHP7c_Tuple4t_atERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+key => rdx
+*/
+
+TypedValue* th_5Tuple_at(TypedValue* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4HPHP7c_Tuple4t_atERKNS_7VariantE");
+
+TypedValue* tg_5Tuple_at(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        th_5Tuple_at((&(rv)), (this_), (args-0));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Tuple::at", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Tuple::at");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Variant HPHP::c_Tuple::t_get(HPHP::Variant const&)
+_ZN4HPHP7c_Tuple5t_getERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+key => rdx
+*/
+
+TypedValue* th_5Tuple_get(TypedValue* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4HPHP7c_Tuple5t_getERKNS_7VariantE");
+
+TypedValue* tg_5Tuple_get(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        th_5Tuple_get((&(rv)), (this_), (args-0));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Tuple::get", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Tuple::get");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+HPHP::VM::Instance* new_TupleIterator_Instance(HPHP::VM::Class* cls) {
+  size_t nProps = cls->numDeclProperties();
+  size_t builtinPropSize = sizeof(c_TupleIterator) - sizeof(ObjectData);
+  size_t size = HPHP::VM::Instance::sizeForNProps(nProps) + builtinPropSize;
+  HPHP::VM::Instance *inst = (HPHP::VM::Instance*)ALLOCOBJSZ(size);
+  new ((void *)inst) c_TupleIterator(cls);
+  return inst;
+}
+
+IMPLEMENT_CLASS(TupleIterator);
+/*
+void HPHP::c_TupleIterator::t___construct()
+_ZN4HPHP15c_TupleIterator13t___constructEv
+
+this_ => rdi
+*/
+
+void th_13TupleIterator___construct(ObjectData* this_) asm("_ZN4HPHP15c_TupleIterator13t___constructEv");
+
+TypedValue* tg_13TupleIterator___construct(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_data.num = 0LL;
+        rv.m_type = KindOfNull;
+        th_13TupleIterator___construct((this_));
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("TupleIterator::__construct", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("TupleIterator::__construct");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Variant HPHP::c_TupleIterator::t_current()
+_ZN4HPHP15c_TupleIterator9t_currentEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+TypedValue* th_13TupleIterator_current(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP15c_TupleIterator9t_currentEv");
+
+TypedValue* tg_13TupleIterator_current(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        th_13TupleIterator_current((&(rv)), (this_));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("TupleIterator::current", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("TupleIterator::current");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Variant HPHP::c_TupleIterator::t_key()
+_ZN4HPHP15c_TupleIterator5t_keyEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+TypedValue* th_13TupleIterator_key(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP15c_TupleIterator5t_keyEv");
+
+TypedValue* tg_13TupleIterator_key(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        th_13TupleIterator_key((&(rv)), (this_));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("TupleIterator::key", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("TupleIterator::key");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+bool HPHP::c_TupleIterator::t_valid()
+_ZN4HPHP15c_TupleIterator7t_validEv
+
+(return value) => rax
+this_ => rdi
+*/
+
+bool th_13TupleIterator_valid(ObjectData* this_) asm("_ZN4HPHP15c_TupleIterator7t_validEv");
+
+TypedValue* tg_13TupleIterator_valid(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_13TupleIterator_valid((this_))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("TupleIterator::valid", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("TupleIterator::valid");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+void HPHP::c_TupleIterator::t_next()
+_ZN4HPHP15c_TupleIterator6t_nextEv
+
+this_ => rdi
+*/
+
+void th_13TupleIterator_next(ObjectData* this_) asm("_ZN4HPHP15c_TupleIterator6t_nextEv");
+
+TypedValue* tg_13TupleIterator_next(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_data.num = 0LL;
+        rv.m_type = KindOfNull;
+        th_13TupleIterator_next((this_));
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("TupleIterator::next", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("TupleIterator::next");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+void HPHP::c_TupleIterator::t_rewind()
+_ZN4HPHP15c_TupleIterator8t_rewindEv
+
+this_ => rdi
+*/
+
+void th_13TupleIterator_rewind(ObjectData* this_) asm("_ZN4HPHP15c_TupleIterator8t_rewindEv");
+
+TypedValue* tg_13TupleIterator_rewind(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_data.num = 0LL;
+        rv.m_type = KindOfNull;
+        th_13TupleIterator_rewind((this_));
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("TupleIterator::rewind", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("TupleIterator::rewind");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
 
 } // !HPHP
 

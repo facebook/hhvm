@@ -30,6 +30,7 @@ struct TypedValue;
 class c_Vector;
 class c_Map;
 class c_StableMap;
+class c_Tuple;
 namespace VM {
   struct Iter;
 }
@@ -129,7 +130,7 @@ class ArrayIter {
     return firstHelper();
   }
   Variant second();
-  void second(Variant &v) {
+  void second(Variant& v) {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
       assert(ad);
@@ -155,24 +156,13 @@ class ArrayIter {
   bool hasArrayData() {
     return !((intptr_t)m_data & 1);
   }
+  bool hasCollection() {
+    return (!hasArrayData() && getObject()->isCollection());
+  }
+  bool hasIteratorObj() {
+    return (!hasArrayData() && !getObject()->isCollection());
+  }
 
- private:
-  bool hasVector() {
-    return (!hasArrayData() &&
-            getRawObject()->getCollectionType() == Collection::VectorType);
-  }
-  bool hasMap() {
-    return (!hasArrayData() &&
-            getRawObject()->getCollectionType() == Collection::MapType);
-  }
-  bool hasStableMap() {
-    return (!hasArrayData() &&
-            getRawObject()->getCollectionType() == Collection::StableMapType);
-  }
-  bool hasObject() {
-    return (!hasArrayData() &&
-            getRawObject()->getCollectionType() == Collection::InvalidType);
-  }
  public:
   const ArrayData* getArrayData() {
     assert(hasArrayData());
@@ -190,26 +180,35 @@ class ArrayIter {
   void setIterType(Type iterType) {
     m_itype = iterType;
   }
+
  private:
   c_Vector* getVector() {
-    assert(hasVector());
+    assert(hasCollection() && getCollectionType() == Collection::VectorType);
     return (c_Vector*)((intptr_t)m_obj & ~1);
   }
   c_Map* getMap() {
-    assert(hasMap());
+    assert(hasCollection() && getCollectionType() == Collection::MapType);
     return (c_Map*)((intptr_t)m_obj & ~1);
   }
   c_StableMap* getStableMap() {
-    assert(hasStableMap());
+    assert(hasCollection() && getCollectionType() == Collection::StableMapType);
     return (c_StableMap*)((intptr_t)m_obj & ~1);
   }
-  ObjectData* getObject() {
-    assert(hasObject());
-    return (ObjectData*)((intptr_t)m_obj & ~1);
+  c_Tuple* getTuple() {
+    assert(hasCollection() && getCollectionType() == Collection::TupleType);
+    return (c_Tuple*)((intptr_t)m_obj & ~1);
   }
-  ObjectData* getRawObject() {
+  ObjectData* getObject() {
     assert(!hasArrayData());
     return (ObjectData*)((intptr_t)m_obj & ~1);
+  }
+  Collection::Type getCollectionType() {
+    ObjectData* obj = getObject();
+    return obj->getCollectionType();
+  }
+  ObjectData* getIteratorObj() {
+    assert(hasIteratorObj());
+    return getObject();
   }
 
   void setArrayData(const ArrayData* ad) {
@@ -224,7 +223,7 @@ class ArrayIter {
   bool endHelper();
   void nextHelper();
   Variant firstHelper();
-  void secondHelper(Variant &v);
+  void secondHelper(Variant& v);
 
   union {
     const ArrayData* m_data;

@@ -78,6 +78,7 @@ class ObjectData : public CountableNF {
     VectorAttrInit = (Collection::VectorType << 13),
     MapAttrInit = (Collection::MapType << 13),
     StableMapAttrInit = (Collection::StableMapType << 13),
+    TupleAttrInit = (Collection::TupleType << 13),
   };
 
   enum {
@@ -114,9 +115,9 @@ class ObjectData : public CountableNF {
   bool isCollection() const {
     return getCollectionType() != Collection::InvalidType;
   }
-  int getCollectionType() const {
+  Collection::Type getCollectionType() const {
     // Return the upper 3 bits of o_attribute
-    return (int)(o_attribute >> 13) & 7;
+    return (Collection::Type)((uint16_t)(o_attribute >> 13) & 7);
   }
   bool supportsUnsetElem() const {
     return isCollection() || instanceof(SystemLib::s_ArrayAccessClass);

@@ -5374,12 +5374,14 @@ TranslatorX64::translateNewCol(const Tracelet& t,
     case Collection::VectorType: fptr = (void*)newVectorHelper; break;
     case Collection::MapType: fptr = (void*)newMapHelper; break;
     case Collection::StableMapType: fptr = (void*)newStableMapHelper; break;
+    case Collection::TupleType: fptr = (void*)newTupleHelper; break;
     default: assert(false); break;
   }
   if (false) {
     ObjectData* obj1 UNUSED = newVectorHelper(42);
     ObjectData* obj2 UNUSED = newMapHelper(42);
     ObjectData* obj3 UNUSED = newStableMapHelper(42);
+    ObjectData* obj4 UNUSED = newTupleHelper(42);
   }
   EMIT_CALL(a, fptr, IMM(nElems));
   m_regMap.bind(rax, i.outStack->location, KindOfObject, RegInfo::DIRTY);

@@ -46,7 +46,6 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: ~c_Vector();
   public: void freeData();
   public: void t___construct(CVarRef iterable = null_variant);
-  public: Variant t___destruct();
   public: Object t_add(CVarRef val);
   public: Object t_append(CVarRef val);
   public: Variant t_pop();
@@ -219,7 +218,6 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: ~c_Map();
   public: void freeData();
   public: void t___construct(CVarRef iterable = null_variant);
-  public: Variant t___destruct();
   public: Object t_clear();
   public: bool t_isempty();
   public: int64_t t_count();
@@ -507,7 +505,6 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: ~c_StableMap();
   public: void freeData();
   public: void t___construct(CVarRef iterable = null_variant);
-  public: Variant t___destruct();
   public: Object t_clear();
   public: bool t_isempty();
   public: int64_t t_count();
@@ -734,21 +731,153 @@ class c_StableMapIterator : public ExtObjectData {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// class Tuple
 
-// Helpers for hhvm
+FORWARD_DECLARE_CLASS_BUILTIN(Tuple);
+class c_Tuple : public ExtObjectDataFlags<ObjectData::TupleAttrInit|
+                                          ObjectData::UseGet|
+                                          ObjectData::UseSet|
+                                          ObjectData::UseIsset|
+                                          ObjectData::UseUnset> {
+ public:
+  DECLARE_CLASS_NO_ALLOCATION(Tuple, Tuple, ObjectData)
+  virtual void sweep();
+  void operator delete(void* p) {
+    c_Tuple* this_ = (c_Tuple*)p;
+    DELETEOBJSZ(sizeForNumElms(this_->m_capacity))(this_);
+  }
+
+  friend class c_TupleIterator;
+  friend class c_Vector;
+  friend class c_Map;
+  friend class c_StableMap;
+  friend class ArrayIter;
+
+  public: c_Tuple(VM::Class* cls = c_Tuple::s_cls);
+  public: ~c_Tuple();
+  public: void t___construct();
+  public: bool t_isempty();
+  public: int64_t t_count();
+  public: Variant t_at(CVarRef key);
+  public: Variant t_get(CVarRef key);
+  public: Array t_toarray();
+  public: Object t_getiterator();
+  public: String t___tostring();
+  public: Variant t___get(Variant name);
+  public: Variant t___set(Variant name, Variant value);
+  public: bool t___isset(Variant name);
+  public: Variant t___unset(Variant name);
+
+  public: static void throwOOB(int64_t key) ATTRIBUTE_COLD;
+
+  public: TypedValue* at(int64_t key) {
+    if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
+      throwOOB(key);
+      return NULL;
+    }
+    return &getData()[key];
+  }
+  public: TypedValue* get(int64_t key) {
+    if ((uint64_t)key >= (uint64_t)m_size) {
+      return NULL;
+    }
+    return &getData()[key];
+  }
+  public: void add(TypedValue* val) {
+    assert(val->m_type != KindOfRef);
+    if (m_size == m_capacity) {
+      Object e(SystemLib::AllocRuntimeExceptionObject(
+        "Cannot add a new element to a Tuple"));
+      throw e;
+    }
+    tvRefcountedIncRef(val);
+    TypedValue* tv = &getData()[m_size];
+    tv->m_data.num = val->m_data.num;
+    tv->m_type = val->m_type;
+    ++m_size;
+  }
+  public: bool contains(int64_t key) {
+    return ((uint64_t)key < (uint64_t)m_size);
+  }
+
+  public: Array toArrayImpl() const;
+
+  public: Array o_toArray() const;
+  public: ObjectData* clone();
+
+  public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
+  public: static void OffsetSet(ObjectData* obj, TypedValue* key,
+                                TypedValue* val);
+  public: static bool OffsetIsset(ObjectData* obj, TypedValue* key);
+  public: static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
+  public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
+  public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  
+  public: static size_t sizeForNumElms(int nElms) {
+    return sizeof(c_Tuple) + sizeof(TypedValue) * nElms;
+  }
+  
+  public: static c_Tuple* alloc(int nElms) {
+    c_Tuple* tup = (c_Tuple*)ALLOCOBJSZ(sizeForNumElms(nElms));
+    new ((void *)tup) c_Tuple();
+    tup->m_capacity = nElms;
+    return tup;
+  }
+
+ private:
+  static void throwBadKeyType();
+
+  uint m_size;
+  uint m_capacity;
+  TypedValue* getData() const {
+    return (TypedValue*)(this+1);
+  }
+
+  friend ObjectData* collectionDeepCopyTuple(c_Tuple* tup);
+} __attribute__((aligned(16)));
+
+///////////////////////////////////////////////////////////////////////////////
+// class TupleIterator
+
+FORWARD_DECLARE_CLASS_BUILTIN(TupleIterator);
+class c_TupleIterator : public ExtObjectData {
+ public:
+  DECLARE_CLASS(TupleIterator, TupleIterator, ObjectData)
+  friend class c_Tuple;
+
+  // need to implement
+  public: c_TupleIterator(VM::Class* cls = c_TupleIterator::s_cls);
+  public: ~c_TupleIterator();
+  public: void t___construct();
+  public: Variant t_current();
+  public: Variant t_key();
+  public: bool t_valid();
+  public: void t_next();
+  public: void t_rewind();
+
+ private:
+  SmartPtr<c_Tuple> m_obj;
+  ssize_t m_pos;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 
 inline TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    return c_Vector::OffsetGet(obj, key);
-  } else if (ct == Collection::MapType) {
-    return c_Map::OffsetGet(obj, key);
-  } else if (ct == Collection::StableMapType) {
-    return c_StableMap::OffsetGet(obj, key);
-  } else {
-    assert(false);
-    return NULL;
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      return c_Vector::OffsetGet(obj, key);
+    case Collection::MapType:
+      return c_Map::OffsetGet(obj, key);
+    case Collection::StableMapType:
+      return c_StableMap::OffsetGet(obj, key);
+    case Collection::TupleType:
+      return c_Tuple::OffsetGet(obj, key);
+    default:
+      assert(false);
+      return NULL;
   }
 }
 
@@ -756,113 +885,147 @@ inline void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   assert(key->m_type != KindOfRef);
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    c_Vector::OffsetSet(obj, key, val);
-  } else if (ct == Collection::MapType) {
-    c_Map::OffsetSet(obj, key, val);
-  } else if (ct == Collection::StableMapType) {
-    c_StableMap::OffsetSet(obj, key, val);
-  } else {
-    assert(false);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      c_Vector::OffsetSet(obj, key, val);
+      break;
+    case Collection::MapType:
+      c_Map::OffsetSet(obj, key, val);
+      break;
+    case Collection::StableMapType:
+      c_StableMap::OffsetSet(obj, key, val);
+      break;
+    case Collection::TupleType:
+      c_Tuple::OffsetSet(obj, key, val);
+      break;
+    default:
+      assert(false);
   }
 }
 
 inline bool collectionIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    return c_Vector::OffsetIsset(obj, key);
-  } else if (ct == Collection::MapType) {
-    return c_Map::OffsetIsset(obj, key);
-  } else if (ct == Collection::StableMapType) {
-    return c_StableMap::OffsetIsset(obj, key);
-  } else {
-    assert(false);
-    return false;
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      return c_Vector::OffsetIsset(obj, key);
+    case Collection::MapType:
+      return c_Map::OffsetIsset(obj, key);
+    case Collection::StableMapType:
+      return c_StableMap::OffsetIsset(obj, key);
+    case Collection::TupleType:
+      return c_Tuple::OffsetIsset(obj, key);
+    default: 
+      assert(false);
+      return false;
   }
 }
 
 inline bool collectionEmpty(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    return c_Vector::OffsetEmpty(obj, key);
-  } else if (ct == Collection::MapType) {
-    return c_Map::OffsetEmpty(obj, key);
-  } else if (ct == Collection::StableMapType) {
-    return c_StableMap::OffsetEmpty(obj, key);
-  } else {
-    assert(false);
-    return true;
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      return c_Vector::OffsetEmpty(obj, key);
+    case Collection::MapType:
+      return c_Map::OffsetEmpty(obj, key);
+    case Collection::StableMapType:
+      return c_StableMap::OffsetEmpty(obj, key);
+    case Collection::TupleType:
+      return c_Tuple::OffsetEmpty(obj, key);
+    default: 
+      assert(false);
+      return false;
   }
 }
 
 inline void collectionUnset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    c_Vector::OffsetUnset(obj, key);
-  } else if (ct == Collection::MapType) {
-    c_Map::OffsetUnset(obj, key);
-  } else if (ct == Collection::StableMapType) {
-    c_StableMap::OffsetUnset(obj, key);
-  } else {
-    assert(false);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      c_Vector::OffsetUnset(obj, key);
+      break;
+    case Collection::MapType:
+      c_Map::OffsetUnset(obj, key);
+      break;
+    case Collection::StableMapType:
+      c_StableMap::OffsetUnset(obj, key);
+      break;
+    case Collection::TupleType:
+      c_Tuple::OffsetUnset(obj, key);
+      break;
+    default: 
+      assert(false);
   }
 }
 
 inline void collectionAppend(ObjectData* obj, TypedValue* val) {
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    c_Vector::OffsetAppend(obj, val);
-  } else if (ct == Collection::MapType) {
-    c_Map::OffsetAppend(obj, val);
-  } else if (ct == Collection::StableMapType) {
-    c_StableMap::OffsetAppend(obj, val);
-  } else {
-    assert(false);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      c_Vector::OffsetAppend(obj, val);
+      break;
+    case Collection::MapType:
+      c_Map::OffsetAppend(obj, val);
+      break;
+    case Collection::StableMapType:
+      c_StableMap::OffsetAppend(obj, val);
+      break;
+    case Collection::TupleType:
+      c_Tuple::OffsetAppend(obj, val);
+      break;
+    default:
+      assert(false);
   }
 }
 
-// Helpers for hphpc
-
 inline Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    c_Vector* vec = static_cast<c_Vector*>(obj);
-    return *(Variant*)(vec->at(offset));
-  } else if (ct == Collection::MapType) {
-    c_Map* mp = static_cast<c_Map*>(obj);
-    return *(Variant*)(mp->at(offset));
-  } else if (ct == Collection::StableMapType) {
-    c_StableMap* smp = static_cast<c_StableMap*>(obj);
-    return *(Variant*)(smp->at(offset));
-  } else {
-    assert(false);
-    return *(Variant*)(NULL);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType: {
+      c_Vector* vec = static_cast<c_Vector*>(obj);
+      return *(Variant*)(vec->at(offset));
+    }
+    case Collection::MapType: {
+      c_Map* mp = static_cast<c_Map*>(obj);
+      return *(Variant*)(mp->at(offset));
+    }
+    case Collection::StableMapType: {
+      c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      return *(Variant*)(smp->at(offset));
+    }
+    case Collection::TupleType: {
+      c_Tuple* tup = static_cast<c_Tuple*>(obj);
+      return *(Variant*)(tup->at(offset));
+    }
+    default:
+      assert(false);
+      return *(Variant*)(NULL);
   }
 }
 
 inline Variant& collectionOffsetGet(ObjectData* obj, CStrRef offset) {
   StringData* key = offset.get();
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Only integer keys may be used with Vectors"));
-    throw e;
-    return *(Variant*)(NULL);
-  } else if (ct == Collection::MapType) {
-    c_Map* mp = static_cast<c_Map*>(obj);
-    return *(Variant*)(mp->at(key));
-  } else if (ct == Collection::StableMapType) {
-    c_StableMap* smp = static_cast<c_StableMap*>(obj);
-    return *(Variant*)(smp->at(key));
-  } else {
-    assert(false);
-    return *(Variant*)(NULL);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType: {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Only integer keys may be used with Vectors"));
+      throw e;
+    }
+    case Collection::MapType: {
+      c_Map* mp = static_cast<c_Map*>(obj);
+      return *(Variant*)(mp->at(key));
+    }
+    case Collection::StableMapType: {
+      c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      return *(Variant*)(smp->at(key));
+    }
+    case Collection::TupleType: {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Only integer keys may be used with Tuples"));
+      throw e;
+    }
+    default:
+      assert(false);
+      return *(Variant*)(NULL);
   }
 }
 
@@ -871,16 +1034,18 @@ inline Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
   if (key->m_type == KindOfRef) {
     key = key->m_data.pref->tv();
   }
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    return *(Variant*)(c_Vector::OffsetGet(obj, key));
-  } else if (ct == Collection::MapType) {
-    return *(Variant*)(c_Map::OffsetGet(obj, key));
-  } else if (ct == Collection::StableMapType) {
-    return *(Variant*)(c_StableMap::OffsetGet(obj, key));
-  } else {
-    assert(false);
-    return *(Variant*)(NULL);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      return *(Variant*)(c_Vector::OffsetGet(obj, key));
+    case Collection::MapType:
+      return *(Variant*)(c_Map::OffsetGet(obj, key));
+    case Collection::StableMapType:
+      return *(Variant*)(c_StableMap::OffsetGet(obj, key));
+    case Collection::TupleType:
+      return *(Variant*)(c_Tuple::OffsetGet(obj, key));
+    default:
+      assert(false);
+      return *(Variant*)(NULL);
   }
 }
 
@@ -904,18 +1069,29 @@ inline void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
     tv = (TypedValue*)(&init_null_variant);
   }
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    c_Vector* vec = static_cast<c_Vector*>(obj);
-    vec->put(offset, tv);
-  } else if (ct == Collection::MapType) {
-    c_Map* mp = static_cast<c_Map*>(obj);
-    mp->put(offset, tv);
-  } else if (ct == Collection::StableMapType) {
-    c_StableMap* smp = static_cast<c_StableMap*>(obj);
-    smp->put(offset, tv);
-  } else {
-    assert(false);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType: {
+      c_Vector* vec = static_cast<c_Vector*>(obj);
+      vec->put(offset, tv);
+      break;
+    }
+    case Collection::MapType: {
+      c_Map* mp = static_cast<c_Map*>(obj);
+      mp->put(offset, tv);
+      break;
+    }
+    case Collection::StableMapType: {
+      c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      smp->put(offset, tv);
+      break;
+    }
+    case Collection::TupleType: {
+      Object e(SystemLib::AllocRuntimeExceptionObject(
+        "Cannot assign to an element of a Tuple"));
+      throw e;
+    }
+    default:
+      assert(false);
   }
 }
 
@@ -928,19 +1104,29 @@ inline void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val) {
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
     tv = (TypedValue*)(&init_null_variant);
   }
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Only integer keys may be used with Vectors"));
-    throw e;
-  } else if (ct == Collection::MapType) {
-    c_Map* mp = static_cast<c_Map*>(obj);
-    mp->put(key, tv);
-  } else if (ct == Collection::StableMapType) {
-    c_StableMap* smp = static_cast<c_StableMap*>(obj);
-    smp->put(key, tv);
-  } else {
-    assert(false);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType: {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Only integer keys may be used with Vectors"));
+      throw e;
+    }
+    case Collection::MapType: {
+      c_Map* mp = static_cast<c_Map*>(obj);
+      mp->put(key, tv);
+      break;
+    }
+    case Collection::StableMapType: {
+      c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      smp->put(key, tv);
+      break;
+    }
+    case Collection::TupleType: {
+      Object e(SystemLib::AllocRuntimeExceptionObject(
+        "Cannot assign to an element of a Tuple"));
+      throw e;
+    }
+    default:
+      assert(false);
   }
 }
 
@@ -956,15 +1142,25 @@ inline void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
     tv = (TypedValue*)(&init_null_variant);
   }
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    c_Vector::OffsetSet(obj, key, tv);
-  } else if (ct == Collection::MapType) {
-    c_Map::OffsetSet(obj, key, tv);
-  } else if (ct == Collection::StableMapType) {
-    c_StableMap::OffsetSet(obj, key, tv);
-  } else {
-    assert(false);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType: {
+      c_Vector::OffsetSet(obj, key, tv);
+      break;
+    }
+    case Collection::MapType: {
+      c_Map::OffsetSet(obj, key, tv);
+      break;
+    }
+    case Collection::StableMapType: {
+      c_StableMap::OffsetSet(obj, key, tv);
+      break;
+    }
+    case Collection::TupleType: {
+      c_Tuple::OffsetSet(obj, key, tv);
+      break;
+    }
+    default:
+      assert(false);
   }
 }
 
@@ -985,16 +1181,18 @@ inline bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
   if (key->m_type == KindOfRef) {
     key = key->m_data.pref->tv();
   }
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    return c_Vector::OffsetContains(obj, key);
-  } else if (ct == Collection::MapType) {
-    return c_Map::OffsetContains(obj, key);
-  } else if (ct == Collection::StableMapType) {
-    return c_StableMap::OffsetContains(obj, key);
-  } else {
-    assert(false);
-    return false;
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      return c_Vector::OffsetContains(obj, key);
+    case Collection::MapType:
+      return c_Map::OffsetContains(obj, key);
+    case Collection::StableMapType:
+      return c_StableMap::OffsetContains(obj, key);
+    case Collection::TupleType:
+      return c_Tuple::OffsetContains(obj, key);
+    default:
+      assert(false);
+      return false;
   }
 }
 
@@ -1003,16 +1201,18 @@ inline bool collectionOffsetIsset(ObjectData* obj, CVarRef offset) {
   if (key->m_type == KindOfRef) {
     key = key->m_data.pref->tv();
   }
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    return c_Vector::OffsetIsset(obj, key);
-  } else if (ct == Collection::MapType) {
-    return c_Map::OffsetIsset(obj, key);
-  } else if (ct == Collection::StableMapType) {
-    return c_StableMap::OffsetIsset(obj, key);
-  } else {
-    assert(false);
-    return false;
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      return c_Vector::OffsetIsset(obj, key);
+    case Collection::MapType:
+      return c_Map::OffsetIsset(obj, key);
+    case Collection::StableMapType:
+      return c_StableMap::OffsetIsset(obj, key);
+    case Collection::TupleType:
+      return c_Tuple::OffsetIsset(obj, key);
+    default:
+      assert(false);
+      return false;
   }
 }
 
@@ -1021,16 +1221,18 @@ inline bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset) {
   if (key->m_type == KindOfRef) {
     key = key->m_data.pref->tv();
   }
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    return c_Vector::OffsetEmpty(obj, key);
-  } else if (ct == Collection::MapType) {
-    return c_Map::OffsetEmpty(obj, key);
-  } else if (ct == Collection::StableMapType) {
-    return c_StableMap::OffsetEmpty(obj, key);
-  } else {
-    assert(false);
-    return true;
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      return c_Vector::OffsetEmpty(obj, key);
+    case Collection::MapType:
+      return c_Map::OffsetEmpty(obj, key);
+    case Collection::StableMapType:
+      return c_StableMap::OffsetEmpty(obj, key);
+    case Collection::TupleType:
+      return c_Tuple::OffsetEmpty(obj, key);
+    default:
+      assert(false);
+      return true;
   }
 }
 
@@ -1054,29 +1256,37 @@ inline void collectionOffsetAppend(ObjectData* obj, CVarRef val) {
 }
 
 inline int64_t collectionSize(ObjectData* obj) {
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    return static_cast<c_Vector*>(obj)->t_count();
-  } else if (ct == Collection::MapType) {
-    return static_cast<c_Map*>(obj)->t_count();
-  } else if (ct == Collection::StableMapType) {
-    return static_cast<c_StableMap*>(obj)->t_count();
-  } else {
-    assert(false);
-    return 0;
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      return static_cast<c_Vector*>(obj)->t_count();
+    case Collection::MapType:
+      return static_cast<c_Map*>(obj)->t_count();
+    case Collection::StableMapType:
+      return static_cast<c_StableMap*>(obj)->t_count();
+    case Collection::TupleType:
+      return static_cast<c_Tuple*>(obj)->t_count();
+    default:
+      assert(false);
+      return 0;
   }
 }
 
 inline void collectionReserve(ObjectData* obj, int64_t sz) {
-  int ct = obj->getCollectionType();
-  if (ct == Collection::VectorType) {
-    static_cast<c_Vector*>(obj)->reserve(sz);
-  } else if (ct == Collection::MapType) {
-    static_cast<c_Map*>(obj)->reserve(sz);
-  } else if (ct == Collection::StableMapType) {
-    static_cast<c_StableMap*>(obj)->reserve(sz);
-  } else {
-    assert(false);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      static_cast<c_Vector*>(obj)->reserve(sz);
+      break;
+    case Collection::MapType:
+      static_cast<c_Map*>(obj)->reserve(sz);
+      break;
+    case Collection::StableMapType:
+      static_cast<c_StableMap*>(obj)->reserve(sz);
+      break;
+    case Collection::TupleType:
+      // do nothing
+      break;
+    default:
+      assert(false);
   }
 }
 
@@ -1089,26 +1299,31 @@ void collectionUnserialize(ObjectData* obj,
 inline bool collectionEquals(ObjectData* obj1, ObjectData* obj2) {
   int ct = obj1->getCollectionType();
   assert(ct == obj2->getCollectionType());
-  if (ct == Collection::VectorType) {
-    return c_Vector::Equals(obj1, obj2);
-  } else if (ct == Collection::MapType) {
-    return c_Map::Equals(obj1, obj2);
-  } else if (ct == Collection::StableMapType) {
-    return c_StableMap::Equals(obj1, obj2);
+  switch (ct) {
+    case Collection::VectorType:
+      return c_Vector::Equals(obj1, obj2);
+    case Collection::MapType:
+      return c_Map::Equals(obj1, obj2);
+    case Collection::StableMapType:
+      return c_StableMap::Equals(obj1, obj2);
+    case Collection::TupleType:
+      return c_Tuple::Equals(obj1, obj2);
+    default:
+      assert(false);
+      return false;
   }
-  assert(false);
-  return false;
 }
 
 void collectionDeepCopyTV(TypedValue* tv);
 ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);
-ObjectData* collectionDeepCopyMap(c_Map* vec);
-ObjectData* collectionDeepCopyStableMap(c_StableMap* vec);
+ObjectData* collectionDeepCopyMap(c_Map* mp);
+ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
+ObjectData* collectionDeepCopyTuple(c_Tuple* tup);
 
 class CollectionInit {
 public:
-  CollectionInit(int cType, ssize_t nElems);
+  CollectionInit(int cType, ssize_t nElms);
   ~CollectionInit() {
     // In case an exception interrupts the initialization.
     if (m_data) m_data->release();
@@ -1174,6 +1389,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // __EXT_COLLECTION_H__

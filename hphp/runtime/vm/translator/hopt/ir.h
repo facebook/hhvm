@@ -1601,8 +1601,8 @@ public:
    *    getInstruction()->getOpcode() == LdConst)
    */
   bool               getValBool() const;
-  int64_t              getValInt() const;
-  int64_t              getValRawInt() const;
+  int64_t            getValInt() const;
+  int64_t            getValRawInt() const;
   double             getValDbl() const;
   const StringData*  getValStr() const;
   const ArrayData*   getValArr() const;

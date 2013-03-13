@@ -58,35 +58,64 @@ static void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
   }
 }
 
-// If main trace ends with a conditional jump with no side-effects on exit,
-// hook it to the exitTrace and make it a TraceExitType::NormalCc
+/**
+ * If main trace ends with a conditional jump with no side-effects on exit,
+ * hook it to the exitTrace and make it a TraceExitType::NormalCc.
+ *
+ * This function essentially looks for the following code pattern:
+ *
+ * Main Trace:
+ * ----------
+ * L1: // jccBlock
+ *    ...
+ *    Jcc ... -> L3
+ * L2: // lastBlock
+ *    DefLabel
+ *    [Marker]
+ *    ExitTrace
+ *
+ * Exit Trace:
+ * ----------
+ * L3: // targetBlock
+ *   DefLabel
+ *   [Marker]
+ *   ExitTraceCc
+ *
+ * If the pattern is found, Jcc's dst operand is linked to the ExitTrace and
+ * ExitTraceCc instructions and it's flagged with kIRDirectJccJmpActive.  This
+ * then triggers CodeGenerator to emit a REQ_BIND_JMPCC_FIRST service request.
+ *
+ */
 static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
-  auto tail = trace->back()->end();
-  IRInstruction* jccInst        = nullptr;
   IRInstruction* exitInst       = nullptr;
   IRInstruction* exitCcInst     = nullptr;
   Opcode opc = OpAdd;
   // Normally Jcc comes before a Marker
-  for (int idx = 3; idx >= 0; idx--) {
-    --tail; // go back to the previous instruction
-    IRInstruction* inst = &*tail;
-    opc = inst->getOpcode();
+  auto& blocks = trace->getBlocks();
+  if (blocks.size() < 2) return;
+  auto it = blocks.end();
+  Block* lastBlock = *(--it);
+  Block* jccBlock  = *(--it);
+
+  IRInstruction& jccInst = *(jccBlock->back());
+  if (!jccCanBeDirectExit(jccInst.getOpcode())) return;
+
+  for (auto it = lastBlock->skipLabel(), end = lastBlock->end(); it != end;
+       it++) {
+    IRInstruction& inst = *it;
+    opc = inst.getOpcode();
     if (opc == ExitTrace) {
-      exitInst = inst;
-      continue;
-    }
-    if (opc == Marker) {
-      continue;
-    }
-    if (jccCanBeDirectExit(opc)) {
-      jccInst = inst;
+      exitInst = &inst;
       break;
     }
-    break;
+    if (opc != Marker) {
+      // Found real instruction on the last block
+      return;
+    }
   }
-  if (jccCanBeDirectExit(opc)) {
-    SSATmp* dst = jccInst->getDst();
-    Block* targetBlock = jccInst->getTaken();
+  if (exitInst) {
+    SSATmp* dst = jccInst.getDst();
+    Block* targetBlock = jccInst.getTaken();
     auto targetInstIter = targetBlock->skipLabel();
 
     // Check for a NormalCc exit with no side effects
@@ -97,15 +126,13 @@ static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
       if (opc == ExitTraceCc) {
         exitCcInst = instr;
         break;
-      } else if (opc == Marker) {
-        continue;
-      } else {
+      } else if (opc != Marker) {
         // Do not optimize if there are other instructions
         break;
       }
     }
 
-    if (exitInst && exitCcInst) {
+    if (exitCcInst) {
       // Found both exits, link them to Jcc for codegen
       assert(dst);
       exitCcInst->appendSrc(irFactory->arena(), dst);

@@ -73,6 +73,7 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
     case Expression::KindOfObjectMethodExpression:
     case Expression::KindOfNewObjectExpression:
     case Expression::KindOfAssignmentExpression:
+    case Expression::KindOfExpressionList:
     case Expression::KindOfIncludeExpression:
       return ListAssignment::Regular;
 
@@ -106,9 +107,24 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
     case Expression::KindOfQOpExpression:
       return ListAssignment::Checked;
 
-    default: break;
+    // invalid context
+    case Expression::KindOfArrayPairExpression:
+    case Expression::KindOfParameterExpression:
+    case Expression::KindOfModifierExpression:
+    case Expression::KindOfUserAttribute:
+      always_assert(false);
+
+    // non-arrays
+    case Expression::KindOfScalarExpression:
+    case Expression::KindOfConstantExpression:
+    case Expression::KindOfClassConstantExpression:
+    case Expression::KindOfEncapsListExpression:
+    case Expression::KindOfClosureExpression:
+      return ListAssignment::Null;
   }
-  return ListAssignment::Null;
+
+  // unreachable for known expression kinds
+  always_assert(false);
 }
 
 static bool AssignmentCouldSet(ExpressionListPtr vars, ExpressionPtr var) {

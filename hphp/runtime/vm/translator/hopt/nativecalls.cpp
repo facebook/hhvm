@@ -29,6 +29,10 @@ static const SyncOptions SNone = kNoSyncPoint;
 static const SyncOptions SSync = kSyncPoint;
 static const SyncOptions SSyncAdj1 = kSyncPointAdjustOne;
 
+static const DestType DSSA = DestType::SSA;
+static const DestType DTV = DestType::TV;
+static const DestType DNone = DestType::None;
+
 /*
  * The table passed to s_callMap's constructor describes helpers calls
  * used by translated code. Each row consists of the following values:
@@ -40,9 +44,9 @@ static const SyncOptions SSyncAdj1 = kSyncPointAdjustOne;
  *     (TCA)<function pointer> - Raw function pointer
  *     {FSSA, idx} - Use a const TCA from inst->getSrc(idx)
  * Dest
- *   DestType::SSA - The helper returns a single-register value
- *   DestType::TV  - The helper returns a TypedValue in two registers
- *   DestType::None - The helper does not return a value
+ *   DSSA - The helper returns a single-register value
+ *   DTV  - The helper returns a TypedValue in two registers
+ *   DNone - The helper does not return a value
  * SyncPoint
  *   SNone - The helper does not need a sync point
  *   SSync - The helper needs a normal sync point
@@ -58,66 +62,63 @@ static const SyncOptions SSyncAdj1 = kSyncPointAdjustOne;
  */
 static CallMap s_callMap({
     /* Opcode, Func, Dest, SyncPoint, Args */
-    {AddElemStrKey,      (TCA)addElemStringKeyHelper, DestType::SSA, SNone,
+    {AddElemStrKey,      (TCA)addElemStringKeyHelper, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
-    {AddElemIntKey,      (TCA)addElemIntKeyHelper, DestType::SSA, SNone,
+    {AddElemIntKey,      (TCA)addElemIntKeyHelper, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
-    {AddNewElem,         (TCA)&HphpArray::AddNewElemC, DestType::SSA, SNone,
+    {AddNewElem,         (TCA)&HphpArray::AddNewElemC, DSSA, SNone,
                            {{SSA, 0}, {TV, 1}}},
-    {ArrayAdd,           (TCA)array_add, DestType::SSA, SNone,
-                           {{SSA, 0}, {SSA, 1}}},
-    {Box,                (TCA)box_value, DestType::SSA, SNone, {{TV, 0}}},
+    {ArrayAdd,           (TCA)array_add, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+    {Box,                (TCA)box_value, DSSA, SNone, {{TV, 0}}},
     {LdObjMethod,        (TCA)TargetCache::MethodCache::lookup,
-                           DestType::SSA, SSync,
-                           {{SSA, 0}, {SSA, 2}, {SSA, 1}}},
-    {NewArray,           (TCA)new_array, DestType::SSA, SNone, {{SSA, 0}}},
-    {NewTuple,           (TCA)new_tuple, DestType::SSA, SNone,
+                           DSSA, SSync, {{SSA, 0}, {SSA, 2}, {SSA, 1}}},
+    {NewArray,           (TCA)new_array, DSSA, SNone, {{SSA, 0}}},
+    {NewTuple,           (TCA)new_tuple, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
-    {PrintStr,           (TCA)print_string, DestType::None, SNone, {{SSA, 0}}},
-    {PrintInt,           (TCA)print_int, DestType::None, SNone, {{SSA, 0}}},
-    {PrintBool,          (TCA)print_boolean, DestType::None, SNone, {{SSA, 0}}},
-    {RaiseUninitLoc,     (TCA)raiseUndefVariable, DestType::None, SSync,
-                           {{SSA, 0}}},
+    {PrintStr,           (TCA)print_string, DNone, SNone, {{SSA, 0}}},
+    {PrintInt,           (TCA)print_int, DNone, SNone, {{SSA, 0}}},
+    {PrintBool,          (TCA)print_boolean, DNone, SNone, {{SSA, 0}}},
+    {RaiseUninitLoc,     (TCA)raiseUndefVariable, DNone, SSync, {{SSA, 0}}},
 
     /* Switch helpers */
-    {LdSwitchDblIndex,   (TCA)switchDoubleHelper, DestType::SSA, SSync,
+    {LdSwitchDblIndex,   (TCA)switchDoubleHelper, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-    {LdSwitchStrIndex,   (TCA)switchStringHelper, DestType::SSA, SSync,
+    {LdSwitchStrIndex,   (TCA)switchStringHelper, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-    {LdSwitchObjIndex,   (TCA)switchObjHelper, DestType::SSA, SSync,
+    {LdSwitchObjIndex,   (TCA)switchObjHelper, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* Continuation support helpers */
-    {CreateCont,         {FSSA, 0}, DestType::SSA, SNone,
+    {CreateCont,         {FSSA, 0}, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
     {FillContLocals, (TCA)&VMExecutionContext::fillContinuationVars,
-              DestType::None, SNone,
+              DNone, SNone,
               {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
 
     /* VectorTranslator helpers */
-    {BaseG,    {FSSA, 0}, DestType::SSA, SSync, {{TV, 1}, {SSA, 2}}},
-    {PropX,    {FSSA, 0}, DestType::SSA, SSync,
+    {BaseG,    {FSSA, 0}, DSSA, SSync, {{TV, 1}, {SSA, 2}}},
+    {PropX,    {FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}, {SSA, 4}}},
-    {CGetProp, {FSSA, 0}, DestType::TV, SSync,
+    {CGetProp, {FSSA, 0}, DTV, SSync,
                  {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}, {SSA, 4}}},
-    {SetProp,  {FSSA, 0}, DestType::TV, SSync,
+    {SetProp,  {FSSA, 0}, DTV, SSync,
                  {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}, {TV, 4}}},
-    {ElemX,    {FSSA, 0}, DestType::SSA, SSync,
+    {ElemX,    {FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
-    {ElemDX,   {FSSA, 0}, DestType::SSA, SSync,
+    {ElemDX,   {FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
-    {CGetElem, {FSSA, 0}, DestType::TV, SSync,
+    {CGetElem, {FSSA, 0}, DTV, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
-    {SetElem,  {FSSA, 0}, DestType::TV, SSync,
+    {SetElem,  {FSSA, 0}, DTV, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {TV, 3}}},
-    {SetNewElem, (TCA)setNewElem, DestType::TV, SSync, {{SSA, 0}, {TV, 1}}},
-    {IssetElem,{FSSA, 0}, DestType::SSA, SSync,
+    {SetNewElem, (TCA)setNewElem, DTV, SSync, {{SSA, 0}, {TV, 1}}},
+    {IssetElem,{FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
-    {EmptyElem,{FSSA, 0}, DestType::SSA, SSync,
+    {EmptyElem,{FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
 
     /* debug assert helpers */
-    {DbgAssertPtr, (TCA)assertTv, DestType::None, SNone, {{SSA, 0}}},
+    {DbgAssertPtr, (TCA)assertTv, DNone, SNone, {{SSA, 0}}},
 });
 
 CallMap::CallMap(CallInfoList infos) {

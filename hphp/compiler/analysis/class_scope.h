@@ -437,6 +437,9 @@ private:
 
   void addImportTraitMethod(const TraitMethod &traitMethod,
                             const std::string &methName);
+  void informClosuresAboutScopeClone(ConstructPtr root,
+                                     FunctionScopePtr outerScope,
+                                     AnalysisResultPtr ar);
 
   void setImportTraitMethodModifiers(const std::string &methName,
                                      ClassScopePtr traitCls,

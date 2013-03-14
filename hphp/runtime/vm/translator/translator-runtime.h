@@ -64,6 +64,8 @@ void VerifyParamTypeCallable(TypedValue value, int param);
 void VerifyParamTypeSlow(const Class* cls, const Class* constraint, int param);
 
 
+void raise_error_sd(const StringData* sd);
+
 int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);

@@ -403,13 +403,14 @@ static inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfBoolean:
   case KindOfInt64:
   case KindOfDouble: {
-    tvWriteUninit(&tvScratch);
-    result = &tvScratch;
+    // Unset on a null base never modifies the base, but the
+    // const_cast is necessary to placate the type system.
+    result = const_cast<TypedValue*>(null_variant.asTypedValue());
     break;
   }
   case KindOfStaticString:
   case KindOfString: {
-    raise_error("Operator not supported for strings");
+    raise_error(Strings::OP_NOT_SUPPORTED_STRING);
     break;
   }
   case KindOfArray: {
@@ -440,8 +441,7 @@ static inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   default: {
-    assert(false);
-    result = nullptr;
+    not_reached();
   }
   }
   return result;
@@ -1227,7 +1227,7 @@ static inline void UnsetElem(TypedValue* base, TypedValue* member) {
   switch (type) {
   case KindOfStaticString:
   case KindOfString: {
-    raise_error("Cannot unset string offsets");
+    raise_error(Strings::CANT_UNSET_STRING);
   }
   case KindOfArray: {
     UnsetElemArray<keyType>(base, member);

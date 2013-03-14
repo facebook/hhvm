@@ -871,6 +871,10 @@ ReleaseVVOrExit S0:StkPtr -> L
   null, does nothing.  If it is an ExtraArgs, deallocates the
   ExtraArgs structure.  Otherwise jumps to the exit-trace label L.
 
+RaiseError S0:Str
+
+  Raises a fatal error with the text in S0 as its message.
+
 D:StkPtr = GenericRetDecRefs S0:StkPtr S1:Gen S2:ConstInt
 
   Does decrefs of all the current function's locals, where S0 is a
@@ -1300,6 +1304,12 @@ D:PtrToGen, D:StkPtr = ElemDXStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
   Like ElemX, but used for intermediate element lookups that may
   modify the base.
 
+D:PtrToGen = ElemUX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:PtrToGen, D:StkPtr = ElemUXStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+
+  Like ElemX, but used for intermediate element lookups that may
+  modify the base as part of an unset operation.
+
 D:Cell = ArrayGet S0:ConstTCA S1:Arr S2:{Int|Str}
 
   Get element with key S2 from base S1.
@@ -1337,6 +1347,11 @@ D:Vector, D:StkPtr = SetElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
 
   Set element with key S2 in S1 to S3.
 
+UnsetElem S0:ConstTCA S1:PtrToGen S2:Gen
+D:StkPtr = UnsetElemStk S0:ConstTCA S1:PtrToGen S2:Gen
+
+  Unsets the element at key S2 in the base S1.
+
 D:Cell = SetOpElem S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell S4:PtrToCell
 D:Cell, D:StkPtr = SetOpElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
                                 S4:PtrToCell
@@ -1359,6 +1374,10 @@ BindNewElem S0:ConstTCA S0:PtrToGen S1:BoxedCell S2:PtrToCell
 D:StkPtr = BindNewElemStk S0:PtrToGen S1:BoxedCell S2:PtrToCell
 
   Append the reference in S1 to S0. S2 should point to an MInstrState struct.
+
+D:Bool = ArrayIsset S0:ConstTCA S1:Arr S2:{Int|Str}
+
+  Returns true iff the element at key S2 in the base S1 is set.
 
 D:Bool = IssetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 

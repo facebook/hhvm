@@ -226,6 +226,7 @@ O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(ExitWhenSurprised,                ND, NA,                                E) \
 O(ExitOnVarEnv,                     ND, S(StkPtr),                         E) \
 O(ReleaseVVOrExit,                  ND, S(StkPtr),                       N|E) \
+O(RaiseError,                       ND, S(Str),               E|N|Mem|Refs|T) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
@@ -452,6 +453,10 @@ O_STK(ElemDX,              D(PtrToGen), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+O_STK(ElemUX,              D(PtrToGen), C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(Gen)                              \
+                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
 O(ArrayGet,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str),    E|N|PRc|Refs|Mem|Er) \
@@ -481,6 +486,9 @@ O_STK(SetElem,                 DVector, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(Cell),     VElem|E|N|Mem|Refs|Er) \
+O_STK(UnsetElem,                    ND, C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(Gen),      VElem|E|N|Mem|Refs|Er) \
 O_STK(SetOpElem,               D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \

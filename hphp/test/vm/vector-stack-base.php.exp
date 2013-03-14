@@ -148,5 +148,13 @@ object(dumper)#5 (2) {
   string(13) "default value"
 }
 string(1) "f"
+dumper 11 constructing
+dumper 11 destructing
+object(dumper)#5 (2) {
+  ["n":"dumper":private]=>
+  int(11)
+  ["prop"]=>
+  string(13) "default value"
+}
 Done with main
 Main has returned

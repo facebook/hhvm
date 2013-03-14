@@ -563,17 +563,6 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
       killPropInfo(inst);
       break;
     }
-    case SetProp:
-    case SetElem:
-    case SetNewElem:
-    case ElemDX: {
-      VectorEffects::get(inst,
-                         /* storeLocValue callback */
-                         storeLocal,
-                         /* setLocType callback. Erases the value for now. */
-                         [&](uint32_t id, Type t) { storeLocal(id, nullptr); });
-      break;
-    }
     case DecRef:
     case DecRefNZ: {
       SSATmp* ref = inst->getSrc(0);
@@ -611,7 +600,15 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
       // otherwise fall through to default case. a DecRef of an Obj{&}/Arr{&}
       // can modify refs if the source hits zero and runs a destructor
     }
-    default: {
+    default:
+      if (VectorEffects::supported(inst)) {
+        VectorEffects::get(inst,
+                           /* storeLocValue callback */
+                           storeLocal,
+                           /* setLocType callback. Erases the value for now. */
+                           [&](uint32_t id, Type t) { storeLocal(id, nullptr); }
+                          );
+      }
       if (inst->mayModifyRefs()) {
 
         // escape any boxes that are on the right hand side of the current
@@ -630,7 +627,6 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
         clearLocalsMap();
       }
       break;
-    }
   }
 }
 

@@ -86,6 +86,7 @@ static CallMap s_callMap({
     {ThrowNonObjProp,    (TCA)throw_null_object_prop, DNone, SSync, {}},
     {RaiseUndefProp,     (TCA)raiseUndefProp, DNone, SSync,
                            {{SSA, 0}, {SSA, 1}}},
+    {RaiseError,         (TCA)raise_error_sd, DNone, SSync, {{SSA, 0}}},
 
     /* Switch helpers */
     {LdSwitchDblIndex,   (TCA)switchDoubleHelper, DSSA, SSync,
@@ -128,6 +129,8 @@ static CallMap s_callMap({
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
     {ElemDX,   {FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+    {ElemUX,   {FSSA, 0}, DSSA, SSync,
+                 {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
     {ArrayGet, {FSSA, 0}, DTV, SSync,
                  {{SSA, 1}, {SSA, 2}}},
     {CGetElem, {FSSA, 0}, DTV, SSync,
@@ -142,6 +145,8 @@ static CallMap s_callMap({
                  {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
     {SetElem,  {FSSA, 0}, DTV, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {TV, 3}}},
+    {UnsetElem, {FSSA, 0}, DNone, SSync,
+                 {{SSA, 1}, {VecKeyIS, 2}}},
     {SetOpElem, {FSSA, 0}, DTV, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {TV, 3}, {SSA, 4}}},
     {IncDecElem, {FSSA, 0}, DTV, SSync,

@@ -61,6 +61,10 @@ void raiseUndefProp(ObjectData* base, const StringData* name) {
   static_cast<Instance*>(base)->raiseUndefProp(name);
 }
 
+void raise_error_sd(const StringData *msg) {
+  raise_error("%s", msg->data());
+}
+
 void VerifyParamTypeFail(int paramNum) {
   VMRegAnchor _;
   const ActRec* ar = curFrame();

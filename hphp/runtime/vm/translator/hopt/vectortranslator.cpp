@@ -87,6 +87,16 @@ void stripBase(Type& baseType, bool& basePtr, bool& baseBoxed) {
   baseBoxed = baseType.isBoxed();
   baseType = baseBoxed ? baseType.innerType() : baseType;
 }
+
+Opcode canonicalOp(Opcode op) {
+  if (op == ElemUX || op == ElemUXStk ||
+      op == UnsetElem || op == UnsetElemStk) {
+    return UnsetElem;
+  }
+  return opcodeHasFlags(op, VectorProp) ? SetProp
+       : opcodeHasFlags(op, VectorElem) || op == ArraySet ? SetElem
+       : bad_value<Opcode>();
+}
 }
 
 void VectorEffects::init(Opcode op, const Type origBase,
@@ -103,14 +113,11 @@ void VectorEffects::init(Opcode op, const Type origBase,
   baseTypeChanged = baseValChanged = valTypeChanged = false;
 
   // Canonicalize the op to SetProp or SetElem
-  op = opcodeHasFlags(op, VectorProp) ? SetProp
-     : opcodeHasFlags(op, VectorElem) || op == ArraySet ? SetElem
-     : bad_value<Opcode>();
-  assert(op == SetProp || op == SetElem);
+  op = canonicalOp(op);
   assert(key.equals(Type::None) || key.isKnownDataType());
   assert(origVal.equals(Type::None) || origVal.isKnownDataType());
 
-  if (baseType.maybe(Type::Null | Type::Bool | Type::Str)) {
+  if (op != UnsetElem && baseType.maybe(Type::Null | Type::Bool | Type::Str)) {
     // stdClass or array promotion might happen
     auto newBase = op == SetElem ? Type::Arr : Type::Obj;
     // If the base is known to be null, promotion will happen. If we can ever
@@ -129,13 +136,13 @@ void VectorEffects::init(Opcode op, const Type origBase,
     }
     baseValChanged = true;
   }
-  if (op == SetElem && baseType.maybe(Type::Arr)) {
+  if ((op == SetElem || op == UnsetElem) && baseType.maybe(Type::Arr)) {
     // possible COW when modifying an array, unless the base was boxed. If the
     // base is a box then the value of the box itself won't change, just what
     // it points to.
     baseValChanged = !baseBoxed;
   }
-  if (op == SetElem && baseType.maybe(Type::StaticArr)) {
+  if ((op == SetElem || op == UnsetElem) && baseType.maybe(Type::StaticArr)) {
     // the base might get promoted to a CountedArr. We can ignore the change if
     // the base is boxed, (for the same reasons as above).
     baseType = baseType | Type::CountedArr;
@@ -211,8 +218,10 @@ int vectorValIdx(Opcode opc) {
     case IncDecProp: case IncDecPropStk:
     case PropDX: case PropDXStk:
     case VGetElem: case VGetElemStk:
+    case UnsetElem: case UnsetElemStk:
     case IncDecElem: case IncDecElemStk:
     case ElemDX: case ElemDXStk:
+    case ElemUX: case ElemUXStk:
       return -1;
 
     case ArraySet: return 3;
@@ -300,6 +309,7 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   const bool isCGetM = m_ni.mInstrOp() == OpCGetM;
   const bool isSetM = m_ni.mInstrOp() == OpSetM;
   const bool isIssetM = m_ni.mInstrOp() == OpIssetM;
+  const bool isUnsetM = m_ni.mInstrOp() == OpUnsetM;
   const bool isSingle = m_ni.immVecM.size() == 1;
 
   assert(baseType.isBoxed() || baseType.notBoxed());
@@ -322,6 +332,12 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   const bool simpleArrayIsset = isIssetM && singleElem &&
     baseType.subtypeOf(Type::Arr);
 
+  // UnsetM on an array with one vector element
+  const bool simpleArrayUnset = isUnsetM && singleElem;
+
+  // UnsetM on a non-standard base. Always a noop or fatal.
+  const bool badUnset = isUnsetM && baseType.not(Type::Arr | Type::Obj);
+
   // CGetM on an array with a base that won't use MInstrState. Str
   // will use tvScratch and baseStrOff and Obj will fatal or use
   // tvRef.
@@ -330,6 +346,7 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
 
   if (simpleProp || singlePropSet ||
       simpleArraySet || simpleArrayGet ||
+      simpleArrayUnset || badUnset ||
       simpleArrayIsset) {
     setNoMIState();
   }
@@ -632,10 +649,14 @@ void HhbcTranslator::VectorTranslator::emitProp() {
   const Class* knownCls = nullptr;
   const int propOffset  = getPropertyOffset(m_ni, knownCls, m_mii,
                                             m_mInd, m_iInd);
+  auto mia = m_mii.getAttr(m_ni.immVecM[m_mInd]);
+  if (mia & Unset) {
+    PUNT(emitProp-Unset);
+  }
   if (propOffset == -1) {
     emitPropGeneric();
   } else {
-    emitPropSpecialized(m_mii.getAttr(m_ni.immVecM[m_mInd]), propOffset);
+    emitPropSpecialized(mia, propOffset);
   }
 }
 
@@ -909,11 +930,34 @@ void HhbcTranslator::VectorTranslator::emitElem() {
   MInstrAttr mia = MInstrAttr(m_mii.getAttr(mCode) & MIA_intermediate);
   SSATmp* key = getInput(m_iInd);
 
+  const bool unset = mia & Unset;
+  const bool define = mia & Define;
+  assert(!(define && unset));
+  if (unset) {
+    ConstData cdata(&null_variant);
+    SSATmp* uninit = m_tb.gen(DefConst, Type::PtrToUninit, &cdata);
+    Type baseType = m_base->getType().deref().unbox();
+    if (baseType.subtypeOf(Type::Str)) {
+      m_ht.spillStack();
+      m_tb.gen(
+        RaiseError,
+        cns(StringData::GetStaticString(Strings::OP_NOT_SUPPORTED_STRING))
+      );
+      m_base = uninit;
+      return;
+    }
+    if (baseType.not(Type::Arr | Type::Obj)) {
+      m_base = uninit;
+      return;
+    }
+  }
+
   typedef TypedValue* (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed(), mia);
   m_ht.spillStack();
-  if (mia & Define) {
-    m_base = genStk(ElemDX, cns((TCA)opFunc), ptr(m_base), key, genMisPtr());
+  if (define || unset) {
+    m_base = genStk(define ? ElemDX : ElemUX, cns((TCA)opFunc), ptr(m_base),
+                    key, genMisPtr());
   } else {
     m_base = m_tb.gen(ElemX, cns((TCA)opFunc), ptr(m_base), key, genMisPtr());
   }
@@ -1171,7 +1215,7 @@ static inline TypedValue setPropImpl(Class* ctx, TypedValue* base,
                                      TypedValue keyVal, Cell val) {
   TypedValue* key = keyPtr<keyType>(keyVal);
   key = unbox<keyType, unboxKey>(key);
-  HPHP::VM::SetProp<true, isObj, keyType>(ctx, base, key, &val);
+  VM::SetProp<true, isObj, keyType>(ctx, base, key, &val);
   return val;
 }
 
@@ -1912,9 +1956,53 @@ void HhbcTranslator::VectorTranslator::emitBindElem() {
 }
 #undef HELPER_TABLE
 
-void HhbcTranslator::VectorTranslator::emitUnsetElem() {
-  SPUNT(__func__);
+template <KeyType keyType, bool unboxKey>
+static inline void unsetElemImpl(TypedValue* base, TypedValue keyVal) {
+  TypedValue* key = keyPtr<keyType>(keyVal);
+  key = unbox<keyType, unboxKey>(key);
+  VM::UnsetElem<keyType>(base, key);
 }
+
+#define HELPER_TABLE(m)                                       \
+  /* name           hot       keyType unboxKey */             \
+  m(unsetElemC,   ,            AnyKey,  false)                \
+  m(unsetElemI,   HOT_FUNC_VM, IntKey,  false)                \
+  m(unsetElemL,   ,            AnyKey,   true)                \
+  m(unsetElemLI,  ,            IntKey,   true)                \
+  m(unsetElemLS,  ,            StrKey,   true)                \
+  m(unsetElemS,   HOT_FUNC_VM, StrKey,  false)
+
+#define ELEM(nm, hot, ...)                                      \
+hot                                                             \
+void nm(TypedValue* base, TypedValue key) {                     \
+  unsetElemImpl<__VA_ARGS__>(base, key);                        \
+}
+namespace VectorHelpers {
+HELPER_TABLE(ELEM)
+}
+#undef ELEM
+
+void HhbcTranslator::VectorTranslator::emitUnsetElem() {
+  SSATmp* key = getInput(m_iInd);
+
+  Type baseType = m_base->getType().deref().unbox();
+  if (baseType.subtypeOf(Type::Str)) {
+    m_ht.spillStack();
+    m_tb.gen(RaiseError,
+             cns(StringData::GetStaticString(Strings::CANT_UNSET_STRING)));
+    return;
+  }
+  if (baseType.not(Type::Arr | Type::Obj)) {
+    // Noop
+    return;
+  }
+
+  typedef void (*OpFunc)(TypedValue*, TypedValue);
+  BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed());
+  m_ht.spillStack();
+  genStk(UnsetElem, cns((TCA)opFunc), m_base, key);
+}
+#undef HELPER_TABLE
 
 void HhbcTranslator::VectorTranslator::emitNotSuppNewElem() {
   not_reached();
@@ -1978,9 +2066,12 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
   // Pop off all stack inputs
   m_ht.discard(nStack);
 
-  // Push result
-  assert(m_result);
-  m_ht.push(m_result);
+  // Push result, if one was produced
+  if (m_result) {
+    m_ht.push(m_result);
+  } else {
+    assert(m_ni.mInstrOp() == OpUnsetM);
+  }
 
   // Clean up tvRef(2)
   if (nLogicalRatchets() > 1) {

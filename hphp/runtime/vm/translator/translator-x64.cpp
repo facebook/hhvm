@@ -2173,13 +2173,11 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
 TCA
 TranslatorX64::emitInterceptPrologue(Func* func) {
   TCA start = a.code.frontier;
-  emitImmReg(a, int64_t(&func->maybeIntercepted()), rax);
-  a.    cmpb (0, al);
+  emitImmReg(a, int64_t(func), rax);
+  a.    cmpb (0, rax[Func::maybeInterceptedOff()]);
   semiLikelyIfBlock(CC_NE, a, [&]{
     // Prologues are not really sites for function entry yet; we can get
     // here via an optimistic bindCall. Check that the func is as expected.
-
-    emitImmReg(a, int64_t(func), rax);
     a.  cmpq (rax, rStashedAR[AROFF(m_func)]);
     {
       JccBlock<CC_NZ> skip(a);

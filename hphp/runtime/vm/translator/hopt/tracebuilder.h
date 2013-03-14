@@ -162,6 +162,7 @@ public:
   SSATmp* genDefUninit();
   SSATmp* genDefInitNull();
   SSATmp* genDefNull();
+  SSATmp* genDefNone();
   SSATmp* genJmp(Trace* target);
   SSATmp* genJmpCond(SSATmp* src, Trace* target, bool negate);
   void    genJmp(Block* target, SSATmp* src);

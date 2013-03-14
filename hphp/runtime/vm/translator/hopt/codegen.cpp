@@ -3110,7 +3110,11 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   // put all outgoing arguments onto the VM stack
   int64_t adjustment = (-(int64_t)numArgs) * sizeof(Cell);
   for (int32_t i = 0; i < numArgs; i++) {
-    cgStore(spReg, -(i + 1) * sizeof(Cell), args[i]);
+    // Type::None here means that the simplifier proved that the value
+    // matches the value already in memory, thus the store is redundant.
+    if (args[i]->getType() != Type::None) {
+      cgStore(spReg, -(i + 1) * sizeof(Cell), args[i]);
+    }
   }
   // store the return bytecode offset into the outgoing actrec
   uint64_t returnBc = returnBcOffset->getValInt();
@@ -3239,6 +3243,10 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
       emitSpillActRec(sp, offset, spillVals[i]);
       cellOff += kNumActRecCells;
       i += kSpillStackActRecExtraArgs;
+    } else if (spillVals[i]->getType() == Type::None) {
+      // The simplifier detected that we're storing the same value
+      // already in there.
+      ++cellOff;
     } else {
       auto* val = spillVals[i];
       auto* inst = val->getInstruction();

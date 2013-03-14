@@ -782,8 +782,10 @@ D:StkPtr = FreeActRec S0:StkPtr
 D:StkPtr = Call S0:ActRec S1:ConstInt S2:Func S3...
 
   Invoke the function S2 with ActRec S0 and variadic arguments S3...
-  representing values to pass to the function.  S2 is the bytecode
-  offset of the next instruction to execute when the call returns.
+  representing values to pass to the function.  A value of type None
+  means the value to be passed is already on the stack.  S2 is the
+  bytecode offset of the next instruction to execute when the call
+  returns.
 
 NativeImpl = S0:ConstFunc S1:StkPtr
 
@@ -864,7 +866,7 @@ StRef
 StRefNT
 StRaw
 
-D:StkPtr = SpillStack         S0:StkP S1:ConstInt, S2...
+D:StkPtr = SpillStack S0:StkP S1:ConstInt, S2...
 
   SpillStack synchronizes the virtual execution stack with the
   physical stack by storing a variadic list of SSATmps to the physical
@@ -879,9 +881,10 @@ D:StkPtr = SpillStack         S0:StkP S1:ConstInt, S2...
                is pushed
 
      S2...   - variadic list of elements to spill, with values
-               representing cells or ActRecs.  Each temp of type
+               representing cells, ActRecs, or None.  Each temp of type
                ActRec is followed by kSpillStackActRecExtraArgs for
-               the contents of the ActRec.
+               the contents of the ActRec.  A temp with type None means
+               to keep the previous value on the stack.
 
 
 11. Trace exits

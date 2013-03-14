@@ -75,6 +75,8 @@ private:
   SSATmp* simplifyLdCtx(IRInstruction*);
   SSATmp* simplifyLdClsCtx(IRInstruction*);
   SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
+  SSATmp* simplifySpillStack(IRInstruction* inst);
+  SSATmp* simplifyCall(IRInstruction* inst);
 
 private:
   SSATmp* genDefInt(int64_t val);

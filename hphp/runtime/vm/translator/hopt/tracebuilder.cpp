@@ -376,6 +376,11 @@ SSATmp* TraceBuilder::genDefNull() {
   return gen(DefConst, Type::Null, &cdata);
 }
 
+SSATmp* TraceBuilder::genDefNone() {
+  ConstData cdata(0);
+  return gen(DefConst, Type::None, &cdata);
+}
+
 SSATmp* TraceBuilder::genConvToInt(SSATmp* src) {
   return gen(Conv, Type::Int, src);
 }
@@ -835,7 +840,9 @@ static SSATmp* getStackValue(SSATmp* sp,
           tmp = tmp->getInstruction()->getSrc(0);
         }
         type = tmp->getType();
-        return tmp;
+        if (!type.equals(Type::None)) {
+          return tmp;
+        }
       }
       ++numPushed;
     }

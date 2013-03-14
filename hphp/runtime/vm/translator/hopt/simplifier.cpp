@@ -135,6 +135,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case LdClsCtx:     return simplifyLdClsCtx(inst);
   case GetCtxFwdCall:return simplifyGetCtxFwdCall(inst);
 
+  case SpillStack:   return simplifySpillStack(inst);
+  case Call:         return simplifyCall(inst);
 
   case Jmp_:
   case JmpInstanceOf:
@@ -162,8 +164,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case LdClsMethodCache:
   case LdClsMethodFCache:
   case LdClsMethod:
-  case Call:
-  case SpillStack:
   case ExitTrace:
   case ExitSlow:
   case ExitGuardFailure:
@@ -232,6 +232,63 @@ static bool hoistGuardToLoad(SSATmp* tmp, Type type) {
       break;
   }
   return false;
+}
+
+SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
+  SSATmp* sp = inst->getSrc(0);
+  auto const spDeficit = inst->getSrc(1)->getValInt();
+  auto       spillVals = inst->getSrcs().subpiece(2);
+  auto const numSpillSrcs = spillVals.size();
+  auto const spillCells = spillValueCells(inst);
+  int64_t adjustment = spDeficit - spillCells;
+  for (uint32_t i = 0, cellOff = 0; i < numSpillSrcs; i++) {
+    const int64_t offset = cellOff + adjustment;
+    if (spillVals[i]->getType() == Type::ActRec) {
+      cellOff += kNumActRecCells;
+      i += kSpillStackActRecExtraArgs;
+      continue;
+    }
+    auto* srcInst = spillVals[i]->getInstruction();
+    // If our value came from a LdStack on the same sp and offset,
+    // we don't need to spill it.
+    if (srcInst->getOpcode() == LdStack && srcInst->getSrc(0) == sp &&
+        srcInst->getSrc(1)->getValInt() == offset) {
+      spillVals[i] = m_tb->genDefNone();
+    }
+    cellOff++;
+  }
+
+  // Note: although the instruction might have been modified above, we still
+  // need to return nullptr so that it gets cloned later if it's stack-allocated
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyCall(IRInstruction* inst) {
+  auto spillVals  = inst->getSrcs().subpiece(3);
+  IRInstruction* spillStack = m_tb->getSp()->getInstruction();
+  if (spillStack->getOpcode() != SpillStack) {
+    return nullptr;
+  }
+
+  SSATmp* sp = spillStack->getSrc(0);
+  int baseOffset = spillStack->getSrc(1)->getValInt() -
+                   spillValueCells(spillStack);
+  auto const numSpillSrcs = spillVals.size();
+  for (int32_t i = 0; i < numSpillSrcs; i++) {
+    const int64_t offset = -(i + 1) + baseOffset;
+    assert(spillVals[i]->getType() != Type::ActRec);
+    IRInstruction* srcInst = spillVals[i]->getInstruction();
+    // If our value came from a LdStack on the same sp and offset,
+    // we don't need to spill it.
+    if (srcInst->getOpcode() == LdStack && srcInst->getSrc(0) == sp &&
+        srcInst->getSrc(1)->getValInt() == offset) {
+      spillVals[i] = m_tb->genDefNone();
+    }
+  }
+
+  // Note: although the instruction might have been modified above, we still
+  // need to return nullptr so that it gets cloned later if it's stack-allocated
+  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyLdCtx(IRInstruction* inst) {

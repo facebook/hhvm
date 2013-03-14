@@ -238,7 +238,8 @@ void assertOperandTypes(const IRInstruction* inst) {
                              "invalid src num");
 #define DofS(src)   checkDst(src < inst->getNumSrcs(),  \
                              "invalid src num");
-#define DParam      checkDst(inst->getTypeParam() != Type::None,        \
+#define DParam      checkDst(inst->getTypeParam() != Type::None ||      \
+                             inst->getOpcode() == DefConst /* for DefNone */, \
                              "DParam with paramType None");
 
 #define O(opcode, dstinfo, srcinfo, flags)      \

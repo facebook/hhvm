@@ -1167,6 +1167,7 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
 }
 
 int32_t spillValueCells(IRInstruction* spillStack) {
+  assert(spillStack->getOpcode() == SpillStack);
   int32_t numSrcs = spillStack->getNumSrcs();
   int32_t ret = 0;
   for (int i = 2; i < numSrcs; ++i) {

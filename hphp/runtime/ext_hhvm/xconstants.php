@@ -16,7 +16,7 @@ if (!defined('GLOBAL_SYMBOL_REDECLARED_CLASS')) {define('GLOBAL_SYMBOL_REDECLARE
 if (!defined('GLOBAL_SYMBOL_REDECLARED_FUNCTION')) {define('GLOBAL_SYMBOL_REDECLARED_FUNCTION', 5);}
 if (!defined('GLOBAL_SYMBOL_STATIC_VARIABLE')) {define('GLOBAL_SYMBOL_STATIC_VARIABLE', 1);}
 if (!defined('HPHP_TRIM_CHARLIST')) {define('HPHP_TRIM_CHARLIST', ' \n\r\t\v' . "\0" . '');}
-if (!defined('HPHP_VERSION')) {define('HPHP_VERSION', '1.0.0');}
+if (!defined('HPHP_VERSION')) {define('HPHP_VERSION', '2.0.0');}
 if (!defined('INI_SCANNER_NORMAL')) {define('INI_SCANNER_NORMAL', 0);}
 if (!defined('INI_SCANNER_RAW')) {define('INI_SCANNER_RAW', 1);}
 if (!defined('PHP_VERSION')) {define('PHP_VERSION', '5.3.3.hiphop');}

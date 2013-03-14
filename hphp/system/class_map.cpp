@@ -457,7 +457,7 @@ const int64_t k_GRAPHEME_EXTR_MAXBYTES = 1;
 const int64_t k_GRAPHEME_EXTR_MAXCHARS = 2;
 const int64_t k_HASH_HMAC = 1;
 extern const StaticString k_HPHP_TRIM_CHARLIST("\n\r\t\v\000 ",6);
-extern const StaticString k_HPHP_VERSION("1.0.0",5);
+extern const StaticString k_HPHP_VERSION("2.0.0",5);
 const int64_t k_HTML_ENTITIES = 1;
 const int64_t k_HTML_SPECIALCHARS = 0;
 extern const StaticString k_ICONV_IMPL("glibc",5);
@@ -17963,7 +17963,7 @@ const char *g_class_map[] = {
   "GRAPHEME_EXTR_MAXCHARS", (const char*)4, "i:2;",
   "HASH_HMAC", (const char*)4, "i:1;",
   "HPHP_TRIM_CHARLIST", (const char*)13, "s:6:\"\n\r\t\v\000 \";",
-  "HPHP_VERSION", (const char*)12, "s:5:\"1.0.0\";",
+  "HPHP_VERSION", (const char*)12, "s:5:\"2.0.0\";",
   "HTML_ENTITIES", (const char*)4, "i:1;",
   "HTML_SPECIALCHARS", (const char*)4, "i:0;",
   "ICONV_IMPL", (const char*)12, "s:5:\"glibc\";",

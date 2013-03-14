@@ -2670,7 +2670,7 @@ DefineConstant(
 DefineConstant(
   array(
     'name'   => "HPHP_VERSION",
-    'value'  => "1.0.0",
+    'value'  => "2.0.0",
   ));
 
 DefineConstant(

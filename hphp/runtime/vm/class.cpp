@@ -22,6 +22,7 @@
 #include <algorithm>
 
 #include "runtime/base/base_includes.h"
+#include "runtime/base/array/hphp_array.h"
 #include "util/util.h"
 #include "util/debug.h"
 #include "runtime/vm/core_types.h"
@@ -952,7 +953,7 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
     // We didn't find a visible declared property in this's property map
     accessible = false;
   }
-  // If ctx is an ancestor of this, check if ctx has a private method
+  // If ctx is an ancestor of this, check if ctx has a private property
   // with the same name.
   if (ctx && classof(ctx)) {
     Slot ctxPropInd = ctx->lookupDeclProp(key);
@@ -1728,7 +1729,6 @@ void Class::setODAttributes() {
   static StringData* sd__set = StringData::GetStaticString("__set");
   static StringData* sd__isset = StringData::GetStaticString("__isset");
   static StringData* sd__unset = StringData::GetStaticString("__unset");
-  static StringData* sd___lval = StringData::GetStaticString("___lval");
   static StringData* sd__call = StringData::GetStaticString("__call");
   static StringData* sd__callStatic
     = StringData::GetStaticString("__callStatic");
@@ -1739,7 +1739,6 @@ void Class::setODAttributes() {
   if (lookupMethod(sd__set       )) { m_ODAttrs |= ObjectData::UseSet;        }
   if (lookupMethod(sd__isset     )) { m_ODAttrs |= ObjectData::UseIsset;      }
   if (lookupMethod(sd__unset     )) { m_ODAttrs |= ObjectData::UseUnset;      }
-  if (lookupMethod(sd___lval     )) { m_ODAttrs |= ObjectData::HasLval;       }
   if (lookupMethod(sd__call      )) { m_ODAttrs |= ObjectData::HasCall;       }
   if (lookupMethod(sd__callStatic)) { m_ODAttrs |= ObjectData::HasCallStatic; }
 }

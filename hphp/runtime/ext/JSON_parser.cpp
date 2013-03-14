@@ -436,9 +436,9 @@ static void object_set(Variant &var, StringBuffer &key, CVarRef value,
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
     if (data.empty()) {
-      var.getObjectData()->o_setPublic("_empty_", value);
+      var.getObjectData()->o_set("_empty_", value);
     } else {
-      var.getObjectData()->o_setPublic(data, value);
+      var.getObjectData()->o_set(data, value);
     }
   } else {
     var.set(data, value);
@@ -451,9 +451,9 @@ static void object_set(Variant &var, StringBuffer &key, RefResult value,
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
     if (data.empty()) {
-      var.getObjectData()->o_setPublic("_empty_", value);
+      var.getObjectData()->o_set("_empty_", value);
     } else {
-      var.getObjectData()->o_setPublic(data, value);
+      var.getObjectData()->o_set(data, value);
     }
   } else {
     var.set(data, value);

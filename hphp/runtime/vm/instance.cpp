@@ -574,35 +574,6 @@ void Instance::raiseUndefProp(const StringData* key) {
                m_cls->name()->data(), key->data());
 }
 
-void Instance::o_setArray(CArrRef properties) {
-  for (ArrayIter iter(properties); iter; ++iter) {
-    String k = iter.first().toString();
-    Class* ctx = nullptr;
-
-    // If the key begins with a NUL, it's a private or protected property. Read
-    // the class name from between the two NUL bytes.
-    if (!k.empty() && k.charAt(0) == '\0') {
-      int subLen = k.find('\0', 1) + 1;
-      String cls = k.substr(1, subLen - 2);
-      if (cls == "*") {
-        // Protected.
-        ctx = m_cls;
-      } else {
-        // Private.
-        ctx = Unit::lookupClass(cls.get());
-        if (!ctx) continue;
-      }
-      k = k.substr(subLen);
-    }
-
-    CVarRef secondRef = iter.secondRef();
-    setProp(ctx, k.get(), (TypedValue*)(&secondRef),
-            secondRef.isReferenced());
-  }
-  // set public properties
-  ObjectData::o_setArray(properties);
-}
-
 void Instance::getProp(const Class* klass, bool pubOnly,
                        const PreClass::Prop* prop,
                        Array& props,
@@ -632,41 +603,6 @@ void Instance::getProps(const Class* klass, bool pubOnly,
   size_t count = pc->numProperties();
   for (size_t i = 0; i < count; ++i) {
     getProp(klass, pubOnly, &propVec[i], props, inserted);
-  }
-}
-
-void Instance::o_getArray(Array& props, bool pubOnly /* = false */) const {
-  // The declared properties in the resultant array should be a permutation of
-  // propVec. They appear in the following order: go most-to-least-derived in
-  // the inheritance hierarchy, inserting properties in declaration order (with
-  // the wrinkle that overridden properties should appear only once, with the
-  // access level given to it in its most-derived declaration).
-
-  // This is needed to keep track of which elements have been inserted. This is
-  // the smoothest way to get overridden properties right.
-  std::vector<bool> inserted(m_cls->numDeclProperties(), false);
-
-  // Iterate over declared properties and insert {mangled name --> prop} pairs.
-  const Class* klass = m_cls;
-  while (klass != nullptr) {
-    getProps(klass, pubOnly, klass->m_preClass.get(), props, inserted);
-
-    const std::vector<ClassPtr> &usedTraits = klass->m_usedTraits;
-    for (unsigned t = 0; t < usedTraits.size(); t++) {
-      const ClassPtr& trait = usedTraits[t];
-      getProps(klass, pubOnly, trait->m_preClass.get(), props, inserted);
-    }
-
-    klass = klass->m_parent.get();
-  }
-
-  // Iterate over dynamic properties and insert {name --> prop} pairs.
-  if (o_properties.get() != nullptr && !o_properties.get()->empty()) {
-    for (ArrayIter it(o_properties.get()); !it.end(); it.next()) {
-      Variant key = it.first();
-      CVarRef value = it.secondRef();
-      props.addLval(key, true).setWithRef(value);
-    }
   }
 }
 

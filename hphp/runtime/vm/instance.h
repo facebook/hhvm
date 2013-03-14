@@ -156,9 +156,6 @@ class Instance : public ObjectData {
   // Virtual ObjectData methods that we need to override
 
  public:
-  virtual void o_setArray(CArrRef properties);
-  virtual void o_getArray(Array& props, bool pubOnly=false) const;
-
   virtual Variant t___destruct();
   virtual Variant t___call(Variant v_name, Variant v_arguments);
   virtual Variant t___set(Variant v_name, Variant v_value);
@@ -252,6 +249,8 @@ class Instance : public ObjectData {
   void unsetProp(Class* ctx, const StringData* key);
 
   void raiseUndefProp(const StringData* name);
+
+  friend class ObjectData;
 };
 
 inline Instance* instanceFromTv(TypedValue* tv) {
@@ -269,9 +268,6 @@ class ExtObjectData : public HPHP::VM::Instance {
     : HPHP::VM::Instance(cls, false) {
     assert(!m_cls->callsCustomInstanceInit());
   }
-  virtual void setRoot(ObjectData *r) {}
-  virtual ObjectData *getRoot() { return this; }
-  ObjectData *getBuiltinRoot() { return this; }
 };
 
 template <int flags> class ExtObjectDataFlags : public ExtObjectData {

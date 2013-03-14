@@ -212,9 +212,10 @@ Variant f_get_parent_class(CVarRef object /* = null_variant */) {
   } else {
     return false;
   }
-  const ClassInfo *classInfo = ClassInfo::FindClass(class_name.toString());
-  if (classInfo) {
-    CStrRef parentClass = classInfo->getParentClass();
+
+  VM::Class* cls = VM::Unit::lookupClass(class_name.toString().get());
+  if (cls) {
+    CStrRef parentClass = *(const String*)(&cls->parentRef());
     if (!parentClass.empty()) {
       return parentClass;
     }
@@ -264,19 +265,18 @@ bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
 bool f_property_exists(CVarRef class_or_object, CStrRef property) {
   if (class_or_object.isObject()) {
     CStrRef context = ctxClassName();
-    // Call o_exists for objects, to include dynamic properties.
-    return class_or_object.toObject()->o_propExists(property, context);
+    return (bool)class_or_object.toObject()->o_realProp(
+      property, ObjectData::RealPropExist, context);
   }
-  const ClassInfo *classInfo =
-    ClassInfo::FindClass(get_classname(class_or_object));
-  while (classInfo) {
-    if (classInfo->hasProperty(property)) {
-      return true;
-    } else {
-      classInfo = classInfo->getParentClassInfo();
-    }
+
+  VM::Class* cls = VM::Unit::lookupClass(get_classname(class_or_object).get());
+  bool accessible;
+  VM::Slot propInd = cls->getDeclPropIndex(cls, property.get(), accessible);
+  if (propInd != VM::kInvalidSlot) {
+    return true;
   }
-  return false;
+  propInd = cls->lookupSProp(property.get());
+  return (propInd != VM::kInvalidSlot);
 }
 
 Variant f_get_object_vars(CVarRef object) {

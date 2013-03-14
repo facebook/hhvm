@@ -43,22 +43,13 @@ namespace VM {
 extern StaticString ssIterator;
 
 /**
- * Base class of all user-defined classes. All data members and methods in
- * this class should start with "o_" or "os_" to avoid name conflicts.
+ * Base class of all PHP objects and PHP resources.
  *
- * Calling sequence:
- *
- * 1. Statically resolved properties and methods will be statically called.
- * 2. Dynamic properties:
+ * 1. Properties:
  *    o_get() -> t___get() as fallback
- *    o_lval() -> t___get() as fallback (!really)
  *    o_set() -> t___set() as fallback
- * 3. Dynamic methods:
+ * 2. Methods:
  *    o_invoke() -> t___call() as fallback
- * 4. Auto-generated jump-tables:
- *    o_realProp()
- *    o_realPropPublic()
- *    o_realPropPrivate() # non-virtual, only as needed
  */
 class ObjectData : public CountableNF {
  public:
@@ -69,7 +60,6 @@ class ObjectData : public CountableNF {
     UseGet        = 0x0008, // __get()
     UseIsset      = 0x0010, // __isset()
     UseUnset      = 0x0020, // __unset()
-    HasLval       = 0x0040, // defines ___lval
     HasCall       = 0x0080, // defines __call
     HasCallStatic = 0x0100, // defines __callStatic
     // The top 3 bits of o_attributes are reserved to indicate the
@@ -82,11 +72,10 @@ class ObjectData : public CountableNF {
   };
 
   enum {
-    RealPropCreate = 1,   // Property should be created if it doesnt exist
-    RealPropWrite = 2,    // Property could be modified
-    RealPropNoDynamic = 4,// Dont return dynamic properties
-    RealPropUnchecked = 8,// Dont check property accessibility
-    RealPropExist = 16,   // For property_exists
+    RealPropCreate = 1,    // Property should be created if it doesnt exist
+    RealPropNoDynamic = 4, // Dont return dynamic properties
+    RealPropUnchecked = 8, // Dont check property accessibility
+    RealPropExist = 16,    // For property_exists
   };
 
   ObjectData(bool noId, VM::Class* type)
@@ -152,15 +141,14 @@ class ObjectData : public CountableNF {
   CStrRef o_getClassName() const;
   CStrRef o_getParentName() const;
   virtual CStrRef o_getClassNameHook() const;
-  static CStrRef GetParentName(CStrRef cls);
   virtual bool isResource() const { return false;}
   bool o_isClass(const char *s) const;
   int o_getId() const { return o_id;}
 
   // overridable casting
-  virtual bool   o_toBoolean() const { return true;}
-  virtual int64_t  o_toInt64() const;
-  virtual double o_toDouble()  const { return o_toInt64();}
+  virtual bool o_toBoolean() const { return true;}
+  virtual int64_t o_toInt64() const;
+  virtual double o_toDouble() const { return o_toInt64();}
 
   void destruct();
 
@@ -172,18 +160,11 @@ class ObjectData : public CountableNF {
     return o_properties;
   }
 
-  Variant *o_realProp(CStrRef s, int flags,
+  Variant* o_realProp(CStrRef s, int flags,
                       CStrRef context = null_string) const;
-  void *o_realPropTyped(CStrRef s, int flags,
-                        CStrRef context, DataType* type) const;
-  Variant *o_realPropPublic(CStrRef s, int flags) const;
-  bool o_exists(CStrRef s, CStrRef context = null_string) const;
+
   Variant o_get(CStrRef s, bool error = true,
                 CStrRef context = null_string);
-  Variant o_getPublic(CStrRef s, bool error = true);
-  Variant o_getUnchecked(CStrRef s, CStrRef context = null_string);
-
-  Variant o_i_setPublicWithRef(CStrRef s, CVarRef v);
 
   Variant o_set(CStrRef s, CVarRef v);
   Variant o_set(CStrRef s, RefResult v);
@@ -192,33 +173,11 @@ class ObjectData : public CountableNF {
   Variant o_set(CStrRef s, CVarRef v, CStrRef context);
   Variant o_set(CStrRef s, RefResult v, CStrRef context);
   Variant o_setRef(CStrRef s, CVarRef v, CStrRef context);
-  Variant o_setPublic(CStrRef s, CVarRef v);
-  Variant o_setPublic(CStrRef s, RefResult v);
-  Variant o_setPublicRef(CStrRef s, CVarRef v);
 
-  Variant &o_lval(CStrRef s, CVarRef tmpForGet, CStrRef context = null_string);
-  Variant *o_weakLval(CStrRef s, CStrRef context = null_string);
-
-  virtual void o_setArray(CArrRef properties);
-
-  virtual void o_getArray(Array &props, bool pubOnly = false) const;
-
-  Variant o_getError(CStrRef prop, CStrRef context);
-  Variant o_setError(CStrRef prop, CStrRef context);
-  /**
-   * This is different from o_exists(), which is isset() semantics. This one
-   * is property_exists() semantics. ie, accessibility is ignored, and declared
-   * but unset properties still return true.
-   */
-  bool o_propExists(CStrRef s, CStrRef context = null_string);
+  void o_setArray(CArrRef properties);
+  void o_getArray(Array &props, bool pubOnly = false) const;
 
   static Object FromArray(ArrayData *properties);
-
-  CVarRef set(CStrRef s, CVarRef v);
-
-  // methods
-  Variant o_invoke_ex(CStrRef clsname, CStrRef s,
-                      CArrRef params, bool fatal = true);
 
   // method invocation with CStrRef
   Variant o_invoke(CStrRef s, CArrRef params, strhash_t hash = -1,
@@ -241,7 +200,6 @@ class ObjectData : public CountableNF {
   virtual Variant t___call(Variant v_name, Variant v_arguments);
   virtual Variant t___set(Variant v_name, Variant v_value);
   virtual Variant t___get(Variant v_name);
-  virtual Variant *___lval(Variant v_name);
   virtual bool t___isset(Variant v_name);
   virtual Variant t___unset(Variant v_name);
   virtual Variant t___sleep();
@@ -256,15 +214,13 @@ class ObjectData : public CountableNF {
   CArrRef getProperties() const { return o_properties; }
   void initProperties(int nProp);
  private:
+  static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
   ObjectData(const ObjectData &) { assert(false);}
   inline Variant o_getImpl(CStrRef propName, int flags,
                            bool error = true, CStrRef context = null_string);
-  static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
   template <typename T>
   inline Variant o_setImpl(CStrRef propName, T v,
                            bool forInit, CStrRef context);
-  template <typename T>
-  inline Variant o_setPublicImpl(CStrRef propName, T v, bool forInit);
  public:
   static const bool IsResourceClass = false;
 
@@ -276,7 +232,6 @@ class ObjectData : public CountableNF {
   union {
     uint16_t u16;
     uint8_t u8[2];
-
   } o_subclassData;
 
  protected:

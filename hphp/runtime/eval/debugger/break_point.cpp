@@ -722,19 +722,17 @@ bool BreakPointInfo::MatchClass(const char *fcls, const std::string &bcls,
   if (regex || !func || !*func) {
     return Match(fcls, 0, bcls, true, true);
   }
-  if (strcasecmp(fcls, bcls.c_str()) == 0) {
-    return true;
-  }
 
-  const ClassInfo *clsInfo = ClassInfo::FindClass(bcls.c_str());
-  if (clsInfo) {
-    ClassInfo *foundClass;
-    if (clsInfo->hasMethod(func, foundClass) && foundClass) {
-      const char *name = foundClass->getName();
-      return strcasecmp(fcls, name) == 0;
-    }
-  }
-  return false;
+  StackStringData sdBClsName(bcls.c_str());
+  VM::Class* clsB = VM::Unit::lookupClass(&sdBClsName);
+  StackStringData sdFClsName(fcls);
+  VM::Class* clsF = VM::Unit::lookupClass(&sdFClsName);
+  if (!clsB) return false;
+  if (clsB == clsF) return true;
+  StackStringData sdFuncName(func);
+  VM::Func* f = clsB->lookupMethod(&sdFuncName);
+  if (!f) return false;
+  return (f->baseCls() == clsF);
 }
 
 bool BreakPointInfo::Match(const char *haystack, int haystack_len,

@@ -41,10 +41,10 @@ public:
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
-  XmlDocWrapper(xmlDocPtr doc, const ClassInfo* cls)
+  XmlDocWrapper(xmlDocPtr doc, CStrRef cls)
     : m_doc(doc), m_cls(cls) { }
 
-  const ClassInfo *getClass() { return m_cls; }
+  CStrRef getClass() { return m_cls; }
 
   void sweep() {
     if (m_doc) {
@@ -54,7 +54,7 @@ public:
   ~XmlDocWrapper() { XmlDocWrapper::sweep(); }
 private:
   xmlDocPtr m_doc;
-  const ClassInfo* m_cls;
+  String m_cls;
 };
 IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(XmlDocWrapper)
 
@@ -124,7 +124,7 @@ static Object create_text(CObjRef doc, xmlNodePtr node,
                           CStrRef value, CStrRef ns,
                           bool is_prefix, bool free_text) {
   Object obj = create_object(doc.getTyped<XmlDocWrapper>()->
-                             getClass()->getName(), Array(), false);
+                             getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
   elem->m_doc = doc;
   elem->m_node = node->parent; // assign to parent, not node
@@ -141,7 +141,7 @@ static Array create_children(CObjRef doc, xmlNodePtr root,
 static Object create_element(CObjRef doc, xmlNodePtr node,
                              CStrRef ns, bool is_prefix) {
   Object obj = create_object(doc.getTyped<XmlDocWrapper>()->
-                             getClass()->getName(), Array(), false);
+                             getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
   elem->m_doc = doc;
   elem->m_node = node;
@@ -244,17 +244,22 @@ Variant f_simplexml_load_string(CStrRef data,
     return uninit_null();
   }
 
-  const ClassInfo *cls = ClassInfo::FindClass(!class_name.empty() ? class_name : s_SimpleXMLElement);
-  if (cls == NULL) {
-    throw_invalid_argument("class not found: %s", class_name.data());
-    return uninit_null();
-  }
-
-  if (!class_name->isame(s_SimpleXMLElement.get()) && !cls->derivesFrom(s_SimpleXMLElement, false)) {
-    throw_invalid_argument("simplexml_load_string() expects parameter 2 to be a class name derived "
-                           "from SimpleXMLElement, '%s' given",
-                           class_name.data());
-    return uninit_null();
+  VM::Class* cls;
+  if (!class_name.empty()) {
+    cls = VM::Unit::lookupClass(class_name.get());
+    if (!cls) {
+      throw_invalid_argument("class not found: %s", class_name.data());
+      return uninit_null();
+    }
+    if (!cls->classof(c_SimpleXMLElement::s_cls)) {
+      throw_invalid_argument(
+        "simplexml_load_string() expects parameter 2 to be a class name "
+        "derived from SimpleXMLElement, '%s' given",
+        class_name.data());
+      return uninit_null();
+    }
+  } else {
+    cls = c_SimpleXMLElement::s_cls;
   }
 
   xmlDocPtr doc = xmlReadMemory(data.data(), data.size(), NULL, NULL, options);
@@ -263,7 +268,7 @@ Variant f_simplexml_load_string(CStrRef data,
     return false;
   }
 
-  return create_element(Object(NEWOBJ(XmlDocWrapper)(doc, cls)),
+  return create_element(Object(NEWOBJ(XmlDocWrapper)(doc, cls->nameRef())),
                                            root, ns, is_prefix);
 }
 
@@ -286,7 +291,6 @@ c_SimpleXMLElement::c_SimpleXMLElement(VM::Class* cb) :
       m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_xpath(NULL) {
-  setAttribute(HasLval);
   m_children = Array::Create();
 }
 
@@ -316,8 +320,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
 
   xmlDocPtr doc = xmlReadMemory(xml.data(), xml.size(), NULL, NULL, options);
   if (doc) {
-    m_doc = Object(NEWOBJ(XmlDocWrapper)(doc,
-                   ClassInfo::FindClass(s_SimpleXMLElement)));
+    m_doc = Object(NEWOBJ(XmlDocWrapper)(doc, s_SimpleXMLElement));
     m_node = xmlDocGetRootElement(doc);
     if (m_node) {
       m_children = create_children(m_doc, m_node, ns, is_prefix);
@@ -480,7 +483,7 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
   }
 
   Object obj = create_object(m_doc.getTyped<XmlDocWrapper>()->
-                             getClass()->getName(), Array(), false);
+                             getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
   elem->m_doc = m_doc;
   elem->m_node = m_node;
@@ -542,7 +545,7 @@ Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
   }
 
   Object obj = create_object(m_doc.getTyped<XmlDocWrapper>()->
-                             getClass()->getName(), Array(), false);
+                             getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
   elem->m_doc = m_doc;
   elem->m_node = m_node;
@@ -688,10 +691,6 @@ String c_SimpleXMLElement::t___tostring() {
   return "";
 }
 
-Variant *c_SimpleXMLElement::___lval(Variant v_name) {
-  return &m_children.lvalAt(v_name);
-}
-
 Variant c_SimpleXMLElement::t___get(Variant name) {
   Variant ret = m_children[name];
   if (ret.isArray()) {
@@ -700,7 +699,7 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
   if (ret.isObject()) {
     c_SimpleXMLElement *elem = ret.toObject().getTyped<c_SimpleXMLElement>();
     Object obj = create_object(m_doc.getTyped<XmlDocWrapper>()->
-                               getClass()->getName(), Array(), false);
+                               getClass(), Array(), false);
     c_SimpleXMLElement *e = obj.getTyped<c_SimpleXMLElement>();
     e->m_doc = elem->m_doc;
     e->m_node = elem->m_node;
@@ -1189,12 +1188,12 @@ static void libxml_error_handler(void *userData, xmlErrorPtr error) {
 
 static Object create_libxmlerror(xmlError &error) {
   Object ret(NEWOBJ(c_LibXMLError)());
-  ret->o_setPublic("level",   error.level);
-  ret->o_setPublic("code",    error.code);
-  ret->o_setPublic("column",  error.int2);
-  ret->o_setPublic("message", String(error.message, CopyString));
-  ret->o_setPublic("file",    String(error.file, CopyString));
-  ret->o_setPublic("line",    error.line);
+  ret->o_set("level",   error.level);
+  ret->o_set("code",    error.code);
+  ret->o_set("column",  error.int2);
+  ret->o_set("message", String(error.message, CopyString));
+  ret->o_set("file",    String(error.file, CopyString));
+  ret->o_set("line",    error.line);
   return ret;
 }
 

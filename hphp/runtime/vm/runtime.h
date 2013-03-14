@@ -23,6 +23,10 @@
 #include <runtime/vm/translator/translator-inline.h>
 
 namespace HPHP {
+
+struct HhbcExtFuncInfo;
+struct HhbcExtClassInfo;
+
 namespace VM {
 
 ArrayData* new_array(int capacity);

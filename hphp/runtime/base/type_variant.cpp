@@ -2445,17 +2445,6 @@ Variant Variant::o_get(CStrRef propName, bool error /* = true */,
   return null_variant;
 }
 
-Variant Variant::o_getPublic(CStrRef propName, bool error /* = true */) const {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_getPublic(propName, error);
-  } else if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_getPublic(propName, error);
-  } else if (error) {
-    raise_notice("Trying to get property of non-object");
-  }
-  return null_variant;
-}
-
 Variant Variant::o_set(CStrRef propName, CVarRef val,
                        CStrRef context /* = null_string */) {
   if (m_type == KindOfObject) {
@@ -2486,60 +2475,11 @@ Variant Variant::o_setRef(CStrRef propName, CVarRef val,
   return m_data.pobj->o_setRef(propName, val, context);
 }
 
-Variant Variant::o_setPublic(CStrRef propName, CVarRef val) {
-  if (m_type == KindOfObject) {
-  } else if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_setPublic(propName, val);
-  } else if (isObjectConvertable()) {
-    setToDefaultObject();
-  } else {
-    // Raise a warning
-    raise_warning("Attempt to assign property of non-object");
-    return uninit_null();
-  }
-  return m_data.pobj->o_setPublic(propName, val);
-}
-
-Variant Variant::o_setPublicRef(CStrRef propName, CVarRef val) {
-  if (m_type == KindOfObject) {
-  } else if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_setPublicRef(propName, val);
-  } else if (isObjectConvertable()) {
-    setToDefaultObject();
-  } else {
-    // Raise a warning
-    raise_warning("Attempt to assign property of non-object");
-    return uninit_null();
-  }
-  return m_data.pobj->o_setPublicRef(propName, val);
-}
-
 Variant Variant::o_invoke(CStrRef s, CArrRef params, int64_t hash /* = -1 */) {
   if (m_type == KindOfObject) {
     return m_data.pobj->o_invoke(s, params, hash);
   } else if (m_type == KindOfRef) {
     return m_data.pref->var()->o_invoke(s, params, hash);
-  } else {
-    throw_call_non_object(s);
-  }
-}
-
-Variant Variant::o_root_invoke(CStrRef s, CArrRef params,
-                               int64_t hash /* = -1 */) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke(s, params, hash);
-  } else if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_root_invoke(s, params, hash);
-  } else {
-    throw_call_non_object(s);
-  }
-}
-
-Variant Variant::o_invoke_ex(CStrRef clsname, CStrRef s, CArrRef params) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke_ex(clsname, s, params);
-  } else if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_invoke_ex(clsname, s, params);
   } else {
     throw_call_non_object(s);
   }
@@ -2555,22 +2495,6 @@ Variant Variant::o_invoke_few_args(CStrRef s, int64_t hash, int count,
                                                  INVOKE_FEW_ARGS_PASS_ARGS);
   } else {
     throw_call_non_object(s);
-  }
-}
-
-Variant &Variant::o_lval(CStrRef propName, CVarRef tmpForGet,
-                         CStrRef context /* = null_string */) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_lval(propName, tmpForGet, context);
-  } else if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_lval(propName, tmpForGet, context);
-  } else if (isObjectConvertable()) {
-    setToDefaultObject();
-    return m_data.pobj->o_lval(propName, tmpForGet, context);
-  } else {
-    // Raise a warning
-    raise_warning("Attempt to assign property of non-object");
-    return const_cast<Variant&>(tmpForGet);
   }
 }
 
@@ -3081,68 +3005,26 @@ void Variant::serialize(VariableSerializer *serializer,
   }
 }
 
-static void setValue(void *addr, DataType type,
-                     VariableUnserializer *uns, Variant &value) {
-  value.unserialize(uns);
-  switch (type) {
-    case KindOfBoolean: *(bool*)addr = value;   break;
-    case KindOfInt64:   *(int64_t*)addr = value;  break;
-    case KindOfDouble:  *(double*)addr = value; break;
-    case KindOfString:
-      *(String*)addr = value.isString() ? value.getStringData() : nullptr;
-      break;
-    case KindOfArray:
-      *(Array*)addr = value.isArray() ? value.getArrayData() : nullptr;
-      break;
-    case KindOfObject:
-      *(Object*)addr = value.isObject() ? value.getObjectData() : nullptr;
-      break;
-    default:
-      raise_error("Internal error in unserialize!");
-  }
-}
-
 static void unserializeProp(VariableUnserializer *uns,
                             ObjectData *obj, CStrRef key,
                             CStrRef context, CStrRef realKey,
                             int nProp) {
   // Do a two-step look up
-  int flags = ObjectData::RealPropWrite;
-  DataType type;
-  void *addr = obj->o_realPropTyped(key, flags, context, &type);
-  if (addr) {
-    if (UNLIKELY(type != KindOfUnknown)) {
-      assert(uns->peek() != 'V' && uns->peek() != 'K');
-      // This is a property which got type inferred.
-      if (UNLIKELY(uns->peek() == 'O')) {
-        // an object can be referred to by an 'r', so we
-        // need to put the variant somewhere it will be available later
-        // in case an 'r' refers back to it
-        Variant &value = uns->addVar();
-        setValue(addr, type, uns, value);
-      } else {
-        // we know its not going to be referred to by an 'R', because
-        // we cant type-infer properties which are referenced, so
-        // just unserialize to a temporary.
-        Variant value;
-        setValue(addr, type, uns, value);
-      }
-      return;
-    }
-  } else {
+  int flags = 0;
+  Variant* t = obj->o_realProp(key, flags, context);
+  if (!t) {
     // Dynamic property. If this is the first, and we're using HphpArray,
     // we need to pre-allocate space in the array to ensure the elements
     // dont move during unserialization.
     obj->initProperties(nProp);
-
-    addr = obj->o_realProp(realKey, ObjectData::RealPropCreate, context);
-    if (!addr) {
+    t = obj->o_realProp(realKey, ObjectData::RealPropCreate, context);
+    if (!t) {
       // When accessing protected/private property from wrong context,
       // we could get NULL for o_realProp.
       throw Exception("Error in accessing property");
     }
   }
-  ((Variant*)addr)->unserialize(uns);
+  t->unserialize(uns);
 }
 
 void Variant::unserialize(VariableUnserializer *uns) {

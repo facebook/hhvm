@@ -183,15 +183,10 @@ public:
    */
   Variant o_get(CStrRef propName, bool error = true,
                 CStrRef context = null_string) const;
-  Variant o_getPublic(CStrRef propName, bool error = true) const;
   Variant o_set(CStrRef s, CVarRef v, CStrRef context = null_string);
   Variant o_set(CStrRef s, RefResult v, CStrRef context = null_string);
   Variant o_setRef(CStrRef s, CVarRef v, CStrRef context = null_string);
-  Variant o_setPublic(CStrRef s, CVarRef v);
-  Variant o_setPublic(CStrRef s, RefResult v);
-  Variant o_setPublicRef(CStrRef s, CVarRef v);
-  Variant &o_lval(CStrRef propName, CVarRef tmpForGet,
-                  CStrRef context = null_string);
+
   /**
    * Input/Output
    */

@@ -885,21 +885,9 @@ class Variant : private VariantBase {
     return o_setRef(s, variant(v), context);
   }
   Variant o_setRef(CStrRef s, CVarRef v, CStrRef context = null_string);
-  Variant o_getPublic(CStrRef propName, bool error = true) const;
-  Variant o_setPublic(CStrRef s, CVarRef v);
-  Variant o_setPublic(CStrRef s, RefResult v) {
-    return o_setPublicRef(s, variant(v));
-  }
-  Variant o_setPublicRef(CStrRef s, CVarRef v);
-  Variant &o_lval(CStrRef propName, CVarRef tmpForGet,
-                  CStrRef context = null_string);
 
   Variant o_invoke(CStrRef s, CArrRef params, int64_t hash = -1);
-  Variant o_root_invoke(CStrRef s, CArrRef params, int64_t hash = -1);
-  Variant o_invoke_ex(CStrRef clsname, CStrRef s, CArrRef params);
   Variant o_invoke_few_args(CStrRef s, int64_t hash, int count,
-                            INVOKE_FEW_ARGS_DECL_ARGS);
-  Variant o_root_invoke_few_args(CStrRef s, int64_t hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
 
   template <typename T>

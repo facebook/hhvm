@@ -2714,8 +2714,11 @@ Variant c_SoapClient::t___setcookie(CStrRef name,
                                     CStrRef value /* = null_string */) {
   if (!value.isNull()) {
     m_cookies.set(name, CREATE_VECTOR1(value));
-  } else if (o_exists("_cookies")) {
-    m_cookies.remove(name);
+  } else {
+    const Variant* t = o_realProp("_cookies", RealPropUnchecked);
+    if (t && t->isInitialized()) {
+      m_cookies.remove(name);
+    }
   }
   return uninit_null();
 }

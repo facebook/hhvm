@@ -50,7 +50,7 @@ UserFile::UserFile(VM::Class *cls, int options /*= 0 */,
   }
 
   m_obj = VM::Instance::newInstance(cls);
-  m_obj.o_setPublic("context", context);
+  m_obj.o_set("context", context);
   Variant ret;
   g_vmContext->invokeFunc(ret.asTypedValue(), ctor,
                           Array::Create(), m_obj.get());

@@ -26,9 +26,7 @@
 
 #include <runtime/vm/core_types.h>
 #include <runtime/vm/repo_helpers.h>
-#include <runtime/base/array/hphp_array.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/ext_hhvm/ext_hhvm.h>
 #include <util/parser/location.h>
 #include <util/fixed_vector.h>
 #include <util/range.h>
@@ -40,7 +38,9 @@ namespace HPHP {
 // Forward declaration.
 class ClassInfo;
 class ClassInfoVM;
+class HphpArray;
 class ObjectData;
+struct HhbcExtClassInfo;
 
 namespace VM {
 
@@ -740,6 +740,10 @@ public:
   // the trait.
   bool declaredMethod(const Func* method);
 
+  bool hasConstant(const StringData* clsCnsName) const {
+    return m_constants.contains(clsCnsName);
+  }
+
   TypedValue* clsCnsGet(const StringData* clsCnsName) const;
   DataType clsCnsType(const StringData* clsCnsName) const;
   void initialize() const;
@@ -903,11 +907,6 @@ private:
   std::vector<ClassPtr> m_usedTraits;
   TraitAliasVec m_traitAliases;
 
-  // Methods.
-  //
-  // The m_methods map contains an entry for every method that can be
-  // called in the context of this Class (but no private methods for
-  // parent classes).
   MethodMap m_methods;
 
   Slot m_traitsBeginIdx;

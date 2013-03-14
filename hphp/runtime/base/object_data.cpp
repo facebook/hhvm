@@ -104,17 +104,6 @@ CStrRef ObjectData::o_getParentName() const {
   return *(const String*)(&m_cls->m_preClass->parentRef());
 }
 
-CStrRef ObjectData::GetParentName(CStrRef cls) {
-  const ClassInfo *classInfo = ClassInfo::FindClass(cls);
-  if (classInfo) {
-    CStrRef parentClass = classInfo->getParentClass();
-    if (!parentClass.isNull()) {
-      return parentClass;
-    }
-  }
-  return empty_string;
-}
-
 CStrRef ObjectData::o_getClassNameHook() const {
   throw FatalErrorException("Class didnt provide a name");
   return empty_string;
@@ -197,10 +186,8 @@ void ObjectData::initProperties(int nProp) {
   if (!o_properties.get()) ((HPHP::VM::Instance*)this)->initDynProps(nProp);
 }
 
-void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
-                                  CStrRef context, DataType *type) const {
-  *type = KindOfUnknown;
-
+Variant* ObjectData::o_realProp(CStrRef propName, int flags,
+                                CStrRef context /* = null_string */) const {
   /*
    * Returns a pointer to a place for a property value. This should never
    * call the magic methods __get or __set. The flags argument describes the
@@ -219,19 +206,18 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
                                         accessible, unset)
                     : thiz->getProp(ctx, propName.get(), visible,
                                     accessible, unset);
-  if (ret == nullptr) {
+  if (!ret) {
     // Property is not declared, and not dynamically created yet.
-    if (flags & RealPropCreate) {
-      assert(!(flags & RealPropNoDynamic));
-      if (o_properties.get() == nullptr) {
-        thiz->initDynProps();
-      }
-      o_properties.get()->lvalPtr(propName,
-                                  *(Variant**)(&ret), false, true);
-      return (Variant*)ret;
-    } else {
+    if (!(flags & RealPropCreate)) {
       return nullptr;
     }
+    assert(!(flags & RealPropNoDynamic));
+    if (!o_properties.get()) {
+      thiz->initDynProps();
+    }
+    o_properties.get()->lvalPtr(propName,
+                                *(Variant**)(&ret), false, true);
+    return (Variant*)ret;
   }
 
   // ret is non-NULL if we reach here
@@ -242,31 +228,6 @@ void *ObjectData::o_realPropTyped(CStrRef propName, int flags,
   } else {
     return nullptr;
   }
-}
-
-Variant *ObjectData::o_realProp(CStrRef propName, int flags,
-                                CStrRef context /* = null_string */) const {
-  DataType type;
-  if (void *p = o_realPropTyped(propName, flags, context, &type)) {
-    if (LIKELY(type == KindOfUnknown)) return (Variant*)p;
-    if (flags & (RealPropCreate|RealPropWrite)) return nullptr;
-    SystemGlobals* globals = get_system_globals();
-    Variant *res = &globals->__realPropProxy;
-    *res = ClassInfo::GetVariant(type, p);
-    return res;
-  }
-
-  return nullptr;
-}
-
-Variant *ObjectData::o_realPropPublic(CStrRef propName, int flags) const {
-  return o_realProp(propName, flags, empty_string);
-}
-
-bool ObjectData::o_exists(CStrRef propName,
-                          CStrRef context /* = null_string */) const {
-  const Variant *t = o_realProp(propName, RealPropUnchecked, context);
-  return t && t->isInitialized();
 }
 
 inline Variant ObjectData::o_getImpl(CStrRef propName, int flags,
@@ -287,7 +248,8 @@ inline Variant ObjectData::o_getImpl(CStrRef propName, int flags,
   }
 
   if (error) {
-    return o_getError(propName, context);
+    raise_notice("Undefined property: %s::$%s", o_getClassName().data(),
+                 propName.data());
   }
 
   return uninit_null();
@@ -296,33 +258,6 @@ inline Variant ObjectData::o_getImpl(CStrRef propName, int flags,
 Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
                           CStrRef context /* = null_string */) {
   return o_getImpl(propName, 0, error, context);
-}
-
-Variant ObjectData::o_getPublic(CStrRef propName, bool error /* = true */) {
-  if (UNLIKELY(!*propName.data())) {
-    throw_invalid_property_name(propName);
-  }
-
-  if (Variant *t = o_realPropPublic(propName, 0)) {
-    if (t->isInitialized())
-      return *t;
-  }
-
-  if (getAttribute(UseGet)) {
-    AttributeClearer a(UseGet, this);
-    return t___get(propName);
-  }
-
-  if (error) {
-    return o_getError(propName, null_string);
-  }
-
-  return uninit_null();
-}
-
-Variant ObjectData::o_getUnchecked(CStrRef propName,
-                                   CStrRef context /* = null_string */) {
-  return o_getImpl(propName, RealPropUnchecked, true, context);
 }
 
 template <class T>
@@ -334,7 +269,7 @@ inline ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
   }
 
   bool useSet = !forInit && getAttribute(UseSet);
-  int flags = useSet ? RealPropWrite : RealPropCreate | RealPropWrite;
+  int flags = useSet ? 0 : RealPropCreate;
   if (forInit) flags |= RealPropUnchecked;
 
   if (Variant *t = o_realProp(propName, flags, context)) {
@@ -350,7 +285,6 @@ inline ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
     return variant(v);
   }
 
-  o_setError(propName, context);
   return variant(v);
 }
 
@@ -378,70 +312,64 @@ Variant ObjectData::o_setRef(CStrRef propName, CVarRef v, CStrRef context) {
   return o_setImpl<RefResult>(propName, ref(v), false, context);
 }
 
-template<typename T>
-inline ALWAYS_INLINE Variant ObjectData::o_setPublicImpl(CStrRef propName,
-                                                         T v,
-                                                         bool forInit) {
-  if (UNLIKELY(!*propName.data())) {
-    throw_invalid_property_name(propName);
-  }
-
-  bool useSet = !forInit && getAttribute(UseSet);
-  int flags = useSet ? RealPropWrite : RealPropCreate | RealPropWrite;
-  if (forInit) flags |= RealPropUnchecked;
-
-  if (Variant *t = o_realPropPublic(propName, flags)) {
-    if (!useSet || t->isInitialized()) {
-      *t = v;
-      return variant(v);
-    }
-  }
-
-  if (useSet) {
-    AttributeClearer a(UseSet, this);
-    t___set(propName, variant(v));
-    return variant(v);
-  }
-
-  o_setError(propName, null_string);
-  return variant(v);
-}
-
-Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v) {
-  return o_setPublicImpl<CVarRef>(propName, v, false);
-}
-
-Variant ObjectData::o_setPublic(CStrRef propName, RefResult v) {
-  return o_setPublicRef(propName, variant(v));
-}
-
-Variant ObjectData::o_setPublicRef(CStrRef propName, CVarRef v) {
-  return o_setPublicImpl<CVarStrongBind>(propName, strongBind(v), false);
-}
-
-Variant ObjectData::o_i_setPublicWithRef(CStrRef propName, CVarRef v) {
-  return o_setPublicImpl<CVarWithRefBind>(propName, withRefBind(v), true);
-}
-
 HOT_FUNC
 void ObjectData::o_setArray(CArrRef properties) {
+  auto thiz = static_cast<VM::Instance*>(this);
   for (ArrayIter iter(properties); iter; ++iter) {
-    String key = iter.first().toString();
-    if (key.empty() || key.charAt(0) != '\0') {
-      // non-private property
-      CVarRef secondRef = iter.secondRef();
-      o_i_setPublicWithRef(key, secondRef);
+    String k = iter.first().toString();
+    VM::Class* ctx = nullptr;
+    // If the key begins with a NUL, it's a private or protected property. Read
+    // the class name from between the two NUL bytes.
+    if (!k.empty() && k.charAt(0) == '\0') {
+      int subLen = k.find('\0', 1) + 1;
+      String cls = k.substr(1, subLen - 2);
+      if (cls == "*") {
+        // Protected.
+        ctx = m_cls;
+      } else {
+        // Private.
+        ctx = VM::Unit::lookupClass(cls.get());
+        if (!ctx) continue;
+      }
+      k = k.substr(subLen);
     }
+
+    CVarRef secondRef = iter.secondRef();
+    thiz->setProp(ctx, k.get(), (TypedValue*)(&secondRef),
+                  secondRef.isReferenced());
   }
 }
 
 void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
-  const Array& arr = o_properties.asArray();
-  if (!arr.empty()) {
-    for (ArrayIter it(arr); !it.end(); it.next()) {
+  // The declared properties in the resultant array should be a permutation of
+  // propVec. They appear in the following order: go most-to-least-derived in
+  // the inheritance hierarchy, inserting properties in declaration order (with
+  // the wrinkle that overridden properties should appear only once, with the
+  // access level given to it in its most-derived declaration).
+
+  // This is needed to keep track of which elements have been inserted. This is
+  // the smoothest way to get overridden properties right.
+  std::vector<bool> inserted(m_cls->numDeclProperties(), false);
+
+  // Iterate over declared properties and insert {mangled name --> prop} pairs.
+  const VM::Class* cls = m_cls;
+  auto thiz = static_cast<const VM::Instance*>(this); 
+  do {
+    thiz->getProps(cls, pubOnly, cls->m_preClass.get(), props, inserted);
+    const std::vector<VM::ClassPtr> &usedTraits = cls->m_usedTraits;
+    for (unsigned t = 0; t < usedTraits.size(); t++) {
+      const VM::ClassPtr& trait = usedTraits[t];
+      thiz->getProps(cls, pubOnly, trait->m_preClass.get(), props, inserted);
+    }
+    cls = cls->m_parent.get();
+  } while (cls);
+
+  // Iterate over dynamic properties and insert {name --> prop} pairs.
+  if (o_properties.get() && !o_properties.get()->empty()) {
+    for (ArrayIter it(o_properties.get()); !it.end(); it.next()) {
       Variant key = it.first();
       CVarRef value = it.secondRef();
-      props.lvalAt(key, AccessFlags::Key).setWithRef(value);
+      props.addLval(key, true).setWithRef(value);
     }
   }
 }
@@ -452,55 +380,6 @@ Object ObjectData::FromArray(ArrayData *properties) {
     ret->o_properties.asArray() = properties;
   }
   return ret;
-}
-
-CVarRef ObjectData::set(CStrRef s, CVarRef v) {
-  o_set(s, v);
-  return v;
-}
-
-Variant &ObjectData::o_lval(CStrRef propName, CVarRef tmpForGet,
-                            CStrRef context /* = null_string */) {
-  if (UNLIKELY(!*propName.data())) {
-    throw_invalid_property_name(propName);
-  }
-
-  bool useGet = getAttribute(UseGet);
-  int flags = useGet ? RealPropWrite : RealPropCreate | RealPropWrite;
-  if (Variant *t = o_realProp(propName, flags, context)) {
-    if (!useGet || t->isInitialized()) {
-      return *t;
-    }
-  }
-
-  Variant &ret = const_cast<Variant&>(tmpForGet);
-  if (LIKELY(useGet)) {
-    AttributeClearer a(UseGet, this);
-    if (getAttribute(HasLval)) {
-      return *___lval(propName);
-    }
-
-    ret = t___get(propName);
-    return ret;
-  }
-
-  /* we only get here if its a protected property
-     under hphpi - and then o_getError fatals
-     with a suitable message
-  */
-  ret = o_getError(propName, context);
-  return ret;
-}
-
-Variant *ObjectData::o_weakLval(CStrRef propName,
-                                CStrRef context /* = null_string */) {
-  if (Variant *t = o_realProp(propName, RealPropWrite|RealPropUnchecked,
-                              context)) {
-    if (t->isInitialized()) {
-      return t;
-    }
-  }
-  return nullptr;
 }
 
 Array ObjectData::o_toArray() const {
@@ -522,7 +401,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
   // Get all declared properties first, bottom-to-top in the inheritance
   // hierarchy, in declaration order.
   const VM::Class* klass = m_cls;
-  while (klass != nullptr) {
+  while (klass) {
     const VM::PreClass::Prop* props = klass->m_preClass->properties();
     const size_t numProps = klass->m_preClass->numProperties();
 
@@ -670,47 +549,6 @@ Variant ObjectData::o_invoke_few_args(CStrRef s, strhash_t hash, int count,
   return o_invoke(s, params, hash);
 }
 
-Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
-                                CArrRef params, bool fatal /* = true */) {
-  // TODO This duplicates some logic from vm_decode_function and
-  // vm_call_user_func, we should refactor this in the near future
-  ObjectData* this_ = this;
-  HPHP::VM::Class* cls = VM::Unit::lookupClass(clsname.get());
-  if (!cls || !getVMClass()->classof(cls)) {
-    o_invoke_failed(clsname.data(), s.data(), fatal);
-    return uninit_null();
-  }
-  StringData* invName = nullptr;
-  // XXX The lookup below doesn't take context into account, so it will lead
-  // to incorrect behavior in some corner cases. o_invoke is gradually being
-  // removed from the HPHP runtime this should be ok for the short term.
-  const HPHP::VM::Func* f = cls->lookupMethod(s.get());
-  if (f && (f->attrs() & HPHP::VM::AttrStatic)) {
-    // If we found a method and its static, null out this_
-    this_ = nullptr;
-  } else if (!f) {
-    if (this_) {
-      // If this_ is non-null AND we could not find a method, try
-      // looking up __call in cls's method table
-      f = cls->lookupMethod(s___call.get());
-    }
-    if (!f) {
-      // Bail if we couldn't find the method or __call
-      o_invoke_failed(clsname.data(), s.data(), fatal);
-      return uninit_null();
-    }
-    // We found __call! Stash the original name into invName.
-    assert(!(f->attrs() & HPHP::VM::AttrStatic));
-    invName = s.get();
-    invName->incRefCount();
-  }
-  assert(f);
-  Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
-                          nullptr, invName);
-  return ret;
-}
-
 bool ObjectData::php_sleep(Variant &ret) {
   setAttribute(HasSleep);
   ret = t___sleep();
@@ -783,19 +621,24 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
   if (UNLIKELY(handleSleep)) {
     assert(!isCollection());
     if (ret.isArray()) {
-      const ClassInfo *cls = ClassInfo::FindClass(o_getClassName());
+      auto thiz = (VM::Instance*)(this);
       Array wanted = Array::Create();
       Array props = ret.toArray();
       for (ArrayIter iter(props); iter; ++iter) {
         String name = iter.second().toString();
-        if (o_exists(name, o_getClassName())) {
-          ClassInfo::PropertyInfo *p = cls->getPropertyInfo(name);
+        bool visible, accessible, unset;
+        thiz->getProp(m_cls, name.get(), visible, accessible, unset);
+        if (accessible && !unset) {
           String propName = name;
-          if (p && (p->attribute & ClassInfo::IsPrivate)) {
-            propName = concat4(s_zero, o_getClassName(), s_zero, name);
+          VM::Slot propInd =
+            m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
+          if (accessible && propInd != VM::kInvalidSlot) {
+            if (m_cls->m_declProperties[propInd].m_attrs & VM::AttrPrivate) {
+              propName = concat4(s_zero, o_getClassName(), s_zero, name);
+            }
           }
           wanted.set(propName, const_cast<ObjectData*>(this)->
-              o_getUnchecked(name, o_getClassName()));
+              o_getImpl(name, RealPropUnchecked, true, o_getClassName()));
         } else {
           raise_warning("\"%s\" returned as member variable from "
               "__sleep() but does not exist", name.data());
@@ -859,16 +702,6 @@ ObjectData *ObjectData::clone() {
   return instance->cloneImpl();
 }
 
-Variant ObjectData::o_getError(CStrRef prop, CStrRef context) {
-  raise_notice("Undefined property: %s::$%s", o_getClassName().data(),
-               prop.data());
-  return uninit_null();
-}
-
-Variant ObjectData::o_setError(CStrRef prop, CStrRef context) {
-  return uninit_null();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // magic methods that user classes can override, and these are default handlers
 // or actions to take:
@@ -893,10 +726,6 @@ Variant ObjectData::t___get(Variant v_name) {
   return uninit_null();
 }
 
-Variant *ObjectData::___lval(Variant v_name) {
-  return nullptr;
-}
-
 Variant ObjectData::offsetGet(Variant key) {
   assert(instanceof(SystemLib::s_ArrayAccessClass));
   const VM::Func* method = m_cls->lookupMethod(s_offsetGet.get());
@@ -917,11 +746,6 @@ bool ObjectData::t___isset(Variant v_name) {
 Variant ObjectData::t___unset(Variant v_name) {
   // not called
   return uninit_null();
-}
-
-bool ObjectData::o_propExists(CStrRef s, CStrRef context /* = null_string */) {
-  Variant *t = o_realProp(s, RealPropExist, context);
-  return t;
 }
 
 Variant ObjectData::t___sleep() {

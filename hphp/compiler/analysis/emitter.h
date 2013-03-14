@@ -40,6 +40,8 @@ DECLARE_BOOST_TYPES(SimpleFunctionCall);
 DECLARE_BOOST_TYPES(SwitchStatement);
 DECLARE_BOOST_TYPES(ForEachStatement);
 class StaticClassName;
+class HhbcExtFuncInfo;
+class HhbcExtClassInfo;
 
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////

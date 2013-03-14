@@ -578,7 +578,7 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
   if (!cls) {
     return;
   }
-  object->set("queryString", stmt->query_string);
+  object->o_set("queryString", stmt->query_string);
   TypedValue ret;
   VM::Instance* inst = static_cast<VM::Instance*>(object.get());
   inst->invokeUserMethod(&ret, cls->getCtor(), ctor_args.toArray());
@@ -1930,12 +1930,12 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
 
     case PDO_FETCH_OBJ:
     case PDO_FETCH_INTO:
-      ret.toObject()->set(name, val);
+      ret.toObject()->o_set(name, val);
       break;
 
     case PDO_FETCH_CLASS:
       if ((flags & PDO_FETCH_SERIALIZE) == 0 || idx) {
-        ret.toObject()->set(name, val);
+        ret.toObject()->o_set(name, val);
       } else {
 #ifdef MBO_0
         ret = f_unserialize(val);

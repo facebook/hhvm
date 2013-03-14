@@ -183,12 +183,12 @@ void tvCastToObjectInPlace(TypedValue* tv) {
   case KindOfDouble:
   case KindOfStaticString: {
     o = SystemLib::AllocStdClassObject();
-    o->o_lval("scalar", -1) = tvAsVariant(tv);
+    o->o_set("scalar", tvAsVariant(tv));
     break;
   }
   case KindOfString: {
     o = SystemLib::AllocStdClassObject();
-    o->o_lval("scalar", -1) = tvAsVariant(tv);
+    o->o_set("scalar", tvAsVariant(tv));
     tvDecRefStr(tv);
     break;
   }

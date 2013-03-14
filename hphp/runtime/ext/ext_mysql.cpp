@@ -1637,19 +1637,19 @@ Variant f_mysql_fetch_field(CVarRef result, int field /* = -1 */) {
   if (!(info = res->fetchFieldInfo())) return false;
 
   Object obj(SystemLib::AllocStdClassObject());
-  obj->set("name",         *(info->name));
-  obj->set("table",        *(info->table));
-  obj->set("def",          *(info->def));
-  obj->set("max_length",   (int)info->max_length);
-  obj->set("not_null",     IS_NOT_NULL(info->flags)? 1 : 0);
-  obj->set("primary_key",  IS_PRI_KEY(info->flags)? 1 : 0);
-  obj->set("multiple_key", info->flags & MULTIPLE_KEY_FLAG? 1 : 0);
-  obj->set("unique_key",   info->flags & UNIQUE_KEY_FLAG? 1 : 0);
-  obj->set("numeric",      IS_NUM(info->type)? 1 : 0);
-  obj->set("blob",         IS_BLOB(info->flags)? 1 : 0);
-  obj->set("type",         php_mysql_get_field_name(info->type));
-  obj->set("unsigned",     info->flags & UNSIGNED_FLAG? 1 : 0);
-  obj->set("zerofill",     info->flags & ZEROFILL_FLAG? 1 : 0);
+  obj->o_set("name",         *(info->name));
+  obj->o_set("table",        *(info->table));
+  obj->o_set("def",          *(info->def));
+  obj->o_set("max_length",   (int)info->max_length);
+  obj->o_set("not_null",     IS_NOT_NULL(info->flags)? 1 : 0);
+  obj->o_set("primary_key",  IS_PRI_KEY(info->flags)? 1 : 0);
+  obj->o_set("multiple_key", info->flags & MULTIPLE_KEY_FLAG? 1 : 0);
+  obj->o_set("unique_key",   info->flags & UNIQUE_KEY_FLAG? 1 : 0);
+  obj->o_set("numeric",      IS_NUM(info->type)? 1 : 0);
+  obj->o_set("blob",         IS_BLOB(info->flags)? 1 : 0);
+  obj->o_set("type",         php_mysql_get_field_name(info->type));
+  obj->o_set("unsigned",     info->flags & UNSIGNED_FLAG? 1 : 0);
+  obj->o_set("zerofill",     info->flags & ZEROFILL_FLAG? 1 : 0);
   return obj;
 }
 

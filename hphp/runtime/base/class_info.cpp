@@ -1031,14 +1031,11 @@ ClassInfo::MethodInfo::~MethodInfo() {
 
 void ClassInfo::GetArray(const ObjectData *obj,
                          Array &props, GetArrayKind kind) {
-  HPHP::VM::Instance *inst = static_cast<HPHP::VM::Instance*>(
-    const_cast<ObjectData*>(obj));
-  inst->HPHP::VM::Instance::o_getArray(props, !(kind & GetArrayPrivate));
+  obj->o_getArray(props, !(kind & GetArrayPrivate));
 }
 
 void ClassInfo::SetArray(ObjectData *obj, CArrRef props) {
-  HPHP::VM::Instance *inst = static_cast<HPHP::VM::Instance*>(obj);
-  inst->HPHP::VM::Instance::o_setArray(props);
+  obj->o_setArray(props);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

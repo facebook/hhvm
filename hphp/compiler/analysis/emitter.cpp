@@ -29,6 +29,7 @@
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/eval/runtime/file_repository.h>
+#include <runtime/ext_hhvm/ext_hhvm.h>
 
 #include <compiler/builtin_symbols.h>
 #include <compiler/analysis/class_scope.h>

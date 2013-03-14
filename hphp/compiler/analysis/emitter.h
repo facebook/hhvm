@@ -450,11 +450,11 @@ private:
   public:
     ControlTargetPusher(EmitterVisitor* e, Id itId, bool itRef, Label& brkTarg,
         Label& cntTarg, Label& brkHand, Label& cntHand) : m_e(e) {
-      e->m_contTargets.push_front(ControlTargets(itId, itRef, brkTarg, cntTarg,
-            brkHand, cntHand));
+      e->m_controlTargets.push_front(ControlTargets(itId, itRef, brkTarg,
+            cntTarg, brkHand, cntHand));
     }
     ~ControlTargetPusher() {
-      m_e->m_contTargets.pop_front();
+      m_e->m_controlTargets.pop_front();
     }
   private:
     EmitterVisitor* m_e;
@@ -524,7 +524,7 @@ private:
   int m_actualStackHighWater;
   int m_fdescHighWater;
   int m_closureCounter;  // used to uniquify closures' mangled names
-  std::deque<ControlTargets> m_contTargets;
+  std::deque<ControlTargets> m_controlTargets;
   std::deque<Funclet> m_funclets;
   std::deque<ExnHandlerRegion*> m_exnHandlers;
   std::deque<FaultRegion*> m_faultRegions;
@@ -535,8 +535,8 @@ private:
   std::map<StringData*, Label, string_data_lt> m_gotoLabels;
   MetaInfoBuilder m_metaInfo;
 public:
-  Label& topBreakHandler() { return m_contTargets.front().m_brkHand; }
-  Label& topContHandler() { return m_contTargets.front().m_cntHand; }
+  Label& topBreakHandler() { return m_controlTargets.front().m_brkHand; }
+  Label& topContHandler() { return m_controlTargets.front().m_cntHand; }
 
   bool checkIfStackEmpty(const char* forInstruction) const;
   void unexpectedStackSym(char sym, const char* where) const;

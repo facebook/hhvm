@@ -1955,7 +1955,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         int64_t n = bs->getDepth();
         if (n == 1) {
           // Plain old "break;" or "continue;"
-          if (m_contTargets.empty()) {
+          if (m_controlTargets.empty()) {
             static const StringData* msg =
               StringData::GetStaticString("Cannot break/continue 1 level");
             e.String(msg);
@@ -1963,16 +1963,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             return false;
           }
           if (bs->is(Statement::KindOfBreakStatement)) {
-            if (m_contTargets.front().m_itId != -1) {
-              if (m_contTargets.front().m_itRef) {
-                e.MIterFree(m_contTargets.front().m_itId);
+            if (m_controlTargets.front().m_itId != -1) {
+              if (m_controlTargets.front().m_itRef) {
+                e.MIterFree(m_controlTargets.front().m_itId);
               } else {
-                e.IterFree(m_contTargets.front().m_itId);
+                e.IterFree(m_controlTargets.front().m_itId);
               }
             }
-            e.Jmp(m_contTargets.front().m_brkTarg);
+            e.Jmp(m_controlTargets.front().m_brkTarg);
           } else {
-            e.Jmp(m_contTargets.front().m_cntTarg);
+            e.Jmp(m_controlTargets.front().m_cntTarg);
           }
           return false;
         }
@@ -1984,7 +1984,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitConvertToCell(e);
         } else {
           // Dynamic break/continue with statically known depth.
-          if (n > (int64_t)m_contTargets.size()) {
+          if (n > (int64_t)m_controlTargets.size()) {
             std::ostringstream msg;
             msg << "Cannot break/continue " << n << " levels";
             e.String(StringData::GetStaticString(msg.str()));
@@ -1994,9 +1994,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.Int(n);
         }
         if (bs->is(Statement::KindOfBreakStatement)) {
-          e.Jmp(m_contTargets.front().m_brkHand);
+          e.Jmp(m_controlTargets.front().m_brkHand);
         } else {
-          e.Jmp(m_contTargets.front().m_cntHand);
+          e.Jmp(m_controlTargets.front().m_cntHand);
         }
         return false;
       }

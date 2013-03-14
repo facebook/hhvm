@@ -53,6 +53,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: Object t_clear();
   public: bool t_isempty();
   public: int64_t t_count();
+  public: Object t_items();
+  public: Object t_keys();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
@@ -72,6 +74,10 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
   public: Variant t___unset(Variant name);
+  public: static Object ti_fromitems(const char* cls, CVarRef iterable);
+  public: static Object t_fromitems(CVarRef iterable) {
+    return ti_fromitems("vector", iterable);
+  }
   public: static Object ti_fromarray(const char* cls, CVarRef arr);
   public: static Object t_fromarray(CVarRef arr) {
     return ti_fromarray("vector", arr);
@@ -221,6 +227,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: Object t_clear();
   public: bool t_isempty();
   public: int64_t t_count();
+  public: Object t_items();
+  public: Object t_keys();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
@@ -243,6 +251,10 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
   public: Variant t___unset(Variant name);
+  public: static Object ti_fromitems(const char* cls, CVarRef iterable);
+  public: static Object t_fromitems(CVarRef iterable) {
+    return ti_fromitems("map", iterable);
+  }
   public: static Object ti_fromarray(const char* cls, CVarRef arr);
   public: static Object t_fromarray(CVarRef arr) {
     return ti_fromarray("map", arr);
@@ -508,6 +520,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: Object t_clear();
   public: bool t_isempty();
   public: int64_t t_count();
+  public: Object t_items();
+  public: Object t_keys();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
@@ -530,13 +544,17 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
   public: Variant t___unset(Variant name);
+  public: static Object ti_fromitems(const char* cls, CVarRef iterable);
+  public: static Object t_fromitems(CVarRef iterable) {
+    return ti_fromitems("stablemap", iterable);
+  }
   public: static Object ti_fromarray(const char* cls, CVarRef arr);
   public: static Object t_fromarray(CVarRef arr) {
-    return ti_fromarray("map", arr);
+    return ti_fromarray("stablemap", arr);
   }
   public: static Object ti_fromiterable(const char* cls, CVarRef vec);
   public: static Object t_fromiterable(CVarRef vec) {
-    return ti_fromiterable("map", vec);
+    return ti_fromiterable("stablemap", vec);
   }
 
   public: static void throwOOB(int64_t key) ATTRIBUTE_COLD;
@@ -758,6 +776,8 @@ class c_Tuple : public ExtObjectDataFlags<ObjectData::TupleAttrInit|
   public: void t___construct();
   public: bool t_isempty();
   public: int64_t t_count();
+  public: Object t_items();
+  public: Object t_keys();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Array t_toarray();

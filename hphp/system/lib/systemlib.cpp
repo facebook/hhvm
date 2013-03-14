@@ -119,6 +119,14 @@ ObjectData* SystemLib::AllocSplFileInfoObject(CVarRef filename) {
   CREATE_AND_CONSTRUCT(SplFileInfo, CREATE_VECTOR1(filename));
 }
 
+ObjectData* SystemLib::AllocKeysIterableObject(CVarRef mp) {
+  CREATE_AND_CONSTRUCT(KeysIterable, CREATE_VECTOR1(mp));
+}
+
+ObjectData* SystemLib::AllocMapItemsIterableObject(CVarRef mp) {
+  CREATE_AND_CONSTRUCT(MapItemsIterable, CREATE_VECTOR1(mp));
+}
+
 #undef CREATE_AND_CONSTRUCT
 
 VM::Func*

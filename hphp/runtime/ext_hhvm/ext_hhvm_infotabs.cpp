@@ -2277,6 +2277,8 @@ VM::Instance* new_Vector_Instance(VM::Class*);
 TypedValue* tg_6Vector___construct(VM::ActRec *ar);
 TypedValue* tg_6Vector_isEmpty(VM::ActRec *ar);
 TypedValue* tg_6Vector_count(VM::ActRec *ar);
+TypedValue* tg_6Vector_items(VM::ActRec *ar);
+TypedValue* tg_6Vector_keys(VM::ActRec *ar);
 TypedValue* tg_6Vector_at(VM::ActRec *ar);
 TypedValue* tg_6Vector_get(VM::ActRec *ar);
 TypedValue* tg_6Vector_set(VM::ActRec *ar);
@@ -2300,6 +2302,7 @@ TypedValue* tg_6Vector___get(VM::ActRec *ar);
 TypedValue* tg_6Vector___set(VM::ActRec *ar);
 TypedValue* tg_6Vector___isset(VM::ActRec *ar);
 TypedValue* tg_6Vector___unset(VM::ActRec *ar);
+TypedValue* tg_6Vector_fromItems(VM::ActRec *ar);
 TypedValue* tg_6Vector_fromArray(VM::ActRec *ar);
 TypedValue* tg_6Vector_fromVector(VM::ActRec *ar);
 TypedValue* tg_6Vector_slice(VM::ActRec *ar);
@@ -2314,6 +2317,8 @@ VM::Instance* new_Map_Instance(VM::Class*);
 TypedValue* tg_3Map___construct(VM::ActRec *ar);
 TypedValue* tg_3Map_isEmpty(VM::ActRec *ar);
 TypedValue* tg_3Map_count(VM::ActRec *ar);
+TypedValue* tg_3Map_items(VM::ActRec *ar);
+TypedValue* tg_3Map_keys(VM::ActRec *ar);
 TypedValue* tg_3Map_at(VM::ActRec *ar);
 TypedValue* tg_3Map_get(VM::ActRec *ar);
 TypedValue* tg_3Map_set(VM::ActRec *ar);
@@ -2337,6 +2342,7 @@ TypedValue* tg_3Map___get(VM::ActRec *ar);
 TypedValue* tg_3Map___set(VM::ActRec *ar);
 TypedValue* tg_3Map___isset(VM::ActRec *ar);
 TypedValue* tg_3Map___unset(VM::ActRec *ar);
+TypedValue* tg_3Map_fromItems(VM::ActRec *ar);
 TypedValue* tg_3Map_fromArray(VM::ActRec *ar);
 TypedValue* tg_3Map_fromIterable(VM::ActRec *ar);
 VM::Instance* new_MapIterator_Instance(VM::Class*);
@@ -2350,6 +2356,8 @@ VM::Instance* new_StableMap_Instance(VM::Class*);
 TypedValue* tg_9StableMap___construct(VM::ActRec *ar);
 TypedValue* tg_9StableMap_isEmpty(VM::ActRec *ar);
 TypedValue* tg_9StableMap_count(VM::ActRec *ar);
+TypedValue* tg_9StableMap_items(VM::ActRec *ar);
+TypedValue* tg_9StableMap_keys(VM::ActRec *ar);
 TypedValue* tg_9StableMap_at(VM::ActRec *ar);
 TypedValue* tg_9StableMap_get(VM::ActRec *ar);
 TypedValue* tg_9StableMap_set(VM::ActRec *ar);
@@ -2372,6 +2380,7 @@ TypedValue* tg_9StableMap___get(VM::ActRec *ar);
 TypedValue* tg_9StableMap___set(VM::ActRec *ar);
 TypedValue* tg_9StableMap___isset(VM::ActRec *ar);
 TypedValue* tg_9StableMap___unset(VM::ActRec *ar);
+TypedValue* tg_9StableMap_fromItems(VM::ActRec *ar);
 TypedValue* tg_9StableMap___toString(VM::ActRec *ar);
 TypedValue* tg_9StableMap_fromArray(VM::ActRec *ar);
 TypedValue* tg_9StableMap_fromIterable(VM::ActRec *ar);
@@ -2386,6 +2395,8 @@ VM::Instance* new_Tuple_Instance(VM::Class*);
 TypedValue* tg_5Tuple___construct(VM::ActRec *ar);
 TypedValue* tg_5Tuple_isEmpty(VM::ActRec *ar);
 TypedValue* tg_5Tuple_count(VM::ActRec *ar);
+TypedValue* tg_5Tuple_items(VM::ActRec *ar);
+TypedValue* tg_5Tuple_keys(VM::ActRec *ar);
 TypedValue* tg_5Tuple_toArray(VM::ActRec *ar);
 TypedValue* tg_5Tuple_getIterator(VM::ActRec *ar);
 TypedValue* tg_5Tuple_at(VM::ActRec *ar);
@@ -5313,11 +5324,13 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DummyClosure[] = {
   { "__construct", tg_12DummyClosure___construct }
 };
 
-static const long long hhbc_ext_method_count_Vector = 29;
+static const long long hhbc_ext_method_count_Vector = 32;
 static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "__construct", tg_6Vector___construct },
   { "isEmpty", tg_6Vector_isEmpty },
   { "count", tg_6Vector_count },
+  { "items", tg_6Vector_items },
+  { "keys", tg_6Vector_keys },
   { "at", tg_6Vector_at },
   { "get", tg_6Vector_get },
   { "set", tg_6Vector_set },
@@ -5341,6 +5354,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "__set", tg_6Vector___set },
   { "__isset", tg_6Vector___isset },
   { "__unset", tg_6Vector___unset },
+  { "fromItems", tg_6Vector_fromItems },
   { "fromArray", tg_6Vector_fromArray },
   { "fromVector", tg_6Vector_fromVector },
   { "slice", tg_6Vector_slice }
@@ -5356,11 +5370,13 @@ static const HhbcExtMethodInfo hhbc_ext_methods_VectorIterator[] = {
   { "rewind", tg_14VectorIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Map = 28;
+static const long long hhbc_ext_method_count_Map = 31;
 static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "__construct", tg_3Map___construct },
   { "isEmpty", tg_3Map_isEmpty },
   { "count", tg_3Map_count },
+  { "items", tg_3Map_items },
+  { "keys", tg_3Map_keys },
   { "at", tg_3Map_at },
   { "get", tg_3Map_get },
   { "set", tg_3Map_set },
@@ -5384,6 +5400,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "__set", tg_3Map___set },
   { "__isset", tg_3Map___isset },
   { "__unset", tg_3Map___unset },
+  { "fromItems", tg_3Map_fromItems },
   { "fromArray", tg_3Map_fromArray },
   { "fromIterable", tg_3Map_fromIterable }
 };
@@ -5398,11 +5415,13 @@ static const HhbcExtMethodInfo hhbc_ext_methods_MapIterator[] = {
   { "rewind", tg_11MapIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_StableMap = 28;
+static const long long hhbc_ext_method_count_StableMap = 31;
 static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "__construct", tg_9StableMap___construct },
   { "isEmpty", tg_9StableMap_isEmpty },
   { "count", tg_9StableMap_count },
+  { "items", tg_9StableMap_items },
+  { "keys", tg_9StableMap_keys },
   { "at", tg_9StableMap_at },
   { "get", tg_9StableMap_get },
   { "set", tg_9StableMap_set },
@@ -5425,6 +5444,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "__set", tg_9StableMap___set },
   { "__isset", tg_9StableMap___isset },
   { "__unset", tg_9StableMap___unset },
+  { "fromItems", tg_9StableMap_fromItems },
   { "__toString", tg_9StableMap___toString },
   { "fromArray", tg_9StableMap_fromArray },
   { "fromIterable", tg_9StableMap_fromIterable }
@@ -5440,11 +5460,13 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StableMapIterator[] = {
   { "rewind", tg_17StableMapIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Tuple = 7;
+static const long long hhbc_ext_method_count_Tuple = 9;
 static const HhbcExtMethodInfo hhbc_ext_methods_Tuple[] = {
   { "__construct", tg_5Tuple___construct },
   { "isEmpty", tg_5Tuple_isEmpty },
   { "count", tg_5Tuple_count },
+  { "items", tg_5Tuple_items },
+  { "keys", tg_5Tuple_keys },
   { "toArray", tg_5Tuple_toArray },
   { "getIterator", tg_5Tuple_getIterator },
   { "at", tg_5Tuple_at },

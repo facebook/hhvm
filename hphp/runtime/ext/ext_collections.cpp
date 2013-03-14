@@ -21,6 +21,7 @@
 #include <runtime/ext/ext_array.h>
 #include <runtime/ext/ext_math.h>
 #include <runtime/ext/ext_intl.h>
+#include <system/lib/systemlib.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -269,6 +270,14 @@ int64_t c_Vector::t_count() {
   return m_size;
 }
 
+Object c_Vector::t_items() {
+  return this;
+}
+
+Object c_Vector::t_keys() {
+  return SystemLib::AllocKeysIterableObject(this);
+}
+
 Variant c_Vector::t_at(CVarRef key) {
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
@@ -473,19 +482,38 @@ Object c_Vector::t_put(CVarRef key, CVarRef value) {
   return t_set(key, value);
 }
 
+Object c_Vector::ti_fromitems(const char* cls, CVarRef iterable) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  c_Vector* target;
+  Object ret = target = NEWOBJ(c_Vector)();
+  if (sz) {
+    target->reserve(sz);
+  }
+  for (uint i = 0; iter; ++i, ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = (TypedValue*)(&v);
+    if (UNLIKELY(tv->m_type == KindOfRef)) {
+      tv = tv->m_data.pref->tv();
+    }
+    target->add(tv);
+  }
+  return ret;
+}
+
 Object c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
     throw e;
   }
-  c_Vector* vec;
-  Object ret = vec = NEWOBJ(c_Vector)();
+  c_Vector* target;
+  Object ret = target = NEWOBJ(c_Vector)();
   ArrayData* ad = arr.getArrayData();
   uint sz = ad->size();
-  vec->m_capacity = vec->m_size = sz;
+  target->m_capacity = target->m_size = sz;
   TypedValue* data;
-  vec->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
   ssize_t pos = ad->iter_begin();
   for (uint i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
     assert(pos != ArrayData::invalid_index);
@@ -942,6 +970,14 @@ int64_t c_Map::t_count() {
   return m_size;
 }
 
+Object c_Map::t_items() {
+  return SystemLib::AllocMapItemsIterableObject(this);
+}
+
+Object c_Map::t_keys() {
+  return SystemLib::AllocKeysIterableObject(this);
+}
+
 Variant c_Map::t_at(CVarRef key) {
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
@@ -1185,6 +1221,47 @@ Object c_Map::t_getiterator() {
   it->m_pos = iter_begin();
   it->m_versionNumber = getVersionNumber();
   return it;
+}
+
+Object c_Map::ti_fromitems(const char* cls, CVarRef iterable) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  c_Map* target;
+  Object ret = target = NEWOBJ(c_Map)();
+  if (sz) {
+    target->reserve(sz);
+  }
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = (TypedValue*)(&v);
+    if (UNLIKELY(tv->m_type == KindOfRef)) {
+      tv = tv->m_data.pref->tv();
+    }
+    if (UNLIKELY(tv->m_type != KindOfObject ||
+                 !tv->m_data.pobj->instanceof(c_Tuple::s_cls))) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Parameter must be an instance of Iterable<Tuple>"));
+      throw e;
+    }
+    auto tup = static_cast<c_Tuple*>(tv->m_data.pobj);
+    if (UNLIKELY(tup->t_count() != 2)) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Expected Tuples containing exactly two elements"));
+      throw e;
+    }
+    TypedValue* tvKey = &tup->getData()[0];
+    TypedValue* tvValue = &tup->getData()[1];
+    assert(tvKey->m_type != KindOfRef);
+    assert(tvValue->m_type != KindOfRef);
+    if (tvKey->m_type == KindOfInt64) {
+      target->update(tvKey->m_data.num, tvValue);
+    } else if (IS_STRING_TYPE(tvKey->m_type)) {
+      target->update(tvKey->m_data.pstr, tvValue);
+    } else {
+      throwBadKeyType();
+    }
+  }
+  return ret;
 }
 
 Object c_Map::ti_fromarray(const char* cls, CVarRef arr) {
@@ -1865,6 +1942,14 @@ int64_t c_StableMap::t_count() {
   return m_size;
 }
 
+Object c_StableMap::t_items() {
+  return SystemLib::AllocMapItemsIterableObject(this);
+}
+
+Object c_StableMap::t_keys() {
+  return SystemLib::AllocKeysIterableObject(this);
+}
+
 Variant c_StableMap::t_at(CVarRef key) {
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
@@ -2097,6 +2182,47 @@ Object c_StableMap::t_getiterator() {
   it->m_pos = iter_begin();
   it->m_versionNumber = getVersionNumber();
   return it;
+}
+
+Object c_StableMap::ti_fromitems(const char* cls, CVarRef iterable) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  c_StableMap* target;
+  Object ret = target = NEWOBJ(c_StableMap)();
+  if (sz) {
+    target->reserve(sz);
+  }
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = (TypedValue*)(&v);
+    if (UNLIKELY(tv->m_type == KindOfRef)) {
+      tv = tv->m_data.pref->tv();
+    }
+    if (UNLIKELY(tv->m_type != KindOfObject ||
+                 !tv->m_data.pobj->instanceof(c_Tuple::s_cls))) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Parameter must be an instance of Iterable<Tuple>"));
+      throw e;
+    }
+    auto tup = static_cast<c_Tuple*>(tv->m_data.pobj);
+    if (UNLIKELY(tup->t_count() != 2)) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Expected Tuples containing exactly two elements"));
+      throw e;
+    }
+    TypedValue* tvKey = &tup->getData()[0];
+    TypedValue* tvValue = &tup->getData()[1];
+    assert(tvKey->m_type != KindOfRef);
+    assert(tvValue->m_type != KindOfRef);
+    if (tvKey->m_type == KindOfInt64) {
+      target->update(tvKey->m_data.num, tvValue);
+    } else if (IS_STRING_TYPE(tvKey->m_type)) {
+      target->update(tvKey->m_data.pstr, tvValue);
+    } else {
+      throwBadKeyType();
+    }
+  }
+  return ret;
 }
 
 Object c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
@@ -2770,6 +2896,14 @@ bool c_Tuple::t_isempty() {
 
 int64_t c_Tuple::t_count() {
   return m_size;
+}
+
+Object c_Tuple::t_items() {
+  return this;
+}
+
+Object c_Tuple::t_keys() {
+  return SystemLib::AllocKeysIterableObject(this);
 }
 
 Variant c_Tuple::t_at(CVarRef key) {

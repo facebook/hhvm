@@ -59,6 +59,8 @@ namespace Eval {
   x(JsonSerializable)                           \
   x(Traversable)                                \
   x(Countable)                                  \
+  x(KeysIterable)                               \
+  x(MapItemsIterable)                           \
   x(__PHP_Incomplete_Class)                     \
 
 class SystemLib {
@@ -102,6 +104,8 @@ class SystemLib {
                                           CVarRef detail = null_variant,
                                           CVarRef name = null_variant,
                                           CVarRef header = null_variant);
+  static ObjectData* AllocKeysIterableObject(CVarRef mp);
+  static ObjectData* AllocMapItemsIterableObject(CVarRef mp);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

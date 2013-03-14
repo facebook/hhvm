@@ -105,6 +105,9 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a Vector built from the values produced by the ".
+                "specified Iterable.",
     'return' => array(
       'type'   => null,
     ),
@@ -134,6 +137,27 @@ DefineFunction(
     'desc'   => "Returns the number of values in the Vector.",
     'return' => array(
       'type'   => Int64,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "items",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the values from this ".
+                "Vector.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "keys",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the keys from this Vector.",
+    'return' => array(
+      'type'   => Object,
     ),
   ));
 
@@ -324,7 +348,7 @@ DefineFunction(
   array(
     'name'   => "toArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an array containing the values from this Vector.",
+    'desc'   => "Returns an array built from the values from this Vector.",
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -497,10 +521,27 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "fromItems",
+    'flags'  =>  IsStatic | HasDocComment,
+    'desc'   => "Returns a Vector built from the values produced by the ".
+                "specified Iterable.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "fromArray",
     'flags'  =>  IsStatic | HasDocComment,
-    'desc'   => "Returns a Vector containing the values from the " .
-                "specified array.",
+    'desc'   => "Returns a Vector built from the values from the specified ".
+                "array.",
     'return' => array(
       'type'   => Object,
     ),
@@ -532,7 +573,7 @@ DefineFunction(
   array(
     'name'   => "slice",
     'flags'  =>  IsStatic | HasDocComment,
-    'desc'   => "Returns a Vector containing the specified slice of values ".
+    'desc'   => "Returns a Vector built from the specified slice of values ".
                 "from the specified Vector.",
     'return' => array(
       'type'   => Object,
@@ -640,6 +681,9 @@ BeginClass(
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a Map built from the keys and values produced by ".
+                "the specified KeyedIterable.",
     'return' => array(
       'type'   => null,
     ),
@@ -669,6 +713,27 @@ DefineFunction(
     'desc'   => "Returns the number of key/value pairs in the Map.",
     'return' => array(
       'type'   => Int64,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "items",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the key/value pairs as ".
+                "Tuples from this Map.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "keys",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the keys from this Map.",
+    'return' => array(
+      'type'   => Object,
     ),
   ));
 
@@ -830,7 +895,7 @@ DefineFunction(
   array(
     'name'   => "toArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an array containing the key/value pairs from this ".
+    'desc'   => "Returns an array built from the keys and values from this ".
                 "Map.",
     'return' => array(
       'type'   => VariantMap,
@@ -842,7 +907,7 @@ DefineFunction(
   array(
     'name'   => "copyAsArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an array containing the key/value pairs from this ".
+    'desc'   => "Returns an array built from the keys and values from this ".
                 "Map.",
     'return' => array(
       'type'   => VariantMap,
@@ -853,8 +918,7 @@ DefineFunction(
   array(
     'name'   => "toKeysArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an array containing the keys from this ".
-                "Map.",
+    'desc'   => "Returns an array built from the keys from this Map.",
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -864,8 +928,7 @@ DefineFunction(
   array(
     'name'   => "values",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns a Vector containing the values from this ".
-                "Map.",
+    'desc'   => "Returns a Vector built from the values from this Map.",
     'return' => array(
       'type'   => Object,
     ),
@@ -875,8 +938,7 @@ DefineFunction(
   array(
     'name'   => "toValuesArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an array containing the values from this ".
-                "Map.",
+    'desc'   => "Returns an array built from the values from this Map.",
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -886,7 +948,7 @@ DefineFunction(
   array(
     'name'   => "updateFromArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Inserts the key/value pairs from the specified array into ".
+    'desc'   => "Inserts the keys and values from the specified array into ".
                 "this Map.",
     'return' => array(
       'type'   => Object,
@@ -903,8 +965,8 @@ DefineFunction(
   array(
     'name'   => "updateFromIterable",
     'flags'  =>  HasDocComment,
-    'desc'   => "Inserts the key/value pairs produced by the specified ".
-                "Iterable.",
+    'desc'   => "Inserts the keys and values produced by the specified ".
+                "KeyedIterable.",
     'return' => array(
       'type'   => Object,
     ),
@@ -1015,9 +1077,26 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "fromItems",
+    'flags'  =>  IsStatic | HasDocComment,
+    'desc'   => "Returns a Map built from the key/value Tuples produced by ".
+                "the specified Iterable.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "fromArray",
     'flags'  =>  IsStatic | HasDocComment,
-    'desc'   => "Returns a Map containing the key/value pairs from the " .
+    'desc'   => "Returns a Map built from the keys and values from the " .
                 "specified array.",
     'return' => array(
       'type'   => Object,
@@ -1034,8 +1113,8 @@ DefineFunction(
   array(
     'name'   => "fromIterable",
     'flags'  =>  IsStatic | HasDocComment,
-    'desc'   => "Returns a Map containing the key/value pairs produced by ".
-                "the specified Iterable.",
+    'desc'   => "Returns a Map built from the keys and values produced by ".
+                "the specified KeyedIterable.",
     'return' => array(
       'type'   => Object,
     ),
@@ -1133,6 +1212,9 @@ BeginClass(
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a StableMap built from the keys and values produced ".
+                "by the specified KeyedIterable.",
     'return' => array(
       'type'   => null,
     ),
@@ -1162,6 +1244,28 @@ DefineFunction(
     'desc'   => "Returns the number of key/value pairs in the StableMap.",
     'return' => array(
       'type'   => Int64,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "items",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the key/value pairs as ".
+                "Tuples from this StableMap.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "keys",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the keys from this ".
+                "StableMap.",
+    'return' => array(
+      'type'   => Object,
     ),
   ));
 
@@ -1323,7 +1427,7 @@ DefineFunction(
   array(
     'name'   => "toArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an array containing the key/value pairs from this ".
+    'desc'   => "Returns an array built from the keys and values from this ".
                 "StableMap.",
     'return' => array(
       'type'   => VariantMap,
@@ -1335,7 +1439,7 @@ DefineFunction(
   array(
     'name'   => "copyAsArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an array containing the key/value pairs from this ".
+    'desc'   => "Returns an array built from the keys and values from this ".
                 "StableMap.",
     'return' => array(
       'type'   => VariantMap,
@@ -1346,8 +1450,7 @@ DefineFunction(
   array(
     'name'   => "toKeysArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an array containing the keys from this ".
-                "StableMap.",
+    'desc'   => "Returns an array built from the keys from this StableMap.",
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -1357,8 +1460,7 @@ DefineFunction(
   array(
     'name'   => "values",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns a Vector containing the values from this ".
-                "StableMap.",
+    'desc'   => "Returns a Vector built from the values from this StableMap.",
     'return' => array(
       'type'   => Object,
     ),
@@ -1368,8 +1470,7 @@ DefineFunction(
   array(
     'name'   => "toValuesArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an array containing the values from this ".
-                "StableMap.",
+    'desc'   => "Returns an array built from the values from this StableMap.",
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -1396,8 +1497,8 @@ DefineFunction(
   array(
     'name'   => "updateFromIterable",
     'flags'  =>  HasDocComment,
-    'desc'   => "Inserts the key/value pairs produced by the specified ".
-                "Iterable.",
+    'desc'   => "Inserts the keys and values produced by the specified ".
+                "KeyedIterable.",
     'return' => array(
       'type'   => Object,
     ),
@@ -1501,6 +1602,23 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "fromItems",
+    'flags'  =>  IsStatic | HasDocComment,
+    'desc'   => "Returns a StableMap built from the key/value Tuples produced ".
+                "by the specified Iterable.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "__toString",
     'return' => array(
       'type'   => String,
@@ -1511,7 +1629,7 @@ DefineFunction(
   array(
     'name'   => "fromArray",
     'flags'  =>  IsStatic | HasDocComment,
-    'desc'   => "Returns a StableMap containing the key/value pairs from the ".
+    'desc'   => "Returns a StableMap built from the keys and values from the ".
                 "specified array.",
     'return' => array(
       'type'   => Object,
@@ -1528,8 +1646,8 @@ DefineFunction(
   array(
     'name'   => "fromIterable",
     'flags'  =>  IsStatic | HasDocComment,
-    'desc'   => "Returns a StableMap containing the key/value pairs produced ".
-                "by the specified Iterable.",
+    'desc'   => "Returns a StableMap built from the keys and values produced ".
+                "by the specified KeyedIterable.",
     'return' => array(
       'type'   => Object,
     ),
@@ -1661,9 +1779,30 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "items",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the values from this ".
+                "Tuple.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "keys",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the keys from this Tuple.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "toArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an array containing the values from this Tuple.",
+    'desc'   => "Returns an array built from the values from this Tuple.",
     'return' => array(
       'type'   => VariantMap,
     ),

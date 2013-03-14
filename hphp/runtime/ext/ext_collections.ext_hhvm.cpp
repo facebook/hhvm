@@ -145,6 +145,82 @@ TypedValue* tg_6Vector_count(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Vector::t_items()
+_ZN4HPHP8c_Vector7t_itemsEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_6Vector_items(Value* _rv, ObjectData* this_) asm("_ZN4HPHP8c_Vector7t_itemsEv");
+
+TypedValue* tg_6Vector_items(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_6Vector_items((Value*)(&(rv)), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Vector::items", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::items");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Vector::t_keys()
+_ZN4HPHP8c_Vector6t_keysEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_6Vector_keys(Value* _rv, ObjectData* this_) asm("_ZN4HPHP8c_Vector6t_keysEv");
+
+TypedValue* tg_6Vector_keys(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_6Vector_keys((Value*)(&(rv)), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Vector::keys", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::keys");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Variant HPHP::c_Vector::t_at(HPHP::Variant const&)
 _ZN4HPHP8c_Vector4t_atERKNS_7VariantE
 
@@ -1022,6 +1098,40 @@ TypedValue* tg_6Vector___unset(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Vector::ti_fromitems(char const*, HPHP::Variant const&)
+_ZN4HPHP8c_Vector12ti_fromitemsEPKcRKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+cls_ => rsi
+iterable => rdx
+*/
+
+Value* th_6Vector_fromItems(Value* _rv, char const* cls_, TypedValue* iterable) asm("_ZN4HPHP8c_Vector12ti_fromitemsEPKcRKNS_7VariantE");
+
+TypedValue* tg_6Vector_fromItems(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      rv.m_type = KindOfObject;
+      th_6Vector_fromItems((Value*)(&(rv)), ("Vector"), (args-0));
+      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("Vector::fromItems", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_Vector::ti_fromarray(char const*, HPHP::Variant const&)
 _ZN4HPHP8c_Vector12ti_fromarrayEPKcRKNS_7VariantE
 
@@ -1465,6 +1575,82 @@ TypedValue* tg_3Map_count(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("Map::count");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Map::t_items()
+_ZN4HPHP5c_Map7t_itemsEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_3Map_items(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map7t_itemsEv");
+
+TypedValue* tg_3Map_items(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_items((Value*)(&(rv)), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Map::items", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::items");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Map::t_keys()
+_ZN4HPHP5c_Map6t_keysEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_3Map_keys(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map6t_keysEv");
+
+TypedValue* tg_3Map_keys(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_keys((Value*)(&(rv)), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Map::keys", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::keys");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2358,6 +2544,40 @@ TypedValue* tg_3Map___unset(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Map::ti_fromitems(char const*, HPHP::Variant const&)
+_ZN4HPHP5c_Map12ti_fromitemsEPKcRKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+cls_ => rsi
+iterable => rdx
+*/
+
+Value* th_3Map_fromItems(Value* _rv, char const* cls_, TypedValue* iterable) asm("_ZN4HPHP5c_Map12ti_fromitemsEPKcRKNS_7VariantE");
+
+TypedValue* tg_3Map_fromItems(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      rv.m_type = KindOfObject;
+      th_3Map_fromItems((Value*)(&(rv)), ("Map"), (args-0));
+      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("Map::fromItems", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_Map::ti_fromarray(char const*, HPHP::Variant const&)
 _ZN4HPHP5c_Map12ti_fromarrayEPKcRKNS_7VariantE
 
@@ -2764,6 +2984,82 @@ TypedValue* tg_9StableMap_count(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("StableMap::count");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_StableMap::t_items()
+_ZN4HPHP11c_StableMap7t_itemsEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_9StableMap_items(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c_StableMap7t_itemsEv");
+
+TypedValue* tg_9StableMap_items(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_items((Value*)(&(rv)), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("StableMap::items", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::items");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_StableMap::t_keys()
+_ZN4HPHP11c_StableMap6t_keysEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_9StableMap_keys(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c_StableMap6t_keysEv");
+
+TypedValue* tg_9StableMap_keys(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_keys((Value*)(&(rv)), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("StableMap::keys", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::keys");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -3619,6 +3915,40 @@ TypedValue* tg_9StableMap___unset(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_StableMap::ti_fromitems(char const*, HPHP::Variant const&)
+_ZN4HPHP11c_StableMap12ti_fromitemsEPKcRKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+cls_ => rsi
+iterable => rdx
+*/
+
+Value* th_9StableMap_fromItems(Value* _rv, char const* cls_, TypedValue* iterable) asm("_ZN4HPHP11c_StableMap12ti_fromitemsEPKcRKNS_7VariantE");
+
+TypedValue* tg_9StableMap_fromItems(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      rv.m_type = KindOfObject;
+      th_9StableMap_fromItems((Value*)(&(rv)), ("StableMap"), (args-0));
+      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("StableMap::fromItems", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::String HPHP::c_StableMap::t___tostring()
 _ZN4HPHP11c_StableMap12t___tostringEv
 
@@ -4061,6 +4391,82 @@ TypedValue* tg_5Tuple_count(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("Tuple::count");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Tuple::t_items()
+_ZN4HPHP7c_Tuple7t_itemsEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_5Tuple_items(Value* _rv, ObjectData* this_) asm("_ZN4HPHP7c_Tuple7t_itemsEv");
+
+TypedValue* tg_5Tuple_items(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_5Tuple_items((Value*)(&(rv)), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Tuple::items", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Tuple::items");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Tuple::t_keys()
+_ZN4HPHP7c_Tuple6t_keysEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_5Tuple_keys(Value* _rv, ObjectData* this_) asm("_ZN4HPHP7c_Tuple6t_keysEv");
+
+TypedValue* tg_5Tuple_keys(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_5Tuple_keys((Value*)(&(rv)), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Tuple::keys", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Tuple::keys");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

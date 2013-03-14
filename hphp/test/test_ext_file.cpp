@@ -607,8 +607,12 @@ bool TestExtFile::test_copy() {
   f_copy("test/test_ext_file.tmp", "test/test_ext_file2.tmp");
   VERIFY(f_file_exists("test/test_ext_file2.tmp"));
   VERIFY(f_file_exists("test/test_ext_file.tmp"));
+
+  // XXX disabled until we work out flaky network issues. t2183444
+#if 0
   f_copy("http://facebook.com", "test/test_ext_file3.tmp");
   VERIFY(f_file_exists("test/test_ext_file3.tmp"));
+#endif
   return Count(true);
 }
 

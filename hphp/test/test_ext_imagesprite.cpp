@@ -228,6 +228,8 @@ bool TestExtImagesprite::test_loadImages() {
   VS(sprite->m_image_data["test/images/php.gif"]->m_height, 67);
   VS(sprite->m_image_data["test/images/php.gif"]->m_image == nullptr, false);
 
+  // XXX disabled until we work out flaky network issues. t2183444
+#if 0
   sprite->t_clear();
   sprite->t_addurl("http://www.facebook.com/images/icons/like.png", -1, dims);
   sprite->t_loadimages(true);
@@ -244,7 +246,7 @@ bool TestExtImagesprite::test_loadImages() {
       ->m_image
       == nullptr,
     false);
-
+#endif
   return Count(true);
 }
 bool TestExtImagesprite::test_map() {

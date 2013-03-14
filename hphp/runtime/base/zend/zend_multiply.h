@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#if defined(__i386__) && defined(__GNUC__)
+#if (defined(__x86_64__) || defined(__i386__)) && defined(__GNUC__)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
     long __tmpvar;                                                      \

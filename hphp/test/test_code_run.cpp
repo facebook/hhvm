@@ -10084,6 +10084,42 @@ bool TestCodeRun::TestCollectionClasses() {
         "bool(false)\n"
         );
 
+  MVCRO("<?php\n"
+        "function f() {\n"
+        "  $mp1 = StableMap {'a' => 1, 2 => 'b', 'c' => array()};\n"
+        "  $mp2 = StableMap {};\n"
+        "  $mp3 = StableMap {};\n"
+        "  foreach ($mp1->items() as $t) {\n"
+        "    $mp2->add($t);\n"
+        "  }\n"
+        "  var_dump($mp2);\n"
+        "  foreach ($mp1->items() as $t) {\n"
+        "    $mp3[] = $t;\n"
+        "  }\n"
+        "  var_dump($mp3);\n"
+        "}\n"
+        "f();\n"
+        ,
+        "object(StableMap)#2 (3) {\n"
+        "  [\"a\"]=>\n"
+        "  int(1)\n"
+        "  [2]=>\n"
+        "  string(1) \"b\"\n"
+        "  [\"c\"]=>\n"
+        "  array(0) {\n"
+        "  }\n"
+        "}\n"
+        "object(StableMap)#3 (3) {\n"
+        "  [\"a\"]=>\n"
+        "  int(1)\n"
+        "  [2]=>\n"
+        "  string(1) \"b\"\n"
+        "  [\"c\"]=>\n"
+        "  array(0) {\n"
+        "  }\n"
+        "}\n"
+        );
+
   return true;
 }
 

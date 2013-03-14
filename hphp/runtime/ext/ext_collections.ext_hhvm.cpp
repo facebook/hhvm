@@ -2083,6 +2083,45 @@ TypedValue* tg_3Map_discard(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Map::t_add(HPHP::Variant const&)
+_ZN4HPHP5c_Map5t_addERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+val => rdx
+*/
+
+Value* th_3Map_add(Value* _rv, ObjectData* this_, TypedValue* val) asm("_ZN4HPHP5c_Map5t_addERKNS_7VariantE");
+
+TypedValue* tg_3Map_add(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_add((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::add", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::add");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Array HPHP::c_Map::t_toarray()
 _ZN4HPHP5c_Map9t_toarrayEv
 
@@ -3519,6 +3558,45 @@ TypedValue* tg_9StableMap_discard(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("StableMap::discard");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_StableMap::t_add(HPHP::Variant const&)
+_ZN4HPHP11c_StableMap5t_addERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+val => rdx
+*/
+
+Value* th_9StableMap_add(Value* _rv, ObjectData* this_, TypedValue* val) asm("_ZN4HPHP11c_StableMap5t_addERKNS_7VariantE");
+
+TypedValue* tg_9StableMap_add(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_add((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::add", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::add");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

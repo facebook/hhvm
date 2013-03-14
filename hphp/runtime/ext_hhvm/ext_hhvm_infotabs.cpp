@@ -2330,6 +2330,7 @@ TypedValue* tg_3Map_containsKey(VM::ActRec *ar);
 TypedValue* tg_3Map_remove(VM::ActRec *ar);
 TypedValue* tg_3Map_removeKey(VM::ActRec *ar);
 TypedValue* tg_3Map_discard(VM::ActRec *ar);
+TypedValue* tg_3Map_add(VM::ActRec *ar);
 TypedValue* tg_3Map_toArray(VM::ActRec *ar);
 TypedValue* tg_3Map_copyAsArray(VM::ActRec *ar);
 TypedValue* tg_3Map_toKeysArray(VM::ActRec *ar);
@@ -2370,6 +2371,7 @@ TypedValue* tg_9StableMap_containsKey(VM::ActRec *ar);
 TypedValue* tg_9StableMap_remove(VM::ActRec *ar);
 TypedValue* tg_9StableMap_removeKey(VM::ActRec *ar);
 TypedValue* tg_9StableMap_discard(VM::ActRec *ar);
+TypedValue* tg_9StableMap_add(VM::ActRec *ar);
 TypedValue* tg_9StableMap_toArray(VM::ActRec *ar);
 TypedValue* tg_9StableMap_copyAsArray(VM::ActRec *ar);
 TypedValue* tg_9StableMap_toKeysArray(VM::ActRec *ar);
@@ -5375,7 +5377,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_VectorIterator[] = {
   { "rewind", tg_14VectorIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Map = 32;
+static const long long hhbc_ext_method_count_Map = 33;
 static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "__construct", tg_3Map___construct },
   { "isEmpty", tg_3Map_isEmpty },
@@ -5392,6 +5394,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "remove", tg_3Map_remove },
   { "removeKey", tg_3Map_removeKey },
   { "discard", tg_3Map_discard },
+  { "add", tg_3Map_add },
   { "toArray", tg_3Map_toArray },
   { "copyAsArray", tg_3Map_copyAsArray },
   { "toKeysArray", tg_3Map_toKeysArray },
@@ -5421,7 +5424,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_MapIterator[] = {
   { "rewind", tg_11MapIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_StableMap = 32;
+static const long long hhbc_ext_method_count_StableMap = 33;
 static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "__construct", tg_9StableMap___construct },
   { "isEmpty", tg_9StableMap_isEmpty },
@@ -5438,6 +5441,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "remove", tg_9StableMap_remove },
   { "removeKey", tg_9StableMap_removeKey },
   { "discard", tg_9StableMap_discard },
+  { "add", tg_9StableMap_add },
   { "toArray", tg_9StableMap_toArray },
   { "copyAsArray", tg_9StableMap_copyAsArray },
   { "toKeysArray", tg_9StableMap_toKeysArray },

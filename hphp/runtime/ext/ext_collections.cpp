@@ -956,6 +956,15 @@ ObjectData* c_Map::clone() {
   return obj;
 }
 
+Object c_Map::t_add(CVarRef val) {
+  TypedValue* tv = (TypedValue*)(&val);
+  if (UNLIKELY(tv->m_type == KindOfRef)) {
+    tv = tv->m_data.pref->tv();
+  }
+  add(tv);
+  return this;
+}
+
 Object c_Map::t_clear() {
   deleteBuckets();
   freeData();
@@ -1337,6 +1346,32 @@ void c_Map::throwOOB(StringData* key) {
   throwStrOOB(key);
 }
 
+void c_Map::add(TypedValue* val) {
+  if (UNLIKELY(val->m_type != KindOfObject ||
+               !val->m_data.pobj->instanceof(c_Tuple::s_cls))) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be an instance of Tuple"));
+    throw e;
+  }
+  auto tup = static_cast<c_Tuple*>(val->m_data.pobj);
+  if (UNLIKELY(tup->t_count() != 2)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Expected Tuple containing exactly two elements"));
+    throw e;
+  }
+  TypedValue* tvKey = &tup->getData()[0];
+  TypedValue* tvValue = &tup->getData()[1];
+  assert(tvKey->m_type != KindOfRef);
+  assert(tvValue->m_type != KindOfRef);
+  if (tvKey->m_type == KindOfInt64) {
+    updateImpl<true>(tvKey->m_data.num, tvValue);
+  } else if (IS_STRING_TYPE(tvKey->m_type)) {
+    updateImpl<true>(tvKey->m_data.pstr, tvValue);
+  } else {
+    throwBadKeyType();
+  }
+}
+
 #define STRING_HASH(x)   (int32_t(x) | 0x80000000)
 
 bool inline hitStringKey(const c_Map::Bucket* p, const char* k,
@@ -1448,11 +1483,17 @@ c_Map::Bucket* c_Map::findForNewInsert(size_t h0) const {
 #undef FIND_BODY
 #undef FIND_FOR_INSERT_BODY
 
-bool c_Map::update(int64_t h, TypedValue* data) {
+template <bool throwIfExists>
+bool c_Map::updateImpl(int64_t h, TypedValue* data) {
   assert(data->m_type != KindOfRef);
   Bucket* p = findForInsert(h);
   assert(p);
   if (p->validValue()) {
+    if (throwIfExists) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "An element with the same key already exists"));
+      throw e;
+    }
     tvRefcountedIncRef(data);
     tvRefcountedDecRef(&p->data);
     p->data.m_data.num = data->m_data.num;
@@ -1475,11 +1516,17 @@ bool c_Map::update(int64_t h, TypedValue* data) {
   return true;
 }
 
-bool c_Map::update(StringData *key, TypedValue* data) {
+template <bool throwIfExists>
+bool c_Map::updateImpl(StringData *key, TypedValue* data) {
   strhash_t h = key->hash();
   Bucket* p = findForInsert(key->data(), key->size(), h);
   assert(p);
   if (p->validValue()) {
+    if (throwIfExists) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "An element with the same key already exists"));
+      throw e;
+    }
     tvRefcountedIncRef(data);
     tvRefcountedDecRef(&p->data);
     p->data.m_data.num = data->m_data.num;
@@ -1698,9 +1745,9 @@ bool c_Map::OffsetContains(ObjectData* obj, TypedValue* key) {
 }
 
 void c_Map::OffsetAppend(ObjectData* obj, TypedValue* val) {
-  Object e(SystemLib::AllocRuntimeExceptionObject(
-    "[] operator not supported for Maps"));
-  throw e;
+  assert(val->m_type != KindOfRef);
+  auto mp = static_cast<c_Map*>(obj);
+  mp->add(val);
 }
 
 void c_Map::OffsetUnset(ObjectData* obj, TypedValue* key) {
@@ -1928,6 +1975,15 @@ ObjectData* c_StableMap::clone() {
   target->m_pListTail = last;
 
   return obj;
+}
+
+Object c_StableMap::t_add(CVarRef val) {
+  TypedValue* tv = (TypedValue*)(&val);
+  if (UNLIKELY(tv->m_type == KindOfRef)) {
+    tv = tv->m_data.pref->tv();
+  }
+  add(tv);
+  return this;
 }
 
 Object c_StableMap::t_clear() {
@@ -2303,6 +2359,32 @@ void c_StableMap::throwOOB(StringData* key) {
   throwStrOOB(key);
 }
 
+void c_StableMap::add(TypedValue* val) {
+  if (UNLIKELY(val->m_type != KindOfObject ||
+               !val->m_data.pobj->instanceof(c_Tuple::s_cls))) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter must be an instance of Tuple"));
+    throw e;
+  }
+  auto tup = static_cast<c_Tuple*>(val->m_data.pobj);
+  if (UNLIKELY(tup->t_count() != 2)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Expected Tuple containing exactly two elements"));
+    throw e;
+  }
+  TypedValue* tvKey = &tup->getData()[0];
+  TypedValue* tvValue = &tup->getData()[1];
+  assert(tvKey->m_type != KindOfRef);
+  assert(tvValue->m_type != KindOfRef);
+  if (tvKey->m_type == KindOfInt64) {
+    updateImpl<true>(tvKey->m_data.num, tvValue);
+  } else if (IS_STRING_TYPE(tvKey->m_type)) {
+    updateImpl<true>(tvKey->m_data.pstr, tvValue);
+  } else {
+    throwBadKeyType();
+  }
+}
+
 bool inline sm_hit_string_key(const c_StableMap::Bucket* p,
                               const char* k, int len, int32_t hash) ALWAYS_INLINE;
 bool inline sm_hit_string_key(const c_StableMap::Bucket* p,
@@ -2358,9 +2440,15 @@ c_StableMap::Bucket** c_StableMap::findForErase(const char* k, int len,
   return NULL;
 }
 
-bool c_StableMap::update(int64_t h, TypedValue* data) {
+template <bool throwIfExists>
+bool c_StableMap::updateImpl(int64_t h, TypedValue* data) {
   Bucket* p = find(h);
   if (p) {
+    if (throwIfExists) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "An element with the same key already exists"));
+      throw e;
+    }
     tvRefcountedIncRef(data);
     tvRefcountedDecRef(&p->data);
     p->data.m_data.num = data->m_data.num;
@@ -2380,10 +2468,16 @@ bool c_StableMap::update(int64_t h, TypedValue* data) {
   return true;
 }
 
-bool c_StableMap::update(StringData *key, TypedValue* data) {
+template <bool throwIfExists>
+bool c_StableMap::updateImpl(StringData *key, TypedValue* data) {
   strhash_t h = key->hash();
   Bucket* p = find(key->data(), key->size(), h);
   if (p) {
+    if (throwIfExists) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "An element with the same key already exists"));
+      throw e;
+    }
     tvRefcountedIncRef(data);
     tvRefcountedDecRef(&p->data);
     p->data.m_data.num = data->m_data.num;
@@ -2754,9 +2848,9 @@ bool c_StableMap::OffsetContains(ObjectData* obj, TypedValue* key) {
 }
 
 void c_StableMap::OffsetAppend(ObjectData* obj, TypedValue* val) {
-  Object e(SystemLib::AllocRuntimeExceptionObject(
-    "[] operator not supported for StableMaps"));
-  throw e;
+  assert(val->m_type != KindOfRef);
+  auto smp = static_cast<c_StableMap*>(obj);
+  smp->add(val);
 }
 
 void c_StableMap::OffsetUnset(ObjectData* obj, TypedValue* key) {

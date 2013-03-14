@@ -321,6 +321,8 @@ DefineFunction(
   array(
     'name'   => "add",
     'flags'  =>  HasDocComment,
+    'desc'   => "Adds the specified value to the end of this Vector using ".
+                "the next available integer key.",
     'return' => array(
       'type'   => Object,
     ),
@@ -927,6 +929,24 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "add",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Adds the specified key/value Tuple to this Map. If an ".
+                "element with the same key is already present, an exception ".
+                "is thrown.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "val",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "toArray",
     'flags'  =>  HasDocComment,
     'desc'   => "Returns an array built from the keys and values from this ".
@@ -1469,6 +1489,24 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "key",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "add",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Adds the specified key/value Tuple to this StableMap. If an ".
+                "element with the same key is already present, an exception ".
+                "is thrown.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "val",
         'type'   => Variant,
       ),
     ),

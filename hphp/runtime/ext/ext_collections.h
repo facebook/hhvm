@@ -227,6 +227,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: ~c_Map();
   public: void freeData();
   public: void t___construct(CVarRef iterable = null_variant);
+  public: Object t_add(CVarRef val);
   public: Object t_clear();
   public: bool t_isempty();
   public: int64_t t_count();
@@ -303,6 +304,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
     assert(val->m_type != KindOfRef);
     update(key, val);
   }
+  public: void add(TypedValue* val);
   public: void remove(int64_t key) {
     ++m_versionNumber;
     erase(find(key));
@@ -457,8 +459,16 @@ private:
   Bucket* findForInsert(const char* k, int len, strhash_t prehash) const;
   Bucket* findForNewInsert(size_t h0) const;
 
-  bool update(int64_t h, TypedValue* data);
-  bool update(StringData* key, TypedValue* data);
+  template <bool throwIfExists=false>
+  bool updateImpl(int64_t h, TypedValue* data);
+  template <bool throwIfExists=false>
+  bool updateImpl(StringData* key, TypedValue* data);
+  bool update(int64_t h, TypedValue* data) {
+    return updateImpl<>(h, data);
+  }
+  bool update(StringData* key, TypedValue* data) {
+    return updateImpl<>(key, data);
+  }
   void erase(Bucket* prev);
 
   void resize();
@@ -523,6 +533,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: ~c_StableMap();
   public: void freeData();
   public: void t___construct(CVarRef iterable = null_variant);
+  public: Object t_add(CVarRef val);
   public: Object t_clear();
   public: bool t_isempty();
   public: int64_t t_count();
@@ -597,6 +608,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: void set(StringData* key, TypedValue* val) {
     update(key, val);
   }
+  public: void add(TypedValue* val);
   public: void remove(int64_t key) {
     ++m_versionNumber;
     erase(findForErase(key));
@@ -713,8 +725,16 @@ private:
   Bucket** findForErase(int64_t h) const;
   Bucket** findForErase(const char* k, int len, strhash_t prehash) const;
 
-  bool update(int64_t h, TypedValue* data);
-  bool update(StringData* key, TypedValue* data);
+  template <bool throwIfExists=false>
+  bool updateImpl(int64_t h, TypedValue* data);
+  template <bool throwIfExists=false>
+  bool updateImpl(StringData* key, TypedValue* data);
+  bool update(int64_t h, TypedValue* data) {
+    return updateImpl<>(h, data);
+  }
+  bool update(StringData* key, TypedValue* data) {
+    return updateImpl<>(key, data);
+  }
   void erase(Bucket** prev);
 
   void resize();

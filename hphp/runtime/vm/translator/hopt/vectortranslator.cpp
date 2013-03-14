@@ -630,6 +630,7 @@ SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
   SSATmp* baseAsObj, SSATmp* propAddr,
   int propOffset, bool doWarn, bool doDefine) {
   SSATmp* key = getInput(m_iInd);
+  assert(key->isA(Type::StaticStr));
   assert(baseAsObj->isA(Type::Obj));
   assert(propAddr->getType().isPtr());
   // The m_mInd check is to avoid initializing a property to
@@ -668,8 +669,6 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
   const bool doDefine = mia & MIA_define || mia & MIA_unset;
 
   SSATmp* initNull = cns((const TypedValue*)&init_null_variant);
-  SSATmp* key = getInput(m_iInd);
-  assert(key->isA(Type::StaticStr));
 
   /*
    * Type-inference from hphpc only tells us that this is either an object of a

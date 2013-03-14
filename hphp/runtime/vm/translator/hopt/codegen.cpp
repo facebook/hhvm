@@ -222,26 +222,6 @@ pathloop:
   }
 }
 
-ConditionCode cmpOpToCC(Opcode opc) {
-  switch (opc) {
-  case OpGt:                return CC_G;
-  case OpGte:               return CC_GE;
-  case OpLt:                return CC_L;
-  case OpLte:               return CC_LE;
-  case OpEq:                return CC_E;
-  case OpNeq:               return CC_NE;
-  case OpSame:              return CC_E;
-  case OpNSame:             return CC_NE;
-  case InstanceOf:          return CC_NZ;
-  case NInstanceOf:         return CC_Z;
-  case InstanceOfBitmask:   return CC_NZ;
-  case NInstanceOfBitmask:  return CC_Z;
-  case IsType:              return CC_NZ;
-  case IsNType:             return CC_Z;
-  default:                  always_assert(0);
-  }
-}
-
 const char* getContextName(Class* ctx) {
   return ctx ? ctx->name()->data() : ":anonymous:";
 }
@@ -534,7 +514,7 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
   SSATmp* src1  = inst->getSrc(0);
   SSATmp* src2  = inst->getSrc(1);
   Opcode opc = inst->getOpcode();
-  ConditionCode cc = cmpOpToCC(queryJmpToQueryOp(opc));
+  ConditionCode cc = queryJmpToCC(opc);
   Type src1Type = src1->getType();
   Type src2Type = src2->getType();
 
@@ -2253,7 +2233,7 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
         // Patch the original jcc;jmp, don't emit another
         IRInstruction* jcc = toSmash->getInstruction();
         Opcode         opc = jcc->getOpcode();
-        ConditionCode  cc  = cmpOpToCC(queryJmpToQueryOp(opc));
+        ConditionCode   cc = queryJmpToCC(opc);
         uint64_t     taken = pc->getValInt();
         uint64_t  notTaken = notTakenPC->getValInt();
 

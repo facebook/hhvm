@@ -629,12 +629,58 @@ inline Opcode queryToJmpOp(Opcode opc) {
 }
 
 inline bool isQueryJmpOp(Opcode opc) {
-  return opc >= JmpGt && opc <= JmpIsNType;
+  switch (opc) {
+    case JmpGt:
+    case JmpGte:
+    case JmpLt:
+    case JmpLte:
+    case JmpEq:
+    case JmpNeq:
+    case JmpSame:
+    case JmpNSame:
+    case JmpInstanceOf:
+    case JmpNInstanceOf:
+    case JmpInstanceOfBitmask:
+    case JmpNInstanceOfBitmask:
+    case JmpIsType:
+    case JmpIsNType:
+    case JmpZero:
+    case JmpNZero:
+      return true;
+    default:
+      return false;
+  }
 }
 
 inline Opcode queryJmpToQueryOp(Opcode opc) {
   assert(isQueryJmpOp(opc));
+  assert(opc != JmpZero && opc != JmpNZero);
   return Opcode(OpGt + (opc - JmpGt));
+}
+
+inline ConditionCode queryJmpToCC(Opcode opc) {
+  assert(isQueryJmpOp(opc));
+
+  switch (opc) {
+    case JmpGt:                 return CC_G;
+    case JmpGte:                return CC_GE;
+    case JmpLt:                 return CC_L;
+    case JmpLte:                return CC_LE;
+    case JmpEq:                 return CC_E;
+    case JmpNeq:                return CC_NE;
+    case JmpSame:               return CC_E;
+    case JmpNSame:              return CC_NE;
+    case JmpInstanceOf:         return CC_NZ;
+    case JmpNInstanceOf:        return CC_Z;
+    case JmpInstanceOfBitmask:  return CC_NZ;
+    case JmpNInstanceOfBitmask: return CC_Z;
+    case JmpIsType:             return CC_NZ;
+    case JmpIsNType:            return CC_Z;
+    case JmpZero:               return CC_Z;
+    case JmpNZero:              return CC_NZ;
+    default:
+      not_reached();
+  }
 }
 
 /*

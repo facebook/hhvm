@@ -23,10 +23,7 @@ namespace HPHP { namespace VM { namespace JIT {
 // These are the conditional branches supported for direct branch
 // to their target trace at TraceExit, TraceExitType::NormalCc
 static bool jccCanBeDirectExit(Opcode opc) {
-  // JmpGt .. JmpNSame are contiguous and all use cgJcc
-  return (JmpGt <= opc && opc <= JmpNSame) ||
-    opc == JmpInstanceOf || opc == JmpNInstanceOf ||
-    opc == JmpInstanceOfBitmask || opc == JmpNInstanceOfBitmask;
+  return isQueryJmpOp(opc) && (opc != JmpIsType) && (opc != JmpIsNType);
     // TODO(#2053369): JmpIsType, etc
 }
 

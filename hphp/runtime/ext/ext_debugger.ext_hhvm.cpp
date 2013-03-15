@@ -178,7 +178,7 @@ TypedValue * fg1_hphpd_get_client(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_hphpd_get_client(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  String defVal0 = null;
+  String defVal0 = uninit_null();
   fh_hphpd_get_client((rv), (count > 0) ? (Value*)(args-0) : (Value*)(&defVal0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -190,7 +190,7 @@ TypedValue* fg_hphpd_get_client(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        String defVal0 = null;
+        String defVal0 = uninit_null();
         fh_hphpd_get_client((&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&defVal0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);

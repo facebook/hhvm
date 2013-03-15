@@ -129,7 +129,7 @@ bool TestExtIcu::test_icu_match() {
     ")\n");
 
   // Test regex caching functionality.
-  VERIFY(f_icu_match("(php)", subject, null, k_UREGEX_CASE_INSENSITIVE));
+  VERIFY(f_icu_match("(php)", subject, uninit_null(), k_UREGEX_CASE_INSENSITIVE));
   VERIFY(!f_icu_match("(php)", subject));
 
   // Test ICU specific (ie bidi) functionality.

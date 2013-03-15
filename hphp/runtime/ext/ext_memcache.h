@@ -30,7 +30,7 @@ Object f_memcache_pconnect(CStrRef host, int port = 0, int timeout = 0, int time
 bool f_memcache_add(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0);
 bool f_memcache_set(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0);
 bool f_memcache_replace(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0);
-Variant f_memcache_get(CObjRef memcache, CVarRef key, VRefParam flags = null);
+Variant f_memcache_get(CObjRef memcache, CVarRef key, VRefParam flags = uninit_null());
 bool f_memcache_delete(CObjRef memcache, CStrRef key, int expire = 0);
 int64_t f_memcache_increment(CObjRef memcache, CStrRef key, int offset = 1);
 int64_t f_memcache_decrement(CObjRef memcache, CStrRef key, int offset = 1);
@@ -63,7 +63,7 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   public: bool t_add(CStrRef key, CVarRef var, int flag = 0, int expire = 0);
   public: bool t_set(CStrRef key, CVarRef var, int flag = 0, int expire = 0);
   public: bool t_replace(CStrRef key, CVarRef var, int flag = 0, int expire = 0);
-  public: Variant t_get(CVarRef key, VRefParam flags = null);
+  public: Variant t_get(CVarRef key, VRefParam flags = uninit_null());
   public: bool t_delete(CStrRef key, int expire = 0);
   public: int64_t t_increment(CStrRef key, int offset = 1);
   public: int64_t t_decrement(CStrRef key, int offset = 1);

@@ -829,7 +829,7 @@ TypedValue * fg1_php_check_syntax(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  VRefParamValue defVal1 = null;
+  VRefParamValue defVal1 = uninit_null();
   rv->m_data.num = (fh_php_check_syntax((Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1))) ? 1LL : 0LL;
   return rv;
 }
@@ -841,7 +841,7 @@ TypedValue* fg_php_check_syntax(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        VRefParamValue defVal1 = null;
+        VRefParamValue defVal1 = uninit_null();
         rv.m_data.num = (fh_php_check_syntax((Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

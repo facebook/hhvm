@@ -1545,7 +1545,7 @@ public:
 
       return ret;
     }
-    return null;
+    return uninit_null();
   }
 
   /**
@@ -1587,7 +1587,7 @@ Variant f_hotprofiler_disable() {
 #ifdef HOTPROFILER
   return s_factory->stop();
 #else
-  return null;
+  return uninit_null();
 #endif
 }
 
@@ -1601,7 +1601,7 @@ Variant f_phprof_disable() {
 #ifdef HOTPROFILER
   return s_factory->stop();
 #else
-  return null;
+  return uninit_null();
 #endif
 }
 
@@ -1661,7 +1661,7 @@ Variant f_xhprof_disable() {
 #ifdef HOTPROFILER
   return s_factory->stop();
 #else
-  return null;
+  return uninit_null();
 #endif
 }
 
@@ -1683,7 +1683,7 @@ Variant f_xhprof_sample_disable() {
 #ifdef HOTPROFILER
   return s_factory->stop();
 #else
-  return null;
+  return uninit_null();
 #endif
 }
 
@@ -1697,7 +1697,7 @@ Variant f_xhprof_run_trace(CStrRef packedTrace, int flags) {
 
   int MHz;
   if (sscanf(syms, xhprof_trace_speed, &MHz) != 1) {
-    return null;
+    return uninit_null();
   }
 
   vector<char *>symbols;
@@ -1720,7 +1720,7 @@ Variant f_xhprof_run_trace(CStrRef packedTrace, int flags) {
       toup->symbol.ptr = NULL;
     } else {
       // corrupt trace
-      return null;
+      return uninit_null();
     }
   }
 
@@ -1731,7 +1731,7 @@ Variant f_xhprof_run_trace(CStrRef packedTrace, int flags) {
   Profiler::extractStats(result, stats, flags, MHz);
   return result;
 #else
-  return null;
+  return uninit_null();
 #endif
 }
 

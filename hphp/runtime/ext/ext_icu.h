@@ -31,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_icu_match(CStrRef pattern, CStrRef subject,
-                    VRefParam matches = null, int64_t flags = 0);
+                    VRefParam matches = uninit_null(), int64_t flags = 0);
 String f_icu_transliterate(CStrRef str, bool remove_accents);
 Array f_icu_tokenize(CStrRef text);
 extern const int64_t k_UREGEX_CASE_INSENSITIVE;

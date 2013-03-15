@@ -61,13 +61,13 @@ bool TestExtFb::RunTests(const std::string &which) {
     VERIFY(ss_[0] & 0x80);                                              \
     VS(f_fb_compact_unserialize(s_, ref(ret)), v_);                     \
     VERIFY(same(ret, true));                                            \
-    ret = null;                                                         \
+    ret = uninit_null();                                                         \
     VS(f_fb_unserialize(s_, ref(ret)), v_);                             \
     VERIFY(same(ret, true));                                            \
   } while(0)
 
 bool TestExtFb::test_fb_compact_serialize() {
-  fb_cs_test(null);
+  fb_cs_test(uninit_null());
   fb_cs_test(true);
   fb_cs_test(false);
   fb_cs_test(1234.5678);
@@ -131,7 +131,7 @@ bool TestExtFb::test_fb_thrift_serialize() {
   VS(f_fb_thrift_unserialize(f_fb_thrift_serialize("test"), ref(ret)), "test");
   VERIFY(same(ret, true));
 
-  ret = null;
+  ret = uninit_null();
   VS(f_fb_thrift_unserialize(f_fb_thrift_serialize(CREATE_VECTOR1("test")),
                              ref(ret)),
      CREATE_VECTOR1("test"));
@@ -325,7 +325,7 @@ bool TestExtFb::test_fb_call_user_func_safe() {
   {
     Variant ret = f_fb_call_user_func_safe
       (1, "NonTEst", CREATE_VECTOR1("param"));
-    VS(ret, CREATE_VECTOR2(false, null));
+    VS(ret, CREATE_VECTOR2(false, uninit_null()));
   }
   return Count(true);
 }
@@ -353,7 +353,7 @@ bool TestExtFb::test_fb_call_user_func_array_safe() {
   {
     Variant ret = f_fb_call_user_func_array_safe
       ("NonTest", CREATE_VECTOR1("param"));
-    VS(ret, CREATE_VECTOR2(false, null));
+    VS(ret, CREATE_VECTOR2(false, uninit_null()));
   }
   return Count(true);
 }

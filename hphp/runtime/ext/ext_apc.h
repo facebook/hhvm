@@ -27,11 +27,11 @@ namespace HPHP {
 
 bool f_apc_add(CStrRef key, CVarRef var, int64_t ttl = 0, int64_t cache_id = 0);
 bool f_apc_store(CStrRef key, CVarRef var, int64_t ttl = 0, int64_t cache_id = 0);
-Variant f_apc_fetch(CVarRef key, VRefParam success = null, int64_t cache_id = 0);
+Variant f_apc_fetch(CVarRef key, VRefParam success = uninit_null(), int64_t cache_id = 0);
 Variant f_apc_delete(CVarRef key, int64_t cache_id = 0);
 bool f_apc_clear_cache(int64_t cache_id = 0);
-Variant f_apc_inc(CStrRef key, int64_t step = 1, VRefParam success = null, int64_t cache_id = 0);
-Variant f_apc_dec(CStrRef key, int64_t step = 1, VRefParam success = null, int64_t cache_id = 0);
+Variant f_apc_inc(CStrRef key, int64_t step = 1, VRefParam success = uninit_null(), int64_t cache_id = 0);
+Variant f_apc_dec(CStrRef key, int64_t step = 1, VRefParam success = uninit_null(), int64_t cache_id = 0);
 bool f_apc_cas(CStrRef key, int64_t old_cas, int64_t new_cas, int64_t cache_id = 0);
 Variant f_apc_exists(CVarRef key, int64_t cache_id = 0);
 
@@ -68,10 +68,10 @@ inline bool f_apc_bin_load(CStrRef data, int64_t flags = 0, int64_t cache_id = 0
 }
 inline Variant f_apc_bin_dumpfile(int64_t cache_id, CVarRef filter,
                                   CStrRef filename, int64_t flags = 0,
-                                  CObjRef context = null) {
+                                  CObjRef context = uninit_null()) {
   throw NotSupportedException(__func__, "feature not supported");
 }
-inline bool f_apc_bin_loadfile(CStrRef filename, CObjRef context = null,
+inline bool f_apc_bin_loadfile(CStrRef filename, CObjRef context = uninit_null(),
                                int64_t flags = 0, int64_t cache_id = 0) {
   throw NotSupportedException(__func__, "feature not supported");
 }

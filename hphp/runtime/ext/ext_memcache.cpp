@@ -144,11 +144,11 @@ String static memcache_prepare_for_storage(CVarRef var, int &flag) {
 Variant static memcache_fetch_from_storage(const char *payload,
                                            size_t payload_len,
                                            uint32_t flags) {
-  Variant ret = null;
+  Variant ret = uninit_null();
 
   if (flags & MMC_COMPRESSED) {
     raise_warning("Unable to handle compressed values yet");
-    return null;
+    return uninit_null();
   }
 
   if (flags & MMC_SERIALIZED) {
@@ -547,7 +547,7 @@ bool c_Memcache::t_addserver(CStrRef host, int port /* = 11211 */,
 
 Variant c_Memcache::t___destruct() {
   t_close();
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

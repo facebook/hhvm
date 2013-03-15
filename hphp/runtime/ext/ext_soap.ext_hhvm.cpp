@@ -789,7 +789,7 @@ TypedValue* tg1_10SoapClient___soapcall(TypedValue* rv, HPHP::VM::ActRec* ar, in
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  VRefParamValue defVal4 = null;
+  VRefParamValue defVal4 = uninit_null();
   th_10SoapClient___soapcall((rv), (this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_array), (count > 3) ? (args-3) : (TypedValue*)(&null_variant), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -803,7 +803,7 @@ TypedValue* tg_10SoapClient___soapcall(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 5LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfArray) && (args-1)->m_type == KindOfArray && IS_STRING_TYPE((args-0)->m_type)) {
-          VRefParamValue defVal4 = null;
+          VRefParamValue defVal4 = uninit_null();
           th_10SoapClient___soapcall((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_array), (count > 3) ? (args-3) : (TypedValue*)(&null_variant), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 5);

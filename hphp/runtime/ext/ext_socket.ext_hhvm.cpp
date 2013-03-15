@@ -59,8 +59,8 @@ TypedValue * fg1_fsockopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  VRefParamValue defVal2 = null;
-  VRefParamValue defVal3 = null;
+  VRefParamValue defVal2 = uninit_null();
+  VRefParamValue defVal3 = uninit_null();
   fh_fsockopen((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args[-4].m_data.dbl) : (double)(0.0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -72,8 +72,8 @@ TypedValue* fg_fsockopen(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfDouble) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        VRefParamValue defVal2 = null;
-        VRefParamValue defVal3 = null;
+        VRefParamValue defVal2 = uninit_null();
+        VRefParamValue defVal3 = uninit_null();
         fh_fsockopen((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args[-4].m_data.dbl) : (double)(0.0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
@@ -133,8 +133,8 @@ TypedValue * fg1_pfsockopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  VRefParamValue defVal2 = null;
-  VRefParamValue defVal3 = null;
+  VRefParamValue defVal2 = uninit_null();
+  VRefParamValue defVal3 = uninit_null();
   fh_pfsockopen((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args[-4].m_data.dbl) : (double)(0.0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -146,8 +146,8 @@ TypedValue* fg_pfsockopen(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfDouble) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        VRefParamValue defVal2 = null;
-        VRefParamValue defVal3 = null;
+        VRefParamValue defVal2 = uninit_null();
+        VRefParamValue defVal3 = uninit_null();
         fh_pfsockopen((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args[-4].m_data.dbl) : (double)(0.0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
@@ -430,7 +430,7 @@ TypedValue * fg1_socket_getpeername(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   rv->m_data.num = (fh_socket_getpeername((Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
   return rv;
 }
@@ -442,7 +442,7 @@ TypedValue* fg_socket_getpeername(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         rv.m_data.num = (fh_socket_getpeername((Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -483,7 +483,7 @@ TypedValue * fg1_socket_getsockname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   rv->m_data.num = (fh_socket_getsockname((Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
   return rv;
 }
@@ -495,7 +495,7 @@ TypedValue* fg_socket_getsockname(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         rv.m_data.num = (fh_socket_getsockname((Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -949,8 +949,8 @@ TypedValue * fg1_socket_server(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  VRefParamValue defVal2 = null;
-  VRefParamValue defVal3 = null;
+  VRefParamValue defVal2 = uninit_null();
+  VRefParamValue defVal3 = uninit_null();
   fh_socket_server((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -962,8 +962,8 @@ TypedValue* fg_socket_server(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        VRefParamValue defVal2 = null;
-        VRefParamValue defVal3 = null;
+        VRefParamValue defVal2 = uninit_null();
+        VRefParamValue defVal3 = uninit_null();
         fh_socket_server((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);

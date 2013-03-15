@@ -174,11 +174,11 @@ bool TestExtSocket::test_socket_select() {
   Variant s = f_socket_accept(server);
 
   Variant reads = CREATE_VECTOR1(s);
-  VS(f_socket_select(ref(reads), null, null, 1, 0), 0);
+  VS(f_socket_select(ref(reads), uninit_null(), uninit_null(), 1, 0), 0);
 
   VERIFY(f_socket_write(client, "testing"));
   reads = CREATE_VECTOR1(s);
-  VS(f_socket_select(ref(reads), null, null, 1, 0), 1);
+  VS(f_socket_select(ref(reads), uninit_null(), uninit_null(), 1, 0), 1);
   return Count(true);
 }
 
@@ -193,11 +193,11 @@ bool TestExtSocket::test_socket_server() {
   Variant s = f_socket_accept(server);
 
   Variant reads = CREATE_VECTOR1(s);
-  VS(f_socket_select(ref(reads), null, null, 1, 0), 0);
+  VS(f_socket_select(ref(reads), uninit_null(), uninit_null(), 1, 0), 0);
 
   VERIFY(f_socket_write(client, "testing"));
   reads = CREATE_VECTOR1(s);
-  VS(f_socket_select(ref(reads), null, null, 1, 0), 1);
+  VS(f_socket_select(ref(reads), uninit_null(), uninit_null(), 1, 0), 1);
   return Count(true);
 }
 

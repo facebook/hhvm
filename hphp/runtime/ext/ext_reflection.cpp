@@ -506,7 +506,7 @@ Variant f_hphp_get_class_constant(CVarRef cls, CVarRef name) {
   TypedValue *res = g_vmContext->lookupClsCns(cls.toString().get(),
                                               name.toString().get());
   if (res) return tvAsCVarRef(res);
-  return null;
+  return uninit_null();
 }
 
 static Array get_class_info(const ClassInfo *cls) {

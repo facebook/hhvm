@@ -166,7 +166,7 @@ Array TimeZone::GetAbbreviations() {
     if (entry->full_tz_name) {
       element.set("timezone_id", String(entry->full_tz_name, AttachLiteral));
     } else {
-      element.set("timezone_id", null);
+      element.set("timezone_id", uninit_null());
     }
 
     ret.lvalAt(entry->name).append(element);

@@ -148,7 +148,7 @@ void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
     thrift.read(sdata);
     int error = DebuggerWireHelpers::WireUnserialize(sdata, m_ret);
     if (error) {
-      m_ret = null;
+      m_ret = uninit_null();
     }
     if (error == DebuggerWireHelpers::HitLimit) {
       m_wireError = "Hit unserialization limit. "

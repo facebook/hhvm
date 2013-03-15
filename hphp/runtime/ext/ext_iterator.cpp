@@ -501,20 +501,20 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
 }
 
 Variant c_MutableArrayIterator::t___destruct() {
-  return null;
+  return uninit_null();
 }
 
 Variant c_MutableArrayIterator::t_currentref() {
-  if (!m_valid) return null;
+  if (!m_valid) return uninit_null();
   MArrayIter& mi = marr();
-  if (mi.end()) return null;
+  if (mi.end()) return uninit_null();
   return strongBind(mi.val());
 }
 
 Variant c_MutableArrayIterator::t_current() {
-  if (!m_valid) return null;
+  if (!m_valid) return uninit_null();
   MArrayIter& mi = marr();
-  if (mi.end()) return null;
+  if (mi.end()) return uninit_null();
   return mi.val();
 }
 

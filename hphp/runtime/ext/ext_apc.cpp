@@ -422,7 +422,7 @@ void const_load_impl(struct cache_info *info,
         switch (*v++) {
         case 0: value = false; break;
         case 1: value = true; break;
-        case 2: value = null; break;
+        case 2: value = uninit_null(); break;
         default:
           throw Exception("bad apc archive, unknown char type");
         }
@@ -526,7 +526,7 @@ void apc_load_impl(struct cache_info *info,
         switch (*v++) {
         case 0: s.constructPrime(false, item); break;
         case 1: s.constructPrime(true , item); break;
-        case 2: s.constructPrime(null , item); break;
+        case 2: s.constructPrime(uninit_null() , item); break;
         default:
           throw Exception("bad apc archive, unknown char type");
         }
@@ -656,7 +656,7 @@ void const_load_impl_compressed
         switch (*v++) {
         case 0: value = false; break;
         case 1: value = true; break;
-        case 2: value = null; break;
+        case 2: value = uninit_null(); break;
         default:
           throw Exception("bad const archive, unknown char type");
         }
@@ -802,7 +802,7 @@ void apc_load_impl_compressed
         switch (*v++) {
         case 0: s.constructPrime(false, item); break;
         case 1: s.constructPrime(true , item); break;
-        case 2: s.constructPrime(null , item); break;
+        case 2: s.constructPrime(uninit_null() , item); break;
         default:
           throw Exception("bad apc archive, unknown char type");
         }

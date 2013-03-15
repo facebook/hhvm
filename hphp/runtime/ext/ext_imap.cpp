@@ -1221,7 +1221,7 @@ Variant f_imap_last_error() {
       return String((const char *)cur->text.data, CopyString);
     }
   }
-  return null;
+  return uninit_null();
 }
 
 Variant f_imap_list(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {

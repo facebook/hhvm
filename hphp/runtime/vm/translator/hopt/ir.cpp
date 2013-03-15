@@ -945,7 +945,7 @@ Variant SSATmp::getValVariant() const {
   switch (m_inst->getTypeParam().toDataType()) {
   case KindOfUninit:
   case KindOfNull:
-    return null;
+    return uninit_null();
   case KindOfBoolean:
     return m_inst->getExtra<ConstData>()->as<bool>();
   case KindOfInt64:
@@ -963,7 +963,7 @@ Variant SSATmp::getValVariant() const {
     return m_inst->getExtra<ConstData>()->as<const Object*>();
   default:
     assert(false);
-    return null;
+    return uninit_null();
   }
 }
 

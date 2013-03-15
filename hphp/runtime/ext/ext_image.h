@@ -50,7 +50,7 @@ private:
 };
 
 Array f_gd_info();
-Variant f_getimagesize(CStrRef filename, VRefParam imageinfo = null);
+Variant f_getimagesize(CStrRef filename, VRefParam imageinfo = uninit_null());
 String f_image_type_to_extension(int imagetype, bool include_dot = true);
 String f_image_type_to_mime_type(int imagetype);
 bool f_image2wbmp(CObjRef image, CStrRef filename = null_string, int threshold = -1);
@@ -105,8 +105,8 @@ bool f_imagefilltoborder(CObjRef image, int x, int y, int border, int color);
 bool f_imagefilter(CObjRef image, int filtertype, int arg1 = 0, int arg2 = 0, int arg3 = 0, int arg4 = 0);
 int64_t f_imagefontheight(int font);
 int64_t f_imagefontwidth(int font);
-Variant f_imageftbbox(double size, double angle, CStrRef font_file, CStrRef text, CArrRef extrainfo = null);
-Variant f_imagefttext(CObjRef image, double size, double angle, int x, int y, int col, CStrRef font_file, CStrRef text, CArrRef extrainfo = null);
+Variant f_imageftbbox(double size, double angle, CStrRef font_file, CStrRef text, CArrRef extrainfo = uninit_null());
+Variant f_imagefttext(CObjRef image, double size, double angle, int x, int y, int col, CStrRef font_file, CStrRef text, CArrRef extrainfo = uninit_null());
 bool f_imagegammacorrect(CObjRef image, double inputgamma, double outputgamma);
 bool f_imagegd2(CObjRef image, CStrRef filename = null_string, int chunk_size = 0, int type = 0);
 bool f_imagegd(CObjRef image, CStrRef filename = null_string);
@@ -155,7 +155,7 @@ Variant f_exif_imagetype(CStrRef filename);
 Variant f_exif_read_data(CStrRef filename, CStrRef sections = null_string, bool arrays = false, bool thumbnail = false);
 Variant f_read_exif_data(CStrRef filename, CStrRef sections = null_string, bool arrays = false, bool thumbnail = false);
 Variant f_exif_tagname(int index);
-Variant f_exif_thumbnail(CStrRef filename, VRefParam width = null, VRefParam height = null, VRefParam imagetype = null);
+Variant f_exif_thumbnail(CStrRef filename, VRefParam width = uninit_null(), VRefParam height = uninit_null(), VRefParam imagetype = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 }

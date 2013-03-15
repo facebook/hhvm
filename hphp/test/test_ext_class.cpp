@@ -91,7 +91,7 @@ bool TestExtClass::test_get_class_methods() {
 
 bool TestExtClass::test_get_class_vars() {
   Array properties = f_get_class_vars("TEst");
-  VS(properties, CREATE_MAP1("foo", null));
+  VS(properties, CREATE_MAP1("foo", uninit_null()));
   return Count(true);
 }
 

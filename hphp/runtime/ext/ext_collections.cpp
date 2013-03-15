@@ -130,7 +130,7 @@ void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
 }
 
 Variant c_Vector::t___destruct() {
-  return null;
+  return uninit_null();
 }
 
 void c_Vector::grow() {
@@ -278,7 +278,7 @@ Variant c_Vector::t_at(CVarRef key) {
     return tvAsCVarRef(at(key.toInt64()));
   }
   throwBadKeyType();
-  return null;
+  return uninit_null();
 }
 
 Variant c_Vector::t_get(CVarRef key) {
@@ -287,11 +287,11 @@ Variant c_Vector::t_get(CVarRef key) {
     if (tv) {
       return tvAsCVarRef(tv);
     } else {
-      return null;
+      return uninit_null();
     }
   }
   throwBadKeyType();
-  return null;
+  return uninit_null();
 }
 
 bool c_Vector::t_contains(CVarRef key) {
@@ -883,7 +883,7 @@ void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
 }
 
 Variant c_Map::t___destruct() {
-  return null;
+  return uninit_null();
 }
 
 Array c_Map::toArrayImpl() const {
@@ -957,7 +957,7 @@ Variant c_Map::t_at(CVarRef key) {
     return tvAsCVarRef(at(key.getStringData()));
   }
   throwBadKeyType();
-  return null;
+  return uninit_null();
 }
 
 Variant c_Map::t_get(CVarRef key) {
@@ -966,18 +966,18 @@ Variant c_Map::t_get(CVarRef key) {
     if (tv) {
       return tvAsCVarRef(tv);
     } else {
-      return null;
+      return uninit_null();
     }
   } else if (key.isString()) {
     TypedValue* tv = get(key.getStringData());
     if (tv) {
       return tvAsCVarRef(tv);
     } else {
-      return null;
+      return uninit_null();
     }
   }
   throwBadKeyType();
-  return null;
+  return uninit_null();
 }
 
 Object c_Map::t_set(CVarRef key, CVarRef value) {
@@ -1793,7 +1793,7 @@ void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
 }
 
 Variant c_StableMap::t___destruct() {
-  return null;
+  return uninit_null();
 }
 
 Array c_StableMap::toArrayImpl() const {
@@ -1884,7 +1884,7 @@ Variant c_StableMap::t_at(CVarRef key) {
     return tvAsCVarRef(at(key.getStringData()));
   }
   throwBadKeyType();
-  return null;
+  return uninit_null();
 }
 
 Variant c_StableMap::t_get(CVarRef key) {
@@ -1893,18 +1893,18 @@ Variant c_StableMap::t_get(CVarRef key) {
     if (tv) {
       return tvAsCVarRef(tv);
     } else {
-      return null;
+      return uninit_null();
     }
   } else if (key.isString()) {
     TypedValue* tv = get(key.getStringData());
     if (tv) {
       return tvAsCVarRef(tv);
     } else {
-      return null;
+      return uninit_null();
     }
   }
   throwBadKeyType();
-  return null;
+  return uninit_null();
 }
 
 Object c_StableMap::t_set(CVarRef key, CVarRef value) {

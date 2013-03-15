@@ -610,7 +610,7 @@ class CompactReader {
       switch (type) {
         case T_STOP:
         case T_VOID:
-          return null;
+          return uninit_null();
 
         case T_STRUCT: {
             Variant className = spec.rvalAt(s_class);

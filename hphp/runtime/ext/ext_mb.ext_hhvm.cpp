@@ -1342,7 +1342,7 @@ TypedValue * fg1_mb_ereg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __
 TypedValue * fg1_mb_ereg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   fh_mb_ereg((rv), (args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -1354,7 +1354,7 @@ TypedValue* fg_mb_ereg(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         fh_mb_ereg((&(rv)), (args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
@@ -1462,7 +1462,7 @@ TypedValue * fg1_mb_eregi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) _
 TypedValue * fg1_mb_eregi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   fh_mb_eregi((rv), (args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -1474,7 +1474,7 @@ TypedValue* fg_mb_eregi(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         fh_mb_eregi((&(rv)), (args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
@@ -1823,7 +1823,7 @@ TypedValue * fg1_mb_parse_str(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  VRefParamValue defVal1 = null;
+  VRefParamValue defVal1 = uninit_null();
   rv->m_data.num = (fh_mb_parse_str((Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1))) ? 1LL : 0LL;
   return rv;
 }
@@ -1835,7 +1835,7 @@ TypedValue* fg_mb_parse_str(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        VRefParamValue defVal1 = null;
+        VRefParamValue defVal1 = uninit_null();
         rv.m_data.num = (fh_mb_parse_str((Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

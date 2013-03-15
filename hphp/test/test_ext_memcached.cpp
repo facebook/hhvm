@@ -90,7 +90,7 @@ bool TestExtMemcached::test_Memcached_types() {
   list.add("float_positive2", 1.2131E+52);
   list.add("float_negative", -42.123312);
   list.add("float_zero", 0.0);
-  list.add("null", null);
+  list.add("null", uninit_null());
   list.add("array_empty", Array());
   list.add("array", CREATE_VECTOR4(1, 2, 3, "foo"));
 
@@ -131,14 +131,14 @@ bool TestExtMemcached::test_Memcached_cas() {
 
   Variant cas;
 
-  VS(memc->t_get(key, null, strongBind(cas)), 10);
+  VS(memc->t_get(key, uninit_null(), strongBind(cas)), 10);
 
   VERIFY(!cas.isNull() && cas.isDouble());
   VERIFY(memc->t_cas(cas.toDouble(), key, 11, EXPIRATION));
 
-  VS(memc->t_get(key, null, cas), 11);
+  VS(memc->t_get(key, uninit_null(), cas), 11);
   VERIFY(!memc->t_cas(cas.toDouble(), key, 12, EXPIRATION));
-  VS(memc->t_get(key, null, cas), 11);
+  VS(memc->t_get(key, uninit_null(), cas), 11);
 
   return Count(true);
 }

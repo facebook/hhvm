@@ -184,7 +184,7 @@ bool TestExtOutput::test_ob_list_handlers() {
   Array handlers = f_ob_list_handlers();
   f_ob_end_clean();
   f_ob_end_clean();
-  VS(handlers, CREATE_VECTOR2(null, "test"));
+  VS(handlers, CREATE_VECTOR2(uninit_null(), "test"));
   return Count(true);
 }
 

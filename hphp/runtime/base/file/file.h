@@ -52,7 +52,7 @@ public:
                               bool keepRelative = false);
   static String TranslateCommand(CStrRef cmd);
   static Variant Open(CStrRef filename, CStrRef mode,
-                      int options = 0, CVarRef context = null);
+                      int options = 0, CVarRef context = uninit_null());
 
   static bool IsVirtualDirectory(CStrRef filename);
   static bool IsPlainFilePath(CStrRef filename);

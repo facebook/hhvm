@@ -55,7 +55,7 @@ int64_t f_connection_timeout() {
 }
 
 Variant f_constant(CStrRef name) {
-  if (!name.get()) return null;
+  if (!name.get()) return uninit_null();
   const char *data = name.data();
   int len = name.length();
   char *colon;
@@ -91,7 +91,7 @@ Variant f_constant(CStrRef name) {
       }
     }
     raise_warning("Couldn't find constant %s", data);
-    return null;
+    return uninit_null();
   } else {
     TypedValue* cns = g_vmContext->getCns(name.get());
     if (cns == NULL) {
@@ -100,7 +100,7 @@ Variant f_constant(CStrRef name) {
       }
     }
     if (cns) return tvAsVariant(cns);
-    return null;
+    return uninit_null();
   }
 }
 

@@ -1595,7 +1595,7 @@ Variant f_session_unset() {
   }
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
   g->GV(_SESSION).reset();
-  return null;
+  return uninit_null();
 }
 
 void f_session_write_close() {

@@ -1677,7 +1677,7 @@ TypedValue * fg1_mysql_fetch_object(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
     break;
   }
   String defVal1 = "stdClass";
-  Array defVal2 = null;
+  Array defVal2 = uninit_null();
   fh_mysql_fetch_object((rv), (args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -1690,7 +1690,7 @@ TypedValue* fg_mysql_fetch_object(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfArray) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type))) {
         String defVal1 = "stdClass";
-        Array defVal2 = null;
+        Array defVal2 = uninit_null();
         fh_mysql_fetch_object((&(rv)), (args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);

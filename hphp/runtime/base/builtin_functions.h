@@ -285,14 +285,14 @@ bool isset(CArrRef v, CVarRef offset);
 bool isset(CArrRef v, litstr  offset, bool isString = false);
 bool isset(CArrRef v, CStrRef offset, bool isString = false);
 
-inline Variant unset(Variant &v)               { v.unset();   return null;}
-inline Variant unset(CVarRef v)                {              return null;}
-inline Variant setNull(Variant &v)             { v.setNull(); return null;}
+inline Variant unset(Variant &v)               { v.unset();   return uninit_null();}
+inline Variant unset(CVarRef v)                {              return uninit_null();}
+inline Variant setNull(Variant &v)             { v.setNull(); return uninit_null();}
 inline Object setNull(Object &v)               { v.reset();   return Object();}
 inline Array setNull(Array &v)                 { v.reset();   return Array();}
 inline String setNull(String &v)               { v.reset();   return String();}
-inline Variant unset(Object &v)                { v.reset();   return null;}
-inline Variant unset(Array &v)                 { v.reset();   return null;}
+inline Variant unset(Object &v)                { v.reset();   return uninit_null();}
+inline Variant unset(Array &v)                 { v.reset();   return uninit_null();}
 ///////////////////////////////////////////////////////////////////////////////
 // special variable contexts
 

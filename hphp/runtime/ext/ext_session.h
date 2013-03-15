@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_session_set_cookie_params(int64_t lifetime, CStrRef path = null_string, CStrRef domain = null_string, CVarRef secure = null, CVarRef httponly = null);
+void f_session_set_cookie_params(int64_t lifetime, CStrRef path = null_string, CStrRef domain = null_string, CVarRef secure = uninit_null(), CVarRef httponly = uninit_null());
 Array f_session_get_cookie_params();
 String f_session_name(CStrRef newname = null_string);
 Variant f_session_module_name(CStrRef newname = null_string);

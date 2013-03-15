@@ -99,7 +99,7 @@ Variant f_assert(CVarRef assertion) {
   if (s_option_data->assertBail) {
     throw Assertion();
   }
-  return null;
+  return uninit_null();
 }
 
 int64_t f_dl(CStrRef library) {
@@ -973,7 +973,7 @@ Variant f_version_compare(CStrRef version1, CStrRef version2,
       !strncmp(op, "ne", op_len)) {
     return compare != 0;
   }
-  return null;
+  return uninit_null();
 }
 
 bool f_gc_enabled() {

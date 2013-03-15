@@ -397,7 +397,7 @@ TypedValue * fg1_memcache_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
 TypedValue * fg1_memcache_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   fh_memcache_get((rv), (Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -409,7 +409,7 @@ TypedValue* fg_memcache_get(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((args-0)->m_type == KindOfObject) {
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         fh_memcache_get((&(rv)), (Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
@@ -1764,7 +1764,7 @@ TypedValue* tg_8Memcache_get(HPHP::VM::ActRec *ar) {
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
-        VRefParamValue defVal1 = null;
+        VRefParamValue defVal1 = uninit_null();
         th_8Memcache_get((&(rv)), (this_), (args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 2);

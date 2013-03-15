@@ -71,7 +71,7 @@ bool TestExtOpenssl::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtOpenssl::test_openssl_csr_export_to_file() {
-  Variant csr = f_openssl_csr_new(null, null);
+  Variant csr = f_openssl_csr_new(uninit_null(), uninit_null());
   VERIFY(!csr.isNull());
 
   const char *tmp = "test/test_csr.tmp";
@@ -90,7 +90,7 @@ bool TestExtOpenssl::test_openssl_csr_export() {
 }
 
 bool TestExtOpenssl::test_openssl_csr_get_public_key() {
-  Variant csr = f_openssl_csr_new(null, null);
+  Variant csr = f_openssl_csr_new(uninit_null(), uninit_null());
   VERIFY(!csr.isNull());
   Variant publickey = f_openssl_csr_get_public_key(csr);
   VERIFY(!same(publickey, false));
@@ -99,7 +99,7 @@ bool TestExtOpenssl::test_openssl_csr_get_public_key() {
 }
 
 bool TestExtOpenssl::test_openssl_csr_get_subject() {
-  Variant csr = f_openssl_csr_new(null, null);
+  Variant csr = f_openssl_csr_new(uninit_null(), uninit_null());
   VERIFY(!csr.isNull());
   VERIFY(f_openssl_csr_get_subject(csr)["O"] == "Internet Widgits Pty Ltd");
   return Count(true);
@@ -127,7 +127,7 @@ bool TestExtOpenssl::test_openssl_csr_sign() {
   VERIFY(!privkey.isNull());
   Variant csr = f_openssl_csr_new(dn, privkey);
   VERIFY(!csr.isNull());
-  Variant scert = f_openssl_csr_sign(csr, null, privkey, numberofdays);
+  Variant scert = f_openssl_csr_sign(csr, uninit_null(), privkey, numberofdays);
   Variant publickey, privatekey, csrStr;
   f_openssl_x509_export(scert, ref(publickey));
   f_openssl_pkey_export(privkey, ref(privatekey), privkeypass);
@@ -147,7 +147,7 @@ bool TestExtOpenssl::test_openssl_error_string() {
 }
 
 bool TestExtOpenssl::test_openssl_free_key() {
-  Variant csr = f_openssl_csr_new(null, null);
+  Variant csr = f_openssl_csr_new(uninit_null(), uninit_null());
   VERIFY(!csr.isNull());
   Variant publickey = f_openssl_csr_get_public_key(csr);
   VERIFY(!same(publickey, false));
@@ -164,9 +164,9 @@ bool TestExtOpenssl::test_openssl_open() {
 bool TestExtOpenssl::test_openssl_pkcs12_export_to_file() {
   Variant privkey = f_openssl_pkey_new();
   VERIFY(!privkey.isNull());
-  Variant csr = f_openssl_csr_new(null, privkey);
+  Variant csr = f_openssl_csr_new(uninit_null(), privkey);
   VERIFY(!csr.isNull());
-  Variant scert = f_openssl_csr_sign(csr, null, privkey, 365);
+  Variant scert = f_openssl_csr_sign(csr, uninit_null(), privkey, 365);
 
   const char *tmp = "test/test_pkcs12.tmp";
   f_unlink(tmp);
@@ -185,9 +185,9 @@ bool TestExtOpenssl::test_openssl_pkcs12_export() {
 bool TestExtOpenssl::test_openssl_pkcs12_read() {
   Variant privkey = f_openssl_pkey_new();
   VERIFY(!privkey.isNull());
-  Variant csr = f_openssl_csr_new(null, privkey);
+  Variant csr = f_openssl_csr_new(uninit_null(), privkey);
   VERIFY(!csr.isNull());
-  Variant scert = f_openssl_csr_sign(csr, null, privkey, 365);
+  Variant scert = f_openssl_csr_sign(csr, uninit_null(), privkey, 365);
 
   Variant pkcs12;
   f_openssl_pkcs12_export(scert, ref(pkcs12), privkey, "1234");
@@ -208,9 +208,9 @@ bool TestExtOpenssl::test_openssl_pkcs7_decrypt() {
 bool TestExtOpenssl::test_openssl_pkcs7_encrypt() {
   Variant privkey = f_openssl_pkey_new();
   VERIFY(!privkey.isNull());
-  Variant csr = f_openssl_csr_new(null, privkey);
+  Variant csr = f_openssl_csr_new(uninit_null(), privkey);
   VERIFY(!csr.isNull());
-  Variant scert = f_openssl_csr_sign(csr, null, privkey, 365);
+  Variant scert = f_openssl_csr_sign(csr, uninit_null(), privkey, 365);
   Variant pubkey = f_openssl_csr_get_public_key(csr);
   VERIFY(!pubkey.isNull());
 
@@ -257,9 +257,9 @@ bool TestExtOpenssl::test_openssl_pkcs7_encrypt() {
 bool TestExtOpenssl::test_openssl_pkcs7_sign() {
   Variant privkey = f_openssl_pkey_new();
   VERIFY(!privkey.isNull());
-  Variant csr = f_openssl_csr_new(null, privkey);
+  Variant csr = f_openssl_csr_new(uninit_null(), privkey);
   VERIFY(!csr.isNull());
-  Variant scert = f_openssl_csr_sign(csr, null, privkey, 365);
+  Variant scert = f_openssl_csr_sign(csr, uninit_null(), privkey, 365);
   Variant pubkey = f_openssl_csr_get_public_key(csr);
   VERIFY(!pubkey.isNull());
 
@@ -374,7 +374,7 @@ bool TestExtOpenssl::test_openssl_private_decrypt() {
 bool TestExtOpenssl::test_openssl_private_encrypt() {
   Variant privkey = f_openssl_pkey_new();
   VERIFY(!privkey.isNull());
-  Variant csr = f_openssl_csr_new(null, privkey);
+  Variant csr = f_openssl_csr_new(uninit_null(), privkey);
   VERIFY(!csr.isNull());
   Variant pubkey = f_openssl_csr_get_public_key(csr);
   VERIFY(!pubkey.isNull());
@@ -396,7 +396,7 @@ bool TestExtOpenssl::test_openssl_public_decrypt() {
 bool TestExtOpenssl::test_openssl_public_encrypt() {
   Variant privkey = f_openssl_pkey_new();
   VERIFY(!privkey.isNull());
-  Variant csr = f_openssl_csr_new(null, privkey);
+  Variant csr = f_openssl_csr_new(uninit_null(), privkey);
   VERIFY(!csr.isNull());
   Variant pubkey = f_openssl_csr_get_public_key(csr);
   VERIFY(!pubkey.isNull());
@@ -413,7 +413,7 @@ bool TestExtOpenssl::test_openssl_public_encrypt() {
 bool TestExtOpenssl::test_openssl_seal() {
   Variant privkey = f_openssl_pkey_new();
   VERIFY(!privkey.isNull());
-  Variant csr = f_openssl_csr_new(null, privkey);
+  Variant csr = f_openssl_csr_new(uninit_null(), privkey);
   VERIFY(!csr.isNull());
   Variant pubkey = f_openssl_csr_get_public_key(csr);
   VERIFY(!pubkey.isNull());
@@ -437,7 +437,7 @@ bool TestExtOpenssl::test_openssl_seal() {
 bool TestExtOpenssl::test_openssl_sign() {
   Variant privkey = f_openssl_pkey_new();
   VERIFY(!privkey.isNull());
-  Variant csr = f_openssl_csr_new(null, privkey);
+  Variant csr = f_openssl_csr_new(uninit_null(), privkey);
   VERIFY(!csr.isNull());
   Variant pubkey = f_openssl_csr_get_public_key(csr);
   VERIFY(!pubkey.isNull());
@@ -458,9 +458,9 @@ bool TestExtOpenssl::test_openssl_verify() {
 bool TestExtOpenssl::test_openssl_x509_check_private_key() {
   Variant privkey = f_openssl_pkey_new();
   VERIFY(!privkey.isNull());
-  Variant csr = f_openssl_csr_new(null, privkey);
+  Variant csr = f_openssl_csr_new(uninit_null(), privkey);
   VERIFY(!csr.isNull());
-  Variant scert = f_openssl_csr_sign(csr, null, privkey, 365);
+  Variant scert = f_openssl_csr_sign(csr, uninit_null(), privkey, 365);
   VERIFY(f_openssl_x509_check_private_key(scert, privkey));
   return Count(true);
 }

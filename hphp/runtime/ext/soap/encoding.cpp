@@ -1131,7 +1131,7 @@ static xmlNodePtr to_xml_bool(encodeTypePtr type, CVarRef data, int style,
 
 /* Null encode/decode */
 static Variant to_zval_null(encodeTypePtr type, xmlNodePtr data) {
-  return null;
+  return uninit_null();
 }
 
 static xmlNodePtr to_xml_null(encodeTypePtr type, CVarRef data, int style,
@@ -1411,7 +1411,7 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
           return ret;
         }
         redo_any = get_zval_property(ret, "any");
-        ret.toObject()->set("any", null);
+        ret.toObject()->set("any", uninit_null());
       } else {
         if (soap_check_xml_ref(ret, data)) {
           return ret;
@@ -1428,7 +1428,7 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
     }
     if (sdlType->model) {
       if (redo_any) {
-        ret.toObject()->set("any", null);
+        ret.toObject()->set("any", uninit_null());
       }
       model_to_zval_object(ret, sdlType->model, data, sdl);
       if (redo_any) {
@@ -2008,7 +2008,7 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
                                  zdata, style);
         } else {
           add_xml_array_elements(xmlParam, type, enc, ns, dimension-1, dims+1,
-                                 null, style);
+                                 uninit_null(), style);
         }
       }
     }
@@ -2030,7 +2030,7 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
         }
       } else {
         add_xml_array_elements(xmlParam, type, enc, ns, dimension-1, dims+1,
-                               null, style);
+                               uninit_null(), style);
       }
     }
   }

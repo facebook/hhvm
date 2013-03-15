@@ -252,7 +252,7 @@ public:
   /**
    * Output buffering.
    */
-  void obStart(CVarRef handler = null);
+  void obStart(CVarRef handler = uninit_null());
   String obCopyContents();
   String obDetachContents();
   int obGetContentLength();

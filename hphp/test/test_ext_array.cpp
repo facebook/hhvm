@@ -287,7 +287,7 @@ bool TestExtArray::test_array_filter() {
      "    [6] => 12\n"
      ")\n");
 
-  Array entry = CREATE_MAP5(0, "foo", 1, false, 2, -1, 3, null, 4, "");
+  Array entry = CREATE_MAP5(0, "foo", 1, false, 2, -1, 3, uninit_null(), 4, "");
   VS(f_print_r(f_array_filter(entry), true),
      "Array\n"
      "(\n"
@@ -315,7 +315,7 @@ bool TestExtArray::test_array_key_exists() {
   Array search_array = CREATE_MAP2("first", 1, "second", 4);
   VERIFY(f_array_key_exists("first", search_array));
 
-  search_array = CREATE_MAP2("first", null, "second", 4);
+  search_array = CREATE_MAP2("first", uninit_null(), "second", 4);
   //VERIFY(!isset(search_array.lvalAt("first")));
   VERIFY(f_array_key_exists("first", search_array));
 
@@ -405,7 +405,7 @@ bool TestExtArray::test_array_map() {
      "    [4] => 125\n"
      ")\n");
 
-  b = f_array_map(2, null, a);
+  b = f_array_map(2, uninit_null(), a);
   VS(f_print_r(b, true),
      "Array\n"
      "(\n"
@@ -416,7 +416,7 @@ bool TestExtArray::test_array_map() {
      "    [4] => 5\n"
      ")\n");
 
-  b = f_array_map(2, null, CREATE_MAP2("x", 6, 0, 7));
+  b = f_array_map(2, uninit_null(), CREATE_MAP2("x", 6, 0, 7));
   VS(f_print_r(b, true),
      "Array\n"
      "(\n"
@@ -424,7 +424,7 @@ bool TestExtArray::test_array_map() {
      "    [0] => 7\n"
      ")\n");
 
-  VS(f_print_r(f_array_map(3, null, CREATE_MAP2("x", 6, 0, 7),
+  VS(f_print_r(f_array_map(3, uninit_null(), CREATE_MAP2("x", 6, 0, 7),
                            CREATE_VECTOR1(CREATE_VECTOR2("a","b"))), true),
      "Array\n"
      "(\n"
@@ -565,8 +565,8 @@ bool TestExtArray::test_array_merge() {
   }
   {
     Variant a = CREATE_MAP2(1, 50, 5, 60);
-    Variant b = null;
-    VS(f_array_merge(2, a, CREATE_VECTOR1(b)), null);
+    Variant b = uninit_null();
+    VS(f_array_merge(2, a, CREATE_VECTOR1(b)), uninit_null());
   }
   return Count(true);
 }
@@ -664,8 +664,8 @@ bool TestExtArray::test_array_replace() {
   }
   {
     Variant a = CREATE_MAP2(1, 50, 5, 60);
-    Variant b = null;
-    VS(f_array_replace(2, a, CREATE_VECTOR1(b)), null);
+    Variant b = uninit_null();
+    VS(f_array_replace(2, a, CREATE_VECTOR1(b)), uninit_null());
   }
   return Count(true);
 }
@@ -1206,7 +1206,7 @@ bool TestExtArray::test_count() {
   b.set(10, 11);
   VS(f_count(b), 3);
 
-  VS(f_count(null), 0);
+  VS(f_count(uninit_null()), 0);
   VS(f_count(false), 1);
 
   Array food = CREATE_MAP2("fruits",
@@ -1232,7 +1232,7 @@ bool TestExtArray::test_sizeof() {
   b.set(10, 11);
   VS(f_sizeof(b), 3);
 
-  VS(f_sizeof(null), 0);
+  VS(f_sizeof(uninit_null()), 0);
   VS(f_sizeof(false), 1);
 
   Array food = CREATE_MAP2("fruits",
@@ -1678,7 +1678,7 @@ bool TestExtArray::test_array_intersect_key() {
   Array array2 = CREATE_MAP4("green", 5, "blue", 6, "yellow", 7, "cyan", 8);
   VS(f_array_intersect_key(2, array1, array2),
      CREATE_MAP2("blue", 1, "green", 3));
-  VS(f_array_intersect_key(2, null, CREATE_MAP1(1, 1)), null);
+  VS(f_array_intersect_key(2, uninit_null(), CREATE_MAP1(1, 1)), uninit_null());
   return Count(true);
 }
 

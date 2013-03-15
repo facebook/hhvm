@@ -311,7 +311,7 @@ Variant c_XMLReader::string_func_string_arg(String value, xmlreader_read_one_cha
     xmlFree(retchar);
     return ret;
   } else {
-    return null;
+    return uninit_null();
   }
 }
 
@@ -329,7 +329,7 @@ Variant c_XMLReader::t_getattributeno(int64_t index) {
     xmlFree(retchar);
     return ret;
   } else {
-    return null;
+    return uninit_null();
   }
 }
 
@@ -351,7 +351,7 @@ Variant c_XMLReader::t_getattributens(CStrRef name, CStrRef namespaceURI) {
     xmlFree(retchar);
     return ret;
   } else {
-    return null;
+    return uninit_null();
   }
 }
 
@@ -579,13 +579,13 @@ Variant c_XMLReader::t___get(Variant name) {
       return retint;
 
     default:
-      return null;
+      return uninit_null();
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_XMLReader::t___destruct() {
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

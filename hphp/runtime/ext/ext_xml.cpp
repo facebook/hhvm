@@ -347,7 +347,7 @@ static Variant xml_call_handler(XmlParser *parser, CVarRef handler,
     }
     return retval;
   }
-  return null;
+  return uninit_null();
 }
 
 static void _xml_add_to_info(XmlParser *parser, char *name) {

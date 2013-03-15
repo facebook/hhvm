@@ -294,7 +294,7 @@ TypedValue * fg1_hphp_set_hardware_events(TypedValue* rv, HPHP::VM::ActRec* ar, 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  String defVal0 = null;
+  String defVal0 = uninit_null();
   rv->m_data.num = (fh_hphp_set_hardware_events((count > 0) ? (Value*)(args-0) : (Value*)(&defVal0))) ? 1LL : 0LL;
   return rv;
 }
@@ -306,7 +306,7 @@ TypedValue* fg_hphp_set_hardware_events(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
         rv.m_type = KindOfBoolean;
-        String defVal0 = null;
+        String defVal0 = uninit_null();
         rv.m_data.num = (fh_hphp_set_hardware_events((count > 0) ? (Value*)(args-0) : (Value*)(&defVal0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

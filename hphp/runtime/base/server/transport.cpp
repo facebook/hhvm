@@ -37,7 +37,7 @@ namespace HPHP {
 Transport::Transport()
   : m_instructions(0), m_url(nullptr), m_postData(nullptr), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
-    m_headerCallback(null), m_headerCallbackDone(false),
+    m_headerCallback(uninit_null()), m_headerCallbackDone(false),
     m_responseCode(-1), m_firstHeaderSet(false), m_firstHeaderLine(0),
     m_responseSize(0), m_responseTotalSize(0), m_responseSentSize(0),
     m_flushTimeUs(0), m_sendContentType(true),

@@ -242,7 +242,7 @@ Variant f_parse_url(CStrRef url, int component /* = -1 */) {
       throw_invalid_argument("component: %d", component);
       return false;
     }
-    return null;
+    return uninit_null();
   }
 
   Array ret;

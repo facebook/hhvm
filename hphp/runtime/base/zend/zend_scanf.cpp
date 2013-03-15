@@ -277,7 +277,7 @@ static inline void scan_set_error_return(int numVars, Variant &return_value) {
   if (numVars) {
     return_value = SCAN_ERROR_EOF; /* EOF marker */
   } else {
-    return_value = null;
+    return_value = uninit_null();
   }
 }
 

@@ -156,12 +156,12 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   public: void t___construct();
   public: Variant t_execute(CArrRef params = null_array);
   public: Variant t_fetch(int64_t how = 0, int64_t orientation = q_PDO$$FETCH_ORI_NEXT, int64_t offset = 0);
-  public: Variant t_fetchobject(CStrRef class_name = null_string, CVarRef ctor_args = null);
+  public: Variant t_fetchobject(CStrRef class_name = null_string, CVarRef ctor_args = uninit_null());
   public: Variant t_fetchcolumn(int64_t column_numner = 0);
-  public: Variant t_fetchall(int64_t how = 0, CVarRef class_name = null, CVarRef ctor_args = null);
+  public: Variant t_fetchall(int64_t how = 0, CVarRef class_name = uninit_null(), CVarRef ctor_args = uninit_null());
   public: bool t_bindvalue(CVarRef paramno, CVarRef param, int64_t type = q_PDO$$PARAM_STR);
-  public: bool t_bindparam(CVarRef paramno, VRefParam param, int64_t type = q_PDO$$PARAM_STR, int64_t max_value_len = 0, CVarRef driver_params = null);
-  public: bool t_bindcolumn(CVarRef paramno, VRefParam param, int64_t type = q_PDO$$PARAM_STR, int64_t max_value_len = 0, CVarRef driver_params = null);
+  public: bool t_bindparam(CVarRef paramno, VRefParam param, int64_t type = q_PDO$$PARAM_STR, int64_t max_value_len = 0, CVarRef driver_params = uninit_null());
+  public: bool t_bindcolumn(CVarRef paramno, VRefParam param, int64_t type = q_PDO$$PARAM_STR, int64_t max_value_len = 0, CVarRef driver_params = uninit_null());
   public: int64_t t_rowcount();
   public: Variant t_errorcode();
   public: Array t_errorinfo();

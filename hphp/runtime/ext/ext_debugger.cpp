@@ -88,7 +88,7 @@ static DbgCltMap s_dbgCltMap;
 // if the DebuggerClient with the same name is already in use, return null
 Variant f_hphpd_get_client(CStrRef name /* = null */) {
   if (name.empty()) {
-    return null;
+    return uninit_null();
   }
   DebuggerClient *client = NULL;
   std::string nameStr = name->toCPPString();
@@ -102,7 +102,7 @@ Variant f_hphpd_get_client(CStrRef name /* = null */) {
     }
     if (!client->apiGrab()) {
       // already grabbed by another request
-      return null;
+      return uninit_null();
     }
   }
   p_DebuggerClient clt(NEWOBJ(c_DebuggerClient));
@@ -120,7 +120,7 @@ Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op) {
         return q_DebuggerClient$$STATE_INVALID;
       } else {
         raise_warning("client %s does not exist", name.data());
-        return null;
+        return uninit_null();
       }
     }
     client = acc->second;
@@ -128,14 +128,14 @@ Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op) {
   if (op.equal("interrupt")) {
     if (client->getClientState() < DebuggerClient::StateReadyForCommand) {
       raise_warning("client is not initialized");
-      return null;
+      return uninit_null();
     }
     if (client->getClientState() != DebuggerClient::StateBusy) {
       raise_warning("client is not in a busy state");
-      return null;
+      return uninit_null();
     }
     client->onSignal(SIGINT);
-    return null;
+    return uninit_null();
   } else if (op.equal("getstate")) {
     return client->getClientState();
   } else if (op.equal("reset")) {
@@ -152,7 +152,7 @@ Variant f_hphpd_client_ctrl(CStrRef name, CStrRef op) {
 
   raise_warning("unknown op %s", op.data());
 
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -479,19 +479,19 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
   if (!m_client ||
       m_client->getClientState() < DebuggerClient::StateReadyForCommand) {
     raise_warning("client is not initialized");
-    return null;
+    return uninit_null();
   }
   if (m_client->getClientState() != DebuggerClient::StateReadyForCommand) {
     raise_warning("client is not ready to take command");
-    return null;
+    return uninit_null();
   }
   if (!cmdName.isString()) {
     raise_warning("cmdName must be string");
-    return null;
+    return uninit_null();
   }
   if (!args.isNull() && !args.isArray()) {
     raise_warning("args must be null or array");
-    return null;
+    return uninit_null();
   }
 
   static const char *s_allowedCmds[] = {
@@ -513,7 +513,7 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
   }
   if (!allowed) {
     raise_warning("unsupported command %s", cmdName.toString().data());
-    return null;
+    return uninit_null();
   }
 
   m_client->setCommand(cmdName.toString().data());
@@ -555,7 +555,7 @@ Variant c_DebuggerClient::t_processcmd(CVarRef cmdName, CVarRef args) {
     return true;
   } catch (DebuggerProtocolException &e) {
     raise_warning("DebuggerProtocolException");
-    return null;
+    return uninit_null();
   }
 
   return m_client->getOutputArray();

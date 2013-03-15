@@ -523,8 +523,8 @@ TypedValue * fg1_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  VRefParamValue defVal1 = null;
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal1 = uninit_null();
+  VRefParamValue defVal2 = uninit_null();
   fh_exec((Value*)(rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
@@ -537,8 +537,8 @@ TypedValue* fg_exec(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        VRefParamValue defVal1 = null;
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal1 = uninit_null();
+        VRefParamValue defVal2 = uninit_null();
         fh_exec((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
@@ -579,7 +579,7 @@ TypedValue * fg1_passthru(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
-  VRefParamValue defVal1 = null;
+  VRefParamValue defVal1 = uninit_null();
   fh_passthru((Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   return rv;
 }
@@ -592,7 +592,7 @@ TypedValue* fg_passthru(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        VRefParamValue defVal1 = null;
+        VRefParamValue defVal1 = uninit_null();
         fh_passthru((Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -633,7 +633,7 @@ TypedValue * fg1_system(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  VRefParamValue defVal1 = null;
+  VRefParamValue defVal1 = uninit_null();
   fh_system((Value*)(rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
@@ -646,7 +646,7 @@ TypedValue* fg_system(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        VRefParamValue defVal1 = null;
+        VRefParamValue defVal1 = uninit_null();
         fh_system((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);

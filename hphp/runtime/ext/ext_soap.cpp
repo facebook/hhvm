@@ -346,9 +346,9 @@ static xmlDocPtr serialize_function_call
         sdlParamPtr parameter = get_param(function.get(), NULL, i, false);
 
         if (style == SOAP_RPC) {
-          param = serialize_parameter(parameter, null, i, NULL, use, method);
+          param = serialize_parameter(parameter, uninit_null(), i, NULL, use, method);
         } else if (style == SOAP_DOCUMENT) {
-          param = serialize_parameter(parameter, null, i, NULL, use, body);
+          param = serialize_parameter(parameter, uninit_null(), i, NULL, use, body);
           if (function && function->binding->bindingType == BINDING_SOAP) {
             if (parameter && parameter->element) {
               ns = encode_add_ns(param, parameter->element->namens.c_str());
@@ -2449,7 +2449,7 @@ Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
     soap_headers = CREATE_VECTOR1(input_headers);
   } else{
     raise_warning("Invalid SOAP header");
-    return null;
+    return uninit_null();
   }
   if (!m_default_headers.isNull()) {
     soap_headers.merge(m_default_headers);
@@ -2598,7 +2598,7 @@ Variant c_SoapClient::t___getfunctions() {
     }
     return ret;
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_SoapClient::t___gettypes() {
@@ -2613,7 +2613,7 @@ Variant c_SoapClient::t___gettypes() {
     }
     return ret;
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef action,
@@ -2621,7 +2621,7 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
   if (location.empty()) {
     m_soap_fault =
       Object(SystemLib::AllocSoapFaultObject("HTTP", "Unable to parse URL"));
-    return null;
+    return uninit_null();
   }
 
   USE_SOAP_GLOBAL;
@@ -2647,7 +2647,7 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
         ret = f_gzencode(buffer, level);
         headers["Content-Encoding"].push_back("gzip");
       }
-      if (!ret.isString()) return null;
+      if (!ret.isString()) return uninit_null();
       buffer = ret.toString();
     }
   }
@@ -2689,7 +2689,7 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
     }
     m_soap_fault = Object(SystemLib::AllocSoapFaultObject(
       "HTTP", msg));
-    return null;
+    return uninit_null();
   }
   if (code != 200) {
     String msg = response.detach();
@@ -2697,7 +2697,7 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
       msg = HttpProtocol::GetReasonString(code);
     }
     m_soap_fault = Object(SystemLib::AllocSoapFaultObject("HTTP", msg));
-    return null;
+    return uninit_null();
   }
 
   // return response
@@ -2717,7 +2717,7 @@ Variant c_SoapClient::t___setcookie(CStrRef name,
   } else if (o_exists("_cookies")) {
     m_cookies.remove(name);
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_SoapClient::t___setlocation(CStrRef new_location /* = null_string */){
@@ -2728,7 +2728,7 @@ Variant c_SoapClient::t___setlocation(CStrRef new_location /* = null_string */){
 
 bool c_SoapClient::t___setsoapheaders(CVarRef headers /* = null_variant */) {
   if (headers.isNull()) {
-    m_default_headers = null;
+    m_default_headers = uninit_null();
   } else if (headers.isArray()) {
     Array arr = headers.toArray();
     verify_soap_headers_array(arr);

@@ -247,7 +247,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       if (!forbidden) {
         rpcFile = canonicalize_path(rpcFile, "", 0);
         rpcFile = getSourceFilename(rpcFile, sourceRootInfo);
-        ret = hphp_invoke(m_context, rpcFile, false, Array(), null,
+        ret = hphp_invoke(m_context, rpcFile, false, Array(), uninit_null(),
                           reqInitFunc, reqInitDoc, error, errorMsg, runOnce);
       }
       // no need to do the initialization for a second time

@@ -51,7 +51,7 @@ String f_json_encode(CVarRef value, CVarRef options /* = 0 */) {
 Variant f_json_decode(CStrRef json, bool assoc /* = false */,
                       CVarRef options /* = 0 */) {
   if (json.empty()) {
-    return null;
+    return uninit_null();
   }
 
   int64_t json_options = options.toInt64();
@@ -66,7 +66,7 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
   }
 
   if (json.size() == 4) {
-    if (!strcasecmp(json.data(), "null")) return null;
+    if (!strcasecmp(json.data(), "null")) return uninit_null();
     if (!strcasecmp(json.data(), "true")) return true;
   } else if (json.size() == 5 && !strcasecmp(json.data(), "false")) {
     return false;
@@ -92,7 +92,7 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
   }
 
   if (ch0 == '{' || ch0 == '[') { /* invalid JSON string */
-    return null;
+    return uninit_null();
   }
 
   return json;

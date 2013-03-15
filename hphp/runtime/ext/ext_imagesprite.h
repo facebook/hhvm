@@ -40,10 +40,10 @@ class c_ImageSprite : public ExtObjectData, public Sweepable {
   public: c_ImageSprite(VM::Class* cls = c_ImageSprite::s_cls);
   public: ~c_ImageSprite();
   public: void t___construct();
-  public: Object t_addfile(CStrRef file, CArrRef options = null);
-  public: Object t_addstring(CStrRef id, CStrRef data, CArrRef options = null);
-  public: Object t_addurl(CStrRef url, int timeout_ms = 0, CArrRef Options = null);
-  public: Object t_clear(CVarRef paths = null);
+  public: Object t_addfile(CStrRef file, CArrRef options = uninit_null());
+  public: Object t_addstring(CStrRef id, CStrRef data, CArrRef options = uninit_null());
+  public: Object t_addurl(CStrRef url, int timeout_ms = 0, CArrRef Options = uninit_null());
+  public: Object t_clear(CVarRef paths = uninit_null());
   public: Object t_loaddims(bool block = false);
   public: Object t_loadimages(bool block = false);
   public: String t_output(CStrRef output_file = null_string, CStrRef format = "png", int quality = 75);

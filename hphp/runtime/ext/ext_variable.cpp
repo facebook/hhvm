@@ -58,7 +58,7 @@ bool f_settype(VRefParam var, CStrRef type) {
   else if (type == "string" ) var = var.toString();
   else if (type == "array"  ) var = var.toArray();
   else if (type == "object" ) var = var.toObject();
-  else if (type == "null"   ) var = null;
+  else if (type == "null"   ) var = uninit_null();
   else return false;
   return true;
 }

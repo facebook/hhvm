@@ -72,8 +72,6 @@ class MutableArrayIter;
  *   pref    strong    x (pointer)                      x
  */
 
-#define null ((Variant()))
-
 #ifdef HHVM_GC
 typedef GCRootTracker<Variant> VariantBase;
 #else
@@ -1563,6 +1561,10 @@ inline const Variant Array::operator[](CStrRef key) const {
 
 inline const Variant Array::operator[](CVarRef key) const {
   return rvalAt(key);
+}
+
+inline Variant uninit_null() {
+  return Variant();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

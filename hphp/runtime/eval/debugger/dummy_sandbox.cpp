@@ -114,7 +114,7 @@ void DummySandbox::run() {
                      doc.c_str(), cwd);
         bool error; string errorMsg;
         bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
-                               null, "", "", error, errorMsg, true, false,
+                               uninit_null(), "", "", error, errorMsg, true, false,
                                true);
         if (!ret || error) {
           msg += "Unable to pre-load " + doc;

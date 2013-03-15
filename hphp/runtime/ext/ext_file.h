@@ -32,7 +32,7 @@ namespace HPHP {
 // file handle based file operations
 
 Variant f_fopen(CStrRef filename, CStrRef mode, bool use_include_path = false,
-                CVarRef context = null);
+                CVarRef context = uninit_null());
 Variant f_popen(CStrRef command, CStrRef mode);
 bool f_fclose(CObjRef handle);
 Variant f_pclose(CObjRef handle);
@@ -54,7 +54,7 @@ Variant f_fprintf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv = nul
 Variant f_vfprintf(CObjRef handle, CStrRef format, CArrRef args);
 bool f_fflush(CObjRef handle);
 bool f_ftruncate(CObjRef handle, int64_t size);
-bool f_flock(CObjRef handle, int operation, VRefParam wouldblock = null);
+bool f_flock(CObjRef handle, int operation, VRefParam wouldblock = uninit_null());
 Variant f_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter = ",",
                   CStrRef enclosure = "\"");
 Variant f_fgetcsv(CObjRef handle, int64_t length = 0, CStrRef delimiter = ",",
@@ -64,13 +64,13 @@ Variant f_fgetcsv(CObjRef handle, int64_t length = 0, CStrRef delimiter = ",",
 // file name based file operations
 
 Variant f_file_get_contents(CStrRef filename, bool use_include_path = false,
-                            CVarRef context = null, int64_t offset = 0,
+                            CVarRef context = uninit_null(), int64_t offset = 0,
                             int64_t maxlen = 0);
 Variant f_file_put_contents(CStrRef filename, CVarRef data, int flags = 0,
-                            CVarRef context = null);
-Variant f_file(CStrRef filename, int flags = 0, CVarRef context = null);
+                            CVarRef context = uninit_null());
+Variant f_file(CStrRef filename, int flags = 0, CVarRef context = uninit_null());
 Variant f_readfile(CStrRef filename, bool use_include_path = false,
-                   CVarRef context = null);
+                   CVarRef context = uninit_null());
 bool f_move_uploaded_file(CStrRef filename, CStrRef destination);
 Variant f_parse_ini_file(CStrRef filename, bool process_sections = false,
                          int scanner_mode = k_INI_SCANNER_NORMAL);
@@ -92,10 +92,10 @@ bool f_lchown(CStrRef filename, CVarRef user);
 bool f_chgrp(CStrRef filename, CVarRef group);
 bool f_lchgrp(CStrRef filename, CVarRef group);
 bool f_touch(CStrRef filename, int64_t mtime = 0, int64_t atime = 0);
-bool f_copy(CStrRef source, CStrRef dest, CVarRef context = null);
-bool f_rename(CStrRef oldname, CStrRef newname, CVarRef context = null);
+bool f_copy(CStrRef source, CStrRef dest, CVarRef context = uninit_null());
+bool f_rename(CStrRef oldname, CStrRef newname, CVarRef context = uninit_null());
 int64_t f_umask(CVarRef mask = null_variant);
-bool f_unlink(CStrRef filename, CVarRef context = null);
+bool f_unlink(CStrRef filename, CVarRef context = uninit_null());
 bool f_link(CStrRef target, CStrRef link);
 bool f_symlink(CStrRef target, CStrRef link);
 String f_basename(CStrRef path, CStrRef suffix = null_string);
@@ -141,18 +141,18 @@ Variant f_disk_total_space(CStrRef directory);
 // directory functions
 
 bool f_mkdir(CStrRef pathname, int64_t mode = 0777, bool recursive = false,
-             CVarRef context = null);
-bool f_rmdir(CStrRef dirname, CVarRef context = null);
+             CVarRef context = uninit_null());
+bool f_rmdir(CStrRef dirname, CVarRef context = uninit_null());
 String f_dirname(CStrRef path);
 Variant f_getcwd();
 bool f_chdir(CStrRef directory);
 bool f_chroot(CStrRef directory);
 Variant f_dir(CStrRef directory);
-Variant f_opendir(CStrRef path, CVarRef context = null);
+Variant f_opendir(CStrRef path, CVarRef context = uninit_null());
 Variant f_readdir(CObjRef dir_handle);
 void f_rewinddir(CObjRef dir_handle);
 Variant f_scandir(CStrRef directory, bool descending = false,
-                  CVarRef context = null);
+                  CVarRef context = uninit_null());
 void f_closedir(CObjRef dir_handle);
 
 ///////////////////////////////////////////////////////////////////////////////

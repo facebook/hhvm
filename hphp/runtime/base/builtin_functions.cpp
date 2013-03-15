@@ -366,7 +366,7 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
   const HPHP::VM::Func* f = vm_decode_function(function, cf(), forwarding,
                                                obj, cls, invName);
   if (f == nullptr) {
-    return null;
+    return uninit_null();
   }
   Variant ret;
   g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
@@ -401,12 +401,12 @@ Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
   HPHP::VM::Class* class_ = VM::Unit::lookupClass(s.get());
   if (class_ == nullptr) {
     o_invoke_failed(s.data(), method.data(), fatal);
-    return null;
+    return uninit_null();
   }
   const HPHP::VM::Func* f = class_->lookupMethod(method.get());
   if (f == nullptr || !(f->attrs() & HPHP::VM::AttrStatic)) {
     o_invoke_failed(s.data(), method.data(), fatal);
-    return null;
+    return uninit_null();
   }
   Variant ret;
   g_vmContext->invokeFunc((TypedValue*)&ret, f, params, nullptr, class_);
@@ -572,7 +572,7 @@ Variant throw_missing_arguments(const char *fn, int num, int level /* = 0 */) {
   } else {
     raise_warning("Missing argument %d for %s()", num, fn);
   }
-  return null;
+  return uninit_null();
 }
 
 Variant throw_toomany_arguments(const char *fn, int num, int level /* = 0 */) {
@@ -581,7 +581,7 @@ Variant throw_toomany_arguments(const char *fn, int num, int level /* = 0 */) {
   } else if (level == 1 || RuntimeOption::WarnTooManyArguments) {
     raise_warning("Too many arguments for %s(), expected %d", fn, num);
   }
-  return null;
+  return uninit_null();
 }
 
 Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
@@ -593,7 +593,7 @@ Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
     return throw_toomany_arguments(fn, cmax, level);
   }
   assert(false);
-  return null;
+  return uninit_null();
 }
 
 void throw_missing_arguments_nr(const char *fn, int num, int level /* = 0 */) {
@@ -634,7 +634,7 @@ Variant throw_missing_typed_argument(const char *fn,
     raise_error("Argument %d passed to %s() must be "
                 "an instance of %s, none given", arg, fn, type);
   }
-  return null;
+  return uninit_null();
 }
 
 void throw_bad_type_exception(const char *fmt, ...) {
@@ -676,7 +676,7 @@ void throw_invalid_argument(const char *fmt, ...) {
 
 Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
   raise_error("Attempt to unset static property %s::$%s", s, prop);
-  return null;
+  return uninit_null();
 }
 
 void check_request_timeout_info(ThreadInfo *info, int lc) {

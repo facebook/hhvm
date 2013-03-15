@@ -211,7 +211,7 @@ bool run_intercept_handler(ActRec* ar, Variant* ihandler) {
   Variant doneFlag = true;
   Array intArgs =
     CREATE_VECTOR5(ar->m_func->fullNameRef(),
-                   (ar->hasThis() ? Variant(Object(ar->getThis())) : null),
+                   (ar->hasThis() ? Variant(Object(ar->getThis())) : uninit_null()),
                    Array(pack_args_into_array(ar, ar->numArgs())),
                    ihandler->asCArrRef()[1],
                    ref(doneFlag));

@@ -74,7 +74,7 @@ TypedValue * fg1_getimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
 TypedValue * fg1_getimagesize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  VRefParamValue defVal1 = null;
+  VRefParamValue defVal1 = uninit_null();
   fh_getimagesize((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -86,7 +86,7 @@ TypedValue* fg_getimagesize(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        VRefParamValue defVal1 = null;
+        VRefParamValue defVal1 = uninit_null();
         fh_getimagesize((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
@@ -3556,7 +3556,7 @@ TypedValue * fg1_imageftbbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if ((args-0)->m_type != KindOfDouble) {
     tvCastToDoubleInPlace(args-0);
   }
-  Array defVal4 = null;
+  Array defVal4 = uninit_null();
   fh_imageftbbox((rv), (args[-0].m_data.dbl), (args[-1].m_data.dbl), (Value*)(args-2), (Value*)(args-3), (count > 4) ? (Value*)(args-4) : (Value*)(&defVal4));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -3568,7 +3568,7 @@ TypedValue* fg_imageftbbox(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfArray) && IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfDouble) {
-        Array defVal4 = null;
+        Array defVal4 = uninit_null();
         fh_imageftbbox((&(rv)), (args[-0].m_data.dbl), (args[-1].m_data.dbl), (Value*)(args-2), (Value*)(args-3), (count > 4) ? (Value*)(args-4) : (Value*)(&defVal4));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
@@ -3647,7 +3647,7 @@ TypedValue * fg1_imagefttext(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  Array defVal8 = null;
+  Array defVal8 = uninit_null();
   fh_imagefttext((rv), (Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (int)(args[-3].m_data.num), (int)(args[-4].m_data.num), (int)(args[-5].m_data.num), (Value*)(args-6), (Value*)(args-7), (count > 8) ? (Value*)(args-8) : (Value*)(&defVal8));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -3659,7 +3659,7 @@ TypedValue* fg_imagefttext(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 8LL && count <= 9LL) {
       if ((count <= 8 || (args-8)->m_type == KindOfArray) && IS_STRING_TYPE((args-7)->m_type) && IS_STRING_TYPE((args-6)->m_type) && (args-5)->m_type == KindOfInt64 && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfObject) {
-        Array defVal8 = null;
+        Array defVal8 = uninit_null();
         fh_imagefttext((&(rv)), (Value*)(args-0), (args[-1].m_data.dbl), (args[-2].m_data.dbl), (int)(args[-3].m_data.num), (int)(args[-4].m_data.num), (int)(args[-5].m_data.num), (Value*)(args-6), (Value*)(args-7), (count > 8) ? (Value*)(args-8) : (Value*)(&defVal8));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 9);
@@ -6615,9 +6615,9 @@ TypedValue * fg1_exif_thumbnail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_exif_thumbnail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  VRefParamValue defVal1 = null;
-  VRefParamValue defVal2 = null;
-  VRefParamValue defVal3 = null;
+  VRefParamValue defVal1 = uninit_null();
+  VRefParamValue defVal2 = uninit_null();
+  VRefParamValue defVal3 = uninit_null();
   fh_exif_thumbnail((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -6629,9 +6629,9 @@ TypedValue* fg_exif_thumbnail(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        VRefParamValue defVal1 = null;
-        VRefParamValue defVal2 = null;
-        VRefParamValue defVal3 = null;
+        VRefParamValue defVal1 = uninit_null();
+        VRefParamValue defVal2 = uninit_null();
+        VRefParamValue defVal3 = uninit_null();
         fh_exif_thumbnail((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);

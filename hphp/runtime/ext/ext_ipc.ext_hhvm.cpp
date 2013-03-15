@@ -227,7 +227,7 @@ TypedValue * fg1_msg_send(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  VRefParamValue defVal5 = null;
+  VRefParamValue defVal5 = uninit_null();
   rv->m_data.num = (fh_msg_send((Value*)(args-0), (long)(args[-1].m_data.num), (args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(true), (count > 5) ? (args-5) : (TypedValue*)(&defVal5))) ? 1LL : 0LL;
   return rv;
 }
@@ -239,7 +239,7 @@ TypedValue* fg_msg_send(HPHP::VM::ActRec *ar) {
     if (count >= 3LL && count <= 6LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfBoolean) && (count <= 3 || (args-3)->m_type == KindOfBoolean) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        VRefParamValue defVal5 = null;
+        VRefParamValue defVal5 = uninit_null();
         rv.m_data.num = (fh_msg_send((Value*)(args-0), (long)(args[-1].m_data.num), (args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(true), (count > 5) ? (args-5) : (TypedValue*)(&defVal5))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -306,7 +306,7 @@ TypedValue * fg1_msg_receive(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  VRefParamValue defVal7 = null;
+  VRefParamValue defVal7 = uninit_null();
   rv->m_data.num = (fh_msg_receive((Value*)(args-0), (long)(args[-1].m_data.num), (args-2), (long)(args[-3].m_data.num), (args-4), (count > 5) ? (bool)(args[-5].m_data.num) : (bool)(true), (count > 6) ? (long)(args[-6].m_data.num) : (long)(0), (count > 7) ? (args-7) : (TypedValue*)(&defVal7))) ? 1LL : 0LL;
   return rv;
 }
@@ -318,7 +318,7 @@ TypedValue* fg_msg_receive(HPHP::VM::ActRec *ar) {
     if (count >= 5LL && count <= 8LL) {
       if ((count <= 6 || (args-6)->m_type == KindOfInt64) && (count <= 5 || (args-5)->m_type == KindOfBoolean) && (args-3)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        VRefParamValue defVal7 = null;
+        VRefParamValue defVal7 = uninit_null();
         rv.m_data.num = (fh_msg_receive((Value*)(args-0), (long)(args[-1].m_data.num), (args-2), (long)(args[-3].m_data.num), (args-4), (count > 5) ? (bool)(args[-5].m_data.num) : (bool)(true), (count > 6) ? (long)(args[-6].m_data.num) : (long)(0), (count > 7) ? (args-7) : (TypedValue*)(&defVal7))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 8);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

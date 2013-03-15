@@ -510,7 +510,7 @@ Object c_ImageSprite::t_addurl(CStrRef url, int timeout_ms /* = 0 */,
 }
 
 Object c_ImageSprite::t_clear(CVarRef files /* = null */) {
-  if (same(files, null)) {
+  if (same(files, uninit_null())) {
     // Clear them all, might as well __destruct
     t___destruct();
   } else if (files.isArray()) {
@@ -1176,7 +1176,7 @@ Variant c_ImageSprite::t___destruct() {
   m_img_errors = Array::Create();
   m_sprite_errors = Array::Create();
 
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

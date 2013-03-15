@@ -234,7 +234,7 @@ ArrayData *ArrayData::pop(Variant &value) {
     value = getValue(pos);
     return remove(getKey(pos), getCount() > 1);
   }
-  value = null;
+  value = uninit_null();
   return nullptr;
 }
 
@@ -253,7 +253,7 @@ ArrayData *ArrayData::dequeue(Variant &value) {
 
     return ret;
   }
-  value = null;
+  value = uninit_null();
   return nullptr;
 }
 
@@ -372,7 +372,7 @@ Variant ArrayData::key() const {
   if (m_pos >= 0 && m_pos < size()) {
     return getKey(m_pos);
   }
-  return null;
+  return uninit_null();
 }
 
 Variant ArrayData::value(ssize_t &pos) const {

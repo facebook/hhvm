@@ -824,7 +824,7 @@ Variant f_socket_recv(CObjRef socket, VRefParam buf, int len, int flags) {
   int retval;
   if ((retval = recv(sock->fd(), recv_buf, len, flags)) < 1) {
     free(recv_buf);
-    buf = null;
+    buf = uninit_null();
   } else {
     recv_buf[retval] = '\0';
     buf = String(recv_buf, retval, AttachString);

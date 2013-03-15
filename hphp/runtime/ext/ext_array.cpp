@@ -74,7 +74,7 @@ using HPHP::VM::Transl::CallerFrame;
 
 #define getCheckedArrayRet(input, fail) \
   getCheckedArrayRetType(input, fail, CArrRef)
-#define getCheckedArray(input) getCheckedArrayRet(input, null)
+#define getCheckedArray(input) getCheckedArrayRet(input, uninit_null())
 
 Variant f_array_change_key_case(CVarRef input, bool upper /* = false */) {
   getCheckedArrayRet(input, false);
@@ -118,7 +118,7 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
   ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
                                 ctx.invName);
   if (ctx.func == NULL) {
-    return null;
+    return uninit_null();
   }
   return ArrayUtil::Filter(arr_input, filter_func, &ctx);
 }
@@ -189,7 +189,7 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
   Array inputs;
   if (!arr1.isArray()) {
     throw_bad_array_exception();
-    return null;
+    return uninit_null();
   }
   inputs.append(arr1);
   if (!_argv.empty()) {
@@ -255,7 +255,7 @@ Variant f_array_merge(int _argc, CVarRef array1,
     Variant v = iter.second();
     if (!v.isArray()) {
       throw_bad_array_exception();
-      return null;
+      return uninit_null();
     }
     CArrRef arr_v = v.asCArrRef();
     php_array_merge(ret, arr_v);
@@ -274,7 +274,7 @@ Variant f_array_merge_recursive(int _argc, CVarRef array1,
     Variant v = iter.second();
     if (!v.isArray()) {
       throw_bad_array_exception();
-      return null;
+      return uninit_null();
     }
     CArrRef arr_v = v.asCArrRef();
     php_array_merge_recursive(seen, false, ret, arr_v);
@@ -377,7 +377,7 @@ Variant f_array_product(CVarRef array) {
 }
 
 Variant f_array_push(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
-  getCheckedArrayRetType(array, null, Array &);
+  getCheckedArrayRetType(array, uninit_null(), Array &);
   arr_array.append(var);
   for (ArrayIter iter(_argv); iter; ++iter) {
     arr_array.append(iter.second());
@@ -406,7 +406,7 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
   ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
                                 ctx.invName);
   if (ctx.func == NULL) {
-    return null;
+    return uninit_null();
   }
   return ArrayUtil::Reduce(arr_input, reduce_func, &ctx, initial);
 }
@@ -513,7 +513,7 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
   ctx.func = vm_decode_function(funcname, cf(), false, ctx.this_, ctx.cls,
                                 ctx.invName);
   if (ctx.func == NULL) {
-    return null;
+    return uninit_null();
   }
   PointerSet seen;
   ArrayUtil::Walk(input, walk_func, &ctx, true, &seen, userdata);
@@ -530,7 +530,7 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
   ctx.func = vm_decode_function(funcname, cf(), false, ctx.this_, ctx.cls,
                                 ctx.invName);
   if (ctx.func == NULL) {
-    return null;
+    return uninit_null();
   }
   ArrayUtil::Walk(input, walk_func, &ctx, false, NULL, userdata);
   return true;

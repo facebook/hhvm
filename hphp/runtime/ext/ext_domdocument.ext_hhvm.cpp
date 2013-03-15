@@ -1341,7 +1341,7 @@ TypedValue * fg1_dom_node_insert_before(TypedValue* rv, HPHP::VM::ActRec* ar, in
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
   }
-  Object defVal2 = null;
+  Object defVal2 = uninit_null();
   fh_dom_node_insert_before((rv), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -1353,7 +1353,7 @@ TypedValue* fg_dom_node_insert_before(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfObject) && (args-1)->m_type == KindOfObject) {
-        Object defVal2 = null;
+        Object defVal2 = uninit_null();
         fh_dom_node_insert_before((&(rv)), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
@@ -4055,7 +4055,7 @@ TypedValue* tg1_7DOMNode_insertBefore(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  Object defVal1 = null;
+  Object defVal1 = uninit_null();
   th_7DOMNode_insertBefore((rv), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -4069,7 +4069,7 @@ TypedValue* tg_7DOMNode_insertBefore(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfObject) && (args-0)->m_type == KindOfObject) {
-          Object defVal1 = null;
+          Object defVal1 = uninit_null();
           th_7DOMNode_insertBefore((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);

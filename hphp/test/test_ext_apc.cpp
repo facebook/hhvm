@@ -301,7 +301,7 @@ bool TestExtApc::test_apc_bin_load() {
 
 bool TestExtApc::test_apc_bin_dumpfile() {
   try {
-    f_apc_bin_dumpfile(0, null, "");
+    f_apc_bin_dumpfile(0, uninit_null(), "");
   } catch (NotSupportedException e) {
     return Count(true);
   }

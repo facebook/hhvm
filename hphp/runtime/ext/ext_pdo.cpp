@@ -930,12 +930,12 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
     String name = "pdo.dsn."; name += data_source;
     String ini_dsn;
     if (!IniSetting::Get(name, ini_dsn)) {
-      throw_pdo_exception(null, null, "invalid data source name");
+      throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source name");
     }
     data_source = ini_dsn;
     colon = strchr(data_source.data(), ':');
     if (!colon) {
-      throw_pdo_exception(null, null, "invalid data source name (via INI: %s)",
+      throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source name (via INI: %s)",
                           ini_dsn.data());
     }
   }
@@ -944,12 +944,12 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
     /* the specified URI holds connection details */
     Variant stream = File::Open(data_source.substr(4), "rb");
     if (same(stream, false)) {
-      throw_pdo_exception(null, null, "invalid data source URI");
+      throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source URI");
     }
     data_source = stream.toObject().getTyped<File>()->readLine(1024);
     colon = strchr(data_source.data(), ':');
     if (!colon) {
-      throw_pdo_exception(null, null, "invalid data source name (via URI)");
+      throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source name (via URI)");
     }
   }
 
@@ -959,7 +959,7 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
   if (iter == drivers.end()) {
     /* NB: don't want to include the data_source in the error message as
      * it might contain a password */
-    throw_pdo_exception(null, null, "could not find driver");
+    throw_pdo_exception(uninit_null(), uninit_null(), "could not find driver");
   }
   PDODriver *driver = iter->second;
 
@@ -1013,7 +1013,7 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
         /* need a brand new pdbh */
         m_dbh = driver->createConnection(colon+1, username, password, options);
         if (m_dbh.get() == NULL) {
-          throw_pdo_exception(null, null, "unable to create a connection");
+          throw_pdo_exception(uninit_null(), uninit_null(), "unable to create a connection");
         }
         m_dbh->persistent_id = string(shashkey.data(), shashkey.size());
       }
@@ -1022,7 +1022,7 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
   if (!m_dbh.get()) {
     m_dbh = driver->createConnection(colon+1, username, password, options);
     if (m_dbh.get() == NULL) {
-      throw_pdo_exception(null, null, "unable to create a connection");
+      throw_pdo_exception(uninit_null(), uninit_null(), "unable to create a connection");
     }
   }
 
@@ -1100,7 +1100,7 @@ Variant c_PDO::t_prepare(CStrRef statement,
 
 bool c_PDO::t_begintransaction() {
   if (m_dbh->in_txn) {
-    throw_pdo_exception(null, null, "There is already an active transaction");
+    throw_pdo_exception(uninit_null(), uninit_null(), "There is already an active transaction");
   }
   if (m_dbh->begin()) {
     m_dbh->in_txn = 1;
@@ -1115,7 +1115,7 @@ bool c_PDO::t_begintransaction() {
 bool c_PDO::t_commit() {
   assert(m_dbh->driver);
   if (!m_dbh->in_txn) {
-    throw_pdo_exception(null, null, "There is no active transaction");
+    throw_pdo_exception(uninit_null(), uninit_null(), "There is no active transaction");
   }
   if (m_dbh->commit()) {
     m_dbh->in_txn = 0;
@@ -1128,7 +1128,7 @@ bool c_PDO::t_commit() {
 bool c_PDO::t_rollback() {
   assert(m_dbh->driver);
   if (!m_dbh->in_txn) {
-    throw_pdo_exception(null, null, "There is no active transaction");
+    throw_pdo_exception(uninit_null(), uninit_null(), "There is no active transaction");
   }
   if (m_dbh->rollback()) {
     m_dbh->in_txn = 0;
@@ -1241,7 +1241,7 @@ bool c_PDO::t_setattribute(int64_t attribute, CVarRef value) {
   }
 
   if (attribute == PDO_ATTR_AUTOCOMMIT) {
-    throw_pdo_exception(null, null,
+    throw_pdo_exception(uninit_null(), uninit_null(),
                         "The auto-commit mode cannot be changed for this "
                         "driver");
   } else if (!m_dbh->support(PDOConnection::MethodSetAttribute)) {
@@ -1351,7 +1351,7 @@ Variant c_PDO::t_errorcode() {
   }
 
   if (m_dbh->error_code[0] == '\0') {
-    return null;
+    return uninit_null();
   }
 
   /**
@@ -1385,7 +1385,7 @@ Array c_PDO::t_errorinfo() {
   if (error_expected_count > error_count) {
     int error_count_diff = error_expected_count - error_count;
     for (int i = 0; i < error_count_diff; i++) {
-      ret.append(null);
+      ret.append(uninit_null());
     }
   }
   return ret;
@@ -1402,7 +1402,7 @@ Variant c_PDO::t_query(CStrRef sql) {
     pdo_raise_impl_error
       (m_dbh, NULL, "HY000",
        "failed to instantiate user supplied statement class");
-    return null;
+    return uninit_null();
   }
   c_PDOStatement *pdostmt = ret.getTyped<c_PDOStatement>();
 
@@ -1415,7 +1415,7 @@ Variant c_PDO::t_query(CStrRef sql) {
     stmt->default_fetch_type = m_dbh->default_fetch_type;
     stmt->active_query_string = stmt->query_string;
     stmt->dbh = m_dbh;
-    stmt->lazy_object_ref = null;
+    stmt->lazy_object_ref = uninit_null();
 
     strcpy(stmt->error_code, PDO_ERR_NONE);
 
@@ -1469,15 +1469,15 @@ Variant c_PDO::t_quote(CStrRef str, int64_t paramtype /* = q_PDO$$PARAM_STR */) 
 }
 
 Variant c_PDO::t___wakeup() {
-  throw_pdo_exception(null, null,
+  throw_pdo_exception(uninit_null(), uninit_null(),
                       "You cannot serialize or unserialize PDO instances");
-  return null;
+  return uninit_null();
 }
 
 Variant c_PDO::t___sleep() {
-  throw_pdo_exception(null, null,
+  throw_pdo_exception(uninit_null(), uninit_null(),
                       "You cannot serialize or unserialize PDO instances");
-  return null;
+  return uninit_null();
 }
 
 Array c_PDO::ti_getavailabledrivers(const char* cls) {
@@ -1661,7 +1661,7 @@ static inline void fetch_value(sp_PDOStatement stmt, Variant &dest, int colno,
     case PDO_PARAM_INT:  dest = dest.toInt64();   break;
     case PDO_PARAM_BOOL: dest = dest.toBoolean(); break;
     case PDO_PARAM_STR:  dest = dest.toString();  break;
-    case PDO_PARAM_NULL: dest = null;             break;
+    case PDO_PARAM_NULL: dest = uninit_null();             break;
     }
   }
   if (stmt->dbh->stringify && (dest.isInteger() || dest.isDouble())) {
@@ -2878,7 +2878,7 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
 
 bool c_PDOStatement::t_bindvalue(CVarRef paramno, CVarRef param,
                                  int64_t type /* = q_PDO$$PARAM_STR */) {
-  return register_bound_param(paramno, param, type, 0, null, m_stmt, true);
+  return register_bound_param(paramno, param, type, 0, uninit_null(), m_stmt, true);
 }
 
 bool c_PDOStatement::t_bindparam(CVarRef paramno, VRefParam param,
@@ -2903,7 +2903,7 @@ int64_t c_PDOStatement::t_rowcount() {
 
 Variant c_PDOStatement::t_errorcode() {
   if (m_stmt->error_code[0] == '\0') {
-    return null;
+    return uninit_null();
   }
   return String(m_stmt->error_code, CopyString);
 }
@@ -2921,7 +2921,7 @@ Array c_PDOStatement::t_errorinfo() {
   if (error_expected_count > error_count) {
     int error_count_diff = error_expected_count - error_count;
     for (int i = 0; i < error_count_diff; i++) {
-      ret.append(null);
+      ret.append(uninit_null());
     }
   }
   return ret;
@@ -3112,13 +3112,13 @@ Variant c_PDOStatement::t_next() {
   } else {
     ++m_rowIndex;
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_PDOStatement::t_rewind() {
   m_rowIndex = -1;
   t_next();
-  return null;
+  return uninit_null();
 }
 
 Variant c_PDOStatement::t_valid() {
@@ -3126,15 +3126,15 @@ Variant c_PDOStatement::t_valid() {
 }
 
 Variant c_PDOStatement::t___wakeup() {
-  throw_pdo_exception(null, null, "You cannot serialize or unserialize "
+  throw_pdo_exception(uninit_null(), uninit_null(), "You cannot serialize or unserialize "
                       "PDOStatement instances");
-  return null;
+  return uninit_null();
 }
 
 Variant c_PDOStatement::t___sleep() {
-  throw_pdo_exception(null, null, "You cannot serialize or unserialize "
+  throw_pdo_exception(uninit_null(), uninit_null(), "You cannot serialize or unserialize "
                       "PDOStatement instances");
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

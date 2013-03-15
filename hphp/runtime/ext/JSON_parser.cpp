@@ -395,7 +395,7 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type) {
     z = (buf.data() && (*buf.data() == 't'));
     break;
   default:
-    z = null;
+    z = uninit_null();
     break;
   }
 }

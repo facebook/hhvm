@@ -347,7 +347,7 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   if (log) {
     Logger::SetThreadHook(append_stderr, &sb);
   }
-  ret = null;
+  ret = uninit_null();
   g_context->setStdout(nullptr, nullptr);
   g_context->swapOutputBuffer(save);
   if (log) {

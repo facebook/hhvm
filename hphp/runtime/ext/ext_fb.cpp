@@ -267,7 +267,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
   int type;
   switch (type = buff[(*pos)++]) {
   case T_NULL:
-    res = null;
+    res = uninit_null();
     break;
   case T_BOOLEAN:
     CHECK_ENOUGH(sizeof(int8_t), *pos, buff_len);
@@ -417,7 +417,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
 Variant f_fb_thrift_serialize(CVarRef thing) {
   int len;
   if (fb_serialized_size(thing, 0, &len)) {
-    return null;
+    return uninit_null();
   }
   String s(len, ReserveString);
   int pos = 0;
@@ -429,7 +429,7 @@ Variant f_fb_thrift_serialize(CVarRef thing) {
 Variant fb_thrift_unserialize(const char* str, int len, VRefParam success,
                               VRefParam errcode /* = null_variant */) {
   int pos = 0;
-  errcode = null;
+  errcode = uninit_null();
   int errcd;
   Variant ret;
   success = false;
@@ -789,7 +789,7 @@ Variant f_fb_compact_serialize(CVarRef thing) {
   // so no need to check for length.
   if (fb_compact_serialize_variant(sd, thing, 0)) {
     DELETE(StringData)(sd);
-    return null;
+    return uninit_null();
   }
 
   return Variant(sd);
@@ -876,7 +876,7 @@ int fb_compact_unserialize_from_buffer(
   code &= kCodeMask;
   switch (code) {
     case FB_CS_NULL:
-      out = null;
+      out = uninit_null();
       break;
 
     case FB_CS_TRUE:
@@ -1002,7 +1002,7 @@ Variant fb_compact_unserialize(const char* str, int len,
     return false;
   }
   success = true;
-  errcode = null;
+  errcode = uninit_null();
   return ret;
 }
 
@@ -1516,7 +1516,7 @@ Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
   if (f_is_callable(function)) {
     return CREATE_VECTOR2(true, f_call_user_func_array(function, params));
   }
-  return CREATE_VECTOR2(false, null);
+  return CREATE_VECTOR2(false, uninit_null());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

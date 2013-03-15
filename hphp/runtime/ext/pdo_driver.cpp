@@ -97,69 +97,69 @@ bool PDOConnection::support(SupportedMethod method) {
 }
 
 bool PDOConnection::closer() {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOConnection::preparer(CStrRef sql, sp_PDOStatement *stmt,
                              CVarRef options) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 int64_t PDOConnection::doer(CStrRef sql) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return 0;
 }
 
 bool PDOConnection::quoter(CStrRef input, String &quoted,
                            PDOParamType paramtype) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOConnection::begin() {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOConnection::commit() {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOConnection::rollback() {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOConnection::setAttribute(int64_t attr, CVarRef value) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 String PDOConnection::lastId(const char *name) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return String();
 }
 
 bool PDOConnection::fetchErr(PDOStatement *stmt, Array &info) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 int PDOConnection::getAttribute(int64_t attr, Variant &value) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return -1;
 }
 
 bool PDOConnection::checkLiveness() {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 void PDOConnection::persistentShutdown() {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -210,52 +210,52 @@ bool PDOStatement::support(SupportedMethod method) {
 }
 
 bool PDOStatement::executer() {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOStatement::fetcher(PDOFetchOrientation ori, long offset) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOStatement::describer(int colno) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOStatement::getColumn(int colno, Variant &value) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOStatement::paramHook(PDOBoundParam *param, PDOParamEvent event_type) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOStatement::setAttribute(int64_t attr, CVarRef value) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 int PDOStatement::getAttribute(int64_t attr, Variant &value) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return -1;
 }
 
 bool PDOStatement::getColumnMeta(int64_t colno, Array &return_value) {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOStatement::nextRowset() {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 
 bool PDOStatement::cursorCloser() {
-  throw_pdo_exception(null, null, "This driver doesn't support %s", __func__);
+  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
 

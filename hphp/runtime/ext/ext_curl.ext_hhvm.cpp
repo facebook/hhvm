@@ -987,7 +987,7 @@ TypedValue * fg1_curl_multi_info_read(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_curl_multi_info_read(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  VRefParamValue defVal1 = null;
+  VRefParamValue defVal1 = uninit_null();
   fh_curl_multi_info_read((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -999,7 +999,7 @@ TypedValue* fg_curl_multi_info_read(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        VRefParamValue defVal1 = null;
+        VRefParamValue defVal1 = uninit_null();
         fh_curl_multi_info_read((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);

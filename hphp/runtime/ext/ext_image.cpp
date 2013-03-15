@@ -1578,7 +1578,7 @@ Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
   int itype = 0;
   struct gfxinfo *result = NULL;
   if (imageinfo.isReferenced()) {
-    imageinfo = null;
+    imageinfo = uninit_null();
   }
 
   Array ret;
@@ -7602,7 +7602,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
         name = uname;
       }
       if (info_data->length==0) {
-        tmpi->set(String(name, CopyString), null);
+        tmpi->set(String(name, CopyString), uninit_null());
       } else {
         switch (info_data->format) {
         default:

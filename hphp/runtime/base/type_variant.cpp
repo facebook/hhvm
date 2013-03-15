@@ -2399,7 +2399,7 @@ Variant &Variant::lvalAt() {
       if (obj->isCollection()) {
         raise_error("Cannot use [] for reading");
       }
-      Array params = CREATE_VECTOR1(null);
+      Array params = CREATE_VECTOR1(uninit_null());
       Variant& ret = lvalBlackHole();
       ret = m_data.pobj->o_invoke(s_offsetGet, params);
       raise_warning("Indirect modification of overloaded element of %s has "
@@ -2473,7 +2473,7 @@ Variant Variant::o_set(CStrRef propName, CVarRef val,
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
-    return null;
+    return uninit_null();
   }
   return m_data.pobj->o_set(propName, val, context);
 }
@@ -2488,7 +2488,7 @@ Variant Variant::o_setRef(CStrRef propName, CVarRef val,
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
-    return null;
+    return uninit_null();
   }
   return m_data.pobj->o_setRef(propName, val, context);
 }
@@ -2502,7 +2502,7 @@ Variant Variant::o_setPublic(CStrRef propName, CVarRef val) {
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
-    return null;
+    return uninit_null();
   }
   return m_data.pobj->o_setPublic(propName, val);
 }
@@ -2516,7 +2516,7 @@ Variant Variant::o_setPublicRef(CStrRef propName, CVarRef val) {
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
-    return null;
+    return uninit_null();
   }
   return m_data.pobj->o_setPublicRef(propName, val);
 }
@@ -2697,7 +2697,7 @@ CVarRef Variant::append(CVarRef v) {
       if (LIKELY(obj->isCollection())) {
         collectionOffsetAppend(obj, v);
       } else {
-        Array params = CREATE_VECTOR2(null, v);
+        Array params = CREATE_VECTOR2(uninit_null(), v);
         obj->o_invoke(s_offsetSet, params);
       }
       break;
@@ -2826,7 +2826,7 @@ CVarRef Variant::appendRef(CVarRef v) {
       if (LIKELY(obj->isCollection())) {
         raise_error("Collection elements cannot be taken by reference");
       } else {
-        obj->o_invoke_few_args(s_offsetSet, -1, 2, null, v);
+        obj->o_invoke_few_args(s_offsetSet, -1, 2, uninit_null(), v);
       }
     }
   case KindOfStaticString:

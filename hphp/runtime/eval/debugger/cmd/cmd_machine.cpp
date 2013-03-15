@@ -284,7 +284,7 @@ bool CmdMachine::onServer(DebuggerProxy *proxy) {
   if (m_body == "rpc") {
     String host = m_rpcConfig["host"].toString();
     if (host.empty()) {
-      register_intercept("", false, null);
+      register_intercept("", false, uninit_null());
     } else {
       int port = m_rpcConfig["port"].toInt32();
       LibEventHttpClient::SetCache(host.data(), port, 1);

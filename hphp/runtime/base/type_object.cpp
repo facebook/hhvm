@@ -103,7 +103,7 @@ bool Object::more(CObjRef v2) const {
 
 static Variant warn_non_object() {
   raise_warning("Cannot access property on non-object");
-  return null;
+  return uninit_null();
 }
 
 Variant Object::o_get(CStrRef propName, bool error /* = true */,

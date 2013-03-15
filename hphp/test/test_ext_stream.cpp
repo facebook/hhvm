@@ -327,7 +327,7 @@ bool TestExtStream::test_stream_resolve_include_path() {
   String filename = f_getcwd();
   filename += "/test/test_ext_file.txt";
   VS(filename, f_stream_resolve_include_path("test_ext_file.txt"));
-  VS(null, f_stream_resolve_include_path("some-nonexistant-file.ext"));
+  VS(uninit_null(), f_stream_resolve_include_path("some-nonexistant-file.ext"));
   f_set_include_path(old_include_path);
   return Count(true);
 }
@@ -335,7 +335,7 @@ bool TestExtStream::test_stream_resolve_include_path() {
 bool TestExtStream::test_stream_select() {
   Variant f = f_fopen("test/test_ext_file.txt", "r");
   Variant reads = CREATE_VECTOR1(f);
-  VERIFY(!same(f_stream_select(ref(reads), null, null, 0, 0), false));
+  VERIFY(!same(f_stream_select(ref(reads), uninit_null(), uninit_null(), 0, 0), false));
   return Count(true);
 }
 

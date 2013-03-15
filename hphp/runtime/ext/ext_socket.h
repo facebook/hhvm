@@ -28,9 +28,9 @@ Variant f_socket_create_listen(int port, int backlog = 128);
 bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd);
 Variant f_socket_get_option(CObjRef socket, int level, int optname);
 bool f_socket_getpeername(CObjRef socket, VRefParam address,
-                          VRefParam port = null);
+                          VRefParam port = uninit_null());
 bool f_socket_getsockname(CObjRef socket, VRefParam address,
-                          VRefParam port = null);
+                          VRefParam port = uninit_null());
 bool f_socket_set_block(CObjRef socket);
 bool f_socket_set_nonblock(CObjRef socket);
 bool f_socket_set_option(CObjRef socket, int level, int optname,
@@ -40,8 +40,8 @@ bool f_socket_bind(CObjRef socket, CStrRef address, int port = 0);
 bool f_socket_listen(CObjRef socket, int backlog = 0);
 Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
                         CVarRef vtv_sec, int tv_usec = 0);
-Variant f_socket_server(CStrRef hostname, int port = -1, VRefParam errnum = null,
-                        VRefParam errstr = null);
+Variant f_socket_server(CStrRef hostname, int port = -1, VRefParam errnum = uninit_null(),
+                        VRefParam errstr = uninit_null());
 Variant f_socket_accept(CObjRef socket);
 Variant f_socket_read(CObjRef socket, int length, int type = 0);
 Variant f_socket_write(CObjRef socket, CStrRef buffer, int length = 0);

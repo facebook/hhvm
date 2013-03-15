@@ -312,7 +312,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
 
   bool error = false;
   std::string errorMsg = "Internal Server Error";
-  ret = hphp_invoke(context, file, false, Array(), null,
+  ret = hphp_invoke(context, file, false, Array(), uninit_null(),
                     RuntimeOption::RequestInitFunction,
                     RuntimeOption::RequestInitDocument,
                     error, errorMsg);
@@ -339,7 +339,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
       context->obEndAll();
       context->obStart();
       context->obProtect(true);
-      ret = hphp_invoke(context, errorPage, false, Array(), null,
+      ret = hphp_invoke(context, errorPage, false, Array(), uninit_null(),
                         RuntimeOption::RequestInitFunction,
                         RuntimeOption::RequestInitDocument,
                         error, errorMsg);

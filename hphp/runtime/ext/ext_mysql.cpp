@@ -740,7 +740,7 @@ Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field) {
     //case MYSQL_TYPE_NEWDECIMAL:
     return data.toDouble();
   case MYSQL_TYPE_NULL:
-    return null;
+    return uninit_null();
   default:
     break;
   }
@@ -1592,7 +1592,7 @@ Variant f_mysql_result(CVarRef result, int row,
                     CopyString);
     }
   }
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1723,7 +1723,7 @@ MySQLFieldInfo *MySQLResult::getFieldInfo(int64_t field) {
 
 Variant MySQLResult::getField(int64_t field) const {
   if (!m_localized || field < 0 || field >= (int64_t)m_current_row->size()) {
-    return null;
+    return uninit_null();
   }
   return *(*m_current_row)[field];
 }

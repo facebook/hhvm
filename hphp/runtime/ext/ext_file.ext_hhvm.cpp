@@ -1283,7 +1283,7 @@ TypedValue * fg1_flock(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   rv->m_data.num = (fh_flock((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
   return rv;
 }
@@ -1295,7 +1295,7 @@ TypedValue* fg_flock(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         rv.m_data.num = (fh_flock((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

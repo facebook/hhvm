@@ -676,7 +676,7 @@ Variant Instance::t___destruct() {
     g_vmContext->invokeFunc((TypedValue*)&v, method, Array::Create(), this);
     return v;
   } else {
-    return null;
+    return uninit_null();
   }
 }
 
@@ -689,7 +689,7 @@ Variant Instance::t___call(Variant v_name, Variant v_arguments) {
                           CREATE_VECTOR2(v_name, v_arguments), this);
     return v;
   } else {
-    return null;
+    return uninit_null();
   }
 }
 
@@ -702,7 +702,7 @@ Variant Instance::t___set(Variant v_name, Variant v_value) {
       this);
     return v;
   } else {
-    return null;
+    return uninit_null();
   }
 }
 
@@ -714,7 +714,7 @@ Variant Instance::t___get(Variant v_name) {
                           CREATE_VECTOR1(v_name), this);
     return v;
   } else {
-    return null;
+    return uninit_null();
   }
 }
 
@@ -726,7 +726,7 @@ bool Instance::t___isset(Variant v_name) {
                           CREATE_VECTOR1(v_name), this);
     return v;
   } else {
-    return null;
+    return uninit_null();
   }
 }
 
@@ -738,7 +738,7 @@ Variant Instance::t___unset(Variant v_name) {
                           CREATE_VECTOR1(v_name), this);
     return v;
   } else {
-    return null;
+    return uninit_null();
   }
 }
 
@@ -751,7 +751,7 @@ Variant Instance::t___sleep() {
     return tvAsVariant(&tv);
   } else {
     clearAttribute(HasSleep);
-    return null;
+    return uninit_null();
   }
 }
 
@@ -763,7 +763,7 @@ Variant Instance::t___wakeup() {
     g_vmContext->invokeFunc(&tv, method, Array::Create(), this);
     return tvAsVariant(&tv);
   } else {
-    return null;
+    return uninit_null();
   }
 }
 

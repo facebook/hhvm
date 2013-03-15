@@ -588,7 +588,7 @@ Variant c_Normalizer::ti_isnormalized(const char* cls , CStrRef input,
     s_intl_error->m_error.code = U_ILLEGAL_ARGUMENT_ERROR;
     s_intl_error->m_error.custom_error_message =
       "normalizer_isnormalized: illegal normalization form";
-    return null;
+    return uninit_null();
   }
 
   /* First convert the string to UTF-16. */
@@ -639,7 +639,7 @@ Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
     s_intl_error->m_error.code = U_ILLEGAL_ARGUMENT_ERROR;
     s_intl_error->m_error.custom_error_message =
       "normalizer_normalize: illegal normalization form";
-    return null;
+    return uninit_null();
   }
 
   /* First convert the string to UTF-16. */
@@ -653,7 +653,7 @@ Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
     s_intl_error->m_error.custom_error_message =
         "Error converting string to UTF-16.";
     free(uinput);
-    return null;
+    return uninit_null();
   }
 
   /* Allocate memory for the destination buffer for normalization */
@@ -675,7 +675,7 @@ Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
       status != U_STRING_NOT_TERMINATED_WARNING) {
     free(uret_buf);
     free(uinput);
-    return null;
+    return uninit_null();
   }
 
   if (size_needed > uret_len) {
@@ -699,7 +699,7 @@ Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
       s_intl_error->m_error.custom_error_message = "Error normalizing string";
       free(uret_buf);
       free(uinput);
-      return null;
+      return uninit_null();
     }
   }
 
@@ -716,7 +716,7 @@ Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
     s_intl_error->m_error.code = status;
     s_intl_error->m_error.custom_error_message =
       "normalizer_normalize: error converting normalized text UTF-8";
-    return null;
+    return uninit_null();
   }
 
   return String(ret_buf, ret_len, AttachString);

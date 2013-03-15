@@ -925,7 +925,7 @@ Variant MimePart::extract(CVarRef filename, CVarRef callbackfunc, int decode,
     }
     return true;
   }
-  return null;
+  return uninit_null();
 }
 
 int MimePart::extractImpl(int decode, File *src) {

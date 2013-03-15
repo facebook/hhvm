@@ -253,19 +253,19 @@ Variant c_DateInterval::t___get(Variant member) {
 
 Variant c_DateInterval::t___set(Variant member, Variant value) {
   if (member.isString()) {
-    if (member.same("y")) { m_di->setYears(value.toInt64());   return null; }
-    if (member.same("m")) { m_di->setMonths(value.toInt64());  return null; }
-    if (member.same("d")) { m_di->setDays(value.toInt64());    return null; }
-    if (member.same("h")) { m_di->setHours(value.toInt64());   return null; }
-    if (member.same("i")) { m_di->setMinutes(value.toInt64()); return null; }
-    if (member.same("s")) { m_di->setSeconds(value.toInt64()); return null; }
+    if (member.same("y")) { m_di->setYears(value.toInt64());   return uninit_null(); }
+    if (member.same("m")) { m_di->setMonths(value.toInt64());  return uninit_null(); }
+    if (member.same("d")) { m_di->setDays(value.toInt64());    return uninit_null(); }
+    if (member.same("h")) { m_di->setHours(value.toInt64());   return uninit_null(); }
+    if (member.same("i")) { m_di->setMinutes(value.toInt64()); return uninit_null(); }
+    if (member.same("s")) { m_di->setSeconds(value.toInt64()); return uninit_null(); }
     if (member.same("invert")) {
       m_di->setInverted(value.toBoolean());
-      return null;
+      return uninit_null();
     }
     if (member.same("days")) {
       m_di->setTotalDays(value.toInt64());
-      return null;
+      return uninit_null();
     }
   }
 

@@ -241,20 +241,20 @@ Variant f_simplexml_load_string(CStrRef data,
                                 bool is_prefix /* = false */) {
   if (!class_exists(class_name)) {
     throw_invalid_argument("class %s does not exist", class_name.data());
-    return null;
+    return uninit_null();
   }
 
   const ClassInfo *cls = ClassInfo::FindClass(!class_name.empty() ? class_name : s_SimpleXMLElement);
   if (cls == NULL) {
     throw_invalid_argument("class not found: %s", class_name.data());
-    return null;
+    return uninit_null();
   }
 
   if (!class_name->isame(s_SimpleXMLElement.get()) && !cls->derivesFrom(s_SimpleXMLElement, false)) {
     throw_invalid_argument("simplexml_load_string() expects parameter 2 to be a class name derived "
                            "from SimpleXMLElement, '%s' given",
                            class_name.data());
-    return null;
+    return uninit_null();
   }
 
   xmlDocPtr doc = xmlReadMemory(data.data(), data.size(), NULL, NULL, options);
@@ -331,7 +331,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
 
 Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
   if (m_is_attribute || !m_node) {
-    return null;
+    return uninit_null();
   }
 
   xmlDocPtr doc = m_node->doc;
@@ -563,15 +563,15 @@ Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
                                        CStrRef ns /* = null_string */) {
   if (qname.empty()) {
     raise_warning("Element name is required");
-    return null;
+    return uninit_null();
   }
   if (m_is_attribute) {
     raise_warning("Cannot add element to attributes");
-    return null;
+    return uninit_null();
   }
   if (!m_node) {
     raise_warning("Parent is not a permanent member of the XML tree");
-    return null;
+    return uninit_null();
   }
 
   xmlChar *prefix = NULL;
@@ -717,7 +717,7 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
 }
 
 Variant c_SimpleXMLElement::t___unset(Variant name) {
-  if (m_node == NULL) return null;
+  if (m_node == NULL) return uninit_null();
 
   Variant node;
   if (m_is_attribute) {
@@ -747,7 +747,7 @@ Variant c_SimpleXMLElement::t___unset(Variant name) {
   } else {
     m_children.remove(name);
   }
-  return null;
+  return uninit_null();
 }
 
 bool c_SimpleXMLElement::t___isset(Variant name) {
@@ -776,7 +776,7 @@ static void change_node_zval(xmlNodePtr node, CStrRef value) {
 }
 
 Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
-  if (m_node == NULL) return null;
+  if (m_node == NULL) return uninit_null();
 
   String svalue = value.toString();
   xmlChar *sv = svalue.empty() ? NULL : (xmlChar *)svalue.data();
@@ -834,7 +834,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
     }
   }
 
-  return null;
+  return uninit_null();
 }
 
 bool c_SimpleXMLElement::o_toBoolean() const {
@@ -1040,7 +1040,7 @@ void c_SimpleXMLElementIterator::t___construct() {
 }
 
 Variant c_SimpleXMLElementIterator::t_current() {
-  if (m_iter1 == NULL) return null;
+  if (m_iter1 == NULL) return uninit_null();
   if (m_parent->m_is_attribute) {
     return m_iter1->second();
   }
@@ -1055,27 +1055,27 @@ Variant c_SimpleXMLElementIterator::t_current() {
   }
 
   assert(false);
-  return null;
+  return uninit_null();
 }
 
 Variant c_SimpleXMLElementIterator::t_key() {
   if (m_iter1) {
     return m_iter1->first();
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_SimpleXMLElementIterator::t_next() {
-  if (m_iter1 == NULL) return null;
+  if (m_iter1 == NULL) return uninit_null();
   if (m_parent->m_is_attribute) {
     m_iter1->next();
-    return null;
+    return uninit_null();
   }
 
   if (m_iter2) {
     m_iter2->next();
     if (!m_iter2->end()) {
-      return null;
+      return uninit_null();
     }
     delete m_iter2; m_iter2 = NULL;
   }
@@ -1090,12 +1090,12 @@ Variant c_SimpleXMLElementIterator::t_next() {
     }
     m_iter1->next();
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_SimpleXMLElementIterator::t_rewind() {
   reset_iterator();
-  return null;
+  return uninit_null();
 }
 
 Variant c_SimpleXMLElementIterator::t_valid() {

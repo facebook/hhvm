@@ -452,7 +452,7 @@ Variant ScalarExpression::getVariant() const {
     default:
       assert(false);
   }
-  return null;
+  return uninit_null();
 }
 
 bool ScalarExpression::getString(const std::string *&s) const {

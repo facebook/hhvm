@@ -159,14 +159,14 @@ inline int64_t f_set_file_buffer(CObjRef stream, int buffer) {
 // stream sockets: ext_socket has better implementation of socket functions
 
 Variant f_stream_socket_accept(CObjRef server_socket, double timeout = 0.0,
-                              VRefParam peername = null);
+                              VRefParam peername = uninit_null());
 
-Variant f_stream_socket_server(CStrRef local_socket, VRefParam errnum = null,
-                              VRefParam errstr = null,
+Variant f_stream_socket_server(CStrRef local_socket, VRefParam errnum = uninit_null(),
+                              VRefParam errstr = uninit_null(),
                               int flags = 0, CObjRef context = null_object);
 
-Variant f_stream_socket_client(CStrRef remote_socket, VRefParam errnum = null,
-                              VRefParam errstr = null, double timeout = 0.0,
+Variant f_stream_socket_client(CStrRef remote_socket, VRefParam errnum = uninit_null(),
+                              VRefParam errstr = uninit_null(), double timeout = 0.0,
                               int flags = 0, CObjRef context = null_object);
 
 inline Variant f_stream_socket_enable_crypto(CObjRef stream, bool enable,

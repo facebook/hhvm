@@ -26,7 +26,7 @@ class UserFile : public File {
 public:
   DECLARE_OBJECT_ALLOCATION(UserFile);
 
-  UserFile(VM::Class *cls, int options = 0, CVarRef context = null);
+  UserFile(VM::Class *cls, int options = 0, CVarRef context = uninit_null());
   virtual ~UserFile();
 
   static StaticString s_class_name;

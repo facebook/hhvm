@@ -173,7 +173,7 @@ TypedValue * fg1_apc_fetch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
 TypedValue * fg1_apc_fetch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-2);
-  VRefParamValue defVal1 = null;
+  VRefParamValue defVal1 = uninit_null();
   fh_apc_fetch((rv), (args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -185,7 +185,7 @@ TypedValue* fg_apc_fetch(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64)) {
-        VRefParamValue defVal1 = null;
+        VRefParamValue defVal1 = uninit_null();
         fh_apc_fetch((&(rv)), (args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
@@ -405,7 +405,7 @@ TypedValue * fg1_apc_inc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   fh_apc_inc((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -417,7 +417,7 @@ TypedValue* fg_apc_inc(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         fh_apc_inc((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
@@ -475,7 +475,7 @@ TypedValue * fg1_apc_dec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   fh_apc_dec((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -487,7 +487,7 @@ TypedValue* fg_apc_dec(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         fh_apc_dec((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);

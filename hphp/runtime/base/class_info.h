@@ -336,7 +336,7 @@ public:
         return *(Object*)addr;
       default:
         assert(false);
-        return null;
+        return uninit_null();
     }
   }
 

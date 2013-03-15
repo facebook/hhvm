@@ -50,7 +50,7 @@ Variant f_dom_document_schema_validate_file(CVarRef obj, CStrRef filename);
 Variant f_dom_document_schema_validate_xml(CVarRef obj, CStrRef source);
 Variant f_dom_document_relaxng_validate_file(CVarRef obj, CStrRef filename);
 Variant f_dom_document_relaxng_validate_xml(CVarRef obj, CStrRef source);
-Variant f_dom_node_insert_before(CVarRef obj, CObjRef newnode, CObjRef refnode = null);
+Variant f_dom_node_insert_before(CVarRef obj, CObjRef newnode, CObjRef refnode = uninit_null());
 Variant f_dom_node_replace_child(CVarRef obj, CObjRef newchildobj, CObjRef oldchildobj);
 Variant f_dom_node_remove_child(CVarRef obj, CObjRef node);
 Variant f_dom_node_append_child(CVarRef obj, CObjRef newnode);
@@ -96,7 +96,7 @@ Variant f_dom_text_is_whitespace_in_element_content(CVarRef obj);
 Variant f_dom_xpath_register_ns(CVarRef obj, CStrRef prefix, CStrRef uri);
 Variant f_dom_xpath_query(CVarRef obj, CStrRef expr, CObjRef context = null_object);
 Variant f_dom_xpath_evaluate(CVarRef obj, CStrRef expr, CObjRef context = null_object);
-Variant f_dom_xpath_register_php_functions(CVarRef obj, CVarRef funcs = null);
+Variant f_dom_xpath_register_php_functions(CVarRef obj, CVarRef funcs = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNode
@@ -115,7 +115,7 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
   public: int64_t t_getlineno();
   public: bool t_hasattributes();
   public: bool t_haschildnodes();
-  public: Variant t_insertbefore(CObjRef newnode, CObjRef refnode = null);
+  public: Variant t_insertbefore(CObjRef newnode, CObjRef refnode = uninit_null());
   public: bool t_isdefaultnamespace(CStrRef namespaceuri);
   public: bool t_issamenode(CObjRef node);
   public: bool t_issupported(CStrRef feature, CStrRef version);
@@ -124,8 +124,8 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
   public: void t_normalize();
   public: Variant t_removechild(CObjRef node);
   public: Variant t_replacechild(CObjRef newchildobj, CObjRef oldchildobj);
-  public: Variant t_c14n(bool exclusive = false, bool with_comments = false, CVarRef xpath = null, CVarRef ns_prefixes = null);
-  public: Variant t_c14nfile(CStrRef uri, bool exclusive = false, bool with_comments = false, CVarRef xpath = null, CVarRef ns_prefixes = null);
+  public: Variant t_c14n(bool exclusive = false, bool with_comments = false, CVarRef xpath = uninit_null(), CVarRef ns_prefixes = uninit_null());
+  public: Variant t_c14nfile(CStrRef uri, bool exclusive = false, bool with_comments = false, CVarRef xpath = uninit_null(), CVarRef ns_prefixes = uninit_null());
   public: Variant t_getnodepath();
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
@@ -569,7 +569,7 @@ class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseS
   public: Variant t_evaluate(CStrRef expr, CObjRef context = null_object);
   public: Variant t_query(CStrRef expr, CObjRef context = null_object);
   public: bool t_registernamespace(CStrRef prefix, CStrRef uri);
-  public: Variant t_registerphpfunctions(CVarRef funcs = null);
+  public: Variant t_registerphpfunctions(CVarRef funcs = uninit_null());
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);

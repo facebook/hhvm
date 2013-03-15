@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline bool f_ob_start(CVarRef output_callback = null, int chunk_size = 0,
+inline bool f_ob_start(CVarRef output_callback = uninit_null(), int chunk_size = 0,
                        bool erase = true) {
   // ignoring chunk_size and erase
   g_context->obStart(output_callback);

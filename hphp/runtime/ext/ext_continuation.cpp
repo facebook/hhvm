@@ -199,7 +199,7 @@ String c_Continuation::t_getorigfuncname() {
 Variant c_Continuation::t___clone() {
   throw_fatal(
       "Trying to clone an uncloneable object of class Continuation");
-  return null;
+  return uninit_null();
 }
 
 HphpArray* c_Continuation::getStaticLocals() {
@@ -250,7 +250,7 @@ void c_DummyContinuation::t___construct() {
 
 Variant c_DummyContinuation::t_current() {
   throw_fatal("Tring to use a DummyContinuation");
-  return null;
+  return uninit_null();
 }
 
 int64_t c_DummyContinuation::t_key() {

@@ -26,12 +26,12 @@ namespace HPHP {
 Array f_get_defined_functions();
 bool f_function_exists(CStrRef function_name, bool autoload = true);
 bool f_is_callable(CVarRef v, bool syntax = false,
-                   VRefParam name = null);
+                   VRefParam name = uninit_null());
 Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv = null_array);
 Object f_call_user_func_array_async(CVarRef function, CArrRef params);
 Object f_call_user_func_async(int _argc, CVarRef function, CArrRef _argv = null_array);
 Variant f_check_user_func_async(CVarRef handles, int timeout = -1);
-Variant f_end_user_func_async(CObjRef handle, int default_strategy = k_GLOBAL_STATE_IGNORE, CVarRef additional_strategies = null);
+Variant f_end_user_func_async(CObjRef handle, int default_strategy = k_GLOBAL_STATE_IGNORE, CVarRef additional_strategies = uninit_null());
 String f_call_user_func_serialized(CStrRef input);
 Variant f_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth, int timeout, CVarRef function, CArrRef params);
 Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth, int timeout, CVarRef function, CArrRef _argv = null_array);

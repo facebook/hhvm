@@ -37,7 +37,7 @@ ssize_t NameValueTableWrapper::vsize() const {
 
 Variant NameValueTableWrapper::getKey(ssize_t pos) const {
   NameValueTable::Iterator iter(m_tab, pos);
-  return iter.valid() ? Variant(StrNR(iter.curKey())) : null;
+  return iter.valid() ? Variant(StrNR(iter.curKey())) : uninit_null();
 }
 
 Variant NameValueTableWrapper::getValue(ssize_t pos) const {

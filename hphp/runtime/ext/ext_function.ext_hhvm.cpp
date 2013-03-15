@@ -135,7 +135,7 @@ TypedValue * fg1_is_callable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-1);
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   rv->m_data.num = (fh_is_callable((args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
   return rv;
 }
@@ -147,7 +147,7 @@ TypedValue* fg_is_callable(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean)) {
         rv.m_type = KindOfBoolean;
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         rv.m_data.num = (fh_is_callable((args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

@@ -390,7 +390,7 @@ Variant HphpArray::key() const {
     }
     return e->ikey;
   }
-  return null;
+  return uninit_null();
 }
 
 Variant HphpArray::value(ssize_t& pos) const {
@@ -1407,7 +1407,7 @@ TypedValue* HphpArray::nvGet(const StringData* k) const {
 ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
   HphpArray *a = this, *t = 0;
   if (copy) a = t = copyImpl();
-  if (UNLIKELY(!a->nextInsert(null))) {
+  if (UNLIKELY(!a->nextInsert(uninit_null()))) {
     ret = nullptr;
     return t;
   }
@@ -1620,7 +1620,7 @@ ArrayData* HphpArray::pop(Variant& value) {
         : a->findForInsert(e->ikey);
     a->erase(ei, true);
   } else {
-    value = null;
+    value = uninit_null();
   }
   // To match PHP-like semantics, the pop operation resets the array's
   // internal iterator.
@@ -1647,7 +1647,7 @@ ArrayData* HphpArray::dequeue(Variant& value) {
              a->findForInsert(e->ikey));
     a->compact(true);
   } else {
-    value = null;
+    value = uninit_null();
   }
   // To match PHP-like semantics, the dequeue operation resets the array's
   // internal iterator

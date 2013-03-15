@@ -141,14 +141,14 @@ Object f_call_user_func_async(int _argc, CVarRef function,
 
 Variant f_check_user_func_async(CVarRef handles, int timeout /* = -1 */) {
   raise_error("%s is no longer supported", __func__);
-  return null;
+  return uninit_null();
 }
 
 Variant f_end_user_func_async(CObjRef handle,
                               int default_strategy /* = k_GLOBAL_STATE_IGNORE */,
                               CVarRef additional_strategies /* = null */) {
   raise_error("%s is no longer supported", __func__);
-  return null;
+  return uninit_null();
 }
 
 String f_call_user_func_serialized(CStrRef input) {

@@ -485,7 +485,7 @@ TypedValue * fg1_hash_update_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  Object defVal2 = null;
+  Object defVal2 = uninit_null();
   rv->m_data.num = (fh_hash_update_file((Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2))) ? 1LL : 0LL;
   return rv;
 }
@@ -497,7 +497,7 @@ TypedValue* fg_hash_update_file(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfObject) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        Object defVal2 = null;
+        Object defVal2 = uninit_null();
         rv.m_data.num = (fh_hash_update_file((Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

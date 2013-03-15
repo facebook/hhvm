@@ -604,7 +604,7 @@ public:
       m_exception = e.clone();
       m_phpException = false;
     }
-    return null;
+    return uninit_null();
   }
 
   static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx) {
@@ -833,7 +833,7 @@ Variant f_curl_getinfo(CObjRef ch, int opt /* = 0 */) {
       if (s_code != NULL) {
         ret.set("content_type", String(s_code, CopyString));
       } else {
-        ret.set("content_type", null);
+        ret.set("content_type", uninit_null());
       }
     }
     if (curl_easy_getinfo(cp, CURLINFO_HTTP_CODE, &l_code) == CURLE_OK) {
@@ -961,7 +961,7 @@ Variant f_curl_getinfo(CObjRef ch, int opt /* = 0 */) {
     }
   }
 
-  return null;
+  return uninit_null();
 }
 
 Variant f_curl_errno(CObjRef ch) {
@@ -977,7 +977,7 @@ Variant f_curl_error(CObjRef ch) {
 Variant f_curl_close(CObjRef ch) {
   CHECK_RESOURCE(curl);
   curl->close();
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1083,7 +1083,7 @@ StaticString CurlMultiResource::s_class_name("cURL Multi Handle");
   CurlMultiResource *curlm = mh.getTyped<CurlMultiResource>(true, true); \
   if (curlm == NULL) {                                                  \
     raise_warning("expects parameter 1 to be cURL multi resource");     \
-    return null;                                                        \
+    return uninit_null();                                                        \
   }                                                                     \
 
 Object f_curl_multi_init() {
@@ -1234,7 +1234,7 @@ Variant f_curl_multi_info_read(CObjRef mh,
 Variant f_curl_multi_close(CObjRef mh) {
   CHECK_MULTI_RESOURCE(curlm);
   curlm->close();
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

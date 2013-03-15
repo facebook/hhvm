@@ -106,7 +106,7 @@ Variant c_UConverter::t___destruct() {
     ucnv_close(m_dest);
   }
 
-  return null;
+  return uninit_null();
 }
 
 /* get/set source/dest encodings */
@@ -302,14 +302,14 @@ void c_UConverter::t_setdestinationencoding(CStrRef encoding) {
 
 String c_UConverter::t_getsourceencoding() {
   if (!m_src) {
-    return null;
+    return uninit_null();
   }
 
   UErrorCode error = U_ZERO_ERROR;
   const char *name = ucnv_getName(m_src, &error);
   if (U_FAILURE(error)) {
     THROW_UFAILURE(ucnv_getName, error, m_error);
-    return null;
+    return uninit_null();
   }
 
   return String(name);
@@ -317,14 +317,14 @@ String c_UConverter::t_getsourceencoding() {
 
 String c_UConverter::t_getdestinationencoding() {
   if (!m_dest) {
-    return null;
+    return uninit_null();
   }
 
   UErrorCode error = U_ZERO_ERROR;
   const char *name = ucnv_getName(m_dest, &error);
   if (U_FAILURE(error)) {
     THROW_UFAILURE(ucnv_getName, error, m_error);
-    return null;
+    return uninit_null();
   }
 
   return String(name);
@@ -374,7 +374,7 @@ String c_UConverter::t_getsubstchars() {
   ucnv_getSubstChars(m_src, chars, &chars_len, &error);
   if (U_FAILURE(error)) {
     THROW_UFAILURE(ucnv_getSubstChars, error, m_error);
-    return null;
+    return uninit_null();
   }
 
   return String(chars, chars_len, CopyString);
@@ -391,7 +391,7 @@ Variant c_UConverter::defaultCallback(int64_t reason, VRefParam error) {
       return t_getsubstchars();
   }
 
-  return null;
+  return uninit_null();
 }
 
 Variant c_UConverter::t_fromucallback(int64_t reason,
@@ -422,7 +422,7 @@ String c_UConverter::doConvert(CStrRef str,
   if (!fromCnv || !toCnv) {
     err.code = U_INVALID_STATE_ERROR;
     err.custom_error_message = "Internal converters not initialized";
-    return null;
+    return uninit_null();
   }
 
   /* Convert to UChar pivot encoding */
@@ -430,7 +430,7 @@ String c_UConverter::doConvert(CStrRef str,
                                    str.c_str(), str.size(), &error);
   if (U_FAILURE(error) && error != U_BUFFER_OVERFLOW_ERROR) {
     THROW_UFAILURE(ucnv_toUChars, error, err);
-    return null;
+    return uninit_null();
   }
   // Explicitly include the space for a \u0000 UChar since String
   // only allocates one extra byte (not the 2 needed)
@@ -442,7 +442,7 @@ String c_UConverter::doConvert(CStrRef str,
                            str.c_str(), str.size(), &error);
   if (U_FAILURE(error)) {
     THROW_UFAILURE(ucnv_toUChars, error, err);
-    return null;
+    return uninit_null();
   }
   temp[temp_len] = 0;
 
@@ -452,7 +452,7 @@ String c_UConverter::doConvert(CStrRef str,
                                      temp, temp_len, &error);
   if (U_FAILURE(error) && error != U_BUFFER_OVERFLOW_ERROR) {
     THROW_UFAILURE(ucnv_fromUChars, error, err);
-    return null;
+    return uninit_null();
   }
   String destStr(dest_len, ReserveString);
   char *dest = (char*) destStr.mutableSlice().ptr;
@@ -462,7 +462,7 @@ String c_UConverter::doConvert(CStrRef str,
                              temp, temp_len, &error);
   if (U_FAILURE(error)) {
     THROW_UFAILURE(ucnv_fromUChars, error, err);
-    return null;
+    return uninit_null();
   }
   return destStr.setSize(dest_len);
 }
@@ -472,20 +472,20 @@ Variant c_UConverter::ti_transcode(const char* cls , CStrRef str,
                                    CArrRef options) {
   UConverter *fromCnv = NULL, *toCnv = NULL;
   if (!setEncoding(fromEncoding, &fromCnv, s_intl_error->m_error)) {
-    return null;
+    return uninit_null();
   }
   if (!setEncoding(toEncoding, &toCnv, s_intl_error->m_error)) {
-    return null;
+    return uninit_null();
   }
   if (options.exists("from_subst") &&
      !setSubstChars(options["from_subst"].toString(), fromCnv,
                                           s_intl_error->m_error)) {
-    return null;
+    return uninit_null();
   }
   if (options.exists("to_subst") &&
      !setSubstChars(options["to_subst"].toString(), toCnv,
                                         s_intl_error->m_error)) {
-    return null;
+    return uninit_null();
   }
   Variant ret = doConvert(str, toCnv, fromCnv, s_intl_error->m_error);
   ucnv_close(toCnv);
@@ -516,7 +516,7 @@ String c_UConverter::ti_reasontext(const char* cls , int64_t reason) {
     UCNV_REASON_CASE(CLONE)
     default:
       raise_warning("Unknown UConverterCallbackReason: %ld", (long)reason);
-      return null;
+      return uninit_null();
   }
 }
 
@@ -537,7 +537,7 @@ Array c_UConverter::ti_getaliases(const char* cls , CStrRef encoding) {
 
   if (U_FAILURE(error)) {
     THROW_UFAILURE(ucnv_getAliases, error, s_intl_error->m_error);
-    return null;
+    return uninit_null();
   }
 
   Array ret = Array::Create();
@@ -546,7 +546,7 @@ Array c_UConverter::ti_getaliases(const char* cls , CStrRef encoding) {
     const char *alias = ucnv_getAlias(encoding, i, &error);
     if (U_FAILURE(error)) {
       THROW_UFAILURE(ucnv_getAlias, error, s_intl_error->m_error);
-      return null;
+      return uninit_null();
     }
     ret.append(alias);
   }
@@ -562,7 +562,7 @@ Array c_UConverter::ti_getstandards(const char* cls ) {
     const char *name = ucnv_getStandard(i, &error);
     if (U_FAILURE(error)) {
       THROW_UFAILURE(ucnv_getStandard, error, s_intl_error->m_error);
-      return null;
+      return uninit_null();
     }
     ret.append(name);
   }

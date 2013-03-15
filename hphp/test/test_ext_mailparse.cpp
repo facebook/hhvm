@@ -110,7 +110,7 @@ bool TestExtMailparse::test_mailparse_msg_create() {
 }
 
 bool TestExtMailparse::test_mailparse_msg_free() {
-  f_mailparse_msg_free(null);
+  f_mailparse_msg_free(uninit_null());
   return Count(true);
 }
 
@@ -165,7 +165,7 @@ bool TestExtMailparse::test_mailparse_msg_extract_part() {
   f_mailparse_msg_extract_part_file(mime, fp);
 
   echo("Extract and return as string\n");
-  Variant result = f_mailparse_msg_extract_part_file(mime, fp, null);
+  Variant result = f_mailparse_msg_extract_part_file(mime, fp, uninit_null());
   echo("-->\n");
   echo(result);
 

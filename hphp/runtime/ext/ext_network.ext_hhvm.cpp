@@ -713,8 +713,8 @@ TypedValue * fg1_dns_get_record(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  VRefParamValue defVal2 = null;
-  VRefParamValue defVal3 = null;
+  VRefParamValue defVal2 = uninit_null();
+  VRefParamValue defVal3 = uninit_null();
   fh_dns_get_record((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -726,8 +726,8 @@ TypedValue* fg_dns_get_record(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        VRefParamValue defVal2 = null;
-        VRefParamValue defVal3 = null;
+        VRefParamValue defVal2 = uninit_null();
+        VRefParamValue defVal3 = uninit_null();
         fh_dns_get_record((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
@@ -769,7 +769,7 @@ TypedValue * fg1_dns_get_mx(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   rv->m_data.num = (fh_dns_get_mx((Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
   return rv;
 }
@@ -781,7 +781,7 @@ TypedValue* fg_dns_get_mx(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         rv.m_data.num = (fh_dns_get_mx((Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1004,8 +1004,8 @@ TypedValue* fg_headers_sent(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 2LL) {
       rv.m_type = KindOfBoolean;
-      VRefParamValue defVal0 = null;
-      VRefParamValue defVal1 = null;
+      VRefParamValue defVal0 = uninit_null();
+      VRefParamValue defVal1 = uninit_null();
       rv.m_data.num = (fh_headers_sent((count > 0) ? (args-0) : (TypedValue*)(&defVal0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1))) ? 1LL : 0LL;
       frame_free_locals_no_this_inl(ar, 2);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));

@@ -52,8 +52,8 @@ class c_SpoofChecker : public ExtObjectData {
   public: c_SpoofChecker(VM::Class* cls = c_SpoofChecker::s_cls);
   public: ~c_SpoofChecker();
   public: void t___construct();
-  public: bool t_issuspicious(CStrRef text, VRefParam issuesFound = null);
-  public: bool t_areconfusable(CStrRef s1, CStrRef s2, VRefParam issuesFound = null);
+  public: bool t_issuspicious(CStrRef text, VRefParam issuesFound = uninit_null());
+  public: bool t_areconfusable(CStrRef s1, CStrRef s2, VRefParam issuesFound = uninit_null());
   public: void t_setallowedlocales(CStrRef localesList);
   public: void t_setchecks(int checks);
 

@@ -1171,7 +1171,7 @@ static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
   case XML_NOTATION_NODE:      clsname = "domnotation";              break;
   default:
     raise_warning("Unsupported node type: %d", obj->type);
-    return null;
+    return uninit_null();
   }
 
   if (doc.get() && doc->m_classmap.exists(clsname)) {
@@ -1191,7 +1191,7 @@ static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
 static Variant create_node_object(xmlNodePtr node, p_DOMDocument doc,
                                   bool owner = false) {
   if (!node) {
-    return null;
+    return uninit_null();
   }
   Variant retval = php_dom_create_object(node, doc, owner);
   if (retval.isNull()) {
@@ -1304,7 +1304,7 @@ static Variant php_xpath_eval(c_DOMXPath * domxpath, CStrRef expr,
     ret = String((char*)xpathobjp->stringval, CopyString);
     break;
   default:
-    ret = null;
+    ret = uninit_null();
     break;
   }
   xmlXPathFreeObject(xpathobjp);
@@ -1461,7 +1461,7 @@ static xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index) {
 
 Variant dummy_getter(CObjRef) {
   raise_error("Cannot read property");
-  return null;
+  return uninit_null();
 }
 
 void dummy_setter(CObjRef,CVarRef) {
@@ -1522,7 +1522,7 @@ public:
   xmlNodePtr nodep = domnode->m_node;                   \
   if (nodep == NULL) {                                  \
     php_dom_throw_error(INVALID_STATE_ERR, 0);          \
-    return null;                                        \
+    return uninit_null();                                        \
   }                                                     \
 
 #define CHECK_WRITE_NODE(nodep)                         \
@@ -1612,7 +1612,7 @@ static Variant domnode_nodevalue_read(CObjRef obj) {
     xmlFree(str);
     return retval;
   } else {
-    return null;
+    return uninit_null();
   }
 }
 
@@ -1661,7 +1661,7 @@ static Variant domnode_parentnode_read(CObjRef obj) {
 static Variant domnode_childnodes_read(CObjRef obj) {
   CHECK_NODE(nodep);
   if (!dom_node_children_valid(nodep)) {
-    return null;
+    return uninit_null();
   }
   c_DOMNodeList *retval = NEWOBJ(c_DOMNodeList)();
   retval->m_doc = domnode->doc();
@@ -1707,14 +1707,14 @@ static Variant domnode_attributes_read(CObjRef obj) {
     nodemap->m_nodetype = XML_ATTRIBUTE_NODE;
     return nodemap;
   }
-  return null;
+  return uninit_null();
 }
 
 static Variant domnode_ownerdocument_read(CObjRef obj) {
   CHECK_NODE(nodep);
   if (nodep->type == XML_DOCUMENT_NODE ||
       nodep->type == XML_HTML_DOCUMENT_NODE) {
-    return null;
+    return uninit_null();
   }
   return create_node_object((xmlNodePtr)nodep->doc, domnode->doc());
 }
@@ -1736,7 +1736,7 @@ static Variant domnode_namespaceuri_read(CObjRef obj) {
   if (str) {
     return String(str, CopyString);
   }
-  return null;
+  return uninit_null();
 }
 
 static Variant domnode_prefix_read(CObjRef obj) {
@@ -1829,7 +1829,7 @@ static Variant domnode_localname_read(CObjRef obj) {
       nodep->type == XML_NAMESPACE_DECL) {
     return String((char *)(nodep->name), CopyString);
   }
-  return null;
+  return uninit_null();
 }
 
 static Variant domnode_baseuri_read(CObjRef obj) {
@@ -1840,7 +1840,7 @@ static Variant domnode_baseuri_read(CObjRef obj) {
     xmlFree(baseuri);
     return ret;
   }
-  return null;
+  return uninit_null();
 }
 
 static Variant domnode_textcontent_read(CObjRef obj) {
@@ -1898,7 +1898,7 @@ Variant c_DOMNode::t___get(Variant name) {
 
 Variant c_DOMNode::t___set(Variant name, Variant value) {
   domnode_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMNode::t___isset(Variant name) {
@@ -2204,14 +2204,14 @@ Variant c_DOMNode::t_lookupnamespaceuri(CStrRef namespaceuri) {
       nodep->type == XML_HTML_DOCUMENT_NODE) {
     nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
     if (nodep == NULL) {
-      return null;
+      return uninit_null();
     }
   }
   nsptr = xmlSearchNs(nodep->doc, nodep, (xmlChar*)namespaceuri.data());
   if (nsptr && nsptr->href != NULL) {
     return String((char *)nsptr->href, CopyString);
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMNode::t_lookupprefix(CStrRef prefix) {
@@ -2232,7 +2232,7 @@ Variant c_DOMNode::t_lookupprefix(CStrRef prefix) {
     case XML_DOCUMENT_FRAG_NODE:
     case XML_DOCUMENT_TYPE_NODE:
     case XML_DTD_NODE:
-      return null;
+      return uninit_null();
     default:
       lookupp = nodep->parent;
     }
@@ -2244,7 +2244,7 @@ Variant c_DOMNode::t_lookupprefix(CStrRef prefix) {
       }
     }
   }
-  return null;
+  return uninit_null();
 }
 
 void c_DOMNode::t_normalize() {
@@ -2365,7 +2365,7 @@ Variant c_DOMNode::t_getnodepath() {
     xmlFree(value);
     return ret;
   }
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2375,7 +2375,7 @@ Variant c_DOMNode::t_getnodepath() {
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;       \
   if (attrp == NULL) {                                  \
     php_dom_throw_error(INVALID_STATE_ERR, 0);          \
-    return null;                                        \
+    return uninit_null();                                        \
   }                                                     \
 
 #define CHECK_WRITE_ATTR(attrp)                         \
@@ -2424,7 +2424,7 @@ static Variant domattr_ownerelement_read(CObjRef obj) {
 
 static Variant domattr_schematypeinfo_read(CObjRef obj) {
   raise_warning("Not yet implemented");
-  return null;
+  return uninit_null();
 }
 
 static PropertyAccessor domattr_properties[] = {
@@ -2466,7 +2466,7 @@ Variant c_DOMAttr::t___get(Variant name) {
 
 Variant c_DOMAttr::t___set(Variant name, Variant value) {
   domattr_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMAttr::t___isset(Variant name) {
@@ -2534,7 +2534,7 @@ Variant c_DOMCharacterData::t___get(Variant name) {
 
 Variant c_DOMCharacterData::t___set(Variant name, Variant value) {
   domcharacterdata_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMCharacterData::t___isset(Variant name) {
@@ -2745,7 +2745,7 @@ Variant c_DOMText::t___get(Variant name) {
 
 Variant c_DOMText::t___set(Variant name, Variant value) {
   domtext_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMText::t___isset(Variant name) {
@@ -2817,7 +2817,7 @@ void c_DOMCDATASection::t___construct(CStrRef value) {
   xmlDocPtr docp = (xmlDocPtr)domdoc->m_node;                   \
   if (docp == NULL) {                                           \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                  \
-    return null;                                                \
+    return uninit_null();                                                \
   }                                                             \
 
 #define CHECK_WRITE_DOC(docp)                                   \
@@ -2848,7 +2848,7 @@ static Variant dom_document_encoding_read(CObjRef obj) {
   if (encoding) {
     return String(encoding, CopyString);
   }
-  return null;
+  return uninit_null();
 }
 
 static void dom_document_encoding_write(CObjRef obj, CVarRef value) {
@@ -2892,7 +2892,7 @@ static Variant dom_document_version_read(CObjRef obj) {
   if (version) {
     return String(version, CopyString);
   }
-  return null;
+  return uninit_null();
 }
 
 static void dom_document_version_write(CObjRef obj, CVarRef value) {
@@ -2929,7 +2929,7 @@ static Variant dom_document_document_uri_read(CObjRef obj) {
   if (url) {
     return String(url, CopyString);
   }
-  return null;
+  return uninit_null();
 }
 
 static void dom_document_document_uri_write(CObjRef obj, CVarRef value) {
@@ -2942,7 +2942,7 @@ static void dom_document_document_uri_write(CObjRef obj, CVarRef value) {
 }
 
 static Variant dom_document_config_read(CObjRef obj) {
-  return null;
+  return uninit_null();
 }
 
 /* }}} */
@@ -3043,7 +3043,7 @@ Variant c_DOMDocument::t___get(Variant name) {
 
 Variant c_DOMDocument::t___set(Variant name, Variant value) {
   domdocument_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMDocument::t___isset(Variant name) {
@@ -3287,7 +3287,7 @@ Variant c_DOMDocument::t_getelementbyid(CStrRef elementid) {
     ret->m_node = attrp->parent;
     return ret;
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMDocument::t_getelementsbytagname(CStrRef name) {
@@ -3612,7 +3612,7 @@ bool c_DOMDocumentFragment::t_appendxml(CStrRef data) {
   xmlDtdPtr dtdptr = (xmlDtdPtr)domdoctype->m_node;                     \
   if (dtdptr == NULL) {                                                 \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                          \
-    return null;                                                        \
+    return uninit_null();                                                        \
   }                                                                     \
 
 static Variant dom_documenttype_name_read(CObjRef obj) {
@@ -3706,7 +3706,7 @@ Variant c_DOMDocumentType::t___get(Variant name) {
 
 Variant c_DOMDocumentType::t___set(Variant name, Variant value) {
   domdocumenttype_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMDocumentType::t___isset(Variant name) {
@@ -3731,7 +3731,7 @@ static Variant dom_element_tag_name_read(CObjRef obj) {
 }
 
 static Variant dom_element_schema_type_info_read(CObjRef obj) {
-  return null;
+  return uninit_null();
 }
 
 static PropertyAccessor domelement_properties[] = {
@@ -3817,7 +3817,7 @@ Variant c_DOMElement::t___get(Variant name) {
 
 Variant c_DOMElement::t___set(Variant name, Variant value) {
   domelement_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMElement::t___isset(Variant name) {
@@ -4020,7 +4020,7 @@ Variant c_DOMElement::t_removeattributens(CStrRef namespaceuri,
   xmlNsPtr nsptr;
   if (dom_node_is_read_only(nodep)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
-    return null;
+    return uninit_null();
   }
   attrp = xmlHasNsProp(nodep, (xmlChar*)localname.data(),
                        (xmlChar*)namespaceuri.data());
@@ -4036,7 +4036,7 @@ Variant c_DOMElement::t_removeattributens(CStrRef namespaceuri,
         nsptr->prefix = NULL;
       }
     } else {
-      return null;
+      return uninit_null();
     }
   }
   if (attrp && attrp->type != XML_ATTRIBUTE_DECL) {
@@ -4044,7 +4044,7 @@ Variant c_DOMElement::t_removeattributens(CStrRef namespaceuri,
     xmlUnlinkNode((xmlNodePtr)attrp);
     xmlFreeProp(attrp);
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMElement::t_setattribute(CStrRef name, CStrRef value) {
@@ -4126,7 +4126,7 @@ Variant c_DOMElement::t_setattributenode(CObjRef newattr) {
     ret->m_node = (xmlNodePtr)existattrp;
     return ret;
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMElement::t_setattributenodens(CObjRef newattr) {
@@ -4167,7 +4167,7 @@ Variant c_DOMElement::t_setattributenodens(CObjRef newattr) {
     ret->m_node = (xmlNodePtr)existattrp;
     return ret;
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMElement::t_setattributens(CStrRef namespaceuri, CStrRef name,
@@ -4185,7 +4185,7 @@ Variant c_DOMElement::t_setattributens(CStrRef namespaceuri, CStrRef name,
   int stricterror = doc()->m_stricterror;
   if (dom_node_is_read_only(elemp)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
-    return null;
+    return uninit_null();
   }
   errorcode = dom_check_qname((char*)name.data(), &localname, &prefix,
                               namespaceuri.size(), name.size());
@@ -4266,7 +4266,7 @@ Variant c_DOMElement::t_setattributens(CStrRef namespaceuri, CStrRef name,
   if (errorcode != 0) {
     php_dom_throw_error((dom_exception_code)errorcode, stricterror);
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMElement::t_setidattribute(CStrRef name, bool isid) {
@@ -4274,7 +4274,7 @@ Variant c_DOMElement::t_setidattribute(CStrRef name, bool isid) {
   xmlAttrPtr attrp;
   if (dom_node_is_read_only(nodep)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
-    return null;
+    return uninit_null();
   }
   attrp = xmlHasNsProp(nodep, (xmlChar*)name.data(), NULL);
   if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
@@ -4282,7 +4282,7 @@ Variant c_DOMElement::t_setidattribute(CStrRef name, bool isid) {
   } else {
     php_set_attribute_id(attrp, isid);
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMElement::t_setidattributenode(CObjRef idattr, bool isid) {
@@ -4291,14 +4291,14 @@ Variant c_DOMElement::t_setidattributenode(CObjRef idattr, bool isid) {
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;
   if (dom_node_is_read_only(nodep)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
-    return null;
+    return uninit_null();
   }
   if (attrp->parent != nodep) {
     php_dom_throw_error(NOT_FOUND_ERR, doc()->m_stricterror);
   } else {
     php_set_attribute_id(attrp, isid);
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMElement::t_setidattributens(CStrRef namespaceuri,
@@ -4307,7 +4307,7 @@ Variant c_DOMElement::t_setidattributens(CStrRef namespaceuri,
   xmlAttrPtr attrp;
   if (dom_node_is_read_only(elemp)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
-    return null;
+    return uninit_null();
   }
   attrp = xmlHasNsProp(elemp, (xmlChar*)localname.data(),
                        (xmlChar*)namespaceuri.data());
@@ -4316,7 +4316,7 @@ Variant c_DOMElement::t_setidattributens(CStrRef namespaceuri,
   } else {
     php_set_attribute_id(attrp, isid);
   }
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4326,13 +4326,13 @@ Variant c_DOMElement::t_setidattributens(CStrRef namespaceuri,
   xmlEntity *nodep = (xmlEntity*)domentity->m_node;     \
   if (nodep == NULL) {                                  \
     php_dom_throw_error(INVALID_STATE_ERR, 0);          \
-    return null;                                        \
+    return uninit_null();                                        \
   }                                                     \
 
 static Variant dom_entity_public_id_read(CObjRef obj) {
   CHECK_ENTITY(nodep);
   if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
-    return null;
+    return uninit_null();
   }
   return String((char *)(nodep->ExternalID), CopyString);
 }
@@ -4340,7 +4340,7 @@ static Variant dom_entity_public_id_read(CObjRef obj) {
 static Variant dom_entity_system_id_read(CObjRef obj) {
   CHECK_ENTITY(nodep);
   if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
-    return null;
+    return uninit_null();
   }
   return String((char *)(nodep->SystemID), CopyString);
 }
@@ -4348,7 +4348,7 @@ static Variant dom_entity_system_id_read(CObjRef obj) {
 static Variant dom_entity_notation_name_read(CObjRef obj) {
   CHECK_ENTITY(nodep);
   if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
-    return null;
+    return uninit_null();
   }
   char *content = (char*)xmlNodeGetContent((xmlNodePtr) nodep);
   String ret(content, CopyString);
@@ -4357,7 +4357,7 @@ static Variant dom_entity_notation_name_read(CObjRef obj) {
 }
 
 static Variant dom_entity_actual_encoding_read(CObjRef obj) {
-  return null;
+  return uninit_null();
 }
 
 static void dom_entity_actual_encoding_write(CObjRef obj, CVarRef value) {
@@ -4365,7 +4365,7 @@ static void dom_entity_actual_encoding_write(CObjRef obj, CVarRef value) {
 }
 
 static Variant dom_entity_encoding_read(CObjRef obj) {
-  return null;
+  return uninit_null();
 }
 
 static void dom_entity_encoding_write(CObjRef obj, CVarRef value) {
@@ -4373,7 +4373,7 @@ static void dom_entity_encoding_write(CObjRef obj, CVarRef value) {
 }
 
 static Variant dom_entity_version_read(CObjRef obj) {
-  return null;
+  return uninit_null();
 }
 
 static void dom_entity_version_write(CObjRef obj, CVarRef value) {
@@ -4412,7 +4412,7 @@ Variant c_DOMEntity::t___get(Variant name) {
 
 Variant c_DOMEntity::t___set(Variant name, Variant value) {
   domentity_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMEntity::t___isset(Variant name) {
@@ -4448,7 +4448,7 @@ void c_DOMEntityReference::t___construct(CStrRef name) {
   xmlEntity *nodep = (xmlEntity*)domnotation->m_node;         \
   if (nodep == NULL) {                                        \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                \
-    return null;                                              \
+    return uninit_null();                                              \
   }                                                           \
 
 static Variant dom_notation_public_id_read(CObjRef obj) {
@@ -4496,7 +4496,7 @@ Variant c_DOMNotation::t___get(Variant name) {
 
 Variant c_DOMNotation::t___set(Variant name, Variant value) {
   domnotation_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMNotation::t___isset(Variant name) {
@@ -4567,7 +4567,7 @@ Variant c_DOMProcessingInstruction::t___get(Variant name) {
 
 Variant c_DOMProcessingInstruction::t___set(Variant name, Variant value) {
   domprocessinginstruction_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMProcessingInstruction::t___isset(Variant name) {
@@ -4654,7 +4654,7 @@ Variant c_DOMNamedNodeMap::t_getnameditem(CStrRef name) {
     }
     return ret;
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMNamedNodeMap::t_getnameditemns(CStrRef namespaceuri,
@@ -4692,7 +4692,7 @@ Variant c_DOMNamedNodeMap::t_getnameditemns(CStrRef namespaceuri,
     }
     return ret;
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMNamedNodeMap::t_item(int64_t index) {
@@ -4731,7 +4731,7 @@ Variant c_DOMNamedNodeMap::t_item(int64_t index) {
     }
   }
 
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMNamedNodeMap::t___get(Variant name) {
@@ -4740,7 +4740,7 @@ Variant c_DOMNamedNodeMap::t___get(Variant name) {
 
 Variant c_DOMNamedNodeMap::t___set(Variant name, Variant value) {
   domnamednodemap_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMNamedNodeMap::t___isset(Variant name) {
@@ -4820,7 +4820,7 @@ Variant c_DOMNodeList::t___get(Variant name) {
 
 Variant c_DOMNodeList::t___set(Variant name, Variant value) {
   domnodelist_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMNodeList::t___isset(Variant name) {
@@ -5207,7 +5207,7 @@ Variant c_DOMXPath::t___get(Variant name) {
 
 Variant c_DOMXPath::t___set(Variant name, Variant value) {
   domxpath_properties_map.setter(name)(this, value);
-  return null;
+  return uninit_null();
 }
 
 bool c_DOMXPath::t___isset(Variant name) {
@@ -5249,7 +5249,7 @@ Variant c_DOMXPath::t_registerphpfunctions(CVarRef funcs /* = null */) {
   } else {
     m_registerPhpFunctions = 1;
   }
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5346,7 +5346,7 @@ Variant c_DOMNodeIterator::t_key() {
 Variant c_DOMNodeIterator::t_next() {
   if (m_iter) {
     m_iter->next();
-    return null;
+    return uninit_null();
   }
 
   xmlNodePtr curnode = NULL;
@@ -5391,7 +5391,7 @@ err:
   } else {
     m_curobj.reset();
   }
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMNodeIterator::t_rewind() {
@@ -5399,7 +5399,7 @@ Variant c_DOMNodeIterator::t_rewind() {
   m_iter = NULL;
   m_index = -1;
   reset_iterator();
-  return null;
+  return uninit_null();
 }
 
 Variant c_DOMNodeIterator::t_valid() {
@@ -5418,11 +5418,11 @@ Variant c_DOMNodeIterator::t_valid() {
     pobj = obj.toObject().getTyped<c_DOM ##name>(true, true);   \
     if (pobj == NULL) {                                         \
       raise_warning("Expecting dom " #name " object");          \
-      return null;                                              \
+      return uninit_null();                                              \
     }                                                           \
   } else {                                                      \
     raise_warning("Expecting dom objects in parameters");       \
-    return null;                                                \
+    return uninit_null();                                                \
   }
 
 Variant f_dom_document_create_element(CVarRef obj, CStrRef name,
@@ -5503,7 +5503,7 @@ Variant f_dom_document_get_element_by_id(CVarRef obj, CStrRef elementid) {
 Variant f_dom_document_normalize_document(CVarRef obj) {
   DOM_GET_OBJ(Document);
   pobj->t_normalizedocument();
-  return null;
+  return uninit_null();
 }
 
 Variant f_dom_document_save(CVarRef obj, CStrRef file,
@@ -5593,7 +5593,7 @@ Variant f_dom_node_clone_node(CVarRef obj, bool deep /* = false */) {
 Variant f_dom_node_normalize(CVarRef obj) {
   DOM_GET_OBJ(Node);
   pobj->t_normalize();
-  return null;
+  return uninit_null();
 }
 
 Variant f_dom_node_is_supported(CVarRef obj, CStrRef feature,

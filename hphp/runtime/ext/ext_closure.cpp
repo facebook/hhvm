@@ -28,7 +28,7 @@ void c_Closure::t___construct() {}
 
 Variant c_Closure::t___invoke(int _argc, CArrRef _argv) {
   always_assert(false);
-  return null;
+  return uninit_null();
 }
 
 bool c_Closure::php_sleep(Variant &ret) {

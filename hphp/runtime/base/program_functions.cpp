@@ -225,7 +225,7 @@ void register_variable(Variant &variables, char *name, CVarRef value,
 
       if (!index) {
         symtable->append(Array::Create());
-        gpc_elements.push_back(null);
+        gpc_elements.push_back(uninit_null());
         gpc_elements.back().assignRef(
           symtable->lvalAt((int)symtable->toArray().size() - 1));
       } else {
@@ -234,7 +234,7 @@ void register_variable(Variant &variables, char *name, CVarRef value,
         if (v.isNull() || !v.is(KindOfArray)) {
           symtable->set(key, Array::Create());
         }
-        gpc_elements.push_back(null);
+        gpc_elements.push_back(uninit_null());
         gpc_elements.back().assignRef(symtable->lvalAt(key));
       }
       symtable = &gpc_elements.back();
@@ -491,7 +491,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 
   if (xhprof) {
-    f_xhprof_enable(xhprof, null);
+    f_xhprof_enable(xhprof, uninit_null());
   }
 }
 
@@ -1283,7 +1283,7 @@ ExecutionContext *hphp_context_init() {
 bool hphp_invoke_simple(const std::string &filename,
                         bool warmupOnly /* = false */) {
   bool error; string errorMsg;
-  return hphp_invoke(g_context.getNoCheck(), filename, false, null_array, null,
+  return hphp_invoke(g_context.getNoCheck(), filename, false, null_array, uninit_null(),
                      "", "", error, errorMsg, true, warmupOnly);
 }
 

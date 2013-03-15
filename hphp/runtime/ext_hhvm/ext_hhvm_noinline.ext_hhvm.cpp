@@ -511,7 +511,7 @@ TypedValue * fg1_apc_bin_dumpfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  Object defVal4 = null;
+  Object defVal4 = uninit_null();
   fh_apc_bin_dumpfile((rv), (long)(args[-0].m_data.num), (args-1), (Value*)(args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (Value*)(args-4) : (Value*)(&defVal4));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
@@ -523,7 +523,7 @@ TypedValue* fg_apc_bin_dumpfile(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfObject) && (count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-2)->m_type) && (args-0)->m_type == KindOfInt64) {
-        Object defVal4 = null;
+        Object defVal4 = uninit_null();
         fh_apc_bin_dumpfile((&(rv)), (long)(args[-0].m_data.num), (args-1), (Value*)(args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (Value*)(args-4) : (Value*)(&defVal4));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
@@ -584,7 +584,7 @@ TypedValue * fg1_apc_bin_loadfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  Object defVal1 = null;
+  Object defVal1 = uninit_null();
   rv->m_data.num = (fh_apc_bin_loadfile((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
   return rv;
 }
@@ -596,7 +596,7 @@ TypedValue* fg_apc_bin_loadfile(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfObject) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        Object defVal1 = null;
+        Object defVal1 = uninit_null();
         rv.m_data.num = (fh_apc_bin_loadfile((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6916,7 +6916,7 @@ TypedValue * fg1_getmxrr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   rv->m_data.num = (fh_getmxrr((Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
   return rv;
 }
@@ -6928,7 +6928,7 @@ TypedValue* fg_getmxrr(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         rv.m_data.num = (fh_getmxrr((Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14198,7 +14198,7 @@ TypedValue * fg1_similar_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   rv->m_data.num = (int64_t)fh_similar_text((Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
   return rv;
 }
@@ -14210,7 +14210,7 @@ TypedValue* fg_similar_text(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        VRefParamValue defVal2 = null;
+        VRefParamValue defVal2 = uninit_null();
         rv.m_data.num = (int64_t)fh_similar_text((Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

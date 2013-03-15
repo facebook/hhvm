@@ -257,7 +257,7 @@ Variant f_sscanf(int _argc, CStrRef str, CStrRef format, CArrRef _argv /* = null
   Variant ret;
   int result;
   result = string_sscanf(str, format, _argv.size(), ret);
-  if (SCAN_ERROR_WRONG_PARAM_COUNT == result) return null;
+  if (SCAN_ERROR_WRONG_PARAM_COUNT == result) return uninit_null();
   if (_argv.empty()) return ret;
 
   if (ret.isArray()) {

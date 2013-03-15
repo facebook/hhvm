@@ -138,7 +138,7 @@ bool TestExtVariable::test_is_string() {
 bool TestExtVariable::test_is_scalar() {
   VERIFY(f_is_scalar(123));
   VERIFY(f_is_scalar("test"));
-  VERIFY(!f_is_scalar(null));
+  VERIFY(!f_is_scalar(uninit_null()));
   VERIFY(!f_is_scalar(CREATE_VECTOR1(123)));
   return Count(true);
 }
@@ -179,12 +179,12 @@ bool TestExtVariable::test_is_null() {
   VERIFY(f_is_null(Array()));
   VERIFY(f_is_null(Object()));
   VERIFY(f_is_null(Variant()));
-  VERIFY(f_is_null(null));
+  VERIFY(f_is_null(uninit_null()));
   return Count(true);
 }
 
 bool TestExtVariable::test_gettype() {
-  VS(f_gettype(null), "NULL");
+  VS(f_gettype(uninit_null()), "NULL");
   VS(f_gettype(0), "integer");
   VS(f_gettype("test"), "string");
   VS(f_gettype(String()), "string");
@@ -378,7 +378,7 @@ bool TestExtVariable::test_unserialize() {
     VERIFY(v.is(KindOfObject));
     Object obj = v.toObject();
     VS(obj->o_getClassName(), "stdClass");
-    VS(obj.o_get("name"), null);
+    VS(obj.o_get("name"), uninit_null());
   }
   {
     Variant v1 = CREATE_MAP3("a","apple","b",2,"c",CREATE_VECTOR3(1,"y",3));

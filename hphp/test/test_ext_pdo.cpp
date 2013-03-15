@@ -93,7 +93,7 @@ bool TestExtPdo::test_pdo_mysql() {
     VS(rs, CREATE_MAP2("id", "2", "name", "test2"));
 
   } catch (Object &e) {
-    VS(e, null);
+    VS(e, uninit_null());
   }
   return Count(true);
 }
@@ -117,7 +117,7 @@ bool TestExtPdo::test_pdo_sqlite() {
     VS(rs, CREATE_MAP1("bar", "DEF"));
 
   } catch (Object &e) {
-    VS(e, null);
+    VS(e, uninit_null());
   }
 
   try {
@@ -139,7 +139,7 @@ bool TestExtPdo::test_pdo_sqlite() {
     VERIFY(iter.end());
 
   } catch (Object &e) {
-    VS(e, null);
+    VS(e, uninit_null());
   }
 
   try {
@@ -155,7 +155,7 @@ bool TestExtPdo::test_pdo_sqlite() {
     VS(ret["id"], "1");
 
   } catch (Object &e) {
-    VS(e, null);
+    VS(e, uninit_null());
   }
 
   CleanupSqliteTestTable();

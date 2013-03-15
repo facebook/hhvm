@@ -217,7 +217,7 @@ TypedValue * fg1_xml_parse_into_struct(TypedValue* rv, HPHP::VM::ActRec* ar, int
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  VRefParamValue defVal3 = null;
+  VRefParamValue defVal3 = uninit_null();
   rv->m_data.num = (int64_t)fh_xml_parse_into_struct((Value*)(args-0), (Value*)(args-1), (args-2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
   return rv;
 }
@@ -229,7 +229,7 @@ TypedValue* fg_xml_parse_into_struct(HPHP::VM::ActRec *ar) {
     if (count >= 3LL && count <= 4LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        VRefParamValue defVal3 = null;
+        VRefParamValue defVal3 = uninit_null();
         rv.m_data.num = (int64_t)fh_xml_parse_into_struct((Value*)(args-0), (Value*)(args-1), (args-2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3));
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

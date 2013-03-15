@@ -47,7 +47,7 @@ class c_SoapServer : public ExtObjectData {
   public: Variant t_getfunctions();
   public: void t_handle(CStrRef request = null_string);
   public: void t_setpersistence(int64_t mode);
-  public: void t_fault(CVarRef code, CStrRef fault, CStrRef actor = null_string, CVarRef detail = null, CStrRef name = null_string);
+  public: void t_fault(CVarRef code, CStrRef fault, CStrRef actor = null_string, CVarRef detail = uninit_null(), CStrRef name = null_string);
   public: void t_addsoapheader(CObjRef fault);
 
 
@@ -81,7 +81,7 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   public: ~c_SoapClient();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
   public: Variant t___call(Variant name, Variant args);
-  public: Variant t___soapcall(CStrRef name, CArrRef args, CArrRef options = null_array, CVarRef input_headers = null_variant, VRefParam output_headers = null);
+  public: Variant t___soapcall(CStrRef name, CArrRef args, CArrRef options = null_array, CVarRef input_headers = null_variant, VRefParam output_headers = uninit_null());
   public: Variant t___getlastrequest();
   public: Variant t___getlastresponse();
   public: Variant t___getlastrequestheaders();
@@ -184,7 +184,7 @@ class c_SoapHeader : public ExtObjectData {
   // need to implement
   public: c_SoapHeader(VM::Class* cls = c_SoapHeader::s_cls);
   public: ~c_SoapHeader();
-  public: void t___construct(CStrRef ns, CStrRef name, CVarRef data = null, bool mustunderstand = false, CVarRef actor = null);
+  public: void t___construct(CStrRef ns, CStrRef name, CVarRef data = uninit_null(), bool mustunderstand = false, CVarRef actor = uninit_null());
 
 
 

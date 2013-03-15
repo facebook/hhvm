@@ -87,7 +87,7 @@ TypedValue* tg1_12SpoofChecker_isSuspicious(TypedValue* rv, HPHP::VM::ActRec* ar
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  VRefParamValue defVal1 = null;
+  VRefParamValue defVal1 = uninit_null();
   rv->m_data.num = (th_12SpoofChecker_isSuspicious((this_), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1))) ? 1LL : 0LL;
   return rv;
 }
@@ -101,7 +101,7 @@ TypedValue* tg_12SpoofChecker_isSuspicious(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 2LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          VRefParamValue defVal1 = null;
+          VRefParamValue defVal1 = uninit_null();
           rv.m_data.num = (th_12SpoofChecker_isSuspicious((this_), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -154,7 +154,7 @@ TypedValue* tg1_12SpoofChecker_areConfusable(TypedValue* rv, HPHP::VM::ActRec* a
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  VRefParamValue defVal2 = null;
+  VRefParamValue defVal2 = uninit_null();
   rv->m_data.num = (th_12SpoofChecker_areConfusable((this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
   return rv;
 }
@@ -168,7 +168,7 @@ TypedValue* tg_12SpoofChecker_areConfusable(HPHP::VM::ActRec *ar) {
       if (count >= 2LL && count <= 3LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          VRefParamValue defVal2 = null;
+          VRefParamValue defVal2 = uninit_null();
           rv.m_data.num = (th_12SpoofChecker_areConfusable((this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));

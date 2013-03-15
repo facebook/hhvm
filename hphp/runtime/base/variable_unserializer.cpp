@@ -66,7 +66,7 @@ void VariableUnserializer::read(char *buf, uint n) {
 }
 
 Variant &VariableUnserializer::addVar() {
-  m_vars.push_back(null);
+  m_vars.push_back(uninit_null());
   return m_vars.back();
 }
 

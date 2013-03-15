@@ -61,10 +61,10 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: bool t_contains(CVarRef key);
   public: Object t_removeat(CVarRef key);
   public: Array t_toarray();
-  public: void t_sort(CVarRef col = null);
+  public: void t_sort(CVarRef col = uninit_null());
   public: void t_reverse();
-  public: void t_splice(CVarRef offset, CVarRef len = null,
-                        CVarRef replacement = null);
+  public: void t_splice(CVarRef offset, CVarRef len = uninit_null(),
+                        CVarRef replacement = uninit_null());
   public: int64_t t_linearsearch(CVarRef search_value);
   public: void t_shuffle();
   public: Object t_getiterator();
@@ -82,9 +82,9 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     return ti_fromvector("vector", vec);
   }
   public: static Variant ti_slice(const char* cls, CVarRef vec, CVarRef offset,
-                                  CVarRef len = null);
+                                  CVarRef len = uninit_null());
   public: static Variant t_slice(CVarRef vec, CVarRef offset,
-                                 CVarRef len = null) {
+                                 CVarRef len = uninit_null()) {
     return ti_slice("vector", vec, offset, len);
   }
 

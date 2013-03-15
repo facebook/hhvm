@@ -2143,9 +2143,9 @@ TypedValue * fg1_ldap_parse_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  VRefParamValue defVal3 = null;
-  VRefParamValue defVal4 = null;
-  VRefParamValue defVal5 = null;
+  VRefParamValue defVal3 = uninit_null();
+  VRefParamValue defVal4 = uninit_null();
+  VRefParamValue defVal5 = uninit_null();
   rv->m_data.num = (fh_ldap_parse_result((Value*)(args-0), (Value*)(args-1), (args-2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (args-5) : (TypedValue*)(&defVal5))) ? 1LL : 0LL;
   return rv;
 }
@@ -2157,9 +2157,9 @@ TypedValue* fg_ldap_parse_result(HPHP::VM::ActRec *ar) {
     if (count >= 3LL && count <= 6LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        VRefParamValue defVal3 = null;
-        VRefParamValue defVal4 = null;
-        VRefParamValue defVal5 = null;
+        VRefParamValue defVal3 = uninit_null();
+        VRefParamValue defVal4 = uninit_null();
+        VRefParamValue defVal5 = uninit_null();
         rv.m_data.num = (fh_ldap_parse_result((Value*)(args-0), (Value*)(args-1), (args-2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (args-5) : (TypedValue*)(&defVal5))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

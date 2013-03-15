@@ -1012,7 +1012,7 @@ Variant f_ldap_get_entries(CObjRef link, CObjRef result) {
   Array ret;
   ret.set("count", num_entries);
   if (num_entries == 0) {
-    return null;
+    return uninit_null();
   }
 
   LDAPMessage *ldap_result_entry = ldap_first_entry(ldap, res->data);

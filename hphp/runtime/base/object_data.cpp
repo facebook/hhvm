@@ -290,7 +290,7 @@ inline Variant ObjectData::o_getImpl(CStrRef propName, int flags,
     return o_getError(propName, context);
   }
 
-  return null;
+  return uninit_null();
 }
 
 Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
@@ -317,7 +317,7 @@ Variant ObjectData::o_getPublic(CStrRef propName, bool error /* = true */) {
     return o_getError(propName, null_string);
   }
 
-  return null;
+  return uninit_null();
 }
 
 Variant ObjectData::o_getUnchecked(CStrRef propName,
@@ -612,7 +612,7 @@ Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
     if (!f) {
       // Bail if we couldn't find the method or __call
       o_invoke_failed(o_getClassName().data(), s.data(), fatal);
-      return null;
+      return uninit_null();
     }
     // We found __call! Stash the original name into invName.
     assert(!(f->attrs() & HPHP::VM::AttrStatic));
@@ -678,7 +678,7 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
   HPHP::VM::Class* cls = VM::Unit::lookupClass(clsname.get());
   if (!cls || !getVMClass()->classof(cls)) {
     o_invoke_failed(clsname.data(), s.data(), fatal);
-    return null;
+    return uninit_null();
   }
   StringData* invName = nullptr;
   // XXX The lookup below doesn't take context into account, so it will lead
@@ -697,7 +697,7 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
     if (!f) {
       // Bail if we couldn't find the method or __call
       o_invoke_failed(clsname.data(), s.data(), fatal);
-      return null;
+      return uninit_null();
     }
     // We found __call! Stash the original name into invName.
     assert(!(f->attrs() & HPHP::VM::AttrStatic));
@@ -776,7 +776,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
       handleSleep = const_cast<ObjectData*>(this)->php_sleep(ret);
     } catch (...) {
       raise_warning("%s::sleep() throws exception", o_getClassName().data());
-      ret = null;
+      ret = uninit_null();
       handleSleep = true;
     }
   }
@@ -799,7 +799,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
         } else {
           raise_warning("\"%s\" returned as member variable from "
               "__sleep() but does not exist", name.data());
-          wanted.set(name, null);
+          wanted.set(name, uninit_null());
         }
       }
       serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
@@ -829,7 +829,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
         raise_warning("serialize(): __sleep should return an array only "
                       "containing the names of instance-variables to "
                       "serialize");
-        null.serialize(serializer);
+        uninit_null().serialize(serializer);
       }
     }
   } else {
@@ -862,11 +862,11 @@ ObjectData *ObjectData::clone() {
 Variant ObjectData::o_getError(CStrRef prop, CStrRef context) {
   raise_notice("Undefined property: %s::$%s", o_getClassName().data(),
                prop.data());
-  return null;
+  return uninit_null();
 }
 
 Variant ObjectData::o_setError(CStrRef prop, CStrRef context) {
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -875,22 +875,22 @@ Variant ObjectData::o_setError(CStrRef prop, CStrRef context) {
 
 Variant ObjectData::t___destruct() {
   // do nothing
-  return null;
+  return uninit_null();
 }
 
 Variant ObjectData::t___call(Variant v_name, Variant v_arguments) {
   // do nothing
-  return null;
+  return uninit_null();
 }
 
 Variant ObjectData::t___set(Variant v_name, Variant v_value) {
   // not called
-  return null;
+  return uninit_null();
 }
 
 Variant ObjectData::t___get(Variant v_name) {
   // not called
-  return null;
+  return uninit_null();
 }
 
 Variant *ObjectData::___lval(Variant v_name) {
@@ -902,7 +902,7 @@ Variant ObjectData::offsetGet(Variant key) {
   const VM::Func* method = m_cls->lookupMethod(s_offsetGet.get());
   assert(method);
   if (!method) {
-    return null;
+    return uninit_null();
   }
   Variant v;
   g_vmContext->invokeFunc((TypedValue*)(&v), method,
@@ -916,7 +916,7 @@ bool ObjectData::t___isset(Variant v_name) {
 
 Variant ObjectData::t___unset(Variant v_name) {
   // not called
-  return null;
+  return uninit_null();
 }
 
 bool ObjectData::o_propExists(CStrRef s, CStrRef context /* = null_string */) {
@@ -926,12 +926,12 @@ bool ObjectData::o_propExists(CStrRef s, CStrRef context /* = null_string */) {
 
 Variant ObjectData::t___sleep() {
   clearAttribute(HasSleep);
-  return null;
+  return uninit_null();
 }
 
 Variant ObjectData::t___wakeup() {
   // do nothing
-  return null;
+  return uninit_null();
 }
 
 String ObjectData::t___tostring() {
@@ -942,7 +942,7 @@ String ObjectData::t___tostring() {
 
 Variant ObjectData::t___clone() {
   // do nothing
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

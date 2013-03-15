@@ -367,7 +367,7 @@ bool run_intercept_handler_for_invokefunc(TypedValue* retval,
     args = magicArgs;
   }
   Array intArgs =
-    CREATE_VECTOR5(f->fullNameRef(), (this_ ? Variant(Object(this_)) : null),
+    CREATE_VECTOR5(f->fullNameRef(), (this_ ? Variant(Object(this_)) : uninit_null()),
                    args, ihandler->asCArrRef()[1], ref(doneFlag));
   call_intercept_handler<false>(retval, intArgs, nullptr, ihandler);
   // $done is true, meaning don't enter the intercepted function.

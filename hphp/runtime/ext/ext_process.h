@@ -57,10 +57,10 @@ inline int64_t f_pcntl_wtermsig(int status) { return WTERMSIG(status);}
 ///////////////////////////////////////////////////////////////////////////////
 
 String f_shell_exec(CStrRef cmd);
-String f_exec(CStrRef command, VRefParam output = null,
-              VRefParam return_var = null);
-void f_passthru(CStrRef command, VRefParam return_var = null);
-String f_system(CStrRef command, VRefParam return_var = null);
+String f_exec(CStrRef command, VRefParam output = uninit_null(),
+              VRefParam return_var = uninit_null());
+void f_passthru(CStrRef command, VRefParam return_var = uninit_null());
+String f_system(CStrRef command, VRefParam return_var = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 

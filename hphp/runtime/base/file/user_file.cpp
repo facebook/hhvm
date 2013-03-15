@@ -104,7 +104,7 @@ Variant UserFile::invoke(const VM::Func *func, CStrRef name,
   // No explicitly defined function, no __call() magic method
   // Give up.
   if (!func && !m_Call) {
-    return null;
+    return uninit_null();
   }
 
   switch(g_vmContext->lookupObjMethod(func, m_cls, name.get())) {
@@ -133,18 +133,18 @@ Variant UserFile::invoke(const VM::Func *func, CStrRef name,
       // We're not calling staticly, so this result is unhelpful
       // Also, it's never produced by lookupObjMethod, so it'll
       // never happen, but we must handle all enums
-      return null;
+      return uninit_null();
 
     case MethodLookup::MethodFoundNoThis:
       // Should never happen (Attr::Static check in ctor)
       assert(false);
       raise_error("%s::%s() must not be declared static",
                   m_cls->name()->data(), name.data());
-      return null;
+      return uninit_null();
   }
 
   NOT_REACHED();
-  return null;
+  return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

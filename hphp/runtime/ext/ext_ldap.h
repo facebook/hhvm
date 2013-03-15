@@ -61,7 +61,7 @@ Variant f_ldap_next_attribute(CObjRef link, CObjRef result_entry);
 Variant f_ldap_first_reference(CObjRef link, CObjRef result);
 Variant f_ldap_next_reference(CObjRef link, CObjRef result_entry);
 bool f_ldap_parse_reference(CObjRef link, CObjRef result_entry, VRefParam referrals);
-bool f_ldap_parse_result(CObjRef link, CObjRef result, VRefParam errcode, VRefParam matcheddn = null, VRefParam errmsg = null, VRefParam referrals = null);
+bool f_ldap_parse_result(CObjRef link, CObjRef result, VRefParam errcode, VRefParam matcheddn = uninit_null(), VRefParam errmsg = uninit_null(), VRefParam referrals = uninit_null());
 bool f_ldap_free_result(CObjRef result);
 Variant f_ldap_get_values_len(CObjRef link, CObjRef result_entry, CStrRef attribute);
 Variant f_ldap_get_values(CObjRef link, CObjRef result_entry, CStrRef attribute);

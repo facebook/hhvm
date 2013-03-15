@@ -945,7 +945,7 @@ function php_escape_val($val) {
   } else if ($val === false) {
     return 'false';
   } else if ($val === null) {
-    return 'null';
+    return 'uninit_null()';
   } else {
     return var_export($val, true);
   }

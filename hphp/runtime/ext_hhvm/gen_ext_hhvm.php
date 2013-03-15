@@ -275,7 +275,8 @@ function emitExtCall($obj, $ext_hhvm_cpp, $indent, $prefix) {
       fwrite($ext_hhvm_cpp, $indent . $defValType . ' defVal' . $k);
       if ($defValType != 'Variant' ||
           ($p->defVal != 'null' && $p->defVal != 'null_variant')) {
-        fwrite($ext_hhvm_cpp, ' = ' . $p->defVal);
+        $defVal = $p->defVal == 'null' ? 'uninit_null()' : $p->defVal;
+        fwrite($ext_hhvm_cpp, ' = ' . $defVal);
       }
       fwrite($ext_hhvm_cpp, ";\n");
     }
@@ -641,7 +642,8 @@ function emitSlowPathHelper($obj, $ext_hhvm_cpp, $indent, $prefix) {
       fwrite($ext_hhvm_cpp, $indent . $defValType . ' defVal' . $k);
       if ($defValType != 'Variant' ||
           ($p->defVal != 'null' && $p->defVal != 'null_variant')) {
-        fwrite($ext_hhvm_cpp, ' = ' . $p->defVal);
+        $defVal = $p->defVal == 'null' ? 'uninit_null()' : $p->defVal;
+        fwrite($ext_hhvm_cpp, ' = ' . $defVal);
       }
       fwrite($ext_hhvm_cpp, ";\n");
     }

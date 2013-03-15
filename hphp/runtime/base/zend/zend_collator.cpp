@@ -350,7 +350,7 @@ static Variant collator_convert_object_to_string(CVarRef obj) {
   if (U_FAILURE(status)) {
     raise_warning("Error casting object to string in "
                   "collator_convert_object_to_string()");
-    return null;
+    return uninit_null();
   }
   return ustr;
 }

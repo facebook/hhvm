@@ -1653,14 +1653,34 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
   SSATmp* sp;
   if (freeInline) {
+    /*
+     * In case retVal comes from a local, the logic below tweaks the code
+     * so that retVal is DecRef'd and the corresponding local's SSATmp is
+     * returned. This enables the ref-count optimization to eliminate the
+     * IncRef/DecRef pair in the main trace.
+     */
+    SSATmp* retValSrcLoc = nullptr;
+    IRInstruction* retValSrcInstr = retVal->getInstruction();
+    if (retValSrcInstr->getOpcode() == IncRef) {
+      retValSrcLoc = retValSrcInstr->getSrc(0);
+      if (retValSrcLoc->getInstruction()->getOpcode() != LdLoc) {
+        retValSrcLoc = nullptr;
+      }
+    }
+    int retValLocId = retValSrcLoc ?
+      retValSrcLoc->getInstruction()->getExtra<LocalId>()->locId : -1;
     for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
       /*
        * TODO(#1980291): this doesn't correctly handle
        * debug_backtrace.
        */
-      m_tb->genDecRefLoc(id);
+      if (retValLocId == id) {
+        m_tb->genDecRef(retVal);
+      } else {
+        m_tb->genDecRefLoc(id);
+      }
     }
-    m_tb->genRetVal(retVal);
+    m_tb->genRetVal(retValSrcLoc ? retValSrcLoc : retVal);
     sp = m_tb->genRetAdjustStack();
   } else {
     sp = m_tb->genGenericRetDecRefs(retVal, curFunc->numLocals());

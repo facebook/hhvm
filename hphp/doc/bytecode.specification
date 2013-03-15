@@ -3650,10 +3650,12 @@ ContReceive    []  ->  [C]
   sent to the continuation will be pushed on the stack. The value will be no
   longer referenced by the Continuation object.
 
-ContDone    []  ->  []
+ContRetC    [C]  ->  []
 
-  Finish continuation. Marks the continuation in local 0 as finished. Further
-  attempts to iterate it will fail.
+  Return from continuation. Marks the continuation in local 0 as finished, sets
+  the result and transfers control flow to the caller of the continuation body,
+  which must be a non-static method of the Continuation class. Further attempts
+  to iterate it will fail.
 
 ContNext    []  ->  []
 

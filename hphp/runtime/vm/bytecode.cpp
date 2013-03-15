@@ -6893,11 +6893,17 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContReceive(PC& pc) {
   tvWriteUninit(fr);
 }
 
-inline void OPTBLD_INLINE VMExecutionContext::iopContDone(PC& pc) {
+inline void OPTBLD_INLINE VMExecutionContext::iopContRetC(PC& pc) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
   cont->m_done = true;
-  cont->m_value.setNull();
+  tvSetIgnoreRef(m_stack.topC(), cont->m_value.asTypedValue());
+  m_stack.popC();
+
+  EventHook::FunctionExit(m_fp);
+  ActRec* prevFp = arGetSfp(m_fp);
+  pc = prevFp->m_func->getEntry() + m_fp->m_soff;
+  m_fp = prevFp;
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContNext(PC& pc) {

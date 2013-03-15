@@ -275,6 +275,7 @@ private:
   void emitCallFillCont(Asm& a, const Func* orig, const Func* gen);
   void emitCallPack(Asm& a, const NormalizedInstruction& i);
   void emitContRaiseCheck(Asm& a, const NormalizedInstruction& i);
+  void emitContExit();
   void emitContPreNext(const NormalizedInstruction& i, ScratchReg&  rCont);
   void emitContStartedCheck(const NormalizedInstruction& i, ScratchReg& rCont);
   template<bool raise>
@@ -594,7 +595,7 @@ MINSTRS
   CASE(UnpackCont) \
   CASE(PackCont) \
   CASE(ContReceive) \
-  CASE(ContDone) \
+  CASE(ContRetC) \
   CASE(ContNext) \
   CASE(ContSend) \
   CASE(ContRaise) \

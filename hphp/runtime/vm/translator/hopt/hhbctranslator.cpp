@@ -714,8 +714,7 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
   assert(m_stackDeficit == 0);
 }
 
-void HhbcTranslator::emitContExit() {
-  m_tb->genExitWhenSurprised(getExitSlowTrace());
+void HhbcTranslator::emitContExitImpl() {
   SSATmp* retAddr = m_tb->genLdRetAddr();
   // Despite the name, this doesn't actually free the AR; it updates the
   // hardware fp and returns the old one
@@ -732,6 +731,11 @@ void HhbcTranslator::emitContExit() {
 
   m_tb->genRetCtrl(sp, fp, retAddr);
   m_hasExit = true;
+}
+
+void HhbcTranslator::emitContExit() {
+  m_tb->genExitWhenSurprised(getExitSlowTrace());
+  emitContExitImpl();
 }
 
 void HhbcTranslator::emitUnpackCont() {
@@ -756,10 +760,14 @@ void HhbcTranslator::emitContReceive() {
   m_tb->genStProp(cont, valOffset, m_tb->genDefUninit(), true);
 }
 
-void HhbcTranslator::emitContDone() {
+void HhbcTranslator::emitContRetC() {
   SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
+  m_tb->genExitWhenSurprised(getExitSlowTrace());
   m_tb->genStRaw(cont, RawMemSlot::ContDone, m_tb->genDefConst(true));
-  m_tb->genSetPropCell(cont, CONTOFF(m_value), m_tb->genDefInitNull());
+  m_tb->genSetPropCell(cont, CONTOFF(m_value), popC());
+
+  // transfer control
+  emitContExitImpl();
 }
 
 void HhbcTranslator::emitContNext() {

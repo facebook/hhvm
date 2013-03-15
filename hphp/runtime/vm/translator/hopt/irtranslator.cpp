@@ -633,9 +633,9 @@ void TranslatorX64::irTranslateContReceive(const Tracelet& t,
   HHIR_EMIT(ContReceive);
 }
 
-void TranslatorX64::irTranslateContDone(const Tracelet& t,
+void TranslatorX64::irTranslateContRetC(const Tracelet& t,
                                         const NormalizedInstruction& i) {
-  HHIR_EMIT(ContDone);
+  HHIR_EMIT(ContRetC);
 }
 
 void TranslatorX64::irTranslateContNext(const Tracelet& t,

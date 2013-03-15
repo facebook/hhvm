@@ -2180,12 +2180,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Statement::KindOfReturnStatement: {
         ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
         bool retV = false;
-        if (m_curFunc->isGenerator()) {
-          assert(m_evalStack.size() == 0);
-          e.ContDone();
-          e.ContExit();
-          return false;
-        }
         if (visit(r->getRetExp())) {
           if (r->getRetExp()->getContext() & Expression::RefValue) {
             emitConvertToVar(e);
@@ -2199,6 +2193,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitFreePendingIters(e);
           e.Null();
         }
+
+        if (m_curFunc->isGenerator()) {
+          assert(!retV);
+          m_metaInfo.addKnownDataType(
+            KindOfObject, false, m_ue.bcPos(), false, 1);
+          assert(m_evalStack.size() == 1);
+          e.ContRetC();
+          return false;
+        }
+
         if (r->isGuarded()) {
           m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                       false, 0, 0);
@@ -3163,9 +3167,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.CreateCont(callGetArgs, nameStr);
           return true;
         } else if (call->isCompilerCallToFunction("hphp_continuation_done")) {
-          inputIsAnObject(0);
-          e.ContDone();
-          e.ContExit();
+          assert(params && params->getCount() == 1);
+          visit((*params)[0]);
+          emitConvertToCell(e);
+          inputIsAnObject(1);
+          assert(m_evalStack.size() == 1);
+          e.ContRetC();
           e.Null();
           return true;
         } else if ((call->isCallToFunction("class_exists") ||
@@ -5379,12 +5386,13 @@ void EmitterVisitor::emitPostponedMeths() {
     // If the current position in the bytecode is reachable, emit code to
     // return null
     if (currentPositionIsReachable()) {
+      e.Null();
       if (p.m_meth->getFunctionScope()->isGenerator()) {
-        assert(m_evalStack.size() == 0);
-        e.ContDone();
-        e.ContExit();
+        m_metaInfo.addKnownDataType(
+          KindOfObject, false, m_ue.bcPos(), false, 1);
+        assert(m_evalStack.size() == 1);
+        e.ContRetC();
       } else {
-        e.Null();
         if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded())) {
           m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                          false, 0, 0);

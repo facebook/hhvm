@@ -7565,10 +7565,7 @@ void TranslatorX64::translateContEnter(const Tracelet& t,
   a.    call   (rax);
 }
 
-void TranslatorX64::translateContExit(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
-  syncOutputs(i);
-
+void TranslatorX64::emitContExit() {
   emitTestSurpriseFlags(a);
   {
     UnlikelyIfBlock ifTracer(CC_NZ, a, astubs);
@@ -7581,13 +7578,25 @@ void TranslatorX64::translateContExit(const Tracelet& t,
   a.    ret   ();
 }
 
-void TranslatorX64::translateContDone(const Tracelet& t,
+void TranslatorX64::translateContExit(const Tracelet& t,
                                       const NormalizedInstruction& i) {
-  PhysReg contReg = getReg(i.inputs[0]->location);
+  syncOutputs(i);
+  emitContExit();
+}
+
+void TranslatorX64::translateContRetC(const Tracelet& t,
+                                      const NormalizedInstruction& i) {
+  PhysReg valueReg = getReg(i.inputs[0]->location);
+  PhysReg contReg = getReg(i.inputs[1]->location);
   a.    store_imm8_disp_reg(0x1, CONTOFF(m_done), contReg);
 
-  // m_value.setNull()
-  emitTvSet(i, InvalidReg, KindOfNull, contReg, CONTOFF(m_value), false);
+  // m_value = $1
+  emitTvSet(i, valueReg, i.inputs[0]->outerType(),
+            contReg, CONTOFF(m_value), false);
+
+  // transfer control
+  syncOutputs(i.stackOff - 1);
+  emitContExit();
 }
 
 static void contPreNextThrowHelper(c_Continuation* c) {
@@ -12429,8 +12438,8 @@ bool TranslatorX64::dumpTCData() {
   SUPPORTED_OP(BareThis) \
   SUPPORTED_OP(CheckThis) \
   SUPPORTED_OP(PackCont) \
-  SUPPORTED_OP(ContDone) \
   SUPPORTED_OP(ContReceive) \
+  SUPPORTED_OP(ContRetC) \
   SUPPORTED_OP(ContNext) \
   SUPPORTED_OP(ContSend) \
   SUPPORTED_OP(ContRaise) \

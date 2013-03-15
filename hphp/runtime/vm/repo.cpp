@@ -16,15 +16,14 @@
 
 #include "util/logger.h"
 #include "util/trace.h"
+#include "util/repo_schema.h"
 #include "runtime/vm/repo.h"
-#include "runtime/vm/repo_schema.h"
 
 namespace HPHP {
 namespace VM {
 
 static const Trace::Module TRACEMOD = Trace::hhbc;
 
-const char* Repo::kSchemaId = REPO_SCHEMA;
 const char* Repo::kMagicProduct =
   "facebook.com HipHop Virtual Machine bytecode repository";
 const char* Repo::kSchemaPlaceholder = "%{schema}";
@@ -41,7 +40,7 @@ void initialize_repo() {
   }
   if (const char* schemaOverride = getenv("HHVM_RUNTIME_REPO_SCHEMA")) {
     TRACE(1, "Schema override: HHVM_RUNTIME_REPO_SCHEMA=%s\n", schemaOverride);
-    Repo::kSchemaId = schemaOverride;
+    kRepoSchemaId = schemaOverride;
   }
 }
 
@@ -218,7 +217,7 @@ void Repo::commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue) {
 
 std::string Repo::table(int repoId, const char* tablePrefix) {
   std::stringstream ss;
-  ss << dbName(repoId) << "." << tablePrefix << "_" << kSchemaId;
+  ss << dbName(repoId) << "." << tablePrefix << "_" << kRepoSchemaId;
   return ss.str();
 }
 
@@ -431,11 +430,11 @@ static int busyHandler(void* opaque, int nCalls) {
 }
 
 std::string Repo::insertSchema(const char* path) {
-  assert(strstr(kSchemaId, kSchemaPlaceholder) == nullptr);
+  assert(strstr(kRepoSchemaId, kSchemaPlaceholder) == nullptr);
   std::string result = path;
   size_t idx;
   if ((idx = result.find(kSchemaPlaceholder)) != std::string::npos) {
-    result.replace(idx, strlen(kSchemaPlaceholder), kSchemaId);
+    result.replace(idx, strlen(kSchemaPlaceholder), kRepoSchemaId);
   }
   TRACE(2, "Repo::%s() transformed %s into %s\n",
         __func__, path, result.c_str());

@@ -131,7 +131,6 @@ class Repo : public RepoProxy {
   // This allows multiple schemas to coexist in the same database, which is
   // especially important if multiple versions of hhvm are in use at the same
   // time.
-  static const char* kSchemaId;
  private:
   // Magic product constant used to distinguish a .hhbc database.
   static const char* kMagicProduct;
@@ -173,6 +172,6 @@ class Repo : public RepoProxy {
   FuncRepoProxy m_frp;
 };
 
-} }
+}}
 
 #endif

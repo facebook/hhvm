@@ -17,33 +17,34 @@
 #include <sstream>
 #include <iomanip>
 
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/base/server/admin_request_handler.h>
-#include <runtime/base/server/http_server.h>
-#include <runtime/base/server/pagelet_server.h>
-#include <runtime/base/util/http_client.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/preg.h>
-#include <util/process.h>
-#include <util/logger.h>
-#include <util/util.h>
-#include <util/mutex.h>
-#include <runtime/base/time/datetime.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/shared/shared_store_base.h>
-#include <runtime/base/memory/leak_detectable.h>
-#include <runtime/ext/mysql_stats.h>
-#include <runtime/base/shared/shared_store_stats.h>
-#include <runtime/vm/repo.h>
-#include <runtime/vm/translator/translator.h>
-#include <runtime/vm/translator/translator-deps.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <util/alloc.h>
+#include "runtime/eval/runtime/file_repository.h"
+#include "runtime/base/server/admin_request_handler.h"
+#include "runtime/base/server/http_server.h"
+#include "runtime/base/server/pagelet_server.h"
+#include "runtime/base/util/http_client.h"
+#include "runtime/base/server/server_stats.h"
+#include "runtime/base/runtime_option.h"
+#include "runtime/base/preg.h"
+#include "util/process.h"
+#include "util/logger.h"
+#include "util/util.h"
+#include "util/mutex.h"
+#include "runtime/base/time/datetime.h"
+#include "runtime/base/memory/memory_manager.h"
+#include "runtime/base/program_functions.h"
+#include "runtime/base/shared/shared_store_base.h"
+#include "runtime/base/memory/leak_detectable.h"
+#include "runtime/ext/mysql_stats.h"
+#include "runtime/base/shared/shared_store_stats.h"
+#include "runtime/vm/repo.h"
+#include "runtime/vm/translator/translator.h"
+#include "runtime/vm/translator/translator-deps.h"
+#include "runtime/vm/translator/translator-x64.h"
+#include "util/alloc.h"
 #include <util/timer.h>
-#include <runtime/ext/ext_fb.h>
-#include <runtime/ext/ext_apc.h>
+#include "util/repo_schema.h"
+#include "runtime/ext/ext_fb.h"
+#include "runtime/ext/ext_apc.h"
 
 #ifdef GOOGLE_CPU_PROFILER
 #include <google/profiler.h>
@@ -275,7 +276,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (cmd == "repo-schema") {
-      transport->sendString(VM::Repo::kSchemaId, 200);
+      transport->sendString(kRepoSchemaId, 200);
       break;
     }
     if (cmd == "translate") {

@@ -48,6 +48,7 @@
 #include <dlfcn.h>
 #include <system/lib/systemlib.h>
 #include <compiler/compiler.h>
+#include "util/repo_schema.h"
 
 #include "hhvm/process_init.h"
 
@@ -387,7 +388,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 #include "../version"
 
     cout << "Compiler: " << kCompilerId << "\n";
-    cout << "Repo schema: " << VM::Repo::kSchemaId << "\n";
+    cout << "Repo schema: " << kRepoSchemaId << "\n";
     return 1;
   }
 
@@ -397,7 +398,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
 
   if (vm.count("repo-schema")) {
-    cout << VM::Repo::kSchemaId << "\n";
+    cout << kRepoSchemaId << "\n";
     return 1;
   }
 

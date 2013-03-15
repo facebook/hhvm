@@ -54,6 +54,7 @@ typedef __sighandler_t *sighandler_t;
 #include "util/trace.h"
 #include "util/meta.h"
 #include "util/util.h"
+#include "util/repo_schema.h"
 
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/php_debug.h"
@@ -12276,7 +12277,7 @@ bool TranslatorX64::dumpTCData() {
                 "a.frontier      = %p\n"
                 "astubs.base     = %p\n"
                 "astubs.frontier = %p\n\n",
-                Repo::kSchemaId,
+                kRepoSchemaId,
                 atrampolines.code.base, a.code.frontier,
                 astubs.code.base, astubs.code.frontier)) {
     return false;

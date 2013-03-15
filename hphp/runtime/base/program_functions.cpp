@@ -14,57 +14,57 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/types.h>
-#include <runtime/base/program_functions.h>
-#include <runtime/base/type_conversions.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/thread_init_fini.h>
-#include <runtime/base/code_coverage.h>
-#include <runtime/base/runtime_option.h>
-#include <runtime/base/compiler_id.h>
-#include <util/shared_memory_allocator.h>
-#include <runtime/base/server/pagelet_server.h>
-#include <runtime/base/server/xbox_server.h>
-#include <runtime/base/server/http_server.h>
-#include <runtime/base/server/replay_transport.h>
-#include <runtime/base/server/http_request_handler.h>
-#include <runtime/base/server/admin_request_handler.h>
-#include <runtime/base/server/server_stats.h>
-#include <runtime/base/server/server_note.h>
-#include <runtime/base/memory/memory_manager.h>
-#include <util/process.h>
-#include <util/capability.h>
-#include <util/timer.h>
-#include <util/stack_trace.h>
-#include <util/light_process.h>
-#include <runtime/base/stat_cache.h>
-#include <runtime/ext/extension.h>
-#include <runtime/ext/ext_fb.h>
-#include <runtime/ext/ext_json.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/ext/ext_apc.h>
-#include <runtime/ext/ext_function.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/eval/debugger/debugger_client.h>
-#include <runtime/base/util/simple_counter.h>
-#include <runtime/base/util/extended_logger.h>
-#include <runtime/base/file/stream_wrapper_registry.h>
+#include "runtime/base/types.h"
+#include "runtime/base/program_functions.h"
+#include "runtime/base/type_conversions.h"
+#include "runtime/base/builtin_functions.h"
+#include "runtime/base/execution_context.h"
+#include "runtime/base/thread_init_fini.h"
+#include "runtime/base/code_coverage.h"
+#include "runtime/base/runtime_option.h"
+#include "util/shared_memory_allocator.h"
+#include "runtime/base/server/pagelet_server.h"
+#include "runtime/base/server/xbox_server.h"
+#include "runtime/base/server/http_server.h"
+#include "runtime/base/server/replay_transport.h"
+#include "runtime/base/server/http_request_handler.h"
+#include "runtime/base/server/admin_request_handler.h"
+#include "runtime/base/server/server_stats.h"
+#include "runtime/base/server/server_note.h"
+#include "runtime/base/memory/memory_manager.h"
+#include "util/process.h"
+#include "util/capability.h"
+#include "util/timer.h"
+#include "util/stack_trace.h"
+#include "util/light_process.h"
+#include "util/repo_schema.h"
+#include "runtime/base/stat_cache.h"
+#include "runtime/ext/extension.h"
+#include "runtime/ext/ext_fb.h"
+#include "runtime/ext/ext_json.h"
+#include "runtime/ext/ext_variable.h"
+#include "runtime/ext/ext_apc.h"
+#include "runtime/ext/ext_function.h"
+#include "runtime/eval/debugger/debugger.h"
+#include "runtime/eval/debugger/debugger_client.h"
+#include "runtime/base/util/simple_counter.h"
+#include "runtime/base/util/extended_logger.h"
+#include "runtime/base/file/stream_wrapper_registry.h"
 
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/positional_options.hpp>
-#include <boost/program_options/variables_map.hpp>
-#include <boost/program_options/parsers.hpp>
+#include "boost/program_options/options_description.hpp"
+#include "boost/program_options/positional_options.hpp"
+#include "boost/program_options/variables_map.hpp"
+#include "boost/program_options/parsers.hpp"
 #include <libgen.h>
 #include <oniguruma.h>
 #include <libxml/parser.h>
 
-#include <runtime/eval/runtime/file_repository.h>
+#include "runtime/eval/runtime/file_repository.h"
 
-#include <runtime/vm/runtime.h>
-#include <runtime/vm/repo.h>
-#include <runtime/vm/translator/translator.h>
-#include <compiler/builtin_symbols.h>
+#include "runtime/vm/runtime.h"
+#include "runtime/vm/repo.h"
+#include "runtime/vm/translator/translator.h"
+#include "compiler/builtin_symbols.h"
 
 using namespace boost::program_options;
 using std::cout;
@@ -73,14 +73,6 @@ extern char **environ;
 #define MAX_INPUT_NESTING_LEVEL 64
 
 namespace HPHP {
-
-const char* kCompilerId =
-#ifdef COMPILER_ID
-  COMPILER_ID
-#else
-  ""
-#endif
-  ;
 
 extern InitFiniNode *extra_process_init, *extra_process_exit;
 
@@ -857,7 +849,7 @@ static int execute_program_impl(int argc, char **argv) {
     cout << "HipHop VM";
     cout << " v" << version << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
-    cout << "Repo schema: " << VM::Repo::kSchemaId << "\n";
+    cout << "Repo schema: " << kRepoSchemaId << "\n";
     return 0;
   }
   if (vm.count("compiler-id")) {
@@ -866,7 +858,7 @@ static int execute_program_impl(int argc, char **argv) {
   }
 
   if (vm.count("repo-schema")) {
-    cout << VM::Repo::kSchemaId << "\n";
+    cout << kRepoSchemaId << "\n";
     return 0;
   }
 

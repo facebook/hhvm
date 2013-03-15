@@ -61,7 +61,12 @@ class ArrayData : public Countable {
     m_pos(src->m_pos), m_strongIterators(0), m_kind(kind),
     m_nonsmart(nonsmart) {
   }
-  virtual ~ArrayData();
+
+  virtual ~ArrayData() {
+    // If there are any strong iterators pointing to this array, they need
+    // to be invalidated.
+    freeStrongIterators();
+  }
 
   /**
    * Create a new ArrayData with specified array element(s).
@@ -472,10 +477,10 @@ class ArrayData : public Countable {
   static TypedValue* nvGetNotFound(int64_t k);
   static TypedValue* nvGetNotFound(const StringData* k);
 
-  static bool IsValidKey(litstr k);
+  static bool IsValidKey(litstr k) { return k; }
   static bool IsValidKey(CStrRef k);
   static bool IsValidKey(CVarRef k);
-  static bool IsValidKey(const StringData* k);
+  static bool IsValidKey(const StringData* k) { return k; }
 
  protected:
   uint m_size;

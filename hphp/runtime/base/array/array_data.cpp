@@ -35,7 +35,7 @@ static ArrayDataMap s_arrayDataMap;
 
 ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
                                      const StringData *key /* = nullptr */) {
-  if (key == nullptr) {
+  if (!key) {
     key = StringData::GetStaticString(f_serialize(arr).get());
   } else {
     assert(key->isStatic());
@@ -54,14 +54,6 @@ ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
 // In general, arrays can contain int-valued-strings, even though
 // plain array access converts them to integers.  non-int-string
 // assersions should go upstream of the ArrayData api.
-
-bool ArrayData::IsValidKey(litstr k) {
-  return k != nullptr;
-}
-
-bool ArrayData::IsValidKey(const StringData* k) {
-  return k != nullptr;
-}
 
 bool ArrayData::IsValidKey(CStrRef k) {
   return IsValidKey(k.get());
@@ -106,15 +98,6 @@ ArrayData *ArrayData::CreateRef(CVarRef name, CVarRef value) {
   return init.create();
 }
 
-HOT_FUNC
-ArrayData::~ArrayData() {
-  // If there are any strong iterators pointing to this array, they need
-  // to be invalidated.
-  if (strongIterators()) {
-    freeStrongIterators();
-  }
-}
-
 ArrayData *ArrayData::nonSmartCopy() const {
   throw FatalErrorException("nonSmartCopy not implemented.");
 }
@@ -127,7 +110,8 @@ Object ArrayData::toObject() const {
 }
 
 bool ArrayData::isVectorData() const {
-  for (ssize_t i = 0, n = size(); i < n; i++) {
+  const auto n = size();
+  for (ssize_t i = 0; i < n; i++) {
     if (getIndex(i) != i) {
       return false;
     }
@@ -138,8 +122,8 @@ bool ArrayData::isVectorData() const {
 int ArrayData::compare(const ArrayData *v2) const {
   assert(v2);
 
-  int count1 = size();
-  int count2 = v2->size();
+  auto const count1 = size();
+  auto const count2 = v2->size();
   if (count1 < count2) return -1;
   if (count1 > count2) return 1;
   if (count1 == 0) return 0;
@@ -148,11 +132,10 @@ int ArrayData::compare(const ArrayData *v2) const {
   DECLARE_THREAD_INFO; check_recursion(info);
 
   for (ArrayIter iter(this); iter; ++iter) {
-    Variant key(iter.first());
+    auto key = iter.first();
     if (!v2->exists(key)) return 1;
-
-    Variant value1(iter.second());
-    Variant value2(v2->get(key));
+    auto value1 = iter.second();
+    auto value2 = v2->get(key);
     if (value1.more(value2)) return 1;
     if (value1.less(value2)) return -1;
   }
@@ -163,8 +146,8 @@ int ArrayData::compare(const ArrayData *v2) const {
 bool ArrayData::equal(const ArrayData *v2, bool strict) const {
   assert(v2);
 
-  int count1 = size();
-  int count2 = v2->size();
+  auto const count1 = size();
+  auto const count2 = v2->size();
   if (count1 != count2) return false;
   if (count1 == 0) return true;
 
@@ -172,23 +155,16 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
   DECLARE_THREAD_INFO; check_recursion(info);
 
   if (strict) {
-    for (ArrayIter iter1(this), iter2(v2); iter1 && iter2; ++iter1, ++iter2) {
-      Variant key1(iter1.first());
-      Variant key2(iter2.first());
-      if (!key1.same(key2)) return false;
-
-      Variant value1(iter1.second());
-      Variant value2(iter2.second());
-      if (!value1.same(value2)) return false;
+    for (ArrayIter iter1(this), iter2(v2); iter1; ++iter1, ++iter2) {
+      assert(iter2);
+      if (!iter1.first().same(iter2.first())
+          || !iter1.second().same(iter2.secondRef())) return false;
     }
   } else {
     for (ArrayIter iter(this); iter; ++iter) {
       Variant key(iter.first());
       if (!v2->exists(key)) return false;
-
-      Variant value1(iter.second());
-      Variant value2(v2->get(key));
-      if (!value1.equal(value2)) return false;
+      if (!iter.second().equal(v2->get(key))) return false;
     }
   }
 
@@ -240,7 +216,7 @@ ArrayData *ArrayData::pop(Variant &value) {
 
 ArrayData *ArrayData::dequeue(Variant &value) {
   if (!empty()) {
-    ssize_t pos = iter_begin();
+    auto const pos = iter_begin();
     value = getValue(pos);
     ArrayData *ret = remove(getKey(pos), getCount() > 1);
 
@@ -261,7 +237,7 @@ ArrayData *ArrayData::dequeue(Variant &value) {
 // MutableArrayIter related functions
 
 void ArrayData::newFullPos(FullPos &fp) {
-  assert(fp.getContainer() == nullptr);
+  assert(!fp.getContainer());
   fp.setContainer(this);
   fp.setNext(strongIterators());
   setStrongIterators(&fp);
@@ -321,17 +297,19 @@ void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {
 }
 
 CVarRef ArrayData::currentRef() {
-  if (m_pos >= 0 && m_pos < size()) {
+  if (size_t(m_pos) < size_t(size())) {
     return getValueRef(m_pos);
   }
   throw FatalErrorException("invalid ArrayData::m_pos");
 }
+
 CVarRef ArrayData::endRef() {
-  if (m_pos >= 0 && m_pos < size()) {
+  if (size_t(m_pos) < size_t(size())) {
     return getValueRef(size() - 1);
   }
   throw FatalErrorException("invalid ArrayData::m_pos");
 }
+
 ArrayData* ArrayData::escalateForSort() {
   if (getCount() > 1) {
     return copy();
@@ -369,14 +347,14 @@ Variant ArrayData::next()          { return value(++m_pos);}
 Variant ArrayData::end()           { return value(m_pos = size() - 1);}
 
 Variant ArrayData::key() const {
-  if (m_pos >= 0 && m_pos < size()) {
+  if (size_t(m_pos) < size_t(size())) {
     return getKey(m_pos);
   }
   return uninit_null();
 }
 
 Variant ArrayData::value(ssize_t &pos) const {
-  if (pos >= 0 && pos < size()) {
+  if (size_t(pos) < size_t(size())) {
     return getValue(pos);
   }
   pos = ArrayData::invalid_index;
@@ -384,17 +362,17 @@ Variant ArrayData::value(ssize_t &pos) const {
 }
 
 Variant ArrayData::current() const {
-  if (m_pos >= 0 && m_pos < size()) {
+  if (size_t(m_pos) < size_t(size())) {
     return getValue(m_pos);
   }
   return false;
 }
 
-static StaticString s_value("value");
-static StaticString s_key("key");
+static const StaticString s_value("value");
+static const StaticString s_key("key");
 
 Variant ArrayData::each() {
-  if (m_pos >= 0 && m_pos < size()) {
+  if (size_t(m_pos) < size_t(size())) {
     Array ret;
     Variant key(getKey(m_pos));
     Variant value(getValue(m_pos));

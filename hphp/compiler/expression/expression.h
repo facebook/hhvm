@@ -180,6 +180,7 @@ public:
   bool hasError(Error error) const { return m_error & error; }
 
   ExprClass getExprClass() const;
+  virtual ExpressionPtr getStoreVariable() const { return ExpressionPtr(); }
   void setArgNum(int n);
 
   /**

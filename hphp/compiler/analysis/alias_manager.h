@@ -205,7 +205,7 @@ class AliasManager {
   StatementPtr canonicalizeRecur(StatementPtr e, int &ret);
 
   void invalidateChainRoots(StatementPtr s);
-  void nullSafeDisableCSE(StatementPtr parent, int kid);
+  void nullSafeDisableCSE(StatementPtr parent, ExpressionPtr kid);
   void disableCSE(StatementPtr s);
   void createCFG(MethodStatementPtr m);
   void deleteCFG();

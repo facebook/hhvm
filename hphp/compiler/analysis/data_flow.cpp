@@ -350,12 +350,13 @@ void DataFlowWalker::process(ExpressionPtr e, bool doAccessChains) {
     case Expression::KindOfAssignmentExpression:
     case Expression::KindOfBinaryOpExpression:
     case Expression::KindOfUnaryOpExpression: {
-      ExpressionPtr var = e->getNthExpr(0);
+      ExpressionPtr var = e->getStoreVariable();
       if (var && var->getContext() & (Expression::AssignmentLHS|
                                       Expression::OprLValue)) {
         processAccessChain(var);
         processAccess(var);
       }
+      // fall through
     }
     default:
       processAccess(e);

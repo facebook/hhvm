@@ -144,7 +144,7 @@ bool Expression::hasSubExpr(ExpressionPtr sub) const {
 Expression::ExprClass Expression::getExprClass() const {
   ExprClass cls = Classes[m_kindOf];
   if (cls == Update) {
-    ExpressionPtr k = getNthExpr(0);
+    ExpressionPtr k = getStoreVariable();
     if (!k || !(k->hasContext(OprLValue))) cls = Expression::None;
   }
   return cls;

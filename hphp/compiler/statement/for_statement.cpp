@@ -68,13 +68,13 @@ void ForStatement::analyzeProgram(AnalysisResultPtr ar) {
 
 ConstructPtr ForStatement::getNthKid(int n) const {
   switch (n) {
-    case InitExpr:
+    case 0:
       return m_exp1;
-    case CondExpr:
+    case 1:
       return m_exp2;
-    case BodyStmt:
+    case 2:
       return m_stmt;
-    case IncExpr:
+    case 3:
       return m_exp3;
     default:
       assert(false);
@@ -89,16 +89,16 @@ int ForStatement::getKidCount() const {
 
 void ForStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
-    case InitExpr:
+    case 0:
       m_exp1 = boost::dynamic_pointer_cast<Expression>(cp);
       break;
-    case CondExpr:
+    case 1:
       m_exp2 = boost::dynamic_pointer_cast<Expression>(cp);
       break;
-    case BodyStmt:
+    case 2:
       m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
       break;
-    case IncExpr:
+    case 3:
       m_exp3 = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:

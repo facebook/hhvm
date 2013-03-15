@@ -26,18 +26,22 @@ DECLARE_BOOST_TYPES(ForStatement);
 
 class ForStatement : public LoopStatement {
 public:
-  enum { InitExpr, CondExpr, BodyStmt, IncExpr };
   ForStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                ExpressionPtr exp1, ExpressionPtr exp2, ExpressionPtr exp3,
                StatementPtr stmt);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+
+  ExpressionPtr getInitExp() const { return m_exp1; }
+  ExpressionPtr getCondExp() const { return m_exp2; }
+  ExpressionPtr getIncExp() const { return m_exp3; }
+  StatementPtr getBody() const { return m_stmt; }
   virtual bool hasDecl() const { return m_stmt && m_stmt->hasDecl(); }
   virtual bool hasRetExp() const { return m_stmt && m_stmt->hasRetExp(); }
   virtual int getRecursiveCount() const {
     return 1 + (m_stmt ? m_stmt->getRecursiveCount() : 0);
   }
-  virtual bool kidUnused(int i) const { return i == InitExpr || i == IncExpr; }
+  virtual bool kidUnused(int i) const { return i == 0 || i == 3; }
 private:
   ExpressionPtr m_exp1;
   ExpressionPtr m_exp2;

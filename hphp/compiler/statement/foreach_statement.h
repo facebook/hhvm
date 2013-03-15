@@ -26,13 +26,16 @@ DECLARE_BOOST_TYPES(ForEachStatement);
 
 class ForEachStatement : public LoopStatement {
 public:
-  enum { ArrayExpr, NameExpr, ValueExpr, BodyStmt };
   ForEachStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                    ExpressionPtr array, ExpressionPtr name, bool nameRef,
                    ExpressionPtr value, bool valueRef, StatementPtr stmt);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
+  ExpressionPtr getArrayExp() const { return m_array; }
+  ExpressionPtr getNameExp() const { return m_name; }
+  ExpressionPtr getValueExp() const { return m_value; }
+  StatementPtr getBody() const { return m_stmt; }
   virtual bool hasDecl() const { return m_stmt && m_stmt->hasDecl(); }
   virtual bool hasRetExp() const { return m_stmt && m_stmt->hasRetExp(); }
   virtual int getRecursiveCount() const {

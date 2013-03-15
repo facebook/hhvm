@@ -1980,7 +1980,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // Dynamic break/continue.
         if (n == 0) {
           // Depth can't be statically determined.
-          visit(bs->getNthKid(0));
+          visit(bs->getExp());
           emitConvertToCell(e);
         } else {
           // Dynamic break/continue with statically known depth.
@@ -2002,6 +2002,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfDoStatement: {
+        DoStatementPtr ds(static_pointer_cast<DoStatement>(s));
         Label top(e);
         Label condition;
         Label exit;
@@ -2009,12 +2010,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         Label cntHand;
         {
           CONTROL_BODY(exit, condition, brkHand, cntHand);
-          visit(node->getNthKid(DoStatement::BodyStmt));
+          visit(ds->getBody());
         }
         condition.set(e);
         {
-          ExpressionPtr c(static_pointer_cast<Expression>(
-                            node->getNthKid(DoStatement::CondExpr)));
+          ExpressionPtr c = ds->getCondExp();
           Emitter condEmitter(c, m_ue, *this);
           visitIfCondition(c, condEmitter, top, exit, false);
         }
@@ -2060,15 +2060,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfExpStatement: {
-        assert(node->getKidCount() == 1);
-        if (visit(node->getNthKid(0))) {
+        ExpStatementPtr es(static_pointer_cast<ExpStatement>(s));
+        if (visit(es->getExpression())) {
           emitPop(e);
         }
         return false;
       }
 
       case Statement::KindOfForStatement: {
-        if (visit(node->getNthKid(ForStatement::InitExpr))) {
+        ForStatementPtr fs(static_pointer_cast<ForStatement>(s));
+        if (visit(fs->getInitExp())) {
           emitPop(e);
         }
         Label preCond(e);
@@ -2076,20 +2077,18 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         Label fail;
         Label brkHand;
         Label cntHand;
-        if (ConstructPtr n = node->getNthKid(ForStatement::CondExpr)) {
+        if (ExpressionPtr condExp = fs->getCondExp()) {
           Label tru;
-          Emitter condEmitter(static_pointer_cast<Expression>(n),
-                              m_ue, *this);
-          visitIfCondition(static_pointer_cast<Expression>(n),
-                           condEmitter, tru, fail, true);
+          Emitter condEmitter(condExp, m_ue, *this);
+          visitIfCondition(condExp, condEmitter, tru, fail, true);
           if (tru.isUsed()) tru.set(e);
         }
         {
           CONTROL_BODY(fail, preInc, brkHand, cntHand);
-          visit(node->getNthKid(ForStatement::BodyStmt));
+          visit(fs->getBody());
         }
         preInc.set(e);
-        if (visit(node->getNthKid(ForStatement::IncExpr))) {
+        if (visit(fs->getIncExp())) {
           emitPop(e);
         }
         e.Jmp(preCond);
@@ -2411,7 +2410,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         TryStatementPtr ts = static_pointer_cast<TryStatement>(node);
 
         Offset start = m_ue.bcPos();
-        visit(ts->getNthKid(0));
+        visit(ts->getBody());
         // include the jump out of the try-catch block in the
         // exception handler address range
         e.Jmp(after);
@@ -2467,21 +2466,21 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfWhileStatement: {
+        WhileStatementPtr ws(static_pointer_cast<WhileStatement>(s));
         Label preCond(e);
         Label fail;
         Label brkHand;
         Label cntHand;
         {
           Label tru;
-          ExpressionPtr c(static_pointer_cast<Expression>(
-                            node->getNthKid(WhileStatement::CondExpr)));
+          ExpressionPtr c(ws->getCondExp());
           Emitter condEmitter(c, m_ue, *this);
           visitIfCondition(c, condEmitter, tru, fail, true);
           if (tru.isUsed()) tru.set(e);
         }
         {
           CONTROL_BODY(fail, preCond, brkHand, cntHand);
-          visit(node->getNthKid(WhileStatement::BodyStmt));
+          visit(ws->getBody());
         }
         e.Jmp(preCond);
         emitBreakHandler(e, fail, preCond, brkHand, cntHand);
@@ -6335,14 +6334,10 @@ class ForeachIterGuard {
 };
 
 void EmitterVisitor::emitForeach(Emitter& e, ForEachStatementPtr fe) {
-  ExpressionPtr ae(static_pointer_cast<Expression>(
-                      fe->getNthKid(ForEachStatement::ArrayExpr)));
-  ExpressionPtr val(static_pointer_cast<Expression>(
-                      fe->getNthKid(ForEachStatement::ValueExpr)));
-  ExpressionPtr key(static_pointer_cast<Expression>(
-                      fe->getNthKid(ForEachStatement::NameExpr)));
-  StatementPtr body(static_pointer_cast<Statement>(
-                      fe->getNthKid(ForEachStatement::BodyStmt)));
+  ExpressionPtr ae(fe->getArrayExp());
+  ExpressionPtr val(fe->getValueExp());
+  ExpressionPtr key(fe->getNameExp());
+  StatementPtr body(fe->getBody());
   int keyTempLocal;
   int valTempLocal;
   bool strong = fe->isStrong();

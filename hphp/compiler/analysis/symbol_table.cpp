@@ -21,6 +21,7 @@
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/function_scope.h>
 
+#include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/parameter_expression.h>
@@ -295,20 +296,18 @@ void Symbol::serializeParam(JSON::DocTarget::OutputStream &out) const {
 static inline std::string ExtractDocComment(ExpressionPtr e) {
   if (!e) return "";
   switch (e->getKindOf()) {
-  case Expression::KindOfAssignmentExpression:
-    return ExtractDocComment(e->getNthExpr(0));
-  case Expression::KindOfSimpleVariable:
-    {
-      SimpleVariablePtr sv(
-        static_pointer_cast<SimpleVariable>(e));
-      return sv->getDocComment();
-    }
-  case Expression::KindOfConstantExpression:
-    {
-      ConstantExpressionPtr ce(
-        static_pointer_cast<ConstantExpression>(e));
-      return ce->getDocComment();
-    }
+  case Expression::KindOfAssignmentExpression: {
+    AssignmentExpressionPtr ae(static_pointer_cast<AssignmentExpression>(e));
+    return ExtractDocComment(ae->getVariable());
+  }
+  case Expression::KindOfSimpleVariable: {
+    SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(e));
+    return sv->getDocComment();
+  }
+  case Expression::KindOfConstantExpression: {
+    ConstantExpressionPtr ce(static_pointer_cast<ConstantExpression>(e));
+    return ce->getDocComment();
+  }
   default: return "";
   }
   return "";

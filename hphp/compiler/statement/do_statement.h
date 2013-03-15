@@ -26,11 +26,13 @@ DECLARE_BOOST_TYPES(DoStatement);
 
 class DoStatement : public LoopStatement {
 public:
-  enum { BodyStmt, CondExpr };
   DoStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
               StatementPtr stmt, ExpressionPtr condition);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+
+  ExpressionPtr getCondExp() const { return m_condition; }
+  StatementPtr getBody() const { return m_stmt; }
   virtual bool hasDecl() const { return m_stmt && m_stmt->hasDecl(); }
   virtual bool hasRetExp() const { return m_stmt && m_stmt->hasRetExp(); }
   virtual int getRecursiveCount() const {

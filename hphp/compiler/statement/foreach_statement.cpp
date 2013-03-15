@@ -79,13 +79,13 @@ void ForEachStatement::analyzeProgram(AnalysisResultPtr ar) {
 
 ConstructPtr ForEachStatement::getNthKid(int n) const {
   switch (n) {
-    case ArrayExpr:
+    case 0:
       return m_array;
-    case NameExpr:
+    case 1:
       return m_name;
-    case ValueExpr:
+    case 2:
       return m_value;
-    case BodyStmt:
+    case 3:
       return m_stmt;
     default:
       assert(false);
@@ -100,16 +100,16 @@ int ForEachStatement::getKidCount() const {
 
 void ForEachStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
-    case ArrayExpr:
+    case 0:
       m_array = boost::dynamic_pointer_cast<Expression>(cp);
       break;
-    case NameExpr:
+    case 1:
       m_name = boost::dynamic_pointer_cast<Expression>(cp);
       break;
-    case ValueExpr:
+    case 2:
       m_value = boost::dynamic_pointer_cast<Expression>(cp);
       break;
-    case BodyStmt:
+    case 3:
       m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
       break;
     default:

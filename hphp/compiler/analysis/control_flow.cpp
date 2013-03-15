@@ -329,9 +329,10 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           }
 
           case Statement::KindOfForStatement: {
-            ConstructRawPtr cond(s->getNthKid(ForStatement::CondExpr));
-            ConstructRawPtr body(s->getNthKid(ForStatement::BodyStmt));
-            ConstructRawPtr incr(s->getNthKid(ForStatement::IncExpr));
+            ForStatementPtr fs(static_pointer_cast<ForStatement>(s));
+            ConstructRawPtr body(fs->getBody());
+            ConstructRawPtr cond(fs->getCondExp());
+            ConstructRawPtr incr(fs->getIncExp());
             if (cond) addEdge(cond, AfterConstruct, s, AfterConstruct);
             ConstructRawPtr end = incr ? incr : body ? body : cond;
             ConstructRawPtr start = cond ? cond : body ? body : incr;
@@ -341,8 +342,9 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           }
 
           case Statement::KindOfWhileStatement: {
-            ConstructRawPtr cond(s->getNthKid(WhileStatement::CondExpr));
-            ConstructRawPtr body(s->getNthKid(WhileStatement::BodyStmt));
+            WhileStatementPtr ws(static_pointer_cast<WhileStatement>(s));
+            ConstructRawPtr body(ws->getBody());
+            ConstructRawPtr cond(ws->getCondExp());
             addEdge(cond, AfterConstruct, s, AfterConstruct);
             addEdge(body ? body : cond, AfterConstruct, cond, BeforeConstruct);
             noFallThrough(s);
@@ -350,15 +352,16 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           }
 
           case Statement::KindOfDoStatement: {
-            ConstructRawPtr cond(s->getNthKid(DoStatement::CondExpr));
-            addEdge(cond, AfterConstruct, s, BeforeConstruct);
+            DoStatementPtr ds(static_pointer_cast<DoStatement>(s));
+            addEdge(ds->getCondExp(), AfterConstruct, s, BeforeConstruct);
             break;
           }
 
           case Statement::KindOfForEachStatement: {
-            ConstructRawPtr body(s->getNthKid(ForEachStatement::BodyStmt));
-            ConstructRawPtr name(s->getNthKid(ForEachStatement::NameExpr));
-            ConstructRawPtr value(s->getNthKid(ForEachStatement::ValueExpr));
+            ForEachStatementPtr fs(static_pointer_cast<ForEachStatement>(s));
+            ConstructRawPtr body(fs->getBody());
+            ConstructRawPtr name(fs->getNameExp());
+            ConstructRawPtr value(fs->getValueExp());
             ConstructRawPtr begin = name ? name : value;
             ConstructRawPtr end = body ? body : value;
             addEdge(end, AfterConstruct, begin, BeforeConstruct);
@@ -450,23 +453,31 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
                   } else {
                     ConstructRawPtr kid;
                     switch (l->getKindOf()) {
-                      case Statement::KindOfForEachStatement:
-                        kid = l->getNthKid(ForEachStatement::NameExpr);
+                      case Statement::KindOfForEachStatement: {
+                        ForEachStatementPtr fs(static_pointer_cast<ForEachStatement>(l));
+                        kid = fs->getNameExp();
                         if (!kid) {
-                          kid = l->getNthKid(ForEachStatement::ValueExpr);
+                          kid = fs->getValueExp();
                         }
                         break;
-                      case Statement::KindOfForStatement:
-                        kid = l->getNthKid(ForStatement::IncExpr);
-                        if (!kid) kid = l->getNthKid(ForStatement::CondExpr);
-                        if (!kid) kid = l->getNthKid(ForStatement::BodyStmt);
+                      }
+                      case Statement::KindOfForStatement: {
+                        ForStatementPtr fs(static_pointer_cast<ForStatement>(l));
+                        kid = fs->getIncExp();
+                        if (!kid) kid = fs->getCondExp();
+                        if (!kid) kid = fs->getBody();
                         break;
-                      case Statement::KindOfWhileStatement:
-                        kid = l->getNthKid(WhileStatement::CondExpr);
+                      }
+                      case Statement::KindOfWhileStatement: {
+                        WhileStatementPtr ws(static_pointer_cast<WhileStatement>(l));
+                        kid = ws->getCondExp();
                         break;
-                      case Statement::KindOfDoStatement:
-                        kid = l->getNthKid(DoStatement::CondExpr);
+                      }
+                      case Statement::KindOfDoStatement: {
+                        DoStatementPtr ds(static_pointer_cast<DoStatement>(l));
+                        kid = ds->getCondExp();
                         break;
+                      }
                       default:
                         always_assert(0);
                     }
@@ -495,36 +506,36 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
       } else {
         ExpressionPtr e(dynamic_pointer_cast<Expression>(cp));
         switch (e->getKindOf()) {
-          case Expression::KindOfBinaryOpExpression:
-            {
-              BinaryOpExpressionPtr b(
-                  static_pointer_cast<BinaryOpExpression>(e));
-              if (b->isShortCircuitOperator()) {
-                ConstructPtr trueBranch, falseBranch;
-                ConstructLocation tLoc, fLoc;
-                getTrueFalseBranches(0, trueBranch, tLoc, falseBranch, fLoc);
-                assert(trueBranch);
-                assert(falseBranch);
-                if (b->isLogicalOrOperator()) {
-                  addEdge(e->getNthExpr(0), AfterConstruct, trueBranch, tLoc);
-                } else {
-                  addEdge(e->getNthExpr(0), AfterConstruct, falseBranch, fLoc);
-                }
+          case Expression::KindOfBinaryOpExpression: {
+            BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(e));
+            if (b->isShortCircuitOperator()) {
+              ConstructPtr trueBranch, falseBranch;
+              ConstructLocation tLoc, fLoc;
+              getTrueFalseBranches(0, trueBranch, tLoc, falseBranch, fLoc);
+              assert(trueBranch);
+              assert(falseBranch);
+              if (b->isLogicalOrOperator()) {
+                addEdge(b->getExp1(), AfterConstruct, trueBranch, tLoc);
+              } else {
+                addEdge(b->getExp1(), AfterConstruct, falseBranch, fLoc);
               }
             }
             break;
-          case Expression::KindOfQOpExpression:
-            if (ExpressionPtr e1 = e->getNthExpr(1)) {
-              addEdge(e->getNthExpr(0), AfterConstruct,
-                      e->getNthExpr(2), BeforeConstruct);
+          }
+          case Expression::KindOfQOpExpression: {
+            QOpExpressionPtr q(static_pointer_cast<QOpExpression>(e));
+            if (ExpressionPtr e1 = q->getYes()) {
+              addEdge(q->getCondition(), AfterConstruct,
+                      q->getNo(), BeforeConstruct);
               addEdge(e1, AfterConstruct,
-                      e->getNthExpr(2), AfterConstruct);
+                      q->getNo(), AfterConstruct);
               noFallThrough(e1);
             } else {
-              addEdge(e->getNthExpr(0), AfterConstruct,
-                      e->getNthExpr(2), AfterConstruct);
+              addEdge(q->getCondition(), AfterConstruct,
+                      q->getNo(), AfterConstruct);
             }
             break;
+          }
           default:
             break;
         }
@@ -586,32 +597,36 @@ void ControlFlowBuilder::getTrueFalseBranches(
 
   ConstructPtr c(top(level));
   if (StatementPtr s = dynamic_pointer_cast<Statement>(c)) {
-    int kidBodyIdx = -1;
+    StatementPtr kidBody;
     switch (s->getKindOf()) {
-    case Statement::KindOfForStatement:
+    case Statement::KindOfForStatement: {
       // examine which context we're in
-      {
-        ConstructPtr kid(top(level - 1));
-        if (kid == s->getNthKid(ForStatement::InitExpr)) {
-          ; // just do the default case
-        } else if (kid == s->getNthKid(ForStatement::CondExpr)) {
-          kidBodyIdx = ForStatement::BodyStmt;
-          goto loop_stmt;
-        } else if (kid == s->getNthKid(ForStatement::IncExpr)) {
-          ; // just do the default case
-        } else {
-          assert(false);
-        }
+      ForStatementPtr fs(static_pointer_cast<ForStatement>(s));
+      ConstructPtr kid(top(level - 1));
+      if (kid == fs->getInitExp()) {
+        ; // just do the default case
+      } else if (kid == fs->getCondExp()) {
+        kidBody = fs->getBody();
+        goto loop_stmt;
+      } else if (kid == fs->getIncExp()) {
+        ; // just do the default case
+      } else {
+        assert(false);
       }
       break;
-    case Statement::KindOfWhileStatement:
-      kidBodyIdx = WhileStatement::BodyStmt;
+    }
+    case Statement::KindOfWhileStatement: {
+      WhileStatementPtr ws(static_pointer_cast<WhileStatement>(s));
+      kidBody = ws->getBody();
       goto loop_stmt;
-    case Statement::KindOfDoStatement:
-      kidBodyIdx = DoStatement::BodyStmt;
+    }
+    case Statement::KindOfDoStatement: {
+      DoStatementPtr ds(static_pointer_cast<DoStatement>(s));
+      kidBody = ds->getBody();
+    }
     loop_stmt:
       if (!trueBranch) {
-        trueBranch = s->getNthKid(kidBodyIdx);
+        trueBranch = kidBody;
         tLoc = BeforeConstruct;
       }
       if (!falseBranch) {

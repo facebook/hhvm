@@ -45,7 +45,9 @@ public:
   }
 
   ExpressionPtr getVariable() { return m_variable;}
+  ExpressionPtr getStoreVariable() const { return m_variable; }
   ExpressionPtr getValue() { return m_value;}
+  void setVariable(ExpressionPtr v) { m_variable = v; }
   void setValue(ExpressionPtr v) { m_value = v; }
   int getLocalEffects() const;
 

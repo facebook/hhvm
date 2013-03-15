@@ -50,6 +50,7 @@ public:
   virtual bool getScalarValue(Variant &value);
 
   ExpressionPtr getExpression() { return m_exp;}
+  ExpressionPtr getStoreVariable() const { return m_exp;}
   int getOp() const { return m_op;}
   bool isLogicalNot() const { return m_op == '!'; }
   bool isCast() const;

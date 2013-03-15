@@ -41,6 +41,7 @@
 #include <compiler/statement/block_statement.h>
 #include <compiler/statement/if_statement.h>
 #include <compiler/statement/if_branch_statement.h>
+#include <compiler/statement/switch_statement.h>
 #include <compiler/statement/break_statement.h>
 #include <compiler/statement/return_statement.h>
 #include <compiler/statement/loop_statement.h>
@@ -51,6 +52,8 @@
 #include <compiler/statement/exp_statement.h>
 #include <compiler/statement/echo_statement.h>
 #include <compiler/statement/try_statement.h>
+#include <compiler/statement/global_statement.h>
+#include <compiler/statement/static_statement.h>
 #include <compiler/analysis/alias_manager.h>
 #include <compiler/analysis/control_flow.h>
 #include <compiler/analysis/variable_table.h>
@@ -601,7 +604,7 @@ void AliasManager::cleanRefs(ExpressionPtr e,
   if (e->is(Expression::KindOfAssignmentExpression) ||
       e->is(Expression::KindOfBinaryOpExpression) ||
       e->is(Expression::KindOfUnaryOpExpression)) {
-    ExpressionPtr var = e->getNthExpr(0);
+    ExpressionPtr var = e->getStoreVariable();
     if (var->is(Expression::KindOfSimpleVariable) &&
         !(var->getContext() & Expression::RefAssignmentLHS)) {
       SimpleVariablePtr sv(spc(SimpleVariable, var));
@@ -845,18 +848,11 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e,
       return testAccesses(e, rv, forLval);
     }
 
+    case Expression::KindOfAssignmentExpression:
+    case Expression::KindOfBinaryOpExpression:
     case Expression::KindOfUnaryOpExpression:
       isLoad = false;
-      return testAccesses(
-          spc(UnaryOpExpression,e)->getExpression(), rv, forLval);
-    case Expression::KindOfBinaryOpExpression:
-      isLoad = false;
-      return testAccesses(
-          spc(BinaryOpExpression,e)->getExp1(), rv, forLval);
-    case Expression::KindOfAssignmentExpression:
-      isLoad = false;
-      return testAccesses(
-          spc(AssignmentExpression,e)->getVariable(), rv, forLval);
+      return testAccesses(e->getStoreVariable(), rv, forLval);
 
     default:
       not_reached();
@@ -883,11 +879,9 @@ int AliasManager::checkAnyInterf(ExpressionPtr e1, ExpressionPtr e2,
       return DisjointAccess;
     }
     case Expression::KindOfAssignmentExpression:
-      e1 = spc(AssignmentExpression, e1)->getVariable();
-      break;
-    case Expression::KindOfUnaryOpExpression:
     case Expression::KindOfBinaryOpExpression:
-      e1 = e1->getNthExpr(0);
+    case Expression::KindOfUnaryOpExpression:
+      e1 = e1->getStoreVariable();
       if (!e1 || !e1->hasContext(Expression::OprLValue)) return DisjointAccess;
       break;
     default:
@@ -1065,14 +1059,10 @@ void AliasManager::setCanonPtrForArrayCSE(
     // need to switch on rep
     ExpressionPtr rep0;
     switch (rep->getKindOf()) {
-    case Expression::KindOfUnaryOpExpression:
-      rep0 = spc(UnaryOpExpression, rep)->getExpression();
-      break;
-    case Expression::KindOfBinaryOpExpression:
-      rep0 = spc(BinaryOpExpression, rep)->getExp1();
-      break;
     case Expression::KindOfAssignmentExpression:
-      rep0 = spc(AssignmentExpression, rep)->getVariable();
+    case Expression::KindOfBinaryOpExpression:
+    case Expression::KindOfUnaryOpExpression:
+      rep0 = rep->getStoreVariable();
       break;
     case Expression::KindOfListAssignment:
       // TODO: IMPLEMENT
@@ -1152,11 +1142,12 @@ ExpressionPtr AliasManager::canonicalizeNode(
     return ExpressionPtr();
   }
 
+  ExpressionPtr var;
   switch (e->getKindOf()) {
-    case Expression::KindOfAssignmentExpression:
+    case Expression::KindOfAssignmentExpression: {
     case Expression::KindOfBinaryOpExpression:
-    case Expression::KindOfUnaryOpExpression: {
-      ExpressionPtr var = e->getNthExpr(0);
+    case Expression::KindOfUnaryOpExpression:
+      ExpressionPtr var = e->getStoreVariable();
       if (var && var->getContext() & (Expression::AssignmentLHS|
                                       Expression::OprLValue)) {
         processAccessChain(var);
@@ -1383,7 +1374,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                               value = value->replaceValue(
                                 canonicalizeRecurNonNull(
                                   value->makeConstant(m_arp, "null")));
-                              a->setNthKid(1, value);
+                              a->setValue(value);
                               a->recomputeEffects();
                               setChanged();
                             } else {
@@ -1394,7 +1385,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                               a = spc(AssignmentExpression, a->clone());
                               el->addElement(a);
                               el->addElement(a->getValue());
-                              a->setNthKid(1, value->makeConstant(m_arp, "null"));
+                              a->setValue(value->makeConstant(m_arp, "null"));
                               rep->setReplacement(el);
                               m_replaced++;
                             }
@@ -1567,8 +1558,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                    Expression::UnsetContext))) {
               rep = ae->clone();
               ae->setContext(Expression::DeadStore);
-              ae->setNthKid(1, ae->makeConstant(m_arp, "null"));
-              ae->setNthKid(0, ae->makeConstant(m_arp, "null"));
+              ae->setValue(ae->makeConstant(m_arp, "null"));
+              ae->setVariable(ae->makeConstant(m_arp, "null"));
               e->recomputeEffects();
               m_replaced++;
               return e->replaceValue(canonicalizeRecurNonNull(rep));
@@ -1703,13 +1694,9 @@ ExpressionPtr AliasManager::canonicalizeNode(
             if (interf == SameAccess) {
               switch (alt->getKindOf()) {
                 case Expression::KindOfAssignmentExpression:
-                  alt = spc(AssignmentExpression,alt)->getVariable();
-                  break;
                 case Expression::KindOfBinaryOpExpression:
-                  alt = spc(BinaryOpExpression,alt)->getExp1();
-                  break;
                 case Expression::KindOfUnaryOpExpression:
-                  alt = spc(UnaryOpExpression,alt)->getExpression();
+                  alt = alt->getStoreVariable();
                   break;
                 default:
                   break;
@@ -1750,6 +1737,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
 }
 
 void AliasManager::canonicalizeKid(ConstructPtr c, ExpressionPtr kid, int i) {
+  assert(c->getNthKid(i) == kid);
+
   if (kid) {
     StatementPtr sp(dpc(Statement, c));
     if (sp) beginInExpression(sp, kid);
@@ -1769,6 +1758,8 @@ void AliasManager::canonicalizeKid(ConstructPtr c, ExpressionPtr kid, int i) {
 }
 
 int AliasManager::canonicalizeKid(ConstructPtr c, ConstructPtr kid, int i) {
+  assert(c->getNthKid(i) == kid);
+
   int ret = FallThrough;
   if (kid) {
     ExpressionPtr e = dpc(Expression, kid);
@@ -1802,30 +1793,29 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
   bool setInCall = true;
 
   switch (e->getKindOf()) {
-    case Expression::KindOfQOpExpression:
-      canonicalizeKid(e, e->getNthExpr(0), 0);
+    case Expression::KindOfQOpExpression: {
+      QOpExpressionPtr qe(spc(QOpExpression, e));
+      canonicalizeKid(e, qe->getCondition(), 0);
       beginScope();
-      if (ExpressionPtr e1 = e->getNthExpr(1)) {
+      if (ExpressionPtr e1 = qe->getYes()) {
         canonicalizeKid(e, e1, 1);
         resetScope();
       }
-      canonicalizeKid(e, e->getNthExpr(2), 2);
+      canonicalizeKid(e, qe->getNo(), 2);
       endScope();
       return canonicalizeNode(e);
-
-    case Expression::KindOfBinaryOpExpression:
-      {
-        BinaryOpExpressionPtr binop(spc(BinaryOpExpression, e));
-        if (binop->isShortCircuitOperator()) {
-          canonicalizeKid(e, e->getNthExpr(0), 0);
-          beginScope();
-          canonicalizeKid(e, e->getNthExpr(1), 1);
-          endScope();
-          return canonicalizeNode(e);
-        }
+    }
+    case Expression::KindOfBinaryOpExpression: {
+      BinaryOpExpressionPtr binop(spc(BinaryOpExpression, e));
+      if (binop->isShortCircuitOperator()) {
+        canonicalizeKid(e, binop->getExp1(), 0);
+        beginScope();
+        canonicalizeKid(e, binop->getExp2(), 1);
+        endScope();
+        return canonicalizeNode(e);
       }
       break;
-
+    }
     case Expression::KindOfExpressionList:
       delayVars = false;
       break;
@@ -1937,42 +1927,42 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
     // and fall through
     break;
 
-  case Statement::KindOfIfStatement:
-    {
-      StatementPtr iflist = spc(Statement, s->getNthKid(0));
-      if (iflist) {
-        for (int i = 0, n = iflist->getKidCount(); i < n; i++) {
-          StatementPtr ifstmt = spc(Statement, iflist->getNthKid(i));
-          ExpressionPtr cond = spc(Expression, ifstmt->getNthKid(0));
-          canonicalizeKid(ifstmt, cond, 0);
-          if (!i) beginScope();
-          beginScope();
-          canonicalizeKid(ifstmt, ifstmt->getNthKid(1), 1);
-          endScope();
-          if (i+1 < n) resetScope();
-        }
+  case Statement::KindOfIfStatement: {
+    IfStatementPtr is = spc(IfStatement, s);
+    StatementListPtr iflist = is->getIfBranches();
+    if (iflist) {
+      for (int i = 0, n = iflist->getKidCount(); i < n; i++) {
+        IfBranchStatementPtr ifstmt = spc(IfBranchStatement, (*iflist)[i]);
+        canonicalizeKid(ifstmt, ifstmt->getCondition(), 0);
+        if (!i) beginScope();
+        beginScope();
+        canonicalizeKid(ifstmt, ifstmt->getStmt(), 1);
         endScope();
+        if (i+1 < n) resetScope();
       }
-      ret = FallThrough;
-      start = nkid;
+      endScope();
     }
+    ret = FallThrough;
+    start = nkid;
     break;
+  }
 
   case Statement::KindOfIfBranchStatement:
     always_assert(0);
     break;
 
-  case Statement::KindOfForStatement:
-    canonicalizeKid(s, spc(Expression,s->getNthKid(0)), 0);
+  case Statement::KindOfForStatement: {
+    ForStatementPtr fs(spc(ForStatement, s));
+    canonicalizeKid(s, fs->getInitExp(), 0);
     clear();
-    canonicalizeKid(s, spc(Expression,s->getNthKid(1)), 1);
-    canonicalizeKid(s, s->getNthKid(2), 2);
+    canonicalizeKid(s, fs->getCondExp(), 1);
+    canonicalizeKid(s, fs->getBody(), 2);
     clear();
-    canonicalizeKid(s, spc(Expression,s->getNthKid(3)), 3);
+    canonicalizeKid(s, fs->getIncExp(), 3);
     ret = Converge;
     start = nkid;
     break;
-
+  }
   case Statement::KindOfWhileStatement:
   case Statement::KindOfDoStatement:
   case Statement::KindOfForEachStatement:
@@ -1980,27 +1970,27 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
     ret = Converge;
     break;
 
-  case Statement::KindOfSwitchStatement:
-    canonicalizeKid(s, spc(Expression,s->getNthKid(0)), 0);
+  case Statement::KindOfSwitchStatement: {
+    SwitchStatementPtr ss(spc(SwitchStatement, s));
+    canonicalizeKid(s, ss->getExp(), 0);
     clear();
     start = 1;
     ret = Converge;
     break;
-
+  }
   case Statement::KindOfCaseStatement:
   case Statement::KindOfLabelStatement:
     clear();
     break;
 
-  case Statement::KindOfReturnStatement:
-  {
-    canonicalizeKid(s, spc(Expression,s->getNthKid(0)), 0);
+  case Statement::KindOfReturnStatement: {
+    ReturnStatementPtr rs(spc(ReturnStatement, s));
+    canonicalizeKid(s, rs->getRetExp(), 0);
     killLocals();
     ret = FallThrough;
     start = nkid;
     break;
   }
-
   case Statement::KindOfBreakStatement:
   case Statement::KindOfContinueStatement:
   case Statement::KindOfGotoStatement:
@@ -2126,7 +2116,10 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       case Statement::KindOfGlobalStatement:
       case Statement::KindOfStaticStatement:
       {
-        ExpressionListPtr vars = dpc(ExpressionList, s->getNthKid(0));
+        ExpressionListPtr vars = (skind == Statement::KindOfGlobalStatement)
+          ? spc(GlobalStatement, s)->getVars()
+          : spc(StaticStatement, s)->getVars();
+
         for (int i = 0, n = vars->getCount(); i < n; i++) {
           ExpressionPtr e = (*vars)[i];
           if (AssignmentExpressionPtr ae = dpc(AssignmentExpression, e)) {
@@ -2182,14 +2175,13 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         }
         break;
       case Statement::KindOfForEachStatement: {
-        SimpleVariablePtr name =
-          dpc(SimpleVariable, s->getNthKid(ForEachStatement::NameExpr));
+        ForEachStatementPtr fs(static_pointer_cast<ForEachStatement>(s));
+        SimpleVariablePtr name = dpc(SimpleVariable, fs->getNameExp());
         if (name) {
           Symbol *sym = name->getSymbol();
           sym->setNeeded();
         }
-        SimpleVariablePtr value =
-          dpc(SimpleVariable, s->getNthKid(ForEachStatement::ValueExpr));
+        SimpleVariablePtr value = dpc(SimpleVariable, fs->getValueExp());
         if (value) {
           Symbol *sym = value->getSymbol();
           sym->setNeeded();
@@ -2403,14 +2395,14 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         }
         break;
       }
-
-      case Expression::KindOfQOpExpression:
+      case Expression::KindOfQOpExpression: {
+        QOpExpressionPtr q(spc(QOpExpression, e));
         if (unused) {
-          if (ExpressionPtr t1 = e->getNthExpr(1)) t1->setUnused(true);
-          e->getNthExpr(2)->setUnused(true);
+          if (ExpressionPtr t1 = q->getYes()) t1->setUnused(true);
+          q->getNo()->setUnused(true);
         }
         break;
-
+      }
       default:
         break;
     }
@@ -2969,8 +2961,9 @@ private:
     if (!e) return ExpressionPtr();
     if (FunctionWalker::SkipRecurse(e)) return ExpressionPtr();
 
-    int loopCondIdx = -1, loopBodyIdx = -1;
-    std::vector<int> needed;
+    ExpressionPtr loopCond;
+    StatementPtr loopBody;
+    std::vector<ExpressionPtr> needed;
     switch (e->getKindOf()) {
     case Statement::KindOfIfStatement:
       {
@@ -3042,46 +3035,45 @@ private:
         }
       }
       return ExpressionPtr();
-    case Statement::KindOfForStatement:
-      loopCondIdx = ForStatement::CondExpr;
-      loopBodyIdx = ForStatement::BodyStmt;
-      needed.push_back(ForStatement::InitExpr);
-      needed.push_back(ForStatement::IncExpr);
+    case Statement::KindOfForStatement: {
+      ForStatementPtr fs(static_pointer_cast<ForStatement>(e));
+      loopCond = fs->getCondExp();
+      loopBody = fs->getBody();
+      needed.push_back(fs->getInitExp());
+      needed.push_back(fs->getIncExp());
       goto loop_stmt;
-    case Statement::KindOfWhileStatement:
-      loopCondIdx = WhileStatement::CondExpr;
-      loopBodyIdx = WhileStatement::BodyStmt;
+    }
+    case Statement::KindOfWhileStatement: {
+      WhileStatementPtr ws(static_pointer_cast<WhileStatement>(e));
+      loopCond = ws->getCondExp();
+      loopBody = ws->getBody();
       goto loop_stmt;
-    case Statement::KindOfDoStatement:
-      loopCondIdx = DoStatement::CondExpr;
-      loopBodyIdx = DoStatement::BodyStmt;
+    }
+    case Statement::KindOfDoStatement: {
+      DoStatementPtr ds(static_pointer_cast<DoStatement>(e));
+      loopCond = ds->getCondExp();
+      loopBody = ds->getBody();
+    }
 
 loop_stmt:
       {
-        assert(loopCondIdx >= 0);
-        assert(loopBodyIdx >= 0);
-        if (e->getNthKid(loopCondIdx)) {
+        if (loopCond) {
           bool passStmt;
           bool negate;
-          ExpressionPtr after(createTypeAssertions(
-              spc(Expression, e->getNthKid(loopCondIdx)), passStmt, negate));
+          ExpressionPtr after(createTypeAssertions(loopCond, passStmt, negate));
           if (after && !negate) {
-            insertTypeAssertion(
-                after, dpc(Statement, e->getNthKid(loopBodyIdx)));
+            insertTypeAssertion(after, loopBody);
           }
         }
-        for (std::vector<int>::const_iterator it = needed.begin();
-             it != needed.end();
-             ++it) {
-          ExpressionPtr k(dpc(Expression, e->getNthKid(*it)));
+        for (auto it = needed.begin(); it != needed.end(); ++it) {
+          ExpressionPtr k(dpc(Expression, *it));
           if (k) {
             bool passStmt;
             bool negate;
             createTypeAssertions(k, passStmt, negate);
           }
         }
-        ConstructPtr body(e->getNthKid(loopBodyIdx));
-        createTypeAssertions(dpc(Statement, body));
+        createTypeAssertions(loopBody);
       }
       return ExpressionPtr();
     case Statement::KindOfStatementList:
@@ -3906,7 +3898,8 @@ void AliasManager::invalidateChainRoots(StatementPtr s) {
       // otherwise we'd have to declare all CSE temps like:
       //   declare_temps;
       //   do { ... } while (cond);
-      disableCSE(s->getNthStmt(DoStatement::BodyStmt));
+      DoStatementPtr ds(static_pointer_cast<DoStatement>(s));
+      disableCSE(ds->getBody());
     }
     // fall through
   default:
@@ -3917,47 +3910,56 @@ void AliasManager::invalidateChainRoots(StatementPtr s) {
   }
 }
 
-void AliasManager::nullSafeDisableCSE(StatementPtr parent, int kid) {
+void AliasManager::nullSafeDisableCSE(StatementPtr parent, ExpressionPtr kid) {
   assert(parent);
-  ConstructPtr c(parent->getNthKid(kid));
-  if (!c) return;
-  ExpressionPtr e(dpc(Expression, c));
-  assert(e);
-  e->disableCSE();
+  if (!kid) return;
+  kid->disableCSE();
 }
 
 void AliasManager::disableCSE(StatementPtr s) {
   if (!s) return;
   switch (s->getKindOf()) {
-  case Statement::KindOfIfBranchStatement:
-    nullSafeDisableCSE(s, 0);
+  case Statement::KindOfIfBranchStatement: {
+    IfBranchStatementPtr is(static_pointer_cast<IfBranchStatement>(s));
+    nullSafeDisableCSE(s, is->getCondition());
     break;
-  case Statement::KindOfSwitchStatement:
-    nullSafeDisableCSE(s, 0);
+  }
+  case Statement::KindOfSwitchStatement: {
+    SwitchStatementPtr ss(static_pointer_cast<SwitchStatement>(s));
+    nullSafeDisableCSE(s, ss->getExp());
     break;
-  case Statement::KindOfForStatement:
-    nullSafeDisableCSE(s, ForStatement::InitExpr);
-    nullSafeDisableCSE(s, ForStatement::CondExpr);
-    nullSafeDisableCSE(s, ForStatement::IncExpr);
+  }
+  case Statement::KindOfForStatement: {
+    ForStatementPtr fs(static_pointer_cast<ForStatement>(s));
+    nullSafeDisableCSE(s, fs->getInitExp());
+    nullSafeDisableCSE(s, fs->getCondExp());
+    nullSafeDisableCSE(s, fs->getIncExp());
     break;
-  case Statement::KindOfForEachStatement:
-    nullSafeDisableCSE(s, ForEachStatement::ArrayExpr);
-    nullSafeDisableCSE(s, ForEachStatement::NameExpr);
-    nullSafeDisableCSE(s, ForEachStatement::ValueExpr);
+  }
+  case Statement::KindOfForEachStatement: {
+    ForEachStatementPtr fs(static_pointer_cast<ForEachStatement>(s));
+    nullSafeDisableCSE(s, fs->getArrayExp());
+    nullSafeDisableCSE(s, fs->getNameExp());
+    nullSafeDisableCSE(s, fs->getValueExp());
     break;
-  case Statement::KindOfWhileStatement:
-    nullSafeDisableCSE(s, WhileStatement::CondExpr);
+  }
+  case Statement::KindOfWhileStatement: {
+    WhileStatementPtr ws(static_pointer_cast<WhileStatement>(s));
+    nullSafeDisableCSE(s, ws->getCondExp());
     break;
-  case Statement::KindOfDoStatement:
-    nullSafeDisableCSE(s, DoStatement::CondExpr);
+  }
+  case Statement::KindOfDoStatement: {
+    DoStatementPtr ds(static_pointer_cast<DoStatement>(s));
+    nullSafeDisableCSE(s, ds->getCondExp());
     break;
+  }
   default:
     for (int i = s->getKidCount(); i--; ) {
       ConstructPtr c(s->getNthKid(i));
       if (StatementPtr skid = dpc(Statement, c)) {
         disableCSE(skid);
       } else {
-        nullSafeDisableCSE(s, i);
+        nullSafeDisableCSE(s, dpc(Expression, c));
       }
     }
     break;
@@ -4101,38 +4103,42 @@ void AliasManager::stringOptsRecur(StatementPtr s) {
     }
     break;
 
-  case Statement::KindOfForStatement:
-    stringOptsRecur(spc(Expression,s->getNthKid(0)), true);
+  case Statement::KindOfForStatement: {
+    ForStatementPtr fs = spc(ForStatement, s);
+    stringOptsRecur(fs->getInitExp(), true);
     pushStringScope(s);
-    stringOptsRecur(spc(Expression,s->getNthKid(1)), false);
-    stringOptsRecur(spc(Statement, s->getNthKid(2)));
-    stringOptsRecur(spc(Expression,s->getNthKid(3)), true);
+    stringOptsRecur(fs->getCondExp(), false);
+    stringOptsRecur(fs->getBody());
+    stringOptsRecur(fs->getIncExp(), true);
     popStringScope(s);
     return;
-
-  case Statement::KindOfWhileStatement:
+  }
+  case Statement::KindOfWhileStatement: {
+    WhileStatementPtr ws = spc(WhileStatement, s);
     pushStringScope(s);
-    stringOptsRecur(spc(Expression,s->getNthKid(0)), false);
-    stringOptsRecur(spc(Statement, s->getNthKid(1)));
+    stringOptsRecur(ws->getCondExp(), false);
+    stringOptsRecur(ws->getBody());
     popStringScope(s);
     return;
-
-  case Statement::KindOfDoStatement:
+  }
+  case Statement::KindOfDoStatement: {
+    DoStatementPtr ds = spc(DoStatement, s);
     pushStringScope(s);
-    stringOptsRecur(spc(Statement, s->getNthKid(0)));
-    stringOptsRecur(spc(Expression,s->getNthKid(1)), false);
+    stringOptsRecur(ds->getBody());
+    stringOptsRecur(ds->getCondExp(), false);
     popStringScope(s);
     return;
-
-  case Statement::KindOfForEachStatement:
-    stringOptsRecur(spc(Expression,s->getNthKid(0)), false);
-    stringOptsRecur(spc(Expression,s->getNthKid(1)), false);
-    stringOptsRecur(spc(Expression,s->getNthKid(2)), false);
+  }
+  case Statement::KindOfForEachStatement: {
+    ForEachStatementPtr fs = spc(ForEachStatement, s);
+    stringOptsRecur(fs->getArrayExp(), false);
+    stringOptsRecur(fs->getNameExp(), false);
+    stringOptsRecur(fs->getValueExp(), false);
     pushStringScope(s);
-    stringOptsRecur(spc(Statement, s->getNthKid(3)));
+    stringOptsRecur(fs->getBody());
     popStringScope(s);
     return;
-
+  }
   case Statement::KindOfExpStatement:
     stringOptsRecur(spc(ExpStatement,s)->getExpression(), true);
     return;

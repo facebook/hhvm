@@ -313,7 +313,7 @@ void ExprDict::updateAccess(ExpressionPtr e) {
             BitOps::set_bit(aid, m_altered, true);
           }
           if (!(cls & Expression::Store) ||
-              a != e->getNthExpr(0)) {
+              a != e->getStoreVariable()) {
             a->clearAvailable();
             m_avlAccess[i] = m_avlAccess[--n];
             m_avlAccess.resize(n);

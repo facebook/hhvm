@@ -42,9 +42,11 @@ using namespace HPHP;
 
 AssignmentExpression::AssignmentExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- ExpressionPtr variable, ExpressionPtr value, bool ref)
+ ExpressionPtr variable, ExpressionPtr value, bool ref,
+ bool rhsFirst /* = false */)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(AssignmentExpression)),
-    m_variable(variable), m_value(value), m_ref(ref) {
+    m_variable(variable), m_value(value), m_ref(ref), m_rhsFirst(rhsFirst) {
+  assert(!m_ref || !m_rhsFirst);
   m_variable->setContext(Expression::DeepAssignmentLHS);
   m_variable->setContext(Expression::AssignmentLHS);
   m_variable->setContext(Expression::LValue);
@@ -135,7 +137,7 @@ void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 ConstructPtr AssignmentExpression::getNthKid(int n) const {
-  switch (n) {
+  switch (m_rhsFirst ? 1 - n : n) {
     case 0:
       return m_variable;
     case 1:
@@ -152,7 +154,7 @@ int AssignmentExpression::getKidCount() const {
 }
 
 void AssignmentExpression::setNthKid(int n, ConstructPtr cp) {
-  switch (n) {
+  switch (m_rhsFirst ? 1 - n : n) {
     case 0:
       m_variable = boost::dynamic_pointer_cast<Expression>(cp);
       break;

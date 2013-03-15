@@ -29,7 +29,7 @@ class AssignmentExpression : public Expression, public IParseHandler {
 public:
   AssignmentExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                        ExpressionPtr variable, ExpressionPtr value,
-                       bool ref);
+                       bool ref, bool rhsFirst = false);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
@@ -49,6 +49,7 @@ public:
   ExpressionPtr getValue() { return m_value;}
   void setVariable(ExpressionPtr v) { m_variable = v; }
   void setValue(ExpressionPtr v) { m_value = v; }
+  bool isRhsFirst() { return m_rhsFirst; }
   int getLocalEffects() const;
 
   // $GLOBALS[<literal-string>] = <scalar>;
@@ -59,6 +60,7 @@ private:
   ExpressionPtr m_variable;
   ExpressionPtr m_value;
   bool m_ref;
+  bool m_rhsFirst;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

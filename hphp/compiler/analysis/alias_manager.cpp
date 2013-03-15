@@ -1841,6 +1841,7 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
 
   int n = e->getKidCount();
   if (n < 2) delayVars = false;
+  if (e->is(Expression::KindOfAssignmentExpression)) delayVars = false;
 
   m_inCall += inCall;
   for (int j = delayVars ? 0 : 1; j < 2; j++) {

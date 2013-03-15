@@ -35,7 +35,8 @@ public:
     Null
   };
   ListAssignment(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                 ExpressionListPtr variables, ExpressionPtr array);
+                 ExpressionListPtr variables, ExpressionPtr array,
+                 bool rhsFirst = false);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
@@ -43,10 +44,12 @@ public:
 
   ExpressionListPtr getVariables() const { return m_variables; }
   ExpressionPtr getArray() const { return m_array; }
+  bool isRhsFirst() { return m_rhsFirst; }
 private:
   ExpressionListPtr m_variables;
   ExpressionPtr m_array;
   RHSKind m_rhsKind;
+  bool m_rhsFirst;
 
   void setLValue();
 };

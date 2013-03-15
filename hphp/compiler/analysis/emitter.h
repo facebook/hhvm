@@ -582,6 +582,8 @@ public:
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
   void emitResolveClsBase(Emitter& e, int pos);
   void emitClsIfSPropBase(Emitter& e);
+  Id emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp);
+  void emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
   Label* getContinuationGotoLabel(StatementPtr s);
   void emitContinuationSwitch(Emitter& e, SwitchStatementPtr s);
   DataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);

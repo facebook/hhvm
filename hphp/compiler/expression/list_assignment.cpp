@@ -147,9 +147,10 @@ static bool AssignmentCouldSet(ExpressionListPtr vars, ExpressionPtr var) {
 
 ListAssignment::ListAssignment
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- ExpressionListPtr variables, ExpressionPtr array)
+ ExpressionListPtr variables, ExpressionPtr array, bool rhsFirst /* = false */)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ListAssignment)),
-    m_variables(variables), m_array(array), m_rhsKind(Regular) {
+    m_variables(variables), m_array(array), m_rhsKind(Regular),
+    m_rhsFirst(rhsFirst) {
   setLValue();
 
   if (m_array) {
@@ -217,7 +218,7 @@ void ListAssignment::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 ConstructPtr ListAssignment::getNthKid(int n) const {
-  switch (n) {
+  switch (m_rhsFirst ? 1 - n : n) {
     case 0:
       return m_variables;
     case 1:
@@ -234,7 +235,7 @@ int ListAssignment::getKidCount() const {
 }
 
 void ListAssignment::setNthKid(int n, ConstructPtr cp) {
-  switch (n) {
+  switch (m_rhsFirst ? 1 - n : n) {
     case 0:
       m_variables = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;

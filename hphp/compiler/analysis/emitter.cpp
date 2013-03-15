@@ -2742,11 +2742,26 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Expression::KindOfAssignmentExpression: {
         AssignmentExpressionPtr ae(
           static_pointer_cast<AssignmentExpression>(node));
+        ExpressionPtr rhs = ae->getValue();
+        Id tempLocal = -1;
+        Offset start = InvalidAbsoluteOffset;
+
+        if (ae->isRhsFirst()) {
+          assert(!rhs->hasContext(Expression::RefValue));
+          tempLocal = emitVisitAndSetUnnamedL(e, rhs);
+          start = m_ue.bcPos();
+        }
 
         visit(ae->getVariable());
         emitClsIfSPropBase(e);
-        visit(ae->getValue());
-        if (ae->getValue()->hasContext(Expression::RefValue)) {
+
+        if (ae->isRhsFirst()) {
+          emitPushAndFreeUnnamedL(e, tempLocal, start);
+        } else {
+          visit(rhs);
+        }
+
+        if (rhs->hasContext(Expression::RefValue)) {
           emitConvertToVar(e);
           emitBind(e);
           if (ae->hasAnyContext(Expression::AccessContext|
@@ -3259,9 +3274,19 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         ListAssignmentPtr la(static_pointer_cast<ListAssignment>(node));
         ExpressionPtr rhs = la->getArray();
 
-        if (!rhs) {
-          // visitListAssignmentLHS should have handled this
-          assert(false);
+        // visitListAssignmentLHS should have handled this
+        assert(rhs);
+
+        bool nullRHS = la->getRHSKind() == ListAssignment::Null;
+        // Assign RHS to temp local, unless it's already a simple variable
+        bool simpleRHS = rhs->is(Expression::KindOfSimpleVariable)
+          && !static_pointer_cast<SimpleVariable>(rhs)->getAlwaysStash();
+        Id tempLocal = -1;
+        Offset start = InvalidAbsoluteOffset;
+
+        if (!simpleRHS && la->isRhsFirst()) {
+          tempLocal = emitVisitAndSetUnnamedL(e, rhs);
+          start = m_ue.bcPos();
         }
 
         // We use "index chains" to deal with nested list assignment.  We will
@@ -3271,19 +3296,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         IndexChain workingChain;
         visitListAssignmentLHS(e, la, workingChain, indexChains);
 
-        bool nullRHS = la->getRHSKind() == ListAssignment::Null;
-        // Assign RHS to temp local, unless it's already a simple variable
-        bool simpleRHS = rhs->is(Expression::KindOfSimpleVariable)
-          && !static_pointer_cast<SimpleVariable>(rhs)->getAlwaysStash();
-        Id tempLocal = -1;
-        Offset start = InvalidAbsoluteOffset;
-        if (!simpleRHS) {
-          tempLocal = m_curFunc->allocUnnamedLocal();
-          emitVirtualLocal(tempLocal);
-          visit(rhs);
-          emitConvertToCell(e);
-          emitSet(e);
-          emitPop(e);
+        if (!simpleRHS && !la->isRhsFirst()) {
+          assert(tempLocal == -1);
+          assert(start == InvalidAbsoluteOffset);
+          tempLocal = emitVisitAndSetUnnamedL(e, rhs);
           start = m_ue.bcPos();
         }
 
@@ -3319,20 +3335,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         if (simpleRHS) {
           visit(rhs);
         } else {
-          emitVirtualLocal(tempLocal);
-          emitCGet(e);
+          emitPushAndFreeUnnamedL(e, tempLocal, start);
         }
 
-        // Null out and free unnamed local
-        if (!simpleRHS) {
-          assert(tempLocal >= 0);
-          assert(start != InvalidAbsoluteOffset);
-          newFaultRegion(start, m_ue.bcPos(),
-                         new UnsetUnnamedLocalThunklet(tempLocal));
-          emitVirtualLocal(tempLocal);
-          emitUnset(e);
-          m_curFunc->freeUnnamedLocal(tempLocal);
-        }
         return true;
       }
 
@@ -4149,6 +4154,27 @@ void EmitterVisitor::emitVGet(Emitter& e) {
     buildVectorImm(vectorImm, i, iLast, true, e);
     e.VGetM(vectorImm);
   }
+}
+
+Id EmitterVisitor::emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp) {
+  Id tempLocal = m_curFunc->allocUnnamedLocal();
+  emitVirtualLocal(tempLocal);
+  visit(exp);
+  emitConvertToCell(e);
+  emitSet(e);
+  emitPop(e);
+  return tempLocal;
+}
+
+void EmitterVisitor::emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start) {
+  assert(tempLocal >= 0);
+  assert(start != InvalidAbsoluteOffset);
+  emitVirtualLocal(tempLocal);
+  emitCGet(e);
+  newFaultRegion(start, m_ue.bcPos(), new UnsetUnnamedLocalThunklet(tempLocal));
+  emitVirtualLocal(tempLocal);
+  emitUnset(e);
+  m_curFunc->freeUnnamedLocal(tempLocal);
 }
 
 EmitterVisitor::PassByRefKind EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {

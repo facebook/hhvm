@@ -533,6 +533,7 @@ private:
   std::set<std::string,stdltistr> m_hoistables;
   LocationPtr m_tempLoc;
   std::map<StringData*, Label, string_data_lt> m_gotoLabels;
+  std::vector<Label> m_yieldLabels;
   MetaInfoBuilder m_metaInfo;
 public:
   Label& topBreakHandler() { return m_controlTargets.front().m_brkHand; }
@@ -584,8 +585,7 @@ public:
   void emitClsIfSPropBase(Emitter& e);
   Id emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp);
   void emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
-  Label* getContinuationGotoLabel(StatementPtr s);
-  void emitContinuationSwitch(Emitter& e, SwitchStatementPtr s);
+  void emitContinuationSwitch(Emitter& e, int ncase);
   DataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);
   void emitIntegerSwitch(Emitter& e, SwitchStatementPtr s,
                          std::vector<Label>& caseLabels, Label& done,

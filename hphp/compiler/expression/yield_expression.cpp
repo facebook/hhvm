@@ -24,9 +24,9 @@ using namespace HPHP;
 
 YieldExpression::YieldExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- ExpressionPtr exp, int label)
+ ExpressionPtr exp)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(YieldExpression)),
-    m_exp(exp), m_label(label) {
+    m_exp(exp), m_label(-1) {
 }
 
 ExpressionPtr YieldExpression::clone() {
@@ -47,6 +47,9 @@ ExpressionPtr YieldExpression::clone() {
 void YieldExpression::analyzeProgram(AnalysisResultPtr ar) {
   assert(getFunctionScope() && getFunctionScope()->isGenerator());
   m_exp->analyzeProgram(ar);
+  if (m_label == -1) {
+    setLabel(getFunctionScope()->allocYieldLabel());
+  }
 }
 
 ConstructPtr YieldExpression::getNthKid(int n) const {

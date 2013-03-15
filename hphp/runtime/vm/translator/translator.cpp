@@ -2913,10 +2913,7 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
 static bool checkTaintFuncs(StringData* name) {
   static const StringData* s_extract =
     StringData::GetStaticString("extract");
-  static const StringData* s_hphp_unpack_continuation =
-    StringData::GetStaticString("hphp_unpack_continuation");
-  return name->isame(s_extract) ||
-            name->isame(s_hphp_unpack_continuation);
+  return name->isame(s_extract);
 }
 
 /*

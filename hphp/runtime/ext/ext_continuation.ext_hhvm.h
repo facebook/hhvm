@@ -30,15 +30,6 @@ args => r8
 
 Value* fh_hphp_create_continuation(Value* _rv, Value* clsname, Value* funcname, Value* origFuncName, Value* args) asm("_ZN4HPHP26f_hphp_create_continuationERKNS_6StringES2_S2_RKNS_5ArrayE");
 
-/*
-void HPHP::f_hphp_unpack_continuation(HPHP::Object const&)
-_ZN4HPHP26f_hphp_unpack_continuationERKNS_6ObjectE
-
-continuation => rdi
-*/
-
-void fh_hphp_unpack_continuation(Value* continuation) asm("_ZN4HPHP26f_hphp_unpack_continuationERKNS_6ObjectE");
-
 
 } // !HPHP
 

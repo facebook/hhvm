@@ -109,8 +109,7 @@
 
 using namespace HPHP::Compiler;
 
-extern void prepare_generator(Parser *_p, Token &stmt, Token &params,
-                              int count);
+extern void prepare_generator(Parser *_p, Token &stmt, Token &params);
 extern void create_generator(Parser *_p, Token &out, Token &params,
                              Token &name, const std::string &closureName,
                              const char *clsname, Token *modifiers,
@@ -828,7 +827,7 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
       ContinuationFromClosure : Continuation;
     const string &closureName = getAnonFuncName(fKind);
     Token new_params;
-    prepare_generator(this, stmt, new_params, funcContext.numYields);
+    prepare_generator(this, stmt, new_params);
 
     func = NEW_STMT(FunctionStatement, exp, ref->num(), closureName,
                     dynamic_pointer_cast<ExpressionList>(new_params->exp),
@@ -1130,7 +1129,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   if (funcContext.isGenerator) {
     const string &closureName = getAnonFuncName(ParserBase::Continuation);
     Token new_params;
-    prepare_generator(this, stmt, new_params, funcContext.numYields);
+    prepare_generator(this, stmt, new_params);
     ModifierExpressionPtr exp2 = Construct::Clone(exp);
     mth = NEW_STMT(MethodStatement, exp2, ref->num(), closureName,
                    dynamic_pointer_cast<ExpressionList>(new_params->exp),
@@ -1409,9 +1408,7 @@ void Parser::onYield(Token &out, Token &expr) {
     return;
   }
 
-  FunctionContext &funcContext = m_funcContexts.back();
-  int label = ++funcContext.numYields;
-  out->exp = NEW_EXP(YieldExpression, expr->exp, label);
+  out->exp = NEW_EXP(YieldExpression, expr->exp);
 }
 
 void Parser::onYieldBreak(Token &out) {

@@ -191,7 +191,6 @@ TypedValue* fg_get_object_vars(VM::ActRec *ar);
 TypedValue* fg_call_user_method_array(VM::ActRec *ar);
 TypedValue* fg_call_user_method(VM::ActRec *ar);
 TypedValue* fg_hphp_create_continuation(VM::ActRec *ar);
-TypedValue* fg_hphp_unpack_continuation(VM::ActRec *ar);
 TypedValue* fg_ctype_alnum(VM::ActRec *ar);
 TypedValue* fg_ctype_alpha(VM::ActRec *ar);
 TypedValue* fg_ctype_cntrl(VM::ActRec *ar);
@@ -3020,7 +3019,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2208;
+const long long hhbc_ext_funcs_count = 2207;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -3190,7 +3189,6 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "call_user_method_array", fg_call_user_method_array, (void *)&fh_call_user_method_array },
   { "call_user_method", fg_call_user_method, (void *)&fh_call_user_method },
   { "hphp_create_continuation", fg_hphp_create_continuation, (void *)&fh_hphp_create_continuation },
-  { "hphp_unpack_continuation", fg_hphp_unpack_continuation, (void *)&fh_hphp_unpack_continuation },
   { "ctype_alnum", fg_ctype_alnum, (void *)&fh_ctype_alnum },
   { "ctype_alpha", fg_ctype_alpha, (void *)&fh_ctype_alpha },
   { "ctype_cntrl", fg_ctype_cntrl, (void *)&fh_ctype_cntrl },

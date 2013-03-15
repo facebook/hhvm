@@ -249,7 +249,6 @@ private:
     FunctionContext()
       : isNotGenerator(false)
       , isGenerator(false)
-      , numYields(0)
     {}
 
     // mark this function as generator; returns true on success
@@ -270,7 +269,6 @@ private:
 
     bool isNotGenerator;  // function determined to not be a generator
     bool isGenerator;     // function determined to be a generator
-    int numYields;        // number of plain yield statements seen so far
  };
 
   AnalysisResultPtr m_ar;

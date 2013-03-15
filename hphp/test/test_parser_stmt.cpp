@@ -658,8 +658,7 @@ bool TestParserStmt::TestYieldStatement() {
 
   V("<?php function foo() { yield break;}",
     "function ($" CONTINUATION_OBJECT_NAME ") {\n"
-    "switch (hphp_unpack_continuation($" CONTINUATION_OBJECT_NAME ")) {\n"
-    "}\n"
+    "hphp_unpack_continuation();\n"
     "return;\n"
     "}\n"
     "function foo() {\n"
@@ -669,10 +668,7 @@ bool TestParserStmt::TestYieldStatement() {
 
   V("<?php function foo() { yield 123;}",
     "function ($" CONTINUATION_OBJECT_NAME ") {\n"
-    "switch (hphp_unpack_continuation($" CONTINUATION_OBJECT_NAME ")) {\n"
-    "case 1:\n"
-    "goto " YIELD_LABEL_PREFIX "1;\n"
-    "}\n"
+    "hphp_unpack_continuation();\n"
     "yield 123;\n"
     "}\n"
     "function foo() {\n"
@@ -687,13 +683,7 @@ bool TestParserStmt::TestYieldStatement() {
     "(__CLASS__, '3990978909_1', __METHOD__);\n"
     "}\n"
     "public function ($" CONTINUATION_OBJECT_NAME ") {\n"
-    "switch (hphp_unpack_continuation($" CONTINUATION_OBJECT_NAME ")) {\n"
-    "case 2:\n"
-    "goto " YIELD_LABEL_PREFIX "2;\n"
-    "\n"
-    "case 1:\n"
-    "goto " YIELD_LABEL_PREFIX "1;\n"
-    "}\n"
+    "hphp_unpack_continuation();\n"
     "yield 123;\n"
     "yield 456;\n"
     "}\n"

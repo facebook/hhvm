@@ -143,56 +143,21 @@ static void on_constant(Parser *_p, Token &out, Token *stmts,
 ///////////////////////////////////////////////////////////////////////////////
 // continuation transformations
 
-void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
+void prepare_generator(Parser *_p, Token &stmt, Token &params) {
   // 1. add prologue and epilogue to original body and store it back to "stmt"
   {
-    Token scall;
-    Token switchExp;
-    {
-      // hphp_unpack_continuation(v___cont__)
-      Token name;    name.setText(CONTINUATION_OBJECT_NAME);
-      Token var;     _p->onSynthesizedVariable(var, name);
-      Token param1;  _p->onCallParam(param1, NULL, var, false);
+    // hphp_unpack_continuation()
+    Token empty;
+    Token cname;   cname.setText("hphp_unpack_continuation");
+    Token unpack;  _p->onCall(unpack, false, cname, empty, NULL, true);
+    Token sunpack; _p->onExpStatement(sunpack, unpack);
 
-      Token cname;   cname.setText("hphp_unpack_continuation");
-      Token call;    _p->onCall(call, false, cname, param1, NULL, true);
+    Token stmts0;  _p->onStatementListStart(stmts0);
+    Token stmts1;  _p->addStatement(stmts1, stmts0, sunpack);
+    Token stmts2;  _p->addStatement(stmts2, stmts1, stmt);
 
-      switchExp = call;
-    }
-    Token sswitch;
-    {
-      _p->pushLabelScope();
-      {
-        Token cases;
-        for (int i = count; i > 0; i--) {
-          std::string si = boost::lexical_cast<std::string>(i);
-
-          Token label;   label.setText(YIELD_LABEL_PREFIX + si);
-          Token sgoto;   _p->onGoto(sgoto, label, false);
-                         _p->addGoto(label.text(), _p->getLocation(), &sgoto);
-
-          Token stmts0;  _p->onStatementListStart(stmts0);
-          Token stmts1;  _p->addStatement(stmts1, stmts0, sgoto);
-          Token stmts;   _p->finishStatement(stmts, stmts1); stmts = 1;
-
-          Token snum;    snum.setText(si);
-          Token num;     _p->onScalar(num, T_LNUMBER, snum);
-          Token scase;   _p->onCase(scase, cases, &num, stmts);
-          cases = scase;
-        }
-        _p->onSwitch(sswitch, switchExp, cases);
-      }
-      _p->popLabelScope();
-    }
-    {
-      Token stmts0;  _p->onStatementListStart(stmts0);
-      Token stmts1;  _p->addStatement(stmts1, stmts0, scall);
-      Token stmts2;  _p->addStatement(stmts2, stmts1, sswitch);
-      Token stmts3;  _p->addStatement(stmts3, stmts2, stmt);
-
-      stmt.reset();
-      _p->finishStatement(stmt, stmts3); stmt = 1;
-    }
+    stmt.reset();
+    _p->finishStatement(stmt, stmts2); stmt = 1;
   }
 
   // 2. prepare a single continuation parameter list and store it in "params"

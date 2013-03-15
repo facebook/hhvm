@@ -113,6 +113,8 @@ public:
   bool isClosure() const;
   bool isGenerator() const;
   bool isGeneratorFromClosure() const;
+  int allocYieldLabel() { return ++m_yieldLabelCount; }
+  int getYieldLabelCount() const { return m_yieldLabelCount; }
   bool hasGeneratorAsBody() const;
   MethodStatementRawPtr getOrigGenStmt() const;
   FunctionScopeRawPtr getOrigGenFS() const;
@@ -485,6 +487,7 @@ private:
   ExpressionListPtr m_closureValues;
   ReadWriteMutex m_inlineMutex;
   unsigned m_nextID; // used when cloning generators for traits
+  int m_yieldLabelCount; // number of allocated yield labels
   std::list<FunctionScopeRawPtr> m_clonedTraitOuterScope;
 };
 

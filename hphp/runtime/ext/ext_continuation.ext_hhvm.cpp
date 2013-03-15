@@ -95,56 +95,6 @@ TypedValue* fg_hphp_create_continuation(HPHP::VM::ActRec *ar) {
 
 
 
-/*
-void HPHP::f_hphp_unpack_continuation(HPHP::Object const&)
-_ZN4HPHP26f_hphp_unpack_continuationERKNS_6ObjectE
-
-continuation => rdi
-*/
-
-void fh_hphp_unpack_continuation(Value* continuation) asm("_ZN4HPHP26f_hphp_unpack_continuationERKNS_6ObjectE");
-
-TypedValue * fg1_hphp_unpack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_unpack_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
-  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_data.num = 0LL;
-  rv->m_type = KindOfNull;
-  tvCastToObjectInPlace(args-0);
-  fh_hphp_unpack_continuation((Value*)(args-0));
-  return rv;
-}
-
-TypedValue* fg_hphp_unpack_continuation(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if ((args-0)->m_type == KindOfObject) {
-        rv.m_data.num = 0LL;
-        rv.m_type = KindOfNull;
-        fh_hphp_unpack_continuation((Value*)(args-0));
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_hphp_unpack_continuation(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
-    } else {
-      throw_wrong_arguments_nr("hphp_unpack_continuation", count, 1, 1, 1);
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-
-
 HPHP::VM::Instance* new_Continuation_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_Continuation) - sizeof(ObjectData);

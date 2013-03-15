@@ -40,10 +40,6 @@ p_Continuation f_hphp_create_continuation(CStrRef clsname,
   return NULL;
 }
 
-void f_hphp_unpack_continuation(CObjRef continuation) {
-  throw_fatal("Invalid call hphp_unpack_continuation");
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static StaticString s___cont__("__cont__");

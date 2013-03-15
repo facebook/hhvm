@@ -77,21 +77,6 @@ DefineFunction(
     'taint_observer' => false,
   ));
 
-DefineFunction(
-  array(
-    'name'   => 'hphp_unpack_continuation',
-    'return' => array(
-      'type'   => null,
-    ),
-    'args'   => array(
-      array(
-        'name'   => 'continuation',
-        'type'   => Object,
-      ),
-    ),
-    'taint_observer' => false,
-  ));
-
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 //

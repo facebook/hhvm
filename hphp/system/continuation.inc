@@ -2,7 +2,6 @@
 
 #if EXT_TYPE == 0
 "hphp_create_continuation", S(999), "Continuation", S(0), "clsname", T(String), NULL, S(0), NULL, S(0), "funcname", T(String), NULL, S(0), NULL, S(0), "origFuncName", T(String), NULL, S(0), NULL, S(0), "args", T(Array), "N;", S(2), "null", S(0), NULL, S(16384), "/**\n * ( excerpt from\n * http://php.net/manual/en/function.hphp-create-continuation.php )\n *\n *\n * @clsname    string\n * @funcname   string\n * @origFuncName\n *             string\n * @args       map\n *\n * @return     Continuation\n *\n */", 
-"hphp_unpack_continuation", T(Void), S(0), "continuation", T(Object), NULL, S(0), NULL, S(0), NULL, S(16384), "/**\n * ( excerpt from\n * http://php.net/manual/en/function.hphp-unpack-continuation.php )\n *\n *\n * @continuation\n *             object\n */", 
 
 #elif EXT_TYPE == 1
 

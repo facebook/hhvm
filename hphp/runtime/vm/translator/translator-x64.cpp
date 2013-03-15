@@ -2315,7 +2315,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
       //   rVmFp[loopReg].m_type = KindOfUninit;
       // } while(++loopReg != loopEnd);
 
-      a.  storel (edx, rVmFp[loopReg]);
+      emitStoreTVType(a, edx, rVmFp[loopReg]);
       a.  addq   (sizeof(Cell), loopReg);
       a.  cmpq   (loopEnd, loopReg);
       a.  jcc8   (CC_NE, topOfLoop);
@@ -11569,7 +11569,7 @@ asm_label(a, doRelease);
     Label skipDecRef;
 
     emitLoadTVType(a, rIter[TVOFF(m_type)], rType);
-    a.  cmpl   (KindOfRefCountThreshold, rType);
+    emitCmpTVType(a, KindOfRefCountThreshold, rType);
     a.  jle8   (skipDecRef);
     a.  call   (release);
     recordIndirectFixup(a.code.frontier, 0);

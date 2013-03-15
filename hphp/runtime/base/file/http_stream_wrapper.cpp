@@ -53,9 +53,9 @@ File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
         Array parts = StringUtil::Explode(it.second().toString(), ": ");
         headers.set(parts.rvalAt(0), parts.rvalAt(1));
       }
-      if (opts.exists("user_agent") && !headers.exists("User-Agent")) {
-        headers.set("User_Agent", opts["user_agent"]);
-      }
+    }
+    if (opts.exists("user_agent") && !headers.exists("User-Agent")) {
+      headers.set("User-Agent", opts["user_agent"]);
     }
     int max_redirs = 20;
     if (opts.exists("max_redirects")) max_redirs = opts["max_redirects"];

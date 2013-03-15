@@ -248,7 +248,6 @@ private:
       : isNotGenerator(false)
       , isGenerator(false)
       , numYields(0)
-      , numForeaches(0)
     {}
 
     // mark this function as generator; returns true on success
@@ -265,14 +264,11 @@ private:
 
     void checkFinalAssertions() {
       assert(!isGenerator || !isNotGenerator);
-      assert(foreachHasYield.empty());
     }
 
     bool isNotGenerator;  // function determined to not be a generator
     bool isGenerator;     // function determined to be a generator
     int numYields;        // number of plain yield statements seen so far
-    int numForeaches;     // number of foreach statements seen so far
-    std::vector<bool> foreachHasYield;  // whether open foreach has yield
  };
 
   AnalysisResultPtr m_ar;

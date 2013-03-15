@@ -373,118 +373,6 @@ void transform_yield_break(Parser *_p, Token &out) {
   _p->finishStatement(out, stmts2); out = 1;
 }
 
-// convert a foreach (by ref or not) to a normal for statement with
-// an iterator object.
-void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
-                       Token &value, Token &stmt, int count,
-                       bool hasValue, bool byRef) {
-  out.reset();
-
-  std::string loopvar = FOREACH_VAR_PREFIX;
-  loopvar += boost::lexical_cast<std::string>(count);
-
-  Token init;
-  {
-    Token cname;    cname.setText(byRef ?
-                                  "hphp_get_mutable_iterator" :
-                                  "hphp_get_iterator");
-    Token param1;   _p->onCallParam(param1, NULL, arr, 0);
-    Token call;     _p->onCall(call, 0, cname, param1, NULL);
-    Token lname;    lname.setText(loopvar);
-    Token var;      _p->onSynthesizedVariable(var, lname);
-    Token assign;   _p->onAssign(assign, var, call, false);
-
-    if (byRef) {
-      // hphp_get_mutable_iterator will reset the array's internal pointer.
-      _p->onExprListElem(init, NULL, assign);
-    } else {
-      // We have to reset the iterator's pointer ourselves.
-      Token rname;    rname.setText("rewind");
-      Token empty;    empty = 1;
-      Token rcall;    _p->onObjectMethodCall(rcall, assign, rname, empty);
-
-      _p->onExprListElem(init, NULL, rcall);
-    }
-  }
-
-  Token cond;
-  {
-    Token lname;    lname.setText(loopvar);
-    Token var;      _p->onSynthesizedVariable(var, lname);
-    Token pn;       pn.setText("valid");
-    Token pname;    _p->onName(pname, pn, Parser::VarName);
-    Token empty;    empty = 1;
-    Token valid;    _p->onObjectMethodCall(valid, var, pname, empty);
-    _p->onExprListElem(cond, NULL, valid);
-  }
-
-  Token step;
-  {
-    Token lname;    lname.setText(loopvar);
-    Token var;      _p->onSynthesizedVariable(var, lname);
-    Token pn;       pn.setText("next");
-    Token pname;    _p->onName(pname, pn, Parser::VarName);
-    Token empty;    empty = 1;
-    Token next;     _p->onObjectMethodCall(next, var, pname, empty);
-    _p->onExprListElem(step, NULL, next);
-  }
-
-  {
-    Token stmts0;   _p->onStatementListStart(stmts0);
-
-    if (hasValue) {
-      Token skset;
-      {
-        Token lname;  lname.setText(loopvar);
-        Token var;    _p->onSynthesizedVariable(var, lname);
-        Token pn;     pn->setText("key");
-        Token pname;  _p->onName(pname, pn, Parser::VarName);
-        Token empty;  empty = 1;
-        Token call;   _p->onObjectMethodCall(call, var, pname, empty);
-        Token kset;   _p->onAssign(kset, name, call, false);
-        _p->onExpStatement(skset, kset);
-      }
-      Token stmts1; _p->addStatement(stmts1, stmts0, skset);
-
-      Token svset;
-      {
-        Token lname;  lname.setText(loopvar);
-        Token var;    _p->onSynthesizedVariable(var, lname);
-        Token pn;     pn.setText(byRef ? "currentRef" : "current");
-        Token pname;  _p->onName(pname, pn, Parser::VarName);
-        Token empty;  empty = 1;
-        Token call;   _p->onObjectMethodCall(call, var, pname, empty);
-        Token vset;   _p->onAssign(vset, value, call, byRef);
-        _p->onExpStatement(svset, vset);
-      }
-      Token stmts2; _p->addStatement(stmts2, stmts1, svset);
-
-      Token stmts3; _p->addStatement(stmts3, stmts2, stmt);
-      stmt.reset();
-      _p->finishStatement(stmt, stmts3); stmt = 1;
-    } else {
-      Token svset;
-      {
-        Token lname;  lname.setText(loopvar);
-        Token var;    _p->onSynthesizedVariable(var, lname);
-        Token pn;     pn.setText(byRef ? "currentRef" : "current");
-        Token pname;  _p->onName(pname, pn, Parser::VarName);
-        Token empty;  empty = 1;
-        Token call;   _p->onObjectMethodCall(call, var, pname, empty);
-        Token vset;   _p->onAssign(vset, name, call, byRef);
-        _p->onExpStatement(svset, vset);
-      }
-      Token stmts1; _p->addStatement(stmts1, stmts0, svset);
-
-      Token stmts2; _p->addStatement(stmts2, stmts1, stmt);
-      stmt.reset();
-      _p->finishStatement(stmt, stmts2); stmt = 1;
-    }
-  }
-
-  _p->onFor(out, init, cond, step, stmt);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static void user_attribute_check(Parser *_p) {
@@ -1185,8 +1073,7 @@ statement:
   | T_INLINE_HTML                      { _p->onEcho($$, $1, 1);}
   | T_FOREACH '(' expr
     T_AS foreach_variable
-    foreach_optional_arg ')'           { _p->onForEachStart();
-                                         _p->pushLabelScope();}
+    foreach_optional_arg ')'           { _p->pushLabelScope();}
     foreach_statement                  { _p->popLabelScope();
                                          _p->onForEach($$,$3,$5,$6,$9);}
   | T_DECLARE '(' declare_list ')'

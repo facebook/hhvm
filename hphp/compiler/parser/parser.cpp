@@ -118,9 +118,6 @@ extern void create_generator(Parser *_p, Token &out, Token &params,
 extern void transform_yield(Parser *_p, Token &stmts, int index,
                             Token *expr, bool assign);
 extern void transform_yield_break(Parser *_p, Token &out);
-extern void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
-                              Token &value, Token &stmt, int count,
-                              bool hasValue, bool byRef);
 
 namespace HPHP {
 
@@ -1410,8 +1407,6 @@ void Parser::onYield(Token &out, Token *expr, bool assign) {
   }
 
   FunctionContext &funcContext = m_funcContexts.back();
-  std::fill(funcContext.foreachHasYield.begin(),
-            funcContext.foreachHasYield.end(), true);
   int index = ++funcContext.numYields;
   transform_yield(this, out, index, expr, assign);
 }
@@ -1485,12 +1480,6 @@ void Parser::onExpStatement(Token &out, Token &expr) {
   exp->onParse(m_ar, m_file);
 }
 
-void Parser::onForEachStart() {
-  if (!m_funcContexts.empty()) {
-    m_funcContexts.back().foreachHasYield.push_back(false);
-  }
-}
-
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                        Token &stmt) {
   if (value->exp && name->num()) {
@@ -1499,17 +1488,6 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
   }
   checkAssignThis(name);
   checkAssignThis(value);
-  if (!m_funcContexts.empty()) {
-    bool hasYield = m_funcContexts.back().foreachHasYield.back();
-    m_funcContexts.back().foreachHasYield.pop_back();
-
-    if (hasYield) {
-      int cnt = ++m_funcContexts.back().numForeaches;
-      transform_foreach(this, out, arr, name, value, stmt, cnt, value->exp,
-                        value->exp ? value->num() == 1 : name->num() == 1);
-      return;
-    }
-  }
   if (stmt->stmt && stmt->stmt->is(Statement::KindOfStatementList)) {
     stmt->stmt = NEW_STMT(BlockStatement,
                           dynamic_pointer_cast<StatementList>(stmt->stmt));

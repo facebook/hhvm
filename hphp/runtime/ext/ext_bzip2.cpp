@@ -113,7 +113,7 @@ Variant f_bzdecompress(CStrRef source, int small /* = 0 */) {
     /* compression is better then 2:1, need to allocate more memory */
     bzs.avail_out = source_len;
     size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-    dest = (char *) Util::safe_realloc(dest, bzs.avail_out + 1);
+    dest = (char *) Util::safe_realloc(dest, size + bzs.avail_out + 1);
     bzs.next_out = dest + size;
   }
 

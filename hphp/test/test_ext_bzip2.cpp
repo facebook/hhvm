@@ -125,5 +125,9 @@ bool TestExtBzip2::test_bzdecompress() {
   ret = f_bzdecompress(ret);
   ret = f_bzdecompress(ret);
   VS(ret, str);
+  str = StringUtil::Repeat("x", 1000);
+  ret = f_bzcompress(str);
+  ret = f_bzdecompress(ret);
+  VS(ret, str);
   return Count(true);
 }

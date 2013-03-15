@@ -115,6 +115,12 @@ class Array : protected ArrayBase {
   }
   bool valueExists(CVarRef search_value, bool strict = false) const;
   Variant key(CVarRef search_value, bool strict = false) const;
+
+  /**
+   * Note that search_value == null_variant will return all keys,
+   * while search_value == init_null_variant will return only keys
+   * for pairs where the value is a PHP NULL. (or null-like if strict is false)
+   */
   Array keys(CVarRef search_value = null_variant, bool strict = false) const;
   Array values() const;
 

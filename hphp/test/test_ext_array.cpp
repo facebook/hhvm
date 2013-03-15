@@ -356,6 +356,39 @@ bool TestExtArray::test_array_keys() {
        ")\n");
   }
 
+  {
+    Array array = CREATE_MAP3(
+      "a", init_null_variant,
+      "b", 123,
+      "c", false);
+    VS(f_print_r(f_array_keys(array), true),
+      "Array\n"
+      "(\n"
+      "    [0] => a\n"
+      "    [1] => b\n"
+      "    [2] => c\n"
+      ")\n");
+    VS(f_print_r(f_array_keys(array, init_null_variant), true),
+      "Array\n"
+      "(\n"
+      "    [0] => a\n"
+      "    [1] => c\n"
+      ")\n");
+    // null_variant is uninitialized, so it should act like not passing a value
+    VS(f_print_r(f_array_keys(array, null_variant), true),
+      "Array\n"
+      "(\n"
+      "    [0] => a\n"
+      "    [1] => b\n"
+      "    [2] => c\n"
+      ")\n");
+    VS(f_print_r(f_array_keys(array, init_null_variant, true), true),
+      "Array\n"
+      "(\n"
+      "    [0] => a\n"
+      ")\n");
+  }
+
   return Count(true);
 }
 

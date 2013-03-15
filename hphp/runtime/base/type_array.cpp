@@ -777,7 +777,7 @@ Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
 
 Array Array::keys(CVarRef search_value /* = null_variant */,
                   bool strict /* = false */) const {
-  if (search_value.isNull()) {
+  if (!search_value.isInitialized()) {
     ArrayInit ai(size(), ArrayInit::vectorInit);
     for (ArrayIter iter(*this); iter; ++iter) {
       ai.set(iter.first());

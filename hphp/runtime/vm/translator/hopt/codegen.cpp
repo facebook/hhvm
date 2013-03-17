@@ -2954,6 +2954,11 @@ void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   cgDecRefWork(inst, false);
 }
 
+void CodeGenerator::cgDecRefNZOrBranch(IRInstruction* inst) {
+  assert(inst->getTaken());
+  cgDecRefWork(inst, true);
+}
+
 void CodeGenerator::emitSpillActRec(SSATmp* sp,
                                     int64_t spOffset,
                                     SSATmp* defAR) {

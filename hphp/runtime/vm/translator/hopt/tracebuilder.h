@@ -357,6 +357,7 @@ private:
     bool thisAvailable;
     std::vector<SSATmp*> localValues;
     std::vector<Type> localTypes;
+    SSATmp* refCountedMemValue;
   };
   void saveState(Block*);
   void mergeState(State* s1);
@@ -414,14 +415,17 @@ private:
    */
   SSATmp*    m_spValue;      // current physical sp
   SSATmp*    m_fpValue;      // current physical fp
-  int32_t      m_spOffset;     // offset of physical sp from physical fp
+  int32_t    m_spOffset;     // offset of physical sp from physical fp
   SSATmp*    m_curFunc;      // current function context
   CSEHash    m_cseHash;
   bool       m_thisIsAvailable; // true only if current ActRec has non-null this
 
+  // state of values in memory
+  SSATmp*    m_refCountedMemValue;
+
   // vectors that track local values & types
   std::vector<SSATmp*>   m_localValues;
-  std::vector<Type> m_localTypes;
+  std::vector<Type>      m_localTypes;
 };
 
 template<>

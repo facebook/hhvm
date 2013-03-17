@@ -43,6 +43,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_fpValue(nullptr)
   , m_spOffset(initialSpOffsetFromFp)
   , m_thisIsAvailable(false)
+  , m_refCountedMemValue(nullptr)
   , m_localValues(func->numLocals(), nullptr)
   , m_localTypes(func->numLocals(), Type::None)
 {
@@ -160,6 +161,7 @@ SSATmp* TraceBuilder::genUnboxPtr(SSATmp* ptr) {
  */
 bool TraceBuilder::isValueAvailable(SSATmp* tmp) const {
   while (true) {
+    if (m_refCountedMemValue == tmp) return true;
     if (anyLocalHasValue(tmp)) return true;
 
     IRInstruction* srcInstr = tmp->getInstruction();
@@ -1152,6 +1154,12 @@ SSATmp* TraceBuilder::genIterFree(uint32_t iterId) {
 void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   Opcode opc = inst->getOpcode();
   // Update tracked state of local values/types, stack/frame pointer, CSE, etc.
+
+  // kill tracked memory values
+  if (inst->mayModifyRefs()) {
+    m_refCountedMemValue = nullptr;
+  }
+
   switch (opc) {
     case Call: {
       m_spValue = inst->getDst();
@@ -1208,8 +1216,25 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       break;
     }
 
+    case StProp:
+    case StPropNT:
+      // fall through to StMem; stored value is the same arg number (2)
+    case StMem:
+    case StMemNT: {
+      m_refCountedMemValue = inst->getSrc(2);
+      break;
+    }
+
+    case LdMem:
+    case LdProp:
+    case LdRef: {
+      m_refCountedMemValue = inst->getDst();
+      break;
+    }
+
     case StRefNT:
     case StRef: {
+      m_refCountedMemValue = inst->getSrc(2);
       SSATmp* newRef = inst->getDst();
       SSATmp* prevRef = inst->getSrc(0);
       // update other tracked locals that also contain prevRef
@@ -1312,6 +1337,7 @@ void TraceBuilder::saveState(Block* block) {
     state->thisAvailable = m_thisIsAvailable;
     state->localValues = m_localValues;
     state->localTypes = m_localTypes;
+    state->refCountedMemValue = m_refCountedMemValue;
     m_snapshots[block] = state;
   }
 }
@@ -1351,6 +1377,11 @@ void TraceBuilder::mergeState(State* state) {
     state->localTypes[i] = (t1 == Type::None || t2 == Type::None) ? Type::None :
                            Type::unionOf(t1, t2);
   }
+  // Reference counted memory value is available only if it is available on both
+  // paths
+  if (state->refCountedMemValue != m_refCountedMemValue) {
+    state->refCountedMemValue = nullptr;
+  }
 }
 
 void TraceBuilder::useState(Block* block) {
@@ -1361,6 +1392,7 @@ void TraceBuilder::useState(Block* block) {
   m_fpValue = state->fpValue;
   m_spOffset = state->spOffset;
   m_thisIsAvailable = state->thisAvailable;
+  m_refCountedMemValue = state->refCountedMemValue;
   m_localValues = std::move(state->localValues);
   m_localTypes = std::move(state->localTypes);
   delete state;
@@ -1380,6 +1412,7 @@ void TraceBuilder::clearTrackedState() {
   m_spValue = m_fpValue = nullptr;
   m_spOffset = 0;
   m_thisIsAvailable = false;
+  m_refCountedMemValue = nullptr;
   for (auto i = m_snapshots.begin(), end = m_snapshots.end(); i != end; ++i) {
     delete *i;
     *i = nullptr;
@@ -1572,8 +1605,9 @@ void TraceBuilder::optimizeTrace() {
       // Could have converted a conditional branch to Jmp; clear next.
       block->setNext(nullptr);
     } else {
-      // if the last instruction was a branch, we already saved state for the
-      // target in updateTrackedState().  Now save state for the fall-through path.
+      // if the last instruction was a branch, we already saved state
+      // for the target in updateTrackedState().  Now save state for
+      // the fall-through path.
       saveState(block->getNext());
     }
   }

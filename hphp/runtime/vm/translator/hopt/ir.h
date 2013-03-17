@@ -316,6 +316,7 @@ O(DecRef,                           ND, S(Gen),           N|E|Mem|CRc|Refs|K) \
 O(DecRefMem,                        ND, S(PtrToGen)                           \
                                           C(Int),           N|E|Mem|CRc|Refs) \
 O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
+O(DecRefNZOrBranch,                 ND, S(Gen),                      Mem|CRc) \
 O(DefLabel,                     DMulti, SUnk,                              E) \
 O(Marker,                           ND, NA,                                E) \
 O(DefFP,                     D(StkPtr), NA,                                E) \

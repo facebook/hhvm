@@ -564,6 +564,14 @@ private:
   const Func* getCurFunc()  { return m_curFunc; }
   Class*      getCurClass() { return getCurFunc()->cls(); }
   Unit*       getCurUnit()  { return getCurFunc()->unit(); }
+
+  SrcKey      getCurSrcKey()  { return SrcKey(m_curFunc, m_bcOff); }
+  SrcKey      getNextSrcKey() {
+    SrcKey srcKey(m_curFunc, m_bcOff);
+    srcKey.advance(m_curFunc->unit());
+    return srcKey;
+  }
+
   /*
    * Helpers for resolving bytecode immediate ids.
    */

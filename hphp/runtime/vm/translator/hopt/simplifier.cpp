@@ -130,6 +130,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case PrintInt:
   case PrintBool:    return simplifyPrint(inst);
   case DecRef:
+  case DecRefNZOrBranch:
   case DecRefNZ:     return simplifyDecRef(inst);
   case IncRef:       return simplifyIncRef(inst);
   case GuardType:    return simplifyGuardType(inst);

@@ -2137,10 +2137,17 @@ SSATmp* HhbcTranslator::unboxPtr(SSATmp* ptr) {
 }
 
 void HhbcTranslator::emitBindMem(SSATmp* ptr, SSATmp* src) {
-  SSATmp* prevValue = m_tb->genLdMem(ptr, Type::Gen, NULL);
+  SSATmp* prevValue = m_tb->genLdMem(ptr, ptr->getType().deref(), NULL);
   pushIncRef(src);
   m_tb->genStMem(ptr, src, true);
-  m_tb->genDecRef(prevValue);
+  if (isRefCounted(src) && src->getType().canRunDtor()) {
+    Block* exitBlock = getExitTrace(getNextSrcKey().offset())->front();
+    Block::iterator markerInst = exitBlock->skipLabel();
+    exitBlock->insert(++markerInst, m_irFactory.gen(DecRef, prevValue));
+    m_tb->gen(DecRefNZOrBranch, exitBlock, prevValue);
+  } else {
+    m_tb->genDecRef(prevValue);
+  }
 }
 
 template<class CheckSupportedFun, class EmitLdAddrFun>
@@ -2153,11 +2160,7 @@ void HhbcTranslator::emitBind(const StringData* name,
 }
 
 void HhbcTranslator::emitSetMem(SSATmp* ptr, SSATmp* src) {
-  ptr = unboxPtr(ptr);
-  SSATmp* prevValue = m_tb->genLdMem(ptr, Type::Cell, nullptr);
-  pushIncRef(src);
-  m_tb->genStMem(ptr, src, true);
-  m_tb->genDecRef(prevValue);
+  emitBindMem(unboxPtr(ptr), src);
 }
 
 template<class CheckSupportedFun, class EmitLdAddrFun>

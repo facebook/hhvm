@@ -766,6 +766,10 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
     if (src1->getType() == Type::Obj && src2->getType() == Type::Obj) {
       return nullptr;
     }
+    // for arrays, don't simplify Same to Eq
+    if (src1->getType() == Type::Arr && src2->getType() == Type::Arr) {
+      return nullptr;
+    }
     // Type is neither a string nor an object - simplify to OpEq/OpNeq
     if (opName == OpSame) {
       return m_tb->genCmp(OpEq, src1, src2);

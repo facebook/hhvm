@@ -300,6 +300,10 @@ Variant c_Vector::t_get(CVarRef key) {
 }
 
 bool c_Vector::t_contains(CVarRef key) {
+  return t_containskey(key);
+}
+
+bool c_Vector::t_containskey(CVarRef key) {
   if (key.isInteger()) {
     return contains(key.toInt64());
   }
@@ -307,7 +311,7 @@ bool c_Vector::t_contains(CVarRef key) {
   return false;
 }
 
-Object c_Vector::t_removeat(CVarRef key) {
+Object c_Vector::t_removekey(CVarRef key) {
   if (!key.isInteger()) {
     throwBadKeyType();
   }
@@ -471,7 +475,7 @@ Object c_Vector::t_set(CVarRef key, CVarRef value) {
     if (UNLIKELY(tv->m_type == KindOfRef)) {
       tv = tv->m_data.pref->tv();
     }
-    put(key.toInt64(), tv);
+    set(key.toInt64(), tv);
     return this;
   }
   throwBadKeyType();
@@ -727,7 +731,7 @@ void c_Vector::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   assert(val->m_type != KindOfRef);
   auto vec = static_cast<c_Vector*>(obj);
   if (key->m_type == KindOfInt64) {
-    vec->put(key->m_data.num, val);
+    vec->set(key->m_data.num, val);
     return;
   }
   throwBadKeyType();
@@ -1039,6 +1043,10 @@ bool c_Map::t_contains(CVarRef key) {
   return false;
 }
 
+bool c_Map::t_containskey(CVarRef key) {
+  return t_contains(key);
+}
+
 Object c_Map::t_remove(CVarRef key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
@@ -1051,7 +1059,7 @@ Object c_Map::t_remove(CVarRef key) {
   return this;
 }
 
-Object c_Map::t_removeat(CVarRef key) {
+Object c_Map::t_removekey(CVarRef key) {
   return t_remove(key);
 }
 
@@ -1636,11 +1644,11 @@ void c_Map::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   assert(val->m_type != KindOfRef);
   auto mp = static_cast<c_Map*>(obj);
   if (key->m_type == KindOfInt64) {
-    mp->put(key->m_data.num, val);
+    mp->set(key->m_data.num, val);
     return;
   }
   if (IS_STRING_TYPE(key->m_type)) {
-    mp->put(key->m_data.pstr, val);
+    mp->set(key->m_data.pstr, val);
     return;
   }
   throwBadKeyType();
@@ -2011,6 +2019,10 @@ bool c_StableMap::t_contains(CVarRef key) {
   return false;
 }
 
+bool c_StableMap::t_containskey(CVarRef key) {
+  return t_contains(key);
+}
+
 Object c_StableMap::t_remove(CVarRef key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
@@ -2023,7 +2035,7 @@ Object c_StableMap::t_remove(CVarRef key) {
   return this;
 }
 
-Object c_StableMap::t_removeat(CVarRef key) {
+Object c_StableMap::t_removekey(CVarRef key) {
   return t_remove(key);
 }
 
@@ -2688,11 +2700,11 @@ void c_StableMap::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   assert(val->m_type != KindOfRef);
   auto smp = static_cast<c_StableMap*>(obj);
   if (key->m_type == KindOfInt64) {
-    smp->put(key->m_data.num, val);
+    smp->set(key->m_data.num, val);
     return;
   }
   if (IS_STRING_TYPE(key->m_type)) {
-    smp->put(key->m_data.pstr, val);
+    smp->set(key->m_data.pstr, val);
     return;
   }
   throwBadKeyType();
@@ -2925,6 +2937,14 @@ Variant c_Tuple::t_get(CVarRef key) {
   }
   throwBadKeyType();
   return init_null_variant;
+}
+
+bool c_Tuple::t_containskey(CVarRef key) {
+  if (key.isInteger()) {
+    return contains(key.toInt64());
+  }
+  throwBadKeyType();
+  return false;
 }
 
 Array c_Tuple::t_toarray() {

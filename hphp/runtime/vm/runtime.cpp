@@ -412,17 +412,17 @@ void collection_setm_ik1_v0(ObjectData* obj, int64_t key, TypedValue* value) {
   switch (obj->getCollectionType()) {
     case Collection::VectorType: {
       c_Vector* vec = static_cast<c_Vector*>(obj);
-      vec->put(key, value);
+      vec->set(key, value);
       break;
     }
     case Collection::MapType: {
       c_Map* mp = static_cast<c_Map*>(obj);
-      mp->put(key, value);
+      mp->set(key, value);
       break;
     }
     case Collection::StableMapType: {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->put(key, value);
+      smp->set(key, value);
       break;
     }
     case Collection::TupleType: {
@@ -446,12 +446,12 @@ void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
     }
     case Collection::MapType: {
       c_Map* mp = static_cast<c_Map*>(obj);
-      mp->put(key, value);
+      mp->set(key, value);
       break;
     }
     case Collection::StableMapType: {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->put(key, value);
+      smp->set(key, value);
       break;
     }
     case Collection::TupleType: {

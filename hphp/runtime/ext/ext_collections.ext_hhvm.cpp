@@ -452,8 +452,45 @@ TypedValue* tg_6Vector_contains(HPHP::VM::ActRec *ar) {
 }
 
 /*
-HPHP::Object HPHP::c_Vector::t_removeat(HPHP::Variant const&)
-_ZN4HPHP8c_Vector10t_removeatERKNS_7VariantE
+bool HPHP::c_Vector::t_containskey(HPHP::Variant const&)
+_ZN4HPHP8c_Vector13t_containskeyERKNS_7VariantE
+
+(return value) => rax
+this_ => rdi
+key => rsi
+*/
+
+bool th_6Vector_containsKey(ObjectData* this_, TypedValue* key) asm("_ZN4HPHP8c_Vector13t_containskeyERKNS_7VariantE");
+
+TypedValue* tg_6Vector_containsKey(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_6Vector_containsKey((this_), (args-0))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::containsKey", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::containsKey");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Vector::t_removekey(HPHP::Variant const&)
+_ZN4HPHP8c_Vector11t_removekeyERKNS_7VariantE
 
 (return value) => rax
 _rv => rdi
@@ -461,9 +498,9 @@ this_ => rsi
 key => rdx
 */
 
-Value* th_6Vector_removeAt(Value* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4HPHP8c_Vector10t_removeatERKNS_7VariantE");
+Value* th_6Vector_removeKey(Value* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4HPHP8c_Vector11t_removekeyERKNS_7VariantE");
 
-TypedValue* tg_6Vector_removeAt(HPHP::VM::ActRec *ar) {
+TypedValue* tg_6Vector_removeKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -471,16 +508,16 @@ TypedValue* tg_6Vector_removeAt(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         rv.m_type = KindOfObject;
-        th_6Vector_removeAt((Value*)(&(rv)), (this_), (args-0));
+        th_6Vector_removeKey((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
-        throw_wrong_arguments_nr("Vector::removeAt", count, 1, 1, 1);
+        throw_wrong_arguments_nr("Vector::removeKey", count, 1, 1, 1);
       }
     } else {
-      throw_instance_method_fatal("Vector::removeAt");
+      throw_instance_method_fatal("Vector::removeKey");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -1892,6 +1929,43 @@ TypedValue* tg_3Map_contains(HPHP::VM::ActRec *ar) {
 }
 
 /*
+bool HPHP::c_Map::t_containskey(HPHP::Variant const&)
+_ZN4HPHP5c_Map13t_containskeyERKNS_7VariantE
+
+(return value) => rax
+this_ => rdi
+key => rsi
+*/
+
+bool th_3Map_containsKey(ObjectData* this_, TypedValue* key) asm("_ZN4HPHP5c_Map13t_containskeyERKNS_7VariantE");
+
+TypedValue* tg_3Map_containsKey(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_3Map_containsKey((this_), (args-0))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::containsKey", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::containsKey");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_Map::t_remove(HPHP::Variant const&)
 _ZN4HPHP5c_Map8t_removeERKNS_7VariantE
 
@@ -1931,8 +2005,8 @@ TypedValue* tg_3Map_remove(HPHP::VM::ActRec *ar) {
 }
 
 /*
-HPHP::Object HPHP::c_Map::t_removeat(HPHP::Variant const&)
-_ZN4HPHP5c_Map10t_removeatERKNS_7VariantE
+HPHP::Object HPHP::c_Map::t_removekey(HPHP::Variant const&)
+_ZN4HPHP5c_Map11t_removekeyERKNS_7VariantE
 
 (return value) => rax
 _rv => rdi
@@ -1940,9 +2014,9 @@ this_ => rsi
 key => rdx
 */
 
-Value* th_3Map_removeAt(Value* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4HPHP5c_Map10t_removeatERKNS_7VariantE");
+Value* th_3Map_removeKey(Value* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4HPHP5c_Map11t_removekeyERKNS_7VariantE");
 
-TypedValue* tg_3Map_removeAt(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3Map_removeKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1950,16 +2024,16 @@ TypedValue* tg_3Map_removeAt(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         rv.m_type = KindOfObject;
-        th_3Map_removeAt((Value*)(&(rv)), (this_), (args-0));
+        th_3Map_removeKey((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
-        throw_wrong_arguments_nr("Map::removeAt", count, 1, 1, 1);
+        throw_wrong_arguments_nr("Map::removeKey", count, 1, 1, 1);
       }
     } else {
-      throw_instance_method_fatal("Map::removeAt");
+      throw_instance_method_fatal("Map::removeKey");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -3301,6 +3375,43 @@ TypedValue* tg_9StableMap_contains(HPHP::VM::ActRec *ar) {
 }
 
 /*
+bool HPHP::c_StableMap::t_containskey(HPHP::Variant const&)
+_ZN4HPHP11c_StableMap13t_containskeyERKNS_7VariantE
+
+(return value) => rax
+this_ => rdi
+key => rsi
+*/
+
+bool th_9StableMap_containsKey(ObjectData* this_, TypedValue* key) asm("_ZN4HPHP11c_StableMap13t_containskeyERKNS_7VariantE");
+
+TypedValue* tg_9StableMap_containsKey(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_9StableMap_containsKey((this_), (args-0))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::containsKey", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::containsKey");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_StableMap::t_remove(HPHP::Variant const&)
 _ZN4HPHP11c_StableMap8t_removeERKNS_7VariantE
 
@@ -3340,8 +3451,8 @@ TypedValue* tg_9StableMap_remove(HPHP::VM::ActRec *ar) {
 }
 
 /*
-HPHP::Object HPHP::c_StableMap::t_removeat(HPHP::Variant const&)
-_ZN4HPHP11c_StableMap10t_removeatERKNS_7VariantE
+HPHP::Object HPHP::c_StableMap::t_removekey(HPHP::Variant const&)
+_ZN4HPHP11c_StableMap11t_removekeyERKNS_7VariantE
 
 (return value) => rax
 _rv => rdi
@@ -3349,9 +3460,9 @@ this_ => rsi
 key => rdx
 */
 
-Value* th_9StableMap_removeAt(Value* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4HPHP11c_StableMap10t_removeatERKNS_7VariantE");
+Value* th_9StableMap_removeKey(Value* _rv, ObjectData* this_, TypedValue* key) asm("_ZN4HPHP11c_StableMap11t_removekeyERKNS_7VariantE");
 
-TypedValue* tg_9StableMap_removeAt(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9StableMap_removeKey(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3359,16 +3470,16 @@ TypedValue* tg_9StableMap_removeAt(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         rv.m_type = KindOfObject;
-        th_9StableMap_removeAt((Value*)(&(rv)), (this_), (args-0));
+        th_9StableMap_removeKey((Value*)(&(rv)), (this_), (args-0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
       } else {
-        throw_wrong_arguments_nr("StableMap::removeAt", count, 1, 1, 1);
+        throw_wrong_arguments_nr("StableMap::removeKey", count, 1, 1, 1);
       }
     } else {
-      throw_instance_method_fatal("StableMap::removeAt");
+      throw_instance_method_fatal("StableMap::removeKey");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -4619,6 +4730,43 @@ TypedValue* tg_5Tuple_get(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("Tuple::get");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+bool HPHP::c_Tuple::t_containskey(HPHP::Variant const&)
+_ZN4HPHP7c_Tuple13t_containskeyERKNS_7VariantE
+
+(return value) => rax
+this_ => rdi
+key => rsi
+*/
+
+bool th_5Tuple_containsKey(ObjectData* this_, TypedValue* key) asm("_ZN4HPHP7c_Tuple13t_containskeyERKNS_7VariantE");
+
+TypedValue* tg_5Tuple_containsKey(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (th_5Tuple_containsKey((this_), (args-0))) ? 1LL : 0LL;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Tuple::containsKey", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Tuple::containsKey");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

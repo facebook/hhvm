@@ -270,7 +270,24 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "removeAt",
+    'name'   => "containsKey",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns true if the specified key is present in the Vector, ".
+                "returns false otherwise.",
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "removeKey",
     'flags'  =>  HasDocComment,
     'desc'   => "Removes the element with the specified key from this ".
                 "Vector and renumbers the keys of all subsequent elements.",
@@ -844,6 +861,23 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "containsKey",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns true if the specified key is present in the Map, ".
+                "false otherwise.",
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "remove",
     'flags'  =>  HasDocComment,
     'desc'   => "Removes the specified key from this Map.",
@@ -860,7 +894,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "removeAt",
+    'name'   => "removeKey",
     'flags'  =>  HasDocComment,
     'desc'   => "Removes the specified key from this Map.",
     'return' => array(
@@ -1376,6 +1410,23 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "containsKey",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns true if the specified key is present in the ".
+                "StableMap, false otherwise.",
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "remove",
     'flags'  =>  HasDocComment,
     'desc'   => "Removes the specified key from this StableMap.",
@@ -1392,7 +1443,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "removeAt",
+    'name'   => "removeKey",
     'flags'  =>  HasDocComment,
     'desc'   => "Removes the specified key from this StableMap.",
     'return' => array(
@@ -1844,6 +1895,23 @@ DefineFunction(
                 "not present, null is returned.",
     'return' => array(
       'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "containsKey",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns true if the specified key is present in the Tuple, ".
+                "returns false otherwise.",
+    'return' => array(
+      'type'   => Boolean,
     ),
     'args'   => array(
       array(

@@ -47,7 +47,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: void freeData();
   public: void t___construct(CVarRef iterable = null_variant);
   public: Object t_add(CVarRef val);
-  public: Object t_append(CVarRef val);
+  public: Object t_append(CVarRef val); // deprecated
   public: Variant t_pop();
   public: void t_resize(CVarRef sz, CVarRef value);
   public: Object t_clear();
@@ -58,11 +58,12 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
-  public: Object t_put(CVarRef key, CVarRef value);
-  public: bool t_contains(CVarRef key);
-  public: Object t_removeat(CVarRef key);
+  public: Object t_put(CVarRef key, CVarRef value); // deprecated
+  public: bool t_contains(CVarRef key); // deprecated
+  public: bool t_containskey(CVarRef key);
+  public: Object t_removekey(CVarRef key);
   public: Array t_toarray();
-  public: void t_sort(CVarRef col = uninit_null());
+  public: void t_sort(CVarRef col = uninit_null()); // deprecated
   public: void t_reverse();
   public: void t_splice(CVarRef offset, CVarRef len = uninit_null(),
                         CVarRef replacement = uninit_null());
@@ -78,11 +79,13 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: static Object t_fromitems(CVarRef iterable) {
     return ti_fromitems("vector", iterable);
   }
-  public: static Object ti_fromarray(const char* cls, CVarRef arr);
+  public: static Object ti_fromarray(const char* cls,
+                                     CVarRef arr); // deprecated
   public: static Object t_fromarray(CVarRef arr) {
     return ti_fromarray("vector", arr);
   }
-  public: static Object ti_fromvector(const char* cls, CVarRef vec);
+  public: static Object ti_fromvector(const char* cls,
+                                      CVarRef vec); // deprecated
   public: static Object t_fromvector(CVarRef vec) {
     return ti_fromvector("vector", vec);
   }
@@ -108,7 +111,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     }
     return &m_data[key];
   }
-  public: void put(int64_t key, TypedValue* val) {
+  public: void set(int64_t key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       throwOOB(key);
@@ -232,16 +235,17 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
-  public: Object t_put(CVarRef key, CVarRef value);
+  public: Object t_put(CVarRef key, CVarRef value); // deprecated
   public: bool t_contains(CVarRef key);
+  public: bool t_containskey(CVarRef key);
   public: Object t_remove(CVarRef key);
-  public: Object t_removeat(CVarRef key);
-  public: Object t_discard(CVarRef key);
+  public: Object t_removekey(CVarRef key);
+  public: Object t_discard(CVarRef key); // deprecated
   public: Array t_toarray();
-  public: Array t_copyasarray();
-  public: Array t_tokeysarray();
-  public: Object t_values();
-  public: Array t_tovaluesarray();
+  public: Array t_copyasarray(); // deprecated
+  public: Array t_tokeysarray(); // deprecated
+  public: Object t_values(); // deprecated
+  public: Array t_tovaluesarray(); // deprecated
   public: Object t_updatefromarray(CVarRef arr);
   public: Object t_updatefromiterable(CVarRef it);
   public: Object t_differencebykey(CVarRef it);
@@ -255,11 +259,13 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: static Object t_fromitems(CVarRef iterable) {
     return ti_fromitems("map", iterable);
   }
-  public: static Object ti_fromarray(const char* cls, CVarRef arr);
+  public: static Object ti_fromarray(const char* cls, // deprecated
+                                     CVarRef arr);
   public: static Object t_fromarray(CVarRef arr) {
     return ti_fromarray("map", arr);
   }
-  public: static Object ti_fromiterable(const char* cls, CVarRef vec);
+  public: static Object ti_fromiterable(const char* cls, // deprecated
+                                        CVarRef vec);
   public: static Object t_fromiterable(CVarRef vec) {
     return ti_fromiterable("map", vec);
   }
@@ -289,11 +295,11 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
     if (p) return &p->data;
     return NULL;
   }
-  public: void put(int64_t key, TypedValue* val) {
+  public: void set(int64_t key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
     update(key, val);
   }
-  public: void put(StringData* key, TypedValue* val) {
+  public: void set(StringData* key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
     update(key, val);
   }
@@ -525,16 +531,17 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
-  public: Object t_put(CVarRef key, CVarRef value);
+  public: Object t_put(CVarRef key, CVarRef value); // deprecated
   public: bool t_contains(CVarRef key);
+  public: bool t_containskey(CVarRef key);
   public: Object t_remove(CVarRef key);
-  public: Object t_removeat(CVarRef key);
-  public: Object t_discard(CVarRef key);
+  public: Object t_removekey(CVarRef key);
+  public: Object t_discard(CVarRef key); // deprecated
   public: Array t_toarray();
-  public: Array t_copyasarray();
-  public: Array t_tokeysarray();
-  public: Object t_values();
-  public: Array t_tovaluesarray();
+  public: Array t_copyasarray(); // deprecated
+  public: Array t_tokeysarray(); // deprecated
+  public: Object t_values(); // deprecated
+  public: Array t_tovaluesarray(); // deprecated
   public: Object t_updatefromarray(CVarRef arr);
   public: Object t_updatefromiterable(CVarRef it);
   public: Object t_differencebykey(CVarRef it);
@@ -548,11 +555,13 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: static Object t_fromitems(CVarRef iterable) {
     return ti_fromitems("stablemap", iterable);
   }
-  public: static Object ti_fromarray(const char* cls, CVarRef arr);
+  public: static Object ti_fromarray(const char* cls,
+                                     CVarRef arr); // deprecated
   public: static Object t_fromarray(CVarRef arr) {
     return ti_fromarray("stablemap", arr);
   }
-  public: static Object ti_fromiterable(const char* cls, CVarRef vec);
+  public: static Object ti_fromiterable(const char* cls,
+                                        CVarRef vec); // deprecated
   public: static Object t_fromiterable(CVarRef vec) {
     return ti_fromiterable("stablemap", vec);
   }
@@ -582,10 +591,10 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
     if (p != NULL) return &p->data;
     return NULL;
   }
-  public: void put(int64_t key, TypedValue* val) {
+  public: void set(int64_t key, TypedValue* val) {
     update(key, val);
   }
-  public: void put(StringData* key, TypedValue* val) {
+  public: void set(StringData* key, TypedValue* val) {
     update(key, val);
   }
   public: void remove(int64_t key) {
@@ -780,6 +789,7 @@ class c_Tuple : public ExtObjectDataFlags<ObjectData::TupleAttrInit|
   public: Object t_keys();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
+  public: bool t_containskey(CVarRef key);
   public: Array t_toarray();
   public: Object t_getiterator();
   public: String t___tostring();
@@ -1092,17 +1102,17 @@ inline void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
   switch (obj->getCollectionType()) {
     case Collection::VectorType: {
       c_Vector* vec = static_cast<c_Vector*>(obj);
-      vec->put(offset, tv);
+      vec->set(offset, tv);
       break;
     }
     case Collection::MapType: {
       c_Map* mp = static_cast<c_Map*>(obj);
-      mp->put(offset, tv);
+      mp->set(offset, tv);
       break;
     }
     case Collection::StableMapType: {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->put(offset, tv);
+      smp->set(offset, tv);
       break;
     }
     case Collection::TupleType: {
@@ -1132,12 +1142,12 @@ inline void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val) {
     }
     case Collection::MapType: {
       c_Map* mp = static_cast<c_Map*>(obj);
-      mp->put(key, tv);
+      mp->set(key, tv);
       break;
     }
     case Collection::StableMapType: {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->put(key, tv);
+      smp->set(key, tv);
       break;
     }
     case Collection::TupleType: {

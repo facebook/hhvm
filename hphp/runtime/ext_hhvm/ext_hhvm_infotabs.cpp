@@ -2285,7 +2285,8 @@ TypedValue* tg_6Vector_set(VM::ActRec *ar);
 TypedValue* tg_6Vector_put(VM::ActRec *ar);
 TypedValue* tg_6Vector_clear(VM::ActRec *ar);
 TypedValue* tg_6Vector_contains(VM::ActRec *ar);
-TypedValue* tg_6Vector_removeAt(VM::ActRec *ar);
+TypedValue* tg_6Vector_containsKey(VM::ActRec *ar);
+TypedValue* tg_6Vector_removeKey(VM::ActRec *ar);
 TypedValue* tg_6Vector_append(VM::ActRec *ar);
 TypedValue* tg_6Vector_add(VM::ActRec *ar);
 TypedValue* tg_6Vector_pop(VM::ActRec *ar);
@@ -2325,8 +2326,9 @@ TypedValue* tg_3Map_set(VM::ActRec *ar);
 TypedValue* tg_3Map_put(VM::ActRec *ar);
 TypedValue* tg_3Map_clear(VM::ActRec *ar);
 TypedValue* tg_3Map_contains(VM::ActRec *ar);
+TypedValue* tg_3Map_containsKey(VM::ActRec *ar);
 TypedValue* tg_3Map_remove(VM::ActRec *ar);
-TypedValue* tg_3Map_removeAt(VM::ActRec *ar);
+TypedValue* tg_3Map_removeKey(VM::ActRec *ar);
 TypedValue* tg_3Map_discard(VM::ActRec *ar);
 TypedValue* tg_3Map_toArray(VM::ActRec *ar);
 TypedValue* tg_3Map_copyAsArray(VM::ActRec *ar);
@@ -2364,8 +2366,9 @@ TypedValue* tg_9StableMap_set(VM::ActRec *ar);
 TypedValue* tg_9StableMap_put(VM::ActRec *ar);
 TypedValue* tg_9StableMap_clear(VM::ActRec *ar);
 TypedValue* tg_9StableMap_contains(VM::ActRec *ar);
+TypedValue* tg_9StableMap_containsKey(VM::ActRec *ar);
 TypedValue* tg_9StableMap_remove(VM::ActRec *ar);
-TypedValue* tg_9StableMap_removeAt(VM::ActRec *ar);
+TypedValue* tg_9StableMap_removeKey(VM::ActRec *ar);
 TypedValue* tg_9StableMap_discard(VM::ActRec *ar);
 TypedValue* tg_9StableMap_toArray(VM::ActRec *ar);
 TypedValue* tg_9StableMap_copyAsArray(VM::ActRec *ar);
@@ -2401,6 +2404,7 @@ TypedValue* tg_5Tuple_toArray(VM::ActRec *ar);
 TypedValue* tg_5Tuple_getIterator(VM::ActRec *ar);
 TypedValue* tg_5Tuple_at(VM::ActRec *ar);
 TypedValue* tg_5Tuple_get(VM::ActRec *ar);
+TypedValue* tg_5Tuple_containsKey(VM::ActRec *ar);
 VM::Instance* new_TupleIterator_Instance(VM::Class*);
 TypedValue* tg_13TupleIterator___construct(VM::ActRec *ar);
 TypedValue* tg_13TupleIterator_current(VM::ActRec *ar);
@@ -5324,7 +5328,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DummyClosure[] = {
   { "__construct", tg_12DummyClosure___construct }
 };
 
-static const long long hhbc_ext_method_count_Vector = 32;
+static const long long hhbc_ext_method_count_Vector = 33;
 static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "__construct", tg_6Vector___construct },
   { "isEmpty", tg_6Vector_isEmpty },
@@ -5337,7 +5341,8 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "put", tg_6Vector_put },
   { "clear", tg_6Vector_clear },
   { "contains", tg_6Vector_contains },
-  { "removeAt", tg_6Vector_removeAt },
+  { "containsKey", tg_6Vector_containsKey },
+  { "removeKey", tg_6Vector_removeKey },
   { "append", tg_6Vector_append },
   { "add", tg_6Vector_add },
   { "pop", tg_6Vector_pop },
@@ -5370,7 +5375,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_VectorIterator[] = {
   { "rewind", tg_14VectorIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Map = 31;
+static const long long hhbc_ext_method_count_Map = 32;
 static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "__construct", tg_3Map___construct },
   { "isEmpty", tg_3Map_isEmpty },
@@ -5383,8 +5388,9 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "put", tg_3Map_put },
   { "clear", tg_3Map_clear },
   { "contains", tg_3Map_contains },
+  { "containsKey", tg_3Map_containsKey },
   { "remove", tg_3Map_remove },
-  { "removeAt", tg_3Map_removeAt },
+  { "removeKey", tg_3Map_removeKey },
   { "discard", tg_3Map_discard },
   { "toArray", tg_3Map_toArray },
   { "copyAsArray", tg_3Map_copyAsArray },
@@ -5415,7 +5421,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_MapIterator[] = {
   { "rewind", tg_11MapIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_StableMap = 31;
+static const long long hhbc_ext_method_count_StableMap = 32;
 static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "__construct", tg_9StableMap___construct },
   { "isEmpty", tg_9StableMap_isEmpty },
@@ -5428,8 +5434,9 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "put", tg_9StableMap_put },
   { "clear", tg_9StableMap_clear },
   { "contains", tg_9StableMap_contains },
+  { "containsKey", tg_9StableMap_containsKey },
   { "remove", tg_9StableMap_remove },
-  { "removeAt", tg_9StableMap_removeAt },
+  { "removeKey", tg_9StableMap_removeKey },
   { "discard", tg_9StableMap_discard },
   { "toArray", tg_9StableMap_toArray },
   { "copyAsArray", tg_9StableMap_copyAsArray },
@@ -5460,7 +5467,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StableMapIterator[] = {
   { "rewind", tg_17StableMapIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Tuple = 9;
+static const long long hhbc_ext_method_count_Tuple = 10;
 static const HhbcExtMethodInfo hhbc_ext_methods_Tuple[] = {
   { "__construct", tg_5Tuple___construct },
   { "isEmpty", tg_5Tuple_isEmpty },
@@ -5470,7 +5477,8 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Tuple[] = {
   { "toArray", tg_5Tuple_toArray },
   { "getIterator", tg_5Tuple_getIterator },
   { "at", tg_5Tuple_at },
-  { "get", tg_5Tuple_get }
+  { "get", tg_5Tuple_get },
+  { "containsKey", tg_5Tuple_containsKey }
 };
 
 static const long long hhbc_ext_method_count_TupleIterator = 6;

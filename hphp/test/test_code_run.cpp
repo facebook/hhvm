@@ -10043,6 +10043,47 @@ bool TestCodeRun::TestCollectionClasses() {
         "}\n"
         );
 
+  MVCRO("<?php\n"
+        "function f() {\n"
+        "  $vec = Vector {1, 'b'};\n"
+        "  var_dump($vec->containsKey(0));\n"
+        "  var_dump($vec->containsKey(1));\n"
+        "  var_dump($vec->containsKey(2));\n"
+        "  echo \"==========\\n\";\n"
+        "  $mp = Map {'a' => 1, 2 => 'b'};\n"
+        "  var_dump($mp->containsKey('a'));\n"
+        "  var_dump($mp->containsKey(2));\n"
+        "  var_dump($mp->containsKey('b'));\n"
+        "  echo \"==========\\n\";\n"
+        "  $smp = StableMap {'a' => 1, 2 => 'b'};\n"
+        "  var_dump($smp->containsKey('a'));\n"
+        "  var_dump($smp->containsKey(2));\n"
+        "  var_dump($smp->containsKey('b'));\n"
+        "  echo \"==========\\n\";\n"
+        "  $tup = Tuple {1, 'b'};\n"
+        "  var_dump($tup->containsKey(0));\n"
+        "  var_dump($tup->containsKey(1));\n"
+        "  var_dump($tup->containsKey(2));\n"
+        "}\n"
+        "f();\n"
+        ,
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "==========\n"
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "==========\n"
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "==========\n"
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        );
+
   return true;
 }
 

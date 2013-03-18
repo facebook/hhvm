@@ -65,10 +65,6 @@ endforeach(file ${CXX_SOURCES})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 
-if (NOT SKIP_BUNDLED_XHP)
-	add_subdirectory(third_party/xhp/xhp)
-endif()
-
 add_subdirectory(third_party/libafdt)
 add_subdirectory(third_party/libmbfl)
 add_subdirectory(third_party/libsqlite3)

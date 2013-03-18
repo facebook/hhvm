@@ -139,16 +139,6 @@ include_directories("${HPHP_HOME}/hphp/third_party/lz4")
 include_directories("${HPHP_HOME}/hphp/third_party/double-conversion/src")
 include_directories("${HPHP_HOME}/hphp/third_party/folly")
 
-FIND_LIBRARY(XHP_LIB xhp)
-FIND_PATH(XHP_INCLUDE_DIR xhp_preprocess.hpp)
-
-if (XHP_LIB AND XHP_INCLUDE_DIR)
-	include_directories(${XHP_INCLUDE_DIR})
-	set(SKIP_BUNDLED_XHP ON)
-else()
-	include_directories("${HPHP_HOME}/hphp/third_party/xhp/xhp")
-endif()
-
 # ICU
 find_package(ICU REQUIRED)
 if (ICU_FOUND)
@@ -431,12 +421,6 @@ endif()
 	target_link_libraries(${target} lz4)
 	target_link_libraries(${target} double-conversion)
 	target_link_libraries(${target} folly)
-
-	if (SKIP_BUNDLED_XHP)
-		target_link_libraries(${target} ${XHP_LIB})
-	else()
-		target_link_libraries(${target} xhp)
-	endif()
 
 	target_link_libraries(${target} afdt)
 	target_link_libraries(${target} mbfl)

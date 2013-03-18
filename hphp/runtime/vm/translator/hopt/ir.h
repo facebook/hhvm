@@ -1558,10 +1558,10 @@ private:
 private:
   Opcode            m_op;
   Type              m_typeParam;
-  uint16_t            m_numSrcs;
-  uint16_t            m_numDsts;
+  uint16_t          m_numSrcs;
+  uint16_t          m_numDsts;
   const IId         m_iid;
-  uint32_t            m_id;
+  uint32_t          m_id;
   SSATmp**          m_srcs;
   RegSet            m_liveOutRegs;
   SSATmp*           m_dst;     // if HasDest or NaryDest
@@ -1626,17 +1626,17 @@ inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
 
 class SSATmp {
 public:
-  uint32_t            getId() const { return m_id; }
+  uint32_t          getId() const { return m_id; }
   IRInstruction*    getInstruction() const { return m_inst; }
   void              setInstruction(IRInstruction* i) { m_inst = i; }
   Type              getType() const { return m_type; }
   void              setType(Type t) { m_type = t; }
-  uint32_t            getLastUseId() const { return m_lastUseId; }
+  uint32_t          getLastUseId() const { return m_lastUseId; }
   void              setLastUseId(uint32_t newId) { m_lastUseId = newId; }
-  uint32_t            getUseCount() const { return m_useCount; }
+  uint32_t          getUseCount() const { return m_useCount; }
   void              setUseCount(uint32_t count) { m_useCount = count; }
   void              incUseCount() { m_useCount++; }
-  uint32_t            decUseCount() { return --m_useCount; }
+  uint32_t          decUseCount() { return --m_useCount; }
   bool              isBoxed() const { return getType().isBoxed(); }
   bool              isString() const { return isA(Type::Str); }
   bool              isArray() const { return isA(Type::Arr); }

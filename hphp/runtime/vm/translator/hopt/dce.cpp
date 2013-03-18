@@ -145,13 +145,15 @@ BlockList removeUnreachable(Trace* trace, IRFactory* factory) {
 }
 
 WorkList
-initInstructions(Trace* trace, const BlockList& blocks,
-                 DceState& state, IRFactory* factory) {
+initInstructions(const BlockList& blocks, DceState& state) {
   TRACE(5, "DCE:vvvvvvvvvvvvvvvvvvvv\n");
   // mark reachable, essential, instructions live and enqueue them
   WorkList wl;
-  for (const Block* block : blocks) {
-    for (const IRInstruction& inst : *block) {
+  for (Block* block : blocks) {
+    for (IRInstruction& inst : *block) {
+      for (SSATmp& dst : inst.getDsts()) {
+        dst.setUseCount(0);
+      }
       if (inst.isControlFlowInstruction()) {
         // mark the destination label so that the destination trace
         // is marked reachable
@@ -178,7 +180,10 @@ initInstructions(Trace* trace, const BlockList& blocks,
 // 1) Change all unconsumed IncRefs to Mov.
 // 2) Mark a conditionally dead DecRefNZ as live if its corresponding IncRef
 //    cannot be eliminated.
+// 3) Eliminates IncRef-DecRef pairs who value is used only by the DecRef and
+//    whose type does not run a destructor with side effects.
 void optimizeRefCount(Trace* trace, DceState& state) {
+  WorkList decrefs;
   forEachInst(trace, [&](IRInstruction* inst) {
     if (inst->getOpcode() == IncRef && !state[inst].countConsumedAny()) {
       auto& s = state[inst];
@@ -192,15 +197,36 @@ void optimizeRefCount(Trace* trace, DceState& state) {
       s.setDead();
     }
     if (inst->getOpcode() == DecRefNZ) {
-      IRInstruction* srcInst = inst->getSrc(0)->getInstruction();
+      SSATmp* src = inst->getSrc(0);
+      IRInstruction* srcInst = src->getInstruction();
       if (state[srcInst].countConsumedAny()) {
         state[inst].setLive();
+        src->incUseCount();
+      }
+    }
+    if (inst->getOpcode() == DecRef) {
+      SSATmp* src = inst->getSrc(0);
+      if (src->getUseCount() == 1 && !src->getType().canRunDtor()) {
+        IRInstruction* srcInst = src->getInstruction();
+        if (srcInst->getOpcode() == IncRef) {
+          decrefs.push_back(inst);
+        }
       }
     }
     // Do copyProp at last. When processing DecRefNZs, we still need to look at
     // its source which should not be trampled over.
     Simplifier::copyProp(inst);
   });
+  for (const IRInstruction* decref : decrefs) {
+    assert(decref->getOpcode() == DecRef);
+    SSATmp* src = decref->getSrc(0);
+    assert(src->getInstruction()->getOpcode() == IncRef);
+    assert(!src->getType().canRunDtor());
+    if (src->getUseCount() == 1) {
+      state[decref].setDead();
+      state[src->getInstruction()].setDead();
+    }
+  }
 }
 
 /*
@@ -275,7 +301,7 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
         state[inst].setDead();
         // Put all REFCOUNT_CONSUMED_OFF_TRACE IncRefs to the sinking list.
         toSink.push_back(inst);
-      } else {
+      } else if (!state[inst].isDead()) {
         assert(state[inst].countConsumed());
       }
     }
@@ -334,7 +360,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   // work list; this will also mark reachable exit traces. All
   // other instructions marked dead.
   DceState state(irFactory, DceFlags());
-  WorkList wl = initInstructions(trace, blocks, state, irFactory);
+  WorkList wl = initInstructions(blocks, state);
 
   // process the worklist
   while (!wl.empty()) {
@@ -342,10 +368,11 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
     wl.pop_front();
     for (uint32_t i = 0; i < inst->getNumSrcs(); i++) {
       SSATmp* src = inst->getSrc(i);
-      if (src->getInstruction()->getOpcode() == DefConst) {
+      IRInstruction* srcInst = src->getInstruction();
+      if (srcInst->getOpcode() == DefConst) {
         continue;
       }
-      IRInstruction* srcInst = src->getInstruction();
+      src->incUseCount();
       if (state[srcInst].isDead()) {
         state[srcInst].setLive();
         wl.push_back(srcInst);

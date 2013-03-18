@@ -4105,11 +4105,8 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
   StringData* fullName = fullConstName(cls, cnsName);
   TargetCache::CacheHandle ch = TargetCache::allocClassConstant(fullName);
 
-  auto rTvPtr = rScratch; // Cell* ptr to slot in target cache
-  m_as.lea(rVmTl[ch], rTvPtr);
-
   ArgGroup args;
-  args.reg(rTvPtr)
+  args.addr(rVmTl, ch)
       .immPtr(Unit::GetNamedEntity(cls->getValStr()))
       .immPtr(cls->getValStr())
       .immPtr(cnsName->getValStr());

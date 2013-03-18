@@ -295,7 +295,7 @@ Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
   marker.bcOff    = bcOff;
   marker.stackOff = m_spOffset + numOpnds - stackDeficit;
   marker.func     = m_curFunc->getValFunc();
-  gen(Marker, &marker);
+  exitTrace->back()->push_back(m_irFactory.gen(Marker, &marker));
 
   SSATmp* sp = m_spValue;
   if (numOpnds != 0 || stackDeficit != 0) {

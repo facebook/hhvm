@@ -505,28 +505,30 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
   }                                                                           \
 } while (0)
 
-#define SIMPLIFY_COMMUTATIVE(OP, NAME) do {                               \
-  SIMPLIFY_CONST(OP);                                                     \
-  if (src1->isConst() && !src2->isConst()) {                              \
-    return m_tb->gen##NAME(src2, src1);                                   \
-  }                                                                       \
-  IRInstruction* inst1 = src1->getInstruction();                          \
-  IRInstruction* inst2 = src2->getInstruction();                          \
-  if (inst1->getOpcode() == Op##NAME && inst1->getSrc(1)->isConst()) {    \
-    /* (X + C1) + C2 --> X + C3 */                                        \
-    if (src2->isConst()) {                                                \
-      int64_t right = inst1->getSrc(1)->getValInt();                 \
-      right OP##= src2->getValInt();                               \
-      return m_tb->gen##NAME(inst1->getSrc(0), genDefInt(right));         \
-    }                                                                     \
-    /* (X + C1) + (Y + C2) --> X + Y + C3 */                              \
-    if (inst2->getOpcode() == Op##NAME && inst2->getSrc(1)->isConst()) {  \
-      int64_t right = inst1->getSrc(1)->getValInt();                 \
-      right OP##= inst2->getSrc(1)->getValInt();                   \
-      SSATmp* left = m_tb->gen##NAME(inst1->getSrc(0), inst2->getSrc(0)); \
-      return m_tb->gen##NAME(left, genDefInt(right));                     \
-    }                                                                     \
-  }                                                                       \
+#define SIMPLIFY_COMMUTATIVE(OP, NAME) do {                                 \
+  SIMPLIFY_CONST(OP);                                                       \
+  if (src1->isConst() && !src2->isConst()) {                                \
+    return m_tb->gen##NAME(src2, src1);                                     \
+  }                                                                         \
+  if (src1->isA(Type::Int) && src2->isA(Type::Int)) {                       \
+    IRInstruction* inst1 = src1->getInstruction();                          \
+    IRInstruction* inst2 = src2->getInstruction();                          \
+    if (inst1->getOpcode() == Op##NAME && inst1->getSrc(1)->isConst()) {    \
+      /* (X + C1) + C2 --> X + C3 */                                        \
+      if (src2->isConst()) {                                                \
+        int64_t right = inst1->getSrc(1)->getValInt();                      \
+        right OP##= src2->getValInt();                                      \
+        return m_tb->gen##NAME(inst1->getSrc(0), genDefInt(right));         \
+      }                                                                     \
+      /* (X + C1) + (Y + C2) --> X + Y + C3 */                              \
+      if (inst2->getOpcode() == Op##NAME && inst2->getSrc(1)->isConst()) {  \
+        int64_t right = inst1->getSrc(1)->getValInt();                      \
+        right OP##= inst2->getSrc(1)->getValInt();                          \
+        SSATmp* left = m_tb->gen##NAME(inst1->getSrc(0), inst2->getSrc(0)); \
+        return m_tb->gen##NAME(left, genDefInt(right));                     \
+      }                                                                     \
+    }                                                                       \
+  }                                                                         \
 } while (0)
 
 #define SIMPLIFY_DISTRIBUTIVE(OUTOP, INOP, OUTNAME, INNAME) do {              \

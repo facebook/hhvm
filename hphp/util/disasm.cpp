@@ -123,9 +123,8 @@ static int addressToSymbol(xed_uint64_t address,
 }
 #endif /* HAVE_LIBXED */
 
-Disasm::Disasm(int indentLevel /* = 0 */, bool printEncoding /* = false */)
-    : m_indent(indentLevel)
-    , m_printEncoding(printEncoding)
+Disasm::Disasm(const Disasm::Options& opts)
+    : m_opts(opts)
 {
 #ifdef HAVE_LIBXED
   xed_state_init(&m_xedState, XED_MACHINE_MODE_LONG_64,
@@ -153,6 +152,7 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
   char codeStr[MAX_INSTR_ASM_LEN];
   xed_uint8_t *frontier;
   xed_decoded_inst_t xedd;
+  uint64_t codeBase = uint64_t(codeStartAddr);
   uint64_t ip;
 
   // Decode and print each instruction
@@ -168,14 +168,30 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
                             MAX_INSTR_ASM_LEN, ip, nullptr)) {
       error("disasm error: xed_format_context failed");
     }
+    uint32_t instrLen = xed_decoded_inst_get_length(&xedd);
 
-    for (int i = 0; i < m_indent; ++i) {
+    // If it's a jump, we're printing relative offsets, and the dest
+    // is within the range we're printing, add the dest as a relative
+    // offset.
+    std::string jmpComment;
+    auto const cat = xed_decoded_inst_get_category(&xedd);
+    if (cat == XED_CATEGORY_COND_BR || cat == XED_CATEGORY_UNCOND_BR) {
+      if (m_opts.m_relativeOffset) {
+        auto disp = uint64_t(frontier + instrLen +
+                             xed_decoded_inst_get_branch_displacement(&xedd) -
+                             codeBase);
+        if (disp < uint64_t(codeEndAddr - codeStartAddr)) {
+          jmpComment = folly::format(" # {:#x}", disp).str();
+        }
+      }
+    }
+
+    for (int i = 0; i < m_opts.m_indentLevel; ++i) {
       out << ' ';
     }
-    out << folly::format("{:#10x}: ", ip);
-
-    uint32_t instrLen = xed_decoded_inst_get_length(&xedd);
-    if (m_printEncoding) {
+    const char* fmt = m_opts.m_relativeOffset ? "{:3x}: " : "{:#10x}: ";
+    out << folly::format(fmt, ip - (m_opts.m_relativeOffset ? codeBase : 0));
+    if (m_opts.m_printEncoding) {
       // print encoding, like in objdump
       unsigned posi = 0;
       for (; posi < instrLen; ++posi) {
@@ -185,7 +201,7 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
         out << "   ";
       }
     }
-    out << codeStr << std::endl;
+    out << codeStr << jmpComment << std::endl;
     frontier += instrLen;
     ip       += instrLen;
   }

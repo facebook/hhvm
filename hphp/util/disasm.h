@@ -30,10 +30,35 @@ namespace HPHP {
 
 class Disasm : private boost::noncopyable {
  public:
+  struct Options {
+    Options()
+        : m_indentLevel(0)
+        , m_printEncoding(false)
+        , m_relativeOffset(false)
+      {}
+
+    Options& indent(int i) {
+      m_indentLevel = i;
+      return *this;
+    }
+    Options& printEncoding(bool pe) {
+      m_printEncoding = pe;
+      return *this;
+    }
+    Options& relativeOffset(bool re) {
+      m_relativeOffset = re;
+      return *this;
+    }
+
+    int m_indentLevel;
+    bool m_printEncoding;
+    bool m_relativeOffset;
+  };
+
   /* Create a Disasm object. indentLevel spaces will be put at the beginning of
    * each line of disassembly. If printEncoding is true, the raw hex bytes of
    * the instructions will also be in the output. */
-  explicit Disasm(int indentLevel = 0, bool printEncoding = false);
+  explicit Disasm(const Options& opts = Options());
 
   /* Disassemble instructions. start should be the first byte of the region to
    * disassemble and end should be the first byte past the region to
@@ -44,8 +69,7 @@ class Disasm : private boost::noncopyable {
 #ifdef HAVE_LIBXED
   xed_state_t m_xedState;
 #endif // HAVE_LIBXED
-  const int m_indent;
-  const bool m_printEncoding;
+  const Options m_opts;
 };
 
 } // namespace HPHP

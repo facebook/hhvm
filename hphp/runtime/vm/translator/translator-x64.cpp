@@ -11475,7 +11475,7 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
 
   if (transKind == TransNormalIR && RuntimeOption::EvalJitCompareHHIR) {
     m_useHHIR = false;
-    Disasm disasm;
+    Disasm disasm(Disasm::Options().relativeOffset(true));
     TCA irEnd = a.code.frontier;
     TCA irStubsEnd = astubs.code.frontier;
     TCA tx64Start = a.code.frontier;
@@ -11484,15 +11484,16 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
     size_t irSize = irEnd - start;
     size_t tx64Size = tx64End - tx64Start;
 
-    if (irSize > tx64Size) {
+    double ratio = (double)irSize / tx64Size;
+    if (ratio > RuntimeOption::EvalJitCompareHHIR) {
       std::ostringstream irOut, tx64Out, out;
       out << folly::format("{:-^140}\n",
                            folly::format(" New translation - hhir/tx64 = {}% ",
-                                         100 * irSize / tx64Size));
+                                         int(100 * ratio)));
       t.print(out);
       out << '\n';
 #     define IRCOL "{:<90}"
-#     define TXCOL "{:<55}"
+#     define TXCOL "{:<50}"
       out << folly::format(TXCOL "  " TXCOL "\n",
                            folly::format("Translation from tx64 ({} bytes)",
                                          tx64Size),

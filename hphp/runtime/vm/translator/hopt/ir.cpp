@@ -1067,7 +1067,8 @@ void Trace::print() const {
 
 void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
   static const int kIndent = 4;
-  Disasm disasm(kIndent + 4, RuntimeOption::EvalDumpIR > 5);
+  Disasm disasm(Disasm::Options().indent(kIndent + 4)
+                                 .printEncoding(RuntimeOption::EvalDumpIR > 5));
 
   // Print unlikely blocks at the end
   BlockList blocks, unlikely;

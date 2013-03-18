@@ -1910,6 +1910,10 @@ static int exception_handler() {
   } catch (Exception &e) {
     pushFault(Fault::CppException, e.clone());
     longJmpType = g_vmContext->hhvmPrepareThrow();
+  } catch (std::exception& e) {
+    pushFault(Fault::CppException,
+              new Exception("unexpected %s: %s", typeid(e).name(), e.what()));
+    longJmpType = g_vmContext->hhvmPrepareThrow();
   } catch (...) {
     pushFault(Fault::CppException,
               new Exception("unknown exception"));

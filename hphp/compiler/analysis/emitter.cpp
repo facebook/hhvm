@@ -3382,6 +3382,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         e.FCall(numParams);
+        if (Option::WholeProgram) {
+          FunctionScopePtr fs = ne->getFuncScope();
+          if (fs && !fs->getReturnType()) {
+            m_evalStack.setKnownType(KindOfNull, false /* inferred */);
+            m_evalStack.setNotRef();
+          }
+        }
         e.PopR();
         return true;
       }

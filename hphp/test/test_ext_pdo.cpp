@@ -67,6 +67,9 @@ bool TestExtPdo::test_pdo_drivers() {
 }
 
 bool TestExtPdo::test_pdo_mysql() {
+  // XXX: Disabled until flakiness is resolved: t2196379
+  return CountSkip();
+
   CreateMySqlTestTable();
 
   try {

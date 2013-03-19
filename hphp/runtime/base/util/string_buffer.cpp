@@ -150,8 +150,8 @@ void StringBuffer::release() {
 }
 
 void StringBuffer::resize(int size) {
-  assert(size >= 0 && size < m_cap);
-  if (size >= 0 && size < m_cap) {
+  assert(size >= 0 && size <= m_cap);
+  if (size >= 0 && size <= m_cap) {
     m_len = size;
   }
 }

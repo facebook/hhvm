@@ -17,7 +17,10 @@
 #ifndef __HPHP_RUNTIME_ERROR_H__
 #define __HPHP_RUNTIME_ERROR_H__
 
+#include <cstdarg>
 #include <string>
+
+#include "util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

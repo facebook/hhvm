@@ -14,11 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/util/curl_tls_workarounds.h>
-#include <runtime/base/runtime_option.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <openssl/ssl.h>
+
+#include "runtime/base/util/curl_tls_workarounds.h"
+#include "runtime/base/runtime_error.h"
+#include "runtime/base/runtime_option.h"
 
 namespace HPHP {
 

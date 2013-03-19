@@ -566,6 +566,9 @@ SSATmp* Simplifier::simplifyAdd(SSATmp* src1, SSATmp* src2) {
     int64_t src2Val = src2->getValInt();
     // X + 0 --> X
     if (src2Val == 0) {
+      if (src1->getType() == Type::Bool) {
+        return m_tb->genConvToInt(src1);
+      }
       return src1;
     }
     // X + -C --> X - C
@@ -596,6 +599,9 @@ SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
     int64_t src2Val = src2->getValInt();
     // X - 0 --> X
     if (src2Val == 0) {
+      if (src1->getType() == Type::Bool) {
+        return m_tb->genConvToInt(src1);
+      }
       return src1;
     }
     // X - -C --> X + C
@@ -633,6 +639,9 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
     }
     // X * 1 --> X
     if (src2->getValInt() == 1) {
+      if (src1->getType() == Type::Bool) {
+        return m_tb->genConvToInt(src1);
+      }
       return src1;
     }
     // X * 2 --> X + X

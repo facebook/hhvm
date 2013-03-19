@@ -473,8 +473,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
       (Util::format_pattern(po.excludeStaticPatterns[i], true));
   }
 
+  Option::OutputHHBC = true;
   if (po.target == "hhbc" || po.target == "run") {
-    Option::OutputHHBC = true;
     Option::AnalyzePerfectVirtuals = false;
   }
 

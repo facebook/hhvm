@@ -382,32 +382,32 @@ SSATmp* TraceBuilder::genDefNone() {
 }
 
 SSATmp* TraceBuilder::genConvToInt(SSATmp* src) {
-  return gen(Conv, Type::Int, src);
+  return gen(ConvToInt, Type::Int, src);
 }
 
 SSATmp* TraceBuilder::genConvToDbl(SSATmp* src) {
-  return gen(Conv, Type::Dbl, src);
+  return gen(ConvToDbl, Type::Dbl, src);
 }
 
 SSATmp* TraceBuilder::genConvToStr(SSATmp* src) {
   if (src->getType() == Type::Bool) {
     // Bool to string code sequence loads static strings
-    return gen(Conv, Type::StaticStr, src);
+    return gen(ConvToStr, Type::StaticStr, src);
   } else {
-    return gen(Conv, Type::Str, src);
+    return gen(ConvToStr, Type::Str, src);
   }
 }
 
 SSATmp* TraceBuilder::genConvToArr(SSATmp* src) {
-  return gen(Conv, Type::Arr, src);
+  return gen(ConvToArr, Type::Arr, src);
 }
 
 SSATmp* TraceBuilder::genConvToObj(SSATmp* src) {
-  return gen(Conv, Type::Obj, src);
+  return gen(ConvToObj, Type::Obj, src);
 }
 
 SSATmp* TraceBuilder::genConvToBool(SSATmp* src) {
-  return gen(Conv, Type::Bool, src);
+  return gen(ConvToBool, Type::Bool, src);
 }
 
 SSATmp* TraceBuilder::genCmp(Opcode opc, SSATmp* src1, SSATmp* src2) {

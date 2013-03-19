@@ -164,7 +164,12 @@ O(OpAnd,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpOr,                         D(Int), SNum SNum,                         C) \
 O(OpXor,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpMul,                        DParam, SNum SNum,                         C) \
-O(Conv,                         DParam, S(Gen),                          C|N) \
+O(ConvToArr,                    DParam, S(Gen),                          C|N) \
+O(ConvToBool,                   DParam, S(Gen),                          C|N) \
+O(ConvToDbl,                    DParam, S(Gen),                          C|N) \
+O(ConvToInt,                    DParam, S(Gen),                          C|N) \
+O(ConvToObj,                    DParam, S(Gen),                          C|N) \
+O(ConvToStr,                    DParam, S(Gen),                          C|N) \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
 O(IsNTypeMem,                  D(Bool), S(PtrToGen),                      NA) \
@@ -2180,8 +2185,7 @@ int32_t spillValueCells(IRInstruction* spillStack);
 constexpr int kSpillStackActRecExtraArgs = 4;
 
 inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
-  if (!(instr->getOpcode() == Conv &&
-        instr->getTypeParam() == Type::Bool)) {
+  if (instr->getOpcode() != ConvToBool) {
     return false;
   }
 

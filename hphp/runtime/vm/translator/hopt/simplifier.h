@@ -62,7 +62,12 @@ private:
   SSATmp* simplifyIsType(IRInstruction*);
   SSATmp* simplifyJmpIsType(IRInstruction*);
   SSATmp* simplifyConcat(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyConv(IRInstruction*);
+  SSATmp* simplifyConvToArr(IRInstruction*);
+  SSATmp* simplifyConvToBool(IRInstruction*);
+  SSATmp* simplifyConvToDbl(IRInstruction*);
+  SSATmp* simplifyConvToInt(IRInstruction*);
+  SSATmp* simplifyConvToObj(IRInstruction*);
+  SSATmp* simplifyConvToStr(IRInstruction*);
   SSATmp* simplifyUnbox(IRInstruction*);
   SSATmp* simplifyUnboxPtr(IRInstruction*);
   SSATmp* simplifyCheckInit(IRInstruction* inst);

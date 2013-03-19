@@ -375,11 +375,17 @@ D:Int = OpMul S0:{Int|Bool} S1:{Int|Bool}
   Integer/boolean arithmetic.  Performs the operation described by the
   opcode name on S0 and S1, and puts the result in D.
 
+
 3. Type conversions
 
-D:T = Conv<T> S0:Gen
+D:Arr  = ConvToArr S0:Gen
+D:Bool = ConvToBool S0:Gen
+D:Dbl  = ConvToDbl S0:Gen
+D:Int  = ConvToInt S0:Gen
+D:Obj  = ConvoObj S0:Gen
+D:Str  = ConvToStr S0:Gen
 
-  Convert S0 from its current type to type T, according to the PHP
+  Convert S0 from its current type to destination type, according to the PHP
   semantics of such a conversion.
 
 

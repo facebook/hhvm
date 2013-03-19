@@ -1588,7 +1588,6 @@ asm_label(a, falseLabel);
 asm_label(a, out);
 }
 
-HOT_FUNC_VM
 ArrayData* new_singleton_array_helper(TypedValue value) {
   // tvCastToArrayInPlace overwrites value and thus decrements the ref count
   // of any counted object that value refers to.
@@ -1602,8 +1601,17 @@ ArrayData* new_singleton_array_helper(TypedValue value) {
   return value.m_data.parr;
 }
 
-void CodeGenerator::cgConv(IRInstruction* inst) {
-  Type toType   = inst->getTypeParam();
+void CodeGenerator::cgConvToArr(IRInstruction* inst) {
+  SSATmp* dst = inst->getDst();
+  SSATmp* src = inst->getSrc(0);
+
+  ArgGroup args;
+  args.typedValue(src);
+  ArrayData*(*fPtr)(TypedValue) = new_singleton_array_helper;
+  cgCallHelper(m_as, (TCA)fPtr, dst, kNoSyncPoint, args);
+}
+
+void CodeGenerator::cgConvToBool(IRInstruction* inst) {
   Type fromType = inst->getSrc(0)->getType();
   SSATmp* dst = inst->getDst();
   SSATmp* src = inst->getSrc(0);
@@ -1613,125 +1621,135 @@ void CodeGenerator::cgConv(IRInstruction* inst) {
 
   bool srcIsConst = src->isConst();
 
-  if (toType == Type::Int) {
-    if (fromType == Type::Bool) {
-      // Bool -> Int is just a move
-      if (srcIsConst) {
-        int64_t constVal = src->getValRawInt();
-        if (constVal == 0) {
-          m_as.xor_reg64_reg64(dstReg, dstReg);
-        } else {
-          m_as.mov_imm64_reg(1, dstReg);
-        }
+  if (fromType.isNull()) {
+    // Uninit/Null -> Bool (false)
+    m_as.xor_reg64_reg64(dstReg, dstReg);
+  } else if (fromType == Type::Bool) {
+    // Bool -> Bool (nop!)
+    if (srcIsConst) {
+      int64_t constVal = src->getValRawInt();
+      if (constVal == 0) {
+        m_as.xor_reg64_reg64(dstReg, dstReg);
       } else {
-        m_as.movzbl (rbyte(srcReg), r32(dstReg));
-      }
-      return;
-    }
-    if (fromType.isString()) {
-      if (src->isConst()) {
-        auto val = src->getValStr()->toInt64();
-        m_as.mov_imm64_reg(val, dstReg);
-      } else {
-        ArgGroup args;
-        args.ssa(src).imm(10);
-        cgCallHelper(m_as,
-                     Transl::Call(getMethodPtr(&StringData::toInt64)),
-                     dstReg, kNoSyncPoint, args);
-      }
-      return;
-    }
-  }
-
-  if (toType == Type::Bool) {
-    if (fromType.isNull()) {
-      // Uninit/Null -> Bool (false)
-      m_as.xor_reg64_reg64(dstReg, dstReg);
-    } else if (fromType == Type::Bool) {
-      // Bool -> Bool (nop!)
-      if (srcIsConst) {
-        int64_t constVal = src->getValRawInt();
-        if (constVal == 0) {
-          m_as.xor_reg64_reg64(dstReg, dstReg);
-        } else {
-          m_as.mov_imm64_reg(1, dstReg);
-        }
-      } else {
-        emitMovRegReg(m_as, srcReg, dstReg);
-      }
-    } else if (fromType == Type::Int) {
-      // Int -> Bool
-      if (src->isConst()) {
-        int64_t constVal = src->getValInt();
-        if (constVal == 0) {
-          m_as.xor_reg64_reg64(dstReg, dstReg);
-        } else {
-          m_as.mov_imm64_reg(1, dstReg);
-        }
-      } else {
-        m_as.test_reg64_reg64(srcReg, srcReg);
-        m_as.setne(rbyte(dstReg));
+        m_as.mov_imm64_reg(1, dstReg);
       }
     } else {
-      Transl::Call helper(nullptr);
-      ArgGroup args;
-      if (fromType == Type::Cell) {
-        // Cell -> Bool
-        args.typedValue(src);
-        helper = Transl::Call((TCA)cellToBoolHelper);
-      } else if (fromType.isString()) {
-        // Str -> Bool
-        args.ssa(src);
-        helper = Transl::Call(getMethodPtr(&StringData::toBoolean));
-      } else if (fromType.isArray()) {
-        // Arr -> Bool
-        args.ssa(src);
-        helper = Transl::Call((TCA)arrToBoolHelper);
-      } else if (fromType == Type::Obj) {
-        // Obj -> Bool
-        args.ssa(src);
-        helper = Transl::Call(getMethodPtr(&ObjectData::o_toBoolean));
+      emitMovRegReg(m_as, srcReg, dstReg);
+    }
+  } else if (fromType == Type::Int) {
+    // Int -> Bool
+    if (srcIsConst) {
+      int64_t constVal = src->getValInt();
+      if (constVal == 0) {
+        m_as.xor_reg64_reg64(dstReg, dstReg);
       } else {
-        // Dbl -> Bool
-        CG_PUNT(Conv_Dbl_Bool);
+        m_as.mov_imm64_reg(1, dstReg);
       }
-      cgCallHelper(m_as, helper, dstReg, kNoSyncPoint, args);
-    }
-    return;
-  }
-
-  if (toType.isString()) {
-    if (fromType == Type::Int) {
-      // Int -> Str
-      ArgGroup args;
-      args.ssa(src);
-      StringData*(*fPtr)(int64_t) = buildStringData;
-      cgCallHelper(m_as, (TCA)fPtr,
-                   dst, kNoSyncPoint, args);
-    } else if (fromType == Type::Bool) {
-      // Bool -> Str
-      m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
-      m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString(""),
-                         dstReg);
-      m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString("1"),
-                         rScratch);
-      m_as.cmov_reg64_reg64(CC_NZ, rScratch, dstReg);
     } else {
-      CG_PUNT(Conv_toString);
+      m_as.test_reg64_reg64(srcReg, srcReg);
+      m_as.setne(rbyte(dstReg));
     }
-    return;
-  }
-
-  if (toType.isArray()) {
+  } else {
+    Transl::Call helper(nullptr);
     ArgGroup args;
-    args.typedValue(src);
-    ArrayData*(*fPtr)(TypedValue) = new_singleton_array_helper;
-    cgCallHelper(m_as, (TCA)fPtr, dst, kNoSyncPoint, args);
+    if (fromType == Type::Cell) {
+      // Cell -> Bool
+      args.typedValue(src);
+      helper = Transl::Call((TCA)cellToBoolHelper);
+    } else if (fromType.isString()) {
+      // Str -> Bool
+      args.ssa(src);
+      helper = Transl::Call(getMethodPtr(&StringData::toBoolean));
+    } else if (fromType.isArray()) {
+      // Arr -> Bool
+      args.ssa(src);
+      helper = Transl::Call((TCA)arrToBoolHelper);
+    } else if (fromType == Type::Obj) {
+      // Obj -> Bool
+      args.ssa(src);
+      helper = Transl::Call(getMethodPtr(&ObjectData::o_toBoolean));
+    } else {
+      // Dbl -> Bool
+      CG_PUNT(Conv_Dbl_Bool);
+    }
+    cgCallHelper(m_as, helper, dstReg, kNoSyncPoint, args);
+  }
+}
+
+void CodeGenerator::cgConvToDbl(IRInstruction* inst) {
+  CG_PUNT(ConvToDbl);
+}
+
+void CodeGenerator::cgConvToInt(IRInstruction* inst) {
+  Type fromType = inst->getSrc(0)->getType();
+  SSATmp* dst = inst->getDst();
+  SSATmp* src = inst->getSrc(0);
+
+  auto dstReg = dst->getReg();
+  auto srcReg = src->getReg();
+
+  bool srcIsConst = src->isConst();
+
+  if (fromType == Type::Bool) {
+    // Bool -> Int is just a move
+    if (srcIsConst) {
+      int64_t constVal = src->getValRawInt();
+      if (constVal == 0) {
+        m_as.xor_reg64_reg64(dstReg, dstReg);
+      } else {
+        m_as.mov_imm64_reg(1, dstReg);
+      }
+    } else {
+      m_as.movzbl (rbyte(srcReg), r32(dstReg));
+    }
     return;
   }
-
-  // TODO: Add handling of conversions
+  if (fromType.isString()) {
+    if (srcIsConst) {
+      auto val = src->getValStr()->toInt64();
+      m_as.mov_imm64_reg(val, dstReg);
+    } else {
+      ArgGroup args;
+      args.ssa(src).imm(10);
+      cgCallHelper(m_as,
+                   Transl::Call(getMethodPtr(&StringData::toInt64)),
+                   dstReg, kNoSyncPoint, args);
+    }
+    return;
+  }
   CG_PUNT(Conv);
+}
+
+void CodeGenerator::cgConvToObj(IRInstruction* inst) {
+  CG_PUNT(ConvToObj);
+}
+
+void CodeGenerator::cgConvToStr(IRInstruction* inst) {
+  Type fromType = inst->getSrc(0)->getType();
+  SSATmp* dst = inst->getDst();
+  SSATmp* src = inst->getSrc(0);
+
+  auto dstReg = dst->getReg();
+  auto srcReg = src->getReg();
+
+  if (fromType == Type::Int) {
+    // Int -> Str
+    ArgGroup args;
+    args.ssa(src);
+    StringData*(*fPtr)(int64_t) = buildStringData;
+    cgCallHelper(m_as, (TCA)fPtr,
+                 dst, kNoSyncPoint, args);
+  } else if (fromType == Type::Bool) {
+    // Bool -> Str
+    m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
+    m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString(""),
+                       dstReg);
+    m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString("1"),
+                       rScratch);
+    m_as.cmov_reg64_reg64(CC_NZ, rScratch, dstReg);
+  } else {
+    CG_PUNT(ConvToString);
+  }
 }
 
 void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {

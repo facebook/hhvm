@@ -95,7 +95,12 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case Concat:        return simplifyConcat(src1, src2);
   case Mov:           return simplifyMov(src1);
   case LdClsPropAddr: return simplifyLdClsPropAddr(inst);
-  case Conv:          return simplifyConv(inst);
+  case ConvToArr:     return simplifyConvToArr(inst);
+  case ConvToBool:    return simplifyConvToBool(inst);
+  case ConvToDbl:     return simplifyConvToDbl(inst);
+  case ConvToInt:     return simplifyConvToInt(inst);
+  case ConvToObj:     return simplifyConvToObj(inst);
+  case ConvToStr:     return simplifyConvToStr(inst);
   case Unbox:         return simplifyUnbox(inst);
   case UnboxPtr:      return simplifyUnboxPtr(inst);
   case IsType:
@@ -418,7 +423,7 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
 
   // TODO: Add more algebraic simplification rules for NOT
   switch (op) {
-    case Conv:
+    case ConvToBool:
       return simplifyNot(inst->getSrc(0));
     case OpXor: {
       // !!X --> bool(X)
@@ -1082,108 +1087,141 @@ SSATmp* Simplifier::simplifyConcat(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConv(IRInstruction* inst) {
-  SSATmp* src      = inst->getSrc(0);
-  Type type   = src->getType();
-  Type toType = inst->getTypeParam();
-  if (toType == type) {
+SSATmp* Simplifier::simplifyConvToArr(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
+  Type srcType = src->getType();
+  if (srcType == Type::Arr) {
     return src;
   }
-  if (toType == Type::Str) {
-    if (type.isString()) {
-      return src;
+  if (srcType.isNull()) {
+    return m_tb->genDefConst(HphpArray::GetStaticEmptyArray());
+  }
+  // If the src is a constant, the result can be a constant array.
+  if (src->isConst()) {
+    switch (srcType.toDataType()) {
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfStaticString: {
+      auto arr = ArrayData::Create(src->getValVariant());
+      arr->incRefCount();
+      return m_tb->genDefConst(ArrayData::GetScalarArray(arr));
     }
-    // arrays always get converted to the string "Array"
-    if (type.isArray()) {
-      return m_tb->genDefConst(StringData::GetStaticString("Array"));
-    }
-    if (type.isNull()) {
-      return m_tb->genDefConst(StringData::GetStaticString(""));
-    }
-    if (src->isConst()) {
-      if (type == Type::Bool) {
-        if (src->getValBool()) {
-          return m_tb->genDefConst(StringData::GetStaticString("1"));
-        }
-        return m_tb->genDefConst(StringData::GetStaticString(""));
-      }
-      if (type == Type::Int) {
-        std::stringstream ss;
-        ss << src->getValInt();
-        return m_tb->genDefConst(StringData::GetStaticString(ss.str()));
-      }
-      if (type == Type::Dbl) {
-        // TODO constant dbl to string
-      }
+    default:
+      assert(!srcType.isArray());
+      break;
     }
   }
-  if (toType == Type::Bool) {
-    if (type.isNull()) {
-      return genDefBool(false);
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvToBool(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
+  Type srcType = src->getType();
+  if (srcType == Type::Bool) {
+    return src;
+  }
+  if (srcType.isNull()) {
+    return genDefBool(false);
+  }
+  if (srcType == Type::Obj) {
+    return genDefBool(true);
+  }
+  if (src->isConst()) {
+    if (srcType == Type::Int) {
+      return genDefBool(bool(src->getValInt()));
     }
-    if (type == Type::Obj) {
+    if (srcType == Type::StaticStr) {
+      // only the strings "", and "0" convert to false, all other strings
+      // are converted to true
+      const StringData* str = src->getValStr();
+      return genDefBool(!str->empty() && !str->isZero());
+    }
+    if (srcType.isArray()) {
+      if (src->getValArr()->empty()) {
+        return genDefBool(false);
+      }
       return genDefBool(true);
     }
-    if (src->isConst()) {
-      if (type == Type::Int) {
-        return genDefBool(bool(src->getValInt()));
-      }
-      if (type == Type::StaticStr) {
-        // only the strings "", and "0" convert to false, all other strings
-        // are converted to true
-        const StringData* str = src->getValStr();
-        return genDefBool(!str->empty() && !str->isZero());
-      }
-      if (type.isArray()) {
-        if (src->getValArr()->empty()) {
-          return genDefBool(false);
-        }
-        return genDefBool(true);
-      }
-    }
   }
-  if (toType == Type::Int) {
-    if (type.isNull()) {
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvToDbl(IRInstruction* inst) {
+  SSATmp* src = inst->getSrc(0);
+  Type type   = src->getType();
+  if (type == Type::Dbl) {
+    return src;
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvToInt(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
+  Type srcType = src->getType();
+  if (srcType == Type::Int) {
+    return src;
+  }
+  if (srcType.isNull()) {
+    return genDefInt(0);
+  }
+  if (src->isConst()) {
+    if (src->getType() == Type::Bool) {
+      return genDefInt(int(src->getValBool()));
+    }
+    if (srcType == Type::StaticStr) {
+      const StringData *str = src->getValStr();
+      if (str->isInteger()) {
+        return genDefInt(str->toInt64());
+      }
       return genDefInt(0);
     }
-    if (src->isConst()) {
-      if (src->getType() == Type::Bool) {
-        return genDefInt(int(src->getValBool()));
-      }
-      if (type == Type::StaticStr) {
-        const StringData *str = src->getValStr();
-        if (str->isInteger()) {
-          return genDefInt(str->toInt64());
-        }
+    if (srcType.isArray()) {
+      if (src->getValArr()->empty()) {
         return genDefInt(0);
       }
-      if (type.isArray()) {
-        if (src->getValArr()->empty()) {
-          return genDefInt(0);
-        }
-        return genDefInt(1);
-      }
+      return genDefInt(1);
     }
   }
-  if (toType == Type::Arr) {
-    if (type.isNull()) {
-      return m_tb->genDefConst(HphpArray::GetStaticEmptyArray());
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvToObj(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
+  Type srcType = src->getType();
+  if (srcType == Type::Obj) {
+    return src;
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvToStr(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
+  Type srcType = src->getType();
+  if (srcType.isString()) {
+    return src;
+  }
+  // arrays always get converted to the string "Array"
+  if (srcType.isArray()) {
+    return m_tb->genDefConst(StringData::GetStaticString("Array"));
+  }
+  if (srcType.isNull()) {
+    return m_tb->genDefConst(StringData::GetStaticString(""));
+  }
+  if (src->isConst()) {
+    if (srcType == Type::Bool) {
+      if (src->getValBool()) {
+        return m_tb->genDefConst(StringData::GetStaticString("1"));
+      }
+      return m_tb->genDefConst(StringData::GetStaticString(""));
     }
-    // If the src is a constant, the result can be a constant array.
-    if (src->isConst()) {
-      switch (type.toDataType()) {
-      case KindOfBoolean:
-      case KindOfInt64:
-      case KindOfDouble:
-      case KindOfStaticString: {
-        auto arr = ArrayData::Create(src->getValVariant());
-        arr->incRefCount();
-        return m_tb->genDefConst(ArrayData::GetScalarArray(arr));
-      }
-      default:
-        assert(!type.isArray());
-        break;
-      }
+    if (srcType == Type::Int) {
+      std::stringstream ss;
+      ss << src->getValInt();
+      return m_tb->genDefConst(StringData::GetStaticString(ss.str()));
+    }
+    if (srcType == Type::Dbl) {
+      // TODO constant dbl to string
     }
   }
   return nullptr;

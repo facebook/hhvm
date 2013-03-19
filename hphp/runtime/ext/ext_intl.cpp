@@ -741,7 +741,7 @@ static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant id
   int32_t     converted_len;
   UIDNA       *uts46;
   UIDNAInfo   info = UIDNA_INFO_INITIALIZER;
-  UErrorCode  status;
+  UErrorCode  status = U_ZERO_ERROR;
 
   // Get UIDNA instance which implements UTS #46.
   uts46 = uidna_openUTS46(options, &status);

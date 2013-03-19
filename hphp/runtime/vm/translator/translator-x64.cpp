@@ -3061,6 +3061,22 @@ struct DepthGuard { bool depthOne() const { return false; } };
 #endif
 
 /*
+ * enterTCHelper does not save callee-saved registers except %rbp. This means
+ * when we call it from C++, we have to tell gcc to clobber all the other
+ * callee-saved registers.
+ */
+#if defined(__x86_64__)
+#  define CALLEE_SAVED_BARRIER() \
+  asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15")
+#elif defined(__AARCH64EL__)
+#  define CALLEE_SAVED_BARRIER() \
+  asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25", \
+               "x26", "x27", "x28", "x29")
+#else
+#  error What are the callee-saved registers on your system?
+#endif
+
+/*
  * enterTCHelper
  *
  * This helper routine is written in x64 assembly to take care of the details
@@ -3071,10 +3087,6 @@ struct DepthGuard { bool depthOne() const { return false; } };
  *   rcx:  TReqInfo* infoPtr
  *   r8:   ActRec* firstAR
  *   r9:   uint8_t* targetCacheBase
- *
- * Note: enterTCHelper does not save callee-saved registers except
- * %rbp.  This means when we call it from C++, we have to tell gcc to
- * clobber all the other callee-saved registers.
  */
 static_assert(rVmSp == rbx &&
               rVmFp == rbp &&
@@ -3232,13 +3244,12 @@ TranslatorX64::enterTC(SrcKey sk) {
           vmfp(), ((ActRec*)vmfp())->m_func->name()->data(), vmsp());
     tl_regState = REGSTATE_DIRTY;
 
-    // The asm volatile here is to force C++ to spill anything that
-    // might be in a callee-saved register (aside from rbp).
-    // enterTCHelper does not preserve these registers.
-    asm volatile("" : : : "rbx","r12","r13","r14","r15");
+    // We have to force C++ to spill anything that might be in a callee-saved
+    // register (aside from rbp). enterTCHelper does not save them.
+    CALLEE_SAVED_BARRIER();
     enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
                   tl_targetCaches);
-    asm volatile("" : : : "rbx","r12","r13","r14","r15");
+    CALLEE_SAVED_BARRIER();
     assert(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));
 
     tl_regState = REGSTATE_CLEAN; // Careful: pc isn't sync'ed yet.

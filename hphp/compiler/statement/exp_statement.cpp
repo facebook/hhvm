@@ -46,47 +46,6 @@ StatementPtr ExpStatement::clone() {
 // parser functions
 
 void ExpStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
-  if (Option::OutputHHBC && !ar->isParseOnDemand()) return;
-  if (!m_exp->is(Expression::KindOfAssignmentExpression)) return;
-
-  AssignmentExpressionPtr assign =
-    dynamic_pointer_cast<AssignmentExpression>(m_exp);
-  if (!assign->getVariable()->is(Expression::KindOfArrayElementExpression)) {
-    return;
-  }
-  if (!assign->getValue()->is(Expression::KindOfScalarExpression) ||
-      !dynamic_pointer_cast<ScalarExpression>
-      (assign->getValue())->isLiteralString()) {
-    return;
-  }
-
-  string file = assign->getValue()->getLiteralString();
-  if (file.empty()) return;
-
-  string s = assign->getText();
-  string path = Option::GetAutoloadRoot(s);
-  if (path.empty()) return;
-
-  if (path[path.length() - 1] != '/' && file[0] != '/') {
-    file = path + '/' + file;
-  } else {
-    file = path + file;
-  }
-
-  if (Option::OutputHHBC) {
-    ar->parseOnDemand(file);
-    return;
-  }
-
-  ScalarExpressionPtr exp
-    (new ScalarExpression(getScope(), assign->getValue()->getLocation(),
-                          T_STRING, file, true));
-  IncludeExpressionPtr include
-    (new IncludeExpression(getScope(), assign->getLocation(),
-                           exp, T_INCLUDE_ONCE));
-  include->setDocumentRoot(); // autoload always starts from document root
-  include->onParse(ar, scope);
-  m_exp = include;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

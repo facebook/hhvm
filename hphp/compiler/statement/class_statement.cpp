@@ -271,8 +271,5 @@ void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 bool ClassStatement::hasImpl() const {
-  ClassScopeRawPtr cls = getClassScope();
-  return cls->isVolatile() ||
-    cls->getVariables()->getAttribute(VariableTable::ContainsDynamicStatic) ||
-    Option::OutputHHBC;
+  return true;
 }

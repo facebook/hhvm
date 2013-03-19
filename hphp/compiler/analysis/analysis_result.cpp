@@ -530,7 +530,7 @@ void AnalysisResult::checkClassDerivations() {
     BOOST_FOREACH(cls, iter->second) {
       hphp_string_iset seen;
       cls->checkDerivation(ar, seen);
-      if (Option::WholeProgram || !Option::OutputHHBC) {
+      if (Option::WholeProgram) {
         cls->importUsedTraits(ar);
       }
     }
@@ -1071,12 +1071,12 @@ typedef   OptWorker<Post>          PostOptWorker;
 
 template<>
 void OptWorker<Pre>::onThreadEnter() {
-  if (!Option::SystemGen) hphp_session_init();
+  hphp_session_init();
 }
 
 template<>
 void OptWorker<Pre>::onThreadExit() {
-  if (!Option::SystemGen) hphp_session_exit();
+  hphp_session_exit();
 }
 
 /**

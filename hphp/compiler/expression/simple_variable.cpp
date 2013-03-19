@@ -141,9 +141,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
   } else if (m_name == "GLOBALS") {
     m_globals = true;
   } else {
-    m_sym = variables->addDeclaredSymbol(
-      m_name,
-      Option::OutputHHBC ? shared_from_this() : ConstructPtr());
+    m_sym = variables->addDeclaredSymbol(m_name, shared_from_this());
   }
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {

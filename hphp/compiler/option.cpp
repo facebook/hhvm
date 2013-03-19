@@ -113,7 +113,6 @@ std::string Option::ProgramName;
 std::string Option::PreprocessedPartitionConfig;
 
 bool Option::ParseTimeOpts = true;
-bool Option::OutputHHBC = false;
 bool Option::EnableHipHopSyntax = false;
 bool Option::JitEnableRenameFunction = false;
 bool Option::EnableHipHopExperimentalSyntax = false;
@@ -151,7 +150,6 @@ bool Option::GenerateCppLibCode = false;
 bool Option::GenerateSourceInfo = false;
 bool Option::GenerateDocComments = true;
 bool Option::FlAnnotate = false;
-bool Option::SystemGen = false;
 
 void (*Option::m_hookHandler)(Hdf &config);
 bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);

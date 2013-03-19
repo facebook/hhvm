@@ -486,8 +486,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
   if (m_exp1->isScalar()) {
     if (!m_exp1->getScalarValue(v1)) return ExpressionPtr();
     try {
-      if (Option::OutputHHBC &&
-          (!Option::WholeProgram || !Option::ParseTimeOpts)) {
+      if (!Option::WholeProgram || !Option::ParseTimeOpts) {
         // In the VM, don't optimize __CLASS__ if within a trait, since
         // __CLASS__ is not resolved yet.
         ClassScopeRawPtr clsScope = getOriginalClass();

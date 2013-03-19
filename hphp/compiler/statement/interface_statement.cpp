@@ -64,8 +64,7 @@ StatementPtr InterfaceStatement::clone() {
 }
 
 bool InterfaceStatement::hasImpl() const {
-  ClassScopeRawPtr cls = getClassScope();
-  return cls->isVolatile() || Option::OutputHHBC;
+  return true;
 }
 
 int InterfaceStatement::getRecursiveCount() const {

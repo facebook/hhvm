@@ -123,8 +123,7 @@ TypePtr ParameterExpression::getTypeSpecForClass(AnalysisResultPtr ar,
   TypePtr ret;
   if (forInference) {
     ClassScopePtr cls = ar->findClass(m_type);
-    if (Option::SystemGen ||
-        !cls || cls->isRedeclaring() || cls->derivedByDynamic()) {
+    if (!cls || cls->isRedeclaring() || cls->derivedByDynamic()) {
       if (!cls && getScope()->isFirstPass()) {
         ConstructPtr self = shared_from_this();
         Compiler::Error(Compiler::UnknownClass, self);

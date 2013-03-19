@@ -851,7 +851,6 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
       Token origGenFunc;
       create_generator(this, out, params, name, closureName, nullptr, nullptr,
                        hasCallToGetArgs, origGenFunc,
-                       Option::OutputHHBC &&
                        (!Option::WholeProgram || !Option::ParseTimeOpts),
                        attr);
       m_closureGenerator = false;
@@ -1147,7 +1146,6 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     Token origGenFunc;
     create_generator(this, out, params, name, closureName, m_clsName.c_str(),
                      &modifiers, hasCallToGetArgs, origGenFunc,
-                     Option::OutputHHBC &&
                      (!Option::WholeProgram || !Option::ParseTimeOpts),
                      attr);
     MethodStatementPtr origStmt =

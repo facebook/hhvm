@@ -478,7 +478,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
       (Util::format_pattern(po.excludeStaticPatterns[i], true));
   }
 
-  Option::OutputHHBC = true;
   if (po.target == "hhbc" || po.target == "run") {
     Option::AnalyzePerfectVirtuals = false;
   }
@@ -509,11 +508,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
 
   if (po.optimizeLevel == -1) {
-    if (Option::OutputHHBC) {
-      po.optimizeLevel = 1;
-    } else {
-      po.optimizeLevel = 1;
-    }
+    po.optimizeLevel = 1;
   }
 
   // we always do pre/post opt no matter the opt level
@@ -522,9 +517,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   if (po.optimizeLevel == 0) {
     // --optimize-level=0 is equivalent to --opts=none
     po.optimizations = "none";
-    if (Option::OutputHHBC) {
-      Option::ParseTimeOpts = false;
-    }
+    Option::ParseTimeOpts = false;
   }
 
   return 0;
@@ -594,9 +587,7 @@ int process(const CompilerOptions &po) {
     } else {
       ar->loadBuiltins();
     }
-    if (!Option::SystemGen) {
-      hphp_process_init();
-    }
+    hphp_process_init();
   }
 
   {

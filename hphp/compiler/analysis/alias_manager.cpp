@@ -1551,11 +1551,10 @@ ExpressionPtr AliasManager::canonicalizeNode(
             }
             if (!m_inCall &&
                 ae->isUnused() && m_accessList.isLast(ae) &&
-                !(Option::OutputHHBC &&
-                  e->hasAnyContext(Expression::AccessContext |
-                                   Expression::ObjectContext |
-                                   Expression::ExistContext |
-                                   Expression::UnsetContext))) {
+                !e->hasAnyContext(Expression::AccessContext |
+                                  Expression::ObjectContext |
+                                  Expression::ExistContext |
+                                  Expression::UnsetContext)) {
               rep = ae->clone();
               ae->setContext(Expression::DeadStore);
               ae->setValue(ae->makeConstant(m_arp, "null"));
@@ -1821,22 +1820,6 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
       break;
 
     case Expression::KindOfSimpleFunctionCall:
-      if (!Option::OutputHHBC) {
-        SimpleFunctionCallPtr f(spc(SimpleFunctionCall, e));
-        if (!f->getClass()) {
-          if (f->getClassName().empty()) {
-            if (f->getFuncScope() &&
-                !f->getFuncScope()->isVolatile()) {
-              setInCall = false;
-            }
-          } else if (ClassScopePtr cls = f->resolveClass()) {
-            if (!cls->isVolatile()) {
-              setInCall = false;
-            }
-          }
-        }
-      }
-      // fall through
     case Expression::KindOfNewObjectExpression:
     case Expression::KindOfDynamicFunctionCall:
       inCall = setInCall;

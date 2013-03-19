@@ -120,58 +120,6 @@ ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultConstPtr ar) const {
       return rep;
     }
     if (s->hasImpl()) {
-      /*
-        In hphpc, marking a volatile class as defined is very cheap - just
-        setting a flag in GlobalVariables. So if all a file does is to define
-        a number of volatile classes (non-volatile classes are already ignored
-        by s->hasImpl()) we may as well just pull those definitions into
-        the requirer.
-        In hhvm, we would need to be able to find the unit that defines
-        the class in order to do the same thing. Not out of the question,
-        but a lot of complexity/fragility for not much gain (we already
-        omit the pseudomain if we manage to merge all the classes
-        successfully).
-      */
-      if (Option::OutputHHBC) break;
-      if (s->is(KindOfClassStatement) ||
-          s->is(KindOfInterfaceStatement)) {
-        ClassScopePtr cls(
-          static_pointer_cast<InterfaceStatement>(s)->getClassScope());
-
-        if (!cls->isVolatile()) continue;
-        if (cls->hasUnknownBases()) break;
-        if (!rep) {
-          rep = ExpressionListPtr(
-            new ExpressionList(getScope(), getLocation(),
-                               ExpressionList::ListKindWrapped));
-        }
-        UnaryOpExpressionPtr e(
-          new UnaryOpExpression(getScope(), getLocation(),
-                                makeScalarExpression(ar, cls->getName()),
-                                T_CLASS, true));
-        e->setDefinedScope(cls);
-        rep->addElement(e);
-        continue;
-      } else if (s->is(KindOfFunctionStatement)) {
-        FunctionScopePtr func(
-          static_pointer_cast<FunctionStatement>(s)->getFunctionScope());
-
-        if (!func->isVolatile()) continue;
-
-        if (!rep) {
-          rep = ExpressionListPtr(
-            new ExpressionList(getScope(), getLocation(),
-                               ExpressionList::ListKindWrapped));
-        }
-        UnaryOpExpressionPtr e(
-          new UnaryOpExpression(getScope(), getLocation(),
-                                makeScalarExpression(ar, func->getName()),
-                                T_FUNCTION, true));
-        e->setDefinedScope(func);
-        rep->addElement(e);
-        continue;
-      }
-
       break;
     }
   }

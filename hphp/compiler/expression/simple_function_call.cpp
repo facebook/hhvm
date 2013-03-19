@@ -201,7 +201,7 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
       // If all the parameters in the compact() call are statically known,
       // there is no need to create a variable table.
       vector<ExpressionPtr> literals;
-      if (!Option::OutputHHBC && m_params->flattenLiteralStrings(literals)) {
+      if (false && m_params->flattenLiteralStrings(literals)) {
         m_type = StaticCompactFunction;
         m_params->clearElements();
         for (unsigned i = 0; i < literals.size(); i++) {
@@ -550,7 +550,6 @@ bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
 }
 
 bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
-  if (Option::OutputHHBC) return false;
   if (m_class || !m_className.empty()) return false;
   if (m_type == DefineFunction && m_params &&
       unsigned(m_params->getCount() - 2) <= 1u) {
@@ -946,15 +945,6 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultConstPtr ar) {
-  if (!Option::KeepStatementsWithNoEffect && isDefineWithoutImpl(ar)) {
-    Construct::recomputeEffects();
-    if (m_extra) {
-      Symbol *sym = (Symbol *)m_extra;
-      Lock lock(BlockScope::s_constMutex);
-      sym->setReplaced();
-    }
-    return m_extra ? CONSTANT("true") : CONSTANT("false");
-  }
   if (m_type == StaticCompactFunction) {
     for (int i = 0; i < m_params->getCount(); i += 2) {
       ExpressionPtr e = (*m_params)[i + 1];
@@ -1477,7 +1467,7 @@ ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
         if (error) {
           rep.reset();
         } else if (rep) {
-          if (!Option::OutputHHBC || !isArray) {
+          if (!isArray) {
             rep->setSafeCall(-1);
             rep->addLateDependencies(ar);
             if (isArray) rep->setArrayParams();
@@ -1515,16 +1505,6 @@ ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
             ret.set(1, Variant());
             return call->makeScalarExpression(ar, ret);
           }
-        }
-        if (rep && !Option::OutputHHBC) {
-          if (isArray) rep->setArrayParams();
-          rep->addLateDependencies(ar);
-          rep->setSafeCall(1);
-          if (safe_ret) {
-            ExpressionPtr def = (*call->getParams())[1];
-            rep->setSafeDefault(def);
-          }
-          return rep;
         }
       }
     }

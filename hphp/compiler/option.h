@@ -267,7 +267,6 @@ public:
   static bool GenerateSourceInfo;
   static bool GenerateDocComments;
   static bool FlAnnotate; // annotate emitted code with compiler file-line info
-  static bool SystemGen; // -t cpp -f sys
   static bool ControlFlow;
   static bool VariableCoalescing;
   static bool DumpAst;

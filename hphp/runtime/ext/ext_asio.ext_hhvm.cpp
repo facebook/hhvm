@@ -290,6 +290,56 @@ TypedValue* fg_asio_set_on_failed_callback(HPHP::VM::ActRec *ar) {
 
 
 
+/*
+void HPHP::f_asio_set_on_started_callback(HPHP::Object const&)
+_ZN4HPHP30f_asio_set_on_started_callbackERKNS_6ObjectE
+
+on_started_cb => rdi
+*/
+
+void fh_asio_set_on_started_callback(Value* on_started_cb) asm("_ZN4HPHP30f_asio_set_on_started_callbackERKNS_6ObjectE");
+
+TypedValue * fg1_asio_set_on_started_callback(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_asio_set_on_started_callback(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_data.num = 0LL;
+  rv->m_type = KindOfNull;
+  tvCastToObjectInPlace(args-0);
+  fh_asio_set_on_started_callback((Value*)(args-0));
+  return rv;
+}
+
+TypedValue* fg_asio_set_on_started_callback(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfObject) {
+        rv.m_data.num = 0LL;
+        rv.m_type = KindOfNull;
+        fh_asio_set_on_started_callback((Value*)(args-0));
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_asio_set_on_started_callback(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("asio_set_on_started_callback", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
 
 } // !HPHP
 

@@ -73,5 +73,15 @@ void f_asio_set_on_failed_callback(CObjRef on_failed_cb) {
   AsioSession::Get()->setOnFailedCallback(on_failed_cb.get());
 }
 
+void f_asio_set_on_started_callback(CObjRef on_started_cb) {
+  if (!on_started_cb.isNull() && !on_started_cb.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set asio on started callback: on_started_cb not a closure"));
+    throw e;
+  }
+
+  AsioSession::Get()->setOnStartedCallback(on_started_cb.get());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

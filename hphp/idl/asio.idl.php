@@ -145,6 +145,23 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "asio_set_on_started_callback",
+    'desc'   => "Set callback to be called when a continuation is started",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "on_started_cb",
+        'type'   => Object,
+        'desc'   => "A Closure to be called when wait handle is started",
+      ),
+    ),
+  ));
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

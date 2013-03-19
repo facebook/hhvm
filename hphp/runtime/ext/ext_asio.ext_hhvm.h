@@ -81,6 +81,15 @@ on_failed_cb => rdi
 
 void fh_asio_set_on_failed_callback(Value* on_failed_cb) asm("_ZN4HPHP29f_asio_set_on_failed_callbackERKNS_6ObjectE");
 
+/*
+void HPHP::f_asio_set_on_started_callback(HPHP::Object const&)
+_ZN4HPHP30f_asio_set_on_started_callbackERKNS_6ObjectE
+
+on_started_cb => rdi
+*/
+
+void fh_asio_set_on_started_callback(Value* on_started_cb) asm("_ZN4HPHP30f_asio_set_on_started_callbackERKNS_6ObjectE");
+
 
 } // !HPHP
 

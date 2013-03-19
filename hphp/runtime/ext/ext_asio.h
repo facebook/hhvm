@@ -31,6 +31,7 @@ Object f_asio_get_running_in_context(int ctx_idx);
 Object f_asio_get_running();
 Object f_asio_get_current();
 void f_asio_set_on_failed_callback(CObjRef on_failed_cb);
+void f_asio_set_on_started_callback(CObjRef on_failed_cb);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class WaitHandle

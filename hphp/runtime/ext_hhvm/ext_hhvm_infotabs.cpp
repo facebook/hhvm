@@ -151,6 +151,7 @@ TypedValue* fg_asio_get_running_in_context(VM::ActRec *ar);
 TypedValue* fg_asio_get_running(VM::ActRec *ar);
 TypedValue* fg_asio_get_current(VM::ActRec *ar);
 TypedValue* fg_asio_set_on_failed_callback(VM::ActRec *ar);
+TypedValue* fg_asio_set_on_started_callback(VM::ActRec *ar);
 TypedValue* fg_bcscale(VM::ActRec *ar);
 TypedValue* fg_bcadd(VM::ActRec *ar);
 TypedValue* fg_bcsub(VM::ActRec *ar);
@@ -3022,7 +3023,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2208;
+const long long hhbc_ext_funcs_count = 2209;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -3152,6 +3153,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "asio_get_running", fg_asio_get_running, (void *)&fh_asio_get_running },
   { "asio_get_current", fg_asio_get_current, (void *)&fh_asio_get_current },
   { "asio_set_on_failed_callback", fg_asio_set_on_failed_callback, (void *)&fh_asio_set_on_failed_callback },
+  { "asio_set_on_started_callback", fg_asio_set_on_started_callback, (void *)&fh_asio_set_on_started_callback },
   { "bcscale", fg_bcscale, (void *)&fh_bcscale },
   { "bcadd", fg_bcadd, (void *)&fh_bcadd },
   { "bcsub", fg_bcsub, (void *)&fh_bcsub },

@@ -32,7 +32,8 @@ void AsioSession::Init() {
   s_current.set(new AsioSession());
 }
 
-AsioSession::AsioSession() : m_contexts(), m_onFailedCallback(nullptr) {
+AsioSession::AsioSession()
+    : m_contexts(), m_onFailedCallback(nullptr), m_onStartedCallback(nullptr) {
 }
 
 void AsioSession::enterContext() {
@@ -86,6 +87,27 @@ void AsioSession::onFailed(CObjRef exception) {
     } catch (Object callback_exception) {
       raise_warning("[asio] Ignoring exception thrown by onFailed callback");
     }
+  }
+}
+
+void AsioSession::setOnStartedCallback(ObjectData* on_started_callback) {
+  if (on_started_callback) {
+    on_started_callback->incRefCount();
+  }
+
+  if (m_onStartedCallback) {
+    decRefObj(m_onStartedCallback);
+  }
+
+  m_onStartedCallback = on_started_callback;
+}
+
+void AsioSession::onStarted(CObjRef wait_handle) {
+  assert(m_onStartedCallback);
+  try {
+    f_call_user_func_array(m_onStartedCallback, Array::Create(wait_handle));
+  } catch (Object callback_exception) {
+    raise_warning("[asio] Ignoring exception thrown by onStarted callback");
   }
 }
 

@@ -68,6 +68,11 @@ class AsioSession {
     void setOnFailedCallback(ObjectData* on_failed_callback);
     void onFailed(CObjRef exception);
 
+    // callback: on started
+    void setOnStartedCallback(ObjectData* on_started_callback);
+    void onStarted(CObjRef wait_handle);
+    bool hasOnStartedCallback() { return m_onStartedCallback; }
+
   private:
     static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);
 
@@ -75,6 +80,7 @@ class AsioSession {
 
     smart::vector<AsioContext*> m_contexts;
     ObjectData* m_onFailedCallback;
+    ObjectData* m_onStartedCallback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

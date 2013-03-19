@@ -77,8 +77,11 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation,
     return cont->m_waitHandle;
   }
 
-  c_ContinuationWaitHandle* wh = NEWOBJ(c_ContinuationWaitHandle)();
+  p_ContinuationWaitHandle wh = NEWOBJ(c_ContinuationWaitHandle)();
   wh->start(cont, static_cast<uint32_t>(prio), depth + 1);
+  if (UNLIKELY(session->hasOnStartedCallback())) {
+    session->onStarted(wh);
+  }
   return wh;
 }
 

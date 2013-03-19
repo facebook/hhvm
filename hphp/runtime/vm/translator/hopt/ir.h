@@ -1504,8 +1504,11 @@ struct IRInstruction {
    */
   bool       isTransient() const       { return m_iid == kTransient; }
 
-  RegSet     getLiveOutRegs() const    { return m_liveOutRegs; }
-  void       setLiveOutRegs(RegSet s)  { m_liveOutRegs = s; }
+  // LiveRegs is the set of registers that are live across this instruction.
+  // Doesn't include dest registers, or src registers whose lifetime ends here.
+  RegSet     getLiveRegs() const       { return m_liveRegs; }
+  void       setLiveRegs(RegSet s)     { m_liveRegs = s; }
+
   Block*     getBlock() const          { return m_block; }
   void       setBlock(Block* b)        { m_block = b; }
   Trace*     getTrace() const;
@@ -1563,7 +1566,7 @@ private:
   const IId         m_iid;
   uint32_t          m_id;
   SSATmp**          m_srcs;
-  RegSet            m_liveOutRegs;
+  RegSet            m_liveRegs;
   SSATmp*           m_dst;     // if HasDest or NaryDest
   Block*            m_taken;   // for branches, guards, and jmp
   Block*            m_block;   // block that owns this instruction
@@ -1713,9 +1716,10 @@ public:
    *
    * Returns InvalidReg for slots that aren't allocated.
    */
-  PhysReg     getReg() const { assert(!m_isSpilled); return m_regs[0]; }
-  PhysReg     getReg(uint32_t i) const { assert(!m_isSpilled); return m_regs[i]; }
-  void        setReg(PhysReg reg, uint32_t i) { m_regs[i] = reg; }
+  PhysReg getReg() const { assert(!m_isSpilled); return m_regs[0]; }
+  PhysReg getReg(uint32_t i) const { assert(!m_isSpilled); return m_regs[i]; }
+  void    setReg(PhysReg reg, uint32_t i) { m_regs[i] = reg; }
+  RegSet  getRegs() const;
 
   /*
    * Returns information about how to spill/fill a SSATmp.

@@ -758,9 +758,9 @@ void CodeGenerator::cgCallHelper(Asm& a,
   // Save the register that are live at the point after this IR instruction.
   // However, don't save the destination registers that will be overwritten
   // by this call.
-  RegSet regsToSave = (m_curInst->getLiveOutRegs() & kCallerSaved).
-                      remove(dstReg0).remove(dstReg1);
-  PhysRegSaverParity<1> regSaver(a, regsToSave);
+  RegSet toSave = m_curInst->getLiveRegs() & kCallerSaved;
+  assert((toSave & RegSet().add(dstReg0).add(dstReg1)).empty());
+  PhysRegSaverParity<1> regSaver(a, toSave);
 
   // Assign registers to the arguments
   for (size_t i = 0; i < args.size(); i++) {
@@ -2484,10 +2484,7 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto const rDest     = inst->getDst()->getReg();
   auto& a = m_as;
 
-  RegSet retvalRegs;
-  for (int i = 0; i < retVal->numAllocatedRegs(); ++i) {
-    retvalRegs.add(retVal->getReg(i));
-  }
+  RegSet retvalRegs = retVal->getRegs();
   assert(retvalRegs.size() <= 2);
 
   /*
@@ -2509,7 +2506,7 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
    * are still allocated to registers at this time.
    */
   const auto UNUSED expectedLiveRegs = RegSet(rFp).add(rDest) | retvalRegs;
-  assert((m_curInst->getLiveOutRegs() - expectedLiveRegs).empty());
+  assert((m_curInst->getLiveRegs() - expectedLiveRegs).empty());
   assert(rFp == rVmFp &&
          "free locals helper assumes the frame pointer is rVmFp");
   assert(rDest == rVmSp &&
@@ -2825,7 +2822,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
   if (exit == nullptr && RuntimeOption::EvalHHIRGenericDtorHelper) {
     {
       // This PhysRegSaverParity saves rdi redundantly if
-      // !m_curInst->getLiveOutRegs().contains(rdi), but its
+      // !m_curInst->getLiveRegs().contains(rdi), but its
       // necessary to maintain stack alignment. We can do better
       // by making the helpers adjust the stack for us in the cold
       // path, which calls the destructor.
@@ -3802,15 +3799,14 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
                                           getContextName(getCurClass()));
   auto funcDestReg  = dst->getReg(0);
   auto classDestReg = dst->getReg(1);
+  auto offsetof_func = offsetof(TargetCache::StaticMethodCache, m_func);
+  auto offsetof_cls  = offsetof(TargetCache::StaticMethodCache, m_cls);
 
   assert(funcDestReg != InvalidReg && classDestReg != InvalidReg);
   // Attempt to retrieve the func* and class* from cache
-  m_as.load_reg64_disp_reg64(rVmTl, ch, funcDestReg);
-  m_as.load_reg64_disp_reg64(rVmTl,
-                             ch + offsetof(TargetCache::StaticMethodCache,
-                                           m_cls),
-                             classDestReg);
-  m_as.test_reg64_reg64(funcDestReg, funcDestReg);
+  m_as.loadq(rVmTl[ch + offsetof_func], funcDestReg);
+  m_as.loadq(rVmTl[ch + offsetof_cls], classDestReg);
+  m_as.testq(funcDestReg, funcDestReg);
   // May have retrieved a NULL from the cache
   // handle case where method is not entered in the cache
   unlikelyIfBlock(CC_E, [&] {
@@ -3828,11 +3824,8 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
                            .immPtr(method)     // methodName
     );
     // recordInstrCall is done in cgCallHelper
-    m_astubs.test_reg64_reg64(funcDestReg, funcDestReg);
-    m_astubs.load_reg64_disp_reg64(rVmTl,
-                                   ch + offsetof(TargetCache::StaticMethodCache,
-                                                 m_cls),
-                                   classDestReg);
+    m_astubs.testq(funcDestReg, funcDestReg);
+    m_astubs.loadq(rVmTl[ch + offsetof_cls], classDestReg);
     // if StaticMethodCache::lookupIR() returned NULL, jmp to label
     emitFwdJcc(m_astubs, CC_Z, label);
   });
@@ -3931,6 +3924,8 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
     if (false) { // typecheck
       const UNUSED Func* f = StaticMethodFCache::lookupIR(ch, cls, methName);
     }
+    // preserve destCtxReg across the call since it wouldn't be otherwise
+    inst->setLiveRegs(inst->getLiveRegs().add(destCtxReg));
     cgCallHelper(m_astubs,
                  (TCA)StaticMethodFCache::lookupIR,
                  funcDestReg,

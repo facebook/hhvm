@@ -545,7 +545,7 @@ void IRInstruction::convertToNop() {
   m_numSrcs = nop.m_numSrcs;
   m_id = nop.m_id;
   m_srcs = nop.m_srcs;
-  m_liveOutRegs = nop.m_liveOutRegs;
+  m_liveRegs = nop.m_liveRegs;
   m_numDsts = nop.m_numDsts;
   m_dst = nop.m_dst;
   m_taken = nullptr;
@@ -716,7 +716,8 @@ void IRInstruction::print(std::ostream& ostream) const {
   }
 
   if (!isTransient()) {
-    ostream << folly::format("({:02d}) ", getIId());
+    if (!m_id) ostream << folly::format("({:02d}) ", getIId());
+    else ostream << folly::format("({:02d}@{:02d}) ", getIId(), m_id);
   }
   printDst(ostream);
 
@@ -881,6 +882,13 @@ int SSATmp::numAllocatedRegs() const {
   return i;
 }
 
+RegSet SSATmp::getRegs() const {
+  RegSet regs;
+  for (int i = 0, n = numAllocatedRegs(); i < n; ++i) {
+    if (hasReg(i)) regs.add(getReg(i));
+  }
+  return regs;
+}
 
 bool SSATmp::getValBool() const {
   assert(isConst());

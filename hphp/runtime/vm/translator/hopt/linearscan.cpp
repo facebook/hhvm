@@ -97,8 +97,8 @@ private:
   void allocRegToTmp(SSATmp* ssaTmp, uint32_t index);
   void freeRegsAtId(uint32_t id);
   void spill(SSATmp* tmp);
-  void computeLiveOutRegs();
-  static RegSet computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs);
+  void computeLiveRegs();
+  static RegSet computeLiveRegs(IRInstruction* inst, RegSet liveRegs);
 
   void initFreeList();
   void coalesce(Trace* trace);
@@ -202,52 +202,38 @@ LinearScan::LinearScan(IRFactory* irFactory)
   }
 }
 
-RegSet LinearScan::computeLiveOutRegs(IRInstruction* inst, RegSet liveRegs) {
+/*
+ * Compute and save registers that are live *across* inst, not including
+ * registers whose lifetimes end at inst, nor registers defined by inst.
+ * Return the updated live set, including registers defined by inst.
+ */
+RegSet LinearScan::computeLiveRegs(IRInstruction* inst, RegSet live) {
   uint32_t instId = inst->getId();
   for (SSATmp* src : inst->getSrcs()) {
-    if (src->getLastUseId() <= instId) {
-      for (int locIndex = 0;
-           locIndex < src->numAllocatedRegs();
-           ++locIndex) {
-        if (src->hasReg(locIndex)) {
-          // inst is the last use of the register assigned to this SSATmp
-          // remove src reg from live regs set
-          liveRegs.remove(src->getReg(locIndex));
-        }
-      }
-    }
+    if (src->getLastUseId() <= instId) live -= src->getRegs();
   }
-  // add the destination registers to the live regs set
+  RegSet def, defOut;
   for (const SSATmp& dst : inst->getDsts()) {
-    if (dst.getLastUseId() > instId) {
-      for (int locIndex = 0;
-           locIndex < dst.numAllocatedRegs();
-           locIndex++) {
-        if (dst.hasReg(locIndex)) {
-          liveRegs.add(dst.getReg(locIndex));
-        }
-      }
-    }
+    RegSet d = dst.getRegs();
+    if (dst.getLastUseId() > instId) defOut |= d;
+    live -= d;
   }
-  inst->setLiveOutRegs(liveRegs);
-  return liveRegs;
+  inst->setLiveRegs(live);
+  return live | defOut;
 }
 
 /*
- * Computes the live out regs at each instruction in a trace.
- * This function takes as the second argument an initial live
- * register set at the start of the trace and returns the live
- * registers at the end of the trace.
+ * Computes the live regs at each instruction in a trace.
  * The function uses the same last use information and instruction
  * ordering used by the linear scan register allocator, so its
  * important that this function iterates over the instruction in
  * the same order that linear scan orders the instructions.
  */
-void LinearScan::computeLiveOutRegs() {
-  RegSet liveOutRegs;
+void LinearScan::computeLiveRegs() {
+  RegSet liveRegs;
   for (Block* block : m_blocks) {
     for (IRInstruction& inst : *block) {
-      liveOutRegs = LinearScan::computeLiveOutRegs(&inst, liveOutRegs);
+      liveRegs = LinearScan::computeLiveRegs(&inst, liveRegs);
     }
   }
 }
@@ -276,11 +262,8 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
       inst->setSrc(i, tmp);
     }
     if (!needsReloading[i]) {
-      for (int locIndex = 0;
-           locIndex < tmp->numAllocatedRegs();
-           ++locIndex) {
-        auto srcReg = tmp->getReg(locIndex);
-        m_regs[int(srcReg)].m_pinned = true;
+      for (int i = 0, n = tmp->numAllocatedRegs(); i < n; ++i) {
+        m_regs[int(tmp->getReg(i))].m_pinned = true;
       }
     }
   }
@@ -843,8 +826,8 @@ void LinearScan::allocRegs(Trace* trace) {
   }
   numberInstructions(m_blocks);
 
-  // record the live out register set at each instruction
-  computeLiveOutRegs();
+  // record the live register set at each instruction
+  computeLiveRegs();
 }
 
 void LinearScan::allocRegsToTrace() {

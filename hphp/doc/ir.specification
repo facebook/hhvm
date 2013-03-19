@@ -689,7 +689,13 @@ D:PtrToGen = LdClsPropAddrCached S0:Cls S1:ConstStr S2:ConstStr
   throw a fatal error if the optional label L is not present, or (2)
   jump to L if it is present.
 
-D:Func = LdObjMethod S0:ConstInt S1:ConstStr S2:StkPtr
+LdObjMethod S0:Cls S1:ConstStr S2:StkPtr
+
+  Stores a pointer to an object's method into an activation record. S0
+  points to the object's class, S1 is the method name, and S3 points
+  to the activation record. Caches the mapping in the target
+  cache. Fatals if the class does not have an accessible method with
+  the given name and does not have a __call method.
 
 D:Cls = LdObjClass S0:Obj
 

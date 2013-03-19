@@ -70,8 +70,6 @@ static CallMap s_callMap({
                            {{SSA, 0}, {TV, 1}}},
     {ArrayAdd,           (TCA)array_add, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
     {Box,                (TCA)box_value, DSSA, SNone, {{TV, 0}}},
-    {LdObjMethod,        (TCA)TargetCache::MethodCache::lookup,
-                           DSSA, SSync, {{SSA, 0}, {SSA, 2}, {SSA, 1}}},
     {NewArray,           (TCA)new_array, DSSA, SNone, {{SSA, 0}}},
     {NewTuple,           (TCA)new_tuple, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},

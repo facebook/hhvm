@@ -461,61 +461,81 @@ void methodCacheSlowPath(MethodCache::Pair* mce,
   assert(ar->getThis()->getVMClass() == cls);
   assert(IMPLIES(mce->m_key, mce->m_value));
 
-  bool isMagicCall = mce->m_key & 0x1u;
-  bool isStatic;
-  const Func* func;
+  try {
+    bool isMagicCall = mce->m_key & 0x1u;
+    bool isStatic;
+    const Func* func;
 
-  auto* storedClass = reinterpret_cast<Class*>(mce->m_key & ~0x3u);
-  if (storedClass == cls) {
-    isStatic = mce->m_key & 0x2u;
-    func = mce->m_value;
-  } else {
-    if (LIKELY(storedClass != nullptr &&
-               ((func = cls->wouldCall(mce->m_value)) != nullptr) &&
-               !isMagicCall)) {
-      Stats::inc(Stats::TgtCache_MethodHit, func != nullptr);
-      isMagicCall = false;
+    auto* storedClass = reinterpret_cast<Class*>(mce->m_key & ~0x3u);
+    if (storedClass == cls) {
+      isStatic = mce->m_key & 0x2u;
+      func = mce->m_value;
     } else {
-      Class* ctx = arGetContextClass((ActRec*)ar->m_savedRbp);
-      Stats::inc(Stats::TgtCache_MethodMiss);
-      TRACE(2, "MethodCache: miss class %p name %s!\n", cls, name->data());
-      func = g_vmContext->lookupMethodCtx(cls, name, ctx,
-        MethodLookup::ObjMethod, false);
-      if (UNLIKELY(!func)) {
-        isMagicCall = true;
-        func = cls->lookupMethod(s___call.get());
-        if (UNLIKELY(!func)) {
-          // Do it again, but raise the error this time.
-          (void) g_vmContext->lookupMethodCtx(cls, name, ctx,
-                    MethodLookup::ObjMethod, true);
-          NOT_REACHED();
-        }
-      } else {
+      if (LIKELY(storedClass != nullptr &&
+                 ((func = cls->wouldCall(mce->m_value)) != nullptr) &&
+                 !isMagicCall)) {
+        Stats::inc(Stats::TgtCache_MethodHit, func != nullptr);
         isMagicCall = false;
+      } else {
+        Class* ctx = arGetContextClass((ActRec*)ar->m_savedRbp);
+        Stats::inc(Stats::TgtCache_MethodMiss);
+        TRACE(2, "MethodCache: miss class %p name %s!\n", cls, name->data());
+        func = g_vmContext->lookupMethodCtx(cls, name, ctx,
+                                            MethodLookup::ObjMethod, false);
+        if (UNLIKELY(!func)) {
+          isMagicCall = true;
+          func = cls->lookupMethod(s___call.get());
+          if (UNLIKELY(!func)) {
+            // Do it again, but raise the error this time.
+            (void) g_vmContext->lookupMethodCtx(cls, name, ctx,
+                                                MethodLookup::ObjMethod, true);
+            NOT_REACHED();
+          }
+        } else {
+          isMagicCall = false;
+        }
       }
+
+      isStatic = func->attrs() & AttrStatic;
+
+      mce->m_key = uintptr_t(cls) | (uintptr_t(isStatic) << 1) |
+        uintptr_t(isMagicCall);
+      mce->m_value = func;
     }
 
-    isStatic = func->attrs() & AttrStatic;
+    assert(func);
+    func->validate();
+    ar->m_func = func;
 
-    mce->m_key = uintptr_t(cls) | (uintptr_t(isStatic) << 1) |
-                 uintptr_t(isMagicCall);
-    mce->m_value = func;
-  }
+    if (UNLIKELY(isStatic)) {
+      decRefObj(ar->getThis());
+      if (debug) ar->setThis(nullptr); // suppress assert in setClass
+      ar->setClass(cls);
+    }
 
-  assert(func);
-  func->validate();
-  ar->m_func = func;
-
-  if (UNLIKELY(isStatic)) {
-    decRefObj(ar->getThis());
-    if (debug) ar->setThis(nullptr); // suppress assert in setClass
-    ar->setClass(cls);
-  }
-
-  assert(!ar->hasVarEnv() && !ar->hasInvName());
-  if (UNLIKELY(isMagicCall)) {
-    ar->setInvName(name);
-    assert(name->isStatic()); // No incRef needed.
+    assert(!ar->hasVarEnv() && !ar->hasInvName());
+    if (UNLIKELY(isMagicCall)) {
+      ar->setInvName(name);
+      assert(name->isStatic()); // No incRef needed.
+    }
+  } catch (...) {
+    /*
+     * Barf.
+     *
+     * If the slow lookup fails, we're going to rewind to the state
+     * before the FPushObjMethodD that dumped us here. In this state,
+     * the object is still on the stack, but for efficiency reasons,
+     * we've smashed this TypedValue* with the ActRec we were trying
+     * to push.
+     *
+     * Reconstitute the virtual object before rethrowing.
+     */
+    TypedValue* shouldBeObj = reinterpret_cast<TypedValue*>(ar) +
+      kNumActRecCells - 1;
+    ObjectData* arThis = ar->getThis();
+    shouldBeObj->m_type = KindOfObject;
+    shouldBeObj->m_data.pobj = arThis;
+    throw;
   }
 }
 

@@ -1834,7 +1834,6 @@ void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
-  auto dstReg    = inst->getDst()->getReg();
   auto cls       = inst->getSrc(0);
   auto clsReg    = cls->getReg();
   auto name      = inst->getSrc(1);
@@ -1860,7 +1859,8 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
                m_as.storeq(rScratch, actRecReg[AROFF(m_func)]);
              },
              [&] { // else call slow path helper
-               cgCallHelper(m_as, (TCA)methodCacheSlowPath, dstReg, kSyncPoint,
+               cgCallHelper(m_as, (TCA)methodCacheSlowPath, InvalidReg,
+                            kSyncPoint,
                             ArgGroup().addr(rVmTl, handle)
                                       .ssa(actRec)
                                       .ssa(name)

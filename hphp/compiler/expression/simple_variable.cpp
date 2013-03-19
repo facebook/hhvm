@@ -172,7 +172,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_sym) {
+    if (m_sym && !m_this) {
       if (!m_sym->isSystem() &&
           !(getContext() &
             (LValue|RefValue|RefParameter|UnsetContext|ExistContext)) &&

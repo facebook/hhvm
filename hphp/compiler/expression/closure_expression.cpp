@@ -172,6 +172,13 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
   }
+
+  FunctionScopeRawPtr container = 
+    getFunctionScope()->getContainingNonClosureFunction();
+  if (container && container->isStatic()) {
+    m_func->getModifiers()->add(T_STATIC);
+  }
+
 }
 
 TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,

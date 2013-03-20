@@ -5582,7 +5582,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
   ar->m_func = func;
   arSetSfp(ar, m_fp);
   if (origObj) {
-    if (func->attrs() & AttrStatic) {
+    if (func->attrs() & AttrStatic && !func->isClosureBody()) {
       ar->setClass(origObj->getVMClass());
       decRefObj(origObj);
     } else {

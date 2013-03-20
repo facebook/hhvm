@@ -146,7 +146,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     if (FunctionScopePtr func = getFunctionScope()) {
-      if (m_name == "this" && (func->inPseudoMain() || getClassScope())) {
+      if (m_name == "this" && func->mayContainThis()) {
         func->setContainsThis();
         m_this = true;
         if (!hasContext(ObjectContext)) {

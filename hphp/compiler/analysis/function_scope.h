@@ -109,6 +109,7 @@ public:
   bool hasImpl() const;
   void setDirectInvoke() { m_directInvoke = true; }
   bool hasDirectInvoke() const { return m_directInvoke; }
+  bool mayContainThis();
   bool isClosure() const;
   bool isGenerator() const;
   bool isGeneratorFromClosure() const;

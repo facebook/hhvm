@@ -310,7 +310,7 @@ void create_generator(Parser *_p, Token &out, Token &params,
     _p->finishStatement(out, stmts2); out = 1;
   } else {
     out.reset();
-    _p->onFunction(out, ret, ref, name, params, scont, attr);
+    _p->onFunction(out, modifiers, ret, ref, name, params, scont, attr);
     origGenFunc = out;
   }
 }
@@ -1139,7 +1139,7 @@ function_declaration_statement:
     '(' parameter_list ')'
     sm_opt_return_type
     '{' inner_statement_list '}'       { Token t; t.reset();
-                                         _p->onFunction($$,t,$2,$3,$6,$10,0);
+                                         _p->onFunction($$,0,t,$2,$3,$6,$10,0);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
   | non_empty_user_attributes function_loc
@@ -1149,7 +1149,7 @@ function_declaration_statement:
     '(' parameter_list ')'
     sm_opt_return_type
     '{' inner_statement_list '}'       { Token t; t.reset();
-                                         _p->onFunction($$,t,$3,$4,$7,$11,&$1);
+                                         _p->onFunction($$,0,t,$3,$4,$7,$11,&$1);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
 ;
@@ -1717,12 +1717,21 @@ expr_no_variable:
   | array_literal                      { $$ = $1;}
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
-  | function_loc is_reference '('      { Token t; _p->onClosureStart(t);
+  | function_loc 
+    is_reference '('                   { Token t; _p->onClosureStart(t);
                                          _p->pushLabelInfo();}
     parameter_list ')'
     sm_opt_return_type lexical_vars
     '{' inner_statement_list '}'       { Token u; u.reset();
-                                         _p->onClosure($$,u,$2,$5,$8,$10);
+                                         _p->onClosure($$,u,$2,$5,$8,$10,0);
+                                         _p->popLabelInfo();}
+  | T_STATIC function_loc 
+    is_reference '('                   { Token t; _p->onClosureStart(t);
+                                         _p->pushLabelInfo();}
+    parameter_list ')'
+    sm_opt_return_type lexical_vars
+    '{' inner_statement_list '}'       { Token u; u.reset();
+                                         _p->onClosure($$,u,$3,$6,$9,$11,1);
                                          _p->popLabelInfo();}
   | xhp_tag                            { $$ = $1;}
   | dim_expr                           { $$ = $1;}

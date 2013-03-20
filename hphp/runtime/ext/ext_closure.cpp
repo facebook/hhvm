@@ -41,18 +41,25 @@ void c_Closure::t___construct() {
     VM::ActRec* childClosure = context->getPrevVMState(me);
     ar = context->getPrevVMState(childClosure);
   }
+  
+  static StringData* invokeName = StringData::GetStaticString("__invoke");
+  VM::Func* invokeFunc = getVMClass()->lookupMethod(invokeName);
 
-  // I don't care if it is a $this or a late bound class because we will just
-  // put it back in the same place on an ActRec.
-  m_thisOrClass = ar->m_this;
-  if (ar->hasThis()) {
-    ar->getThis()->incRefCount();
+  if (invokeFunc->attrs() & VM::AttrStatic) {
+    // Only set the class for static closures
+    m_thisOrClass = (ObjectData*)(intptr_t(ar->m_func->cls()) | 1LL);
+  } else {
+    // I don't care if it is a $this or a late bound class because we will just
+    // put it back in the same place on an ActRec.
+    m_thisOrClass = ar->m_this;
+    if (ar->hasThis()) {
+      ar->getThis()->incRefCount();
+    }
   }
 
   // Change my __invoke's m_cls to be the same as my creator's
-  static StringData* invokeName = StringData::GetStaticString("__invoke");
   VM::Class* scope = ar->m_func->cls();
-  m_func = getVMClass()->lookupMethod(invokeName)->cloneAndSetClass(scope);
+  m_func = invokeFunc->cloneAndSetClass(scope);
 }
 
 ObjectData* c_Closure::clone() {

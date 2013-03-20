@@ -9377,7 +9377,8 @@ TranslatorX64::translateThis(const Tracelet &t,
   }
 
   assert(!i.outLocal);
-  assert(curFunc()->isPseudoMain() || curFunc()->cls());
+  assert(curFunc()->isPseudoMain() || curFunc()->cls() || 
+         curFunc()->isClosureBody());
   m_regMap.allocOutputRegs(i);
   PhysReg out = getReg(i.outStack->location);
   a.   load_reg64_disp_reg64(rVmFp, AROFF(m_this), out);
@@ -9396,7 +9397,7 @@ TranslatorX64::translateBareThis(const Tracelet &t,
     return;
   }
   assert(!i.outLocal);
-  assert(curFunc()->cls());
+  assert(curFunc()->cls() || curFunc()->isClosureBody());
   ScratchReg outScratch(m_regMap);
   PhysReg out = r(outScratch);
   PhysReg base;

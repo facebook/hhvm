@@ -396,6 +396,7 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
   StatementListPtr st = m_tree;
   FunctionStatementPtr f
     (new FunctionStatement(BlockScopePtr(), LocationPtr(),
+                           ModifierExpressionPtr(),
                            false, pseudoMainName(),
                            ExpressionListPtr(), st, 0, "",
                            ExpressionListPtr()));

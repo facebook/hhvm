@@ -316,9 +316,9 @@ struct Parser : ParserBase {
     X(name);
   }
 
-  void onFunction(Token& out, Token& ret, Token& ref, Token& name,
-                  Token& params, Token& stmt, Token* attr) {
-    X(ret, ref, name, params, stmt, attr);
+  void onFunction(Token& out, Token* modifiers, Token& ret, Token& ref, 
+                  Token& name, Token& params, Token& stmt, Token* attr) {
+    X(modifiers, ret, ref, name, params, stmt, attr);
   }
 
   void onParam(Token &out, Token *params, Token &type, Token &var,
@@ -482,9 +482,9 @@ struct Parser : ParserBase {
 
   void onThrow(Token &out, Token &expr) { X(expr); }
 
-  void onClosure(Token &out, Token &ret, Token &ref, Token &params,
-                 Token &cparams, Token &stmts) {
-    X(ret, ref, params, cparams, stmts);
+  void onClosure(Token &out, Token &ret, Token &ref, Token &params, 
+                 Token &cparams, Token &stmts, bool is_static) {
+    X(ret, ref, params, cparams, stmts, is_static);
   }
 
   void onClosureParam(Token &out, Token *params, Token &param, bool ref) {

@@ -331,6 +331,11 @@ bool FunctionScope::needsActRec() const {
   return res;
 }
 
+bool FunctionScope::mayContainThis() {
+  return inPseudoMain() || getContainingClass() ||
+    (isClosure() && !m_modifiers->isStatic());
+}
+
 bool FunctionScope::isClosure() const {
   return ParserBase::IsClosureName(name());
 }

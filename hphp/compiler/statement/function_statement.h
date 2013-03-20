@@ -31,9 +31,9 @@ DECLARE_BOOST_TYPES(FunctionStatement);
 class FunctionStatement : public MethodStatement {
 public:
   FunctionStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
-                    bool ref, const std::string &name,
-                    ExpressionListPtr params, StatementListPtr stmt,
-                    int attr,
+                    ModifierExpressionPtr modifiers, bool ref, 
+                    const std::string &name, ExpressionListPtr params, 
+                    StatementListPtr stmt, int attr,
                     const std::string &docComment,
                     ExpressionListPtr attrList);
 

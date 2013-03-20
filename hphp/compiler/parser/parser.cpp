@@ -789,8 +789,13 @@ void Parser::fixStaticVars() {
   m_staticVars.pop_back();
 }
 
-void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
-                        Token &params, Token &stmt, Token *attr) {
+void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref, 
+                        Token &name, Token &params, Token &stmt, Token *attr) {
+  
+  ModifierExpressionPtr exp = modifiers?
+    dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
+    : NEW_EXP0(ModifierExpression);
+
   const string &retType = ret.text();
   if (!retType.empty() && !ret.check()) {
     PARSE_ERROR("Return type hint is not supported yet");
@@ -825,7 +830,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     Token new_params;
     prepare_generator(this, stmt, new_params, funcContext.numYields);
 
-    func = NEW_STMT(FunctionStatement, ref->num(), closureName,
+    func = NEW_STMT(FunctionStatement, exp, ref->num(), closureName,
                     dynamic_pointer_cast<ExpressionList>(new_params->exp),
                     dynamic_pointer_cast<StatementList>(stmt->stmt),
                     attribute, comment, ExpressionListPtr());
@@ -876,7 +881,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
       attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
     }
 
-    func = NEW_STMT(FunctionStatement, ref->num(), funcName,
+    func = NEW_STMT(FunctionStatement, exp, ref->num(), funcName,
                     old_params, dynamic_pointer_cast<StatementList>(stmt->stmt),
                     attribute, comment, attrList);
     out->stmt = func;
@@ -1540,10 +1545,16 @@ void Parser::onClosureStart(Token &name) {
   onFunctionStart(name, true);
 }
 
-void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
-                       Token &cparams, Token &stmts) {
-  Token func, name;
-  onFunction(func, ret, ref, name, params, stmts, 0);
+void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params, 
+                       Token &cparams, Token &stmts, bool is_static) {
+  Token func, name, modifiers;
+  
+  ModifierExpressionPtr modifier_exp = NEW_EXP0(ModifierExpression);
+  modifiers->exp = modifier_exp;
+  if (is_static) {
+    modifier_exp->add(T_STATIC);
+  }
+  onFunction(func, &modifiers, ret, ref, name, params, stmts, 0);
 
   out.reset();
   out->exp = NEW_EXP(ClosureExpression,

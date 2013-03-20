@@ -1160,7 +1160,8 @@ void
 TranslatorX64::irTranslateThis(const Tracelet &t,
                              const NormalizedInstruction &i) {
   assert(i.outStack && !i.outLocal);
-  assert(curFunc()->isPseudoMain() || curFunc()->cls());
+  assert(curFunc()->isPseudoMain() || curFunc()->cls() ||
+         curFunc()->isClosureBody());
 
   HHIR_EMIT(This);
 }
@@ -1169,7 +1170,8 @@ void
 TranslatorX64::irTranslateBareThis(const Tracelet &t,
                                   const NormalizedInstruction &i) {
   assert(i.outStack && !i.outLocal);
-  assert(curFunc()->isPseudoMain() || curFunc()->cls());
+  assert(curFunc()->isPseudoMain() || curFunc()->cls() ||
+         curFunc()->isClosureBody());
 
   HHIR_EMIT(BareThis, (i.imm[0].u_OA));
 }

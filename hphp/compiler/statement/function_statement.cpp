@@ -35,11 +35,11 @@ using namespace HPHP;
 
 FunctionStatement::FunctionStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
- bool ref, const std::string &name, ExpressionListPtr params,
- StatementListPtr stmt, int attr, const std::string &docComment,
- ExpressionListPtr attrList)
+ ModifierExpressionPtr modifiers, bool ref, const std::string &name, 
+ ExpressionListPtr params, StatementListPtr stmt, int attr, const 
+ std::string &docComment, ExpressionListPtr attrList)
   : MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(FunctionStatement),
-                    ModifierExpressionPtr(), ref, name, params, stmt, attr,
+                    modifiers, ref, name, params, stmt, attr,
                     docComment, attrList, false), m_ignored(false) {
 }
 

@@ -178,6 +178,7 @@ public:
   VariableTablePtr getVariables() { return m_variables;}
   ConstantTablePtr getConstants() { return m_constants;}
   ClassScopeRawPtr getContainingClass();
+  FunctionScopeRawPtr getContainingNonClosureFunction();
   FunctionScopeRawPtr getContainingFunction() const {
     return FunctionScopeRawPtr(is(FunctionScope) ?
                                (HPHP::FunctionScope*)this : 0);
@@ -341,8 +342,6 @@ protected:
   int m_updated;
   int m_runId;
 private:
-  FunctionScopeRawPtr getContainingNonClosureFunction();
-
   Marks m_mark;
   BlockScopeRawPtrFlagsPtrVec  m_orderedDeps;
   BlockScopeRawPtrFlagsVec     m_orderedUsers;

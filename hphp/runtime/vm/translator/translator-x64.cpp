@@ -32,7 +32,11 @@
 typedef __sighandler_t *sighandler_t;
 # define RIP_REGISTER(v) (v).mc_rip
 #else
-# define RIP_REGISTER(v) (v).gregs[REG_RIP]
+#  if defined(__x86_64__)
+#    define RIP_REGISTER(v) (v).gregs[REG_RIP]
+#  elif defined(__AARCH64EL__)
+#    define RIP_REGISTER(v) (v).pc
+#  endif
 #endif
 
 #include <boost/bind.hpp>
@@ -3057,6 +3061,22 @@ __thread int DepthGuard::m_depth;
 
 struct DepthGuard { bool depthOne() const { return false; } };
 
+#endif
+
+/*
+ * enterTCHelper does not save callee-saved registers except %rbp. This means
+ * when we call it from C++, we have to tell gcc to clobber all the other
+ * callee-saved registers.
+ */
+#if defined(__x86_64__)
+#  define CALLEE_SAVED_BARRIER() \
+  asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15")
+#elif defined(__AARCH64EL__)
+#  define CALLEE_SAVED_BARRIER() \
+  asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25", \
+               "x26", "x27", "x28")
+#else
+#  error What are the callee-saved registers on your system?
 #endif
 
 /*

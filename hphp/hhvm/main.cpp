@@ -31,10 +31,13 @@ int main(int argc, char** argv) {
     return HPHP::execute_program(argc, argv);
   }
   std::vector<char*> args;
-  args.insert(args.begin(), argv, argv + argc);
+  args.push_back(argv[0]);
   args.push_back("-vRepo.Authoritative=true");
   args.push_back("-vRepo.Local.Mode=r-");
   repo = "-vRepo.Local.Path=" + repo;
   args.push_back(const_cast<char*>(repo.c_str()));
+  if (argc > 1) {
+    args.insert(args.end(), argv + 1, argv + argc);
+  }
   return HPHP::execute_program(args.size(), &args[0]);
 }

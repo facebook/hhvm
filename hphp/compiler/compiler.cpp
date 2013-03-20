@@ -147,7 +147,6 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
                AsyncFileCacheSaver &fcThread);
 int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr ar,
                    AsyncFileCacheSaver &fcThread);
-int buildTarget(const CompilerOptions &po);
 int runTarget(const CompilerOptions &po);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -914,42 +913,6 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-int buildTarget(const CompilerOptions &po) {
-  const char *HPHP_HOME = getenv("HPHP_HOME");
-  if (!HPHP_HOME || !*HPHP_HOME) {
-    throw Exception("Environment variable HPHP_HOME is not set.");
-  }
-  string cmd = string(HPHP_HOME) + "/hphp/legacy/run.sh";
-  string flags;
-  if (getenv("RELEASE"))      flags += "RELEASE=1 ";
-  if (getenv("SHOW_LINK"))    flags += "SHOW_LINK=1 ";
-  if (getenv("SHOW_COMPILE")) flags += "SHOW_COMPILE=1 ";
-  if (po.format == "lib")     flags += "HPHP_BUILD_LIBRARY=1 ";
-  const char *argv[] = {"", po.outputDir.c_str(),
-                        po.program.c_str(), flags.c_str(), nullptr};
-
-  if (getenv("SHOW_COMPILE")) {
-    Logger::Info ("Compile command: %s %s %s", po.outputDir.c_str(),
-        po.program.c_str(), flags.c_str());
-  }
-  Timer timer(Timer::WallTime, "compiling and linking CPP files");
-  string out, err;
-  bool ret = Process::Exec(cmd.c_str(), argv, nullptr, out, &err);
-  if (getenv("SHOW_COMPILE")) {
-    Logger::Info("%s", out.c_str());
-  } else {
-    Logger::Verbose("%s", out.c_str());
-  }
-  if (!err.empty()) {
-    Logger::Error("%s", err.c_str());
-  }
-  if (!ret) {
-    return 1;
-  }
-
-  return 0;
-}
 
 int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr ar,
                    AsyncFileCacheSaver &fcThread) {

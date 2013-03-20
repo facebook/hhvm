@@ -25,7 +25,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestRequestHandler : public RequestHandler {
+class TestCurlRequestHandler : public RequestHandler {
 public:
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport) {
@@ -53,7 +53,7 @@ static std::string get_request_uri() {
 static ServerPtr runServer() {
   for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
     try {
-      ServerPtr server(new TypedServer<LibEventServer, TestRequestHandler>
+      ServerPtr server(new TypedServer<LibEventServer, TestCurlRequestHandler>
                        ("127.0.0.1", s_server_port, 4, -1));
       server->start();
       return server;

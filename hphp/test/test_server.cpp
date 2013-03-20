@@ -166,7 +166,7 @@ void TestServer::StopServer() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestRequestHandler : public RequestHandler {
+class TestServerRequestHandler : public RequestHandler {
 public:
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport) {
@@ -177,7 +177,7 @@ public:
 static int find_server_port(int port_min, int port_max) {
   for (int port = port_min; ; port++) {
     try {
-      ServerPtr server(new TypedServer<LibEventServer, TestRequestHandler>
+      ServerPtr server(new TypedServer<LibEventServer, TestServerRequestHandler>
                        ("127.0.0.1", port, 50, -1));
       server->start();
       server->stop();

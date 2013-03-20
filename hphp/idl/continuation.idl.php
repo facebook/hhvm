@@ -160,9 +160,6 @@ BeginClass(
     m_called_class = cls;
   }
 protected: virtual bool php_sleep(Variant &ret);
-private:
-  template<typename FI> void nextImpl(FI& fi);
-
 public:
   inline void preNext() {
     if (m_done) {

@@ -80,9 +80,6 @@ class c_Continuation : public ExtObjectData {
   }
 
 protected: virtual bool php_sleep(Variant &ret);
-private:
-  template<typename FI> void nextImpl(FI& fi);
-
 public:
   void call_next();
   void call_send(TypedValue* v);

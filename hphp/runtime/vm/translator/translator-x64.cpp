@@ -3159,114 +3159,26 @@ struct DepthGuard { bool depthOne() const { return false; } };
 #endif
 
 /*
- * enterTCHelper
- *
- * This helper routine is written in x64 assembly to take care of the details
- * when transferring control between jitted code and the translator.
- *   rdi:  Cell* vm_sp
- *   rsi:  Cell* vm_fp
- *   rdx:  unsigned char* start
- *   rcx:  TReqInfo* infoPtr
- *   r8:   ActRec* firstAR
- *   r9:   uint8_t* targetCacheBase
+ * enterTCHelper is a handwritten assembly function that transfers control in
+ * and out of the TC.
  */
 static_assert(rVmSp == rbx &&
               rVmFp == rbp &&
               rVmTl == r12 &&
               rStashedAR == r15,
-  "__enterTCHelper needs to be modified to use the correct ABI");
+              "__enterTCHelper needs to be modified to use the correct ABI");
 static_assert(kReservedRSPScratchSpace == 0x100,
               "enterTCHelper needs to be updated for changes to "
               "kReservedRSPScratchSpace");
 static_assert(REQ_BIND_CALL == 0x1,
-  "Update assembly test for REQ_BIND_CALL in __enterTCHelper");
-asm (
-  ".byte 0\n"
-  ".align 16\n"
-  ".section .text\n"
-  ".globl __enterTCHelper\n"
-"__enterTCHelper:\n"
-  // Prologue
-  ".cfi_startproc\n"
-  "push %rbp\n"
-  ".cfi_adjust_cfa_offset 8\n"  // offset to previous frame relative to %rsp
-  ".cfi_offset rbp, -16\n"      // Where to find previous value of rbp
+              "Update assembly test for REQ_BIND_CALL in __enterTCHelper");
+extern "C" void enterTCHelper(Cell* vm_sp,
+                              Cell* vm_fp,
+                              TCA start,
+                              TReqInfo* infoPtr,
+                              ActRec* firstAR,
+                              void* targetCacheBase);
 
-  // Set firstAR->m_savedRbp to point to this frame.
-  "mov %rsp, (%r8)\n"
-
-  // Save infoPtr
-  "push %rcx\n"
-  ".cfi_adjust_cfa_offset 8\n"
-
-  // Set up special registers used for translated code.
-  "mov %rdi, %rbx\n"          // rVmSp
-  "mov %r9, %r12\n"           // rVmTl
-  "mov %rsi, %rbp\n"          // rVmFp
-  "mov 0x30(%rcx), %r15\n"    // rStashedAR saved across service requests
-
-  /*
-   * The translated code we are about to enter does not follow the
-   * standard prologue of pushing rbp at entry, so we are purposely 8
-   * bytes short of 16-byte alignment before this call instruction so
-   * that the return address being pushed will make the native stack
-   * 16-byte aligned.
-   */
-
-  "sub $0x100, %rsp\n" // kReservedRSPScratchSpace
-
-  /*
-   * If returning from a BIND_CALL request, push the return IP saved
-   * in the ActRec pointed to by r15.  The 0x1 in the cmp instruction
-   * must be kept in sync with REQ_BIND_CALL in abi-x64.h.
-   */
-  "cmp $0x1, 0x0(%rcx)\n"
-  "jne .LenterTCHelper$jumpToTC\n"
-  "lea .LenterTCHelper$serviceReqLabel(%rip), %rax\n"
-  "push %rax\n"
-  "push 0x8(%r15)\n"
-  "jmp *%rdx\n"
-".LenterTCHelper$jumpToTC:\n"
-  // May need cfi_adjust_cfa_offset annotations: Task #1747813
-  "call *%rdx\n"
-".LenterTCHelper$serviceReqLabel:\n"
-
-  "add $0x100, %rsp\n" // kReservedRSPScratchSpace
-  // Restore infoPtr into %rbx
-  "pop %rbx\n"
-  ".cfi_adjust_cfa_offset -8\n"
-
-  // Copy the values passed from jitted code into *infoPtr
-  "mov %rdi, 0x0(%rbx)\n"
-  "test %rdi,%rdi\n"
-  "jnz .LenterTCHelper$copyReqArgs\n"
-  ".cfi_remember_state\n"
-  "pop %rbp\n"
-  ".cfi_restore rbp\n"
-  ".cfi_adjust_cfa_offset -8\n"
-  "ret\n"
-
-".LenterTCHelper$copyReqArgs:\n"
-  ".cfi_restore_state\n"
-  "mov %rsi, 0x8(%rbx)\n"
-  "mov %rdx, 0x10(%rbx)\n"
-  "mov %rcx, 0x18(%rbx)\n"
-  "mov %r8,  0x20(%rbx)\n"
-  "mov %r9,  0x28(%rbx)\n"
-
-  // Service request "callee-saved".  (Returnee-saved?)
-  "mov %r15, 0x30(%rbx)\n"
-
-  // copy stub address into infoPtr->stubAddr
-  "mov %r10, 0x38(%rbx)\n"
-
-  // Epilogue
-  "pop %rbp\n"
-  ".cfi_restore rbp\n"
-  ".cfi_adjust_cfa_offset -8\n"
-  "ret\n"
-  ".cfi_endproc\n"
-);
 
 struct TReqInfo {
   uintptr_t requestNum;
@@ -3279,12 +3191,6 @@ struct TReqInfo {
   TCA stubAddr;
 };
 
-void enterTCHelper(Cell* vm_sp,
-                   Cell* vm_fp,
-                   TCA start,
-                   TReqInfo* infoPtr,
-                   ActRec* firstAR,
-                   void* targetCacheBase) asm ("__enterTCHelper");
 
 void
 TranslatorX64::enterTC(SrcKey sk, TCA start) {

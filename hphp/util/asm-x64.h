@@ -41,16 +41,6 @@
  *   2. The embedded assemblers from v8, the Sun JVM, etc.
  */
 
-#ifndef __x86_64__
-/*
- * Technically, you could use this to generate x86_64 instructions on some
- * other platform, e.g., in a cross-compiler.
- *
- * Most likely, you didn't mean to do this, though.
- */
-#error Your architecture is unsupported.
-#endif
-
 /*
  * Some members cannot be const because their values aren't known in
  * an initialization list. Like the opposite of the "mutable" keyword.

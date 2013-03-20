@@ -31,6 +31,8 @@ foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 	auto_sources(files "*.c" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
 	list(APPEND C_SOURCES ${files})
 
+	auto_sources(files "*.S" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
+	list(APPEND ASM_SOURCES ${files})
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 
 # Disable hardware counters off of Linux
@@ -80,7 +82,7 @@ add_custom_command(
 
 ADD_LIBRARY(hphp_runtime_static STATIC
             hphp_repo_schema.h hphp_build_info.cpp
-            ${CXX_SOURCES} ${C_SOURCES})
+            ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES PREFIX "lib")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)

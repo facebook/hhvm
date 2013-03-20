@@ -560,9 +560,7 @@ int process(const CompilerOptions &po) {
   Package package(po.inputDir.c_str());
   ar = package.getAnalysisResult();
 
-  if (po.target == "hhbc" || po.target == "run") {
-    hhbcTargetInit(po, ar);
-  }
+  hhbcTargetInit(po, ar);
 
   std::string errs;
   if (!AliasManager::parseOptimizations(po.optimizations, errs)) {

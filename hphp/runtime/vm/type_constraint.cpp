@@ -16,6 +16,7 @@
 
 #include <util/base.h>
 #include <util/trace.h>
+#include <runtime/ext/ext_function.h>
 #include <runtime/vm/hhbc.h>
 #include <runtime/vm/class.h>
 #include <runtime/vm/unit.h>
@@ -39,22 +40,23 @@ TypeConstraint::TypeConstraint(const StringData* typeName /* = NULL */,
       const StringData* name;
       Type type;
     } pairs[] = {
-      { StringData::GetStaticString("bool"),    { KindOfBoolean, Precise }},
-      { StringData::GetStaticString("boolean"), { KindOfBoolean, Precise }},
+      { StringData::GetStaticString("bool"),     { KindOfBoolean, Precise }},
+      { StringData::GetStaticString("boolean"),  { KindOfBoolean, Precise }},
 
-      { StringData::GetStaticString("int"),     { KindOfInt64, Precise }},
-      { StringData::GetStaticString("integer"), { KindOfInt64, Precise }},
+      { StringData::GetStaticString("int"),      { KindOfInt64, Precise }},
+      { StringData::GetStaticString("integer"),  { KindOfInt64, Precise }},
 
-      { StringData::GetStaticString("real"),    { KindOfDouble, Precise }},
-      { StringData::GetStaticString("double"),  { KindOfDouble, Precise }},
-      { StringData::GetStaticString("float"),   { KindOfDouble, Precise }},
+      { StringData::GetStaticString("real"),     { KindOfDouble, Precise }},
+      { StringData::GetStaticString("double"),   { KindOfDouble, Precise }},
+      { StringData::GetStaticString("float"),    { KindOfDouble, Precise }},
 
-      { StringData::GetStaticString("string"),  { KindOfString, Precise }},
+      { StringData::GetStaticString("string"),   { KindOfString, Precise }},
 
-      { StringData::GetStaticString("array"),   { KindOfArray, Precise }},
+      { StringData::GetStaticString("array"),    { KindOfArray, Precise }},
 
-      { StringData::GetStaticString("self"),    { KindOfObject, Self }},
-      { StringData::GetStaticString("parent"),  { KindOfObject, Parent }},
+      { StringData::GetStaticString("self"),     { KindOfObject, Self }},
+      { StringData::GetStaticString("parent"),   { KindOfObject, Parent }},
+      { StringData::GetStaticString("callable"), { KindOfObject, Callable }},
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
       s_typeNamesToTypes[pairs[i].name] = pairs[i].type;
@@ -107,11 +109,13 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
       return true;
     }
     const Class *c = nullptr;
-    if (isSelf() || isParent()) {
+    if (isSelf() || isParent() || isCallable()) {
       if (isSelf()) {
         selfToClass(func, &c);
       } else if (isParent()) {
         parentToClass(func, &c);
+      } else if (isCallable()) {
+        return f_is_callable(tvAsCVarRef(tv));
       }
     } else {
       // We can't save the Class* since it moves around from request

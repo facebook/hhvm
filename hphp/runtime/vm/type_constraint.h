@@ -34,7 +34,8 @@ protected:
   enum MetaType {
     Precise,
     Self,
-    Parent
+    Parent,
+    Callable
   };
 
   struct Type {
@@ -45,6 +46,9 @@ protected:
     }
     constexpr bool isSelf() const {
       return m_metatype == Self;
+    }
+    constexpr bool isCallable() const {
+      return m_metatype == Callable;
     }
   };
 
@@ -74,10 +78,15 @@ public:
   bool isParent() const {
     return m_type.isParent();
   }
+  
+  bool isCallable() const {
+    return m_type.isCallable();
+  }
 
   bool isObject() const {
     assert(IMPLIES(isParent(), m_type.m_dt == KindOfObject));
     assert(IMPLIES(isSelf(), m_type.m_dt == KindOfObject));
+    assert(IMPLIES(isCallable(), m_type.m_dt == KindOfObject));
     return m_type.m_dt == KindOfObject;
   }
 

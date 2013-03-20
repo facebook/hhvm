@@ -66,6 +66,7 @@ typedef __sighandler_t *sighandler_t;
 #include "runtime/base/runtime_option.h"
 #include "runtime/base/server/source_root_info.h"
 #include "runtime/ext/ext_continuation.h"
+#include "runtime/ext/ext_function.h"
 #include "runtime/vm/debug/debug.h"
 #include "runtime/vm/translator/targetcache.h"
 #include "runtime/vm/translator/translator-deps.h"
@@ -10258,6 +10259,16 @@ VerifyParamTypeSlow(const Class* cls, const Class* constraint, int param) {
   }
 }
 
+static void
+VerifyParamCallable(ObjectData* obj, int param) {
+  TypedValue tv;
+  tvWriteObject(obj, &tv);
+  if (!UNLIKELY(f_is_callable(tvAsCVarRef(&tv)))) {
+    VerifyParamTypeFail(param);
+  }
+  tvDecRef(&tv);
+}
+
 void
 TranslatorX64::translateVerifyParamType(const Tracelet& t,
                                         const NormalizedInstruction& i) {
@@ -10283,18 +10294,21 @@ TranslatorX64::translateVerifyParamType(const Tracelet& t,
   ScratchReg cls(m_regMap);
   // Constraint may not be in the class-hierarchy of the method being traced,
   // look up the class handle and emit code to put the Class* into a reg.
-  bool isSelfOrParent = tc.isSelf() || tc.isParent();
+  bool isSpecial = tc.isSelf() || tc.isParent() || tc.isCallable();
   const Class* constraint = nullptr;
   const StringData* clsName;
-  if (!isSelfOrParent) {
+  if (!isSpecial) {
     clsName = tc.typeName();
     constraint = Unit::lookupUniqueClass(clsName);
   } else {
     if (tc.isSelf()) {
       tc.selfToClass(curFunc(), &constraint);
-    } else {
-      assert(tc.isParent());
+    } else if (tc.isParent()) {
       tc.parentToClass(curFunc(), &constraint);
+    } else {
+      assert(tc.isCallable());
+      EMIT_RCALL(a, i, VerifyParamCallable, R(src), IMM(param));
+      return;
     }
     clsName = constraint ? constraint->preClass()->name() : nullptr;
   }

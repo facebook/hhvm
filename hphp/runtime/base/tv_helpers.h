@@ -34,9 +34,12 @@ class Stack;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline TypedValue tv(DataType type, intptr_t data) {
+template<typename Data>
+inline TypedValue tv(DataType type, Data data) {
+  static_assert(sizeof(Data) == sizeof(int64_t),
+                "Data type in tv() not proper size");
   TypedValue v;
-  v.m_data.num = data;
+  v.m_data.num = (int64_t)data;
   v.m_type = type;
   return v;
 }
@@ -179,18 +182,18 @@ inline void tvUnbox(TypedValue* tv) {
   assert(tvIsPlausible(tv));
 }
 
-// Assumes 'fr' is live and 'to' is dead
+// Assumes 'fr' is live and 'to' is dead. Store a reference to 'fr',
+// as a Cell, into 'to'.
 inline void tvReadCell(const TypedValue* fr, TypedValue* to) {
   assert(tvIsPlausible(fr));
   if (fr->m_type != KindOfRef) {
     memcpy(to, fr, sizeof(TypedValue));
-    tvRefcountedIncRef(to);
   } else {
     TypedValue* fr2 = fr->m_data.pref->tv();
     to->m_data.num = fr2->m_data.num;
     to->m_type = fr2->m_type;
-    tvRefcountedIncRef(to);
   }
+  tvRefcountedIncRef(to);
 }
 
 // Assumes 'fr' is live and 'to' is dead
@@ -213,6 +216,14 @@ inline void tvDupVar(const TypedValue* fr, TypedValue* to) {
   to->m_data.num = fr->m_data.num;
   to->m_type = KindOfRef;
   tvIncRefNotShared(to);
+}
+
+// Assumes 'fr' is live and 'to' is dead
+inline void tvDupRef(RefData* fr, TypedValue* to) {
+  assert(tvIsPlausible(fr->tv()));
+  to->m_data.pref = fr;
+  to->m_type = KindOfRef;
+  fr->incRefCount();
 }
 
 // Assumes 'fr' is live and 'to' is dead
@@ -325,6 +336,14 @@ inline void tvBind(TypedValue * fr, TypedValue * to) {
   DataType oldType = to->m_type;
   uint64_t oldDatum = to->m_data.num;
   tvDupVar(fr, to);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+// Assumes 'to' and 'fr' are live
+inline void tvBindRef(RefData* fr, TypedValue* to) {
+  DataType oldType = to->m_type;
+  uint64_t oldDatum = to->m_data.num;
+  tvDupRef(fr, to);
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 

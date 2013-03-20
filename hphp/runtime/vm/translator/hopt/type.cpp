@@ -30,9 +30,6 @@ TRACE_SET_MOD(hhir);
 namespace {
 
 Type vectorReturn(const IRInstruction* inst) {
-  assert(inst->getOpcode() == SetProp ||
-         inst->getOpcode() == SetElem ||
-         inst->getOpcode() == SetNewElem);
   return VectorEffects(inst).valType;
 }
 
@@ -79,7 +76,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DBox(n)   return boxReturn(inst, n);
 #define DParam    return inst->getTypeParam();
 #define DMulti    return Type::None;
-#define DStk(in)  return stkReturn(inst, dstId, [&]{ in not_reached(); });
+#define DStk(in)  return stkReturn(inst, dstId,                         \
+                                   [&]() -> Type { in not_reached(); });
 #define DVector   return vectorReturn(inst);
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin  return builtinReturn(inst);

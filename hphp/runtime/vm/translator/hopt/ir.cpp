@@ -93,6 +93,8 @@ namespace {
 #define P      Passthrough
 #define K      KillsSources
 #define StkFlags(f) HasStackVersion|(f)
+#define VProp  VectorProp
+#define VElem  VectorElem
 
 #define ND        0
 #define D(n)      HasDest
@@ -133,6 +135,8 @@ struct {
 #undef P
 #undef K
 #undef StkFlags
+#undef VProp
+#undef VElem
 
 #undef ND
 #undef D

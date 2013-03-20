@@ -297,18 +297,27 @@ KillsSource
   The instruction might destroy one or more of its sources, so they
   cannot be safely used after it has executed.
 
-HasStackVersion
-
-  This instruction has a counterpart that returns a StkPtr in addition to any
-  primary destination. The behavior of the stack-modifying version is otherwise
-  identical.
-
 ModifiesStack
 
   The instruction modifies the in-memory evaluation stack in the process of
   performing its primary work. It will have a StkPtr destination in addition to
   its primary destination.
 
+HasStackVersion
+
+  This instruction has a counterpart that returns a StkPtr in addition to any
+  primary destination. The behavior of the stack-modifying version is otherwise
+  identical.
+
+VectorProp
+
+  The instruction may affect the type and/or value of its base operand,
+  operating on object properties.
+
+VectorElem
+
+  The instruction may affect the type and/or value of its base operand,
+  operating on array elements.
 
 Instruction set
 ---------------
@@ -1142,7 +1151,7 @@ IterFree S0:StkPtr S1:ConstInt
 
 D:PtrToCell = DefMIStateBase
 
-  Declares a base register for MInstrState. Currently this is always %rsp
+  Declares a base register for MInstrState. Currently this is always %rsp.
 
 All of the remaining opcodes in this section are simple wrappers
 around helper functions (specified in S0) to perform the corresponding
@@ -1160,6 +1169,9 @@ SetProp/SetOpProp/IncDecProp:
   with a warning and the return value is null. Otherwise the return
   value is the same as the value input.
 
+Any instructions that take a pointer to an MInstrState struct use the various
+fields of that struct for holding intermediate values.
+
 D:PtrToGen = PropX S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
 
   Lookup intermediate property in S2, with key S3. S4 should point to
@@ -1170,10 +1182,50 @@ D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
   Get property with key S3 from S2. S4 should point to an MInstrState
   struct.
 
+D:BoxedCell = VGetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrtoGen} S3:Gen
+                       S4:PtrToCell
+D:BoxedCell, D:StkPtr = VGetPropStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen}
+                                    S3:Gen S4:PtrToCell
+
+  Get property with key S3 from base S2 as a reference. S4 should point to an
+  MInstrState struct.
+
+BindProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:BoxedCell
+         S5:PtrToCell
+D:StkPtr = BindPropStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrtoGen} S3:Gen
+                       S4:BoxedCell S5:PtrToCell
+
+  Bind property with key S3 in base S2 to the reference in S4. S5 should point
+  to an MInstrState struct.
+
 D:Vector = SetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:Cell
-D:Vector, D:StkPtr = SetPropStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:Cell
+D:Vector, D:StkPtr = SetPropStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen
+                                S4:Cell
 
   Set property with key S3 in S2 to S4.
+
+D:Cell = SetOpProp S0:ConstTCA S1:{Obj|PtrToGen} S2:Gen S3:Cell S4:PtrToCell
+D:Cell, D:StkPtr = SetOpPropStk S0:ConstTCA S1:{Obj|PtrtoGen} S2:Gen S3:Cell
+                                S4:PtrtoCell
+
+  Set op propery with key S2 in base S1, using S3 as the right hand side. S4
+  should point to an MInstrState struct.
+
+D:Cell = IncDecProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen
+                    S4:PtrToCell
+D:Cell, D:StkPtr = IncDecPropStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen}
+                                 S3:Gen S4:PtrToCell
+
+  Increment/decrement property with key S3 in base S2. S4 should point to an
+  MInstrState struct.
+
+D:Bool = EmptyProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen
+
+  Returns true iff the property with key S3 in base S2 is empty.
+
+D:Bool = IssetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen
+
+  Returns true iff the property with key S3 in base S2 is set.
 
 D:PtrToGen = ElemX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
@@ -1191,6 +1243,18 @@ D:Cell = CGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
   Get element with key S2 from S1. S3 should point to an MInstrState
   struct.
 
+D:BoxedCell = VGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:BoxedCell, D:StkPtr = VGetElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+
+  Get element with key S2 from base S1 as a reference. S3 should point to an
+  MInstrState struct.
+
+BindElem S0:ConstTCA S1:PtrToGen S2:Gen S3:BoxedCell S4:PtrToCell
+D:StkPtr = BindElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:BoxedCell S4:PtrToCell
+
+  Bind element with key S2 in base S1 to the reference S3. S4 should point to
+  an MInstrState struct.
+
 D:Arr = ArraySet S0:ConstTCA S1:Arr S2:{Int|Str} S3:Cell
 
   Set element with key S2 in S1 to S3. The dest will be a new Array
@@ -1207,10 +1271,28 @@ D:Vector, D:StkPtr = SetElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
 
   Set element with key S2 in S1 to S3.
 
+D:Cell = SetOpElem S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell S4:PtrToCell
+D:Cell, D:StkPtr = SetOpElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
+                                S4:PtrToCell
+
+  Set op elem with key S2 in base S1, using S3 as the right hand side. S4
+  should point to an MInstrState struct.
+
+D:Cell = IncDecElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:Cell, D:StkPtr = IncDecElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+
+  Increment/decrement element with key S2 in base S1. S3 should point to an
+  MInstrState struct.
+
 D:Vector = SetNewElem S0:PtrToGen S1:Cell
 D:Vector, D:StkPtr = SetNewElemStk S0:PtrToGen S1:Cell
 
   Append the value in S1 to S0.
+
+BindNewElem S0:ConstTCA S0:PtrToGen S1:BoxedCell S2:PtrToCell
+D:StkPtr = BindNewElemStk S0:PtrToGen S1:BoxedCell S2:PtrToCell
+
+  Append the reference in S1 to S0. S2 should point to an MInstrState struct.
 
 D:Bool = IssetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 

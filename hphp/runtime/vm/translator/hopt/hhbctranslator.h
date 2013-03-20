@@ -438,6 +438,11 @@ private:
     void setNoMIState() { m_needMIS = false; }
     SSATmp* genMisPtr();
     SSATmp* getInput(unsigned i);
+    SSATmp* getValue() {
+      // If an instruction takes an rhs, it's always input 0.
+      const int kValIdx = 0;
+      return getInput(kValIdx);
+    }
     SSATmp* checkInitProp(SSATmp* baseAsObj, SSATmp* propAddr, int propOffset,
                           bool warn, bool define);
 

@@ -346,14 +346,25 @@ CALL_OPCODE(RaiseUndefProp)
 CALL_OPCODE(BaseG)
 CALL_OPCODE(PropX)
 CALL_OPCODE(CGetProp)
+CALL_STK_OPCODE(VGetProp)
+CALL_STK_OPCODE(BindProp)
 CALL_STK_OPCODE(SetProp)
+CALL_STK_OPCODE(SetOpProp)
+CALL_STK_OPCODE(IncDecProp)
+CALL_OPCODE(EmptyProp);
+CALL_OPCODE(IssetProp);
 CALL_OPCODE(ElemX)
 CALL_STK_OPCODE(ElemDX)
 CALL_OPCODE(CGetElem)
+CALL_STK_OPCODE(VGetElem)
+CALL_STK_OPCODE(BindElem)
 CALL_OPCODE(ArraySet)
 CALL_OPCODE(ArraySetRef)
 CALL_STK_OPCODE(SetElem)
+CALL_STK_OPCODE(SetOpElem)
+CALL_STK_OPCODE(IncDecElem)
 CALL_STK_OPCODE(SetNewElem)
+CALL_STK_OPCODE(BindNewElem)
 CALL_OPCODE(IssetElem)
 CALL_OPCODE(EmptyElem)
 
@@ -3444,15 +3455,16 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
   SSATmp* value = inst->getSrc(2);
 
   RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
+  assert(value->getType().equals(slot.getType()));
   int stSize = slot.getSize();
   int64_t off = slot.getOffset();
   auto dest = baseReg[off];
 
   if (value->isConst()) {
     if (stSize == sz::qword) {
-      m_as.storeq(value->getValInt(), dest);
+      m_as.storeq(value->getValRawInt(), dest);
     } else if (stSize == sz::dword) {
-      m_as.storel(value->getValInt(), dest);
+      m_as.storel(value->getValRawInt(), dest);
     } else {
       assert(stSize == sz::byte);
       m_as.storeb(value->getValBool(), dest);

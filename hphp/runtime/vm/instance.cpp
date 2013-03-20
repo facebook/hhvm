@@ -393,12 +393,14 @@ TypedValue* Instance::setOpProp(TypedValue& tvRef, Class* ctx,
       invokeGet(&tvResult, key);
       SETOP_BODY(&tvResult, op, val);
       if (getAttribute(UseSet)) {
+        assert(tvRef.m_type == KindOfUninit);
+        memcpy(&tvRef, &tvResult, sizeof(TypedValue));
         TypedValue ignored;
-        invokeSet(&ignored, key, &tvResult);
+        invokeSet(&ignored, key, &tvRef);
         tvRefcountedDecRef(&ignored);
-        propVal = &tvResult;
+        propVal = &tvRef;
       } else {
-        memcpy((void *)propVal, (void *)&tvResult, sizeof(TypedValue));
+        memcpy(propVal, &tvResult, sizeof(TypedValue));
       }
     } else {
       SETOP_BODY(propVal, op, val);

@@ -150,6 +150,10 @@ DynLocation* Tracelet::newDynLocation() {
   return dl;
 }
 
+void Tracelet::print() const {
+  print(std::cerr);
+}
+
 void Tracelet::print(std::ostream& out) const {
   const NormalizedInstruction* i = m_instrStream.first;
   if (i == nullptr) {

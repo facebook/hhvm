@@ -270,7 +270,6 @@ SSATmp* TraceBuilder::genLdRaw(SSATmp* base, RawMemSlot::Kind kind,
 
 void TraceBuilder::genStRaw(SSATmp* base, RawMemSlot::Kind kind,
                             SSATmp* value) {
-  assert(value->getType() == Type::Int || value->getType() == Type::Bool);
   gen(StRaw, base, genDefConst(int64_t(kind)), value);
 }
 

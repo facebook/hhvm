@@ -1713,10 +1713,7 @@ static inline void setOpElemImpl(TypedValue* base, TypedValue* key, Cell* val,
   TypedValue* result = SetOpElem<keyType>(mis->tvScratch, mis->tvRef, op, base,
                                           key, val);
   if (setResult) {
-    if (result->m_type == KindOfRef) {
-      tvUnbox(result);
-    }
-    tvDup(result, tvRes); // tvRes may or may not be &mis->tvResult.
+    tvReadCell(result, tvRes);
   }
 }
 
@@ -1804,10 +1801,7 @@ static inline void setOpPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
   TypedValue* result = SetOpProp<isObj, keyType>(mis->tvScratch, mis->tvRef,
                                                  ctx, op, base, key, val);
   if (setResult) {
-    if (result->m_type == KindOfRef) {
-      tvUnbox(result);
-    }
-    tvDup(result, tvRes); // tvRes may or may not be &mis->tvResult.
+    tvReadCell(result, tvRes);
   }
 }
 

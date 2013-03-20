@@ -143,6 +143,8 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *      T     isTerminal
  *      P     passthrough
  *      K     killsSource
+ *      VProp VectorProp
+ *      VElem VectorElem
  */
 
 #define O_STK(name, dst, src, flags)            \
@@ -388,11 +390,40 @@ O(CGetProp,                    D(Cell), C(TCA)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
+O_STK(VGetProp,           D(BoxedCell), C(TCA)                                \
+                                          C(Cls)                              \
+                                          S(Obj,PtrToGen)                     \
+                                          S(Gen)                              \
+                                          S(PtrToCell),VProp|E|N|Mem|Refs|Er) \
+O_STK(BindProp,                     ND, C(TCA)                                \
+                                          C(Cls)                              \
+                                          S(Obj,PtrToGen)                     \
+                                          S(Gen)                              \
+                                          S(BoxedCell)                        \
+                                          S(PtrToCell),VProp|E|N|Mem|Refs|Er) \
 O_STK(SetProp,                 DVector, C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
                                           S(Gen)                              \
-                                          S(Cell),           E|N|Mem|Refs|Er) \
+                                          S(Cell),     VProp|E|N|Mem|Refs|Er) \
+O_STK(SetOpProp,               D(Cell), C(TCA)                                \
+                                          S(Obj,PtrToGen)                     \
+                                          S(Gen)                              \
+                                          S(Cell)                             \
+                                          S(PtrToCell),VProp|E|N|Mem|Refs|Er) \
+O_STK(IncDecProp,              D(Cell), C(TCA)                                \
+                                          C(Cls)                              \
+                                          S(Obj,PtrToGen)                     \
+                                          S(Gen)                              \
+                                          S(PtrToCell),VProp|E|N|Mem|Refs|Er) \
+O(EmptyProp,                   D(Bool), C(TCA)                                \
+                                          C(Cls)                              \
+                                          S(Obj,PtrToGen)                     \
+                                          S(Gen),            E|N|Mem|Refs|Er) \
+O(IssetProp,                   D(Bool), C(TCA)                                \
+                                          C(Cls)                              \
+                                          S(Obj,PtrToGen)                     \
+                                          S(Gen),            E|N|Mem|Refs|Er) \
 O(ElemX,                   D(PtrToGen), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
@@ -400,11 +431,20 @@ O(ElemX,                   D(PtrToGen), C(TCA)                                \
 O_STK(ElemDX,              D(PtrToGen), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
-                                          S(PtrToCell),      E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
 O(CGetElem,                    D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
+O_STK(VGetElem,           D(BoxedCell), C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(Gen)                              \
+                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+O_STK(BindElem,                     ND, C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(Gen)                              \
+                                          S(BoxedCell)                        \
+                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
 O(ArraySet,                     D(Arr), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \
@@ -417,8 +457,21 @@ O(ArraySetRef,                      ND, C(TCA)                                \
 O_STK(SetElem,                 DVector, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
-                                          S(Cell),           E|N|Mem|Refs|Er) \
-O_STK(SetNewElem,              DVector, S(PtrToGen) S(Gen),  E|N|Mem|Refs|Er) \
+                                          S(Cell),     VElem|E|N|Mem|Refs|Er) \
+O_STK(SetOpElem,               D(Cell), C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(Gen)                              \
+                                          S(Cell)                             \
+                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+O_STK(IncDecElem,              D(Cell), C(TCA)                                \
+                                          S(PtrToGen)                         \
+                                          S(Gen)                              \
+                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+O_STK(SetNewElem,              DVector, S(PtrToGen)                           \
+                                          S(Gen),      VElem|E|N|Mem|Refs|Er) \
+O_STK(BindNewElem,                  ND, S(PtrToGen)                           \
+                                          S(BoxedCell)                        \
+                                          S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
 O(IssetElem,                   D(Bool), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \
@@ -780,6 +833,8 @@ enum OpcodeFlag : uint64_t {
   KillsSources     = 1ULL << 14,
   ModifiesStack    = 1ULL << 15,
   HasStackVersion  = 1ULL << 16,
+  VectorProp       = 1ULL << 17,
+  VectorElem       = 1ULL << 18,
 };
 
 bool opcodeHasFlags(Opcode opc, uint64_t flags);
@@ -1278,6 +1333,7 @@ class RawMemSlot {
   enum Kind {
     ContLabel, ContDone, ContShouldThrow, ContRunning, ContARPtr,
     StrLen, FuncNumParams, FuncRefBitVec, FuncBody, MisBaseStrOff,
+    MisCtx,
     MaxKind
   };
 
@@ -1293,6 +1349,7 @@ class RawMemSlot {
       case FuncRefBitVec:   return GetFuncRefBitVec();
       case FuncBody:        return GetFuncBody();
       case MisBaseStrOff:   return GetMisBaseStrOff();
+      case MisCtx:          return GetMisCtx();
       default: not_reached();
     }
   }
@@ -1344,6 +1401,10 @@ class RawMemSlot {
   }
   static RawMemSlot& GetMisBaseStrOff() {
     static RawMemSlot m(HHIR_MISOFF(baseStrOff), sz::byte, Type::Bool);
+    return m;
+  }
+  static RawMemSlot& GetMisCtx() {
+    static RawMemSlot m(HHIR_MISOFF(ctx), sz::qword, Type::Cls);
     return m;
   }
 
@@ -1911,6 +1972,11 @@ struct VectorEffects {
   }
   VectorEffects(Opcode op, Type base, Type key, Type val) {
     init(op, base, key, val);
+  }
+  VectorEffects(Opcode op, SSATmp* base, SSATmp* key, SSATmp* val) {
+    auto typeOrNone =
+      [](SSATmp* val){ return val ? val->getType() : Type::None; };
+    init(op, typeOrNone(base), typeOrNone(key), typeOrNone(val));
   }
   Type baseType;
   Type valType;

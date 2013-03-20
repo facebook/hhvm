@@ -39,6 +39,13 @@ HOT_FUNC_VM TypedValue setNewElem(TypedValue* base, Cell val) {
   return val;
 }
 
+void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
+  base = NewElem(mis->tvScratch, mis->tvRef, base);
+  if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
+    tvBindRef(val, base);
+  }
+}
+
 // TODO: Kill this #2031980
 HOT_FUNC_VM RefData* box_value(TypedValue tv) {
   return tvBoxHelper(tv.m_type, tv.m_data.num);

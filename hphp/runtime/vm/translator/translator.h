@@ -677,7 +677,10 @@ struct Tracelet : private boost::noncopyable {
   DynLocation* newDynLocation(Location l, RuntimeType t);
   DynLocation* newDynLocation();
 
-  void print(std::ostream& out = std::cerr) const;
+  /* These aren't merged into a single method with a default argument
+   * to make gdb happy. */
+  void print() const;
+  void print(std::ostream& out) const;
 };
 
 struct TraceletContext {

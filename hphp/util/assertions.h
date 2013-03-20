@@ -51,6 +51,11 @@
   } while (true)
 #endif
 
+template<typename T>
+T bad_value() {
+  not_reached();
+}
+
 #define NOT_REACHED not_reached
 
 #define not_implemented() do {                   \

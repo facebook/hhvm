@@ -5326,11 +5326,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpM(PC& pc) {
       }
     }
 
-    if (result->m_type == KindOfRef) {
-      tvUnbox(result);
-    }
     tvRefcountedDecRef(rhs);
-    tvDup(result, rhs);
+    tvReadCell(result, rhs);
   }
   setHelperPost<1>(SETHELPERPOST_ARGS);
 }

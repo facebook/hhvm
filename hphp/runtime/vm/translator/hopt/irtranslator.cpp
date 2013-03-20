@@ -1011,6 +1011,7 @@ TranslatorX64::irTranslateIncDecM(const Tracelet& t,
       const DynLocation& prop = *i.inputs[1];
       const Location& propLoc = prop.location;
       HHIR_EMIT(IncDecProp, pre, inc, offset, propLoc.isStack());
+      return;
     }
   }
 

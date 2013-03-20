@@ -31,7 +31,14 @@ namespace HPHP {
  */
 class RefData {
 public:
+  enum NullInit {
+    nullinit,
+  };
   RefData() {}
+  RefData(NullInit) {
+    _count = 1;
+    m_tv.m_type = KindOfNull;
+  }
   RefData(DataType t, int64_t datum) { init(t, datum); }
   ~RefData();
 

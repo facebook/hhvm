@@ -164,7 +164,7 @@ O(OpAnd,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpOr,                         D(Int), SNum SNum,                         C) \
 O(OpXor,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpMul,                        DParam, SNum SNum,                         C) \
-O(ConvToArr,                    DParam, S(Gen),                          C|N) \
+O(ConvToArr,                    DParam, S(Gen),                        N|CRc) \
 O(ConvToBool,                   DParam, S(Gen),                          C|N) \
 O(ConvToDbl,                    DParam, S(Gen),                          C|N) \
 O(ConvToInt,                    DParam, S(Gen),                          C|N) \

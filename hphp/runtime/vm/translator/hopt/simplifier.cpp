@@ -1090,7 +1090,7 @@ SSATmp* Simplifier::simplifyConcat(SSATmp* src1, SSATmp* src2) {
 SSATmp* Simplifier::simplifyConvToArr(IRInstruction* inst) {
   SSATmp* src  = inst->getSrc(0);
   Type srcType = src->getType();
-  if (srcType == Type::Arr) {
+  if (srcType.isArray()) {
     return src;
   }
   if (srcType.isNull()) {
@@ -1103,9 +1103,8 @@ SSATmp* Simplifier::simplifyConvToArr(IRInstruction* inst) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfStaticString: {
-      auto arr = ArrayData::Create(src->getValVariant());
-      arr->incRefCount();
-      return m_tb->genDefConst(ArrayData::GetScalarArray(arr));
+      Array arr = Array::Create(src->getValVariant());
+      return m_tb->genDefConst(ArrayData::GetScalarArray(arr.get()));
     }
     default:
       assert(!srcType.isArray());

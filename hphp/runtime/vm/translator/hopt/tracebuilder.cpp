@@ -398,10 +398,6 @@ SSATmp* TraceBuilder::genConvToStr(SSATmp* src) {
   }
 }
 
-SSATmp* TraceBuilder::genConvToArr(SSATmp* src) {
-  return gen(ConvToArr, Type::Arr, src);
-}
-
 SSATmp* TraceBuilder::genConvToObj(SSATmp* src) {
   return gen(ConvToObj, Type::Obj, src);
 }

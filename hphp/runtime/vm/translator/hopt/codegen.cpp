@@ -1589,14 +1589,6 @@ asm_label(a, out);
 }
 
 ArrayData* new_singleton_array_helper(TypedValue value) {
-  // tvCastToArrayInPlace overwrites value and thus decrements the ref count
-  // of any counted object that value refers to.
-  // The code calling cgConv (emitCastArray) does not expect that ref count
-  // to be decreased and thus emits a dec ref following the call to this helper.
-  // emitCastArray could (and probably should) be modified to not do that
-  // which means that an inc ref dec ref pair can be eliminated. Unfortunately
-  // doing that triggers a test failure. See Task 2160031.
-  tvRefcountedIncRef(&value);
   tvCastToArrayInPlace(&value);
   return value.m_data.parr;
 }

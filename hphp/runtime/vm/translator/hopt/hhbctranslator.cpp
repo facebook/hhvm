@@ -2092,10 +2092,7 @@ void HhbcTranslator::emitCastString() {
 
 void HhbcTranslator::emitCastArray() {
   SSATmp* src = popC();
-  pushIncRef(m_tb->genConvToArr(src));
-  // TODO: change genConvToArr so that the next line is not needed,
-  // but first do Task 2160031.
-  m_tb->genDecRef(src);
+  push(m_tb->gen(ConvToArr, Type::Arr, src));
 }
 
 void HhbcTranslator::emitCastObject() {

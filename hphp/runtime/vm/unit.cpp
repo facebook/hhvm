@@ -2143,8 +2143,8 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit, Id id, int line1,
                            int line2, Offset base, Offset past,
                            const StringData* name, Attr attrs, bool top,
                            const StringData* docComment, int numParams,
-                           bool isGenerator) {
-  Func* f = new (Func::allocFuncMem(name, numParams))
+                           bool needsNextClonedClosure, bool isGenerator) {
+  Func* f = new (Func::allocFuncMem(name, numParams, needsNextClonedClosure))
     Func(unit, id, line1, line2, base, past, name, attrs,
          top, docComment, numParams, isGenerator);
   m_fMap[fe] = f;
@@ -2156,8 +2156,8 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
                            Offset base, Offset past,
                            const StringData* name, Attr attrs, bool top,
                            const StringData* docComment, int numParams,
-                           bool isGenerator) {
-  Func* f = new (Func::allocFuncMem(name, numParams))
+                           bool needsNextClonedClosure, bool isGenerator) {
+  Func* f = new (Func::allocFuncMem(name, numParams, needsNextClonedClosure))
     Func(unit, preClass, line1, line2, base, past, name,
          attrs, top, docComment, numParams, isGenerator);
   m_fMap[fe] = f;

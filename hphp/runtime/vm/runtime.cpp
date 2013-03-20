@@ -18,6 +18,7 @@
 #include "runtime/base/zend/zend_string.h"
 #include "runtime/base/array/hphp_array.h"
 #include "runtime/base/builtin_functions.h"
+#include "runtime/ext/ext_closure.h"
 #include "runtime/ext/ext_continuation.h"
 #include "runtime/ext/ext_collections.h"
 #include "runtime/vm/core_types.h"
@@ -383,28 +384,10 @@ bool run_intercept_handler_for_invokefunc(TypedValue* retval,
 
 HphpArray* get_static_locals(const ActRec* ar) {
   if (ar->m_func->isClosureBody()) {
-    static const StringData* s___static_locals =
-      StringData::GetStaticString("__static_locals");
-    assert(ar->hasThis());
-    ObjectData* closureObj = ar->getThis();
-    assert(closureObj);
-    TypedValue* prop;
-    TypedValue ref;
-    tvWriteUninit(&ref);
-    static_cast<Instance*>(closureObj)->prop(
-      prop,
-      ref,
-      closureObj->getVMClass(),
-      s___static_locals);
-    if (prop->m_type == KindOfNull) {
-      prop->m_data.parr = NEW(HphpArray)(1);
-      prop->m_data.parr->incRefCount();
-      prop->m_type = KindOfArray;
-    }
-    assert(prop->m_type == KindOfArray);
-    assert(IsHphpArray(prop->m_data.parr));
-    assert(ref.m_type == KindOfUninit);
-    return static_cast<HphpArray*>(prop->m_data.parr);
+    TypedValue* closureLoc = frame_local(ar, 0);
+    c_Closure* closure = static_cast<c_Closure*>(closureLoc->m_data.pobj);
+    assert(closure != nullptr);
+    return closure->getStaticLocals();
   } else if (ar->m_func->isGeneratorFromClosure()) {
     TypedValue* contLoc = frame_local(ar, 0);
     c_Continuation* cont = static_cast<c_Continuation*>(contLoc->m_data.pobj);
@@ -504,6 +487,36 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
       collectionDeepCopyTV(dst);
     }
   }
+}
+
+int init_closure(ActRec* ar, TypedValue* sp) {
+  c_Closure* closure = static_cast<c_Closure*>(ar->getThis());
+
+  // Swap in the $this or late bound class
+  ar->setThis(closure->getThisOrClass());
+
+  if (ar->hasThis()) {
+    ar->getThis()->incRefCount();
+  }
+
+  // Put in the correct context
+  ar->m_func = closure->getInvokeFunc();
+
+  // The closure is the first local.
+  // Similar to tvWriteObject() but we don't incref because it used to be $this
+  // and now it is a local, so they cancel out
+  TypedValue* firstLocal = --sp;
+  firstLocal->m_type = KindOfObject;
+  firstLocal->m_data.pobj = closure;
+
+  // Copy in all the use vars
+  TypedValue* prop = closure->getUseVars();
+  int n = closure->getNumUseVars();
+  for (int i=0; i < n; i++) {
+    tvDup(prop++, --sp);
+  }
+
+  return n + 1;
 }
 
 } } // HPHP::VM

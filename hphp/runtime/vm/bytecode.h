@@ -704,6 +704,11 @@ public:
     pushObjectNoRc(o);
     o->incRefCount();
   }
+  
+  inline void ALWAYS_INLINE nalloc(size_t n) {
+    assert((uintptr_t)&m_top[-n] <= (uintptr_t)m_base);
+    m_top -= n;
+  }
 
   inline Cell* ALWAYS_INLINE allocC() {
     assert(m_top != m_elms);

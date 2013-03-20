@@ -65,6 +65,7 @@ typedef __sighandler_t *sighandler_t;
 #include "runtime/base/zend/zend_string.h"
 #include "runtime/base/runtime_option.h"
 #include "runtime/base/server/source_root_info.h"
+#include "runtime/ext/ext_closure.h"
 #include "runtime/ext/ext_continuation.h"
 #include "runtime/ext/ext_function.h"
 #include "runtime/vm/debug/debug.h"
@@ -2340,6 +2341,15 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     destPC = func->unit()->entry() + dvInitializer;
   }
   SrcKey funcBody(func, destPC);
+
+  if (UNLIKELY(func->isClosureBody())) {
+    // It is a bit of a waste having the use_vars being emitted as
+    // uninitialized first then overwritten here, but knowing how to change
+    // numParams at translation time is hard
+    a.  mov_reg64_reg64(rVmFp, argNumToRegName[0]);
+    emitLea(a, rVmFp, -cellsToBytes(numParams), argNumToRegName[1]);
+    emitCall(a, TCA(init_closure));
+  }
 
   // Move rVmSp to the right place: just past all locals
   int frameCells = func->numSlotsInFrame();
@@ -7303,7 +7313,7 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
   // Even callee-saved regs need to be clean, because
   // createContinuation will read all locals.
   m_regMap.cleanAll();
-  auto helper = origFunc->isNonClosureMethod() ?
+  auto helper = origFunc->isMethod() ?
     VMExecutionContext::createContinuation<true> :
     VMExecutionContext::createContinuation<false>;
   EMIT_CALL(a,

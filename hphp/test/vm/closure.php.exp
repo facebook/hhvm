@@ -8,13 +8,11 @@ Args: 888 500
 #0  funk() called at hphp/test/vm/closure.php:17]
 #1  {closure}() called at hphp/test/vm/closure.php:28]
 #2  main() called at hphp/test/vm/closure.php:33]
-object(Closure$)#1 (3) {
+object(Closure$)#1 (2) {
   ["use_by_val":"Closure$":private]=>
   int(123)
   ["use_by_ref":"Closure$":private]=>
   &int(4000)
-  ["__static_locals":protected]=>
-  NULL
 }
 int(123)
 int(4000)

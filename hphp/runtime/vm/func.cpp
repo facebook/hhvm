@@ -157,14 +157,25 @@ void Func::init(int numParams, bool isGenerator) {
   initPrologues(numParams, isGenerator);
 }
 
-void* Func::allocFuncMem(const StringData* name, int numParams) {
+void* Func::allocFuncMem(
+    const StringData* name, int numParams, bool needsNextClonedClosure) {
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numExtraPrologues =
     maxNumPrologues > kNumFixedPrologues ?
     maxNumPrologues - kNumFixedPrologues :
     0;
   size_t funcSize = sizeof(Func) + numExtraPrologues * sizeof(unsigned char*);
-  return Util::low_malloc(funcSize);
+  if (needsNextClonedClosure) {
+    funcSize += sizeof(Func*);
+  }
+  void* mem = Util::low_malloc(funcSize);
+  if (needsNextClonedClosure) {
+    // make room for nextClonedClosure to work
+    Func** startOfFunc = (Func**) mem;
+    *startOfFunc = nullptr;
+    return startOfFunc + 1;
+  }
+  return mem;
 }
 
 Func::Func(Unit& unit, Id id, int line1, int line2,
@@ -224,15 +235,61 @@ Func::~Func() {
 }
 
 void Func::destroy(Func* func) {
+  void* mem = func;
+  if (func->isClosureBody() || func->isGeneratorFromClosure()) {
+    Func** startOfFunc = (Func**) mem;
+    mem = startOfFunc - 1; // move back by a pointer
+  }
   func->~Func();
-  Util::low_free(func);
+  Util::low_free(mem);
 }
 
 Func* Func::clone() const {
-  Func* f = new (allocFuncMem(m_name, m_numParams)) Func(*this);
+  Func* f = new (allocFuncMem(
+        m_name,
+        m_numParams,
+        isClosureBody() || isGeneratorFromClosure()
+  )) Func(*this);
   f->initPrologues(m_numParams, isGenerator());
   f->m_funcId = InvalidId;
   return f;
+}
+
+const Func* Func::cloneAndSetClass(Class* cls) const {
+  if (const Func* ret = findCachedClone(cls)) {
+    return ret;
+  }
+
+  static Mutex s_clonedFuncListMutex;
+  Lock l(s_clonedFuncListMutex);
+  // Check again now that I'm the writer
+  if (const Func* ret = findCachedClone(cls)) {
+    return ret;
+  }
+
+  Func* clonedFunc = clone();
+  clonedFunc->setNewFuncId();
+  clonedFunc->setCls(cls);
+
+  // Save it so we don't have to keep cloning it and retranslating
+  Func*& nextFunc = this->nextClonedClosure();
+  while (nextFunc) {
+    nextFunc = nextFunc->nextClonedClosure();
+  }
+  nextFunc = clonedFunc;
+
+  return clonedFunc;
+}
+
+const Func* Func::findCachedClone(Class* cls) const {
+  const Func* nextFunc = this;
+  while (nextFunc) {
+    if (nextFunc->cls() == cls) {
+      return nextFunc;
+    }
+    nextFunc = nextFunc->nextClonedClosure();
+  }
+  return nullptr;
 }
 
 void Func::rename(const StringData* name) {
@@ -679,9 +736,13 @@ void FuncEmitter::allocVarId(const StringData* name) {
 }
 
 Id FuncEmitter::lookupVarId(const StringData* name) const {
-  assert(name != nullptr);
-  assert(m_localNames.find(name) != m_localNames.end());
+  assert(this->hasVar(name));
   return m_localNames.find(name)->second;
+}
+
+bool FuncEmitter::hasVar(const StringData* name) const {
+  assert(name != nullptr);
+  return m_localNames.find(name) != m_localNames.end();
 }
 
 Id FuncEmitter::allocIterator() {
@@ -815,10 +876,12 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   Func* f = (m_pce == nullptr)
     ? m_ue.newFunc(this, unit, m_id, m_line1, m_line2, m_base,
                    m_past, m_name, attrs, m_top, m_docComment,
-                   m_params.size(), m_isGenerator)
+                   m_params.size(), m_isClosureBody | m_isGeneratorFromClosure,
+                   m_isGenerator)
     : m_ue.newFunc(this, unit, preClass, m_line1, m_line2, m_base,
                    m_past, m_name, attrs, m_top, m_docComment,
-                   m_params.size(), m_isGenerator);
+                   m_params.size(), m_isClosureBody | m_isGeneratorFromClosure,
+                   m_isGenerator);
   f->shared()->m_info = m_info;
   f->shared()->m_returnType = m_returnType;
   std::vector<Func::ParamInfo> pBuilder;

@@ -285,5 +285,8 @@ void assertTv(const TypedValue* tv);
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps);
 
+// returns the number of things it put on sp
+int init_closure(ActRec* ar, TypedValue* sp);
+
 } }
 #endif

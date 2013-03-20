@@ -5,7 +5,7 @@
 #elif EXT_TYPE == 1
 
 #elif EXT_TYPE == 2
-"Closure", "", NULL, "__construct", T(Void), S(0), NULL, S(16384), "/**\n * ( excerpt from http://php.net/manual/en/closure.construct.php )\n *\n *\n */", S(16384),"__invoke", T(Variant), S(0), NULL, S(147456), "/**\n * ( excerpt from http://php.net/manual/en/closure.invoke.php )\n *\n *\n * @return     mixed\n */", S(147456),"__clone", T(Variant), S(0), NULL, S(16384), "/**\n * ( excerpt from http://php.net/manual/en/closure.clone.php )\n *\n *\n * @return     mixed\n */", S(16384),NULL,S(128), "this", T(Object),S(128), "className", T(String),S(128), "functionName", T(String),S(128), "__static_locals", T(String),NULL,NULL,
+"Closure", "", NULL, "__construct", T(Void), S(0), NULL, S(16384), "/**\n * ( excerpt from http://php.net/manual/en/closure.construct.php )\n *\n *\n */", S(16384),NULL,NULL,NULL,
 S(16384), "/**\n * ( excerpt from http://php.net/manual/en/class.closure.php )\n *\n * Used as the base class for all closures\n *\n */", "DummyClosure", "", NULL, "__construct", T(Void), S(0), NULL, S(16384), "/**\n * ( excerpt from http://php.net/manual/en/dummyclosure.construct.php )\n *\n *\n */", S(16384),NULL,NULL,NULL,
 S(16384), "/**\n * ( excerpt from http://php.net/manual/en/class.dummyclosure.php )\n *\n * Represents an invalid closure which will fatal when used.\n *\n */", 
 #endif

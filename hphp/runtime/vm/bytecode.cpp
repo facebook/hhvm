@@ -53,6 +53,7 @@
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/ext/ext_string.h>
 #include <runtime/ext/ext_error.h>
+#include <runtime/ext/ext_closure.h>
 #include <runtime/ext/ext_continuation.h>
 #include <runtime/ext/ext_function.h>
 #include <runtime/ext/ext_variable.h>
@@ -1798,7 +1799,17 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
       }
     }
   }
-  pushLocalsAndIterators(func, nparams);
+
+  int nlocals = nparams;
+  if (UNLIKELY(func->isClosureBody())) {
+    int nuse = init_closure(ar, m_stack.top());
+    // init_closure doesn't move m_stack
+    m_stack.nalloc(nuse);
+    nlocals += nuse;
+    func = ar->m_func;
+  }
+
+  pushLocalsAndIterators(func, nlocals);
 
   /*
    * If we're reentering, make sure to finalize the ActRec before
@@ -6857,18 +6868,26 @@ VMExecutionContext::createContinuation(ActRec* fp,
   // does. We set it up once, here, and then just change FP to point to it when
   // we enter the generator body.
   ActRec* ar = cont->actRec();
-  ar->m_func = genFunc;
+
   if (isMethod) {
+    Class* cls = frameStaticClass(fp);
+
+    if (origFunc->isClosureBody()) {
+      genFunc = genFunc->cloneAndSetClass(cls);
+    }
+
     if (obj.get()) {
       ObjectData* objData = obj.get();
       ar->setThis(objData);
       objData->incRefCount();
     } else {
-      ar->setClass(frameStaticClass(fp));
+      ar->setClass(cls);
     }
   } else {
     ar->setThis(nullptr);
   }
+
+  ar->m_func = genFunc;
   ar->initNumArgs(1);
   ar->setVarEnv(nullptr);
 
@@ -6953,7 +6972,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   const Func* genFunc = origFunc->getGeneratorBody(genName);
   assert(genFunc != nullptr);
 
-  bool isMethod = origFunc->isNonClosureMethod();
+  bool isMethod = origFunc->isMethod();
   c_Continuation* cont = isMethod ?
     createContinuation<true>(m_fp, getArgs, origFunc, genFunc) :
     createContinuation<false>(m_fp, getArgs, origFunc, genFunc);

@@ -12,6 +12,7 @@
 // Preamble: C++ code inserted at beginning of ext_{name}.h
 
 DefinePreamble(<<<CPP
+#include <runtime/vm/func.h>
 
 CPP
 );
@@ -88,37 +89,32 @@ BeginClass(
   array(
     'name' => 'Closure',
     'desc' => 'Used as the base class for all closures',
+    // https://phabricator.fb.com/D727298 means this can't be abstract
+    // 'flags'  => IsAbstract,
     'footer' => <<<EOT
+public:
+  public: ObjectData* clone();
+  ObjectData* getThisOrClass() { return m_thisOrClass; }
+  const VM::Func* getInvokeFunc() { return m_func; }
+  HphpArray* getStaticLocals();
+  TypedValue* getUseVars() { return propVec(); }
+  int getNumUseVars() { return m_cls->numDeclProperties(); }
 protected:
   virtual bool php_sleep(Variant &ret);
+private:
+  SmartPtr<HphpArray> m_VMStatics;
+  ObjectData* m_thisOrClass;
+  const VM::Func* m_func;
 EOT
 ,
   )
 );
 
-DefineProperty(
-  array(
-    'name'  => '__static_locals',
-    'type'  => String,
-    'flags' => IsProtected,
-    'desc'  => 'For storing the static locals from the closure body',
-  ));
-
 DefineFunction(
   array(
     'name'   => '__construct',
-    'args'   => array(),
     'return' => array(
       'type'   => null,
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => '__invoke',
-    'flags'  => VariableArguments,
-    'return' => array(
-      'type'   => Variant,
     ),
   ));
 

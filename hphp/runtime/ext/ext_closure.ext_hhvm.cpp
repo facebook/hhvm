@@ -70,54 +70,6 @@ TypedValue* tg_7Closure___construct(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_Closure::t___invoke(int, HPHP::Array const&)
-_ZN4HPHP9c_Closure10t___invokeEiRKNS_5ArrayE
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-_argc => rdx
-_argv => rcx
-*/
-
-TypedValue* th_7Closure___invoke(TypedValue* _rv, ObjectData* this_, int64_t _argc, Value* _argv) asm("_ZN4HPHP9c_Closure10t___invokeEiRKNS_5ArrayE");
-
-TypedValue* tg_7Closure___invoke(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      Array extraArgs;
-      {
-        ArrayInit ai(count-0);
-        for (int64_t i = 0; i < count; ++i) {
-          TypedValue* extraArg = ar->getExtraArg(i-0);
-          if (tvIsStronglyBound(extraArg)) {
-            ai.setRef(i-0, tvAsVariant(extraArg));
-          } else {
-            ai.set(i-0, tvAsVariant(extraArg));
-          }
-        }
-        extraArgs = ai.create();
-      }
-      th_7Closure___invoke((&(rv)), (this_), (count), (Value*)(&extraArgs));
-      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-      frame_free_locals_inl(ar, 0);
-      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-      return &ar->m_r;
-    } else {
-      throw_instance_method_fatal("Closure::__invoke");
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
 HPHP::VM::Instance* new_DummyClosure_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_DummyClosure) - sizeof(ObjectData);

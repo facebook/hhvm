@@ -341,6 +341,8 @@ protected:
   int m_updated;
   int m_runId;
 private:
+  FunctionScopeRawPtr getContainingNonClosureFunction();
+
   Marks m_mark;
   BlockScopeRawPtrFlagsPtrVec  m_orderedDeps;
   BlockScopeRawPtrFlagsVec     m_orderedUsers;

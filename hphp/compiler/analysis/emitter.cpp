@@ -2501,7 +2501,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         not_reached();
 
       case Statement::KindOfFunctionStatement: {
-        assert(!node->getClassScope()); // Handled directly by emitClass().
         MethodStatementPtr m(static_pointer_cast<MethodStatement>(node));
         // Only called for fn defs not on the top level
         StringData* nName = StringData::GetStaticString(m->getOriginalName());
@@ -2523,6 +2522,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
           postponeMeth(m, nullptr, true);
         } else {
+          assert(!node->getClassScope()); // Handled directly by emitClass().
           FuncEmitter* fe = m_ue.newFuncEmitter(nName, false);
           e.DefFunc(fe->id());
           postponeMeth(m, fe, false);
@@ -3540,9 +3540,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               scalarExp(static_pointer_cast<ScalarExpression>(node));
             // Inside traits, __class__ cannot be resolved yet,
             // so emit call to get_class.
-            if (scalarExp->getType() == T_CLASS_C && m_curFunc &&
-                m_curFunc->pce() &&
-                (m_curFunc->pce()->attrs() & VM::AttrTrait)) {
+            if (scalarExp->getType() == T_CLASS_C &&
+                ex->getFunctionScope()->getContainingClass() &&
+                ex->getFunctionScope()->getContainingClass()->isTrait()) {
               static const StringData* fname =
                 StringData::GetStaticString("get_class");
               Offset fpiStart = m_ue.bcPos();
@@ -5259,6 +5259,28 @@ void EmitterVisitor::emitPostponedMeths() {
 
     m_curFunc = fe;
 
+    if (fe->isClosureBody()) {
+      // We are going to keep the closure as the first local
+      fe->allocVarId(StringData::GetStaticString("0Closure"));
+
+      ClosureUseVarVec* useVars = p.m_closureUseVars;
+      auto it = useVars->begin();
+      while (it != useVars->end()) {
+        const StringData* name = it->first;
+        if (fe->hasVar(name) && fe->lookupVarId(name) < fe->numParams()) {
+          // Because PHP is insane you can have a use variable with the same
+          // name as a param name.
+          // In that case, params win (which is different than zend but much easier)
+          it = useVars->erase(it);
+        } else {
+          // These are all locals. I want them right after the params so I don't
+          // have to keep track of which one goes where at runtime.
+          fe->allocVarId(name);
+          it++;
+        }
+      }
+    }
+
     // Assign ids to all of the local variables eagerly. This gives us the
     // nice property that all named local variables will be assigned ids
     // 0 through k-1, while any unnamed local variable will have an id >= k.
@@ -5337,35 +5359,6 @@ void EmitterVisitor::emitPostponedMeths() {
         assert(tc.typeName()->data() != (const char*)0xdeadba5eba11f00d);
         e.VerifyParamType(i);
       }
-      if (fe->isClosureBody()) {
-        assert(p.m_closureUseVars != nullptr);
-        // Emit code to unpack the instance variables (which store the
-        // use-variables) into locals. Some of the use-variables may have the
-        // same name, in which case the last one wins.
-        unsigned n = p.m_closureUseVars->size();
-        for (unsigned i = 0; i < n; ++i) {
-          StringData* name = (*p.m_closureUseVars)[i].first;
-          bool byRef = (*p.m_closureUseVars)[i].second;
-          emitVirtualLocal(fe->lookupVarId(name));
-          if (i) {
-            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
-                        false, 0, 0);
-          }
-          e.CheckThis();
-          m_evalStack.push(StackSym::H);
-          m_evalStack.push(StackSym::T);
-          m_evalStack.setString(name);
-          markProp(e);
-          if (byRef) {
-            emitVGet(e);
-            emitBind(e);
-          } else {
-            emitCGet(e);
-            emitSet(e);
-          }
-          emitPop(e);
-        }
-      }
 
       if (funcScope->isAbstract()) {
         StringData* msg =
@@ -5411,8 +5404,7 @@ void EmitterVisitor::emitPostponedMeths() {
         e.ContExit();
       } else {
         e.Null();
-        if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded()) ||
-            (fe->isClosureBody() && p.m_closureUseVars->size())) {
+        if ((p.m_meth->getStmts() && p.m_meth->getStmts()->isGuarded())) {
           m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
                          false, 0, 0);
         }
@@ -5665,6 +5657,21 @@ void EmitterVisitor::emitPostponedClosureCtors() {
         emitPop(e);
       }
     }
+
+    // call parent::__construct()
+    static StringData* s___construct = StringData::GetStaticString("__construct");
+    e.String(s___construct);
+    static StringData* s_Closure = StringData::GetStaticString("Closure");
+    e.String(s_Closure);
+    e.AGetC();
+    Offset fpiStart = m_ue.bcPos();
+    e.FPushClsMethodF(0);
+    {
+      FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+    }
+    e.FCall(0);
+    e.PopR();
+
     e.Null();
     if (n > 0) {
       m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,

@@ -1,0 +1,2 @@
+HipHop Notice:  Undefined variable: this in hphp/test/vm/closure_recursive_bad.php on line 6
+HipHop Fatal error: Uncaught exception 'BadMethodCallException' with message 'Call to a member function d() on a non-object' in hphp/test/vm/closure_recursive_bad.php:6\nStack trace:\n#0 hphp/test/vm/closure_recursive_bad.php(17): {closure}()\n#1 {main}

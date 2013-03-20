@@ -137,6 +137,7 @@ struct Func {
   static void destroy(Func* func);
 
   Func* clone() const;
+  const Func* cloneAndSetClass(Class* cls) const;
 
   void validate() const {
 #ifdef DEBUG
@@ -326,8 +327,8 @@ struct Func {
   }
   /**
    * If this function is a generator then it is implemented as a simple
-   * function that just returns another function. hasGeneratorAsBody() will be 
-   * true for the outer functions and isGenerator() is true for the 
+   * function that just returns another function. hasGeneratorAsBody() will be
+   * true for the outer functions and isGenerator() is true for the
    * inner function.
    *
    * This isn't a pointer to the function itself because it was too hard to
@@ -353,7 +354,19 @@ struct Func {
     return shared()->m_userAttributes;
   }
 
-  static void* allocFuncMem(const StringData* name, int numParams);
+  /**
+   * Closure's __invoke()s have an extra pointer used to keep cloned versions
+   * of themselves with different contexts.
+   *
+   * const here is the equivalent of "mutable" since this is just a cache
+   */
+  Func*& nextClonedClosure() const {
+    assert(isClosureBody() || isGeneratorFromClosure());
+    return ((Func**)this)[-1];
+  }
+
+  static void* allocFuncMem(
+    const StringData* name, int numParams, bool needsNextClonedClosure);
 
   void setPrologue(int index, unsigned char* tca) {
     m_prologueTable[index] = tca;
@@ -465,6 +478,7 @@ private:
   void allocVarId(const StringData* name);
   const SharedData* shared() const { return m_shared.get(); }
   SharedData* shared() { return m_shared.get(); }
+  const Func* findCachedClone(Class* cls) const;
 
 private:
   static bool s_interceptsEnabled;
@@ -549,6 +563,7 @@ public:
   }
   void allocVarId(const StringData* name);
   Id lookupVarId(const StringData* name) const;
+  bool hasVar(const StringData* name) const;
   Id numParams() const { return m_params.size(); }
 
   Id allocIterator();

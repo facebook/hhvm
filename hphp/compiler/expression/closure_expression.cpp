@@ -47,6 +47,11 @@ ClosureExpression::ClosureExpression
       ParameterExpressionPtr param(
         dynamic_pointer_cast<ParameterExpression>((*vars)[i]));
       assert(param);
+      if (param->getName() == "this") {
+        // "this" is automatically included.
+        // Once we get rid of all the callsites, make this an error
+        continue;
+      }
       if (seenBefore.find(param->getName().c_str()) == seenBefore.end()) {
         seenBefore.insert(param->getName().c_str());
         m_vars->insertElement(param);

@@ -2,11 +2,9 @@ object(foo)#1 (2) {
   ["test":"foo":private]=>
   int(3)
   ["a"]=>
-  object(Closure$)#2 (2) {
+  object(Closure$)#2 (1) {
     ["a":"Closure$":private]=>
     *RECURSION*
-    ["__static_locals":protected]=>
-    NULL
   }
 }
 bool(true)

@@ -1797,6 +1797,7 @@ TypedValue* fg_hphp_invoke(VM::ActRec *ar);
 TypedValue* fg_hphp_invoke_method(VM::ActRec *ar);
 TypedValue* fg_hphp_instanceof(VM::ActRec *ar);
 TypedValue* fg_hphp_create_object(VM::ActRec *ar);
+TypedValue* fg_hphp_create_object_without_constructor(VM::ActRec *ar);
 TypedValue* fg_hphp_get_property(VM::ActRec *ar);
 TypedValue* fg_hphp_set_property(VM::ActRec *ar);
 TypedValue* fg_hphp_get_static_property(VM::ActRec *ar);
@@ -2280,6 +2281,7 @@ TypedValue* tg_6Vector_keys(VM::ActRec *ar);
 TypedValue* tg_6Vector_at(VM::ActRec *ar);
 TypedValue* tg_6Vector_get(VM::ActRec *ar);
 TypedValue* tg_6Vector_set(VM::ActRec *ar);
+TypedValue* tg_6Vector_setAll(VM::ActRec *ar);
 TypedValue* tg_6Vector_put(VM::ActRec *ar);
 TypedValue* tg_6Vector_clear(VM::ActRec *ar);
 TypedValue* tg_6Vector_contains(VM::ActRec *ar);
@@ -2287,6 +2289,7 @@ TypedValue* tg_6Vector_containsKey(VM::ActRec *ar);
 TypedValue* tg_6Vector_removeKey(VM::ActRec *ar);
 TypedValue* tg_6Vector_append(VM::ActRec *ar);
 TypedValue* tg_6Vector_add(VM::ActRec *ar);
+TypedValue* tg_6Vector_addAll(VM::ActRec *ar);
 TypedValue* tg_6Vector_pop(VM::ActRec *ar);
 TypedValue* tg_6Vector_resize(VM::ActRec *ar);
 TypedValue* tg_6Vector_toArray(VM::ActRec *ar);
@@ -2321,6 +2324,7 @@ TypedValue* tg_3Map_keys(VM::ActRec *ar);
 TypedValue* tg_3Map_at(VM::ActRec *ar);
 TypedValue* tg_3Map_get(VM::ActRec *ar);
 TypedValue* tg_3Map_set(VM::ActRec *ar);
+TypedValue* tg_3Map_setAll(VM::ActRec *ar);
 TypedValue* tg_3Map_put(VM::ActRec *ar);
 TypedValue* tg_3Map_clear(VM::ActRec *ar);
 TypedValue* tg_3Map_contains(VM::ActRec *ar);
@@ -2329,6 +2333,7 @@ TypedValue* tg_3Map_remove(VM::ActRec *ar);
 TypedValue* tg_3Map_removeKey(VM::ActRec *ar);
 TypedValue* tg_3Map_discard(VM::ActRec *ar);
 TypedValue* tg_3Map_add(VM::ActRec *ar);
+TypedValue* tg_3Map_addAll(VM::ActRec *ar);
 TypedValue* tg_3Map_toArray(VM::ActRec *ar);
 TypedValue* tg_3Map_copyAsArray(VM::ActRec *ar);
 TypedValue* tg_3Map_toKeysArray(VM::ActRec *ar);
@@ -2362,6 +2367,7 @@ TypedValue* tg_9StableMap_keys(VM::ActRec *ar);
 TypedValue* tg_9StableMap_at(VM::ActRec *ar);
 TypedValue* tg_9StableMap_get(VM::ActRec *ar);
 TypedValue* tg_9StableMap_set(VM::ActRec *ar);
+TypedValue* tg_9StableMap_setAll(VM::ActRec *ar);
 TypedValue* tg_9StableMap_put(VM::ActRec *ar);
 TypedValue* tg_9StableMap_clear(VM::ActRec *ar);
 TypedValue* tg_9StableMap_contains(VM::ActRec *ar);
@@ -2370,6 +2376,7 @@ TypedValue* tg_9StableMap_remove(VM::ActRec *ar);
 TypedValue* tg_9StableMap_removeKey(VM::ActRec *ar);
 TypedValue* tg_9StableMap_discard(VM::ActRec *ar);
 TypedValue* tg_9StableMap_add(VM::ActRec *ar);
+TypedValue* tg_9StableMap_addAll(VM::ActRec *ar);
 TypedValue* tg_9StableMap_toArray(VM::ActRec *ar);
 TypedValue* tg_9StableMap_copyAsArray(VM::ActRec *ar);
 TypedValue* tg_9StableMap_toKeysArray(VM::ActRec *ar);
@@ -3034,7 +3041,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2207;
+const long long hhbc_ext_funcs_count = 2208;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -4810,6 +4817,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "hphp_invoke_method", fg_hphp_invoke_method, (void *)&fh_hphp_invoke_method },
   { "hphp_instanceof", fg_hphp_instanceof, (void *)&fh_hphp_instanceof },
   { "hphp_create_object", fg_hphp_create_object, (void *)&fh_hphp_create_object },
+  { "hphp_create_object_without_constructor", fg_hphp_create_object_without_constructor, (void *)&fh_hphp_create_object_without_constructor },
   { "hphp_get_property", fg_hphp_get_property, (void *)&fh_hphp_get_property },
   { "hphp_set_property", fg_hphp_set_property, (void *)&fh_hphp_set_property },
   { "hphp_get_static_property", fg_hphp_get_static_property, (void *)&fh_hphp_get_static_property },
@@ -5326,7 +5334,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DummyClosure[] = {
   { "__construct", tg_12DummyClosure___construct }
 };
 
-static const long long hhbc_ext_method_count_Vector = 33;
+static const long long hhbc_ext_method_count_Vector = 35;
 static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "__construct", tg_6Vector___construct },
   { "isEmpty", tg_6Vector_isEmpty },
@@ -5336,6 +5344,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "at", tg_6Vector_at },
   { "get", tg_6Vector_get },
   { "set", tg_6Vector_set },
+  { "setAll", tg_6Vector_setAll },
   { "put", tg_6Vector_put },
   { "clear", tg_6Vector_clear },
   { "contains", tg_6Vector_contains },
@@ -5343,6 +5352,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "removeKey", tg_6Vector_removeKey },
   { "append", tg_6Vector_append },
   { "add", tg_6Vector_add },
+  { "addAll", tg_6Vector_addAll },
   { "pop", tg_6Vector_pop },
   { "resize", tg_6Vector_resize },
   { "toArray", tg_6Vector_toArray },
@@ -5373,7 +5383,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_VectorIterator[] = {
   { "rewind", tg_14VectorIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Map = 33;
+static const long long hhbc_ext_method_count_Map = 35;
 static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "__construct", tg_3Map___construct },
   { "isEmpty", tg_3Map_isEmpty },
@@ -5383,6 +5393,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "at", tg_3Map_at },
   { "get", tg_3Map_get },
   { "set", tg_3Map_set },
+  { "setAll", tg_3Map_setAll },
   { "put", tg_3Map_put },
   { "clear", tg_3Map_clear },
   { "contains", tg_3Map_contains },
@@ -5391,6 +5402,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "removeKey", tg_3Map_removeKey },
   { "discard", tg_3Map_discard },
   { "add", tg_3Map_add },
+  { "addAll", tg_3Map_addAll },
   { "toArray", tg_3Map_toArray },
   { "copyAsArray", tg_3Map_copyAsArray },
   { "toKeysArray", tg_3Map_toKeysArray },
@@ -5420,7 +5432,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_MapIterator[] = {
   { "rewind", tg_11MapIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_StableMap = 33;
+static const long long hhbc_ext_method_count_StableMap = 35;
 static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "__construct", tg_9StableMap___construct },
   { "isEmpty", tg_9StableMap_isEmpty },
@@ -5430,6 +5442,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "at", tg_9StableMap_at },
   { "get", tg_9StableMap_get },
   { "set", tg_9StableMap_set },
+  { "setAll", tg_9StableMap_setAll },
   { "put", tg_9StableMap_put },
   { "clear", tg_9StableMap_clear },
   { "contains", tg_9StableMap_contains },
@@ -5438,6 +5451,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "removeKey", tg_9StableMap_removeKey },
   { "discard", tg_9StableMap_discard },
   { "add", tg_9StableMap_add },
+  { "addAll", tg_9StableMap_addAll },
   { "toArray", tg_9StableMap_toArray },
   { "copyAsArray", tg_9StableMap_copyAsArray },
   { "toKeysArray", tg_9StableMap_toKeysArray },

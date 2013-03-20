@@ -47,6 +47,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: void freeData();
   public: void t___construct(CVarRef iterable = null_variant);
   public: Object t_add(CVarRef val);
+  public: Object t_addall(CVarRef val);
   public: Object t_append(CVarRef val); // deprecated
   public: Variant t_pop();
   public: void t_resize(CVarRef sz, CVarRef value);
@@ -58,6 +59,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
+  public: Object t_setall(CVarRef iterable);
   public: Object t_put(CVarRef key, CVarRef value); // deprecated
   public: bool t_contains(CVarRef key); // deprecated
   public: bool t_containskey(CVarRef key);
@@ -231,6 +233,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: void freeData();
   public: void t___construct(CVarRef iterable = null_variant);
   public: Object t_add(CVarRef val);
+  public: Object t_addall(CVarRef val);
   public: Object t_clear();
   public: bool t_isempty();
   public: int64_t t_count();
@@ -239,6 +242,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
+  public: Object t_setall(CVarRef iterable);
   public: Object t_put(CVarRef key, CVarRef value); // deprecated
   public: bool t_contains(CVarRef key);
   public: bool t_containskey(CVarRef key);
@@ -322,7 +326,11 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: bool contains(StringData* key) {
     return find(key->data(), key->size(), key->hash());
   }
-  public: void reserve(int64_t sz);
+  public: void reserve(int64_t sz) {
+    if (int64_t(m_load) + sz - int64_t(m_size) >= computeMaxLoad()) {
+      growImpl(sz);
+    }
+  }
   public: int getVersionNumber() {
     return m_versionNumber;
   }
@@ -477,7 +485,11 @@ private:
   }
   void erase(Bucket* prev);
 
-  void resize();
+  void growImpl(int64_t sz);
+  void grow() {
+    growImpl(m_size);
+  }
+
   void deleteBuckets();
 
   ssize_t iter_begin() const;
@@ -540,6 +552,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: void freeData();
   public: void t___construct(CVarRef iterable = null_variant);
   public: Object t_add(CVarRef val);
+  public: Object t_addall(CVarRef val);
   public: Object t_clear();
   public: bool t_isempty();
   public: int64_t t_count();
@@ -548,6 +561,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
+  public: Object t_setall(CVarRef iterable);
   public: Object t_put(CVarRef key, CVarRef value); // deprecated
   public: bool t_contains(CVarRef key);
   public: bool t_containskey(CVarRef key);
@@ -629,7 +643,11 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: bool contains(StringData* key) {
     return find(key->data(), key->size(), key->hash());
   }
-  public: void reserve(int64_t sz);
+  public: void reserve(int64_t sz) {
+    if (sz > int64_t(m_nTableSize)) {
+      growImpl(sz);
+    }
+  }
   public: int getVersionNumber() {
     return m_versionNumber;
   }
@@ -746,7 +764,11 @@ private:
   }
   void erase(Bucket** prev);
 
-  void resize();
+  void growImpl(int64_t sz);
+  void grow() {
+    growImpl(m_size);
+  }
+
   void deleteBuckets();
 
   ssize_t iter_begin() const;
@@ -927,6 +949,10 @@ class c_TupleIterator : public ExtObjectData {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+inline TypedValue* cvarToCell(const Variant* v) {
+  return const_cast<TypedValue*>(tvToCell(v->asTypedValue()));
+}
+
 inline TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   switch (obj->getCollectionType()) {
@@ -1045,23 +1071,23 @@ inline Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
   switch (obj->getCollectionType()) {
     case Collection::VectorType: {
       c_Vector* vec = static_cast<c_Vector*>(obj);
-      return *(Variant*)(vec->at(offset));
+      return tvAsVariant(vec->at(offset));
     }
     case Collection::MapType: {
       c_Map* mp = static_cast<c_Map*>(obj);
-      return *(Variant*)(mp->at(offset));
+      return tvAsVariant(mp->at(offset));
     }
     case Collection::StableMapType: {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      return *(Variant*)(smp->at(offset));
+      return tvAsVariant(smp->at(offset));
     }
     case Collection::TupleType: {
       c_Tuple* tup = static_cast<c_Tuple*>(obj);
-      return *(Variant*)(tup->at(offset));
+      return tvAsVariant(tup->at(offset));
     }
     default:
       assert(false);
-      return *(Variant*)(NULL);
+      return tvAsVariant(NULL);
   }
 }
 
@@ -1075,11 +1101,11 @@ inline Variant& collectionOffsetGet(ObjectData* obj, CStrRef offset) {
     }
     case Collection::MapType: {
       c_Map* mp = static_cast<c_Map*>(obj);
-      return *(Variant*)(mp->at(key));
+      return tvAsVariant(mp->at(key));
     }
     case Collection::StableMapType: {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      return *(Variant*)(smp->at(key));
+      return tvAsVariant(smp->at(key));
     }
     case Collection::TupleType: {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -1088,27 +1114,24 @@ inline Variant& collectionOffsetGet(ObjectData* obj, CStrRef offset) {
     }
     default:
       assert(false);
-      return *(Variant*)(NULL);
+      return tvAsVariant(NULL);
   }
 }
 
 inline Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
-  TypedValue* key = (TypedValue*)(&offset);
-  if (key->m_type == KindOfRef) {
-    key = key->m_data.pref->tv();
-  }
+  TypedValue* key = cvarToCell(&offset);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
-      return *(Variant*)(c_Vector::OffsetGet(obj, key));
+      return tvAsVariant(c_Vector::OffsetGet(obj, key));
     case Collection::MapType:
-      return *(Variant*)(c_Map::OffsetGet(obj, key));
+      return tvAsVariant(c_Map::OffsetGet(obj, key));
     case Collection::StableMapType:
-      return *(Variant*)(c_StableMap::OffsetGet(obj, key));
+      return tvAsVariant(c_StableMap::OffsetGet(obj, key));
     case Collection::TupleType:
-      return *(Variant*)(c_Tuple::OffsetGet(obj, key));
+      return tvAsVariant(c_Tuple::OffsetGet(obj, key));
     default:
       assert(false);
-      return *(Variant*)(NULL);
+      return tvAsVariant(NULL);
   }
 }
 
@@ -1125,10 +1148,7 @@ inline Variant& collectionOffsetGet(ObjectData* obj, litstr offset) {
 }
 
 inline void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
-  TypedValue* tv = (TypedValue*)(&val);
-  if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.pref->tv();
-  }
+  TypedValue* tv = cvarToCell(&val);
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
     tv = (TypedValue*)(&init_null_variant);
   }
@@ -1160,10 +1180,7 @@ inline void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
 
 inline void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val) {
   StringData* key = offset.get();
-  TypedValue* tv = (TypedValue*)(&val);
-  if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.pref->tv();
-  }
+  TypedValue* tv = cvarToCell(&val);
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
     tv = (TypedValue*)(&init_null_variant);
   }
@@ -1194,14 +1211,8 @@ inline void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val) {
 }
 
 inline void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
-  TypedValue* key = (TypedValue*)(&offset);
-  if (UNLIKELY(key->m_type == KindOfRef)) {
-    key = key->m_data.pref->tv();
-  }
-  TypedValue* tv = (TypedValue*)(&val);
-  if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.pref->tv();
-  }
+  TypedValue* key = cvarToCell(&offset);
+  TypedValue* tv = cvarToCell(&val);
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
     tv = (TypedValue*)(&init_null_variant);
   }
@@ -1240,10 +1251,7 @@ inline void collectionOffsetSet(ObjectData* obj, litstr offset, CVarRef val) {
 }
 
 inline bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
-  TypedValue* key = (TypedValue*)(&offset);
-  if (key->m_type == KindOfRef) {
-    key = key->m_data.pref->tv();
-  }
+  TypedValue* key = cvarToCell(&offset);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
       return c_Vector::OffsetContains(obj, key);
@@ -1260,10 +1268,7 @@ inline bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
 }
 
 inline bool collectionOffsetIsset(ObjectData* obj, CVarRef offset) {
-  TypedValue* key = (TypedValue*)(&offset);
-  if (key->m_type == KindOfRef) {
-    key = key->m_data.pref->tv();
-  }
+  TypedValue* key = cvarToCell(&offset);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
       return c_Vector::OffsetIsset(obj, key);
@@ -1280,10 +1285,7 @@ inline bool collectionOffsetIsset(ObjectData* obj, CVarRef offset) {
 }
 
 inline bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset) {
-  TypedValue* key = (TypedValue*)(&offset);
-  if (key->m_type == KindOfRef) {
-    key = key->m_data.pref->tv();
-  }
+  TypedValue* key = cvarToCell(&offset);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
       return c_Vector::OffsetEmpty(obj, key);
@@ -1300,21 +1302,12 @@ inline bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset) {
 }
 
 inline void collectionOffsetUnset(ObjectData* obj, CVarRef offset) {
-  TypedValue* key = (TypedValue*)(&offset);
-  if (UNLIKELY(key->m_type == KindOfRef)) {
-    key = key->m_data.pref->tv();
-  }
+  TypedValue* key = cvarToCell(&offset);
   collectionUnset(obj, key);
 }
 
 inline void collectionOffsetAppend(ObjectData* obj, CVarRef val) {
-  TypedValue* tv = (TypedValue*)(&val);
-  if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.pref->tv();
-  }
-  if (UNLIKELY(tv->m_type == KindOfUninit)) {
-    tv = (TypedValue*)(&init_null_variant);
-  }
+  TypedValue* tv = cvarToCell(&val);
   collectionAppend(obj, tv);
 }
 

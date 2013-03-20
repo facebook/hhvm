@@ -500,6 +500,58 @@ TypedValue* fg_hphp_create_object(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Object HPHP::f_hphp_create_object_without_constructor(HPHP::String const&)
+_ZN4HPHP40f_hphp_create_object_without_constructorERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+name => rsi
+*/
+
+Value* fh_hphp_create_object_without_constructor(Value* _rv, Value* name) asm("_ZN4HPHP40f_hphp_create_object_without_constructorERKNS_6StringE");
+
+TypedValue * fg1_hphp_create_object_without_constructor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_create_object_without_constructor(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfObject;
+  tvCastToStringInPlace(args-0);
+  fh_hphp_create_object_without_constructor((&rv->m_data), &args[-0].m_data);
+  if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_hphp_create_object_without_constructor(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_type = KindOfObject;
+        fh_hphp_create_object_without_constructor((&rv.m_data), &args[-0].m_data);
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_hphp_create_object_without_constructor(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("hphp_create_object_without_constructor", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::f_hphp_get_property(HPHP::Object const&, HPHP::String const&, HPHP::String const&)
 _ZN4HPHP19f_hphp_get_propertyERKNS_6ObjectERKNS_6StringES5_
 

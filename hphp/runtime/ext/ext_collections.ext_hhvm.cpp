@@ -337,6 +337,45 @@ TypedValue* tg_6Vector_set(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Vector::t_setall(HPHP::Variant const&)
+_ZN4HPHP8c_Vector8t_setallERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+iterable => rdx
+*/
+
+Value* th_6Vector_setAll(Value* _rv, ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP8c_Vector8t_setallERKNS_7VariantE");
+
+TypedValue* tg_6Vector_setAll(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_6Vector_setAll((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::setAll", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::setAll");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_Vector::t_put(HPHP::Variant const&, HPHP::Variant const&)
 _ZN4HPHP8c_Vector5t_putERKNS_7VariantES3_
 
@@ -596,6 +635,45 @@ TypedValue* tg_6Vector_add(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("Vector::add");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Vector::t_addall(HPHP::Variant const&)
+_ZN4HPHP8c_Vector8t_addallERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+iterable => rdx
+*/
+
+Value* th_6Vector_addAll(Value* _rv, ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP8c_Vector8t_addallERKNS_7VariantE");
+
+TypedValue* tg_6Vector_addAll(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_6Vector_addAll((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::addAll", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::addAll");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -1814,6 +1892,45 @@ TypedValue* tg_3Map_set(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Map::t_setall(HPHP::Variant const&)
+_ZN4HPHP5c_Map8t_setallERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+iterable => rdx
+*/
+
+Value* th_3Map_setAll(Value* _rv, ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP5c_Map8t_setallERKNS_7VariantE");
+
+TypedValue* tg_3Map_setAll(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_setAll((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::setAll", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::setAll");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_Map::t_put(HPHP::Variant const&, HPHP::Variant const&)
 _ZN4HPHP5c_Map5t_putERKNS_7VariantES3_
 
@@ -2112,6 +2229,45 @@ TypedValue* tg_3Map_add(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("Map::add");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Map::t_addall(HPHP::Variant const&)
+_ZN4HPHP5c_Map8t_addallERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+iterable => rdx
+*/
+
+Value* th_3Map_addAll(Value* _rv, ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP5c_Map8t_addallERKNS_7VariantE");
+
+TypedValue* tg_3Map_addAll(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_addAll((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::addAll", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::addAll");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -3299,6 +3455,45 @@ TypedValue* tg_9StableMap_set(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_StableMap::t_setall(HPHP::Variant const&)
+_ZN4HPHP11c_StableMap8t_setallERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+iterable => rdx
+*/
+
+Value* th_9StableMap_setAll(Value* _rv, ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP11c_StableMap8t_setallERKNS_7VariantE");
+
+TypedValue* tg_9StableMap_setAll(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_setAll((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::setAll", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::setAll");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Object HPHP::c_StableMap::t_put(HPHP::Variant const&, HPHP::Variant const&)
 _ZN4HPHP11c_StableMap5t_putERKNS_7VariantES3_
 
@@ -3597,6 +3792,45 @@ TypedValue* tg_9StableMap_add(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("StableMap::add");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_StableMap::t_addall(HPHP::Variant const&)
+_ZN4HPHP11c_StableMap8t_addallERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+iterable => rdx
+*/
+
+Value* th_9StableMap_addAll(Value* _rv, ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP11c_StableMap8t_addallERKNS_7VariantE");
+
+TypedValue* tg_9StableMap_addAll(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_addAll((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::addAll", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::addAll");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

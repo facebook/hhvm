@@ -201,7 +201,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'desc'   => "Stores a value into the Vector with the specified key, ".
                 "overwriting any previous value that was associated with ".
-                "the key. If the key is outside the bounds of the Vector, ".
+                "the key; if the key is outside the bounds of the Vector, ".
                 "an exception is thrown.",
     'return' => array(
       'type'   => Object,
@@ -213,6 +213,26 @@ DefineFunction(
       ),
       array(
         'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "setAll",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Stores each value produced by the specified KeyedIterable ".
+                "into the Vector using its corresponding key, overwriting ".
+                "any previous value that was associated with that key; if ".
+                "the key is outside the bounds of the Vector, an exception ".
+                "is thrown.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
         'type'   => Variant,
       ),
     ),
@@ -329,6 +349,23 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "val",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "addAll",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Adds the values produced by the specified Iterable to the ".
+                "end of this Vector using the next available integer keys.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
         'type'   => Variant,
       ),
     ),
@@ -814,6 +851,24 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "setAll",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Stores each value produced by the specified KeyedIterable ".
+                "into the Map using its corresponding key, overwriting ".
+                "any previous value that was associated with that key.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "put",
     'flags'  =>  HasDocComment,
     'desc'   => "Stores a value into the Map with the specified key, ".
@@ -940,6 +995,23 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "val",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "addAll",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Adds the key/value Tuples produced by the specified ".
+                "Iterable to this Map.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
         'type'   => Variant,
       ),
     ),
@@ -1381,6 +1453,24 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "setAll",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Stores each value produced by the specified KeyedIterable ".
+                "into the StableMap using its corresponding key, overwriting ".
+                "any previous value that was associated with that key.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "put",
     'flags'  =>  HasDocComment,
     'desc'   => "Stores a value into the StableMap with the specified key, ".
@@ -1507,6 +1597,23 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "val",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "addAll",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Adds the key/value Tuples produced by the specified ".
+                "Iterable to the end of this StableMap.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
         'type'   => Variant,
       ),
     ),

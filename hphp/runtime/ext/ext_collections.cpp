@@ -122,10 +122,7 @@ void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
   }
   for (; iter; ++iter) {
     Variant v = iter.second();
-    TypedValue* tv = (TypedValue*)(&v);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell(&v);
     add(tv);
   }
 }
@@ -162,9 +159,9 @@ void c_Vector::resize(int64_t sz, TypedValue* val) {
 }
 
 void c_Vector::reserve(int64_t sz) {
-  ++m_versionNumber;
   if (sz <= 0) return;
   if (m_capacity < sz) {
+    ++m_versionNumber;
     m_capacity = sz;
     m_data =
       (TypedValue*)smart_realloc(m_data, m_capacity * sizeof(TypedValue));
@@ -199,19 +196,27 @@ ObjectData* c_Vector::clone() {
 }
 
 Object c_Vector::t_add(CVarRef val) {
-  TypedValue* tv = (TypedValue*)(&val);
-  if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.pref->tv();
-  }
+  TypedValue* tv = cvarToCell(&val);
   add(tv);
   return this;
 }
 
-Object c_Vector::t_append(CVarRef val) {
-  TypedValue* tv = (TypedValue*)(&val);
-  if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.pref->tv();
+Object c_Vector::t_addall(CVarRef iterable) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  if (sz) {
+    reserve(m_size + sz);
   }
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = tvToCell(v.asTypedValue());
+    add(tv);
+  }
+  return this;
+}
+
+Object c_Vector::t_append(CVarRef val) {
+  TypedValue* tv = cvarToCell(&val);
   add(tv);
   return this;
 }
@@ -242,10 +247,7 @@ void c_Vector::t_resize(CVarRef sz, CVarRef value) {
       "Parameter sz must be a non-negative integer"));
     throw e;
   }
-  TypedValue* val = (TypedValue*)(&value);
-  if (UNLIKELY(val->m_type == KindOfRef)) {
-    val = val->m_data.pref->tv();
-  }
+  TypedValue* val = cvarToCell(&value);
   resize(intSz, val);
 }
 
@@ -471,14 +473,27 @@ Object c_Vector::t_getiterator() {
 
 Object c_Vector::t_set(CVarRef key, CVarRef value) {
   if (key.isInteger()) {
-    TypedValue* tv = (TypedValue*)(&value);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell(&value);
     set(key.toInt64(), tv);
     return this;
   }
   throwBadKeyType();
+  return this;
+}
+
+Object c_Vector::t_setall(CVarRef iterable) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  for (; iter; ++iter) {
+    Variant k = iter.first();
+    Variant v = iter.second();
+    TypedValue* tvKey = tvToCell(k.asTypedValue());
+    TypedValue* tvVal = tvToCell(v.asTypedValue());
+    if (tvKey->m_type != KindOfInt64) {
+      throwBadKeyType();
+    }
+    set(tvKey->m_data.num, tvVal);
+  }
   return this;
 }
 
@@ -496,10 +511,7 @@ Object c_Vector::ti_fromitems(const char* cls, CVarRef iterable) {
   }
   for (uint i = 0; iter; ++i, ++iter) {
     Variant v = iter.second();
-    TypedValue* tv = (TypedValue*)(&v);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = tvToCell(v.asTypedValue());
     target->add(tv);
   }
   return ret;
@@ -521,10 +533,7 @@ Object c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
   ssize_t pos = ad->iter_begin();
   for (uint i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
     assert(pos != ArrayData::invalid_index);
-    TypedValue* tv = (TypedValue*)(&ad->getValueRef(pos));
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell((&ad->getValueRef(pos)));
     tvRefcountedIncRef(tv);
     data[i].m_data.num = tv->m_data.num;
     data[i].m_type = tv->m_type;
@@ -914,10 +923,7 @@ void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
   for (; iter; ++iter) {
     Variant k = iter.first();
     Variant v = iter.second();
-    TypedValue* tv = (TypedValue*)(&v);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = tvToCell(v.asTypedValue());
     if (k.isInteger()) {
       update(k.toInt64(), tv);
     } else if (k.isString()) {
@@ -975,11 +981,20 @@ ObjectData* c_Map::clone() {
 }
 
 Object c_Map::t_add(CVarRef val) {
-  TypedValue* tv = (TypedValue*)(&val);
-  if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.pref->tv();
-  }
+  TypedValue* tv = cvarToCell(&val);
   add(tv);
+  return this;
+}
+
+Object c_Map::t_addall(CVarRef iterable) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  reserve(m_size + sz);
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = tvToCell(v.asTypedValue());
+    add(tv);
+  }
   return this;
 }
 
@@ -1040,16 +1055,32 @@ Variant c_Map::t_get(CVarRef key) {
 }
 
 Object c_Map::t_set(CVarRef key, CVarRef value) {
-  TypedValue* val = (TypedValue*)(&value);
-  if (UNLIKELY(val->m_type == KindOfRef)) {
-    val = val->m_data.pref->tv();
-  }
+  TypedValue* val = cvarToCell(&value);
   if (key.isInteger()) {
     update(key.toInt64(), val);
   } else if (key.isString()) {
     update(key.getStringData(), val);
   } else {
     throwBadKeyType();
+  }
+  return this;
+}
+
+Object c_Map::t_setall(CVarRef iterable) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  for (; iter; ++iter) {
+    Variant k = iter.first();
+    Variant v = iter.second();
+    TypedValue* tvKey = tvToCell(k.asTypedValue());
+    TypedValue* tvVal = tvToCell(v.asTypedValue());
+    if (tvKey->m_type == KindOfInt64) {
+      set(tvKey->m_data.num, tvVal);
+    } else if (IS_STRING_TYPE(tvKey->m_type)) {
+      set(tvKey->m_data.pstr, tvVal);
+    } else {
+      throwBadKeyType();
+    }
   }
   return this;
 }
@@ -1163,10 +1194,7 @@ Object c_Map::t_updatefromarray(CVarRef arr) {
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
     Variant k = ad->getKey(pos);
-    TypedValue* tv = (TypedValue*)(&ad->getValueRef(pos));
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell((&ad->getValueRef(pos)));
     if (k.isInteger()) {
       update(k.toInt64(), tv);
     } else {
@@ -1201,10 +1229,7 @@ Object c_Map::t_updatefromiterable(CVarRef it) {
   for (ArrayIter iter = obj->begin(); iter; ++iter) {
     Variant k = iter.first();
     Variant v = iter.second();
-    TypedValue* tv = (TypedValue*)(&v);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = tvToCell(v.asTypedValue());
     if (k.isInteger()) {
       update(k.toInt64(), tv);
     } else {
@@ -1268,10 +1293,7 @@ Object c_Map::ti_fromitems(const char* cls, CVarRef iterable) {
   }
   for (; iter; ++iter) {
     Variant v = iter.second();
-    TypedValue* tv = (TypedValue*)(&v);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = tvToCell(v.asTypedValue());
     if (UNLIKELY(tv->m_type != KindOfObject ||
                  !tv->m_data.pobj->instanceof(c_Tuple::s_cls))) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -1311,10 +1333,7 @@ Object c_Map::ti_fromarray(const char* cls, CVarRef arr) {
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
     Variant k = ad->getKey(pos);
-    TypedValue* tv = (TypedValue*)(&ad->getValueRef(pos));
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell((&ad->getValueRef(pos)));
     if (k.isInteger()) {
       mp->update(k.toInt64(), tv);
     } else {
@@ -1342,10 +1361,7 @@ Object c_Map::ti_fromiterable(const char* cls, CVarRef it) {
   for (ArrayIter iter = obj->begin(); iter; ++iter) {
     Variant k = iter.first();
     Variant v = iter.second();
-    TypedValue* tv = (TypedValue*)(&v);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell(&v);
     if (k.isInteger()) {
       target->update(k.toInt64(), tv);
     } else {
@@ -1522,7 +1538,7 @@ bool c_Map::updateImpl(int64_t h, TypedValue* data) {
   ++m_size;
   if (!p->tombstone()) {
     if (UNLIKELY(++m_load >= computeMaxLoad())) {
-      resize();
+      grow();
       p = findForInsert(h);
       assert(p);
     }
@@ -1555,7 +1571,7 @@ bool c_Map::updateImpl(StringData *key, TypedValue* data) {
   ++m_size;
   if (!p->tombstone()) {
     if (UNLIKELY(++m_load >= computeMaxLoad())) {
-      resize();
+      grow();
       p = findForInsert(key->data(), key->size(), h);
       assert(p);
     }
@@ -1579,16 +1595,12 @@ void c_Map::erase(Bucket* p) {
     }
     p->data.m_type = (DataType)KindOfTombstone;
     if (m_size < computeMinElements() && m_size) {
-      resize();
+      grow();
     }
   }
 }
 
-void c_Map::resize() {
-  reserve(m_size);
-}
-
-void c_Map::reserve(int64_t sz) {
+void c_Map::growImpl(int64_t sz) {
   ++m_versionNumber;
   if (sz < 2) {
     if (sz <= 0) return;
@@ -1956,10 +1968,7 @@ void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
   for (; iter; ++iter) {
     Variant k = iter.first();
     Variant v = iter.second();
-    TypedValue* tv = (TypedValue*)(&v);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell(&v);
     if (k.isInteger()) {
       update(k.toInt64(), tv);
     } else if (k.isString()) {
@@ -2032,11 +2041,20 @@ ObjectData* c_StableMap::clone() {
 }
 
 Object c_StableMap::t_add(CVarRef val) {
-  TypedValue* tv = (TypedValue*)(&val);
-  if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.pref->tv();
-  }
+  TypedValue* tv = cvarToCell(&val);
   add(tv);
+  return this;
+}
+
+Object c_StableMap::t_addall(CVarRef iterable) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  reserve(m_size + sz);
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = cvarToCell(&v);
+    add(tv);
+  }
   return this;
 }
 
@@ -2099,16 +2117,32 @@ Variant c_StableMap::t_get(CVarRef key) {
 }
 
 Object c_StableMap::t_set(CVarRef key, CVarRef value) {
-  TypedValue* val = (TypedValue*)(&value);
-  if (UNLIKELY(val->m_type == KindOfRef)) {
-    val = val->m_data.pref->tv();
-  }
+  TypedValue* val = cvarToCell(&value);
   if (key.isInteger()) {
     update(key.toInt64(), val);
   } else if (key.isString()) {
     update(key.getStringData(), val);
   } else {
     throwBadKeyType();
+  }
+  return this;
+}
+
+Object c_StableMap::t_setall(CVarRef iterable) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  for (; iter; ++iter) {
+    Variant k = iter.first();
+    Variant v = iter.second();
+    TypedValue* tvKey = cvarToCell(&k);
+    TypedValue* tvVal = cvarToCell(&v);
+    if (tvKey->m_type == KindOfInt64) {
+      set(tvKey->m_data.num, tvVal);
+    } else if (IS_STRING_TYPE(tvKey->m_type)) {
+      set(tvKey->m_data.pstr, tvVal);
+    } else {
+      throwBadKeyType();
+    }
   }
   return this;
 }
@@ -2214,10 +2248,7 @@ Object c_StableMap::t_updatefromarray(CVarRef arr) {
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
     Variant k = ad->getKey(pos);
-    TypedValue* tv = (TypedValue*)(&ad->getValueRef(pos));
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell((&ad->getValueRef(pos)));
     if (k.isInteger()) {
       update(k.toInt64(), tv);
     } else {
@@ -2251,10 +2282,7 @@ Object c_StableMap::t_updatefromiterable(CVarRef it) {
   for (ArrayIter iter = obj->begin(); iter; ++iter) {
     Variant k = iter.first();
     Variant v = iter.second();
-    TypedValue* tv = (TypedValue*)(&v);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell(&v);
     if (k.isInteger()) {
       update(k.toInt64(), tv);
     } else {
@@ -2316,10 +2344,7 @@ Object c_StableMap::ti_fromitems(const char* cls, CVarRef iterable) {
   }
   for (; iter; ++iter) {
     Variant v = iter.second();
-    TypedValue* tv = (TypedValue*)(&v);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell(&v);
     if (UNLIKELY(tv->m_type != KindOfObject ||
                  !tv->m_data.pobj->instanceof(c_Tuple::s_cls))) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -2360,10 +2385,7 @@ Object c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
        pos = ad->iter_advance(pos)) {
     Variant k = ad->getKey(pos);
     Variant v = ad->getValue(pos);
-    TypedValue* tv = (TypedValue*)(&v);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell(&v);
     if (k.isInteger()) {
       smp->update(k.toInt64(), tv);
     } else {
@@ -2391,10 +2413,7 @@ Object c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
   for (ArrayIter iter = obj->begin(); iter; ++iter) {
     Variant k = iter.first();
     Variant v = iter.second();
-    TypedValue* tv = (TypedValue*)(&v);
-    if (UNLIKELY(tv->m_type == KindOfRef)) {
-      tv = tv->m_data.pref->tv();
-    }
+    TypedValue* tv = cvarToCell(&v);
     if (k.isInteger()) {
       target->update(k.toInt64(), tv);
     } else {
@@ -2511,7 +2530,7 @@ bool c_StableMap::updateImpl(int64_t h, TypedValue* data) {
   }
   ++m_versionNumber;
   if (++m_size > m_nTableSize) {
-    resize();
+    grow();
   }
   p = NEW(Bucket)(data);
   p->setIntKey(h);
@@ -2540,7 +2559,7 @@ bool c_StableMap::updateImpl(StringData *key, TypedValue* data) {
   }
   ++m_versionNumber;
   if (++m_size > m_nTableSize) {
-    resize();
+    grow();
   }
   p = NEW(Bucket)(data);
   p->setStrKey(key, h);
@@ -2576,11 +2595,7 @@ void c_StableMap::erase(Bucket** prev) {
   }
 }
 
-void c_StableMap::resize() {
-  reserve(m_size);
-}
-
-void c_StableMap::reserve(int64_t sz) {
+void c_StableMap::growImpl(int64_t sz) {
   ++m_versionNumber;
   if (sz < 4) {
     if (sz <= 0) return;

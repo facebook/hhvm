@@ -134,6 +134,17 @@ params => rdx
 Value* fh_hphp_create_object(Value* _rv, Value* name, Value* params) asm("_ZN4HPHP20f_hphp_create_objectERKNS_6StringERKNS_5ArrayE");
 
 /*
+HPHP::Object HPHP::f_hphp_create_object_without_constructor(HPHP::String const&)
+_ZN4HPHP40f_hphp_create_object_without_constructorERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+name => rsi
+*/
+
+Value* fh_hphp_create_object_without_constructor(Value* _rv, Value* name) asm("_ZN4HPHP40f_hphp_create_object_without_constructorERKNS_6StringE");
+
+/*
 HPHP::Variant HPHP::f_hphp_get_property(HPHP::Object const&, HPHP::String const&, HPHP::String const&)
 _ZN4HPHP19f_hphp_get_propertyERKNS_6ObjectERKNS_6StringES5_
 

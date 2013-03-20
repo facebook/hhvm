@@ -32,7 +32,11 @@
 typedef __sighandler_t *sighandler_t;
 # define RIP_REGISTER(v) (v).mc_rip
 #else
-# define RIP_REGISTER(v) (v).gregs[REG_RIP]
+#  if defined(__x86_64__)
+#    define RIP_REGISTER(v) (v).gregs[REG_RIP]
+#  elif defined(__AARCH64EL__)
+#    define RIP_REGISTER(v) (v).pc
+#  endif
 #endif
 
 #include <boost/bind.hpp>
@@ -3083,7 +3087,7 @@ struct DepthGuard { bool depthOne() const { return false; } };
 #elif defined(__AARCH64EL__)
 #  define CALLEE_SAVED_BARRIER() \
   asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25", \
-               "x26", "x27", "x28", "x29")
+               "x26", "x27", "x28")
 #else
 #  error What are the callee-saved registers on your system?
 #endif

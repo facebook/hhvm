@@ -2056,7 +2056,8 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   // If this is a method, either this_ or cls must be non-NULL
   assert(!f->preClass() || (this_ || cls));
   // If this is a static method, this_ must be NULL
-  assert(!(f->attrs() & HPHP::VM::AttrStatic) || (!this_));
+  assert(!(f->attrs() & HPHP::VM::AttrStatic && !f->isClosureBody()) || 
+         (!this_));
   // invName should only be non-NULL if we are calling __call or
   // __callStatic
   assert(!invName || f->name()->isame(s___call.get()) ||

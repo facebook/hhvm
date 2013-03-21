@@ -2401,7 +2401,6 @@ TypedValue* tg_13TupleIterator_rewind(VM::ActRec *ar);
 VM::Instance* new_Continuation_Instance(VM::Class*);
 TypedValue* tg_12Continuation___construct(VM::ActRec *ar);
 TypedValue* tg_12Continuation_update(VM::ActRec *ar);
-TypedValue* tg_12Continuation_done(VM::ActRec *ar);
 TypedValue* tg_12Continuation_getWaitHandle(VM::ActRec *ar);
 TypedValue* tg_12Continuation_getLabel(VM::ActRec *ar);
 TypedValue* tg_12Continuation_num_args(VM::ActRec *ar);
@@ -5464,11 +5463,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_TupleIterator[] = {
   { "rewind", tg_13TupleIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Continuation = 17;
+static const long long hhbc_ext_method_count_Continuation = 16;
 static const HhbcExtMethodInfo hhbc_ext_methods_Continuation[] = {
   { "__construct", tg_12Continuation___construct },
   { "update", tg_12Continuation_update },
-  { "done", tg_12Continuation_done },
   { "getWaitHandle", tg_12Continuation_getWaitHandle },
   { "getLabel", tg_12Continuation_getLabel },
   { "num_args", tg_12Continuation_num_args },

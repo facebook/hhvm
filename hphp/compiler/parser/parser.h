@@ -169,7 +169,7 @@ public:
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
   void fixStaticVars();
   void onFunctionStart(Token &name, bool doPushComment = true);
-  void onFunction(Token &out, Token *modifier, Token &ret, Token &ref, 
+  void onFunction(Token &out, Token *modifier, Token &ret, Token &ref,
                   Token &name, Token &params, Token &stmt, Token *attr);
   void onParam(Token &out, Token *params, Token &type, Token &var,
                bool ref, Token *defValue, Token *attr);
@@ -210,7 +210,7 @@ public:
   void onCase(Token &out, Token &cases, Token *cond, Token &stmt);
   void onBreak(Token &out, Token *expr);
   void onContinue(Token &out, Token *expr);
-  void onReturn(Token &out, Token *expr, bool checkYield = true);
+  void onReturn(Token &out, Token *expr);
   void onYield(Token &out, Token &expr);
   void onYieldBreak(Token &out);
   void onGlobal(Token &out, Token &expr);

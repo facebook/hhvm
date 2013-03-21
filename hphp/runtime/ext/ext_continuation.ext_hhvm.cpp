@@ -284,42 +284,6 @@ TypedValue* tg_12Continuation_update(HPHP::VM::ActRec *ar) {
 }
 
 /*
-void HPHP::c_Continuation::t_done()
-_ZN4HPHP14c_Continuation6t_doneEv
-
-this_ => rdi
-*/
-
-void th_12Continuation_done(ObjectData* this_) asm("_ZN4HPHP14c_Continuation6t_doneEv");
-
-TypedValue* tg_12Continuation_done(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_data.num = 0LL;
-        rv.m_type = KindOfNull;
-        th_12Continuation_done((this_));
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("Continuation::done", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("Continuation::done");
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
 HPHP::Object HPHP::c_Continuation::t_getwaithandle()
 _ZN4HPHP14c_Continuation15t_getwaithandleEv
 

@@ -143,12 +143,6 @@ static void on_constant(Parser *_p, Token &out, Token *stmts,
 ///////////////////////////////////////////////////////////////////////////////
 // continuation transformations
 
-static void prepare_continuation_call(Parser* _p, Token& rhs, const char* cname) {
-  Token fname;  fname.setText(std::string("hphp_continuation_") + cname);
-  Token empty;
-  _p->onCall(rhs, false, fname, empty, NULL, true);
-}
-
 void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
   // 1. add prologue and epilogue to original body and store it back to "stmt"
   {
@@ -190,20 +184,14 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
       }
       _p->popLabelScope();
     }
-    Token sdone;
-    {
-      Token mcall;  prepare_continuation_call(_p, mcall, "done");
-      _p->onExpStatement(sdone, mcall);
-    }
     {
       Token stmts0;  _p->onStatementListStart(stmts0);
       Token stmts1;  _p->addStatement(stmts1, stmts0, scall);
       Token stmts2;  _p->addStatement(stmts2, stmts1, sswitch);
       Token stmts3;  _p->addStatement(stmts3, stmts2, stmt);
-      Token stmts4;  _p->addStatement(stmts4, stmts3, sdone);
 
       stmt.reset();
-      _p->finishStatement(stmt, stmts4); stmt = 1;
+      _p->finishStatement(stmt, stmts3); stmt = 1;
     }
   }
 
@@ -286,20 +274,6 @@ void create_generator(Parser *_p, Token &out, Token &params,
     _p->onFunction(out, modifiers, ret, ref, name, params, scont, attr);
     origGenFunc = out;
   }
-}
-
-void transform_yield_break(Parser *_p, Token &out) {
-  // hphp_continuation_done()
-  Token mcall;   prepare_continuation_call(_p, mcall, "done");
-  Token done;    _p->onExpStatement(done, mcall);
-
-  // return
-  Token ret;     _p->onReturn(ret, NULL, false);
-
-  Token stmts0;  _p->onStatementListStart(stmts0);
-  Token stmts1;  _p->addStatement(stmts1, stmts0, done);
-  Token stmts2;  _p->addStatement(stmts2, stmts1, ret);
-  _p->finishStatement(out, stmts2); out = 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

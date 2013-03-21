@@ -318,7 +318,7 @@ struct Parser : ParserBase {
     X(name);
   }
 
-  void onFunction(Token& out, Token* modifiers, Token& ret, Token& ref, 
+  void onFunction(Token& out, Token* modifiers, Token& ret, Token& ref,
                   Token& name, Token& params, Token& stmt, Token* attr) {
     X(modifiers, ret, ref, name, params, stmt, attr);
   }
@@ -437,8 +437,8 @@ struct Parser : ParserBase {
     X(expr);
   }
 
-  void onReturn(Token &out, Token *expr, bool checkYield = true) {
-    X(expr, checkYield);
+  void onReturn(Token &out, Token *expr) {
+    X(expr);
   }
 
   void onYield(Token &out, Token &expr) {
@@ -484,7 +484,7 @@ struct Parser : ParserBase {
 
   void onThrow(Token &out, Token &expr) { X(expr); }
 
-  void onClosure(Token &out, Token &ret, Token &ref, Token &params, 
+  void onClosure(Token &out, Token &ret, Token &ref, Token &params,
                  Token &cparams, Token &stmts, bool is_static) {
     X(ret, ref, params, cparams, stmts, is_static);
   }

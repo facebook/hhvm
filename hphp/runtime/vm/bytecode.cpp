@@ -2071,7 +2071,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   // If this is a method, either this_ or cls must be non-NULL
   assert(!f->preClass() || (this_ || cls));
   // If this is a static method, this_ must be NULL
-  assert(!(f->attrs() & HPHP::VM::AttrStatic && !f->isClosureBody()) || 
+  assert(!(f->attrs() & HPHP::VM::AttrStatic && !f->isClosureBody()) ||
          (!this_));
   // invName should only be non-NULL if we are calling __call or
   // __callStatic
@@ -7076,7 +7076,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContReceive(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopContDone(PC& pc) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
-  cont->t_done();
+  cont->m_done = true;
+  cont->m_value.setNull();
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopContNext(PC& pc) {

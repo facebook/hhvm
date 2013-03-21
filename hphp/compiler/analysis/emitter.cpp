@@ -2181,7 +2181,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
         bool retV = false;
         if (m_curFunc->isGenerator()) {
-          // used by yield break
+          assert(m_evalStack.size() == 0);
+          e.ContDone();
           e.ContExit();
           return false;
         }
@@ -3169,7 +3170,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         } else if (call->isCompilerCallToFunction("hphp_continuation_done")) {
           inputIsAnObject(0);
           e.ContDone();
-          return false;
+          e.ContExit();
+          e.Null();
+          return true;
         } else if ((call->isCallToFunction("class_exists") ||
                     call->isCallToFunction("interface_exists") ||
                     call->isCallToFunction("trait_exists")) && params &&
@@ -5419,6 +5422,8 @@ void EmitterVisitor::emitPostponedMeths() {
     // return null
     if (currentPositionIsReachable()) {
       if (p.m_meth->getFunctionScope()->isGenerator()) {
+        assert(m_evalStack.size() == 0);
+        e.ContDone();
         e.ContExit();
       } else {
         e.Null();

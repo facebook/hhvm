@@ -660,9 +660,7 @@ bool TestParserStmt::TestYieldStatement() {
     "function ($" CONTINUATION_OBJECT_NAME ") {\n"
     "switch (hphp_unpack_continuation($" CONTINUATION_OBJECT_NAME ")) {\n"
     "}\n"
-    "hphp_continuation_done();\n"
     "return;\n"
-    "hphp_continuation_done();\n"
     "}\n"
     "function foo() {\n"
     "return hphp_create_continuation"
@@ -676,7 +674,6 @@ bool TestParserStmt::TestYieldStatement() {
     "goto " YIELD_LABEL_PREFIX "1;\n"
     "}\n"
     "yield 123;\n"
-    "hphp_continuation_done();\n"
     "}\n"
     "function foo() {\n"
     "return hphp_create_continuation"
@@ -699,7 +696,6 @@ bool TestParserStmt::TestYieldStatement() {
     "}\n"
     "yield 123;\n"
     "yield 456;\n"
-    "hphp_continuation_done();\n"
     "}\n"
     "}\n");
 

@@ -116,7 +116,6 @@ extern void create_generator(Parser *_p, Token &out, Token &params,
                              const char *clsname, Token *modifiers,
                              bool getArgs, Token &origGenFunc, bool isHhvm,
                              Token *attr);
-extern void transform_yield_break(Parser *_p, Token &out);
 
 namespace HPHP {
 
@@ -790,9 +789,9 @@ void Parser::fixStaticVars() {
   m_staticVars.pop_back();
 }
 
-void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref, 
+void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
                         Token &name, Token &params, Token &stmt, Token *attr) {
-  
+
   ModifierExpressionPtr exp = modifiers?
     dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
     : NEW_EXP0(ModifierExpression);
@@ -1341,9 +1340,9 @@ void Parser::onContinue(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ContinueStatement, expr ? expr->exp : ExpressionPtr());
 }
 
-void Parser::onReturn(Token &out, Token *expr, bool checkYield /* = true */) {
+void Parser::onReturn(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
-  if (checkYield && !m_funcContexts.empty()) {
+  if (!m_funcContexts.empty()) {
     if (!m_funcContexts.back().setIsNotGenerator()) {
       Compiler::Error(InvalidYield, out->stmt);
       PARSE_ERROR("Cannot mix 'return' and 'yield' in the same function");
@@ -1420,7 +1419,7 @@ void Parser::onYieldBreak(Token &out) {
     return;
   }
 
-  transform_yield_break(this, out);
+  out->stmt = NEW_STMT(ReturnStatement, ExpressionPtr());
 }
 
 void Parser::onGlobal(Token &out, Token &expr) {
@@ -1546,10 +1545,10 @@ void Parser::onClosureStart(Token &name) {
   onFunctionStart(name, true);
 }
 
-void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params, 
+void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
                        Token &cparams, Token &stmts, bool is_static) {
   Token func, name, modifiers;
-  
+
   ModifierExpressionPtr modifier_exp = NEW_EXP0(ModifierExpression);
   modifiers->exp = modifier_exp;
   if (is_static) {

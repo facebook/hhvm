@@ -93,11 +93,6 @@ void c_Continuation::t_update(int64_t label, CVarRef value) {
   m_value.assignVal(value);
 }
 
-void c_Continuation::t_done() {
-  m_done = true;
-  m_value.setNull();
-}
-
 Object c_Continuation::t_getwaithandle() {
   return m_waitHandle.isNull() ? c_ContinuationWaitHandle::t_start(this) : m_waitHandle;
 }

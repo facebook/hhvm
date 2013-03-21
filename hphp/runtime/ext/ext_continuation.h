@@ -48,7 +48,6 @@ class c_Continuation : public ExtObjectData {
   public: ~c_Continuation();
   public: void t___construct(int64_t func, CStrRef origFuncName, CVarRef obj = uninit_null(), CArrRef args = null_array);
   public: void t_update(int64_t label, CVarRef value);
-  public: void t_done();
   public: Object t_getwaithandle();
   public: int64_t t_getlabel();
   public: int64_t t_num_args();

@@ -244,14 +244,6 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => 'done',
-    'return' => array(
-      'type'   => null,
-    ),
-  ));
-
-DefineFunction(
-  array(
     'name'   => "getWaitHandle",
     'desc'   => "Start asynchronous execution of this Continuation and return the wait handle",
     'flags'  => HasDocComment,

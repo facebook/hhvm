@@ -50,7 +50,7 @@ TypedValue * fg1_posix_access(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_posix_access((Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_posix_access(&args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -61,7 +61,7 @@ TypedValue* fg_posix_access(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_posix_access((Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_posix_access(&args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -149,7 +149,7 @@ TypedValue * fg1_posix_getgrnam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_posix_getgrnam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_posix_getgrnam((rv), (Value*)(args-0));
+  fh_posix_getgrnam((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -160,7 +160,7 @@ TypedValue* fg_posix_getgrnam(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_posix_getgrnam((&(rv)), (Value*)(args-0));
+        fh_posix_getgrnam((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -232,7 +232,7 @@ TypedValue * fg1_posix_getpwnam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
 TypedValue * fg1_posix_getpwnam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_posix_getpwnam((rv), (Value*)(args-0));
+  fh_posix_getpwnam((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -243,7 +243,7 @@ TypedValue* fg_posix_getpwnam(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_posix_getpwnam((&(rv)), (Value*)(args-0));
+        fh_posix_getpwnam((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -418,7 +418,7 @@ TypedValue * fg1_posix_mknod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_posix_mknod((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_posix_mknod(&args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -429,7 +429,7 @@ TypedValue* fg_posix_mknod(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_posix_mknod((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_posix_mknod(&args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;

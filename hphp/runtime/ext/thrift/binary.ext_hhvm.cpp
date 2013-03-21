@@ -61,7 +61,7 @@ TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, HPHP::VM::ActRec* 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_thrift_protocol_write_binary((Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num), (Value*)(args-3), (int)(args[-4].m_data.num), (bool)(args[-5].m_data.num));
+  fh_thrift_protocol_write_binary(&args[-0].m_data, &args[-1].m_data, (long)(args[-2].m_data.num), &args[-3].m_data, (int)(args[-4].m_data.num), (bool)(args[-5].m_data.num));
   return rv;
 }
 
@@ -73,7 +73,7 @@ TypedValue* fg_thrift_protocol_write_binary(HPHP::VM::ActRec *ar) {
       if ((args-5)->m_type == KindOfBoolean && (args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfObject && (args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_thrift_protocol_write_binary((Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num), (Value*)(args-3), (int)(args[-4].m_data.num), (bool)(args[-5].m_data.num));
+        fh_thrift_protocol_write_binary(&args[-0].m_data, &args[-1].m_data, (long)(args[-2].m_data.num), &args[-3].m_data, (int)(args[-4].m_data.num), (bool)(args[-5].m_data.num));
         frame_free_locals_no_this_inl(ar, 6);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -121,7 +121,7 @@ TypedValue * fg1_thrift_protocol_read_binary(TypedValue* rv, HPHP::VM::ActRec* a
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_thrift_protocol_read_binary((rv), (Value*)(args-0), (Value*)(args-1), (bool)(args[-2].m_data.num));
+  fh_thrift_protocol_read_binary((rv), &args[-0].m_data, &args[-1].m_data, (bool)(args[-2].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -132,7 +132,7 @@ TypedValue* fg_thrift_protocol_read_binary(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfBoolean && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        fh_thrift_protocol_read_binary((&(rv)), (Value*)(args-0), (Value*)(args-1), (bool)(args[-2].m_data.num));
+        fh_thrift_protocol_read_binary((&(rv)), &args[-0].m_data, &args[-1].m_data, (bool)(args[-2].m_data.num));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

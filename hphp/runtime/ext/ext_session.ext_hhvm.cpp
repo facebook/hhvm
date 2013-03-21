@@ -61,7 +61,7 @@ TypedValue * fg1_session_set_cookie_params(TypedValue* rv, HPHP::VM::ActRec* ar,
   }
   Variant defVal3;
   Variant defVal4;
-  fh_session_set_cookie_params((long)(args[-0].m_data.num), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
+  fh_session_set_cookie_params((long)(args[-0].m_data.num), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
   return rv;
 }
 
@@ -75,7 +75,7 @@ TypedValue* fg_session_set_cookie_params(HPHP::VM::ActRec *ar) {
         rv.m_type = KindOfNull;
         Variant defVal3;
         Variant defVal4;
-        fh_session_set_cookie_params((long)(args[-0].m_data.num), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
+        fh_session_set_cookie_params((long)(args[-0].m_data.num), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -114,7 +114,7 @@ TypedValue* fg_session_get_cookie_params(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_session_get_cookie_params((Value*)(&(rv)));
+      fh_session_get_cookie_params((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -148,7 +148,7 @@ TypedValue * fg1_session_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_session_name((Value*)(rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  fh_session_name((&rv->m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -160,7 +160,7 @@ TypedValue* fg_session_name(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
         rv.m_type = KindOfString;
-        fh_session_name((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+        fh_session_name((&rv.m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -199,7 +199,7 @@ TypedValue * fg1_session_module_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64
 TypedValue * fg1_session_module_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_session_module_name((rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  fh_session_module_name((rv), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -210,7 +210,7 @@ TypedValue* fg_session_module_name(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        fh_session_module_name((&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+        fh_session_module_name((&(rv)), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -271,7 +271,7 @@ TypedValue * fg1_session_set_save_handler(TypedValue* rv, HPHP::VM::ActRec* ar, 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_session_set_save_handler((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (Value*)(args-4), (Value*)(args-5))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_session_set_save_handler(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data, &args[-4].m_data, &args[-5].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -282,7 +282,7 @@ TypedValue* fg_session_set_save_handler(HPHP::VM::ActRec *ar) {
     if (count == 6LL) {
       if (IS_STRING_TYPE((args-5)->m_type) && IS_STRING_TYPE((args-4)->m_type) && IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_session_set_save_handler((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (Value*)(args-4), (Value*)(args-5))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_session_set_save_handler(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data, &args[-4].m_data, &args[-5].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -321,7 +321,7 @@ TypedValue * fg1_session_save_path(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_session_save_path((Value*)(rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  fh_session_save_path((&rv->m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -333,7 +333,7 @@ TypedValue* fg_session_save_path(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
         rv.m_type = KindOfString;
-        fh_session_save_path((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+        fh_session_save_path((&rv.m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -373,7 +373,7 @@ TypedValue * fg1_session_id(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_session_id((Value*)(rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  fh_session_id((&rv->m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -385,7 +385,7 @@ TypedValue* fg_session_id(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
         rv.m_type = KindOfString;
-        fh_session_id((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+        fh_session_id((&rv.m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -474,7 +474,7 @@ TypedValue * fg1_session_cache_limiter(TypedValue* rv, HPHP::VM::ActRec* ar, int
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_session_cache_limiter((Value*)(rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  fh_session_cache_limiter((&rv->m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -486,7 +486,7 @@ TypedValue* fg_session_cache_limiter(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
         rv.m_type = KindOfString;
-        fh_session_cache_limiter((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+        fh_session_cache_limiter((&rv.m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -525,7 +525,7 @@ TypedValue * fg1_session_cache_expire(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_session_cache_expire((count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  rv->m_data.num = (int64_t)fh_session_cache_expire((count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -536,7 +536,7 @@ TypedValue* fg_session_cache_expire(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_session_cache_expire((count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+        rv.m_data.num = (int64_t)fh_session_cache_expire((count > 0) ? &args[-0].m_data : (Value*)(&null_string));
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -607,7 +607,7 @@ TypedValue * fg1_session_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (fh_session_decode((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_session_decode(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -618,7 +618,7 @@ TypedValue* fg_session_decode(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_session_decode((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_session_decode(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -865,7 +865,7 @@ TypedValue * fg1_session_unregister(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (fh_session_unregister((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_session_unregister(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -876,7 +876,7 @@ TypedValue* fg_session_unregister(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_session_unregister((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_session_unregister(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -914,7 +914,7 @@ TypedValue * fg1_session_is_registered(TypedValue* rv, HPHP::VM::ActRec* ar, int
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (fh_session_is_registered((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_session_is_registered(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -925,7 +925,7 @@ TypedValue* fg_session_is_registered(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_session_is_registered((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_session_is_registered(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;

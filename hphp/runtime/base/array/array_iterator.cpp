@@ -550,7 +550,7 @@ MArrayIter::~MArrayIter() {
   }
   // unprotect the data
   if (hasVar()) {
-    RefData* ref = (RefData*)getVar();
+    RefData* ref = RefData::refDataFromVariantIfYouDare(getVar());
     decRefRef(ref);
   } else if (hasAd()) {
     decRefArr(getAd());

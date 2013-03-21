@@ -59,7 +59,7 @@ TypedValue * fg1_hphp_create_continuation(TypedValue* rv, HPHP::VM::ActRec* ar, 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_hphp_create_continuation((Value*)(rv), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
+  fh_hphp_create_continuation((&rv->m_data), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (count > 3) ? &args[-3].m_data : (Value*)(&null_array));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -71,7 +71,7 @@ TypedValue* fg_hphp_create_continuation(HPHP::VM::ActRec *ar) {
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfArray) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfObject;
-        fh_hphp_create_continuation((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
+        fh_hphp_create_continuation((&rv.m_data), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (count > 3) ? &args[-3].m_data : (Value*)(&null_array));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -139,7 +139,7 @@ TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar,
     tvCastToInt64InPlace(args-0);
   }
   Variant defVal2;
-  th_12Continuation___construct((this_), (long)(args[-0].m_data.num), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
+  th_12Continuation___construct((this_), (long)(args[-0].m_data.num), &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? &args[-3].m_data : (Value*)(&null_array));
   return rv;
 }
 
@@ -154,7 +154,7 @@ TypedValue* tg_12Continuation___construct(HPHP::VM::ActRec *ar) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
           Variant defVal2;
-          th_12Continuation___construct((this_), (long)(args[-0].m_data.num), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
+          th_12Continuation___construct((this_), (long)(args[-0].m_data.num), &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? &args[-3].m_data : (Value*)(&null_array));
           frame_free_locals_inl(ar, 4);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -252,7 +252,7 @@ TypedValue* tg_12Continuation_getWaitHandle(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfObject;
-        th_12Continuation_getWaitHandle((Value*)(&(rv)), (this_));
+        th_12Continuation_getWaitHandle((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -362,7 +362,7 @@ TypedValue* tg_12Continuation_get_args(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfArray;
-        th_12Continuation_get_args((Value*)(&(rv)), (this_));
+        th_12Continuation_get_args((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -709,7 +709,7 @@ TypedValue* tg_12Continuation_getOrigFuncName(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfString;
-        th_12Continuation_getOrigFuncName((Value*)(&(rv)), (this_));
+        th_12Continuation_getOrigFuncName((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

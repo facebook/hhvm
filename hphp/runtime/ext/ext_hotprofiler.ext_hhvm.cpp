@@ -51,7 +51,7 @@ TypedValue * fg1_xhprof_enable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   case 0:
     break;
   }
-  fh_xhprof_enable((count > 0) ? (int)(args[-0].m_data.num) : (int)(0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
+  fh_xhprof_enable((count > 0) ? (int)(args[-0].m_data.num) : (int)(0), (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
   return rv;
 }
 
@@ -63,7 +63,7 @@ TypedValue* fg_xhprof_enable(HPHP::VM::ActRec *ar) {
       if ((count <= 1 || (args-1)->m_type == KindOfArray) && (count <= 0 || (args-0)->m_type == KindOfInt64)) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_xhprof_enable((count > 0) ? (int)(args[-0].m_data.num) : (int)(0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
+        fh_xhprof_enable((count > 0) ? (int)(args[-0].m_data.num) : (int)(0), (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -199,7 +199,7 @@ TypedValue * fg1_xhprof_frame_begin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
-  fh_xhprof_frame_begin((Value*)(args-0));
+  fh_xhprof_frame_begin(&args[-0].m_data);
   return rv;
 }
 
@@ -211,7 +211,7 @@ TypedValue* fg_xhprof_frame_begin(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_xhprof_frame_begin((Value*)(args-0));
+        fh_xhprof_frame_begin(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -287,7 +287,7 @@ TypedValue * fg1_xhprof_run_trace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_xhprof_run_trace((rv), (Value*)(args-0), (int)(args[-1].m_data.num));
+  fh_xhprof_run_trace((rv), &args[-0].m_data, (int)(args[-1].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -298,7 +298,7 @@ TypedValue* fg_xhprof_run_trace(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_xhprof_run_trace((&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num));
+        fh_xhprof_run_trace((&(rv)), &args[-0].m_data, (int)(args[-1].m_data.num));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

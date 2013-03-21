@@ -40,7 +40,7 @@ TypedValue* fg_serialize(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv.m_type = KindOfString;
-      fh_serialize((Value*)(&(rv)), (args-0));
+      fh_serialize((&rv.m_data), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 1);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));

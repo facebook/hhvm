@@ -40,7 +40,7 @@ TypedValue* fg_pdo_drivers(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_pdo_drivers((Value*)(&(rv)));
+      fh_pdo_drivers((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -105,7 +105,7 @@ TypedValue* tg1_3PDO___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_3PDO___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
+  th_3PDO___construct((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_array));
   return rv;
 }
 
@@ -119,7 +119,7 @@ TypedValue* tg_3PDO___construct(HPHP::VM::ActRec *ar) {
         if ((count <= 3 || (args-3)->m_type == KindOfArray) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_3PDO___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
+          th_3PDO___construct((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_array));
           frame_free_locals_inl(ar, 4);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -170,7 +170,7 @@ TypedValue* tg1_3PDO_prepare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_3PDO_prepare((rv), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
+  th_3PDO_prepare((rv), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -183,7 +183,7 @@ TypedValue* tg_3PDO_prepare(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfArray) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_3PDO_prepare((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
+          th_3PDO_prepare((&(rv)), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -440,7 +440,7 @@ TypedValue* tg1_3PDO_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, O
 TypedValue* tg1_3PDO_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_3PDO_exec((rv), (this_), (Value*)(args-0));
+  th_3PDO_exec((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -453,7 +453,7 @@ TypedValue* tg_3PDO_exec(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_3PDO_exec((&(rv)), (this_), (Value*)(args-0));
+          th_3PDO_exec((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -494,7 +494,7 @@ TypedValue* tg1_3PDO_lastinsertid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue* tg1_3PDO_lastinsertid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_3PDO_lastinsertid((rv), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  th_3PDO_lastinsertid((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -507,7 +507,7 @@ TypedValue* tg_3PDO_lastinsertid(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 1LL) {
         if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-          th_3PDO_lastinsertid((&(rv)), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+          th_3PDO_lastinsertid((&(rv)), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -588,7 +588,7 @@ TypedValue* tg_3PDO_errorinfo(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfArray;
-        th_3PDO_errorinfo((Value*)(&(rv)), (this_));
+        th_3PDO_errorinfo((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -623,7 +623,7 @@ TypedValue* tg1_3PDO_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, 
 TypedValue* tg1_3PDO_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_3PDO_query((rv), (this_), (Value*)(args-0));
+  th_3PDO_query((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -636,7 +636,7 @@ TypedValue* tg_3PDO_query(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_3PDO_query((&(rv)), (this_), (Value*)(args-0));
+          th_3PDO_query((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -688,7 +688,7 @@ TypedValue* tg1_3PDO_quote(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_3PDO_quote((rv), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$PARAM_STR));
+  th_3PDO_quote((rv), (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$PARAM_STR));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -701,7 +701,7 @@ TypedValue* tg_3PDO_quote(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_3PDO_quote((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$PARAM_STR));
+          th_3PDO_quote((&(rv)), (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$PARAM_STR));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -817,7 +817,7 @@ TypedValue* tg_3PDO_getavailabledrivers(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      th_3PDO_getavailabledrivers((Value*)(&(rv)), ("PDO"));
+      th_3PDO_getavailabledrivers((&rv.m_data), ("PDO"));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -895,7 +895,7 @@ TypedValue* tg1_12PDOStatement_execute(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue* tg1_12PDOStatement_execute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToArrayInPlace(args-0);
-  th_12PDOStatement_execute((rv), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_array));
+  th_12PDOStatement_execute((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_array));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -908,7 +908,7 @@ TypedValue* tg_12PDOStatement_execute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 1LL) {
         if ((count <= 0 || (args-0)->m_type == KindOfArray)) {
-          th_12PDOStatement_execute((&(rv)), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_array));
+          th_12PDOStatement_execute((&(rv)), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_array));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1022,7 +1022,7 @@ TypedValue* tg1_12PDOStatement_fetchobject(TypedValue* rv, HPHP::VM::ActRec* ar,
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
-  th_12PDOStatement_fetchobject((rv), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  th_12PDOStatement_fetchobject((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1036,7 +1036,7 @@ TypedValue* tg_12PDOStatement_fetchobject(HPHP::VM::ActRec *ar) {
       if (count <= 2LL) {
         if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           Variant defVal1;
-          th_12PDOStatement_fetchobject((&(rv)), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+          th_12PDOStatement_fetchobject((&(rv)), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1464,7 +1464,7 @@ TypedValue* tg_12PDOStatement_errorinfo(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfArray;
-        th_12PDOStatement_errorinfo((Value*)(&(rv)), (this_));
+        th_12PDOStatement_errorinfo((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

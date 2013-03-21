@@ -99,7 +99,7 @@ TypedValue* tg1_11ImageSprite_addFile(TypedValue* rv, HPHP::VM::ActRec* ar, int6
     tvCastToStringInPlace(args-0);
   }
   Array defVal1 = uninit_null();
-  th_11ImageSprite_addFile((Value*)(rv), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1));
+  th_11ImageSprite_addFile((&rv->m_data), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&defVal1));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -114,7 +114,7 @@ TypedValue* tg_11ImageSprite_addFile(HPHP::VM::ActRec *ar) {
         if ((count <= 1 || (args-1)->m_type == KindOfArray) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfObject;
           Array defVal1 = uninit_null();
-          th_11ImageSprite_addFile((Value*)(&(rv)), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1));
+          th_11ImageSprite_addFile((&rv.m_data), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&defVal1));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -172,7 +172,7 @@ TypedValue* tg1_11ImageSprite_addString(TypedValue* rv, HPHP::VM::ActRec* ar, in
     tvCastToStringInPlace(args-0);
   }
   Array defVal2 = uninit_null();
-  th_11ImageSprite_addString((Value*)(rv), (this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+  th_11ImageSprite_addString((&rv->m_data), (this_), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -187,7 +187,7 @@ TypedValue* tg_11ImageSprite_addString(HPHP::VM::ActRec *ar) {
         if ((count <= 2 || (args-2)->m_type == KindOfArray) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfObject;
           Array defVal2 = uninit_null();
-          th_11ImageSprite_addString((Value*)(&(rv)), (this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+          th_11ImageSprite_addString((&rv.m_data), (this_), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -246,7 +246,7 @@ TypedValue* tg1_11ImageSprite_addUrl(TypedValue* rv, HPHP::VM::ActRec* ar, int64
     tvCastToStringInPlace(args-0);
   }
   Array defVal2 = uninit_null();
-  th_11ImageSprite_addUrl((Value*)(rv), (this_), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+  th_11ImageSprite_addUrl((&rv->m_data), (this_), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(0), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -261,7 +261,7 @@ TypedValue* tg_11ImageSprite_addUrl(HPHP::VM::ActRec *ar) {
         if ((count <= 2 || (args-2)->m_type == KindOfArray) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfObject;
           Array defVal2 = uninit_null();
-          th_11ImageSprite_addUrl((Value*)(&(rv)), (this_), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+          th_11ImageSprite_addUrl((&rv.m_data), (this_), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(0), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -307,7 +307,7 @@ TypedValue* tg_11ImageSprite_clear(HPHP::VM::ActRec *ar) {
       if (count <= 1LL) {
         rv.m_type = KindOfObject;
         Variant defVal0;
-        th_11ImageSprite_clear((Value*)(&(rv)), (this_), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+        th_11ImageSprite_clear((&rv.m_data), (this_), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -343,7 +343,7 @@ TypedValue* tg1_11ImageSprite_loadDims(TypedValue* rv, HPHP::VM::ActRec* ar, int
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToBooleanInPlace(args-0);
-  th_11ImageSprite_loadDims((Value*)(rv), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
+  th_11ImageSprite_loadDims((&rv->m_data), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -357,7 +357,7 @@ TypedValue* tg_11ImageSprite_loadDims(HPHP::VM::ActRec *ar) {
       if (count <= 1LL) {
         if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
           rv.m_type = KindOfObject;
-          th_11ImageSprite_loadDims((Value*)(&(rv)), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
+          th_11ImageSprite_loadDims((&rv.m_data), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -399,7 +399,7 @@ TypedValue* tg1_11ImageSprite_loadImages(TypedValue* rv, HPHP::VM::ActRec* ar, i
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToBooleanInPlace(args-0);
-  th_11ImageSprite_loadImages((Value*)(rv), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
+  th_11ImageSprite_loadImages((&rv->m_data), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -413,7 +413,7 @@ TypedValue* tg_11ImageSprite_loadImages(HPHP::VM::ActRec *ar) {
       if (count <= 1LL) {
         if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
           rv.m_type = KindOfObject;
-          th_11ImageSprite_loadImages((Value*)(&(rv)), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
+          th_11ImageSprite_loadImages((&rv.m_data), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -473,7 +473,7 @@ TypedValue* tg1_11ImageSprite_output(TypedValue* rv, HPHP::VM::ActRec* ar, int64
     break;
   }
   String defVal1 = "png";
-  th_11ImageSprite_output((Value*)(rv), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(75));
+  th_11ImageSprite_output((&rv->m_data), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&defVal1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(75));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -488,7 +488,7 @@ TypedValue* tg_11ImageSprite_output(HPHP::VM::ActRec *ar) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_type = KindOfString;
           String defVal1 = "png";
-          th_11ImageSprite_output((Value*)(&(rv)), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(75));
+          th_11ImageSprite_output((&rv.m_data), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&defVal1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(75));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -551,7 +551,7 @@ TypedValue* tg1_11ImageSprite_css(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_11ImageSprite_css((Value*)(rv), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
+  th_11ImageSprite_css((&rv->m_data), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -565,7 +565,7 @@ TypedValue* tg_11ImageSprite_css(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 4LL) {
         if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfString;
-          th_11ImageSprite_css((Value*)(&(rv)), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
+          th_11ImageSprite_css((&rv.m_data), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 4);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -609,7 +609,7 @@ TypedValue* tg_11ImageSprite_getErrors(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfArray;
-        th_11ImageSprite_getErrors((Value*)(&(rv)), (this_));
+        th_11ImageSprite_getErrors((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -647,7 +647,7 @@ TypedValue* tg_11ImageSprite_mapping(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfArray;
-        th_11ImageSprite_mapping((Value*)(&(rv)), (this_));
+        th_11ImageSprite_mapping((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

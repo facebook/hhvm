@@ -1403,7 +1403,7 @@ TypedValue* fg_compact(HPHP::VM::ActRec *ar) {
         }
         extraArgs = ai.create();
       }
-      fh_compact((Value*)(&(rv)), (count), (args-0), (Value*)(&extraArgs));
+      fh_compact((&rv.m_data), (count), (args-0), (Value*)(&extraArgs));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 1);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3006,7 +3006,7 @@ TypedValue* fg_i18n_loc_get_default(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfString;
-      fh_i18n_loc_get_default((Value*)(&(rv)));
+      fh_i18n_loc_get_default((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3039,7 +3039,7 @@ TypedValue * fg1_i18n_loc_set_default(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (fh_i18n_loc_set_default((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_i18n_loc_set_default(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -3050,7 +3050,7 @@ TypedValue* fg_i18n_loc_set_default(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_i18n_loc_set_default((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_i18n_loc_set_default(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;

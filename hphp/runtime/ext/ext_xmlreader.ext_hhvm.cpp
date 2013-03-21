@@ -102,7 +102,7 @@ TypedValue* tg1_9XMLReader_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (th_9XMLReader_open((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_open((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -115,7 +115,7 @@ TypedValue* tg_9XMLReader_open(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_open((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_open((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -171,7 +171,7 @@ TypedValue* tg1_9XMLReader_XML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (th_9XMLReader_XML((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_XML((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -184,7 +184,7 @@ TypedValue* tg_9XMLReader_XML(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_XML((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_XML((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -296,7 +296,7 @@ TypedValue* tg1_9XMLReader_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_9XMLReader_next((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_next((this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -309,7 +309,7 @@ TypedValue* tg_9XMLReader_next(HPHP::VM::ActRec *ar) {
       if (count <= 1LL) {
         if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_next((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_next((this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -352,7 +352,7 @@ TypedValue* tg_9XMLReader_readString(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfString;
-        th_9XMLReader_readString((Value*)(&(rv)), (this_));
+        th_9XMLReader_readString((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -390,7 +390,7 @@ TypedValue* tg_9XMLReader_readInnerXML(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfString;
-        th_9XMLReader_readInnerXML((Value*)(&(rv)), (this_));
+        th_9XMLReader_readInnerXML((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -428,7 +428,7 @@ TypedValue* tg_9XMLReader_readOuterXML(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfString;
-        th_9XMLReader_readOuterXML((Value*)(&(rv)), (this_));
+        th_9XMLReader_readOuterXML((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -499,7 +499,7 @@ TypedValue* tg1_9XMLReader_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue* tg1_9XMLReader_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_9XMLReader_getAttribute((rv), (this_), (Value*)(args-0));
+  th_9XMLReader_getAttribute((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -512,7 +512,7 @@ TypedValue* tg_9XMLReader_getAttribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_9XMLReader_getAttribute((&(rv)), (this_), (Value*)(args-0));
+          th_9XMLReader_getAttribute((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -613,7 +613,7 @@ TypedValue* tg1_9XMLReader_getAttributeNs(TypedValue* rv, HPHP::VM::ActRec* ar, 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_9XMLReader_getAttributeNs((rv), (this_), (Value*)(args-0), (Value*)(args-1));
+  th_9XMLReader_getAttributeNs((rv), (this_), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -626,7 +626,7 @@ TypedValue* tg_9XMLReader_getAttributeNs(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_9XMLReader_getAttributeNs((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
+          th_9XMLReader_getAttributeNs((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -667,7 +667,7 @@ TypedValue* tg1_9XMLReader_moveToAttribute(TypedValue* rv, HPHP::VM::ActRec* ar,
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_9XMLReader_moveToAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_moveToAttribute((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -680,7 +680,7 @@ TypedValue* tg_9XMLReader_moveToAttribute(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_moveToAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_moveToAttribute((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -779,7 +779,7 @@ TypedValue* tg1_9XMLReader_moveToAttributeNs(TypedValue* rv, HPHP::VM::ActRec* a
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (th_9XMLReader_moveToAttributeNs((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_moveToAttributeNs((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -792,7 +792,7 @@ TypedValue* tg_9XMLReader_moveToAttributeNs(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_moveToAttributeNs((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_moveToAttributeNs((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -1067,7 +1067,7 @@ TypedValue* tg1_9XMLReader_lookupNamespace(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue* tg1_9XMLReader_lookupNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_9XMLReader_lookupNamespace((rv), (this_), (Value*)(args-0));
+  th_9XMLReader_lookupNamespace((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1080,7 +1080,7 @@ TypedValue* tg_9XMLReader_lookupNamespace(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_9XMLReader_lookupNamespace((&(rv)), (this_), (Value*)(args-0));
+          th_9XMLReader_lookupNamespace((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1121,7 +1121,7 @@ TypedValue* tg1_9XMLReader_setSchema(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_9XMLReader_setSchema((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_setSchema((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -1134,7 +1134,7 @@ TypedValue* tg_9XMLReader_setSchema(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_setSchema((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_setSchema((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -1233,7 +1233,7 @@ TypedValue* tg1_9XMLReader_setRelaxNGSchema(TypedValue* rv, HPHP::VM::ActRec* ar
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_9XMLReader_setRelaxNGSchema((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_setRelaxNGSchema((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -1246,7 +1246,7 @@ TypedValue* tg_9XMLReader_setRelaxNGSchema(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_setRelaxNGSchema((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_setRelaxNGSchema((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -1286,7 +1286,7 @@ TypedValue* tg1_9XMLReader_setRelaxNGSchemaSource(TypedValue* rv, HPHP::VM::ActR
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_9XMLReader_setRelaxNGSchemaSource((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_9XMLReader_setRelaxNGSchemaSource((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -1299,7 +1299,7 @@ TypedValue* tg_9XMLReader_setRelaxNGSchemaSource(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_9XMLReader_setRelaxNGSchemaSource((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_9XMLReader_setRelaxNGSchemaSource((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;

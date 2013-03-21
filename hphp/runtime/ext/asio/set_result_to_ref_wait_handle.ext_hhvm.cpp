@@ -88,7 +88,7 @@ TypedValue* tg1_24SetResultToRefWaitHandle_create(TypedValue* rv, HPHP::VM::ActR
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
-  th_24SetResultToRefWaitHandle_create((Value*)(rv), ("SetResultToRefWaitHandle"), (Value*)(args-0), (args-1));
+  th_24SetResultToRefWaitHandle_create((&rv->m_data), ("SetResultToRefWaitHandle"), &args[-0].m_data, (args-1));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -100,7 +100,7 @@ TypedValue* tg_24SetResultToRefWaitHandle_create(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        th_24SetResultToRefWaitHandle_create((Value*)(&(rv)), ("SetResultToRefWaitHandle"), (Value*)(args-0), (args-1));
+        th_24SetResultToRefWaitHandle_create((&rv.m_data), ("SetResultToRefWaitHandle"), &args[-0].m_data, (args-1));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

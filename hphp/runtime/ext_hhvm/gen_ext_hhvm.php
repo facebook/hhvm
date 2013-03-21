@@ -105,18 +105,12 @@ function emitCall($obj, $prefix, $ref) {
   $firstParam = true;
   $fnName = $prefix . getUniqueFuncName($obj);
   $ret .= $fnName . '(';
-  $retval = '';
-  if ($ref) {
-    $retval = '(rv)';
-  } else {
-    $retval = '(&(rv))';
-  }
   if (isTypeCppReturnByRef($obj->returnType)) {
     $firstParam = false;
     if ($obj->returnType == 'HPHP::Variant') {
-      $ret .= $retval;
+      $ret .= ($ref) ? '(rv)' : '(&(rv))';
     } else {
-      $ret .= '(Value*)' . $retval;
+      $ret .= ($ref) ? '(&rv->m_data)' : '(&rv.m_data)';
     }
   }
   if ($obj->className !== null) {
@@ -155,7 +149,7 @@ function emitCall($obj, $prefix, $ref) {
           $p->type == 'HPHP::VRefParamValue const&') {
         $ret .= '(args-' . $k . ')';
       } else {
-        $ret .= '(Value*)(args-' . $k . ')';
+        $ret .= '&args[-' . $k . '].m_data';
       }
     } else {
       if ($p->type == 'double') {
@@ -170,11 +164,10 @@ function emitCall($obj, $prefix, $ref) {
         if ($p->type == 'HPHP::Variant' ||
             $p->type == 'HPHP::Variant const&' ||
             $p->type == 'HPHP::VRefParamValue const&') {
-          $ret .= '(TypedValue*)';
+          $ret .= '(TypedValue*)(&defVal' . $k . ')';
         } else {
-          $ret .= '(Value*)';
+          $ret .= '(Value*)(&defVal' . $k . ')';
         }
-        $ret .= '(&defVal' . $k . ')';
       } else if (isTypeCppPassByRef($p->type)) {
         if ($p->type == 'HPHP::Variant' ||
             $p->type == 'HPHP::Variant const&' ||

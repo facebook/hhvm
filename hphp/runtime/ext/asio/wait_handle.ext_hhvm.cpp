@@ -80,7 +80,7 @@ TypedValue* tg_10WaitHandle_getWaitHandle(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfObject;
-        th_10WaitHandle_getWaitHandle((Value*)(&(rv)), (this_));
+        th_10WaitHandle_getWaitHandle((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -335,7 +335,7 @@ TypedValue* tg_10WaitHandle_getName(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfString;
-        th_10WaitHandle_getName((Value*)(&(rv)), (this_));
+        th_10WaitHandle_getName((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -373,7 +373,7 @@ TypedValue* tg_10WaitHandle_getExceptionIfFailed(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfObject;
-        th_10WaitHandle_getExceptionIfFailed((Value*)(&(rv)), (this_));
+        th_10WaitHandle_getExceptionIfFailed((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

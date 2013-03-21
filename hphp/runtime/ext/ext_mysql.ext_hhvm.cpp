@@ -76,7 +76,7 @@ TypedValue * fg1_mysql_connect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   case 0:
     break;
   }
-  fh_mysql_connect((rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1));
+  fh_mysql_connect((rv), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -87,7 +87,7 @@ TypedValue* fg_mysql_connect(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 7LL) {
       if ((count <= 6 || (args-6)->m_type == KindOfInt64) && (count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfBoolean) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        fh_mysql_connect((&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1));
+        fh_mysql_connect((&(rv)), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 7);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -148,7 +148,7 @@ TypedValue * fg1_mysql_async_connect_start(TypedValue* rv, HPHP::VM::ActRec* ar,
   case 0:
     break;
   }
-  fh_mysql_async_connect_start((rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string));
+  fh_mysql_async_connect_start((rv), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -159,7 +159,7 @@ TypedValue* fg_mysql_async_connect_start(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 4LL) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        fh_mysql_async_connect_start((&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string));
+        fh_mysql_async_connect_start((&(rv)), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -232,7 +232,7 @@ TypedValue * fg1_mysql_async_query_start(TypedValue* rv, HPHP::VM::ActRec* ar, i
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (fh_mysql_async_query_start((Value*)(args-0), (args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_mysql_async_query_start(&args[-0].m_data, (args-1))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -243,7 +243,7 @@ TypedValue* fg_mysql_async_query_start(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_mysql_async_query_start((Value*)(args-0), (args-1))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_mysql_async_query_start(&args[-0].m_data, (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -482,7 +482,7 @@ TypedValue * fg1_mysql_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   case 0:
     break;
   }
-  fh_mysql_pconnect((rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0), (count > 4) ? (int)(args[-4].m_data.num) : (int)(-1), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1));
+  fh_mysql_pconnect((rv), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0), (count > 4) ? (int)(args[-4].m_data.num) : (int)(-1), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -493,7 +493,7 @@ TypedValue* fg_mysql_pconnect(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 6LL) {
       if ((count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        fh_mysql_pconnect((&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0), (count > 4) ? (int)(args[-4].m_data.num) : (int)(-1), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1));
+        fh_mysql_pconnect((&(rv)), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0), (count > 4) ? (int)(args[-4].m_data.num) : (int)(-1), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 6);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -574,7 +574,7 @@ TypedValue * fg1_mysql_connect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, int
   case 0:
     break;
   }
-  fh_mysql_connect_with_db((rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false), (count > 5) ? (int)(args[-5].m_data.num) : (int)(0), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
+  fh_mysql_connect_with_db((rv), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_string), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false), (count > 5) ? (int)(args[-5].m_data.num) : (int)(0), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -585,7 +585,7 @@ TypedValue* fg_mysql_connect_with_db(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 8LL) {
       if ((count <= 7 || (args-7)->m_type == KindOfInt64) && (count <= 6 || (args-6)->m_type == KindOfInt64) && (count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfBoolean) && (count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        fh_mysql_connect_with_db((&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false), (count > 5) ? (int)(args[-5].m_data.num) : (int)(0), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
+        fh_mysql_connect_with_db((&(rv)), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_string), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false), (count > 5) ? (int)(args[-5].m_data.num) : (int)(0), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 8);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -661,7 +661,7 @@ TypedValue * fg1_mysql_pconnect_with_db(TypedValue* rv, HPHP::VM::ActRec* ar, in
   case 0:
     break;
   }
-  fh_mysql_pconnect_with_db((rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1));
+  fh_mysql_pconnect_with_db((rv), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_string), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -672,7 +672,7 @@ TypedValue* fg_mysql_pconnect_with_db(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 7LL) {
       if ((count <= 6 || (args-6)->m_type == KindOfInt64) && (count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        fh_mysql_pconnect_with_db((&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1));
+        fh_mysql_pconnect_with_db((&(rv)), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_string), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 7);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -712,7 +712,7 @@ TypedValue * fg1_mysql_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_mysql_escape_string((Value*)(rv), (Value*)(args-0));
+  fh_mysql_escape_string((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -724,7 +724,7 @@ TypedValue* fg_mysql_escape_string(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_mysql_escape_string((Value*)(&(rv)), (Value*)(args-0));
+        fh_mysql_escape_string((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -765,7 +765,7 @@ TypedValue * fg1_mysql_real_escape_string(TypedValue* rv, HPHP::VM::ActRec* ar, 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
-  fh_mysql_real_escape_string((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  fh_mysql_real_escape_string((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -777,7 +777,7 @@ TypedValue* fg_mysql_real_escape_string(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal1;
-        fh_mysql_real_escape_string((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        fh_mysql_real_escape_string((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -975,7 +975,7 @@ TypedValue * fg1_mysql_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
-  fh_mysql_query((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  fh_mysql_query((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -987,7 +987,7 @@ TypedValue* fg_mysql_query(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal1;
-        fh_mysql_query((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        fh_mysql_query((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1028,7 +1028,7 @@ TypedValue * fg1_mysql_multi_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
-  fh_mysql_multi_query((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  fh_mysql_multi_query((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1040,7 +1040,7 @@ TypedValue* fg_mysql_multi_query(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal1;
-        fh_mysql_multi_query((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        fh_mysql_multi_query((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1184,7 +1184,7 @@ TypedValue * fg1_mysql_unbuffered_query(TypedValue* rv, HPHP::VM::ActRec* ar, in
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
-  fh_mysql_unbuffered_query((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  fh_mysql_unbuffered_query((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1196,7 +1196,7 @@ TypedValue* fg_mysql_unbuffered_query(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal1;
-        fh_mysql_unbuffered_query((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        fh_mysql_unbuffered_query((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1272,7 +1272,7 @@ TypedValue * fg1_mysql_list_tables(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
-  fh_mysql_list_tables((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  fh_mysql_list_tables((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1284,7 +1284,7 @@ TypedValue* fg_mysql_list_tables(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal1;
-        fh_mysql_list_tables((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        fh_mysql_list_tables((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1678,7 +1678,7 @@ TypedValue * fg1_mysql_fetch_object(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   }
   String defVal1 = "stdClass";
   Array defVal2 = uninit_null();
-  fh_mysql_fetch_object((rv), (args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+  fh_mysql_fetch_object((rv), (args-0), (count > 1) ? &args[-1].m_data : (Value*)(&defVal1), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1691,7 +1691,7 @@ TypedValue* fg_mysql_fetch_object(HPHP::VM::ActRec *ar) {
       if ((count <= 2 || (args-2)->m_type == KindOfArray) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type))) {
         String defVal1 = "stdClass";
         Array defVal2 = uninit_null();
-        fh_mysql_fetch_object((&(rv)), (args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+        fh_mysql_fetch_object((&(rv)), (args-0), (count > 1) ? &args[-1].m_data : (Value*)(&defVal1), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

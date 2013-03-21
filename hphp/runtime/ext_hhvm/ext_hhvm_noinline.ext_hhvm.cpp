@@ -54,7 +54,7 @@ TypedValue * fg1_apc_compile_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_apc_compile_file((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_apc_compile_file(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -65,7 +65,7 @@ TypedValue* fg_apc_compile_file(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_apc_compile_file((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_apc_compile_file(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -123,7 +123,7 @@ TypedValue * fg1_apc_define_constants(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_apc_define_constants((Value*)(args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_apc_define_constants(&args[-0].m_data, &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -134,7 +134,7 @@ TypedValue* fg_apc_define_constants(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_apc_define_constants((Value*)(args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_apc_define_constants(&args[-0].m_data, &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -188,7 +188,7 @@ TypedValue * fg1_apc_load_constants(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_apc_load_constants((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_apc_load_constants(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -199,7 +199,7 @@ TypedValue* fg_apc_load_constants(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_apc_load_constants((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_apc_load_constants(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -238,7 +238,7 @@ TypedValue * fg1_apc_sma_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToBooleanInPlace(args-0);
-  fh_apc_sma_info((Value*)(rv), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
+  fh_apc_sma_info((&rv->m_data), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -250,7 +250,7 @@ TypedValue* fg_apc_sma_info(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
         rv.m_type = KindOfArray;
-        fh_apc_sma_info((Value*)(&(rv)), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
+        fh_apc_sma_info((&rv.m_data), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -290,7 +290,7 @@ TypedValue* fg_apc_filehits(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_apc_filehits((Value*)(&(rv)));
+      fh_apc_filehits((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -441,7 +441,7 @@ TypedValue * fg1_apc_bin_load(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_apc_bin_load((Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_apc_bin_load(&args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -452,7 +452,7 @@ TypedValue* fg_apc_bin_load(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_apc_bin_load((Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_apc_bin_load(&args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -512,7 +512,7 @@ TypedValue * fg1_apc_bin_dumpfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
     tvCastToInt64InPlace(args-0);
   }
   Object defVal4 = uninit_null();
-  fh_apc_bin_dumpfile((rv), (long)(args[-0].m_data.num), (args-1), (Value*)(args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (Value*)(args-4) : (Value*)(&defVal4));
+  fh_apc_bin_dumpfile((rv), (long)(args[-0].m_data.num), (args-1), &args[-2].m_data, (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? &args[-4].m_data : (Value*)(&defVal4));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -524,7 +524,7 @@ TypedValue* fg_apc_bin_dumpfile(HPHP::VM::ActRec *ar) {
     if (count >= 3LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfObject) && (count <= 3 || (args-3)->m_type == KindOfInt64) && IS_STRING_TYPE((args-2)->m_type) && (args-0)->m_type == KindOfInt64) {
         Object defVal4 = uninit_null();
-        fh_apc_bin_dumpfile((&(rv)), (long)(args[-0].m_data.num), (args-1), (Value*)(args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (Value*)(args-4) : (Value*)(&defVal4));
+        fh_apc_bin_dumpfile((&(rv)), (long)(args[-0].m_data.num), (args-1), &args[-2].m_data, (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? &args[-4].m_data : (Value*)(&defVal4));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -585,7 +585,7 @@ TypedValue * fg1_apc_bin_loadfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
     tvCastToStringInPlace(args-0);
   }
   Object defVal1 = uninit_null();
-  rv->m_data.num = (fh_apc_bin_loadfile((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_apc_bin_loadfile(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&defVal1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -597,7 +597,7 @@ TypedValue* fg_apc_bin_loadfile(HPHP::VM::ActRec *ar) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfObject) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
         Object defVal1 = uninit_null();
-        rv.m_data.num = (fh_apc_bin_loadfile((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_apc_bin_loadfile(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&defVal1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1150,7 +1150,7 @@ TypedValue * fg1_bzclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __
 TypedValue * fg1_bzclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_bzclose((rv), (Value*)(args-0));
+  fh_bzclose((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1161,7 +1161,7 @@ TypedValue* fg_bzclose(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_bzclose((&(rv)), (Value*)(args-0));
+        fh_bzclose((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1211,7 +1211,7 @@ TypedValue * fg1_bzread(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_bzread((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(1024));
+  fh_bzread((rv), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(1024));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1222,7 +1222,7 @@ TypedValue* fg_bzread(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
-        fh_bzread((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(1024));
+        fh_bzread((&(rv)), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(1024));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1276,7 +1276,7 @@ TypedValue * fg1_bzwrite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_bzwrite((rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0));
+  fh_bzwrite((rv), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1287,7 +1287,7 @@ TypedValue* fg_bzwrite(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        fh_bzwrite((&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0));
+        fh_bzwrite((&(rv)), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1392,7 +1392,7 @@ TypedValue * fg1_date_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_date_add((Value*)(rv), (Value*)(args-0), (Value*)(args-1));
+  fh_date_add((&rv->m_data), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -1404,7 +1404,7 @@ TypedValue* fg_date_add(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        fh_date_add((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_date_add((&rv.m_data), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1459,7 +1459,7 @@ TypedValue * fg1_date_create_from_format(TypedValue* rv, HPHP::VM::ActRec* ar, i
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_date_create_from_format((Value*)(rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_object));
+  fh_date_create_from_format((&rv->m_data), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_object));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -1471,7 +1471,7 @@ TypedValue* fg_date_create_from_format(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfObject) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfObject;
-        fh_date_create_from_format((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_object));
+        fh_date_create_from_format((&rv.m_data), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_object));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1523,7 +1523,7 @@ TypedValue * fg1_date_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   case 0:
     break;
   }
-  fh_date_create((Value*)(rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_object));
+  fh_date_create((&rv->m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_object));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -1535,7 +1535,7 @@ TypedValue* fg_date_create(HPHP::VM::ActRec *ar) {
     if (count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfObject) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
         rv.m_type = KindOfObject;
-        fh_date_create((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_object));
+        fh_date_create((&rv.m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_object));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1588,7 +1588,7 @@ TypedValue * fg1_date_date_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_date_date_set((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (int)(args[-3].m_data.num));
+  fh_date_date_set(&args[-0].m_data, (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (int)(args[-3].m_data.num));
   return rv;
 }
 
@@ -1600,7 +1600,7 @@ TypedValue* fg_date_date_set(HPHP::VM::ActRec *ar) {
       if ((args-3)->m_type == KindOfInt64 && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_date_date_set((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (int)(args[-3].m_data.num));
+        fh_date_date_set(&args[-0].m_data, (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (int)(args[-3].m_data.num));
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1639,7 +1639,7 @@ TypedValue* fg_date_default_timezone_get(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfString;
-      fh_date_default_timezone_get((Value*)(&(rv)));
+      fh_date_default_timezone_get((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1672,7 +1672,7 @@ TypedValue * fg1_date_default_timezone_set(TypedValue* rv, HPHP::VM::ActRec* ar,
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (fh_date_default_timezone_set((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_date_default_timezone_set(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -1683,7 +1683,7 @@ TypedValue* fg_date_default_timezone_set(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_date_default_timezone_set((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_date_default_timezone_set(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1737,7 +1737,7 @@ TypedValue * fg1_date_diff(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_date_diff((Value*)(rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
+  fh_date_diff((&rv->m_data), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -1749,7 +1749,7 @@ TypedValue* fg_date_diff(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        fh_date_diff((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
+        fh_date_diff((&rv.m_data), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1795,7 +1795,7 @@ TypedValue * fg1_date_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_date_format((Value*)(rv), (Value*)(args-0), (Value*)(args-1));
+  fh_date_format((&rv->m_data), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1807,7 +1807,7 @@ TypedValue* fg_date_format(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfString;
-        fh_date_format((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_date_format((&rv.m_data), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1847,7 +1847,7 @@ TypedValue* fg_date_get_last_errors(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_date_get_last_errors((Value*)(&(rv)));
+      fh_date_get_last_errors((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1881,7 +1881,7 @@ TypedValue * fg1_date_interval_create_from_date_string(TypedValue* rv, HPHP::VM:
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
-  fh_date_interval_create_from_date_string((Value*)(rv), (Value*)(args-0));
+  fh_date_interval_create_from_date_string((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -1893,7 +1893,7 @@ TypedValue* fg_date_interval_create_from_date_string(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfObject;
-        fh_date_interval_create_from_date_string((Value*)(&(rv)), (Value*)(args-0));
+        fh_date_interval_create_from_date_string((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1939,7 +1939,7 @@ TypedValue * fg1_date_interval_format(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_date_interval_format((Value*)(rv), (Value*)(args-0), (Value*)(args-1));
+  fh_date_interval_format((&rv->m_data), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1951,7 +1951,7 @@ TypedValue* fg_date_interval_format(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfString;
-        fh_date_interval_format((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_date_interval_format((&rv.m_data), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2009,7 +2009,7 @@ TypedValue * fg1_date_isodate_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_date_isodate_set((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (count > 3) ? (int)(args[-3].m_data.num) : (int)(1));
+  fh_date_isodate_set(&args[-0].m_data, (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (count > 3) ? (int)(args[-3].m_data.num) : (int)(1));
   return rv;
 }
 
@@ -2021,7 +2021,7 @@ TypedValue* fg_date_isodate_set(HPHP::VM::ActRec *ar) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_date_isodate_set((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (count > 3) ? (int)(args[-3].m_data.num) : (int)(1));
+        fh_date_isodate_set(&args[-0].m_data, (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (count > 3) ? (int)(args[-3].m_data.num) : (int)(1));
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2065,7 +2065,7 @@ TypedValue * fg1_date_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_date_modify((Value*)(args-0), (Value*)(args-1));
+  fh_date_modify(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -2077,7 +2077,7 @@ TypedValue* fg_date_modify(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_date_modify((Value*)(args-0), (Value*)(args-1));
+        fh_date_modify(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2115,7 +2115,7 @@ TypedValue * fg1_date_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_date_offset_get((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_date_offset_get(&args[-0].m_data);
   return rv;
 }
 
@@ -2126,7 +2126,7 @@ TypedValue* fg_date_offset_get(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_date_offset_get((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_date_offset_get(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2164,7 +2164,7 @@ TypedValue * fg1_date_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
 TypedValue * fg1_date_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_date_parse((rv), (Value*)(args-0));
+  fh_date_parse((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2175,7 +2175,7 @@ TypedValue* fg_date_parse(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_date_parse((&(rv)), (Value*)(args-0));
+        fh_date_parse((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2221,7 +2221,7 @@ TypedValue * fg1_date_sub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_date_sub((Value*)(rv), (Value*)(args-0), (Value*)(args-1));
+  fh_date_sub((&rv->m_data), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -2233,7 +2233,7 @@ TypedValue* fg_date_sub(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        fh_date_sub((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_date_sub((&rv.m_data), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2283,7 +2283,7 @@ TypedValue * fg1_date_sun_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  fh_date_sun_info((Value*)(rv), (long)(args[-0].m_data.num), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
+  fh_date_sun_info((&rv->m_data), (long)(args[-0].m_data.num), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2295,7 +2295,7 @@ TypedValue* fg_date_sun_info(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfDouble && (args-1)->m_type == KindOfDouble && (args-0)->m_type == KindOfInt64) {
         rv.m_type = KindOfArray;
-        fh_date_sun_info((Value*)(&(rv)), (long)(args[-0].m_data.num), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
+        fh_date_sun_info((&rv.m_data), (long)(args[-0].m_data.num), (args[-1].m_data.dbl), (args[-2].m_data.dbl));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2515,7 +2515,7 @@ TypedValue * fg1_date_time_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_date_time_set((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0));
+  fh_date_time_set(&args[-0].m_data, (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0));
   return rv;
 }
 
@@ -2527,7 +2527,7 @@ TypedValue* fg_date_time_set(HPHP::VM::ActRec *ar) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_date_time_set((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0));
+        fh_date_time_set(&args[-0].m_data, (int)(args[-1].m_data.num), (int)(args[-2].m_data.num), (count > 3) ? (int)(args[-3].m_data.num) : (int)(0));
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2565,7 +2565,7 @@ TypedValue * fg1_date_timestamp_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_date_timestamp_get((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_date_timestamp_get(&args[-0].m_data);
   return rv;
 }
 
@@ -2576,7 +2576,7 @@ TypedValue* fg_date_timestamp_get(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_date_timestamp_get((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_date_timestamp_get(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2621,7 +2621,7 @@ TypedValue * fg1_date_timestamp_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_date_timestamp_set((Value*)(rv), (Value*)(args-0), (long)(args[-1].m_data.num));
+  fh_date_timestamp_set((&rv->m_data), &args[-0].m_data, (long)(args[-1].m_data.num));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -2633,7 +2633,7 @@ TypedValue* fg_date_timestamp_set(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        fh_date_timestamp_set((Value*)(&(rv)), (Value*)(args-0), (long)(args[-1].m_data.num));
+        fh_date_timestamp_set((&rv.m_data), &args[-0].m_data, (long)(args[-1].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2672,7 +2672,7 @@ TypedValue * fg1_date_timezone_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
 TypedValue * fg1_date_timezone_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_date_timezone_get((rv), (Value*)(args-0));
+  fh_date_timezone_get((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2683,7 +2683,7 @@ TypedValue* fg_date_timezone_get(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_date_timezone_get((&(rv)), (Value*)(args-0));
+        fh_date_timezone_get((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2728,7 +2728,7 @@ TypedValue * fg1_date_timezone_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_date_timezone_set((Value*)(args-0), (Value*)(args-1));
+  fh_date_timezone_set(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -2740,7 +2740,7 @@ TypedValue* fg_date_timezone_set(HPHP::VM::ActRec *ar) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_date_timezone_set((Value*)(args-0), (Value*)(args-1));
+        fh_date_timezone_set(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2789,7 +2789,7 @@ TypedValue * fg1_date(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_date((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+  fh_date((rv), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2800,7 +2800,7 @@ TypedValue* fg_date(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_date((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+        fh_date((&(rv)), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2840,7 +2840,7 @@ TypedValue * fg1_getdate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToInt64InPlace(args-0);
-  fh_getdate((Value*)(rv), (count > 0) ? (long)(args[-0].m_data.num) : (long)(TimeStamp::Current()));
+  fh_getdate((&rv->m_data), (count > 0) ? (long)(args[-0].m_data.num) : (long)(TimeStamp::Current()));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2852,7 +2852,7 @@ TypedValue* fg_getdate(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfInt64)) {
         rv.m_type = KindOfArray;
-        fh_getdate((Value*)(&(rv)), (count > 0) ? (long)(args[-0].m_data.num) : (long)(TimeStamp::Current()));
+        fh_getdate((&rv.m_data), (count > 0) ? (long)(args[-0].m_data.num) : (long)(TimeStamp::Current()));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2952,7 +2952,7 @@ TypedValue * fg1_gmdate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_gmdate((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+  fh_gmdate((rv), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2963,7 +2963,7 @@ TypedValue* fg_gmdate(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_gmdate((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+        fh_gmdate((&(rv)), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3096,7 +3096,7 @@ TypedValue * fg1_gmstrftime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_gmstrftime((Value*)(rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+  fh_gmstrftime((&rv->m_data), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3108,7 +3108,7 @@ TypedValue* fg_gmstrftime(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_gmstrftime((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+        fh_gmstrftime((&rv.m_data), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3158,7 +3158,7 @@ TypedValue * fg1_idate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_idate((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+  fh_idate((rv), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3169,7 +3169,7 @@ TypedValue* fg_idate(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_idate((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+        fh_idate((&(rv)), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3221,7 +3221,7 @@ TypedValue * fg1_localtime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   case 0:
     break;
   }
-  fh_localtime((Value*)(rv), (count > 0) ? (long)(args[-0].m_data.num) : (long)(TimeStamp::Current()), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
+  fh_localtime((&rv->m_data), (count > 0) ? (long)(args[-0].m_data.num) : (long)(TimeStamp::Current()), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3233,7 +3233,7 @@ TypedValue* fg_localtime(HPHP::VM::ActRec *ar) {
     if (count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (count <= 0 || (args-0)->m_type == KindOfInt64)) {
         rv.m_type = KindOfArray;
-        fh_localtime((Value*)(&(rv)), (count > 0) ? (long)(args[-0].m_data.num) : (long)(TimeStamp::Current()), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
+        fh_localtime((&rv.m_data), (count > 0) ? (long)(args[-0].m_data.num) : (long)(TimeStamp::Current()), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3415,7 +3415,7 @@ TypedValue * fg1_strftime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_strftime((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+  fh_strftime((rv), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3426,7 +3426,7 @@ TypedValue* fg_strftime(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_strftime((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+        fh_strftime((&(rv)), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3471,7 +3471,7 @@ TypedValue * fg1_strptime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_strptime((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_strptime((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3482,7 +3482,7 @@ TypedValue* fg_strptime(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_strptime((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_strptime((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3532,7 +3532,7 @@ TypedValue * fg1_strtotime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_strtotime((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+  fh_strtotime((rv), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3543,7 +3543,7 @@ TypedValue* fg_strtotime(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_strtotime((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
+        fh_strtotime((&(rv)), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(TimeStamp::Current()));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3615,7 +3615,7 @@ TypedValue* fg_timezone_abbreviations_list(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_timezone_abbreviations_list((Value*)(&(rv)));
+      fh_timezone_abbreviations_list((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3649,7 +3649,7 @@ TypedValue* fg_timezone_identifiers_list(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_timezone_identifiers_list((Value*)(&(rv)));
+      fh_timezone_identifiers_list((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3683,7 +3683,7 @@ TypedValue * fg1_timezone_location_get(TypedValue* rv, HPHP::VM::ActRec* ar, int
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
-  fh_timezone_location_get((Value*)(rv), (Value*)(args-0));
+  fh_timezone_location_get((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3695,7 +3695,7 @@ TypedValue* fg_timezone_location_get(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfArray;
-        fh_timezone_location_get((Value*)(&(rv)), (Value*)(args-0));
+        fh_timezone_location_get((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3750,7 +3750,7 @@ TypedValue * fg1_timezone_name_from_abbr(TypedValue* rv, HPHP::VM::ActRec* ar, i
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_timezone_name_from_abbr((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true));
+  fh_timezone_name_from_abbr((rv), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3761,7 +3761,7 @@ TypedValue* fg_timezone_name_from_abbr(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_timezone_name_from_abbr((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true));
+        fh_timezone_name_from_abbr((&(rv)), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3801,7 +3801,7 @@ TypedValue * fg1_timezone_name_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
-  fh_timezone_name_get((Value*)(rv), (Value*)(args-0));
+  fh_timezone_name_get((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3813,7 +3813,7 @@ TypedValue* fg_timezone_name_get(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfString;
-        fh_timezone_name_get((Value*)(&(rv)), (Value*)(args-0));
+        fh_timezone_name_get((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3858,7 +3858,7 @@ TypedValue * fg1_timezone_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_timezone_offset_get((Value*)(args-0), (Value*)(args-1));
+  rv->m_data.num = (int64_t)fh_timezone_offset_get(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -3869,7 +3869,7 @@ TypedValue* fg_timezone_offset_get(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_timezone_offset_get((Value*)(args-0), (Value*)(args-1));
+        rv.m_data.num = (int64_t)fh_timezone_offset_get(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -3908,7 +3908,7 @@ TypedValue * fg1_timezone_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
-  fh_timezone_open((Value*)(rv), (Value*)(args-0));
+  fh_timezone_open((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -3920,7 +3920,7 @@ TypedValue* fg_timezone_open(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfObject;
-        fh_timezone_open((Value*)(&(rv)), (Value*)(args-0));
+        fh_timezone_open((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3960,7 +3960,7 @@ TypedValue * fg1_timezone_transitions_get(TypedValue* rv, HPHP::VM::ActRec* ar, 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
-  fh_timezone_transitions_get((Value*)(rv), (Value*)(args-0));
+  fh_timezone_transitions_get((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3972,7 +3972,7 @@ TypedValue* fg_timezone_transitions_get(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfArray;
-        fh_timezone_transitions_get((Value*)(&(rv)), (Value*)(args-0));
+        fh_timezone_transitions_get((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4012,7 +4012,7 @@ TypedValue* fg_timezone_version_get(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfString;
-      fh_timezone_version_get((Value*)(&(rv)));
+      fh_timezone_version_get((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4046,7 +4046,7 @@ TypedValue * fg1_call_user_func_array(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_call_user_func_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToArrayInPlace(args-1);
-  fh_call_user_func_array((rv), (args-0), (Value*)(args-1));
+  fh_call_user_func_array((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4057,7 +4057,7 @@ TypedValue* fg_call_user_func_array(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray) {
-        fh_call_user_func_array((&(rv)), (args-0), (Value*)(args-1));
+        fh_call_user_func_array((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4472,7 +4472,7 @@ TypedValue * fg1_decbin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
-  fh_decbin((Value*)(rv), (long)(args[-0].m_data.num));
+  fh_decbin((&rv->m_data), (long)(args[-0].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4484,7 +4484,7 @@ TypedValue* fg_decbin(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
         rv.m_type = KindOfString;
-        fh_decbin((Value*)(&(rv)), (long)(args[-0].m_data.num));
+        fh_decbin((&rv.m_data), (long)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4524,7 +4524,7 @@ TypedValue * fg1_dechex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
-  fh_dechex((Value*)(rv), (long)(args[-0].m_data.num));
+  fh_dechex((&rv->m_data), (long)(args[-0].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4536,7 +4536,7 @@ TypedValue* fg_dechex(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
         rv.m_type = KindOfString;
-        fh_dechex((Value*)(&(rv)), (long)(args[-0].m_data.num));
+        fh_dechex((&rv.m_data), (long)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4576,7 +4576,7 @@ TypedValue * fg1_decoct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
-  fh_decoct((Value*)(rv), (long)(args[-0].m_data.num));
+  fh_decoct((&rv->m_data), (long)(args[-0].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4588,7 +4588,7 @@ TypedValue* fg_decoct(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
         rv.m_type = KindOfString;
-        fh_decoct((Value*)(&(rv)), (long)(args[-0].m_data.num));
+        fh_decoct((&rv.m_data), (long)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4627,7 +4627,7 @@ TypedValue * fg1_bindec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __a
 TypedValue * fg1_bindec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_bindec((rv), (Value*)(args-0));
+  fh_bindec((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4638,7 +4638,7 @@ TypedValue* fg_bindec(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_bindec((&(rv)), (Value*)(args-0));
+        fh_bindec((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4677,7 +4677,7 @@ TypedValue * fg1_hexdec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __a
 TypedValue * fg1_hexdec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_hexdec((rv), (Value*)(args-0));
+  fh_hexdec((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4688,7 +4688,7 @@ TypedValue* fg_hexdec(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_hexdec((&(rv)), (Value*)(args-0));
+        fh_hexdec((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4727,7 +4727,7 @@ TypedValue * fg1_octdec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __a
 TypedValue * fg1_octdec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_octdec((rv), (Value*)(args-0));
+  fh_octdec((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4738,7 +4738,7 @@ TypedValue* fg_octdec(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_octdec((&(rv)), (Value*)(args-0));
+        fh_octdec((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5994,7 +5994,7 @@ TypedValue * fg1_mysql_set_charset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
-  fh_mysql_set_charset((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  fh_mysql_set_charset((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6006,7 +6006,7 @@ TypedValue* fg_mysql_set_charset(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal1;
-        fh_mysql_set_charset((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        fh_mysql_set_charset((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6151,7 +6151,7 @@ TypedValue* fg_mysql_get_client_info(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfString;
-      fh_mysql_get_client_info((Value*)(&(rv)));
+      fh_mysql_get_client_info((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6431,7 +6431,7 @@ TypedValue * fg1_mysql_create_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
-  fh_mysql_create_db((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  fh_mysql_create_db((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6443,7 +6443,7 @@ TypedValue* fg_mysql_create_db(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal1;
-        fh_mysql_create_db((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        fh_mysql_create_db((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6484,7 +6484,7 @@ TypedValue * fg1_mysql_select_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
-  fh_mysql_select_db((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  fh_mysql_select_db((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6496,7 +6496,7 @@ TypedValue* fg_mysql_select_db(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal1;
-        fh_mysql_select_db((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        fh_mysql_select_db((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6537,7 +6537,7 @@ TypedValue * fg1_mysql_drop_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
-  fh_mysql_drop_db((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  fh_mysql_drop_db((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6549,7 +6549,7 @@ TypedValue* fg_mysql_drop_db(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal1;
-        fh_mysql_drop_db((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        fh_mysql_drop_db((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6636,7 +6636,7 @@ TypedValue * fg1_mysql_db_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
     tvCastToStringInPlace(args-0);
   }
   Variant defVal2;
-  fh_mysql_db_query((rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+  fh_mysql_db_query((rv), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6648,7 +6648,7 @@ TypedValue* fg_mysql_db_query(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal2;
-        fh_mysql_db_query((&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+        fh_mysql_db_query((&(rv)), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6700,7 +6700,7 @@ TypedValue * fg1_mysql_list_fields(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
     tvCastToStringInPlace(args-0);
   }
   Variant defVal2;
-  fh_mysql_list_fields((rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+  fh_mysql_list_fields((rv), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6712,7 +6712,7 @@ TypedValue* fg_mysql_list_fields(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal2;
-        fh_mysql_list_fields((&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+        fh_mysql_list_fields((&(rv)), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6865,7 +6865,7 @@ TypedValue * fg1_checkdnsrr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_checkdnsrr((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_checkdnsrr(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -6876,7 +6876,7 @@ TypedValue* fg_checkdnsrr(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_checkdnsrr((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_checkdnsrr(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -6917,7 +6917,7 @@ TypedValue * fg1_getmxrr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
   VRefParamValue defVal2 = uninit_null();
-  rv->m_data.num = (fh_getmxrr((Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_getmxrr(&args[-0].m_data, (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -6929,7 +6929,7 @@ TypedValue* fg_getmxrr(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
         VRefParamValue defVal2 = uninit_null();
-        rv.m_data.num = (fh_getmxrr((Value*)(args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_getmxrr(&args[-0].m_data, (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -6967,7 +6967,7 @@ TypedValue * fg1_socket_get_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
 TypedValue * fg1_socket_get_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_socket_get_status((rv), (Value*)(args-0));
+  fh_socket_get_status((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6978,7 +6978,7 @@ TypedValue* fg_socket_get_status(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_socket_get_status((&(rv)), (Value*)(args-0));
+        fh_socket_get_status((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7023,7 +7023,7 @@ TypedValue * fg1_socket_set_blocking(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_socket_set_blocking((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_socket_set_blocking(&args[-0].m_data, (int)(args[-1].m_data.num))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -7034,7 +7034,7 @@ TypedValue* fg_socket_set_blocking(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_socket_set_blocking((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_socket_set_blocking(&args[-0].m_data, (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -7087,7 +7087,7 @@ TypedValue * fg1_socket_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_socket_set_timeout((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_socket_set_timeout(&args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -7098,7 +7098,7 @@ TypedValue* fg_socket_set_timeout(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_socket_set_timeout((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_socket_set_timeout(&args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -7178,7 +7178,7 @@ TypedValue * fg1_openlog(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_openlog((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_openlog(&args[-0].m_data, (int)(args[-1].m_data.num), (int)(args[-2].m_data.num))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -7189,7 +7189,7 @@ TypedValue* fg_openlog(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_openlog((Value*)(args-0), (int)(args[-1].m_data.num), (int)(args[-2].m_data.num))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_openlog(&args[-0].m_data, (int)(args[-1].m_data.num), (int)(args[-2].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -7265,7 +7265,7 @@ TypedValue * fg1_syslog(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  rv->m_data.num = (fh_syslog((int)(args[-0].m_data.num), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_syslog((int)(args[-0].m_data.num), &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -7276,7 +7276,7 @@ TypedValue* fg_syslog(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfInt64) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_syslog((int)(args[-0].m_data.num), (Value*)(args-1))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_syslog((int)(args[-0].m_data.num), &args[-1].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -7347,7 +7347,7 @@ TypedValue* fg_cpu_get_model(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfString;
-      fh_cpu_get_model((Value*)(&(rv)));
+      fh_cpu_get_model((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7606,7 +7606,7 @@ TypedValue* fg_ob_get_clean(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfString;
-      fh_ob_get_clean((Value*)(&(rv)));
+      fh_ob_get_clean((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7640,7 +7640,7 @@ TypedValue* fg_ob_get_contents(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfString;
-      fh_ob_get_contents((Value*)(&(rv)));
+      fh_ob_get_contents((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7674,7 +7674,7 @@ TypedValue* fg_ob_get_flush(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfString;
-      fh_ob_get_flush((Value*)(&(rv)));
+      fh_ob_get_flush((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7772,7 +7772,7 @@ TypedValue * fg1_ob_get_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToBooleanInPlace(args-0);
-  fh_ob_get_status((Value*)(rv), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
+  fh_ob_get_status((&rv->m_data), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -7784,7 +7784,7 @@ TypedValue* fg_ob_get_status(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfBoolean)) {
         rv.m_type = KindOfArray;
-        fh_ob_get_status((Value*)(&(rv)), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
+        fh_ob_get_status((&rv.m_data), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7830,7 +7830,7 @@ TypedValue * fg1_ob_gzhandler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_ob_gzhandler((Value*)(rv), (Value*)(args-0), (int)(args[-1].m_data.num));
+  fh_ob_gzhandler((&rv->m_data), &args[-0].m_data, (int)(args[-1].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -7842,7 +7842,7 @@ TypedValue* fg_ob_gzhandler(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_ob_gzhandler((Value*)(&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num));
+        fh_ob_gzhandler((&rv.m_data), &args[-0].m_data, (int)(args[-1].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7932,7 +7932,7 @@ TypedValue* fg_ob_list_handlers(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_ob_list_handlers((Value*)(&(rv)));
+      fh_ob_list_handlers((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7971,7 +7971,7 @@ TypedValue * fg1_output_add_rewrite_var(TypedValue* rv, HPHP::VM::ActRec* ar, in
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_output_add_rewrite_var((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_output_add_rewrite_var(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -7982,7 +7982,7 @@ TypedValue* fg_output_add_rewrite_var(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_output_add_rewrite_var((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_output_add_rewrite_var(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -8058,7 +8058,7 @@ TypedValue * fg1_hphp_stats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_hphp_stats((Value*)(args-0), (long)(args[-1].m_data.num));
+  fh_hphp_stats(&args[-0].m_data, (long)(args[-1].m_data.num));
   return rv;
 }
 
@@ -8070,7 +8070,7 @@ TypedValue* fg_hphp_stats(HPHP::VM::ActRec *ar) {
       if ((args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_hphp_stats((Value*)(args-0), (long)(args[-1].m_data.num));
+        fh_hphp_stats(&args[-0].m_data, (long)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -8108,7 +8108,7 @@ TypedValue * fg1_hphp_get_stats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_hphp_get_stats((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_hphp_get_stats(&args[-0].m_data);
   return rv;
 }
 
@@ -8119,7 +8119,7 @@ TypedValue* fg_hphp_get_stats(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_hphp_get_stats((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_hphp_get_stats(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -8158,7 +8158,7 @@ TypedValue* fg_hphp_get_iostatus(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_hphp_get_iostatus((Value*)(&(rv)));
+      fh_hphp_get_iostatus((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8191,7 +8191,7 @@ TypedValue * fg1_hphp_set_iostatus_address(TypedValue* rv, HPHP::VM::ActRec* ar,
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
-  fh_hphp_set_iostatus_address((Value*)(args-0));
+  fh_hphp_set_iostatus_address(&args[-0].m_data);
   return rv;
 }
 
@@ -8203,7 +8203,7 @@ TypedValue* fg_hphp_set_iostatus_address(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_hphp_set_iostatus_address((Value*)(args-0));
+        fh_hphp_set_iostatus_address(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -8242,7 +8242,7 @@ TypedValue* fg_posix_ctermid(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfString;
-      fh_posix_ctermid((Value*)(&(rv)));
+      fh_posix_ctermid((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8308,7 +8308,7 @@ TypedValue* fg_posix_getcwd(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfString;
-      fh_posix_getcwd((Value*)(&(rv)));
+      fh_posix_getcwd((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8704,7 +8704,7 @@ TypedValue * fg1_posix_initgroups(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_posix_initgroups((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_posix_initgroups(&args[-0].m_data, (int)(args[-1].m_data.num))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -8715,7 +8715,7 @@ TypedValue* fg_posix_initgroups(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_posix_initgroups((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_posix_initgroups(&args[-0].m_data, (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -8814,7 +8814,7 @@ TypedValue * fg1_posix_mkfifo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_posix_mkfifo((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_posix_mkfifo(&args[-0].m_data, (int)(args[-1].m_data.num))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -8825,7 +8825,7 @@ TypedValue* fg_posix_mkfifo(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_posix_mkfifo((Value*)(args-0), (int)(args[-1].m_data.num))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_posix_mkfifo(&args[-0].m_data, (int)(args[-1].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -9147,7 +9147,7 @@ TypedValue * fg1_posix_strerror(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
-  fh_posix_strerror((Value*)(rv), (int)(args[-0].m_data.num));
+  fh_posix_strerror((&rv->m_data), (int)(args[-0].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -9159,7 +9159,7 @@ TypedValue* fg_posix_strerror(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
         rv.m_type = KindOfString;
-        fh_posix_strerror((Value*)(&(rv)), (int)(args[-0].m_data.num));
+        fh_posix_strerror((&rv.m_data), (int)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9541,7 +9541,7 @@ TypedValue * fg1_hphp_object_pointer(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_hphp_object_pointer((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_hphp_object_pointer(&args[-0].m_data);
   return rv;
 }
 
@@ -9552,7 +9552,7 @@ TypedValue* fg_hphp_object_pointer(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_hphp_object_pointer((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_hphp_object_pointer(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -9603,7 +9603,7 @@ TypedValue * fg1_stream_context_create(TypedValue* rv, HPHP::VM::ActRec* ar, int
   case 0:
     break;
   }
-  fh_stream_context_create((Value*)(rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_array), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
+  fh_stream_context_create((&rv->m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_array), (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -9615,7 +9615,7 @@ TypedValue* fg_stream_context_create(HPHP::VM::ActRec *ar) {
     if (count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfArray) && (count <= 0 || (args-0)->m_type == KindOfArray)) {
         rv.m_type = KindOfObject;
-        fh_stream_context_create((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_array), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
+        fh_stream_context_create((&rv.m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_array), (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9655,7 +9655,7 @@ TypedValue * fg1_stream_context_get_default(TypedValue* rv, HPHP::VM::ActRec* ar
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToArrayInPlace(args-0);
-  fh_stream_context_get_default((Value*)(rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_array));
+  fh_stream_context_get_default((&rv->m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_array));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -9667,7 +9667,7 @@ TypedValue* fg_stream_context_get_default(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || (args-0)->m_type == KindOfArray)) {
         rv.m_type = KindOfObject;
-        fh_stream_context_get_default((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_array));
+        fh_stream_context_get_default((&rv.m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_array));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9706,7 +9706,7 @@ TypedValue * fg1_stream_context_get_options(TypedValue* rv, HPHP::VM::ActRec* ar
 TypedValue * fg1_stream_context_get_options(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_stream_context_get_options((rv), (Value*)(args-0));
+  fh_stream_context_get_options((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -9717,7 +9717,7 @@ TypedValue* fg_stream_context_get_options(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_stream_context_get_options((&(rv)), (Value*)(args-0));
+        fh_stream_context_get_options((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9770,7 +9770,7 @@ TypedValue * fg1_stream_context_set_option(TypedValue* rv, HPHP::VM::ActRec* ar,
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_stream_context_set_option((Value*)(args-0), (args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_stream_context_set_option(&args[-0].m_data, (args-1), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -9781,7 +9781,7 @@ TypedValue* fg_stream_context_set_option(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_stream_context_set_option((Value*)(args-0), (args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_stream_context_set_option(&args[-0].m_data, (args-1), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&null_variant))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -9825,7 +9825,7 @@ TypedValue * fg1_stream_context_set_param(TypedValue* rv, HPHP::VM::ActRec* ar, 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_stream_context_set_param((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_stream_context_set_param(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -9836,7 +9836,7 @@ TypedValue* fg_stream_context_set_param(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_stream_context_set_param((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_stream_context_set_param(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -9885,7 +9885,7 @@ TypedValue * fg1_stream_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_stream_encoding((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_stream_encoding(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -9896,7 +9896,7 @@ TypedValue* fg_stream_encoding(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_stream_encoding((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_stream_encoding(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -9940,7 +9940,7 @@ TypedValue * fg1_stream_bucket_append(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_stream_bucket_append((Value*)(args-0), (Value*)(args-1));
+  fh_stream_bucket_append(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -9952,7 +9952,7 @@ TypedValue* fg_stream_bucket_append(HPHP::VM::ActRec *ar) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_stream_bucket_append((Value*)(args-0), (Value*)(args-1));
+        fh_stream_bucket_append(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -9996,7 +9996,7 @@ TypedValue * fg1_stream_bucket_prepend(TypedValue* rv, HPHP::VM::ActRec* ar, int
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_stream_bucket_prepend((Value*)(args-0), (Value*)(args-1));
+  fh_stream_bucket_prepend(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -10008,7 +10008,7 @@ TypedValue* fg_stream_bucket_prepend(HPHP::VM::ActRec *ar) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_stream_bucket_prepend((Value*)(args-0), (Value*)(args-1));
+        fh_stream_bucket_prepend(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -10047,7 +10047,7 @@ TypedValue * fg1_stream_bucket_make_writeable(TypedValue* rv, HPHP::VM::ActRec* 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
-  fh_stream_bucket_make_writeable((Value*)(rv), (Value*)(args-0));
+  fh_stream_bucket_make_writeable((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -10059,7 +10059,7 @@ TypedValue* fg_stream_bucket_make_writeable(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        fh_stream_bucket_make_writeable((Value*)(&(rv)), (Value*)(args-0));
+        fh_stream_bucket_make_writeable((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10105,7 +10105,7 @@ TypedValue * fg1_stream_bucket_new(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_stream_bucket_new((Value*)(rv), (Value*)(args-0), (Value*)(args-1));
+  fh_stream_bucket_new((&rv->m_data), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -10117,7 +10117,7 @@ TypedValue* fg_stream_bucket_new(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        fh_stream_bucket_new((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_stream_bucket_new((&rv.m_data), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10162,7 +10162,7 @@ TypedValue * fg1_stream_filter_register(TypedValue* rv, HPHP::VM::ActRec* ar, in
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_stream_filter_register((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_stream_filter_register(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -10173,7 +10173,7 @@ TypedValue* fg_stream_filter_register(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_stream_filter_register((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_stream_filter_register(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -10211,7 +10211,7 @@ TypedValue * fg1_stream_filter_remove(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_stream_filter_remove((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_stream_filter_remove(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -10222,7 +10222,7 @@ TypedValue* fg_stream_filter_remove(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_stream_filter_remove((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_stream_filter_remove(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -10278,7 +10278,7 @@ TypedValue * fg1_stream_filter_append(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_stream_filter_append((Value*)(rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (args-3) : (TypedValue*)(&null_variant));
+  fh_stream_filter_append((&rv->m_data), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (args-3) : (TypedValue*)(&null_variant));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -10290,7 +10290,7 @@ TypedValue* fg_stream_filter_append(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        fh_stream_filter_append((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (args-3) : (TypedValue*)(&null_variant));
+        fh_stream_filter_append((&rv.m_data), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (args-3) : (TypedValue*)(&null_variant));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10347,7 +10347,7 @@ TypedValue * fg1_stream_filter_prepend(TypedValue* rv, HPHP::VM::ActRec* ar, int
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_stream_filter_prepend((Value*)(rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (args-3) : (TypedValue*)(&null_variant));
+  fh_stream_filter_prepend((&rv->m_data), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (args-3) : (TypedValue*)(&null_variant));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -10359,7 +10359,7 @@ TypedValue* fg_stream_filter_prepend(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        fh_stream_filter_prepend((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (args-3) : (TypedValue*)(&null_variant));
+        fh_stream_filter_prepend((&rv.m_data), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (args-3) : (TypedValue*)(&null_variant));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10399,7 +10399,7 @@ TypedValue* fg_stream_get_filters(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_stream_get_filters((Value*)(&(rv)));
+      fh_stream_get_filters((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10432,7 +10432,7 @@ TypedValue * fg1_stream_get_meta_data(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue * fg1_stream_get_meta_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_stream_get_meta_data((rv), (Value*)(args-0));
+  fh_stream_get_meta_data((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10443,7 +10443,7 @@ TypedValue* fg_stream_get_meta_data(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_stream_get_meta_data((&(rv)), (Value*)(args-0));
+        fh_stream_get_meta_data((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10483,7 +10483,7 @@ TypedValue* fg_stream_get_transports(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_stream_get_transports((Value*)(&(rv)));
+      fh_stream_get_transports((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10528,7 +10528,7 @@ TypedValue * fg1_stream_resolve_include_path(TypedValue* rv, HPHP::VM::ActRec* a
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_stream_resolve_include_path((Value*)(rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_object));
+  fh_stream_resolve_include_path((&rv->m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_object));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10540,7 +10540,7 @@ TypedValue* fg_stream_resolve_include_path(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfObject) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_stream_resolve_include_path((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_object));
+        fh_stream_resolve_include_path((&rv.m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_object));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10585,7 +10585,7 @@ TypedValue * fg1_set_file_buffer(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_set_file_buffer((Value*)(args-0), (int)(args[-1].m_data.num));
+  rv->m_data.num = (int64_t)fh_set_file_buffer(&args[-0].m_data, (int)(args[-1].m_data.num));
   return rv;
 }
 
@@ -10596,7 +10596,7 @@ TypedValue* fg_set_file_buffer(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_set_file_buffer((Value*)(args-0), (int)(args[-1].m_data.num));
+        rv.m_data.num = (int64_t)fh_set_file_buffer(&args[-0].m_data, (int)(args[-1].m_data.num));
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -10654,7 +10654,7 @@ TypedValue * fg1_stream_socket_enable_crypto(TypedValue* rv, HPHP::VM::ActRec* a
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_stream_socket_enable_crypto((rv), (Value*)(args-0), (bool)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (Value*)(args-3) : (Value*)(&null_object));
+  fh_stream_socket_enable_crypto((rv), &args[-0].m_data, (bool)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? &args[-3].m_data : (Value*)(&null_object));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10665,7 +10665,7 @@ TypedValue* fg_stream_socket_enable_crypto(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfObject) && (count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfBoolean && (args-0)->m_type == KindOfObject) {
-        fh_stream_socket_enable_crypto((&(rv)), (Value*)(args-0), (bool)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? (Value*)(args-3) : (Value*)(&null_object));
+        fh_stream_socket_enable_crypto((&(rv)), &args[-0].m_data, (bool)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0), (count > 3) ? &args[-3].m_data : (Value*)(&null_object));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10711,7 +10711,7 @@ TypedValue * fg1_addcslashes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_addcslashes((Value*)(rv), (Value*)(args-0), (Value*)(args-1));
+  fh_addcslashes((&rv->m_data), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10723,7 +10723,7 @@ TypedValue* fg_addcslashes(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_addcslashes((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_addcslashes((&rv.m_data), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10763,7 +10763,7 @@ TypedValue * fg1_stripcslashes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_stripcslashes((Value*)(rv), (Value*)(args-0));
+  fh_stripcslashes((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10775,7 +10775,7 @@ TypedValue* fg_stripcslashes(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_stripcslashes((Value*)(&(rv)), (Value*)(args-0));
+        fh_stripcslashes((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10815,7 +10815,7 @@ TypedValue * fg1_addslashes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_addslashes((Value*)(rv), (Value*)(args-0));
+  fh_addslashes((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10827,7 +10827,7 @@ TypedValue* fg_addslashes(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_addslashes((Value*)(&(rv)), (Value*)(args-0));
+        fh_addslashes((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10867,7 +10867,7 @@ TypedValue * fg1_stripslashes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_stripslashes((Value*)(rv), (Value*)(args-0));
+  fh_stripslashes((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10879,7 +10879,7 @@ TypedValue* fg_stripslashes(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_stripslashes((Value*)(&(rv)), (Value*)(args-0));
+        fh_stripslashes((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10919,7 +10919,7 @@ TypedValue * fg1_bin2hex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_bin2hex((Value*)(rv), (Value*)(args-0));
+  fh_bin2hex((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10931,7 +10931,7 @@ TypedValue* fg_bin2hex(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_bin2hex((Value*)(&(rv)), (Value*)(args-0));
+        fh_bin2hex((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10970,7 +10970,7 @@ TypedValue * fg1_hex2bin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __
 TypedValue * fg1_hex2bin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_hex2bin((rv), (Value*)(args-0));
+  fh_hex2bin((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10981,7 +10981,7 @@ TypedValue* fg_hex2bin(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_hex2bin((&(rv)), (Value*)(args-0));
+        fh_hex2bin((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11021,7 +11021,7 @@ TypedValue * fg1_nl2br(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_nl2br((Value*)(rv), (Value*)(args-0));
+  fh_nl2br((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11033,7 +11033,7 @@ TypedValue* fg_nl2br(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_nl2br((Value*)(&(rv)), (Value*)(args-0));
+        fh_nl2br((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11073,7 +11073,7 @@ TypedValue * fg1_quotemeta(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_quotemeta((Value*)(rv), (Value*)(args-0));
+  fh_quotemeta((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11085,7 +11085,7 @@ TypedValue* fg_quotemeta(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_quotemeta((Value*)(&(rv)), (Value*)(args-0));
+        fh_quotemeta((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11125,7 +11125,7 @@ TypedValue * fg1_str_shuffle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_str_shuffle((Value*)(rv), (Value*)(args-0));
+  fh_str_shuffle((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11137,7 +11137,7 @@ TypedValue* fg_str_shuffle(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_str_shuffle((Value*)(&(rv)), (Value*)(args-0));
+        fh_str_shuffle((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11177,7 +11177,7 @@ TypedValue * fg1_strrev(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_strrev((Value*)(rv), (Value*)(args-0));
+  fh_strrev((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11189,7 +11189,7 @@ TypedValue* fg_strrev(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_strrev((Value*)(&(rv)), (Value*)(args-0));
+        fh_strrev((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11229,7 +11229,7 @@ TypedValue * fg1_strtolower(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_strtolower((Value*)(rv), (Value*)(args-0));
+  fh_strtolower((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11241,7 +11241,7 @@ TypedValue* fg_strtolower(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_strtolower((Value*)(&(rv)), (Value*)(args-0));
+        fh_strtolower((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11281,7 +11281,7 @@ TypedValue * fg1_strtoupper(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_strtoupper((Value*)(rv), (Value*)(args-0));
+  fh_strtoupper((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11293,7 +11293,7 @@ TypedValue* fg_strtoupper(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_strtoupper((Value*)(&(rv)), (Value*)(args-0));
+        fh_strtoupper((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11333,7 +11333,7 @@ TypedValue * fg1_ucfirst(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_ucfirst((Value*)(rv), (Value*)(args-0));
+  fh_ucfirst((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11345,7 +11345,7 @@ TypedValue* fg_ucfirst(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_ucfirst((Value*)(&(rv)), (Value*)(args-0));
+        fh_ucfirst((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11385,7 +11385,7 @@ TypedValue * fg1_lcfirst(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_lcfirst((Value*)(rv), (Value*)(args-0));
+  fh_lcfirst((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11397,7 +11397,7 @@ TypedValue* fg_lcfirst(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_lcfirst((Value*)(&(rv)), (Value*)(args-0));
+        fh_lcfirst((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11437,7 +11437,7 @@ TypedValue * fg1_ucwords(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_ucwords((Value*)(rv), (Value*)(args-0));
+  fh_ucwords((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11449,7 +11449,7 @@ TypedValue* fg_ucwords(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_ucwords((Value*)(&(rv)), (Value*)(args-0));
+        fh_ucwords((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11500,7 +11500,7 @@ TypedValue * fg1_strip_tags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_strip_tags((Value*)(rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&empty_string));
+  fh_strip_tags((&rv->m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&empty_string));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11512,7 +11512,7 @@ TypedValue* fg_strip_tags(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_strip_tags((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&empty_string));
+        fh_strip_tags((&rv.m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&empty_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11563,7 +11563,7 @@ TypedValue * fg1_trim(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_trim((Value*)(rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&k_HPHP_TRIM_CHARLIST));
+  fh_trim((&rv->m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&k_HPHP_TRIM_CHARLIST));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11575,7 +11575,7 @@ TypedValue* fg_trim(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_trim((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&k_HPHP_TRIM_CHARLIST));
+        fh_trim((&rv.m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&k_HPHP_TRIM_CHARLIST));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11626,7 +11626,7 @@ TypedValue * fg1_ltrim(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_ltrim((Value*)(rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&k_HPHP_TRIM_CHARLIST));
+  fh_ltrim((&rv->m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&k_HPHP_TRIM_CHARLIST));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11638,7 +11638,7 @@ TypedValue* fg_ltrim(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_ltrim((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&k_HPHP_TRIM_CHARLIST));
+        fh_ltrim((&rv.m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&k_HPHP_TRIM_CHARLIST));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11689,7 +11689,7 @@ TypedValue * fg1_rtrim(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_rtrim((Value*)(rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&k_HPHP_TRIM_CHARLIST));
+  fh_rtrim((&rv->m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&k_HPHP_TRIM_CHARLIST));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11701,7 +11701,7 @@ TypedValue* fg_rtrim(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_rtrim((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&k_HPHP_TRIM_CHARLIST));
+        fh_rtrim((&rv.m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&k_HPHP_TRIM_CHARLIST));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11752,7 +11752,7 @@ TypedValue * fg1_chop(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_chop((Value*)(rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&k_HPHP_TRIM_CHARLIST));
+  fh_chop((&rv->m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&k_HPHP_TRIM_CHARLIST));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11764,7 +11764,7 @@ TypedValue* fg_chop(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_chop((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&k_HPHP_TRIM_CHARLIST));
+        fh_chop((&rv.m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&k_HPHP_TRIM_CHARLIST));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11818,7 +11818,7 @@ TypedValue * fg1_explode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_explode((rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0x7FFFFFFF));
+  fh_explode((rv), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(0x7FFFFFFF));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11829,7 +11829,7 @@ TypedValue* fg_explode(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_explode((&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0x7FFFFFFF));
+        fh_explode((&(rv)), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(0x7FFFFFFF));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11871,7 +11871,7 @@ TypedValue* fg_join(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       rv.m_type = KindOfString;
-      fh_join((Value*)(&(rv)), (args-0), (count > 1) ? (args-1) : (TypedValue*)(&null_variant));
+      fh_join((&rv.m_data), (args-0), (count > 1) ? (args-1) : (TypedValue*)(&null_variant));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 2);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11915,7 +11915,7 @@ TypedValue * fg1_str_split(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_str_split((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(1));
+  fh_str_split((rv), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11926,7 +11926,7 @@ TypedValue* fg_str_split(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_str_split((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(1));
+        fh_str_split((&(rv)), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11982,7 +11982,7 @@ TypedValue * fg1_chunk_split(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
     tvCastToStringInPlace(args-0);
   }
   String defVal2 = "\r\n";
-  fh_chunk_split((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(76), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+  fh_chunk_split((rv), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(76), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11994,7 +11994,7 @@ TypedValue* fg_chunk_split(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
         String defVal2 = "\r\n";
-        fh_chunk_split((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(76), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+        fh_chunk_split((&(rv)), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(76), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12048,7 +12048,7 @@ TypedValue * fg1_substr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_substr((rv), (Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0x7FFFFFFF));
+  fh_substr((rv), &args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0x7FFFFFFF));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12059,7 +12059,7 @@ TypedValue* fg_substr(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_substr((&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0x7FFFFFFF));
+        fh_substr((&(rv)), &args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0x7FFFFFFF));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12120,7 +12120,7 @@ TypedValue * fg1_str_pad(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
     tvCastToStringInPlace(args-0);
   }
   String defVal2 = " ";
-  fh_str_pad((Value*)(rv), (Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(k_STR_PAD_RIGHT));
+  fh_str_pad((&rv->m_data), &args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(k_STR_PAD_RIGHT));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12133,7 +12133,7 @@ TypedValue* fg_str_pad(HPHP::VM::ActRec *ar) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
         String defVal2 = " ";
-        fh_str_pad((Value*)(&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(k_STR_PAD_RIGHT));
+        fh_str_pad((&rv.m_data), &args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? (int)(args[-3].m_data.num) : (int)(k_STR_PAD_RIGHT));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12179,7 +12179,7 @@ TypedValue * fg1_str_repeat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_str_repeat((Value*)(rv), (Value*)(args-0), (int)(args[-1].m_data.num));
+  fh_str_repeat((&rv->m_data), &args[-0].m_data, (int)(args[-1].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12191,7 +12191,7 @@ TypedValue* fg_str_repeat(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_str_repeat((Value*)(&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num));
+        fh_str_repeat((&rv.m_data), &args[-0].m_data, (int)(args[-1].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12252,7 +12252,7 @@ TypedValue * fg1_wordwrap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
     tvCastToStringInPlace(args-0);
   }
   String defVal2 = "\n";
-  fh_wordwrap((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(75), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
+  fh_wordwrap((rv), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(75), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12264,7 +12264,7 @@ TypedValue* fg_wordwrap(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
         String defVal2 = "\n";
-        fh_wordwrap((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(75), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
+        fh_wordwrap((&(rv)), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(75), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12321,7 +12321,7 @@ TypedValue * fg1_html_entity_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
     tvCastToStringInPlace(args-0);
   }
   String defVal2 = "ISO-8859-1";
-  fh_html_entity_decode((Value*)(rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+  fh_html_entity_decode((&rv->m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12334,7 +12334,7 @@ TypedValue* fg_html_entity_decode(HPHP::VM::ActRec *ar) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
         String defVal2 = "ISO-8859-1";
-        fh_html_entity_decode((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+        fh_html_entity_decode((&rv.m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12396,7 +12396,7 @@ TypedValue * fg1_htmlentities(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
     tvCastToStringInPlace(args-0);
   }
   String defVal2 = "ISO-8859-1";
-  fh_htmlentities((Value*)(rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
+  fh_htmlentities((&rv->m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12409,7 +12409,7 @@ TypedValue* fg_htmlentities(HPHP::VM::ActRec *ar) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
         String defVal2 = "ISO-8859-1";
-        fh_htmlentities((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
+        fh_htmlentities((&rv.m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12460,7 +12460,7 @@ TypedValue * fg1_htmlspecialchars_decode(TypedValue* rv, HPHP::VM::ActRec* ar, i
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_htmlspecialchars_decode((Value*)(rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT));
+  fh_htmlspecialchars_decode((&rv->m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12472,7 +12472,7 @@ TypedValue* fg_htmlspecialchars_decode(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_htmlspecialchars_decode((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT));
+        fh_htmlspecialchars_decode((&rv.m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12534,7 +12534,7 @@ TypedValue * fg1_htmlspecialchars(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
     tvCastToStringInPlace(args-0);
   }
   String defVal2 = "ISO-8859-1";
-  fh_htmlspecialchars((Value*)(rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
+  fh_htmlspecialchars((&rv->m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12547,7 +12547,7 @@ TypedValue* fg_htmlspecialchars(HPHP::VM::ActRec *ar) {
       if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
         String defVal2 = "ISO-8859-1";
-        fh_htmlspecialchars((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
+        fh_htmlspecialchars((&rv.m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12610,7 +12610,7 @@ TypedValue * fg1_fb_htmlspecialchars(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   }
   String defVal2 = "ISO-8859-1";
   Array defVal3 = Array();
-  fh_fb_htmlspecialchars((Value*)(rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2), (count > 3) ? (Value*)(args-3) : (Value*)(&defVal3));
+  fh_fb_htmlspecialchars((&rv->m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? &args[-3].m_data : (Value*)(&defVal3));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12624,7 +12624,7 @@ TypedValue* fg_fb_htmlspecialchars(HPHP::VM::ActRec *ar) {
         rv.m_type = KindOfString;
         String defVal2 = "ISO-8859-1";
         Array defVal3 = Array();
-        fh_fb_htmlspecialchars((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2), (count > 3) ? (Value*)(args-3) : (Value*)(&defVal3));
+        fh_fb_htmlspecialchars((&rv.m_data), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_ENT_COMPAT), (count > 2) ? &args[-2].m_data : (Value*)(&defVal2), (count > 3) ? &args[-3].m_data : (Value*)(&defVal3));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12664,7 +12664,7 @@ TypedValue * fg1_quoted_printable_encode(TypedValue* rv, HPHP::VM::ActRec* ar, i
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_quoted_printable_encode((Value*)(rv), (Value*)(args-0));
+  fh_quoted_printable_encode((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12676,7 +12676,7 @@ TypedValue* fg_quoted_printable_encode(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_quoted_printable_encode((Value*)(&(rv)), (Value*)(args-0));
+        fh_quoted_printable_encode((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12716,7 +12716,7 @@ TypedValue * fg1_quoted_printable_decode(TypedValue* rv, HPHP::VM::ActRec* ar, i
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_quoted_printable_decode((Value*)(rv), (Value*)(args-0));
+  fh_quoted_printable_decode((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12728,7 +12728,7 @@ TypedValue* fg_quoted_printable_decode(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_quoted_printable_decode((Value*)(&(rv)), (Value*)(args-0));
+        fh_quoted_printable_decode((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12767,7 +12767,7 @@ TypedValue * fg1_convert_uudecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_convert_uudecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_convert_uudecode((rv), (Value*)(args-0));
+  fh_convert_uudecode((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12778,7 +12778,7 @@ TypedValue* fg_convert_uudecode(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_convert_uudecode((&(rv)), (Value*)(args-0));
+        fh_convert_uudecode((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12817,7 +12817,7 @@ TypedValue * fg1_convert_uuencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_convert_uuencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_convert_uuencode((rv), (Value*)(args-0));
+  fh_convert_uuencode((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12828,7 +12828,7 @@ TypedValue* fg_convert_uuencode(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_convert_uuencode((&(rv)), (Value*)(args-0));
+        fh_convert_uuencode((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12868,7 +12868,7 @@ TypedValue * fg1_str_rot13(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_str_rot13((Value*)(rv), (Value*)(args-0));
+  fh_str_rot13((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12880,7 +12880,7 @@ TypedValue* fg_str_rot13(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_str_rot13((Value*)(&(rv)), (Value*)(args-0));
+        fh_str_rot13((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -12919,7 +12919,7 @@ TypedValue * fg1_crc32(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_crc32((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_crc32(&args[-0].m_data);
   return rv;
 }
 
@@ -12930,7 +12930,7 @@ TypedValue* fg_crc32(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_crc32((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_crc32(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -12980,7 +12980,7 @@ TypedValue * fg1_crypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_crypt((Value*)(rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&empty_string));
+  fh_crypt((&rv->m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&empty_string));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -12992,7 +12992,7 @@ TypedValue* fg_crypt(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_crypt((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&empty_string));
+        fh_crypt((&rv.m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&empty_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13043,7 +13043,7 @@ TypedValue * fg1_md5(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_md5((Value*)(rv), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
+  fh_md5((&rv->m_data), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -13055,7 +13055,7 @@ TypedValue* fg_md5(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_md5((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
+        fh_md5((&rv.m_data), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13106,7 +13106,7 @@ TypedValue * fg1_sha1(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_sha1((Value*)(rv), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
+  fh_sha1((&rv->m_data), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -13118,7 +13118,7 @@ TypedValue* fg_sha1(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_sha1((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
+        fh_sha1((&rv.m_data), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13158,7 +13158,7 @@ TypedValue * fg1_nl_langinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
-  fh_nl_langinfo((Value*)(rv), (int)(args[-0].m_data.num));
+  fh_nl_langinfo((&rv->m_data), (int)(args[-0].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -13170,7 +13170,7 @@ TypedValue* fg_nl_langinfo(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
         rv.m_type = KindOfString;
-        fh_nl_langinfo((Value*)(&(rv)), (int)(args[-0].m_data.num));
+        fh_nl_langinfo((&rv.m_data), (int)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13224,7 +13224,7 @@ TypedValue * fg1_printf(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
     }
     extraArgs = ai.create();
   }
-  fh_printf((rv), (count), (Value*)(args-0), (Value*)(&extraArgs));
+  fh_printf((rv), (count), &args[-0].m_data, (Value*)(&extraArgs));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -13248,7 +13248,7 @@ TypedValue* fg_printf(HPHP::VM::ActRec *ar) {
           }
           extraArgs = ai.create();
         }
-        fh_printf((&(rv)), (count), (Value*)(args-0), (Value*)(&extraArgs));
+        fh_printf((&(rv)), (count), &args[-0].m_data, (Value*)(&extraArgs));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13293,7 +13293,7 @@ TypedValue * fg1_vprintf(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_vprintf((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_vprintf((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -13304,7 +13304,7 @@ TypedValue* fg_vprintf(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_vprintf((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_vprintf((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13358,7 +13358,7 @@ TypedValue * fg1_sprintf(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
     }
     extraArgs = ai.create();
   }
-  fh_sprintf((rv), (count), (Value*)(args-0), (Value*)(&extraArgs));
+  fh_sprintf((rv), (count), &args[-0].m_data, (Value*)(&extraArgs));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -13382,7 +13382,7 @@ TypedValue* fg_sprintf(HPHP::VM::ActRec *ar) {
           }
           extraArgs = ai.create();
         }
-        fh_sprintf((&(rv)), (count), (Value*)(args-0), (Value*)(&extraArgs));
+        fh_sprintf((&(rv)), (count), &args[-0].m_data, (Value*)(&extraArgs));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13427,7 +13427,7 @@ TypedValue * fg1_vsprintf(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_vsprintf((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_vsprintf((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -13438,7 +13438,7 @@ TypedValue* fg_vsprintf(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_vsprintf((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_vsprintf((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13478,7 +13478,7 @@ TypedValue * fg1_chr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
-  fh_chr((Value*)(rv), (long)(args[-0].m_data.num));
+  fh_chr((&rv->m_data), (long)(args[-0].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -13490,7 +13490,7 @@ TypedValue* fg_chr(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
         rv.m_type = KindOfString;
-        fh_chr((Value*)(&(rv)), (long)(args[-0].m_data.num));
+        fh_chr((&rv.m_data), (long)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13529,7 +13529,7 @@ TypedValue * fg1_ord(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_ord((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_ord(&args[-0].m_data);
   return rv;
 }
 
@@ -13540,7 +13540,7 @@ TypedValue* fg_ord(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_ord((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_ord(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -13584,7 +13584,7 @@ TypedValue * fg1_money_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_money_format((rv), (Value*)(args-0), (args[-1].m_data.dbl));
+  fh_money_format((rv), &args[-0].m_data, (args[-1].m_data.dbl));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -13595,7 +13595,7 @@ TypedValue* fg_money_format(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfDouble && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_money_format((&(rv)), (Value*)(args-0), (args[-1].m_data.dbl));
+        fh_money_format((&(rv)), &args[-0].m_data, (args[-1].m_data.dbl));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -13640,7 +13640,7 @@ TypedValue * fg1_strcmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_strcmp((Value*)(args-0), (Value*)(args-1));
+  rv->m_data.num = (int64_t)fh_strcmp(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -13651,7 +13651,7 @@ TypedValue* fg_strcmp(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_strcmp((Value*)(args-0), (Value*)(args-1));
+        rv.m_data.num = (int64_t)fh_strcmp(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -13699,7 +13699,7 @@ TypedValue * fg1_strncmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_strncmp((Value*)(args-0), (Value*)(args-1), (int)(args[-2].m_data.num));
+  rv->m_data.num = (int64_t)fh_strncmp(&args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
   return rv;
 }
 
@@ -13710,7 +13710,7 @@ TypedValue* fg_strncmp(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_strncmp((Value*)(args-0), (Value*)(args-1), (int)(args[-2].m_data.num));
+        rv.m_data.num = (int64_t)fh_strncmp(&args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -13754,7 +13754,7 @@ TypedValue * fg1_strnatcmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_strnatcmp((Value*)(args-0), (Value*)(args-1));
+  rv->m_data.num = (int64_t)fh_strnatcmp(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -13765,7 +13765,7 @@ TypedValue* fg_strnatcmp(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_strnatcmp((Value*)(args-0), (Value*)(args-1));
+        rv.m_data.num = (int64_t)fh_strnatcmp(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -13809,7 +13809,7 @@ TypedValue * fg1_strcasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_strcasecmp((Value*)(args-0), (Value*)(args-1));
+  rv->m_data.num = (int64_t)fh_strcasecmp(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -13820,7 +13820,7 @@ TypedValue* fg_strcasecmp(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_strcasecmp((Value*)(args-0), (Value*)(args-1));
+        rv.m_data.num = (int64_t)fh_strcasecmp(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -13868,7 +13868,7 @@ TypedValue * fg1_strncasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_strncasecmp((Value*)(args-0), (Value*)(args-1), (int)(args[-2].m_data.num));
+  rv->m_data.num = (int64_t)fh_strncasecmp(&args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
   return rv;
 }
 
@@ -13879,7 +13879,7 @@ TypedValue* fg_strncasecmp(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_strncasecmp((Value*)(args-0), (Value*)(args-1), (int)(args[-2].m_data.num));
+        rv.m_data.num = (int64_t)fh_strncasecmp(&args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -13923,7 +13923,7 @@ TypedValue * fg1_strnatcasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_strnatcasecmp((Value*)(args-0), (Value*)(args-1));
+  rv->m_data.num = (int64_t)fh_strnatcasecmp(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -13934,7 +13934,7 @@ TypedValue* fg_strnatcasecmp(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_strnatcasecmp((Value*)(args-0), (Value*)(args-1));
+        rv.m_data.num = (int64_t)fh_strnatcasecmp(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -13978,7 +13978,7 @@ TypedValue * fg1_strcoll(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_strcoll((Value*)(args-0), (Value*)(args-1));
+  rv->m_data.num = (int64_t)fh_strcoll(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -13989,7 +13989,7 @@ TypedValue* fg_strcoll(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_strcoll((Value*)(args-0), (Value*)(args-1));
+        rv.m_data.num = (int64_t)fh_strcoll(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -14028,7 +14028,7 @@ TypedValue * fg1_strchr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __a
 TypedValue * fg1_strchr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_strchr((rv), (Value*)(args-0), (args-1));
+  fh_strchr((rv), &args[-0].m_data, (args-1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -14039,7 +14039,7 @@ TypedValue* fg_strchr(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_strchr((&(rv)), (Value*)(args-0), (args-1));
+        fh_strchr((&(rv)), &args[-0].m_data, (args-1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14137,7 +14137,7 @@ TypedValue * fg1_levenshtein(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_levenshtein((Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(1), (count > 3) ? (int)(args[-3].m_data.num) : (int)(1), (count > 4) ? (int)(args[-4].m_data.num) : (int)(1));
+  rv->m_data.num = (int64_t)fh_levenshtein(&args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(1), (count > 3) ? (int)(args[-3].m_data.num) : (int)(1), (count > 4) ? (int)(args[-4].m_data.num) : (int)(1));
   return rv;
 }
 
@@ -14148,7 +14148,7 @@ TypedValue* fg_levenshtein(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 5LL) {
       if ((count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_levenshtein((Value*)(args-0), (Value*)(args-1), (count > 2) ? (int)(args[-2].m_data.num) : (int)(1), (count > 3) ? (int)(args[-3].m_data.num) : (int)(1), (count > 4) ? (int)(args[-4].m_data.num) : (int)(1));
+        rv.m_data.num = (int64_t)fh_levenshtein(&args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(1), (count > 3) ? (int)(args[-3].m_data.num) : (int)(1), (count > 4) ? (int)(args[-4].m_data.num) : (int)(1));
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -14199,7 +14199,7 @@ TypedValue * fg1_similar_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
     tvCastToStringInPlace(args-0);
   }
   VRefParamValue defVal2 = uninit_null();
-  rv->m_data.num = (int64_t)fh_similar_text((Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+  rv->m_data.num = (int64_t)fh_similar_text(&args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
   return rv;
 }
 
@@ -14211,7 +14211,7 @@ TypedValue* fg_similar_text(HPHP::VM::ActRec *ar) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
         VRefParamValue defVal2 = uninit_null();
-        rv.m_data.num = (int64_t)fh_similar_text((Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+        rv.m_data.num = (int64_t)fh_similar_text(&args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -14249,7 +14249,7 @@ TypedValue * fg1_soundex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __
 TypedValue * fg1_soundex(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_soundex((rv), (Value*)(args-0));
+  fh_soundex((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -14260,7 +14260,7 @@ TypedValue* fg_soundex(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_soundex((&(rv)), (Value*)(args-0));
+        fh_soundex((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14310,7 +14310,7 @@ TypedValue * fg1_metaphone(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_metaphone((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
+  fh_metaphone((rv), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -14321,7 +14321,7 @@ TypedValue* fg_metaphone(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_metaphone((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
+        fh_metaphone((&(rv)), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14361,7 +14361,7 @@ TypedValue * fg1_rawurldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_rawurldecode((Value*)(rv), (Value*)(args-0));
+  fh_rawurldecode((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -14373,7 +14373,7 @@ TypedValue* fg_rawurldecode(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_rawurldecode((Value*)(&(rv)), (Value*)(args-0));
+        fh_rawurldecode((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14413,7 +14413,7 @@ TypedValue * fg1_rawurlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_rawurlencode((Value*)(rv), (Value*)(args-0));
+  fh_rawurlencode((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -14425,7 +14425,7 @@ TypedValue* fg_rawurlencode(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_rawurlencode((Value*)(&(rv)), (Value*)(args-0));
+        fh_rawurlencode((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14465,7 +14465,7 @@ TypedValue * fg1_urldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_urldecode((Value*)(rv), (Value*)(args-0));
+  fh_urldecode((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -14477,7 +14477,7 @@ TypedValue* fg_urldecode(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_urldecode((Value*)(&(rv)), (Value*)(args-0));
+        fh_urldecode((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -14517,7 +14517,7 @@ TypedValue * fg1_urlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_urlencode((Value*)(rv), (Value*)(args-0));
+  fh_urlencode((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -14529,7 +14529,7 @@ TypedValue* fg_urlencode(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_urlencode((Value*)(&(rv)), (Value*)(args-0));
+        fh_urlencode((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15115,7 +15115,7 @@ TypedValue* fg_strval(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv.m_type = KindOfString;
-      fh_strval((Value*)(&(rv)), (args-0));
+      fh_strval((&rv.m_data), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 1);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15148,7 +15148,7 @@ TypedValue * fg1_unserialize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
 TypedValue * fg1_unserialize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_unserialize((rv), (Value*)(args-0));
+  fh_unserialize((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -15159,7 +15159,7 @@ TypedValue* fg_unserialize(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_unserialize((&(rv)), (Value*)(args-0));
+        fh_unserialize((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15199,7 +15199,7 @@ TypedValue* fg_zlib_get_coding_type(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfString;
-      fh_zlib_get_coding_type((Value*)(&(rv)));
+      fh_zlib_get_coding_type((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15232,7 +15232,7 @@ TypedValue * fg1_gzclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_gzclose((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_gzclose(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -15243,7 +15243,7 @@ TypedValue* fg_gzclose(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_gzclose((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_gzclose(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -15281,7 +15281,7 @@ TypedValue * fg1_gzrewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_gzrewind((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_gzrewind(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -15292,7 +15292,7 @@ TypedValue* fg_gzrewind(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_gzrewind((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_gzrewind(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -15330,7 +15330,7 @@ TypedValue * fg1_gzeof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_gzeof((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_gzeof(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -15341,7 +15341,7 @@ TypedValue* fg_gzeof(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_gzeof((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_gzeof(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -15379,7 +15379,7 @@ TypedValue * fg1_gzgetc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __a
 TypedValue * fg1_gzgetc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_gzgetc((rv), (Value*)(args-0));
+  fh_gzgetc((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -15390,7 +15390,7 @@ TypedValue* fg_gzgetc(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_gzgetc((&(rv)), (Value*)(args-0));
+        fh_gzgetc((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15440,7 +15440,7 @@ TypedValue * fg1_gzgets(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_gzgets((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1024));
+  fh_gzgets((rv), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(1024));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -15451,7 +15451,7 @@ TypedValue* fg_gzgets(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
-        fh_gzgets((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1024));
+        fh_gzgets((&(rv)), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(1024));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15506,7 +15506,7 @@ TypedValue * fg1_gzgetss(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_gzgetss((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+  fh_gzgetss((rv), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -15517,7 +15517,7 @@ TypedValue* fg_gzgetss(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
-        fh_gzgetss((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+        fh_gzgetss((&(rv)), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0), (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15567,7 +15567,7 @@ TypedValue * fg1_gzread(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_gzread((rv), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
+  fh_gzread((rv), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -15578,7 +15578,7 @@ TypedValue* fg_gzread(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
-        fh_gzread((&(rv)), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
+        fh_gzread((&(rv)), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15617,7 +15617,7 @@ TypedValue * fg1_gzpassthru(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
 TypedValue * fg1_gzpassthru(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_gzpassthru((rv), (Value*)(args-0));
+  fh_gzpassthru((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -15628,7 +15628,7 @@ TypedValue* fg_gzpassthru(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_gzpassthru((&(rv)), (Value*)(args-0));
+        fh_gzpassthru((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15682,7 +15682,7 @@ TypedValue * fg1_gzseek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_gzseek((rv), (Value*)(args-0), (long)(args[-1].m_data.num), (count > 2) ? (long)(args[-2].m_data.num) : (long)(k_SEEK_SET));
+  fh_gzseek((rv), &args[-0].m_data, (long)(args[-1].m_data.num), (count > 2) ? (long)(args[-2].m_data.num) : (long)(k_SEEK_SET));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -15693,7 +15693,7 @@ TypedValue* fg_gzseek(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        fh_gzseek((&(rv)), (Value*)(args-0), (long)(args[-1].m_data.num), (count > 2) ? (long)(args[-2].m_data.num) : (long)(k_SEEK_SET));
+        fh_gzseek((&(rv)), &args[-0].m_data, (long)(args[-1].m_data.num), (count > 2) ? (long)(args[-2].m_data.num) : (long)(k_SEEK_SET));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15732,7 +15732,7 @@ TypedValue * fg1_gztell(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __a
 TypedValue * fg1_gztell(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_gztell((rv), (Value*)(args-0));
+  fh_gztell((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -15743,7 +15743,7 @@ TypedValue* fg_gztell(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_gztell((&(rv)), (Value*)(args-0));
+        fh_gztell((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15797,7 +15797,7 @@ TypedValue * fg1_gzwrite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_gzwrite((rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
+  fh_gzwrite((rv), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -15808,7 +15808,7 @@ TypedValue* fg_gzwrite(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        fh_gzwrite((&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
+        fh_gzwrite((&(rv)), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -15862,7 +15862,7 @@ TypedValue * fg1_gzputs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_gzputs((rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
+  fh_gzputs((rv), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -15873,7 +15873,7 @@ TypedValue* fg_gzputs(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        fh_gzputs((&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
+        fh_gzputs((&(rv)), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

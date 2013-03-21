@@ -51,7 +51,7 @@ TypedValue * fg1_dom_document_create_element(TypedValue* rv, HPHP::VM::ActRec* a
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_document_create_element((rv), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+  fh_dom_document_create_element((rv), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -62,7 +62,7 @@ TypedValue* fg_dom_document_create_element(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_create_element((&(rv)), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+        fh_dom_document_create_element((&(rv)), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -136,7 +136,7 @@ TypedValue * fg1_dom_document_create_text_node(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue * fg1_dom_document_create_text_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_create_text_node((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_create_text_node((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -147,7 +147,7 @@ TypedValue* fg_dom_document_create_text_node(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_create_text_node((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_create_text_node((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -187,7 +187,7 @@ TypedValue * fg1_dom_document_create_comment(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue * fg1_dom_document_create_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_create_comment((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_create_comment((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -198,7 +198,7 @@ TypedValue* fg_dom_document_create_comment(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_create_comment((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_create_comment((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -238,7 +238,7 @@ TypedValue * fg1_dom_document_create_cdatasection(TypedValue* rv, HPHP::VM::ActR
 TypedValue * fg1_dom_document_create_cdatasection(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_create_cdatasection((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_create_cdatasection((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -249,7 +249,7 @@ TypedValue* fg_dom_document_create_cdatasection(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_create_cdatasection((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_create_cdatasection((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -300,7 +300,7 @@ TypedValue * fg1_dom_document_create_processing_instruction(TypedValue* rv, HPHP
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_document_create_processing_instruction((rv), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+  fh_dom_document_create_processing_instruction((rv), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -311,7 +311,7 @@ TypedValue* fg_dom_document_create_processing_instruction(HPHP::VM::ActRec *ar) 
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_create_processing_instruction((&(rv)), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+        fh_dom_document_create_processing_instruction((&(rv)), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -351,7 +351,7 @@ TypedValue * fg1_dom_document_create_attribute(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue * fg1_dom_document_create_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_create_attribute((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_create_attribute((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -362,7 +362,7 @@ TypedValue* fg_dom_document_create_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_create_attribute((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_create_attribute((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -402,7 +402,7 @@ TypedValue * fg1_dom_document_create_entity_reference(TypedValue* rv, HPHP::VM::
 TypedValue * fg1_dom_document_create_entity_reference(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_create_entity_reference((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_create_entity_reference((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -413,7 +413,7 @@ TypedValue* fg_dom_document_create_entity_reference(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_create_entity_reference((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_create_entity_reference((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -453,7 +453,7 @@ TypedValue * fg1_dom_document_get_elements_by_tag_name(TypedValue* rv, HPHP::VM:
 TypedValue * fg1_dom_document_get_elements_by_tag_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_get_elements_by_tag_name((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_get_elements_by_tag_name((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -464,7 +464,7 @@ TypedValue* fg_dom_document_get_elements_by_tag_name(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_get_elements_by_tag_name((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_get_elements_by_tag_name((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -515,7 +515,7 @@ TypedValue * fg1_dom_document_import_node(TypedValue* rv, HPHP::VM::ActRec* ar, 
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
   }
-  fh_dom_document_import_node((rv), (args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
+  fh_dom_document_import_node((rv), (args-0), &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -526,7 +526,7 @@ TypedValue* fg_dom_document_import_node(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (args-1)->m_type == KindOfObject) {
-        fh_dom_document_import_node((&(rv)), (args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
+        fh_dom_document_import_node((&(rv)), (args-0), &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -581,7 +581,7 @@ TypedValue * fg1_dom_document_create_element_ns(TypedValue* rv, HPHP::VM::ActRec
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_document_create_element_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string));
+  fh_dom_document_create_element_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data, (count > 3) ? &args[-3].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -592,7 +592,7 @@ TypedValue* fg_dom_document_create_element_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_create_element_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string));
+        fh_dom_document_create_element_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data, (count > 3) ? &args[-3].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -638,7 +638,7 @@ TypedValue * fg1_dom_document_create_attribute_ns(TypedValue* rv, HPHP::VM::ActR
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_document_create_attribute_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_document_create_attribute_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -649,7 +649,7 @@ TypedValue* fg_dom_document_create_attribute_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_create_attribute_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_document_create_attribute_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -695,7 +695,7 @@ TypedValue * fg1_dom_document_get_elements_by_tag_name_ns(TypedValue* rv, HPHP::
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_document_get_elements_by_tag_name_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_document_get_elements_by_tag_name_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -706,7 +706,7 @@ TypedValue* fg_dom_document_get_elements_by_tag_name_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_get_elements_by_tag_name_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_document_get_elements_by_tag_name_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -746,7 +746,7 @@ TypedValue * fg1_dom_document_get_element_by_id(TypedValue* rv, HPHP::VM::ActRec
 TypedValue * fg1_dom_document_get_element_by_id(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_get_element_by_id((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_get_element_by_id((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -757,7 +757,7 @@ TypedValue* fg_dom_document_get_element_by_id(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_get_element_by_id((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_get_element_by_id((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -842,7 +842,7 @@ TypedValue * fg1_dom_document_save(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_document_save((rv), (args-0), (Value*)(args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
+  fh_dom_document_save((rv), (args-0), &args[-1].m_data, (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -853,7 +853,7 @@ TypedValue* fg_dom_document_save(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_save((&(rv)), (args-0), (Value*)(args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
+        fh_dom_document_save((&(rv)), (args-0), &args[-1].m_data, (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -905,7 +905,7 @@ TypedValue * fg1_dom_document_savexml(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   case 1:
     break;
   }
-  fh_dom_document_savexml((rv), (args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_object), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
+  fh_dom_document_savexml((rv), (args-0), (count > 1) ? &args[-1].m_data : (Value*)(&null_object), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -916,7 +916,7 @@ TypedValue* fg_dom_document_savexml(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfObject)) {
-        fh_dom_document_savexml((&(rv)), (args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_object), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
+        fh_dom_document_savexml((&(rv)), (args-0), (count > 1) ? &args[-1].m_data : (Value*)(&null_object), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1075,7 +1075,7 @@ TypedValue * fg1_dom_document_save_html_file(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue * fg1_dom_document_save_html_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_save_html_file((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_save_html_file((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1086,7 +1086,7 @@ TypedValue* fg_dom_document_save_html_file(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_save_html_file((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_save_html_file((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1126,7 +1126,7 @@ TypedValue * fg1_dom_document_schema_validate_file(TypedValue* rv, HPHP::VM::Act
 TypedValue * fg1_dom_document_schema_validate_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_schema_validate_file((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_schema_validate_file((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1137,7 +1137,7 @@ TypedValue* fg_dom_document_schema_validate_file(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_schema_validate_file((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_schema_validate_file((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1177,7 +1177,7 @@ TypedValue * fg1_dom_document_schema_validate_xml(TypedValue* rv, HPHP::VM::ActR
 TypedValue * fg1_dom_document_schema_validate_xml(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_schema_validate_xml((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_schema_validate_xml((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1188,7 +1188,7 @@ TypedValue* fg_dom_document_schema_validate_xml(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_schema_validate_xml((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_schema_validate_xml((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1228,7 +1228,7 @@ TypedValue * fg1_dom_document_relaxng_validate_file(TypedValue* rv, HPHP::VM::Ac
 TypedValue * fg1_dom_document_relaxng_validate_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_relaxng_validate_file((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_relaxng_validate_file((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1239,7 +1239,7 @@ TypedValue* fg_dom_document_relaxng_validate_file(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_relaxng_validate_file((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_relaxng_validate_file((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1279,7 +1279,7 @@ TypedValue * fg1_dom_document_relaxng_validate_xml(TypedValue* rv, HPHP::VM::Act
 TypedValue * fg1_dom_document_relaxng_validate_xml(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_document_relaxng_validate_xml((rv), (args-0), (Value*)(args-1));
+  fh_dom_document_relaxng_validate_xml((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1290,7 +1290,7 @@ TypedValue* fg_dom_document_relaxng_validate_xml(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_document_relaxng_validate_xml((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_document_relaxng_validate_xml((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1342,7 +1342,7 @@ TypedValue * fg1_dom_node_insert_before(TypedValue* rv, HPHP::VM::ActRec* ar, in
     tvCastToObjectInPlace(args-1);
   }
   Object defVal2 = uninit_null();
-  fh_dom_node_insert_before((rv), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+  fh_dom_node_insert_before((rv), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1354,7 +1354,7 @@ TypedValue* fg_dom_node_insert_before(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfObject) && (args-1)->m_type == KindOfObject) {
         Object defVal2 = uninit_null();
-        fh_dom_node_insert_before((&(rv)), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&defVal2));
+        fh_dom_node_insert_before((&(rv)), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1400,7 +1400,7 @@ TypedValue * fg1_dom_node_replace_child(TypedValue* rv, HPHP::VM::ActRec* ar, in
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
   }
-  fh_dom_node_replace_child((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_node_replace_child((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1411,7 +1411,7 @@ TypedValue* fg_dom_node_replace_child(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfObject && (args-1)->m_type == KindOfObject) {
-        fh_dom_node_replace_child((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_node_replace_child((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1451,7 +1451,7 @@ TypedValue * fg1_dom_node_remove_child(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue * fg1_dom_node_remove_child(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
-  fh_dom_node_remove_child((rv), (args-0), (Value*)(args-1));
+  fh_dom_node_remove_child((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1462,7 +1462,7 @@ TypedValue* fg_dom_node_remove_child(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject) {
-        fh_dom_node_remove_child((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_node_remove_child((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1502,7 +1502,7 @@ TypedValue * fg1_dom_node_append_child(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue * fg1_dom_node_append_child(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
-  fh_dom_node_append_child((rv), (args-0), (Value*)(args-1));
+  fh_dom_node_append_child((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1513,7 +1513,7 @@ TypedValue* fg_dom_node_append_child(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject) {
-        fh_dom_node_append_child((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_node_append_child((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1678,7 +1678,7 @@ TypedValue * fg1_dom_node_is_supported(TypedValue* rv, HPHP::VM::ActRec* ar, int
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_node_is_supported((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_node_is_supported((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1689,7 +1689,7 @@ TypedValue* fg_dom_node_is_supported(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_node_is_supported((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_node_is_supported((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1763,7 +1763,7 @@ TypedValue * fg1_dom_node_is_same_node(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue * fg1_dom_node_is_same_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
-  fh_dom_node_is_same_node((rv), (args-0), (Value*)(args-1));
+  fh_dom_node_is_same_node((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1774,7 +1774,7 @@ TypedValue* fg_dom_node_is_same_node(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject) {
-        fh_dom_node_is_same_node((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_node_is_same_node((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1814,7 +1814,7 @@ TypedValue * fg1_dom_node_lookup_prefix(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_dom_node_lookup_prefix(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_node_lookup_prefix((rv), (args-0), (Value*)(args-1));
+  fh_dom_node_lookup_prefix((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1825,7 +1825,7 @@ TypedValue* fg_dom_node_lookup_prefix(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_node_lookup_prefix((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_node_lookup_prefix((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1865,7 +1865,7 @@ TypedValue * fg1_dom_node_is_default_namespace(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue * fg1_dom_node_is_default_namespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_node_is_default_namespace((rv), (args-0), (Value*)(args-1));
+  fh_dom_node_is_default_namespace((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1876,7 +1876,7 @@ TypedValue* fg_dom_node_is_default_namespace(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_node_is_default_namespace((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_node_is_default_namespace((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1916,7 +1916,7 @@ TypedValue * fg1_dom_node_lookup_namespace_uri(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue * fg1_dom_node_lookup_namespace_uri(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_node_lookup_namespace_uri((rv), (args-0), (Value*)(args-1));
+  fh_dom_node_lookup_namespace_uri((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1927,7 +1927,7 @@ TypedValue* fg_dom_node_lookup_namespace_uri(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_node_lookup_namespace_uri((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_node_lookup_namespace_uri((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2018,7 +2018,7 @@ TypedValue * fg1_dom_namednodemap_get_named_item(TypedValue* rv, HPHP::VM::ActRe
 TypedValue * fg1_dom_namednodemap_get_named_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_namednodemap_get_named_item((rv), (args-0), (Value*)(args-1));
+  fh_dom_namednodemap_get_named_item((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2029,7 +2029,7 @@ TypedValue* fg_dom_namednodemap_get_named_item(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_namednodemap_get_named_item((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_namednodemap_get_named_item((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2126,7 +2126,7 @@ TypedValue * fg1_dom_namednodemap_get_named_item_ns(TypedValue* rv, HPHP::VM::Ac
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_namednodemap_get_named_item_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_namednodemap_get_named_item_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2137,7 +2137,7 @@ TypedValue* fg_dom_namednodemap_get_named_item_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_namednodemap_get_named_item_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_namednodemap_get_named_item_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2234,7 +2234,7 @@ TypedValue * fg1_dom_characterdata_append_data(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue * fg1_dom_characterdata_append_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_characterdata_append_data((rv), (args-0), (Value*)(args-1));
+  fh_dom_characterdata_append_data((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2245,7 +2245,7 @@ TypedValue* fg_dom_characterdata_append_data(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_characterdata_append_data((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_characterdata_append_data((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2291,7 +2291,7 @@ TypedValue * fg1_dom_characterdata_insert_data(TypedValue* rv, HPHP::VM::ActRec*
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
   }
-  fh_dom_characterdata_insert_data((rv), (args-0), (long)(args[-1].m_data.num), (Value*)(args-2));
+  fh_dom_characterdata_insert_data((rv), (args-0), (long)(args[-1].m_data.num), &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2302,7 +2302,7 @@ TypedValue* fg_dom_characterdata_insert_data(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfInt64) {
-        fh_dom_characterdata_insert_data((&(rv)), (args-0), (long)(args[-1].m_data.num), (Value*)(args-2));
+        fh_dom_characterdata_insert_data((&(rv)), (args-0), (long)(args[-1].m_data.num), &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2409,7 +2409,7 @@ TypedValue * fg1_dom_characterdata_replace_data(TypedValue* rv, HPHP::VM::ActRec
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
   }
-  fh_dom_characterdata_replace_data((rv), (args-0), (long)(args[-1].m_data.num), (long)(args[-2].m_data.num), (Value*)(args-3));
+  fh_dom_characterdata_replace_data((rv), (args-0), (long)(args[-1].m_data.num), (long)(args[-2].m_data.num), &args[-3].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2420,7 +2420,7 @@ TypedValue* fg_dom_characterdata_replace_data(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && (args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64) {
-        fh_dom_characterdata_replace_data((&(rv)), (args-0), (long)(args[-1].m_data.num), (long)(args[-2].m_data.num), (Value*)(args-3));
+        fh_dom_characterdata_replace_data((&(rv)), (args-0), (long)(args[-1].m_data.num), (long)(args[-2].m_data.num), &args[-3].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2494,7 +2494,7 @@ TypedValue * fg1_dom_element_get_attribute(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue * fg1_dom_element_get_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_element_get_attribute((rv), (args-0), (Value*)(args-1));
+  fh_dom_element_get_attribute((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2505,7 +2505,7 @@ TypedValue* fg_dom_element_get_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_get_attribute((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_element_get_attribute((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2551,7 +2551,7 @@ TypedValue * fg1_dom_element_set_attribute(TypedValue* rv, HPHP::VM::ActRec* ar,
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_element_set_attribute((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_element_set_attribute((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2562,7 +2562,7 @@ TypedValue* fg_dom_element_set_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_set_attribute((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_element_set_attribute((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2602,7 +2602,7 @@ TypedValue * fg1_dom_element_remove_attribute(TypedValue* rv, HPHP::VM::ActRec* 
 TypedValue * fg1_dom_element_remove_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_element_remove_attribute((rv), (args-0), (Value*)(args-1));
+  fh_dom_element_remove_attribute((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2613,7 +2613,7 @@ TypedValue* fg_dom_element_remove_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_remove_attribute((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_element_remove_attribute((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2653,7 +2653,7 @@ TypedValue * fg1_dom_element_get_attribute_node(TypedValue* rv, HPHP::VM::ActRec
 TypedValue * fg1_dom_element_get_attribute_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_element_get_attribute_node((rv), (args-0), (Value*)(args-1));
+  fh_dom_element_get_attribute_node((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2664,7 +2664,7 @@ TypedValue* fg_dom_element_get_attribute_node(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_get_attribute_node((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_element_get_attribute_node((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2704,7 +2704,7 @@ TypedValue * fg1_dom_element_set_attribute_node(TypedValue* rv, HPHP::VM::ActRec
 TypedValue * fg1_dom_element_set_attribute_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
-  fh_dom_element_set_attribute_node((rv), (args-0), (Value*)(args-1));
+  fh_dom_element_set_attribute_node((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2715,7 +2715,7 @@ TypedValue* fg_dom_element_set_attribute_node(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject) {
-        fh_dom_element_set_attribute_node((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_element_set_attribute_node((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2755,7 +2755,7 @@ TypedValue * fg1_dom_element_remove_attribute_node(TypedValue* rv, HPHP::VM::Act
 TypedValue * fg1_dom_element_remove_attribute_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
-  fh_dom_element_remove_attribute_node((rv), (args-0), (Value*)(args-1));
+  fh_dom_element_remove_attribute_node((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2766,7 +2766,7 @@ TypedValue* fg_dom_element_remove_attribute_node(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject) {
-        fh_dom_element_remove_attribute_node((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_element_remove_attribute_node((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2806,7 +2806,7 @@ TypedValue * fg1_dom_element_get_elements_by_tag_name(TypedValue* rv, HPHP::VM::
 TypedValue * fg1_dom_element_get_elements_by_tag_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_element_get_elements_by_tag_name((rv), (args-0), (Value*)(args-1));
+  fh_dom_element_get_elements_by_tag_name((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2817,7 +2817,7 @@ TypedValue* fg_dom_element_get_elements_by_tag_name(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_get_elements_by_tag_name((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_element_get_elements_by_tag_name((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2863,7 +2863,7 @@ TypedValue * fg1_dom_element_get_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* 
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_element_get_attribute_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_element_get_attribute_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2874,7 +2874,7 @@ TypedValue* fg_dom_element_get_attribute_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_get_attribute_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_element_get_attribute_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2924,7 +2924,7 @@ TypedValue * fg1_dom_element_set_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* 
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_element_set_attribute_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3));
+  fh_dom_element_set_attribute_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data, &args[-3].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2935,7 +2935,7 @@ TypedValue* fg_dom_element_set_attribute_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_set_attribute_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3));
+        fh_dom_element_set_attribute_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data, &args[-3].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2981,7 +2981,7 @@ TypedValue * fg1_dom_element_remove_attribute_ns(TypedValue* rv, HPHP::VM::ActRe
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_element_remove_attribute_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_element_remove_attribute_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2992,7 +2992,7 @@ TypedValue* fg_dom_element_remove_attribute_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_remove_attribute_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_element_remove_attribute_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3038,7 +3038,7 @@ TypedValue * fg1_dom_element_get_attribute_node_ns(TypedValue* rv, HPHP::VM::Act
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_element_get_attribute_node_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_element_get_attribute_node_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3049,7 +3049,7 @@ TypedValue* fg_dom_element_get_attribute_node_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_get_attribute_node_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_element_get_attribute_node_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3089,7 +3089,7 @@ TypedValue * fg1_dom_element_set_attribute_node_ns(TypedValue* rv, HPHP::VM::Act
 TypedValue * fg1_dom_element_set_attribute_node_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
-  fh_dom_element_set_attribute_node_ns((rv), (args-0), (Value*)(args-1));
+  fh_dom_element_set_attribute_node_ns((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3100,7 +3100,7 @@ TypedValue* fg_dom_element_set_attribute_node_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject) {
-        fh_dom_element_set_attribute_node_ns((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_element_set_attribute_node_ns((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3146,7 +3146,7 @@ TypedValue * fg1_dom_element_get_elements_by_tag_name_ns(TypedValue* rv, HPHP::V
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_element_get_elements_by_tag_name_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_element_get_elements_by_tag_name_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3157,7 +3157,7 @@ TypedValue* fg_dom_element_get_elements_by_tag_name_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_get_elements_by_tag_name_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_element_get_elements_by_tag_name_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3197,7 +3197,7 @@ TypedValue * fg1_dom_element_has_attribute(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue * fg1_dom_element_has_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
-  fh_dom_element_has_attribute((rv), (args-0), (Value*)(args-1));
+  fh_dom_element_has_attribute((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3208,7 +3208,7 @@ TypedValue* fg_dom_element_has_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_has_attribute((&(rv)), (args-0), (Value*)(args-1));
+        fh_dom_element_has_attribute((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3254,7 +3254,7 @@ TypedValue * fg1_dom_element_has_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* 
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_element_has_attribute_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_element_has_attribute_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3265,7 +3265,7 @@ TypedValue* fg_dom_element_has_attribute_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_has_attribute_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_element_has_attribute_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3311,7 +3311,7 @@ TypedValue * fg1_dom_element_set_id_attribute(TypedValue* rv, HPHP::VM::ActRec* 
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_element_set_id_attribute((rv), (args-0), (Value*)(args-1), (bool)(args[-2].m_data.num));
+  fh_dom_element_set_id_attribute((rv), (args-0), &args[-1].m_data, (bool)(args[-2].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3322,7 +3322,7 @@ TypedValue* fg_dom_element_set_id_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfBoolean && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_set_id_attribute((&(rv)), (args-0), (Value*)(args-1), (bool)(args[-2].m_data.num));
+        fh_dom_element_set_id_attribute((&(rv)), (args-0), &args[-1].m_data, (bool)(args[-2].m_data.num));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3372,7 +3372,7 @@ TypedValue * fg1_dom_element_set_id_attribute_ns(TypedValue* rv, HPHP::VM::ActRe
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_element_set_id_attribute_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2), (bool)(args[-3].m_data.num));
+  fh_dom_element_set_id_attribute_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data, (bool)(args[-3].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3383,7 +3383,7 @@ TypedValue* fg_dom_element_set_id_attribute_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if ((args-3)->m_type == KindOfBoolean && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_element_set_id_attribute_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2), (bool)(args[-3].m_data.num));
+        fh_dom_element_set_id_attribute_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data, (bool)(args[-3].m_data.num));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3429,7 +3429,7 @@ TypedValue * fg1_dom_element_set_id_attribute_node(TypedValue* rv, HPHP::VM::Act
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
   }
-  fh_dom_element_set_id_attribute_node((rv), (args-0), (Value*)(args-1), (bool)(args[-2].m_data.num));
+  fh_dom_element_set_id_attribute_node((rv), (args-0), &args[-1].m_data, (bool)(args[-2].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3440,7 +3440,7 @@ TypedValue* fg_dom_element_set_id_attribute_node(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfBoolean && (args-1)->m_type == KindOfObject) {
-        fh_dom_element_set_id_attribute_node((&(rv)), (args-0), (Value*)(args-1), (bool)(args[-2].m_data.num));
+        fh_dom_element_set_id_attribute_node((&(rv)), (args-0), &args[-1].m_data, (bool)(args[-2].m_data.num));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3571,7 +3571,7 @@ TypedValue * fg1_dom_xpath_register_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_xpath_register_ns((rv), (args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_dom_xpath_register_ns((rv), (args-0), &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3582,7 +3582,7 @@ TypedValue* fg_dom_xpath_register_ns(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_xpath_register_ns((&(rv)), (args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_dom_xpath_register_ns((&(rv)), (args-0), &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3633,7 +3633,7 @@ TypedValue * fg1_dom_xpath_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_xpath_query((rv), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_object));
+  fh_dom_xpath_query((rv), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_object));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3644,7 +3644,7 @@ TypedValue* fg_dom_xpath_query(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfObject) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_xpath_query((&(rv)), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_object));
+        fh_dom_xpath_query((&(rv)), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_object));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3695,7 +3695,7 @@ TypedValue * fg1_dom_xpath_evaluate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  fh_dom_xpath_evaluate((rv), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_object));
+  fh_dom_xpath_evaluate((rv), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_object));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3706,7 +3706,7 @@ TypedValue* fg_dom_xpath_evaluate(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfObject) && IS_STRING_TYPE((args-1)->m_type)) {
-        fh_dom_xpath_evaluate((&(rv)), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_object));
+        fh_dom_xpath_evaluate((&(rv)), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_object));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -3828,7 +3828,7 @@ TypedValue* tg1_7DOMNode_appendChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64
 TypedValue* tg1_7DOMNode_appendChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  th_7DOMNode_appendChild((rv), (this_), (Value*)(args-0));
+  th_7DOMNode_appendChild((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -3841,7 +3841,7 @@ TypedValue* tg_7DOMNode_appendChild(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
-          th_7DOMNode_appendChild((&(rv)), (this_), (Value*)(args-0));
+          th_7DOMNode_appendChild((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4056,7 +4056,7 @@ TypedValue* tg1_7DOMNode_insertBefore(TypedValue* rv, HPHP::VM::ActRec* ar, int6
     tvCastToObjectInPlace(args-0);
   }
   Object defVal1 = uninit_null();
-  th_7DOMNode_insertBefore((rv), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1));
+  th_7DOMNode_insertBefore((rv), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4070,7 +4070,7 @@ TypedValue* tg_7DOMNode_insertBefore(HPHP::VM::ActRec *ar) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfObject) && (args-0)->m_type == KindOfObject) {
           Object defVal1 = uninit_null();
-          th_7DOMNode_insertBefore((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1));
+          th_7DOMNode_insertBefore((&(rv)), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&defVal1));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4111,7 +4111,7 @@ TypedValue* tg1_7DOMNode_isDefaultNamespace(TypedValue* rv, HPHP::VM::ActRec* ar
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_7DOMNode_isDefaultNamespace((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_7DOMNode_isDefaultNamespace((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -4124,7 +4124,7 @@ TypedValue* tg_7DOMNode_isDefaultNamespace(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_7DOMNode_isDefaultNamespace((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_7DOMNode_isDefaultNamespace((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -4164,7 +4164,7 @@ TypedValue* tg1_7DOMNode_isSameNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (th_7DOMNode_isSameNode((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_7DOMNode_isSameNode((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -4177,7 +4177,7 @@ TypedValue* tg_7DOMNode_isSameNode(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_7DOMNode_isSameNode((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_7DOMNode_isSameNode((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -4223,7 +4223,7 @@ TypedValue* tg1_7DOMNode_isSupported(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (th_7DOMNode_isSupported((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (th_7DOMNode_isSupported((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -4236,7 +4236,7 @@ TypedValue* tg_7DOMNode_isSupported(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_7DOMNode_isSupported((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+          rv.m_data.num = (th_7DOMNode_isSupported((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -4276,7 +4276,7 @@ TypedValue* tg1_7DOMNode_lookupNamespaceUri(TypedValue* rv, HPHP::VM::ActRec* ar
 TypedValue* tg1_7DOMNode_lookupNamespaceUri(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_7DOMNode_lookupNamespaceUri((rv), (this_), (Value*)(args-0));
+  th_7DOMNode_lookupNamespaceUri((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4289,7 +4289,7 @@ TypedValue* tg_7DOMNode_lookupNamespaceUri(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_7DOMNode_lookupNamespaceUri((&(rv)), (this_), (Value*)(args-0));
+          th_7DOMNode_lookupNamespaceUri((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4330,7 +4330,7 @@ TypedValue* tg1_7DOMNode_lookupPrefix(TypedValue* rv, HPHP::VM::ActRec* ar, int6
 TypedValue* tg1_7DOMNode_lookupPrefix(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_7DOMNode_lookupPrefix((rv), (this_), (Value*)(args-0));
+  th_7DOMNode_lookupPrefix((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4343,7 +4343,7 @@ TypedValue* tg_7DOMNode_lookupPrefix(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_7DOMNode_lookupPrefix((&(rv)), (this_), (Value*)(args-0));
+          th_7DOMNode_lookupPrefix((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4420,7 +4420,7 @@ TypedValue* tg1_7DOMNode_removeChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64
 TypedValue* tg1_7DOMNode_removeChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  th_7DOMNode_removeChild((rv), (this_), (Value*)(args-0));
+  th_7DOMNode_removeChild((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4433,7 +4433,7 @@ TypedValue* tg_7DOMNode_removeChild(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
-          th_7DOMNode_removeChild((&(rv)), (this_), (Value*)(args-0));
+          th_7DOMNode_removeChild((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4480,7 +4480,7 @@ TypedValue* tg1_7DOMNode_replaceChild(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  th_7DOMNode_replaceChild((rv), (this_), (Value*)(args-0), (Value*)(args-1));
+  th_7DOMNode_replaceChild((rv), (this_), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4493,7 +4493,7 @@ TypedValue* tg_7DOMNode_replaceChild(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-          th_7DOMNode_replaceChild((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
+          th_7DOMNode_replaceChild((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4630,7 +4630,7 @@ TypedValue* tg1_7DOMNode_c14nfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   }
   Variant defVal3;
   Variant defVal4;
-  th_7DOMNode_c14nfile((rv), (this_), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
+  th_7DOMNode_c14nfile((rv), (this_), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -4645,7 +4645,7 @@ TypedValue* tg_7DOMNode_c14nfile(HPHP::VM::ActRec *ar) {
         if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && (count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
           Variant defVal3;
           Variant defVal4;
-          th_7DOMNode_c14nfile((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
+          th_7DOMNode_c14nfile((&(rv)), (this_), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 5);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -4858,7 +4858,7 @@ TypedValue* tg1_7DOMAttr___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_7DOMAttr___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+  th_7DOMAttr___construct((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -4872,7 +4872,7 @@ TypedValue* tg_7DOMAttr___construct(HPHP::VM::ActRec *ar) {
         if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_7DOMAttr___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+          th_7DOMAttr___construct((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -5108,7 +5108,7 @@ TypedValue* tg1_16DOMCharacterData_appendData(TypedValue* rv, HPHP::VM::ActRec* 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_16DOMCharacterData_appendData((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_16DOMCharacterData_appendData((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -5121,7 +5121,7 @@ TypedValue* tg_16DOMCharacterData_appendData(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_16DOMCharacterData_appendData((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_16DOMCharacterData_appendData((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -5226,7 +5226,7 @@ TypedValue* tg1_16DOMCharacterData_insertData(TypedValue* rv, HPHP::VM::ActRec* 
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  rv->m_data.num = (th_16DOMCharacterData_insertData((this_), (long)(args[-0].m_data.num), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (th_16DOMCharacterData_insertData((this_), (long)(args[-0].m_data.num), &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -5239,7 +5239,7 @@ TypedValue* tg_16DOMCharacterData_insertData(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfInt64) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_16DOMCharacterData_insertData((this_), (long)(args[-0].m_data.num), (Value*)(args-1))) ? 1LL : 0LL;
+          rv.m_data.num = (th_16DOMCharacterData_insertData((this_), (long)(args[-0].m_data.num), &args[-1].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -5289,7 +5289,7 @@ TypedValue* tg1_16DOMCharacterData_replaceData(TypedValue* rv, HPHP::VM::ActRec*
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  rv->m_data.num = (th_16DOMCharacterData_replaceData((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (Value*)(args-2))) ? 1LL : 0LL;
+  rv->m_data.num = (th_16DOMCharacterData_replaceData((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), &args[-2].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -5302,7 +5302,7 @@ TypedValue* tg_16DOMCharacterData_replaceData(HPHP::VM::ActRec *ar) {
       if (count == 3LL) {
         if (IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_16DOMCharacterData_replaceData((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (Value*)(args-2))) ? 1LL : 0LL;
+          rv.m_data.num = (th_16DOMCharacterData_replaceData((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), &args[-2].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -5349,7 +5349,7 @@ TypedValue* tg1_16DOMCharacterData_substringData(TypedValue* rv, HPHP::VM::ActRe
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  th_16DOMCharacterData_substringData((Value*)(rv), (this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num));
+  th_16DOMCharacterData_substringData((&rv->m_data), (this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -5363,7 +5363,7 @@ TypedValue* tg_16DOMCharacterData_substringData(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
           rv.m_type = KindOfString;
-          th_16DOMCharacterData_substringData((Value*)(&(rv)), (this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num));
+          th_16DOMCharacterData_substringData((&rv.m_data), (this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num));
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -5528,7 +5528,7 @@ TypedValue* tg1_10DOMComment___construct(TypedValue* rv, HPHP::VM::ActRec* ar, i
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
-  th_10DOMComment___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  th_10DOMComment___construct((this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -5542,7 +5542,7 @@ TypedValue* tg_10DOMComment___construct(HPHP::VM::ActRec *ar) {
         if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_10DOMComment___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+          th_10DOMComment___construct((this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -5592,7 +5592,7 @@ TypedValue* tg1_7DOMText___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
-  th_7DOMText___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  th_7DOMText___construct((this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -5606,7 +5606,7 @@ TypedValue* tg_7DOMText___construct(HPHP::VM::ActRec *ar) {
         if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_7DOMText___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+          th_7DOMText___construct((this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -5860,7 +5860,7 @@ TypedValue* tg1_15DOMCDATASection___construct(TypedValue* rv, HPHP::VM::ActRec* 
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
-  th_15DOMCDATASection___construct((this_), (Value*)(args-0));
+  th_15DOMCDATASection___construct((this_), &args[-0].m_data);
   return rv;
 }
 
@@ -5874,7 +5874,7 @@ TypedValue* tg_15DOMCDATASection___construct(HPHP::VM::ActRec *ar) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_15DOMCDATASection___construct((this_), (Value*)(args-0));
+          th_15DOMCDATASection___construct((this_), &args[-0].m_data);
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -5936,7 +5936,7 @@ TypedValue* tg1_11DOMDocument___construct(TypedValue* rv, HPHP::VM::ActRec* ar, 
   case 0:
     break;
   }
-  th_11DOMDocument___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+  th_11DOMDocument___construct((this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -5950,7 +5950,7 @@ TypedValue* tg_11DOMDocument___construct(HPHP::VM::ActRec *ar) {
         if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_11DOMDocument___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+          th_11DOMDocument___construct((this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -5990,7 +5990,7 @@ TypedValue* tg1_11DOMDocument_createAttribute(TypedValue* rv, HPHP::VM::ActRec* 
 TypedValue* tg1_11DOMDocument_createAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_11DOMDocument_createAttribute((rv), (this_), (Value*)(args-0));
+  th_11DOMDocument_createAttribute((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6003,7 +6003,7 @@ TypedValue* tg_11DOMDocument_createAttribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_createAttribute((&(rv)), (this_), (Value*)(args-0));
+          th_11DOMDocument_createAttribute((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6050,7 +6050,7 @@ TypedValue* tg1_11DOMDocument_createAttributens(TypedValue* rv, HPHP::VM::ActRec
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_11DOMDocument_createAttributens((rv), (this_), (Value*)(args-0), (Value*)(args-1));
+  th_11DOMDocument_createAttributens((rv), (this_), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6063,7 +6063,7 @@ TypedValue* tg_11DOMDocument_createAttributens(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_createAttributens((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
+          th_11DOMDocument_createAttributens((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6104,7 +6104,7 @@ TypedValue* tg1_11DOMDocument_createCDATASection(TypedValue* rv, HPHP::VM::ActRe
 TypedValue* tg1_11DOMDocument_createCDATASection(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_11DOMDocument_createCDATASection((rv), (this_), (Value*)(args-0));
+  th_11DOMDocument_createCDATASection((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6117,7 +6117,7 @@ TypedValue* tg_11DOMDocument_createCDATASection(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_createCDATASection((&(rv)), (this_), (Value*)(args-0));
+          th_11DOMDocument_createCDATASection((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6158,7 +6158,7 @@ TypedValue* tg1_11DOMDocument_createComment(TypedValue* rv, HPHP::VM::ActRec* ar
 TypedValue* tg1_11DOMDocument_createComment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_11DOMDocument_createComment((rv), (this_), (Value*)(args-0));
+  th_11DOMDocument_createComment((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6171,7 +6171,7 @@ TypedValue* tg_11DOMDocument_createComment(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_createComment((&(rv)), (this_), (Value*)(args-0));
+          th_11DOMDocument_createComment((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6260,7 +6260,7 @@ TypedValue* tg1_11DOMDocument_createElement(TypedValue* rv, HPHP::VM::ActRec* ar
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_11DOMDocument_createElement((rv), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+  th_11DOMDocument_createElement((rv), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6273,7 +6273,7 @@ TypedValue* tg_11DOMDocument_createElement(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_createElement((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+          th_11DOMDocument_createElement((&(rv)), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6329,7 +6329,7 @@ TypedValue* tg1_11DOMDocument_createElementNS(TypedValue* rv, HPHP::VM::ActRec* 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_11DOMDocument_createElementNS((rv), (this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+  th_11DOMDocument_createElementNS((rv), (this_), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6342,7 +6342,7 @@ TypedValue* tg_11DOMDocument_createElementNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 2LL && count <= 3LL) {
         if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_createElementNS((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+          th_11DOMDocument_createElementNS((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6383,7 +6383,7 @@ TypedValue* tg1_11DOMDocument_createEntityReference(TypedValue* rv, HPHP::VM::Ac
 TypedValue* tg1_11DOMDocument_createEntityReference(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_11DOMDocument_createEntityReference((rv), (this_), (Value*)(args-0));
+  th_11DOMDocument_createEntityReference((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6396,7 +6396,7 @@ TypedValue* tg_11DOMDocument_createEntityReference(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_createEntityReference((&(rv)), (this_), (Value*)(args-0));
+          th_11DOMDocument_createEntityReference((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6448,7 +6448,7 @@ TypedValue* tg1_11DOMDocument_createProcessingInstruction(TypedValue* rv, HPHP::
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_11DOMDocument_createProcessingInstruction((rv), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+  th_11DOMDocument_createProcessingInstruction((rv), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6461,7 +6461,7 @@ TypedValue* tg_11DOMDocument_createProcessingInstruction(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_createProcessingInstruction((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+          th_11DOMDocument_createProcessingInstruction((&(rv)), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6502,7 +6502,7 @@ TypedValue* tg1_11DOMDocument_createTextNode(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue* tg1_11DOMDocument_createTextNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_11DOMDocument_createTextNode((rv), (this_), (Value*)(args-0));
+  th_11DOMDocument_createTextNode((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6515,7 +6515,7 @@ TypedValue* tg_11DOMDocument_createTextNode(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_createTextNode((&(rv)), (this_), (Value*)(args-0));
+          th_11DOMDocument_createTextNode((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6556,7 +6556,7 @@ TypedValue* tg1_11DOMDocument_getElementById(TypedValue* rv, HPHP::VM::ActRec* a
 TypedValue* tg1_11DOMDocument_getElementById(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_11DOMDocument_getElementById((rv), (this_), (Value*)(args-0));
+  th_11DOMDocument_getElementById((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6569,7 +6569,7 @@ TypedValue* tg_11DOMDocument_getElementById(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_getElementById((&(rv)), (this_), (Value*)(args-0));
+          th_11DOMDocument_getElementById((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6610,7 +6610,7 @@ TypedValue* tg1_11DOMDocument_getElementsByTagName(TypedValue* rv, HPHP::VM::Act
 TypedValue* tg1_11DOMDocument_getElementsByTagName(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_11DOMDocument_getElementsByTagName((rv), (this_), (Value*)(args-0));
+  th_11DOMDocument_getElementsByTagName((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6623,7 +6623,7 @@ TypedValue* tg_11DOMDocument_getElementsByTagName(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_getElementsByTagName((&(rv)), (this_), (Value*)(args-0));
+          th_11DOMDocument_getElementsByTagName((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6670,7 +6670,7 @@ TypedValue* tg1_11DOMDocument_getElementsByTagNameNS(TypedValue* rv, HPHP::VM::A
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_11DOMDocument_getElementsByTagNameNS((rv), (this_), (Value*)(args-0), (Value*)(args-1));
+  th_11DOMDocument_getElementsByTagNameNS((rv), (this_), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6683,7 +6683,7 @@ TypedValue* tg_11DOMDocument_getElementsByTagNameNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_getElementsByTagNameNS((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
+          th_11DOMDocument_getElementsByTagNameNS((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6735,7 +6735,7 @@ TypedValue* tg1_11DOMDocument_importNode(TypedValue* rv, HPHP::VM::ActRec* ar, i
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  th_11DOMDocument_importNode((rv), (this_), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
+  th_11DOMDocument_importNode((rv), (this_), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6748,7 +6748,7 @@ TypedValue* tg_11DOMDocument_importNode(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && (args-0)->m_type == KindOfObject) {
-          th_11DOMDocument_importNode((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
+          th_11DOMDocument_importNode((&(rv)), (this_), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6800,7 +6800,7 @@ TypedValue* tg1_11DOMDocument_load(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_11DOMDocument_load((rv), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
+  th_11DOMDocument_load((rv), (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6813,7 +6813,7 @@ TypedValue* tg_11DOMDocument_load(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_load((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
+          th_11DOMDocument_load((&(rv)), (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6854,7 +6854,7 @@ TypedValue* tg1_11DOMDocument_loadHTML(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue* tg1_11DOMDocument_loadHTML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_11DOMDocument_loadHTML((rv), (this_), (Value*)(args-0));
+  th_11DOMDocument_loadHTML((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6867,7 +6867,7 @@ TypedValue* tg_11DOMDocument_loadHTML(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_loadHTML((&(rv)), (this_), (Value*)(args-0));
+          th_11DOMDocument_loadHTML((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6908,7 +6908,7 @@ TypedValue* tg1_11DOMDocument_loadHTMLFile(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue* tg1_11DOMDocument_loadHTMLFile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_11DOMDocument_loadHTMLFile((rv), (this_), (Value*)(args-0));
+  th_11DOMDocument_loadHTMLFile((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6921,7 +6921,7 @@ TypedValue* tg_11DOMDocument_loadHTMLFile(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_loadHTMLFile((&(rv)), (this_), (Value*)(args-0));
+          th_11DOMDocument_loadHTMLFile((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -6973,7 +6973,7 @@ TypedValue* tg1_11DOMDocument_loadXML(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_11DOMDocument_loadXML((rv), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
+  th_11DOMDocument_loadXML((rv), (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -6986,7 +6986,7 @@ TypedValue* tg_11DOMDocument_loadXML(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_loadXML((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
+          th_11DOMDocument_loadXML((&(rv)), (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7069,7 +7069,7 @@ TypedValue* tg1_11DOMDocument_registerNodeClass(TypedValue* rv, HPHP::VM::ActRec
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (th_11DOMDocument_registerNodeClass((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (th_11DOMDocument_registerNodeClass((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -7082,7 +7082,7 @@ TypedValue* tg_11DOMDocument_registerNodeClass(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_11DOMDocument_registerNodeClass((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+          rv.m_data.num = (th_11DOMDocument_registerNodeClass((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -7122,7 +7122,7 @@ TypedValue* tg1_11DOMDocument_relaxNGValidate(TypedValue* rv, HPHP::VM::ActRec* 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_11DOMDocument_relaxNGValidate((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_11DOMDocument_relaxNGValidate((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -7135,7 +7135,7 @@ TypedValue* tg_11DOMDocument_relaxNGValidate(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_11DOMDocument_relaxNGValidate((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_11DOMDocument_relaxNGValidate((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -7175,7 +7175,7 @@ TypedValue* tg1_11DOMDocument_relaxNGValidateSource(TypedValue* rv, HPHP::VM::Ac
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_11DOMDocument_relaxNGValidateSource((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_11DOMDocument_relaxNGValidateSource((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -7188,7 +7188,7 @@ TypedValue* tg_11DOMDocument_relaxNGValidateSource(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_11DOMDocument_relaxNGValidateSource((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_11DOMDocument_relaxNGValidateSource((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -7239,7 +7239,7 @@ TypedValue* tg1_11DOMDocument_save(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_11DOMDocument_save((rv), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
+  th_11DOMDocument_save((rv), (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -7252,7 +7252,7 @@ TypedValue* tg_11DOMDocument_save(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_save((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
+          th_11DOMDocument_save((&(rv)), (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7330,7 +7330,7 @@ TypedValue* tg1_11DOMDocument_saveHTMLFile(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue* tg1_11DOMDocument_saveHTMLFile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_11DOMDocument_saveHTMLFile((rv), (this_), (Value*)(args-0));
+  th_11DOMDocument_saveHTMLFile((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -7343,7 +7343,7 @@ TypedValue* tg_11DOMDocument_saveHTMLFile(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_11DOMDocument_saveHTMLFile((&(rv)), (this_), (Value*)(args-0));
+          th_11DOMDocument_saveHTMLFile((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7396,7 +7396,7 @@ TypedValue* tg1_11DOMDocument_saveXML(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   case 0:
     break;
   }
-  th_11DOMDocument_saveXML((rv), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_object), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
+  th_11DOMDocument_saveXML((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_object), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -7409,7 +7409,7 @@ TypedValue* tg_11DOMDocument_saveXML(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (count <= 0 || (args-0)->m_type == KindOfObject)) {
-          th_11DOMDocument_saveXML((&(rv)), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_object), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
+          th_11DOMDocument_saveXML((&(rv)), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_object), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -7450,7 +7450,7 @@ TypedValue* tg1_11DOMDocument_schemaValidate(TypedValue* rv, HPHP::VM::ActRec* a
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_11DOMDocument_schemaValidate((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_11DOMDocument_schemaValidate((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -7463,7 +7463,7 @@ TypedValue* tg_11DOMDocument_schemaValidate(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_11DOMDocument_schemaValidate((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_11DOMDocument_schemaValidate((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -7503,7 +7503,7 @@ TypedValue* tg1_11DOMDocument_schemaValidateSource(TypedValue* rv, HPHP::VM::Act
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_11DOMDocument_schemaValidateSource((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_11DOMDocument_schemaValidateSource((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -7516,7 +7516,7 @@ TypedValue* tg_11DOMDocument_schemaValidateSource(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_11DOMDocument_schemaValidateSource((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_11DOMDocument_schemaValidateSource((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -7806,7 +7806,7 @@ TypedValue* tg1_19DOMDocumentFragment_appendXML(TypedValue* rv, HPHP::VM::ActRec
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_19DOMDocumentFragment_appendXML((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_19DOMDocumentFragment_appendXML((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -7819,7 +7819,7 @@ TypedValue* tg_19DOMDocumentFragment_appendXML(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_19DOMDocumentFragment_appendXML((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_19DOMDocumentFragment_appendXML((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -8045,7 +8045,7 @@ TypedValue* tg1_10DOMElement___construct(TypedValue* rv, HPHP::VM::ActRec* ar, i
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10DOMElement___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+  th_10DOMElement___construct((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -8059,7 +8059,7 @@ TypedValue* tg_10DOMElement___construct(HPHP::VM::ActRec *ar) {
         if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_10DOMElement___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+          th_10DOMElement___construct((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -8100,7 +8100,7 @@ TypedValue* tg1_10DOMElement_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  th_10DOMElement_getAttribute((Value*)(rv), (this_), (Value*)(args-0));
+  th_10DOMElement_getAttribute((&rv->m_data), (this_), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -8114,7 +8114,7 @@ TypedValue* tg_10DOMElement_getAttribute(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfString;
-          th_10DOMElement_getAttribute((Value*)(&(rv)), (this_), (Value*)(args-0));
+          th_10DOMElement_getAttribute((&rv.m_data), (this_), &args[-0].m_data);
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8155,7 +8155,7 @@ TypedValue* tg1_10DOMElement_getAttributeNode(TypedValue* rv, HPHP::VM::ActRec* 
 TypedValue* tg1_10DOMElement_getAttributeNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_10DOMElement_getAttributeNode((rv), (this_), (Value*)(args-0));
+  th_10DOMElement_getAttributeNode((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -8168,7 +8168,7 @@ TypedValue* tg_10DOMElement_getAttributeNode(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_10DOMElement_getAttributeNode((&(rv)), (this_), (Value*)(args-0));
+          th_10DOMElement_getAttributeNode((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8216,7 +8216,7 @@ TypedValue* tg1_10DOMElement_getAttributeNodeNS(TypedValue* rv, HPHP::VM::ActRec
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10DOMElement_getAttributeNodeNS((Value*)(rv), (this_), (Value*)(args-0), (Value*)(args-1));
+  th_10DOMElement_getAttributeNodeNS((&rv->m_data), (this_), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -8230,7 +8230,7 @@ TypedValue* tg_10DOMElement_getAttributeNodeNS(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfObject;
-          th_10DOMElement_getAttributeNodeNS((Value*)(&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
+          th_10DOMElement_getAttributeNodeNS((&rv.m_data), (this_), &args[-0].m_data, &args[-1].m_data);
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8278,7 +8278,7 @@ TypedValue* tg1_10DOMElement_getAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10DOMElement_getAttributeNS((Value*)(rv), (this_), (Value*)(args-0), (Value*)(args-1));
+  th_10DOMElement_getAttributeNS((&rv->m_data), (this_), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -8292,7 +8292,7 @@ TypedValue* tg_10DOMElement_getAttributeNS(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfString;
-          th_10DOMElement_getAttributeNS((Value*)(&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
+          th_10DOMElement_getAttributeNS((&rv.m_data), (this_), &args[-0].m_data, &args[-1].m_data);
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8334,7 +8334,7 @@ TypedValue* tg1_10DOMElement_getElementsByTagName(TypedValue* rv, HPHP::VM::ActR
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
-  th_10DOMElement_getElementsByTagName((Value*)(rv), (this_), (Value*)(args-0));
+  th_10DOMElement_getElementsByTagName((&rv->m_data), (this_), &args[-0].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -8348,7 +8348,7 @@ TypedValue* tg_10DOMElement_getElementsByTagName(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfObject;
-          th_10DOMElement_getElementsByTagName((Value*)(&(rv)), (this_), (Value*)(args-0));
+          th_10DOMElement_getElementsByTagName((&rv.m_data), (this_), &args[-0].m_data);
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8396,7 +8396,7 @@ TypedValue* tg1_10DOMElement_getElementsByTagNameNS(TypedValue* rv, HPHP::VM::Ac
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10DOMElement_getElementsByTagNameNS((Value*)(rv), (this_), (Value*)(args-0), (Value*)(args-1));
+  th_10DOMElement_getElementsByTagNameNS((&rv->m_data), (this_), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -8410,7 +8410,7 @@ TypedValue* tg_10DOMElement_getElementsByTagNameNS(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfObject;
-          th_10DOMElement_getElementsByTagNameNS((Value*)(&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
+          th_10DOMElement_getElementsByTagNameNS((&rv.m_data), (this_), &args[-0].m_data, &args[-1].m_data);
           if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8451,7 +8451,7 @@ TypedValue* tg1_10DOMElement_hasAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_10DOMElement_hasAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_10DOMElement_hasAttribute((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -8464,7 +8464,7 @@ TypedValue* tg_10DOMElement_hasAttribute(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_10DOMElement_hasAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_10DOMElement_hasAttribute((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -8510,7 +8510,7 @@ TypedValue* tg1_10DOMElement_hasAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (th_10DOMElement_hasAttributeNS((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (th_10DOMElement_hasAttributeNS((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -8523,7 +8523,7 @@ TypedValue* tg_10DOMElement_hasAttributeNS(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_10DOMElement_hasAttributeNS((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+          rv.m_data.num = (th_10DOMElement_hasAttributeNS((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -8563,7 +8563,7 @@ TypedValue* tg1_10DOMElement_removeAttribute(TypedValue* rv, HPHP::VM::ActRec* a
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_10DOMElement_removeAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_10DOMElement_removeAttribute((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -8576,7 +8576,7 @@ TypedValue* tg_10DOMElement_removeAttribute(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_10DOMElement_removeAttribute((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_10DOMElement_removeAttribute((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -8616,7 +8616,7 @@ TypedValue* tg1_10DOMElement_removeAttributeNode(TypedValue* rv, HPHP::VM::ActRe
 TypedValue* tg1_10DOMElement_removeAttributeNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  th_10DOMElement_removeAttributeNode((rv), (this_), (Value*)(args-0));
+  th_10DOMElement_removeAttributeNode((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -8629,7 +8629,7 @@ TypedValue* tg_10DOMElement_removeAttributeNode(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
-          th_10DOMElement_removeAttributeNode((&(rv)), (this_), (Value*)(args-0));
+          th_10DOMElement_removeAttributeNode((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8676,7 +8676,7 @@ TypedValue* tg1_10DOMElement_removeAttributeNS(TypedValue* rv, HPHP::VM::ActRec*
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10DOMElement_removeAttributeNS((rv), (this_), (Value*)(args-0), (Value*)(args-1));
+  th_10DOMElement_removeAttributeNS((rv), (this_), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -8689,7 +8689,7 @@ TypedValue* tg_10DOMElement_removeAttributeNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_10DOMElement_removeAttributeNS((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
+          th_10DOMElement_removeAttributeNS((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8736,7 +8736,7 @@ TypedValue* tg1_10DOMElement_setAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10DOMElement_setAttribute((rv), (this_), (Value*)(args-0), (Value*)(args-1));
+  th_10DOMElement_setAttribute((rv), (this_), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -8749,7 +8749,7 @@ TypedValue* tg_10DOMElement_setAttribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_10DOMElement_setAttribute((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
+          th_10DOMElement_setAttribute((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8790,7 +8790,7 @@ TypedValue* tg1_10DOMElement_setAttributeNode(TypedValue* rv, HPHP::VM::ActRec* 
 TypedValue* tg1_10DOMElement_setAttributeNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  th_10DOMElement_setAttributeNode((rv), (this_), (Value*)(args-0));
+  th_10DOMElement_setAttributeNode((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -8803,7 +8803,7 @@ TypedValue* tg_10DOMElement_setAttributeNode(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
-          th_10DOMElement_setAttributeNode((&(rv)), (this_), (Value*)(args-0));
+          th_10DOMElement_setAttributeNode((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8844,7 +8844,7 @@ TypedValue* tg1_10DOMElement_setAttributeNodeNS(TypedValue* rv, HPHP::VM::ActRec
 TypedValue* tg1_10DOMElement_setAttributeNodeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  th_10DOMElement_setAttributeNodeNS((rv), (this_), (Value*)(args-0));
+  th_10DOMElement_setAttributeNodeNS((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -8857,7 +8857,7 @@ TypedValue* tg_10DOMElement_setAttributeNodeNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if ((args-0)->m_type == KindOfObject) {
-          th_10DOMElement_setAttributeNodeNS((&(rv)), (this_), (Value*)(args-0));
+          th_10DOMElement_setAttributeNodeNS((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8908,7 +8908,7 @@ TypedValue* tg1_10DOMElement_setAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10DOMElement_setAttributeNS((rv), (this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2));
+  th_10DOMElement_setAttributeNS((rv), (this_), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -8921,7 +8921,7 @@ TypedValue* tg_10DOMElement_setAttributeNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 3LL) {
         if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_10DOMElement_setAttributeNS((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2));
+          th_10DOMElement_setAttributeNS((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -8968,7 +8968,7 @@ TypedValue* tg1_10DOMElement_setIDAttribute(TypedValue* rv, HPHP::VM::ActRec* ar
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10DOMElement_setIDAttribute((rv), (this_), (Value*)(args-0), (bool)(args[-1].m_data.num));
+  th_10DOMElement_setIDAttribute((rv), (this_), &args[-0].m_data, (bool)(args[-1].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -8981,7 +8981,7 @@ TypedValue* tg_10DOMElement_setIDAttribute(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if ((args-1)->m_type == KindOfBoolean && IS_STRING_TYPE((args-0)->m_type)) {
-          th_10DOMElement_setIDAttribute((&(rv)), (this_), (Value*)(args-0), (bool)(args[-1].m_data.num));
+          th_10DOMElement_setIDAttribute((&(rv)), (this_), &args[-0].m_data, (bool)(args[-1].m_data.num));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9028,7 +9028,7 @@ TypedValue* tg1_10DOMElement_setIDAttributeNode(TypedValue* rv, HPHP::VM::ActRec
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  th_10DOMElement_setIDAttributeNode((rv), (this_), (Value*)(args-0), (bool)(args[-1].m_data.num));
+  th_10DOMElement_setIDAttributeNode((rv), (this_), &args[-0].m_data, (bool)(args[-1].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -9041,7 +9041,7 @@ TypedValue* tg_10DOMElement_setIDAttributeNode(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if ((args-1)->m_type == KindOfBoolean && (args-0)->m_type == KindOfObject) {
-          th_10DOMElement_setIDAttributeNode((&(rv)), (this_), (Value*)(args-0), (bool)(args[-1].m_data.num));
+          th_10DOMElement_setIDAttributeNode((&(rv)), (this_), &args[-0].m_data, (bool)(args[-1].m_data.num));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9092,7 +9092,7 @@ TypedValue* tg1_10DOMElement_setIDAttributeNS(TypedValue* rv, HPHP::VM::ActRec* 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10DOMElement_setIDAttributeNS((rv), (this_), (Value*)(args-0), (Value*)(args-1), (bool)(args[-2].m_data.num));
+  th_10DOMElement_setIDAttributeNS((rv), (this_), &args[-0].m_data, &args[-1].m_data, (bool)(args[-2].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -9105,7 +9105,7 @@ TypedValue* tg_10DOMElement_setIDAttributeNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 3LL) {
         if ((args-2)->m_type == KindOfBoolean && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_10DOMElement_setIDAttributeNS((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1), (bool)(args[-2].m_data.num));
+          th_10DOMElement_setIDAttributeNS((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data, (bool)(args[-2].m_data.num));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -9430,7 +9430,7 @@ TypedValue* tg1_18DOMEntityReference___construct(TypedValue* rv, HPHP::VM::ActRe
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
-  th_18DOMEntityReference___construct((this_), (Value*)(args-0));
+  th_18DOMEntityReference___construct((this_), &args[-0].m_data);
   return rv;
 }
 
@@ -9444,7 +9444,7 @@ TypedValue* tg_18DOMEntityReference___construct(HPHP::VM::ActRec *ar) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_18DOMEntityReference___construct((this_), (Value*)(args-0));
+          th_18DOMEntityReference___construct((this_), &args[-0].m_data);
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -9665,7 +9665,7 @@ TypedValue* tg1_24DOMProcessingInstruction___construct(TypedValue* rv, HPHP::VM:
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_24DOMProcessingInstruction___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+  th_24DOMProcessingInstruction___construct((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -9679,7 +9679,7 @@ TypedValue* tg_24DOMProcessingInstruction___construct(HPHP::VM::ActRec *ar) {
         if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_24DOMProcessingInstruction___construct((this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+          th_24DOMProcessingInstruction___construct((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -10110,7 +10110,7 @@ TypedValue* tg1_15DOMNamedNodeMap_getNamedItem(TypedValue* rv, HPHP::VM::ActRec*
 TypedValue* tg1_15DOMNamedNodeMap_getNamedItem(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_15DOMNamedNodeMap_getNamedItem((rv), (this_), (Value*)(args-0));
+  th_15DOMNamedNodeMap_getNamedItem((rv), (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10123,7 +10123,7 @@ TypedValue* tg_15DOMNamedNodeMap_getNamedItem(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_15DOMNamedNodeMap_getNamedItem((&(rv)), (this_), (Value*)(args-0));
+          th_15DOMNamedNodeMap_getNamedItem((&(rv)), (this_), &args[-0].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10170,7 +10170,7 @@ TypedValue* tg1_15DOMNamedNodeMap_getNamedItemNS(TypedValue* rv, HPHP::VM::ActRe
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_15DOMNamedNodeMap_getNamedItemNS((rv), (this_), (Value*)(args-0), (Value*)(args-1));
+  th_15DOMNamedNodeMap_getNamedItemNS((rv), (this_), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10183,7 +10183,7 @@ TypedValue* tg_15DOMNamedNodeMap_getNamedItemNS(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_15DOMNamedNodeMap_getNamedItemNS((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1));
+          th_15DOMNamedNodeMap_getNamedItemNS((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data);
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10743,7 +10743,7 @@ TypedValue* tg1_17DOMImplementation_createDocument(TypedValue* rv, HPHP::VM::Act
   case 0:
     break;
   }
-  th_17DOMImplementation_createDocument((rv), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_object));
+  th_17DOMImplementation_createDocument((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_object));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10756,7 +10756,7 @@ TypedValue* tg_17DOMImplementation_createDocument(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 3LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfObject) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-          th_17DOMImplementation_createDocument((&(rv)), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_object));
+          th_17DOMImplementation_createDocument((&(rv)), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_object));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10814,7 +10814,7 @@ TypedValue* tg1_17DOMImplementation_createDocumentType(TypedValue* rv, HPHP::VM:
   case 0:
     break;
   }
-  th_17DOMImplementation_createDocumentType((rv), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+  th_17DOMImplementation_createDocumentType((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10827,7 +10827,7 @@ TypedValue* tg_17DOMImplementation_createDocumentType(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 3LL) {
         if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-          th_17DOMImplementation_createDocumentType((&(rv)), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string));
+          th_17DOMImplementation_createDocumentType((&(rv)), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 3);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -10874,7 +10874,7 @@ TypedValue* tg1_17DOMImplementation_hasFeature(TypedValue* rv, HPHP::VM::ActRec*
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (th_17DOMImplementation_hasFeature((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (th_17DOMImplementation_hasFeature((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -10887,7 +10887,7 @@ TypedValue* tg_17DOMImplementation_hasFeature(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_17DOMImplementation_hasFeature((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+          rv.m_data.num = (th_17DOMImplementation_hasFeature((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -10985,7 +10985,7 @@ TypedValue* tg1_8DOMXPath_evaluate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_8DOMXPath_evaluate((rv), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_object));
+  th_8DOMXPath_evaluate((rv), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_object));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -10998,7 +10998,7 @@ TypedValue* tg_8DOMXPath_evaluate(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfObject) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_8DOMXPath_evaluate((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_object));
+          th_8DOMXPath_evaluate((&(rv)), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_object));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11050,7 +11050,7 @@ TypedValue* tg1_8DOMXPath_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_8DOMXPath_query((rv), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_object));
+  th_8DOMXPath_query((rv), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_object));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -11063,7 +11063,7 @@ TypedValue* tg_8DOMXPath_query(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfObject) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_8DOMXPath_query((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_object));
+          th_8DOMXPath_query((&(rv)), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_object));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -11110,7 +11110,7 @@ TypedValue* tg1_8DOMXPath_registerNamespace(TypedValue* rv, HPHP::VM::ActRec* ar
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (th_8DOMXPath_registerNamespace((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (th_8DOMXPath_registerNamespace((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -11123,7 +11123,7 @@ TypedValue* tg_8DOMXPath_registerNamespace(HPHP::VM::ActRec *ar) {
       if (count == 2LL) {
         if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_8DOMXPath_registerNamespace((this_), (Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+          rv.m_data.num = (th_8DOMXPath_registerNamespace((this_), &args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;

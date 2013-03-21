@@ -40,7 +40,7 @@ TypedValue* fg_get_defined_functions(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_get_defined_functions((Value*)(&(rv)));
+      fh_get_defined_functions((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -84,7 +84,7 @@ TypedValue * fg1_function_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_function_exists((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_function_exists(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -95,7 +95,7 @@ TypedValue* fg_function_exists(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_function_exists((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_function_exists(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -237,7 +237,7 @@ TypedValue * fg1_call_user_func_array_async(TypedValue* rv, HPHP::VM::ActRec* ar
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToArrayInPlace(args-1);
-  fh_call_user_func_array_async((Value*)(rv), (args-0), (Value*)(args-1));
+  fh_call_user_func_array_async((&rv->m_data), (args-0), &args[-1].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -249,7 +249,7 @@ TypedValue* fg_call_user_func_array_async(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray) {
         rv.m_type = KindOfObject;
-        fh_call_user_func_array_async((Value*)(&(rv)), (args-0), (Value*)(args-1));
+        fh_call_user_func_array_async((&rv.m_data), (args-0), &args[-1].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -305,7 +305,7 @@ TypedValue* fg_call_user_func_async(HPHP::VM::ActRec *ar) {
         }
         extraArgs = ai.create();
       }
-      fh_call_user_func_async((Value*)(&(rv)), (count), (args-0), (Value*)(&extraArgs));
+      fh_call_user_func_async((&rv.m_data), (count), (args-0), (Value*)(&extraArgs));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 1);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -403,7 +403,7 @@ TypedValue * fg1_end_user_func_async(TypedValue* rv, HPHP::VM::ActRec* ar, int64
     tvCastToObjectInPlace(args-0);
   }
   Variant defVal2;
-  fh_end_user_func_async((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_GLOBAL_STATE_IGNORE), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+  fh_end_user_func_async((rv), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_GLOBAL_STATE_IGNORE), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -415,7 +415,7 @@ TypedValue* fg_end_user_func_async(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
         Variant defVal2;
-        fh_end_user_func_async((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_GLOBAL_STATE_IGNORE), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+        fh_end_user_func_async((&(rv)), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(k_GLOBAL_STATE_IGNORE), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -455,7 +455,7 @@ TypedValue * fg1_call_user_func_serialized(TypedValue* rv, HPHP::VM::ActRec* ar,
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  fh_call_user_func_serialized((Value*)(rv), (Value*)(args-0));
+  fh_call_user_func_serialized((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -467,7 +467,7 @@ TypedValue* fg_call_user_func_serialized(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_call_user_func_serialized((Value*)(&(rv)), (Value*)(args-0));
+        fh_call_user_func_serialized((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -525,7 +525,7 @@ TypedValue * fg1_call_user_func_array_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_call_user_func_array_rpc((rv), (Value*)(args-0), (int)(args[-1].m_data.num), (Value*)(args-2), (int)(args[-3].m_data.num), (args-4), (Value*)(args-5));
+  fh_call_user_func_array_rpc((rv), &args[-0].m_data, (int)(args[-1].m_data.num), &args[-2].m_data, (int)(args[-3].m_data.num), (args-4), &args[-5].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -536,7 +536,7 @@ TypedValue* fg_call_user_func_array_rpc(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 6LL) {
       if ((args-5)->m_type == KindOfArray && (args-3)->m_type == KindOfInt64 && IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_call_user_func_array_rpc((&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num), (Value*)(args-2), (int)(args[-3].m_data.num), (args-4), (Value*)(args-5));
+        fh_call_user_func_array_rpc((&(rv)), &args[-0].m_data, (int)(args[-1].m_data.num), &args[-2].m_data, (int)(args[-3].m_data.num), (args-4), &args[-5].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 6);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -605,7 +605,7 @@ TypedValue * fg1_call_user_func_rpc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
     }
     extraArgs = ai.create();
   }
-  fh_call_user_func_rpc((rv), (count), (Value*)(args-0), (int)(args[-1].m_data.num), (Value*)(args-2), (int)(args[-3].m_data.num), (args-4), (Value*)(&extraArgs));
+  fh_call_user_func_rpc((rv), (count), &args[-0].m_data, (int)(args[-1].m_data.num), &args[-2].m_data, (int)(args[-3].m_data.num), (args-4), (Value*)(&extraArgs));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -629,7 +629,7 @@ TypedValue* fg_call_user_func_rpc(HPHP::VM::ActRec *ar) {
           }
           extraArgs = ai.create();
         }
-        fh_call_user_func_rpc((&(rv)), (count), (Value*)(args-0), (int)(args[-1].m_data.num), (Value*)(args-2), (int)(args[-3].m_data.num), (args-4), (Value*)(&extraArgs));
+        fh_call_user_func_rpc((&(rv)), (count), &args[-0].m_data, (int)(args[-1].m_data.num), &args[-2].m_data, (int)(args[-3].m_data.num), (args-4), (Value*)(&extraArgs));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -669,7 +669,7 @@ TypedValue * fg1_forward_static_call_array(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue * fg1_forward_static_call_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToArrayInPlace(args-1);
-  fh_forward_static_call_array((rv), (args-0), (Value*)(args-1));
+  fh_forward_static_call_array((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -680,7 +680,7 @@ TypedValue* fg_forward_static_call_array(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray) {
-        fh_forward_static_call_array((&(rv)), (args-0), (Value*)(args-1));
+        fh_forward_static_call_array((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -808,7 +808,7 @@ TypedValue * fg1_create_function(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_create_function((Value*)(rv), (Value*)(args-0), (Value*)(args-1));
+  fh_create_function((&rv->m_data), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -820,7 +820,7 @@ TypedValue* fg_create_function(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        fh_create_function((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_create_function((&rv.m_data), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -910,7 +910,7 @@ TypedValue* fg_func_get_args(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_func_get_args((Value*)(&(rv)));
+      fh_func_get_args((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));

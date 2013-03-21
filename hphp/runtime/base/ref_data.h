@@ -55,6 +55,12 @@ public:
   const Variant* var() const { return (const Variant*)&m_tv; }
   Variant* var() { return (Variant*)&m_tv; }
 
+  static constexpr size_t tvOffset() { return offsetof(RefData, m_tv); }
+
+  // TODO: t2221110: get rid of this hack.
+  static RefData* refDataFromVariantIfYouDare(const Variant* var) {
+    return reinterpret_cast<RefData*>(uintptr_t(var) - tvOffset());
+  }
 
 private:
   // initialize this value by laundering uninitNull -> Null

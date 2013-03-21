@@ -43,7 +43,7 @@ TypedValue* fg_json_encode(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       rv.m_type = KindOfString;
       Variant defVal1 = 0;
-      fh_json_encode((Value*)(&(rv)), (args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+      fh_json_encode((&rv.m_data), (args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 2);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -90,7 +90,7 @@ TypedValue * fg1_json_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
     tvCastToStringInPlace(args-0);
   }
   Variant defVal2 = 0;
-  fh_json_decode((rv), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+  fh_json_decode((rv), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -102,7 +102,7 @@ TypedValue* fg_json_decode(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
         Variant defVal2 = 0;
-        fh_json_decode((&(rv)), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+        fh_json_decode((&(rv)), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

@@ -87,7 +87,7 @@ TypedValue* tg1_22ContinuationWaitHandle_start(TypedValue* rv, HPHP::VM::ActRec*
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
-  th_22ContinuationWaitHandle_start((Value*)(rv), ("ContinuationWaitHandle"), (Value*)(args-0));
+  th_22ContinuationWaitHandle_start((&rv->m_data), ("ContinuationWaitHandle"), &args[-0].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -99,7 +99,7 @@ TypedValue* tg_22ContinuationWaitHandle_start(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        th_22ContinuationWaitHandle_start((Value*)(&(rv)), ("ContinuationWaitHandle"), (Value*)(args-0));
+        th_22ContinuationWaitHandle_start((&rv.m_data), ("ContinuationWaitHandle"), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -203,7 +203,7 @@ TypedValue* tg_22ContinuationWaitHandle_getPrivData(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfObject;
-        th_22ContinuationWaitHandle_getPrivData((Value*)(&(rv)), (this_));
+        th_22ContinuationWaitHandle_getPrivData((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -238,7 +238,7 @@ TypedValue* tg1_22ContinuationWaitHandle_setPrivData(TypedValue* rv, HPHP::VM::A
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
-  th_22ContinuationWaitHandle_setPrivData((this_), (Value*)(args-0));
+  th_22ContinuationWaitHandle_setPrivData((this_), &args[-0].m_data);
   return rv;
 }
 
@@ -252,7 +252,7 @@ TypedValue* tg_22ContinuationWaitHandle_setPrivData(HPHP::VM::ActRec *ar) {
         if ((args-0)->m_type == KindOfObject) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_22ContinuationWaitHandle_setPrivData((this_), (Value*)(args-0));
+          th_22ContinuationWaitHandle_setPrivData((this_), &args[-0].m_data);
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;

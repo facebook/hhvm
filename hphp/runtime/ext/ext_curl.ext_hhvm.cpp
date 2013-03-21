@@ -39,7 +39,7 @@ TypedValue * fg1_curl_init(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
 TypedValue * fg1_curl_init(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_curl_init((rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  fh_curl_init((rv), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -50,7 +50,7 @@ TypedValue* fg_curl_init(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        fh_curl_init((&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+        fh_curl_init((&(rv)), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -89,7 +89,7 @@ TypedValue * fg1_curl_copy_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_curl_copy_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_curl_copy_handle((rv), (Value*)(args-0));
+  fh_curl_copy_handle((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -100,7 +100,7 @@ TypedValue* fg_curl_copy_handle(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_curl_copy_handle((&(rv)), (Value*)(args-0));
+        fh_curl_copy_handle((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -196,7 +196,7 @@ TypedValue * fg1_curl_setopt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_curl_setopt((Value*)(args-0), (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_curl_setopt(&args[-0].m_data, (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -207,7 +207,7 @@ TypedValue* fg_curl_setopt(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_curl_setopt((Value*)(args-0), (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_curl_setopt(&args[-0].m_data, (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -251,7 +251,7 @@ TypedValue * fg1_curl_setopt_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_curl_setopt_array((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_curl_setopt_array(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -262,7 +262,7 @@ TypedValue* fg_curl_setopt_array(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_curl_setopt_array((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_curl_setopt_array(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -311,7 +311,7 @@ TypedValue * fg1_fb_curl_getopt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_fb_curl_getopt((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
+  fh_fb_curl_getopt((rv), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -322,7 +322,7 @@ TypedValue* fg_fb_curl_getopt(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
-        fh_fb_curl_getopt((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
+        fh_fb_curl_getopt((&(rv)), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -361,7 +361,7 @@ TypedValue * fg1_curl_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
 TypedValue * fg1_curl_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_curl_exec((rv), (Value*)(args-0));
+  fh_curl_exec((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -372,7 +372,7 @@ TypedValue* fg_curl_exec(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_curl_exec((&(rv)), (Value*)(args-0));
+        fh_curl_exec((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -422,7 +422,7 @@ TypedValue * fg1_curl_getinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_curl_getinfo((rv), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
+  fh_curl_getinfo((rv), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -433,7 +433,7 @@ TypedValue* fg_curl_getinfo(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
-        fh_curl_getinfo((&(rv)), (Value*)(args-0), (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
+        fh_curl_getinfo((&(rv)), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -472,7 +472,7 @@ TypedValue * fg1_curl_errno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
 TypedValue * fg1_curl_errno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_curl_errno((rv), (Value*)(args-0));
+  fh_curl_errno((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -483,7 +483,7 @@ TypedValue* fg_curl_errno(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_curl_errno((&(rv)), (Value*)(args-0));
+        fh_curl_errno((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -522,7 +522,7 @@ TypedValue * fg1_curl_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
 TypedValue * fg1_curl_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_curl_error((rv), (Value*)(args-0));
+  fh_curl_error((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -533,7 +533,7 @@ TypedValue* fg_curl_error(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_curl_error((&(rv)), (Value*)(args-0));
+        fh_curl_error((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -572,7 +572,7 @@ TypedValue * fg1_curl_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
 TypedValue * fg1_curl_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_curl_close((rv), (Value*)(args-0));
+  fh_curl_close((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -583,7 +583,7 @@ TypedValue* fg_curl_close(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_curl_close((&(rv)), (Value*)(args-0));
+        fh_curl_close((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -623,7 +623,7 @@ TypedValue* fg_curl_multi_init(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfObject;
-      fh_curl_multi_init((Value*)(&(rv)));
+      fh_curl_multi_init((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -662,7 +662,7 @@ TypedValue * fg1_curl_multi_add_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_curl_multi_add_handle((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_curl_multi_add_handle((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -673,7 +673,7 @@ TypedValue* fg_curl_multi_add_handle(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_curl_multi_add_handle((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_curl_multi_add_handle((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -718,7 +718,7 @@ TypedValue * fg1_curl_multi_remove_handle(TypedValue* rv, HPHP::VM::ActRec* ar, 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_curl_multi_remove_handle((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_curl_multi_remove_handle((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -729,7 +729,7 @@ TypedValue* fg_curl_multi_remove_handle(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_curl_multi_remove_handle((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_curl_multi_remove_handle((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -769,7 +769,7 @@ TypedValue * fg1_curl_multi_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
 TypedValue * fg1_curl_multi_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_curl_multi_exec((rv), (Value*)(args-0), (args-1));
+  fh_curl_multi_exec((rv), &args[-0].m_data, (args-1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -780,7 +780,7 @@ TypedValue* fg_curl_multi_exec(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_curl_multi_exec((&(rv)), (Value*)(args-0), (args-1));
+        fh_curl_multi_exec((&(rv)), &args[-0].m_data, (args-1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -830,7 +830,7 @@ TypedValue * fg1_curl_multi_select(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_curl_multi_select((rv), (Value*)(args-0), (count > 1) ? (args[-1].m_data.dbl) : (double)(1.0));
+  fh_curl_multi_select((rv), &args[-0].m_data, (count > 1) ? (args[-1].m_data.dbl) : (double)(1.0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -841,7 +841,7 @@ TypedValue* fg_curl_multi_select(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfDouble) && (args-0)->m_type == KindOfObject) {
-        fh_curl_multi_select((&(rv)), (Value*)(args-0), (count > 1) ? (args[-1].m_data.dbl) : (double)(1.0));
+        fh_curl_multi_select((&(rv)), &args[-0].m_data, (count > 1) ? (args[-1].m_data.dbl) : (double)(1.0));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -885,7 +885,7 @@ TypedValue * fg1_fb_curl_multi_fdset(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   VRefParamValue defVal4 = null_object;
-  fh_fb_curl_multi_fdset((rv), (Value*)(args-0), (args-1), (args-2), (args-3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
+  fh_fb_curl_multi_fdset((rv), &args[-0].m_data, (args-1), (args-2), (args-3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -897,7 +897,7 @@ TypedValue* fg_fb_curl_multi_fdset(HPHP::VM::ActRec *ar) {
     if (count >= 4LL && count <= 5LL) {
       if ((args-0)->m_type == KindOfObject) {
         VRefParamValue defVal4 = null_object;
-        fh_fb_curl_multi_fdset((&(rv)), (Value*)(args-0), (args-1), (args-2), (args-3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
+        fh_fb_curl_multi_fdset((&(rv)), &args[-0].m_data, (args-1), (args-2), (args-3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -936,7 +936,7 @@ TypedValue * fg1_curl_multi_getcontent(TypedValue* rv, HPHP::VM::ActRec* ar, int
 TypedValue * fg1_curl_multi_getcontent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_curl_multi_getcontent((rv), (Value*)(args-0));
+  fh_curl_multi_getcontent((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -947,7 +947,7 @@ TypedValue* fg_curl_multi_getcontent(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_curl_multi_getcontent((&(rv)), (Value*)(args-0));
+        fh_curl_multi_getcontent((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -988,7 +988,7 @@ TypedValue * fg1_curl_multi_info_read(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   VRefParamValue defVal1 = uninit_null();
-  fh_curl_multi_info_read((rv), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  fh_curl_multi_info_read((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1000,7 +1000,7 @@ TypedValue* fg_curl_multi_info_read(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((args-0)->m_type == KindOfObject) {
         VRefParamValue defVal1 = uninit_null();
-        fh_curl_multi_info_read((&(rv)), (Value*)(args-0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        fh_curl_multi_info_read((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1039,7 +1039,7 @@ TypedValue * fg1_curl_multi_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
 TypedValue * fg1_curl_multi_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_curl_multi_close((rv), (Value*)(args-0));
+  fh_curl_multi_close((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1050,7 +1050,7 @@ TypedValue* fg_curl_multi_close(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_curl_multi_close((&(rv)), (Value*)(args-0));
+        fh_curl_multi_close((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1104,7 +1104,7 @@ TypedValue * fg1_evhttp_set_cache(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_evhttp_set_cache((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(80));
+  fh_evhttp_set_cache(&args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(80));
   return rv;
 }
 
@@ -1116,7 +1116,7 @@ TypedValue* fg_evhttp_set_cache(HPHP::VM::ActRec *ar) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_evhttp_set_cache((Value*)(args-0), (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(80));
+        fh_evhttp_set_cache(&args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(80));
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1170,7 +1170,7 @@ TypedValue * fg1_evhttp_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_evhttp_get((rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array), (count > 2) ? (int)(args[-2].m_data.num) : (int)(5));
+  fh_evhttp_get((rv), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array), (count > 2) ? (int)(args[-2].m_data.num) : (int)(5));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1181,7 +1181,7 @@ TypedValue* fg_evhttp_get(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfArray) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_evhttp_get((&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array), (count > 2) ? (int)(args[-2].m_data.num) : (int)(5));
+        fh_evhttp_get((&(rv)), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array), (count > 2) ? (int)(args[-2].m_data.num) : (int)(5));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1240,7 +1240,7 @@ TypedValue * fg1_evhttp_post(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_evhttp_post((rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_array), (count > 3) ? (int)(args[-3].m_data.num) : (int)(5));
+  fh_evhttp_post((rv), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_array), (count > 3) ? (int)(args[-3].m_data.num) : (int)(5));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1251,7 +1251,7 @@ TypedValue* fg_evhttp_post(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfArray) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_evhttp_post((&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_array), (count > 3) ? (int)(args[-3].m_data.num) : (int)(5));
+        fh_evhttp_post((&(rv)), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_array), (count > 3) ? (int)(args[-3].m_data.num) : (int)(5));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1306,7 +1306,7 @@ TypedValue * fg1_evhttp_async_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_evhttp_async_get((rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array), (count > 2) ? (int)(args[-2].m_data.num) : (int)(5));
+  fh_evhttp_async_get((rv), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array), (count > 2) ? (int)(args[-2].m_data.num) : (int)(5));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1317,7 +1317,7 @@ TypedValue* fg_evhttp_async_get(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfArray) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_evhttp_async_get((&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array), (count > 2) ? (int)(args[-2].m_data.num) : (int)(5));
+        fh_evhttp_async_get((&(rv)), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array), (count > 2) ? (int)(args[-2].m_data.num) : (int)(5));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1376,7 +1376,7 @@ TypedValue * fg1_evhttp_async_post(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_evhttp_async_post((rv), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_array), (count > 3) ? (int)(args[-3].m_data.num) : (int)(5));
+  fh_evhttp_async_post((rv), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_array), (count > 3) ? (int)(args[-3].m_data.num) : (int)(5));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1387,7 +1387,7 @@ TypedValue* fg_evhttp_async_post(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 2LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfArray) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_evhttp_async_post((&(rv)), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_array), (count > 3) ? (int)(args[-3].m_data.num) : (int)(5));
+        fh_evhttp_async_post((&(rv)), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_array), (count > 3) ? (int)(args[-3].m_data.num) : (int)(5));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1426,7 +1426,7 @@ TypedValue * fg1_evhttp_recv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
 TypedValue * fg1_evhttp_recv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
-  fh_evhttp_recv((rv), (Value*)(args-0));
+  fh_evhttp_recv((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1437,7 +1437,7 @@ TypedValue* fg_evhttp_recv(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
-        fh_evhttp_recv((&(rv)), (Value*)(args-0));
+        fh_evhttp_recv((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

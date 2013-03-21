@@ -243,7 +243,7 @@ TypedValue * fg1_base_convert(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_base_convert((rv), (Value*)(args-0), (long)(args[-1].m_data.num), (long)(args[-2].m_data.num));
+  fh_base_convert((rv), &args[-0].m_data, (long)(args[-1].m_data.num), (long)(args[-2].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -254,7 +254,7 @@ TypedValue* fg_base_convert(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_base_convert((&(rv)), (Value*)(args-0), (long)(args[-1].m_data.num), (long)(args[-2].m_data.num));
+        fh_base_convert((&(rv)), &args[-0].m_data, (long)(args[-1].m_data.num), (long)(args[-2].m_data.num));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

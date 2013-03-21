@@ -87,7 +87,7 @@ TypedValue* tg1_25StaticExceptionWaitHandle_create(TypedValue* rv, HPHP::VM::Act
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
-  th_25StaticExceptionWaitHandle_create((Value*)(rv), ("StaticExceptionWaitHandle"), (Value*)(args-0));
+  th_25StaticExceptionWaitHandle_create((&rv->m_data), ("StaticExceptionWaitHandle"), &args[-0].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -99,7 +99,7 @@ TypedValue* tg_25StaticExceptionWaitHandle_create(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfObject;
-        th_25StaticExceptionWaitHandle_create((Value*)(&(rv)), ("StaticExceptionWaitHandle"), (Value*)(args-0));
+        th_25StaticExceptionWaitHandle_create((&rv.m_data), ("StaticExceptionWaitHandle"), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

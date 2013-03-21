@@ -136,7 +136,7 @@ TypedValue * fg1_asio_get_running_in_context(TypedValue* rv, HPHP::VM::ActRec* a
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToInt64InPlace(args-0);
-  fh_asio_get_running_in_context((Value*)(rv), (int)(args[-0].m_data.num));
+  fh_asio_get_running_in_context((&rv->m_data), (int)(args[-0].m_data.num));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -148,7 +148,7 @@ TypedValue* fg_asio_get_running_in_context(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
         rv.m_type = KindOfObject;
-        fh_asio_get_running_in_context((Value*)(&(rv)), (int)(args[-0].m_data.num));
+        fh_asio_get_running_in_context((&rv.m_data), (int)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -188,7 +188,7 @@ TypedValue* fg_asio_get_running(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfObject;
-      fh_asio_get_running((Value*)(&(rv)));
+      fh_asio_get_running((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -222,7 +222,7 @@ TypedValue* fg_asio_get_current(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfObject;
-      fh_asio_get_current((Value*)(&(rv)));
+      fh_asio_get_current((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));

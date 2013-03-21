@@ -51,7 +51,7 @@ TypedValue * fg1_ldap_connect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   case 0:
     break;
   }
-  fh_ldap_connect((rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (int)(args[-1].m_data.num) : (int)(389));
+  fh_ldap_connect((rv), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? (int)(args[-1].m_data.num) : (int)(389));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -62,7 +62,7 @@ TypedValue* fg_ldap_connect(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-        fh_ldap_connect((&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string), (count > 1) ? (int)(args[-1].m_data.num) : (int)(389));
+        fh_ldap_connect((&(rv)), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? (int)(args[-1].m_data.num) : (int)(389));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -107,7 +107,7 @@ TypedValue * fg1_ldap_explode_dn(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_ldap_explode_dn((rv), (Value*)(args-0), (int)(args[-1].m_data.num));
+  fh_ldap_explode_dn((rv), &args[-0].m_data, (int)(args[-1].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -118,7 +118,7 @@ TypedValue* fg_ldap_explode_dn(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_ldap_explode_dn((&(rv)), (Value*)(args-0), (int)(args[-1].m_data.num));
+        fh_ldap_explode_dn((&(rv)), &args[-0].m_data, (int)(args[-1].m_data.num));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -157,7 +157,7 @@ TypedValue * fg1_ldap_dn2ufn(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
 TypedValue * fg1_ldap_dn2ufn(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_ldap_dn2ufn((rv), (Value*)(args-0));
+  fh_ldap_dn2ufn((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -168,7 +168,7 @@ TypedValue* fg_ldap_dn2ufn(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_ldap_dn2ufn((&(rv)), (Value*)(args-0));
+        fh_ldap_dn2ufn((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -208,7 +208,7 @@ TypedValue * fg1_ldap_err2str(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
-  fh_ldap_err2str((Value*)(rv), (int)(args[-0].m_data.num));
+  fh_ldap_err2str((&rv->m_data), (int)(args[-0].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -220,7 +220,7 @@ TypedValue* fg_ldap_err2str(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
         rv.m_type = KindOfString;
-        fh_ldap_err2str((Value*)(&(rv)), (int)(args[-0].m_data.num));
+        fh_ldap_err2str((&rv.m_data), (int)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -269,7 +269,7 @@ TypedValue * fg1_ldap_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_ldap_add((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_add(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -280,7 +280,7 @@ TypedValue* fg_ldap_add(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_add((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_add(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -328,7 +328,7 @@ TypedValue * fg1_ldap_mod_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_ldap_mod_add((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_mod_add(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -339,7 +339,7 @@ TypedValue* fg_ldap_mod_add(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_mod_add((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_mod_add(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -387,7 +387,7 @@ TypedValue * fg1_ldap_mod_del(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_ldap_mod_del((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_mod_del(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -398,7 +398,7 @@ TypedValue* fg_ldap_mod_del(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_mod_del((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_mod_del(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -446,7 +446,7 @@ TypedValue * fg1_ldap_mod_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_ldap_mod_replace((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_mod_replace(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -457,7 +457,7 @@ TypedValue* fg_ldap_mod_replace(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_mod_replace((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_mod_replace(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -505,7 +505,7 @@ TypedValue * fg1_ldap_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_ldap_modify((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_modify(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -516,7 +516,7 @@ TypedValue* fg_ldap_modify(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_modify((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_modify(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -570,7 +570,7 @@ TypedValue * fg1_ldap_bind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_ldap_bind((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_bind(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -581,7 +581,7 @@ TypedValue* fg_ldap_bind(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 3LL) {
       if ((count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_bind((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_bind(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -620,7 +620,7 @@ TypedValue * fg1_ldap_set_rebind_proc(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_ldap_set_rebind_proc((Value*)(args-0), (args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_set_rebind_proc(&args[-0].m_data, (args-1))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -631,7 +631,7 @@ TypedValue* fg_ldap_set_rebind_proc(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_set_rebind_proc((Value*)(args-0), (args-1))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_set_rebind_proc(&args[-0].m_data, (args-1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -679,7 +679,7 @@ TypedValue * fg1_ldap_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_ldap_sort((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_sort(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -690,7 +690,7 @@ TypedValue* fg_ldap_sort(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_sort((Value*)(args-0), (Value*)(args-1), (Value*)(args-2))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_sort(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -728,7 +728,7 @@ TypedValue * fg1_ldap_start_tls(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_ldap_start_tls((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_start_tls(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -739,7 +739,7 @@ TypedValue* fg_ldap_start_tls(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_start_tls((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_start_tls(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -777,7 +777,7 @@ TypedValue * fg1_ldap_unbind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_ldap_unbind((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_unbind(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -788,7 +788,7 @@ TypedValue* fg_ldap_unbind(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_unbind((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_unbind(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -833,7 +833,7 @@ TypedValue * fg1_ldap_get_option(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_ldap_get_option((Value*)(args-0), (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_get_option(&args[-0].m_data, (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -844,7 +844,7 @@ TypedValue* fg_ldap_get_option(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_get_option((Value*)(args-0), (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_get_option(&args[-0].m_data, (int)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -933,7 +933,7 @@ TypedValue * fg1_ldap_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_ldap_close((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_close(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -944,7 +944,7 @@ TypedValue* fg_ldap_close(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_close((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_close(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1012,7 +1012,7 @@ TypedValue * fg1_ldap_list(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   case 3:
     break;
   }
-  fh_ldap_list((rv), (args-0), (args-1), (args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
+  fh_ldap_list((rv), (args-0), (args-1), (args-2), (count > 3) ? &args[-3].m_data : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1023,7 +1023,7 @@ TypedValue* fg_ldap_list(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 8LL) {
       if ((count <= 7 || (args-7)->m_type == KindOfInt64) && (count <= 6 || (args-6)->m_type == KindOfInt64) && (count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfArray)) {
-        fh_ldap_list((&(rv)), (args-0), (args-1), (args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
+        fh_ldap_list((&(rv)), (args-0), (args-1), (args-2), (count > 3) ? &args[-3].m_data : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 8);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1092,7 +1092,7 @@ TypedValue * fg1_ldap_read(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   case 3:
     break;
   }
-  fh_ldap_read((rv), (args-0), (args-1), (args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
+  fh_ldap_read((rv), (args-0), (args-1), (args-2), (count > 3) ? &args[-3].m_data : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1103,7 +1103,7 @@ TypedValue* fg_ldap_read(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 8LL) {
       if ((count <= 7 || (args-7)->m_type == KindOfInt64) && (count <= 6 || (args-6)->m_type == KindOfInt64) && (count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfArray)) {
-        fh_ldap_read((&(rv)), (args-0), (args-1), (args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
+        fh_ldap_read((&(rv)), (args-0), (args-1), (args-2), (count > 3) ? &args[-3].m_data : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 8);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1172,7 +1172,7 @@ TypedValue * fg1_ldap_search(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   case 3:
     break;
   }
-  fh_ldap_search((rv), (args-0), (args-1), (args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
+  fh_ldap_search((rv), (args-0), (args-1), (args-2), (count > 3) ? &args[-3].m_data : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1183,7 +1183,7 @@ TypedValue* fg_ldap_search(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 3LL && count <= 8LL) {
       if ((count <= 7 || (args-7)->m_type == KindOfInt64) && (count <= 6 || (args-6)->m_type == KindOfInt64) && (count <= 5 || (args-5)->m_type == KindOfInt64) && (count <= 4 || (args-4)->m_type == KindOfInt64) && (count <= 3 || (args-3)->m_type == KindOfArray)) {
-        fh_ldap_search((&(rv)), (args-0), (args-1), (args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
+        fh_ldap_search((&(rv)), (args-0), (args-1), (args-2), (count > 3) ? &args[-3].m_data : (Value*)(&null_array), (count > 4) ? (int)(args[-4].m_data.num) : (int)(0), (count > 5) ? (int)(args[-5].m_data.num) : (int)(-1), (count > 6) ? (int)(args[-6].m_data.num) : (int)(-1), (count > 7) ? (int)(args[-7].m_data.num) : (int)(-1));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 8);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1240,7 +1240,7 @@ TypedValue * fg1_ldap_rename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_ldap_rename((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (bool)(args[-4].m_data.num))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_rename(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data, (bool)(args[-4].m_data.num))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -1251,7 +1251,7 @@ TypedValue* fg_ldap_rename(HPHP::VM::ActRec *ar) {
     if (count == 5LL) {
       if ((args-4)->m_type == KindOfBoolean && IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_rename((Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (bool)(args[-4].m_data.num))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_rename(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data, (bool)(args[-4].m_data.num))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1295,7 +1295,7 @@ TypedValue * fg1_ldap_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_ldap_delete((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_delete(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -1306,7 +1306,7 @@ TypedValue* fg_ldap_delete(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_delete((Value*)(args-0), (Value*)(args-1))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_delete(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1358,7 +1358,7 @@ TypedValue * fg1_ldap_compare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_compare((rv), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3));
+  fh_ldap_compare((rv), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1369,7 +1369,7 @@ TypedValue* fg_ldap_compare(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        fh_ldap_compare((&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3));
+        fh_ldap_compare((&(rv)), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1408,7 +1408,7 @@ TypedValue * fg1_ldap_errno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_ldap_errno((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_ldap_errno(&args[-0].m_data);
   return rv;
 }
 
@@ -1419,7 +1419,7 @@ TypedValue* fg_ldap_errno(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_ldap_errno((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_ldap_errno(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1458,7 +1458,7 @@ TypedValue * fg1_ldap_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
-  fh_ldap_error((Value*)(rv), (Value*)(args-0));
+  fh_ldap_error((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1470,7 +1470,7 @@ TypedValue* fg_ldap_error(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfString;
-        fh_ldap_error((Value*)(&(rv)), (Value*)(args-0));
+        fh_ldap_error((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1515,7 +1515,7 @@ TypedValue * fg1_ldap_get_dn(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_get_dn((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_ldap_get_dn((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1526,7 +1526,7 @@ TypedValue* fg_ldap_get_dn(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_ldap_get_dn((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_ldap_get_dn((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1571,7 +1571,7 @@ TypedValue * fg1_ldap_count_entries(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_ldap_count_entries((Value*)(args-0), (Value*)(args-1));
+  rv->m_data.num = (int64_t)fh_ldap_count_entries(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -1582,7 +1582,7 @@ TypedValue* fg_ldap_count_entries(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_ldap_count_entries((Value*)(args-0), (Value*)(args-1));
+        rv.m_data.num = (int64_t)fh_ldap_count_entries(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1626,7 +1626,7 @@ TypedValue * fg1_ldap_get_entries(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_get_entries((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_ldap_get_entries((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1637,7 +1637,7 @@ TypedValue* fg_ldap_get_entries(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_ldap_get_entries((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_ldap_get_entries((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1682,7 +1682,7 @@ TypedValue * fg1_ldap_first_entry(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_first_entry((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_ldap_first_entry((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1693,7 +1693,7 @@ TypedValue* fg_ldap_first_entry(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_ldap_first_entry((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_ldap_first_entry((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1738,7 +1738,7 @@ TypedValue * fg1_ldap_next_entry(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_next_entry((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_ldap_next_entry((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1749,7 +1749,7 @@ TypedValue* fg_ldap_next_entry(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_ldap_next_entry((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_ldap_next_entry((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1795,7 +1795,7 @@ TypedValue * fg1_ldap_get_attributes(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_get_attributes((Value*)(rv), (Value*)(args-0), (Value*)(args-1));
+  fh_ldap_get_attributes((&rv->m_data), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1807,7 +1807,7 @@ TypedValue* fg_ldap_get_attributes(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfArray;
-        fh_ldap_get_attributes((Value*)(&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_ldap_get_attributes((&rv.m_data), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1852,7 +1852,7 @@ TypedValue * fg1_ldap_first_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_first_attribute((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_ldap_first_attribute((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1863,7 +1863,7 @@ TypedValue* fg_ldap_first_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_ldap_first_attribute((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_ldap_first_attribute((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1908,7 +1908,7 @@ TypedValue * fg1_ldap_next_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_next_attribute((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_ldap_next_attribute((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1919,7 +1919,7 @@ TypedValue* fg_ldap_next_attribute(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_ldap_next_attribute((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_ldap_next_attribute((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1964,7 +1964,7 @@ TypedValue * fg1_ldap_first_reference(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_first_reference((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_ldap_first_reference((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1975,7 +1975,7 @@ TypedValue* fg_ldap_first_reference(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_ldap_first_reference((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_ldap_first_reference((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2020,7 +2020,7 @@ TypedValue * fg1_ldap_next_reference(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_next_reference((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_ldap_next_reference((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2031,7 +2031,7 @@ TypedValue* fg_ldap_next_reference(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_ldap_next_reference((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_ldap_next_reference((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2077,7 +2077,7 @@ TypedValue * fg1_ldap_parse_reference(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (fh_ldap_parse_reference((Value*)(args-0), (Value*)(args-1), (args-2))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_parse_reference(&args[-0].m_data, &args[-1].m_data, (args-2))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -2088,7 +2088,7 @@ TypedValue* fg_ldap_parse_reference(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_parse_reference((Value*)(args-0), (Value*)(args-1), (args-2))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_parse_reference(&args[-0].m_data, &args[-1].m_data, (args-2))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2146,7 +2146,7 @@ TypedValue * fg1_ldap_parse_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   VRefParamValue defVal3 = uninit_null();
   VRefParamValue defVal4 = uninit_null();
   VRefParamValue defVal5 = uninit_null();
-  rv->m_data.num = (fh_ldap_parse_result((Value*)(args-0), (Value*)(args-1), (args-2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (args-5) : (TypedValue*)(&defVal5))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_parse_result(&args[-0].m_data, &args[-1].m_data, (args-2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (args-5) : (TypedValue*)(&defVal5))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -2160,7 +2160,7 @@ TypedValue* fg_ldap_parse_result(HPHP::VM::ActRec *ar) {
         VRefParamValue defVal3 = uninit_null();
         VRefParamValue defVal4 = uninit_null();
         VRefParamValue defVal5 = uninit_null();
-        rv.m_data.num = (fh_ldap_parse_result((Value*)(args-0), (Value*)(args-1), (args-2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (args-5) : (TypedValue*)(&defVal5))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_parse_result(&args[-0].m_data, &args[-1].m_data, (args-2), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (args-5) : (TypedValue*)(&defVal5))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 6);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2198,7 +2198,7 @@ TypedValue * fg1_ldap_free_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_ldap_free_result((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_ldap_free_result(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -2209,7 +2209,7 @@ TypedValue* fg_ldap_free_result(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_ldap_free_result((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_ldap_free_result(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2257,7 +2257,7 @@ TypedValue * fg1_ldap_get_values_len(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_get_values_len((rv), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_ldap_get_values_len((rv), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2268,7 +2268,7 @@ TypedValue* fg_ldap_get_values_len(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_ldap_get_values_len((&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_ldap_get_values_len((&(rv)), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2317,7 +2317,7 @@ TypedValue * fg1_ldap_get_values(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_ldap_get_values((rv), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2));
+  fh_ldap_get_values((rv), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2328,7 +2328,7 @@ TypedValue* fg_ldap_get_values(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && (args-1)->m_type == KindOfObject && (args-0)->m_type == KindOfObject) {
-        fh_ldap_get_values((&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2));
+        fh_ldap_get_values((&(rv)), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

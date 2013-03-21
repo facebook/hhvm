@@ -106,7 +106,7 @@ TypedValue * fg1_thrift_protocol_write_compact(TypedValue* rv, HPHP::VM::ActRec*
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_thrift_protocol_write_compact((Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num), (Value*)(args-3), (int)(args[-4].m_data.num));
+  fh_thrift_protocol_write_compact(&args[-0].m_data, &args[-1].m_data, (long)(args[-2].m_data.num), &args[-3].m_data, (int)(args[-4].m_data.num));
   return rv;
 }
 
@@ -118,7 +118,7 @@ TypedValue* fg_thrift_protocol_write_compact(HPHP::VM::ActRec *ar) {
       if ((args-4)->m_type == KindOfInt64 && (args-3)->m_type == KindOfObject && (args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_data.num = 0LL;
         rv.m_type = KindOfNull;
-        fh_thrift_protocol_write_compact((Value*)(args-0), (Value*)(args-1), (long)(args[-2].m_data.num), (Value*)(args-3), (int)(args[-4].m_data.num));
+        fh_thrift_protocol_write_compact(&args[-0].m_data, &args[-1].m_data, (long)(args[-2].m_data.num), &args[-3].m_data, (int)(args[-4].m_data.num));
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -162,7 +162,7 @@ TypedValue * fg1_thrift_protocol_read_compact(TypedValue* rv, HPHP::VM::ActRec* 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_thrift_protocol_read_compact((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_thrift_protocol_read_compact((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -173,7 +173,7 @@ TypedValue* fg_thrift_protocol_read_compact(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        fh_thrift_protocol_read_compact((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_thrift_protocol_read_compact((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

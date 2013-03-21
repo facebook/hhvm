@@ -64,7 +64,7 @@ TypedValue* tg1_10UConverter___construct(TypedValue* rv, HPHP::VM::ActRec* ar, i
   }
   String defVal0 = "utf-8";
   String defVal1 = "utf-8";
-  th_10UConverter___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&defVal0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1));
+  th_10UConverter___construct((this_), (count > 0) ? &args[-0].m_data : (Value*)(&defVal0), (count > 1) ? &args[-1].m_data : (Value*)(&defVal1));
   return rv;
 }
 
@@ -80,7 +80,7 @@ TypedValue* tg_10UConverter___construct(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           String defVal0 = "utf-8";
           String defVal1 = "utf-8";
-          th_10UConverter___construct((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&defVal0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1));
+          th_10UConverter___construct((this_), (count > 0) ? &args[-0].m_data : (Value*)(&defVal0), (count > 1) ? &args[-1].m_data : (Value*)(&defVal1));
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -160,7 +160,7 @@ TypedValue* tg_10UConverter_getSourceEncoding(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfString;
-        th_10UConverter_getSourceEncoding((Value*)(&(rv)), (this_));
+        th_10UConverter_getSourceEncoding((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -195,7 +195,7 @@ TypedValue* tg1_10UConverter_setSourceEncoding(TypedValue* rv, HPHP::VM::ActRec*
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
-  th_10UConverter_setSourceEncoding((this_), (Value*)(args-0));
+  th_10UConverter_setSourceEncoding((this_), &args[-0].m_data);
   return rv;
 }
 
@@ -209,7 +209,7 @@ TypedValue* tg_10UConverter_setSourceEncoding(HPHP::VM::ActRec *ar) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_10UConverter_setSourceEncoding((this_), (Value*)(args-0));
+          th_10UConverter_setSourceEncoding((this_), &args[-0].m_data);
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -252,7 +252,7 @@ TypedValue* tg_10UConverter_getDestinationEncoding(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfString;
-        th_10UConverter_getDestinationEncoding((Value*)(&(rv)), (this_));
+        th_10UConverter_getDestinationEncoding((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -287,7 +287,7 @@ TypedValue* tg1_10UConverter_setDestinationEncoding(TypedValue* rv, HPHP::VM::Ac
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
-  th_10UConverter_setDestinationEncoding((this_), (Value*)(args-0));
+  th_10UConverter_setDestinationEncoding((this_), &args[-0].m_data);
   return rv;
 }
 
@@ -301,7 +301,7 @@ TypedValue* tg_10UConverter_setDestinationEncoding(HPHP::VM::ActRec *ar) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_10UConverter_setDestinationEncoding((this_), (Value*)(args-0));
+          th_10UConverter_setDestinationEncoding((this_), &args[-0].m_data);
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -416,7 +416,7 @@ TypedValue* tg_10UConverter_getSubstChars(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfString;
-        th_10UConverter_getSubstChars((Value*)(&(rv)), (this_));
+        th_10UConverter_getSubstChars((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -451,7 +451,7 @@ TypedValue* tg1_10UConverter_setSubstChars(TypedValue* rv, HPHP::VM::ActRec* ar,
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (th_10UConverter_setSubstChars((this_), (Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (th_10UConverter_setSubstChars((this_), &args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -464,7 +464,7 @@ TypedValue* tg_10UConverter_setSubstChars(HPHP::VM::ActRec *ar) {
       if (count == 1LL) {
         if (IS_STRING_TYPE((args-0)->m_type)) {
           rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_10UConverter_setSubstChars((this_), (Value*)(args-0))) ? 1LL : 0LL;
+          rv.m_data.num = (th_10UConverter_setSubstChars((this_), &args[-0].m_data)) ? 1LL : 0LL;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -515,7 +515,7 @@ TypedValue* tg1_10UConverter_fromUCallback(TypedValue* rv, HPHP::VM::ActRec* ar,
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  th_10UConverter_fromUCallback((rv), (this_), (long)(args[-0].m_data.num), (Value*)(args-1), (long)(args[-2].m_data.num), (args-3));
+  th_10UConverter_fromUCallback((rv), (this_), (long)(args[-0].m_data.num), &args[-1].m_data, (long)(args[-2].m_data.num), (args-3));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -528,7 +528,7 @@ TypedValue* tg_10UConverter_fromUCallback(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 4LL) {
         if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfInt64) {
-          th_10UConverter_fromUCallback((&(rv)), (this_), (long)(args[-0].m_data.num), (Value*)(args-1), (long)(args[-2].m_data.num), (args-3));
+          th_10UConverter_fromUCallback((&(rv)), (this_), (long)(args[-0].m_data.num), &args[-1].m_data, (long)(args[-2].m_data.num), (args-3));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 4);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -580,7 +580,7 @@ TypedValue* tg1_10UConverter_toUCallback(TypedValue* rv, HPHP::VM::ActRec* ar, i
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  th_10UConverter_toUCallback((rv), (this_), (long)(args[-0].m_data.num), (Value*)(args-1), (Value*)(args-2), (args-3));
+  th_10UConverter_toUCallback((rv), (this_), (long)(args[-0].m_data.num), &args[-1].m_data, &args[-2].m_data, (args-3));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -593,7 +593,7 @@ TypedValue* tg_10UConverter_toUCallback(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 4LL) {
         if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfInt64) {
-          th_10UConverter_toUCallback((&(rv)), (this_), (long)(args[-0].m_data.num), (Value*)(args-1), (Value*)(args-2), (args-3));
+          th_10UConverter_toUCallback((&(rv)), (this_), (long)(args[-0].m_data.num), &args[-1].m_data, &args[-2].m_data, (args-3));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 4);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -645,7 +645,7 @@ TypedValue* tg1_10UConverter_convert(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10UConverter_convert((rv), (this_), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
+  th_10UConverter_convert((rv), (this_), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -658,7 +658,7 @@ TypedValue* tg_10UConverter_convert(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_10UConverter_convert((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
+          th_10UConverter_convert((&(rv)), (this_), &args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -719,7 +719,7 @@ TypedValue* tg1_10UConverter_transcode(TypedValue* rv, HPHP::VM::ActRec* ar, int
     tvCastToStringInPlace(args-0);
   }
   Array defVal3 = null_variant;
-  th_10UConverter_transcode((rv), ("UConverter"), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&defVal3));
+  th_10UConverter_transcode((rv), ("UConverter"), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (count > 3) ? &args[-3].m_data : (Value*)(&defVal3));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -731,7 +731,7 @@ TypedValue* tg_10UConverter_transcode(HPHP::VM::ActRec *ar) {
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfArray) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         Array defVal3 = null_variant;
-        th_10UConverter_transcode((&(rv)), ("UConverter"), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (count > 3) ? (Value*)(args-3) : (Value*)(&defVal3));
+        th_10UConverter_transcode((&(rv)), ("UConverter"), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (count > 3) ? &args[-3].m_data : (Value*)(&defVal3));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -808,7 +808,7 @@ TypedValue* tg_10UConverter_getErrorMessage(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count == 0LL) {
         rv.m_type = KindOfString;
-        th_10UConverter_getErrorMessage((Value*)(&(rv)), (this_));
+        th_10UConverter_getErrorMessage((&rv.m_data), (this_));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_inl(ar, 0);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -844,7 +844,7 @@ TypedValue* tg1_10UConverter_reasonText(TypedValue* rv, HPHP::VM::ActRec* ar, in
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
-  th_10UConverter_reasonText((Value*)(rv), ("UConverter"), (long)(args[-0].m_data.num));
+  th_10UConverter_reasonText((&rv->m_data), ("UConverter"), (long)(args[-0].m_data.num));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -856,7 +856,7 @@ TypedValue* tg_10UConverter_reasonText(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfInt64) {
         rv.m_type = KindOfString;
-        th_10UConverter_reasonText((Value*)(&(rv)), ("UConverter"), (long)(args[-0].m_data.num));
+        th_10UConverter_reasonText((&rv.m_data), ("UConverter"), (long)(args[-0].m_data.num));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -895,7 +895,7 @@ TypedValue* tg_10UConverter_getAvailable(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      th_10UConverter_getAvailable((Value*)(&(rv)), ("UConverter"));
+      th_10UConverter_getAvailable((&rv.m_data), ("UConverter"));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -928,7 +928,7 @@ TypedValue* tg1_10UConverter_getAliases(TypedValue* rv, HPHP::VM::ActRec* ar, in
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
-  th_10UConverter_getAliases((Value*)(rv), ("UConverter"), (Value*)(args-0));
+  th_10UConverter_getAliases((&rv->m_data), ("UConverter"), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -940,7 +940,7 @@ TypedValue* tg_10UConverter_getAliases(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfArray;
-        th_10UConverter_getAliases((Value*)(&(rv)), ("UConverter"), (Value*)(args-0));
+        th_10UConverter_getAliases((&rv.m_data), ("UConverter"), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -979,7 +979,7 @@ TypedValue* tg_10UConverter_getStandards(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      th_10UConverter_getStandards((Value*)(&(rv)), ("UConverter"));
+      th_10UConverter_getStandards((&rv.m_data), ("UConverter"));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1018,7 +1018,7 @@ TypedValue* tg1_10UConverter_getStandardName(TypedValue* rv, HPHP::VM::ActRec* a
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10UConverter_getStandardName((Value*)(rv), ("UConverter"), (Value*)(args-0), (Value*)(args-1));
+  th_10UConverter_getStandardName((&rv->m_data), ("UConverter"), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1030,7 +1030,7 @@ TypedValue* tg_10UConverter_getStandardName(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        th_10UConverter_getStandardName((Value*)(&(rv)), ("UConverter"), (Value*)(args-0), (Value*)(args-1));
+        th_10UConverter_getStandardName((&rv.m_data), ("UConverter"), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1069,7 +1069,7 @@ TypedValue* tg1_10UConverter_getMIMEName(TypedValue* rv, HPHP::VM::ActRec* ar, i
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
-  th_10UConverter_getMIMEName((Value*)(rv), ("UConverter"), (Value*)(args-0));
+  th_10UConverter_getMIMEName((&rv->m_data), ("UConverter"), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1081,7 +1081,7 @@ TypedValue* tg_10UConverter_getMIMEName(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfString;
-        th_10UConverter_getMIMEName((Value*)(&(rv)), ("UConverter"), (Value*)(args-0));
+        th_10UConverter_getMIMEName((&rv.m_data), ("UConverter"), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

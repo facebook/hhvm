@@ -325,94 +325,82 @@ class Variant : private VariantBase {
 ///////////////////////////////////////////////////////////////////////////////
 // string
 
-  inline ALWAYS_INLINE const String & asCStrRef() const {
-    assert(m_type == KindOfString || m_type == KindOfStaticString);
-    assert(m_data.pstr);
-    return *(const String*)(this);
+  inline ALWAYS_INLINE const String& asCStrRef() const {
+    assert(IS_STRING_TYPE(m_type) && m_data.pstr);
+    return *reinterpret_cast<const String*>(&m_data.pstr);
   }
 
-  inline ALWAYS_INLINE const String & toCStrRef() const {
+  inline ALWAYS_INLINE const String& toCStrRef() const {
     assert(is(KindOfString) || is(KindOfStaticString));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
-    return *(const String*)(
-        LIKELY(m_type == KindOfString || m_type == KindOfStaticString) ?
-        this : this->m_data.pref->var());
+    return *reinterpret_cast<const String*>(LIKELY(IS_STRING_TYPE(m_type)) ?
+        &m_data.pstr : &m_data.pref->tv()->m_data.pstr);
   }
 
-  inline ALWAYS_INLINE String & asStrRef() {
-    assert(m_type == KindOfString || m_type == KindOfStaticString);
-    assert(m_data.pstr);
-    return *(String*)(this);
+  inline ALWAYS_INLINE String& asStrRef() {
+    assert(IS_STRING_TYPE(m_type) && m_data.pstr);
+    return *reinterpret_cast<String*>(&m_data.pstr);
   }
 
-  inline ALWAYS_INLINE String & toStrRef() {
+  inline ALWAYS_INLINE String& toStrRef() {
     assert(is(KindOfString) || is(KindOfStaticString));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
-    return *(String*)(
-        LIKELY(m_type == KindOfString || m_type == KindOfStaticString) ?
-        this : this->m_data.pref->var());
+    return *reinterpret_cast<String*>(LIKELY(IS_STRING_TYPE(m_type)) ?
+        &m_data.pstr : &m_data.pref->tv()->m_data.pstr);
   }
 
 ///////////////////////////////////////////////////////////////////////////////
 // array
 
-  inline ALWAYS_INLINE const Array & asCArrRef() const {
-    assert(m_type == KindOfArray);
-    assert(m_data.parr);
-    return *(const Array*)(this);
+  inline ALWAYS_INLINE const Array& asCArrRef() const {
+    assert(m_type == KindOfArray && m_data.parr);
+    return *reinterpret_cast<const Array*>(&m_data.parr);
   }
 
-  inline ALWAYS_INLINE const Array & toCArrRef() const {
+  inline ALWAYS_INLINE const Array& toCArrRef() const {
     assert(is(KindOfArray));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
-    return *(const Array*)(
-        LIKELY(m_type == KindOfArray) ?
-        this : this->m_data.pref->var());
+    return *reinterpret_cast<const Array*>(LIKELY(m_type == KindOfArray) ?
+        &m_data.parr : &m_data.pref->tv()->m_data.parr);
   }
 
-  inline ALWAYS_INLINE Array & asArrRef() {
-    assert(m_type == KindOfArray);
-    assert(m_data.parr);
-    return *(Array*)(this);
+  inline ALWAYS_INLINE Array& asArrRef() {
+    assert(m_type == KindOfArray && m_data.parr);
+    return *reinterpret_cast<Array*>(&m_data.parr);
   }
 
-  inline ALWAYS_INLINE Array & toArrRef() {
+  inline ALWAYS_INLINE Array& toArrRef() {
     assert(is(KindOfArray));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
-    return *(Array*)(
-        LIKELY(m_type == KindOfArray) ?
-        this : this->m_data.pref->var());
+    return *reinterpret_cast<Array*>(LIKELY(m_type == KindOfArray) ?
+        &m_data.parr : &m_data.pref->tv()->m_data.parr);
   }
 
 ///////////////////////////////////////////////////////////////////////////////
 // object
 
-  inline ALWAYS_INLINE const Object & asCObjRef() const {
-    assert(m_type == KindOfObject);
-    assert(m_data.pobj);
-    return *(const Object*)(this);
+  inline ALWAYS_INLINE const Object& asCObjRef() const {
+    assert(m_type == KindOfObject && m_data.pobj);
+    return *reinterpret_cast<const Object*>(&m_data.pobj);
   }
 
-  inline ALWAYS_INLINE const Object & toCObjRef() const {
+  inline ALWAYS_INLINE const Object& toCObjRef() const {
     assert(is(KindOfObject));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
-    return *(const Object*)(
-        LIKELY(m_type == KindOfObject) ?
-        this : this->m_data.pref->var());
+    return *reinterpret_cast<const Object*>(LIKELY(m_type == KindOfObject) ?
+        &m_data.pobj : &m_data.pref->tv()->m_data.pobj);
   }
 
   inline ALWAYS_INLINE Object & asObjRef() {
-    assert(m_type == KindOfObject);
-    assert(m_data.pobj);
-    return *(Object*)(this);
+    assert(m_type == KindOfObject && m_data.pobj);
+    return *reinterpret_cast<Object*>(&m_data.pobj);
   }
 
-  inline ALWAYS_INLINE Object & toObjRef() {
+  inline ALWAYS_INLINE Object& toObjRef() {
     assert(is(KindOfObject));
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
-    return *(Object*)(
-        LIKELY(m_type == KindOfObject) ?
-        this : this->m_data.pref->var());
+    return *reinterpret_cast<Object*>(LIKELY(m_type == KindOfObject) ?
+        &m_data.pobj : &m_data.pref->tv()->m_data.pobj);
   }
 
   ObjectData *objectForCall() const {
@@ -450,8 +438,7 @@ class Variant : private VariantBase {
     return getType() == KindOfDouble;
   }
   bool isString() const {
-    DataType type = getType();
-    return type == KindOfStaticString || type == KindOfString;
+    return IS_STRING_TYPE(getType());
   }
   bool isInteger() const;
   bool isNumeric(bool checkString = false) const;
@@ -501,8 +488,7 @@ class Variant : private VariantBase {
 
   bool getBoolean() const {
     assert(getType() == KindOfBoolean);
-    bool val = m_type == KindOfRef ? m_data.pref->var()->m_data.num : m_data.num;
-    return val;
+    return m_type == KindOfRef ? m_data.pref->var()->m_data.num : m_data.num;
   }
   int64_t getInt64() const {
     assert(getType() == KindOfInt64);
@@ -664,7 +650,7 @@ class Variant : private VariantBase {
     return toDoubleHelper();
   }
   String toString () const {
-    if (m_type == KindOfStaticString || m_type == KindOfString) {
+    if (IS_STRING_TYPE(m_type)) {
       return m_data.pstr;
     }
     return toStringHelper();
@@ -1051,7 +1037,7 @@ class Variant : private VariantBase {
                      const_cast<double*>(&m_data.dbl);
   }
   StringData *getStringData() const {
-    assert(getType() == KindOfString || getType() == KindOfStaticString);
+    assert(IS_STRING_TYPE(getType()));
     return m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr;
   }
   StringData *getStringDataOrNull() const {
@@ -1140,11 +1126,10 @@ class Variant : private VariantBase {
     return acc->m_data.dbl;
   }
   static bool IsString(TypedValueAccessor acc) {
-    return acc->m_type == KindOfString || acc->m_type == KindOfStaticString;
+    return IS_STRING_TYPE(acc->m_type);
   }
   static StringData *GetStringData(TypedValueAccessor acc) {
-    assert(acc);
-    assert(acc->m_type == KindOfString || acc->m_type == KindOfStaticString);
+    assert(acc && IS_STRING_TYPE(acc->m_type));
     return acc->m_data.pstr;
   }
   static ArrayData *GetArrayData(TypedValueAccessor acc) {
@@ -1163,14 +1148,14 @@ class Variant : private VariantBase {
     }
     return obj;
   }
-  static Array &GetAsArray(TypedValueAccessor acc) {
+  static Array& GetAsArray(TypedValueAccessor acc) {
     assert(acc && acc->m_type == KindOfArray);
-    return *(Array*)acc;
+    return *reinterpret_cast<Array*>(&acc->m_data.parr);
   }
 
-  static String &GetAsString(TypedValueAccessor acc) {
+  static String& GetAsString(TypedValueAccessor acc) {
     assert(IsString(acc));
-    return *(String*)acc;
+    return *reinterpret_cast<String*>(&acc->m_data.pstr);
   }
 
  private:
@@ -1179,8 +1164,7 @@ class Variant : private VariantBase {
     assert(m_type != KindOfRef);
     return m_type <= KindOfNull ||
       (m_type == KindOfBoolean && !m_data.num) ||
-      ((m_type == KindOfString || m_type == KindOfStaticString) &&
-       m_data.pstr->empty());
+      (IS_STRING_TYPE(m_type) && m_data.pstr->empty());
   }
 
   void removeImpl(double key);

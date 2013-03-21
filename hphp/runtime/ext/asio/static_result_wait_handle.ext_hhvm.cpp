@@ -88,7 +88,7 @@ TypedValue* tg_22StaticResultWaitHandle_create(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv.m_type = KindOfObject;
-      th_22StaticResultWaitHandle_create((Value*)(&(rv)), ("StaticResultWaitHandle"), (args-0));
+      th_22StaticResultWaitHandle_create((&rv.m_data), ("StaticResultWaitHandle"), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 1);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));

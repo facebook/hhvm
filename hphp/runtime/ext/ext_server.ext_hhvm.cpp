@@ -71,7 +71,7 @@ TypedValue * fg1_dangling_server_proxy_new_request(TypedValue* rv, HPHP::VM::Act
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
-  rv->m_data.num = (fh_dangling_server_proxy_new_request((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_dangling_server_proxy_new_request(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -82,7 +82,7 @@ TypedValue* fg_dangling_server_proxy_new_request(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_dangling_server_proxy_new_request((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_dangling_server_proxy_new_request(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -174,7 +174,7 @@ TypedValue * fg1_pagelet_server_task_start(TypedValue* rv, HPHP::VM::ActRec* ar,
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_pagelet_server_task_start((Value*)(rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
+  fh_pagelet_server_task_start((&rv->m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_array));
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -186,7 +186,7 @@ TypedValue* fg_pagelet_server_task_start(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfArray) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || (args-1)->m_type == KindOfArray) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfObject;
-        fh_pagelet_server_task_start((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
+        fh_pagelet_server_task_start((&rv.m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_array));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -225,7 +225,7 @@ TypedValue * fg1_pagelet_server_task_status(TypedValue* rv, HPHP::VM::ActRec* ar
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_pagelet_server_task_status((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_pagelet_server_task_status(&args[-0].m_data);
   return rv;
 }
 
@@ -236,7 +236,7 @@ TypedValue* fg_pagelet_server_task_status(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_pagelet_server_task_status((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_pagelet_server_task_status(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -288,7 +288,7 @@ TypedValue * fg1_pagelet_server_task_result(TypedValue* rv, HPHP::VM::ActRec* ar
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_pagelet_server_task_result((Value*)(rv), (Value*)(args-0), (args-1), (args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0));
+  fh_pagelet_server_task_result((&rv->m_data), &args[-0].m_data, (args-1), (args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -300,7 +300,7 @@ TypedValue* fg_pagelet_server_task_result(HPHP::VM::ActRec *ar) {
     if (count >= 3LL && count <= 4LL) {
       if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfString;
-        fh_pagelet_server_task_result((Value*)(&(rv)), (Value*)(args-0), (args-1), (args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0));
+        fh_pagelet_server_task_result((&rv.m_data), &args[-0].m_data, (args-1), (args-2), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -388,7 +388,7 @@ TypedValue * fg1_xbox_send_message(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
     tvCastToStringInPlace(args-0);
   }
   String defVal3 = "localhost";
-  rv->m_data.num = (fh_xbox_send_message((Value*)(args-0), (args-1), (long)(args[-2].m_data.num), (count > 3) ? (Value*)(args-3) : (Value*)(&defVal3))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_xbox_send_message(&args[-0].m_data, (args-1), (long)(args[-2].m_data.num), (count > 3) ? &args[-3].m_data : (Value*)(&defVal3))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -400,7 +400,7 @@ TypedValue* fg_xbox_send_message(HPHP::VM::ActRec *ar) {
       if ((count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
         String defVal3 = "localhost";
-        rv.m_data.num = (fh_xbox_send_message((Value*)(args-0), (args-1), (long)(args[-2].m_data.num), (count > 3) ? (Value*)(args-3) : (Value*)(&defVal3))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_xbox_send_message(&args[-0].m_data, (args-1), (long)(args[-2].m_data.num), (count > 3) ? &args[-3].m_data : (Value*)(&defVal3))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -450,7 +450,7 @@ TypedValue * fg1_xbox_post_message(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
     tvCastToStringInPlace(args-0);
   }
   String defVal1 = "localhost";
-  rv->m_data.num = (fh_xbox_post_message((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_xbox_post_message(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&defVal1))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -462,7 +462,7 @@ TypedValue* fg_xbox_post_message(HPHP::VM::ActRec *ar) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
         String defVal1 = "localhost";
-        rv.m_data.num = (fh_xbox_post_message((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&defVal1))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_xbox_post_message(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&defVal1))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -501,7 +501,7 @@ TypedValue * fg1_xbox_task_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
-  fh_xbox_task_start((Value*)(rv), (Value*)(args-0));
+  fh_xbox_task_start((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
   return rv;
 }
@@ -513,7 +513,7 @@ TypedValue* fg_xbox_task_start(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfObject;
-        fh_xbox_task_start((Value*)(&(rv)), (Value*)(args-0));
+        fh_xbox_task_start((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -552,7 +552,7 @@ TypedValue * fg1_xbox_task_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_xbox_task_status((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_xbox_task_status(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -563,7 +563,7 @@ TypedValue* fg_xbox_task_status(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_xbox_task_status((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_xbox_task_status(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -608,7 +608,7 @@ TypedValue * fg1_xbox_task_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_xbox_task_result((Value*)(args-0), (long)(args[-1].m_data.num), (args-2));
+  rv->m_data.num = (int64_t)fh_xbox_task_result(&args[-0].m_data, (long)(args[-1].m_data.num), (args-2));
   return rv;
 }
 
@@ -619,7 +619,7 @@ TypedValue* fg_xbox_task_result(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_xbox_task_result((Value*)(args-0), (long)(args[-1].m_data.num), (args-2));
+        rv.m_data.num = (int64_t)fh_xbox_task_result(&args[-0].m_data, (long)(args[-1].m_data.num), (args-2));
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -657,7 +657,7 @@ TypedValue * fg1_xbox_process_call_message(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue * fg1_xbox_process_call_message(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_xbox_process_call_message((rv), (Value*)(args-0));
+  fh_xbox_process_call_message((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -668,7 +668,7 @@ TypedValue* fg_xbox_process_call_message(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_xbox_process_call_message((&(rv)), (Value*)(args-0));
+        fh_xbox_process_call_message((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

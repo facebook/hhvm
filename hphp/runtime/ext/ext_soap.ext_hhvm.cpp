@@ -165,7 +165,7 @@ TypedValue* tg1_10SoapServer___construct(TypedValue* rv, HPHP::VM::ActRec* ar, i
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToArrayInPlace(args-1);
-  th_10SoapServer___construct((this_), (args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
+  th_10SoapServer___construct((this_), (args-0), (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
   return rv;
 }
 
@@ -179,7 +179,7 @@ TypedValue* tg_10SoapServer___construct(HPHP::VM::ActRec *ar) {
         if ((count <= 1 || (args-1)->m_type == KindOfArray)) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_10SoapServer___construct((this_), (args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
+          th_10SoapServer___construct((this_), (args-0), (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -234,7 +234,7 @@ TypedValue* tg1_10SoapServer_setclass(TypedValue* rv, HPHP::VM::ActRec* ar, int6
     }
     extraArgs = ai.create();
   }
-  th_10SoapServer_setclass((this_), (count), (Value*)(args-0), (Value*)(&extraArgs));
+  th_10SoapServer_setclass((this_), (count), &args[-0].m_data, (Value*)(&extraArgs));
   return rv;
 }
 
@@ -261,7 +261,7 @@ TypedValue* tg_10SoapServer_setclass(HPHP::VM::ActRec *ar) {
             }
             extraArgs = ai.create();
           }
-          th_10SoapServer_setclass((this_), (count), (Value*)(args-0), (Value*)(&extraArgs));
+          th_10SoapServer_setclass((this_), (count), &args[-0].m_data, (Value*)(&extraArgs));
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -301,7 +301,7 @@ TypedValue* tg1_10SoapServer_setobject(TypedValue* rv, HPHP::VM::ActRec* ar, int
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
-  th_10SoapServer_setobject((this_), (Value*)(args-0));
+  th_10SoapServer_setobject((this_), &args[-0].m_data);
   return rv;
 }
 
@@ -315,7 +315,7 @@ TypedValue* tg_10SoapServer_setobject(HPHP::VM::ActRec *ar) {
         if ((args-0)->m_type == KindOfObject) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_10SoapServer_setobject((this_), (Value*)(args-0));
+          th_10SoapServer_setobject((this_), &args[-0].m_data);
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -429,7 +429,7 @@ TypedValue* tg1_10SoapServer_handle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-0);
-  th_10SoapServer_handle((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  th_10SoapServer_handle((this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -443,7 +443,7 @@ TypedValue* tg_10SoapServer_handle(HPHP::VM::ActRec *ar) {
         if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_10SoapServer_handle((this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+          th_10SoapServer_handle((this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -557,7 +557,7 @@ TypedValue* tg1_10SoapServer_fault(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
     tvCastToStringInPlace(args-1);
   }
   Variant defVal3;
-  th_10SoapServer_fault((this_), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+  th_10SoapServer_fault((this_), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -572,7 +572,7 @@ TypedValue* tg_10SoapServer_fault(HPHP::VM::ActRec *ar) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
           Variant defVal3;
-          th_10SoapServer_fault((this_), (args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+          th_10SoapServer_fault((this_), (args-0), &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? (args-3) : (TypedValue*)(&defVal3), (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
           frame_free_locals_inl(ar, 5);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -612,7 +612,7 @@ TypedValue* tg1_10SoapServer_addsoapheader(TypedValue* rv, HPHP::VM::ActRec* ar,
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToObjectInPlace(args-0);
-  th_10SoapServer_addsoapheader((this_), (Value*)(args-0));
+  th_10SoapServer_addsoapheader((this_), &args[-0].m_data);
   return rv;
 }
 
@@ -626,7 +626,7 @@ TypedValue* tg_10SoapServer_addsoapheader(HPHP::VM::ActRec *ar) {
         if ((args-0)->m_type == KindOfObject) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_10SoapServer_addsoapheader((this_), (Value*)(args-0));
+          th_10SoapServer_addsoapheader((this_), &args[-0].m_data);
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -677,7 +677,7 @@ TypedValue* tg1_10SoapClient___construct(TypedValue* rv, HPHP::VM::ActRec* ar, i
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToArrayInPlace(args-1);
-  th_10SoapClient___construct((this_), (args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
+  th_10SoapClient___construct((this_), (args-0), (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
   return rv;
 }
 
@@ -691,7 +691,7 @@ TypedValue* tg_10SoapClient___construct(HPHP::VM::ActRec *ar) {
         if ((count <= 1 || (args-1)->m_type == KindOfArray)) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_10SoapClient___construct((this_), (args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_array));
+          th_10SoapClient___construct((this_), (args-0), (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -790,7 +790,7 @@ TypedValue* tg1_10SoapClient___soapcall(TypedValue* rv, HPHP::VM::ActRec* ar, in
     tvCastToStringInPlace(args-0);
   }
   VRefParamValue defVal4 = uninit_null();
-  th_10SoapClient___soapcall((rv), (this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_array), (count > 3) ? (args-3) : (TypedValue*)(&null_variant), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
+  th_10SoapClient___soapcall((rv), (this_), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_array), (count > 3) ? (args-3) : (TypedValue*)(&null_variant), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -804,7 +804,7 @@ TypedValue* tg_10SoapClient___soapcall(HPHP::VM::ActRec *ar) {
       if (count >= 2LL && count <= 5LL) {
         if ((count <= 2 || (args-2)->m_type == KindOfArray) && (args-1)->m_type == KindOfArray && IS_STRING_TYPE((args-0)->m_type)) {
           VRefParamValue defVal4 = uninit_null();
-          th_10SoapClient___soapcall((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_array), (count > 3) ? (args-3) : (TypedValue*)(&null_variant), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
+          th_10SoapClient___soapcall((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data, (count > 2) ? &args[-2].m_data : (Value*)(&null_array), (count > 3) ? (args-3) : (TypedValue*)(&null_variant), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 5);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1090,7 +1090,7 @@ TypedValue* tg1_10SoapClient___dorequest(TypedValue* rv, HPHP::VM::ActRec* ar, i
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10SoapClient___dorequest((rv), (this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (long)(args[-3].m_data.num), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false));
+  th_10SoapClient___dorequest((rv), (this_), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (long)(args[-3].m_data.num), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1103,7 +1103,7 @@ TypedValue* tg_10SoapClient___dorequest(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 4LL && count <= 5LL) {
         if ((count <= 4 || (args-4)->m_type == KindOfBoolean) && (args-3)->m_type == KindOfInt64 && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_10SoapClient___dorequest((&(rv)), (this_), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (long)(args[-3].m_data.num), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false));
+          th_10SoapClient___dorequest((&(rv)), (this_), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (long)(args[-3].m_data.num), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(false));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 5);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1155,7 +1155,7 @@ TypedValue* tg1_10SoapClient___setcookie(TypedValue* rv, HPHP::VM::ActRec* ar, i
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_10SoapClient___setcookie((rv), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+  th_10SoapClient___setcookie((rv), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1168,7 +1168,7 @@ TypedValue* tg_10SoapClient___setcookie(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count >= 1LL && count <= 2LL) {
         if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_10SoapClient___setcookie((&(rv)), (this_), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+          th_10SoapClient___setcookie((&(rv)), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1209,7 +1209,7 @@ TypedValue* tg1_10SoapClient___setlocation(TypedValue* rv, HPHP::VM::ActRec* ar,
 TypedValue* tg1_10SoapClient___setlocation(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_10SoapClient___setlocation((rv), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  th_10SoapClient___setlocation((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1222,7 +1222,7 @@ TypedValue* tg_10SoapClient___setlocation(HPHP::VM::ActRec *ar) {
     if (this_) {
       if (count <= 1LL) {
         if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-          th_10SoapClient___setlocation((&(rv)), (this_), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+          th_10SoapClient___setlocation((&(rv)), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
           if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
           frame_free_locals_inl(ar, 1);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1334,7 +1334,7 @@ TypedValue* tg1_7SoapVar___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   case 2:
     break;
   }
-  th_7SoapVar___construct((this_), (args-0), (args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string), (count > 5) ? (Value*)(args-5) : (Value*)(&null_string));
+  th_7SoapVar___construct((this_), (args-0), (args-1), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_string), (count > 4) ? &args[-4].m_data : (Value*)(&null_string), (count > 5) ? &args[-5].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -1348,7 +1348,7 @@ TypedValue* tg_7SoapVar___construct(HPHP::VM::ActRec *ar) {
         if ((count <= 5 || IS_STRING_TYPE((args-5)->m_type)) && (count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && (count <= 3 || IS_STRING_TYPE((args-3)->m_type)) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type))) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_7SoapVar___construct((this_), (args-0), (args-1), (count > 2) ? (Value*)(args-2) : (Value*)(&null_string), (count > 3) ? (Value*)(args-3) : (Value*)(&null_string), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string), (count > 5) ? (Value*)(args-5) : (Value*)(&null_string));
+          th_7SoapVar___construct((this_), (args-0), (args-1), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_string), (count > 4) ? &args[-4].m_data : (Value*)(&null_string), (count > 5) ? &args[-5].m_data : (Value*)(&null_string));
           frame_free_locals_inl(ar, 6);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -1399,7 +1399,7 @@ TypedValue* tg1_9SoapParam___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   tvCastToStringInPlace(args-1);
-  th_9SoapParam___construct((this_), (args-0), (Value*)(args-1));
+  th_9SoapParam___construct((this_), (args-0), &args[-1].m_data);
   return rv;
 }
 
@@ -1413,7 +1413,7 @@ TypedValue* tg_9SoapParam___construct(HPHP::VM::ActRec *ar) {
         if (IS_STRING_TYPE((args-1)->m_type)) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          th_9SoapParam___construct((this_), (args-0), (Value*)(args-1));
+          th_9SoapParam___construct((this_), (args-0), &args[-1].m_data);
           frame_free_locals_inl(ar, 2);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
@@ -1484,7 +1484,7 @@ TypedValue* tg1_10SoapHeader___construct(TypedValue* rv, HPHP::VM::ActRec* ar, i
   }
   Variant defVal2;
   Variant defVal4;
-  th_10SoapHeader___construct((this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
+  th_10SoapHeader___construct((this_), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
   return rv;
 }
 
@@ -1500,7 +1500,7 @@ TypedValue* tg_10SoapHeader___construct(HPHP::VM::ActRec *ar) {
           rv.m_type = KindOfNull;
           Variant defVal2;
           Variant defVal4;
-          th_10SoapHeader___construct((this_), (Value*)(args-0), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
+          th_10SoapHeader___construct((this_), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(false), (count > 4) ? (args-4) : (TypedValue*)(&defVal4));
           frame_free_locals_inl(ar, 5);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;

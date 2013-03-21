@@ -53,7 +53,7 @@ TypedValue * fg1_mcrypt_module_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_mcrypt_module_open((rv), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3));
+  fh_mcrypt_module_open((rv), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -64,7 +64,7 @@ TypedValue* fg_mcrypt_module_open(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 4LL) {
       if (IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_mcrypt_module_open((&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3));
+        fh_mcrypt_module_open((&(rv)), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 4);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -103,7 +103,7 @@ TypedValue * fg1_mcrypt_module_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_mcrypt_module_close((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_mcrypt_module_close(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -114,7 +114,7 @@ TypedValue* fg_mcrypt_module_close(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_mcrypt_module_close((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_mcrypt_module_close(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -153,7 +153,7 @@ TypedValue * fg1_mcrypt_list_algorithms(TypedValue* rv, HPHP::VM::ActRec* ar, in
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
-  fh_mcrypt_list_algorithms((Value*)(rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  fh_mcrypt_list_algorithms((&rv->m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -165,7 +165,7 @@ TypedValue* fg_mcrypt_list_algorithms(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
         rv.m_type = KindOfArray;
-        fh_mcrypt_list_algorithms((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+        fh_mcrypt_list_algorithms((&rv.m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -205,7 +205,7 @@ TypedValue * fg1_mcrypt_list_modes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
-  fh_mcrypt_list_modes((Value*)(rv), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+  fh_mcrypt_list_modes((&rv->m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -217,7 +217,7 @@ TypedValue* fg_mcrypt_list_modes(HPHP::VM::ActRec *ar) {
     if (count <= 1LL) {
       if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
         rv.m_type = KindOfArray;
-        fh_mcrypt_list_modes((Value*)(&(rv)), (count > 0) ? (Value*)(args-0) : (Value*)(&null_string));
+        fh_mcrypt_list_modes((&rv.m_data), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -267,7 +267,7 @@ TypedValue * fg1_mcrypt_module_get_algo_block_size(TypedValue* rv, HPHP::VM::Act
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_mcrypt_module_get_algo_block_size((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+  rv->m_data.num = (int64_t)fh_mcrypt_module_get_algo_block_size(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -278,7 +278,7 @@ TypedValue* fg_mcrypt_module_get_algo_block_size(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_mcrypt_module_get_algo_block_size((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+        rv.m_data.num = (int64_t)fh_mcrypt_module_get_algo_block_size(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -327,7 +327,7 @@ TypedValue * fg1_mcrypt_module_get_algo_key_size(TypedValue* rv, HPHP::VM::ActRe
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_mcrypt_module_get_algo_key_size((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+  rv->m_data.num = (int64_t)fh_mcrypt_module_get_algo_key_size(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
   return rv;
 }
 
@@ -338,7 +338,7 @@ TypedValue* fg_mcrypt_module_get_algo_key_size(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_mcrypt_module_get_algo_key_size((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+        rv.m_data.num = (int64_t)fh_mcrypt_module_get_algo_key_size(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -388,7 +388,7 @@ TypedValue * fg1_mcrypt_module_get_supported_key_sizes(TypedValue* rv, HPHP::VM:
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_mcrypt_module_get_supported_key_sizes((Value*)(rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+  fh_mcrypt_module_get_supported_key_sizes((&rv->m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -400,7 +400,7 @@ TypedValue* fg_mcrypt_module_get_supported_key_sizes(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfArray;
-        fh_mcrypt_module_get_supported_key_sizes((Value*)(&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+        fh_mcrypt_module_get_supported_key_sizes((&rv.m_data), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -450,7 +450,7 @@ TypedValue * fg1_mcrypt_module_is_block_algorithm_mode(TypedValue* rv, HPHP::VM:
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_mcrypt_module_is_block_algorithm_mode((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_mcrypt_module_is_block_algorithm_mode(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -461,7 +461,7 @@ TypedValue* fg_mcrypt_module_is_block_algorithm_mode(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_mcrypt_module_is_block_algorithm_mode((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_mcrypt_module_is_block_algorithm_mode(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -510,7 +510,7 @@ TypedValue * fg1_mcrypt_module_is_block_algorithm(TypedValue* rv, HPHP::VM::ActR
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_mcrypt_module_is_block_algorithm((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_mcrypt_module_is_block_algorithm(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -521,7 +521,7 @@ TypedValue* fg_mcrypt_module_is_block_algorithm(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_mcrypt_module_is_block_algorithm((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_mcrypt_module_is_block_algorithm(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -570,7 +570,7 @@ TypedValue * fg1_mcrypt_module_is_block_mode(TypedValue* rv, HPHP::VM::ActRec* a
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_mcrypt_module_is_block_mode((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_mcrypt_module_is_block_mode(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -581,7 +581,7 @@ TypedValue* fg_mcrypt_module_is_block_mode(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_mcrypt_module_is_block_mode((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_mcrypt_module_is_block_mode(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -630,7 +630,7 @@ TypedValue * fg1_mcrypt_module_self_test(TypedValue* rv, HPHP::VM::ActRec* ar, i
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_mcrypt_module_self_test((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_mcrypt_module_self_test(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -641,7 +641,7 @@ TypedValue* fg_mcrypt_module_self_test(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_mcrypt_module_self_test((Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_mcrypt_module_self_test(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -763,7 +763,7 @@ TypedValue * fg1_mcrypt_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_mcrypt_encrypt((rv), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+  fh_mcrypt_encrypt((rv), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data, (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -774,7 +774,7 @@ TypedValue* fg_mcrypt_encrypt(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_mcrypt_encrypt((&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+        fh_mcrypt_encrypt((&(rv)), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data, (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -836,7 +836,7 @@ TypedValue * fg1_mcrypt_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_mcrypt_decrypt((rv), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+  fh_mcrypt_decrypt((rv), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data, (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -847,7 +847,7 @@ TypedValue* fg_mcrypt_decrypt(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && IS_STRING_TYPE((args-3)->m_type) && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_mcrypt_decrypt((&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (Value*)(args-3), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+        fh_mcrypt_decrypt((&(rv)), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, &args[-3].m_data, (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -909,7 +909,7 @@ TypedValue * fg1_mcrypt_cbc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_mcrypt_cbc((rv), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (int)(args[-3].m_data.num), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+  fh_mcrypt_cbc((rv), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (int)(args[-3].m_data.num), (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -920,7 +920,7 @@ TypedValue* fg_mcrypt_cbc(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && (args-3)->m_type == KindOfInt64 && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_mcrypt_cbc((&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (int)(args[-3].m_data.num), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+        fh_mcrypt_cbc((&(rv)), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (int)(args[-3].m_data.num), (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -982,7 +982,7 @@ TypedValue * fg1_mcrypt_cfb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_mcrypt_cfb((rv), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (int)(args[-3].m_data.num), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+  fh_mcrypt_cfb((rv), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (int)(args[-3].m_data.num), (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -993,7 +993,7 @@ TypedValue* fg_mcrypt_cfb(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && (args-3)->m_type == KindOfInt64 && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_mcrypt_cfb((&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (int)(args[-3].m_data.num), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+        fh_mcrypt_cfb((&(rv)), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (int)(args[-3].m_data.num), (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1055,7 +1055,7 @@ TypedValue * fg1_mcrypt_ecb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_mcrypt_ecb((rv), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (int)(args[-3].m_data.num), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+  fh_mcrypt_ecb((rv), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (int)(args[-3].m_data.num), (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1066,7 +1066,7 @@ TypedValue* fg_mcrypt_ecb(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && (args-3)->m_type == KindOfInt64 && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_mcrypt_ecb((&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (int)(args[-3].m_data.num), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+        fh_mcrypt_ecb((&(rv)), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (int)(args[-3].m_data.num), (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1128,7 +1128,7 @@ TypedValue * fg1_mcrypt_ofb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_mcrypt_ofb((rv), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (int)(args[-3].m_data.num), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+  fh_mcrypt_ofb((rv), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (int)(args[-3].m_data.num), (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1139,7 +1139,7 @@ TypedValue* fg_mcrypt_ofb(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 4LL && count <= 5LL) {
       if ((count <= 4 || IS_STRING_TYPE((args-4)->m_type)) && (args-3)->m_type == KindOfInt64 && IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_mcrypt_ofb((&(rv)), (Value*)(args-0), (Value*)(args-1), (Value*)(args-2), (int)(args[-3].m_data.num), (count > 4) ? (Value*)(args-4) : (Value*)(&null_string));
+        fh_mcrypt_ofb((&(rv)), &args[-0].m_data, &args[-1].m_data, &args[-2].m_data, (int)(args[-3].m_data.num), (count > 4) ? &args[-4].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 5);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1189,7 +1189,7 @@ TypedValue * fg1_mcrypt_get_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, int
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_mcrypt_get_block_size((rv), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+  fh_mcrypt_get_block_size((rv), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1200,7 +1200,7 @@ TypedValue* fg_mcrypt_get_block_size(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_mcrypt_get_block_size((&(rv)), (Value*)(args-0), (count > 1) ? (Value*)(args-1) : (Value*)(&null_string));
+        fh_mcrypt_get_block_size((&(rv)), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1239,7 +1239,7 @@ TypedValue * fg1_mcrypt_get_cipher_name(TypedValue* rv, HPHP::VM::ActRec* ar, in
 TypedValue * fg1_mcrypt_get_cipher_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  fh_mcrypt_get_cipher_name((rv), (Value*)(args-0));
+  fh_mcrypt_get_cipher_name((rv), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1250,7 +1250,7 @@ TypedValue* fg_mcrypt_get_cipher_name(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
-        fh_mcrypt_get_cipher_name((&(rv)), (Value*)(args-0));
+        fh_mcrypt_get_cipher_name((&(rv)), &args[-0].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1295,7 +1295,7 @@ TypedValue * fg1_mcrypt_get_iv_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_mcrypt_get_iv_size((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_mcrypt_get_iv_size((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1306,7 +1306,7 @@ TypedValue* fg_mcrypt_get_iv_size(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_mcrypt_get_iv_size((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_mcrypt_get_iv_size((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1351,7 +1351,7 @@ TypedValue * fg1_mcrypt_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_mcrypt_get_key_size((Value*)(args-0), (Value*)(args-1));
+  rv->m_data.num = (int64_t)fh_mcrypt_get_key_size(&args[-0].m_data, &args[-1].m_data);
   return rv;
 }
 
@@ -1362,7 +1362,7 @@ TypedValue* fg_mcrypt_get_key_size(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_mcrypt_get_key_size((Value*)(args-0), (Value*)(args-1));
+        rv.m_data.num = (int64_t)fh_mcrypt_get_key_size(&args[-0].m_data, &args[-1].m_data);
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1401,7 +1401,7 @@ TypedValue * fg1_mcrypt_enc_get_algorithms_name(TypedValue* rv, HPHP::VM::ActRec
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
-  fh_mcrypt_enc_get_algorithms_name((Value*)(rv), (Value*)(args-0));
+  fh_mcrypt_enc_get_algorithms_name((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1413,7 +1413,7 @@ TypedValue* fg_mcrypt_enc_get_algorithms_name(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfString;
-        fh_mcrypt_enc_get_algorithms_name((Value*)(&(rv)), (Value*)(args-0));
+        fh_mcrypt_enc_get_algorithms_name((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1452,7 +1452,7 @@ TypedValue * fg1_mcrypt_enc_get_block_size(TypedValue* rv, HPHP::VM::ActRec* ar,
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_mcrypt_enc_get_block_size((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_mcrypt_enc_get_block_size(&args[-0].m_data);
   return rv;
 }
 
@@ -1463,7 +1463,7 @@ TypedValue* fg_mcrypt_enc_get_block_size(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_mcrypt_enc_get_block_size((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_mcrypt_enc_get_block_size(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1501,7 +1501,7 @@ TypedValue * fg1_mcrypt_enc_get_iv_size(TypedValue* rv, HPHP::VM::ActRec* ar, in
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_mcrypt_enc_get_iv_size((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_mcrypt_enc_get_iv_size(&args[-0].m_data);
   return rv;
 }
 
@@ -1512,7 +1512,7 @@ TypedValue* fg_mcrypt_enc_get_iv_size(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_mcrypt_enc_get_iv_size((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_mcrypt_enc_get_iv_size(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1550,7 +1550,7 @@ TypedValue * fg1_mcrypt_enc_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, i
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_mcrypt_enc_get_key_size((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_mcrypt_enc_get_key_size(&args[-0].m_data);
   return rv;
 }
 
@@ -1561,7 +1561,7 @@ TypedValue* fg_mcrypt_enc_get_key_size(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_mcrypt_enc_get_key_size((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_mcrypt_enc_get_key_size(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1600,7 +1600,7 @@ TypedValue * fg1_mcrypt_enc_get_modes_name(TypedValue* rv, HPHP::VM::ActRec* ar,
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
-  fh_mcrypt_enc_get_modes_name((Value*)(rv), (Value*)(args-0));
+  fh_mcrypt_enc_get_modes_name((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1612,7 +1612,7 @@ TypedValue* fg_mcrypt_enc_get_modes_name(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfString;
-        fh_mcrypt_enc_get_modes_name((Value*)(&(rv)), (Value*)(args-0));
+        fh_mcrypt_enc_get_modes_name((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1652,7 +1652,7 @@ TypedValue * fg1_mcrypt_enc_get_supported_key_sizes(TypedValue* rv, HPHP::VM::Ac
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
-  fh_mcrypt_enc_get_supported_key_sizes((Value*)(rv), (Value*)(args-0));
+  fh_mcrypt_enc_get_supported_key_sizes((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1664,7 +1664,7 @@ TypedValue* fg_mcrypt_enc_get_supported_key_sizes(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfArray;
-        fh_mcrypt_enc_get_supported_key_sizes((Value*)(&(rv)), (Value*)(args-0));
+        fh_mcrypt_enc_get_supported_key_sizes((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1703,7 +1703,7 @@ TypedValue * fg1_mcrypt_enc_is_block_algorithm_mode(TypedValue* rv, HPHP::VM::Ac
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_mcrypt_enc_is_block_algorithm_mode((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_mcrypt_enc_is_block_algorithm_mode(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -1714,7 +1714,7 @@ TypedValue* fg_mcrypt_enc_is_block_algorithm_mode(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_mcrypt_enc_is_block_algorithm_mode((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_mcrypt_enc_is_block_algorithm_mode(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1752,7 +1752,7 @@ TypedValue * fg1_mcrypt_enc_is_block_algorithm(TypedValue* rv, HPHP::VM::ActRec*
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_mcrypt_enc_is_block_algorithm((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_mcrypt_enc_is_block_algorithm(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -1763,7 +1763,7 @@ TypedValue* fg_mcrypt_enc_is_block_algorithm(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_mcrypt_enc_is_block_algorithm((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_mcrypt_enc_is_block_algorithm(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1801,7 +1801,7 @@ TypedValue * fg1_mcrypt_enc_is_block_mode(TypedValue* rv, HPHP::VM::ActRec* ar, 
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_mcrypt_enc_is_block_mode((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_mcrypt_enc_is_block_mode(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -1812,7 +1812,7 @@ TypedValue* fg_mcrypt_enc_is_block_mode(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_mcrypt_enc_is_block_mode((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_mcrypt_enc_is_block_mode(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1850,7 +1850,7 @@ TypedValue * fg1_mcrypt_enc_self_test(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (int64_t)fh_mcrypt_enc_self_test((Value*)(args-0));
+  rv->m_data.num = (int64_t)fh_mcrypt_enc_self_test(&args[-0].m_data);
   return rv;
 }
 
@@ -1861,7 +1861,7 @@ TypedValue* fg_mcrypt_enc_self_test(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_mcrypt_enc_self_test((Value*)(args-0));
+        rv.m_data.num = (int64_t)fh_mcrypt_enc_self_test(&args[-0].m_data);
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -1905,7 +1905,7 @@ TypedValue * fg1_mcrypt_generic(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_mcrypt_generic((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_mcrypt_generic((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -1916,7 +1916,7 @@ TypedValue* fg_mcrypt_generic(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        fh_mcrypt_generic((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_mcrypt_generic((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -1965,7 +1965,7 @@ TypedValue * fg1_mcrypt_generic_init(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_mcrypt_generic_init((Value*)(args-0), (Value*)(args-1), (Value*)(args-2));
+  rv->m_data.num = (int64_t)fh_mcrypt_generic_init(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data);
   return rv;
 }
 
@@ -1976,7 +1976,7 @@ TypedValue* fg_mcrypt_generic_init(HPHP::VM::ActRec *ar) {
     if (count == 3LL) {
       if (IS_STRING_TYPE((args-2)->m_type) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_mcrypt_generic_init((Value*)(args-0), (Value*)(args-1), (Value*)(args-2));
+        rv.m_data.num = (int64_t)fh_mcrypt_generic_init(&args[-0].m_data, &args[-1].m_data, &args[-2].m_data);
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2020,7 +2020,7 @@ TypedValue * fg1_mdecrypt_generic(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
-  fh_mdecrypt_generic((rv), (Value*)(args-0), (Value*)(args-1));
+  fh_mdecrypt_generic((rv), &args[-0].m_data, &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -2031,7 +2031,7 @@ TypedValue* fg_mdecrypt_generic(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
-        fh_mdecrypt_generic((&(rv)), (Value*)(args-0), (Value*)(args-1));
+        fh_mdecrypt_generic((&(rv)), &args[-0].m_data, &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -2070,7 +2070,7 @@ TypedValue * fg1_mcrypt_generic_deinit(TypedValue* rv, HPHP::VM::ActRec* ar, int
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_mcrypt_generic_deinit((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_mcrypt_generic_deinit(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -2081,7 +2081,7 @@ TypedValue* fg_mcrypt_generic_deinit(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_mcrypt_generic_deinit((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_mcrypt_generic_deinit(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -2119,7 +2119,7 @@ TypedValue * fg1_mcrypt_generic_end(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_mcrypt_generic_end((Value*)(args-0))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_mcrypt_generic_end(&args[-0].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -2130,7 +2130,7 @@ TypedValue* fg_mcrypt_generic_end(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if ((args-0)->m_type == KindOfObject) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_mcrypt_generic_end((Value*)(args-0))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_mcrypt_generic_end(&args[-0].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;

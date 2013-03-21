@@ -40,7 +40,7 @@ TypedValue* fg_get_declared_classes(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_get_declared_classes((Value*)(&(rv)));
+      fh_get_declared_classes((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -74,7 +74,7 @@ TypedValue* fg_get_declared_interfaces(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_get_declared_interfaces((Value*)(&(rv)));
+      fh_get_declared_interfaces((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -108,7 +108,7 @@ TypedValue* fg_get_declared_traits(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
       rv.m_type = KindOfArray;
-      fh_get_declared_traits((Value*)(&(rv)));
+      fh_get_declared_traits((&rv.m_data));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -152,7 +152,7 @@ TypedValue * fg1_class_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_class_exists((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_class_exists(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -163,7 +163,7 @@ TypedValue* fg_class_exists(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_class_exists((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_class_exists(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -212,7 +212,7 @@ TypedValue * fg1_interface_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_interface_exists((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_interface_exists(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -223,7 +223,7 @@ TypedValue* fg_interface_exists(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_interface_exists((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_interface_exists(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -272,7 +272,7 @@ TypedValue * fg1_trait_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (fh_trait_exists((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_trait_exists(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -283,7 +283,7 @@ TypedValue* fg_trait_exists(HPHP::VM::ActRec *ar) {
     if (count >= 1LL && count <= 2LL) {
       if ((count <= 1 || (args-1)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_trait_exists((Value*)(args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_trait_exists(&args[-0].m_data, (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -323,7 +323,7 @@ TypedValue* fg_get_class_methods(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 1LL) {
       rv.m_type = KindOfArray;
-      fh_get_class_methods((Value*)(&(rv)), (args-0));
+      fh_get_class_methods((&rv.m_data), (args-0));
       if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 1);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -357,7 +357,7 @@ TypedValue * fg1_get_class_vars(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
-  fh_get_class_vars((Value*)(rv), (Value*)(args-0));
+  fh_get_class_vars((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -369,7 +369,7 @@ TypedValue* fg_get_class_vars(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfArray;
-        fh_get_class_vars((Value*)(&(rv)), (Value*)(args-0));
+        fh_get_class_vars((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -409,7 +409,7 @@ TypedValue * fg1_get_class_constants(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
-  fh_get_class_constants((Value*)(rv), (Value*)(args-0));
+  fh_get_class_constants((&rv->m_data), &args[-0].m_data);
   if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
   return rv;
 }
@@ -421,7 +421,7 @@ TypedValue* fg_get_class_constants(HPHP::VM::ActRec *ar) {
     if (count == 1LL) {
       if (IS_STRING_TYPE((args-0)->m_type)) {
         rv.m_type = KindOfArray;
-        fh_get_class_constants((Value*)(&(rv)), (Value*)(args-0));
+        fh_get_class_constants((&rv.m_data), &args[-0].m_data);
         if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 1);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -540,7 +540,7 @@ TypedValue * fg1_is_a(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  rv->m_data.num = (fh_is_a((args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_is_a((args-0), &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -551,7 +551,7 @@ TypedValue* fg_is_a(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_is_a((args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_is_a((args-0), &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(false))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -601,7 +601,7 @@ TypedValue * fg1_is_subclass_of(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
-  rv->m_data.num = (fh_is_subclass_of((args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_is_subclass_of((args-0), &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
   return rv;
 }
 
@@ -612,7 +612,7 @@ TypedValue* fg_is_subclass_of(HPHP::VM::ActRec *ar) {
     if (count >= 2LL && count <= 3LL) {
       if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_is_subclass_of((args-0), (Value*)(args-1), (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_is_subclass_of((args-0), &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -651,7 +651,7 @@ TypedValue * fg1_method_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-1);
-  rv->m_data.num = (fh_method_exists((args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_method_exists((args-0), &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -662,7 +662,7 @@ TypedValue* fg_method_exists(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_method_exists((args-0), (Value*)(args-1))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_method_exists((args-0), &args[-1].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -701,7 +701,7 @@ TypedValue * fg1_property_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-1);
-  rv->m_data.num = (fh_property_exists((args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  rv->m_data.num = (fh_property_exists((args-0), &args[-1].m_data)) ? 1LL : 0LL;
   return rv;
 }
 
@@ -712,7 +712,7 @@ TypedValue* fg_property_exists(HPHP::VM::ActRec *ar) {
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
         rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_property_exists((args-0), (Value*)(args-1))) ? 1LL : 0LL;
+        rv.m_data.num = (fh_property_exists((args-0), &args[-1].m_data)) ? 1LL : 0LL;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -791,7 +791,7 @@ TypedValue * fg1_call_user_method_array(TypedValue* rv, HPHP::VM::ActRec* ar, in
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  fh_call_user_method_array((rv), (Value*)(args-0), (args-1), (Value*)(args-2));
+  fh_call_user_method_array((rv), &args[-0].m_data, (args-1), &args[-2].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -802,7 +802,7 @@ TypedValue* fg_call_user_method_array(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfArray && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_call_user_method_array((&(rv)), (Value*)(args-0), (args-1), (Value*)(args-2));
+        fh_call_user_method_array((&(rv)), &args[-0].m_data, (args-1), &args[-2].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
@@ -857,7 +857,7 @@ TypedValue * fg1_call_user_method(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
     }
     extraArgs = ai.create();
   }
-  fh_call_user_method((rv), (count), (Value*)(args-0), (args-1), (Value*)(&extraArgs));
+  fh_call_user_method((rv), (count), &args[-0].m_data, (args-1), (Value*)(&extraArgs));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -881,7 +881,7 @@ TypedValue* fg_call_user_method(HPHP::VM::ActRec *ar) {
           }
           extraArgs = ai.create();
         }
-        fh_call_user_method((&(rv)), (count), (Value*)(args-0), (args-1), (Value*)(&extraArgs));
+        fh_call_user_method((&(rv)), (count), &args[-0].m_data, (args-1), (Value*)(&extraArgs));
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

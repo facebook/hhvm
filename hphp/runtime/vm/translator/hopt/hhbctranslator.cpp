@@ -1629,9 +1629,6 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     m_tb->genReleaseVVOrExit(getExitSlowTrace());
   }
   SSATmp* retVal = pop(type);
-  if (mayHaveThis) {
-    m_tb->genDecRefThis();
-  }
 
   SSATmp* sp;
   if (freeInline) {
@@ -1642,14 +1639,26 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
      * IncRef/DecRef pair in the main trace.
      */
     SSATmp* retValSrcLoc = nullptr;
+    Opcode  retValSrcOpc = Nop; // Nop flags the ref-count opti is impossible
     IRInstruction* retValSrcInstr = retVal->getInstruction();
     if (retValSrcInstr->getOpcode() == IncRef) {
       retValSrcLoc = retValSrcInstr->getSrc(0);
-      if (retValSrcLoc->getInstruction()->getOpcode() != LdLoc) {
+      retValSrcOpc = retValSrcLoc->getInstruction()->getOpcode();
+      if (retValSrcOpc != LdLoc && retValSrcOpc != LdThis) {
         retValSrcLoc = nullptr;
+        retValSrcOpc = Nop;
       }
     }
-    int retValLocId = retValSrcLoc ?
+
+    if (mayHaveThis) {
+      if (retValSrcLoc && retValSrcOpc == LdThis) {
+        m_tb->genDecRef(retVal);
+      } else {
+        m_tb->genDecRefThis();
+      }
+    }
+
+    int retValLocId = (retValSrcLoc && retValSrcOpc == LdLoc) ?
       retValSrcLoc->getInstruction()->getExtra<LocalId>()->locId : -1;
     for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
       /*
@@ -1665,6 +1674,9 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     m_tb->genRetVal(retValSrcLoc ? retValSrcLoc : retVal);
     sp = m_tb->genRetAdjustStack();
   } else {
+    if (mayHaveThis) {
+      m_tb->genDecRefThis();
+    }
     sp = m_tb->genGenericRetDecRefs(retVal, curFunc->numLocals());
     m_tb->genRetVal(retVal);
   }

@@ -1256,7 +1256,12 @@ asm_label(a, release);
   }
   a.    ret    ();
 
-  TRACE(1, "STUB total dtor generic stubs %zu bytes\n",
+  TRACE(1, "HOTSTUB: generic dtor start: %lx\n",
+        uintptr_t(m_irPopRHelper));
+  TRACE(1, "HOTSTUB: genericDtorStub: %lx\n", uintptr_t(m_dtorGenericStub));
+  TRACE(1, "HOTSTUB: genericDtorStubRegs: %lx\n",
+        uintptr_t(m_dtorGenericStubRegs));
+  TRACE(1, "HOTSTUB: total dtor generic stubs %zu bytes\n",
         size_t(a.code.frontier - m_dtorGenericStub));
 }
 
@@ -1865,6 +1870,8 @@ TranslatorX64::emitPrologueRedispatch(X64Assembler& a) {
   TCA retval;
   moveToAlign(a);
   retval = a.code.frontier;
+  TRACE(1, "HOTSTUB: emitPrologueRedispatch: %lx\n", uintptr_t(a.code.frontier));
+
   // We're in the wrong func prologue.
 
   assert(kScratchCrossTraceRegs.contains(rax));
@@ -11642,6 +11649,9 @@ void TranslatorX64::emitFreeLocalsHelpers() {
   auto const rData     = rdi;
 
   moveToAlign(a, kNonFallthroughAlign);
+
+  TRACE(1, "HOTSTUB: freeLocalsHelpers starts %lx\n", uintptr_t(a.code.frontier));
+
 asm_label(a, release);
   a.    loadq  (rIter[TVOFF(m_data)], rData);
   a.    cmpl   (RefCountStaticValue, rData[FAST_REFCOUNT_OFFSET]);
@@ -11678,7 +11688,7 @@ asm_label(a, loopHead);
 
   for (int i = 0; i < kNumFreeLocalsHelpers; ++i) {
     m_freeLocalsHelpers[kNumFreeLocalsHelpers - i - 1] = a.code.frontier;
-    TRACE(1, "STUB m_freeLocalsHelpers[%d] = %p\n",
+    TRACE(1, "HOTSTUB: m_freeLocalsHelpers[%d] = %p\n",
           kNumFreeLocalsHelpers - i - 1, a.code.frontier);
     emitDecLocal();
     if (i != kNumFreeLocalsHelpers - 1) {
@@ -11806,20 +11816,23 @@ TranslatorX64::TranslatorX64()
                                        Stack::topOfStackOffset(), rVmSp);
   emitServiceReq(SRFlags::SRInline, REQ_RESUME, 0ull);
 
-  // Helper for DefCls
-  if (false) {
-    PreClass *preClass = 0;
-    defClsHelper(preClass);
+  // Helper for DefCls, in astubs.
+  {
+    auto& a = astubs;
+    if (false) {
+      PreClass *preClass = 0;
+      defClsHelper(preClass);
+    }
+    m_defClsHelper = TCA(a.code.frontier);
+    PhysReg rEC = argNumToRegName[2];
+    emitGetGContext(a, rEC);
+    a.   storeq (rVmFp, rEC[offsetof(VMExecutionContext, m_fp)]);
+    a.   storeq (argNumToRegName[1],
+                    rEC[offsetof(VMExecutionContext, m_pc)]);
+    a.   storeq (rax, rEC[offsetof(VMExecutionContext, m_stack) +
+                      Stack::topOfStackOffset()]);
+    a.   jmp    (TCA(defClsHelper));
   }
-  m_defClsHelper = TCA(a.code.frontier);
-  PhysReg rEC = argNumToRegName[2];
-  emitGetGContext(a, rEC);
-  a.   storeq (rVmFp, rEC[offsetof(VMExecutionContext, m_fp)]);
-  a.   storeq (argNumToRegName[1],
-                  rEC[offsetof(VMExecutionContext, m_pc)]);
-  a.   storeq (rax, rEC[offsetof(VMExecutionContext, m_stack) +
-                    Stack::topOfStackOffset()]);
-  a.   jmp    (TCA(defClsHelper));
 
   // The decRef helper for when we bring the count down to zero. Callee needs to
   // bring the value into rdi. These can be burned in for all time, and for all
@@ -11827,20 +11840,22 @@ TranslatorX64::TranslatorX64()
   typedef void* vp;
 
   TCA strDtor, arrDtor, objDtor, refDtor;
-  strDtor = emitUnaryStub(a, Call(getMethodPtr(&StringData::release)));
-  arrDtor = emitUnaryStub(a, Call(getVTableOffset(&HphpArray::release)));
-  objDtor = emitUnaryStub(a, Call(getMethodPtr(&ObjectData::release)));
-  refDtor = emitUnaryStub(a, Call(vp(getMethodPtr(&RefData::release))));
+  strDtor = emitUnaryStub(astubs, Call(getMethodPtr(&StringData::release)));
+  arrDtor = emitUnaryStub(astubs, Call(getVTableOffset(&HphpArray::release)));
+  objDtor = emitUnaryStub(astubs, Call(getMethodPtr(&ObjectData::release)));
+  refDtor = emitUnaryStub(astubs, Call(vp(getMethodPtr(&RefData::release))));
 
   m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)] = strDtor;
   m_dtorStubs[typeToDestrIndex(KindOfArray)]         = arrDtor;
   m_dtorStubs[typeToDestrIndex(KindOfObject)]        = objDtor;
   m_dtorStubs[typeToDestrIndex(KindOfRef)]           = refDtor;
 
+  // Hot helper stubs in A:
   emitGenericDecRefHelpers();
   emitFreeLocalsHelpers();
-
   m_funcPrologueRedispatch = emitPrologueRedispatch(a);
+  TRACE(1, "HOTSTUB: all stubs finished: %lx\n",
+        uintptr_t(a.code.frontier));
 
   if (trustSigSegv) {
     // Install SIGSEGV handler for timeout exceptions
@@ -11885,11 +11900,11 @@ void TranslatorX64::initGdb() {
   recordBCInstr(OpRetFromInterp, astubs, m_retHelper);
   recordGdbStub(astubs, m_retHelper - 1, "HHVM::retHelper");
   recordBCInstr(OpResumeHelper, astubs, m_resumeHelper);
-  recordBCInstr(OpDefClsHelper, a, m_defClsHelper);
-  recordBCInstr(OpDtorStub, a,
+  recordBCInstr(OpDefClsHelper, astubs, m_defClsHelper);
+  recordBCInstr(OpDtorStub, astubs,
                 m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)]);
-  recordGdbStub(a, m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)],
-                    "HHVM::destructorStub");
+  recordGdbStub(astubs, m_dtorStubs[typeToDestrIndex(BitwiseKindOfString)],
+                        "HHVM::destructorStub");
 }
 
 TranslatorX64*

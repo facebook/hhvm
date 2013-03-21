@@ -461,25 +461,11 @@ bool LiveDict::color(TypePtr type) {
       if (Type::SameType(type, e->getCPPType())) {
         SimpleVariablePtr sv(
             static_pointer_cast<SimpleVariable>(e));
-        bool isGenParam = false;
-        if (sv->getFunctionScope()->isGenerator()) {
-          // do not allow coalescing of symbols which are parameters/use vars
-          // in the generator (sym->isParameter() will be false b/c we are in
-          // the scope of the generator function)
-          FunctionScopeRawPtr origScope(sv->getFunctionScope()->getOrigGenFS());
-          assert(origScope);
-          Symbol *origSym =
-            origScope->getVariables()->getSymbol(sv->getName());
-          if (origSym &&
-              (origSym->isParameter() || origSym->isClosureVar())) {
-            isGenParam = true;
-          }
-        }
         Symbol *sym = sv->getSymbol();
         if (sym &&
             !sym->isGlobal() &&
             !sym->isParameter() &&
-            !isGenParam &&
+            !sym->isGeneratorParameter() &&
             !sym->isClosureVar() &&
             !sym->isStatic() &&
             !e->isThis()) {
@@ -623,9 +609,8 @@ public:
       always_assert(e && e->is(Expression::KindOfSimpleVariable));
       SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(e));
       Symbol *sym = sv->getSymbol();
-      bool inGen = sv->getFunctionScope()->isGenerator();
       if (!sym || sym->isGlobal() || sym->isStatic() || sym->isParameter() ||
-          sym->isClosureVar() || sv->isThis() || inGen) {
+          sym->isGeneratorParameter() || sym->isClosureVar() || sv->isThis()) {
         continue;
       }
 

@@ -1569,10 +1569,13 @@ void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
   Token func, name;
   onFunction(func, ret, ref, name, params, stmts, 0);
 
+  ClosureExpressionPtr closure = NEW_EXP(
+    ClosureExpression,
+    dynamic_pointer_cast<FunctionStatement>(func->stmt),
+    dynamic_pointer_cast<ExpressionList>(cparams->exp));
+  closure->getClosureFunction()->setContainingClosure(closure);
   out.reset();
-  out->exp = NEW_EXP(ClosureExpression,
-                     dynamic_pointer_cast<FunctionStatement>(func->stmt),
-                     dynamic_pointer_cast<ExpressionList>(cparams->exp));
+  out->exp = closure;
 }
 
 void Parser::onClosureParam(Token &out, Token *params, Token &param,

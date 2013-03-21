@@ -523,25 +523,28 @@ static inline TypedValue* baseGImpl(TypedValue *key,
   return base;
 }
 
-static TypedValue* baseG(TypedValue key, MInstrState* mis) {
+namespace VectorHelpers {
+TypedValue* baseG(TypedValue key, MInstrState* mis) {
   return baseGImpl<false, false>(&key, mis);
 }
 
-static TypedValue* baseGW(TypedValue key, MInstrState* mis) {
+TypedValue* baseGW(TypedValue key, MInstrState* mis) {
   return baseGImpl<true, false>(&key, mis);
 }
 
-static TypedValue* baseGD(TypedValue key, MInstrState* mis) {
+TypedValue* baseGD(TypedValue key, MInstrState* mis) {
   return baseGImpl<false, true>(&key, mis);
 }
 
-static TypedValue* baseGWD(TypedValue key, MInstrState* mis) {
+TypedValue* baseGWD(TypedValue key, MInstrState* mis) {
   return baseGImpl<true, true>(&key, mis);
+}
 }
 
 void HhbcTranslator::VectorTranslator::emitBaseG() {
   const MInstrAttr& mia = m_mii.getAttr(m_ni.immVec.locationCode());
   typedef TypedValue* (*OpFunc)(TypedValue, MInstrState*);
+  using namespace VectorHelpers;
   static const OpFunc opFuncs[] = {baseG, baseGW, baseGD, baseGWD};
   OpFunc opFunc = opFuncs[mia & MIA_base];
   SSATmp* gblName = getInput(m_iInd);
@@ -658,11 +661,13 @@ static inline TypedValue* propImpl(Class* ctx, TypedValue* base,
   m(propSWO,   StrKey,  false, Warn,         true)
 
 #define PROP(nm, ...)                                                   \
-static TypedValue* nm(Class* ctx, TypedValue* base, TypedValue key,     \
-                      MInstrState* mis) {                               \
+TypedValue* nm(Class* ctx, TypedValue* base, TypedValue key,            \
+               MInstrState* mis) {                                      \
   return propImpl<__VA_ARGS__>(ctx, base, key, mis);                    \
 }
+namespace VectorHelpers {
 HELPER_TABLE(PROP)
+}
 #undef PROP
 
 void HhbcTranslator::VectorTranslator::emitPropGeneric() {
@@ -860,10 +865,12 @@ static inline TypedValue* elemImpl(TypedValue* base, TypedValue keyVal,
 
 #define ELEM(nm, hot, keyType, unboxKey, attrs)                         \
 hot                                                                     \
-static TypedValue* nm(TypedValue* base, TypedValue key, MInstrState* mis) { \
+TypedValue* nm(TypedValue* base, TypedValue key, MInstrState* mis) {    \
   return elemImpl<keyType, unboxKey, WDRU(attrs)>(base, key, mis);      \
 }
+namespace VectorHelpers {
 HELPER_TABLE(ELEM)
+}
 #undef ELEM
 
 void HhbcTranslator::VectorTranslator::emitElem() {
@@ -986,11 +993,13 @@ static inline TypedValue cGetPropImpl(Class* ctx, TypedValue* base,
 
 #define PROP(nm, hot, ...)                                              \
 hot                                                                     \
-static TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,      \
+TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,             \
                      MInstrState* mis) {                                \
   return cGetPropImpl<__VA_ARGS__>(ctx, base, key, mis);                \
 }
+namespace VectorHelpers {
 HELPER_TABLE(PROP)
+}
 #undef PROP
 
 void HhbcTranslator::VectorTranslator::emitCGetProp() {
@@ -1050,11 +1059,13 @@ static inline TypedValue vGetPropImpl(Class* ctx, TypedValue* base,
 
 #define PROP(nm, hot, ...)                                              \
 hot                                                                     \
-static TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,      \
+TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,             \
                      MInstrState* mis) {                                \
   return vGetPropImpl<__VA_ARGS__>(ctx, base, key, mis);                \
 }
+namespace VectorHelpers {
 HELPER_TABLE(PROP)
+}
 #undef PROP
 
 void HhbcTranslator::VectorTranslator::emitVGetProp() {
@@ -1097,10 +1108,12 @@ static inline bool issetEmptyPropImpl(Class* ctx, TypedValue* base,
 #define ISSET(nm, hot, ...)                                             \
 hot                                                                     \
 /* This returns int64_t to ensure all 64 bits of rax are valid */       \
-static int64_t nm(Class* ctx, TypedValue* base, TypedValue key) {       \
+int64_t nm(Class* ctx, TypedValue* base, TypedValue key) {              \
   return issetEmptyPropImpl<__VA_ARGS__>(ctx, base, key);               \
 }
+namespace VectorHelpers {
 HELPER_TABLE(ISSET)
+}
 #undef ISSET
 
 void HhbcTranslator::VectorTranslator::emitIssetEmptyProp(bool isEmpty) {
@@ -1143,10 +1156,12 @@ static inline TypedValue setPropImpl(Class* ctx, TypedValue* base,
   m(setPropSO,   StrKey,  false,  true)
 
 #define PROP(nm, ...)                                                   \
-static TypedValue nm(Class* ctx, TypedValue* base, TypedValue key, Cell val) { \
+TypedValue nm(Class* ctx, TypedValue* base, TypedValue key, Cell val) { \
   return setPropImpl<__VA_ARGS__>(ctx, base, key, val);                 \
 }
+namespace VectorHelpers {
 HELPER_TABLE(PROP)
+}
 #undef PROP
 
 void HhbcTranslator::VectorTranslator::emitSetProp() {
@@ -1206,12 +1221,14 @@ static inline TypedValue setOpPropImpl(TypedValue* base, TypedValue keyVal,
 
 #define HELPER_TABLE(m, op) OPPROP_TABLE(m, setOp, SetOp##op)
 #define SETOP(nm, ...)                                                 \
-static TypedValue nm(TypedValue* base, TypedValue key,                 \
+TypedValue nm(TypedValue* base, TypedValue key,                        \
                      Cell val, MInstrState* mis) {                     \
   return setOpPropImpl<__VA_ARGS__>(base, key, val, mis);              \
 }
 #define SETOP_OP(op, bcOp) HELPER_TABLE(SETOP, op)
+namespace VectorHelpers {
 SETOP_OPS
+}
 #undef SETOP_OP
 #undef SETOP
 
@@ -1249,12 +1266,14 @@ static inline TypedValue incDecPropImpl(Class* ctx, TypedValue* base,
 
 #define HELPER_TABLE(m, op) OPPROP_TABLE(m, incDec, op)
 #define INCDEC(nm, ...)                                                 \
-static TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,      \
+TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,             \
                      MInstrState* mis) {                                \
   return incDecPropImpl<__VA_ARGS__>(ctx, base, key, mis);              \
 }
 #define INCDEC_OP(op) HELPER_TABLE(INCDEC, op)
+namespace VectorHelpers {
 INCDEC_OPS
+}
 #undef INCDEC_OP
 #undef INCDEC
 
@@ -1297,11 +1316,13 @@ static inline void bindPropImpl(Class* ctx, TypedValue* base, TypedValue keyVal,
   m(bindPropSO,   StrKey, false,  true)
 
 #define PROP(nm, ...)                                                   \
-static inline void nm(Class* ctx, TypedValue* base, TypedValue key,     \
+void nm(Class* ctx, TypedValue* base, TypedValue key,                   \
                       RefData* val, MInstrState* mis) {                 \
   bindPropImpl<__VA_ARGS__>(ctx, base, key, val, mis);                  \
 }
+namespace VectorHelpers {
 HELPER_TABLE(PROP)
+}
 #undef PROP
 
 void HhbcTranslator::VectorTranslator::emitBindProp() {
@@ -1348,10 +1369,12 @@ static inline TypedValue cGetElemImpl(TypedValue* base, TypedValue keyVal,
 
 #define ELEM(nm, hot, ...)                                              \
 hot                                                                     \
-static TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) { \
+TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) {     \
   return cGetElemImpl<__VA_ARGS__>(base, key, mis);                     \
 }
+namespace VectorHelpers {
 HELPER_TABLE(ELEM)
+}
 #undef ELEM
 
 void HhbcTranslator::VectorTranslator::emitCGetElem() {
@@ -1396,10 +1419,12 @@ static inline TypedValue vGetElemImpl(TypedValue* base, TypedValue keyVal,
 
 #define ELEM(nm, hot, ...)                                              \
 hot                                                                     \
-static TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) { \
+TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) {     \
   return vGetElemImpl<__VA_ARGS__>(base, key,  mis);                    \
 }
+namespace VectorHelpers {
 HELPER_TABLE(ELEM)
+}
 #undef ELEM
 
 void HhbcTranslator::VectorTranslator::emitVGetElem() {
@@ -1437,10 +1462,12 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue keyVal,
 
 #define ISSET(nm, hot, ...)                                             \
 hot                                                                     \
-static uint64_t nm(TypedValue* base, TypedValue key, MInstrState* mis) { \
+uint64_t nm(TypedValue* base, TypedValue key, MInstrState* mis) {       \
   return issetEmptyElemImpl<__VA_ARGS__>(base, key, mis);               \
 }
+namespace VectorHelpers {
 HELPER_TABLE(ISSET)
+}
 #undef ISSET
 
 void HhbcTranslator::VectorTranslator::emitIssetEmptyElem(bool isEmpty) {
@@ -1482,10 +1509,12 @@ static inline TypedValue setElemImpl(TypedValue* base, TypedValue keyVal,
 
 #define ELEM(nm, hot, ...)                                              \
 hot                                                                     \
-static TypedValue nm(TypedValue* base, TypedValue key, Cell val) {      \
+TypedValue nm(TypedValue* base, TypedValue key, Cell val) {             \
   return setElemImpl<__VA_ARGS__>(base, key, val);                      \
 }
+namespace VectorHelpers {
 HELPER_TABLE(ELEM)
+}
 #undef ELEM
 
 static inline ArrayData* checkedSet(ArrayData* a, StringData* key,
@@ -1523,12 +1552,14 @@ static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
 
 #define ELEM(nm, hot, keyType, checkForInt, setRef)                     \
 hot                                                                     \
-static typename ShuffleReturn<setRef>::return_type                      \
+typename ShuffleReturn<setRef>::return_type                             \
 nm(ArrayData* a, TypedValue* key, TypedValue value, RefData* ref) {     \
   return arraySetImpl<keyType, checkForInt, setRef>(                    \
     a, keyAsRaw<keyType>(key), tvAsCVarRef(&value), ref);               \
 }
+namespace VectorHelpers {
 HELPER_TABLE_ARRAY_SET(ELEM)
+}
 #undef ELEM
 
 void HhbcTranslator::VectorTranslator::emitSimpleArraySet(SSATmp* key,
@@ -1634,12 +1665,14 @@ static inline TypedValue setOpElemImpl(TypedValue* base, TypedValue keyVal,
 
 #define HELPER_TABLE(m, op) OPELEM_TABLE(m, setOp, SetOp##op)
 #define SETOP(nm, ...)                                                  \
-static TypedValue nm(TypedValue* base, TypedValue key, Cell val,       \
+TypedValue nm(TypedValue* base, TypedValue key, Cell val,               \
                      MInstrState* mis) {                                \
   return setOpElemImpl<__VA_ARGS__>(base, key, val, mis);               \
 }
 #define SETOP_OP(op, bcOp) HELPER_TABLE(SETOP, op)
+namespace VectorHelpers {
 SETOP_OPS
+}
 #undef SETOP_OP
 #undef SETOP
 
@@ -1670,11 +1703,13 @@ static inline TypedValue incDecElemImpl(TypedValue* base, TypedValue keyVal,
 
 #define HELPER_TABLE(m, op) OPELEM_TABLE(m, incDec, op)
 #define INCDEC(nm, ...)                                                 \
-static TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) { \
+TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) {     \
   return incDecElemImpl<__VA_ARGS__>(base, key, mis);                   \
 }
 #define INCDEC_OP(op) HELPER_TABLE(INCDEC, op)
+namespace VectorHelpers {
 INCDEC_OPS
+}
 #undef INCDEC_OP
 #undef INCDEC
 
@@ -1711,11 +1746,13 @@ static inline void bindElemImpl(TypedValue* base, TypedValue keyVal,
   m(bindElemS,   StrKey,  false)
 
 #define ELEM(nm, ...)                                                   \
-static void nm(TypedValue* base, TypedValue key, RefData* val,          \
+void nm(TypedValue* base, TypedValue key, RefData* val,                 \
                MInstrState* mis) {                                      \
   bindElemImpl<__VA_ARGS__>(base, key, val, mis);                       \
 }
+namespace VectorHelpers {
 HELPER_TABLE(ELEM)
+}
 #undef ELEM
 
 void HhbcTranslator::VectorTranslator::emitBindElem() {

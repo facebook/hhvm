@@ -1207,6 +1207,14 @@ D:PtrToGen = PropX S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
   Lookup intermediate property in S2, with key S3. S4 should point to
   an MInstrState struct.
 
+D:PtrToGen = PropDX S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen
+                    S4:PtrToCell
+D:PtrToGen, D:StkPtr = PropDXStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen}
+                                 S3:Gen S4:PtrToCell
+
+  Like PropX, but used for intermediate element lookups that may modify the
+  base.
+
 D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
 
   Get property with key S3 from S2. S4 should point to an MInstrState

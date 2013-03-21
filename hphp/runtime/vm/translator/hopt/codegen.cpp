@@ -345,6 +345,7 @@ CALL_OPCODE(RaiseUndefProp)
 // Vector instruction helpers
 CALL_OPCODE(BaseG)
 CALL_OPCODE(PropX)
+CALL_STK_OPCODE(PropDX)
 CALL_OPCODE(CGetProp)
 CALL_STK_OPCODE(VGetProp)
 CALL_STK_OPCODE(BindProp)

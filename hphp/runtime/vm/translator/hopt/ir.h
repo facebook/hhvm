@@ -392,6 +392,11 @@ O(PropX,                   D(PtrToGen), C(TCA)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Gen)                              \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
+O_STK(PropDX,              D(PtrToGen), C(TCA)                                \
+                                          C(Cls)                              \
+                                          S(Obj,PtrToGen)                     \
+                                          S(Gen)                              \
+                                          S(PtrToCell),VProp|E|N|Mem|Refs|Er) \
 O(CGetProp,                    D(Cell), C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \

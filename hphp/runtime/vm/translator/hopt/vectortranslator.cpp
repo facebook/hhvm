@@ -195,6 +195,7 @@ int vectorValIdx(Opcode opc) {
   switch (opc) {
     case VGetProp: case VGetPropStk:
     case IncDecProp: case IncDecPropStk:
+    case PropDX: case PropDXStk:
     case VGetElem: case VGetElemStk:
     case IncDecElem: case IncDecElemStk:
     case ElemDX: case ElemDXStk:
@@ -381,15 +382,16 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
   switch (l.space) {
     case Location::Stack: {
       SSATmp* val = m_ht.top(Type::Gen | Type::Cls, m_stackInputs[i]);
-      // Check if the type on our eval stack is at least as specific
-      // as what Transl::Translator came up with.
+      // Check if the type on our eval stack is at least as specific as what
+      // Transl::Translator came up with. We allow boxed types with differing
+      // inner types because of the different ways the two systems deal with
+      // reference types.
       auto t = Type::fromRuntimeType(dl.rtt);
-      if (!val->isA(t)) {
+      if (!val->isA(t) && !(val->isBoxed() && t.isBoxed())) {
         FTRACE(1, "{}: hhir stack has a {} where Translator had a {}\n",
                __func__, val->getType().toString(), t.toString());
         // They'd better not be completely unrelated types...
         assert(t.subtypeOf(val->getType()));
-
         m_ht.refineType(val, t);
       }
       return val;
@@ -417,9 +419,6 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
   auto baseType = Type::fromRuntimeType(base.rtt);
   assert(baseType.isKnownDataType());
 
-  if (baseType.subtypeOfAny(Type::Null, Type::BoxedNull)) {
-    PUNT(emitBaseLCR-NullBase);
-  }
   if (base.location.isLocal()) {
     // Check for Uninit and warn/promote to InitNull as appropriate
     if (baseType.subtypeOf(Type::Uninit)) {
@@ -440,8 +439,8 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
   // the tracelet and retranslate. Doing an exit here is a little sketchy since
   // we may have already emitted instructions with memory effects to initialize
   // the MInstrState. These particular stores are harmless though, and the
-  // worst outcome here is that we'll ending up doing the stores twice, once
-  // for this instruction and once at the beginning of the retranslation.
+  // worst outcome here is that we'll end up doing the stores twice, once for
+  // this instruction and once at the beginning of the retranslation.
   Trace* failedRef = baseType.isBoxed() ? m_ht.getExitTrace() : nullptr;
   if ((baseType.subtypeOfAny(Type::Obj, Type::BoxedObj) &&
        mcodeMaybePropName(m_ni.immVecM[0])) ||
@@ -674,8 +673,11 @@ void HhbcTranslator::VectorTranslator::emitPropGeneric() {
   SSATmp* key = getInput(m_iInd);
   BUILD_OPTAB(getKeyTypeS(key), key->isBoxed(), mia, m_base->isA(Type::Obj));
   m_ht.spillStack();
-  m_base = m_tb.gen(PropX, cns((TCA)opFunc), CTX(),
-                    objOrPtr(m_base), noLitInt(key), genMisPtr());
+  if (mia & Define) {
+    m_base = genStk(PropDX, cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
+  } else {
+    m_base = m_tb.gen(PropX, cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
+  }
 }
 #undef HELPER_TABLE
 

@@ -101,6 +101,8 @@ static CallMap s_callMap({
     {BaseG,    {FSSA, 0}, DSSA, SSync, {{TV, 1}, {SSA, 2}}},
     {PropX,    {FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}, {SSA, 4}}},
+    {PropDX,   {FSSA, 0}, DSSA, SSync,
+                 {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}, {SSA, 4}}},
     {CGetProp, {FSSA, 0}, DTV, SSync,
                  {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}, {SSA, 4}}},
     {VGetProp, {FSSA, 0}, DTV, SSync,

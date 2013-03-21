@@ -72,7 +72,13 @@ void raise_recoverable_error(const char *fmt, ...) {
   raise_recoverable_error(msg);
 }
 
+static int64_t g_notice_counter = 0;
+
 void raise_strict_warning(const std::string &msg) {
+  if (RuntimeOption::NoticeFrequency <= 0 ||
+      (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
+    return;
+  }
   int errnum = ErrorConstants::STRICT;
   if (!g_context->errorNeedsHandling(errnum, true,
                                      ExecutionContext::NeverThrow)) {
@@ -84,6 +90,10 @@ void raise_strict_warning(const std::string &msg) {
 }
 
 void raise_strict_warning(const char *fmt, ...) {
+  if (RuntimeOption::NoticeFrequency <= 0 ||
+      (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
+    return;
+  }
   std::string msg;
   int errnum = ErrorConstants::STRICT;
   if (!g_context->errorNeedsHandling(errnum, true,
@@ -117,11 +127,11 @@ void raise_warning(const std::string &msg) {
 }
 
 void raise_warning(const char *fmt, ...) {
-  std::string msg;
   if (RuntimeOption::WarningFrequency <= 0 ||
       (g_warning_counter++) % RuntimeOption::WarningFrequency != 0) {
     return;
   }
+  std::string msg;
   int errnum = ErrorConstants::WARNING;
   if (!g_context->errorNeedsHandling(errnum, true,
                                      ExecutionContext::NeverThrow)) {
@@ -151,8 +161,6 @@ void raise_debugging(const char *fmt, ...) {
   raise_debugging(msg);
 }
 
-static int64_t g_notice_counter = 0;
-
 void raise_notice(const std::string &msg) {
   if (RuntimeOption::NoticeFrequency <= 0 ||
       (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
@@ -169,11 +177,11 @@ void raise_notice(const std::string &msg) {
 }
 
 void raise_notice(const char *fmt, ...) {
-  std::string msg;
   if (RuntimeOption::NoticeFrequency <= 0 ||
       (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
     return;
   }
+  std::string msg;
   int errnum = ErrorConstants::NOTICE;
   if (!g_context->errorNeedsHandling(errnum, true,
                                      ExecutionContext::NeverThrow)) {

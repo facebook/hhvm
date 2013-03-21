@@ -1276,6 +1276,10 @@ D:PtrToGen, D:StkPtr = ElemDXStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
   Like ElemX, but used for intermediate element lookups that may
   modify the base.
 
+D:Cell = ArrayGet S0:ConstTCA S1:Arr S2:{Int|Str}
+
+  Get element with key S2 from base S1.
+
 D:Cell = CGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
 
   Get element with key S2 from S1. S3 should point to an MInstrState

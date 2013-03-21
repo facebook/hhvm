@@ -23,6 +23,7 @@
 
 #include "util/assertions.h"
 #include "runtime/vm/bytecode.h"
+#include "runtime/vm/member_operations.h"
 #include "runtime/vm/translator/runtime-type.h"
 #include "runtime/vm/translator/hopt/tracebuilder.h"
 
@@ -431,6 +432,9 @@ private:
     void emitIncDecNewElem();
     void emitBindNewElem();
     void emitSimpleArraySet(SSATmp* key, SSATmp* value);
+    void emitSimpleArrayGet(SSATmp* key);
+    void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
+                              bool& checkForInt);
 
     // Misc Helpers
     void numberStackInputs();
@@ -454,7 +458,11 @@ private:
     template<typename... Srcs>
     SSATmp* genStk(Opcode op, Srcs... srcs);
 
-    bool isSimpleArraySet();
+    /* Various predicates about the current instruction */
+    bool isSimpleArrayOp();
+    bool isSimpleBase();
+    bool isSingleMember();
+
     bool generateMVal() const;
     bool needFirstRatchet() const;
     bool needFinalRatchet() const;

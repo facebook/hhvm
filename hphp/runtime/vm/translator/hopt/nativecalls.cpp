@@ -123,6 +123,8 @@ static CallMap s_callMap({
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
     {ElemDX,   {FSSA, 0}, DSSA, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
+    {ArrayGet, {FSSA, 0}, DTV, SSync,
+                 {{SSA, 1}, {SSA, 2}}},
     {CGetElem, {FSSA, 0}, DTV, SSync,
                  {{SSA, 1}, {VecKeyIS, 2}, {SSA, 3}}},
     {VGetElem, {FSSA, 0}, DTV, SSync,

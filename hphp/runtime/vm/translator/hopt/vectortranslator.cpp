@@ -444,7 +444,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
   Trace* failedRef = baseType.isBoxed() ? m_ht.getExitTrace() : nullptr;
   if ((baseType.subtypeOfAny(Type::Obj, Type::BoxedObj) &&
        mcodeMaybePropName(m_ni.immVecM[0])) ||
-      isSimpleArraySet()) {
+      isSimpleArrayOp()) {
     // In these cases we can pass the base by value, after unboxing if needed.
     m_base = m_tb.gen(Unbox, failedRef, getInput(m_iInd));
     assert(m_base->isA(baseType.unbox()));
@@ -472,18 +472,28 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
 
 // Is the current instruction a 1-element vector, with an Arr base and Int or
 // Str key?
-bool HhbcTranslator::VectorTranslator::isSimpleArraySet() {
+bool HhbcTranslator::VectorTranslator::isSimpleArrayOp() {
   SSATmp* base = getInput(m_mii.valCount());
-  LocationCode loc = m_ni.immVec.locationCode();
-  if (m_ni.mInstrOp() == OpSetM &&
-      (loc == LL || loc == LC || loc == LR) &&
-      m_ni.immVecM.size() == 1 &&
+  VM::Op op = m_ni.mInstrOp();
+  if ((op == OpSetM || op == OpCGetM) &&
+      isSimpleBase() &&
+      isSingleMember() &&
       mcodeMaybeArrayKey(m_ni.immVecM[0]) &&
       base->getType().subtypeOfAny(Type::Arr, Type::BoxedArr)) {
     SSATmp* key = getInput(m_mii.valCount() + 1);
     return key->isA(Type::Int) || key->isA(Type::Str);
   }
   return false;
+}
+
+// "Simple" bases are stack cells and locals.
+bool HhbcTranslator::VectorTranslator::isSimpleBase() {
+  LocationCode loc = m_ni.immVec.locationCode();
+  return loc == LL || loc == LC || loc == LR;
+}
+
+bool HhbcTranslator::VectorTranslator::isSingleMember() {
+  return m_ni.immVecM.size() == 1;
 }
 
 void HhbcTranslator::VectorTranslator::emitBaseH() {
@@ -1341,6 +1351,73 @@ void HhbcTranslator::VectorTranslator::emitUnsetProp() {
   SPUNT(__func__);
 }
 
+void HhbcTranslator::VectorTranslator::checkStrictlyInteger(
+  SSATmp*& key, KeyType& keyType, bool& checkForInt) {
+  checkForInt = false;
+  if (key->isA(Type::Int)) {
+    keyType = IntKey;
+  } else {
+    assert(key->isA(Type::Str));
+    keyType = StrKey;
+    if (key->isConst()) {
+      int64_t i;
+      if (key->getValStr()->isStrictlyInteger(i)) {
+        keyType = IntKey;
+        key = cns(i);
+      }
+    } else {
+      checkForInt = true;
+    }
+  }
+}
+
+static inline TypedValue* checkedGet(ArrayData* a, StringData* key) {
+  int64_t i;
+  return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGetCell(i)
+                                             : a->nvGetCell(key);
+}
+
+static inline TypedValue* checkedGet(ArrayData* a, int64_t key) {
+  not_reached();
+}
+
+template<KeyType keyType, bool checkForInt>
+static inline TypedValue arrayGetImpl(
+  ArrayData* a, typename KeyTypeTraits<keyType>::rawType key) {
+  TypedValue* ret = checkForInt ? checkedGet(a, key)
+                                : a->nvGetCell(key);
+  tvRefcountedIncRef(ret);
+  return *ret;
+}
+
+#define HELPER_TABLE(m)                                 \
+  /* name        hot        keyType  checkForInt */     \
+  m(arrayGetS,   HOT_FUNC_VM, StrKey,   false)          \
+  m(arrayGetSi,  HOT_FUNC_VM, StrKey,    true)          \
+  m(arrayGetI,   HOT_FUNC_VM, IntKey,   false)
+
+#define ELEM(nm, hot, keyType, checkForInt)                             \
+hot                                                                     \
+TypedValue nm(ArrayData* a, TypedValue* key) {                          \
+  return arrayGetImpl<keyType, checkForInt>(a, keyAsRaw<keyType>(key)); \
+}
+namespace VectorHelpers {
+HELPER_TABLE(ELEM)
+}
+#undef ELEM
+
+void HhbcTranslator::VectorTranslator::emitSimpleArrayGet(SSATmp* key) {
+  KeyType keyType;
+  bool checkForInt;
+  checkStrictlyInteger(key, keyType, checkForInt);
+
+  typedef TypedValue (*OpFunc)(ArrayData*, TypedValue*);
+  BUILD_OPTAB_HOT(keyType, checkForInt);
+  assert(m_base->isA(Type::Arr));
+  m_result = m_tb.gen(ArrayGet, cns((TCA)opFunc), m_base, key);
+}
+#undef HELPER_TABLE
+
 template <KeyType keyType, bool unboxKey>
 static inline TypedValue cGetElemImpl(TypedValue* base, TypedValue keyVal,
                                       MInstrState* mis) {
@@ -1378,8 +1455,14 @@ HELPER_TABLE(ELEM)
 #undef ELEM
 
 void HhbcTranslator::VectorTranslator::emitCGetElem() {
-  typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   SSATmp* key = getInput(m_iInd);
+
+  if (isSimpleArrayOp()) {
+    emitSimpleArrayGet(key);
+    return;
+  }
+
+  typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed());
   m_ht.spillStack();
   m_result = m_tb.gen(CGetElem, cns((TCA)opFunc),
@@ -1489,34 +1572,6 @@ void HhbcTranslator::VectorTranslator::emitEmptyElem() {
   emitIssetEmptyElem(true);
 }
 
-template <KeyType keyType, bool unboxKey>
-static inline TypedValue setElemImpl(TypedValue* base, TypedValue keyVal,
-                                     Cell val) {
-  TypedValue* key = keyPtr<keyType>(keyVal);
-  key = unbox<keyType, unboxKey>(key);
-  HPHP::VM::SetElem<true, keyType>(base, key, &val);
-  return val;
-}
-
-#define HELPER_TABLE(m)                                        \
-  /* name         hot        key   unboxKey */                 \
-  m(setElemC,   ,            AnyKey, false)                    \
-  m(setElemI,   ,            IntKey, false)                    \
-  m(setElemL,   ,            AnyKey,  true)                    \
-  m(setElemLI,  ,            IntKey,  true)                    \
-  m(setElemLS,  ,            StrKey,  true)                    \
-  m(setElemS,   HOT_FUNC_VM, StrKey, false)
-
-#define ELEM(nm, hot, ...)                                              \
-hot                                                                     \
-TypedValue nm(TypedValue* base, TypedValue key, Cell val) {             \
-  return setElemImpl<__VA_ARGS__>(base, key, val);                      \
-}
-namespace VectorHelpers {
-HELPER_TABLE(ELEM)
-}
-#undef ELEM
-
 static inline ArrayData* checkedSet(ArrayData* a, StringData* key,
                                     CVarRef value, bool copy) {
   int64_t i;
@@ -1541,10 +1596,10 @@ static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
   return arrayRefShuffle<setRef>(a, ret, setRef ? ref->tv() : nullptr);
 }
 
-#define HELPER_TABLE_ARRAY_SET(m)                                       \
+#define HELPER_TABLE(m)                                                 \
   /* name        hot          keyType  checkForInt setRef */            \
   m(arraySetS,   HOT_FUNC_VM, StrKey,   false,     false)               \
-  m(arraySetSC,  HOT_FUNC_VM, StrKey,    true,     false)               \
+  m(arraySetSi,  HOT_FUNC_VM, StrKey,    true,     false)               \
   m(arraySetI,   HOT_FUNC_VM, IntKey,   false,     false)               \
   m(arraySetSR,  ,            StrKey,   false,      true)               \
   m(arraySetSiR, ,            StrKey,    true,      true)               \
@@ -1558,7 +1613,7 @@ nm(ArrayData* a, TypedValue* key, TypedValue value, RefData* ref) {     \
     a, keyAsRaw<keyType>(key), tvAsCVarRef(&value), ref);               \
 }
 namespace VectorHelpers {
-HELPER_TABLE_ARRAY_SET(ELEM)
+HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
@@ -1568,28 +1623,13 @@ void HhbcTranslator::VectorTranslator::emitSimpleArraySet(SSATmp* key,
   const int baseStkIdx = m_mii.valCount();
   assert(key->getType().notBoxed());
   assert(value->getType().notBoxed());
-  bool checkForInt = false;
   KeyType keyType;
-  if (key->isA(Type::Int)) {
-    keyType = IntKey;
-  } else {
-    assert(key->isA(Type::Str));
-    keyType = StrKey;
-    if (key->isConst()) {
-      int64_t i;
-      if (key->getValStr()->isStrictlyInteger(i)) {
-        keyType = IntKey;
-        key = cns(i);
-      }
-    } else {
-      checkForInt = true;
-    }
-  }
+  bool checkForInt;
+  checkStrictlyInteger(key, keyType, checkForInt);
   const DynLocation& base = *m_ni.inputs[m_mii.valCount()];
   bool setRef = base.outerType() == KindOfRef;
   typedef ArrayData* (*OpFunc)(ArrayData*, TypedValue*, TypedValue, RefData*);
-  BUILD_OPTAB_ARG(HELPER_TABLE_ARRAY_SET(FILL_ROW_HOT),
-                  keyType, checkForInt, setRef);
+  BUILD_OPTAB_HOT(keyType, checkForInt, setRef);
 
   // Don't spillStack below because the helper can't throw. It may reenter to
   // call destructors so it has a sync point in nativecalls.cpp, but exceptions
@@ -1620,12 +1660,41 @@ void HhbcTranslator::VectorTranslator::emitSimpleArraySet(SSATmp* key,
 
   m_result = value;
 }
+#undef HELPER_TABLE
+
+template <KeyType keyType, bool unboxKey>
+static inline TypedValue setElemImpl(TypedValue* base, TypedValue keyVal,
+                                     Cell val) {
+  TypedValue* key = keyPtr<keyType>(keyVal);
+  key = unbox<keyType, unboxKey>(key);
+  HPHP::VM::SetElem<true, keyType>(base, key, &val);
+  return val;
+}
+
+#define HELPER_TABLE(m)                                        \
+  /* name         hot        key   unboxKey */                 \
+  m(setElemC,   ,            AnyKey, false)                    \
+  m(setElemI,   ,            IntKey, false)                    \
+  m(setElemL,   ,            AnyKey,  true)                    \
+  m(setElemLI,  ,            IntKey,  true)                    \
+  m(setElemLS,  ,            StrKey,  true)                    \
+  m(setElemS,   HOT_FUNC_VM, StrKey, false)
+
+#define ELEM(nm, hot, ...)                                              \
+hot                                                                     \
+TypedValue nm(TypedValue* base, TypedValue key, Cell val) {             \
+  return setElemImpl<__VA_ARGS__>(base, key, val);                      \
+}
+namespace VectorHelpers {
+HELPER_TABLE(ELEM)
+}
+#undef ELEM
 
 void HhbcTranslator::VectorTranslator::emitSetElem() {
   SSATmp* value = getValue();
   SSATmp* key = getInput(m_iInd);
 
-  if (isSimpleArraySet()) {
+  if (isSimpleArrayOp()) {
     emitSimpleArraySet(key, value);
     return;
   }
@@ -1639,7 +1708,6 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
   m_result = ve.valTypeChanged ? result : value;
 }
 #undef HELPER_TABLE
-#undef HELPER_TABLE_ARRAY_SET
 
 template <KeyType keyType, bool unboxKey, SetOpOp op>
 static inline TypedValue setOpElemImpl(TypedValue* base, TypedValue keyVal,

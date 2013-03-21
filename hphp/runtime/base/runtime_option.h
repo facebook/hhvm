@@ -423,7 +423,7 @@ public:
   F(bool, HHIREnableCalleeSavedOpt,    true) \
   F(bool, HHIREnablePreColoring,       true) \
   F(bool, HHIREnableCoalescing,        true) \
-  F(bool, HHIREnableMmx,               true) \
+  F(bool, HHIREnableMmx,               false) \
   F(bool, HHIREnableRefCountOpt,       true) \
   F(bool, HHIREnableSinking,           true) \
   F(bool, HHIRGenerateAsserts,         debug) \

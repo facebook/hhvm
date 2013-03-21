@@ -341,7 +341,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
       // as what Transl::Translator came up with.
       auto t = Type::fromRuntimeType(dl.rtt);
       if (!val->isA(t)) {
-        FTRACE(0, "{}: hhir stack has a {} where Translator had a {}\n",
+        FTRACE(1, "{}: hhir stack has a {} where Translator had a {}\n",
                __func__, val->getType().toString(), t.toString());
         // They'd better not be completely unrelated types...
         assert(t.subtypeOf(val->getType()));

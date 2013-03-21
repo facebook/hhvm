@@ -166,12 +166,17 @@ O(OpAnd,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpOr,                         D(Int), SNum SNum,                         C) \
 O(OpXor,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpMul,                        DParam, SNum SNum,                         C) \
-O(ConvToArr,                    DParam, S(Gen),                        N|CRc) \
-O(ConvToBool,                   DParam, S(Gen),                          C|N) \
-O(ConvToDbl,                    DParam, S(Gen),                          C|N) \
-O(ConvToInt,                    DParam, S(Gen),                          C|N) \
-O(ConvToObj,                    DParam, S(Gen),                          C|N) \
-O(ConvToStr,                    DParam, S(Gen),                          C|N) \
+O(ConvBoolToArr,                D(Arr), S(Bool),                         C|N) \
+O(ConvDblToArr,                 D(Arr), S(Dbl),                          C|N) \
+O(ConvIntToArr,                 D(Arr), S(Int),                          C|N) \
+O(ConvObjToArr,                 D(Arr), S(Obj),                        N|CRc) \
+O(ConvStrToArr,                 D(Arr), S(Str),                        N|CRc) \
+O(ConvGenToArr,                 D(Arr), S(Gen),                        N|CRc) \
+O(ConvToBool,                  D(Bool), S(Gen),                          C|N) \
+O(ConvToDbl,                    D(Dbl), S(Gen),                          C|N) \
+O(ConvToInt,                    D(Int), S(Gen),                          C|N) \
+O(ConvToObj,                    D(Obj), S(Gen),                          C|N) \
+O(ConvToStr,                    D(Str), S(Gen),                          C|N) \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
 O(IsNTypeMem,                  D(Bool), S(PtrToGen),                      NA) \

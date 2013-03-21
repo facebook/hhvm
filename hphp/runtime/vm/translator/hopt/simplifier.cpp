@@ -95,7 +95,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case Concat:        return simplifyConcat(src1, src2);
   case Mov:           return simplifyMov(src1);
   case LdClsPropAddr: return simplifyLdClsPropAddr(inst);
-  case ConvToArr:     return simplifyConvToArr(inst);
+  case ConvBoolToArr: return simplifyConvToArr(inst);
+  case ConvDblToArr:  return simplifyConvToArr(inst);
+  case ConvIntToArr:  return simplifyConvToArr(inst);
+  case ConvStrToArr:  return simplifyConvToArr(inst);
   case ConvToBool:    return simplifyConvToBool(inst);
   case ConvToDbl:     return simplifyConvToDbl(inst);
   case ConvToInt:     return simplifyConvToInt(inst);
@@ -1090,27 +1093,9 @@ SSATmp* Simplifier::simplifyConcat(SSATmp* src1, SSATmp* src2) {
 
 SSATmp* Simplifier::simplifyConvToArr(IRInstruction* inst) {
   SSATmp* src  = inst->getSrc(0);
-  Type srcType = src->getType();
-  if (srcType.isArray()) {
-    return src;
-  }
-  if (srcType.isNull()) {
-    return m_tb->genDefConst(HphpArray::GetStaticEmptyArray());
-  }
-  // If the src is a constant, the result can be a constant array.
   if (src->isConst()) {
-    switch (srcType.toDataType()) {
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfStaticString: {
-      Array arr = Array::Create(src->getValVariant());
-      return m_tb->genDefConst(ArrayData::GetScalarArray(arr.get()));
-    }
-    default:
-      assert(!srcType.isArray());
-      break;
-    }
+    Array arr = Array::Create(src->getValVariant());
+    return m_tb->genDefConst(ArrayData::GetScalarArray(arr.get()));
   }
   return nullptr;
 }

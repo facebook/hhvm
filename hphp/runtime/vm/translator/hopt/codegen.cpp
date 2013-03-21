@@ -1599,12 +1599,48 @@ asm_label(a, falseLabel);
 asm_label(a, out);
 }
 
+// The assumption here is that the overall cost of allocating
+// the array swamps the cost of putting a simple value in to
+// a typed value, so there is no need for further type specialization.
+
+void CodeGenerator::cgConvBoolToArr(IRInstruction* inst) {
+  cgConvGenToArr(inst);
+}
+
+void CodeGenerator::cgConvDblToArr(IRInstruction* inst) {
+  cgConvGenToArr(inst);
+}
+
+void CodeGenerator::cgConvIntToArr(IRInstruction* inst) {
+  cgConvGenToArr(inst);
+}
+
+void CodeGenerator::cgConvObjToArr(IRInstruction* inst) {
+  cgConvGenToArr(inst);
+}
+
+void CodeGenerator::cgConvStrToArr(IRInstruction* inst) {
+  cgConvGenToArr(inst);
+}
+
+// So why have all of these different IR instructions instead
+// of just ConvGenToArr? Because we need at least two variants
+// and we don't want to overload opcodes and we want consistency.
+
 ArrayData* new_singleton_array_helper(TypedValue value) {
+  // Note: the call sites of this function all assume that
+  // no user code will run and no recoverable exceptions will
+  // occur while running this code. This seems trivially true
+  // in all cases but converting objects to arrays. It also
+  // seems true for that case as well, since the resulting array
+  // is essentially metadata for the object. If that is not true,
+  // you might end up looking at this code in a debugger and now
+  // you know why.
   tvCastToArrayInPlace(&value);
   return value.m_data.parr;
 }
 
-void CodeGenerator::cgConvToArr(IRInstruction* inst) {
+void CodeGenerator::cgConvGenToArr(IRInstruction* inst) {
   SSATmp* dst = inst->getDst();
   SSATmp* src = inst->getSrc(0);
 

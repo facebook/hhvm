@@ -2053,6 +2053,42 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
   m_tb->genDecRef(src);
 }
 
+void HhbcTranslator::emitCastArray() {
+  // Turns the castArray BC operation into a type specialized
+  // IR operation. The IR operation might end up being simplified
+  // into a constant, but if not, it simply turns into a helper
+  // call when translated to machine code. The main benefit from
+  // separate IR instructions is that they can have different flags,
+  // principally to distinguish the instructions that (may) hold on to a
+  // reference to argument, from instructions that do not.
+
+  // In the future, if this instruction occurs in a hot trace,
+  // it might be better to expand it into a series of primitive
+  // IR instructions so that the object allocation is exposed to
+  // the optimizer and becomes eligible for removal if it does not
+  // escape the trace.
+
+  SSATmp* src = popC();
+  Type fromType = src->getType();
+  if (fromType.isArray()) {
+    push(src);
+  } else if (fromType.isNull()) {
+    push(m_tb->genDefConst(HphpArray::GetStaticEmptyArray()));
+  } else if (fromType.equals(Type::Bool)) {
+    push(m_tb->gen(ConvBoolToArr, src));
+  } else if (fromType.equals(Type::Dbl)) {
+    push(m_tb->gen(ConvDblToArr, src));
+  } else if (fromType.equals(Type::Int)) {
+    push(m_tb->gen(ConvIntToArr, src));
+  } else if (fromType.isString()) {
+    push(m_tb->gen(ConvStrToArr, src));
+  } else if (fromType.subtypeOf(Type::Obj)) {
+    push(m_tb->gen(ConvObjToArr, src));
+  } else {
+    push(m_tb->gen(ConvGenToArr, src));
+  }
+}
+
 void HhbcTranslator::emitCastBool() {
   SSATmp* src = popC();
   push(m_tb->genConvToBool(src));
@@ -2083,11 +2119,6 @@ void HhbcTranslator::emitCastString() {
     pushIncRef(m_tb->genConvToStr(src));
   }
   m_tb->genDecRef(src);
-}
-
-void HhbcTranslator::emitCastArray() {
-  SSATmp* src = popC();
-  push(m_tb->gen(ConvToArr, Type::Arr, src));
 }
 
 void HhbcTranslator::emitCastObject() {

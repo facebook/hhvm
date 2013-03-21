@@ -387,7 +387,12 @@ D:Int = OpMul S0:{Int|Bool} S1:{Int|Bool}
 
 3. Type conversions
 
-D:Arr  = ConvToArr S0:Gen
+D:Arr  = ConvBoolToArr S0:Bool
+D:Arr  = ConvDblToArr S0:Dbl
+D:Arr  = ConvIntToArr S0:Int
+D:Arr  = ConvObjToArr S0:Obj
+D:Arr  = ConvStrToArr S0:Str
+D:Arr  = ConvGenToArr S0:Gen
 D:Bool = ConvToBool S0:Gen
 D:Dbl  = ConvToDbl S0:Gen
 D:Int  = ConvToInt S0:Gen

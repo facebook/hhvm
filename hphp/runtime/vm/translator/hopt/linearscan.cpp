@@ -641,7 +641,12 @@ void LinearScan::computePreColoringHint() {
         m_preColoringHint.add(inst->getSrc(0), 0, 1);
       }
       break;
-    case ConvToArr:
+    case ConvBoolToArr:
+    case ConvDblToArr:
+    case ConvIntToArr:
+    case ConvObjToArr:
+    case ConvStrToArr:
+    case ConvGenToArr:
       break;
     case ConvToBool:
       {

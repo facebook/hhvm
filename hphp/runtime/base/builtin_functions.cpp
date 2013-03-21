@@ -344,7 +344,8 @@ vm_decode_function(CVarRef function,
     this_ = function.asCObjRef().get();
     cls = nullptr;
     const HPHP::VM::Func *f = this_->getVMClass()->lookupMethod(invokeStr);
-    if (f != nullptr && (f->attrs() & HPHP::VM::AttrStatic)) {
+    if (f != nullptr && 
+        ((f->attrs() & HPHP::VM::AttrStatic) && !f->isClosureBody())) {
       // If __invoke is static, invoke it as such
       cls = this_->getVMClass();
       this_ = nullptr;

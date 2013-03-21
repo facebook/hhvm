@@ -113,7 +113,7 @@ static int getNextTokenType(int t) {
     case ',': case '(': case '|':
       return NextTokenType::XhpTag |
              NextTokenType::XhpClassName |
-             NextTokenType::XhpCategoryName; 
+             NextTokenType::XhpCategoryName;
     case '}':
       return NextTokenType::XhpTagMaybe |
              NextTokenType::XhpClassName;
@@ -873,22 +873,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         }
         _scanner->setHeredocLabel(s, label_len);
         _scanner->setToken(yytext, yyleng, s, label_len);
-
-        DECLARE_YYCURSOR;
-        DECLARE_YYLIMIT;
-
-        /* Check for ending label on the next line */
-        if (label_len < YYLIMIT - YYCURSOR &&
-            !memcmp(YYCURSOR, s, label_len)) {
-                const char *end = YYCURSOR + label_len;
-                if (*end == ';') {
-                        end++;
-                }
-                if (*end == '\n' || *end == '\r') {
-                        BEGIN(ST_END_HEREDOC);
-                }
-        }
-
         return T_START_HEREDOC;
 }
 
@@ -986,136 +970,173 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   return T_XHP_TAG_LT;
 }
 
-<ST_HEREDOC>{ANY_CHAR} {
-  int newline = 0;
-
+<ST_HEREDOC,ST_NOWDOC>{ANY_CHAR} {
+  int refillResult = EOB_ACT_CONTINUE_SCAN;
+  std::vector<std::string> docPieces;
+  size_t totalDocSize = 0;
+  std::string entireDoc;
+  int docLabelLen = _scanner->getHeredocLabelLen();
+  bool isHeredoc = (YYSTATE == ST_HEREDOC);
   DECLARE_YYCURSOR;
   DECLARE_YYLIMIT;
 
-  if (YYCURSOR > YYLIMIT) {
-    return 0;
-  }
-
   YYCURSOR--;
 
-  int heredocLen = _scanner->getHeredocLabelLen();
-  while (YYCURSOR < YYLIMIT) {
-    switch (*YYCURSOR++) {
-      case '\r':
-        if (*YYCURSOR == '\n') {
-          YYCURSOR++;
-        }
-        /* fall through */
-      case '\n':
-        /* Check for ending label on the next line */
-        if (IS_LABEL_START(*YYCURSOR) &&
-            heredocLen < YYLIMIT - YYCURSOR &&
-            !memcmp(YYCURSOR, _scanner->getHeredocLabel(), heredocLen)) {
-          const char *end = YYCURSOR + heredocLen;
-          if (*end == ';') {
-            end++;
+  // The rules that lead to this state all consume an end-of-line.
+  bool lookingForEndLabel = true;
+
+  while (refillResult == EOB_ACT_CONTINUE_SCAN) {
+    while (YYCURSOR < YYLIMIT) {
+      switch (*YYCURSOR++) {
+        case '\r':
+          lookingForEndLabel = true;
+          continue;
+        case '\n':
+          lookingForEndLabel = true;
+          continue;
+        case '$':
+          lookingForEndLabel = false;
+          if (isHeredoc) {
+            if (YYCURSOR == YYLIMIT) {
+              --YYCURSOR;
+              goto doc_scan_get_more_buffer;
+            }
+            if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
+              --YYCURSOR;
+              goto doc_scan_done;
+            }
           }
-          if (*end == '\n' || *end == '\r') {
-            /* newline before label will be subtracted from returned text, but
-               yyleng/yytext will include it, for zend_highlight/strip,
-               tokenizer, etc. */
-            if (YYCURSOR[-2] == '\r' && YYCURSOR[-1] == '\n') {
-              newline = 2; /* Windows newline */
-            } else {
-              newline = 1;
+          continue;
+        case '{':
+          lookingForEndLabel = false;
+          if (isHeredoc) {
+            if (YYCURSOR == YYLIMIT) {
+              --YYCURSOR;
+              goto doc_scan_get_more_buffer;
+            }
+            if (*YYCURSOR == '$') {
+              --YYCURSOR;
+              goto doc_scan_done;
+            }
+          }
+          continue;
+        case '\\':
+          lookingForEndLabel = false;
+          if (isHeredoc) {
+            if (YYCURSOR == YYLIMIT) {
+              --YYCURSOR;
+              goto doc_scan_get_more_buffer;
+            }
+            if (*YYCURSOR != '\n' && *YYCURSOR != '\r') {
+              YYCURSOR++;
+            }
+          }
+          continue;
+        default:
+          if (lookingForEndLabel) {
+            lookingForEndLabel = false;
+
+            // Check for ending label on this line.
+            if (!IS_LABEL_START(YYCURSOR[-1])) continue;
+
+            // Adjust cursor to the start of the potential label.
+            // If a label is recgonized, we want the cursor pointing at it.
+            --YYCURSOR;
+
+            if ((docLabelLen + 2) > (YYLIMIT - YYCURSOR)) {
+              lookingForEndLabel = true;
+              goto doc_scan_get_more_buffer;
             }
 
-            BEGIN(ST_END_HEREDOC);
-            goto heredoc_scan_done;
-          }
-        }
-        continue;
-      case '$':
-        if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
-          break;
-        }
-        continue;
-      case '{':
-        if (*YYCURSOR == '$') {
-          break;
-        }
-        continue;
-      case '\\':
-        if (YYCURSOR < YYLIMIT && *YYCURSOR != '\n' && *YYCURSOR != '\r') {
-          YYCURSOR++;
-        }
-        /* fall through */
-      default:
-        continue;
-    }
-
-    YYCURSOR--;
-    break;
-  }
-
-heredoc_scan_done:
-  yyleng = YYCURSOR - yytext;
-  RESET_YYCURSOR;
-  std::string strval = _scanner->escape(yytext, yyleng - newline, 0);
-  _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
-  return T_ENCAPSED_AND_WHITESPACE;
-}
-
-<ST_NOWDOC>{ANY_CHAR} {
-  int newline = 0;
-
-  DECLARE_YYCURSOR;
-  DECLARE_YYLIMIT;
-
-  if (YYCURSOR > YYLIMIT) {
-    return 0;
-  }
-
-  YYCURSOR--;
-
-  int heredocLen = _scanner->getHeredocLabelLen();
-  while (YYCURSOR < YYLIMIT) {
-    switch (*YYCURSOR++) {
-      case '\r':
-        if (*YYCURSOR == '\n') {
-          YYCURSOR++;
-        }
-        /* fall through */
-      case '\n':
-        /* Check for ending label on the next line */
-        if (IS_LABEL_START(*YYCURSOR) &&
-            heredocLen < YYLIMIT - YYCURSOR &&
-            !memcmp(YYCURSOR, _scanner->getHeredocLabel(), heredocLen)) {
-          const char *end = YYCURSOR + heredocLen;
-          if (*end == ';') {
-            end++;
-          }
-          if (*end == '\n' || *end == '\r') {
-            /* newline before label will be subtracted from returned text, but
-               yyleng/yytext will include it, for zend_highlight/strip,
-               tokenizer, etc. */
-            if (YYCURSOR[-2] == '\r' && YYCURSOR[-1] == '\n') {
-              newline = 2; /* Windows newline */
-            } else {
-              newline = 1;
+            if (!memcmp(YYCURSOR, _scanner->getHeredocLabel(), docLabelLen)) {
+              const char *end = YYCURSOR + docLabelLen;
+              if (*end == ';') {
+                end++;
+              }
+              if (*end == '\n' || *end == '\r') {
+                BEGIN(ST_END_HEREDOC);
+                goto doc_scan_done;
+              }
             }
-
-            BEGIN(ST_END_HEREDOC);
-            goto nowdoc_scan_done;
+            ++YYCURSOR; // No label found, consume this character.
           }
-        }
-        /* fall through */
-      default:
-        continue;
+          continue;
+      }
     }
+
+doc_scan_get_more_buffer:
+    // We ran off the end of the buffer, but no end label has been found.
+    // Save off the string we have so far, re-fill the buffer, and repeat.
+    yyleng = YYCURSOR - yytext;
+    docPieces.emplace_back(yytext, yyleng);
+    if (totalDocSize >= entireDoc.max_size() - yyleng) {
+      _scanner->error("%sdoc too large", isHeredoc ? "Here" : "Now");
+      return 0;
+    }
+    totalDocSize += yyleng;
+
+    // yy_get_next_buffer() needs the text pointing at the data we want to keep
+    // in the buffer, and the cursor pointing off the end. It will move what's
+    // at yytext (if anything) to the beginning of the buffer and fill the rest
+    // with new data.
+    yytext = yytext + yyleng;
+    yyleng = 0;
+    YYCURSOR = YYLIMIT + 1;
+    refillResult = yy_get_next_buffer(yyscanner);
+
+    // Point to the beginning of the (possibly new) buffer.
+    YYCURSOR = yyg->yy_c_buf_p = yytext;
+    YYLIMIT = YY_CURRENT_BUFFER->yy_ch_buf + yyg->yy_n_chars;
   }
 
-nowdoc_scan_done:
+  _scanner->error("Unterminated %sdoc at end of file",
+                  isHeredoc ? "here" : "now");
+  return 0;
+
+doc_scan_done:
   yyleng = YYCURSOR - yytext;
+  totalDocSize += yyleng;
   RESET_YYCURSOR;
-  std::string strval(yytext, yyleng - newline);
-  _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
-  return T_ENCAPSED_AND_WHITESPACE;
+
+  if (totalDocSize > 0) {
+    entireDoc.reserve(totalDocSize);
+
+    for (const auto& piece: docPieces) {
+      entireDoc.append(piece);
+    }
+
+    if (yyleng > 0) {
+      entireDoc.append(yytext, yyleng);
+    }
+
+    // Newline before label will be subtracted from returned text, but
+    // raw text will include it, for zend_highlight/strip, tokenizer, etc.
+    int newline = 0;
+    if (entireDoc.length() > 0) {
+      auto it = entireDoc.end();
+      if (*--it == '\n') {
+        ++newline;
+        if ((entireDoc.length() > 1) && (*--it == '\r')) {
+          ++newline;
+        }
+      }
+    }
+
+    if (isHeredoc) {
+      std::string escapedDoc = _scanner->escape(entireDoc.c_str(),
+                                                entireDoc.length() - newline,
+                                                0);
+      _scanner->setToken(entireDoc.c_str(), entireDoc.length(),
+                         escapedDoc.c_str(), escapedDoc.length());
+    } else {
+      _scanner->setToken(entireDoc.c_str(), entireDoc.length(),
+                         entireDoc.c_str(), entireDoc.length() - newline);
+    }
+    return T_ENCAPSED_AND_WHITESPACE;
+  } else {
+    // No data before the label means we just go right to ST_END_HEREDOC
+    // without forming a new token.
+  }
 }
 
 <ST_END_HEREDOC>{LABEL} {

@@ -440,7 +440,7 @@ void Scanner::incLoc(const char *rawText, int rawLeng) {
   }
 }
 
-string Scanner::escape(char *str, int len, char quote_type) const {
+string Scanner::escape(const char *str, int len, char quote_type) const {
   string output;
   output.reserve(len);
 

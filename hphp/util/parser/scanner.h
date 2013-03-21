@@ -240,7 +240,7 @@ public:
   void setHashBang(const char *rawText, int rawLeng);
   void error(const char* fmt, ...); // also used for YY_FATAL_ERROR in hphp.x
   void warn(const char* fmt, ...);
-  std::string escape(char *str, int len, char quote_type) const;
+  std::string escape(const char *str, int len, char quote_type) const;
 
   /**
    * Called by scanner rules for doc comments.

@@ -5069,21 +5069,26 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
                                oldLocalType == KindOfRef;
   if (affectInnerCell) {
     assert(rhsType != KindOfRef);
-
-    oldLocalReg.alloc();
-    emitDeref(a, localReg, r(oldLocalReg));
+    decRefType = ni.inputs[locIdx]->rtt.innerType();
+    bool useOldType = (locTypeRelaxed && GuardType(decRefType).isCounted()) ||
+      (!locTypeRelaxed && IS_REFCOUNTED_TYPE(decRefType));
+    if (useOldType) {
+      oldLocalReg.alloc();
+      emitDeref(a, localReg, r(oldLocalReg));
+    }
     if (rhsTypeRelaxed) {
       PhysReg base;
       int disp;
       ScratchReg rTmp(m_regMap);
       locToRegDisp(ni.inputs[rhsIdx]->location, &base, &disp);
-      a.store_reg64_disp_reg64(rhsReg, TVOFF(m_data), localReg);
+      size_t typeOff = TVOFF(m_type);
+      size_t dataOff = TVOFF(m_data);
       emitLoadTVType(a, base[disp + TVOFF(m_type)], r(rTmp));
-      emitStoreTVType(a, r(rTmp), localReg[TVOFF(m_type)]);
+      a.    storeq (rhsReg, localReg[dataOff]);
+      emitStoreTVType(a, r(rTmp), localReg[typeOff]);
     } else {
       emitStoreTypedValue(a, rhsType, rhsReg, 0, localReg);
     }
-    decRefType = ni.inputs[locIdx]->rtt.innerType();
   } else if (rhsTypeRelaxed) {
     PhysReg rhsBase;
     int rhsDisp;
@@ -5092,7 +5097,7 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
     int locDisp;
     locToRegDisp(ni.inputs[locIdx]->location, &locBase, &locDisp);
     ScratchReg rTmp(m_regMap);
-    a.store_reg64_disp_reg64(rhsReg, locDisp + TVOFF(m_data), locBase);
+    a.    storeq(rhsReg, locBase[locDisp + TVOFF(m_data)]);
     emitLoadTVType(a, rhsBase[rhsDisp + TVOFF(m_type)], r(rTmp));
     emitStoreTVType(a, r(rTmp), locBase[locDisp + TVOFF(m_type)]);
     m_regMap.swapRegisters(rhsReg, localReg);

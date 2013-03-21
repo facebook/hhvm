@@ -1542,15 +1542,6 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
                 params);
 }
 
-// This is used to check that return types of builtins are not simple
-// types. This is different from IS_REFCOUNTED_TYPE because builtins
-// can return Variants, and we use KindOfUnknown to denote these
-// return types.
-static bool isCppByRef(DataType t) {
-  assert(t != KindOfDouble);
-  return t != KindOfBoolean && t != KindOfInt64 && t != KindOfNull;
-}
-
 void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
                                       uint32_t numNonDefault, int32_t funcId) {
   const NamedEntityPair& nep = lookupNamedEntityPairId(funcId);
@@ -1584,31 +1575,20 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
     }
   }
 
-
   // pass arguments for call
   SSATmp* args[numArgs + 1];
-
-  int isRefReturn = 0;
-  // if the function returns by reference, the first parameter
-  // has to be the fixed C++ location for the return value
-  if (isCppByRef(callee->returnType())) {
-    isRefReturn = 1;
-    SSATmp* misBase = m_tb->gen(DefMIStateBase);
-    SSATmp* returnAddr = m_tb->genLdAddr(misBase, HHIR_MISOFF(tvBuiltinReturn));
-    args[0] = returnAddr;
-  }
 
   for (int i = numArgs - 1; i >= 0; i--) {
     const Func::ParamInfo& pi = callee->params()[i];
     switch (pi.builtinType()) {
       case KindOfBoolean:
       case KindOfInt64:
-        args[isRefReturn + i] = top(Type::fromDataType(pi.builtinType(), KindOfInvalid),
-                                    numArgs - i - 1);
+        args[i] = top(Type::fromDataType(pi.builtinType(), KindOfInvalid),
+                      numArgs - i - 1);
         break;
       case KindOfDouble: assert(false);
       default:
-        args[isRefReturn + i] = loadStackAddr(numArgs - i - 1);
+        args[i] = loadStackAddr(numArgs - i - 1);
         break;
     }
   }
@@ -1616,7 +1596,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   SSATmp* func = m_tb->genDefConst<const Func*>(callee);
   Type type = Type::fromDataTypeWithRef(callee->returnType(),
                        (callee->attrs() & ClassInfo::IsReference));
-  SSATmp* ret = m_tb->genCallBuiltin(func, type, numArgs + isRefReturn, args);
+  SSATmp* ret = m_tb->genCallBuiltin(func, type, numArgs, args);
 
   // decref and free args
   for (int i = 0; i < numArgs; i++) {

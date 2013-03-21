@@ -3238,36 +3238,64 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   Type returnType       = inst->getTypeParam();
 
   const Func* func = f->getValFunc();
-
-  PhysReg returnBase = rsp;
+  DataType funcReturnType = func->returnType();
   int returnOffset = HHIR_MISOFF(tvBuiltinReturn);
 
-  // Load args into registers
+  // RSP points to the MInstrState we need to use.
+  // workaround the fact that rsp moves when we spill registers around call
+  PhysReg misReg = rScratch;
+  emitMovRegReg(m_as, reg::rsp, misReg);
+
   ArgGroup callArgs;
-  callArgs.ssas(inst, 1, numArgs);
-
-  // Call Builtin
-  BuiltinFunction nativeFuncPtr = func->nativeFuncPtr();
-  cgCallHelper(m_as,
-              (TCA)nativeFuncPtr,
-              dstReg,
-              kSyncPoint,
-              callArgs);
-
-  if (dstReg == InvalidReg) {
-    return;
+  if (isCppByRef(funcReturnType)) {
+    // first arg is pointer to storage for that return value
+    if (isSmartPtrRef(funcReturnType)) {
+      returnOffset += TVOFF(m_data);
+    }
+    // misReg is pointing to an MInstrState struct on the C stack.  Pass
+    // the address of tvBuiltinReturn to the native function as the location
+    // it can construct the return Array, String, Object, or Variant.
+    callArgs.addr(misReg, returnOffset); // &misReg[returnOffset]
   }
+
+  // non-pointer args are plain values passed by value.  String, Array,
+  // Object, and Variant are passed by const&, ie a pointer to stack memory
+  // holding the value, so expect PtrToT types for these.
+  // Pointers to smartptr types (String, Array, Object) need adjusting to
+  // point to &ptr->m_data.
+  for (int i = 0; i < numArgs; i++) {
+    const Func::ParamInfo& pi = func->params()[i];
+    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType())) {
+      assert(args[i]->getType().isPtr() && args[i]->getReg() != InvalidReg);
+      callArgs.addr(args[i]->getReg(), TVOFF(m_data));
+    } else {
+      callArgs.ssa(args[i]);
+    }
+  }
+
+  // if the return value is returned by reference, we don't need the
+  // return value from this call since we know where the value is.
+  cgCallHelper(m_as, Transl::Call((TCA)func->nativeFuncPtr()),
+               isCppByRef(funcReturnType) ? InvalidReg : dstReg,
+               kSyncPoint, callArgs);
+
   // load return value from builtin
-  // for primitive return types (int, bool, etc), the return value
+  // for primitive return types (int, bool), the return value
   // is already in dstReg (the builtin call returns in rax). For return
-  // by reference (String, Object, Array, etc), the builtin writes the
+  // by reference (String, Object, Array, Variant), the builtin writes the
   // return value into MInstrState::tvBuiltinReturn TV, from where it
   // has to be tested and copied.
-  if (returnType.isSimpleType()) {
+  if (dstReg == InvalidReg || returnType.isSimpleType()) {
     return;
   }
+  // after the call, RSP is back pointing to MInstrState and rSratch
+  // has been clobberred.
+  misReg = rsp;
+
   if (returnType.isReferenceType()) {
-    m_as.   loadq (returnBase[returnOffset], dstReg);
+    assert(isCppByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
+    // return type is String, Array, or Object; fold nullptr to KindOfNull
+    m_as.   loadq (misReg[returnOffset], dstReg);
     emitLoadImm(m_as, returnType.toDataType(), dstType);
     emitLoadImm(m_as, KindOfNull, rScratch);
     m_as.   testq (dstReg, dstReg);
@@ -3276,12 +3304,14 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   if (returnType.subtypeOf(Type::Cell)
       || returnType.subtypeOf(Type::BoxedCell)) {
-    emitLoadTVType(m_as, returnBase[returnOffset + TVOFF(m_type)], dstType);
-    m_as.   loadq (returnBase[returnOffset + TVOFF(m_data)], dstReg);
+    // return type is Variant; fold KindOfUninit to KindOfNull
+    assert(isCppByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
+    assert(misReg != dstType);
+    emitLoadTVType(m_as, misReg[returnOffset + TVOFF(m_type)], dstType);
+    m_as.   loadq (misReg[returnOffset + TVOFF(m_data)], dstReg);
     emitLoadImm(m_as, KindOfNull, rScratch);
-    static_assert(KindOfUninit == 0,
-                  "CallBuiltin needs update for KindOfUninit");
-    m_as.   testl (r32(dstType), r32(dstType));
+    static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
+    m_as.   testb (rbyte(dstType), rbyte(dstType));
     m_as.   cmov_reg64_reg64 (CC_Z, rScratch, dstType);
     return;
   }

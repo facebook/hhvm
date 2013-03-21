@@ -6098,15 +6098,19 @@ template<class Ret, size_t NArgs, size_t CurArg> struct NativeFuncCaller {
     typedef NativeFuncCaller<Ret,NArgs - 1,CurArg + 1> NextArgT;
     DataType type = func->params()[CurArg].builtinType();
     if (type == KindOfDouble) {
-      // Doubles have a different calling convention.  So we need to
-      // tell the C++ type system about it.
+      // pass TV.m_data.dbl by value with C++ calling convention for doubles
       return NextArgT::call(func, tvs - 1, args..., tvs->m_data.dbl);
-    } else {
-      uintptr_t newArg = (type == KindOfInt64 || type == KindOfBoolean)
-        ? tvs->m_data.num
-        : uintptr_t(tvs);
-      return NextArgT::call(func, tvs - 1, args..., newArg);
     }
+    if (type == KindOfInt64 || type == KindOfBoolean) {
+      // pass TV.m_data.num by value
+      return NextArgT::call(func, tvs - 1, args..., tvs->m_data.num);
+    }
+    if (IS_STRING_TYPE(type) || type == KindOfArray || type == KindOfObject) {
+      // pass ptr to TV.m_data for String&, Array&, or Object&
+      return NextArgT::call(func, tvs - 1, args..., &tvs->m_data);
+    }
+    // final case is for passing full value as Variant&
+    return NextArgT::call(func, tvs - 1, args..., tvs);
   }
 };
 template<class Ret, size_t CurArg> struct NativeFuncCaller<Ret,0,CurArg> {
@@ -6133,7 +6137,8 @@ static Ret makeNativeCall(const Func* f, TypedValue* args, size_t numArgs) {
   not_reached();
 }
 
-static int makeNativeRefCall(const Func* f, TypedValue* ret,
+template<class Ret>
+static int makeNativeRefCall(const Func* f, Ret* ret,
                              TypedValue* args, size_t numArgs) {
   switch (numArgs) {
   case 0: return NativeFuncCaller<int64_t,0,0>::call(f, args, ret);
@@ -6193,9 +6198,10 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
     ret.m_data.num = makeNativeCall<int64_t>(func, args, numArgs);
     break;
   case KindOfString:
+  case KindOfStaticString:
   case KindOfArray:
   case KindOfObject:
-    makeNativeRefCall(func, &ret, args, numArgs);
+    makeNativeRefCall(func, &ret.m_data, args, numArgs);
     if (ret.m_data.num == 0) {
       ret.m_type = KindOfNull;
     }

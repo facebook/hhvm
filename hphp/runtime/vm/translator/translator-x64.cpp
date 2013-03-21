@@ -9381,7 +9381,7 @@ TranslatorX64::translateThis(const Tracelet &t,
   }
 
   assert(!i.outLocal);
-  assert(curFunc()->isPseudoMain() || curFunc()->cls() || 
+  assert(curFunc()->isPseudoMain() || curFunc()->cls() ||
          curFunc()->isClosureBody());
   m_regMap.allocOutputRegs(i);
   PhysReg out = getReg(i.outStack->location);
@@ -9953,14 +9953,6 @@ void TranslatorX64::translateFCallArray(const Tracelet& t,
   }
 }
 
-// This is used to check that return types of builtins are not simple
-// types. This is different from IS_REFCOUNTED_TYPE because builtins
-// can return Variants, and we use KindOfUnknown to denote these
-// return types.
-static bool isCppByRef(DataType t) {
-  return t != KindOfBoolean && t != KindOfInt64 && t != KindOfNull;
-}
-
 void TranslatorX64::analyzeFCallBuiltin(Tracelet& t,
                                         NormalizedInstruction& i) {
   Id funcId = i.imm[2].u_SA;
@@ -10029,7 +10021,9 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
   PhysReg returnBase = rsp;
   int returnOffset = offsetof(MInstrState, tvBuiltinReturn);
 
-  if (isCppByRef(func->returnType())) {
+  auto returnType = func->returnType();
+  if (isCppByRef(returnType)) {
+    if (isSmartPtrRef(returnType)) returnOffset += TVOFF(m_data);
     emitLea(a, returnBase, returnOffset, argNumToRegName[0]);
     refReturn = 1;
   }
@@ -10038,16 +10032,25 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
   for (int i = 0; i < numArgs; i++) {
     const Func::ParamInfo& pi = func->params()[i];
     locToRegDisp(ni.inputs[numArgs - i - 1]->location, &base, &disp);
+    auto argReg = argNumToRegName[i + refReturn];
     switch (pi.builtinType()) {
+      case KindOfDouble:
+        assert(false);
       case KindOfBoolean:
-      case KindOfInt64: {
-        a.   loadq  (base[disp + TVOFF(m_data.num)],
-                       argNumToRegName[i + refReturn]);
-      } break;
-      case KindOfDouble:  assert(false);
-      default: {
-        emitLea(a, base, disp, argNumToRegName[i + refReturn]);
-      }
+      case KindOfInt64:
+        // pass by value
+        a.   loadq  (base[disp + TVOFF(m_data.num)], argReg);
+        break;
+      STRINGCASE():
+      case KindOfArray:
+      case KindOfObject:
+        // pass ptr to TV.m_data as String&, Array&, or Object&
+        emitLea(a, base, disp + TVOFF(m_data), argReg);
+        break;
+      default:
+        // pass ptr to TV as Variant&
+        emitLea(a, base, disp, argReg);
+        break;
     }
   }
   // Call builtin
@@ -10066,7 +10069,7 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
     if (pi.builtinType() == KindOfUnknown) {
       emitDecRefGeneric(ni, base, disp);
     } else if (IS_REFCOUNTED_TYPE(pi.builtinType())) {
-      a.  loadq  (base[disp], rScratch);
+      a.  loadq  (base[disp + TVOFF(m_data)], rScratch);
       emitDecRef(ni, rScratch, pi.builtinType());
     }
   }
@@ -10077,36 +10080,40 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
   // copy return value
   locToRegDisp(ni.outStack->location, &base, &disp);
 
-  switch (func->returnType()) {
+  switch (returnType) {
     // For bool return value, get the %al byte
     case KindOfBoolean:
-      a.  movzbl (al, eax);
+      a.  movzbl (al, eax);  // sign extend byte->qword
+      emitStoreTypedValue(a, func->returnType(), rax, disp, base, true);
+      break;
     case KindOfNull:  /* void return type */
     case KindOfInt64:
       emitStoreTypedValue(a, func->returnType(), rax, disp, base, true);
       break;
-    case BitwiseKindOfString:
+    STRINGCASE():
     case KindOfArray:
     case KindOfObject:
+      // returnOffset already has TVOFF(m_data) added if necessary.
       a.   loadq  (returnBase[returnOffset], rax);
       a.   testq  (rax, rax);
       {
         IfElseBlock<CC_Z> ifNotZero(a);
-        emitStoreTypedValue(a, func->returnType(), rax, disp, base, true);
+        emitStoreTypedValue(a, returnType, rax, disp, base, true);
 
         ifNotZero.Else();
         emitStoreTVType(a, KindOfNull, base[disp + TVOFF(m_type)]);
       }
       break;
-    case KindOfUnknown:
+    case KindOfUnknown: // return type was Variant
       emitLea(a, returnBase, returnOffset, rax);
-      emitLoadTVType(a, rax[TVOFF(m_type)], rScratch);
-      a.   cmpl   (KindOfUninit, r32(rScratch));
+      emitCmpTVType(a, KindOfUninit, rax[TVOFF(m_type)]);
       {
         IfElseBlock<CC_Z> ifNotUninit(a);
+        // copy 16-byte TypedValue
         emitCopyToAligned(a, rax, 0, base, disp);
 
         ifNotUninit.Else();
+        // result was KindOfUninit; convert to KindOfNull
         emitStoreTVType(a, KindOfNull, base[disp + TVOFF(m_type)]);
       }
       break;

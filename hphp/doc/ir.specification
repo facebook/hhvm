@@ -811,13 +811,30 @@ NativeImpl = S0:ConstFunc S1:StkPtr
 
   Execute a call to the native builtin specified by the func in S0.
 
-D:T = CallBuiltin<T> S0:FuncPtr S1:ConstInt S2...SN
+D:T = CallBuiltin<T> S0:FuncPtr S1...SN
 
-  Call builtin function. Operands:
+  Call builtin function with N-1 arguments.  Operands:
 
     S0: callee Func
-    S1: number of arguments to builtin
-    S2..SN: arguments to builtin function
+    S1..SN: arguments to builtin function
+
+  The source and destination types correspond to C++ parameter and return
+  types as follows:
+
+    C++ type            HHIR type         Position
+    -----------------   ---------         --------
+    bool                Bool              source, destination
+    int64_t             Int               source, destination
+    double              Dbl               source, destination
+    const String&       PtrToString       source
+    const Array&        PtrToArray        source
+    const Object&       PtrToObject       source
+    const Variant&      PtrToGen          source
+    Variant&            PtrToGen          source (ref param)
+    String              {Str|InitNull}    destination
+    Array               {Arr|InitNull}    destination
+    Object              {Obj|InitNull}    destination
+    Variant             {Gen-UninitNull}  destination
 
 D:RetAddr = LdRetAddr S0:StkPtr
 

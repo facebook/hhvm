@@ -1103,6 +1103,20 @@ extern bool tc_dump();
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   bool& magicCall, bool staticLookup);
 
+// This is used to check that return types of builtins are not simple
+// types. This is different from IS_REFCOUNTED_TYPE because builtins
+// can return Variants, and we use KindOfUnknown to denote these
+// return types.
+static inline bool isCppByRef(DataType t) {
+  return t != KindOfBoolean && t != KindOfInt64 && t != KindOfNull;
+}
+
+// return true if type is passed in/out of C++ as String&/Array&/Object&
+static inline bool isSmartPtrRef(DataType t) {
+  return t == KindOfString || t == KindOfStaticString ||
+         t == KindOfArray || t == KindOfObject;
+}
+
 } } } // HPHP::VM::Transl
 
 #endif

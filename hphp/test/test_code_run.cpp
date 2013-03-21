@@ -34666,6 +34666,33 @@ bool TestCodeRun::TestUConverter() {
         "**Disallowed\n"
        );
 
+  MVCRO("<?php "
+        "$standards = UConverter::getStandards();"
+        "var_dump(in_array('IANA', $standards));"
+        "var_dump(in_array('MIME', $standards));"
+       ,
+        "bool(true)\n"
+        "bool(true)\n"
+       );
+
+  MVCRO("<?php "
+        "var_dump(UConverter::getStandardName('latin1', 'MIME'));"
+        "var_dump(UConverter::getStandardName('latin1', 'IANA'));"
+        "var_dump(UConverter::getStandardName('blergh', 'blergh'));"
+       ,
+        "string(10) \"ISO-8859-1\"\n"
+        "string(15) \"ISO_8859-1:1987\"\n"
+        "NULL\n"
+       );
+
+  MVCRO("<?php "
+        "var_dump(UConverter::getMIMEName('latin1'));"
+        "var_dump(UConverter::getMIMEName('blergh'));"
+       ,
+        "string(10) \"ISO-8859-1\"\n"
+        "NULL\n"
+       );
+
   return true;
 }
 

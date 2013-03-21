@@ -569,5 +569,25 @@ Array c_UConverter::ti_getstandards(const char* cls ) {
   return ret;
 }
 
+String c_UConverter::ti_getstandardname(const char* cls,
+                                        CStrRef name,
+                                        CStrRef standard) {
+  UErrorCode error = U_ZERO_ERROR;
+  const char *standard_name = ucnv_getStandardName(name.data(),
+                                                   standard.data(),
+                                                   &error);
+
+  if (U_FAILURE(error)) {
+    THROW_UFAILURE(ucnv_getStandardName, error, s_intl_error->m_error);
+    return uninit_null();
+  }
+
+  return String(standard_name, CopyString);
+}
+
+String c_UConverter::ti_getmimename(const char* cls, CStrRef name) {
+  return ti_getstandardname(cls, name, "MIME");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

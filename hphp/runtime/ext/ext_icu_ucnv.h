@@ -129,6 +129,16 @@ class c_UConverter : public ExtObjectData {
   public: static Array t_getstandards() {
     return ti_getstandards("uconverter");
   }
+  public: static String ti_getstandardname(const char* cls,
+                                           CStrRef name,
+                                           CStrRef standard);
+  public: static String t_getstandardname(CStrRef name, CStrRef standard) {
+    return ti_getstandardname("uconverter", name, standard);
+  }
+  public: static String ti_getmimename(const char* cls, CStrRef name);
+  public: static String t_getmimename(CStrRef name) {
+    return ti_getmimename("uconverter", name);
+  }
 
   private:
     static void throwFailure(UErrorCode error, const char *fname,

@@ -633,4 +633,47 @@ DefineFunction(
   )
 );
 
+DefineFunction(
+  array(
+    'name'   => "getStandardName",
+    'desc'   => "Returns a standard name for a given converter name.",
+    'flags'  => HasDocComment|IsStatic,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "Standard name of converter",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => String,
+        'desc'   => "Original converter name",
+      ),
+      array(
+        'name'   => "standard",
+        'type'   => String,
+        'desc'   => "Name of the standard governing the names, e.g. 'MIME' or 'IANA'",
+      ),
+    ),
+  )
+);
+
+DefineFunction(
+  array(
+    'name'   => "getMIMEName",
+    'desc'   => "Returns the MIME name for a given converter name.",
+    'flags'  => HasDocComment|IsStatic,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "Converter's MIME name",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => String,
+        'desc'   => "Original converter name",
+      ),
+    ),
+  )
+);
+
 EndClass();

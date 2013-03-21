@@ -995,6 +995,114 @@ TypedValue* tg_10UConverter_getStandards(HPHP::VM::ActRec *ar) {
   return &ar->m_r;
 }
 
+/*
+HPHP::String HPHP::c_UConverter::ti_getstandardname(char const*, HPHP::String const&, HPHP::String const&)
+_ZN4HPHP12c_UConverter18ti_getstandardnameEPKcRKNS_6StringES5_
+
+(return value) => rax
+_rv => rdi
+cls_ => rsi
+name => rdx
+standard => rcx
+*/
+
+Value* th_10UConverter_getStandardName(Value* _rv, char const* cls_, Value* name, Value* standard) asm("_ZN4HPHP12c_UConverter18ti_getstandardnameEPKcRKNS_6StringES5_");
+
+TypedValue* tg1_10UConverter_getStandardName(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_10UConverter_getStandardName(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfString;
+  if (!IS_STRING_TYPE((args-1)->m_type)) {
+    tvCastToStringInPlace(args-1);
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  th_10UConverter_getStandardName((Value*)(rv), ("UConverter"), (Value*)(args-0), (Value*)(args-1));
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* tg_10UConverter_getStandardName(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 2LL) {
+      if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_type = KindOfString;
+        th_10UConverter_getStandardName((Value*)(&(rv)), ("UConverter"), (Value*)(args-0), (Value*)(args-1));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        tg1_10UConverter_getStandardName(&rv, ar, count );
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("UConverter::getStandardName", count, 2, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::String HPHP::c_UConverter::ti_getmimename(char const*, HPHP::String const&)
+_ZN4HPHP12c_UConverter14ti_getmimenameEPKcRKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+cls_ => rsi
+name => rdx
+*/
+
+Value* th_10UConverter_getMIMEName(Value* _rv, char const* cls_, Value* name) asm("_ZN4HPHP12c_UConverter14ti_getmimenameEPKcRKNS_6StringE");
+
+TypedValue* tg1_10UConverter_getMIMEName(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_10UConverter_getMIMEName(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfString;
+  tvCastToStringInPlace(args-0);
+  th_10UConverter_getMIMEName((Value*)(rv), ("UConverter"), (Value*)(args-0));
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* tg_10UConverter_getMIMEName(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_type = KindOfString;
+        th_10UConverter_getMIMEName((Value*)(&(rv)), ("UConverter"), (Value*)(args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        tg1_10UConverter_getMIMEName(&rv, ar, count );
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("UConverter::getMIMEName", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
 
 } // !HPHP
 

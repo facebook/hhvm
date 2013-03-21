@@ -2686,6 +2686,8 @@ TypedValue* tg_10UConverter_reasonText(VM::ActRec *ar);
 TypedValue* tg_10UConverter_getAvailable(VM::ActRec *ar);
 TypedValue* tg_10UConverter_getAliases(VM::ActRec *ar);
 TypedValue* tg_10UConverter_getStandards(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getStandardName(VM::ActRec *ar);
+TypedValue* tg_10UConverter_getMIMEName(VM::ActRec *ar);
 VM::Instance* new_EncodingDetector_Instance(VM::Class*);
 TypedValue* tg_16EncodingDetector___construct(VM::ActRec *ar);
 TypedValue* tg_16EncodingDetector_setText(VM::ActRec *ar);
@@ -5813,7 +5815,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DOMXPath[] = {
   { "__isset", tg_8DOMXPath___isset }
 };
 
-static const long long hhbc_ext_method_count_UConverter = 20;
+static const long long hhbc_ext_method_count_UConverter = 22;
 static const HhbcExtMethodInfo hhbc_ext_methods_UConverter[] = {
   { "__construct", tg_10UConverter___construct },
   { "__destruct", tg_10UConverter___destruct },
@@ -5834,7 +5836,9 @@ static const HhbcExtMethodInfo hhbc_ext_methods_UConverter[] = {
   { "reasonText", tg_10UConverter_reasonText },
   { "getAvailable", tg_10UConverter_getAvailable },
   { "getAliases", tg_10UConverter_getAliases },
-  { "getStandards", tg_10UConverter_getStandards }
+  { "getStandards", tg_10UConverter_getStandards },
+  { "getStandardName", tg_10UConverter_getStandardName },
+  { "getMIMEName", tg_10UConverter_getMIMEName }
 };
 
 static const long long hhbc_ext_method_count_EncodingDetector = 5;

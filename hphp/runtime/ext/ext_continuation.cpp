@@ -58,7 +58,7 @@ c_Continuation::c_Continuation(VM::Class* cb) :
     m_index(-1LL),
     m_value(Variant::nullInit), m_received(Variant::nullInit),
     m_done(false), m_running(false), m_should_throw(false),
-    m_isMethod(false), m_vmFunc(nullptr), m_label(0ll) {
+    m_vmFunc(nullptr), m_label(0ll) {
 }
 
 c_Continuation::~c_Continuation() {
@@ -79,11 +79,9 @@ c_Continuation::~c_Continuation() {
 }
 
 void c_Continuation::t___construct(
-    int64_t func, int64_t extra, bool isMethod,
-    CStrRef origFuncName, CVarRef obj, CArrRef args) {
-  m_vmFunc       = (VM::Func*) extra;
+  int64_t func, CStrRef origFuncName, CVarRef obj, CArrRef args) {
+  m_vmFunc       = (VM::Func*)func;
   assert(m_vmFunc);
-  m_isMethod     = isMethod;
   m_origFuncName = origFuncName;
 
   if (!obj.isNull()) {

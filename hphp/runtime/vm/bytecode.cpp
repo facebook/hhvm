@@ -6859,8 +6859,9 @@ VMExecutionContext::createContinuation(ActRec* fp,
   cont->incRefCount();
   cont->setNoDestruct();
   try {
-    cont->t___construct((int64_t)0, (int64_t)genFunc, isMethod,
-                        StrNR(const_cast<StringData*>(origName)), obj, args);
+    cont->t___construct(uintptr_t(genFunc),
+                        StrNR(const_cast<StringData*>(origName)),
+                        obj, args);
   } catch (...) {
     decRefObj(cont);
     throw;

@@ -174,7 +174,7 @@ public:
     ++m_index;
   }
 
-  inline void nextCheck() {
+  inline void startedCheck() {
     if (m_index < 0LL) {
       throw_exception(
         Object(SystemLib::AllocExceptionObject("Need to call next() first")));
@@ -188,17 +188,32 @@ public:
   Variant m_value;
   Variant m_received;
   String m_origFuncName;
-  String m_called_class;
   bool m_done;
   bool m_running;
   bool m_should_throw;
-  bool m_isMethod;
-  const CallInfo *m_callInfo;
-  union {
-    void *m_extra;
-    VM::Func *m_vmFunc;
-  };
+
+  int m_localsOffset;
+  VM::Func *m_vmFunc;
   int64_t m_label
+  VM::ActRec* m_arPtr;
+
+  p_ContinuationWaitHandle m_waitHandle;
+
+  SmartPtr<HphpArray> m_VMStatics;
+
+  String& getCalledClass() { not_reached(); }
+
+  HphpArray* getStaticLocals();
+  static size_t sizeForLocalsAndIters(int nLocals, int nIters) {
+    return (sizeof(c_Continuation) + sizeof(TypedValue) * nLocals +
+            sizeof(VM::Iter) * nIters + sizeof(VM::ActRec));
+  }
+  VM::ActRec* actRec() {
+    return m_arPtr;
+  }
+  TypedValue* locals() {
+    return (TypedValue*)(uintptr_t(this) + m_localsOffset);
+  }
 EOT
 ,
   )
@@ -214,14 +229,6 @@ DefineFunction(
       array(
         'name'   => 'func',
         'type'   => Int64,
-      ),
-      array(
-        'name'   => 'extra',
-        'type'   => Int64,
-      ),
-      array(
-        'name'   => 'isMethod',
-        'type'   => Boolean,
       ),
       array(
         'name'   => 'origFuncName',

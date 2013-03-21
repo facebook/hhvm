@@ -213,19 +213,17 @@ HPHP::VM::Instance* new_Continuation_Instance(HPHP::VM::Class* cls) {
 
 IMPLEMENT_CLASS(Continuation);
 /*
-void HPHP::c_Continuation::t___construct(long, long, bool, HPHP::String const&, HPHP::Variant const&, HPHP::Array const&)
-_ZN4HPHP14c_Continuation13t___constructEllbRKNS_6StringERKNS_7VariantERKNS_5ArrayE
+void HPHP::c_Continuation::t___construct(long, HPHP::String const&, HPHP::Variant const&, HPHP::Array const&)
+_ZN4HPHP14c_Continuation13t___constructElRKNS_6StringERKNS_7VariantERKNS_5ArrayE
 
 this_ => rdi
 func => rsi
-extra => rdx
-isMethod => rcx
-origFuncName => r8
-obj => r9
-args => st0
+origFuncName => rdx
+obj => rcx
+args => r8
 */
 
-void th_12Continuation___construct(ObjectData* this_, long func, long extra, bool isMethod, Value* origFuncName, TypedValue* obj, Value* args) asm("_ZN4HPHP14c_Continuation13t___constructEllbRKNS_6StringERKNS_7VariantERKNS_5ArrayE");
+void th_12Continuation___construct(ObjectData* this_, long func, Value* origFuncName, TypedValue* obj, Value* args) asm("_ZN4HPHP14c_Continuation13t___constructElRKNS_6StringERKNS_7VariantERKNS_5ArrayE");
 
 TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
 TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
@@ -233,28 +231,22 @@ TypedValue* tg1_12Continuation___construct(TypedValue* rv, HPHP::VM::ActRec* ar,
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
   switch (count) {
-  default: // count >= 6
-    if ((args-5)->m_type != KindOfArray) {
-      tvCastToArrayInPlace(args-5);
+  default: // count >= 4
+    if ((args-3)->m_type != KindOfArray) {
+      tvCastToArrayInPlace(args-3);
     }
-  case 5:
-  case 4:
+  case 3:
+  case 2:
     break;
   }
-  if (!IS_STRING_TYPE((args-3)->m_type)) {
-    tvCastToStringInPlace(args-3);
-  }
-  if ((args-2)->m_type != KindOfBoolean) {
-    tvCastToBooleanInPlace(args-2);
-  }
-  if ((args-1)->m_type != KindOfInt64) {
-    tvCastToInt64InPlace(args-1);
+  if (!IS_STRING_TYPE((args-1)->m_type)) {
+    tvCastToStringInPlace(args-1);
   }
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  Variant defVal4;
-  th_12Continuation___construct((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (bool)(args[-2].m_data.num), (Value*)(args-3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (Value*)(args-5) : (Value*)(&null_array));
+  Variant defVal2;
+  th_12Continuation___construct((this_), (long)(args[-0].m_data.num), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
   return rv;
 }
 
@@ -264,30 +256,30 @@ TypedValue* tg_12Continuation___construct(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
     if (this_) {
-      if (count >= 4LL && count <= 6LL) {
-        if ((count <= 5 || (args-5)->m_type == KindOfArray) && IS_STRING_TYPE((args-3)->m_type) && (args-2)->m_type == KindOfBoolean && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
+      if (count >= 2LL && count <= 4LL) {
+        if ((count <= 3 || (args-3)->m_type == KindOfArray) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfInt64) {
           rv.m_data.num = 0LL;
           rv.m_type = KindOfNull;
-          Variant defVal4;
-          th_12Continuation___construct((this_), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (bool)(args[-2].m_data.num), (Value*)(args-3), (count > 4) ? (args-4) : (TypedValue*)(&defVal4), (count > 5) ? (Value*)(args-5) : (Value*)(&null_array));
-          frame_free_locals_inl(ar, 6);
+          Variant defVal2;
+          th_12Continuation___construct((this_), (long)(args[-0].m_data.num), (Value*)(args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2), (count > 3) ? (Value*)(args-3) : (Value*)(&null_array));
+          frame_free_locals_inl(ar, 4);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
         } else {
           tg1_12Continuation___construct(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 6);
+          frame_free_locals_inl(ar, 4);
           memcpy(&ar->m_r, &rv, sizeof(TypedValue));
           return &ar->m_r;
         }
       } else {
-        throw_wrong_arguments_nr("Continuation::__construct", count, 4, 6, 1);
+        throw_wrong_arguments_nr("Continuation::__construct", count, 2, 4, 1);
       }
     } else {
       throw_instance_method_fatal("Continuation::__construct");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 6);
+    frame_free_locals_inl(ar, 4);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

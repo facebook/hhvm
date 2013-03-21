@@ -47,7 +47,7 @@ class c_Continuation : public ExtObjectData {
   // need to implement
   public: c_Continuation(VM::Class* cls = c_Continuation::s_cls);
   public: ~c_Continuation();
-  public: void t___construct(int64_t func, int64_t extra, bool isMethod, CStrRef origFuncName, CVarRef obj = uninit_null(), CArrRef args = null_array);
+  public: void t___construct(int64_t func, CStrRef origFuncName, CVarRef obj = uninit_null(), CArrRef args = null_array);
   public: void t_update(int64_t label, CVarRef value);
   public: void t_done();
   public: Object t_getwaithandle();
@@ -115,7 +115,6 @@ public:
   bool m_done;
   bool m_running;
   bool m_should_throw;
-  bool m_isMethod;
 
   int m_localsOffset;
   VM::Func *m_vmFunc;

@@ -22,6 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+DECLARE_BOOST_TYPES(ClosureExpression);
 DECLARE_BOOST_TYPES(ModifierExpression);
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(StatementList);
@@ -104,6 +105,13 @@ public:
     return m_generatorFunc;
   }
 
+  void setContainingClosure(ClosureExpressionRawPtr exp) {
+    m_containingClosure = exp;
+  }
+  ClosureExpressionRawPtr getContainingClosure() const {
+    return m_containingClosure;
+  }
+
   void setClassName(const std::string &name) { m_className = name; }
   void setOriginalClassName(const std::string &name) {
     m_originalClassName = name;
@@ -127,6 +135,7 @@ protected:
   std::string m_docComment;
   MethodStatementRawPtr m_origGeneratorFunc;
   MethodStatementRawPtr m_generatorFunc;
+  ClosureExpressionRawPtr m_containingClosure;
   ExpressionListPtr m_attrList;
 
   void setSpecialMethod(ClassScopePtr classScope);

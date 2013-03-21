@@ -1490,7 +1490,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
             e->is(Expression::KindOfSimpleVariable) &&
             !e->isThis()) {
           Symbol *s = spc(SimpleVariable, e)->getSymbol();
-          if (s && !s->isParameter() && !s->isClosureVar()) {
+          if (s && !s->isParameter() && !s->isGeneratorParameter() &&
+              !s->isClosureVar()) {
             rep = e->makeConstant(m_arp, "null");
             Compiler::Error(Compiler::UseUndeclaredVariable, e);
             if (m_variables->getAttribute(VariableTable::ContainsCompact)) {

@@ -33,6 +33,7 @@
 #include <compiler/expression/parameter_expression.h>
 #include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/simple_variable.h>
+#include <compiler/expression/closure_expression.h>
 
 #include <compiler/analysis/ast_walker.h>
 #include <compiler/analysis/analysis_result.h>
@@ -372,15 +373,36 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     funcScope->setParamSpecs(ar);
     if (funcScope->isGenerator()) {
+      MethodStatementRawPtr orig = getOrigGeneratorFunc();
       VariableTablePtr variables = funcScope->getVariables();
+
       Symbol *cont = variables->getSymbol(CONTINUATION_OBJECT_NAME);
       cont->setHidden();
-      getOrigGeneratorFunc()->getFunctionScope()->addUse(
-        funcScope, BlockScope::UseKindClosure);
-      getOrigGeneratorFunc()->getFunctionScope()->setContainsBareThis(
+
+      orig->getFunctionScope()->addUse(funcScope, BlockScope::UseKindClosure);
+      orig->getFunctionScope()->setContainsBareThis(
         funcScope->containsBareThis(), funcScope->containsRefThis());
-      getOrigGeneratorFunc()->getFunctionScope()->setContainsThis(
-        funcScope->containsThis());
+      orig->getFunctionScope()->setContainsThis(funcScope->containsThis());
+
+      if (ExpressionListPtr params = orig->getParams()) {
+        for (int i = 0; i < params->getCount(); ++i) {
+          auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+          Symbol *gp = variables->addDeclaredSymbol(
+            param->getName(), ConstructPtr());
+          gp->setGeneratorParameter();
+        }
+      }
+
+      if (ClosureExpressionRawPtr closure = orig->getContainingClosure()) {
+        if (ExpressionListPtr cvars = closure->getClosureVariables()) {
+          for (int i = 0; i < cvars->getCount(); ++i) {
+            auto param = dynamic_pointer_cast<ParameterExpression>((*cvars)[i]);
+            Symbol *gp = variables->addDeclaredSymbol(
+              param->getName(), ConstructPtr());
+            gp->setGeneratorParameter();
+          }
+        }
+      }
     }
     if (funcScope->isSepExtension() ||
         Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {

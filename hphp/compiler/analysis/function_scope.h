@@ -116,12 +116,6 @@ public:
   bool hasGeneratorAsBody() const;
   MethodStatementRawPtr getOrigGenStmt() const;
   FunctionScopeRawPtr getOrigGenFS() const;
-  void setNeedsRefTemp() { m_needsRefTemp = true; }
-  bool needsRefTemp() const { return m_needsRefTemp; }
-  void setNeedsObjTemp() { m_needsObjTemp = true; }
-  bool needsObjTemp() const { return m_needsObjTemp; }
-  void setNeedsCheckMem() { m_needsCheckMem = true; }
-  bool needsCheckMem() const { return m_needsCheckMem; }
   void setClosureGenerator() { m_closureGenerator = true; }
   bool isClosureGenerator() const {
     assert(!m_closureGenerator || isClosure());
@@ -475,9 +469,6 @@ private:
   unsigned m_inlineSameContext : 1;
   unsigned m_contextSensitive : 1;
   unsigned m_directInvoke : 1;
-  unsigned m_needsRefTemp : 1;
-  unsigned m_needsObjTemp : 1;
-  unsigned m_needsCheckMem : 1;
   unsigned m_closureGenerator : 1;
   unsigned m_noLSB : 1;
   unsigned m_nextLSB : 1;

@@ -151,8 +151,6 @@ void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_dynamic) {
     getFileScope()->addConstantDependency(ar, m_name);
-    FunctionScopePtr scope = getFunctionScope();
-    if (scope) scope->setNeedsCheckMem();
   }
 }
 

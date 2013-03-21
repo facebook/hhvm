@@ -189,10 +189,7 @@ public:
   void collectCPPTemps(ExpressionPtrVec &collection);
   void disableCSE();
   bool hasChainRoots();
-  bool hasCPPTemp() const { return !m_cppTemp.empty(); }
-  const std::string &cppTemp() const { return m_cppTemp; }
   std::string genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar);
-  void setCPPTemp(const std::string &s) { m_cppTemp = s; }
   BlockScopeRawPtr getOriginalScope();
   void setOriginalScope(BlockScopeRawPtr scope);
   ClassScopeRawPtr getOriginalClass();
@@ -223,10 +220,6 @@ public:
   }
   ExpressionPtr getNextCanonCsePtr() const;
   ExpressionPtr getCanonCsePtr() const;
-  bool needsCSE() const {
-    ExpressionPtr p(getCanonCsePtr());
-    return p && p->hasCPPCseTemp();
-  }
   ExpressionPtr getCanonTypeInfPtr() const;
 
   /**
@@ -397,10 +390,6 @@ protected:
   TypePtr m_expectedType; // null if the same as m_actualType
   TypePtr m_implementedType; // null if the same as m_actualType
   TypePtr m_assertedType;
-  std::string m_cppTemp;
-  std::string m_cppCseTemp;
-
-  bool hasCPPCseTemp() const { return !m_cppCseTemp.empty(); }
 
   TypePtr inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
                                bool coerce, ExpressionPtr variable,
@@ -418,10 +407,6 @@ protected:
    */
   bool getTypeCastPtrs(
       AnalysisResultPtr ar, TypePtr &srcType, TypePtr &dstType);
-
-  bool couldCppTypeBeReferenced();
-  bool needsFastCastTemp(AnalysisResultPtr ar);
-  bool canUseFastCast(AnalysisResultPtr ar);
 
   BlockScopeRawPtr m_originalScope;
   ExpressionPtr m_canonPtr;

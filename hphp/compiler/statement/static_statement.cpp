@@ -79,9 +79,6 @@ void StaticStatement::analyzeProgram(AnalysisResultPtr ar) {
       Symbol *sym = var->getSymbol();
       sym->setStaticInitVal(value);
     }
-  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    FunctionScopePtr fs = getFunctionScope();
-    if (fs) fs->setNeedsCheckMem();
   }
 }
 

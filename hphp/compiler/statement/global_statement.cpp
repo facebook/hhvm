@@ -62,10 +62,6 @@ StatementPtr GlobalStatement::clone() {
 
 void GlobalStatement::analyzeProgram(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    FunctionScopePtr fs = getFunctionScope();
-    if (fs) fs->setNeedsCheckMem();
-  }
 }
 
 ConstructPtr GlobalStatement::getNthKid(int n) const {

@@ -167,16 +167,6 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_variable->analyzeProgram(ar);
   if (m_offset) m_offset->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (!m_global && (m_context & AccessContext) &&
-        !(m_context & (LValue|RefValue|DeepReference|
-                       UnsetContext|RefParameter|InvokeArgument))) {
-      TypePtr type = m_variable->getActualType();
-      if (!type ||
-          (!type->is(Type::KindOfString) && !type->is(Type::KindOfArray))) {
-        FunctionScopePtr scope = getFunctionScope();
-        if (scope && !needsCSE()) scope->setNeedsRefTemp();
-      }
-    }
     if (m_global) {
       if (getContext() & (LValue|RefValue|DeepReference)) {
         setContext(NoLValueWrapper);
@@ -191,8 +181,6 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
                           shared_from_this());
         }
       }
-      FunctionScopePtr scope = getFunctionScope();
-      if (scope) scope->setNeedsCheckMem();
     } else {
       TypePtr at(m_variable->getActualType());
       TypePtr et(m_variable->getExpectedType());

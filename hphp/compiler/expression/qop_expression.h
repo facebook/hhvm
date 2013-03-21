@@ -43,10 +43,6 @@ private:
   ExpressionPtr m_condition;
   ExpressionPtr m_expYes;
   ExpressionPtr m_expNo;
-  // we use this, rather than m_cppTemp, because the result
-  // may need explicit casting, and m_cppTemp is assumed to
-  // already have been cast.
-  std::string m_cppValue;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

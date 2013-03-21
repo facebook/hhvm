@@ -204,10 +204,6 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
     }
-    if (getContext() & RefValue) {
-      FunctionScopePtr fs = getFunctionScope();
-      if (fs) fs->setNeedsCheckMem();
-    }
   }
 }
 

@@ -150,16 +150,6 @@ void ObjectPropertyExpression::analyzeProgram(AnalysisResultPtr ar) {
          !static_pointer_cast<SimpleVariable>(m_object)->isGuarded())) {
       setLocalEffect(DiagnosticEffect);
     }
-    if (FunctionScopePtr func = getFunctionScope()) {
-      if (!m_valid &&
-          m_context & (LValue|RefValue|DeepReference|UnsetContext)) {
-        func->setNeedsRefTemp();
-      }
-      if (getContext() & (RefValue | AssignmentLHS | OprLValue)) {
-        func->setNeedsCheckMem();
-      }
-      if (m_valid) func->setNeedsObjTemp();
-    }
   }
 }
 

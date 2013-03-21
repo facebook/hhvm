@@ -115,10 +115,6 @@ void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
     addUserClass(ar, m_className);
   }
   m_exp->analyzeProgram(ar);
-  if (ar->getPhase() >= AnalysisResult::AnalyzeFinal) {
-    FunctionScopePtr fs = getFunctionScope();
-    if (fs) fs->setNeedsCheckMem();
-  }
 }
 
 ConstructPtr StaticMemberExpression::getNthKid(int n) const {

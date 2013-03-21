@@ -59,48 +59,6 @@ void ReturnStatement::analyzeProgram(AnalysisResultPtr ar) {
     }
     m_exp->analyzeProgram(ar);
   }
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_exp) {
-      TypePtr retType = m_exp->getCPPType();
-      bool needsCheck = !retType->isPrimitive();
-      if (m_exp->is(Expression::KindOfSimpleFunctionCall) ||
-          m_exp->is(Expression::KindOfDynamicFunctionCall) ||
-          m_exp->is(Expression::KindOfObjectMethodExpression)) {
-        // return a value from another function call
-        needsCheck = false;
-      }
-      ExpressionPtr tmp = m_exp;
-      while (tmp &&
-             (tmp->is(Expression::KindOfObjectPropertyExpression) ||
-              tmp->is(Expression::KindOfArrayElementExpression))) {
-        if (ObjectPropertyExpressionPtr opExp =
-            dynamic_pointer_cast<ObjectPropertyExpression>(tmp)) {
-          tmp = opExp->getObject();
-        } else {
-          ArrayElementExpressionPtr aeExp =
-            dynamic_pointer_cast<ArrayElementExpression>(tmp);
-          assert(aeExp);
-          tmp = aeExp->getVariable();
-        }
-      }
-      if (SimpleVariablePtr svExp = dynamic_pointer_cast<SimpleVariable>(tmp)) {
-        if (svExp->isThis()) {
-          // returning something from $this
-          needsCheck = false;
-        } else {
-          Symbol *sym = svExp->getSymbol();
-          if (sym && sym->isParameter() && !sym->isLvalParam()) {
-            // returning something from non-lval parameter
-            needsCheck = false;
-          }
-        }
-      }
-      if (needsCheck) {
-        FunctionScopePtr funcScope = getFunctionScope();
-        if (funcScope) funcScope->setNeedsCheckMem();
-      }
-    }
-  }
 }
 
 ConstructPtr ReturnStatement::getNthKid(int n) const {

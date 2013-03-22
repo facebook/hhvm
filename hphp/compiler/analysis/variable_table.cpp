@@ -567,6 +567,10 @@ void VariableTable::clearUsed() {
     } else {
       sym.second.setReferenced();
     }
+
+    if (sym.second.isRefGeneratorParameter()) {
+      sym.second.setReferenced();
+    }
   }
 }
 

@@ -390,6 +390,10 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
           Symbol *gp = variables->addDeclaredSymbol(
             param->getName(), ConstructPtr());
           gp->setGeneratorParameter();
+          if (param->isRef()) {
+            gp->setRefGeneratorParameter();
+            gp->setReferenced();
+          }
         }
       }
 
@@ -400,6 +404,10 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
             Symbol *gp = variables->addDeclaredSymbol(
               param->getName(), ConstructPtr());
             gp->setGeneratorParameter();
+            if (param->isRef()) {
+              gp->setRefGeneratorParameter();
+              gp->setReferenced();
+            }
           }
         }
       }

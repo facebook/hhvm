@@ -116,6 +116,7 @@ public:
   bool isReferenced() const { return !m_flags.m_notReferenced; }
   bool isHidden() const { return m_flags.m_hidden; }
   bool isGeneratorParameter() const { return m_flags.m_generatorParameter; }
+  bool isRefGeneratorParameter() const { return m_flags.m_refGeneratorParameter; }
   bool isClosureVar() const { return m_flags.m_closureVar; }
   bool isRefClosureVar() const { return m_flags.m_refClosureVar; }
   bool isPassClosureVar() const { return m_flags.m_passClosureVar; }
@@ -142,6 +143,7 @@ public:
   void setReferenced() { m_flags.m_notReferenced = false; }
   void setHidden() { m_flags.m_hidden = true; }
   void setGeneratorParameter() { m_flags.m_generatorParameter = true; }
+  void setRefGeneratorParameter() { m_flags.m_refGeneratorParameter = true; }
   void setClosureVar() { m_flags.m_closureVar = true; }
   void setRefClosureVar() { m_flags.m_refClosureVar = true; }
   void setPassClosureVar() { m_flags.m_passClosureVar = true; }
@@ -222,6 +224,7 @@ private:
       unsigned m_notReferenced : 1;
       unsigned m_hidden : 1;
       unsigned m_generatorParameter : 1;
+      unsigned m_refGeneratorParameter : 1;
       unsigned m_closureVar : 1;
       unsigned m_refClosureVar : 1;
       unsigned m_passClosureVar : 1;

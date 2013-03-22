@@ -787,15 +787,10 @@ void Parser::fixStaticVars() {
 
 void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
                         Token &name, Token &params, Token &stmt, Token *attr) {
-
   ModifierExpressionPtr exp = modifiers?
     dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
     : NEW_EXP0(ModifierExpression);
 
-  const string &retType = ret.text();
-  if (!retType.empty() && !ret.check()) {
-    PARSE_ERROR("Return type hint is not supported yet");
-  }
   if (!stmt->stmt) {
     stmt->stmt = NEW_STMT0(StatementList);
   }
@@ -828,6 +823,7 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
 
     func = NEW_STMT(FunctionStatement, exp, ref->num(), closureName,
                     dynamic_pointer_cast<ExpressionList>(new_params->exp),
+                    ret.text(),
                     dynamic_pointer_cast<StatementList>(stmt->stmt),
                     attribute, comment, ExpressionListPtr());
     out->stmt = func;
@@ -878,7 +874,8 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
     }
 
     func = NEW_STMT(FunctionStatement, exp, ref->num(), funcName,
-                    old_params, dynamic_pointer_cast<StatementList>(stmt->stmt),
+                    old_params, ret.text(),
+                    dynamic_pointer_cast<StatementList>(stmt->stmt),
                     attribute, comment, attrList);
     out->stmt = func;
 
@@ -894,10 +891,6 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
     if (func->ignored()) {
       out->stmt = NEW_STMT0(StatementList);
     }
-  }
-
-  if (hasType(ret)) {
-    // TODO
   }
 }
 
@@ -1080,14 +1073,12 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
       : NEW_EXP0(ModifierExpression);
 
     out->stmt = NEW_STMT
-      (ClassVariable, exp, dynamic_pointer_cast<ExpressionList>(decl->exp));
+      (ClassVariable, exp, (type) ? type->text() : "",
+       dynamic_pointer_cast<ExpressionList>(decl->exp));
   } else {
     out->stmt =
-      NEW_STMT(ClassConstant, dynamic_pointer_cast<ExpressionList>(decl->exp));
-  }
-
-  if (type && hasType(*type)) {
-    // TODO
+      NEW_STMT(ClassConstant, (type) ? type->text() : "",
+               dynamic_pointer_cast<ExpressionList>(decl->exp));
   }
 }
 
@@ -1130,6 +1121,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     ModifierExpressionPtr exp2 = Construct::Clone(exp);
     mth = NEW_STMT(MethodStatement, exp2, ref->num(), closureName,
                    dynamic_pointer_cast<ExpressionList>(new_params->exp),
+                   ret.text(),
                    dynamic_pointer_cast<StatementList>(stmt->stmt),
                    attribute, comment, ExpressionListPtr());
     out->stmt = mth;
@@ -1161,17 +1153,14 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
       attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
     }
     mth = NEW_STMT(MethodStatement, exp, ref->num(), name->text(),
-                   old_params, stmts, attribute, comment, attrList);
+                   old_params, ret.text(), stmts, attribute, comment,
+                   attrList);
     out->stmt = mth;
     if (reloc) {
       mth->getLocation()->line0 = loc->line0;
       mth->getLocation()->char0 = loc->char0;
     }
     completeScope(mth->onInitialParse(m_ar, m_file));
-  }
-
-  if (hasType(ret)) {
-    // TODO
   }
 }
 

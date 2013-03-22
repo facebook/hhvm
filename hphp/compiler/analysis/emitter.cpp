@@ -3816,7 +3816,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         TypedValue uninit;
         tvWriteUninit(&uninit);
         for (auto& useVar : useVars) {
-          pce->addProperty(useVar.first, AttrPrivate, nullptr, &uninit);
+          pce->addProperty(useVar.first, AttrPrivate, nullptr, nullptr, &uninit);
         }
 
         // The constructor. This is entirely generated; all it does is stash its
@@ -5273,6 +5273,9 @@ void EmitterVisitor::emitPostponedMeths() {
       pi.setRef(par->isRef());
       fe->appendParam(parName, pi);
     }
+    // add return type hint
+    fe->setReturnTypeConstraint(
+        StringData::GetStaticString(p.m_meth->getReturnTypeConstraint()));
 
     m_curFunc = fe;
 
@@ -6203,6 +6206,8 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
         ModifierExpressionPtr mod(cv->getModifiers());
         ExpressionListPtr el(cv->getVarList());
         Attr attrs = buildAttrs(mod);
+        StringData* typeConstraint = StringData::GetStaticString(
+          cv->getTypeConstraint());
         int nVars = el->getCount();
         for (int ii = 0; ii < nVars; ii++) {
           ExpressionPtr exp((*el)[ii]);
@@ -6244,12 +6249,14 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
             tvWriteNull(&tvVal);
           }
           bool added UNUSED =
-            pce->addProperty(propName, attrs, propDoc, &tvVal);
+            pce->addProperty(propName, attrs, typeConstraint, propDoc, &tvVal);
           assert(added);
         }
       } else if (ClassConstantPtr cc =
                  dynamic_pointer_cast<ClassConstant>((*stmts)[i])) {
         ExpressionListPtr el(cc->getConList());
+        StringData* typeConstraint = StringData::GetStaticString(
+          cc->getTypeConstraint());
         int nCons = el->getCount();
         for (int ii = 0; ii < nCons; ii++) {
           AssignmentExpressionPtr ae(
@@ -6278,7 +6285,8 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
           AnalysisResultPtr ar(new AnalysisResult());
           vNode->outputPHP(cg, ar);
           bool added UNUSED = pce->addConstant(
-            constName, &tvVal, StringData::GetStaticString(os.str()));
+            constName, typeConstraint, &tvVal,
+            StringData::GetStaticString(os.str()));
           assert(added);
         }
       } else if (UseTraitStatementPtr useStmt =
@@ -7181,7 +7189,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           assert(false);
         }
         pce->addConstant(
-          cnsInfo->name.get(), (TypedValue*)(&val), empty_string.get());
+          cnsInfo->name.get(), nullptr, (TypedValue*)(&val), empty_string.get());
       }
     }
     {
@@ -7200,6 +7208,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         pce->addProperty(
           propInfo->name.get(),
           Attr(attr),
+          nullptr,
           propInfo->docComment ? StringData::GetStaticString(propInfo->docComment) : nullptr,
           &tvNull
         );

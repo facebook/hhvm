@@ -1515,7 +1515,7 @@ void parse_property(AsmState& as) {
 
   TypedValue tvInit = parse_member_tv_initializer(as);
   as.pce->addProperty(StringData::GetStaticString(name),
-                      attrs,
+                      attrs, empty_string.get(),
                       empty_string.get(),
                       &tvInit);
 }
@@ -1534,7 +1534,7 @@ void parse_constant(AsmState& as) {
 
   TypedValue tvInit = parse_member_tv_initializer(as);
   as.pce->addConstant(StringData::GetStaticString(name),
-                      &tvInit,
+                      empty_string.get(), &tvInit,
                       empty_string.get());
 }
 

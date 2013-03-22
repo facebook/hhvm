@@ -32,9 +32,11 @@ using namespace HPHP;
 
 ClassVariable::ClassVariable
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
- ModifierExpressionPtr modifiers, ExpressionListPtr declaration)
+ ModifierExpressionPtr modifiers, std::string typeConstraint,
+ ExpressionListPtr declaration)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassVariable)),
-    m_modifiers(modifiers), m_declaration(declaration) {
+    m_modifiers(modifiers), m_typeConstraint(typeConstraint),
+    m_declaration(declaration) {
 }
 
 StatementPtr ClassVariable::clone() {

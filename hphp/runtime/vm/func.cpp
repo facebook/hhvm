@@ -673,20 +673,20 @@ const Func* Func::getGeneratorBody(const StringData* name) const {
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   : m_ue(ue), m_pce(nullptr), m_sn(sn), m_id(id), m_name(n), m_numLocals(0),
     m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
-    m_nextFreeIterator(0), m_returnType(KindOfInvalid), m_top(false),
-    m_isClosureBody(false), m_isGenerator(false),
-    m_isGeneratorFromClosure(false), m_hasGeneratorAsBody(false), m_info(nullptr),
-    m_builtinFuncPtr(nullptr) {
+    m_nextFreeIterator(0), m_retTypeConstraint(nullptr),
+    m_returnType(KindOfInvalid), m_top(false), m_isClosureBody(false),
+    m_isGenerator(false), m_isGeneratorFromClosure(false),
+    m_hasGeneratorAsBody(false), m_info(nullptr), m_builtinFuncPtr(nullptr) {
 }
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
                          PreClassEmitter* pce)
   : m_ue(ue), m_pce(pce), m_sn(sn), m_name(n), m_numLocals(0),
     m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
-    m_nextFreeIterator(0), m_returnType(KindOfInvalid), m_top(false),
-    m_isClosureBody(false), m_isGenerator(false),
-    m_isGeneratorFromClosure(false), m_hasGeneratorAsBody(false), m_info(nullptr),
-    m_builtinFuncPtr(nullptr) {
+    m_nextFreeIterator(0), m_retTypeConstraint(nullptr),
+    m_returnType(KindOfInvalid), m_top(false), m_isClosureBody(false),
+    m_isGenerator(false), m_isGeneratorFromClosure(false),
+    m_hasGeneratorAsBody(false), m_info(nullptr), m_builtinFuncPtr(nullptr) {
 }
 
 FuncEmitter::~FuncEmitter() {
@@ -915,6 +915,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_userAttributes = m_userAttributes;
   f->shared()->m_builtinFuncPtr = m_builtinFuncPtr;
   f->shared()->m_nativeFuncPtr = m_nativeFuncPtr;
+  f->shared()->m_retTypeConstraint = m_retTypeConstraint;
   return f;
 }
 
@@ -999,6 +1000,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_ehtab)
     (m_fpitab)
     (m_userAttributes)
+    (m_retTypeConstraint)
     ;
 }
 

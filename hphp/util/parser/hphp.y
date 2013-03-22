@@ -1020,8 +1020,7 @@ function_declaration_statement:
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     sm_opt_return_type
-    '{' inner_statement_list '}'       { Token t; t.reset();
-                                         _p->onFunction($$,0,t,$2,$3,$6,$10,0);
+    '{' inner_statement_list '}'       { _p->onFunction($$,0,$8,$2,$3,$6,$10,0);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
   | non_empty_user_attributes function_loc
@@ -1030,8 +1029,7 @@ function_declaration_statement:
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     sm_opt_return_type
-    '{' inner_statement_list '}'       { Token t; t.reset();
-                                         _p->onFunction($$,0,t,$3,$4,$7,$11,&$1);
+    '{' inner_statement_list '}'       { _p->onFunction($$,0,$9,$3,$4,$7,$11,&$1);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
 ;
@@ -1315,8 +1313,7 @@ class_statement:
     parameter_list ')'
     sm_opt_return_type
     method_body
-                                       { Token t; t.reset();
-                                         _p->onMethod($$,$1,t,$3,$4,$7,$10,0);
+                                       { _p->onMethod($$,$1,$9,$3,$4,$7,$10,0);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
   | non_empty_user_attributes
@@ -1327,8 +1324,7 @@ class_statement:
     parameter_list ')'
     sm_opt_return_type
     method_body
-                                       { Token t; t.reset();
-                                         _p->onMethod($$,$2,t,$4,$5,$8,$11,&$1);
+                                       { _p->onMethod($$,$2,$10,$4,$5,$8,$11,&$1);
                                          _p->popLabelInfo();
                                          _p->popTypeScope();}
   | T_XHP_ATTRIBUTE

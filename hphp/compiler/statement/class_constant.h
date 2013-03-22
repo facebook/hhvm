@@ -27,7 +27,8 @@ DECLARE_BOOST_TYPES(ClassConstant);
 
 class ClassConstant : public Statement, public IParseHandler {
 public:
-  ClassConstant(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
+  ClassConstant(STATEMENT_CONSTRUCTOR_PARAMETERS, std::string typeConstraint,
+		        ExpressionListPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultConstPtr ar);
@@ -35,8 +36,11 @@ public:
   // implementing IParseHandler
   virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
 
+  std::string getTypeConstraint() const { return m_typeConstraint; }
+
   ExpressionListPtr getConList() { return m_exp; }
 private:
+  std::string m_typeConstraint;
   ExpressionListPtr m_exp;
 };
 

@@ -82,6 +82,7 @@ static StaticString s_closure("closure");
 static StaticString s___invoke("__invoke");
 static StaticString s_closure_in_braces("{closure}");
 static StaticString s_closureobj("closureobj");
+static StaticString s_return_type("return_type");
 
 static const VM::Class* get_cls(CVarRef class_or_object) {
   VM::Class* cls = NULL;
@@ -183,6 +184,14 @@ static void set_doc_comment(Array &ret, const StringData* comment) {
   }
 }
 
+static void set_return_type_constraint(Array &ret, const StringData* retType) {
+  if (retType && retType->size()) {
+    ret.set(s_return_type, VarNR(retType));
+  } else {
+    ret.set(s_return_type, false_varNR);
+  }
+}
+
 static void set_property_info(Array &ret, ClassInfo::PropertyInfo *info,
                               const ClassInfo *cls) {
   ret.set(s_name, info->name);
@@ -197,6 +206,11 @@ static void set_instance_prop_info(Array &ret, const VM::Class::Prop* prop) {
   set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
   ret.set(s_class, VarNR(prop->m_class->name()));
   set_doc_comment(ret, prop->m_docComment);
+  if (prop->m_typeConstraint && prop->m_typeConstraint->size()) {
+    ret.set(s_type, VarNR(prop->m_typeConstraint));
+  } else {
+    ret.set(s_type, false_varNR);
+  }
 }
 
 static void set_static_prop_info(Array &ret, const VM::Class::SProp* prop) {
@@ -204,6 +218,11 @@ static void set_static_prop_info(Array &ret, const VM::Class::SProp* prop) {
   set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
   ret.set(s_class, VarNR(prop->m_class->name()));
   set_doc_comment(ret, prop->m_docComment);
+  if (prop->m_typeConstraint && prop->m_typeConstraint->size()) {
+    ret.set(s_type, VarNR(prop->m_typeConstraint));
+  } else {
+    ret.set(s_type, false_varNR);
+  }
 }
 
 static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
@@ -313,6 +332,7 @@ static void set_function_info(Array &ret, const VM::Func* func) {
       ret.set(s_hphp,     true_varNR);
     }
   }
+  set_return_type_constraint(ret, func->returnTypeConstraint());
 
   // doc comments
   set_doc_comment(ret, func->docComment());

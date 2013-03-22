@@ -85,9 +85,10 @@ static const StringData* manglePropName(const StringData* className,
 // PreClass::Prop.
 
 PreClass::Prop::Prop(PreClass* preClass, const StringData* n, Attr attrs,
+                     const StringData* typeConstraint,
                      const StringData* docComment, const TypedValue& val)
   : m_preClass(preClass), m_name(n), m_attrs(attrs),
-    m_docComment(docComment) {
+    m_typeConstraint(typeConstraint), m_docComment(docComment) {
   m_mangledName = manglePropName(preClass->name(), n, attrs);
   memcpy(&m_val, &val, sizeof(TypedValue));
 }
@@ -113,8 +114,10 @@ void PreClass::Prop::prettyPrint(std::ostream& out) const {
 // PreClass::Const.
 
 PreClass::Const::Const(PreClass* preClass, const StringData* n,
+		               const StringData* typeConstraint,
                        const TypedValue& val, const StringData* phpCode)
-  : m_preClass(preClass), m_name(n), m_phpCode(phpCode) {
+  : m_preClass(preClass), m_name(n), m_typeConstraint(typeConstraint),
+    m_phpCode(phpCode) {
   memcpy(&m_val, &val, sizeof(TypedValue));
 }
 
@@ -191,9 +194,10 @@ void PreClass::prettyPrint(std::ostream &out) const {
 // PreClassEmitter::Prop.
 
 PreClassEmitter::Prop::Prop(const PreClassEmitter* pce, const StringData* n,
-                            Attr attrs, const StringData* docComment,
-                            TypedValue* val)
-  : m_name(n), m_attrs(attrs), m_docComment(docComment) {
+                            Attr attrs, const StringData* typeConstraint,
+                            const StringData* docComment, TypedValue* val)
+  : m_name(n), m_attrs(attrs), m_typeConstraint(typeConstraint),
+    m_docComment(docComment) {
   m_mangledName = manglePropName(pce->name(), n, attrs);
   memcpy(&m_val, val, sizeof(TypedValue));
 }
@@ -249,13 +253,14 @@ bool PreClassEmitter::addMethod(FuncEmitter* method) {
 }
 
 bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
+		                          const StringData* typeConstraint,
                                   const StringData* docComment,
                                   TypedValue* val) {
   PropMap::Builder::const_iterator it = m_propMap.find(n);
   if (it != m_propMap.end()) {
     return false;
   }
-  PreClassEmitter::Prop prop(this, n, attrs, docComment, val);
+  PreClassEmitter::Prop prop(this, n, attrs, typeConstraint, docComment, val);
   m_propMap.add(prop.name(), prop);
   return true;
 }
@@ -268,13 +273,15 @@ PreClassEmitter::lookupProp(const StringData* propName) const {
   return m_propMap[idx];
 }
 
-bool PreClassEmitter::addConstant(const StringData* n, TypedValue* val,
+bool PreClassEmitter::addConstant(const StringData* n,
+		                          const StringData* typeConstraint,
+		                          TypedValue* val,
                                   const StringData* phpCode) {
   ConstMap::Builder::const_iterator it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
-  PreClassEmitter::Const const_(n, val, phpCode);
+  PreClassEmitter::Const const_(n, typeConstraint, val, phpCode);
   m_constMap.add(const_.name(), const_);
   return true;
 }
@@ -359,6 +366,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     propBuild.add(prop.name(), PreClass::Prop(pc,
                                               prop.name(),
                                               prop.attrs(),
+                                              prop.typeConstraint(),
                                               prop.docComment(),
                                               prop.val()));
   }
@@ -369,6 +377,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     const Const& const_ = m_constMap[i];
     constBuild.add(const_.name(), PreClass::Const(pc,
                                                   const_.name(),
+                                                  const_.typeConstraint(),
                                                   const_.val(),
                                                   const_.phpCode()));
   }
@@ -1830,6 +1839,7 @@ void Class::setProperties() {
       prop.m_originalMangledName = parentProp.m_originalMangledName;
       prop.m_attrs = parentProp.m_attrs;
       prop.m_docComment = parentProp.m_docComment;
+      prop.m_typeConstraint = parentProp.m_typeConstraint;
       prop.m_name = parentProp.m_name;
       if (!(parentProp.m_attrs & AttrPrivate)) {
         curPropMap.add(prop.m_name, prop);
@@ -1847,6 +1857,7 @@ void Class::setProperties() {
       SProp sProp;
       sProp.m_name = parentProp.m_name;
       sProp.m_attrs = parentProp.m_attrs;
+      sProp.m_typeConstraint = parentProp.m_typeConstraint;
       sProp.m_docComment = parentProp.m_docComment;
       sProp.m_class = parentProp.m_class;
       tvWriteUninit(&sProp.m_val);
@@ -1901,6 +1912,7 @@ void Class::setProperties() {
         prop.m_attrs = preProp->attrs();
         // This is the first class to declare this property
         prop.m_class = this;
+        prop.m_typeConstraint = preProp->typeConstraint();
         prop.m_docComment = preProp->docComment();
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
@@ -1927,6 +1939,7 @@ void Class::setProperties() {
         prop.m_mangledName = preProp->mangledName();
         prop.m_originalMangledName = preProp->mangledName();
         prop.m_attrs = preProp->attrs();
+        prop.m_typeConstraint = preProp->typeConstraint();
         // This is the first class to declare this property
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
@@ -1947,6 +1960,7 @@ void Class::setProperties() {
             prop.m_mangledName = preProp->mangledName();
             prop.m_originalMangledName = preProp->mangledName();
             prop.m_attrs = Attr(prop.m_attrs ^ (AttrProtected|AttrPublic));
+            prop.m_typeConstraint = preProp->typeConstraint();
           }
           const TypedValue& tv = m_preClass->lookupProp(preProp->name())->val();
           TypedValueAux& tvaux = m_declPropInit[it2->second];
@@ -1961,6 +1975,7 @@ void Class::setProperties() {
         prop.m_mangledName = preProp->mangledName();
         prop.m_originalMangledName = preProp->mangledName();
         prop.m_attrs = preProp->attrs();
+        prop.m_typeConstraint = preProp->typeConstraint();
         // This is the first class to declare this property
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
@@ -2013,6 +2028,7 @@ void Class::setProperties() {
       SProp& sProp = curSPropMap[sPropInd];
       // Finish initializing.
       sProp.m_attrs = preProp->attrs();
+      sProp.m_typeConstraint = preProp->typeConstraint();
       sProp.m_docComment = preProp->docComment();
       sProp.m_class = this;
       sProp.m_val = m_preClass->lookupProp(preProp->name())->val();

@@ -123,7 +123,8 @@ class PreClass : public AtomicCountable {
   struct Prop {
     Prop() {}
     Prop(PreClass* preClass, const StringData* n, Attr attrs,
-         const StringData* docComment, const TypedValue& val);
+         const StringData* typeConstraint, const StringData* docComment,
+         const TypedValue& val);
 
     void prettyPrint(std::ostream& out) const;
 
@@ -133,6 +134,7 @@ class PreClass : public AtomicCountable {
     const StringData* mangledName() const { return m_mangledName; }
     CStrRef mangledNameRef() const { return *(String*)(&m_mangledName); }
     Attr attrs() const { return m_attrs; }
+    const StringData* typeConstraint() const { return m_typeConstraint; }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
 
@@ -141,13 +143,15 @@ class PreClass : public AtomicCountable {
     const StringData* m_name;
     const StringData* m_mangledName;
     Attr m_attrs;
+    const StringData* m_typeConstraint;
     const StringData* m_docComment;
     TypedValue m_val;
   };
 
   struct Const {
     Const() {}
-    Const(PreClass* preClass, const StringData* n, const TypedValue& val,
+    Const(PreClass* preClass, const StringData* n,
+    	  const StringData* typeConstraint, const TypedValue& val,
           const StringData* phpCode);
 
     void prettyPrint(std::ostream& out) const;
@@ -155,12 +159,14 @@ class PreClass : public AtomicCountable {
     PreClass* preClass() const { return m_preClass; }
     const StringData* name() const { return m_name; }
     CStrRef nameRef() const { return *(String*)&m_name; }
+    const StringData* typeConstraint() const { return m_typeConstraint; }
     const TypedValue& val() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
 
   private:
     PreClass* m_preClass;
     const StringData* m_name;
+    const StringData* m_typeConstraint;
     TypedValue m_val;
     const StringData* m_phpCode;
   };
@@ -359,16 +365,19 @@ class PreClassEmitter {
       : m_name(0)
       , m_mangledName(0)
       , m_attrs(AttrNone)
+      , m_typeConstraint(0)
       , m_docComment(0)
     {}
 
     Prop(const PreClassEmitter* pce, const StringData* n, Attr attrs,
-         const StringData* docComment, TypedValue* val);
+         const StringData* typeConstraint, const StringData* docComment,
+         TypedValue* val);
     ~Prop();
 
     const StringData* name() const { return m_name; }
     const StringData* mangledName() const { return m_mangledName; }
     Attr attrs() const { return m_attrs; }
+    const StringData* typeConstraint() const { return m_typeConstraint; }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
 
@@ -376,6 +385,7 @@ class PreClassEmitter {
       sd(m_name)
         (m_mangledName)
         (m_attrs)
+        (m_typeConstraint)
         (m_docComment)
         (m_val)
         ;
@@ -385,6 +395,7 @@ class PreClassEmitter {
     const StringData* m_name;
     const StringData* m_mangledName;
     Attr m_attrs;
+    const StringData* m_typeConstraint;
     const StringData* m_docComment;
     TypedValue m_val;
   };
@@ -393,15 +404,18 @@ class PreClassEmitter {
    public:
     Const()
       : m_name(0)
+      , m_typeConstraint(0)
       , m_phpCode(0)
     {}
-    Const(const StringData* n, TypedValue* val, const StringData* phpCode)
-      : m_name(n), m_phpCode(phpCode) {
+    Const(const StringData* n, const StringData* typeConstraint,
+    	  TypedValue* val, const StringData* phpCode)
+      : m_name(n), m_typeConstraint(typeConstraint), m_phpCode(phpCode) {
       memcpy(&m_val, val, sizeof(TypedValue));
     }
     ~Const() {}
 
     const StringData* name() const { return m_name; }
+    const StringData* typeConstraint() const { return m_typeConstraint; }
     const TypedValue& val() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
 
@@ -411,6 +425,7 @@ class PreClassEmitter {
 
    private:
     const StringData* m_name;
+    const StringData* m_typeConstraint;
     TypedValue m_val;
     const StringData* m_phpCode;
   };
@@ -432,10 +447,11 @@ class PreClassEmitter {
   void addInterface(const StringData* n);
   bool addMethod(FuncEmitter* method);
   bool addProperty(const StringData* n, Attr attrs,
+		               const StringData* typeConstraint,
                    const StringData* docComment, TypedValue* val);
   const Prop& lookupProp(const StringData* propName) const;
-  bool addConstant(const StringData* n, TypedValue* val,
-                   const StringData* phpCode);
+  bool addConstant(const StringData* n, const StringData* typeConstraint,
+		           TypedValue* val, const StringData* phpCode);
   void addUsedTrait(const StringData* traitName);
   void addTraitPrecRule(const PreClass::TraitPrecRule &rule);
   void addTraitAliasRule(const PreClass::TraitAliasRule &rule);
@@ -544,12 +560,14 @@ public:
     const StringData* m_originalMangledName;
     Class* m_class; // First parent class that declares this property.
     Attr m_attrs;
+    const StringData* m_typeConstraint;
     const StringData* m_docComment;
   };
 
   struct SProp {
     const StringData* m_name;
     Attr m_attrs;
+    const StringData* m_typeConstraint;
     const StringData* m_docComment;
     Class* m_class; // Most derived class that declared this property.
     TypedValue m_val; // Used if (m_class == this).
@@ -560,6 +578,7 @@ public:
     const StringData* m_name;
     TypedValue m_val;
     const StringData* m_phpCode;
+    const StringData* m_typeConstraint;
     CStrRef nameRef() const { return *(String*)&m_name; }
   };
 

@@ -30,9 +30,10 @@ using namespace HPHP;
 // constructors/destructors
 
 ClassConstant::ClassConstant
-(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp)
+(STATEMENT_CONSTRUCTOR_PARAMETERS, std::string typeConstraint,
+  ExpressionListPtr exp)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassConstant)),
-    m_exp(exp) {
+    m_typeConstraint(typeConstraint), m_exp(exp) {
 }
 
 StatementPtr ClassConstant::clone() {

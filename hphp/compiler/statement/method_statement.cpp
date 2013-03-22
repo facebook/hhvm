@@ -59,13 +59,14 @@ using std::map;
 MethodStatement::MethodStatement
 (STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
  ModifierExpressionPtr modifiers, bool ref, const string &name,
- ExpressionListPtr params, StatementListPtr stmt, int attr,
- const string &docComment, ExpressionListPtr attrList,
- bool method /* = true */)
+ ExpressionListPtr params, const std::string &retTypeConstraint,
+ StatementListPtr stmt, int attr, const string &docComment,
+ ExpressionListPtr attrList, bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
     m_method(method), m_ref(ref), m_attribute(attr),
     m_cppLength(-1), m_modifiers(modifiers),
-    m_originalName(name), m_params(params), m_stmt(stmt),
+    m_originalName(name), m_params(params),
+    m_retTypeConstraint(retTypeConstraint), m_stmt(stmt),
     m_docComment(docComment), m_attrList(attrList) {
   m_name = Util::toLower(name);
 }
@@ -73,14 +74,15 @@ MethodStatement::MethodStatement
 MethodStatement::MethodStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ModifierExpressionPtr modifiers, bool ref, const string &name,
- ExpressionListPtr params, StatementListPtr stmt, int attr,
- const string &docComment, ExpressionListPtr attrList,
+ ExpressionListPtr params, const std::string &retTypeConstraint,
+ StatementListPtr stmt,
+ int attr, const string &docComment, ExpressionListPtr attrList,
  bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(MethodStatement)),
     m_method(method), m_ref(ref), m_attribute(attr), m_cppLength(-1),
     m_modifiers(modifiers), m_originalName(name),
-    m_params(params), m_stmt(stmt),
-    m_docComment(docComment), m_attrList(attrList) {
+    m_params(params), m_retTypeConstraint(retTypeConstraint),
+    m_stmt(stmt), m_docComment(docComment), m_attrList(attrList) {
   m_name = Util::toLower(name);
 }
 

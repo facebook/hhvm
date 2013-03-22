@@ -398,7 +398,7 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
     (new FunctionStatement(BlockScopePtr(), LocationPtr(),
                            ModifierExpressionPtr(),
                            false, pseudoMainName(),
-                           ExpressionListPtr(), st, 0, "",
+                           ExpressionListPtr(), "", st, 0, "",
                            ExpressionListPtr()));
   f->setFileLevel();
   FunctionScopePtr pseudoMain(

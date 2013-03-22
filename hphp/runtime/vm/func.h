@@ -313,6 +313,10 @@ struct Func {
     return id < numNamedLocals() ? shared()->m_localNames[id] : 0;
   }
 
+  const StringData* returnTypeConstraint() const {
+    return shared()->m_retTypeConstraint;
+  }
+
   int numIterators() const { return shared()->m_numIterators; }
   const EHEntVec& ehtab() const { return shared()->m_ehtab; }
   const FPIEntVec& fpitab() const { return shared()->m_fpitab; }
@@ -457,6 +461,7 @@ private:
     bool m_isGeneratorFromClosure : 1;
     bool m_hasGeneratorAsBody : 1;
     UserAttributeMap m_userAttributes;
+    const StringData* m_retTypeConstraint;
     SharedData(PreClass* preClass, Id id, Offset base,
         Offset past, int line1, int line2, bool top,
         const StringData* docComment);
@@ -567,6 +572,10 @@ public:
   bool hasVar(const StringData* name) const;
   Id numParams() const { return m_params.size(); }
 
+  void setReturnTypeConstraint(const StringData* retTypeConstraint) {
+    m_retTypeConstraint = retTypeConstraint;
+  }
+
   Id allocIterator();
   void freeIterator(Id id);
   void setNumIterators(Id numIterators);
@@ -650,6 +659,8 @@ private:
   Id m_nextFreeIterator;
   int m_maxStackCells;
   SVInfoVec m_staticVars;
+
+  const StringData* m_retTypeConstraint;
 
   EHEntVec m_ehtab;
   FPIEntVec m_fpitab;

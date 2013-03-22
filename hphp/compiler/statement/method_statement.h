@@ -34,16 +34,16 @@ protected:
   MethodStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,
                   const std::string &name, ExpressionListPtr params,
-                  StatementListPtr stmt, int attr,
-                  const std::string &docComment, ExpressionListPtr attrList,
-                  bool method = true);
+                  const std::string &retTypeConstraint, StatementListPtr stmt,
+                  int attr, const std::string &docComment,
+                  ExpressionListPtr attrList, bool method = true);
 public:
   MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,
                   const std::string &name, ExpressionListPtr params,
-                  StatementListPtr stmt, int attr,
-                  const std::string &docComment, ExpressionListPtr attrList,
-                  bool method = true);
+                  const std::string &retTypeConstraint, StatementListPtr stmt,
+                  int attr, const std::string &docComment,
+                  ExpressionListPtr attrList, bool method = true);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   void inferFunctionTypes(AnalysisResultPtr ar);
@@ -63,6 +63,9 @@ public:
   std::string getOriginalFullName() const;
   std::string getOriginalFullNameForInjection() const;
   ExpressionListPtr getParams() { return m_params;}
+  const std::string getReturnTypeConstraint() const {
+    return m_retTypeConstraint;
+  }
   StatementListPtr getStmts() { return m_stmt;}
   bool isRef(int index = -1) const;
 
@@ -131,6 +134,7 @@ protected:
   std::string m_className;
   std::string m_originalClassName;
   ExpressionListPtr m_params;
+  std::string m_retTypeConstraint;
   StatementListPtr m_stmt;
   std::string m_docComment;
   MethodStatementRawPtr m_origGeneratorFunc;

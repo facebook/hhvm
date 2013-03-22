@@ -31,6 +31,7 @@ class ClassVariable : public Statement, public IParseHandler {
 public:
   ClassVariable(STATEMENT_CONSTRUCTOR_PARAMETERS,
                 ModifierExpressionPtr modifiers,
+                std::string typeConstraint,
                 ExpressionListPtr declaration);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
@@ -39,6 +40,7 @@ public:
   // implementing IParseHandler
   virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
 
+  std::string getTypeConstraint() const { return m_typeConstraint; }
   ExpressionListPtr getVarList() const { return m_declaration; }
   ModifierExpressionPtr getModifiers() const { return m_modifiers; }
 
@@ -47,6 +49,7 @@ public:
 private:
 
   ModifierExpressionPtr m_modifiers;
+  std::string m_typeConstraint;
   ExpressionListPtr m_declaration;
 };
 

@@ -1014,7 +1014,7 @@ void TraceBuilder::genDecRefStack(Type type, uint32_t stackOff) {
 void TraceBuilder::genDecRefThis() {
   if (isThisAvailable()) {
     SSATmp* thiss = genLdThis(nullptr);
-    genDecRef(thiss);
+    gen(DecRefKillThis, thiss);
   } else {
     gen(DecRefThis, m_fpValue);
   }

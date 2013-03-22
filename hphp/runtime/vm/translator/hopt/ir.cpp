@@ -451,7 +451,7 @@ bool IRInstruction::killsSources() const {
 bool IRInstruction::killsSource(int idx) const {
   if (!killsSources()) return false;
 
-  if (m_op == DecRef) {
+  if (m_op == DecRef || m_op == DecRefKillThis) {
     assert(idx == 0);
     return true;
   }

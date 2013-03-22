@@ -977,6 +977,14 @@ DecRefStack<T> S0:StkPtr S1:ConstInt
   DecRef a value of type T at offset S1 on the stack pointed to by S0.
 
 DecRefThis
+  DecRef the this pointer in the ActRec, checking to see if there is
+  one. If it needs to be destroyed, zero ActRec::m_this before calling
+  the destructor.
+
+DecRefKillThis S0:Gen
+  Identical to DecRef, except that in the case it needs to destroy its
+  argument, it first zeros ActRec::m_this. It is expected that the
+  argument will be the $this pointer.
 
 DecRef S0:Gen
 

@@ -480,7 +480,6 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
     m_valid = mi.advance();
     if (!m_valid) mi.~MArrayIter();
   } else if (rtv->m_type == KindOfObject) {
-    CStrRef ctxStr = g_vmContext->getContextClassName();
     if (rtv->m_data.pobj->isCollection()) {
       raise_error("Collection elements cannot be taken by reference");
     }
@@ -489,7 +488,9 @@ void c_MutableArrayIterator::t___construct(VRefParam array) {
     if (isIterator) {
       raise_error("An iterator cannot be used with foreach by reference");
     }
-    Array iterArray = obj->o_toIterArray(ctxStr, true);
+    VM::Class* ctx = g_vmContext->getContextClass();
+    Array iterArray = obj->o_toIterArray(ctx ? ctx->nameRef() : empty_string,
+                                         true);
     ArrayData* ad = iterArray.detach();
     MArrayIter& mi = marr();
     (void) new (&mi) MArrayIter(ad);

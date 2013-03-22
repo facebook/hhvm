@@ -37,7 +37,8 @@ static String get_classname(CVarRef class_or_object) {
 }
 
 static inline CStrRef ctxClassName() {
-  return g_vmContext->getContextClassName();
+  VM::Class* ctx = g_vmContext->getContextClass();
+  return ctx ? ctx->nameRef() : empty_string;
 }
 
 static const VM::Class* get_cls(CVarRef class_or_object) {

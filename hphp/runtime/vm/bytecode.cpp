@@ -1426,46 +1426,22 @@ ObjectData* VMExecutionContext::getThis() {
   return nullptr;
 }
 
-CStrRef VMExecutionContext::getContextClassName() {
+Class* VMExecutionContext::getContextClass() {
   VMRegAnchor _;
   ActRec* ar = getFP();
   assert(ar != nullptr);
   if (ar->skipFrame()) {
     ar = getPrevVMState(ar);
-    if (!ar) return empty_string;
+    if (!ar) return nullptr;
   }
-  if (ar->hasThis()) {
-    return ar->getThis()->o_getClassName();
-  } else if (ar->hasClass()) {
-    return ar->getClass()->nameRef();
-  } else {
-    return empty_string;
-  }
+  return ar->m_func->cls();
 }
 
-CStrRef VMExecutionContext::getParentContextClassName() {
-  VMRegAnchor _;
-  ActRec* ar = getFP();
-  assert(ar != nullptr);
-  if (ar->skipFrame()) {
-    ar = getPrevVMState(ar);
-    if (!ar) return empty_string;
+Class* VMExecutionContext::getParentContextClass() {
+  if (Class* ctx = getContextClass()) {
+    return ctx->parent();
   }
-  if (ar->hasThis()) {
-    const Class* cls = ar->getThis()->getVMClass();
-    if (cls->parent() == nullptr) {
-      return empty_string;
-    }
-    return cls->parent()->nameRef();
-  } else if (ar->hasClass()) {
-    const Class* cls = ar->getClass();
-    if (cls->parent() == nullptr) {
-      return empty_string;
-    }
-    return cls->parent()->nameRef();
-  } else {
-    return empty_string;
-  }
+  return nullptr;
 }
 
 CStrRef VMExecutionContext::getContainingFileName() {

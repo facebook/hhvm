@@ -2198,16 +2198,9 @@ void CodeGenerator::cgSpill(IRInstruction* inst) {
 
     // We do not need to mask booleans, since the IR will reload the spill
     auto sinfo = dst->getSpillInfo(locIndex);
-    switch (sinfo.type()) {
-    case SpillInfo::MMX:
-      m_as.    mov_reg64_mmx(srcReg, sinfo.mmx());
-      break;
-    case SpillInfo::Memory:
-      m_as.    store_reg64_disp_reg64(srcReg,
-                                      sizeof(uint64_t) * sinfo.mem(),
-                                      reg::rsp);
-      break;
-    }
+    assert(sinfo.type() == SpillInfo::Memory);
+    m_as.    storeq(srcReg, reg::rsp[sizeof(uint64_t) * sinfo.mem()]);
+                                    
   }
 }
 
@@ -2220,16 +2213,8 @@ void CodeGenerator::cgReload(IRInstruction* inst) {
     auto dstReg = dst->getReg(locIndex);
 
     auto sinfo = src->getSpillInfo(locIndex);
-    switch (sinfo.type()) {
-    case SpillInfo::MMX:
-      m_as.    mov_mmx_reg64(sinfo.mmx(), dstReg);
-      break;
-    case SpillInfo::Memory:
-      m_as.    load_reg64_disp_reg64(reg::rsp,
-                                     sizeof(uint64_t) * sinfo.mem(),
-                                     dstReg);
-      break;
-    }
+    assert(sinfo.type() == SpillInfo::Memory);
+    m_as.    loadq(reg::rsp[sizeof(uint64_t) * sinfo.mem()], dstReg);
   }
 }
 

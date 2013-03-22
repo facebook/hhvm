@@ -1723,18 +1723,14 @@ Type outputType(const IRInstruction*, int dstId = 0);
 void assertOperandTypes(const IRInstruction*);
 
 struct SpillInfo {
-  enum Type { MMX, Memory };
+  enum Type { Memory }; // Currently only one type of spill supported.
 
-  explicit SpillInfo(RegNumber r) : m_type(MMX), m_val(int(r)) {}
   explicit SpillInfo(uint32_t v)  : m_type(Memory), m_val(v) {}
 
   Type      type() const { return m_type; }
 
-  // return MMX register number for this spill
-  RegNumber mmx()  const { return RegNumber(m_val); }
-
   // return offset in 8-byte-words from stack pointer
-  uint32_t  mem()  const { return m_val; }
+  uint32_t  mem()  const { assert(m_type == Memory); return m_val; }
 
 private:
   Type     m_type : 1;
@@ -1743,9 +1739,6 @@ private:
 
 inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
   switch (si.type()) {
-  case SpillInfo::MMX:
-    os << "mmx" << reg::regname(RegXMM(int(si.mmx())));
-    break;
   case SpillInfo::Memory:
     os << "spill[" << si.mem() << "]";
     break;

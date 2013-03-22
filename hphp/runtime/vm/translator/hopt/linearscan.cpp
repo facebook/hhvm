@@ -27,8 +27,6 @@ using namespace Transl::reg;
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
-const int NumMmxRegs = 8;
-
 struct LinearScan : private boost::noncopyable {
   static const int NumRegs = 16;
 
@@ -440,13 +438,12 @@ void LinearScan::allocRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index) {
 // Assign spill location numbers to Spill/Reload.
 uint32_t LinearScan::assignSpillLoc() {
   uint32_t nextSpillLoc = 0;
-  uint32_t nextMmxReg = 0;
 
   // visit blocks in reverse postorder and instructions in forward order,
-  // assigning a spill slot id or mmx register number to each Spill.
-  // We don't reuse slot id's or mmx registers, but both could be reused
-  // either by visiting the dominator tree in preorder or by analyzing
-  // lifetimes and reusing id/registers between non-conflicting spills.
+  // assigning a spill slot id to each Spill. We don't reuse slot id's,
+  // but both could be reused either by visiting the dominator tree in
+  // preorder or by analyzing lifetimes and reusing id/registers between
+  // non-conflicting spills.
 
   for (Block* block : m_blocks) {
     for (IRInstruction& inst : *block) {
@@ -466,22 +463,8 @@ uint32_t LinearScan::assignSpillLoc() {
             TRACE(3, "[counter] 1 spill a tmp that spans native\n");
           }
 
-          const bool allowMmxSpill = RuntimeOption::EvalHHIREnableMmx &&
-            // The live range of the spill slot doesn't span native calls,
-            // and we still have free MMX registers.
-            dst->getLastUseId() <= getNextNativeId() &&
-            nextMmxReg < (uint32_t)NumMmxRegs;
-
-          dst->setSpillInfo(locIndex,
-            allowMmxSpill
-              ? SpillInfo(RegNumber(nextMmxReg++))
-              : SpillInfo(nextSpillLoc++)
-          );
-          if (allowMmxSpill) {
-            TRACE(3, "[counter] 1 spill to mmx\n");
-          } else {
-            TRACE(3, "[counter] 1 spill to memory\n");
-          }
+          dst->setSpillInfo(locIndex, SpillInfo(nextSpillLoc++));
+          TRACE(3, "[counter] 1 spill\n");
         }
       }
       if (inst.getOpcode() == Reload) {
@@ -489,11 +472,7 @@ uint32_t LinearScan::assignSpillLoc() {
         for (int locIndex = 0;
              locIndex < src->numNeededRegs();
              ++locIndex) {
-          if (src->getSpillInfo(locIndex).type() == SpillInfo::MMX) {
-            TRACE(3, "[counter] reload from mmx\n");
-          } else {
-            TRACE(3, "[counter] reload from memory\n");
-          }
+          TRACE(3, "[counter] reload\n");
         }
       }
     }
@@ -816,9 +795,6 @@ void LinearScan::allocRegs(Trace* trace) {
     rematerialize();
   }
 
-  // assignSpillLoc needs next natives in order to decide whether we
-  // can use MMX registers.
-  collectNatives();
   // Make sure rsp is 16-aligned.
   uint32_t numSpillLocs = assignSpillLoc();
   if (numSpillLocs % 2) {

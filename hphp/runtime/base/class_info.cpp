@@ -594,11 +594,11 @@ bool ClassInfo::HasAccess(CStrRef className, CStrRef methodName,
     clsInfo->hasMethod(methodName, defClass);
   if (!methodInfo) return false;
   if (methodInfo->attribute & ClassInfo::IsPublic) return true;
-  CStrRef ctxName = g_vmContext->getContextClassName();
-  if (ctxName->size() == 0) {
+  VM::Class* ctx = g_vmContext->getContextClass();
+  if (!ctx) {
     return false;
   }
-  const ClassInfo *ctxClass = ClassInfo::FindClass(ctxName);
+  const ClassInfo *ctxClass = ClassInfo::FindClass(ctx->nameRef());
   bool hasObject = hasCallObject || g_vmContext->getThis();
   if (ctxClass) {
     return ctxClass->checkAccess(defClass, methodInfo, staticCall, hasObject);

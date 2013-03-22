@@ -54,6 +54,41 @@ int64_t f_connection_timeout() {
   return f_connection_status() == k_CONNECTION_TIMEOUT;
 }
 
+static VM::Class* getClassByName(const char* name, int len) {
+  VM::Class* cls = nullptr;
+  // translate "self" or "parent"
+  if (len == 4 && !memcmp(name, "self", 4)) {
+    cls = g_vmContext->getContextClass();
+    if (!cls) {
+      throw FatalErrorException("Cannot access self:: "
+                                "when no class scope is active");
+    }
+  } else if (len == 6 && !memcmp(name, "parent", 6)) {
+    cls = g_vmContext->getParentContextClass();
+    if (!cls) {
+      throw FatalErrorException("Cannot access parent");
+    }
+  } else if (len == 6 && !memcmp(name, "static", 6)) {
+    CallerFrame cf;
+    auto ar = cf();
+    if (ar) {
+      if (ar->hasThis()) {
+        cls = ar->getThis()->getVMClass();
+      } else if (ar->hasClass()) {
+        cls = ar->getClass();
+      }
+    }
+    if (!cls) {
+      throw FatalErrorException("Cannot access static:: "
+                                "when no class scope is active");
+    }
+  } else {
+    String className(name, len, CopyString);
+    cls = VM::Unit::loadClass(className.get());
+  }
+  return cls;
+}
+
 Variant f_constant(CStrRef name) {
   if (!name.get()) return null;
   const char *data = name.data();
@@ -63,26 +98,7 @@ Variant f_constant(CStrRef name) {
     // class constant
     int classNameLen = colon - data;
     char *constantName = colon + 2;
-    String className(data, classNameLen, CopyString);
-
-    // translate "self" or "parent"
-    if (className == "self") {
-      String this_class = g_vmContext->getContextClassName();
-      if (this_class.empty()) {
-        throw FatalErrorException("Cannot access self:: "
-                                  "when no class scope is active");
-      } else {
-        className = this_class;
-      }
-    } else if (className == "parent") {
-      String parent_class =g_vmContext->getParentContextClassName();
-      if (parent_class.empty()) {
-        throw FatalErrorException("Cannot access parent");
-      } else {
-        className = parent_class;
-      }
-    }
-    VM::Class* cls = VM::Unit::loadClass(className.get());
+    VM::Class* cls = getClassByName(data, classNameLen);
     if (cls) {
       String cnsName(constantName, data + len - constantName, CopyString);
       TypedValue* tv = cls->clsCnsGet(cnsName.get());
@@ -123,59 +139,12 @@ bool f_defined(CStrRef name, bool autoload /* = true */) {
     // class constant
     int classNameLen = colon - data;
     char *constantName = colon + 2;
-    String className(data, classNameLen, CopyString);
-
-    // translate "self" or "parent" or "static"
-    if (className == "self") {
-      String this_class = g_vmContext->getContextClassName();
-      if (this_class.empty()) {
-        throw FatalErrorException("Cannot access self:: "
-          "when no class scope is active");
-      } else {
-        className = this_class;
-      }
-    } else if (className == "parent") {
-      String parent_class = g_vmContext->getParentContextClassName();
-      if (parent_class.empty()) {
-        throw FatalErrorException("Cannot access parent");
-      } else {
-        className = parent_class;
-      }
-    } else if (className == "static") {
-      CallerFrame cf;
-      auto ar = cf();
-      if (ar) {
-        HPHP::VM::Class* cls;
-        if (ar->hasThis()) {
-          cls = ar->getThis()->getVMClass();
-        } else if (ar->hasClass()) {
-          cls = ar->getClass();
-        } else {
-          cls = NULL;
-        }
-        if (cls) {
-          className = cls->nameRef();
-        } else {
-          throw FatalErrorException("Cannot access static:: "
-            "when no class scope is active");
-        }
-      }
+    VM::Class* cls = getClassByName(data, classNameLen);
+    if (cls) {
+      String cnsName(constantName, data + len - constantName, CopyString);
+      return cls->clsCnsGet(cnsName.get());
     }
-    if (class_exists(className)) { // taking care of volatile class
-      const ClassInfo *info;
-      for (String parentClass = className;
-           !parentClass.empty();
-           parentClass = info->getParentClass()) {
-        info = ClassInfo::FindClass(parentClass);
-        if (!info) {
-          assert(false);
-        }
-        if (info->hasConstant(constantName)) return true;
-      }
-      return false;
-    } else {
-      return false;
-    }
+    return false;
   } else {
     // system/uniquely defined scalar constant
     if (ClassInfo::FindConstant(name)) return true;

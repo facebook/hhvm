@@ -591,8 +591,8 @@ public:
 
   HPHP::VM::ActRec* getStackFrame();
   ObjectData* getThis();
-  CStrRef getContextClassName();
-  CStrRef getParentContextClassName();
+  VM::Class* getContextClass();
+  VM::Class* getParentContextClass();
   CStrRef getContainingFileName();
   int getLine();
   Array getCallerInfo();

@@ -623,8 +623,6 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
                          CREATE_VECTOR1(iterable));
   }
   if (iterable.isObject()) {
-    CStrRef context = g_vmContext->getContextClassName();
-
     ObjectData *obj = iterable.getObjectData();
     Variant iterator;
     while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
@@ -632,6 +630,8 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
       if (!iterator.isObject()) break;
       obj = iterator.getObjectData();
     }
+    VM::Class*ctx = g_vmContext->getContextClass();
+    CStrRef context = ctx ? ctx->nameRef() : empty_string;
     if (isMutable) {
       if (obj->instanceof(SystemLib::s_IteratorClass)) {
         throw FatalErrorException("An iterator cannot be used for "

@@ -165,10 +165,13 @@ initInstructions(const BlockList& blocks, DceState& state) {
       }
       if (inst.getOpcode() == DecRefNZ) {
         auto* srcInst = inst.getSrc(0)->getInstruction();
-        assert(srcInst->getOpcode() == IncRef);
-        assert(state[srcInst].isDead()); // IncRef isn't essential so it should
-                                         // be dead here
-        state[srcInst].setDecRefNZed();
+        Opcode srcOpc = srcInst->getOpcode();
+        if (srcOpc != DefConst) {
+          assert(srcInst->getOpcode() == IncRef);
+          assert(state[srcInst].isDead()); // IncRef isn't essential so it should
+                                           // be dead here
+          state[srcInst].setDecRefNZed();
+        }
       }
     }
   }

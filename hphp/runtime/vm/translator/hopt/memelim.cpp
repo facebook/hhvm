@@ -579,6 +579,12 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
       SSATmp* ref = inst->getSrc(0);
       Type ty = inst->getSrc(0)->getType();
 
+      if (ref->isConst()) {
+        // cannot be ref-counted
+        inst->convertToNop();
+        break;
+      }
+
       // decref of a string has no side effects
       if (ty.isString()) {
         break;

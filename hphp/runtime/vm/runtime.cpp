@@ -384,7 +384,7 @@ bool run_intercept_handler_for_invokefunc(TypedValue* retval,
 
 HphpArray* get_static_locals(const ActRec* ar) {
   if (ar->m_func->isClosureBody()) {
-    TypedValue* closureLoc = frame_local(ar, 0);
+    TypedValue* closureLoc = frame_local(ar, ar->m_func->numParams());
     c_Closure* closure = static_cast<c_Closure*>(closureLoc->m_data.pobj);
     assert(closure != nullptr);
     return closure->getStaticLocals();

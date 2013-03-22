@@ -4,12 +4,12 @@ HipHop VM (HHVM) is a new open-source virtual machine designed for executing pro
 * [Wiki](http://wiki.github.com/facebook/hiphop-php)
 * [Issue Tracker](http://github.com/facebook/hiphop-php/issues)
 
-## Required Packages, Installing HipHop, and running HipHop
+## Required Packages, and Installing and Running HipHop VM
 
 The latest information is available on the [wiki](http://github.com/facebook/hiphop-php/wiki).
 
-## Contributing to HipHop
+## Contributing to HipHop VM
 
-HipHop is licensed under the PHP and Zend licenses except as otherwise noted.
+HipHop VM is licensed under the PHP and Zend licenses except as otherwise noted.
 
 Before changes can be accepted a [Contributors Licensing Agreement](http://developers.facebook.com/opensource/cla) must be signed and returned.

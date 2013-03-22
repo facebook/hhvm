@@ -802,6 +802,24 @@ bool c_Vector::Equals(ObjectData* obj1, ObjectData* obj2) {
   return true;
 }
 
+void c_Vector::Unserialize(ObjectData* obj,
+                           VariableUnserializer* uns,
+                           int64_t sz,
+                           char type) {
+  if (type != 'V') {
+    throw Exception("Vector does not support the '%c' serialization "
+                    "format", type);
+  }
+  auto vec = static_cast<c_Vector*>(obj);
+  vec->reserve(sz);
+  for (int64_t i = 0; i < sz; ++i) {
+    auto tv = &vec->m_data[vec->m_size];
+    tv->m_type = KindOfNull;
+    ++vec->m_size;
+    tvAsVariant(tv).unserialize(uns, Uns::ColValueMode);
+  }
+}
+
 c_VectorIterator::c_VectorIterator(VM::Class* cb) :
     ExtObjectData(cb) {
 }
@@ -1785,6 +1803,42 @@ bool c_Map::Equals(ObjectData* obj1, ObjectData* obj2) {
   return true;
 }
 
+void c_Map::Unserialize(ObjectData* obj,
+                        VariableUnserializer* uns,
+                        int64_t sz,
+                        char type) {
+  if (type != 'K') {
+    throw Exception("Map does not support the '%c' serialization "
+                    "format", type);
+  }
+  auto mp = static_cast<c_Map*>(obj);
+  mp->reserve(sz);
+  for (int64_t i = 0; i < sz; ++i) {
+    Variant k;
+    k.unserialize(uns, Uns::ColKeyMode);
+    Bucket* p;
+    if (k.isInteger()) {
+      auto h = k.toInt64();
+      p = mp->findForInsert(h);
+      if (UNLIKELY(p->validValue())) goto do_unserialize;
+      p->setIntKey(h);
+    } else if (k.isString()) {
+      auto key = k.getStringData();
+      auto h = key->hash();
+      p = mp->findForInsert(key->data(), key->size(), h);
+      if (UNLIKELY(p->validValue())) goto do_unserialize;
+      p->setStrKey(key, h);
+    } else {
+      throw Exception("Invalid key");
+    }
+    ++mp->m_size;
+    ++mp->m_load;
+    p->data.m_type = KindOfNull;
+do_unserialize:
+    tvAsVariant(&p->data).unserialize(uns, Uns::ColValueMode);
+  }
+}
+
 c_MapIterator::c_MapIterator(VM::Class* cb) :
     ExtObjectData(cb) {
 }
@@ -1841,16 +1895,16 @@ void c_MapIterator::t_rewind() {
 
 IMPLEMENT_SMART_ALLOCATION_CLS(c_StableMap, Bucket);
 
-#define CONNECT_TO_GLOBAL_DLLIST(element)                               \
+#define CONNECT_TO_GLOBAL_DLLIST(mapobj, element)                       \
 do {                                                                    \
-  (element)->pListLast = m_pListTail;                                   \
-  m_pListTail = (element);                                              \
+  (element)->pListLast = (mapobj)->m_pListTail;                         \
+  (mapobj)->m_pListTail = (element);                                    \
   (element)->pListNext = NULL;                                          \
   if ((element)->pListLast != NULL) {                                   \
     (element)->pListLast->pListNext = (element);                        \
   }                                                                     \
-  if (!m_pListHead) {                                                   \
-    m_pListHead = (element);                                            \
+  if (!(mapobj)->m_pListHead) {                                         \
+    (mapobj)->m_pListHead = (element);                                  \
   }                                                                     \
 } while (false)
 
@@ -2464,7 +2518,7 @@ bool c_StableMap::updateImpl(int64_t h, TypedValue* data) {
   uint nIndex = (h & m_nTableMask);
   p->pNext = m_arBuckets[nIndex];
   m_arBuckets[nIndex] = p;
-  CONNECT_TO_GLOBAL_DLLIST(p);
+  CONNECT_TO_GLOBAL_DLLIST(this, p);
   return true;
 }
 
@@ -2493,7 +2547,7 @@ bool c_StableMap::updateImpl(StringData *key, TypedValue* data) {
   uint nIndex = (h & m_nTableMask);
   p->pNext = m_arBuckets[nIndex];
   m_arBuckets[nIndex] = p;
-  CONNECT_TO_GLOBAL_DLLIST(p);
+  CONNECT_TO_GLOBAL_DLLIST(this, p);
   return true;
 }
 
@@ -2892,6 +2946,49 @@ bool c_StableMap::Equals(ObjectData* obj1, ObjectData* obj2) {
   return true;
 }
 
+void c_StableMap::Unserialize(ObjectData* obj,
+                              VariableUnserializer* uns,
+                              int64_t sz,
+                              char type) {
+  if (type != 'K') {
+    throw Exception("StableMap does not support the '%c' serialization "
+                    "format", type);
+  }
+  auto smp = static_cast<c_StableMap*>(obj);
+  smp->reserve(sz);
+  for (int64_t i = 0; i < sz; ++i) {
+    Variant k;
+    k.unserialize(uns, Uns::ColKeyMode);
+    Bucket* p;
+    uint nIndex;
+    if (k.isInteger()) {
+      auto h = k.toInt64();
+      p = smp->find(h);
+      if (UNLIKELY(p != nullptr)) goto do_unserialize;
+      p = NEW(Bucket)();
+      p->setIntKey(h);
+      nIndex = (h & smp->m_nTableMask);
+    } else if (k.isString()) {
+      auto key = k.getStringData();
+      auto h = key->hash();
+      p = smp->find(key->data(), key->size(), h);
+      if (UNLIKELY(p != nullptr)) goto do_unserialize;
+      p = NEW(Bucket)();
+      p->setStrKey(key, h);
+      nIndex = (h & smp->m_nTableMask);
+    } else {
+      throw Exception("Invalid key");
+    }
+    ++smp->m_size;
+    p->data.m_type = KindOfNull;
+    p->pNext = smp->m_arBuckets[nIndex];
+    smp->m_arBuckets[nIndex] = p;
+    CONNECT_TO_GLOBAL_DLLIST(smp, p);
+do_unserialize:
+    tvAsVariant(&p->data).unserialize(uns, Uns::ColValueMode);
+  }
+}
+
 #undef CONNECT_TO_GLOBAL_DLLIST
 
 c_StableMapIterator::c_StableMapIterator(VM::Class* cb) :
@@ -3145,6 +3242,23 @@ bool c_Tuple::Equals(ObjectData* obj1, ObjectData* obj2) {
   return true;
 }
 
+void c_Tuple::Unserialize(ObjectData* obj,
+                          VariableUnserializer* uns,
+                          int64_t sz,
+                          char type) {
+  if (type != 'V') {
+    throw Exception("Tuple does not support the '%c' serialization "
+                    "format", type);
+  }
+  auto tup = static_cast<c_Tuple*>(obj);
+  for (int64_t i = 0; i < sz; ++i) {
+    auto tv = &tup->getData()[tup->m_size];
+    tv->m_type = KindOfNull;
+    ++tup->m_size;
+    tvAsVariant(tv).unserialize(uns, Uns::ColValueMode);
+  }
+}
+
 c_TupleIterator::c_TupleIterator(VM::Class* cb) :
     ExtObjectData(cb) {
 }
@@ -3228,7 +3342,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
       }
     } else {
       for (ArrayIter iter(obj); iter; ++iter) {
-        serializer->writeArrayKey(iter.first());
+        serializer->writeCollectionKey(iter.first());
         serializer->writeArrayValue(iter.second());
       }
     }
@@ -3239,34 +3353,10 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'K');
     serializer->writeArrayHeader(sz, false);
     for (ArrayIter iter(obj); iter; ++iter) {
-      serializer->writeArrayKey(iter.first());
+      serializer->writeCollectionKey(iter.first());
       serializer->writeArrayValue(iter.second());
     }
     serializer->writeArrayFooter();
-  }
-}
-
-void collectionUnserialize(ObjectData* obj,
-                           VariableUnserializer* uns,
-                           int64_t sz,
-                           char type) {
-  assert(obj->isCollection());
-  collectionReserve(obj, sz);
-  if (type == 'V') {
-    for (int64_t i = 0; i < sz; ++i) {
-      Variant v;
-      v.unserialize(uns);
-      collectionOffsetAppend(obj, v);
-    }
-  } else {
-    assert(type == 'K');
-    for (int64_t i = 0; i < sz; ++i) {
-      Variant k;
-      k.unserialize(uns);
-      Variant v;
-      v.unserialize(uns);
-      collectionOffsetSet(obj, k, v);
-    }
   }
 }
 

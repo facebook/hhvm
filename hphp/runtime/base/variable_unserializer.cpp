@@ -29,10 +29,8 @@ Variant VariableUnserializer::unserialize() {
 }
 
 Variant VariableUnserializer::unserializeKey() {
-  m_key = true;
   Variant v;
-  v.unserialize(this);
-  m_key = false;
+  v.unserialize(this, Uns::KeyMode);
   return v;
 }
 

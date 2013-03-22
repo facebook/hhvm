@@ -3027,13 +3027,15 @@ static void unserializeProp(VariableUnserializer *uns,
   t->unserialize(uns);
 }
 
-void Variant::unserialize(VariableUnserializer *uns) {
+void Variant::unserialize(VariableUnserializer *uns,
+                          Uns::Mode mode /* = Uns::ValueMode */) {
+
   char type, sep;
   type = uns->readChar();
   sep = uns->readChar();
 
   if (type != 'R') {
-    uns->add(this);
+    uns->add(this, mode);
   }
 
   if (type == 'N') {
@@ -3049,7 +3051,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
   case 'r':
     {
       int64_t id = uns->readInt();
-      Variant *v = uns->get(id);
+      Variant *v = uns->getByVal(id);
       if (v == nullptr) {
         throw Exception("Id %ld out of range", id);
       }
@@ -3059,7 +3061,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
   case 'R':
     {
       int64_t id = uns->readInt();
-      Variant *v = uns->get(id);
+      Variant *v = uns->getByRef(id);
       if (v == nullptr) {
         throw Exception("Id %ld out of range", id);
       }

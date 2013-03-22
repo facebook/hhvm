@@ -165,7 +165,10 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
   public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
-
+  public: static void Unserialize(ObjectData* obj,
+                                  VariableUnserializer* uns,
+                                  int64_t sz,
+                                  char type);
 
  private:
   void grow();
@@ -337,7 +340,10 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
   public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
-
+  public: static void Unserialize(ObjectData* obj,
+                                  VariableUnserializer* uns,
+                                  int64_t sz,
+                                  char type);
 
 public:
   class Bucket {
@@ -641,7 +647,10 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
   public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
-
+  public: static void Unserialize(ObjectData* obj,
+                                  VariableUnserializer* uns,
+                                  int64_t sz,
+                                  char type);
 
 public:
   class Bucket {
@@ -864,7 +873,11 @@ class c_Tuple : public ExtObjectDataFlags<ObjectData::TupleAttrInit|
   public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
   public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
   public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
-  
+  public: static void Unserialize(ObjectData* obj,
+                                  VariableUnserializer* uns,
+                                  int64_t sz,
+                                  char type);
+
   public: static size_t sizeForNumElms(int nElms) {
     return sizeof(c_Tuple) + sizeof(TypedValue) * nElms;
   }
@@ -1341,10 +1354,29 @@ inline void collectionReserve(ObjectData* obj, int64_t sz) {
 }
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
-void collectionUnserialize(ObjectData* obj,
-                           VariableUnserializer* uns,
-                           int64_t sz,
-                           char type);
+
+inline void collectionUnserialize(ObjectData* obj,
+                                  VariableUnserializer* uns,
+                                  int64_t sz,
+                                  char type) {
+  assert(obj->isCollection());
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      c_Vector::Unserialize(obj, uns, sz, type);
+      break;
+    case Collection::TupleType:
+      c_Tuple::Unserialize(obj, uns, sz, type);
+      break;
+    case Collection::MapType:
+      c_Map::Unserialize(obj, uns, sz, type);
+      break;
+    case Collection::StableMapType:
+      c_StableMap::Unserialize(obj, uns, sz, type);
+      break;
+    default:
+      assert(false);
+  }
+}
 
 inline bool collectionEquals(ObjectData* obj1, ObjectData* obj2) {
   int ct = obj1->getCollectionType();

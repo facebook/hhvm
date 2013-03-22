@@ -294,6 +294,15 @@ static inline DataType typeInitNull(DataType t) {
   return t == KindOfUninit ? KindOfNull : t;
 }
 
+namespace Uns {
+enum Mode {
+  ValueMode = 0,
+  KeyMode = 1,
+  ColValueMode = 2,
+  ColKeyMode = 3,
+};
+}
+
 namespace Collection {
 enum Type {
   InvalidType = 0,

@@ -753,7 +753,8 @@ class Variant : private VariantBase {
   void serialize(VariableSerializer *serializer,
                  bool isArrayKey = false,
                  bool skipNestCheck = false) const;
-  void unserialize(VariableUnserializer *unserializer);
+  void unserialize(VariableUnserializer *unserializer,
+                   Uns::Mode mode = Uns::ValueMode);
 
   /**
    * Used by SharedStore to save/restore a variant.

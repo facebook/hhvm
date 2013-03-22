@@ -10120,6 +10120,37 @@ bool TestCodeRun::TestCollectionClasses() {
         "}\n"
         );
 
+  MVCRO("<?php\n"
+        "function f() {\n"
+        "  $obj = new stdClass();\n"
+        "  $a = Vector {$obj, $obj};\n"
+        "  $a = unserialize(serialize($a));\n"
+        "  $a[0]->prop = 11;\n"
+        "  var_dump($a[1]->prop);\n"
+        "  $obj = new stdClass();\n"
+        "  $a = Map {'a' => $obj, 'b' => $obj};\n"
+        "  $a = unserialize(serialize($a));\n"
+        "  $a['a']->prop = 22;\n"
+        "  var_dump($a['b']->prop);\n"
+        "  $obj = new stdClass();\n"
+        "  $a = StableMap {'a' => $obj, 'b' => $obj};\n"
+        "  $a = unserialize(serialize($a));\n"
+        "  $a['a']->prop = 33;\n"
+        "  var_dump($a['b']->prop);\n"
+        "  $obj = new stdClass();\n"
+        "  $a = Tuple {$obj, $obj};\n"
+        "  $a = unserialize(serialize($a));\n"
+        "  $a[0]->prop = 44;\n"
+        "  var_dump($a[1]->prop);\n"
+        "}\n"
+        "f();\n"
+        ,
+        "int(11)\n"
+        "int(22)\n"
+        "int(33)\n"
+        "int(44)\n"
+        );
+
   return true;
 }
 

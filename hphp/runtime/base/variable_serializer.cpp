@@ -750,6 +750,14 @@ void VariableSerializer::writeArrayKey(Variant key) {
   }
 }
 
+void VariableSerializer::writeCollectionKey(CVarRef key) {
+  if (m_type == Serialize || m_type == APCSerialize ||
+      m_type == DebuggerSerialize) {
+    m_valueCount++;
+  }
+  writeArrayKey(key);
+}
+
 void VariableSerializer::writeArrayValue(CVarRef value) {
   // Do not count referenced values after the first
   if ((m_type == Serialize || m_type == APCSerialize ||

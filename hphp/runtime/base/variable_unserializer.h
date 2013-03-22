@@ -35,11 +35,11 @@ public:
 public:
   VariableUnserializer(const char *str, size_t len, Type type,
                        bool allowUnknownSerializableClass = false)
-      : m_type(type), m_buf(str), m_end(str + len), m_key(false),
+      : m_type(type), m_buf(str), m_end(str + len),
         m_unknownSerializable(allowUnknownSerializableClass) {}
   VariableUnserializer(const char *str, const char *end, Type type,
                        bool allowUnknownSerializableClass = false)
-      : m_type(type), m_buf(str), m_end(end), m_key(false),
+      : m_type(type), m_buf(str), m_end(end),
         m_unknownSerializable(allowUnknownSerializableClass) {}
 
   Type getType() const { return m_type;}
@@ -47,14 +47,45 @@ public:
 
   Variant unserialize();
   Variant unserializeKey();
-  void add(Variant* v) {
-    if (!m_key) {
-      m_refs.push_back(v);
+  void add(Variant* v, Uns::Mode mode) {
+    if (mode == Uns::ValueMode) {
+      m_refs.emplace_back(RefInfo(v));
+    } else if (mode == Uns::KeyMode) {
+      // do nothing
+    } else if (mode == Uns::ColValueMode) {
+      m_refs.emplace_back(RefInfo::makeNonRefable(v));
+    } else {
+      assert(mode == Uns::ColKeyMode);
+      // We don't currently support using the 'r' encoding to refer
+      // to collection keys, but eventually we'll need to make this
+      // work to allow objects as keys. For now we encode collections
+      // keys in m_refs using a null pointer.
+      m_refs.emplace_back(RefInfo(nullptr));
     }
   }
-  Variant *get(int id) {
-    if (id <= 0  || id > (int)m_refs.size()) return nullptr;
-    return m_refs[id-1];
+  // getByVal() is used to resolve the 'r' encoding
+  Variant* getByVal(int id) {
+    if (id <= 0 || id > (int)m_refs.size()) return nullptr;
+    Variant* ret = m_refs[id-1].var();
+    if (!ret) {
+      throw Exception("Referring to collection keys using the 'r' encoding "
+                      "is not supported");
+    }
+    return ret;
+  }
+  // getByVal() is used to resolve the 'R' encoding
+  Variant* getByRef(int id) {
+    if (id <= 0 || id > (int)m_refs.size()) return nullptr;
+    if (!m_refs[id-1].canBeReferenced()) {
+      // If the low bit is set, that means the value cannot
+      // be taken by reference
+      throw Exception("Collection values cannot be taken by reference", id);
+    }
+    Variant* ret = m_refs[id-1].var();
+    if (!ret) {
+      throw Exception("Collection keys cannot be taken by reference", id);
+    }
+    return ret;
   }
   int64_t readInt();
   double readDouble();
@@ -71,12 +102,26 @@ public:
   Variant &addVar();
 
  private:
+  struct RefInfo {
+    explicit RefInfo(Variant* v) : m_data(reinterpret_cast<uintptr_t>(v)) {}
+    static RefInfo makeNonRefable(Variant* v) {
+      RefInfo r(v);
+      r.m_data |= 1;
+      return r;
+    }
+    Variant* var() const {
+      return reinterpret_cast<Variant*>(m_data & ~1);
+    }
+    bool canBeReferenced() const { return !(m_data & 1); }
+  private:
+    uintptr_t m_data;
+  };
+
   Type m_type;
   const char *m_buf;
   const char *m_end;
-  std::vector<Variant*> m_refs;
+  std::vector<RefInfo> m_refs;
   std::list<Variant> m_vars;
-  bool m_key;
   bool m_unknownSerializable;
 
   void check() {

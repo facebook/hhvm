@@ -90,6 +90,7 @@ public:
   void writeArrayHeader(int size, bool isVectorData);
   void writeArrayKey(Variant key);
   void writeArrayValue(CVarRef value);
+  void writeCollectionKey(CVarRef key);
   void writeArrayFooter();
   void writeSerializableObject(CStrRef clsname, CStrRef serialized);
 

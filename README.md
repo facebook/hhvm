@@ -1,6 +1,6 @@
-# HipHop for PHP
+# HipHop VM
 
-"HipHop for PHP" is an open source project developed by Facebook. HipHop offers a PHP execution engine called the "HipHop Virtual Machine" (HHVM) which uses a just-in-time compilation approach to achieve superior performance. Using HipHop VM (and before it HPHPc) Facebook has achieved more than 5x increase in throughput as compared with Zend PHP 5.2.
+HipHop VM (HHVM) is a new open-source virtual machine designed for executing programs written in PHP. HHVM uses a just-in-time compilation approach to achieve superior performance while maintaining the flexibility that PHP developers are accustomed to. HipHop VM (and before it HPHPc) has realized >5x increase in throughput for Facebook compared with Zend PHP 5.2.
 * [Wiki](http://wiki.github.com/facebook/hiphop-php)
 * [Issue Tracker](http://github.com/facebook/hiphop-php/issues)
 

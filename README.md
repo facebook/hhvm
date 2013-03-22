@@ -6,7 +6,7 @@
 
 ## Required Packages, Installing HipHop, and running HipHop
 
-The latest information is available on the [wiki](http://wiki.github.com/facebook/hiphop-php/building-and-installing)
+The latest information is available on the [wiki](http://wiki.github.com/facebook/hiphop-php/wiki).
 
 ## Contributing to HipHop
 

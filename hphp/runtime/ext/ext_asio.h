@@ -287,14 +287,6 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   public: static Object t_start(CObjRef continuation) {
     return ti_start("continuationwaithandle", continuation);
   }
-  public: static void ti_markcurrentassucceeded(const char* cls , CVarRef result);
-  public: static void t_markcurrentassucceeded(CVarRef result) {
-    return ti_markcurrentassucceeded("continuationwaithandle", result);
-  }
-  public: static void ti_markcurrentastailcall(const char* cls );
-  public: static void t_markcurrentastailcall() {
-    return ti_markcurrentastailcall("continuationwaithandle");
-  }
   public: Object t_getprivdata();
   public: void t_setprivdata(CObjRef data);
 
@@ -319,7 +311,6 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   p_WaitHandle m_child;
   Object m_privData;
   uint16_t m_depth;
-  bool m_tailCall;
 
   static const int8_t STATE_SCHEDULED = 4;
   static const int8_t STATE_RUNNING   = 5;

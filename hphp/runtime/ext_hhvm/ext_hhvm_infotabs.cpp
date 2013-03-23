@@ -2256,8 +2256,6 @@ TypedValue* tg_19BlockableWaitHandle___construct(VM::ActRec *ar);
 VM::Instance* new_ContinuationWaitHandle_Instance(VM::Class*);
 TypedValue* tg_22ContinuationWaitHandle___construct(VM::ActRec *ar);
 TypedValue* tg_22ContinuationWaitHandle_start(VM::ActRec *ar);
-TypedValue* tg_22ContinuationWaitHandle_markCurrentAsSucceeded(VM::ActRec *ar);
-TypedValue* tg_22ContinuationWaitHandle_markCurrentAsTailCall(VM::ActRec *ar);
 TypedValue* tg_22ContinuationWaitHandle_getPrivData(VM::ActRec *ar);
 TypedValue* tg_22ContinuationWaitHandle_setPrivData(VM::ActRec *ar);
 VM::Instance* new_GenArrayWaitHandle_Instance(VM::Class*);
@@ -5292,12 +5290,10 @@ static const HhbcExtMethodInfo hhbc_ext_methods_BlockableWaitHandle[] = {
   { "__construct", tg_19BlockableWaitHandle___construct }
 };
 
-static const long long hhbc_ext_method_count_ContinuationWaitHandle = 6;
+static const long long hhbc_ext_method_count_ContinuationWaitHandle = 4;
 static const HhbcExtMethodInfo hhbc_ext_methods_ContinuationWaitHandle[] = {
   { "__construct", tg_22ContinuationWaitHandle___construct },
   { "start", tg_22ContinuationWaitHandle_start },
-  { "markCurrentAsSucceeded", tg_22ContinuationWaitHandle_markCurrentAsSucceeded },
-  { "markCurrentAsTailCall", tg_22ContinuationWaitHandle_markCurrentAsTailCall },
   { "getPrivData", tg_22ContinuationWaitHandle_getPrivData },
   { "setPrivData", tg_22ContinuationWaitHandle_setPrivData }
 };

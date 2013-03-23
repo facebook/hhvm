@@ -122,69 +122,6 @@ TypedValue* tg_22ContinuationWaitHandle_start(HPHP::VM::ActRec *ar) {
 }
 
 /*
-void HPHP::c_ContinuationWaitHandle::ti_markcurrentassucceeded(char const*, HPHP::Variant const&)
-_ZN4HPHP24c_ContinuationWaitHandle25ti_markcurrentassucceededEPKcRKNS_7VariantE
-
-cls_ => rdi
-result => rsi
-*/
-
-void th_22ContinuationWaitHandle_markCurrentAsSucceeded(char const* cls_, TypedValue* result) asm("_ZN4HPHP24c_ContinuationWaitHandle25ti_markcurrentassucceededEPKcRKNS_7VariantE");
-
-TypedValue* tg_22ContinuationWaitHandle_markCurrentAsSucceeded(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      rv.m_data.num = 0LL;
-      rv.m_type = KindOfNull;
-      th_22ContinuationWaitHandle_markCurrentAsSucceeded(("ContinuationWaitHandle"), (args-0));
-      frame_free_locals_no_this_inl(ar, 1);
-      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-      return &ar->m_r;
-    } else {
-      throw_wrong_arguments_nr("ContinuationWaitHandle::markCurrentAsSucceeded", count, 1, 1, 1);
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-void HPHP::c_ContinuationWaitHandle::ti_markcurrentastailcall(char const*)
-_ZN4HPHP24c_ContinuationWaitHandle24ti_markcurrentastailcallEPKc
-
-cls_ => rdi
-*/
-
-void th_22ContinuationWaitHandle_markCurrentAsTailCall(char const* cls_) asm("_ZN4HPHP24c_ContinuationWaitHandle24ti_markcurrentastailcallEPKc");
-
-TypedValue* tg_22ContinuationWaitHandle_markCurrentAsTailCall(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 0LL) {
-      rv.m_data.num = 0LL;
-      rv.m_type = KindOfNull;
-      th_22ContinuationWaitHandle_markCurrentAsTailCall(("ContinuationWaitHandle"));
-      frame_free_locals_no_this_inl(ar, 0);
-      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-      return &ar->m_r;
-    } else {
-      throw_toomany_arguments_nr("ContinuationWaitHandle::markCurrentAsTailCall", 0, 1);
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
 HPHP::Object HPHP::c_ContinuationWaitHandle::t_getprivdata()
 _ZN4HPHP24c_ContinuationWaitHandle13t_getprivdataEv
 

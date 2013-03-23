@@ -527,33 +527,6 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "markCurrentAsSucceeded",
-    'desc'   => "Mark currently running Continuation as succeeded and set its result",
-    'flags'  => HasDocComment | IsStatic,
-    'return' => array(
-      'type'   => null,
-    ),
-    'args'   => array(
-      array(
-        'name'   => "result",
-        'type'   => Variant,
-        'desc'   => "A result of the currently running Continuation",
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "markCurrentAsTailCall",
-    'desc'   => "Mark currently running Continuation for a tail call execution",
-    'flags'  => HasDocComment | IsStatic,
-    'return' => array(
-      'type'   => null,
-    ),
-  ));
-
-DefineFunction(
-  array(
     'name'   => "getPrivData",
     'desc'   => "Get user's private data",
     'flags'  => HasDocComment,

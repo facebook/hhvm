@@ -35,7 +35,7 @@ namespace {
 
 c_ContinuationWaitHandle::c_ContinuationWaitHandle(VM::Class* cb)
     : c_BlockableWaitHandle(cb), m_continuation(), m_child(), m_privData(),
-      m_depth(0), m_tailCall(false) {
+      m_depth(0) {
 }
 
 c_ContinuationWaitHandle::~c_ContinuationWaitHandle() {
@@ -87,28 +87,6 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation)
   return wh;
 }
 
-void c_ContinuationWaitHandle::ti_markcurrentassucceeded(const char* cls, CVarRef result) {
-  c_ContinuationWaitHandle* wh = AsioSession::Get()->getCurrentWaitHandle();
-  if (!wh) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Unable to set result: no continuation running"));
-    throw e;
-  }
-
-  wh->markAsSucceeded(tvToCell(result.asTypedValue()));
-}
-
-void c_ContinuationWaitHandle::ti_markcurrentastailcall(const char* cls) {
-  c_ContinuationWaitHandle* wh = AsioSession::Get()->getCurrentWaitHandle();
-  if (!wh) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Unable to setup tail call: no continuation running"));
-    throw e;
-  }
-
-  wh->m_tailCall = true;
-}
-
 Object c_ContinuationWaitHandle::t_getprivdata() {
   return m_privData;
 }
@@ -122,7 +100,6 @@ void c_ContinuationWaitHandle::start(c_Continuation* continuation, uint16_t dept
   m_child = nullptr;
   m_privData = nullptr;
   m_depth = depth;
-  m_tailCall = false;
   continuation->m_waitHandle = this;
 
   setState(STATE_SCHEDULED);
@@ -141,41 +118,19 @@ void c_ContinuationWaitHandle::run() {
     setState(STATE_RUNNING);
 
     do {
-      if (m_tailCall) {
-        if (m_child.isNull()) {
-          markAsSucceeded(init_null_variant.asTypedValue());
-          return;
-        } else if (m_child->isSucceeded()) {
-          markAsSucceeded(m_child->getResult());
-          return;
-        } else {
-          m_tailCall = false;
-        }
-      }
-
       // iterate continuation
       if (m_child.isNull()) {
         // first iteration or null dependency
         m_continuation->call_next();
       } else if (m_child->isSucceeded()) {
         // child succeeded, pass the result to the continuation
-        if (IS_NULL_TYPE(m_child->getResult()->m_type)) {
-          // FIXME: may happen due to RescheduleWaitHandle
-          m_continuation->call_next();
-        } else {
-          m_continuation->call_send(m_child->getResult());
-        }
+        m_continuation->call_send(m_child->getResult());
       } else if (m_child->isFailed()) {
         // child failed, raise the exception inside continuation
         m_continuation->call_raise(m_child->getException());
       } else {
         throw FatalErrorException(
             "Invariant violation: child neither succeeded nor failed");
-      }
-
-      // continuation was marked as finished via markCurrentAsFinished()
-      if (m_continuation.isNull()) {
-        return;
       }
 
       // continuation finished, retrieve result from its m_value

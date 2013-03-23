@@ -139,7 +139,7 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "on_failed_cb",
-        'type'   => Object,
+        'type'   => Variant,
         'desc'   => "A Closure to be called when wait handle fails",
       ),
     ),
@@ -156,7 +156,7 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "on_started_cb",
-        'type'   => Object,
+        'type'   => Variant,
         'desc'   => "A Closure to be called when wait handle is started",
       ),
     ),

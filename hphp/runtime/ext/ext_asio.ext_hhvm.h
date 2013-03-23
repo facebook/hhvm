@@ -73,22 +73,22 @@ _rv => rdi
 Value* fh_asio_get_current(Value* _rv) asm("_ZN4HPHP18f_asio_get_currentEv");
 
 /*
-void HPHP::f_asio_set_on_failed_callback(HPHP::Object const&)
-_ZN4HPHP29f_asio_set_on_failed_callbackERKNS_6ObjectE
+void HPHP::f_asio_set_on_failed_callback(HPHP::Variant const&)
+_ZN4HPHP29f_asio_set_on_failed_callbackERKNS_7VariantE
 
 on_failed_cb => rdi
 */
 
-void fh_asio_set_on_failed_callback(Value* on_failed_cb) asm("_ZN4HPHP29f_asio_set_on_failed_callbackERKNS_6ObjectE");
+void fh_asio_set_on_failed_callback(TypedValue* on_failed_cb) asm("_ZN4HPHP29f_asio_set_on_failed_callbackERKNS_7VariantE");
 
 /*
-void HPHP::f_asio_set_on_started_callback(HPHP::Object const&)
-_ZN4HPHP30f_asio_set_on_started_callbackERKNS_6ObjectE
+void HPHP::f_asio_set_on_started_callback(HPHP::Variant const&)
+_ZN4HPHP30f_asio_set_on_started_callbackERKNS_7VariantE
 
 on_started_cb => rdi
 */
 
-void fh_asio_set_on_started_callback(Value* on_started_cb) asm("_ZN4HPHP30f_asio_set_on_started_callbackERKNS_6ObjectE");
+void fh_asio_set_on_started_callback(TypedValue* on_started_cb) asm("_ZN4HPHP30f_asio_set_on_started_callbackERKNS_7VariantE");
 
 
 } // !HPHP

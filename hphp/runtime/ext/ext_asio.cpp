@@ -63,24 +63,24 @@ Object f_asio_get_current() {
   return AsioSession::Get()->getCurrentWaitHandle();
 }
 
-void f_asio_set_on_failed_callback(CObjRef on_failed_cb) {
+void f_asio_set_on_failed_callback(CVarRef on_failed_cb) {
   if (!on_failed_cb.isNull() && !on_failed_cb.instanceof(c_Closure::s_cls)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set asio on failed callback: on_failed_cb not a closure"));
     throw e;
   }
 
-  AsioSession::Get()->setOnFailedCallback(on_failed_cb.get());
+  AsioSession::Get()->setOnFailedCallback(on_failed_cb.getObjectDataOrNull());
 }
 
-void f_asio_set_on_started_callback(CObjRef on_started_cb) {
+void f_asio_set_on_started_callback(CVarRef on_started_cb) {
   if (!on_started_cb.isNull() && !on_started_cb.instanceof(c_Closure::s_cls)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set asio on started callback: on_started_cb not a closure"));
     throw e;
   }
 
-  AsioSession::Get()->setOnStartedCallback(on_started_cb.get());
+  AsioSession::Get()->setOnStartedCallback(on_started_cb.getObjectDataOrNull());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

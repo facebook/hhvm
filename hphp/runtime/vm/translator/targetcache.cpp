@@ -507,7 +507,7 @@ void methodCacheSlowPath(MethodCache::Pair* mce,
     func->validate();
     ar->m_func = func;
 
-    if (UNLIKELY(isStatic)) {
+    if (UNLIKELY(isStatic && !func->isClosureBody())) {
       decRefObj(ar->getThis());
       if (debug) ar->setThis(nullptr); // suppress assert in setClass
       ar->setClass(cls);

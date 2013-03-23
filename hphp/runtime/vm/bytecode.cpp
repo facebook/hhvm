@@ -1321,7 +1321,7 @@ LookupResult VMExecutionContext::lookupObjMethod(const Func*& f,
     }
     return MagicCallFound;
   }
-  if (f->attrs() & AttrStatic) {
+  if (f->attrs() & AttrStatic && !f->isClosureBody()) {
     return MethodFoundNoThis;
   }
   return MethodFoundWithThis;

@@ -685,14 +685,6 @@ static inline TypedValue* unbox(TypedValue* k) {
   return k;
 }
 
-template<typename FuncType>
-static inline FuncType helperFromKey(const DynLocation& keyDl,
-                                     FuncType localHelper,
-                                     FuncType cellHelper) {
-  if (!keyDl.isVariant()) return cellHelper;
-  return localHelper;
-}
-
 template <KeyType keyType, bool unboxKey, bool warn, bool define, bool reffy,
           bool unset>
 static inline TypedValue* elemImpl(TypedValue* base, TypedValue* key,

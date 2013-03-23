@@ -445,7 +445,7 @@ define('GRAPHEME_EXTR_MAXBYTES', 1);
 define('GRAPHEME_EXTR_MAXCHARS', 2);
 define('HASH_HMAC', 1);
 define('HPHP_TRIM_CHARLIST', "\n\r\t\v\000 ");
-define('HPHP_VERSION', "2.0.0");
+define('HPHP_VERSION', "2.0.1");
 define('HTML_ENTITIES', 1);
 define('HTML_SPECIALCHARS', 0);
 define('ICONV_IMPL', "glibc");

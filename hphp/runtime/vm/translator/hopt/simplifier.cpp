@@ -1214,12 +1214,12 @@ SSATmp* Simplifier::simplifyConvToStr(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
   SSATmp* propName  = inst->getSrc(1);
-  if (!propName->isConst()) return NULL;
+  if (!propName->isConst()) return nullptr;
 
   SSATmp* cls   = inst->getSrc(0);
   const StringData* clsNameString  = cls->isConst()
                                      ? cls->getValClass()->preClass()->name()
-                                     : NULL;
+                                     : nullptr;
   if (!clsNameString) {
     // see if you can get the class name from a LdCls
     IRInstruction* clsInst = cls->getInstruction();
@@ -1233,8 +1233,15 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
   }
   if (!clsNameString) return nullptr;
 
-  // we known both the class name and the property name statically
-  // so use the caching version of LdClsPropAddr
+  // We known both the class name and the property name statically so
+  // we can use the caching version of LdClsPropAddr.  To avoid doing
+  // accessibility checks, we only do this if the context class is the
+  // same as the actual class the property is on.
+  auto const ctxCls = inst->getSrc(2)->getValClass();
+  if (!ctxCls || !clsNameString->isame(ctxCls->preClass()->name())) {
+    return nullptr;
+  }
+
   return m_tb->gen(LdClsPropAddrCached,
                    inst->getTaken(),
                    cls,

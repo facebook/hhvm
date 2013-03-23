@@ -1037,15 +1037,15 @@ void HhbcTranslator::emitIssetL(int32_t id) {
 void HhbcTranslator::emitIssetG(const StringData* gblName) {
   TRACE(3, "%u: IssetG\n", m_bcOff);
   emitIsset(gblName,
-            &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
-            &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddr);
+            &HhbcTranslator::checkSupportedGblName,
+            &HhbcTranslator::emitLdGblAddr);
 }
 
 void HhbcTranslator::emitIssetS(const StringData* propName) {
   TRACE(3, "%u: IssetS\n", m_bcOff);
   emitIsset(propName,
-            &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
-            &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddrOrExit);
+            &HhbcTranslator::checkSupportedClsProp,
+            &HhbcTranslator::emitLdClsPropAddrOrExit);
 }
 
 void HhbcTranslator::emitEmptyL(int32_t id) {
@@ -1065,15 +1065,15 @@ void HhbcTranslator::emitEmptyL(int32_t id) {
 void HhbcTranslator::emitEmptyG(const StringData* gblName) {
   TRACE(3, "%u: EmptyG\n", m_bcOff);
   emitEmpty(gblName,
-            &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
-            &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddr);
+            &HhbcTranslator::checkSupportedGblName,
+            &HhbcTranslator::emitLdGblAddr);
 }
 
 void HhbcTranslator::emitEmptyS(const StringData* propName) {
   TRACE(3, "%u: EmptyS\n", m_bcOff);
   emitEmpty(propName,
-            &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
-            &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddrOrExit);
+            &HhbcTranslator::checkSupportedClsProp,
+            &HhbcTranslator::emitLdClsPropAddrOrExit);
 }
 
 void HhbcTranslator::emitIsTypeC(Type t) {
@@ -2251,41 +2251,41 @@ void HhbcTranslator::emitEmpty(const StringData* name,
 void HhbcTranslator::emitBindG(const StringData* gblName) {
   TRACE(3, "%u: BindG\n", m_bcOff);
   emitBind(gblName,
-           &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
-           &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddrDef);
+           &HhbcTranslator::checkSupportedGblName,
+           &HhbcTranslator::emitLdGblAddrDef);
 }
 
 void HhbcTranslator::emitBindS(const StringData* propName) {
   TRACE(3, "%u: BindS\n", m_bcOff);
   emitBind(propName,
-           &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
-           &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddr);
+           &HhbcTranslator::checkSupportedClsProp,
+           &HhbcTranslator::emitLdClsPropAddr);
 }
 
 void HhbcTranslator::emitVGetG(const StringData* gblName) {
   TRACE(3, "%u: VGetG\n", m_bcOff);
   emitVGet(gblName,
-           &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
-           &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddrDef);
+           &HhbcTranslator::checkSupportedGblName,
+           &HhbcTranslator::emitLdGblAddrDef);
 }
 
 void HhbcTranslator::emitVGetS(const StringData* propName) {
   TRACE(3, "%u: VGetS\n", m_bcOff);
   emitVGet(propName,
-           &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
-           &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddr);
+           &HhbcTranslator::checkSupportedClsProp,
+           &HhbcTranslator::emitLdClsPropAddr);
 }
 
 void HhbcTranslator::emitSetG(const StringData* gblName) {
   emitSet(gblName,
-          &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
-          &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddrDef);
+          &HhbcTranslator::checkSupportedGblName,
+          &HhbcTranslator::emitLdGblAddrDef);
 }
 
 void HhbcTranslator::emitSetS(const StringData* propName) {
   emitSet(propName,
-          &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
-          &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddr);
+          &HhbcTranslator::checkSupportedClsProp,
+          &HhbcTranslator::emitLdClsPropAddr);
 }
 
 static Type getResultType(Type resultType, bool isInferedType) {
@@ -2322,8 +2322,8 @@ void HhbcTranslator::emitCGetG(const StringData* gblName,
                                bool isInferedType) {
   TRACE(3, "%u: CGetG\n", m_bcOff);
   emitCGet(gblName, resultType, isInferedType, true,
-           &HPHP::VM::JIT::HhbcTranslator::checkSupportedGblName,
-           &HPHP::VM::JIT::HhbcTranslator::emitLdGblAddr);
+           &HhbcTranslator::checkSupportedGblName,
+           &HhbcTranslator::emitLdGblAddr);
 }
 
 void HhbcTranslator::emitCGetS(const StringData* propName,
@@ -2331,8 +2331,8 @@ void HhbcTranslator::emitCGetS(const StringData* propName,
                                bool isInferedType) {
   TRACE(3, "%u: CGetS\n", m_bcOff);
   emitCGet(propName, resultType, isInferedType, false,
-           &HPHP::VM::JIT::HhbcTranslator::checkSupportedClsProp,
-           &HPHP::VM::JIT::HhbcTranslator::emitLdClsPropAddrOrExit);
+           &HhbcTranslator::checkSupportedClsProp,
+           &HhbcTranslator::emitLdClsPropAddrOrExit);
 }
 
 void HhbcTranslator::emitBinaryArith(Opcode opc) {

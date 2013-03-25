@@ -897,6 +897,11 @@ void TranslatorX64::prepareCallSaveRegs() {
 
 void
 TranslatorX64::emitIncRef(PhysReg base, DataType dtype) {
+  emitIncRef(a, base, dtype);
+}
+
+void
+TranslatorX64::emitIncRef(X64Assembler &a, PhysReg base, DataType dtype) {
   if (!IS_REFCOUNTED_TYPE(dtype) && dtype != KindOfInvalid) {
     return;
   }
@@ -2294,12 +2299,62 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   // Args are kosher. Frame linkage: set fp = ar.
   a.    mov_reg64_reg64(rStashedAR, rVmFp);
 
+  int numLocals = numParams;
+  if (func->isClosureBody()) {
+    int numUseVars = func->cls()->numDeclProperties();
+
+    emitLea(a, rVmFp, -cellsToBytes(numParams), rVmSp);
+
+    PhysReg rClosure = rcx;
+    a.  loadq(rVmFp[AROFF(m_this)], rClosure);
+
+    // Swap in the $this or late bound class
+    a.  loadq(rClosure[c_Closure::thisOffset()], rScratch);
+    a.  storeq(rScratch, rVmFp[AROFF(m_this)]);
+
+    a.  shrq(1, rScratch);
+    if (func->attrs() & AttrStatic) {
+      UnlikelyIfBlock ifRealThis(CC_NBE, a, astubs);
+      astubs.shlq(1, rScratch);
+      emitIncRef(astubs, rScratch, KindOfObject);
+    } else {
+      JccBlock<CC_BE> ifRealThis(a);
+      a.shlq(1, rScratch);
+      emitIncRef(rScratch, KindOfObject);
+    }
+
+    // Put in the correct context
+    a.  loadq(rClosure[c_Closure::funcOffset()], rScratch);
+    a.  storeq(rScratch, rVmFp[AROFF(m_func)]);
+
+    // Copy in all the use vars
+    int baseUVOffset = sizeof(ObjectData) + func->cls()->builtinPropSize();
+    for (int i = 0; i < numUseVars + 1; i++) {
+      int spOffset = -cellsToBytes(i+1);
+
+      if (i == 0) {
+        // The closure is the first local.
+        // We don't incref because it used to be $this
+        // and now it is a local, so they cancel out
+        emitStoreTypedValue(a, KindOfObject, rClosure, spOffset, rVmSp);
+        continue;
+      }
+
+      int uvOffset = baseUVOffset + cellsToBytes(i-1);
+
+      emitCopyTo(a, rClosure, uvOffset, rVmSp, spOffset, rScratch);
+      emitIncRefGenericRegSafe(rVmSp, spOffset, rScratch);
+    }
+
+    numLocals += numUseVars + 1;
+  }
+
   // We're in the callee frame; initialize locals. Unroll the loop all
   // the way if there are a modest number of locals to update;
   // otherwise, do it in a compact loop. If we're in a generator body,
   // named locals will be initialized by UnpackCont so we can leave
   // them alone here.
-  int numUninitLocals = func->numLocals() - numParams;
+  int numUninitLocals = func->numLocals() - numLocals;
   assert(numUninitLocals >= 0);
   if (numUninitLocals > 0 && !func->isGenerator()) {
     SpaceRecorder sr("_InitializeLocals", a);
@@ -2312,7 +2367,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
       // rVmFp + rcx points to the count/type fields of the TypedValue we're
       // about to write to.
       int loopStart = -func->numLocals() * sizeof(TypedValue) + TVOFF(m_type);
-      int loopEnd = -numParams * sizeof(TypedValue) + TVOFF(m_type);
+      int loopEnd = -numLocals * sizeof(TypedValue) + TVOFF(m_type);
 
       emitImmReg(a, loopStart, loopReg);
       emitImmReg(a, KindOfUninit, rdx);
@@ -2329,10 +2384,10 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     } else {
       PhysReg base;
       int disp, k;
-      if (numParams < func->numLocals()) {
+      if (numLocals < func->numLocals()) {
         a.xorl (eax, eax);
       }
-      for (k = numParams; k < func->numLocals(); ++k) {
+      for (k = numLocals; k < func->numLocals(); ++k) {
         locToRegDisp(Location(Location::Local, k), &base, &disp);
         emitStoreTVType(a, eax, base[disp + TVOFF(m_type)]);
       }
@@ -2345,15 +2400,6 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     destPC = func->unit()->entry() + dvInitializer;
   }
   SrcKey funcBody(func, destPC);
-
-  if (UNLIKELY(func->isClosureBody())) {
-    // It is a bit of a waste having the use_vars being emitted as
-    // uninitialized first then overwritten here, but knowing how to change
-    // numParams at translation time is hard
-    a.  mov_reg64_reg64(rVmFp, argNumToRegName[0]);
-    emitLea(a, rVmFp, -cellsToBytes(numParams), argNumToRegName[1]);
-    emitCall(a, TCA(init_closure));
-  }
 
   // Move rVmSp to the right place: just past all locals
   int frameCells = func->numSlotsInFrame();

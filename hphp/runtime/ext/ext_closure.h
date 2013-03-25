@@ -49,6 +49,10 @@ public:
   HphpArray* getStaticLocals();
   TypedValue* getUseVars() { return propVec(); }
   int getNumUseVars() { return m_cls->numDeclProperties(); }
+
+  static size_t funcOffset() { return offsetof(c_Closure, m_func); }
+  static size_t thisOffset() { return offsetof(c_Closure, m_thisOrClass); }
+
 protected:
   virtual bool php_sleep(Variant &ret);
 private:

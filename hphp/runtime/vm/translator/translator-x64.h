@@ -226,6 +226,7 @@ private:
   }
 
   Asm& getAsmFor(TCA addr) { return asmChoose(addr, a, astubs); }
+  void emitIncRef(X64Assembler &a, PhysReg base, DataType dtype);
   void emitIncRef(PhysReg base, DataType);
   void emitIncRefGenericRegSafe(PhysReg base, int disp, PhysReg tmp);
   void emitIncRefGeneric(PhysReg base, int disp = 0);

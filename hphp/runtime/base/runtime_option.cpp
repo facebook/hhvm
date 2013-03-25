@@ -397,7 +397,8 @@ EVALFLAGS();
 std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
-size_t RuntimeOption::VMTranslASize = 512 << 20;
+size_t RuntimeOption::VMTranslAHotSize = 2 << 20;
+size_t RuntimeOption::VMTranslASize = 510 << 20;
 size_t RuntimeOption::VMTranslAStubsSize = 512 << 20;
 size_t RuntimeOption::VMTranslGDataSize = RuntimeOption::VMTranslASize >> 2;
 
@@ -1153,6 +1154,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     }
     if (RecordCodeCoverage) CheckSymLink = true;
     CodeCoverageOutputFile = eval["CodeCoverageOutputFile"].getString();
+    VMTranslAHotSize = eval["JitAHotSize"].getUInt64(VMTranslAHotSize);
     VMTranslASize = eval["JitASize"].getUInt64(VMTranslASize);
     VMTranslAStubsSize = eval["JitAStubsSize"].getUInt64(VMTranslAStubsSize);
     VMTranslGDataSize = eval["JitGlobalDataSize"].getUInt64(VMTranslGDataSize);

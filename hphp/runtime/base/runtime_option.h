@@ -436,6 +436,7 @@ public:
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTCHuge,                   true)                            \
+  F(bool, RandomHotFuncs,              false)                           \
   F(uint32_t, ConstEstimate,           10000)
 
 #define F(type, name, unused) \
@@ -449,6 +450,7 @@ public:
 
   // TranslatorX64 allocation options
   static size_t VMTranslASize;
+  static size_t VMTranslAHotSize;
   static size_t VMTranslAStubsSize;
   static size_t VMTranslGDataSize;
 

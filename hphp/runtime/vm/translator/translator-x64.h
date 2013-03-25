@@ -128,6 +128,32 @@ class TranslatorX64 : public Translator
   typedef X64Assembler Asm;
   typedef std::map<int, int> ContParamMap;
   static const int kMaxInlineContLocals = 10;
+
+  class AHotSelector {
+   public:
+    AHotSelector(TranslatorX64* tx, bool hot) :
+        m_tx(tx), m_hot(hot &&
+                        tx->ahot.code.base + tx->ahot.code.size -
+                        tx->ahot.code.frontier > 8192 &&
+                        tx->a.code.base != tx->ahot.code.base) {
+      if (m_hot) {
+        m_save = tx->a;
+        tx->a = tx->ahot;
+      }
+    }
+    ~AHotSelector() {
+      if (m_hot) {
+        m_tx->ahot = m_tx->a;
+        m_tx->a = m_save;
+      }
+    }
+   private:
+    TranslatorX64* m_tx;
+    Asm            m_save;
+    bool           m_hot;
+  };
+
+  Asm                    ahot;
   Asm                    a;
   Asm                    astubs;
   Asm                    atrampolines;
@@ -225,7 +251,7 @@ private:
     return m_regMap.getReg(dl.location);
   }
 
-  Asm& getAsmFor(TCA addr) { return asmChoose(addr, a, astubs); }
+  Asm& getAsmFor(TCA addr) { return asmChoose(addr, a, ahot, astubs); }
   void emitIncRef(X64Assembler &a, PhysReg base, DataType dtype);
   void emitIncRef(PhysReg base, DataType);
   void emitIncRefGenericRegSafe(PhysReg base, int disp, PhysReg tmp);
@@ -320,8 +346,7 @@ private:
                                   PhysReg scr);
 
   inline bool isValidCodeAddress(TCA tca) const {
-    return a.code.isValidAddress(tca) || astubs.code.isValidAddress(tca) ||
-      atrampolines.code.isValidAddress(tca);
+    return tca >= ahot.code.base && tca < astubs.code.base + astubs.code.size;
   }
   template<int Arity> TCA emitNAryStub(Asm& a, Call c);
   TCA emitUnaryStub(Asm& a, Call c);
@@ -704,7 +729,6 @@ PSEUDOINSTRS
   void fixupWork(VMExecutionContext* ec, ActRec* startRbp) const;
   void fixup(VMExecutionContext* ec) const;
   TCA getTranslatedCaller() const;
-  bool isCodeAddress(TCA) const;
 
   // helpers for srcDB.
   SrcRec* getSrcRec(SrcKey sk) {

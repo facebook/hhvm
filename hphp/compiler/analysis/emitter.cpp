@@ -5309,6 +5309,14 @@ void EmitterVisitor::emitPostponedMeths() {
       attrs = attrs | AttrMayUseVV;
     }
 
+    auto fullName = p.m_meth->getOriginalFullName();
+    auto it = Option::FunctionSections.find(fullName);
+    if ((it != Option::FunctionSections.end() && it->second == "hot") ||
+        (RuntimeOption::EvalRandomHotFuncs &&
+         (hash_string_i(fullName.c_str()) & 8))) {
+      attrs = attrs | AttrHot;
+    }
+
     if (Option::WholeProgram) {
       if (!funcScope->isRedeclaring()) {
         attrs = attrs | AttrUnique;

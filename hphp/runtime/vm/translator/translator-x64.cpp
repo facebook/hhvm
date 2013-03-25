@@ -1388,6 +1388,7 @@ TranslatorX64::createTranslation(SrcKey sk, bool align,
 
   // We put retranslate requests at the end of our slab to more frequently
   //   allow conditional jump fall-throughs
+  AHotSelector ahs(this, curFunc()->attrs() & AttrHot);
 
   TCA astart = a.code.frontier;
   TCA stubstart = astubs.code.frontier;
@@ -1436,6 +1437,8 @@ TranslatorX64::translate(SrcKey sk, bool align, bool allowIR) {
   } else {
     assert(m_useHHIR == false);
   }
+
+  AHotSelector ahs(this, curFunc()->attrs() & AttrHot);
 
   if (align) {
     moveToAlign(a, kNonFallthroughAlign);
@@ -1545,12 +1548,16 @@ TranslatorX64::smash(X64Assembler &a, TCA src, TCA dest, bool isCall) {
 }
 
 void TranslatorX64::protectCode() {
-  mprotect(tx64->a.code.base, tx64->a.code.size, PROT_READ | PROT_EXEC);
+  mprotect(tx64->ahot.code.base,
+           tx64->astubs.code.base - tx64->ahot.code.base +
+           tx64->astubs.code.size, PROT_READ | PROT_EXEC);
 
 }
 
 void TranslatorX64::unprotectCode() {
-  mprotect(tx64->a.code.base, tx64->a.code.size,
+  mprotect(tx64->ahot.code.base,
+           tx64->astubs.code.base - tx64->ahot.code.base +
+           tx64->astubs.code.size,
            PROT_READ | PROT_WRITE | PROT_EXEC);
 }
 
@@ -2089,6 +2096,8 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
+
+  AHotSelector ahs(this, func->attrs() & AttrHot);
 
   SpaceRecorder sr("_FuncPrologue", a);
   // If we're close to a cache line boundary, just burn some space to
@@ -2693,7 +2702,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
 
   Asm &as = getAsmFor(toSmash);
   // Its not clear where chainFrom should go to if as is astubs
-  assert(&as == &a);
+  assert(&as != &astubs);
 
   // can we just directly fall through?
   // a jmp + jz takes 5 + 6 = 11 bytes
@@ -2721,7 +2730,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
    *     toSmash+11: newHotness
    */
   CodeCursor cg(as, toSmash);
-  a.jcc(cc, stub);
+  as.jcc(cc, stub);
   getSrcRec(dest)->chainFrom(as, IncomingBranch(as.code.frontier));
   TRACE(5, "bindJmpccFirst: overwrote with cc%02x taken %d\n", cc, taken);
   return tDest;
@@ -4144,17 +4153,11 @@ TCA TranslatorX64::getTranslatedCaller() const {
   ActRec* framePtr = fp;  // can't directly mutate the register-mapped one
   for (; framePtr; framePtr = (ActRec*)framePtr->m_savedRbp) {
     TCA rip = (TCA)framePtr->m_savedRip;
-    if (isCodeAddress(rip)) {
+    if (isValidCodeAddress(rip)) {
       return rip;
     }
   }
   return nullptr;
-}
-
-bool TranslatorX64::isCodeAddress(TCA addr) const {
-  return a.code.isValidAddress(addr) ||
-    astubs.code.isValidAddress(addr) ||
-    atrampolines.code.isValidAddress(addr);
 }
 
 void
@@ -11413,13 +11416,15 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
   SKTRACE(1, sk, "translateTracelet\n");
   assert(m_srcDB.find(sk));
   assert(m_regMap.pristine());
+
   TCA                     start = a.code.frontier;
   TCA                     stubStart = astubs.code.frontier;
   TCA                     counterStart = 0;
-  uint8_t                   counterLen = 0;
+  uint8_t                 counterLen = 0;
   SrcRec&                 srcRec = *getSrcRec(sk);
   vector<TransBCMapping>  bcMapping;
   TransKind               transKind = TransNormal;
+
 
   if (m_useHHIR) {
     TranslateTraceletResult result;
@@ -11703,15 +11708,18 @@ TranslatorX64::TranslatorX64()
   m_curFunc(nullptr),
   m_vecState(nullptr)
 {
+  const size_t kAHotSize = RuntimeOption::VMTranslAHotSize;
   const size_t kASize = RuntimeOption::VMTranslASize;
   const size_t kAStubsSize = RuntimeOption::VMTranslAStubsSize;
   const size_t kGDataSize = RuntimeOption::VMTranslGDataSize;
-  m_totalSize = kASize + kAStubsSize + kTrampolinesBlockSize + kGDataSize;
+  m_totalSize = kAHotSize + kASize + kAStubsSize +
+    kTrampolinesBlockSize + kGDataSize;
 
   TRACE(1, "TranslatorX64@%p startup\n", this);
   tx64 = this;
 
-  if ((kASize < (10 << 20)) ||
+  if ((kAHotSize < (2 << 20)) ||
+      (kASize < (10 << 20)) ||
       (kAStubsSize < (10 << 20)) ||
       (kGDataSize < (2 << 20))) {
     fprintf(stderr, "Allocation sizes ASize, AStubsSize, and GlobalDataSize "
@@ -11761,15 +11769,22 @@ TranslatorX64::TranslatorX64()
   TRACE(1, "init atrampolines @%p\n", base);
   atrampolines.init(base, kTrampolinesBlockSize);
   base += kTrampolinesBlockSize;
+
+  m_unwindRegistrar = register_unwind_region(base, m_totalSize);
+  TRACE(1, "init ahot @%p\n", base);
+  ahot.init(base, kAHotSize);
+  base += kAHotSize;
   TRACE(1, "init a @%p\n", base);
   a.init(base, kASize);
-  m_unwindRegistrar = register_unwind_region(base, m_totalSize);
   base += kASize;
   TRACE(1, "init astubs @%p\n", base);
   astubs.init(base, kAStubsSize);
   base += kAStubsSize;
   TRACE(1, "init gdata @%p\n", base);
   m_globalData.init(base, kGDataSize);
+
+  // put the stubs into ahot, rather than a
+  AHotSelector ahs(this, true);
 
   // Emit some special helpers that are shared across translations.
 
@@ -12187,24 +12202,28 @@ size_t TranslatorX64::getTargetCacheSize() {
 
 std::string TranslatorX64::getUsage() {
   std::string usage;
+  size_t aHotUsage = ahot.code.frontier - ahot.code.base;
   size_t aUsage = a.code.frontier - a.code.base;
   size_t stubsUsage = astubs.code.frontier - astubs.code.base;
   size_t dataUsage = m_globalData.frontier - m_globalData.base;
   size_t tcUsage = TargetCache::s_frontier;
-  Util::string_printf(usage,
-                      "tx64: %9zd bytes (%" PRId64 "%%) in a.code\n"
-                      "tx64: %9zd bytes (%" PRId64 "%%) in astubs.code\n"
-                      "tx64: %9zd bytes (%" PRId64 "%%) in a.code from ir\n"
-                      "tx64: %9zd bytes (%" PRId64 "%%) in astubs.code from ir\n"
-                      "tx64: %9zd bytes (%" PRId64 "%%) in m_globalData\n"
-                      "tx64: %9zd bytes (%" PRId64 "%%) in targetCache\n",
-                      aUsage,     100 * aUsage / a.code.size,
-                      stubsUsage, 100 * stubsUsage / astubs.code.size,
-                      m_irAUsage,     100 * m_irAUsage / a.code.size,
-                      m_irAstubsUsage, 100 * m_irAstubsUsage / astubs.code.size,
-                      dataUsage, 100 * dataUsage / m_globalData.size,
-                      tcUsage,
-                      100 * tcUsage / RuntimeOption::EvalJitTargetCacheSize);
+  Util::string_printf(
+    usage,
+    "tx64: %9zd bytes (%" PRId64 "%%) in ahot.code\n"
+    "tx64: %9zd bytes (%" PRId64 "%%) in a.code\n"
+    "tx64: %9zd bytes (%" PRId64 "%%) in astubs.code\n"
+    "tx64: %9zd bytes (%" PRId64 "%%) in a.code from ir\n"
+    "tx64: %9zd bytes (%" PRId64 "%%) in astubs.code from ir\n"
+    "tx64: %9zd bytes (%" PRId64 "%%) in m_globalData\n"
+    "tx64: %9zd bytes (%" PRId64 "%%) in targetCache\n",
+    aHotUsage,  100 * aHotUsage / ahot.code.size,
+    aUsage,     100 * aUsage / a.code.size,
+    stubsUsage, 100 * stubsUsage / astubs.code.size,
+    m_irAUsage,     100 * m_irAUsage / a.code.size,
+    m_irAstubsUsage, 100 * m_irAstubsUsage / astubs.code.size,
+    dataUsage, 100 * dataUsage / m_globalData.size,
+    tcUsage,
+    100 * tcUsage / RuntimeOption::EvalJitTargetCacheSize);
   return usage;
 }
 

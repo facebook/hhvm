@@ -463,6 +463,9 @@ void Func::prettyPrint(std::ostream& out) const {
   } else {
     out << "Function " << m_name->data();
   }
+
+  if (m_attrs & AttrHot) out << " (hot)";
+
   out << " at " << base();
   if (shared()->m_id != -1) {
     out << " (ID " << shared()->m_id << ")";

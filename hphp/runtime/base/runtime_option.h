@@ -374,69 +374,70 @@ public:
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
-#define EVALFLAGS() \
-  /* F(type, name, defaultVal) */ \
-  /*
-   * Maximum number of elements on the VM execution stack.
-   */ \
-  F(uint64_t, VMStackElms, kEvalVMStackElmsDefault) \
-  /*
-   * Initial space reserved for the global variable environment (in
-   * number of global variables).
-   */ \
-  F(uint32_t, VMInitialGlobalTableSize, \
-    kEvalVMInitialGlobalTableSizeDefault) \
-  F(bool, Jit,                         evalJitDefault()) \
-  F(bool, AllowHhas,                   false) \
-  F(bool, JitNoGdb,                    true) \
-  F(bool, PerfPidMap,                  true) \
-  F(uint32_t, JitTargetCacheSize,        64 << 20) \
-  F(bool, ProfileBC,                   false) \
-  F(bool, ProfileHWEnable,             true) \
-  F(string, ProfileHWEvents,           string("")) \
-  F(bool, JitTrampolines,              true) \
-  F(string, JitProfilePath,            string("")) \
-  F(int32_t, JitStressTypePredPercent,   0) \
-  F(uint32_t, JitWarmupRequests,         kDefaultWarmupRequests) \
-  F(bool, JitProfileRecord,            false) \
-  F(uint32_t, GdbSyncChunks,             128) \
-  F(bool, JitStressLease,              false) \
-  F(bool, JitKeepDbgFiles,             false) \
-  F(bool, JitEnableRenameFunction,     false) \
- \
-  F(bool, JitDisabledByHphpd,          false) \
-  F(bool, ThreadingJit,                false) \
-  F(bool, JitTransCounters,            false) \
-  F(bool, JitMGeneric,                 true) \
-  F(bool, JitUseIR,                    false) \
-  F(double, JitCompareHHIR,                0) \
-  F(bool, IRPuntDontInterp,            false) \
-  F(bool, HHIRGenericDtorHelper,       true) \
-  F(bool, HHIRCse,                     true) \
-  F(bool, HHIRSimplification,          true) \
-  F(uint32_t, HHIRSimplificationMaxBlocks,1000) \
-  F(bool, HHIRGenOpts,                 true) \
-  F(bool, HHIRJumpOpts,                true) \
-  F(bool, HHIRExtraOptPass,            true) \
-  F(bool, HHIRMemOpt,                  true) \
-  F(uint32_t, HHIRNumFreeRegs,           -1) \
-  F(bool, HHIREnableRematerialization, true) \
-  F(bool, HHIREnableCalleeSavedOpt,    true) \
-  F(bool, HHIREnablePreColoring,       true) \
-  F(bool, HHIREnableCoalescing,        true) \
-  F(bool, HHIREnableRefCountOpt,       true) \
-  F(bool, HHIREnableSinking,           true) \
-  F(bool, HHIRGenerateAsserts,         debug) \
-  F(bool, HHIRDirectExit,              true) \
-  F(bool, HHIRDisableTx64,             false) \
-  F(uint64_t, MaxHHIRTrans,              -1) \
-  F(bool, HHIRDeadCodeElim,            true) \
-  F(bool, DumpBytecode,                false) \
-  F(uint32_t, DumpIR,                    0) \
-  F(bool, DumpTC,                      false) \
-  F(bool, DumpAst,                     false) \
-  F(bool, MapTCHuge,                   true) \
-  F(uint32_t, ConstEstimate,             10000) \
+#define EVALFLAGS()                                                     \
+  /* F(type, name, defaultVal) */                                       \
+  /*                                                                    \
+   * Maximum number of elements on the VM execution stack.              \
+   */                                                                   \
+  F(uint64_t, VMStackElms, kEvalVMStackElmsDefault)                     \
+  /*                                                                    \
+   * Initial space reserved for the global variable environment (in     \
+   * number of global variables).                                       \
+   */                                                                   \
+  F(uint32_t, VMInitialGlobalTableSize,                                 \
+    kEvalVMInitialGlobalTableSizeDefault)                               \
+  F(bool, Jit,                         evalJitDefault())                \
+  F(bool, AllowHhas,                   false)                           \
+  F(bool, JitNoGdb,                    true)                            \
+  F(bool, PerfPidMap,                  true)                            \
+  F(bool, KeepPerfPidMap,              false)                           \
+  F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
+  F(bool, ProfileBC,                   false)                           \
+  F(bool, ProfileHWEnable,             true)                            \
+  F(string, ProfileHWEvents,           string(""))                      \
+  F(bool, JitTrampolines,              true)                            \
+  F(string, JitProfilePath,            string(""))                      \
+  F(int32_t, JitStressTypePredPercent, 0)                               \
+  F(uint32_t, JitWarmupRequests,       kDefaultWarmupRequests)          \
+  F(bool, JitProfileRecord,            false)                           \
+  F(uint32_t, GdbSyncChunks,           128)                             \
+  F(bool, JitStressLease,              false)                           \
+  F(bool, JitKeepDbgFiles,             false)                           \
+  F(bool, JitEnableRenameFunction,     false)                           \
+                                                                        \
+  F(bool, JitDisabledByHphpd,          false)                           \
+  F(bool, ThreadingJit,                false)                           \
+  F(bool, JitTransCounters,            false)                           \
+  F(bool, JitMGeneric,                 true)                            \
+  F(bool, JitUseIR,                    false)                           \
+  F(double, JitCompareHHIR,            0)                               \
+  F(bool, IRPuntDontInterp,            false)                           \
+  F(bool, HHIRGenericDtorHelper,       true)                            \
+  F(bool, HHIRCse,                     true)                            \
+  F(bool, HHIRSimplification,          true)                            \
+  F(uint32_t, HHIRSimplificationMaxBlocks,1000)                         \
+  F(bool, HHIRGenOpts,                 true)                            \
+  F(bool, HHIRJumpOpts,                true)                            \
+  F(bool, HHIRExtraOptPass,            true)                            \
+  F(bool, HHIRMemOpt,                  true)                            \
+  F(uint32_t, HHIRNumFreeRegs,         -1)                              \
+  F(bool, HHIREnableRematerialization, true)                            \
+  F(bool, HHIREnableCalleeSavedOpt,    true)                            \
+  F(bool, HHIREnablePreColoring,       true)                            \
+  F(bool, HHIREnableCoalescing,        true)                            \
+  F(bool, HHIREnableRefCountOpt,       true)                            \
+  F(bool, HHIREnableSinking,           true)                            \
+  F(bool, HHIRGenerateAsserts,         debug)                           \
+  F(bool, HHIRDirectExit,              true)                            \
+  F(bool, HHIRDisableTx64,             false)                           \
+  F(uint64_t, MaxHHIRTrans,            -1)                              \
+  F(bool, HHIRDeadCodeElim,            true)                            \
+  F(bool, DumpBytecode,                false)                           \
+  F(uint32_t, DumpIR,                  0)                               \
+  F(bool, DumpTC,                      false)                           \
+  F(bool, DumpAst,                     false)                           \
+  F(bool, MapTCHuge,                   true)                            \
+  F(uint32_t, ConstEstimate,           10000)
 
 #define F(type, name, unused) \
   static type Eval ## name;

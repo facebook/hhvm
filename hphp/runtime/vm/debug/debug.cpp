@@ -47,7 +47,9 @@ DebugInfo::DebugInfo() {
 
 DebugInfo::~DebugInfo() {
   if (m_perfMap) fclose(m_perfMap);
-  unlink(m_perfMapName);
+  if (!RuntimeOption::EvalKeepPerfPidMap) {
+    unlink(m_perfMapName);
+  }
 }
 
 void DebugInfo::recordStub(TCRange range, const char* name) {

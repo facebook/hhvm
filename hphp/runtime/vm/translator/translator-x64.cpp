@@ -9073,7 +9073,7 @@ TranslatorX64::translateFPushObjMethodD(const Tracelet &t,
   }
 
   if (func) {
-    if (func->attrs() & AttrStatic) {
+    if (func->attrs() & AttrStatic && !func->isClosureBody()) {
       if (func->attrs() & AttrPrivate) {
         emitVStackStoreImm(a, i, uintptr_t(curFunc()->cls()) | 1,
                            thisOff, sz::qword);

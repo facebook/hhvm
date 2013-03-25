@@ -415,8 +415,15 @@ struct CallCtx {
   StringData* invName;
 };
 
-static const size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
-static const size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
+constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
+constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
+
+/*
+ * We pad all stack overflow checks by a small amount to allow for
+ * inlining functions without having to either do another stack check
+ * or chase down prologues to smash.
+ */
+constexpr int kMaxJITInlineStackCells = 4 + kNumActRecCells;
 
 struct Fault {
   enum Type : int16_t {

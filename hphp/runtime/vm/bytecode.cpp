@@ -1645,7 +1645,7 @@ static inline void checkStack(Stack& stk, const Func* f) {
   // Check whether func's maximum stack usage would overflow the stack.
   // Both native and VM stack overflows are independently possible.
   if (!stack_in_bounds(info) ||
-      stk.wouldOverflow(f->maxStackCells())) {
+      stk.wouldOverflow(f->maxStackCells() + kMaxJITInlineStackCells)) {
     TRACE(1, "Maximum VM stack depth exceeded.\n");
     raise_error("Stack overflow");
   }

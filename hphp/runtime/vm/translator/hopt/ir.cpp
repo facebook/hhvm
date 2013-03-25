@@ -1138,15 +1138,16 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
                           TcaRange(nullptr, nullptr);
     for (auto it = block->begin(); it != block->end();) {
       auto& inst = *it; ++it;
+
       if (inst.getOpcode() == Marker) {
+        os << std::string(kIndent, ' ');
+        inst.print(os);
+        os << '\n';
+
+        // Don't print bytecode in a non-main trace.
+        if (!isMain()) continue;
+
         auto* marker = inst.getExtra<Marker>();
-        if (!isMain()) {
-          // Don't print bytecode, but print the label.
-          os << std::string(kIndent, ' ');
-          inst.print(os);
-          os << '\n';
-          continue;
-        }
         uint32_t bcOffset = marker->bcOff;
         if (const auto* func = marker->func) {
           std::ostringstream uStr;
@@ -1163,6 +1164,7 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
           continue;
         }
       }
+
       if (inst.getOpcode() == DefLabel) {
         os << std::string(kIndent - 2, ' ');
         inst.getBlock()->printLabel(os);
@@ -1186,9 +1188,11 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
           os << '\n';
         }
       }
+
       os << std::string(kIndent, ' ');
       inst.print(os);
       os << '\n';
+
       if (asmInfo) {
         TcaRange instRange = asmInfo->instRanges[inst];
         if (!instRange.empty()) {
@@ -1200,6 +1204,7 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
         }
       }
     }
+
     if (asmInfo) {
       // print code associated with this block that isn't tied to any
       // instruction.  This includes code after the last isntruction (e.g.
@@ -1230,16 +1235,7 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
 int32_t spillValueCells(IRInstruction* spillStack) {
   assert(spillStack->getOpcode() == SpillStack);
   int32_t numSrcs = spillStack->getNumSrcs();
-  int32_t ret = 0;
-  for (int i = 2; i < numSrcs; ++i) {
-    if (spillStack->getSrc(i)->getType() == Type::ActRec) {
-      ret += kNumActRecCells;
-      i += kSpillStackActRecExtraArgs;
-    } else {
-      ++ret;
-    }
-  }
-  return ret;
+  return numSrcs - 2;
 }
 
 /**
@@ -1430,14 +1426,6 @@ bool hasInternalFlow(Trace* trace) {
 
 void dumpTraceImpl(const Trace* trace, std::ostream& out,
                    const AsmInfo* asmInfo) {
-  auto func = trace->getFunc();
-  auto unitName = func->unit()->filepath()->empty()
-    ? "<systemlib>"
-    : func->unit()->filepath()->data();
-  out << folly::format("{}() @{} ({})\n",
-                       func->fullName()->data(),
-                       trace->getBcOff(),
-                       unitName);
   trace->print(out, asmInfo);
 }
 

@@ -290,7 +290,7 @@ O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),    C|E|N|Er) \
 O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),   E|N|Refs|Er) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
-O(LdGblAddr,               D(PtrToGen), S(Str),                        N    ) \
+O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
 O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
 O(LdFuncCached,                D(Func), CStr,                       N|C|E|Er) \
@@ -320,11 +320,6 @@ O(CreateCl,                     D(Obj), C(Cls)                                \
 O(NewArray,                     D(Arr), C(Int),                  E|Mem|N|PRc) \
 O(NewTuple,                     D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
-O(DefActRec,                 D(ActRec), S(FramePtr)                           \
-                                          S(Func,FuncCls,FuncCtx,Null)        \
-                                          S(Ctx,Cls,InitNull)                 \
-                                          C(Int)                              \
-                                          S(Str,Null),                   Mem) \
 O(FreeActRec,                D(FramePtr), S(FramePtr),                   Mem) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(Call,                      D(StkPtr), SUnk,                 E|Mem|CRc|Refs) \
@@ -355,7 +350,12 @@ O(StaticLocInitCached,    D(BoxedCell), CStr                                  \
                                           S(FramePtr)                         \
                                           S(Cell)                             \
                                             C(CacheHandle),      PRc|E|N|Mem) \
-O(SpillStack,                D(StkPtr), SUnk,                      E|Mem|CRc) \
+O(SpillStack,                D(StkPtr), SUnk,                            CRc) \
+O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
+                                          S(FramePtr)                         \
+                                          S(Func,FuncCls,FuncCtx,Null)        \
+                                          S(Ctx,Cls,InitNull),           CRc) \
+O(ExceptionBarrier,          D(StkPtr), S(StkPtr),                         E) \
 O(ExitTrace,                        ND, SUnk,                            T|E) \
 O(ExitTraceCc,                      ND, SUnk,                            T|E) \
 O(ExitSlow,                         ND, SUnk,                            T|E) \
@@ -379,8 +379,13 @@ O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
 O(DecRefNZOrBranch,                 ND, S(Gen),                      Mem|CRc) \
 O(DefLabel,                     DMulti, SUnk,                              E) \
 O(Marker,                           ND, NA,                                E) \
-O(DefFP,                     D(FramePtr), NA,                              E) \
-O(DefSP,                     D(StkPtr), S(FramePtr) C(Int),                E) \
+O(DefInlineFP,             D(FramePtr), S(StkPtr),                        NF) \
+O(InlineReturn,                     ND, S(FramePtr),                       E) \
+O(DefFP,                   D(FramePtr), NA,                                E) \
+O(DefSP,                     D(StkPtr), S(FramePtr),                       E) \
+O(ReDefSP,                   D(StkPtr), S(FramePtr) S(StkPtr),            NF) \
+O(StashGeneratorSP,          D(StkPtr), S(StkPtr),                        NF) \
+O(ReDefGeneratorSP,          D(StkPtr), S(StkPtr),                        NF) \
 O(VerifyParamCls,                   ND, S(Cls)                                \
                                           S(Cls)                              \
                                           C(Int)                              \
@@ -746,6 +751,37 @@ struct ExitData : IRExtraData {
   std::string show() const;
 };
 
+/*
+ * Compile-time metadata about an ActRec allocation.
+ */
+struct ActRecInfo : IRExtraData {
+  const StringData* invName;  // may be nullptr
+  int32_t numArgs;
+
+  std::string show() const {
+    return folly::to<std::string>(numArgs, invName ? " M" : "");
+  }
+};
+
+/*
+ * Stack and bytecode offsets.
+ */
+struct StackOffset : IRExtraData {
+  explicit StackOffset(int32_t offset) : offset(offset) {}
+
+  std::string show() const { return folly::to<std::string>(offset); }
+
+  int32_t offset;
+};
+
+struct BCOffset : IRExtraData {
+  explicit BCOffset(Offset offset) : offset(offset) {}
+
+  std::string show() const { return folly::to<std::string>(offset); }
+
+  Offset offset;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -771,6 +807,12 @@ X(LdConst,            ConstData);
 X(Jmp_,               EdgeData);
 X(ExitTrace,          ExitData);
 X(ExitTraceCc,        ExitData);
+X(SpillFrame,         ActRecInfo);
+X(ReDefSP,            StackOffset);
+X(ReDefGeneratorSP,   StackOffset);
+X(DefSP,              StackOffset);
+X(DefInlineFP,        BCOffset);
+
 #undef X
 
 //////////////////////////////////////////////////////////////////////
@@ -2160,7 +2202,6 @@ struct Block : boost::noncopyable {
   }
 
   uint32_t    getId() const      { return m_id; }
-  const Func* getFunc() const    { return m_func; }
   Trace*      getTrace() const   { return m_trace; }
   void        setTrace(Trace* t) { m_trace = t; }
   void        setHint(Hint hint) { m_hint = hint; }
@@ -2316,14 +2357,6 @@ public:
     return b;
   }
 
-  const Func* getFunc() const {
-    return front()->getFunc();
-  }
-
-  const Unit* getUnit() const {
-    return getFunc()->unit();
-  }
-
   uint32_t getBcOff() const { return m_bcOff; }
   Trace* addExitTrace(Trace* exit) {
     m_exitTraces.push_back(exit);
@@ -2406,12 +2439,6 @@ void optimizeTrace(Trace*, IRFactory* irFactory);
  * spill sources, this totals up whether it is an ActRec or a cell.
  */
 int32_t spillValueCells(IRInstruction* spillStack);
-
-/*
- * When SpillStack takes an ActRec, it has this many extra
- * dependencies in the spill vector for the values in the ActRec.
- */
-constexpr int kSpillStackActRecExtraArgs = 5;
 
 inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
   switch (instr->getOpcode()) {

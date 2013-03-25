@@ -26,6 +26,8 @@
 #include <vector>
 #include <string>
 
+#include "folly/Conv.h"
+
 #include "util/trace.h"
 #include "util/biased_coin.h"
 
@@ -53,6 +55,42 @@ TRACE_SET_MOD(trans)
 static __thread BiasedCoin *dbgTranslateCoin;
 Translator* transl;
 Lease Translator::s_writeLease;
+
+struct TraceletContext {
+  TraceletContext() = delete;
+
+  TraceletContext(Tracelet* t, const TypeMap& initialTypes)
+    : m_t(t)
+    , m_numJmps(0)
+    , m_aliasTaint(false)
+    , m_varEnvTaint(false)
+  {
+    for (auto& kv : initialTypes) {
+      TRACE(1, "%s\n",
+            Trace::prettyNode("InitialType", kv.first, kv.second).c_str());
+      m_currentMap[kv.first] = t->newDynLocation(kv.first, kv.second);
+    }
+  }
+
+  Tracelet*   m_t;
+  ChangeMap   m_currentMap;
+  DepMap      m_dependencies;
+  DepMap      m_resolvedDeps; // dependencies resolved by static analysis
+  LocationSet m_changeSet;
+  LocationSet m_deletedSet;
+  int         m_numJmps;
+  bool        m_aliasTaint;
+  bool        m_varEnvTaint;
+
+  RuntimeType currentType(const Location& l) const;
+  DynLocation* recordRead(const InputInfo& l, bool useHHIR,
+                          DataType staticType = KindOfInvalid);
+  void recordWrite(DynLocation* dl, NormalizedInstruction* source);
+  void recordDelete(const Location& l);
+  void recordJmp();
+  void aliasTaint();
+  void varEnvTaint();
+};
 
 void InstrStream::append(NormalizedInstruction* ni) {
   if (last) {
@@ -237,12 +275,9 @@ Translator::locPhysicalOffset(Location l, const Func* f) {
   return -((l.offset + 1) * iterInflator + localsToSkip);
 }
 
-// liveType --
-//   Return the live type of a location. If we've already plucked
-//   out the cell ...
 RuntimeType Translator::liveType(Location l, const Unit& u) {
   Cell *outer;
-  switch(l.space) {
+  switch (l.space) {
     case Location::Stack:
       // Stack accesses must be to addresses pushed before
       // translation time; if they are to addresses pushed after,
@@ -280,6 +315,8 @@ RuntimeType Translator::liveType(Location l, const Unit& u) {
 
 RuntimeType
 Translator::liveType(const Cell* outer, const Location& l) {
+  always_assert(analysisDepth() == 0);
+
   if (!outer) {
     // An undefined global; starts out as a variant null
     return RuntimeType(KindOfRef, KindOfNull);
@@ -311,11 +348,18 @@ Translator::liveType(const Cell* outer, const Location& l) {
 }
 
 RuntimeType Translator::outThisObjectType() {
-  // Use the current method's context class (ctx) as a constraint.
-  // For instance methods, if $this is non-null, we are guaranteed
-  // that $this is an instance of ctx or a class derived from
-  // ctx. Zend allows this assumption to be violated but we have
-  // deliberately chosen to diverge from them here.
+  /*
+   * Use the current method's context class (ctx) as a constraint.
+   * For instance methods, if $this is non-null, we are guaranteed
+   * that $this is an instance of ctx or a class derived from
+   * ctx. Zend allows this assumption to be violated but we have
+   * deliberately chosen to diverge from them here.
+   *
+   * Note that if analysisDepth() != 0 we'll have !hasThis() here,
+   * because our fake ActRec has no $this, but we'll still return the
+   * correct object type because arGetContextClass() looks at
+   * ar->m_func's class for methods.
+   */
   const Class *ctx = curFunc()->isMethod() ?
     arGetContextClass(curFrame()) : nullptr;
   if (ctx) {
@@ -516,7 +560,9 @@ static const int kTooPolyRet = 6;
 
 static std::pair<DataType,double>
 predictMVec(const NormalizedInstruction* ni) {
-  auto info = getFinalPropertyOffset(*ni, getMInstrInfo(ni->mInstrOp()));
+  auto info = getFinalPropertyOffset(*ni,
+                                     curFunc()->cls(),
+                                     getMInstrInfo(ni->mInstrOp()));
   if (info.offset != -1 && info.hphpcType != KindOfInvalid) {
     FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
            int(info.hphpcType));
@@ -2493,7 +2539,7 @@ RuntimeType TraceletContext::currentType(const Location& l) const {
   if (!mapGet(m_currentMap, l, &dl)) {
     assert(!mapContains(m_deletedSet, l));
     assert(!mapContains(m_changeSet, l));
-    return Translator::liveType(l, *curUnit());
+    return tx64->liveType(l, *curUnit());
   }
   return dl->rtt;
 }
@@ -2516,7 +2562,7 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
         m_resolvedDeps[l] = dl;
       }
     } else {
-      RuntimeType rtt = Translator::liveType(l, *curUnit());
+      RuntimeType rtt = tx64->liveType(l, *curUnit());
       assert(rtt.isIter() || !rtt.isVagueValue());
       // Allocate a new DynLocation to represent this and store it in the
       // current map.
@@ -2931,6 +2977,230 @@ static bool checkTaintFuncs(StringData* name) {
   return name->isame(s_extract);
 }
 
+static const NormalizedInstruction*
+findFPushForCall(const FPIEnt* fpi,
+                 const NormalizedInstruction* fcall) {
+  for (auto* ni = fcall->prev; ni; ni = ni->prev) {
+    if (ni->source.offset() == fpi->m_fpushOff) {
+      return ni;
+    }
+  }
+  return nullptr;
+}
+
+/*
+ * Check whether the a given FCall should be analyzed for possible
+ * inlining or not.
+ */
+static bool shouldAnalyzeCallee(const NormalizedInstruction* fcall) {
+  auto const numArgs = fcall->imm[0].u_IVA;
+  auto const target  = fcall->funcd;
+  auto const fpi     = curFunc()->findFPI(fcall->source.m_offset);
+  auto const pushOp  = curUnit()->getOpcode(fpi->m_fpushOff);
+
+  if (!RuntimeOption::RepoAuthoritative) return false;
+
+  // Note: the IR assumes that $this is available in all inlined object
+  // methods, which will need to be updated when we support
+  // OpFPushClsMethod here.
+  if (pushOp != OpFPushFuncD && pushOp != OpFPushObjMethodD) {
+    FTRACE(1, "analyzeCallee: push op ({}) was not supported\n",
+           opcodeToName(pushOp));
+    return false;
+  }
+
+  if (!target) {
+    FTRACE(1, "analyzeCallee: target func not known\n");
+    return false;
+  }
+  if (target->isBuiltin()) {
+    FTRACE(1, "analyzeCallee: target func is a builtin\n");
+    return false;
+  }
+
+  constexpr int kMaxSubtraceAnalysisDepth = 2;
+  if (tx64->analysisDepth() + 1 >= kMaxSubtraceAnalysisDepth) {
+    FTRACE(1, "analyzeCallee: max inlining depth reached\n");
+    return false;
+  }
+
+  if (numArgs != target->numParams()) {
+    FTRACE(1, "analyzeCallee: param count mismatch {} != {}\n",
+           numArgs, target->numParams());
+    return false;
+  }
+  if (numArgs != 0) {
+    FTRACE(1, "analyzeCallee: currently ignoring calls with parameters\n");
+    return false;
+  }
+
+  if (!findFPushForCall(fpi, fcall)) {
+    FTRACE(1, "analyzeCallee: push instruction was in a different "
+              "tracelet\n");
+    return false;
+  }
+
+  return true;
+}
+
+void Translator::analyzeCallee(TraceletContext& tas,
+                               Tracelet& parent,
+                               NormalizedInstruction* fcall) {
+  always_assert(m_useHHIR);
+  if (!shouldAnalyzeCallee(fcall)) return;
+
+  auto const numArgs = fcall->imm[0].u_IVA;
+  auto const target  = fcall->funcd;
+
+  /*
+   * Prepare a map for all the known information about the argument
+   * types.
+   *
+   * Also, fill out KindOfUninit for any remaining locals.  The point
+   * here is that the subtrace can't call liveType for a local or
+   * stack location (since our ActRec is fake), so we need them all in
+   * the TraceletContext.
+   *
+   * If any of the argument types are unknown (including inner-types
+   * of KindOfRefs), we don't really try to analyze the callee.  It
+   * might be possible to do this but we'll need to modify the
+   * analyzer to support unknown input types before there are any
+   * NormalizedInstructions in the Tracelet.
+   */
+  TypeMap initialMap;
+  LocationSet callerArgLocs;
+  for (int i = 0; i < numArgs; ++i) {
+    auto callerLoc = Location(Location::Stack, fcall->stackOff - i - 1);
+    auto calleeLoc = Location(Location::Local, numArgs - i - 1);
+    auto type      = tas.currentType(callerLoc);
+
+    callerArgLocs.insert(callerLoc);
+
+    if (type.isVagueValue()) {
+      FTRACE(1, "analyzeCallee: {} has unknown type\n", callerLoc.pretty());
+      return;
+    }
+    if (type.isValue() && type.isRef() &&
+        type.innerType() == KindOfInvalid) {
+      FTRACE(1, "analyzeCallee: {} has unknown inner-refdata type\n",
+             callerLoc.pretty());
+      return;
+    }
+
+    FTRACE(2, "mapping arg{} locs {} -> {} :: {}\n",
+              numArgs - i - 1,
+              callerLoc.pretty(),
+              calleeLoc.pretty(),
+              type.pretty());
+    initialMap[calleeLoc] = type;
+  }
+  for (int i = numArgs; i < target->numLocals(); ++i) {
+    initialMap[Location(Location::Local, i)] = RuntimeType(KindOfUninit);
+  }
+
+  /*
+   * When reentering analyze to generate a Tracelet for a callee,
+   * currently we handle this by creating a fake ActRec on the stack.
+   *
+   * This is mostly a compromise to deal with existing code during the
+   * analysis phase which pretty liberally inspects live VM state.
+   */
+  ActRec fakeAR;
+  fakeAR.m_savedRbp = reinterpret_cast<uintptr_t>(curFrame());
+  fakeAR.m_savedRip = 0xbaabaa;  // should never be inspected
+  fakeAR.m_func = fcall->funcd;
+  fakeAR.m_soff = 0xb00b00;      // should never be inspected
+  fakeAR.m_numArgsAndCtorFlag = numArgs;
+  fakeAR.m_varEnv = nullptr;
+
+  /*
+   * Even when inlining an object method, we can leave the m_this as
+   * null.  See outThisObjectType().
+   */
+  fakeAR.m_this = nullptr;
+
+  FTRACE(1, "analyzing sub trace =================================\n");
+  auto const oldFP = vmfp();
+  auto const oldSP = vmsp();
+  auto const oldPC = vmpc();
+  auto const oldAnalyzeCalleeDepth = m_analysisDepth++;
+  vmpc() = nullptr; // should never be used
+  vmsp() = nullptr; // should never be used
+  vmfp() = reinterpret_cast<Cell*>(&fakeAR);
+  auto restoreFrame = [&]{
+    vmfp() = oldFP;
+    vmsp() = oldSP;
+    vmpc() = oldPC;
+    m_analysisDepth = oldAnalyzeCalleeDepth;
+  };
+  SCOPE_EXIT {
+    // It's ok to restoreFrame() twice---we have it in this scope
+    // handler to ensure it still happens if we exit via an exception.
+    restoreFrame();
+    FTRACE(1, "finished sub trace ===================================\n");
+  };
+
+  auto subTrace = analyze(SrcKey(target, target->base()), initialMap);
+
+  /*
+   * Verify the target trace actually ended with a return, or we have
+   * no business doing anything based on it right now.
+   */
+  if (!subTrace->m_instrStream.last ||
+      (subTrace->m_instrStream.last->op() != OpRetC &&
+       subTrace->m_instrStream.last->op() != OpRetV)) {
+    FTRACE(1, "analyzeCallee: callee did not end in a return\n");
+    return;
+  }
+
+  /*
+   * Disabled for now:
+   *
+   * Propagate the return type to our caller.  If the return type is
+   * not vague, it will hold if we can inline the trace.
+   *
+   * This isn't really a sensible thing to do if we aren't also going
+   * to inline the callee, however, because the return type may only
+   * be what it is due to other output predictions (CGetMs or FCall)
+   * inside the callee.  This means we would need to check the return
+   * value in the caller still as if it were a predicted return type.
+   */
+  Location retVal(Location::Stack, 0);
+  auto it = subTrace->m_changes.find(retVal);
+  assert(it != subTrace->m_changes.end());
+  FTRACE(1, "subtrace return: {}\n", it->second->pretty());
+  if (false) {
+    if (!it->second->rtt.isVagueValue() && !it->second->rtt.isRef()) {
+      FTRACE(1, "changing callee's return type from {} to {}\n",
+                fcall->outStack->rtt.pretty(),
+                it->second->pretty());
+
+      fcall->outputPredicted = true;
+      fcall->outputPredictionStatic = false;
+      fcall->outStack = parent.newDynLocation(fcall->outStack->location,
+                                              it->second->rtt);
+      tas.recordWrite(fcall->outStack, fcall);
+    }
+  }
+
+  /*
+   * In order for relaxDeps not to relax guards on things we may
+   * potentially have depended on here, we need to ensure that the
+   * call instruction depends on all the inputs we've used.
+   *
+   * What we probably want to do is modify getOutputUsage to be aware
+   * of callee-uses of parameters.
+   *
+   * For now this assert is just protecting the known breakage if we
+   * start doing analyzeCallee on things with parameters.
+   */
+  restoreFrame();
+  assert(callerArgLocs.empty());
+
+  FTRACE(1, "analyzeCallee: inline candidate\n");
+  fcall->calleeTrace = std::move(subTrace);
+}
+
 /*
  * analyze --
  *
@@ -2970,7 +3240,8 @@ static bool checkTaintFuncs(StringData* name) {
  * we store the RuntimeTypes from the TraceletContext right after the
  * instruction executes into the various output fields.
  */
-std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
+std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
+                                              const TypeMap& initialTypes) {
   std::unique_ptr<Tracelet> retval(new Tracelet());
   auto& t = *retval;
   t.m_sk = sk;
@@ -2979,9 +3250,8 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
   DEBUG_ONLY const int lineNum = curUnit()->getLineNumber(t.m_sk.offset());
   DEBUG_ONLY const char* funcName = curFunc()->fullName()->data();
 
-  TRACE(3, "Translator::analyze %s:%d %s\n",
-           file, lineNum, funcName);
-  TraceletContext tas(&t);
+  TRACE(1, "Translator::analyze %s:%d %s\n", file, lineNum, funcName);
+  TraceletContext tas(&t, initialTypes);
   ImmStack immStack;
   int stackFrameOffset = 0;
   int oldStackFrameOffset = 0;
@@ -3156,12 +3426,12 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
     // agree with the inputs and outputs.
     assert(getStackDelta(*ni) == (stackFrameOffset - oldStackFrameOffset));
     // If this instruction decreased the depth of the stack, mark the
-    // appropriate stack locations as "dead"
+    // appropriate stack locations as "dead".  But we need to leave
+    // them in the TraceletContext until after analyzeCallee (if this
+    // is an FCall).
     if (stackFrameOffset < oldStackFrameOffset) {
       for (int i = stackFrameOffset; i < oldStackFrameOffset; ++i) {
-        Location loc(Location::Stack, i);
-        tas.recordDelete(loc);
-        ni->deadLocs.push_back(loc);
+        ni->deadLocs.push_back(Location(Location::Stack, i));
       }
     }
 
@@ -3170,8 +3440,27 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
     t.m_instrStream.append(ni);
     ++t.m_numOpcodes;
 
-    annotate(ni);
+    /*
+     * The annotation step attempts to track Func*'s associated with
+     * given FCalls when the FPush is in a different tracelet.
+     *
+     * When we're analyzing a callee, we can't do this because we may
+     * have class information in some of our RuntimeTypes that is only
+     * true because of who the caller was.  (Normally it is only there
+     * if it came from static analysis.)
+     */
+    if (analysisDepth() == 0) {
+      annotate(ni);
+    }
+
     analyzeInstr(t, *ni);
+    if (m_useHHIR && ni->op() == OpFCall) {
+      analyzeCallee(tas, t, ni);
+    }
+
+    for (auto& l : ni->deadLocs) {
+      tas.recordDelete(l);
+    }
 
     if (debug) {
       // The interpreter has lots of nice sanity assertions in debug mode
@@ -3278,6 +3567,7 @@ breakBB:
       --t.m_numOpcodes;
     }
   }
+
   // Peephole optimizations may leave the bytecode stream in a state that is
   // inconsistent and troubles HHIR emission, so don't do it if HHIR is in use
   if (!m_useHHIR) {
@@ -3305,10 +3595,12 @@ breakBB:
   return retval;
 }
 
-Translator::Translator() :
-    m_resumeHelper(nullptr),
-    m_useHHIR(false),
-    m_createdTime(Timer::GetCurrentTimeMicros()) {
+Translator::Translator()
+  : m_resumeHelper(nullptr)
+  , m_useHHIR(false)
+  , m_createdTime(Timer::GetCurrentTimeMicros())
+  , m_analysisDepth(0)
+{
   initInstrInfo();
 }
 
@@ -3585,6 +3877,29 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
     }
   }
   return func;
+}
+
+std::string traceletShape(const Tracelet& trace) {
+  std::string ret;
+
+  for (auto ni = trace.m_instrStream.first; ni; ni = ni->next) {
+    using folly::toAppend;
+
+    toAppend(opcodeToName(ni->op()), &ret);
+    if (ni->immVec.isValid()) {
+      toAppend(
+        "<",
+        locationCodeString(ni->immVec.locationCode()),
+        &ret);
+      for (auto& mc : ni->immVecM) {
+        toAppend(" ", memberCodeString(mc), &ret);
+      }
+      toAppend(">", &ret);
+    }
+    toAppend(" ", &ret);
+  }
+
+  return ret;
 }
 
 } } }

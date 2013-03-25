@@ -266,8 +266,9 @@ ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1), m_zeroExtend(false),
 }
 
 const Func* CodeGenerator::getCurFunc() const {
-  return m_state.lastMarker ? m_state.lastMarker->func :
-         m_curTrace->front()->getFunc();
+  always_assert(m_state.lastMarker &&
+                "We shouldn't be looking for a func when we have no marker");
+  return m_state.lastMarker->func;
 }
 
 Address CodeGenerator::cgInst(IRInstruction* inst) {
@@ -306,10 +307,10 @@ NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
 NOOP_OPCODE(Marker)
 NOOP_OPCODE(AssertLoc)
-NOOP_OPCODE(DefActRec)
 NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
+NOOP_OPCODE(ExceptionBarrier)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -498,8 +499,18 @@ void emitLoadImm(CodeGenerator::Asm& as, int64_t val, PhysReg dstReg) {
   as.emitImmReg(val, dstReg);
 }
 
-void emitMovRegReg(CodeGenerator::Asm& as, PhysReg srcReg, PhysReg dstReg) {
+static void
+emitMovRegReg(CodeGenerator::Asm& as, PhysReg srcReg, PhysReg dstReg) {
   if (srcReg != dstReg) as.movq(srcReg, dstReg);
+}
+
+static void emitLea(CodeGenerator::Asm& as, MemoryRef mr, PhysReg dst) {
+  if (dst == InvalidReg) return;
+  if (mr.r.disp == 0) {
+    emitMovRegReg(as, mr.r.base, dst);
+  } else {
+    as.lea(mr, dst);
+  }
 }
 
 void shuffle2(CodeGenerator::Asm& a,
@@ -823,9 +834,6 @@ void CodeGenerator::cgCallHelper(Asm& a,
   // do the call; may use a trampoline
   m_tx64->emitCall(a, call);
 
-  // HHIR:TODO this only does required part of TranslatorX64::recordCallImpl()
-  // Better to have improved SKTRACE'n by calling recordStubCall,
-  // recordReentrantCall, or recordReentrantStubCall as appropriate
   if (sync != kNoSyncPoint) {
     recordSyncPoint(a, sync);
   }
@@ -2106,14 +2114,55 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
                  .immPtr(jmptab));
 }
 
+/*
+ * It'd be nice not to have the cgMov here (and just copy propagate
+ * the source or something), but for now we're keeping it allocated to
+ * rVmFp so inlined calls to C++ helpers that use the rbp chain to
+ * find the caller's ActRec will work correctly.
+ *
+ * This instruction primarily exists to assist in optimizing away
+ * unused activation records, so it's usually not going to happen
+ * anyway.
+ */
+void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
+  auto const fp       = inst->getSrc(0)->getReg();
+  auto const fakeRet  = m_tx64->getRetFromInlinedFrame();
+  auto const retBCOff = inst->getExtra<DefInlineFP>()->offset;
+
+  m_as.    storeq (fakeRet, fp[AROFF(m_savedRip)]);
+  m_as.    storel (retBCOff, fp[AROFF(m_soff)]);
+
+  cgMov(inst);
+}
+
+void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
+  auto fpReg = inst->getSrc(0)->getReg();
+  assert(fpReg == rVmFp);
+  m_as.    loadq  (fpReg[AROFF(m_savedRbp)], rVmFp);
+}
+
+void CodeGenerator::cgReDefSP(IRInstruction* inst) {
+  // TODO(#2288359): this instruction won't be necessary (for
+  // non-generator frames) when we don't track rVmSp independently
+  // from rVmFp.  In generator frames we'll have to track offsets from
+  // a DefGeneratorSP or something similar.
+  auto fp  = inst->getSrc(0)->getReg();
+  auto dst = inst->getDst()->getReg();
+  auto off = -inst->getExtra<ReDefSP>()->offset * sizeof(Cell);
+  emitLea(m_as, fp[off], dst);
+}
+
+void CodeGenerator::cgStashGeneratorSP(IRInstruction* inst) {
+  cgMov(inst);
+}
+
+void CodeGenerator::cgReDefGeneratorSP(IRInstruction* inst) {
+  cgMov(inst);
+}
+
 void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
-  SSATmp* outFp = inst->getDst();
-  SSATmp* inFp  = inst->getSrc(0);
-
-  auto  inFpReg =  inFp->getReg();
-  auto outFpReg = outFp->getReg();
-
-  m_as.load_reg64_disp_reg64(inFpReg, AROFF(m_savedRbp), outFpReg);
+  m_as.loadq(inst->getSrc(0)->getReg()[AROFF(m_savedRbp)],
+             inst->getDst()->getReg());
 }
 
 void CodeGenerator::cgAllocSpill(IRInstruction* inst) {
@@ -2956,22 +3005,15 @@ void CodeGenerator::cgDecRefNZOrBranch(IRInstruction* inst) {
   cgDecRefWork(inst, true);
 }
 
-void CodeGenerator::emitSpillActRec(SSATmp* sp,
-                                    int64_t spOffset,
-                                    SSATmp* defAR) {
-  if (debug) {
-    // Ensure srcs of defAR are still live, since we use their registers.
-    for (SSATmp* UNUSED src : defAR->getInstruction()->getSrcs()) {
-      assert(src->getInstruction()->getOpcode() == DefConst ||
-             src->getLastUseId() >= m_curInst->getId());
-    }
-  }
-  auto* defInst     = defAR->getInstruction();
-  SSATmp* fp        = defInst->getSrc(0);
-  SSATmp* func      = defInst->getSrc(1);
-  SSATmp* objOrCls  = defInst->getSrc(2);
-  SSATmp* nArgs     = defInst->getSrc(3);
-  SSATmp* magicName = defInst->getSrc(4);
+void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
+  auto const sp        = inst->getSrc(0);
+  auto const fp        = inst->getSrc(1);
+  auto const func      = inst->getSrc(2);
+  auto const objOrCls  = inst->getSrc(3);
+  auto const magicName = inst->getExtra<SpillFrame>()->invName;
+  auto const nArgs     = inst->getExtra<SpillFrame>()->numArgs;
+
+  const int64_t spOffset = -kNumActRecCells * sizeof(Cell);
 
   DEBUG_ONLY bool setThis = true;
 
@@ -2981,27 +3023,27 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
     // store class
     if (objOrCls->isConst()) {
       m_as.store_imm64_disp_reg64(uintptr_t(objOrCls->getValClass()) | 1,
-                                  spOffset + AROFF(m_this),
+                                  spOffset + int(AROFF(m_this)),
                                   spReg);
     } else {
       Reg64 clsPtrReg = objOrCls->getReg();
       m_as.movq  (clsPtrReg, rScratch);
       m_as.orq   (1, rScratch);
-      m_as.storeq(rScratch, spReg[spOffset + AROFF(m_this)]);
+      m_as.storeq(rScratch, spReg[spOffset + int(AROFF(m_this))]);
     }
   } else if (objOrCls->isA(Type::Obj)) {
     // store this pointer
     m_as.store_reg64_disp_reg64(objOrCls->getReg(),
-                                spOffset + AROFF(m_this),
+                                spOffset + int(AROFF(m_this)),
                                 spReg);
   } else if (objOrCls->isA(Type::Ctx)) {
     // Stores either a this pointer or a Cctx -- statically unknown.
     Reg64 objOrClsPtrReg = objOrCls->getReg();
-    m_as.storeq(objOrClsPtrReg, spReg[spOffset + AROFF(m_this)]);
+    m_as.storeq(objOrClsPtrReg, spReg[spOffset + int(AROFF(m_this))]);
   } else {
     assert(objOrCls->isA(Type::InitNull));
     // no obj or class; this happens in FPushFunc
-    int offset_m_this = spOffset + AROFF(m_this);
+    int offset_m_this = spOffset + int(AROFF(m_this));
     // When func is either Type::FuncCls or Type::FuncCtx,
     // m_this/m_cls will be initialized below
     if (!func->isConst() && (func->isA(Type::FuncCtx))) {
@@ -3012,38 +3054,35 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
     }
   }
   // actRec->m_invName
-  assert(magicName->isConst());
   // ActRec::m_invName is encoded as a pointer with bit kInvNameBit
   // set to distinguish it from m_varEnv and m_extrArgs
-  uintptr_t invName =
-    (magicName->getType().isNull()
-      ? 0
-      : (uintptr_t(magicName->getValStr()) | ActRec::kInvNameBit));
+  uintptr_t invName = !magicName
+    ? 0
+    : reinterpret_cast<uintptr_t>(magicName) | ActRec::kInvNameBit;
   m_as.store_imm64_disp_reg64(invName,
-                              spOffset + AROFF(m_invName),
+                              spOffset + int(AROFF(m_invName)),
                               spReg);
   // actRec->m_func  and possibly actRec->m_cls
   // Note m_cls is unioned with m_this and may overwrite previous value
   if (func->getType().isNull()) {
     assert(func->isConst());
   } else if (func->isConst()) {
-    // TODO: have register allocator materialize constants
     const Func* f = func->getValFunc();
     m_as. mov_imm64_reg((uint64_t)f, rScratch);
     m_as.store_reg64_disp_reg64(rScratch,
-                                spOffset + AROFF(m_func),
+                                spOffset + int(AROFF(m_func)),
                                 spReg);
     if (func->isA(Type::FuncCtx)) {
       // Fill in m_cls if provided with both func* and class*
       CG_PUNT(cgAllocActRec);
     }
   } else {
-    int offset_m_func = spOffset + AROFF(m_func);
+    int offset_m_func = spOffset + int(AROFF(m_func));
     m_as.store_reg64_disp_reg64(func->getReg(0),
                                 offset_m_func,
                                 spReg);
     if (func->isA(Type::FuncCtx)) {
-      int offset_m_cls = spOffset + AROFF(m_cls);
+      int offset_m_cls = spOffset + int(AROFF(m_cls));
       m_as.store_reg64_disp_reg64(func->getReg(1),
                                   offset_m_cls,
                                   spReg);
@@ -3053,14 +3092,17 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
   assert(setThis);
   // actRec->m_savedRbp
   m_as.store_reg64_disp_reg64(fp->getReg(),
-                              spOffset + AROFF(m_savedRbp),
+                              spOffset + int(AROFF(m_savedRbp)),
                               spReg);
 
   // actRec->m_numArgsAndCtorFlag
-  assert(nArgs->isConst());
-  m_as.store_imm32_disp_reg(nArgs->getValInt(),
-                            spOffset + AROFF(m_numArgsAndCtorFlag),
+  m_as.store_imm32_disp_reg(nArgs,
+                            spOffset + int(AROFF(m_numArgsAndCtorFlag)),
                             spReg);
+
+  emitAdjustSp(spReg,
+               inst->getDst()->getReg(),
+               spOffset);
 }
 
 HOT_FUNC_VM ActRec*
@@ -3346,39 +3388,41 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
   auto const spillCells   = spillValueCells(inst);
 
   int64_t adjustment = (spDeficit - spillCells) * sizeof(Cell);
-  for (uint32_t i = 0, cellOff = 0; i < numSpillSrcs; ++i) {
-    const int64_t offset = cellOff * sizeof(Cell) + adjustment;
-    if (spillVals[i]->getType() == Type::ActRec) {
-      emitSpillActRec(sp, offset, spillVals[i]);
-      cellOff += kNumActRecCells;
-      i += kSpillStackActRecExtraArgs;
-    } else if (spillVals[i]->getType() == Type::None) {
+  for (uint32_t i = 0; i < numSpillSrcs; ++i) {
+    const int64_t offset = i * sizeof(Cell) + adjustment;
+    if (spillVals[i]->getType() == Type::None) {
       // The simplifier detected that we're storing the same value
       // already in there.
-      ++cellOff;
+      continue;
+    }
+
+    auto* val = spillVals[i];
+    auto* inst = val->getInstruction();
+    while (inst->isPassthrough()) {
+      inst = inst->getPassthroughValue()->getInstruction();
+    }
+    // If our value came from a LdStack on the same sp and offset,
+    // we don't need to spill it.
+    if (inst->getOpcode() == LdStack && inst->getSrc(0) == sp &&
+        inst->getSrc(1)->getValInt() * sizeof(Cell) == offset) {
+      FTRACE(1, "{}: Not spilling spill value {} from {}\n",
+             __func__, i, inst->toString());
     } else {
-      auto* val = spillVals[i];
-      auto* inst = val->getInstruction();
-      while (inst->isPassthrough()) {
-        inst = inst->getPassthroughValue()->getInstruction();
-      }
-      // If our value came from a LdStack on the same sp and offset,
-      // we don't need to spill it.
-      if (inst->getOpcode() == LdStack && inst->getSrc(0) == sp &&
-          inst->getSrc(1)->getValInt() * sizeof(Cell) == offset) {
-        FTRACE(1, "{}: Not spilling spill value {} from {}\n",
-               __func__, i, inst->toString());
-      } else {
-        cgStore(spReg, offset, val);
-      }
-      ++cellOff;
+      cgStore(spReg, offset, val);
     }
   }
+
+  emitAdjustSp(spReg, dstReg, adjustment);
+}
+
+void CodeGenerator::emitAdjustSp(PhysReg spReg,
+                                 PhysReg dstReg,
+                                 int64_t adjustment /* bytes */) {
   if (adjustment != 0) {
     if (dstReg != spReg) {
-      m_as.lea_reg64_disp_reg64(spReg, adjustment, dstReg);
+      m_as.    lea   (spReg[adjustment], dstReg);
     } else {
-      m_as.add_imm32_reg64(adjustment, dstReg);
+      m_as.    addq  (adjustment, dstReg);
     }
   } else {
     emitMovRegReg(m_as, spReg, dstReg);
@@ -3732,6 +3776,9 @@ void CodeGenerator::recordSyncPoint(Asm& as,
   }
 
   Offset pcOff = m_state.lastMarker->bcOff - m_state.lastMarker->func->base();
+
+  FTRACE(3, "IR recordSyncPoint: {} {} {}\n", as.code.frontier, pcOff,
+         stackOff);
   m_tx64->recordSyncPoint(as, pcOff, stackOff);
 }
 
@@ -4847,7 +4894,7 @@ void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64_t pcOff,
   tx64->emitCall(as, (TCA)traceCallback);
 }
 
-void patchJumps(Asm& as, CodegenState& state, Block* block) {
+static void patchJumps(Asm& as, CodegenState& state, Block* block) {
   void* list = state.patches[block];
   Address labelAddr = as.code.frontier;
   while (list) {

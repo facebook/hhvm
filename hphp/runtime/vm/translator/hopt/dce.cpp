@@ -30,7 +30,12 @@ static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
 /* DceFlags tracks the state of one instruction during dead code analysis. */
 struct DceFlags {
-  DceFlags() : m_state(DEAD), m_decRefNZ(false) {}
+  DceFlags()
+    : m_state(DEAD)
+    , m_weakUseCount(0)
+    , m_decRefNZ(false)
+  {}
+
   bool isDead()                const { return m_state == DEAD; }
   bool countConsumed()         const { return m_state == REFCOUNT_CONSUMED; }
   bool countConsumedOffTrace() const {
@@ -46,6 +51,27 @@ struct DceFlags {
   void setCountConsumed()         { m_state = REFCOUNT_CONSUMED; }
   void setCountConsumedOffTrace() { m_state = REFCOUNT_CONSUMED_OFF_TRACE; }
   void setDecRefNZed()            { m_decRefNZ = true; }
+
+  /*
+   * "Weak" uses are used in optimizeActRecs.
+   *
+   * If a frame pointer is used for something that can be modified to
+   * not be a use as long as the whole frame can go away, we'll track
+   * that here.
+   */
+  void incWeakUse() {
+    if (m_weakUseCount + 1 > kMaxWeakUseCount) {
+      always_assert(!"currently there's only one instruction "
+                    "using this machinery, so this shouldn't "
+                    "happen ... ");
+      return;
+    }
+    ++m_weakUseCount;
+  }
+
+  int32_t weakUseCount() const {
+    return m_weakUseCount;
+  }
 
   std::string toString() const {
     static const char* const names[] = {
@@ -76,7 +102,9 @@ private:
     REFCOUNT_CONSUMED,
     REFCOUNT_CONSUMED_OFF_TRACE,
   };
-  uint8_t m_state:7;
+  uint8_t m_state:3;
+  static constexpr uint8_t kMaxWeakUseCount = 15;
+  uint8_t m_weakUseCount:4;
   bool m_decRefNZ:1;
 };
 static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
@@ -119,7 +147,7 @@ BlockList removeUnreachable(Trace* trace, IRFactory* factory) {
   //    perform copy propagation on every instruction. Targets that become
   //    unreachable from this pass will be eliminated in step 2 below.
   forEachTraceInst(trace, [](IRInstruction* inst) {
-    Simplifier::copyProp(inst);
+    copyProp(inst);
     // if this is a load that does not generate a guard, then get rid
     // of its label so that its not an essential control-flow
     // instruction
@@ -191,6 +219,8 @@ void optimizeRefCount(Trace* trace, DceState& state) {
   WorkList decrefs;
   forEachInst(trace, [&](IRInstruction* inst) {
     if (inst->getOpcode() == IncRef && !state[inst].countConsumedAny()) {
+      // This assert is often hit when an instruction should have a
+      // consumesReferences flag but doesn't.
       auto& s = state[inst];
       always_assert_log(s.decRefNZed(), [&]{
         Trace* mainTrace = trace->isMain() ? trace : trace->getMain();
@@ -220,7 +250,7 @@ void optimizeRefCount(Trace* trace, DceState& state) {
     }
     // Do copyProp at last. When processing DecRefNZs, we still need to look at
     // its source which should not be trampled over.
-    Simplifier::copyProp(inst);
+    copyProp(inst);
   });
   for (const IRInstruction* decref : decrefs) {
     assert(decref->getOpcode() == DecRef);
@@ -256,8 +286,8 @@ void optimizeRefCount(Trace* trace, DceState& state) {
 void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
   assert(trace->isMain());
 
-  auto copyProp = [] (Trace* trace) {
-    forEachInst(trace, Simplifier::copyProp);
+  auto copyPropTrace = [] (Trace* trace) {
+    forEachInst(trace, copyProp);
   };
 
   WorkList toSink;
@@ -289,7 +319,7 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
     });
     // Do copyProp at last, because we need to keep REFCOUNT_CONSUMED_OFF_TRACE
     // Movs as the prototypes for sunk instructions.
-    copyProp(exit);
+    copyPropTrace(exit);
   };
 
   // An exit trace may be entered from multiple exit points. We keep track of
@@ -330,7 +360,100 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
 
   // Do copyProp at last, because we need to keep REFCOUNT_CONSUMED_OFF_TRACE
   // Movs as the prototypes for sunk instructions.
-  copyProp(trace);
+  copyPropTrace(trace);
+}
+
+/*
+ * Look for InlineReturn instructions that are the only "non-weak" use
+ * of a DefInlineFP.  In this case we can kill both, which may allow
+ * removing a SpillFrame as well.
+ */
+void optimizeActRecs(Trace* trace, DceState& state) {
+  FTRACE(5, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
+  SCOPE_EXIT { FTRACE(5, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
+
+  bool killedFrames = false;
+
+  forEachInst(trace, [&](IRInstruction* inst) {
+    switch (inst->getOpcode()) {
+    case DecRefKillThis:
+      {
+        auto frame = inst->getSrc(1);
+        auto frameInst = frame->getInstruction();
+        if (frameInst->getOpcode() == DefInlineFP) {
+          FTRACE(5, "DecRefKillThis ({}): weak use of frame {}\n",
+                 inst->getIId(),
+                 frameInst->getIId());
+          state[frameInst].incWeakUse();
+        }
+      }
+      break;
+
+    case InlineReturn:
+      {
+        auto frameUses = inst->getSrc(0)->getUseCount();
+        auto srcInst = inst->getSrc(0)->getInstruction();
+        if (srcInst->getOpcode() == DefInlineFP) {
+          auto weakUses = state[srcInst].weakUseCount();
+          // We haven't counted this InlineReturn as a weak use yet,
+          // which is where this '1' comes from.
+          if (frameUses - weakUses == 1) {
+            FTRACE(5, "killing frame {}\n", srcInst->getIId());
+            killedFrames = true;
+            state[srcInst].setDead();
+          }
+        }
+      }
+      break;
+
+    default:
+      break;
+    }
+  });
+
+  if (!killedFrames) return;
+
+  /*
+   * The first time through, we've counted up weak uses of the frame
+   * and then finally marked it dead.  The instructions in between
+   * that were weak uses may need modifications now that their frame
+   * is going away.
+   */
+  forEachInst(trace, [&](IRInstruction* inst) {
+    switch (inst->getOpcode()) {
+    case DecRefKillThis:
+      {
+        auto fp = inst->getSrc(1);
+        if (state[fp->getInstruction()].isDead()) {
+          FTRACE(5, "DecRefKillThis ({}) -> DecRef\n", inst->getIId());
+          inst->setOpcode(DecRef);
+          inst->setSrc(1, nullptr);
+          inst->setNumSrcs(1);
+        }
+      }
+      break;
+
+    case InlineReturn:
+      {
+        auto fp = inst->getSrc(0);
+        if (state[fp->getInstruction()].isDead()) {
+          FTRACE(5, "InlineReturn ({}) setDead\n", inst->getIId());
+          state[inst].setDead();
+        }
+      }
+      break;
+
+    case DefInlineFP:
+      FTRACE(5, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
+             inst->getIId(),
+             state[inst].weakUseCount(),
+             inst->getDst()->getUseCount());
+      break;
+
+    default:
+      break;
+    }
+  });
 }
 
 // Assuming that the 'consumer' instruction consumes 'src', trace back through
@@ -465,6 +588,10 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
     // Sink IncRefs consumed off trace.
     sinkIncRefs(trace, irFactory, state);
   }
+
+  // Optimize unused inlined activation records.  It's not necessary
+  // to look at non-main traces for this.
+  optimizeActRecs(trace, state);
 
   // now remove instructions whose id == DEAD
   removeDeadInstructions(trace, state);

@@ -17,6 +17,7 @@
 #include <strings.h>
 
 #include "folly/Format.h"
+#include "folly/Conv.h"
 #include "util/trace.h"
 #include "util/stack_trace.h"
 #include "util/util.h"
@@ -611,6 +612,10 @@ void TranslatorX64::irTranslateCreateCont(const Tracelet& t,
 void TranslatorX64::irTranslateContEnter(const Tracelet& t,
                                          const NormalizedInstruction& i) {
   int after = nextSrcKey(t, i).offset();
+
+  // ContEnter can't exist in an inlined function right now.  (If it
+  // ever can, this curFunc() needs to change.)
+  assert(!m_hhbcTrans->isInlining());
   const Func* srcFunc = curFunc();
   int32_t callOffsetInUnit = after - srcFunc->base();
 
@@ -973,9 +978,6 @@ TranslatorX64::irTranslateFPushClsMethodF(const Tracelet& t,
                           FPushClsMethodF_unknown);
 
   auto cls = classLoc->rtt.valueClass();
-  DEBUG_ONLY ActRec* fp = curFrame();
-  assert(!fp->hasThis() || fp->getThis()->instanceof(cls));
-
   HHIR_EMIT(FPushClsMethodF,
             i.imm[0].u_IVA, // # of arguments
             cls,
@@ -1018,20 +1020,12 @@ void TranslatorX64::irTranslateCreateCl(const Tracelet& t,
 void
 TranslatorX64::irTranslateThis(const Tracelet &t,
                                const NormalizedInstruction &i) {
-  assert(i.outStack && !i.outLocal);
-  assert(curFunc()->isPseudoMain() || curFunc()->cls() ||
-         curFunc()->isClosureBody());
-
   HHIR_EMIT(This);
 }
 
 void
 TranslatorX64::irTranslateBareThis(const Tracelet &t,
                                   const NormalizedInstruction &i) {
-  assert(i.outStack && !i.outLocal);
-  assert(curFunc()->isPseudoMain() || curFunc()->cls() ||
-         curFunc()->isClosureBody());
-
   HHIR_EMIT(BareThis, (i.imm[0].u_OA));
 }
 
@@ -1044,9 +1038,6 @@ TranslatorX64::irTranslateCheckThis(const Tracelet& t,
 void
 TranslatorX64::irTranslateInitThisLoc(const Tracelet& t,
                                     const NormalizedInstruction& i) {
-  assert(i.outLocal && !i.outStack);
-  assert(curFunc()->isPseudoMain() || curFunc()->cls());
-
   HHIR_EMIT(InitThisLoc, i.outLocal->location.offset);
 }
 
@@ -1117,16 +1108,205 @@ TranslatorX64::irTranslateFCallBuiltin(const Tracelet& t,
   HHIR_EMIT(FCallBuiltin, numArgs, numNonDefault, funcId);
 }
 
+static bool shouldIRInline(const Func* func, const Tracelet& callee) {
+  if (!RuntimeOption::EvalHHIREnableGenTimeInlining) {
+    return false;
+  }
+
+  auto refuse = [&](const char* why) -> bool {
+    FTRACE(1, "shouldIRInline: refusing {} <reason: {}>\n",
+              func->fullName()->data(), why);
+    return false;
+  };
+  auto accept = [&](const char* kind) -> bool {
+    FTRACE(1, "shouldIRInline: inlining {} <kind: {}>\n",
+              func->fullName()->data(), kind);
+    return true;
+  };
+
+  if (func->numLocals() != func->numParams()) {
+    return refuse("locals");
+  }
+  if (func->numIterators() != 0) {
+    return refuse("iterators");
+  }
+  if (func->maxStackCells() >= kMaxJITInlineStackCells) {
+    FTRACE(1, "{} >= {}\n",
+           func->maxStackCells(),
+           kMaxJITInlineStackCells);
+    return refuse("too many stack cells");
+  }
+
+  // Disable anything with locals---specialized RetC generates stores
+  // that zero out the m_type's and depend on the frame.
+  if (func->numLocals() != 0) {
+    return refuse("has locals (would use frame)");
+  }
+
+  // Little pattern recognition helpers:
+  const NormalizedInstruction* cursor;
+  Opcode current;
+  auto resetCursor = [&] {
+    cursor = callee.m_instrStream.first;
+    current = cursor->op();
+  };
+  auto next = [&]() -> Opcode {
+    auto op = cursor->op();
+    cursor = cursor->next;
+    current = cursor->op();
+    return op;
+  };
+  auto nextIf = [&](Opcode op) -> bool {
+    if (current != op) return false;
+    next();
+    return true;
+  };
+  auto atRet = [&] { return current == OpRetC || current == OpRetV; };
+
+  // Simple operations that just put a Cell on the stack without any
+  // inputs.  For now avoid CreateCont because it depends on the
+  // frame.
+  auto simpleCell = [&]() -> bool {
+    if (cursor->outStack && cursor->inputs.empty() &&
+        current != OpCreateCont) {
+      next();
+      return true;
+    }
+    return false;
+  };
+
+  // Simple two-cell comparison operators.
+  auto simpleCmp = [&]() -> bool {
+    switch (current) {
+    case OpAdd: case OpSub: case OpMul: case OpDiv: case OpMod:
+    case OpXor: case OpNot: case OpSame: case OpNSame: case OpEq:
+    case OpNeq: case OpLt: case OpLte: case OpGt: case OpGte:
+    case OpBitAnd: case OpBitOr: case OpBitXor: case OpBitNot:
+    case OpShl: case OpShr:
+      next();
+      return true;
+    default:
+      return false;
+    }
+  };
+
+  // In the various patterns below, when we're down to a cell on the
+  // stack, this is used to allow simple constant-foldable
+  // manipulations of it before return.
+  auto cellManipRet = [&]() -> bool {
+    if (nextIf(OpNot)) return atRet();
+    if (simpleCell() && simpleCmp()) return atRet();
+    return atRet();
+  };
+
+  /////////////
+
+  // Identity functions.
+  resetCursor();
+  if (current == OpCGetL) {
+    next();
+    if (atRet()) return accept("returns parameter");
+  }
+
+  // Simple property accessors.
+  resetCursor();
+  if (current == OpCheckThis) next();
+  if (cursor->op() == OpCGetM &&
+      cursor->immVec.locationCode() == LH &&
+      cursor->immVecM.size() == 1 &&
+      cursor->immVecM.front() == MPT &&
+      !mInstrHasUnknownOffsets(*cursor, func->cls())) {
+    next();
+    // Can't currently support cellManipRet because it's usually going
+    // to be CGetM-prediction, which will use the frame.
+    if (atRet()) {
+      return accept("simple property accessor");
+    }
+  }
+
+  /*
+   * Functions that set an object property to a simple cell value.
+   * E.g. something that does $this->foo = null;
+   */
+  resetCursor();
+  if (current == OpCheckThis) next();
+  if (simpleCell()) {
+    if (cursor->op() == OpSetM &&
+        cursor->immVec.locationCode() == LH &&
+        cursor->immVecM.size() == 1 &&
+        cursor->immVecM.front() == MPT &&
+        !mInstrHasUnknownOffsets(*cursor, func->cls())) {
+      next();
+      if (nextIf(OpPopC) && simpleCell() && atRet()) {
+        return accept("simpleCell prop setter");
+      }
+    }
+  }
+
+  /*
+   * Anything that just puts a value on the stack with no inputs, and
+   * then returns it, after possibly doing some comparison with
+   * another such thing.
+   *
+   * E.g. String; String; Same; RetC, or Null; RetC.
+   */
+  resetCursor();
+  if (simpleCell() && cellManipRet()) {
+    return accept("simple returner");
+  }
+
+  // BareThis; InstanceOfD; RetC
+  resetCursor();
+  if (nextIf(OpBareThis) && nextIf(OpInstanceOfD) && atRet()) {
+    return accept("$this instanceof D");
+  }
+
+  return refuse("unknown kind of function");
+}
+
 void
 TranslatorX64::irTranslateFCall(const Tracelet& t,
-                              const NormalizedInstruction& i) {
-  int numArgs = i.imm[0].u_IVA;
+                                const NormalizedInstruction& i) {
+  auto const numArgs = i.imm[0].u_IVA;
+
+  always_assert(!m_hhbcTrans->isInlining() && "curUnit and curFunc calls");
   const Opcode* after = curUnit()->at(nextSrcKey(t, i).offset());
   const Func* srcFunc = curFunc();
-
-  Offset callOffsetInUnit =
+  Offset returnBcOffset =
     srcFunc->unit()->offsetOf(after - srcFunc->base());
-  HHIR_EMIT(FCall, numArgs, callOffsetInUnit, i.funcd);
+
+  /*
+   * If we have a calleeTrace, we're going to see if we should inline
+   * the call.
+   */
+  if (i.calleeTrace) {
+    if (!m_hhbcTrans->isInlining() &&
+        shouldIRInline(i.funcd, *i.calleeTrace)) {
+      m_hhbcTrans->beginInlining(numArgs, i.funcd, returnBcOffset);
+      static const bool shapeStats = Stats::enabledAny() &&
+                                     getenv("HHVM_STATS_INLINESHAPE");
+      if (shapeStats) {
+        m_hhbcTrans->profileInlineFunctionShape(traceletShape(*i.calleeTrace));
+      }
+
+      for (auto* ni = i.calleeTrace->m_instrStream.first;
+          ni; ni = ni->next) {
+        m_curNI = ni;
+        SCOPE_EXIT { m_curNI = &i; };
+        irTranslateInstr(*i.calleeTrace, *ni);
+      }
+      return;
+    }
+
+    static const auto enabled = Stats::enabledAny() &&
+                                getenv("HHVM_STATS_FAILEDINL");
+    if (enabled) {
+      m_hhbcTrans->profileFunctionEntry("FailedCandidate");
+      m_hhbcTrans->profileFailedInlShape(traceletShape(*i.calleeTrace));
+    }
+  }
+
+  HHIR_EMIT(FCall, numArgs, returnBcOffset, i.funcd);
 }
 
 void
@@ -1440,7 +1620,8 @@ void TranslatorX64::irTranslateInstr(const Tracelet& t,
   assert(!i.outLocal || i.outLocal->isLocal());
   FTRACE(1, "translating: {}\n", opcodeToName(i.op()));
 
-  m_hhbcTrans->setBcOff(i.source.offset(), i.breaksTracelet);
+  m_hhbcTrans->setBcOff(i.source.offset(),
+                        i.breaksTracelet && !m_hhbcTrans->isInlining());
 
   if (!i.grouped) {
     emitVariantGuards(t, i);
@@ -1561,6 +1742,30 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
     Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
     recordBCInstr(OpTraceletGuard, a, start);
     m_hhbcTrans->setBcOffNextTrace(t.m_nextSk.offset());
+
+    // Profiling on function entry.
+    if (m_curTrace->m_sk.offset() == curFunc()->base()) {
+      m_hhbcTrans->profileFunctionEntry("Normal");
+    }
+
+    /*
+     * Profiling on the shapes of tracelets that are whole functions.
+     * (These are the things we might consider trying to support
+     * inlining.)
+     */
+    [&]{
+      static const bool enabled = Stats::enabledAny() &&
+                                  getenv("HHVM_STATS_FUNCSHAPE");
+      if (!enabled) return;
+      if (m_curTrace->m_sk.offset() != curFunc()->base()) return;
+      if (auto last = m_curTrace->m_instrStream.last) {
+        if (last->op() != OpRetC && last->op() != OpRetV) {
+          return;
+        }
+      }
+      m_hhbcTrans->profileSmallFunctionShape(traceletShape(*m_curTrace));
+    }();
+
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni; ni = ni->next) {
       try {
@@ -1603,7 +1808,7 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
       transResult = Success;
       hhirTraceCodeGen(bcMap);
 
-      TRACE(1, "HHIR: SUCCEEDED to generate code for Translation %d\n",
+      TRACE(1, "HHIR: SUCCEEDED to generate code for Translation %d\n\n\n",
             getCurrentTransID());
     }
   } catch (JIT::FailedCodeGen& fcg) {
@@ -1719,6 +1924,5 @@ void TranslatorX64::hhirTraceFree() {
   m_hhbcTrans.reset();
   m_irFactory.reset();
 }
-
 
 }}}

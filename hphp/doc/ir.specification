@@ -838,30 +838,45 @@ NewTuple
 
 9. Call & Return
 
-D:ActRec = DefActRec S0:FramePtr
-                     S1:Func
-                     S2:{CtxPtr|ClassPtr|Null}
-                     S3:ConstInt
-                     S4:{String|Null}
+D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
+                                       S1:FramePtr
+                                       S1:Func
+                                       S2:{Ctx|Class|Null}
 
   Operands:
 
-     S0 - callee frame pointer
-     S1 - callee Func
-     S2 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
+     S0 - caller stack pointer
+     S1 - caller frame pointer
+     S2 - callee Func
+     S3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or
           null (for FPushFunc*).
-     S3 - number of arguments
-     S4 - invName field for magic calls, or null
 
-  Defines the fields for an activation record.  May be passed to a
-  SpillStack to store the fields to the stack.
+  Defines the fields for an activation record and writes them to the
+  stack pointed to by S1.
 
 D:FramePtr = FreeActRec S0:FramePtr
 
   Load the saved frame pointer from the activation record pointed to
   by S0 into D.
 
-D:StkPtr = Call S0:ActRec S1:ConstInt S2:Func S3...
+D:FramePtr = DefInlineFP<returnBcOffset> S0:StkPtr
+
+  Defines a frame pointer for an inlined function.  S0 is a StkPtr
+  that points to the ActRec for the callee (i.e. after parameters have
+  been popped).
+
+  This instruction is primarily used to represent a frame in the IR in
+  a way that allows us to eliminate it entirely.  When it cannot be
+  eliminated (or if it is pushed into an unlikely path) it performs
+  callee-side responsibilities for setting up an activation record
+  (i.e. setting the return ip and m_soff, storing the frame pointer
+  into D).
+
+InlineReturn S0:FramePtr
+
+  Unlinks a frame constructed by DefInlineFP.
+
+D:StkPtr = Call S0:StkPtr S1:ConstInt S2:Func S3...
 
   Invoke the function S2 with ActRec S0 and variadic arguments S3...
   representing values to pass to the function.  A value of type None
@@ -988,10 +1003,8 @@ D:StkPtr = SpillStack S0:StkP S1:ConstInt, S2...
                is pushed
 
      S2...   - variadic list of elements to spill, with values
-               representing cells, ActRecs, or None.  Each temp of type
-               ActRec is followed by kSpillStackActRecExtraArgs for
-               the contents of the ActRec.  A temp with type None means
-               to keep the previous value on the stack.
+               representing cells.  A temp with type None means to
+               keep the previous value on the stack.
 
 
 11. Trace exits
@@ -1087,12 +1100,51 @@ D:FramePtr = DefFP
 
   Creates a temporary D representing the current vm frame pointer.
 
-D:StkPtr = DefSP S0:StkPtr S1:ConstInt
+D:StkPtr = DefSP<stackOff> S0:StkPtr
 
   Creates a temporary D representing the current vm stack pointer.  S0
-  is a pointer to the current frame, and S1 is the offset between the
-  stack pointer and the frame pointer.  (XXX: this doesn't work
-  because of continuations, and is unused.)
+  is a pointer to the current frame.  The 'stackOff' is the logical
+  offset between S0 and the stack pointer, but in the case of
+  continuations this is not the physical offset at runtime.
+
+  This instruction is used at the beginning of tracelets to represent
+  the state of the stack on entry and does not emit code.
+
+D:StkPtr = ReDefSP<offset> S0:FramePtr S1:StkPtr
+
+  Re-define a stack in terms of a frame pointer S0 and an offset,
+  putting the resulting pointer in D.  The resulting stack is assumed
+  to give the same view as S1, which is a previous stack pointer.
+  (I.e. for getStackValue we just chain to S1.)
+
+  This instruction is used when entering or "returning" from an
+  inlined call.  The one used on entry will be DCE'd when the actrec
+  can be eliminated.  The one on exit is only needed until TODO(#2288359).
+
+D:StkPtr = StashGeneratorSP S0:StkPtr
+
+  Store a generator stack pointer, for later use.
+
+  This instruction has exactly the effects of Mov.
+
+  The point of this is a bit of a hack to handle the fact that we
+  currently assign the same registers to frame (rVmFp) and stack
+  pointers (rVmSp) through the IR.  During an inline call, we want to
+  be able to have uses of the stack after the call, but we can't
+  restore it using a frame pointer like with ReDefSP, because the
+  values of rVmSp and rVmFp are not related like that in a generator.
+
+  This instruction moves the value of rVmSp into a temporary, which we
+  can get back using ReDefGeneratorSP.
+
+  TODO(#2288359): this shouldn't be needed.
+
+D:StkPtr = ReDefGeneratorSP<offset> S0:StkPtr
+
+  Restore a generator stack pointer.  See StashGeneratorSP.
+
+  This instruction has exactly the effects of Mov, except that the
+  destination is allocated to rVmSp.
 
 Nop
 

@@ -3161,9 +3161,8 @@ static inline void ratchetRefs(TypedValue*& result, TypedValue& tvRef,
   }
 }
 
-#define DECLARE_GETHELPER_ARGS                  \
+#define DECLARE_MEMBERHELPER_ARGS               \
   unsigned ndiscard;                            \
-  TypedValue* tvRet;                            \
   TypedValue* base;                             \
   bool baseStrOff = false;                      \
   TypedValue tvScratch;                         \
@@ -3172,9 +3171,15 @@ static inline void ratchetRefs(TypedValue*& result, TypedValue& tvRef,
   TypedValue tvRef2;                            \
   MemberCode mcode = MEL;                       \
   TypedValue* curMember = 0;
-#define GETHELPERPRE_ARGS                                              \
+#define DECLARE_SETHELPER_ARGS DECLARE_MEMBERHELPER_ARGS
+#define DECLARE_GETHELPER_ARGS                  \
+  DECLARE_MEMBERHELPER_ARGS                     \
+  TypedValue* tvRet;
+
+#define MEMBERHELPERPRE_ARGS                                           \
   pc, ndiscard, base, baseStrOff, tvScratch, tvLiteral,                \
     tvRef, tvRef2, mcode, curMember
+
 // The following arguments are outputs:
 // pc:         bytecode instruction after the vector instruction
 // ndiscard:   number of stack elements to discard
@@ -3205,205 +3210,8 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
     TypedValue& tvRef2,
     MemberCode& mcode,
     TypedValue*& curMember) {
-  // The caller is responsible for moving pc to point to the vector immediate
-  // before calling getHelperPre().
-  const ImmVector immVec = ImmVector::createFromStream(pc);
-  const uint8_t* vec = immVec.vec();
-  assert(immVec.size() > 0);
-
-  // PC needs to be advanced before we do anything, otherwise if we
-  // raise a notice in the middle of this we could resume at the wrong
-  // instruction.
-  pc += immVec.size() + sizeof(int32_t) + sizeof(int32_t);
-
-  ndiscard = immVec.numStackValues();
-  int depth = ndiscard - 1;
-  const LocationCode lcode = LocationCode(*vec++);
-
-  TypedValue* loc = nullptr;
-  TypedValue dummy;
-  Class* const ctx = arGetContextClass(getFP());
-
-  StringData* name;
-  TypedValue* fr = nullptr;
-  TypedValue* cref;
-  TypedValue* pname;
-  tvWriteUninit(&tvScratch);
-
-  switch (lcode) {
-  case LNL:
-    loc = frame_local_inner(m_fp, decodeVariableSizeImm(&vec));
-    goto lcodeName;
-  case LNC:
-    loc = m_stack.indTV(depth--);
-    goto lcodeName;
-
-  lcodeName:
-    lookup_var(m_fp, name, loc, fr);
-    if (fr == nullptr) {
-      if (warn) {
-        raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-      }
-      tvWriteNull(&dummy);
-      loc = &dummy;
-    } else {
-      loc = fr;
-    }
-    decRefStr(name);
-    break;
-
-  case LGL:
-    loc = frame_local_inner(m_fp, decodeVariableSizeImm(&vec));
-    goto lcodeGlobal;
-  case LGC:
-    loc = m_stack.indTV(depth--);
-    goto lcodeGlobal;
-
-  lcodeGlobal:
-    lookup_gbl(m_fp, name, loc, fr);
-    if (fr == nullptr) {
-      if (warn) {
-        raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-      }
-      tvWriteNull(&dummy);
-      loc = &dummy;
-    } else {
-      loc = fr;
-    }
-    decRefStr(name);
-    break;
-
-  case LSC:
-    cref = m_stack.topTV();
-    pname = m_stack.indTV(depth--);
-    goto lcodeSprop;
-  case LSL:
-    cref = m_stack.topTV();
-    pname = frame_local_inner(m_fp, decodeVariableSizeImm(&vec));
-    goto lcodeSprop;
-
-  lcodeSprop: {
-    bool visible, accessible;
-    assert(cref->m_type == KindOfClass);
-    const Class* class_ = cref->m_data.pcls;
-    StringData* name = lookup_name(pname);
-    loc = class_->getSProp(ctx, name, visible, accessible);
-    if (!(visible && accessible)) {
-      raise_error("Invalid static property access: %s::%s",
-                  class_->name()->data(),
-                  name->data());
-    }
-    decRefStr(name);
-    break;
-  }
-
-  case LL: {
-    int localInd = decodeVariableSizeImm(&vec);
-    loc = frame_local_inner(m_fp, localInd);
-    if (warn) {
-      if (loc->m_type == KindOfUninit) {
-        raise_notice(Strings::UNDEFINED_VARIABLE,
-                     m_fp->m_func->localVarName(localInd)->data());
-      }
-    }
-    break;
-  }
-  case LC:
-  case LR:
-    loc = m_stack.indTV(depth--);
-    break;
-  case LH:
-    assert(m_fp->hasThis());
-    tvScratch.m_type = KindOfObject;
-    tvScratch.m_data.pobj = m_fp->getThis();
-    loc = &tvScratch;
-    break;
-
-  default: not_reached();
-  }
-
-  base = loc;
-  tvWriteUninit(&tvLiteral);
-  tvWriteUninit(&tvRef);
-  tvWriteUninit(&tvRef2);
-
-  // Iterate through the members.
-  while (vec < pc) {
-    mcode = MemberCode(*vec++);
-    if (memberCodeHasImm(mcode)) {
-      int64_t memberImm = decodeMemberCodeImm(&vec, mcode);
-      if (memberCodeImmIsString(mcode)) {
-        tvAsVariant(&tvLiteral) =
-          m_fp->m_func->unit()->lookupLitstrId(memberImm);
-        assert(!IS_REFCOUNTED_TYPE(tvLiteral.m_type));
-        curMember = &tvLiteral;
-      } else if (mcode == MEI) {
-        tvAsVariant(&tvLiteral) = memberImm;
-        curMember = &tvLiteral;
-      } else {
-        assert(memberCodeImmIsLoc(mcode));
-        curMember = frame_local_inner(m_fp, memberImm);
-      }
-    } else {
-      curMember = m_stack.indTV(depth--);
-    }
-
-    if (mleave == LeaveLast) {
-      if (vec >= pc) {
-        assert(vec == pc);
-        break;
-      }
-    }
-
-    TypedValue* result;
-    switch (mcode) {
-    case MEL:
-    case MEC:
-    case MET:
-    case MEI:
-      result = Elem<warn>(tvScratch, tvRef, base, baseStrOff, curMember);
-      break;
-    case MPL:
-    case MPC:
-    case MPT:
-      result = Prop<warn, false, false>(tvScratch, tvRef, ctx, base,
-                                        curMember);
-      break;
-    case MW:
-      raise_error("Cannot use [] for reading");
-      result = nullptr;
-      break;
-    default:
-      assert(false);
-      result = nullptr; // Silence compiler warning.
-    }
-    assert(result != nullptr);
-    ratchetRefs(result, tvRef, tvRef2);
-    base = result;
-  }
-
-  if (mleave == ConsumeAll) {
-    assert(vec == pc);
-    if (debug) {
-      if (lcode == LSC || lcode == LSL) {
-        assert(depth == 0);
-      } else {
-        assert(depth == -1);
-      }
-    }
-  }
-
-  if (saveResult) {
-    // If requested, save a copy of the result.  If base already points to
-    // tvScratch, no reference counting is necessary, because (with the
-    // exception of the following block), tvScratch is never populated such
-    // that it owns a reference that must be accounted for.
-    if (base != &tvScratch) {
-      // Acquire a reference to the result via tvDup(); base points to the
-      // result but does not own a reference.
-      tvDup(base, &tvScratch);
-    }
-  }
+  memberHelperPre<false, warn, false, false,
+    false, 0, mleave, saveResult>(MEMBERHELPERPRE_ARGS);
 }
 
 #define GETHELPERPOST_ARGS ndiscard, tvRet, tvScratch, tvRef, tvRef2
@@ -3450,7 +3258,7 @@ VMExecutionContext::getHelper(PC& pc,
                               TypedValue& tvRef2,
                               MemberCode& mcode,
                               TypedValue*& curMember) {
-  getHelperPre<true, true, ConsumeAll>(GETHELPERPRE_ARGS);
+  getHelperPre<true, true, ConsumeAll>(MEMBERHELPERPRE_ARGS);
   getHelperPost<true>(GETHELPERPOST_ARGS);
 }
 
@@ -3467,45 +3275,21 @@ VMExecutionContext::getElem(TypedValue* base, TypedValue* key,
   }
 }
 
-#define DECLARE_SETHELPER_ARGS                                                \
-  unsigned ndiscard;                                                          \
-  TypedValue* base;                                                           \
-  bool baseStrOff = false;                                                    \
-  TypedValue tvScratch;                                                       \
-  TypedValue tvLiteral;                                                      \
-  TypedValue tvRef;                                                           \
-  TypedValue tvRef2;                                                          \
-  MemberCode mcode = MEL;                                                     \
-  TypedValue* curMember = 0;
-#define SETHELPERPRE_ARGS                                                     \
-  pc, ndiscard, base, baseStrOff, tvScratch, tvLiteral, tvRef, tvRef2, \
-    mcode, curMember
-// The following arguments are outputs:  (TODO put them in struct)
-// pc:         bytecode instruction after the vector instruction
-// ndiscard:   number of stack elements to discard
-// base:       ultimate result of the vector-get
-// baseStrOff: StrOff flag associated with base
-// tvScratch:  temporary result storage
-// tvRef:      temporary result storage
-// tvRef2:     temporary result storage
-// mcode:      output MemberCode for the last member if LeaveLast
-// curMember:  output last member value one if LeaveLast; but undefined
-//             if the last mcode == MW
-//
-// TODO(#1068709) XXX this function should be merged with getHelperPre.
-template <bool warn,
+template <bool setMember,
+          bool warn,
           bool define,
           bool unset,
           bool reffy,
           unsigned mdepth, // extra args on stack for set (e.g. rhs)
-          VMExecutionContext::VectorLeaveCode mleave>
-inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
+          VMExecutionContext::VectorLeaveCode mleave,
+          bool saveResult>
+inline bool OPTBLD_INLINE VMExecutionContext::memberHelperPre(
     PC& pc, unsigned& ndiscard, TypedValue*& base,
     bool& baseStrOff, TypedValue& tvScratch, TypedValue& tvLiteral,
     TypedValue& tvRef, TypedValue& tvRef2,
     MemberCode& mcode, TypedValue*& curMember) {
   // The caller must move pc to the vector immediate before calling
-  // setHelperPre.
+  // {get, set}HelperPre.
   const ImmVector immVec = ImmVector::createFromStream(pc);
   const uint8_t* vec = immVec.vec();
   assert(immVec.size() > 0);
@@ -3514,6 +3298,12 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
   // raise a notice in the middle of this we could resume at the wrong
   // instruction.
   pc += immVec.size() + sizeof(int32_t) + sizeof(int32_t);
+
+  if (!setMember) {
+    assert(mdepth == 0);
+    assert(!define);
+    assert(!unset);
+  }
 
   ndiscard = immVec.numStackValues();
   int depth = mdepth + ndiscard - 1;
@@ -3652,7 +3442,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
         curMember = frame_local_inner(m_fp, memberImm);
       }
     } else {
-      curMember = mcode == MW ? nullptr : m_stack.indTV(depth--);
+      curMember = (setMember && mcode == MW) ? nullptr : m_stack.indTV(depth--);
     }
 
     if (mleave == LeaveLast) {
@@ -3683,8 +3473,13 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
                                          curMember);
       break;
     case MW:
-      assert(define);
-      result = NewElem(tvScratch, tvRef, base);
+      if (setMember) {
+        assert(define);
+        result = NewElem(tvScratch, tvRef, base);
+      } else {
+        raise_error("Cannot use [] for reading");
+        result = nullptr;
+      }
       break;
     default:
       assert(false);
@@ -3693,7 +3488,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     assert(result != nullptr);
     ratchetRefs(result, tvRef, tvRef2);
     // Check whether an error occurred (i.e. no result was set).
-    if (result == &tvScratch && result->m_type == KindOfUninit) {
+    if (setMember && result == &tvScratch && result->m_type == KindOfUninit) {
       return true;
     }
     base = result;
@@ -3710,7 +3505,46 @@ inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     }
   }
 
+  if (saveResult) {
+    assert(!setMember);
+    // If requested, save a copy of the result.  If base already points to
+    // tvScratch, no reference counting is necessary, because (with the
+    // exception of the following block), tvScratch is never populated such
+    // that it owns a reference that must be accounted for.
+    if (base != &tvScratch) {
+      // Acquire a reference to the result via tvDup(); base points to the
+      // result but does not own a reference.
+      tvDup(base, &tvScratch);
+    }
+  }
+
   return false;
+}
+
+// The following arguments are outputs:  (TODO put them in struct)
+// pc:         bytecode instruction after the vector instruction
+// ndiscard:   number of stack elements to discard
+// base:       ultimate result of the vector-get
+// baseStrOff: StrOff flag associated with base
+// tvScratch:  temporary result storage
+// tvRef:      temporary result storage
+// tvRef2:     temporary result storage
+// mcode:      output MemberCode for the last member if LeaveLast
+// curMember:  output last member value one if LeaveLast; but undefined
+//             if the last mcode == MW
+template <bool warn,
+          bool define,
+          bool unset,
+          bool reffy,
+          unsigned mdepth, // extra args on stack for set (e.g. rhs)
+          VMExecutionContext::VectorLeaveCode mleave>
+inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
+    PC& pc, unsigned& ndiscard, TypedValue*& base,
+    bool& baseStrOff, TypedValue& tvScratch, TypedValue& tvLiteral,
+    TypedValue& tvRef, TypedValue& tvRef2,
+    MemberCode& mcode, TypedValue*& curMember) {
+  return memberHelperPre<true, warn, define, unset,
+    reffy, mdepth, mleave, false>(MEMBERHELPERPRE_ARGS);
 }
 
 #define SETHELPERPOST_ARGS ndiscard, tvRef, tvRef2
@@ -4877,7 +4711,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopVGetM(PC& pc) {
   TypedValue* tv1 = m_stack.allocTV();
   tvWriteUninit(tv1);
   if (!setHelperPre<false, true, false, true, 1,
-      ConsumeAll>(SETHELPERPRE_ARGS)) {
+      ConsumeAll>(MEMBERHELPERPRE_ARGS)) {
     if (base->m_type != KindOfRef) {
       tvBox(base);
     }
@@ -4942,7 +4776,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetS(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopIssetM(PC& pc) {
   NEXT();
   DECLARE_GETHELPER_ARGS
-  getHelperPre<false, false, LeaveLast>(GETHELPERPRE_ARGS);
+  getHelperPre<false, false, LeaveLast>(MEMBERHELPERPRE_ARGS);
   // Process last member specially, in order to employ the IssetElem/IssetProp
   // operations.  (TODO combine with EmptyM.)
   bool issetResult = false;
@@ -5071,7 +4905,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyS(PC& pc) {
 inline void OPTBLD_INLINE VMExecutionContext::iopEmptyM(PC& pc) {
   NEXT();
   DECLARE_GETHELPER_ARGS
-  getHelperPre<false, false, LeaveLast>(GETHELPERPRE_ARGS);
+  getHelperPre<false, false, LeaveLast>(MEMBERHELPERPRE_ARGS);
   // Process last member specially, in order to employ the EmptyElem/EmptyProp
   // operations.  (TODO combine with IssetM)
   bool emptyResult = false;
@@ -5172,7 +5006,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetM(PC& pc) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<false, true, false, false, 1,
-      LeaveLast>(SETHELPERPRE_ARGS)) {
+      LeaveLast>(MEMBERHELPERPRE_ARGS)) {
     Cell* c1 = m_stack.topC();
 
     if (mcode == MW) {
@@ -5275,7 +5109,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopSetOpM(PC& pc) {
   DECODE(unsigned char, op);
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<MoreWarnings, true, false, false, 1,
-      LeaveLast>(SETHELPERPRE_ARGS)) {
+      LeaveLast>(MEMBERHELPERPRE_ARGS)) {
     TypedValue* result;
     Cell* rhs = m_stack.topC();
 
@@ -5365,7 +5199,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIncDecM(PC& pc) {
   TypedValue to;
   tvWriteUninit(&to);
   if (!setHelperPre<MoreWarnings, true, false, false, 0,
-      LeaveLast>(SETHELPERPRE_ARGS)) {
+      LeaveLast>(MEMBERHELPERPRE_ARGS)) {
     if (mcode == MW) {
       IncDecNewElem<true>(tvScratch, tvRef, op, base, to);
     } else {
@@ -5455,7 +5289,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopBindM(PC& pc) {
   DECLARE_SETHELPER_ARGS
   TypedValue* tv1 = m_stack.topTV();
   if (!setHelperPre<false, true, false, true, 1,
-      ConsumeAll>(SETHELPERPRE_ARGS)) {
+      ConsumeAll>(MEMBERHELPERPRE_ARGS)) {
     // Bind the element/property with the var on the top of the stack
     tvBind(tv1, base);
   }
@@ -5501,7 +5335,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetM(PC& pc) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<false, false, true, false, 0,
-      LeaveLast>(SETHELPERPRE_ARGS)) {
+      LeaveLast>(MEMBERHELPERPRE_ARGS)) {
     switch (mcode) {
     case MEL:
     case MEC:
@@ -6020,7 +5854,7 @@ void VMExecutionContext::iopFPassM(PC& pc) {
     TypedValue* tv1 = m_stack.allocTV();
     tvWriteUninit(tv1);
     if (!setHelperPre<false, true, false, true, 1,
-        ConsumeAll>(SETHELPERPRE_ARGS)) {
+        ConsumeAll>(MEMBERHELPERPRE_ARGS)) {
       if (base->m_type != KindOfRef) {
         tvBox(base);
       }

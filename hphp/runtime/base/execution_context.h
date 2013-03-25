@@ -442,6 +442,13 @@ private:
     ConsumeAll,
     LeaveLast
   };
+  template <bool setMember, bool warn, bool define, bool unset, bool reffy,
+            unsigned mdepth, VectorLeaveCode mleave, bool saveResult>
+  bool memberHelperPre(VM::PC& pc, unsigned& ndiscard, TypedValue*& base,
+                       bool& baseStrOff, TypedValue& tvScratch,
+                       TypedValue& tvLiteral,
+                       TypedValue& tvRef, TypedValue& tvRef2,
+                       VM::MemberCode& mcode, TypedValue*& curMember);
   template <bool warn, bool saveResult, VectorLeaveCode mleave>
   void getHelperPre(VM::PC& pc, unsigned& ndiscard,
                     TypedValue*& base, bool& baseStrOff, TypedValue& tvScratch,

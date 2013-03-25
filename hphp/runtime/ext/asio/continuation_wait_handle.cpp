@@ -71,6 +71,14 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation)
     return cont->m_waitHandle;
   }
 
+  if (UNLIKELY(cont->m_index != -1)) {
+    Object e(SystemLib::AllocInvalidOperationExceptionObject(
+        cont->m_running
+        ? "Encountered an attempt to start currently running continuation"
+        : "Encountered an attempt to start tainted continuation"));
+    throw e;
+  }
+
   p_ContinuationWaitHandle wh = NEWOBJ(c_ContinuationWaitHandle)();
   wh->start(cont, depth + 1);
   if (UNLIKELY(session->hasOnStartedCallback())) {

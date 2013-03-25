@@ -285,6 +285,7 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   Type baseType = Type::fromRuntimeType(baseRtt);
   const bool isCGetM = m_ni.mInstrOp() == OpCGetM;
   const bool isSetM = m_ni.mInstrOp() == OpSetM;
+  const bool isIssetM = m_ni.mInstrOp() == OpIssetM;
   const bool isSingle = m_ni.immVecM.size() == 1;
 
   assert(baseType.isBoxed() || baseType.notBoxed());
@@ -300,8 +301,12 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   // Array access with one element in the vector
   const bool singleElem = isSingle && mcodeMaybeArrayKey(m_ni.immVecM[0]);
 
-  // SetM on an array with one vector element
+  // SetM with one vector array element
   const bool simpleArraySet = isSetM && singleElem;
+
+  // IssetM with one vector array element and an Arr base
+  const bool simpleArrayIsset = isIssetM && singleElem &&
+    baseType.subtypeOf(Type::Arr);
 
   // CGetM on an array with a base that won't use MInstrState. Str
   // will use tvScratch and baseStrOff and Obj will fatal or use
@@ -309,7 +314,9 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   const bool simpleArrayGet = isCGetM && singleElem &&
     baseType.not(Type::Str | Type::Obj);
 
-  if (simpleProp || singlePropSet || simpleArraySet || simpleArrayGet) {
+  if (simpleProp || singlePropSet ||
+      simpleArraySet || simpleArrayGet ||
+      simpleArrayIsset) {
     setNoMIState();
   }
 }
@@ -475,7 +482,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
 bool HhbcTranslator::VectorTranslator::isSimpleArrayOp() {
   SSATmp* base = getInput(m_mii.valCount());
   VM::Op op = m_ni.mInstrOp();
-  if ((op == OpSetM || op == OpCGetM) &&
+  if ((op == OpSetM || op == OpCGetM || op == OpIssetM) &&
       isSimpleBase() &&
       isSingleMember() &&
       mcodeMaybeArrayKey(m_ni.immVecM[0]) &&
@@ -1118,7 +1125,7 @@ static inline bool issetEmptyPropImpl(Class* ctx, TypedValue* base,
 #define ISSET(nm, hot, ...)                                             \
 hot                                                                     \
 /* This returns int64_t to ensure all 64 bits of rax are valid */       \
-int64_t nm(Class* ctx, TypedValue* base, TypedValue key) {              \
+uint64_t nm(Class* ctx, TypedValue* base, TypedValue key) {             \
   return issetEmptyPropImpl<__VA_ARGS__>(ctx, base, key);               \
 }
 namespace VectorHelpers {
@@ -1128,7 +1135,7 @@ HELPER_TABLE(ISSET)
 
 void HhbcTranslator::VectorTranslator::emitIssetEmptyProp(bool isEmpty) {
   SSATmp* key = getInput(m_iInd);
-  typedef bool (*OpFunc)(Class*, TypedValue*, TypedValue);
+  typedef uint64_t (*OpFunc)(Class*, TypedValue*, TypedValue);
   BUILD_OPTAB_HOT(getKeyTypeS(key), key->isBoxed(), isEmpty,
                   m_base->isA(Type::Obj));
   m_ht.spillStack();
@@ -1371,20 +1378,20 @@ void HhbcTranslator::VectorTranslator::checkStrictlyInteger(
   }
 }
 
-static inline TypedValue* checkedGet(ArrayData* a, StringData* key) {
+static inline TypedValue* checkedGetCell(ArrayData* a, StringData* key) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGetCell(i)
                                              : a->nvGetCell(key);
 }
 
-static inline TypedValue* checkedGet(ArrayData* a, int64_t key) {
+static inline TypedValue* checkedGetCell(ArrayData* a, int64_t key) {
   not_reached();
 }
 
 template<KeyType keyType, bool checkForInt>
 static inline TypedValue arrayGetImpl(
   ArrayData* a, typename KeyTypeTraits<keyType>::rawType key) {
-  TypedValue* ret = checkForInt ? checkedGet(a, key)
+  TypedValue* ret = checkForInt ? checkedGetCell(a, key)
                                 : a->nvGetCell(key);
   tvRefcountedIncRef(ret);
   return *ret;
@@ -1406,7 +1413,7 @@ HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitSimpleArrayGet(SSATmp* key) {
+void HhbcTranslator::VectorTranslator::emitArrayGet(SSATmp* key) {
   KeyType keyType;
   bool checkForInt;
   checkStrictlyInteger(key, keyType, checkForInt);
@@ -1458,7 +1465,7 @@ void HhbcTranslator::VectorTranslator::emitCGetElem() {
   SSATmp* key = getInput(m_iInd);
 
   if (isSimpleArrayOp()) {
-    emitSimpleArrayGet(key);
+    emitArrayGet(key);
     return;
   }
 
@@ -1524,8 +1531,12 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue keyVal,
                                       MInstrState* mis) {
   TypedValue* key = keyPtr<keyType>(keyVal);
   key = unbox<keyType, unboxKey>(key);
-  return HPHP::VM::IssetEmptyElem<isEmpty, false, keyType>(
-    mis->tvScratch, mis->tvRef, base, mis->baseStrOff, key);
+  // mis == nullptr if we proved that it won't be used. mis->tvScratch and
+  // mis->tvRef are ok because those params are passed by
+  // reference. mis->baseStrOff is passed by value so we have to check mis
+  // before accessing it.
+  return VM::IssetEmptyElem<isEmpty, false, keyType>(
+    mis->tvScratch, mis->tvRef, base, mis ? mis->baseStrOff : false, key);
 }
 
 #define HELPER_TABLE(m)                                      \
@@ -1564,7 +1575,60 @@ void HhbcTranslator::VectorTranslator::emitIssetEmptyElem(bool isEmpty) {
 }
 #undef HELPER_TABLE
 
+static inline TypedValue* checkedGet(ArrayData* a, StringData* key) {
+  int64_t i;
+  return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i)
+                                             : a->nvGet(key);
+}
+
+static inline TypedValue* checkedGet(ArrayData* a, int64_t key) {
+  not_reached();
+}
+
+template<KeyType keyType, bool checkForInt>
+static inline uint64_t arrayIssetImpl(
+  ArrayData* a, typename KeyTypeTraits<keyType>::rawType key) {
+  TypedValue* value = checkForInt ? checkedGet(a, key)
+                                  : a->nvGet(key);
+  Variant* var = &tvAsVariant(value);
+  return var && !var->isNull();
+}
+
+#define HELPER_TABLE(m)                         \
+  /* name          keyType  checkForInt */      \
+  m(arrayIssetS,    StrKey,   false)            \
+  m(arrayIssetSi,   StrKey,    true)            \
+  m(arrayIssetI,    IntKey,   false)
+
+#define ISSET(nm, keyType, checkForInt)                                 \
+  uint64_t nm(ArrayData* a, TypedValue* key) {                          \
+    return arrayIssetImpl<keyType, checkForInt>(a, keyAsRaw<keyType>(key)); \
+  }
+namespace VectorHelpers {
+HELPER_TABLE(ISSET)
+}
+#undef ISSET
+
+void HhbcTranslator::VectorTranslator::emitArrayIsset() {
+  SSATmp* key = getInput(m_iInd);
+  KeyType keyType;
+  bool checkForInt;
+  checkStrictlyInteger(key, keyType, checkForInt);
+
+  typedef uint64_t (*OpFunc)(ArrayData*, TypedValue*);
+  BUILD_OPTAB(keyType, checkForInt);
+  assert(m_base->isA(Type::Arr));
+  m_ht.spillStack();
+  m_result = m_tb.gen(ArrayIsset, cns((TCA)opFunc), m_base, key);
+}
+#undef HELPER_TABLE
+
 void HhbcTranslator::VectorTranslator::emitIssetElem() {
+  if (isSimpleArrayOp()) {
+    emitArrayIsset();
+    return;
+  }
+
   emitIssetEmptyElem(false);
 }
 
@@ -1617,8 +1681,8 @@ HELPER_TABLE(ELEM)
 }
 #undef ELEM
 
-void HhbcTranslator::VectorTranslator::emitSimpleArraySet(SSATmp* key,
-                                                          SSATmp* value) {
+void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
+                                                    SSATmp* value) {
   assert(m_iInd == m_mii.valCount() + 1);
   const int baseStkIdx = m_mii.valCount();
   assert(key->getType().notBoxed());
@@ -1695,7 +1759,7 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
   SSATmp* key = getInput(m_iInd);
 
   if (isSimpleArrayOp()) {
-    emitSimpleArraySet(key, value);
+    emitArraySet(key, value);
     return;
   }
 

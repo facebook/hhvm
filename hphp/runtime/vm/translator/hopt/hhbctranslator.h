@@ -431,8 +431,9 @@ private:
     void emitSetOpNewElem();
     void emitIncDecNewElem();
     void emitBindNewElem();
-    void emitSimpleArraySet(SSATmp* key, SSATmp* value);
-    void emitSimpleArrayGet(SSATmp* key);
+    void emitArraySet(SSATmp* key, SSATmp* value);
+    void emitArrayGet(SSATmp* key);
+    void emitArrayIsset();
     void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
                               bool& checkForInt);
 

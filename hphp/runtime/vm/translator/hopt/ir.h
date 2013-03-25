@@ -487,6 +487,9 @@ O_STK(SetNewElem,              DVector, S(PtrToGen)                           \
 O_STK(BindNewElem,                  ND, S(PtrToGen)                           \
                                           S(BoxedCell)                        \
                                           S(PtrToCell),VElem|E|N|Mem|Refs|Er) \
+O(ArrayIsset,                  D(Bool), C(TCA)                                \
+                                          S(Arr)                              \
+                                          S(Int,Str),        E|N|Mem|Refs|Er) \
 O(IssetElem,                   D(Bool), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Gen)                              \

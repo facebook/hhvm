@@ -189,11 +189,46 @@ void c_GenArrayWaitHandle::enterContext(context_idx_t ctx_idx) {
 
   assert(getState() == STATE_BLOCKED);
 
-  // TODO: enterContext() for all remaining dependencies
-  c_WaitableWaitHandle* wait_handle = static_cast<c_WaitableWaitHandle*>(
-      m_deps->nvGetValueRef(m_iterPos)->m_data.pobj);
-  wait_handle->enterContext(ctx_idx);
+  // recursively import current child
+  {
+    assert(m_iterPos != ArrayData::invalid_index);
+    TypedValue* current = m_deps->nvGetValueRef(m_iterPos);
+
+    assert(current->m_type == KindOfObject);
+    assert(dynamic_cast<c_WaitableWaitHandle*>(current->m_data.pobj));
+    auto child_wh = static_cast<c_WaitableWaitHandle*>(current->m_data.pobj);
+    child_wh->enterContext(ctx_idx);
+  }
+
+  // import ourselves
   setContextIdx(ctx_idx);
+
+  // try to import other children
+  try {
+    for (ssize_t iter_pos = m_deps->iter_advance(m_iterPos);
+         iter_pos != ArrayData::invalid_index;
+         iter_pos = m_deps->iter_advance(iter_pos)) {
+
+      TypedValue* current = m_deps->nvGetValueRef(iter_pos);
+      if (IS_NULL_TYPE(current->m_type)) {
+        continue;
+      }
+
+      assert(current->m_type == KindOfObject);
+      assert(dynamic_cast<c_WaitHandle*>(current->m_data.pobj));
+      auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
+
+      if (child->isFinished()) {
+        continue;
+      }
+
+      assert(dynamic_cast<c_WaitableWaitHandle*>(child));
+      auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
+      child_wh->enterContext(ctx_idx);
+    }
+  } catch (Object cycle_exception) {
+    // exception will be eventually processed by onUnblocked()
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

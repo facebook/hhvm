@@ -19,6 +19,7 @@
 #include <sstream>
 #include <type_traits>
 
+#include <runtime/base/type_conversions.h>
 #include "runtime/vm/translator/hopt/tracebuilder.h"
 #include "runtime/vm/runtime.h"
 
@@ -104,7 +105,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConvBoolToDbl: return simplifyConvBoolToDbl(inst);
   case ConvIntToDbl:  return simplifyConvIntToDbl(inst);
   case ConvStrToDbl:  return simplifyConvStrToDbl(inst);
-  case ConvToInt:     return simplifyConvToInt(inst);
+  case ConvArrToInt:  return simplifyConvArrToInt(inst);
+  case ConvBoolToInt: return simplifyConvBoolToInt(inst);
+  case ConvDblToInt:  return simplifyConvDblToInt(inst);
+  case ConvStrToInt:  return simplifyConvStrToInt(inst);
   case ConvToObj:     return simplifyConvToObj(inst);
   case ConvToStr:     return simplifyConvToStr(inst);
   case Unbox:         return simplifyUnbox(inst);
@@ -636,7 +640,7 @@ SSATmp* Simplifier::simplifyAdd(SSATmp* src1, SSATmp* src2) {
     // X + 0 --> X
     if (src2Val == 0) {
       if (src1->getType() == Type::Bool) {
-        return m_tb->genConvToInt(src1);
+        return m_tb->gen(ConvBoolToInt, src1);
       }
       return src1;
     }
@@ -669,7 +673,7 @@ SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
     // X - 0 --> X
     if (src2Val == 0) {
       if (src1->getType() == Type::Bool) {
-        return m_tb->genConvToInt(src1);
+        return m_tb->gen(ConvBoolToInt, src1);
       }
       return src1;
     }
@@ -709,7 +713,7 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
     // X * 1 --> X
     if (src2->getValInt() == 1) {
       if (src1->getType() == Type::Bool) {
-        return m_tb->genConvToInt(src1);
+        return m_tb->gen(ConvBoolToInt, src1);
       }
       return src1;
     }
@@ -1173,32 +1177,41 @@ SSATmp* Simplifier::simplifyConvStrToDbl(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvToInt(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvArrToInt(IRInstruction* inst) {
   SSATmp* src  = inst->getSrc(0);
-  Type srcType = src->getType();
-  if (srcType == Type::Int) {
-    return src;
-  }
-  if (srcType.isNull()) {
-    return genDefInt(0);
-  }
   if (src->isConst()) {
-    if (src->getType() == Type::Bool) {
-      return genDefInt(int(src->getValBool()));
-    }
-    if (srcType == Type::StaticStr) {
-      const StringData *str = src->getValStr();
-      if (str->isInteger()) {
-        return genDefInt(str->toInt64());
-      }
+    if (src->getValArr()->empty()) {
       return genDefInt(0);
     }
-    if (srcType.isArray()) {
-      if (src->getValArr()->empty()) {
-        return genDefInt(0);
-      }
-      return genDefInt(1);
+    return genDefInt(1);
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvBoolToInt(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
+  if (src->isConst()) {
+    return genDefInt(int(src->getValBool()));
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvDblToInt(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
+  if (src->isConst()) {
+    return genDefInt(toInt64(src->getValDbl()));
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvStrToInt(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
+  if (src->isConst()) {
+    const StringData *str = src->getValStr();
+    if (str->isInteger()) {
+      return genDefInt(str->toInt64());
     }
+    return genDefInt(0);
   }
   return nullptr;
 }

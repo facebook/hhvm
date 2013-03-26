@@ -676,15 +676,18 @@ void LinearScan::computePreColoringHint() {
     case ConvStrToDbl:
     case ConvGenToDbl:
       break;
-    case ConvToInt:
+    case ConvBoolToInt:
+    case ConvDblToInt:
+    case ConvObjToInt:
+      break;
+    case ConvStrToInt:
       {
         SSATmp* src = inst->getSrc(0);
-        Type fromType = src->getType();
-        if (fromType.isString()) {
-          m_preColoringHint.add(src, 0, 0);
-        }
+        m_preColoringHint.add(src, 0, 0);
         break;
       }
+    case ConvGenToInt:
+      break;
     case ConvToObj:
       break;
     case ConvToStr:

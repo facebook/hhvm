@@ -845,7 +845,7 @@ void HhbcTranslator::emitStrlen() {
     push(m_tb->genDefConst<int64_t>(0));
   } else if (inType == Type::Bool) {
     // strlen(true) == 1, strlen(false) == 0.
-    push(m_tb->genConvToInt(popC()));
+    push(m_tb->gen(ConvBoolToInt, popC()));
   } else {
     emitInterpOne(Type::Int | Type::InitNull, 1);
   }
@@ -2064,8 +2064,28 @@ void HhbcTranslator::emitCastDouble() {
 
 void HhbcTranslator::emitCastInt() {
   SSATmp* src = popC();
-  push(m_tb->genConvToInt(src));
-  m_tb->genDecRef(src);
+  Type fromType = src->getType();
+  if (fromType.isInt()) {
+    push(src);
+  } else if (fromType.isNull()) {
+    push(m_tb->genDefConst(0));
+  } else if (fromType.isArray()) {
+    push(m_tb->gen(ConvArrToInt, src));
+    m_tb->genDecRef(src);
+  } else if (fromType.isBool()) {
+    push(m_tb->gen(ConvBoolToInt, src));
+  } else if (fromType.isDbl()) {
+    push(m_tb->gen(ConvDblToInt, src));
+  } else if (fromType.isString()) {
+    push(m_tb->gen(ConvStrToInt, src));
+    m_tb->genDecRef(src);
+  } else if (fromType.isObj()) {
+    spillStack(); // may throw
+    push(m_tb->gen(ConvObjToInt, src));
+  } else {
+    spillStack(); // may throw
+    push(m_tb->gen(ConvGenToInt, src));
+  }
 }
 
 void HhbcTranslator::emitCastString() {

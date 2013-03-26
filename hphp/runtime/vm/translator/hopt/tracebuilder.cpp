@@ -396,10 +396,6 @@ SSATmp* TraceBuilder::genDefNone() {
   return gen(DefConst, Type::None, &cdata);
 }
 
-SSATmp* TraceBuilder::genConvToInt(SSATmp* src) {
-  return gen(ConvToInt, Type::Int, src);
-}
-
 SSATmp* TraceBuilder::genConvToStr(SSATmp* src) {
   if (src->getType() == Type::Bool) {
     // Bool to string code sequence loads static strings

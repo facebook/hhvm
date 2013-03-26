@@ -68,7 +68,11 @@ private:
   SSATmp* simplifyConvBoolToDbl(IRInstruction*);
   SSATmp* simplifyConvIntToDbl(IRInstruction*);
   SSATmp* simplifyConvStrToDbl(IRInstruction*);
-  SSATmp* simplifyConvToInt(IRInstruction*);
+  SSATmp* simplifyConvArrToInt(IRInstruction*);
+  SSATmp* simplifyConvBoolToInt(IRInstruction*);
+  SSATmp* simplifyConvDblToInt(IRInstruction*);
+  SSATmp* simplifyConvObjToInt(IRInstruction*);
+  SSATmp* simplifyConvStrToInt(IRInstruction*);
   SSATmp* simplifyConvToObj(IRInstruction*);
   SSATmp* simplifyConvToStr(IRInstruction*);
   SSATmp* simplifyUnbox(IRInstruction*);

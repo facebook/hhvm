@@ -400,11 +400,15 @@ D:Dbl  = ConvIntToDbl S0:Int
 D:Dbl  = ConvObjToDbl S0:Obj
 D:Dbl  = ConvStrToDbl S0:Str
 D:Dbl  = ConvGenToDbl S0:Gen
-D:Int  = ConvToInt S0:Gen
+D:Int  = ConvArrToInt S0:Arr
+D:Int  = ConvDblToInt S0:Dbl
+D:Int  = ConvObjToInt S0:Obj
+D:Int  = ConvStrToInt S0:Str
+D:Int  = ConvGenToInt S0:Gen
 D:Obj  = ConvoObj S0:Gen
 D:Str  = ConvToStr S0:Gen
 
-  Convert S0 from its current type to destination type, according to the PHP
+  Convert S0 from its current type to the destination type, according to the PHP
   semantics of such a conversion.
 
 

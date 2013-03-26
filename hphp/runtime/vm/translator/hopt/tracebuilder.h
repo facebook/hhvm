@@ -176,7 +176,6 @@ public:
   SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
   SSATmp* genCastStk(uint32_t id, Type type);
   SSATmp* genConvToBool(SSATmp* src);
-  SSATmp* genConvToInt(SSATmp* src);
   SSATmp* genConvToDbl(SSATmp* src);
   SSATmp* genConvToStr(SSATmp* src);
   SSATmp* genConvToArr(SSATmp* src);

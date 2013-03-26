@@ -30,6 +30,7 @@
 #include <runtime/vm/instance.h>
 #include <system/lib/systemlib.h>
 #include <runtime/ext/ext_collections.h>
+#include <util/util.h>
 
 #include <util/logger.h>
 
@@ -199,13 +200,7 @@ Variant::Variant(CVarWithRefBind v) {
  */
 
 HOT_FUNC
-static void destructString(RefData *p)  { ((StringData *)p)->release(); }
-HOT_FUNC
 static void destructArray(RefData *p)   { ((ArrayData *)p)->release();  }
-HOT_FUNC
-static void destructObject(RefData *p)  { ((ObjectData *)p)->release(); }
-HOT_FUNC
-static void destructRef(RefData *p)     { p->release(); }
 
 static_assert(TYPE_TO_DESTR_IDX(KindOfString) == 0, "String destruct index");
 static_assert(TYPE_TO_DESTR_IDX(KindOfArray)  == 1,  "Array destruct index");
@@ -215,10 +210,12 @@ static_assert(TYPE_TO_DESTR_IDX(KindOfRef)    == 3,    "Ref destruct index");
 static_assert(kDestrTableSize == 4,
               "size of g_destructors[] must be kDestrTableSize");
 
-void (*g_destructors[kDestrTableSize])(RefData *) = { destructString,
-                                                      destructArray,
-                                                      destructObject,
-                                                      destructRef };
+const RawDestructor g_destructors[] = {
+  (RawDestructor)Util::getMethodPtr(&StringData::release),
+  (RawDestructor)destructArray,
+  (RawDestructor)Util::getMethodPtr(&ObjectData::release),
+  (RawDestructor)Util::getMethodPtr(&RefData::release),
+};
 
 inline ALWAYS_INLINE void Variant::destructDataImpl(RefData* data, DataType t) {
   assert(IS_REFCOUNTED_TYPE(t));
@@ -234,10 +231,10 @@ inline ALWAYS_INLINE void Variant::destructImpl() {
 }
 
 HOT_FUNC_VM
-void tvDecRefHelper(DataType type, uint64_t datum) {
+void tvDecRefHelper(DataType type, uintptr_t datum) {
   assert(type >= KindOfString && type <= KindOfRef);
   if (((RefData*)datum)->decRefCount() == 0) {
-    g_destructors[typeToDestrIndex(type)]((RefData*)datum);
+    g_destructors[typeToDestrIndex(type)]((void*)datum);
   }
 }
 

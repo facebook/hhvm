@@ -465,7 +465,8 @@ void tvCastToStringInPlace(TypedValue* tv);
 void tvCastToArrayInPlace(TypedValue* tv);
 void tvCastToObjectInPlace(TypedValue* tv);
 
-extern void (*g_destructors[kDestrTableSize])(RefData*);
+typedef void(*RawDestructor)(void*);
+extern const RawDestructor g_destructors[kDestrTableSize];
 
 ///////////////////////////////////////////////////////////////////////////////
 }

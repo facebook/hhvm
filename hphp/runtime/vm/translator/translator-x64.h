@@ -78,8 +78,8 @@ struct Call {
   bool isDirect()  const { return m_kind == Direct;  }
   bool isVirtual() const { return m_kind == Virtual; }
 
-  void* getAddress() const { return m_fptr; }
-  int   getOffset()  const { return m_offset; }
+  const void* getAddress() const { return m_fptr; }
+  int         getOffset()  const { return m_offset; }
 
  private:
   enum { Direct, Virtual } m_kind;

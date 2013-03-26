@@ -1032,10 +1032,8 @@ TranslatorX64::irTranslateIncDecL(const Tracelet& t,
   bool pre  = !post;
   bool inc  = (oplet == PostInc || oplet == PreInc);
 
-  // ++ and -- have no effect on booleans
-  if (i.inputs[0]->outerType() == KindOfBoolean) return;
-
-  HHIR_UNIMPLEMENTED_WHEN((i.inputs[0]->valueType() != KindOfInt64) &&
+  HHIR_UNIMPLEMENTED_WHEN((i.inputs[0]->valueType() != KindOfBoolean) &&
+                          (i.inputs[0]->valueType() != KindOfInt64) &&
                           (i.inputs[0]->valueType() != KindOfDouble),
                           IncDecL_unsupported);
   HHIR_EMIT(IncDecL, pre, inc, inputs[0]->location.offset);

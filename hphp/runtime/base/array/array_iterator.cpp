@@ -787,7 +787,7 @@ HOT_FUNC
 int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
   valOut = tvToCell(valOut);
-  if (UNLIKELY(!IsHphpArray(ad))) {
+  if (UNLIKELY(!ad->isHphpArray())) {
     goto cold;
   }
   {
@@ -823,7 +823,7 @@ int64_t new_iter_array_key(Iter* dest, ArrayData* ad, TypedValue* valOut,
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
   valOut = tvToCell(valOut);
   keyOut = tvToCell(keyOut);
-  if (UNLIKELY(!IsHphpArray(ad))) {
+  if (UNLIKELY(!ad->isHphpArray())) {
     goto cold;
   }
   {
@@ -1000,7 +1000,7 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
   }
   {
     const ArrayData* ad = arrIter->getArrayData();
-    if (UNLIKELY(!IsHphpArray(ad))) {
+    if (UNLIKELY(!ad->isHphpArray())) {
       goto cold;
     }
     const HphpArray* arr = (HphpArray*)ad;
@@ -1045,7 +1045,7 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   }
   {
     const ArrayData* ad = arrIter->getArrayData();
-    if (UNLIKELY(!IsHphpArray(ad))) {
+    if (UNLIKELY(!ad->isHphpArray())) {
       goto cold;
     }
     const HphpArray* arr = (HphpArray*)ad;

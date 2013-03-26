@@ -514,10 +514,6 @@ public:
   }
 };
 
-inline bool IsHphpArray(const ArrayData* ad) {
-  return ad->kind() == ArrayData::kHphpArray;
-}
-
 //=============================================================================
 // VM runtime support functions.
 namespace VM {

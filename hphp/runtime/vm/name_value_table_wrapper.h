@@ -54,8 +54,9 @@ namespace HPHP { namespace VM {
  */
 struct NameValueTableWrapper : public ArrayData {
   explicit NameValueTableWrapper(NameValueTable* tab)
-    : m_tab(tab)
-  {}
+    : ArrayData(kNameValueTableWrapper)
+    , m_tab(tab)
+  { }
 
 public: // ArrayData implementation
 
@@ -74,7 +75,6 @@ public: // ArrayData implementation
   using ArrayData::addLval;
   using ArrayData::remove;
 
-  virtual void release() {}
   virtual ssize_t vsize() const;
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;

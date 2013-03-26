@@ -2135,7 +2135,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
       // ArrayData::merge.
       hphpArrCopy.merge(params);
       arr = dynamic_cast<HphpArray*>(hphpArrCopy.get());
-      assert(arr && IsHphpArray(arr));
+      assert(arr && arr->isHphpArray());
     }
     if (arr) {
       const int numParams = f->numParams();

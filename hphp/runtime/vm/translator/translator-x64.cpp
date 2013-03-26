@@ -1004,7 +1004,7 @@ Call TranslatorX64::getDtorCall(DataType type) {
   case BitwiseKindOfString:
     return Call(getMethodPtr(&StringData::release));
   case KindOfArray:
-    return Call(getVTableOffset(&HphpArray::release));
+    return Call(getMethodPtr(&ArrayData::release));
   case KindOfObject:
     return Call(getMethodPtr(&ObjectData::release));
   case KindOfRef:

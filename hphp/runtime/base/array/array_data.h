@@ -40,25 +40,26 @@ class ArrayData : public Countable {
 
   // enum of possible array types, so we can guard nonvirtual
   // fast paths in runtime code.
-  enum ArrayKind {
-    kArrayData,
-    kHphpArray
+  enum ArrayKind : uint8_t {
+    kHphpArray,
+    kSharedMap,
+    kNameValueTableWrapper,
   };
 
  protected:
   // used in subclasses but declared here.
-  enum AllocMode { kInline, kSmart, kMalloc };
+  enum AllocMode : uint8_t { kInline, kSmart, kMalloc };
 
  public:
   static const ssize_t invalid_index = -1;
 
-  ArrayData(ArrayKind kind = kArrayData, bool nonsmart = false) :
+  ArrayData(ArrayKind kind, bool nonsmart = false) :
     m_size(-1), m_pos(0), m_strongIterators(0), m_kind(kind),
     m_nonsmart(nonsmart) {
   }
-  ArrayData(const ArrayData *src, ArrayKind kind = kArrayData,
+  ArrayData(const ArrayData *src, ArrayKind kind,
             bool nonsmart = false) :
-    m_pos(src->m_pos), m_strongIterators(0), m_kind(kind),
+    m_pos(src->m_pos), m_strongIterators(0), m_kind(src->m_kind),
     m_nonsmart(nonsmart) {
   }
 
@@ -94,8 +95,10 @@ class ArrayData : public Countable {
 
   /**
    * For SmartAllocator.
+   *
+   *   NB: *Not* virtual. ArrayData knows about its only subclasses.
    */
-  virtual void release() = 0;
+  void release();
 
   /**
    * Whether this array has any element.
@@ -143,7 +146,12 @@ class ArrayData : public Countable {
   /*
    * Specific derived class type querying operators.
    */
-  virtual bool isSharedMap() const { return false; }
+  bool isHphpArray() const { return m_kind == kHphpArray; }
+  bool isSharedMap() const { return m_kind == kSharedMap; }
+  bool isNameValueTableWrapper() const {
+    return m_kind == kNameValueTableWrapper;
+  }
+
 
   /*
    * Returns whether or not this array contains "vector-like" data.
@@ -488,9 +496,9 @@ class ArrayData : public Countable {
  private:
   FullPos* m_strongIterators; // head of linked list
  protected:
-  const uint8_t m_kind;  // enum ArrayKind
+  const ArrayKind m_kind;
+  AllocMode m_allocMode;
   const bool m_nonsmart; // never use smartalloc to allocate Elms
-  uint8_t m_allocMode;   // enum AllocMode
   /* The 4 bytes of padding here are available to subclasses if their
    * first field is also <= 4 bytes. */
 

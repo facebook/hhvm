@@ -1538,7 +1538,7 @@ ArrayData* HphpArray::AddNewElemC(ArrayData* a, TypedValue value) {
   HphpArray* h;
   ElmInd* ei;
   int64_t k;
-  if (LIKELY(IsHphpArray(a)) &&
+  if (LIKELY(a->isHphpArray()) &&
       ((h = (HphpArray*)a), LIKELY(h->m_pos >= 0)) &&
       LIKELY(!h->isFull()) &&
       ((k = h->m_nextKI), LIKELY(k >= 0)) &&

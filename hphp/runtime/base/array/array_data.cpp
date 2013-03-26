@@ -23,6 +23,7 @@
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/macros.h>
+#include <runtime/base/shared/shared_map.h>
 #include <util/exception.h>
 #include <tbb/concurrent_hash_map.h>
 
@@ -100,6 +101,22 @@ ArrayData *ArrayData::CreateRef(CVarRef name, CVarRef value) {
 
 ArrayData *ArrayData::nonSmartCopy() const {
   throw FatalErrorException("nonSmartCopy not implemented.");
+}
+
+HOT_FUNC
+void ArrayData::release() {
+  if (isHphpArray()) {
+    HphpArray* that = static_cast<HphpArray*>(this);
+    that->release();
+    return;
+  }
+  if (isSharedMap()) {
+    SharedMap* that = static_cast<SharedMap*>(this);
+    that->release();
+    return;
+  }
+  assert(m_kind == kNameValueTableWrapper);
+  // NameValueTableWrapper: nop.
 }
 
 ///////////////////////////////////////////////////////////////////////////////

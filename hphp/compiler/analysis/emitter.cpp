@@ -6750,7 +6750,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
 
         HphpArray* va = m_staticArrays.back();
         m_staticArrays.pop_back();
-        assert(IsHphpArray(ArrayData::GetScalarArray(va)));
+        assert(ArrayData::GetScalarArray(va)->isHphpArray());
         va = static_cast<HphpArray*>(ArrayData::GetScalarArray(va));
 
         tvVal.m_data.parr = va;

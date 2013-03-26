@@ -199,9 +199,6 @@ Variant::Variant(CVarWithRefBind v) {
  * and RefData classes.
  */
 
-HOT_FUNC
-static void destructArray(RefData *p)   { ((ArrayData *)p)->release();  }
-
 static_assert(TYPE_TO_DESTR_IDX(KindOfString) == 0, "String destruct index");
 static_assert(TYPE_TO_DESTR_IDX(KindOfArray)  == 1,  "Array destruct index");
 static_assert(TYPE_TO_DESTR_IDX(KindOfObject) == 2, "Object destruct index");
@@ -212,7 +209,7 @@ static_assert(kDestrTableSize == 4,
 
 const RawDestructor g_destructors[] = {
   (RawDestructor)Util::getMethodPtr(&StringData::release),
-  (RawDestructor)destructArray,
+  (RawDestructor)Util::getMethodPtr(&ArrayData::release),
   (RawDestructor)Util::getMethodPtr(&ObjectData::release),
   (RawDestructor)Util::getMethodPtr(&RefData::release),
 };

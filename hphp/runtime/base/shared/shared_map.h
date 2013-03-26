@@ -31,7 +31,10 @@ namespace HPHP {
  */
 class SharedMap : public ArrayData, Sweepable {
 public:
-  SharedMap(SharedVariant* source) : m_arr(source), m_localCache(nullptr) {
+  SharedMap(SharedVariant* source)
+    : ArrayData(kSharedMap)
+    , m_arr(source)
+    , m_localCache(nullptr) {
     source->incRef();
   }
 

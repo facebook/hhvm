@@ -39,25 +39,12 @@ if(NOT LINUX)
 	list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/runtime/base/hardware_counter.cpp)
 endif()
 
-# remove ext_hhvm, util/tests, and runtime/vm/translator/test
+# remove ext_hhvm, and anything in a test folder
 foreach (file ${CXX_SOURCES})
        	if (${file} MATCHES "ext_hhvm")
 		list(REMOVE_ITEM CXX_SOURCES ${file})
 	endif()
-	if (${file} MATCHES "util/test")
-		list(REMOVE_ITEM CXX_SOURCES ${file})
-	endif()
-	if (${file} MATCHES "runtime/vm/translator/test")
-		list(REMOVE_ITEM CXX_SOURCES ${file})
-	endif()
-	if (${file} MATCHES "runtime/vm/translator/hopt/test")
-		list(REMOVE_ITEM CXX_SOURCES ${file})
-	endif()
-endforeach(file ${CXX_SOURCES})
-
-# remove ext/sep for hhvm
-foreach (file ${CXX_SOURCES})
-	if (${file} MATCHES "ext/sep")
+	if (${file} MATCHES "/test/")
 		list(REMOVE_ITEM CXX_SOURCES ${file})
 	endif()
 endforeach(file ${CXX_SOURCES})

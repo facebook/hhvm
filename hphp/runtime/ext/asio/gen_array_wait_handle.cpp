@@ -34,12 +34,6 @@ namespace {
       exception_field = new_exception;
     }
   }
-
-  void putInvalidArgumentException(Object& exception_field) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected dependencies to be an array of WaitHandle instances"));
-    putException(exception_field, e.get());
-  }
 }
 
 c_GenArrayWaitHandle::c_GenArrayWaitHandle(VM::Class* cb)
@@ -57,7 +51,6 @@ void c_GenArrayWaitHandle::t___construct() {
 
 Object c_GenArrayWaitHandle::ti_create(const char* cls, CArrRef dependencies) {
   Array deps = dependencies->copy();
-  Object exception;
   for (ssize_t iter_pos = deps->iter_begin();
        iter_pos != ArrayData::invalid_index;
        iter_pos = deps->iter_advance(iter_pos)) {
@@ -67,22 +60,37 @@ Object c_GenArrayWaitHandle::ti_create(const char* cls, CArrRef dependencies) {
       tvUnbox(current);
     }
 
+    if (!c_WaitHandle::fromTypedValue(current) &&
+        !IS_NULL_TYPE(current->m_type)) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Expected dependencies to be an array of WaitHandle instances"));
+      throw e;
+    }
+  }
+
+  Object exception;
+  for (ssize_t iter_pos = deps->iter_begin();
+       iter_pos != ArrayData::invalid_index;
+       iter_pos = deps->iter_advance(iter_pos)) {
+
+    TypedValue* current = deps->nvGetValueRef(iter_pos);
     if (IS_NULL_TYPE(current->m_type)) {
       // {uninit,null} yields null
       tvWriteNull(current);
       continue;
     }
 
-    c_WaitHandle* child = c_WaitHandle::fromTypedValue(current);
-    if (UNLIKELY(!child)) {
-      putInvalidArgumentException(exception);
-    } else if (child->isSucceeded()) {
+    assert(current->m_type == KindOfObject);
+    assert(dynamic_cast<c_WaitHandle*>(current->m_data.pobj));
+    auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
+
+    if (child->isSucceeded()) {
       tvSetIgnoreRef(child->getResult(), current);
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
-      c_WaitableWaitHandle* child_wh =
-        static_cast<c_WaitableWaitHandle*>(child);
+      assert(dynamic_cast<c_WaitableWaitHandle*>(child));
+      auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       c_GenArrayWaitHandle* my_wh = NEWOBJ(c_GenArrayWaitHandle)();
       my_wh->initialize(exception, deps, iter_pos, child_wh);
@@ -116,26 +124,23 @@ void c_GenArrayWaitHandle::onUnblocked() {
        m_iterPos = m_deps->iter_advance(m_iterPos)) {
 
     TypedValue* current = m_deps->nvGetValueRef(m_iterPos);
-    if (UNLIKELY(current->m_type == KindOfRef)) {
-      tvUnbox(current);
-    }
-
     if (IS_NULL_TYPE(current->m_type)) {
       // {uninit,null} yields null
       tvWriteNull(current);
       continue;
     }
 
-    c_WaitHandle* child = c_WaitHandle::fromTypedValue(current);
-    if (UNLIKELY(!child)) {
-      putInvalidArgumentException(m_exception);
-    } else if (child->isSucceeded()) {
+    assert(current->m_type == KindOfObject);
+    assert(dynamic_cast<c_WaitHandle*>(current->m_data.pobj));
+    auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
+
+    if (child->isSucceeded()) {
       tvSetIgnoreRef(child->getResult(), current);
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {
-      c_WaitableWaitHandle* child_wh =
-        static_cast<c_WaitableWaitHandle*>(child);
+      assert(dynamic_cast<c_WaitableWaitHandle*>(child));
+      auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       try {
         blockOn(child_wh);

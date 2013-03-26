@@ -1998,14 +1998,34 @@ void HhbcTranslator::emitCastBool() {
   m_tb->genDecRef(src);
 }
 
+void HhbcTranslator::emitCastDouble() {
+  SSATmp* src = popC();
+  Type fromType = src->getType();
+  if (fromType.equals(Type::Dbl)) {
+    push(src);
+  } else if (fromType.isNull()) {
+    push(m_tb->genDefConst(0.0));
+  } else if (fromType.isArray()) {
+    push(m_tb->gen(ConvArrToDbl, src));
+  } else if (fromType.equals(Type::Bool)) {
+    push(m_tb->gen(ConvBoolToDbl, src));
+  } else if (fromType.equals(Type::Int)) {
+    push(m_tb->gen(ConvIntToDbl, src));
+  } else if (fromType.isString()) {
+    push(m_tb->gen(ConvStrToDbl, src));
+  } else if (fromType.subtypeOf(Type::Obj)) {
+    spillStack(); // may throw
+    push(m_tb->gen(ConvObjToDbl, src));
+  } else {
+    spillStack(); // may throw
+    push(m_tb->gen(ConvGenToDbl, src));
+  }
+}
+
 void HhbcTranslator::emitCastInt() {
   SSATmp* src = popC();
   push(m_tb->genConvToInt(src));
   m_tb->genDecRef(src);
-}
-
-void HhbcTranslator::emitCastDouble() {
-  emitInterpOneOrPunt(Type::Dbl, 1);
 }
 
 void HhbcTranslator::emitCastString() {

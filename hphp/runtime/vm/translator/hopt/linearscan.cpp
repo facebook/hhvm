@@ -642,7 +642,12 @@ void LinearScan::computePreColoringHint() {
         }
         break;
       }
-    case ConvToDbl:
+    case ConvArrToDbl:
+    case ConvBoolToDbl:
+    case ConvIntToDbl:
+    case ConvObjToDbl:
+    case ConvStrToDbl:
+    case ConvGenToDbl:
       break;
     case ConvToInt:
       {

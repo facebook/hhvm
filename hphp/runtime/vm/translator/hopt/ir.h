@@ -173,7 +173,12 @@ O(ConvObjToArr,                 D(Arr), S(Obj),                        N|CRc) \
 O(ConvStrToArr,                 D(Arr), S(Str),                        N|CRc) \
 O(ConvGenToArr,                 D(Arr), S(Gen),                        N|CRc) \
 O(ConvToBool,                  D(Bool), S(Gen),                          C|N) \
-O(ConvToDbl,                    D(Dbl), S(Gen),                          C|N) \
+O(ConvArrToDbl,                 D(Dbl), S(Arr),                        N|CRc) \
+O(ConvBoolToDbl,                D(Dbl), S(Bool),                         C|N) \
+O(ConvIntToDbl,                 D(Dbl), S(Int),                          C|N) \
+O(ConvObjToDbl,                 D(Dbl), S(Obj),                     N|Er|CRc) \
+O(ConvStrToDbl,                 D(Dbl), S(Str),                        N|CRc) \
+O(ConvGenToDbl,                 D(Dbl), S(Gen),                     N|Er|CRc) \
 O(ConvToInt,                    D(Int), S(Gen),                          C|N) \
 O(ConvToObj,                    D(Obj), S(Gen),                          C|N) \
 O(ConvToStr,                    D(Str), S(Gen),                          C|N) \

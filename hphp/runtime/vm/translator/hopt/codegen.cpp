@@ -497,29 +497,31 @@ static void zeroExtendIfBool(X64Assembler& as, const SSATmp* src) {
   }
 }
 
-static void prepBinaryXmmOp(X64Assembler& a, const SSATmp* l, const SSATmp* r) {
-  auto intoXmm = [&](const SSATmp* ssa, RegXMM xmm) {
-    RegNumber src(ssa->getReg());
-    if (ssa->getReg() == InvalidReg) {
-      src = rScratch;
-      assert(ssa->isConst());
-      a.mov_imm64_reg(ssa->getValBits(), rScratch);
-    }
-    if (ssa->isA(Type::Int | Type::Bool)) {
-      // Expand non-const bools to 64-bit.
-      // Consts are already moved into src as 64-bit values above.
-      if (!ssa->isConst()) zeroExtendIfBool(a, ssa);
-      // cvtsi2sd doesn't modify the high bits of its target, which can
-      // cause false dependencies to prevent register renaming from kicking
-      // in. Break the dependency chain by zeroing out the destination reg.
-      a.  pxor_xmm_xmm(xmm, xmm);
-      a.  cvtsi2sd_reg64_xmm(src, xmm);
-    } else {
-      a.  mov_reg64_xmm(src, xmm);
-    }
-  };
-  intoXmm(l, xmm0);
-  intoXmm(r, xmm1);
+static void prepUnaryXmmOp(X64Assembler& a, const SSATmp* ssa, RegXMM xmm) {
+  RegNumber src(ssa->getReg());
+  if (ssa->getReg() == InvalidReg) {
+    src = rScratch;
+    assert(ssa->isConst());
+    a.mov_imm64_reg(ssa->getValBits(), rScratch);
+  }
+  if (ssa->isA(Type::Int | Type::Bool)) {
+    // Expand non-const bools to 64-bit.
+    // Consts are already moved into src as 64-bit values above.
+    if (!ssa->isConst()) zeroExtendIfBool(a, ssa);
+    // cvtsi2sd doesn't modify the high bits of its target, which can
+    // cause false dependencies to prevent register renaming from kicking
+    // in. Break the dependency chain by zeroing out the destination reg.
+    a.  pxor_xmm_xmm(xmm, xmm);
+    a.  cvtsi2sd_reg64_xmm(src, xmm);
+  } else {
+    a.  mov_reg64_xmm(src, xmm);
+  }
+}
+
+static void prepBinaryXmmOp(X64Assembler& a, const SSATmp* left,
+                            const SSATmp* right) {
+  prepUnaryXmmOp(a, left, xmm0);
+  prepUnaryXmmOp(a, right, xmm1);
 }
 
 static void doubleCmp(X64Assembler& a, RegXMM xmm0, RegXMM xmm1) {
@@ -1718,8 +1720,47 @@ void CodeGenerator::cgConvToBool(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgConvToDbl(IRInstruction* inst) {
-  CG_PUNT(ConvToDbl);
+void CodeGenerator::cgConvArrToDbl(IRInstruction* inst) {
+  cgConvGenToDbl(inst);
+}
+
+void CodeGenerator::cgConvBoolToDbl(IRInstruction* inst) {
+  cgConvPrimitiveToDbl(inst);
+}
+
+void CodeGenerator::cgConvIntToDbl(IRInstruction* inst) {
+  cgConvPrimitiveToDbl(inst);
+}
+
+void CodeGenerator::cgConvObjToDbl(IRInstruction* inst) {
+  cgConvGenToDbl(inst);
+}
+
+void CodeGenerator::cgConvStrToDbl(IRInstruction* inst) {
+  cgConvGenToDbl(inst);
+}
+
+HOT_FUNC_VM static int64_t genToDblHelper(TypedValue value) {
+  tvCastToDoubleInPlace(&value); // this will decrease the ref count
+  // of the current object in value.
+  return value.m_data.num;
+}
+
+void CodeGenerator::cgConvGenToDbl(IRInstruction* inst) {
+  SSATmp* dst = inst->getDst();
+  SSATmp* src = inst->getSrc(0);
+  ArgGroup args;
+  args.typedValue(src);
+  int64_t (*fPtr)(TypedValue) = genToDblHelper;
+  cgCallHelper(m_as, (TCA)fPtr, dst, kSyncPoint, args);
+}
+
+void CodeGenerator::cgConvPrimitiveToDbl(IRInstruction* inst) {
+  SSATmp* dst = inst->getDst();
+  SSATmp* src = inst->getSrc(0);
+  prepUnaryXmmOp(m_as, src, xmm0);
+  m_as.mov_xmm_reg64(xmm0, dst->getReg());
+  return;
 }
 
 void CodeGenerator::cgConvToInt(IRInstruction* inst) {
@@ -2203,7 +2244,7 @@ void CodeGenerator::cgSpill(IRInstruction* inst) {
     auto sinfo = dst->getSpillInfo(locIndex);
     assert(sinfo.type() == SpillInfo::Memory);
     m_as.    storeq(srcReg, reg::rsp[sizeof(uint64_t) * sinfo.mem()]);
-                                    
+
   }
 }
 

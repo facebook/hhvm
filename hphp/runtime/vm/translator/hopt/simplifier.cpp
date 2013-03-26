@@ -100,7 +100,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConvIntToArr:  return simplifyConvToArr(inst);
   case ConvStrToArr:  return simplifyConvToArr(inst);
   case ConvToBool:    return simplifyConvToBool(inst);
-  case ConvToDbl:     return simplifyConvToDbl(inst);
+  case ConvArrToDbl:  return simplifyConvArrToDbl(inst);
+  case ConvBoolToDbl: return simplifyConvBoolToDbl(inst);
+  case ConvIntToDbl:  return simplifyConvIntToDbl(inst);
+  case ConvStrToDbl:  return simplifyConvStrToDbl(inst);
   case ConvToInt:     return simplifyConvToInt(inst);
   case ConvToObj:     return simplifyConvToObj(inst);
   case ConvToStr:     return simplifyConvToStr(inst);
@@ -1132,11 +1135,40 @@ SSATmp* Simplifier::simplifyConvToBool(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvToDbl(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvArrToDbl(IRInstruction* inst) {
   SSATmp* src = inst->getSrc(0);
-  Type type   = src->getType();
-  if (type == Type::Dbl) {
-    return src;
+  if (src->isConst()) {
+    if (src->getValArr()->empty()) {
+      return genDefDbl(0.0);
+    }
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvBoolToDbl(IRInstruction* inst) {
+  SSATmp* src = inst->getSrc(0);
+  if (src->isConst()) {
+    return genDefDbl(double(src->getValBool()));
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvIntToDbl(IRInstruction* inst) {
+  SSATmp* src = inst->getSrc(0);
+  if (src->isConst()) {
+    return genDefDbl(double(src->getValInt()));
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvStrToDbl(IRInstruction* inst) {
+  SSATmp* src = inst->getSrc(0);
+  if (src->isConst()) {
+    const StringData *str = src->getValStr();
+    if (str->isNumeric()) {
+      return genDefDbl(str->toDouble());
+    }
+    return genDefDbl(0.0);
   }
   return nullptr;
 }
@@ -1310,6 +1342,10 @@ SSATmp* Simplifier::simplifyIncRef(IRInstruction* inst) {
 
 SSATmp* Simplifier::genDefInt(int64_t val) {
   return m_tb->genDefConst<int64_t>(val);
+}
+
+SSATmp* Simplifier::genDefDbl(double val) {
+ return m_tb->genDefConst<double>(val);
 }
 
 SSATmp* Simplifier::genDefBool(bool val) {

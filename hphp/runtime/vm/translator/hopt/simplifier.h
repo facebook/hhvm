@@ -64,7 +64,10 @@ private:
   SSATmp* simplifyConcat(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyConvToArr(IRInstruction*);
   SSATmp* simplifyConvToBool(IRInstruction*);
-  SSATmp* simplifyConvToDbl(IRInstruction*);
+  SSATmp* simplifyConvArrToDbl(IRInstruction*);
+  SSATmp* simplifyConvBoolToDbl(IRInstruction*);
+  SSATmp* simplifyConvIntToDbl(IRInstruction*);
+  SSATmp* simplifyConvStrToDbl(IRInstruction*);
   SSATmp* simplifyConvToInt(IRInstruction*);
   SSATmp* simplifyConvToObj(IRInstruction*);
   SSATmp* simplifyConvToStr(IRInstruction*);
@@ -85,6 +88,7 @@ private:
 
 private:
   SSATmp* genDefInt(int64_t val);
+  SSATmp* genDefDbl(double val);
   SSATmp* genDefBool(bool val);
   SSATmp* simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(IRInstruction*);

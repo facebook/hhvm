@@ -243,6 +243,7 @@ private:
   Address cgCheckRefCountedType(PhysReg typeReg);
   Address cgCheckRefCountedType(PhysReg baseReg,
                                 int64_t offset);
+  void cgConvPrimitiveToDbl(IRInstruction* inst);
   void cgDecRefStaticType(Type type,
                           PhysReg dataReg,
                           Block* exit,

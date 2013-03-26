@@ -449,13 +449,15 @@ String StringUtil::HtmlDecode(CStrRef input, QuoteStyle quoteStyle,
 
   assert(charset);
 
-  if (!html_supported_charset(charset)) {
-    throw NotImplementedException(charset);
-  }
-
   int len = input.size();
   char *ret = string_html_decode(input, len, quoteStyle != NoQuotes,
                                  quoteStyle == BothQuotes, charset, all);
+  if (!ret) {
+    // null iff charset was not recognized
+    throw NotImplementedException(charset);
+    // (charset is not null, see assertion above)
+  }
+
   return String(ret, len, AttachString);
 }
 

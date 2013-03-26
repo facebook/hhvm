@@ -807,8 +807,10 @@ static const HtmlBasicEntity basic_entities[] = {
 };
 
 Array f_get_html_translation_table(int table, int quote_style) {
+  static entity_charset charset = determine_charset(nullptr); // get default one
   char ind[2]; ind[1] = 0;
-  entity_charset charset = determine_charset(NULL);
+
+  assert(charset != entity_charset_enum::cs_unknown);
 
   const int HTML_SPECIALCHARS = 0;
   const int HTML_ENTITIES = 1;

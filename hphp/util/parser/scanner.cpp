@@ -67,8 +67,15 @@ bool ScannerToken::htmlTrim() {
 
 void ScannerToken::xhpDecode() {
   int len = m_text.size();
+  // note: 5th arg is charset_hint string; here we pass nullptr to indicate
+  // "use the default one" which is UTF-8.  (Just saves a charset lookup.)
   char *ret = string_html_decode(m_text.c_str(), len, true,
-                                 false, "UTF-8", true, true);
+                                 false, nullptr, true, true);
+  // safety check: decode function returns null iff charset unrecognized;
+  // i.e. nullptr result would mean UTF-8 is available.
+  // Pretty sure it is universally available!
+  // (Do assertion anyway.)
+  assert(ret);
   m_text = string(ret, len);
   free(ret);
 }

@@ -62,6 +62,7 @@ enum entity_charset {
   cs_8859_15, cs_utf_8, cs_big5, cs_gb2312,
   cs_big5hkscs, cs_sjis, cs_eucjp, cs_koi8r,
   cs_cp1251, cs_8859_5, cs_cp866, cs_macroman,
+  cs_unknown,
   cs_end
 };
 }
@@ -85,6 +86,10 @@ struct html_entity_map {
 
 const html_entity_map* html_get_entity_map();
 
+/*
+ * returns cs_unknown iff not found;
+ * if input null, returns default charset of cs_utf_8
+ */
 entity_charset determine_charset(const char*);
 
 char *string_html_encode(const char *input, int &len, bool encode_double_quote,
@@ -92,11 +97,18 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
 char *string_html_encode_extra(const char *input, int &len,
                                StringHtmlEncoding flags,
                                const AsciiMap *asciiMap);
+
+/**
+ * returns decoded string;
+ * note, can return nullptr if the charset could not be detected
+ * using the given charset_hint; can also pass in nullptr
+ * for the charset_hint to use the default one (UTF-8).
+ * (see determine_charset).
+ */
 char *string_html_decode(const char *input, int &len,
                          bool decode_double_quote, bool decode_single_quote,
                          const char *charset_hint,
                          bool all, bool xhp = false );
-bool html_supported_charset(const char *charset);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

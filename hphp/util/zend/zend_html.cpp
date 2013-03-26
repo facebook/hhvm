@@ -310,14 +310,13 @@ static const struct {
 ///////////////////////////////////////////////////////////////////////////////
 
 entity_charset determine_charset(const char *charset_hint) {
-  entity_charset charset = cs_utf_8;
+  entity_charset charset = cs_unknown;
 
   if (charset_hint == nullptr) {
     // default to utf-8
     return cs_utf_8;
   }
 
-  DEBUG_ONLY bool found = false;
   size_t len = strlen(charset_hint);
 
   /* now walk the charset map and look for the codeset */
@@ -325,14 +324,9 @@ entity_charset determine_charset(const char *charset_hint) {
     if (len == strlen(charset_map[i].codeset) &&
       strncasecmp(charset_hint, charset_map[i].codeset, len) == 0) {
       charset = charset_map[i].charset;
-      found = true;
       break;
     }
   }
-
-  // All code paths that go into this check html_supported_charset()
-  // and throw if not.
-  assert(found && "currently we expect to only use supported charsets");
 
   return charset;
 }
@@ -766,6 +760,9 @@ char *string_html_decode(const char *input, int &len,
   }
 
   entity_charset charset = determine_charset(charset_hint);
+  if (charset == cs_unknown) {
+    return nullptr;
+  }
 
   char *ret = (char *)malloc(len + 1);
   char *q = ret;
@@ -824,17 +821,6 @@ const html_entity_map* html_get_entity_map() {
     }
   }
   return entity_map;
-}
-
-bool html_supported_charset(const char *charset) {
-  size_t len = strlen(charset);
-  for (int i = 0; charset_map[i].codeset; i++) {
-     if (len == strlen(charset_map[i].codeset) &&
-       strncasecmp(charset, charset_map[i].codeset, len) == 0) {
-       return true;
-     }
-   }
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

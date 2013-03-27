@@ -697,7 +697,12 @@ Variant ZendPack::unpack(CStrRef fmt, CStrRef data) {
           }
 
           v |= unpack(&input[inputpos], sizeof(int), issigned, int_map);
-          ret.set(String(n, CopyString), v);
+          if (type == 'i') {
+            ret.set(String(n, CopyString), v);
+          } else {
+            uint64_t u64 = uint32_t(v);
+            ret.set(String(n, CopyString), u64);
+          }
           break;
         }
 

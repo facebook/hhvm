@@ -7538,11 +7538,11 @@ void TranslatorX64::translateContReceive(const Tracelet& t,
                                          const NormalizedInstruction& i) {
   const int contIdx = 0;
   emitContRaiseCheck(a, i);
+  PhysReg rCont = getReg(i.inputs[contIdx]->location);
   ScratchReg rScratch(m_regMap);
-  emitLea(a, getReg(i.inputs[contIdx]->location), CONTOFF(m_received),
-          r(rScratch));
-  emitIncRefGeneric(r(rScratch), 0);
+  emitLea(a, rCont, CONTOFF(m_received), r(rScratch));
   emitCopyToStack(a, i, r(rScratch), -1 * (int)sizeof(Cell));
+  emitStoreUninitNull(a, CONTOFF(m_received), rCont);
 }
 
 void TranslatorX64::translateContEnter(const Tracelet& t,

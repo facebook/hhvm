@@ -3647,7 +3647,8 @@ ContReceive    []  ->  [C]
 
   Receive continuation value. If the continuation in local 0 has a pending
   exception, this instruction will throw that exception. Otherwise, the value
-  sent to the continuation will be pushed on the stack.
+  sent to the continuation will be pushed on the stack. The value will be no
+  longer referenced by the Continuation object.
 
 ContDone    []  ->  []
 

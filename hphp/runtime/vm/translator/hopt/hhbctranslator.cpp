@@ -752,9 +752,8 @@ void HhbcTranslator::emitContReceive() {
   SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
   m_tb->genContRaiseCheck(cont, getExitSlowTrace());
   SSATmp* valOffset = m_tb->genDefConst<int64_t>(CONTOFF(m_received));
-  SSATmp* value = m_tb->genLdProp(cont, valOffset, Type::Cell, nullptr);
-  value = m_tb->genIncRef(value);
-  push(value);
+  push(m_tb->genLdProp(cont, valOffset, Type::Cell, nullptr));
+  m_tb->genStProp(cont, valOffset, m_tb->genDefUninit(), true);
 }
 
 void HhbcTranslator::emitContDone() {

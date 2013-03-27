@@ -149,52 +149,6 @@ __thread VMRegState tl_regState = REGSTATE_CLEAN;
 __thread JmpHitMap* tl_unlikelyHits = nullptr;
 __thread JmpHitMap* tl_jccHits = nullptr;
 
-namespace {
-typedef hphp_hash_map<litstr, int64_t, pointer_hash<const char>> PuntMap;
-__thread PuntMap* tl_puntCounts = nullptr;
-
-void recordPunt(litstr key) {
-  assert(Trace::moduleEnabled(Trace::punt, 1));
-  assert(tl_puntCounts);
-  (*tl_puntCounts)[key]++;
-}
-
-void initPuntCounts() {
-  if (!Trace::moduleEnabled(Trace::punt, 1)) return;
-  assert(!tl_puntCounts);
-  tl_puntCounts = new PuntMap();
-}
-
-void dumpPuntCounts() {
-  if (!Trace::moduleEnabled(Trace::punt, 1)) return;
-  assert(tl_puntCounts);
-  TRACE_SET_MOD(punt);
-
-  int64_t total = 0;
-  std::map<int64_t, litstr> sortedPunts;
-  for (auto const& pair : *tl_puntCounts) {
-    sortedPunts[pair.second] = pair.first;
-    total += pair.second;
-  }
-
-  TRACE(1, "-------------------- hhir punts for %s --------------------\n",
-       g_context->getRequestUrl(50).c_str());
-  TRACE(1, "%30s   %9s %9s %9s\n",
-        "name", "count", "% total", "accum %");
-  int64_t accum = 0;
-  for (auto const& pair : boost::adaptors::reverse(sortedPunts)) {
-    accum += pair.first;
-    TRACE(1, "%30s : %9ld %8.2f%% %8.2f%%\n",
-          pair.second, pair.first,
-          100.0 * pair.first / total, 100.0 * accum / total);
-  }
-  TRACE(1, "\n");
-
-  delete tl_puntCounts;
-  tl_puntCounts = nullptr;
-}
-}
-
 static StaticString s___call(LITSTR_INIT("__call"));
 static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
 
@@ -2937,8 +2891,10 @@ void TranslatorX64::emitReqRetransNoIR(Asm& as, SrcKey& sk) {
 
 void TranslatorX64::emitRecordPunt(Asm& a, const std::string& name) {
   PhysRegSaver regs(a, kAllX64Regs);
-  a.  movq (StringData::GetStaticString(name)->data(), rdi);
-  a.  call ((TCA)recordPunt);
+  a.  movq (StringData::GetStaticString("hhir punts"), rdi);
+  a.  movq (StringData::GetStaticString(name), rsi);
+  a.  movq (1, rdx);
+  a.  call ((TCA)Stats::incStatGrouped);
 }
 
 uint64_t TranslatorX64::packBitVec(const vector<bool>& bits, unsigned i) {
@@ -12051,7 +12007,7 @@ TranslatorX64::requestInit() {
   Treadmill::startRequest(g_vmContext->m_currentThreadIdx);
   memset(&s_perfCounters, 0, sizeof(s_perfCounters));
   initJmpProfile();
-  initPuntCounts();
+  Stats::init();
 }
 
 void
@@ -12069,7 +12025,6 @@ TranslatorX64::requestExit() {
   Stats::dump();
   Stats::clear();
   dumpJmpProfile();
-  dumpPuntCounts();
 
   if (Trace::moduleEnabledRelease(Trace::tx64stats, 1)) {
     Trace::traceRelease("TranslatorX64 perf counters for %s:\n",

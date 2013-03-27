@@ -313,16 +313,17 @@ CALL_OPCODE(PrintStr)
 CALL_OPCODE(PrintInt)
 CALL_OPCODE(PrintBool)
 CALL_OPCODE(DbgAssertPtr)
-CALL_OPCODE(LdSwitchDblIndex);
-CALL_OPCODE(LdSwitchStrIndex);
-CALL_OPCODE(LdSwitchObjIndex);
-CALL_OPCODE(VerifyParamCallable);
-CALL_OPCODE(VerifyParamFail);
+CALL_OPCODE(LdSwitchDblIndex)
+CALL_OPCODE(LdSwitchStrIndex)
+CALL_OPCODE(LdSwitchObjIndex)
+CALL_OPCODE(VerifyParamCallable)
+CALL_OPCODE(VerifyParamFail)
 CALL_OPCODE(RaiseUninitLoc)
 CALL_OPCODE(WarnNonObjProp)
 CALL_OPCODE(ThrowNonObjProp)
 CALL_OPCODE(RaiseUndefProp)
 CALL_OPCODE(RaiseError)
+CALL_OPCODE(IncStatGrouped)
 
 // Vector instruction helpers
 CALL_OPCODE(BaseG)

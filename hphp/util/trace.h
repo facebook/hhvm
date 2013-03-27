@@ -86,6 +86,8 @@ namespace Trace {
       TM(instancebits)\
       TM(hhas)        \
       TM(punt)        \
+      TM(statgroups)  \
+      TM(minstr)      \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

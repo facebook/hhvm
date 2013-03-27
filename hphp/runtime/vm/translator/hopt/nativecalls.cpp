@@ -17,6 +17,7 @@
 #include "runtime/vm/translator/hopt/nativecalls.h"
 
 #include "runtime/vm/runtime.h"
+#include "runtime/vm/stats.h"
 #include "runtime/vm/translator/targetcache.h"
 #include "runtime/vm/translator/translator-runtime.h"
 #include "runtime/vm/translator/hopt/ir.h"
@@ -87,6 +88,8 @@ static CallMap s_callMap({
     {RaiseUndefProp,     (TCA)raiseUndefProp, DNone, SSync,
                            {{SSA, 0}, {SSA, 1}}},
     {RaiseError,         (TCA)raise_error_sd, DNone, SSync, {{SSA, 0}}},
+    {IncStatGrouped,     (TCA)Stats::incStatGrouped, DNone, SNone,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* Switch helpers */
     {LdSwitchDblIndex,   (TCA)switchDoubleHelper, DSSA, SSync,

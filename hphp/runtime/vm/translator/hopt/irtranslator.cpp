@@ -1071,7 +1071,7 @@ TranslatorX64::irTranslateFPassV(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateFPassR(const Tracelet& t,
-                               const NormalizedInstruction& i) {
+                                 const NormalizedInstruction& i) {
   /*
    * Like FPassC, FPassR is able to cheat on boxing if the current
    * parameter is pass by reference but we have a cell: the box would refer

@@ -2423,7 +2423,10 @@ void HhbcTranslator::emitInterpOneOrPunt(Type type,
                                          int numDiscard, /* = 0 */
                                          Trace* target /* = NULL */) {
   if (RuntimeOption::EvalIRPuntDontInterp) {
-    PUNT(PuntDontInterp);
+    Op op = *(Op*)(getCurUnit()->entry() + m_bcOff);
+    const char* name = StringData::GetStaticString(
+      std::string("PuntDontInterp-") + opcodeToName(op))->data();
+    SPUNT(name);
   } else {
     emitInterpOne(type, numDiscard, target);
   }

@@ -199,6 +199,10 @@ static inline bool enabled() {
   return Trace::moduleEnabled(Trace::stats, 1);
 }
 
+static inline bool enabledAny() {
+  return enabled() || Trace::moduleEnabled(Trace::statgroups);
+}
+
 static inline bool enableInstrCount() {
   return Trace::moduleEnabled(Trace::stats, 2);
 }
@@ -248,8 +252,11 @@ inline void emitInc(Transl::X64Assembler& a, StatCounter stat, int n = 1,
 
 extern void emitIncTranslOp(Transl::X64Assembler& a, Opcode opc,
                             bool force = false);
+extern void init();
 extern void dump();
 extern void clear();
+
+void incStatGrouped(const StringData* cat, const StringData* name, int n = 1);
 
 } } }
 

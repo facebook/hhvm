@@ -820,6 +820,11 @@ StackTransInfo instrStackTransInfo(const Opcode* opcode);
 int instrSpToArDelta(const Opcode* opcode);
 
 inline bool
+mcodeIsLiteral(MemberCode mcode) {
+  return mcode == MET || mcode == MEI || mcode == MPT;
+}
+
+inline bool
 mcodeMaybePropName(MemberCode mcode) {
   return mcode == MPC || mcode == MPL || mcode == MPT;
 }

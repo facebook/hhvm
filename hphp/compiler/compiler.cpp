@@ -157,6 +157,7 @@ int compiler_main(int argc, char **argv) {
   try {
     Hdf empty;
     RuntimeOption::Load(empty);
+    VM::initialize_repo();
 
     CompilerOptions po;
 #ifdef FACEBOOK

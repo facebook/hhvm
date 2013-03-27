@@ -383,6 +383,7 @@ private:
     void emitMPre();
     void emitFinalMOp();
     void emitMPost();
+    void emitMTrace();
 
     // Bases
     void emitBaseOp();

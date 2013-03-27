@@ -1151,6 +1151,10 @@ IncStat S0:ConstInt S1:ConstInt S2:ConstBool
   'force' flag. This opcode becomes a noop iff (force == false and runtime
   stats are not enabled) at translation time.
 
+IncStatGrouped S0:ConstStr S1:ConstStr S2:ConstInt
+
+  Adds the value S2 to the counter named S1, in the category S0.
+
 DbgAssertRefCount S0:{Counted|StaticStr|StaticArr}
 
   Assert that S0 has a valid refcount.  S0 must be a type with a valid

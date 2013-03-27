@@ -355,6 +355,10 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
 void HhbcTranslator::VectorTranslator::emitMPre() {
   checkMIState();
 
+  if (HPHP::Trace::moduleEnabled(HPHP::Trace::minstr, 1)) {
+    emitMTrace();
+  }
+
   if (m_needMIS) {
     m_misBase = m_tb.gen(DefMIStateBase);
     SSATmp* uninit = m_tb.genDefUninit();
@@ -380,6 +384,41 @@ void HhbcTranslator::VectorTranslator::emitMPre() {
     emitIntermediateOp();
     emitRatchetRefs();
   }
+}
+
+void HhbcTranslator::VectorTranslator::emitMTrace() {
+  auto rttStr = [this](int i) {
+    return Type::fromRuntimeType(m_ni.inputs[i]->rtt).unbox().toString();
+  };
+  std::ostringstream shape;
+  int iInd = m_mii.valCount();
+  const char* separator = "";
+
+  shape << opcodeToName(m_ni.mInstrOp()) << " <";
+  auto baseLoc = m_ni.immVec.locationCode();
+  shape << folly::format("{}:{} ", locationCodeString(baseLoc), rttStr(iInd));
+  ++iInd;
+
+  for (int mInd = 0; mInd < m_ni.immVecM.size(); ++mInd) {
+    auto mcode = m_ni.immVecM[mInd];
+    shape << separator;
+    if (mcode == MW) {
+      shape << "MW";
+    } else if (mcodeMaybeArrayKey(mcode)) {
+      shape << "ME:" << rttStr(iInd);
+    } else if (mcodeMaybePropName(mcode)) {
+      shape << "MP:" << rttStr(iInd);
+    } else {
+      not_reached();
+    }
+    if (mcode != MW) ++iInd;
+    separator = " ";
+  }
+  shape << '>';
+  m_tb.gen(IncStatGrouped,
+           cns(StringData::GetStaticString("vector instructions")),
+           cns(StringData::GetStaticString(shape.str())),
+           cns(1));
 }
 
 // Build a map from (stack) input index to stack index.

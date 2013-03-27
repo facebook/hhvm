@@ -621,49 +621,6 @@ function generateFuncCPPHeader($func, $f, $method = false, $forceRef = false,
   }
 }
 
-function generateFuncProfileHeader($func, $f) {
-  $var_arg = ($func['flags'] & VarArgsMask);
-  $args = $func['args'];
-
-  fprintf($f, 'inline %s x_%s', typename($func['return']), $func['name']);
-  generateFuncArgsCPPHeader($func, $f);
-  fprintf($f, " {\n");
-
-  if (($func['flags'] & NoProfile)) {
-    fprintf($f, "  FUNCTION_NOPROFILE_BUILTIN(%s);\n", $func['name']);
-  } else if (!($func['flags'] & NoInjection)) {
-    fprintf($f, "  FUNCTION_INJECTION_BUILTIN(%s);\n", $func['name']);
-  }
-  if (!empty($func['taint_observer'])) {
-    fprintf(
-      $f,
-      "  TAINT_OBSERVER(%s, %s);\n",
-      $func['taint_observer']['set_mask'],
-      $func['taint_observer']['clear_mask']);
-  }
-
-  fprintf($f, "  ");
-
-  if (typename($func['return']) !== 'void') {
-    fprintf($f, "return ");
-  }
-  fprintf($f, "f_%s(", $func['name']);
-
-  if ($var_arg) fprintf($f, '_argc');
-  if ($var_arg && count($args) > 0) fprintf($f, ', ');
-  for ($i = 0; $i < count($args); $i++) {
-    $arg = $args[$i];
-    if ($i > 0) fprintf($f, ', ');
-    fprintf($f, '%s', $arg['name']);
-  }
-  if ($var_arg) {
-    fprintf($f, ', _argv');
-  }
-  fprintf($f, ");\n");
-
-  fprintf($f, "}\n\n");
-}
-
 function generateConstCPPHeader($const, $f) {
   $name = typename($const['type']);
   if ($name == 'String') {

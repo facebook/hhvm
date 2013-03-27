@@ -16,6 +16,7 @@
 
 #include <test/test_ext_misc.h>
 #include <runtime/ext/ext_misc.h>
+#include <runtime/ext/ext_string.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -203,8 +204,55 @@ bool TestExtMisc::test_uniqid() {
   return Count(true);
 }
 
+#define VUNPACK(fmt, inp, exp) \
+{ Array __a = f_unpack(fmt, inp); \
+  VS(__a.exists(1), true); \
+  VS(__a[1], (int64_t)exp); }
+
 bool TestExtMisc::test_unpack() {
-  // covered in TestCodeRun::TestExtMisc
+  // Also covered in TestCodeRun::TestExtMisc
+
+  String iFF = f_str_repeat("\xFF", sizeof(int));
+  String le32_FF("\xFF\x00\x00\x00", 4, AttachLiteral);
+  String be32_FF("\x00\x00\x00\xFF", 4, AttachLiteral);
+  String le16_FF("\xFF\x00", 2, AttachLiteral);
+  String be16_FF("\x00\xFF", 2, AttachLiteral);
+
+  uint32_t endian_check = 1;
+  bool le = ((char*)&endian_check)[0];
+
+  // HPHP, unlike PHP, truncates overflowing ints
+  if (sizeof(int) == 8) {
+    VUNPACK("I", iFF, 0x7FFFFFFFFFFFFFFF);
+  } else if (sizeof(int) == 4) {
+    VUNPACK("I", iFF, 0xFFFFFFFF);
+  } else {
+    // Panic
+    VS(true, false);
+  }
+
+  VUNPACK("i", iFF, -1);
+
+  // LlNV test 32-bit ints specifically
+  VUNPACK("L", iFF, 0xFFFFFFFF);
+  VUNPACK("l", iFF, -1);
+
+  VUNPACK("N", be32_FF, 0xFF);
+  VUNPACK("V", le32_FF, 0xFF);
+  VUNPACK("V", be32_FF, 0xFF000000);
+
+  VUNPACK("L", le ? le32_FF : be32_FF, 0xFF);
+
+  // Ssnv test 16-bit shorts
+  VUNPACK("S", iFF, 0xFFFF);
+  VUNPACK("s", iFF, -1);
+
+  VUNPACK("n", be16_FF, 0xFF);
+  VUNPACK("v", le16_FF, 0xFF);
+  VUNPACK("v", be16_FF, 0xFF00);
+
+  VUNPACK("S", le ? le16_FF : be16_FF, 0xFF);
+
   return Count(true);
 }
 

@@ -185,48 +185,32 @@ struct HhbcTranslator {
   void emitCGetG(const StringData* name, Type resultType,
                  bool isInferedType);
   void emitMInstr(const NormalizedInstruction& ni);
-  void emitCGetProp(LocationCode locCode,
-                    int propOffset,
-                    bool isPropOnStack,
-                    Type resultType,
-                    bool isInferedType);
   void emitVGetL(int32_t id);
   void emitVGetS(const StringData* propName);
   void emitVGetG(const StringData* name);
-  void emitVGetM();
   void emitSetL(int32_t id);
   void emitSetS(const StringData* propName);
   void emitSetG(const StringData* gblName);
-  void emitSetProp(int propOffset, bool isPropOnStack); // object + offset
   void emitBindL(int32_t id);
   void emitBindS(const StringData* propName);
   void emitBindG(const StringData* gblName);
-  void emitBindM(const char* vectorDesc);
   void emitUnsetL(int32_t id);
   void emitUnsetN();
   void emitUnsetG(const StringData* gblName);
-  void emitUnsetProp(int offset);
   void emitIssetL(int32_t id);
   void emitIssetS(const StringData* propName);
   void emitIssetG(const StringData* gblName);
-  void emitIssetM(const char* vectorDesc);
-  void emitIssetProp(int offset);
   void emitEmptyL(int32_t id);
   void emitEmptyS(const StringData* propName);
   void emitEmptyG(const StringData* gblName);
-  void emitEmptyM(const char* vectorDesc);
-  void emitEmptyProp(int offset);
   // The subOpc param can be one of either
   // Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor
   void emitSetOpL(Opcode subOpc, uint32_t id);
   void emitSetOpS(Opcode subOpc);
-  void emitSetOpM(Opcode subOpc, const char* vectorDesc);
-  void emitSetOpProp(Opcode subOpc, int offset);
   // the pre & inc params encode the 4 possible sub opcodes:
   // PreInc, PostInc, PreDec, PostDec
   void emitIncDecL(bool pre, bool inc, uint32_t id);
   void emitIncDecS(bool pre, bool inc);
-  void emitIncDecProp(bool pre, bool inc, int offset, bool isPropOnStack);
   void emitPopC();
   void emitPopV();
   void emitPopR();

@@ -794,58 +794,6 @@ void TranslatorX64::irTranslateBindG(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateCGetMProp(const Tracelet& t,
-                                    const NormalizedInstruction& i) {
-  assert(i.inputs.size() == 2 && i.outStack);
-
-  static const int kPropIdx = 1;
-  const DynLocation& prop = *i.inputs[kPropIdx];
-  const Location& propLoc = prop.location;
-  const int propOffset    = getNormalPropertyOffset(i,
-                              getMInstrInfo(OpCGetM), 1, 0);
-
-  LocationCode locCode = i.immVec.locationCode();
-  assert(propOffset != -1 && (locCode == LC || locCode == LH));
-  // XXX Get rid of passing type because it's subsumed by
-  // irPassPredictedAndInferredTypes
-  HHIR_EMIT(CGetProp, locCode, propOffset, propLoc.isStack(),
-            getInferredOrPredictedType(i), isInferredType(i));
-}
-
-static bool
-isSupportedCGetMProp(const NormalizedInstruction& i) {
-  if (i.inputs.size() != 2) return false;
-  SKTRACE(2, i.source, "CGetM prop candidate: prop supported: %d, "
-                       "in[0] %s in[1] %s\n",
-          mcodeMaybePropName(i.immVecM[0]),
-          i.inputs[0]->rtt.pretty().c_str(),
-          i.inputs[1]->rtt.pretty().c_str());
-  return isNormalPropertyAccess(i, 1, 0) &&
-    (i.immVec.locationCode() == LC || i.immVec.locationCode() == LH) &&
-    getNormalPropertyOffset(i, getMInstrInfo(OpCGetM), 1, 0) != -1;
-}
-
-void
-TranslatorX64::irTranslateCGetM(const Tracelet& t,
-                                const NormalizedInstruction& i) {
-  assert(i.inputs.size() >= 2);
-  assert(i.outStack);
-
-  if (isSupportedCGetMProp(i)) {
-    irTranslateCGetMProp(t, i);
-    return;
-  }
-
-  m_hhbcTrans->emitMInstr(i);
-}
-
-void
-TranslatorX64::irTranslateVGetM(const Tracelet& t,
-                                const NormalizedInstruction& i) {
-  m_hhbcTrans->emitMInstr(i);
-}
-
-void
 TranslatorX64::irTranslateLateBoundCls(const Tracelet&,
                                        const NormalizedInstruction&i) {
   HHIR_EMIT(LateBoundCls);
@@ -877,17 +825,6 @@ void TranslatorX64::irTranslateFPassG(const Tracelet& t,
   } else {
     irTranslateCGetG(t, ni);
   }
-}
-
-void
-TranslatorX64::irTranslateIssetM(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-  m_hhbcTrans->emitMInstr(i);
-}
-
-void TranslatorX64::irTranslateEmptyM(const Tracelet& t,
-                                      const NormalizedInstruction& ni) {
-  m_hhbcTrans->emitMInstr(ni);
 }
 
 void
@@ -927,49 +864,6 @@ TranslatorX64::irTranslateAKExists(const Tracelet& t,
 }
 
 void
-TranslatorX64::irTranslateSetMProp(const Tracelet& t,
-                                   const NormalizedInstruction& i) {
-  using namespace TargetCache;
-  assert(i.inputs.size() == 3);
-
-  const int kBaseIdx      = 1;
-  const int kPropIdx      = 2;
-  const DynLocation& base = *i.inputs[kBaseIdx];
-  const DynLocation& prop = *i.inputs[kPropIdx];
-  const int propOffset    = getNormalPropertyOffset(i, getMInstrInfo(OpSetM),
-                                                    kPropIdx, 1);
-
-  const Location& propLoc = prop.location;
-
-  bool fastSet = propOffset != -1 && i.immVec.locationCode() == LC;
-
-  if (fastSet && base.valueType() == KindOfObject) {
-    HHIR_EMIT(SetProp, propOffset, propLoc.isStack());
-  } else {
-    m_hhbcTrans->emitMInstr(i);
-  }
-}
-
-static bool isSupportedSetMProp(const NormalizedInstruction& i) {
-  if (i.inputs.size() != 3) return false;
-  SKTRACE(2, i.source, "setM prop candidate: prop supported: %d, rtt %s\n",
-          mcodeMaybePropName(i.immVecM[0]),
-          i.inputs[2]->rtt.pretty().c_str());
-  return isNormalPropertyAccess(i, 2, 1);
-}
-
-void
-TranslatorX64::irTranslateSetM(const Tracelet& t,
-                               const NormalizedInstruction& i) {
-  if (isSupportedSetMProp(i)) {
-    irTranslateSetMProp(t, i);
-    return;
-  }
-
-  m_hhbcTrans->emitMInstr(i);
-}
-
-void
 TranslatorX64::irTranslateSetOpL(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   JIT::Opcode opc;
@@ -989,33 +883,6 @@ TranslatorX64::irTranslateSetOpL(const Tracelet& t,
   }
   const int localIdx = 1;
   HHIR_EMIT(SetOpL, opc, i.inputs[localIdx]->location.offset);
-}
-
-void
-TranslatorX64::irTranslateIncDecM(const Tracelet& t,
-                                  const NormalizedInstruction& i) {
-  if (isNormalPropertyAccess(i, 1, 0) && !curFunc()->isPseudoMain()) {
-    int offset = getNormalPropertyOffset(i, getMInstrInfo(OpIncDecM), 1, 0);
-    if (offset != -1 && i.immVec.locationCode() == LC) {
-      const IncDecOp oplet = (IncDecOp) *(i.pc() + 1);
-      assert(oplet == PreInc || oplet == PostInc || oplet == PreDec ||
-             oplet == PostDec);
-      bool post = (oplet == PostInc || oplet == PostDec);
-      bool pre  = !post;
-      bool inc  = (oplet == PostInc || oplet == PreInc);
-      const DynLocation& prop = *i.inputs[1];
-      const Location& propLoc = prop.location;
-      HHIR_EMIT(IncDecProp, pre, inc, offset, propLoc.isStack());
-      return;
-    }
-  }
-
-  m_hhbcTrans->emitMInstr(i);
-}
-
-void TranslatorX64::irTranslateSetOpM(const Tracelet& t,
-                                      const NormalizedInstruction& ni) {
-  m_hhbcTrans->emitMInstr(ni);
 }
 
 void
@@ -1043,17 +910,6 @@ void
 TranslatorX64::irTranslateUnsetL(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   HHIR_EMIT(UnsetL, i.inputs[0]->location.offset);
-}
-
-void
-TranslatorX64::irTranslateUnsetM(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-  m_hhbcTrans->emitMInstr(i);
-}
-
-void TranslatorX64::irTranslateBindM(const Tracelet& t,
-                                     const NormalizedInstruction& ni) {
-  m_hhbcTrans->emitMInstr(ni);
 }
 
 void
@@ -1211,19 +1067,6 @@ TranslatorX64::irTranslateFPassV(const Tracelet& t,
     return;
   }
   HHIR_EMIT(FPassV);
-}
-
-void
-TranslatorX64::irTranslateFPassM(const Tracelet& t,
-                                 const NormalizedInstruction& i) {
-  assert(i.inputs.size() >= 1);
-  assert(i.outStack && !i.outLocal);
-
-  if (i.preppedByRef) {
-    irTranslateVGetM(t, i);
-  } else {
-    irTranslateCGetM(t, i);
-  }
 }
 
 void
@@ -1440,6 +1283,16 @@ TranslatorX64::irTranslateIterFree(const Tracelet& t,
   case OpIsBoolC:                               \
   case OpIsDoubleC:                             \
     func(CheckTypeOp, t, i)
+
+// All vector instructions are handled by one HhbcTranslator method.
+#define MII(instr, ...)                                                 \
+  void TranslatorX64::irTranslate##instr##M(const Tracelet& t,          \
+                                            const NormalizedInstruction& ni) { \
+    m_hhbcTrans->emitMInstr(ni);                                        \
+  }
+MINSTRS
+MII(FPass)
+#undef MII
 
 void
 TranslatorX64::irTranslateInstrDefault(const Tracelet& t,

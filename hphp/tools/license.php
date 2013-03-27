@@ -17,6 +17,7 @@ $excluded = array(
   'facebook',
 
   // non-PHP licenses
+  'compiler/parser/hphp.tab.cpp',
   'runtime/base/zend/utf8_decode.c',
   'runtime/base/zend/utf8_to_utf16.c',
   'runtime/base/zend/zend_strtod.cpp',

@@ -43,6 +43,20 @@ ClosureExpression::ClosureExpression
       (new ExpressionList(vars->getScope(), vars->getLocation()));
     // push the vars in reverse order, not retaining duplicates
     std::set<string> seenBefore;
+
+    // Because PHP is insane you can have a use variable with the same
+    // name as a param name.
+    // In that case, params win (which is different than zend but much easier)
+    ExpressionListPtr bodyParams = m_func->getParams();
+    if (bodyParams) {
+      int nParams = bodyParams->getCount();
+      for (int i = 0; i < nParams; i++) {
+        ParameterExpressionPtr par(
+          static_pointer_cast<ParameterExpression>((*bodyParams)[i]));
+        seenBefore.insert(par->getName());
+      }
+    }
+
     for (int i = vars->getCount() - 1; i >= 0; i--) {
       ParameterExpressionPtr param(
         dynamic_pointer_cast<ParameterExpression>((*vars)[i]));

@@ -3756,8 +3756,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             ParameterExpressionPtr var(
               static_pointer_cast<ParameterExpression>((*useList)[i]));
             StringData* varName = StringData::GetStaticString(var->getName());
-            useVars.push_back(
-              ClosureUseVar(varName, var->isRef()));
+            useVars.push_back(ClosureUseVar(varName, var->isRef()));
           }
         }
 
@@ -3788,8 +3787,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // Instance variables.
         TypedValue uninit;
         tvWriteUninit(&uninit);
-        for (int i = 0; i < useCount; ++i) {
-          pce->addProperty(useVars[i].first, AttrPrivate, nullptr, &uninit);
+        for (auto& useVar : useVars) {
+          pce->addProperty(useVar.first, AttrPrivate, nullptr, &uninit);
         }
 
         // The constructor. This is entirely generated; all it does is stash its
@@ -5254,20 +5253,10 @@ void EmitterVisitor::emitPostponedMeths() {
       fe->allocVarId(StringData::GetStaticString("0Closure"));
 
       ClosureUseVarVec* useVars = p.m_closureUseVars;
-      auto it = useVars->begin();
-      while (it != useVars->end()) {
-        const StringData* name = it->first;
-        if (fe->hasVar(name) && fe->lookupVarId(name) < fe->numParams()) {
-          // Because PHP is insane you can have a use variable with the same
-          // name as a param name.
-          // In that case, params win (which is different than zend but much easier)
-          it = useVars->erase(it);
-        } else {
-          // These are all locals. I want them right after the params so I don't
-          // have to keep track of which one goes where at runtime.
-          fe->allocVarId(name);
-          it++;
-        }
+      for (auto& useVar : *useVars) {
+        // These are all locals. I want them right after the params so I don't
+        // have to keep track of which one goes where at runtime.
+        fe->allocVarId(useVar.first);
       }
     }
 

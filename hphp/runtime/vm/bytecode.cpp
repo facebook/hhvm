@@ -4444,7 +4444,8 @@ inline void OPTBLD_INLINE VMExecutionContext::iopRetC(PC& pc) {
   ActRec* sfp = arGetSfp(m_fp);
   // Memcpy the the return value on top of the activation record. This works
   // the same regardless of whether the return value is boxed or not.
-  memcpy(&(m_fp->m_r), m_stack.topTV(), sizeof(TypedValue));
+  TypedValue* retval_ptr = &m_fp->m_r;
+  memcpy(retval_ptr, m_stack.topTV(), sizeof(TypedValue));
   // Adjust the stack
   m_stack.ndiscard(m_fp->m_func->numSlotsInFrame() + 1);
 
@@ -4453,6 +4454,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopRetC(PC& pc) {
     m_fp = sfp;
     pc = m_fp->m_func->unit()->entry() + m_fp->m_func->base() + soff;
     m_stack.ret();
+    assert(m_stack.topTV() == retval_ptr);
   } else {
     // No caller; terminate.
     m_stack.ret();

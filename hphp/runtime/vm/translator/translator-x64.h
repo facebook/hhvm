@@ -1154,6 +1154,8 @@ Instance* newInstanceHelper(Class* cls, int numArgs, ActRec* ar,
 Instance* newInstanceHelperCached(Class** classCache,
                                   const StringData* clsName, int numArgs,
                                   ActRec* ar, ActRec* prevAr);
+Instance* newInstanceHelperNoCtorCached(Class** classCache,
+                                        const StringData* clsName);
 
 SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i);
 bool isNormalPropertyAccess(const NormalizedInstruction& i,

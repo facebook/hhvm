@@ -740,16 +740,22 @@ SSATmp* TraceBuilder::genStLoc(uint32_t id,
 }
 
 SSATmp* TraceBuilder::genNewObj(int32_t numParams, SSATmp* cls) {
-  return gen(NewObj, genDefConst<int64_t>(numParams), cls, m_spValue, m_fpValue);
+  return gen(NewObj, cls, genDefConst<int64_t>(numParams), m_spValue, m_fpValue);
 }
 
-SSATmp* TraceBuilder::genNewObj(int32_t numParams,
-                                const StringData* className) {
-  return gen(NewObj,
+SSATmp* TraceBuilder::genNewObjCached(int32_t numParams,
+                                      const StringData* className) {
+  return gen(NewObjCached,
              genDefConst<int64_t>(numParams),
              genDefConst<const StringData*>(className),
              m_spValue,
              m_fpValue);
+}
+
+SSATmp* TraceBuilder::genNewObjNoCtorCached(const StringData* className) {
+  return gen(NewObjNoCtorCached,
+             genDefConst<const StringData*>(className),
+             m_spValue);
 }
 
 SSATmp* TraceBuilder::genNewArray(int32_t capacity) {
@@ -877,19 +883,31 @@ static SSATmp* getStackValue(SSATmp* sp,
   }
 
   case NewObj:
+  case NewObjCached:
     // sp = NewObj(numParams, className, sp, fp)
     if (index == kNumActRecCells) {
       // newly allocated object, which we unfortunately don't have any
       // kind of handle to :-(
       type = Type::Obj;
       return nullptr;
-    } else {
-      return getStackValue(sp->getInstruction()->getSrc(2),
-                           // NewObj pushes an object and an ActRec
-                           index - (1 + kNumActRecCells),
-                           spansCall,
-                           type);
     }
+
+    return getStackValue(sp->getInstruction()->getSrc(2),
+                         // NewObj pushes an object and an ActRec
+                         index - (1 + kNumActRecCells),
+                         spansCall,
+                         type);
+
+  case NewObjNoCtorCached:
+    if (index == 0) {
+      type = Type::Obj;
+      return nullptr;
+    }
+
+    return getStackValue(sp->getInstruction()->getSrc(1),
+                         index - 1,
+                         spansCall,
+                         type);
 
   default: {
     SSATmp* value;
@@ -1202,11 +1220,17 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       assert(m_spOffset >= 0);
       break;
     }
-    case NewObj: {
+    case NewObj:
+    case NewObjCached: {
       m_spValue = inst->getDst();
       // new obj leaves the new object and an actrec on the stack
       m_spOffset += (sizeof(ActRec) / sizeof(Cell)) + 1;
       assert(m_spOffset >= 0);
+      break;
+    }
+    case NewObjNoCtorCached: {
+      m_spValue = inst->getDst();
+      m_spOffset += 1;
       break;
     }
     case InterpOne: {

@@ -318,6 +318,7 @@ CALL_OPCODE(CreateCont)
 CALL_OPCODE(FillContLocals)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewTuple)
+CALL_OPCODE(NewObj)
 CALL_OPCODE(PrintStr)
 CALL_OPCODE(PrintInt)
 CALL_OPCODE(PrintBool)
@@ -3242,7 +3243,7 @@ void CodeGenerator::emitSpillActRec(SSATmp* sp,
                             spReg);
 }
 
-HOT_FUNC_VM static ActRec*
+HOT_FUNC_VM ActRec*
 cgNewInstanceHelper(Class* cls,
                     int numArgs,
                     Cell* sp,
@@ -3277,28 +3278,76 @@ cgNewInstanceHelperCached(CacheHandle cacheHandle,
   return ar;
 }
 
-void CodeGenerator::cgNewObj(IRInstruction* inst) {
+static inline ALWAYS_INLINE Class* getKnownClass(Class** classCache,
+                                                 const StringData* clsName) {
+  Class* cls = *classCache;
+  if (UNLIKELY(cls == nullptr)) {
+    // lookupKnownClass does its own VMRegAnchor'ing.
+    cls = TargetCache::lookupKnownClass<false>(classCache, clsName, true);
+    assert(*classCache && *classCache == cls);
+  }
+  assert(cls);
+  return cls;
+}
+
+static Cell*
+newInstanceHelperNoCtorCached(CacheHandle cacheHandle,
+                                const StringData* clsName,
+                                Cell* sp) {
+  Cell* obj = sp - 1; // this is where the newly allocated object will go
+
+  Class* cls = getKnownClass((Class**)handleToPtr(cacheHandle), clsName);
+  Instance* newObj = newInstance(cls);
+  newObj->incRefCount();
+
+  // store obj into the stack
+  obj->m_data.pobj = newObj;
+  obj->m_type = KindOfObject;
+  return obj;
+}
+
+void CodeGenerator::cgNewObjCached(IRInstruction* inst) {
   SSATmp* dst   = inst->getDst();
   SSATmp* numParams = inst->getSrc(0);
   SSATmp* clsName = inst->getSrc(1);
   SSATmp* sp    = inst->getSrc(2);
   SSATmp* fp    = inst->getSrc(3);
 
-  if (clsName->isString()) {
-    const StringData* classNameString = clsName->getValStr();
-    CacheHandle ch = allocKnownClass(classNameString);
-    ArgGroup args;
-    args.imm(ch)
-      .ssa(clsName)
-      .ssa(numParams)
-      .ssa(sp)
-      .ssa(fp);
-    cgCallHelper(m_as, (TCA)cgNewInstanceHelperCached, dst, kSyncPoint, args);
-  } else {
-    ArgGroup args;
-    args.ssa(clsName).ssa(numParams).ssa(sp).ssa(fp);
-    cgCallHelper(m_as, (TCA)cgNewInstanceHelper, dst, kSyncPoint, args);
-  }
+  assert(clsName->isString());
+  const StringData* classNameString = clsName->getValStr();
+  CacheHandle ch = allocKnownClass(classNameString);
+
+  ActRec* (*helper)(CacheHandle, const StringData*, int, Cell*, ActRec*)
+    = cgNewInstanceHelperCached;
+  ArgGroup args;
+  args.imm(ch)
+    .ssa(clsName)
+    .ssa(numParams)
+    .ssa(sp)
+    .ssa(fp);
+  cgCallHelper(m_as, (TCA)helper, dst, kSyncPoint, args);
+}
+
+void CodeGenerator::cgNewObjNoCtorCached(IRInstruction* inst) {
+  SSATmp* dst   = inst->getDst();
+  SSATmp* clsName = inst->getSrc(0);
+  SSATmp* sp    = inst->getSrc(1);
+
+  assert(clsName->isString());
+  const StringData* classNameString = clsName->getValStr();
+  CacheHandle ch = allocKnownClass(classNameString);
+
+  Cell* (*helper)(CacheHandle, const StringData*, Cell*) =
+    newInstanceHelperNoCtorCached;
+  ArgGroup args;
+  args.imm(ch)
+    .ssa(clsName)
+    .ssa(sp);
+  cgCallHelper(m_as,
+               (TCA)helper,
+               dst,
+               kSyncPoint,
+               args);
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {

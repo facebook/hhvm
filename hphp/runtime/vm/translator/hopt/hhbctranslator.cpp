@@ -1226,7 +1226,23 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   const StringData* className = lookupStringId(classNameStrId);
   TRACE(3, "%u: FPushFuncCtorD %d %s\n", m_bcOff, numParams, className->data());
   spillStack();
-  m_tb->genNewObj(numParams, className);
+  // If constructor is the generated 86ctor, no need to call it.
+  if (RuntimeOption::RepoAuthoritative &&
+      numParams == 0) {
+    const Class* cls = Unit::lookupUniqueClass(className);
+    if (cls &&
+        (cls->attrs() & AttrUnique) &&
+        Func::isSpecial(cls->getCtor()->name())) {
+      // This optimization is only safe if the FCall is in the same
+      // tracelet.  Luckily that is always the case: since this
+      // optimization only applies when numParams==0, there will be
+      // nothing between the FPushCtorD and the FCall.
+      m_tb->genNewObjNoCtorCached(className);
+      push(m_tb->genDefNull());
+      return;
+    }
+  }
+  m_tb->genNewObjCached(numParams, className);
 }
 
 void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {

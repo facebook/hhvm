@@ -74,6 +74,8 @@ static CallMap s_callMap({
     {NewArray,           (TCA)new_array, DSSA, SNone, {{SSA, 0}}},
     {NewTuple,           (TCA)new_tuple, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
+    {NewObj,             (TCA)cgNewInstanceHelper, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {PrintStr,           (TCA)print_string, DNone, SNone, {{SSA, 0}}},
     {PrintInt,           (TCA)print_int, DNone, SNone, {{SSA, 0}}},
     {PrintBool,          (TCA)print_boolean, DNone, SNone, {{SSA, 0}}},

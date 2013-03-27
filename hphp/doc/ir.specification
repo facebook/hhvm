@@ -782,7 +782,29 @@ D:BoxedCell = LdStaticLocCached S0:ConstCacheHandle -> L
 
 8. Allocation
 
-NewObj
+D:StkPtr = NewObj S0:ConstInt S1:Cls S2:StkPtr S3:StkPtr
+
+  Allocate a new object.  Push a Cell pointing to the object and an
+  ActRec for the constructor onto the stack and return the new SP.
+  S0 is the number of parameters for the constructor
+  S1 is the class of the object
+  S2 is the current stack pointer
+  S3 is the frame pointer of the current ActRec
+
+D:StkPtr = NewObjCached S0:ConstInt S1:Str S2:StkPtr S3:StkPtr
+
+  Allocate a new object with class name S1, using a target cache
+  lookup.  S1 is the string name of the class, other parameters are
+  the same as NewObj.
+
+D:StkPtr = NewObjNoCtorCached S0:Str S1:StkPtr
+
+  Allocate a new object, which does not require a constructor call,
+  with class name S0, using a target cache lookup.  Because no
+  constructor will be called this opcode does not allocate an ActRec.
+  Operand S0 is the name of the class, S1 is the current stack
+  pointer.
+
 NewArray
 NewTuple
 

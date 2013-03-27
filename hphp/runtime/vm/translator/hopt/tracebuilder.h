@@ -127,7 +127,8 @@ public:
   SSATmp* genLdCurFuncPtr();
   SSATmp* genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset);
   SSATmp* genLdFuncCls(SSATmp* func);
-  SSATmp* genNewObj(int32_t numParams, const StringData* clsName);
+  SSATmp* genNewObjNoCtorCached(const StringData* className);
+  SSATmp* genNewObjCached(int32_t numParams, const StringData* clsName);
   SSATmp* genNewObj(int32_t numParams, SSATmp* cls);
   SSATmp* genNewArray(int32_t capacity);
   SSATmp* genNewTuple(int32_t numArgs, SSATmp* sp);

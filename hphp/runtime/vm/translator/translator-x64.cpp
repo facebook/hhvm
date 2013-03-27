@@ -9239,7 +9239,7 @@ newInstanceHelperNoCtor(Class* cls) {
   return ret;
 }
 
-static Instance*
+Instance*
 HOT_FUNC_VM
 newInstanceHelperNoCtorCached(Class** classCache, const StringData* clsName) {
   Class* cls = getKnownClass(classCache, clsName);

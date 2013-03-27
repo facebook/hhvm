@@ -287,9 +287,15 @@ O(LdSwitchDblIndex,             D(Int), S(Dbl) S(Int) S(Int),              N) \
 O(LdSwitchStrIndex,             D(Int), S(Str) S(Int) S(Int),          CRc|N) \
 O(LdSwitchObjIndex,             D(Int), S(Obj) S(Int) S(Int),       CRc|N|Er) \
 O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
-O(NewObj,                    D(StkPtr), C(Int)                                \
-                                          S(Str,Cls)                          \
+O(NewObj,                    D(StkPtr), S(Cls)                                \
+                                          C(Int)                              \
                                           S(StkPtr)                           \
+                                          S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
+O(NewObjCached,              D(StkPtr), C(Int)                                \
+                                          S(Str)                              \
+                                          S(StkPtr)                           \
+                                          S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
+O(NewObjNoCtorCached,        D(StkPtr), S(Str)                                \
                                           S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
 O(NewArray,                     D(Arr), C(Int),                  E|Mem|N|PRc) \
 O(NewTuple,                     D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \

@@ -287,6 +287,9 @@ SSATmp* Simplifier::simplifyCall(IRInstruction* inst) {
   }
 
   SSATmp* sp = spillStack->getSrc(0);
+  if (sp->getInstruction()->getOpcode() == NewObjNoCtorCached) {
+    inst->convertToNop();
+  }
   int baseOffset = spillStack->getSrc(1)->getValInt() -
                    spillValueCells(spillStack);
   auto const numSpillSrcs = spillVals.size();

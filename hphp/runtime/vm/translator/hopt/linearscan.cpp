@@ -338,7 +338,9 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
       if (dst.isA(Type::StkPtr) && opc != LdRaw) {
         assert(opc == DefSP || opc == Call || opc == SpillStack ||
                opc == RetAdjustStack ||
-               opc == NewObj || opc == InterpOne || opc == GenericRetDecRefs ||
+               opc == NewObj || opc == NewObjCached ||
+               opc == NewObjNoCtorCached ||
+               opc == InterpOne || opc == GenericRetDecRefs ||
                opc == GuardStk || opc == AssertStk || opc == CastStk ||
                VectorEffects::supported(opc));
         allocRegToTmp(&m_regs[int(rVmSp)], &dst, 0);

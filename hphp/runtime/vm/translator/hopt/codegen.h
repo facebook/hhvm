@@ -452,6 +452,12 @@ private:
   std::vector<ArgDesc> m_args;
 };
 
+using namespace HPHP::VM::Transl::TargetCache;
+ActRec* cgNewInstanceHelper(Class* cls,
+                            int numArgs,
+                            Cell* sp,
+                            ActRec* prevAr);
+
 void genCodeForTrace(Trace*                  trace,
                      CodeGenerator::Asm&     a,
                      CodeGenerator::Asm&     astubs,

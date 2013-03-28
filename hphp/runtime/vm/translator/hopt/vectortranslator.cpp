@@ -118,7 +118,15 @@ void VectorEffects::init(Opcode op, const Type origBase,
     // definitely happen but those cases aren't handled yet. In a perfect world
     // we would remove Type::Null from baseType here but that can produce types
     // that are tricky to guard against and doesn't buy us much right now.
-    baseType = baseType.isNull() ? newBase : (baseType | newBase);
+    if (!baseBoxed || !baseType.isString()) {
+      /*
+       * Uses of boxed types are always guarded, in case the inner
+       * type was modified. If the base type was String, its extremely
+       * likely to still be a String, so leave it as such, and we'll
+       * exit in the rare case that it changed.
+       */
+      baseType = baseType.isNull() ? newBase : (baseType | newBase);
+    }
     baseValChanged = true;
   }
   if (op == SetElem && baseType.maybe(Type::Arr)) {

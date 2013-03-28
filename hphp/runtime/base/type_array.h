@@ -314,7 +314,6 @@ class Array : protected ArrayBase {
   }
 
   Variant *lvalPtr(CStrRef key, bool forWrite, bool create);
-  Variant *lvalPtr(int64_t   key, bool forWrite, bool create);
 
   Variant &lvalAt();
 

@@ -143,7 +143,6 @@ public:
   ArrayData* lvalNew(Variant*& ret, bool copy);
 
   // overrides ArrayData
-  ArrayData* lvalPtr(int64_t k, Variant*& ret, bool copy, bool create);
   ArrayData* lvalPtr(StringData* k, Variant*& ret, bool copy,
                      bool create);
 

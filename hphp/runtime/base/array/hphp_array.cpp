@@ -1177,28 +1177,6 @@ ArrayData *HphpArray::lvalPtr(StringData* key, Variant*& ret, bool copy,
   return a;
 }
 
-ArrayData *HphpArray::lvalPtr(int64_t k, Variant*& ret, bool copy,
-                              bool create) {
-  HphpArray* a = 0;
-  HphpArray* t = this;
-  if (copy) {
-    a = t = copyImpl();
-  }
-
-  if (create) {
-    t->addLvalImpl(k, &ret);
-  } else {
-    ElmInd pos = t->find(k);
-    if (pos != ElmIndEmpty) {
-      Elm* e = &t->m_data[pos];
-      ret = &tvAsVariant(&e->data);
-    } else {
-      ret = nullptr;
-    }
-  }
-  return a;
-}
-
 ArrayData* HphpArray::lvalNew(Variant*& ret, bool copy) {
   TypedValue* tv;
   ArrayData* a = nvNew(tv, copy);

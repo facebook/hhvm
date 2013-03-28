@@ -238,7 +238,6 @@ class ArrayData : public Countable {
    * the dynamic property array in ObjectData or the local cache array
    * in ShardMap.
    */
-  virtual ArrayData *lvalPtr(int64_t k, Variant *&ret, bool copy, bool create);
   virtual ArrayData *lvalPtr(StringData* k, Variant *&ret, bool copy,
                              bool create);
 

@@ -193,11 +193,6 @@ ArrayData *ArrayData::lvalPtr(StringData* k, Variant *&ret, bool copy,
   throw FatalErrorException("Unimplemented ArrayData::lvalPtr");
 }
 
-ArrayData *ArrayData::lvalPtr(int64_t k, Variant *&ret, bool copy,
-                              bool create) {
-  throw FatalErrorException("Unimplemented ArrayData::lvalPtr");
-}
-
 ArrayData *ArrayData::add(int64_t k, CVarRef v, bool copy) {
   assert(!exists(k));
   return set(k, v, copy);

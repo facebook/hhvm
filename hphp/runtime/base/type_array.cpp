@@ -557,25 +557,6 @@ Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
   return ret;
 }
 
-Variant *Array::lvalPtr(int64_t key, bool forWrite, bool create) {
-  if (create) {
-    if (!m_px) {
-      ArrayBase::operator=(ArrayData::Create());
-    }
-    return &lvalAt(key, AccessFlags::None);
-  }
-  Variant *ret = nullptr;
-  if (m_px) {
-    ArrayData *escalated = m_px->lvalPtr(key, ret,
-                                         forWrite && m_px->getCount() > 1,
-                                         false);
-    if (escalated) {
-      ArrayBase::operator=(escalated);
-    }
-  }
-  return ret;
-}
-
 Variant &Array::lvalAt() {
   if (!m_px) {
     ArrayBase::operator=(ArrayData::Create());

@@ -111,6 +111,55 @@ TypedValue* fg_spl_object_hash(HPHP::VM::ActRec *ar) {
 
 
 /*
+long HPHP::f_hphp_object_pointer(HPHP::Object const&)
+_ZN4HPHP21f_hphp_object_pointerERKNS_6ObjectE
+
+(return value) => rax
+obj => rdi
+*/
+
+long fh_hphp_object_pointer(Value* obj) asm("_ZN4HPHP21f_hphp_object_pointerERKNS_6ObjectE");
+
+TypedValue * fg1_hphp_object_pointer(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_object_pointer(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfInt64;
+  tvCastToObjectInPlace(args-0);
+  rv->m_data.num = (int64_t)fh_hphp_object_pointer(&args[-0].m_data);
+  return rv;
+}
+
+TypedValue* fg_hphp_object_pointer(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfObject) {
+        rv.m_type = KindOfInt64;
+        rv.m_data.num = (int64_t)fh_hphp_object_pointer(&args[-0].m_data);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_hphp_object_pointer(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("hphp_object_pointer", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::f_hphp_get_this()
 _ZN4HPHP15f_hphp_get_thisEv
 

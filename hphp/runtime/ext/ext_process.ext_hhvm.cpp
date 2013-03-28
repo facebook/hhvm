@@ -25,6 +25,55 @@
 namespace HPHP {
 
 /*
+long HPHP::f_pcntl_alarm(int)
+_ZN4HPHP13f_pcntl_alarmEi
+
+(return value) => rax
+seconds => rdi
+*/
+
+long fh_pcntl_alarm(int seconds) asm("_ZN4HPHP13f_pcntl_alarmEi");
+
+TypedValue * fg1_pcntl_alarm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pcntl_alarm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfInt64;
+  tvCastToInt64InPlace(args-0);
+  rv->m_data.num = (int64_t)fh_pcntl_alarm((int)(args[-0].m_data.num));
+  return rv;
+}
+
+TypedValue* fg_pcntl_alarm(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfInt64) {
+        rv.m_type = KindOfInt64;
+        rv.m_data.num = (int64_t)fh_pcntl_alarm((int)(args[-0].m_data.num));
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_pcntl_alarm(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("pcntl_alarm", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 void HPHP::f_pcntl_exec(HPHP::String const&, HPHP::Array const&, HPHP::Array const&)
 _ZN4HPHP12f_pcntl_execERKNS_6StringERKNS_5ArrayES5_
 
@@ -414,6 +463,300 @@ TypedValue* fg_pcntl_waitpid(HPHP::VM::ActRec *ar) {
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+long HPHP::f_pcntl_wexitstatus(int)
+_ZN4HPHP19f_pcntl_wexitstatusEi
+
+(return value) => rax
+status => rdi
+*/
+
+long fh_pcntl_wexitstatus(int status) asm("_ZN4HPHP19f_pcntl_wexitstatusEi");
+
+TypedValue * fg1_pcntl_wexitstatus(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pcntl_wexitstatus(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfInt64;
+  tvCastToInt64InPlace(args-0);
+  rv->m_data.num = (int64_t)fh_pcntl_wexitstatus((int)(args[-0].m_data.num));
+  return rv;
+}
+
+TypedValue* fg_pcntl_wexitstatus(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfInt64) {
+        rv.m_type = KindOfInt64;
+        rv.m_data.num = (int64_t)fh_pcntl_wexitstatus((int)(args[-0].m_data.num));
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_pcntl_wexitstatus(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("pcntl_wexitstatus", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_pcntl_wifexited(int)
+_ZN4HPHP17f_pcntl_wifexitedEi
+
+(return value) => rax
+status => rdi
+*/
+
+bool fh_pcntl_wifexited(int status) asm("_ZN4HPHP17f_pcntl_wifexitedEi");
+
+TypedValue * fg1_pcntl_wifexited(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pcntl_wifexited(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfBoolean;
+  tvCastToInt64InPlace(args-0);
+  rv->m_data.num = (fh_pcntl_wifexited((int)(args[-0].m_data.num))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_pcntl_wifexited(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfInt64) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (fh_pcntl_wifexited((int)(args[-0].m_data.num))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_pcntl_wifexited(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("pcntl_wifexited", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_pcntl_wifsignaled(int)
+_ZN4HPHP19f_pcntl_wifsignaledEi
+
+(return value) => rax
+status => rdi
+*/
+
+bool fh_pcntl_wifsignaled(int status) asm("_ZN4HPHP19f_pcntl_wifsignaledEi");
+
+TypedValue * fg1_pcntl_wifsignaled(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pcntl_wifsignaled(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfBoolean;
+  tvCastToInt64InPlace(args-0);
+  rv->m_data.num = (fh_pcntl_wifsignaled((int)(args[-0].m_data.num))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_pcntl_wifsignaled(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfInt64) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (fh_pcntl_wifsignaled((int)(args[-0].m_data.num))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_pcntl_wifsignaled(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("pcntl_wifsignaled", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_pcntl_wifstopped(int)
+_ZN4HPHP18f_pcntl_wifstoppedEi
+
+(return value) => rax
+status => rdi
+*/
+
+bool fh_pcntl_wifstopped(int status) asm("_ZN4HPHP18f_pcntl_wifstoppedEi");
+
+TypedValue * fg1_pcntl_wifstopped(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pcntl_wifstopped(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfBoolean;
+  tvCastToInt64InPlace(args-0);
+  rv->m_data.num = (fh_pcntl_wifstopped((int)(args[-0].m_data.num))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_pcntl_wifstopped(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfInt64) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (fh_pcntl_wifstopped((int)(args[-0].m_data.num))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_pcntl_wifstopped(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("pcntl_wifstopped", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+long HPHP::f_pcntl_wstopsig(int)
+_ZN4HPHP16f_pcntl_wstopsigEi
+
+(return value) => rax
+status => rdi
+*/
+
+long fh_pcntl_wstopsig(int status) asm("_ZN4HPHP16f_pcntl_wstopsigEi");
+
+TypedValue * fg1_pcntl_wstopsig(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pcntl_wstopsig(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfInt64;
+  tvCastToInt64InPlace(args-0);
+  rv->m_data.num = (int64_t)fh_pcntl_wstopsig((int)(args[-0].m_data.num));
+  return rv;
+}
+
+TypedValue* fg_pcntl_wstopsig(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfInt64) {
+        rv.m_type = KindOfInt64;
+        rv.m_data.num = (int64_t)fh_pcntl_wstopsig((int)(args[-0].m_data.num));
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_pcntl_wstopsig(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("pcntl_wstopsig", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+long HPHP::f_pcntl_wtermsig(int)
+_ZN4HPHP16f_pcntl_wtermsigEi
+
+(return value) => rax
+status => rdi
+*/
+
+long fh_pcntl_wtermsig(int status) asm("_ZN4HPHP16f_pcntl_wtermsigEi");
+
+TypedValue * fg1_pcntl_wtermsig(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pcntl_wtermsig(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfInt64;
+  tvCastToInt64InPlace(args-0);
+  rv->m_data.num = (int64_t)fh_pcntl_wtermsig((int)(args[-0].m_data.num));
+  return rv;
+}
+
+TypedValue* fg_pcntl_wtermsig(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfInt64) {
+        rv.m_type = KindOfInt64;
+        rv.m_data.num = (int64_t)fh_pcntl_wtermsig((int)(args[-0].m_data.num));
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_pcntl_wtermsig(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("pcntl_wtermsig", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

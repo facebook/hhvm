@@ -17,6 +17,64 @@
 namespace HPHP {
 
 /*
+HPHP::Object HPHP::f_stream_context_create(HPHP::Array const&, HPHP::Array const&)
+_ZN4HPHP23f_stream_context_createERKNS_5ArrayES2_
+
+(return value) => rax
+_rv => rdi
+options => rsi
+params => rdx
+*/
+
+Value* fh_stream_context_create(Value* _rv, Value* options, Value* params) asm("_ZN4HPHP23f_stream_context_createERKNS_5ArrayES2_");
+
+/*
+HPHP::Object HPHP::f_stream_context_get_default(HPHP::Array const&)
+_ZN4HPHP28f_stream_context_get_defaultERKNS_5ArrayE
+
+(return value) => rax
+_rv => rdi
+options => rsi
+*/
+
+Value* fh_stream_context_get_default(Value* _rv, Value* options) asm("_ZN4HPHP28f_stream_context_get_defaultERKNS_5ArrayE");
+
+/*
+HPHP::Variant HPHP::f_stream_context_get_options(HPHP::Object const&)
+_ZN4HPHP28f_stream_context_get_optionsERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+stream_or_context => rsi
+*/
+
+TypedValue* fh_stream_context_get_options(TypedValue* _rv, Value* stream_or_context) asm("_ZN4HPHP28f_stream_context_get_optionsERKNS_6ObjectE");
+
+/*
+bool HPHP::f_stream_context_set_option(HPHP::Object const&, HPHP::Variant const&, HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP27f_stream_context_set_optionERKNS_6ObjectERKNS_7VariantERKNS_6StringES5_
+
+(return value) => rax
+stream_or_context => rdi
+wrapper => rsi
+option => rdx
+value => rcx
+*/
+
+bool fh_stream_context_set_option(Value* stream_or_context, TypedValue* wrapper, Value* option, TypedValue* value) asm("_ZN4HPHP27f_stream_context_set_optionERKNS_6ObjectERKNS_7VariantERKNS_6StringES5_");
+
+/*
+bool HPHP::f_stream_context_set_param(HPHP::Object const&, HPHP::Array const&)
+_ZN4HPHP26f_stream_context_set_paramERKNS_6ObjectERKNS_5ArrayE
+
+(return value) => rax
+stream_or_context => rdi
+params => rsi
+*/
+
+bool fh_stream_context_set_param(Value* stream_or_context, Value* params) asm("_ZN4HPHP26f_stream_context_set_paramERKNS_6ObjectERKNS_5ArrayE");
+
+/*
 HPHP::Variant HPHP::f_stream_copy_to_stream(HPHP::Object const&, HPHP::Object const&, int, int)
 _ZN4HPHP23f_stream_copy_to_streamERKNS_6ObjectES2_ii
 
@@ -29,6 +87,109 @@ offset => r8
 */
 
 TypedValue* fh_stream_copy_to_stream(TypedValue* _rv, Value* source, Value* dest, int maxlength, int offset) asm("_ZN4HPHP23f_stream_copy_to_streamERKNS_6ObjectES2_ii");
+
+/*
+bool HPHP::f_stream_encoding(HPHP::Object const&, HPHP::String const&)
+_ZN4HPHP17f_stream_encodingERKNS_6ObjectERKNS_6StringE
+
+(return value) => rax
+stream => rdi
+encoding => rsi
+*/
+
+bool fh_stream_encoding(Value* stream, Value* encoding) asm("_ZN4HPHP17f_stream_encodingERKNS_6ObjectERKNS_6StringE");
+
+/*
+void HPHP::f_stream_bucket_append(HPHP::Object const&, HPHP::Object const&)
+_ZN4HPHP22f_stream_bucket_appendERKNS_6ObjectES2_
+
+brigade => rdi
+bucket => rsi
+*/
+
+void fh_stream_bucket_append(Value* brigade, Value* bucket) asm("_ZN4HPHP22f_stream_bucket_appendERKNS_6ObjectES2_");
+
+/*
+void HPHP::f_stream_bucket_prepend(HPHP::Object const&, HPHP::Object const&)
+_ZN4HPHP23f_stream_bucket_prependERKNS_6ObjectES2_
+
+brigade => rdi
+bucket => rsi
+*/
+
+void fh_stream_bucket_prepend(Value* brigade, Value* bucket) asm("_ZN4HPHP23f_stream_bucket_prependERKNS_6ObjectES2_");
+
+/*
+HPHP::Object HPHP::f_stream_bucket_make_writeable(HPHP::Object const&)
+_ZN4HPHP30f_stream_bucket_make_writeableERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+brigade => rsi
+*/
+
+Value* fh_stream_bucket_make_writeable(Value* _rv, Value* brigade) asm("_ZN4HPHP30f_stream_bucket_make_writeableERKNS_6ObjectE");
+
+/*
+HPHP::Object HPHP::f_stream_bucket_new(HPHP::Object const&, HPHP::String const&)
+_ZN4HPHP19f_stream_bucket_newERKNS_6ObjectERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+stream => rsi
+buffer => rdx
+*/
+
+Value* fh_stream_bucket_new(Value* _rv, Value* stream, Value* buffer) asm("_ZN4HPHP19f_stream_bucket_newERKNS_6ObjectERKNS_6StringE");
+
+/*
+bool HPHP::f_stream_filter_register(HPHP::String const&, HPHP::String const&)
+_ZN4HPHP24f_stream_filter_registerERKNS_6StringES2_
+
+(return value) => rax
+filtername => rdi
+classname => rsi
+*/
+
+bool fh_stream_filter_register(Value* filtername, Value* classname) asm("_ZN4HPHP24f_stream_filter_registerERKNS_6StringES2_");
+
+/*
+bool HPHP::f_stream_filter_remove(HPHP::Object const&)
+_ZN4HPHP22f_stream_filter_removeERKNS_6ObjectE
+
+(return value) => rax
+stream_filter => rdi
+*/
+
+bool fh_stream_filter_remove(Value* stream_filter) asm("_ZN4HPHP22f_stream_filter_removeERKNS_6ObjectE");
+
+/*
+HPHP::Object HPHP::f_stream_filter_append(HPHP::Object const&, HPHP::String const&, int, HPHP::Variant const&)
+_ZN4HPHP22f_stream_filter_appendERKNS_6ObjectERKNS_6StringEiRKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+stream => rsi
+filtername => rdx
+read_write => rcx
+params => r8
+*/
+
+Value* fh_stream_filter_append(Value* _rv, Value* stream, Value* filtername, int read_write, TypedValue* params) asm("_ZN4HPHP22f_stream_filter_appendERKNS_6ObjectERKNS_6StringEiRKNS_7VariantE");
+
+/*
+HPHP::Object HPHP::f_stream_filter_prepend(HPHP::Object const&, HPHP::String const&, int, HPHP::Variant const&)
+_ZN4HPHP23f_stream_filter_prependERKNS_6ObjectERKNS_6StringEiRKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+stream => rsi
+filtername => rdx
+read_write => rcx
+params => r8
+*/
+
+Value* fh_stream_filter_prepend(Value* _rv, Value* stream, Value* filtername, int read_write, TypedValue* params) asm("_ZN4HPHP23f_stream_filter_prependERKNS_6ObjectERKNS_6StringEiRKNS_7VariantE");
 
 /*
 HPHP::Variant HPHP::f_stream_get_contents(HPHP::Object const&, int, int)
@@ -44,6 +205,16 @@ offset => rcx
 TypedValue* fh_stream_get_contents(TypedValue* _rv, Value* handle, int maxlen, int offset) asm("_ZN4HPHP21f_stream_get_contentsERKNS_6ObjectEii");
 
 /*
+HPHP::Array HPHP::f_stream_get_filters()
+_ZN4HPHP20f_stream_get_filtersEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_stream_get_filters(Value* _rv) asm("_ZN4HPHP20f_stream_get_filtersEv");
+
+/*
 HPHP::Variant HPHP::f_stream_get_line(HPHP::Object const&, int, HPHP::String const&)
 _ZN4HPHP17f_stream_get_lineERKNS_6ObjectEiRKNS_6StringE
 
@@ -55,6 +226,27 @@ ending => rcx
 */
 
 TypedValue* fh_stream_get_line(TypedValue* _rv, Value* handle, int length, Value* ending) asm("_ZN4HPHP17f_stream_get_lineERKNS_6ObjectEiRKNS_6StringE");
+
+/*
+HPHP::Variant HPHP::f_stream_get_meta_data(HPHP::Object const&)
+_ZN4HPHP22f_stream_get_meta_dataERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+stream => rsi
+*/
+
+TypedValue* fh_stream_get_meta_data(TypedValue* _rv, Value* stream) asm("_ZN4HPHP22f_stream_get_meta_dataERKNS_6ObjectE");
+
+/*
+HPHP::Array HPHP::f_stream_get_transports()
+_ZN4HPHP23f_stream_get_transportsEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_stream_get_transports(Value* _rv) asm("_ZN4HPHP23f_stream_get_transportsEv");
 
 /*
 HPHP::Array HPHP::f_stream_get_wrappers()
@@ -109,6 +301,18 @@ protocol => rdi
 bool fh_stream_wrapper_unregister(Value* protocol) asm("_ZN4HPHP27f_stream_wrapper_unregisterERKNS_6StringE");
 
 /*
+HPHP::String HPHP::f_stream_resolve_include_path(HPHP::String const&, HPHP::Object const&)
+_ZN4HPHP29f_stream_resolve_include_pathERKNS_6StringERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+filename => rsi
+context => rdx
+*/
+
+Value* fh_stream_resolve_include_path(Value* _rv, Value* filename, Value* context) asm("_ZN4HPHP29f_stream_resolve_include_pathERKNS_6StringERKNS_6ObjectE");
+
+/*
 HPHP::Variant HPHP::f_stream_select(HPHP::VRefParamValue const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&, HPHP::Variant const&, int)
 _ZN4HPHP15f_stream_selectERKNS_14VRefParamValueES2_S2_RKNS_7VariantEi
 
@@ -158,6 +362,17 @@ buffer => rsi
 long fh_stream_set_write_buffer(Value* stream, int buffer) asm("_ZN4HPHP25f_stream_set_write_bufferERKNS_6ObjectEi");
 
 /*
+long HPHP::f_set_file_buffer(HPHP::Object const&, int)
+_ZN4HPHP17f_set_file_bufferERKNS_6ObjectEi
+
+(return value) => rax
+stream => rdi
+buffer => rsi
+*/
+
+long fh_set_file_buffer(Value* stream, int buffer) asm("_ZN4HPHP17f_set_file_bufferERKNS_6ObjectEi");
+
+/*
 HPHP::Variant HPHP::f_stream_socket_accept(HPHP::Object const&, double, HPHP::VRefParamValue const&)
 _ZN4HPHP22f_stream_socket_acceptERKNS_6ObjectEdRKNS_14VRefParamValueE
 
@@ -200,6 +415,20 @@ context => r9
 */
 
 TypedValue* fh_stream_socket_client(TypedValue* _rv, Value* remote_socket, TypedValue* errnum, TypedValue* errstr, double timeout, int flags, Value* context) asm("_ZN4HPHP22f_stream_socket_clientERKNS_6StringERKNS_14VRefParamValueES5_diRKNS_6ObjectE");
+
+/*
+HPHP::Variant HPHP::f_stream_socket_enable_crypto(HPHP::Object const&, bool, int, HPHP::Object const&)
+_ZN4HPHP29f_stream_socket_enable_cryptoERKNS_6ObjectEbiS2_
+
+(return value) => rax
+_rv => rdi
+stream => rsi
+enable => rdx
+crypto_type => rcx
+session_stream => r8
+*/
+
+TypedValue* fh_stream_socket_enable_crypto(TypedValue* _rv, Value* stream, bool enable, int crypto_type, Value* session_stream) asm("_ZN4HPHP29f_stream_socket_enable_cryptoERKNS_6ObjectEbiS2_");
 
 /*
 HPHP::Variant HPHP::f_stream_socket_get_name(HPHP::Object const&, bool)

@@ -24,9 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline int64_t f_pcntl_alarm(int seconds) {
-  return alarm(seconds);
-}
+int64_t f_pcntl_alarm(int seconds);
 void f_pcntl_exec(CStrRef path, CArrRef args = null_array, CArrRef envs = null_array);
 
 int64_t f_pcntl_fork();
@@ -38,9 +36,7 @@ bool f_pcntl_signal(int signo, CVarRef handler, bool restart_syscalls = true);
 int64_t f_pcntl_wait(VRefParam status, int options = 0);
 int64_t f_pcntl_waitpid(int pid, VRefParam status, int options = 0);
 
-inline int64_t f_pcntl_wexitstatus(int status) {
-  return WEXITSTATUS(status);
-}
+int64_t f_pcntl_wexitstatus(int status);
 
 /**
  * Process pending signals flagged earlier.
@@ -48,11 +44,11 @@ inline int64_t f_pcntl_wexitstatus(int status) {
 bool f_pcntl_signal_dispatch();
 
 // status querying
-inline bool f_pcntl_wifexited(int status) { return WIFEXITED(status);}
-inline bool f_pcntl_wifsignaled(int status) { return WIFSIGNALED(status);}
-inline bool f_pcntl_wifstopped(int status) { return WIFSTOPPED(status);}
-inline int64_t f_pcntl_wstopsig(int status) { return WSTOPSIG(status);}
-inline int64_t f_pcntl_wtermsig(int status) { return WTERMSIG(status);}
+bool f_pcntl_wifexited(int status);
+bool f_pcntl_wifsignaled(int status);
+bool f_pcntl_wifstopped(int status);
+int64_t f_pcntl_wstopsig(int status);
+int64_t f_pcntl_wtermsig(int status);
 
 ///////////////////////////////////////////////////////////////////////////////
 

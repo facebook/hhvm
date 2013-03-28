@@ -357,6 +357,10 @@ bool f_dns_check_record(CStrRef host, CStrRef type /* = null_string */) {
   return (i >= 0);
 }
 
+bool f_checkdnsrr(CStrRef host, CStrRef type /* = null_string */) {
+  return f_dns_check_record(host, type);
+}
+
 typedef union {
   HEADER qb1;
   u_char qb2[65536];
@@ -832,12 +836,30 @@ bool f_dns_get_mx(CStrRef hostname, VRefParam mxhosts,
   return true;
 }
 
+bool f_getmxrr(CStrRef hostname, VRefParam mxhosts,
+               VRefParam weight /* = uninit_null() */) {
+  return f_dns_get_mx(hostname, ref(mxhosts), weight);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // socket
 
 /**
  * f_fsockopen() and f_pfsockopen() are implemented in ext_socket.cpp.
  */
+
+Variant f_socket_get_status(CObjRef stream) {
+  return f_stream_get_meta_data(stream);
+}
+
+bool f_socket_set_blocking(CObjRef stream, int mode) {
+  return f_stream_set_blocking(stream, mode);
+}
+
+bool f_socket_set_timeout(CObjRef stream, int seconds,
+                          int microseconds /* = 0 */) {
+  return f_stream_set_timeout(stream, seconds, microseconds);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // http
@@ -1010,6 +1032,27 @@ bool f_setrawcookie(CStrRef name, CStrRef value /* = null_string */,
                                 httponly, false);
   }
   return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void f_define_syslog_variables() {
+  // do nothing, since all variables are defined as constants already
+}
+
+bool f_openlog(CStrRef ident, int option, int facility) {
+  openlog(ident.data(), option, facility);
+  return true;
+}
+
+bool f_closelog() {
+  closelog();
+  return true;
+}
+
+bool f_syslog(int priority, CStrRef message) {
+  syslog(priority, "%s", message.data());
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

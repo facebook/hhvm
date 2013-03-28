@@ -24,83 +24,32 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline bool f_ob_start(CVarRef output_callback = uninit_null(), int chunk_size = 0,
-                       bool erase = true) {
-  // ignoring chunk_size and erase
-  g_context->obStart(output_callback);
-  return true;
-}
-inline void f_ob_clean() {
-  g_context->obClean();
-}
-inline void f_ob_flush() {
-  g_context->obFlush();
-}
-inline bool f_ob_end_clean() {
-  g_context->obClean();
-  return g_context->obEnd();
-}
-inline bool f_ob_end_flush() {
-  bool ret = g_context->obFlush();
-  g_context->obEnd();
-  return ret;
-}
-inline void f_flush() {
-  g_context->flush();
-}
-inline String f_ob_get_contents() {
-  return g_context->obCopyContents();
-}
-inline String f_ob_get_clean() {
-  String output = f_ob_get_contents();
-  f_ob_end_clean();
-  return output;
-}
-inline String f_ob_get_flush() {
-  String output = g_context->obCopyContents();
-  g_context->obFlush();
-  return output;
-}
-inline int64_t f_ob_get_length() {
-  return g_context->obGetContentLength();
-}
-inline int64_t f_ob_get_level() {
-  return g_context->obGetLevel();
-}
-inline Array f_ob_get_status(bool full_status = false) {
-  return g_context->obGetStatus(full_status);
-}
-inline String f_ob_gzhandler(CStrRef buffer, int mode) {
-  throw NotSupportedException(__func__, "something that's in transport layer");
-}
-inline void f_ob_implicit_flush(bool flag = true) {
-  g_context->obSetImplicitFlush(flag);
-}
-inline Array f_ob_list_handlers() {
-  return g_context->obGetHandlers();
-}
-inline bool f_output_add_rewrite_var(CStrRef name, CStrRef value) {
-  throw NotSupportedException(__func__, "bad coding style");
-}
-inline bool f_output_reset_rewrite_vars() {
-  throw NotSupportedException(__func__, "bad coding style");
-}
+bool f_ob_start(CVarRef output_callback = uninit_null(), int chunk_size = 0,
+                bool erase = true);
+void f_ob_clean();
+void f_ob_flush();
+bool f_ob_end_clean();
+bool f_ob_end_flush();
+void f_flush();
+String f_ob_get_contents();
+String f_ob_get_clean();
+String f_ob_get_flush();
+int64_t f_ob_get_length();
+int64_t f_ob_get_level();
+Array f_ob_get_status(bool full_status = false);
+String f_ob_gzhandler(CStrRef buffer, int mode);
+void f_ob_implicit_flush(bool flag = true);
+Array f_ob_list_handlers();
+bool f_output_add_rewrite_var(CStrRef name, CStrRef value);
+bool f_output_reset_rewrite_vars();
 
 void f_hphp_crash_log(CStrRef name, CStrRef value);
 
-inline void f_hphp_stats(CStrRef name, int64_t value) {
-  ServerStats::Log(name.data(), value);
-}
-inline int64_t f_hphp_get_stats(CStrRef name) {
-  return ServerStats::Get(name.data());
-}
+void f_hphp_stats(CStrRef name, int64_t value);
+int64_t f_hphp_get_stats(CStrRef name);
 Array f_hphp_get_status();
-inline Array f_hphp_get_iostatus() {
-  return ServerStats::GetThreadIOStatuses();
-}
-inline void f_hphp_set_iostatus_address(CStrRef name) {
-  return ServerStats::SetThreadIOStatusAddress(name);
-}
+Array f_hphp_get_iostatus();
+void f_hphp_set_iostatus_address(CStrRef name);
 Variant f_hphp_get_timers(bool get_as_float = true);
 Variant f_hphp_output_global_state(bool serialize = true);
 int64_t f_hphp_instruction_counter(void);

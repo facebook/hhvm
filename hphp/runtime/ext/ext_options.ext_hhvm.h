@@ -306,6 +306,25 @@ nsec => rdx
 bool fh_clock_settime(int clk_id, long sec, long nsec) asm("_ZN4HPHP15f_clock_settimeEill");
 
 /*
+long HPHP::f_cpu_get_count()
+_ZN4HPHP15f_cpu_get_countEv
+
+(return value) => rax
+*/
+
+long fh_cpu_get_count() asm("_ZN4HPHP15f_cpu_get_countEv");
+
+/*
+HPHP::String HPHP::f_cpu_get_model()
+_ZN4HPHP15f_cpu_get_modelEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_cpu_get_model(Value* _rv) asm("_ZN4HPHP15f_cpu_get_modelEv");
+
+/*
 HPHP::String HPHP::f_ini_alter(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP11f_ini_alterERKNS_6StringES2_
 

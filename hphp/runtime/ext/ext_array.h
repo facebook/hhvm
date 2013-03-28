@@ -54,15 +54,11 @@ Variant f_array_chunk(CVarRef input, int size,
 Variant f_array_combine(CVarRef keys, CVarRef values);
 Variant f_array_count_values(CVarRef input);
 Variant f_array_fill_keys(CVarRef keys, CVarRef value);
-inline Variant f_array_fill(int start_index, int num, CVarRef value) {
-  return ArrayUtil::CreateArray(start_index, num, value);
-}
+Variant f_array_fill(int start_index, int num, CVarRef value);
 Variant f_array_filter(CVarRef input, CVarRef callback = null_variant);
 Variant f_array_flip(CVarRef trans);
 bool f_array_key_exists(CVarRef key, CVarRef search);
-inline bool f_key_exists(CVarRef key, CVarRef search) {
-  return f_array_key_exists(key, search);
-}
+bool f_key_exists(CVarRef key, CVarRef search);
 
 Variant f_array_keys(CVarRef input, CVarRef search_value = null_variant,
                      bool strict = false);
@@ -77,9 +73,7 @@ Variant f_array_replace_recursive(int _argc, CVarRef array1, CArrRef _argv = nul
 Variant f_array_replace(int _argc, CVarRef array1, CArrRef _argv = null_array);
 
 Variant f_array_pad(CVarRef input, int pad_size, CVarRef pad_value);
-inline Variant f_array_pop(VRefParam array) {
-  return array.pop();
-}
+Variant f_array_pop(VRefParam array);
 Variant f_array_product(CVarRef array);
 Variant f_array_push(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
 
@@ -90,9 +84,7 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
 Variant f_array_reverse(CVarRef array, bool preserve_keys = false);
 Variant f_array_search(CVarRef needle, CVarRef haystack,
                               bool strict = false);
-inline Variant f_array_shift(VRefParam array) {
-  return array.dequeue();
-}
+Variant f_array_shift(VRefParam array);
 Variant f_array_slice(CVarRef array, int offset,
                              CVarRef length = null_variant,
                              bool preserve_keys = false);
@@ -116,40 +108,16 @@ Array f_compact(int _argc, CVarRef varname, CArrRef _argv = null_array);
 bool f_shuffle(VRefParam array);
 int64_t f_count(CVarRef var, bool recursive = false);
 
-inline int64_t f_sizeof(CVarRef var, bool recursive = false) {
-  return f_count(var, recursive);
-}
-inline Variant f_each(VRefParam array) {
-  return array.array_iter_each();
-}
-inline Variant f_current(VRefParam array) {
-  return array.array_iter_current();
-}
-inline Variant f_hphp_current_ref(VRefParam array) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
-  return strongBind(array.array_iter_current_ref());
-}
-inline Variant f_next(VRefParam array) {
-  return array.array_iter_next();
-}
-inline Variant f_pos(VRefParam array) {
-  return array.array_iter_current();
-}
-inline Variant f_prev(VRefParam array) {
-  return array.array_iter_prev();
-}
-inline Variant f_reset(VRefParam array) {
-  return array.array_iter_reset();
-}
-inline Variant f_end(VRefParam array) {
-  return array.array_iter_end();
-}
-inline Variant f_key(VRefParam array) {
-  return array.array_iter_key();
-}
+int64_t f_sizeof(CVarRef var, bool recursive = false);
+Variant f_each(VRefParam array);
+Variant f_current(VRefParam array);
+Variant f_hphp_current_ref(VRefParam array);
+Variant f_next(VRefParam array);
+Variant f_pos(VRefParam array);
+Variant f_prev(VRefParam array);
+Variant f_reset(VRefParam array);
+Variant f_end(VRefParam array);
+Variant f_key(VRefParam array);
 
 Variant f_hphp_get_iterator(CVarRef iterable);
 Variant f_hphp_get_mutable_iterator(VRefParam iterable);

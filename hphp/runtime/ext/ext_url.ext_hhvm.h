@@ -88,6 +88,50 @@ component => rdx
 
 TypedValue* fh_parse_url(TypedValue* _rv, Value* url, int component) asm("_ZN4HPHP11f_parse_urlERKNS_6StringEi");
 
+/*
+HPHP::String HPHP::f_rawurldecode(HPHP::String const&)
+_ZN4HPHP14f_rawurldecodeERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+str => rsi
+*/
+
+Value* fh_rawurldecode(Value* _rv, Value* str) asm("_ZN4HPHP14f_rawurldecodeERKNS_6StringE");
+
+/*
+HPHP::String HPHP::f_rawurlencode(HPHP::String const&)
+_ZN4HPHP14f_rawurlencodeERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+str => rsi
+*/
+
+Value* fh_rawurlencode(Value* _rv, Value* str) asm("_ZN4HPHP14f_rawurlencodeERKNS_6StringE");
+
+/*
+HPHP::String HPHP::f_urldecode(HPHP::String const&)
+_ZN4HPHP11f_urldecodeERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+str => rsi
+*/
+
+Value* fh_urldecode(Value* _rv, Value* str) asm("_ZN4HPHP11f_urldecodeERKNS_6StringE");
+
+/*
+HPHP::String HPHP::f_urlencode(HPHP::String const&)
+_ZN4HPHP11f_urlencodeERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+str => rsi
+*/
+
+Value* fh_urlencode(Value* _rv, Value* str) asm("_ZN4HPHP11f_urlencodeERKNS_6StringE");
+
 
 } // !HPHP
 

@@ -627,6 +627,9 @@ bool f_clock_settime(int clk_id, int64_t sec, int64_t nsec) {
 #endif
 }
 
+int64_t f_cpu_get_count() { return Process::GetCPUCount();}
+String f_cpu_get_model() { return Process::GetCPUModel();}
+
 String f_ini_alter(CStrRef varname, CStrRef newvalue) {
   throw NotSupportedException(__func__, "not using ini");
 }

@@ -1193,6 +1193,72 @@ TypedValue* fg_clock_settime(HPHP::VM::ActRec *ar) {
 
 
 /*
+long HPHP::f_cpu_get_count()
+_ZN4HPHP15f_cpu_get_countEv
+
+(return value) => rax
+*/
+
+long fh_cpu_get_count() asm("_ZN4HPHP15f_cpu_get_countEv");
+
+TypedValue* fg_cpu_get_count(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv.m_type = KindOfInt64;
+      rv.m_data.num = (int64_t)fh_cpu_get_count();
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("cpu_get_count", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::String HPHP::f_cpu_get_model()
+_ZN4HPHP15f_cpu_get_modelEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_cpu_get_model(Value* _rv) asm("_ZN4HPHP15f_cpu_get_modelEv");
+
+TypedValue* fg_cpu_get_model(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv.m_type = KindOfString;
+      fh_cpu_get_model((&rv.m_data));
+      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("cpu_get_model", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::String HPHP::f_ini_alter(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP11f_ini_alterERKNS_6StringES2_
 

@@ -25,6 +25,56 @@
 namespace HPHP {
 
 /*
+HPHP::Variant HPHP::f_bzclose(HPHP::Object const&)
+_ZN4HPHP9f_bzcloseERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+bz => rsi
+*/
+
+TypedValue* fh_bzclose(TypedValue* _rv, Value* bz) asm("_ZN4HPHP9f_bzcloseERKNS_6ObjectE");
+
+TypedValue * fg1_bzclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bzclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToObjectInPlace(args-0);
+  fh_bzclose((rv), &args[-0].m_data);
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_bzclose(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfObject) {
+        fh_bzclose((&(rv)), &args[-0].m_data);
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_bzclose(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("bzclose", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::f_bzopen(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP8f_bzopenERKNS_6StringES2_
 
@@ -73,6 +123,132 @@ TypedValue* fg_bzopen(HPHP::VM::ActRec *ar) {
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_bzread(HPHP::Object const&, int)
+_ZN4HPHP8f_bzreadERKNS_6ObjectEi
+
+(return value) => rax
+_rv => rdi
+bz => rsi
+length => rdx
+*/
+
+TypedValue* fh_bzread(TypedValue* _rv, Value* bz, int length) asm("_ZN4HPHP8f_bzreadERKNS_6ObjectEi");
+
+TypedValue * fg1_bzread(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bzread(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  switch (count) {
+  default: // count >= 2
+    if ((args-1)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-1);
+    }
+  case 1:
+    break;
+  }
+  if ((args-0)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-0);
+  }
+  fh_bzread((rv), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(1024));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_bzread(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 1LL && count <= 2LL) {
+      if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfObject) {
+        fh_bzread((&(rv)), &args[-0].m_data, (count > 1) ? (int)(args[-1].m_data.num) : (int)(1024));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_bzread(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("bzread", count, 1, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_bzwrite(HPHP::Object const&, HPHP::String const&, int)
+_ZN4HPHP9f_bzwriteERKNS_6ObjectERKNS_6StringEi
+
+(return value) => rax
+_rv => rdi
+bz => rsi
+data => rdx
+length => rcx
+*/
+
+TypedValue* fh_bzwrite(TypedValue* _rv, Value* bz, Value* data, int length) asm("_ZN4HPHP9f_bzwriteERKNS_6ObjectERKNS_6StringEi");
+
+TypedValue * fg1_bzwrite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bzwrite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  switch (count) {
+  default: // count >= 3
+    if ((args-2)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-2);
+    }
+  case 2:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-1)->m_type)) {
+    tvCastToStringInPlace(args-1);
+  }
+  if ((args-0)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-0);
+  }
+  fh_bzwrite((rv), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(0));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_bzwrite(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 2LL && count <= 3LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfInt64) && IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfObject) {
+        fh_bzwrite((&(rv)), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (int)(args[-2].m_data.num) : (int)(0));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_bzwrite(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("bzwrite", count, 2, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

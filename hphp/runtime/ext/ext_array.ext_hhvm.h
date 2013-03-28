@@ -77,6 +77,19 @@ value => rdx
 TypedValue* fh_array_fill_keys(TypedValue* _rv, TypedValue* keys, TypedValue* value) asm("_ZN4HPHP17f_array_fill_keysERKNS_7VariantES2_");
 
 /*
+HPHP::Variant HPHP::f_array_fill(int, int, HPHP::Variant const&)
+_ZN4HPHP12f_array_fillEiiRKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+start_index => rsi
+num => rdx
+value => rcx
+*/
+
+TypedValue* fh_array_fill(TypedValue* _rv, int start_index, int num, TypedValue* value) asm("_ZN4HPHP12f_array_fillEiiRKNS_7VariantE");
+
+/*
 HPHP::Variant HPHP::f_array_filter(HPHP::Variant const&, HPHP::Variant const&)
 _ZN4HPHP14f_array_filterERKNS_7VariantES2_
 
@@ -109,6 +122,17 @@ search => rsi
 */
 
 bool fh_array_key_exists(TypedValue* key, TypedValue* search) asm("_ZN4HPHP18f_array_key_existsERKNS_7VariantES2_");
+
+/*
+bool HPHP::f_key_exists(HPHP::Variant const&, HPHP::Variant const&)
+_ZN4HPHP12f_key_existsERKNS_7VariantES2_
+
+(return value) => rax
+key => rdi
+search => rsi
+*/
+
+bool fh_key_exists(TypedValue* key, TypedValue* search) asm("_ZN4HPHP12f_key_existsERKNS_7VariantES2_");
 
 /*
 HPHP::Variant HPHP::f_array_keys(HPHP::Variant const&, HPHP::Variant const&, bool)
@@ -215,6 +239,17 @@ pad_value => rcx
 TypedValue* fh_array_pad(TypedValue* _rv, TypedValue* input, int pad_size, TypedValue* pad_value) asm("_ZN4HPHP11f_array_padERKNS_7VariantEiS2_");
 
 /*
+HPHP::Variant HPHP::f_array_pop(HPHP::VRefParamValue const&)
+_ZN4HPHP11f_array_popERKNS_14VRefParamValueE
+
+(return value) => rax
+_rv => rdi
+array => rsi
+*/
+
+TypedValue* fh_array_pop(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP11f_array_popERKNS_14VRefParamValueE");
+
+/*
 HPHP::Variant HPHP::f_array_product(HPHP::Variant const&)
 _ZN4HPHP15f_array_productERKNS_7VariantE
 
@@ -288,6 +323,17 @@ strict => rcx
 */
 
 TypedValue* fh_array_search(TypedValue* _rv, TypedValue* needle, TypedValue* haystack, bool strict) asm("_ZN4HPHP14f_array_searchERKNS_7VariantES2_b");
+
+/*
+HPHP::Variant HPHP::f_array_shift(HPHP::VRefParamValue const&)
+_ZN4HPHP13f_array_shiftERKNS_14VRefParamValueE
+
+(return value) => rax
+_rv => rdi
+array => rsi
+*/
+
+TypedValue* fh_array_shift(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP13f_array_shiftERKNS_14VRefParamValueE");
 
 /*
 HPHP::Variant HPHP::f_array_slice(HPHP::Variant const&, int, HPHP::Variant const&, bool)
@@ -421,6 +467,116 @@ recursive => rsi
 */
 
 long fh_count(TypedValue* var, bool recursive) asm("_ZN4HPHP7f_countERKNS_7VariantEb");
+
+/*
+long HPHP::f_sizeof(HPHP::Variant const&, bool)
+_ZN4HPHP8f_sizeofERKNS_7VariantEb
+
+(return value) => rax
+var => rdi
+recursive => rsi
+*/
+
+long fh_sizeof(TypedValue* var, bool recursive) asm("_ZN4HPHP8f_sizeofERKNS_7VariantEb");
+
+/*
+HPHP::Variant HPHP::f_each(HPHP::VRefParamValue const&)
+_ZN4HPHP6f_eachERKNS_14VRefParamValueE
+
+(return value) => rax
+_rv => rdi
+array => rsi
+*/
+
+TypedValue* fh_each(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP6f_eachERKNS_14VRefParamValueE");
+
+/*
+HPHP::Variant HPHP::f_current(HPHP::VRefParamValue const&)
+_ZN4HPHP9f_currentERKNS_14VRefParamValueE
+
+(return value) => rax
+_rv => rdi
+array => rsi
+*/
+
+TypedValue* fh_current(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP9f_currentERKNS_14VRefParamValueE");
+
+/*
+HPHP::Variant HPHP::f_hphp_current_ref(HPHP::VRefParamValue const&)
+_ZN4HPHP18f_hphp_current_refERKNS_14VRefParamValueE
+
+(return value) => rax
+_rv => rdi
+array => rsi
+*/
+
+TypedValue* fh_hphp_current_ref(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP18f_hphp_current_refERKNS_14VRefParamValueE");
+
+/*
+HPHP::Variant HPHP::f_next(HPHP::VRefParamValue const&)
+_ZN4HPHP6f_nextERKNS_14VRefParamValueE
+
+(return value) => rax
+_rv => rdi
+array => rsi
+*/
+
+TypedValue* fh_next(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP6f_nextERKNS_14VRefParamValueE");
+
+/*
+HPHP::Variant HPHP::f_pos(HPHP::VRefParamValue const&)
+_ZN4HPHP5f_posERKNS_14VRefParamValueE
+
+(return value) => rax
+_rv => rdi
+array => rsi
+*/
+
+TypedValue* fh_pos(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP5f_posERKNS_14VRefParamValueE");
+
+/*
+HPHP::Variant HPHP::f_prev(HPHP::VRefParamValue const&)
+_ZN4HPHP6f_prevERKNS_14VRefParamValueE
+
+(return value) => rax
+_rv => rdi
+array => rsi
+*/
+
+TypedValue* fh_prev(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP6f_prevERKNS_14VRefParamValueE");
+
+/*
+HPHP::Variant HPHP::f_reset(HPHP::VRefParamValue const&)
+_ZN4HPHP7f_resetERKNS_14VRefParamValueE
+
+(return value) => rax
+_rv => rdi
+array => rsi
+*/
+
+TypedValue* fh_reset(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP7f_resetERKNS_14VRefParamValueE");
+
+/*
+HPHP::Variant HPHP::f_end(HPHP::VRefParamValue const&)
+_ZN4HPHP5f_endERKNS_14VRefParamValueE
+
+(return value) => rax
+_rv => rdi
+array => rsi
+*/
+
+TypedValue* fh_end(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP5f_endERKNS_14VRefParamValueE");
+
+/*
+HPHP::Variant HPHP::f_key(HPHP::VRefParamValue const&)
+_ZN4HPHP5f_keyERKNS_14VRefParamValueE
+
+(return value) => rax
+_rv => rdi
+array => rsi
+*/
+
+TypedValue* fh_key(TypedValue* _rv, TypedValue* array) asm("_ZN4HPHP5f_keyERKNS_14VRefParamValueE");
 
 /*
 HPHP::Variant HPHP::f_hphp_get_iterator(HPHP::Variant const&)

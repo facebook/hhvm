@@ -308,6 +308,10 @@ Variant f_gzdecode(CStrRef data) {
   return String(ret, len, AttachString);
 }
 
+String f_zlib_get_coding_type() {
+  throw NotSupportedException(__func__, "no use");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions
 
@@ -322,6 +326,45 @@ Object f_gzopen(CStrRef filename, CStrRef mode,
   }
   return handle;
 }
+
+bool f_gzclose(CObjRef zp) {
+  return f_fclose(zp);
+}
+Variant f_gzread(CObjRef zp, int64_t length /* = 0 */) {
+  return f_fread(zp, length);
+}
+Variant f_gzseek(CObjRef zp, int64_t offset, int64_t whence /* = k_SEEK_SET */) {
+  return f_fseek(zp, offset, whence);
+}
+Variant f_gztell(CObjRef zp) {
+  return f_ftell(zp);
+}
+bool f_gzeof(CObjRef zp) {
+  return f_feof(zp);
+}
+bool f_gzrewind(CObjRef zp) {
+  return f_rewind(zp);
+}
+Variant f_gzgetc(CObjRef zp) {
+  return f_fgetc(zp);
+}
+Variant f_gzgets(CObjRef zp, int64_t length /* = 1024 */) {
+  return f_fgets(zp, length);
+}
+Variant f_gzgetss(CObjRef zp, int64_t length /* = 0 */,
+                  CStrRef allowable_tags /* = null_string */) {
+  return f_fgetss(zp, length, allowable_tags);
+}
+Variant f_gzpassthru(CObjRef zp) {
+  return f_fpassthru(zp);
+}
+Variant f_gzputs(CObjRef zp, CStrRef str, int64_t length /* = 0 */) {
+  return f_fwrite(zp, str, length);
+}
+Variant f_gzwrite(CObjRef zp, CStrRef str, int64_t length /* = 0 */) {
+  return f_fwrite(zp, str, length);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // QuickLZ functions

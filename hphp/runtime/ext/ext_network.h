@@ -40,19 +40,15 @@ String f_long2ip(int proper_address);
 
 bool f_dns_check_record(CStrRef host, CStrRef type = null_string);
 
-inline bool f_checkdnsrr(CStrRef host, CStrRef type = null_string) {
-  return f_dns_check_record(host, type);
-}
+bool f_checkdnsrr(CStrRef host, CStrRef type = null_string);
 
 Variant f_dns_get_record(CStrRef hostname, int type = -1, VRefParam authns = uninit_null(),
                          VRefParam addtl = uninit_null());
 
 bool f_dns_get_mx(CStrRef hostname, VRefParam mxhosts, VRefParam weights = uninit_null());
 
-inline bool f_getmxrr(CStrRef hostname, VRefParam mxhosts,
-                      VRefParam weight = uninit_null()) {
-  return f_dns_get_mx(hostname, ref(mxhosts), weight);
-}
+bool f_getmxrr(CStrRef hostname, VRefParam mxhosts,
+               VRefParam weight = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 // socket
@@ -63,18 +59,12 @@ Variant f_fsockopen(CStrRef hostname, int port = -1, VRefParam errnum = uninit_n
 Variant f_pfsockopen(CStrRef hostname, int port = -1, VRefParam errnum = uninit_null(),
                      VRefParam errstr = uninit_null(), double timeout = 0.0);
 
-inline Variant f_socket_get_status(CObjRef stream) {
-  return f_stream_get_meta_data(stream);
-}
+Variant f_socket_get_status(CObjRef stream);
 
-inline bool f_socket_set_blocking(CObjRef stream, int mode) {
-  return f_stream_set_blocking(stream, mode);
-}
+bool f_socket_set_blocking(CObjRef stream, int mode);
 
-inline bool f_socket_set_timeout(CObjRef stream, int seconds,
-                                 int microseconds = 0) {
-  return f_stream_set_timeout(stream, seconds, microseconds);
-}
+bool f_socket_set_timeout(CObjRef stream, int seconds,
+                          int microseconds = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 // http
@@ -104,24 +94,13 @@ bool f_setrawcookie(CStrRef name, CStrRef value = null_string, int64_t expire = 
 ///////////////////////////////////////////////////////////////////////////////
 // syslog
 
-inline void f_define_syslog_variables() {
-  // do nothing, since all variables are defined as constants already
-}
+void f_define_syslog_variables();
 
-inline bool f_openlog(CStrRef ident, int option, int facility) {
-  openlog(ident.data(), option, facility);
-  return true;
-}
+bool f_openlog(CStrRef ident, int option, int facility);
 
-inline bool f_closelog() {
-  closelog();
-  return true;
-}
+bool f_closelog();
 
-inline bool f_syslog(int priority, CStrRef message) {
-  syslog(priority, "%s", message.data());
-  return true;
-}
+bool f_syslog(int priority, CStrRef message);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

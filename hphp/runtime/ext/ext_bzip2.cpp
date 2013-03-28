@@ -22,6 +22,18 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+Variant f_bzclose(CObjRef bz) {
+  return f_fclose(bz);
+}
+
+Variant f_bzread(CObjRef bz, int length /* = 1024 */) {
+  return f_fread(bz, length);
+}
+
+Variant f_bzwrite(CObjRef bz, CStrRef data, int length /* = 0 */) {
+  return f_fwrite(bz, data, length);
+}
+
 Variant f_bzopen(CStrRef filename, CStrRef mode) {
   if (mode != "r" && mode != "w") {
     return false;

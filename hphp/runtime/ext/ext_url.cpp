@@ -259,5 +259,21 @@ Variant f_parse_url(CStrRef url, int component /* = -1 */) {
   return ret;
 }
 
+String f_rawurldecode(CStrRef str) {
+  return StringUtil::UrlDecode(str, false);
+}
+
+String f_rawurlencode(CStrRef str) {
+  return StringUtil::UrlEncode(str, false);
+}
+
+String f_urldecode(CStrRef str) {
+  return StringUtil::UrlDecode(str, true);
+}
+
+String f_urlencode(CStrRef str) {
+  return StringUtil::UrlEncode(str, true);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

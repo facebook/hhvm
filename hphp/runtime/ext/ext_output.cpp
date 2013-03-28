@@ -25,15 +25,93 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+
+bool f_ob_start(CVarRef output_callback /* = uninit_null() */,
+                int chunk_size /* = 0 */, bool erase /* = true */) {
+  // ignoring chunk_size and erase
+  g_context->obStart(output_callback);
+  return true;
+}
+void f_ob_clean() {
+  g_context->obClean();
+}
+void f_ob_flush() {
+  g_context->obFlush();
+}
+bool f_ob_end_clean() {
+  g_context->obClean();
+  return g_context->obEnd();
+}
+bool f_ob_end_flush() {
+  bool ret = g_context->obFlush();
+  g_context->obEnd();
+  return ret;
+}
+void f_flush() {
+  g_context->flush();
+}
+String f_ob_get_contents() {
+  return g_context->obCopyContents();
+}
+String f_ob_get_clean() {
+  String output = f_ob_get_contents();
+  f_ob_end_clean();
+  return output;
+}
+String f_ob_get_flush() {
+  String output = g_context->obCopyContents();
+  g_context->obFlush();
+  return output;
+}
+int64_t f_ob_get_length() {
+  return g_context->obGetContentLength();
+}
+int64_t f_ob_get_level() {
+  return g_context->obGetLevel();
+}
+Array f_ob_get_status(bool full_status /* = false */) {
+  return g_context->obGetStatus(full_status);
+}
+String f_ob_gzhandler(CStrRef buffer, int mode) {
+  throw NotSupportedException(__func__, "something that's in transport layer");
+}
+void f_ob_implicit_flush(bool flag /* = true */) {
+  g_context->obSetImplicitFlush(flag);
+}
+Array f_ob_list_handlers() {
+  return g_context->obGetHandlers();
+}
+bool f_output_add_rewrite_var(CStrRef name, CStrRef value) {
+  throw NotSupportedException(__func__, "bad coding style");
+}
+bool f_output_reset_rewrite_vars() {
+  throw NotSupportedException(__func__, "bad coding style");
+}
+
 void f_hphp_crash_log(CStrRef name, CStrRef value) {
   StackTraceNoHeap::AddExtraLogging(name.data(), value.data());
 }
 
+void f_hphp_stats(CStrRef name, int64_t value) {
+  ServerStats::Log(name.data(), value);
+}
+int64_t f_hphp_get_stats(CStrRef name) {
+  return ServerStats::Get(name.data());
+}
 Array f_hphp_get_status() {
   std::string out;
   ServerStats::ReportStatus(out, ServerStats::JSON);
   return f_json_decode(String(out));
 }
+Array f_hphp_get_iostatus() {
+  return ServerStats::GetThreadIOStatuses();
+}
+void f_hphp_set_iostatus_address(CStrRef name) {
+  return ServerStats::SetThreadIOStatusAddress(name);
+}
+
+
+
 
 static double ts_float(const timespec &ts) {
   return (double)ts.tv_sec + (double)ts.tv_nsec / 1000000000;

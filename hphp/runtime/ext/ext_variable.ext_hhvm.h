@@ -49,6 +49,48 @@ handle => rsi
 Value* fh_get_resource_type(Value* _rv, Value* handle) asm("_ZN4HPHP19f_get_resource_typeERKNS_6ObjectE");
 
 /*
+long HPHP::f_intval(HPHP::Variant const&, long)
+_ZN4HPHP8f_intvalERKNS_7VariantEl
+
+(return value) => rax
+v => rdi
+base => rsi
+*/
+
+long fh_intval(TypedValue* v, long base) asm("_ZN4HPHP8f_intvalERKNS_7VariantEl");
+
+/*
+double HPHP::f_doubleval(HPHP::Variant const&)
+_ZN4HPHP11f_doublevalERKNS_7VariantE
+
+(return value) => xmm0
+v => rdi
+*/
+
+double fh_doubleval(TypedValue* v) asm("_ZN4HPHP11f_doublevalERKNS_7VariantE");
+
+/*
+double HPHP::f_floatval(HPHP::Variant const&)
+_ZN4HPHP10f_floatvalERKNS_7VariantE
+
+(return value) => xmm0
+v => rdi
+*/
+
+double fh_floatval(TypedValue* v) asm("_ZN4HPHP10f_floatvalERKNS_7VariantE");
+
+/*
+HPHP::String HPHP::f_strval(HPHP::Variant const&)
+_ZN4HPHP8f_strvalERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+v => rsi
+*/
+
+Value* fh_strval(Value* _rv, TypedValue* v) asm("_ZN4HPHP8f_strvalERKNS_7VariantE");
+
+/*
 bool HPHP::f_settype(HPHP::VRefParamValue const&, HPHP::String const&)
 _ZN4HPHP9f_settypeERKNS_14VRefParamValueERKNS_6StringE
 

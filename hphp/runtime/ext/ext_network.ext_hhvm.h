@@ -161,6 +161,17 @@ type => rsi
 bool fh_dns_check_record(Value* host, Value* type) asm("_ZN4HPHP18f_dns_check_recordERKNS_6StringES2_");
 
 /*
+bool HPHP::f_checkdnsrr(HPHP::String const&, HPHP::String const&)
+_ZN4HPHP12f_checkdnsrrERKNS_6StringES2_
+
+(return value) => rax
+host => rdi
+type => rsi
+*/
+
+bool fh_checkdnsrr(Value* host, Value* type) asm("_ZN4HPHP12f_checkdnsrrERKNS_6StringES2_");
+
+/*
 HPHP::Variant HPHP::f_dns_get_record(HPHP::String const&, int, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
 _ZN4HPHP16f_dns_get_recordERKNS_6StringEiRKNS_14VRefParamValueES5_
 
@@ -185,6 +196,52 @@ weights => rdx
 */
 
 bool fh_dns_get_mx(Value* hostname, TypedValue* mxhosts, TypedValue* weights) asm("_ZN4HPHP12f_dns_get_mxERKNS_6StringERKNS_14VRefParamValueES5_");
+
+/*
+bool HPHP::f_getmxrr(HPHP::String const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
+_ZN4HPHP9f_getmxrrERKNS_6StringERKNS_14VRefParamValueES5_
+
+(return value) => rax
+hostname => rdi
+mxhosts => rsi
+weight => rdx
+*/
+
+bool fh_getmxrr(Value* hostname, TypedValue* mxhosts, TypedValue* weight) asm("_ZN4HPHP9f_getmxrrERKNS_6StringERKNS_14VRefParamValueES5_");
+
+/*
+HPHP::Variant HPHP::f_socket_get_status(HPHP::Object const&)
+_ZN4HPHP19f_socket_get_statusERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+stream => rsi
+*/
+
+TypedValue* fh_socket_get_status(TypedValue* _rv, Value* stream) asm("_ZN4HPHP19f_socket_get_statusERKNS_6ObjectE");
+
+/*
+bool HPHP::f_socket_set_blocking(HPHP::Object const&, int)
+_ZN4HPHP21f_socket_set_blockingERKNS_6ObjectEi
+
+(return value) => rax
+stream => rdi
+mode => rsi
+*/
+
+bool fh_socket_set_blocking(Value* stream, int mode) asm("_ZN4HPHP21f_socket_set_blockingERKNS_6ObjectEi");
+
+/*
+bool HPHP::f_socket_set_timeout(HPHP::Object const&, int, int)
+_ZN4HPHP20f_socket_set_timeoutERKNS_6ObjectEii
+
+(return value) => rax
+stream => rdi
+seconds => rsi
+microseconds => rdx
+*/
+
+bool fh_socket_set_timeout(Value* stream, int seconds, int microseconds) asm("_ZN4HPHP20f_socket_set_timeoutERKNS_6ObjectEii");
 
 /*
 void HPHP::f_header(HPHP::String const&, bool, int)
@@ -288,6 +345,46 @@ httponly => st0
 */
 
 bool fh_setrawcookie(Value* name, Value* value, long expire, Value* path, Value* domain, bool secure, bool httponly) asm("_ZN4HPHP14f_setrawcookieERKNS_6StringES2_lS2_S2_bb");
+
+/*
+void HPHP::f_define_syslog_variables()
+_ZN4HPHP25f_define_syslog_variablesEv
+
+*/
+
+void fh_define_syslog_variables() asm("_ZN4HPHP25f_define_syslog_variablesEv");
+
+/*
+bool HPHP::f_openlog(HPHP::String const&, int, int)
+_ZN4HPHP9f_openlogERKNS_6StringEii
+
+(return value) => rax
+ident => rdi
+option => rsi
+facility => rdx
+*/
+
+bool fh_openlog(Value* ident, int option, int facility) asm("_ZN4HPHP9f_openlogERKNS_6StringEii");
+
+/*
+bool HPHP::f_closelog()
+_ZN4HPHP10f_closelogEv
+
+(return value) => rax
+*/
+
+bool fh_closelog() asm("_ZN4HPHP10f_closelogEv");
+
+/*
+bool HPHP::f_syslog(int, HPHP::String const&)
+_ZN4HPHP8f_syslogEiRKNS_6StringE
+
+(return value) => rax
+priority => rdi
+message => rsi
+*/
+
+bool fh_syslog(int priority, Value* message) asm("_ZN4HPHP8f_syslogEiRKNS_6StringE");
 
 
 } // !HPHP

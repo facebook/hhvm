@@ -105,6 +105,10 @@ static bool check_cmd(const char *cmd) {
 
 IMPLEMENT_DEFAULT_EXTENSION(pcntl);
 
+int64_t f_pcntl_alarm(int seconds) {
+  return alarm(seconds);
+}
+
 void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
                   CArrRef envs /* = null_array */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(path.data())) {
@@ -358,6 +362,16 @@ int64_t f_pcntl_waitpid(int pid, VRefParam status, int options /* = 0 */) {
   status = nstatus;
   return child_id;
 }
+
+int64_t f_pcntl_wexitstatus(int status) {
+  return WEXITSTATUS(status);
+}
+
+bool f_pcntl_wifexited(int status) { return WIFEXITED(status);}
+bool f_pcntl_wifsignaled(int status) { return WIFSIGNALED(status);}
+bool f_pcntl_wifstopped(int status) { return WIFSTOPPED(status);}
+int64_t f_pcntl_wstopsig(int status) { return WSTOPSIG(status);}
+int64_t f_pcntl_wtermsig(int status) { return WTERMSIG(status);}
 
 ///////////////////////////////////////////////////////////////////////////////
 // popen

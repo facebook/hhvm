@@ -113,6 +113,16 @@ data => rsi
 TypedValue* fh_gzdecode(TypedValue* _rv, Value* data) asm("_ZN4HPHP10f_gzdecodeERKNS_6StringE");
 
 /*
+HPHP::String HPHP::f_zlib_get_coding_type()
+_ZN4HPHP22f_zlib_get_coding_typeEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_zlib_get_coding_type(Value* _rv) asm("_ZN4HPHP22f_zlib_get_coding_typeEv");
+
+/*
 HPHP::Object HPHP::f_gzopen(HPHP::String const&, HPHP::String const&, bool)
 _ZN4HPHP8f_gzopenERKNS_6StringES2_b
 
@@ -124,6 +134,145 @@ use_include_path => rcx
 */
 
 Value* fh_gzopen(Value* _rv, Value* filename, Value* mode, bool use_include_path) asm("_ZN4HPHP8f_gzopenERKNS_6StringES2_b");
+
+/*
+bool HPHP::f_gzclose(HPHP::Object const&)
+_ZN4HPHP9f_gzcloseERKNS_6ObjectE
+
+(return value) => rax
+zp => rdi
+*/
+
+bool fh_gzclose(Value* zp) asm("_ZN4HPHP9f_gzcloseERKNS_6ObjectE");
+
+/*
+bool HPHP::f_gzrewind(HPHP::Object const&)
+_ZN4HPHP10f_gzrewindERKNS_6ObjectE
+
+(return value) => rax
+zp => rdi
+*/
+
+bool fh_gzrewind(Value* zp) asm("_ZN4HPHP10f_gzrewindERKNS_6ObjectE");
+
+/*
+bool HPHP::f_gzeof(HPHP::Object const&)
+_ZN4HPHP7f_gzeofERKNS_6ObjectE
+
+(return value) => rax
+zp => rdi
+*/
+
+bool fh_gzeof(Value* zp) asm("_ZN4HPHP7f_gzeofERKNS_6ObjectE");
+
+/*
+HPHP::Variant HPHP::f_gzgetc(HPHP::Object const&)
+_ZN4HPHP8f_gzgetcERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+zp => rsi
+*/
+
+TypedValue* fh_gzgetc(TypedValue* _rv, Value* zp) asm("_ZN4HPHP8f_gzgetcERKNS_6ObjectE");
+
+/*
+HPHP::Variant HPHP::f_gzgets(HPHP::Object const&, long)
+_ZN4HPHP8f_gzgetsERKNS_6ObjectEl
+
+(return value) => rax
+_rv => rdi
+zp => rsi
+length => rdx
+*/
+
+TypedValue* fh_gzgets(TypedValue* _rv, Value* zp, long length) asm("_ZN4HPHP8f_gzgetsERKNS_6ObjectEl");
+
+/*
+HPHP::Variant HPHP::f_gzgetss(HPHP::Object const&, long, HPHP::String const&)
+_ZN4HPHP9f_gzgetssERKNS_6ObjectElRKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+zp => rsi
+length => rdx
+allowable_tags => rcx
+*/
+
+TypedValue* fh_gzgetss(TypedValue* _rv, Value* zp, long length, Value* allowable_tags) asm("_ZN4HPHP9f_gzgetssERKNS_6ObjectElRKNS_6StringE");
+
+/*
+HPHP::Variant HPHP::f_gzread(HPHP::Object const&, long)
+_ZN4HPHP8f_gzreadERKNS_6ObjectEl
+
+(return value) => rax
+_rv => rdi
+zp => rsi
+length => rdx
+*/
+
+TypedValue* fh_gzread(TypedValue* _rv, Value* zp, long length) asm("_ZN4HPHP8f_gzreadERKNS_6ObjectEl");
+
+/*
+HPHP::Variant HPHP::f_gzpassthru(HPHP::Object const&)
+_ZN4HPHP12f_gzpassthruERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+zp => rsi
+*/
+
+TypedValue* fh_gzpassthru(TypedValue* _rv, Value* zp) asm("_ZN4HPHP12f_gzpassthruERKNS_6ObjectE");
+
+/*
+HPHP::Variant HPHP::f_gzseek(HPHP::Object const&, long, long)
+_ZN4HPHP8f_gzseekERKNS_6ObjectEll
+
+(return value) => rax
+_rv => rdi
+zp => rsi
+offset => rdx
+whence => rcx
+*/
+
+TypedValue* fh_gzseek(TypedValue* _rv, Value* zp, long offset, long whence) asm("_ZN4HPHP8f_gzseekERKNS_6ObjectEll");
+
+/*
+HPHP::Variant HPHP::f_gztell(HPHP::Object const&)
+_ZN4HPHP8f_gztellERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+zp => rsi
+*/
+
+TypedValue* fh_gztell(TypedValue* _rv, Value* zp) asm("_ZN4HPHP8f_gztellERKNS_6ObjectE");
+
+/*
+HPHP::Variant HPHP::f_gzwrite(HPHP::Object const&, HPHP::String const&, long)
+_ZN4HPHP9f_gzwriteERKNS_6ObjectERKNS_6StringEl
+
+(return value) => rax
+_rv => rdi
+zp => rsi
+str => rdx
+length => rcx
+*/
+
+TypedValue* fh_gzwrite(TypedValue* _rv, Value* zp, Value* str, long length) asm("_ZN4HPHP9f_gzwriteERKNS_6ObjectERKNS_6StringEl");
+
+/*
+HPHP::Variant HPHP::f_gzputs(HPHP::Object const&, HPHP::String const&, long)
+_ZN4HPHP8f_gzputsERKNS_6ObjectERKNS_6StringEl
+
+(return value) => rax
+_rv => rdi
+zp => rsi
+str => rdx
+length => rcx
+*/
+
+TypedValue* fh_gzputs(TypedValue* _rv, Value* zp, Value* str, long length) asm("_ZN4HPHP8f_gzputsERKNS_6ObjectERKNS_6StringEl");
 
 /*
 HPHP::Variant HPHP::f_qlzcompress(HPHP::String const&, int)

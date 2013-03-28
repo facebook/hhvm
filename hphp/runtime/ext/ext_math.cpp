@@ -27,6 +27,8 @@ const int64_t k_PHP_ROUND_HALF_DOWN = PHP_ROUND_HALF_DOWN;
 const int64_t k_PHP_ROUND_HALF_EVEN = PHP_ROUND_HALF_EVEN;
 const int64_t k_PHP_ROUND_HALF_ODD =  PHP_ROUND_HALF_ODD;
 
+double f_pi() { return k_M_PI;}
+
 Variant f_min(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
   Variant ret;
   if (_argv.empty() && value.is(KindOfArray)) {
@@ -106,6 +108,13 @@ Variant f_abs(CVarRef number) {
   }
 }
 
+bool f_is_finite(double val) { return finite(val);}
+bool f_is_infinite(double val) { return isinf(val);}
+bool f_is_nan(double val) { return isnan(val);}
+
+double f_ceil(double value) { return ceil(value);}
+double f_floor(double value) { return floor(value);}
+
 double f_round(CVarRef val, int64_t precision /* = 0 */,
                int64_t mode /* = PHP_ROUND_HALF_UP */) {
   int64_t ival;
@@ -122,6 +131,28 @@ double f_round(CVarRef val, int64_t precision /* = 0 */,
   }
   dval = php_math_round(dval, precision, mode);
   return dval;
+}
+
+double f_deg2rad(double number) { return number / 180.0 * k_M_PI;}
+double f_rad2deg(double number) { return number / k_M_PI * 180.0;}
+
+String f_decbin(int64_t number) {
+  return String(string_long_to_base(number, 2), AttachString);
+}
+String f_dechex(int64_t number) {
+  return String(string_long_to_base(number, 16), AttachString);
+}
+String f_decoct(int64_t number) {
+  return String(string_long_to_base(number, 8), AttachString);
+}
+Variant f_bindec(CStrRef binary_string) {
+  return string_base_to_numeric(binary_string.data(), binary_string.size(), 2);
+}
+Variant f_hexdec(CStrRef hex_string) {
+  return string_base_to_numeric(hex_string.data(), hex_string.size(), 16);
+}
+Variant f_octdec(CStrRef octal_string) {
+  return string_base_to_numeric(octal_string.data(), octal_string.size(), 8);
 }
 
 Variant f_base_convert(CStrRef number, int64_t frombase, int64_t tobase) {
@@ -174,6 +205,34 @@ Numeric f_pow(CVarRef base, CVarRef exp) {
   return pow(bdbl, edbl);
 }
 
+double f_exp(double arg) { return exp(arg);}
+double f_expm1(double arg) { return expm1(arg);}
+double f_log10(double arg) { return log10(arg);}
+double f_log1p(double number) { return log1p(number);}
+double f_log(double arg, double base /* = 0 */) {
+  return base <= 0 ? log(arg) : log(arg)/log(base);
+}
+
+double f_cos(double arg) { return cos(arg);  }
+double f_cosh(double arg) { return cosh(arg); }
+double f_sin(double arg) { return sin(arg);  }
+double f_sinh(double arg) { return sinh(arg); }
+double f_tan(double arg) { return tan(arg);  }
+double f_tanh(double arg) { return tanh(arg); }
+double f_acos(double arg) { return acos(arg); }
+double f_acosh(double arg) { return acosh(arg);}
+double f_asin(double arg) { return asin(arg); }
+double f_asinh(double arg) { return asinh(arg);}
+double f_atan(double arg) { return atan(arg); }
+double f_atanh(double arg) { return atanh(arg);}
+double f_atan2(double y, double x) { return atan2(y, x);}
+
+double f_hypot(double x, double y) { return hypot(x, y);}
+double f_fmod(double x, double y) { return fmod(x, y);}
+double f_sqrt(double arg) { return sqrt(arg);}
+
+int64_t f_getrandmax() { return RAND_MAX;}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static bool s_rand_is_seeded = false;
@@ -203,6 +262,8 @@ int64_t f_rand(int64_t min /* = 0 */, int64_t max /* = RAND_MAX */) {
   return number;
 }
 
+int64_t f_mt_getrandmax() { return MT_RAND_MAX;}
+
 void f_mt_srand(CVarRef seed /* = null_variant */) {
   if (seed.isNull()) {
     return math_mt_srand(math_generate_seed());
@@ -213,6 +274,11 @@ void f_mt_srand(CVarRef seed /* = null_variant */) {
     raise_warning("mt_srand() expects parameter 1 to be long");
   }
 }
+
+int64_t f_mt_rand(int64_t min /* = 0 */, int64_t max /* = RAND_MAX */) {
+  return math_mt_rand(min, max);
+}
+double f_lcg_value() { return math_combined_lcg();}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -165,6 +165,29 @@ query_timeout_ms => st8
 TypedValue* fh_mysql_pconnect_with_db(TypedValue* _rv, Value* server, Value* username, Value* password, Value* database, int client_flags, int connect_timeout_ms, int query_timeout_ms) asm("_ZN4HPHP24f_mysql_pconnect_with_dbERKNS_6StringES2_S2_S2_iii");
 
 /*
+HPHP::Variant HPHP::f_mysql_set_charset(HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP19f_mysql_set_charsetERKNS_6StringERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+charset => rsi
+link_identifier => rdx
+*/
+
+TypedValue* fh_mysql_set_charset(TypedValue* _rv, Value* charset, TypedValue* link_identifier) asm("_ZN4HPHP19f_mysql_set_charsetERKNS_6StringERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_ping(HPHP::Variant const&)
+_ZN4HPHP12f_mysql_pingERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_ping(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP12f_mysql_pingERKNS_7VariantE");
+
+/*
 HPHP::String HPHP::f_mysql_escape_string(HPHP::String const&)
 _ZN4HPHP21f_mysql_escape_stringERKNS_6StringE
 
@@ -186,6 +209,28 @@ link_identifier => rdx
 */
 
 TypedValue* fh_mysql_real_escape_string(TypedValue* _rv, Value* unescaped_string, TypedValue* link_identifier) asm("_ZN4HPHP26f_mysql_real_escape_stringERKNS_6StringERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_client_encoding(HPHP::Variant const&)
+_ZN4HPHP23f_mysql_client_encodingERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_client_encoding(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP23f_mysql_client_encodingERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_close(HPHP::Variant const&)
+_ZN4HPHP13f_mysql_closeERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_close(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP13f_mysql_closeERKNS_7VariantE");
 
 /*
 HPHP::Variant HPHP::f_mysql_errno(HPHP::Variant const&)
@@ -219,6 +264,140 @@ link_identifier => rsi
 */
 
 TypedValue* fh_mysql_warning_count(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP21f_mysql_warning_countERKNS_7VariantE");
+
+/*
+HPHP::String HPHP::f_mysql_get_client_info()
+_ZN4HPHP23f_mysql_get_client_infoEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_mysql_get_client_info(Value* _rv) asm("_ZN4HPHP23f_mysql_get_client_infoEv");
+
+/*
+HPHP::Variant HPHP::f_mysql_get_host_info(HPHP::Variant const&)
+_ZN4HPHP21f_mysql_get_host_infoERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_get_host_info(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP21f_mysql_get_host_infoERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_get_proto_info(HPHP::Variant const&)
+_ZN4HPHP22f_mysql_get_proto_infoERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_get_proto_info(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP22f_mysql_get_proto_infoERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_get_server_info(HPHP::Variant const&)
+_ZN4HPHP23f_mysql_get_server_infoERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_get_server_info(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP23f_mysql_get_server_infoERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_info(HPHP::Variant const&)
+_ZN4HPHP12f_mysql_infoERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_info(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP12f_mysql_infoERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_insert_id(HPHP::Variant const&)
+_ZN4HPHP17f_mysql_insert_idERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_insert_id(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP17f_mysql_insert_idERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_stat(HPHP::Variant const&)
+_ZN4HPHP12f_mysql_statERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_stat(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP12f_mysql_statERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_thread_id(HPHP::Variant const&)
+_ZN4HPHP17f_mysql_thread_idERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_thread_id(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP17f_mysql_thread_idERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_create_db(HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP17f_mysql_create_dbERKNS_6StringERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+db => rsi
+link_identifier => rdx
+*/
+
+TypedValue* fh_mysql_create_db(TypedValue* _rv, Value* db, TypedValue* link_identifier) asm("_ZN4HPHP17f_mysql_create_dbERKNS_6StringERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_select_db(HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP17f_mysql_select_dbERKNS_6StringERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+db => rsi
+link_identifier => rdx
+*/
+
+TypedValue* fh_mysql_select_db(TypedValue* _rv, Value* db, TypedValue* link_identifier) asm("_ZN4HPHP17f_mysql_select_dbERKNS_6StringERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_drop_db(HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP15f_mysql_drop_dbERKNS_6StringERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+db => rsi
+link_identifier => rdx
+*/
+
+TypedValue* fh_mysql_drop_db(TypedValue* _rv, Value* db, TypedValue* link_identifier) asm("_ZN4HPHP15f_mysql_drop_dbERKNS_6StringERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_affected_rows(HPHP::Variant const&)
+_ZN4HPHP21f_mysql_affected_rowsERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_affected_rows(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP21f_mysql_affected_rowsERKNS_7VariantE");
 
 /*
 bool HPHP::f_mysql_set_timeout(int, HPHP::Variant const&)
@@ -299,6 +478,19 @@ link_identifier => rdx
 TypedValue* fh_mysql_unbuffered_query(TypedValue* _rv, Value* query, TypedValue* link_identifier) asm("_ZN4HPHP24f_mysql_unbuffered_queryERKNS_6StringERKNS_7VariantE");
 
 /*
+HPHP::Variant HPHP::f_mysql_db_query(HPHP::String const&, HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP16f_mysql_db_queryERKNS_6StringES2_RKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+database => rsi
+query => rdx
+link_identifier => rcx
+*/
+
+TypedValue* fh_mysql_db_query(TypedValue* _rv, Value* database, Value* query, TypedValue* link_identifier) asm("_ZN4HPHP16f_mysql_db_queryERKNS_6StringES2_RKNS_7VariantE");
+
+/*
 HPHP::Variant HPHP::f_mysql_list_dbs(HPHP::Variant const&)
 _ZN4HPHP16f_mysql_list_dbsERKNS_7VariantE
 
@@ -322,6 +514,19 @@ link_identifier => rdx
 TypedValue* fh_mysql_list_tables(TypedValue* _rv, Value* database, TypedValue* link_identifier) asm("_ZN4HPHP19f_mysql_list_tablesERKNS_6StringERKNS_7VariantE");
 
 /*
+HPHP::Variant HPHP::f_mysql_list_fields(HPHP::String const&, HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP19f_mysql_list_fieldsERKNS_6StringES2_RKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+database_name => rsi
+table_name => rdx
+link_identifier => rcx
+*/
+
+TypedValue* fh_mysql_list_fields(TypedValue* _rv, Value* database_name, Value* table_name, TypedValue* link_identifier) asm("_ZN4HPHP19f_mysql_list_fieldsERKNS_6StringES2_RKNS_7VariantE");
+
+/*
 HPHP::Variant HPHP::f_mysql_list_processes(HPHP::Variant const&)
 _ZN4HPHP22f_mysql_list_processesERKNS_7VariantE
 
@@ -331,6 +536,31 @@ link_identifier => rsi
 */
 
 TypedValue* fh_mysql_list_processes(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP22f_mysql_list_processesERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_mysql_db_name(HPHP::Variant const&, int, HPHP::Variant const&)
+_ZN4HPHP15f_mysql_db_nameERKNS_7VariantEiS2_
+
+(return value) => rax
+_rv => rdi
+result => rsi
+row => rdx
+field => rcx
+*/
+
+TypedValue* fh_mysql_db_name(TypedValue* _rv, TypedValue* result, int row, TypedValue* field) asm("_ZN4HPHP15f_mysql_db_nameERKNS_7VariantEiS2_");
+
+/*
+HPHP::Variant HPHP::f_mysql_tablename(HPHP::Variant const&, int)
+_ZN4HPHP17f_mysql_tablenameERKNS_7VariantEi
+
+(return value) => rax
+_rv => rdi
+result => rsi
+i => rdx
+*/
+
+TypedValue* fh_mysql_tablename(TypedValue* _rv, TypedValue* result, int i) asm("_ZN4HPHP17f_mysql_tablenameERKNS_7VariantEi");
 
 /*
 HPHP::Variant HPHP::f_mysql_num_fields(HPHP::Variant const&)

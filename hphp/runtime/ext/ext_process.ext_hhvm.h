@@ -17,6 +17,16 @@
 namespace HPHP {
 
 /*
+long HPHP::f_pcntl_alarm(int)
+_ZN4HPHP13f_pcntl_alarmEi
+
+(return value) => rax
+seconds => rdi
+*/
+
+long fh_pcntl_alarm(int seconds) asm("_ZN4HPHP13f_pcntl_alarmEi");
+
+/*
 void HPHP::f_pcntl_exec(HPHP::String const&, HPHP::Array const&, HPHP::Array const&)
 _ZN4HPHP12f_pcntl_execERKNS_6StringERKNS_5ArrayES5_
 
@@ -94,6 +104,66 @@ options => rdx
 */
 
 long fh_pcntl_waitpid(int pid, TypedValue* status, int options) asm("_ZN4HPHP15f_pcntl_waitpidEiRKNS_14VRefParamValueEi");
+
+/*
+long HPHP::f_pcntl_wexitstatus(int)
+_ZN4HPHP19f_pcntl_wexitstatusEi
+
+(return value) => rax
+status => rdi
+*/
+
+long fh_pcntl_wexitstatus(int status) asm("_ZN4HPHP19f_pcntl_wexitstatusEi");
+
+/*
+bool HPHP::f_pcntl_wifexited(int)
+_ZN4HPHP17f_pcntl_wifexitedEi
+
+(return value) => rax
+status => rdi
+*/
+
+bool fh_pcntl_wifexited(int status) asm("_ZN4HPHP17f_pcntl_wifexitedEi");
+
+/*
+bool HPHP::f_pcntl_wifsignaled(int)
+_ZN4HPHP19f_pcntl_wifsignaledEi
+
+(return value) => rax
+status => rdi
+*/
+
+bool fh_pcntl_wifsignaled(int status) asm("_ZN4HPHP19f_pcntl_wifsignaledEi");
+
+/*
+bool HPHP::f_pcntl_wifstopped(int)
+_ZN4HPHP18f_pcntl_wifstoppedEi
+
+(return value) => rax
+status => rdi
+*/
+
+bool fh_pcntl_wifstopped(int status) asm("_ZN4HPHP18f_pcntl_wifstoppedEi");
+
+/*
+long HPHP::f_pcntl_wstopsig(int)
+_ZN4HPHP16f_pcntl_wstopsigEi
+
+(return value) => rax
+status => rdi
+*/
+
+long fh_pcntl_wstopsig(int status) asm("_ZN4HPHP16f_pcntl_wstopsigEi");
+
+/*
+long HPHP::f_pcntl_wtermsig(int)
+_ZN4HPHP16f_pcntl_wtermsigEi
+
+(return value) => rax
+status => rdi
+*/
+
+long fh_pcntl_wtermsig(int status) asm("_ZN4HPHP16f_pcntl_wtermsigEi");
 
 /*
 bool HPHP::f_pcntl_signal_dispatch()

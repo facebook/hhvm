@@ -697,6 +697,94 @@ TypedValue* fg_mysql_pconnect_with_db(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Variant HPHP::f_mysql_set_charset(HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP19f_mysql_set_charsetERKNS_6StringERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+charset => rsi
+link_identifier => rdx
+*/
+
+TypedValue* fh_mysql_set_charset(TypedValue* _rv, Value* charset, TypedValue* link_identifier) asm("_ZN4HPHP19f_mysql_set_charsetERKNS_6StringERKNS_7VariantE");
+
+TypedValue * fg1_mysql_set_charset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_set_charset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToStringInPlace(args-0);
+  Variant defVal1;
+  fh_mysql_set_charset((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_mysql_set_charset(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 1LL && count <= 2LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        Variant defVal1;
+        fh_mysql_set_charset((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_set_charset(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("mysql_set_charset", count, 1, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_ping(HPHP::Variant const&)
+_ZN4HPHP12f_mysql_pingERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_ping(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP12f_mysql_pingERKNS_7VariantE");
+
+TypedValue* fg_mysql_ping(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      Variant defVal0;
+      fh_mysql_ping((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_ping", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::String HPHP::f_mysql_escape_string(HPHP::String const&)
 _ZN4HPHP21f_mysql_escape_stringERKNS_6StringE
 
@@ -802,6 +890,76 @@ TypedValue* fg_mysql_real_escape_string(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Variant HPHP::f_mysql_client_encoding(HPHP::Variant const&)
+_ZN4HPHP23f_mysql_client_encodingERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_client_encoding(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP23f_mysql_client_encodingERKNS_7VariantE");
+
+TypedValue* fg_mysql_client_encoding(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      Variant defVal0;
+      fh_mysql_client_encoding((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_client_encoding", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_close(HPHP::Variant const&)
+_ZN4HPHP13f_mysql_closeERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_close(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP13f_mysql_closeERKNS_7VariantE");
+
+TypedValue* fg_mysql_close(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      Variant defVal0;
+      fh_mysql_close((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_close", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::f_mysql_errno(HPHP::Variant const&)
 _ZN4HPHP13f_mysql_errnoERKNS_7VariantE
 
@@ -895,6 +1053,479 @@ TypedValue* fg_mysql_warning_count(HPHP::VM::ActRec *ar) {
       return &ar->m_r;
     } else {
       throw_toomany_arguments_nr("mysql_warning_count", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::String HPHP::f_mysql_get_client_info()
+_ZN4HPHP23f_mysql_get_client_infoEv
+
+(return value) => rax
+_rv => rdi
+*/
+
+Value* fh_mysql_get_client_info(Value* _rv) asm("_ZN4HPHP23f_mysql_get_client_infoEv");
+
+TypedValue* fg_mysql_get_client_info(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv.m_type = KindOfString;
+      fh_mysql_get_client_info((&rv.m_data));
+      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_get_client_info", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_get_host_info(HPHP::Variant const&)
+_ZN4HPHP21f_mysql_get_host_infoERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_get_host_info(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP21f_mysql_get_host_infoERKNS_7VariantE");
+
+TypedValue* fg_mysql_get_host_info(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      Variant defVal0;
+      fh_mysql_get_host_info((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_get_host_info", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_get_proto_info(HPHP::Variant const&)
+_ZN4HPHP22f_mysql_get_proto_infoERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_get_proto_info(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP22f_mysql_get_proto_infoERKNS_7VariantE");
+
+TypedValue* fg_mysql_get_proto_info(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      Variant defVal0;
+      fh_mysql_get_proto_info((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_get_proto_info", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_get_server_info(HPHP::Variant const&)
+_ZN4HPHP23f_mysql_get_server_infoERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_get_server_info(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP23f_mysql_get_server_infoERKNS_7VariantE");
+
+TypedValue* fg_mysql_get_server_info(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      Variant defVal0;
+      fh_mysql_get_server_info((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_get_server_info", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_info(HPHP::Variant const&)
+_ZN4HPHP12f_mysql_infoERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_info(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP12f_mysql_infoERKNS_7VariantE");
+
+TypedValue* fg_mysql_info(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      Variant defVal0;
+      fh_mysql_info((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_info", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_insert_id(HPHP::Variant const&)
+_ZN4HPHP17f_mysql_insert_idERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_insert_id(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP17f_mysql_insert_idERKNS_7VariantE");
+
+TypedValue* fg_mysql_insert_id(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      Variant defVal0;
+      fh_mysql_insert_id((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_insert_id", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_stat(HPHP::Variant const&)
+_ZN4HPHP12f_mysql_statERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_stat(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP12f_mysql_statERKNS_7VariantE");
+
+TypedValue* fg_mysql_stat(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      Variant defVal0;
+      fh_mysql_stat((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_stat", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_thread_id(HPHP::Variant const&)
+_ZN4HPHP17f_mysql_thread_idERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_thread_id(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP17f_mysql_thread_idERKNS_7VariantE");
+
+TypedValue* fg_mysql_thread_id(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      Variant defVal0;
+      fh_mysql_thread_id((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_thread_id", 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_create_db(HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP17f_mysql_create_dbERKNS_6StringERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+db => rsi
+link_identifier => rdx
+*/
+
+TypedValue* fh_mysql_create_db(TypedValue* _rv, Value* db, TypedValue* link_identifier) asm("_ZN4HPHP17f_mysql_create_dbERKNS_6StringERKNS_7VariantE");
+
+TypedValue * fg1_mysql_create_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_create_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToStringInPlace(args-0);
+  Variant defVal1;
+  fh_mysql_create_db((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_mysql_create_db(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 1LL && count <= 2LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        Variant defVal1;
+        fh_mysql_create_db((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_create_db(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("mysql_create_db", count, 1, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_select_db(HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP17f_mysql_select_dbERKNS_6StringERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+db => rsi
+link_identifier => rdx
+*/
+
+TypedValue* fh_mysql_select_db(TypedValue* _rv, Value* db, TypedValue* link_identifier) asm("_ZN4HPHP17f_mysql_select_dbERKNS_6StringERKNS_7VariantE");
+
+TypedValue * fg1_mysql_select_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_select_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToStringInPlace(args-0);
+  Variant defVal1;
+  fh_mysql_select_db((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_mysql_select_db(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 1LL && count <= 2LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        Variant defVal1;
+        fh_mysql_select_db((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_select_db(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("mysql_select_db", count, 1, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_drop_db(HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP15f_mysql_drop_dbERKNS_6StringERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+db => rsi
+link_identifier => rdx
+*/
+
+TypedValue* fh_mysql_drop_db(TypedValue* _rv, Value* db, TypedValue* link_identifier) asm("_ZN4HPHP15f_mysql_drop_dbERKNS_6StringERKNS_7VariantE");
+
+TypedValue * fg1_mysql_drop_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_drop_db(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToStringInPlace(args-0);
+  Variant defVal1;
+  fh_mysql_drop_db((rv), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_mysql_drop_db(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 1LL && count <= 2LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        Variant defVal1;
+        fh_mysql_drop_db((&(rv)), &args[-0].m_data, (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_drop_db(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("mysql_drop_db", count, 1, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_affected_rows(HPHP::Variant const&)
+_ZN4HPHP21f_mysql_affected_rowsERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+link_identifier => rsi
+*/
+
+TypedValue* fh_mysql_affected_rows(TypedValue* _rv, TypedValue* link_identifier) asm("_ZN4HPHP21f_mysql_affected_rowsERKNS_7VariantE");
+
+TypedValue* fg_mysql_affected_rows(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count <= 1LL) {
+      Variant defVal0;
+      fh_mysql_affected_rows((&(rv)), (count > 0) ? (args-0) : (TypedValue*)(&defVal0));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("mysql_affected_rows", 1, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -1221,6 +1852,70 @@ TypedValue* fg_mysql_unbuffered_query(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Variant HPHP::f_mysql_db_query(HPHP::String const&, HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP16f_mysql_db_queryERKNS_6StringES2_RKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+database => rsi
+query => rdx
+link_identifier => rcx
+*/
+
+TypedValue* fh_mysql_db_query(TypedValue* _rv, Value* database, Value* query, TypedValue* link_identifier) asm("_ZN4HPHP16f_mysql_db_queryERKNS_6StringES2_RKNS_7VariantE");
+
+TypedValue * fg1_mysql_db_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_db_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  switch (count) {
+  default: // count >= 3
+  case 2:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-1)->m_type)) {
+    tvCastToStringInPlace(args-1);
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  Variant defVal2;
+  fh_mysql_db_query((rv), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_mysql_db_query(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 2LL && count <= 3LL) {
+      if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
+        Variant defVal2;
+        fh_mysql_db_query((&(rv)), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_db_query(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("mysql_db_query", count, 2, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::f_mysql_list_dbs(HPHP::Variant const&)
 _ZN4HPHP16f_mysql_list_dbsERKNS_7VariantE
 
@@ -1309,6 +2004,70 @@ TypedValue* fg_mysql_list_tables(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Variant HPHP::f_mysql_list_fields(HPHP::String const&, HPHP::String const&, HPHP::Variant const&)
+_ZN4HPHP19f_mysql_list_fieldsERKNS_6StringES2_RKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+database_name => rsi
+table_name => rdx
+link_identifier => rcx
+*/
+
+TypedValue* fh_mysql_list_fields(TypedValue* _rv, Value* database_name, Value* table_name, TypedValue* link_identifier) asm("_ZN4HPHP19f_mysql_list_fieldsERKNS_6StringES2_RKNS_7VariantE");
+
+TypedValue * fg1_mysql_list_fields(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_list_fields(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  switch (count) {
+  default: // count >= 3
+  case 2:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-1)->m_type)) {
+    tvCastToStringInPlace(args-1);
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  Variant defVal2;
+  fh_mysql_list_fields((rv), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_mysql_list_fields(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 2LL && count <= 3LL) {
+      if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
+        Variant defVal2;
+        fh_mysql_list_fields((&(rv)), &args[-0].m_data, &args[-1].m_data, (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_list_fields(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("mysql_list_fields", count, 2, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::f_mysql_list_processes(HPHP::Variant const&)
 _ZN4HPHP22f_mysql_list_processesERKNS_7VariantE
 
@@ -1336,6 +2095,109 @@ TypedValue* fg_mysql_list_processes(HPHP::VM::ActRec *ar) {
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_db_name(HPHP::Variant const&, int, HPHP::Variant const&)
+_ZN4HPHP15f_mysql_db_nameERKNS_7VariantEiS2_
+
+(return value) => rax
+_rv => rdi
+result => rsi
+row => rdx
+field => rcx
+*/
+
+TypedValue* fh_mysql_db_name(TypedValue* _rv, TypedValue* result, int row, TypedValue* field) asm("_ZN4HPHP15f_mysql_db_nameERKNS_7VariantEiS2_");
+
+TypedValue * fg1_mysql_db_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_db_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToInt64InPlace(args-1);
+  fh_mysql_db_name((rv), (args-0), (int)(args[-1].m_data.num), (count > 2) ? (args-2) : (TypedValue*)(&null_variant));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_mysql_db_name(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 2LL && count <= 3LL) {
+      if ((args-1)->m_type == KindOfInt64) {
+        fh_mysql_db_name((&(rv)), (args-0), (int)(args[-1].m_data.num), (count > 2) ? (args-2) : (TypedValue*)(&null_variant));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_db_name(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("mysql_db_name", count, 2, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_mysql_tablename(HPHP::Variant const&, int)
+_ZN4HPHP17f_mysql_tablenameERKNS_7VariantEi
+
+(return value) => rax
+_rv => rdi
+result => rsi
+i => rdx
+*/
+
+TypedValue* fh_mysql_tablename(TypedValue* _rv, TypedValue* result, int i) asm("_ZN4HPHP17f_mysql_tablenameERKNS_7VariantEi");
+
+TypedValue * fg1_mysql_tablename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mysql_tablename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToInt64InPlace(args-1);
+  fh_mysql_tablename((rv), (args-0), (int)(args[-1].m_data.num));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_mysql_tablename(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 2LL) {
+      if ((args-1)->m_type == KindOfInt64) {
+        fh_mysql_tablename((&(rv)), (args-0), (int)(args[-1].m_data.num));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_mysql_tablename(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("mysql_tablename", count, 2, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

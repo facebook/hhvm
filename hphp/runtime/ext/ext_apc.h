@@ -38,43 +38,23 @@ Variant f_apc_exists(CVarRef key, int64_t cache_id = 0);
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_apc_cache_info(int64_t cache_id = 0, bool limited = false);
-inline Array f_apc_sma_info(bool limited = false) {
-  return Array::Create();
-}
-inline bool f_apc_define_constants(CStrRef key, CStrRef constants,
-                                   bool case_sensitive = true,
-                                   int64_t cache_id = 0) {
-  throw NotSupportedException(__func__, "dynamic coding");
-}
-inline bool f_apc_load_constants(CStrRef key, bool case_sensitive = true,
-                                 int64_t cache_id = 0) {
-  throw NotSupportedException(__func__, "dynamic coding");
-}
-inline bool f_apc_compile_file(CStrRef filename, bool atomic = true,
-                               int64_t cache_id = 0) {
-  throw NotSupportedException(__func__, "dynamic coding");
-}
-inline Array f_apc_filehits() {
-  throw NotSupportedException(__func__, "feature not supported");
-}
-inline Variant f_apc_delete_file(CVarRef keys, int64_t cache_id = 0) {
-  throw NotSupportedException(__func__, "feature not supported");
-}
-inline Variant f_apc_bin_dump(int64_t cache_id = 0, CVarRef filter = null_variant) {
-  throw NotSupportedException(__func__, "feature not supported");
-}
-inline bool f_apc_bin_load(CStrRef data, int64_t flags = 0, int64_t cache_id = 0) {
-  throw NotSupportedException(__func__, "feature not supported");
-}
-inline Variant f_apc_bin_dumpfile(int64_t cache_id, CVarRef filter,
-                                  CStrRef filename, int64_t flags = 0,
-                                  CObjRef context = uninit_null()) {
-  throw NotSupportedException(__func__, "feature not supported");
-}
-inline bool f_apc_bin_loadfile(CStrRef filename, CObjRef context = uninit_null(),
-                               int64_t flags = 0, int64_t cache_id = 0) {
-  throw NotSupportedException(__func__, "feature not supported");
-}
+Array f_apc_sma_info(bool limited = false);
+bool f_apc_define_constants(CStrRef key, CStrRef constants,
+                            bool case_sensitive = true,
+                            int64_t cache_id = 0);
+bool f_apc_load_constants(CStrRef key, bool case_sensitive = true,
+                          int64_t cache_id = 0);
+bool f_apc_compile_file(CStrRef filename, bool atomic = true,
+                        int64_t cache_id = 0);
+Array f_apc_filehits();
+Variant f_apc_delete_file(CVarRef keys, int64_t cache_id = 0);
+Variant f_apc_bin_dump(int64_t cache_id = 0, CVarRef filter = null_variant);
+bool f_apc_bin_load(CStrRef data, int64_t flags = 0, int64_t cache_id = 0);
+Variant f_apc_bin_dumpfile(int64_t cache_id, CVarRef filter,
+                           CStrRef filename, int64_t flags = 0,
+                           CObjRef context = uninit_null());
+bool f_apc_bin_loadfile(CStrRef filename, CObjRef context = uninit_null(),
+                        int64_t flags = 0, int64_t cache_id = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 // loading APC from archive files

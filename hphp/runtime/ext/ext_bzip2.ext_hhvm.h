@@ -17,6 +17,17 @@
 namespace HPHP {
 
 /*
+HPHP::Variant HPHP::f_bzclose(HPHP::Object const&)
+_ZN4HPHP9f_bzcloseERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+bz => rsi
+*/
+
+TypedValue* fh_bzclose(TypedValue* _rv, Value* bz) asm("_ZN4HPHP9f_bzcloseERKNS_6ObjectE");
+
+/*
 HPHP::Variant HPHP::f_bzopen(HPHP::String const&, HPHP::String const&)
 _ZN4HPHP8f_bzopenERKNS_6StringES2_
 
@@ -27,6 +38,31 @@ mode => rdx
 */
 
 TypedValue* fh_bzopen(TypedValue* _rv, Value* filename, Value* mode) asm("_ZN4HPHP8f_bzopenERKNS_6StringES2_");
+
+/*
+HPHP::Variant HPHP::f_bzread(HPHP::Object const&, int)
+_ZN4HPHP8f_bzreadERKNS_6ObjectEi
+
+(return value) => rax
+_rv => rdi
+bz => rsi
+length => rdx
+*/
+
+TypedValue* fh_bzread(TypedValue* _rv, Value* bz, int length) asm("_ZN4HPHP8f_bzreadERKNS_6ObjectEi");
+
+/*
+HPHP::Variant HPHP::f_bzwrite(HPHP::Object const&, HPHP::String const&, int)
+_ZN4HPHP9f_bzwriteERKNS_6ObjectERKNS_6StringEi
+
+(return value) => rax
+_rv => rdi
+bz => rsi
+data => rdx
+length => rcx
+*/
+
+TypedValue* fh_bzwrite(TypedValue* _rv, Value* bz, Value* data, int length) asm("_ZN4HPHP9f_bzwriteERKNS_6ObjectERKNS_6StringEi");
 
 /*
 HPHP::Variant HPHP::f_bzflush(HPHP::Object const&)

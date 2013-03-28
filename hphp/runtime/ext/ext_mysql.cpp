@@ -677,6 +677,29 @@ Variant f_mysql_real_escape_string(CStrRef unescaped_string,
   return false;
 }
 
+String f_mysql_get_client_info() {
+  return String(mysql_get_client_info(), CopyString);
+}
+Variant f_mysql_set_charset(CStrRef charset,
+                                   CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return uninit_null();
+  return !mysql_set_character_set(conn, charset.data());
+}
+Variant f_mysql_ping(CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return uninit_null();
+  return !mysql_ping(conn);
+}
+Variant f_mysql_client_encoding(CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return false;
+  return String(mysql_character_set_name(conn), CopyString);
+}
+Variant f_mysql_close(CVarRef link_identifier /* = uninit_null() */) {
+  return MySQL::CloseConn(link_identifier);
+}
+
 Variant f_mysql_errno(CVarRef link_identifier /* = null */) {
   MySQL *mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
@@ -720,6 +743,63 @@ Variant f_mysql_warning_count(CVarRef link_identifier /* = null */) {
     return (int64_t)mysql_warning_count(conn);
   }
   return false;
+}
+
+Variant f_mysql_get_host_info(CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return false;
+  return String(mysql_get_host_info(conn), CopyString);
+}
+Variant f_mysql_get_proto_info(CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return false;
+  return (int64_t)mysql_get_proto_info(conn);
+}
+Variant f_mysql_get_server_info(CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return false;
+  return String(mysql_get_server_info(conn), CopyString);
+}
+Variant f_mysql_info(CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return false;
+  return String(mysql_info(conn), CopyString);
+}
+Variant f_mysql_insert_id(CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return false;
+  return static_cast<int64_t>(mysql_insert_id(conn));
+}
+Variant f_mysql_stat(CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return false;
+  return String(mysql_stat(conn), CopyString);
+}
+Variant f_mysql_thread_id(CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return false;
+  return (int64_t)mysql_thread_id(conn);
+}
+Variant f_mysql_create_db(CStrRef db,
+                                 CVarRef link_identifier /* = uninit_null() */) {
+  throw NotSupportedException
+    (__func__, "Deprecated. Use mysql_query(CREATE DATABASE) instead.");
+}
+Variant f_mysql_select_db(CStrRef db,
+                                 CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return false;
+  return mysql_select_db(conn, db.data()) == 0;
+}
+Variant f_mysql_drop_db(CStrRef db,
+                               CVarRef link_identifier /* = uninit_null() */) {
+  throw NotSupportedException
+    (__func__, "Deprecated. Use mysql_query(DROP DATABASE) instead.");
+}
+Variant f_mysql_affected_rows(CVarRef link_identifier /* = uninit_null() */) {
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return false;
+  return static_cast<int64_t>(mysql_affected_rows(conn));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1046,6 +1126,12 @@ Variant f_mysql_unbuffered_query(CStrRef query,
   return php_mysql_do_query_general(query, link_identifier, false, false);
 }
 
+Variant f_mysql_db_query(CStrRef database, CStrRef query,
+                         CVarRef link_identifier /* = uninit_null() */) {
+  throw NotSupportedException
+    (__func__, "Deprecated. Use mysql_query() instead.");
+}
+
 Variant f_mysql_list_dbs(CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
@@ -1070,6 +1156,13 @@ Variant f_mysql_list_tables(CStrRef database,
     return false;
   }
   return Object(NEWOBJ(MySQLResult)(res));
+}
+
+Variant f_mysql_list_fields(CStrRef database_name, CStrRef table_name,
+                            CVarRef link_identifier /* = uninit_null() */) {
+  throw NotSupportedException
+    (__func__, "Deprecated. Use mysql_query(SHOW COLUMNS FROM table "
+     "[LIKE 'name']) instead.");
 }
 
 Variant f_mysql_list_processes(CVarRef link_identifier /* = null */) {
@@ -1597,6 +1690,15 @@ Variant f_mysql_result(CVarRef result, int row,
 
 ///////////////////////////////////////////////////////////////////////////////
 // result functions
+
+
+Variant f_mysql_db_name(CVarRef result, int row,
+                        CVarRef field /* = null_variant */) {
+  return f_mysql_result(result, row, field);
+}
+Variant f_mysql_tablename(CVarRef result, int i) {
+  return f_mysql_result(result, i);
+}
 
 Variant f_mysql_num_fields(CVarRef result) {
   MySQLResult *res = get_result(result);

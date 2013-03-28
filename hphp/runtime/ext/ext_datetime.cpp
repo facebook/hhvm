@@ -292,4 +292,294 @@ ObjectData *c_DateInterval::clone() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// timestamp
+
+Variant f_gettimeofday(bool return_float /* = false */) {
+  if (return_float) {
+    return TimeStamp::CurrentSecond();
+  }
+  return TimeStamp::CurrentTime();
+}
+
+Variant f_microtime(bool get_as_float /* = false */) {
+  if (get_as_float) {
+    return TimeStamp::CurrentSecond();
+  }
+  return TimeStamp::CurrentMicroTime();
+}
+
+int64_t f_time() {
+  return time(0);
+}
+
+Variant f_mktime(int hour /* = INT_MAX */, int minute /* = INT_MAX */,
+                 int second /* = INT_MAX */, int month /* = INT_MAX */,
+                 int day /* = INT_MAX */, int year /* = INT_MAX */) {
+  bool error;
+  int64_t ts = TimeStamp::Get(error, hour, minute, second, month, day, year,
+                              false);
+  if (error) return false;
+  return ts;
+}
+
+Variant f_gmmktime(int hour /* = INT_MAX */, int minute /* = INT_MAX */,
+                   int second /* = INT_MAX */,
+                   int month /* = INT_MAX */, int day /* = INT_MAX */,
+                   int year /* = INT_MAX */) {
+  bool error;
+  int64_t ts = TimeStamp::Get(error, hour, minute, second, month, day, year,
+                              true);
+  if (error) return false;
+  return ts;
+}
+
+Variant f_idate(CStrRef format, int64_t timestamp /* = TimeStamp::Current() */) {
+  if (format.size() != 1) {
+    throw_invalid_argument("format: %s", format.data());
+    return false;
+  }
+  int64_t ret = DateTime(timestamp, false).toInteger(*format.data());
+  if (ret == -1) return false;
+  return ret;
+}
+
+Variant f_date(CStrRef format, int64_t timestamp /* = TimeStamp::Current() */) {
+  if (format.empty()) return "";
+  String ret = DateTime(timestamp, false).toString(format, false);
+  if (ret.isNull()) return false;
+  return ret;
+}
+
+Variant f_gmdate(CStrRef format,
+                 int64_t timestamp /* = TimeStamp::Current() */) {
+  String ret = DateTime(timestamp, true).toString(format, false);
+  if (ret.isNull()) return false;
+  return ret;
+}
+
+Variant f_strftime(CStrRef format,
+                   int64_t timestamp /* = TimeStamp::Current() */) {
+  String ret = DateTime(timestamp, false).toString(format, true);
+  if (ret.isNull()) return false;
+  return ret;
+}
+
+String f_gmstrftime(CStrRef format,
+                    int64_t timestamp /* = TimeStamp::Current() */) {
+  String ret = DateTime(timestamp, true).toString(format, true);
+  if (ret.isNull()) return false;
+  return ret;
+}
+
+Array f_getdate(int64_t timestamp /* = TimeStamp::Current() */) {
+  return DateTime(timestamp, false).toArray(DateTime::TimeMap);
+}
+
+Array f_localtime(int64_t timestamp /* = TimeStamp::Current() */,
+                  bool is_associative /* = false */) {
+  DateTime::ArrayFormat format =
+    is_associative ? DateTime::TmMap : DateTime::TmVector;
+  return DateTime(timestamp, false).toArray(format);
+}
+
+Variant f_strptime(CStrRef date, CStrRef format) {
+  Array ret = DateTime::Parse(date, format);
+  if (ret.empty()) {
+    return false;
+  }
+  return ret;
+}
+
+Variant f_strtotime(CStrRef input,
+                    int64_t timestamp /* = TimeStamp::Current() */) {
+  if (input.empty()) {
+    return false;
+  }
+
+  DateTime dt(timestamp);
+  if (!dt.fromString(input, SmartObject<TimeZone>())) {
+    return false;
+  }
+  bool error;
+  return dt.toTimeStamp(error);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// timezone
+
+String f_date_default_timezone_get() {
+  return TimeZone::Current()->name();
+}
+
+bool f_date_default_timezone_set(CStrRef name) {
+  return TimeZone::SetCurrent(name);
+}
+
+Array f_timezone_identifiers_list() {
+  return c_DateTimeZone::t_listidentifiers();
+}
+
+Array f_timezone_abbreviations_list() {
+  return c_DateTimeZone::t_listabbreviations();
+}
+
+Variant f_timezone_name_from_abbr(CStrRef abbr, int gmtoffset /* = -1 */,
+                                  bool isdst /* = true */) {
+  String ret = TimeZone::AbbreviationToName(abbr, gmtoffset, isdst);
+  if (ret.isNull()) {
+    return false;
+  }
+  return ret;
+}
+
+Object f_timezone_open(CStrRef timezone) {
+  c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();
+  Object ret(ctz);
+  ctz->t___construct(timezone);
+  return ret;
+}
+
+Array f_timezone_location_get(CObjRef timezone) {
+  return timezone.getTyped<c_DateTimeZone>()->t_getlocation();
+}
+
+String f_timezone_name_get(CObjRef object) {
+  return object.getTyped<c_DateTimeZone>()->t_getname();
+}
+
+int64_t f_timezone_offset_get(CObjRef object, CObjRef dt) {
+  return object.getTyped<c_DateTimeZone>()->t_getoffset(dt);
+}
+
+Array f_timezone_transitions_get(CObjRef object) {
+  return object.getTyped<c_DateTimeZone>()->t_gettransitions();
+}
+
+String f_timezone_version_get() {
+  return TimeZone::getVersion();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// datetime
+
+bool f_checkdate(int month, int day, int year) {
+  return DateTime::IsValid(year, month, day);
+}
+
+Object f_date_add(CObjRef datetime, CObjRef interval) {
+  return datetime.getTyped<c_DateTime>()->
+    t_add(interval.getTyped<c_DateInterval>());
+}
+
+Object f_date_create_from_format(CStrRef format,
+                                 CStrRef time,
+                                 CObjRef timezone /* = null_object */) {
+  return c_DateTime::t_createfromformat(format, time, timezone);
+}
+
+Object f_date_create(CStrRef time /* = null_string */,
+                     CObjRef timezone /* = null_object */) {
+  c_DateTime *cdt = NEWOBJ(c_DateTime)();
+  Object ret(cdt);
+  cdt->t___construct(time, timezone);
+  return ret;
+}
+
+void f_date_date_set(CObjRef object, int year, int month, int day) {
+  object.getTyped<c_DateTime>()->t_setdate(year, month, day);
+}
+
+Object f_date_diff(CObjRef datetime,
+                   CObjRef datetime2,
+                   bool absolute /* = false */) {
+  return datetime.getTyped<c_DateTime>()->
+    t_diff(datetime2.getTyped<c_DateTime>(), absolute);
+}
+
+void f_date_isodate_set(CObjRef object, int year, int week,
+                        int day /* = 1 */) {
+  object.getTyped<c_DateTime>()->t_setisodate(year, week, day);
+}
+
+String f_date_format(CObjRef object, CStrRef format) {
+  return object.getTyped<c_DateTime>()->t_format(format);
+}
+
+Array f_date_get_last_errors() {
+  return c_DateTime::t_getlasterrors();
+}
+
+Object f_date_interval_create_from_date_string(CStrRef time) {
+  return c_DateInterval::t_createfromdatestring(time);
+}
+
+String f_date_interval_format(CObjRef interval, CStrRef format_spec) {
+  return interval.getTyped<c_DateInterval>()->t_format(format_spec);
+}
+
+void f_date_modify(CObjRef object, CStrRef modify) {
+  object.getTyped<c_DateTime>()->t_modify(modify);
+}
+
+int64_t f_date_offset_get(CObjRef object) {
+  return object.getTyped<c_DateTime>()->t_getoffset();
+}
+
+Variant f_date_parse(CStrRef date) {
+  return DateTime::Parse(date);
+}
+
+void f_date_time_set(CObjRef object, int hour, int minute,
+                     int second /* = 0 */) {
+  object.getTyped<c_DateTime>()->t_settime(hour, minute, second);
+}
+
+int64_t f_date_timestamp_get(CObjRef datetime) {
+  return datetime.getTyped<c_DateTime>()->t_gettimestamp();
+}
+
+Object f_date_timestamp_set(CObjRef datetime, int64_t timestamp) {
+  return datetime.getTyped<c_DateTime>()->
+    t_settimestamp(timestamp);
+}
+
+Variant f_date_timezone_get(CObjRef object) {
+  return object.getTyped<c_DateTime>()->t_gettimezone();
+}
+
+void f_date_timezone_set(CObjRef object, CObjRef timezone) {
+  object.getTyped<c_DateTime>()->t_settimezone(timezone);
+}
+
+Object f_date_sub(CObjRef datetime, CObjRef interval) {
+  return datetime.getTyped<c_DateTime>()->
+    t_sub(interval.getTyped<c_DateInterval>());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// sun
+
+Array f_date_sun_info(int64_t ts, double latitude, double longitude) {
+  return DateTime(ts, false).getSunInfo(latitude, longitude);
+}
+
+Variant f_date_sunrise(int64_t timestamp, int format /* = 0 */,
+                       double latitude /* = 0.0 */, double longitude /* = 0.0 */,
+                       double zenith /* = 0.0 */,
+                       double gmt_offset /* = 99999.0 */) {
+  return DateTime(timestamp, false).getSunInfo
+    (static_cast<DateTime::SunInfoFormat>(format), latitude, longitude,
+     zenith, gmt_offset, false);
+}
+
+Variant f_date_sunset(int64_t timestamp, int format /* = 0 */,
+                      double latitude /* = 0.0 */, double longitude /* = 0.0 */,
+                      double zenith /* = 0.0 */,
+                      double gmt_offset /* = 99999.0 */) {
+  return DateTime(timestamp, false).getSunInfo
+    (static_cast<DateTime::SunInfoFormat>(format), latitude, longitude,
+     zenith, gmt_offset, true);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

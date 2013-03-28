@@ -26,17 +26,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline Variant f_bzclose(CObjRef bz) {
-  return f_fclose(bz);
-}
-
-inline Variant f_bzread(CObjRef bz, int length = 1024) {
-  return f_fread(bz, length);
-}
-
-inline Variant f_bzwrite(CObjRef bz, CStrRef data, int length = 0) {
-  return f_fwrite(bz, data, length);
-}
+Variant f_bzclose(CObjRef bz);
+Variant f_bzread(CObjRef bz, int length = 1024);
+Variant f_bzwrite(CObjRef bz, CStrRef data, int length = 0);
 
 Variant f_bzopen(CStrRef filename, CStrRef mode);
 Variant f_bzflush(CObjRef bz);

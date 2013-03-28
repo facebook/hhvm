@@ -35,6 +35,75 @@ namespace HPHP {
 static Mutex s_mutex;
 ///////////////////////////////////////////////////////////////////////////////
 
+String f_addcslashes(CStrRef str, CStrRef charlist) {
+  return StringUtil::CEncode(str, charlist);
+}
+String f_stripcslashes(CStrRef str) {
+  return StringUtil::CDecode(str);
+}
+String f_addslashes(CStrRef str) {
+  return StringUtil::SqlEncode(str);
+}
+String f_stripslashes(CStrRef str) {
+  return StringUtil::SqlDecode(str);
+}
+String f_bin2hex(CStrRef str) {
+  return StringUtil::HexEncode(str);
+}
+Variant f_hex2bin(CStrRef str) {
+  try {
+    return StringUtil::HexDecode(str);
+  } catch (...) {
+    raise_warning("hex2bin: malformed input");
+    return false;
+  }
+}
+String f_nl2br(CStrRef str) {
+  return str.replace("\n", "<br />\n");
+}
+String f_quotemeta(CStrRef str) {
+  return StringUtil::RegExEncode(str);
+}
+String f_str_shuffle(CStrRef str) {
+  return StringUtil::Shuffle(str);
+}
+String f_strrev(CStrRef str) {
+  return StringUtil::Reverse(str);
+}
+String f_strtolower(CStrRef str) {
+  return StringUtil::ToLower(str);
+}
+String f_strtoupper(CStrRef str) {
+  return StringUtil::ToUpper(str, StringUtil::ToUpperAll);
+}
+String f_ucfirst(CStrRef str) {
+  return StringUtil::ToUpper(str, StringUtil::ToUpperFirst);
+}
+String f_lcfirst(CStrRef str) {
+  return StringUtil::ToLower(str, StringUtil::ToLowerFirst);
+}
+String f_ucwords(CStrRef str) {
+  return StringUtil::ToUpper(str, StringUtil::ToUpperWords);
+}
+String f_strip_tags(CStrRef str, CStrRef allowable_tags /* = "" */) {
+  return StringUtil::StripHTMLTags(str, allowable_tags);
+}
+String f_trim(CStrRef str, CStrRef charlist /* = k_HPHP_TRIM_CHARLIST */) {
+  return StringUtil::Trim(str, StringUtil::TrimBoth, charlist);
+}
+String f_ltrim(CStrRef str, CStrRef charlist /* = k_HPHP_TRIM_CHARLIST */) {
+  return StringUtil::Trim(str, StringUtil::TrimLeft, charlist);
+}
+String f_rtrim(CStrRef str, CStrRef charlist /* = k_HPHP_TRIM_CHARLIST */) {
+  return StringUtil::Trim(str, StringUtil::TrimRight, charlist);
+}
+String f_chop(CStrRef str, CStrRef charlist /* = k_HPHP_TRIM_CHARLIST */) {
+  return StringUtil::Trim(str, StringUtil::TrimRight, charlist);
+}
+Variant f_explode(CStrRef delimiter, CStrRef str, int limit /* = 0x7FFFFFFF */) {
+  return StringUtil::Explode(str, delimiter, limit);
+}
+
 String f_implode(CVarRef arg1, CVarRef arg2 /* = null_variant */) {
   Array items;
   String delim;
@@ -49,6 +118,17 @@ String f_implode(CVarRef arg1, CVarRef arg2 /* = null_variant */) {
     return String();
   }
   return StringUtil::Implode(items, delim);
+}
+
+String f_join(CVarRef glue, CVarRef pieces /* = null_variant */) {
+  return f_implode(glue, pieces);
+}
+Variant f_str_split(CStrRef str, int split_length /* = 1 */) {
+  return StringUtil::Split(str, split_length);
+}
+Variant f_chunk_split(CStrRef body, int chunklen /* = 76 */,
+                      CStrRef end /* = "\r\n" */) {
+  return StringUtil::ChunkSplit(body, chunklen, end);
 }
 
 class TokenizerData : public RequestEventHandler {
@@ -250,8 +330,52 @@ Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
   return ret;
 }
 
+Variant f_substr(CStrRef str, int start, int length /* = 0x7FFFFFFF */) {
+  String ret = str.substr(start, length, true);
+  if (ret.isNull()) return false;
+  return ret;
+}
+String f_str_pad(CStrRef input, int pad_length, CStrRef pad_string /* = " " */,
+                        int pad_type /* = k_STR_PAD_RIGHT */) {
+  return StringUtil::Pad(input, pad_length, pad_string,
+                         (StringUtil::PadType)pad_type);
+}
+String f_str_repeat(CStrRef input, int multiplier) {
+  return StringUtil::Repeat(input, multiplier);
+}
+Variant f_wordwrap(CStrRef str, int width /* = 75 */, CStrRef wordbreak /* = "\n" */,
+                   bool cut /* = false */) {
+  String ret = StringUtil::WordWrap(str, width, wordbreak, cut);
+  if (ret.isNull()) return false;
+  return ret;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
+
+Variant f_printf(int _argc, CStrRef format, CArrRef _argv /* = null_array */) {
+  int len = 0; char *output = string_printf(format.data(), format.size(),
+                                            _argv, &len);
+  if (output == NULL) return false;
+  echo(output); free(output);
+  return len;
+}
+Variant f_vprintf(CStrRef format, CArrRef args) {
+  int len = 0; char *output = string_printf(format.data(), format.size(),
+                                            args, &len);
+  if (output == NULL) return false;
+  echo(output); free(output);
+  return len;
+}
+Variant f_sprintf(int _argc, CStrRef format, CArrRef _argv /* = null_array */) {
+  char *output = string_printf(format.data(), format.size(), _argv, NULL);
+  if (output == NULL) return false;
+  return String(output, AttachString);
+}
+Variant f_vsprintf(CStrRef format, CArrRef args) {
+  char *output = string_printf(format.data(), format.size(), args, NULL);
+  if (output == NULL) return false;
+  return String(output, AttachString);
+}
 
 Variant f_sscanf(int _argc, CStrRef str, CStrRef format, CArrRef _argv /* = null_array */) {
   Variant ret;
@@ -269,6 +393,19 @@ Variant f_sscanf(int _argc, CStrRef str, CStrRef format, CArrRef _argv /* = null
   }
   if (ret.isNull()) return 0;
   return ret;
+}
+
+String f_chr(int64_t ascii) {
+  char buf[2]; buf[0] = ascii; buf[1] = 0;
+  return String(buf, 1, CopyString);
+}
+int64_t f_ord(CStrRef str) {
+  return (int64_t)(unsigned char)(*((const char *)str));
+}
+Variant f_money_format(CStrRef format, double number) {
+  String s = StringUtil::MoneyFormat(format, number);
+  if (s.isNull()) return false;
+  return s;
 }
 
 String f_number_format(double number, int decimals /* = 0 */,
@@ -293,6 +430,32 @@ String f_number_format(double number, int decimals /* = 0 */,
   char *ret = string_number_format(number, decimals, ch_dec_point,
                                    ch_thousands_sep);
   return String(ret, AttachString);
+}
+
+int64_t f_strcmp(CStrRef str1, CStrRef str2) {
+  return string_strcmp(str1.data(), str1.size(), str2.data(), str2.size());
+}
+int64_t f_strncmp(CStrRef str1, CStrRef str2, int len) {
+  return string_strncmp(str1.data(), str1.size(), str2.data(), str2.size(),
+                        len);
+}
+int64_t f_strnatcmp(CStrRef str1, CStrRef str2) {
+  return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
+                            false);
+}
+int64_t f_strcasecmp(CStrRef str1, CStrRef str2) {
+  return bstrcasecmp(str1.data(), str1.size(), str2.data(), str2.size());
+}
+int64_t f_strncasecmp(CStrRef str1, CStrRef str2, int len) {
+  return string_strncasecmp(str1.data(), str1.size(), str2.data(), str2.size(),
+                            len);
+}
+int64_t f_strnatcasecmp(CStrRef str1, CStrRef str2) {
+  return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
+                            true);
+}
+int64_t f_strcoll(CStrRef str1, CStrRef str2) {
+  return strcoll(str1, str2);
 }
 
 Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
@@ -359,6 +522,10 @@ Variant f_strpbrk(CStrRef haystack, CStrRef char_list) {
     return String(p, CopyString);
   }
   return false;
+}
+
+Variant f_strchr(CStrRef haystack, CVarRef needle) {
+  return f_strstr(haystack, needle);
 }
 
 Variant f_strpos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
@@ -491,6 +658,26 @@ Variant f_strcspn(CStrRef str1, CStrRef str2, int start /* = 0 */,
   }
 
   return length;
+}
+
+Variant f_strlen(CVarRef vstr) {
+  Variant::TypedValueAccessor tva = vstr.getTypedAccessor();
+  switch (Variant::GetAccessorType(tva)) {
+  case KindOfString:
+  case KindOfStaticString:
+    return Variant(Variant::GetStringData(tva)->size());
+  case KindOfArray:
+    raise_warning("strlen() expects parameter 1 to be string, array given");
+    return uninit_null();
+  case KindOfObject:
+    if (!f_method_exists(vstr, "__toString")) {
+      raise_warning("strlen() expects parameter 1 to be string, object given");
+      return uninit_null();
+    } //else fallback to default
+  default:
+    CStrRef str = vstr.toString();
+    return Variant(str.size());
+  }
 }
 
 Variant f_count_chars(CStrRef str, int64_t mode /* = 0 */) {
@@ -627,6 +814,100 @@ Variant f_str_word_count(CStrRef str, int64_t format /* = 0 */,
     return word_count;
   }
   return ret.isNull() ? Array::Create() : ret;
+}
+
+int64_t f_levenshtein(CStrRef str1, CStrRef str2, int cost_ins /* = 1 */,
+                         int cost_rep /* = 1 */, int cost_del /* = 1 */) {
+  return string_levenshtein(str1, str1.size(), str2, str2.size(),
+                            cost_ins, cost_rep, cost_del);
+}
+int64_t f_similar_text(CStrRef first, CStrRef second,
+                       VRefParam percent /* = uninit_null() */) {
+  float p;
+  int ret = string_similar_text(first, first.size(), second, second.size(),
+                                &p);
+  percent = p;
+  return ret;
+}
+Variant f_soundex(CStrRef str) {
+  if (str.empty()) return false;
+  return String(string_soundex(str), AttachString);
+}
+Variant f_metaphone(CStrRef str, int phones /* = 0 */) {
+  char *ret = string_metaphone(str, str.size(), 0, 1);
+  if (ret) {
+    return String(ret, AttachString);
+  }
+  return false;
+}
+
+String f_html_entity_decode(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
+                            CStrRef charset /* = "ISO-8859-1" */) {
+  const char *scharset = charset.data();
+  if (!*scharset) scharset = "UTF-8";
+  return StringUtil::HtmlDecode(str, (StringUtil::QuoteStyle)quote_style,
+                                scharset, true);
+}
+String f_htmlentities(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
+                      CStrRef charset /* = "ISO-8859-1" */,
+                      bool double_encode /* = true */) {
+  // dropping double_encode parameters and see runtime/base/zend_html.h
+  const char *scharset = charset.data();
+  if (!*scharset) scharset = "UTF-8";
+  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
+                                scharset, true);
+}
+String f_htmlspecialchars_decode(CStrRef str,
+                                 int quote_style /* = k_ENT_COMPAT */) {
+  return StringUtil::HtmlDecode(str, (StringUtil::QuoteStyle)quote_style,
+                                "UTF-8", false);
+}
+String f_htmlspecialchars(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
+                          CStrRef charset /* = "ISO-8859-1" */,
+                          bool double_encode /* = true */) {
+  // dropping double_encode parameters and see runtime/base/zend_html.h
+  const char *scharset = charset.data();
+  if (!*scharset) scharset = "UTF-8";
+  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
+                                scharset, false);
+}
+String f_fb_htmlspecialchars(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
+                             CStrRef charset /* = "ISO-8859-1" */,
+                             CArrRef extra /* = Array() */) {
+  return StringUtil::HtmlEncodeExtra(str, (StringUtil::QuoteStyle)quote_style,
+                                     charset.data(), false, extra);
+}
+String f_quoted_printable_encode(CStrRef str) {
+  return StringUtil::QuotedPrintableEncode(str);
+}
+String f_quoted_printable_decode(CStrRef str) {
+  return StringUtil::QuotedPrintableDecode(str);
+}
+Variant f_convert_uudecode(CStrRef data) {
+  String ret = StringUtil::UUDecode(data);
+  if (ret.isNull()) {
+    return false; // bad format
+  }
+  return ret;
+}
+Variant f_convert_uuencode(CStrRef data) {
+  if (data.empty()) return false;
+  return StringUtil::UUEncode(data);
+}
+String f_str_rot13(CStrRef str) {
+  return StringUtil::ROT13(str);
+}
+int64_t f_crc32(CStrRef str) {
+  return (uint32_t)StringUtil::CRC32(str);
+}
+String f_crypt(CStrRef str, CStrRef salt /* = "" */) {
+  return StringUtil::Crypt(str, salt);
+}
+String f_md5(CStrRef str, bool raw_output /* = false */) {
+  return StringUtil::MD5(str, raw_output);
+}
+String f_sha1(CStrRef str, bool raw_output /* = false */) {
+  return StringUtil::SHA1(str, raw_output);
 }
 
 Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
@@ -779,6 +1060,10 @@ Array f_localeconv() {
   ret.set("mon_grouping", mon_grouping);
 
   return ret;
+}
+
+String f_nl_langinfo(int item) {
+  return nl_langinfo(item);
 }
 
 String f_convert_cyr_string(CStrRef str, CStrRef from, CStrRef to) {

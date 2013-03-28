@@ -36,6 +36,38 @@ bool f_posix_access(CStrRef file, int mode /* = 0 */) {
   return !access(path.data(), mode);
 }
 
+String f_posix_ctermid() {
+  String s = String(L_ctermid, ReserveString);
+  char *buffer = s.mutableSlice().ptr;
+  ctermid(buffer);
+  return s.setSize(strlen(buffer));
+}
+
+int64_t f_posix_get_last_error() {
+  return errno;
+}
+
+String f_posix_getcwd() {
+  String s = String(PATH_MAX, ReserveString);
+  char *buffer = s.mutableSlice().ptr;
+  if (getcwd(buffer, PATH_MAX) == NULL) {
+    return "/";
+  }
+  return s.setSize(strlen(buffer));
+}
+
+int64_t f_posix_getegid() {
+  return getegid();
+}
+
+int64_t f_posix_geteuid() {
+  return geteuid();
+}
+
+int64_t f_posix_getgid() {
+  return getgid();
+}
+
 static Variant php_posix_group_to_array(int gid,
                    CStrRef gname = null_variant) {
   // Don't pass a gid *and* a gname to this.
@@ -99,6 +131,32 @@ Variant f_posix_getgroups() {
     ret.append((int)gidlist[i]);
   }
   return ret;
+}
+
+Variant f_posix_getlogin() {
+  char buf[L_cuserid];
+  if (!getlogin_r(buf, sizeof(buf) - 1)) {
+    return String(buf, CopyString);
+  }
+  return false;
+}
+
+Variant f_posix_getpgid(int pid) {
+  int ret = getpgid(pid);
+  if (ret < 0) return false;
+  return ret;
+}
+
+int64_t f_posix_getpgrp() {
+  return getpgrp();
+}
+
+int64_t f_posix_getpid() {
+  return getpid();
+}
+
+int64_t f_posix_getppid() {
+  return getppid();
 }
 
 static Variant php_posix_passwd_to_array(int uid,
@@ -206,6 +264,21 @@ Variant f_posix_getrlimit() {
   return ret;
 }
 
+Variant f_posix_getsid(int pid) {
+  int ret = getsid(pid);
+  if (ret < 0) return false;
+  return ret;
+}
+
+int64_t f_posix_getuid() {
+  return getuid();
+}
+
+bool f_posix_initgroups(CStrRef name, int base_group_id) {
+  if (name.empty()) return false;
+  return !initgroups(name.data(), base_group_id);
+}
+
 static int php_posix_get_fd(CVarRef fd) {
   int nfd;
   if (fd.isResource()) {
@@ -222,6 +295,14 @@ static int php_posix_get_fd(CVarRef fd) {
 
 bool f_posix_isatty(CVarRef fd) {
   return isatty(php_posix_get_fd(fd));
+}
+
+bool f_posix_kill(int pid, int sig) {
+  return kill(pid, sig) >= 0;
+}
+
+bool f_posix_mkfifo(CStrRef pathname, int mode) {
+  return mkfifo(pathname.data(), mode) >= 0;
 }
 
 bool f_posix_mknod(CStrRef pathname, int mode, int major /* = 0 */,
@@ -242,6 +323,34 @@ bool f_posix_mknod(CStrRef pathname, int mode, int major /* = 0 */,
   }
 
   return mknod(pathname.data(), mode, php_dev) >= 0;
+}
+
+bool f_posix_setegid(int gid) {
+  return setegid(gid);
+}
+
+bool f_posix_seteuid(int uid) {
+  return seteuid(uid);
+}
+
+bool f_posix_setgid(int gid) {
+  return setgid(gid);
+}
+
+bool f_posix_setpgid(int pid, int pgid) {
+  return setpgid(pid, pgid) >= 0;
+}
+
+int64_t f_posix_setsid() {
+  return setsid();
+}
+
+bool f_posix_setuid(int uid) {
+  return setuid(uid);
+}
+
+String f_posix_strerror(int errnum) {
+  return String(Util::safe_strerror(errnum));
 }
 
 Variant f_posix_times() {

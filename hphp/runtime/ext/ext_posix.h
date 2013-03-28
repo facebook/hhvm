@@ -28,37 +28,17 @@ namespace HPHP {
 
 bool f_posix_access(CStrRef file, int mode = 0);
 
-inline String f_posix_ctermid() {
-  String s = String(L_ctermid, ReserveString);
-  char *buffer = s.mutableSlice().ptr;
-  ctermid(buffer);
-  return s.setSize(strlen(buffer));
-}
+String f_posix_ctermid();
 
-inline int64_t f_posix_get_last_error() {
-  return errno;
-}
+int64_t f_posix_get_last_error();
 
-inline String f_posix_getcwd() {
-  String s = String(PATH_MAX, ReserveString);
-  char *buffer = s.mutableSlice().ptr;
-  if (getcwd(buffer, PATH_MAX) == NULL) {
-    return "/";
-  }
-  return s.setSize(strlen(buffer));
-}
+String f_posix_getcwd();
 
-inline int64_t f_posix_getegid() {
-  return getegid();
-}
+int64_t f_posix_getegid();
 
-inline int64_t f_posix_geteuid() {
-  return geteuid();
-}
+int64_t f_posix_geteuid();
 
-inline int64_t f_posix_getgid() {
-  return getgid();
-}
+int64_t f_posix_getgid();
 
 Variant f_posix_getgrgid(int gid);
 
@@ -66,31 +46,15 @@ Variant f_posix_getgrnam(CStrRef name);
 
 Variant f_posix_getgroups();
 
-inline Variant f_posix_getlogin() {
-  char buf[L_cuserid];
-  if (!getlogin_r(buf, sizeof(buf) - 1)) {
-    return String(buf, CopyString);
-  }
-  return false;
-}
+Variant f_posix_getlogin();
 
-inline Variant f_posix_getpgid(int pid) {
-  int ret = getpgid(pid);
-  if (ret < 0) return false;
-  return ret;
-}
+Variant f_posix_getpgid(int pid);
 
-inline int64_t f_posix_getpgrp() {
-  return getpgrp();
-}
+int64_t f_posix_getpgrp();
 
-inline int64_t f_posix_getpid() {
-  return getpid();
-}
+int64_t f_posix_getpid();
 
-inline int64_t f_posix_getppid() {
-  return getppid();
-}
+int64_t f_posix_getppid();
 
 Variant f_posix_getpwnam(CStrRef username);
 
@@ -98,60 +62,33 @@ Variant f_posix_getpwuid(int uid);
 
 Variant f_posix_getrlimit();
 
-inline Variant f_posix_getsid(int pid) {
-  int ret = getsid(pid);
-  if (ret < 0) return false;
-  return ret;
-}
+Variant f_posix_getsid(int pid);
 
-inline int64_t f_posix_getuid() {
-  return getuid();
-}
+int64_t f_posix_getuid();
 
-inline bool f_posix_initgroups(CStrRef name, int base_group_id) {
-  if (name.empty()) return false;
-  return !initgroups(name.data(), base_group_id);
-}
+bool f_posix_initgroups(CStrRef name, int base_group_id);
 
 bool f_posix_isatty(CVarRef fd);
 
-inline bool f_posix_kill(int pid, int sig) {
-  return kill(pid, sig) >= 0;
-}
+bool f_posix_kill(int pid, int sig);
 
-inline bool f_posix_mkfifo(CStrRef pathname, int mode) {
-  return mkfifo(pathname.data(), mode) >= 0;
-}
+bool f_posix_mkfifo(CStrRef pathname, int mode);
 
 bool f_posix_mknod(CStrRef pathname, int mode, int major = 0, int minor = 0);
 
-inline bool f_posix_setegid(int gid) {
-  return setegid(gid);
-}
+bool f_posix_setegid(int gid);
 
-inline bool f_posix_seteuid(int uid) {
-  return seteuid(uid);
-}
+bool f_posix_seteuid(int uid);
 
-inline bool f_posix_setgid(int gid) {
-  return setgid(gid);
-}
+bool f_posix_setgid(int gid);
 
-inline bool f_posix_setpgid(int pid, int pgid) {
-  return setpgid(pid, pgid) >= 0;
-}
+bool f_posix_setpgid(int pid, int pgid);
 
-inline int64_t f_posix_setsid() {
-  return setsid();
-}
+int64_t f_posix_setsid();
 
-inline bool f_posix_setuid(int uid) {
-  return setuid(uid);
-}
+bool f_posix_setuid(int uid);
 
-inline String f_posix_strerror(int errnum) {
-  return String(Util::safe_strerror(errnum));
-}
+String f_posix_strerror(int errnum);
 
 Variant f_posix_times();
 

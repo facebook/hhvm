@@ -30,87 +30,34 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // transformations and manipulations
 
-inline String f_addcslashes(CStrRef str, CStrRef charlist) {
-  return StringUtil::CEncode(str, charlist);
-}
-inline String f_stripcslashes(CStrRef str) {
-  return StringUtil::CDecode(str);
-}
-inline String f_addslashes(CStrRef str) {
-  return StringUtil::SqlEncode(str);
-}
-inline String f_stripslashes(CStrRef str) {
-  return StringUtil::SqlDecode(str);
-}
-inline String f_bin2hex(CStrRef str) {
-  return StringUtil::HexEncode(str);
-}
-inline Variant f_hex2bin(CStrRef str) {
-  try {
-    return StringUtil::HexDecode(str);
-  } catch (...) {
-    raise_warning("hex2bin: malformed input");
-    return false;
-  }
-}
-inline String f_nl2br(CStrRef str) {
-  return str.replace("\n", "<br />\n");
-}
-inline String f_quotemeta(CStrRef str) {
-  return StringUtil::RegExEncode(str);
-}
-inline String f_str_shuffle(CStrRef str) {
-  return StringUtil::Shuffle(str);
-}
-inline String f_strrev(CStrRef str) {
-  return StringUtil::Reverse(str);
-}
-inline String f_strtolower(CStrRef str) {
-  return StringUtil::ToLower(str);
-}
-inline String f_strtoupper(CStrRef str) {
-  return StringUtil::ToUpper(str, StringUtil::ToUpperAll);
-}
-inline String f_ucfirst(CStrRef str) {
-  return StringUtil::ToUpper(str, StringUtil::ToUpperFirst);
-}
-inline String f_lcfirst(CStrRef str) {
-  return StringUtil::ToLower(str, StringUtil::ToLowerFirst);
-}
-inline String f_ucwords(CStrRef str) {
-  return StringUtil::ToUpper(str, StringUtil::ToUpperWords);
-}
-inline String f_strip_tags(CStrRef str, CStrRef allowable_tags = "") {
-  return StringUtil::StripHTMLTags(str, allowable_tags);
-}
-inline String f_trim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
-  return StringUtil::Trim(str, StringUtil::TrimBoth, charlist);
-}
-inline String f_ltrim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
-  return StringUtil::Trim(str, StringUtil::TrimLeft, charlist);
-}
-inline String f_rtrim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
-  return StringUtil::Trim(str, StringUtil::TrimRight, charlist);
-}
-inline String f_chop(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
-  return StringUtil::Trim(str, StringUtil::TrimRight, charlist);
-}
-inline Variant f_explode(CStrRef delimiter, CStrRef str, int limit = 0x7FFFFFFF) {
-  return StringUtil::Explode(str, delimiter, limit);
-}
+String f_addcslashes(CStrRef str, CStrRef charlist);
+String f_stripcslashes(CStrRef str);
+String f_addslashes(CStrRef str);
+String f_stripslashes(CStrRef str);
+String f_bin2hex(CStrRef str);
+Variant f_hex2bin(CStrRef str);
+String f_nl2br(CStrRef str);
+String f_quotemeta(CStrRef str);
+String f_str_shuffle(CStrRef str);
+String f_strrev(CStrRef str);
+String f_strtolower(CStrRef str);
+String f_strtoupper(CStrRef str);
+String f_ucfirst(CStrRef str);
+String f_lcfirst(CStrRef str);
+String f_ucwords(CStrRef str);
+String f_strip_tags(CStrRef str, CStrRef allowable_tags = "");
+String f_trim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST);
+String f_ltrim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST);
+String f_rtrim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST);
+String f_chop(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST);
+Variant f_explode(CStrRef delimiter, CStrRef str, int limit = 0x7FFFFFFF);
 
 String f_implode(CVarRef arg1, CVarRef arg2 = null_variant);
 
-inline String f_join(CVarRef glue, CVarRef pieces = null_variant) {
-  return f_implode(glue, pieces);
-}
-inline Variant f_str_split(CStrRef str, int split_length = 1) {
-  return StringUtil::Split(str, split_length);
-}
-inline Variant f_chunk_split(CStrRef body, int chunklen = 76,
-                             CStrRef end = "\r\n") {
-  return StringUtil::ChunkSplit(body, chunklen, end);
-}
+String f_join(CVarRef glue, CVarRef pieces = null_variant);
+Variant f_str_split(CStrRef str, int split_length = 1);
+Variant f_chunk_split(CStrRef body, int chunklen = 76,
+                      CStrRef end = "\r\n");
 
 Variant f_strtok(CStrRef str, CVarRef token = null_variant);
 
@@ -121,97 +68,38 @@ Variant f_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject,
 Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
                          CVarRef length = 0x7FFFFFFF);
 
-inline Variant f_substr(CStrRef str, int start, int length = 0x7FFFFFFF) {
-  String ret = str.substr(start, length, true);
-  if (ret.isNull()) return false;
-  return ret;
-}
-inline String f_str_pad(CStrRef input, int pad_length, CStrRef pad_string = " ",
-                        int pad_type = k_STR_PAD_RIGHT) {
-  return StringUtil::Pad(input, pad_length, pad_string,
-                         (StringUtil::PadType)pad_type);
-}
-inline String f_str_repeat(CStrRef input, int multiplier) {
-  return StringUtil::Repeat(input, multiplier);
-}
-inline Variant f_wordwrap(CStrRef str, int width = 75, CStrRef wordbreak = "\n",
-                         bool cut = false) {
-  String ret = StringUtil::WordWrap(str, width, wordbreak, cut);
-  if (ret.isNull()) return false;
-  return ret;
-}
+Variant f_substr(CStrRef str, int start, int length = 0x7FFFFFFF);
+String f_str_pad(CStrRef input, int pad_length, CStrRef pad_string = " ",
+                 int pad_type = k_STR_PAD_RIGHT);
+String f_str_repeat(CStrRef input, int multiplier);
+Variant f_wordwrap(CStrRef str, int width = 75, CStrRef wordbreak = "\n",
+                   bool cut = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 // encoding/decoding
 
-inline String f_html_entity_decode(CStrRef str, int quote_style = k_ENT_COMPAT,
-                                   CStrRef charset = "ISO-8859-1") {
-  const char *scharset = charset.data();
-  if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlDecode(str, (StringUtil::QuoteStyle)quote_style,
-                                scharset, true);
-}
-inline String f_htmlentities(CStrRef str, int quote_style = k_ENT_COMPAT,
+String f_html_entity_decode(CStrRef str, int quote_style = k_ENT_COMPAT,
+                            CStrRef charset = "ISO-8859-1");
+String f_htmlentities(CStrRef str, int quote_style = k_ENT_COMPAT,
+                      CStrRef charset = "ISO-8859-1",
+                      bool double_encode = true);
+String f_htmlspecialchars_decode(CStrRef str,
+                                 int quote_style = k_ENT_COMPAT);
+String f_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
+                          CStrRef charset = "ISO-8859-1",
+                          bool double_encode = true);
+String f_fb_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
                              CStrRef charset = "ISO-8859-1",
-                             bool double_encode = true) {
-  // dropping double_encode parameters and see runtime/base/zend_html.h
-  const char *scharset = charset.data();
-  if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
-                                scharset, true);
-}
-inline String f_htmlspecialchars_decode(CStrRef str,
-                                        int quote_style = k_ENT_COMPAT) {
-  return StringUtil::HtmlDecode(str, (StringUtil::QuoteStyle)quote_style,
-                                "UTF-8", false);
-}
-inline String f_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
-                                 CStrRef charset = "ISO-8859-1",
-                                 bool double_encode = true) {
-  // dropping double_encode parameters and see runtime/base/zend_html.h
-  const char *scharset = charset.data();
-  if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
-                                scharset, false);
-}
-inline String f_fb_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
-                                    CStrRef charset = "ISO-8859-1",
-                                    CArrRef extra = Array()) {
-  return StringUtil::HtmlEncodeExtra(str, (StringUtil::QuoteStyle)quote_style,
-                                     charset.data(), false, extra);
-}
-inline String f_quoted_printable_encode(CStrRef str) {
-  return StringUtil::QuotedPrintableEncode(str);
-}
-inline String f_quoted_printable_decode(CStrRef str) {
-  return StringUtil::QuotedPrintableDecode(str);
-}
-inline Variant f_convert_uudecode(CStrRef data) {
-  String ret = StringUtil::UUDecode(data);
-  if (ret.isNull()) {
-    return false; // bad format
-  }
-  return ret;
-}
-inline Variant f_convert_uuencode(CStrRef data) {
-  if (data.empty()) return false;
-  return StringUtil::UUEncode(data);
-}
-inline String f_str_rot13(CStrRef str) {
-  return StringUtil::ROT13(str);
-}
-inline int64_t f_crc32(CStrRef str) {
-  return (uint32_t)StringUtil::CRC32(str);
-}
-inline String f_crypt(CStrRef str, CStrRef salt = "") {
-  return StringUtil::Crypt(str, salt);
-}
-inline String f_md5(CStrRef str, bool raw_output = false) {
-  return StringUtil::MD5(str, raw_output);
-}
-inline String f_sha1(CStrRef str, bool raw_output = false) {
-  return StringUtil::SHA1(str, raw_output);
-}
+                             CArrRef extra = Array());
+String f_quoted_printable_encode(CStrRef str);
+String f_quoted_printable_decode(CStrRef str);
+Variant f_convert_uudecode(CStrRef data);
+Variant f_convert_uuencode(CStrRef data);
+String f_str_rot13(CStrRef str);
+int64_t f_crc32(CStrRef str);
+String f_crypt(CStrRef str, CStrRef salt = "");
+String f_md5(CStrRef str, bool raw_output = false);
+String f_sha1(CStrRef str, bool raw_output = false);
 Variant f_strtr(CStrRef str, CVarRef from, CVarRef to = null_variant);
 
 String f_convert_cyr_string(CStrRef str, CStrRef from, CStrRef to);
@@ -226,83 +114,34 @@ String f_hebrevc(CStrRef hebrew_text, int max_chars_per_line = 0);
 Variant f_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv = null_array);
 Array f_localeconv();
 
-inline String f_nl_langinfo(int item) {
-  return nl_langinfo(item);
-}
+String f_nl_langinfo(int item);
 
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
 
-inline Variant f_printf(int _argc, CStrRef format, CArrRef _argv = null_array) {
-  int len = 0; char *output = string_printf(format.data(), format.size(),
-                                            _argv, &len);
-  if (output == NULL) return false;
-  echo(output); free(output);
-  return len;
-}
-inline Variant f_vprintf(CStrRef format, CArrRef args) {
-  int len = 0; char *output = string_printf(format.data(), format.size(),
-                                            args, &len);
-  if (output == NULL) return false;
-  echo(output); free(output);
-  return len;
-}
-inline Variant f_sprintf(int _argc, CStrRef format, CArrRef _argv = null_array) {
-  char *output = string_printf(format.data(), format.size(), _argv, NULL);
-  if (output == NULL) return false;
-  return String(output, AttachString);
-}
-inline Variant f_vsprintf(CStrRef format, CArrRef args) {
-  char *output = string_printf(format.data(), format.size(), args, NULL);
-  if (output == NULL) return false;
-  return String(output, AttachString);
-}
+Variant f_printf(int _argc, CStrRef format, CArrRef _argv = null_array);
+Variant f_vprintf(CStrRef format, CArrRef args);
+Variant f_sprintf(int _argc, CStrRef format, CArrRef _argv = null_array);
+Variant f_vsprintf(CStrRef format, CArrRef args);
 
 Variant f_sscanf(int _argc, CStrRef str, CStrRef format, CArrRef _argv = null_array);
 
-inline String f_chr(int64_t ascii) {
-  char buf[2]; buf[0] = ascii; buf[1] = 0;
-  return String(buf, 1, CopyString);
-}
-inline int64_t f_ord(CStrRef str) {
-  return (int64_t)(unsigned char)(*((const char *)str));
-}
-inline Variant f_money_format(CStrRef format, double number) {
-  String s = StringUtil::MoneyFormat(format, number);
-  if (s.isNull()) return false;
-  return s;
-}
+String f_chr(int64_t ascii);
+int64_t f_ord(CStrRef str);
+Variant f_money_format(CStrRef format, double number);
 String f_number_format(double number, int decimals = 0, CStrRef dec_point = ".",
                        CStrRef thousands_sep = ",");
 
 ///////////////////////////////////////////////////////////////////////////////
 // analysis
 
-inline int64_t f_strcmp(CStrRef str1, CStrRef str2) {
-  return string_strcmp(str1.data(), str1.size(), str2.data(), str2.size());
-}
-inline int64_t f_strncmp(CStrRef str1, CStrRef str2, int len) {
-  return string_strncmp(str1.data(), str1.size(), str2.data(), str2.size(),
-                        len);
-}
-inline int64_t f_strnatcmp(CStrRef str1, CStrRef str2) {
-  return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
-                            false);
-}
-inline int64_t f_strcasecmp(CStrRef str1, CStrRef str2) {
-  return bstrcasecmp(str1.data(), str1.size(), str2.data(), str2.size());
-}
-inline int64_t f_strncasecmp(CStrRef str1, CStrRef str2, int len) {
-  return string_strncasecmp(str1.data(), str1.size(), str2.data(), str2.size(),
-                            len);
-}
-inline int64_t f_strnatcasecmp(CStrRef str1, CStrRef str2) {
-  return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
-                            true);
-}
-inline int64_t f_strcoll(CStrRef str1, CStrRef str2) {
-  return strcoll(str1, str2);
-}
+int64_t f_strcmp(CStrRef str1, CStrRef str2);
+int64_t f_strncmp(CStrRef str1, CStrRef str2, int len);
+int64_t f_strnatcmp(CStrRef str1, CStrRef str2);
+int64_t f_strcasecmp(CStrRef str1, CStrRef str2);
+int64_t f_strncasecmp(CStrRef str1, CStrRef str2, int len);
+int64_t f_strnatcasecmp(CStrRef str1, CStrRef str2);
+int64_t f_strcoll(CStrRef str1, CStrRef str2);
 
 Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
                          int length = INT_MAX, bool case_insensitivity = false);
@@ -312,9 +151,7 @@ Variant f_strstr(CStrRef haystack, CVarRef needle, bool before_needle = false);
 Variant f_stristr(CStrRef haystack, CVarRef needle);
 Variant f_strpbrk(CStrRef haystack, CStrRef char_list);
 
-inline Variant f_strchr(CStrRef haystack, CVarRef needle) {
-  return f_strstr(haystack, needle);
-}
+Variant f_strchr(CStrRef haystack, CVarRef needle);
 
 Variant f_strpos(CStrRef haystack, CVarRef needle, int offset = 0);
 Variant f_stripos(CStrRef haystack, CVarRef needle, int offset = 0);
@@ -328,53 +165,17 @@ Variant f_strspn(CStrRef str1, CStrRef str2, int start = 0,
 Variant f_strcspn(CStrRef str1, CStrRef str2, int start = 0,
                   int length = 0x7FFFFFFF);
 
-inline Variant f_strlen(CVarRef vstr) {
-  Variant::TypedValueAccessor tva = vstr.getTypedAccessor();
-  switch (Variant::GetAccessorType(tva)) {
-  case KindOfString:
-  case KindOfStaticString:
-    return Variant(Variant::GetStringData(tva)->size());
-  case KindOfArray:
-    raise_warning("strlen() expects parameter 1 to be string, array given");
-    return uninit_null();
-  case KindOfObject:
-    if (!f_method_exists(vstr, "__toString")) {
-      raise_warning("strlen() expects parameter 1 to be string, object given");
-      return uninit_null();
-    } //else fallback to default
-  default:
-    CStrRef str = vstr.toString();
-    return Variant(str.size());
-  }
-}
+Variant f_strlen(CVarRef vstr);
 
 Variant f_count_chars(CStrRef str, int64_t mode = 0);
 
 Variant f_str_word_count(CStrRef str, int64_t format = 0, CStrRef charlist = "");
 
-inline int64_t f_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1,
-                         int cost_rep = 1, int cost_del = 1) {
-  return string_levenshtein(str1, str1.size(), str2, str2.size(),
-                            cost_ins, cost_rep, cost_del);
-}
-inline int64_t f_similar_text(CStrRef first, CStrRef second, VRefParam percent = uninit_null()) {
-  float p;
-  int ret = string_similar_text(first, first.size(), second, second.size(),
-                                &p);
-  percent = p;
-  return ret;
-}
-inline Variant f_soundex(CStrRef str) {
-  if (str.empty()) return false;
-  return String(string_soundex(str), AttachString);
-}
-inline Variant f_metaphone(CStrRef str, int phones = 0) {
-  char *ret = string_metaphone(str, str.size(), 0, 1);
-  if (ret) {
-    return String(ret, AttachString);
-  }
-  return false;
-}
+int64_t f_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1,
+                      int cost_rep = 1, int cost_del = 1);
+int64_t f_similar_text(CStrRef first, CStrRef second, VRefParam percent = uninit_null());
+Variant f_soundex(CStrRef str);
+Variant f_metaphone(CStrRef str, int phones = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 // special

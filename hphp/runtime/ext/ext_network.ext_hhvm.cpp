@@ -684,6 +684,66 @@ TypedValue* fg_dns_check_record(HPHP::VM::ActRec *ar) {
 
 
 /*
+bool HPHP::f_checkdnsrr(HPHP::String const&, HPHP::String const&)
+_ZN4HPHP12f_checkdnsrrERKNS_6StringES2_
+
+(return value) => rax
+host => rdi
+type => rsi
+*/
+
+bool fh_checkdnsrr(Value* host, Value* type) asm("_ZN4HPHP12f_checkdnsrrERKNS_6StringES2_");
+
+TypedValue * fg1_checkdnsrr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_checkdnsrr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfBoolean;
+  switch (count) {
+  default: // count >= 2
+    if (!IS_STRING_TYPE((args-1)->m_type)) {
+      tvCastToStringInPlace(args-1);
+    }
+  case 1:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  rv->m_data.num = (fh_checkdnsrr(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_checkdnsrr(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 1LL && count <= 2LL) {
+      if ((count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (fh_checkdnsrr(&args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_checkdnsrr(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("checkdnsrr", count, 1, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::f_dns_get_record(HPHP::String const&, int, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
 _ZN4HPHP16f_dns_get_recordERKNS_6StringEiRKNS_14VRefParamValueES5_
 
@@ -794,6 +854,228 @@ TypedValue* fg_dns_get_mx(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_wrong_arguments_nr("dns_get_mx", count, 2, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_getmxrr(HPHP::String const&, HPHP::VRefParamValue const&, HPHP::VRefParamValue const&)
+_ZN4HPHP9f_getmxrrERKNS_6StringERKNS_14VRefParamValueES5_
+
+(return value) => rax
+hostname => rdi
+mxhosts => rsi
+weight => rdx
+*/
+
+bool fh_getmxrr(Value* hostname, TypedValue* mxhosts, TypedValue* weight) asm("_ZN4HPHP9f_getmxrrERKNS_6StringERKNS_14VRefParamValueES5_");
+
+TypedValue * fg1_getmxrr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_getmxrr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfBoolean;
+  tvCastToStringInPlace(args-0);
+  VRefParamValue defVal2 = uninit_null();
+  rv->m_data.num = (fh_getmxrr(&args[-0].m_data, (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_getmxrr(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 2LL && count <= 3LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_type = KindOfBoolean;
+        VRefParamValue defVal2 = uninit_null();
+        rv.m_data.num = (fh_getmxrr(&args[-0].m_data, (args-1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_getmxrr(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("getmxrr", count, 2, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::Variant HPHP::f_socket_get_status(HPHP::Object const&)
+_ZN4HPHP19f_socket_get_statusERKNS_6ObjectE
+
+(return value) => rax
+_rv => rdi
+stream => rsi
+*/
+
+TypedValue* fh_socket_get_status(TypedValue* _rv, Value* stream) asm("_ZN4HPHP19f_socket_get_statusERKNS_6ObjectE");
+
+TypedValue * fg1_socket_get_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_socket_get_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToObjectInPlace(args-0);
+  fh_socket_get_status((rv), &args[-0].m_data);
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_socket_get_status(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if ((args-0)->m_type == KindOfObject) {
+        fh_socket_get_status((&(rv)), &args[-0].m_data);
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_socket_get_status(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("socket_get_status", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_socket_set_blocking(HPHP::Object const&, int)
+_ZN4HPHP21f_socket_set_blockingERKNS_6ObjectEi
+
+(return value) => rax
+stream => rdi
+mode => rsi
+*/
+
+bool fh_socket_set_blocking(Value* stream, int mode) asm("_ZN4HPHP21f_socket_set_blockingERKNS_6ObjectEi");
+
+TypedValue * fg1_socket_set_blocking(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_socket_set_blocking(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfBoolean;
+  if ((args-1)->m_type != KindOfInt64) {
+    tvCastToInt64InPlace(args-1);
+  }
+  if ((args-0)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-0);
+  }
+  rv->m_data.num = (fh_socket_set_blocking(&args[-0].m_data, (int)(args[-1].m_data.num))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_socket_set_blocking(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 2LL) {
+      if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (fh_socket_set_blocking(&args[-0].m_data, (int)(args[-1].m_data.num))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_socket_set_blocking(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("socket_set_blocking", count, 2, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_socket_set_timeout(HPHP::Object const&, int, int)
+_ZN4HPHP20f_socket_set_timeoutERKNS_6ObjectEii
+
+(return value) => rax
+stream => rdi
+seconds => rsi
+microseconds => rdx
+*/
+
+bool fh_socket_set_timeout(Value* stream, int seconds, int microseconds) asm("_ZN4HPHP20f_socket_set_timeoutERKNS_6ObjectEii");
+
+TypedValue * fg1_socket_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_socket_set_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfBoolean;
+  switch (count) {
+  default: // count >= 3
+    if ((args-2)->m_type != KindOfInt64) {
+      tvCastToInt64InPlace(args-2);
+    }
+  case 2:
+    break;
+  }
+  if ((args-1)->m_type != KindOfInt64) {
+    tvCastToInt64InPlace(args-1);
+  }
+  if ((args-0)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-0);
+  }
+  rv->m_data.num = (fh_socket_set_timeout(&args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_socket_set_timeout(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 2LL && count <= 3LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (fh_socket_set_timeout(&args[-0].m_data, (int)(args[-1].m_data.num), (count > 2) ? (int)(args[-2].m_data.num) : (int)(0))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_socket_set_timeout(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("socket_set_timeout", count, 2, 3, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -1269,6 +1551,184 @@ TypedValue* fg_setrawcookie(HPHP::VM::ActRec *ar) {
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, 7);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+void HPHP::f_define_syslog_variables()
+_ZN4HPHP25f_define_syslog_variablesEv
+
+*/
+
+void fh_define_syslog_variables() asm("_ZN4HPHP25f_define_syslog_variablesEv");
+
+TypedValue* fg_define_syslog_variables(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv.m_data.num = 0LL;
+      rv.m_type = KindOfNull;
+      fh_define_syslog_variables();
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("define_syslog_variables", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_openlog(HPHP::String const&, int, int)
+_ZN4HPHP9f_openlogERKNS_6StringEii
+
+(return value) => rax
+ident => rdi
+option => rsi
+facility => rdx
+*/
+
+bool fh_openlog(Value* ident, int option, int facility) asm("_ZN4HPHP9f_openlogERKNS_6StringEii");
+
+TypedValue * fg1_openlog(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openlog(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfBoolean;
+  if ((args-2)->m_type != KindOfInt64) {
+    tvCastToInt64InPlace(args-2);
+  }
+  if ((args-1)->m_type != KindOfInt64) {
+    tvCastToInt64InPlace(args-1);
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  rv->m_data.num = (fh_openlog(&args[-0].m_data, (int)(args[-1].m_data.num), (int)(args[-2].m_data.num))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_openlog(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 3LL) {
+      if ((args-2)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (fh_openlog(&args[-0].m_data, (int)(args[-1].m_data.num), (int)(args[-2].m_data.num))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_openlog(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("openlog", count, 3, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_closelog()
+_ZN4HPHP10f_closelogEv
+
+(return value) => rax
+*/
+
+bool fh_closelog() asm("_ZN4HPHP10f_closelogEv");
+
+TypedValue* fg_closelog(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 0LL) {
+      rv.m_type = KindOfBoolean;
+      rv.m_data.num = (fh_closelog()) ? 1LL : 0LL;
+      frame_free_locals_no_this_inl(ar, 0);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_toomany_arguments_nr("closelog", 0, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+bool HPHP::f_syslog(int, HPHP::String const&)
+_ZN4HPHP8f_syslogEiRKNS_6StringE
+
+(return value) => rax
+priority => rdi
+message => rsi
+*/
+
+bool fh_syslog(int priority, Value* message) asm("_ZN4HPHP8f_syslogEiRKNS_6StringE");
+
+TypedValue * fg1_syslog(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_syslog(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfBoolean;
+  if (!IS_STRING_TYPE((args-1)->m_type)) {
+    tvCastToStringInPlace(args-1);
+  }
+  if ((args-0)->m_type != KindOfInt64) {
+    tvCastToInt64InPlace(args-0);
+  }
+  rv->m_data.num = (fh_syslog((int)(args[-0].m_data.num), &args[-1].m_data)) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_syslog(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 2LL) {
+      if (IS_STRING_TYPE((args-1)->m_type) && (args-0)->m_type == KindOfInt64) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (fh_syslog((int)(args[-0].m_data.num), &args[-1].m_data)) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_syslog(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("syslog", count, 2, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

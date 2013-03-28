@@ -34,21 +34,13 @@ Variant f_http_build_query(CVarRef formdata,
                            CStrRef arg_separator = null_string);
 Variant f_parse_url(CStrRef url, int component = -1);
 
-inline String f_rawurldecode(CStrRef str) {
-  return StringUtil::UrlDecode(str, false);
-}
+String f_rawurldecode(CStrRef str);
 
-inline String f_rawurlencode(CStrRef str) {
-  return StringUtil::UrlEncode(str, false);
-}
+String f_rawurlencode(CStrRef str);
 
-inline String f_urldecode(CStrRef str) {
-  return StringUtil::UrlDecode(str, true);
-}
+String f_urldecode(CStrRef str);
 
-inline String f_urlencode(CStrRef str) {
-  return StringUtil::UrlEncode(str, true);
-}
+String f_urlencode(CStrRef str);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

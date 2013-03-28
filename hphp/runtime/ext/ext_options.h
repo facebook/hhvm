@@ -52,8 +52,8 @@ Array f_getrusage(int who = 0);
 bool f_clock_getres(int clk_id, VRefParam sec, VRefParam nsec);
 bool f_clock_gettime(int clk_id, VRefParam sec, VRefParam nsec);
 bool f_clock_settime(int clk_id, int64_t sec, int64_t nsec);
-inline int64_t f_cpu_get_count() { return Process::GetCPUCount();}
-inline String f_cpu_get_model() { return Process::GetCPUModel();}
+int64_t f_cpu_get_count();
+String f_cpu_get_model();
 String f_ini_alter(CStrRef varname, CStrRef newvalue);
 Array f_ini_get_all(CStrRef extension = null_string);
 String f_ini_get(CStrRef varname);

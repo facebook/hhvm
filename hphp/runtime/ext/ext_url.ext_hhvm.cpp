@@ -385,6 +385,214 @@ TypedValue* fg_parse_url(HPHP::VM::ActRec *ar) {
 
 
 
+/*
+HPHP::String HPHP::f_rawurldecode(HPHP::String const&)
+_ZN4HPHP14f_rawurldecodeERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+str => rsi
+*/
+
+Value* fh_rawurldecode(Value* _rv, Value* str) asm("_ZN4HPHP14f_rawurldecodeERKNS_6StringE");
+
+TypedValue * fg1_rawurldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_rawurldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfString;
+  tvCastToStringInPlace(args-0);
+  fh_rawurldecode((&rv->m_data), &args[-0].m_data);
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_rawurldecode(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_type = KindOfString;
+        fh_rawurldecode((&rv.m_data), &args[-0].m_data);
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_rawurldecode(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("rawurldecode", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::String HPHP::f_rawurlencode(HPHP::String const&)
+_ZN4HPHP14f_rawurlencodeERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+str => rsi
+*/
+
+Value* fh_rawurlencode(Value* _rv, Value* str) asm("_ZN4HPHP14f_rawurlencodeERKNS_6StringE");
+
+TypedValue * fg1_rawurlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_rawurlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfString;
+  tvCastToStringInPlace(args-0);
+  fh_rawurlencode((&rv->m_data), &args[-0].m_data);
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_rawurlencode(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_type = KindOfString;
+        fh_rawurlencode((&rv.m_data), &args[-0].m_data);
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_rawurlencode(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("rawurlencode", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::String HPHP::f_urldecode(HPHP::String const&)
+_ZN4HPHP11f_urldecodeERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+str => rsi
+*/
+
+Value* fh_urldecode(Value* _rv, Value* str) asm("_ZN4HPHP11f_urldecodeERKNS_6StringE");
+
+TypedValue * fg1_urldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_urldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfString;
+  tvCastToStringInPlace(args-0);
+  fh_urldecode((&rv->m_data), &args[-0].m_data);
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_urldecode(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_type = KindOfString;
+        fh_urldecode((&rv.m_data), &args[-0].m_data);
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_urldecode(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("urldecode", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
+HPHP::String HPHP::f_urlencode(HPHP::String const&)
+_ZN4HPHP11f_urlencodeERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+str => rsi
+*/
+
+Value* fh_urlencode(Value* _rv, Value* str) asm("_ZN4HPHP11f_urlencodeERKNS_6StringE");
+
+TypedValue * fg1_urlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_urlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfString;
+  tvCastToStringInPlace(args-0);
+  fh_urlencode((&rv->m_data), &args[-0].m_data);
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_urlencode(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      if (IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_type = KindOfString;
+        fh_urlencode((&rv.m_data), &args[-0].m_data);
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_urlencode(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("urlencode", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
 
 } // !HPHP
 

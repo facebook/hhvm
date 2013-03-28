@@ -40,95 +40,59 @@ public:
   Array m_params;
 };
 
-inline Object f_stream_context_create(CArrRef options = null_array,
-                                      CArrRef params = null_array) {
-  return Object(NEWOBJ(StreamContext)(options, params));
-}
+Object f_stream_context_create(CArrRef options = null_array,
+                               CArrRef params = null_array);
 
-inline Object f_stream_context_get_default(CArrRef options = null_array) {
-  throw NotImplementedException(__func__);
-}
+Object f_stream_context_get_default(CArrRef options = null_array);
 
-inline Variant f_stream_context_get_options(CObjRef stream_or_context) {
-  throw NotImplementedException(__func__);
-}
+Variant f_stream_context_get_options(CObjRef stream_or_context);
 
-inline bool f_stream_context_set_option(CObjRef stream_or_context,
-                                        CVarRef wrapper,
-                                        CStrRef option = null_string,
-                                        CVarRef value = null_variant) {
-  throw NotImplementedException(__func__);
-}
+bool f_stream_context_set_option(CObjRef stream_or_context,
+                                 CVarRef wrapper,
+                                 CStrRef option = null_string,
+                                 CVarRef value = null_variant);
 
-inline bool f_stream_context_set_param(CObjRef stream_or_context,
-                                       CArrRef params) {
-  throw NotImplementedException(__func__);
-}
+bool f_stream_context_set_param(CObjRef stream_or_context,
+                                CArrRef params);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_stream_copy_to_stream(CObjRef source, CObjRef dest,
                                 int maxlength = -1, int offset = 0);
 
-inline bool f_stream_encoding(CObjRef stream, CStrRef encoding = null_string) {
-  throw NotSupportedException(__func__, "stream filter is not supported");
-}
+bool f_stream_encoding(CObjRef stream, CStrRef encoding = null_string);
 
-inline void f_stream_bucket_append(CObjRef brigade, CObjRef bucket) {
-  throw NotSupportedException(__func__, "stream bucket is not supported");
-}
+void f_stream_bucket_append(CObjRef brigade, CObjRef bucket);
 
-inline void f_stream_bucket_prepend(CObjRef brigade, CObjRef bucket) {
-  throw NotSupportedException(__func__, "stream bucket is not supported");
-}
+void f_stream_bucket_prepend(CObjRef brigade, CObjRef bucket);
 
-inline Object f_stream_bucket_make_writeable(CObjRef brigade) {
-  throw NotSupportedException(__func__, "stream bucket is not supported");
-}
+Object f_stream_bucket_make_writeable(CObjRef brigade);
 
-inline Object f_stream_bucket_new(CObjRef stream, CStrRef buffer) {
-  throw NotSupportedException(__func__, "stream bucket is not supported");
-}
+Object f_stream_bucket_new(CObjRef stream, CStrRef buffer);
 
-inline bool f_stream_filter_register(CStrRef filtername, CStrRef classname) {
-  throw NotSupportedException(__func__, "stream filter is not supported");
-}
+bool f_stream_filter_register(CStrRef filtername, CStrRef classname);
 
-inline bool f_stream_filter_remove(CObjRef stream_filter) {
-  throw NotSupportedException(__func__, "stream filter is not supported");
-}
+bool f_stream_filter_remove(CObjRef stream_filter);
 
-inline Object f_stream_filter_append(CObjRef stream, CStrRef filtername,
-                                     int read_write = 0,
-                                     CVarRef params = null_variant) {
-  throw NotSupportedException(__func__, "stream filter is not supported");
-}
+Object f_stream_filter_append(CObjRef stream, CStrRef filtername,
+                              int read_write = 0,
+                              CVarRef params = null_variant);
 
-inline Object f_stream_filter_prepend(CObjRef stream, CStrRef filtername,
-                                      int read_write = 0,
-                                      CVarRef params = null_variant) {
-  throw NotSupportedException(__func__, "stream filter is not supported");
-}
+Object f_stream_filter_prepend(CObjRef stream, CStrRef filtername,
+                               int read_write = 0,
+                               CVarRef params = null_variant);
 
 Variant f_stream_get_contents(CObjRef handle, int maxlen = 0,
                               int offset = 0);
 
-inline Array f_stream_get_filters() {
-  throw NotSupportedException(__func__, "stream filter is not supported");
-}
+Array f_stream_get_filters();
 
 Variant f_stream_get_line(CObjRef handle, int length = 0,
                           CStrRef ending = null_string);
 
-inline Variant f_stream_get_meta_data(CObjRef stream) {
-  File *f = stream.getTyped<File>(true, true);
-  if (f) return f->getMetaData();
-  return false;
-}
+Variant f_stream_get_meta_data(CObjRef stream);
 
-inline Array f_stream_get_transports() {
-  return CREATE_VECTOR4("tcp", "udp", "unix", "udg");
-}
+Array f_stream_get_transports();
 
 Array f_stream_get_wrappers();
 bool f_stream_register_wrapper(CStrRef protocol, CStrRef classname);
@@ -136,11 +100,8 @@ bool f_stream_wrapper_register(CStrRef protocol, CStrRef classname);
 bool f_stream_wrapper_restore(CStrRef protocol);
 bool f_stream_wrapper_unregister(CStrRef protocol);
 
-inline String f_stream_resolve_include_path(CStrRef filename,
-                                            CObjRef context = null_object) {
-  struct stat s;
-  return Eval::resolveVmInclude(filename.get(), "", &s);
-}
+String f_stream_resolve_include_path(CStrRef filename,
+                                     CObjRef context = null_object);
 
 Variant f_stream_select(VRefParam read, VRefParam write, VRefParam except,
                         CVarRef vtv_sec, int tv_usec = 0);
@@ -151,9 +112,7 @@ bool f_stream_set_timeout(CObjRef stream, int seconds, int microseconds = 0);
 
 int64_t f_stream_set_write_buffer(CObjRef stream, int buffer);
 
-inline int64_t f_set_file_buffer(CObjRef stream, int buffer) {
-  return f_stream_set_write_buffer(stream, buffer);
-}
+int64_t f_set_file_buffer(CObjRef stream, int buffer);
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream sockets: ext_socket has better implementation of socket functions
@@ -169,11 +128,9 @@ Variant f_stream_socket_client(CStrRef remote_socket, VRefParam errnum = uninit_
                               VRefParam errstr = uninit_null(), double timeout = 0.0,
                               int flags = 0, CObjRef context = null_object);
 
-inline Variant f_stream_socket_enable_crypto(CObjRef stream, bool enable,
-                                             int crypto_type = 0,
-                                             CObjRef session_stream = null_object) {
-  throw NotSupportedException(__func__, "no crypto support on sockets");
-}
+Variant f_stream_socket_enable_crypto(CObjRef stream, bool enable,
+                                      int crypto_type = 0,
+                                      CObjRef session_stream = null_object);
 
 Variant f_stream_socket_get_name(CObjRef handle, bool want_peer);
 

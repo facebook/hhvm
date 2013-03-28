@@ -27,7 +27,7 @@ namespace HPHP {
 
 Array f_spl_classes();
 String f_spl_object_hash(CObjRef obj);
-inline int64_t f_hphp_object_pointer(CObjRef obj) { return (int64_t)obj.get();}
+int64_t f_hphp_object_pointer(CObjRef obj);
 Variant f_hphp_get_this();
 Variant f_class_implements(CVarRef obj, bool autoload = true);
 Variant f_class_parents(CVarRef obj, bool autoload = true);

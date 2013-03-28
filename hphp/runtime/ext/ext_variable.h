@@ -223,10 +223,10 @@ String f_get_resource_type(CObjRef handle);
 ///////////////////////////////////////////////////////////////////////////////
 // type conversion
 
-inline int64_t f_intval(CVarRef v, int64_t base = 10) { return v.toInt64(base);}
-inline double f_doubleval(CVarRef v) { return v.toDouble();}
-inline double f_floatval(CVarRef v) { return v.toDouble();}
-inline String f_strval(CVarRef v) { return v.toString();}
+int64_t f_intval(CVarRef v, int64_t base = 10);
+double f_doubleval(CVarRef v);
+double f_floatval(CVarRef v);
+String f_strval(CVarRef v);
 
 bool f_settype(VRefParam var, CStrRef type);
 

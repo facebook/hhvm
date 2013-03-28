@@ -98,6 +98,9 @@ Variant f_array_fill_keys(CVarRef keys, CVarRef value) {
   getCheckedArray(keys);
   return ArrayUtil::CreateArray(arr_keys, value);
 }
+Variant f_array_fill(int start_index, int num, CVarRef value) {
+  return ArrayUtil::CreateArray(start_index, num, value);
+}
 
 static bool filter_func(CVarRef value, const void *data) {
   HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
@@ -163,6 +166,9 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
   }
   raise_warning("Array key should be either a string or an integer");
   return false;
+}
+bool f_key_exists(CVarRef key, CVarRef search) {
+  return f_array_key_exists(key, search);
 }
 
 Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
@@ -362,6 +368,10 @@ Variant f_array_pad(CVarRef input, int pad_size, CVarRef pad_value) {
   return ArrayUtil::Pad(arr_input, pad_value, -pad_size, false);
 }
 
+Variant f_array_pop(VRefParam array) {
+  return array.pop();
+}
+
 Variant f_array_product(CVarRef array) {
   getCheckedArray(array);
   if (arr_array.empty()) {
@@ -420,6 +430,10 @@ Variant f_array_search(CVarRef needle, CVarRef haystack,
                        bool strict /* = false */) {
   getCheckedArrayRet(haystack, false);
   return arr_haystack.key(needle, strict);
+}
+
+Variant f_array_shift(VRefParam array) {
+  return array.dequeue();
 }
 
 Variant f_array_slice(CVarRef array, int offset,
@@ -604,6 +618,42 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
   }
   return 1;
 }
+
+int64_t f_sizeof(CVarRef var, bool recursive /* = false */) {
+  return f_count(var, recursive);
+}
+Variant f_each(VRefParam array) {
+  return array.array_iter_each();
+}
+Variant f_current(VRefParam array) {
+  return array.array_iter_current();
+}
+Variant f_hphp_current_ref(VRefParam array) {
+  if (!array.isArray()) {
+    throw_bad_array_exception();
+    return false;
+  }
+  return strongBind(array.array_iter_current_ref());
+}
+Variant f_next(VRefParam array) {
+  return array.array_iter_next();
+}
+Variant f_pos(VRefParam array) {
+  return array.array_iter_current();
+}
+Variant f_prev(VRefParam array) {
+  return array.array_iter_prev();
+}
+Variant f_reset(VRefParam array) {
+  return array.array_iter_reset();
+}
+Variant f_end(VRefParam array) {
+  return array.array_iter_end();
+}
+Variant f_key(VRefParam array) {
+  return array.array_iter_key();
+}
+
 
 static StaticString s_Iterator("Iterator");
 static StaticString s_IteratorAggregate("IteratorAggregate");

@@ -38,6 +38,16 @@ obj => rsi
 Value* fh_spl_object_hash(Value* _rv, Value* obj) asm("_ZN4HPHP17f_spl_object_hashERKNS_6ObjectE");
 
 /*
+long HPHP::f_hphp_object_pointer(HPHP::Object const&)
+_ZN4HPHP21f_hphp_object_pointerERKNS_6ObjectE
+
+(return value) => rax
+obj => rdi
+*/
+
+long fh_hphp_object_pointer(Value* obj) asm("_ZN4HPHP21f_hphp_object_pointerERKNS_6ObjectE");
+
+/*
 HPHP::Variant HPHP::f_hphp_get_this()
 _ZN4HPHP15f_hphp_get_thisEv
 

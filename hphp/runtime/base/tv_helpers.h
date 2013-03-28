@@ -48,13 +48,7 @@ inline TypedValue tv(DataType type, Data data) {
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
 void tvDecRefHelper(DataType type, uint64_t datum);
 
-inline bool tvIsPlausibleType(DataType type) {
-  return type >= MinDataType && type < MaxNumDataTypes;
-}
-
-inline bool tvIsPlausible(const TypedValue* tv) {
-  return tvIsPlausibleType(tv->m_type);
-}
+bool tvIsPlausible(const TypedValue* tv);
 
 inline bool tvWillBeReleased(TypedValue* tv) {
   return IS_REFCOUNTED_TYPE(tv->m_type) &&

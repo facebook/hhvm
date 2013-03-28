@@ -4638,7 +4638,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCGetG(PC& pc) {
   } else {                                                \
     tvReadCell(val, output);                              \
   }                                                       \
-  m_stack.popC();                                         \
+  m_stack.popA();                                         \
   SPROP_OP_POSTLUDE                                       \
 } while (0)
 
@@ -4769,7 +4769,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetS(PC& pc) {
   } else {
     e = isset(tvAsCVarRef(val));
   }
-  m_stack.popC();
+  m_stack.popA();
   output->m_data.num = e;
   output->m_type = KindOfBoolean;
   SPROP_OP_POSTLUDE
@@ -4898,7 +4898,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyS(PC& pc) {
   } else {
     e = empty(tvAsCVarRef(val));
   }
-  m_stack.popC();
+  m_stack.popA();
   output->m_data.num = e;
   output->m_type = KindOfBoolean;
   SPROP_OP_POSTLUDE

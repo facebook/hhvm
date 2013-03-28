@@ -543,6 +543,12 @@ public:
     m_top++;
   }
 
+  inline void ALWAYS_INLINE popA() {
+    assert(m_top != m_base);
+    assert(m_top->m_type == KindOfClass);
+    m_top++;
+  }
+
   inline void ALWAYS_INLINE popV() {
     assert(m_top != m_base);
     assert(m_top->m_type == KindOfRef);
@@ -553,7 +559,7 @@ public:
 
   inline void ALWAYS_INLINE popTV() {
     assert(m_top != m_base);
-    assert(tvIsPlausible(m_top));
+    assert(m_top->m_type == KindOfClass || tvIsPlausible(m_top));
     tvRefcountedDecRef(m_top);
     m_top++;
   }
@@ -704,7 +710,7 @@ public:
     pushObjectNoRc(o);
     o->incRefCount();
   }
-  
+
   inline void ALWAYS_INLINE nalloc(size_t n) {
     assert((uintptr_t)&m_top[-n] <= (uintptr_t)m_base);
     m_top -= n;

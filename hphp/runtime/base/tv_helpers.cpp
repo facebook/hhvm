@@ -205,5 +205,35 @@ void tvCastToObjectInPlace(TypedValue* tv) {
   tv->m_data.pobj->incRefCount();
 }
 
+bool tvIsPlausible(const TypedValue* tv) {
+  if (!tv) return false;
+  auto okPtr = [](void* ptr) {
+    return ptr && (uintptr_t(ptr) % sizeof(ptr) == 0);
+  };
+  switch (tv->m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+      return true;
+    case KindOfBoolean:
+      return tv->m_data.num == 0 || tv->m_data.num == 1;
+    case KindOfInt64:
+    case KindOfDouble:
+      return true;
+    case KindOfStaticString:
+      return okPtr(tv->m_data.pstr) && tv->m_data.pstr->isStatic();
+    case KindOfString:
+    case KindOfArray:
+      return okPtr(tv->m_data.parr) &&
+             is_refcount_realistic(tv->m_data.parr->getCount());
+    case KindOfObject:
+      return okPtr(tv->m_data.pobj) && !tv->m_data.pobj->isStatic();
+    case KindOfRef:
+      return okPtr(tv->m_data.pref) &&
+             tv->m_data.pref->tv()->m_type != KindOfRef;
+    default:
+      return false;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

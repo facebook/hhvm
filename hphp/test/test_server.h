@@ -36,6 +36,8 @@ public:
 
   // test $_ variables
   bool TestServerVariables();
+  // test things that need more than one request
+  bool TestInteraction();
   bool TestGet();
   bool TestPost();
   bool TestCookie();
@@ -71,6 +73,17 @@ protected:
                             const char *header, const char *postdata,
                             bool responseHeader,
                             const char *file = "", int line = 0,
+                            int port = 0) {
+    return VerifyServerResponse(input, &output, &url, 1,
+                                method, header, postdata, responseHeader,
+                                file, line, port);
+  }
+
+  bool VerifyServerResponse(const char *input, const char **outputs,
+                            const char **urls, int nUrl, const char *method,
+                            const char *header, const char *postdata,
+                            bool responseHeader,
+                            const char *file = "", int line = 0,
                             int port = 0);
   bool PreBindSocket();
   void CleanupPreBoundSocket();
@@ -81,8 +94,17 @@ protected:
 
 #define VSR(input, output)                                              \
   if (!Count(VerifyServerResponse(input, output, "string", "GET", nullptr, \
-                                  nullptr, false, __FILE__,__LINE__)))     \
+                                  nullptr, false, __FILE__,__LINE__)))  \
     return false;
+
+#define VSR2(input, output) do {                                        \
+    const char* urls[2] = { "string", "string" };                       \
+    const char* outputs[2] = { output, output };                        \
+    if (!Count(VerifyServerResponse(input, outputs, urls, 2, "GET",     \
+                                    nullptr, nullptr, false,            \
+                                    __FILE__,__LINE__)))                \
+      return false;                                                     \
+  } while (false)
 
 #define VSRES(input, output)                                            \
   if (!Count(VerifyServerResponse(input, output, "string", "GET", nullptr, \

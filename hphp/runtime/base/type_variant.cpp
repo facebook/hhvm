@@ -2257,8 +2257,6 @@ public:
   static const bool CheckParams = true;
 };
 
-DECLARE_THREAD_LOCAL(Variant, __lvalProxy);
-  
 template<typename T>
 Variant& Variant::LvalAtImpl0(
     Variant *self, T key, Variant *tmp, bool blackHole, ACCESSPARAMS_IMPL) {
@@ -2304,7 +2302,7 @@ head:
       *tmp = self->getArrayAccess()->offsetGet(key);
       return *tmp;
     }
-    Variant& retv = *(__lvalProxy.get());
+    Variant& retv = get_global_variables()->__lvalProxy;
     retv = self->getArrayAccess()->offsetGet(key);
     return retv;
   }
@@ -2430,7 +2428,7 @@ Variant &Variant::lvalInvalid() {
 }
 
 Variant &Variant::lvalBlackHole() {
-  Variant &bh = *(__lvalProxy.get());
+  Variant &bh = get_global_variables()->__lvalProxy;
   bh.unset();
   return bh;
 }

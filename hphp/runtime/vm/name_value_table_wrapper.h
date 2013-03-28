@@ -165,6 +165,7 @@ class GlobalNameValueTableWrapper : public NameValueTableWrapper {
   Variant gvm_http_response_header;
 
   Variant __realPropProxy;
+  Variant __lvalProxy;
 
   Variant stgv_Variant[1];
   #define k_SID stgv_Variant[0]

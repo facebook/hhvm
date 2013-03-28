@@ -45,8 +45,9 @@ static int s_admin_port = 0;
 static int s_rpc_port = 0;
 static int inherit_fd = -1;
 
-bool TestServer::VerifyServerResponse(const char *input, const char *output,
-                                      const char *url, const char *method,
+bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
+                                      const char **urls, int nUrls,
+                                      const char *method,
                                       const char *header, const char *postdata,
                                       bool responseHeader,
                                       const char *file /* = "" */,
@@ -70,44 +71,54 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
   AsyncFunc<TestServer> func(this, &TestServer::RunServer);
   func.start();
 
-  String server = "http://";
-  server += f_php_uname("n");
-  server += ":" + lexical_cast<string>(port) + "/";
-  server += url;
-  string actual, err;
-  for (int i = 0; i < 10; i++) {
-    Variant c = f_curl_init();
-    f_curl_setopt(c, k_CURLOPT_URL, server);
-    f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
-    if (postdata) {
-      f_curl_setopt(c, k_CURLOPT_POSTFIELDS, postdata);
-      f_curl_setopt(c, k_CURLOPT_POST, true);
-    }
-    if (header) {
-      f_curl_setopt(c, k_CURLOPT_HTTPHEADER, CREATE_VECTOR1(header));
-    }
-    if (responseHeader) {
-      f_curl_setopt(c, k_CURLOPT_HEADER, 1);
-    }
+  bool passed = true;
 
-    Variant res = f_curl_exec(c);
-    if (!same(res, false)) {
-      actual = res.toString();
-      break;
+  string actual;
+
+  int url = 0;
+  for (url = 0; url < nUrls; url++) {
+    String server = "http://";
+    server += f_php_uname("n");
+    server += ":" + lexical_cast<string>(port) + "/";
+    server += urls[url];
+    actual = "<No response from server>";
+    string err;
+    for (int i = 0; i < 10; i++) {
+      Variant c = f_curl_init();
+      f_curl_setopt(c, k_CURLOPT_URL, server);
+      f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
+      if (postdata) {
+        f_curl_setopt(c, k_CURLOPT_POSTFIELDS, postdata);
+        f_curl_setopt(c, k_CURLOPT_POST, true);
+      }
+      if (header) {
+        f_curl_setopt(c, k_CURLOPT_HTTPHEADER, CREATE_VECTOR1(header));
+      }
+      if (responseHeader) {
+        f_curl_setopt(c, k_CURLOPT_HEADER, 1);
+      }
+
+      Variant res = f_curl_exec(c);
+      if (!same(res, false)) {
+        actual = res.toString();
+        break;
+      }
+      sleep(1); // wait until HTTP server is up and running
     }
-    sleep(1); // wait until HTTP server is up and running
+    if (actual != outputs[url]) {
+      if (!responseHeader ||
+          actual.find(outputs[url]) == string::npos) {
+        passed = false;
+        break;
+      }
+    }
   }
 
   AsyncFunc<TestServer>(this, &TestServer::StopServer).run();
   func.waitForEnd();
 
-  bool passed = (actual == output);
-  if (responseHeader) {
-    passed = (actual.find(output) != string::npos);
-  }
-
   if (!passed) {
-    printf("%s:%d\nParsing: [%s]\nBet %d:\n"
+    printf("%s:%d\nParsing: [%s] (req %d)\nBet %d:\n"
            "--------------------------------------\n"
            "%s"
            "--------------------------------------\n"
@@ -115,7 +126,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
            "--------------------------------------\n"
            "%s"
            "--------------------------------------\n",
-           file, line, input, (int)strlen(output), output,
+           file, line, input, url + 1, (int)strlen(outputs[url]), outputs[url],
            (int)actual.length(), actual.c_str());
     return false;
   }
@@ -204,6 +215,7 @@ bool TestServer::RunTests(const std::string &which) {
   RUN_TEST(TestInheritFdServer);
   RUN_TEST(TestSanity);
   RUN_TEST(TestServerVariables);
+  RUN_TEST(TestInteraction);
   RUN_TEST(TestGet);
   RUN_TEST(TestPost);
   RUN_TEST(TestCookie);
@@ -270,6 +282,16 @@ bool TestServer::TestServerVariables() {
         "bool(false)\n",
 
         "string?a=1&b=2");
+
+  return true;
+}
+
+bool TestServer::TestInteraction() {
+  // run this twice to test lvalBlackHole
+  VSR2("<?php "
+        "$a[] = new stdclass;"
+        "var_dump(count(array_combine($a, $a)));",
+        "int(0)\n");
 
   return true;
 }

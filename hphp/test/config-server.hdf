@@ -6,7 +6,7 @@ Log {
 Server {
   Port = 8080
   SourceRoot != echo $(pwd)/runtime/tmp
-
+  ThreadCount = 1
   AllowedFiles {
     0 = string
   }

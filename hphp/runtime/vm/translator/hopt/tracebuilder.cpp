@@ -420,7 +420,7 @@ SSATmp* TraceBuilder::genJmpCond(SSATmp* boolSrc, Trace* target, bool negate) {
 
 void TraceBuilder::genJmp(Block* target, SSATmp* src) {
   EdgeData edge;
-  gen(Jmp_, target, &edge, src)->getInstruction();
+  gen(Jmp_, target, &edge, src);
 }
 
 void TraceBuilder::genExitWhenSurprised(Trace* targetTrace) {
@@ -515,18 +515,6 @@ SSATmp* TraceBuilder::genLdClsMethodCache(SSATmp* className,
              baseClass);
 }
 
-// TODO(#2058871): move this to hhbctranslator
-void TraceBuilder::genVerifyParamType(SSATmp* objClass,
-                                        SSATmp* className,
-                                        const Class*  constraintClass,
-                                        Trace*  exitTrace) {
-  // do NOT use genLdCls() since don't want to load class if it isn't loaded
-  SSATmp* constraint =
-    constraintClass ? genDefConst<const Class*>(constraintClass)
-                    : gen(LdCachedClass, className);
-  gen(JmpNSame, getFirstBlock(exitTrace), objClass, constraint);
-}
-
 SSATmp* TraceBuilder::genBoxLoc(uint32_t id) {
   SSATmp* prevValue  = genLdLoc(id);
   Type prevType = prevValue->getType();
@@ -584,6 +572,7 @@ SSATmp* TraceBuilder::genLdLoc(uint32_t id) {
 SSATmp* TraceBuilder::genLdLocAsCell(uint32_t id, Trace* exitTrace) {
   SSATmp*    tmp = genLdLoc(id);
   Type type = tmp->getType();
+  assert(type.isBoxed() || type.notBoxed());
   if (!type.isBoxed()) {
     return tmp;
   }

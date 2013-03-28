@@ -16,7 +16,9 @@
 
 #include "runtime/vm/translator/translator-runtime.h"
 
+#include "runtime/ext/ext_function.h"
 #include "runtime/vm/member_operations.h"
+#include "runtime/vm/type_constraint.h"
 
 namespace HPHP { namespace VM { namespace Transl {
 
@@ -57,6 +59,29 @@ void raisePropertyOnNonObject() {
 
 void raiseUndefProp(ObjectData* base, const StringData* name) {
   static_cast<Instance*>(base)->raiseUndefProp(name);
+}
+
+void VerifyParamTypeFail(int paramNum) {
+  VMRegAnchor _;
+  const ActRec* ar = curFrame();
+  const Func* func = ar->m_func;
+  const TypeConstraint& tc = func->params()[paramNum].typeConstraint();
+  TypedValue* tv = frame_local(ar, paramNum);
+  assert(!tc.check(tv, func));
+  tc.verifyFail(func, paramNum, tv);
+}
+
+void VerifyParamTypeCallable(TypedValue value, int param) {
+  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
+    VerifyParamTypeFail(param);
+  }
+}
+
+HOT_FUNC_VM
+void VerifyParamTypeSlow(const Class* cls, const Class* constraint, int param) {
+  if (UNLIKELY(!(constraint && cls->classof(constraint)))) {
+    VerifyParamTypeFail(param);
+  }
 }
 
 } } }

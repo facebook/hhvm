@@ -271,8 +271,7 @@ struct HhbcTranslator {
   void emitIsBoolC();
   void emitIsDoubleL(int id);
   void emitIsDoubleC();
-  void emitVerifyParamType(int32_t paramId,
-                           const StringData* constraintClsName);
+  void emitVerifyParamType(int32_t paramId);
   void emitInstanceOfD(int classNameStrId);
   void emitNop() {}
   void emitCastBool();

@@ -79,8 +79,8 @@ TypeConstraint::TypeConstraint(const StringData* typeName /* = NULL */,
     m_namedEntity = Unit::GetNamedEntity(typeName);
     return;
   }
-  if (RuntimeOption::EnableHipHopSyntax || dtype.m_dt == KindOfArray ||  
-    dtype.isParent() || dtype.isSelf()) {
+  if (RuntimeOption::EnableHipHopSyntax || dtype.m_dt == KindOfArray ||
+      dtype.isParent() || dtype.isSelf()) {
     m_type = dtype;
   } else {
     m_type = { KindOfObject, Precise };
@@ -129,6 +129,14 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     return c && tv->m_data.pobj->instanceof(c);
   }
   return equivDataTypes(m_type.m_dt, tv->m_type);
+}
+
+bool
+TypeConstraint::check(DataType dt) const {
+  assert(m_type.m_dt != KindOfObject);
+  assert(dt != KindOfRef);
+  if (m_nullable && IS_NULL_TYPE(dt)) return true;
+  return equivDataTypes(m_type.m_dt, dt);
 }
 
 void TypeConstraint::verifyFail(const Func* func, int paramNum,

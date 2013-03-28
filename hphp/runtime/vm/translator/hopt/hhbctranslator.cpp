@@ -1858,48 +1858,86 @@ Trace* HhbcTranslator::guardRefs(int64_t               entryArDelta,
   return exitTrace;
 }
 
-void HhbcTranslator::emitVerifyParamType(int32_t paramId,
-                                         const StringData* constraintClsName) {
-  /* It's currently better to interpOne all of these, since the slow path punts
-   * for the entire tracelet */
-  emitInterpOneOrPunt(Type::None);
-  return;
-
-  assert(!constraintClsName || constraintClsName->isStatic());
+void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   const Func* func = getCurFunc();
-  const Class* constraint = (constraintClsName ?
-                             Unit::lookupUniqueClass(constraintClsName) :
-                             nullptr);
   const TypeConstraint& tc = func->params()[paramId].typeConstraint();
-  const StringData* tcTypeName = tc.typeName();
+  SSATmp* locVal = m_tb->genLdLoc(paramId);
+  Type locType = locVal->getType().unbox();
+  assert(locType.isKnownDataType());
 
-  // VerifyParamType does not remove the parameter from the stack
-  TRACE(3, "%u: VerifyParamType %s\n", m_bcOff, tcTypeName->data());
-  Trace* exitTrace2 = getExitSlowTrace();
-  // XXX Should verify param type unbox?
-  SSATmp* param = m_tb->genLdAssertedLoc(paramId, Type::Gen);
-  if (param->getType() != Type::Obj) {
-    PUNT(VerifyParamType_nonobj);
+  if (tc.nullable() && locType.isNull()) {
+    return;
   }
-  SSATmp* objClass = m_tb->gen(LdObjClass, param);
+  if (tc.isCallable()) {
+    spillStack();
+    locVal = m_tb->gen(Unbox, getExitTrace(), locVal);
+    m_tb->gen(VerifyParamCallable, locVal, cns(paramId));
+    return;
+  }
+  // For non-object guards, or object guards with non-object runtime
+  // types, we rely on what we know from the tracelet guards and never
+  // have to do runtime checks.
+  if ((!tc.isObject() && !tc.check(locType.toDataType())) ||
+      (tc.isObject() && !locType.subtypeOf(Type::Obj))) {
+    spillStack();
+    m_tb->gen(VerifyParamFail, cns(paramId));
+    return;
+  }
+  if (!tc.isObject()) {
+    return;
+  }
 
-  if (tc.isObject()) {
-    if (!(param->getType() == Type::Obj ||
-          (param->getType().isNull() && tc.nullable()))) {
-      emitInterpOne(Type::None);
-      return;
-    }
+  const StringData* clsName;
+  const Class* knownConstraint = nullptr;
+  if (!tc.isSelf() && !tc.isParent()) {
+    clsName = tc.typeName();
+    knownConstraint = Unit::lookupClass(clsName);
   } else {
-    if (!tc.check(frame_local(curFrame() /* FIXME */, paramId), getCurFunc())) {
-      emitInterpOne(Type::None);
+    if (tc.isSelf()) {
+      tc.selfToClass(getCurFunc(), &knownConstraint);
+    } else if (tc.isParent()) {
+      tc.parentToClass(getCurFunc(), &knownConstraint);
+    }
+    if (knownConstraint) {
+      clsName = knownConstraint->preClass()->name();
+    } else {
+      // The hint was self or parent and there's no corresponding
+      // class for the current func. This typehint will always fail.
+      spillStack();
+      m_tb->gen(VerifyParamFail, cns(paramId));
       return;
     }
   }
+  assert(clsName);
+  // We can only burn in the Class* if it's unique or in the
+  // inheritance hierarchy of our context. It's ok if the class isn't
+  // defined yet - all paths below are tolerant of a null constraint.
+  if (!classIsUniqueOrCtxParent(knownConstraint)) knownConstraint = nullptr;
 
-  m_tb->genVerifyParamType(objClass,
-                          m_tb->genDefConst(tcTypeName),
-                          constraint,
-                          exitTrace2);
+  Class::initInstanceBits();
+  bool haveBit = Class::haveInstanceBit(clsName);
+  SSATmp* constraint = knownConstraint ? cns(knownConstraint)
+                                       : m_tb->gen(LdCachedClass, cns(clsName));
+  locVal = m_tb->gen(Unbox, getExitTrace(), locVal);
+  SSATmp* objClass = m_tb->gen(LdObjClass, locVal);
+  if (haveBit || classIsUniqueNormalClass(knownConstraint)) {
+    SSATmp* isInstance = haveBit ?
+      m_tb->gen(InstanceOfBitmask, objClass, cns(clsName))
+    : m_tb->gen(ExtendsClass, objClass, constraint);
+    m_tb->ifThen(getCurFunc(),
+      [&](Block* taken) {
+        m_tb->gen(JmpZero, taken, isInstance);
+      },
+      [&] { // taken: the param type does not match
+        m_tb->hint(Block::Unlikely);
+        spillStack();
+        m_tb->gen(VerifyParamFail, cns(paramId));
+      }
+    );
+  } else {
+    spillStack();
+    m_tb->gen(VerifyParamCls, objClass, constraint, cns(paramId));
+  }
 }
 
 void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
@@ -1929,11 +1967,8 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
   const bool haveBit = Class::haveInstanceBit(className);
 
   Class* const maybeCls = Unit::lookupUniqueClass(className);
-  const bool isNormalClass = maybeCls &&
-                             !(maybeCls->attrs() &
-                               (AttrTrait | AttrInterface));
-  const bool isUnique = RuntimeOption::RepoAuthoritative &&
-                        maybeCls && (maybeCls->attrs() & AttrUnique);
+  const bool isNormalClass = classIsUniqueNormalClass(maybeCls);
+  const bool isUnique = classIsUnique(maybeCls);
 
   /*
    * If the class is unique or a parent of the current context, we

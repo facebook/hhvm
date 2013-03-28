@@ -647,13 +647,13 @@ D:T = LdConst<T>
 
 D:ConstT = DefConst<T>
 
-D:Cls = LdCls S0:Str S1:Cls
+D:Cls = LdCls S0:Str S1:ConstCls
 
-  Loads the class named S0 in the context of the class S1. Invokes
-  autoload and may raise an error if the class is not defined. The
-  explicit context parameter allows the compiler to optimize this
-  instruction by simplifying it to LdClsCached, which uses the target
-  cache.
+  Loads the class named S0 in the context of the class S1. Invokes autoload and
+  may raise an error if the class is not defined. The explicit context
+  parameter allows the compiler to simplify this instruction to a DefConst in
+  some cases. If S0 is constant, this instruction may be simplified to a
+  LdClsCached.
 
 D:Cls = LdClsCached S0:ConstStr
 
@@ -1028,6 +1028,25 @@ Nop
 
 
 14. Runtime helpers
+
+VerifyParamCls S0:Cls S1:Cls S2:ConstInt
+
+  Verify parameter type for classes or traits. If S0 does not extend
+  (if S1 is a class) or implement (if S1 is an interface) S1, this
+  instruction will raise a recoverable fatal error describing the type
+  mismatch.
+
+VerifyParamCallable S0:Cell S1:ConstInt
+
+  If S0 is not callable, as defined by the php function is_callable,
+  this instruction will raise a recoverable fatal error describing the
+  type mismatch.
+
+VerifyParamFail S0:ConstInt
+
+  Assumes that parameter number S0 in the current function has failed
+  its typehint and raises a recoverable fatal error describing the
+  type mismatch.
 
 RaiseUninitLoc<localId>
 

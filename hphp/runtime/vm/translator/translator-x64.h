@@ -1151,6 +1151,10 @@ TXFlags planInstrAdd_Int(const NormalizedInstruction& i);
 TXFlags planInstrAdd_Array(const NormalizedInstruction& i);
 void dumpTranslationInfo(const Tracelet& t, TCA postGuards);
 
+bool classIsUnique(const Class* cls);
+bool classIsUniqueOrCtxParent(const Class* cls);
+bool classIsUniqueNormalClass(const Class* cls);
+
 // SpaceRecorder is used in translator-x64.cpp and in hopt/irtranslator.cpp
 // RAII logger for TC space consumption.
 struct SpaceRecorder {

@@ -1150,35 +1150,9 @@ TranslatorX64::irTranslateStaticLocInit(const Tracelet& t,
 // check class hierarchy and fail if no match
 void
 TranslatorX64::irTranslateVerifyParamType(const Tracelet& t,
-                                        const NormalizedInstruction& i) {
+                                          const NormalizedInstruction& i) {
   int param = i.imm[0].u_IVA;
-  const TypeConstraint& tc = curFunc()->params()[param].typeConstraint();
-
-  // not quite a nop. The guards should have verified that the m_type field
-  // is compatible, but for objects we need to go one step further and
-  // ensure that we're dealing with the right class.
-  // NULL inputs only get traced when constraint is nullable.
-  assert(i.inputs.size() == 1);
-  if (!i.inputs[0]->isObject()) {
-    HHIR_UNIMPLEMENTED_WHEN(i.m_txFlags == Interp, VerifyParamType);
-    return; // nop.
-  }
-
-  bool isSelf   = tc.isSelf();
-  bool isParent = tc.isParent();
-  const Class *constraint = nullptr;
-
-  UNUSED TargetCache::CacheHandle ch = 0;
-  if (isSelf) {
-    tc.selfToClass(curFunc(), &constraint);
-  } else if (isParent) {
-    tc.parentToClass(curFunc(), &constraint);
-  } else {
-    const StringData* clsName = tc.typeName();
-    ch = TargetCache::allocKnownClass(clsName);
-  }
-
-  HHIR_EMIT(VerifyParamType, param, (constraint ? constraint->name() : nullptr));
+  HHIR_EMIT(VerifyParamType, param);
 }
 
 void

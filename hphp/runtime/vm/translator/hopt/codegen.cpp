@@ -316,6 +316,8 @@ CALL_OPCODE(DbgAssertPtr)
 CALL_OPCODE(LdSwitchDblIndex);
 CALL_OPCODE(LdSwitchStrIndex);
 CALL_OPCODE(LdSwitchObjIndex);
+CALL_OPCODE(VerifyParamCallable);
+CALL_OPCODE(VerifyParamFail);
 CALL_OPCODE(RaiseUninitLoc)
 CALL_OPCODE(WarnNonObjProp)
 CALL_OPCODE(ThrowNonObjProp)
@@ -4768,6 +4770,24 @@ void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
   checkFrame(fp, sp, /*checkLocals*/true);
 }
 
+void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
+  SSATmp* objClass = inst->getSrc(0);
+  assert(!objClass->isConst());
+  auto objClassReg = objClass->getReg();
+  SSATmp* constraint = inst->getSrc(1);
+
+  if (constraint->isConst()) {
+    m_as.  cmpq(constraint->getValClass(), objClassReg);
+  } else {
+    m_as.  cmpq(constraint->getReg(), objClassReg);
+  }
+
+  // The native call for this instruction is the slow path that does
+  // proper subtype checking. The comparison above is just to
+  // short-circuit the overhead when the Classes are an exact match.
+  ifThen(m_as, CC_NE, [&]{ cgCallNative(inst); });
+}
+
 void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64_t pcOff,
                                   Transl::TranslatorX64* tx64) {
   // call to a trace function
@@ -4840,26 +4860,28 @@ void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
     TCA astubsStart = astubs.code.frontier;
     patchJumps(*as, state, block);
 
-    // If the block ends with a Jmp_ to the next block we're translating into
-    // the same assembler, it doesn't need to actually emit a jmp.
-    state.noTerminalJmp_ = false;
-    IRInstruction* last = block->back();
-    if (last->getOpcode() == Jmp_) {
-      for (auto next = it; next != end; ++next) {
-        if (chooseAs(*next) == as) {
-          state.noTerminalJmp_ = last->getTaken() == *next;
-          break;
-        }
+    // Grab the next block that will go into this assembler
+    Block* nextThisAs = nullptr;
+    for (auto next = it; next != end; ++next) {
+      if (chooseAs(*next) == as) {
+        nextThisAs = *next;
+        break;
       }
     }
+
+    // If the block ends with a Jmp_ to the next block for this
+    // assembler, it doesn't need to actually emit a jmp.
+    IRInstruction* last = block->back();
+    state.noTerminalJmp_ =
+      last->getOpcode() == Jmp_ && last->getTaken() == nextThisAs;
+
     CodeGenerator cg(trace, *as, astubs, tx64, state);
     cg.cgBlock(block, bcMap);
-    if (Block* next = block->getNext()) {
-      // if there's a fallthrough block and it's not the next thing going
-      // into this assembler, then emit a jump to it.
-      if (it == end || next != *it || as != chooseAs(next)) {
-        CodeGenerator::emitFwdJmp(*as, next, state);
-      }
+    Block* next = block->getNext();
+    if (next && next != nextThisAs) {
+      // if there's a fallthrough block and it's not the next thing
+      // going into this assembler, then emit a jump to it.
+      CodeGenerator::emitFwdJmp(*as, next, state);
     }
     if (state.asmInfo) {
       state.asmInfo->asmRanges[block] = TcaRange(asmStart, as->code.frontier);

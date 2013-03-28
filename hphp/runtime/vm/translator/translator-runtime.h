@@ -59,6 +59,10 @@ void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis);
 RefData* box_value(TypedValue tv);
 void raisePropertyOnNonObject();
 void raiseUndefProp(ObjectData* base, const StringData* name);
+void VerifyParamTypeFail(int param);
+void VerifyParamTypeCallable(TypedValue value, int param);
+void VerifyParamTypeSlow(const Class* cls, const Class* constraint, int param);
+
 
 int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);

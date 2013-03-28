@@ -311,14 +311,14 @@ classIsPersistent(const Class* cls) {
     TargetCache::isPersistentHandle(cls->m_cachedOffset);
 }
 
-inline static bool
+bool
 classIsUnique(const Class* cls) {
   return RuntimeOption::RepoAuthoritative &&
     cls &&
     (cls->attrs() & AttrUnique);
 }
 
-inline static bool
+bool
 classIsUniqueOrCtxParent(const Class* cls) {
   if (!cls) return false;
   if (classIsUnique(cls)) return true;
@@ -327,7 +327,7 @@ classIsUniqueOrCtxParent(const Class* cls) {
   return ctx->classof(cls);
 }
 
-inline static bool
+bool
 classIsUniqueNormalClass(const Class* cls) {
   return classIsUnique(cls) &&
     !(cls->attrs() & (AttrInterface | AttrTrait));
@@ -10324,32 +10324,6 @@ emitClassToReg(X64Assembler& a, const StringData* name, PhysReg r) {
 }
 
 static void
-VerifyParamTypeFail(int paramNum) {
-  VMRegAnchor _;
-  const ActRec* ar = curFrame();
-  const Func* func = ar->m_func;
-  const TypeConstraint& tc = func->params()[paramNum].typeConstraint();
-  assert(tc.isObject());
-  TypedValue* tv = frame_local(ar, paramNum);
-  TRACE(3, "%s Obj %s, needs type %s\n",
-        __func__,
-        tv->m_data.pobj->getVMClass()->name()->data(),
-        tc.typeName()->data());
-  tc.verifyFail(func, paramNum, tv);
-}
-
-// check class hierarchy and fail if no match
-static void
-VerifyParamTypeSlow(const Class* cls, const Class* constraint, int param) {
-  Stats::inc(Stats::Tx64_VerifyParamTypeSlow);
-  Stats::inc(Stats::Tx64_VerifyParamTypeSlowShortcut, -1);
-
-  if (UNLIKELY(!(constraint && cls->classof(constraint)))) {
-    VerifyParamTypeFail(param);
-  }
-}
-
-static void
 VerifyParamCallable(ObjectData* obj, int param) {
   TypedValue tv;
   tvWriteObject(obj, &tv);
@@ -10428,7 +10402,6 @@ TranslatorX64::translateVerifyParamType(const Tracelet& t,
                  IMM(param));
     }
   }
-
 }
 
 void

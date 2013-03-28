@@ -214,8 +214,6 @@ public:
   SSATmp* genLdStackAddr(int64_t offset) {
     return genLdStackAddr(m_spValue, offset);
   }
-  void    genVerifyParamType(SSATmp* objClass, SSATmp* className,
-                             const Class* constraint, Trace* exitTrace);
 
   void    genNativeImpl();
 
@@ -297,6 +295,22 @@ public:
     m_trace->back()->setHint(h);
   }
 
+  struct DisableCseGuard {
+    DisableCseGuard(TraceBuilder& tb)
+        : m_tb(tb)
+        , m_oldEnable(tb.m_enableCse)
+    {
+        m_tb.m_enableCse = false;
+    }
+    ~DisableCseGuard() {
+      m_tb.m_enableCse = m_oldEnable;
+    }
+
+   private:
+    TraceBuilder& m_tb;
+    bool m_oldEnable;
+  };
+
   /*
    * cond() generates if-then-else blocks within a trace.  The caller
    * supplies lambdas to create the branch, next-body, and taken-body.
@@ -307,9 +321,7 @@ public:
   SSATmp* cond(const Func* func, Branch branch, Next next, Taken taken) {
     Block* taken_block = m_irFactory.defBlock(func);
     Block* done_block = m_irFactory.defBlock(func, 1);
-    bool oldEnableCse = m_enableCse;
-    m_enableCse = false;
-    SCOPE_EXIT { m_enableCse = oldEnableCse; };
+    DisableCseGuard guard(*this);
     branch(taken_block);
     SSATmp* v1 = next();
     genJmp(done_block, v1);
@@ -320,6 +332,41 @@ public:
     SSATmp* result = done_block->getLabel()->getDst(0);
     result->setType(Type::unionOf(v1->getType(), v2->getType()));
     return result;
+  }
+
+  /*
+   * ifThen generates if-then blocks within a trace that do not
+   * produce values. Code emitted in the taken lambda will be executed
+   * iff the branch emitted in the branch lambda is taken.
+   */
+  template <class Branch, class Taken>
+  void ifThen(const Func* func, Branch branch, Taken taken) {
+    Block* taken_block = m_irFactory.defBlock(func);
+    Block* done_block = m_irFactory.defBlock(func);
+    DisableCseGuard guard(*this);
+    branch(taken_block);
+    assert(!m_trace->back()->getNext());
+    m_trace->back()->setNext(done_block);
+    appendBlock(taken_block);
+    taken();
+    taken_block->setNext(done_block);
+    appendBlock(done_block);
+  }
+
+  /*
+   * ifElse generates if-then-else blocks with an empty 'then' block
+   * that do not produce values. Code emitted in the next lambda will
+   * be executed iff the branch emitted in the branch lambda is not
+   * taken.
+   */
+  template <class Branch, class Next>
+  void ifElse(const Func* func, Branch branch, Next next) {
+    Block* done_block = m_irFactory.defBlock(func);
+    DisableCseGuard guard(*this);
+    branch(done_block);
+    next();
+    m_trace->back()->setNext(done_block);
+    appendBlock(done_block);
   }
 
 private:

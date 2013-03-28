@@ -78,7 +78,7 @@ public:
   bool isParent() const {
     return m_type.isParent();
   }
-  
+
   bool isCallable() const {
     return m_type.isCallable();
   }
@@ -112,6 +112,7 @@ public:
   }
 
   bool check(const TypedValue* tv, const Func* func) const;
+  bool check(DataType dt) const;
 
   // NB: will throw if the check fails.
   void verify(const TypedValue* tv,

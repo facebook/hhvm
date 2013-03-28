@@ -703,7 +703,7 @@ bool TestServer::TestXboxServer() {
         "int(5)\n"
         "int(0)\n"
         "int(0)\n"
-        "int(2)\n",
+        "int(0)\n",
         "string?main=1");
 
   return true;

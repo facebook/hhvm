@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <pwd.h>
+#include <memory>
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(posix);
@@ -35,30 +36,55 @@ bool f_posix_access(CStrRef file, int mode /* = 0 */) {
   return !access(path.data(), mode);
 }
 
-static Variant php_posix_group_to_array(struct group *g) {
-  if (!g) {
+static Variant php_posix_group_to_array(int gid,
+                   CStrRef gname = null_variant) {
+  // Don't pass a gid *and* a gname to this.
+  assert((gid <  0) || gname.size() == 0);
+
+  if ((gid < 0) && (gname.size() == 0)) {
+    return false;
+  }
+
+  int grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+  if (grbuflen < 1) {
+    return false;
+  }
+
+  std::unique_ptr<char[]> grbuf(new char[grbuflen]);
+  struct group gr;
+  struct group *retgrptr = NULL;
+
+  // If we somehow reach this point and both gname and gid were
+  // passed, then the gid values will override the game values,
+  // but it will otherwise function just fine.
+  // The assert() clause above should prevent that, however.
+  if ((gname.size() > 0) &&
+      getgrnam_r(gname.data(), &gr, grbuf.get(), grbuflen, &retgrptr)) {
+    return false;
+  } else if ((gid >= 0) &&
+      getgrgid_r(gid, &gr, grbuf.get(), grbuflen, &retgrptr)) {
     return false;
   }
 
   Array members;
-  for (int count=0; g->gr_mem[count] != NULL; count++) {
-    members.append(String(g->gr_mem[count], AttachLiteral));
+  for (int count=0; gr.gr_mem[count] != NULL; count++) {
+    members.append(String(gr.gr_mem[count], CopyString));
   }
 
   Array ret;
-  ret.set("name", String(g->gr_name, AttachLiteral));
-  ret.set("passwd", String(g->gr_passwd, AttachLiteral));
+  ret.set("name", String(gr.gr_name, CopyString));
+  ret.set("passwd", String(gr.gr_passwd, CopyString));
   ret.set("members", members);
-  ret.set("gid", (int)g->gr_gid);
+  ret.set("gid", (int)gr.gr_gid);
   return ret;
 }
 
 Variant f_posix_getgrgid(int gid) {
-  return php_posix_group_to_array(getgrgid(gid));
+  return php_posix_group_to_array(gid);
 }
 
 Variant f_posix_getgrnam(CStrRef name) {
-  return php_posix_group_to_array(getgrnam(name.data()));
+  return php_posix_group_to_array(-1, name.data());
 }
 
 Variant f_posix_getgroups() {
@@ -75,28 +101,53 @@ Variant f_posix_getgroups() {
   return ret;
 }
 
-static Variant php_posix_passwd_to_array(struct passwd *pw) {
-  if (!pw) {
+static Variant php_posix_passwd_to_array(int uid,
+                   CStrRef name = null_variant) {
+  // Don't pass a uid *and* a name to this.
+  assert((uid <  0) || name.size() == 0);
+
+  if ((uid < 0) && name.size() == 0) {
+    return false;
+  }
+
+  int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+  if (pwbuflen < 1) {
+    return false;
+  }
+
+  std::unique_ptr<char[]> pwbuf(new char[pwbuflen]);
+  struct passwd pw;
+  struct passwd *retpwptr = NULL;
+
+  // If we somehow reach this point and both name and uid were
+  // passed, then the uid values will override the name values,
+  // but it will otherwise function just fine.
+  // The assert() clauses above should prevent that, however.
+  if ((name.size() > 0) &&
+      getpwnam_r(name.data(), &pw, pwbuf.get(), pwbuflen, &retpwptr)) {
+    return false;
+  } else if ((uid >= 0) &&
+      getpwuid_r(uid, &pw, pwbuf.get(), pwbuflen, &retpwptr)) {
     return false;
   }
 
   Array ret;
-  ret.set("name",   String(pw->pw_name,   AttachLiteral));
-  ret.set("passwd", String(pw->pw_passwd, AttachLiteral));
-  ret.set("uid",    (int)pw->pw_uid);
-  ret.set("gid",    (int)pw->pw_gid);
-  ret.set("gecos",  String(pw->pw_gecos,  AttachLiteral));
-  ret.set("dir",    String(pw->pw_dir,    AttachLiteral));
-  ret.set("shell",  String(pw->pw_shell,  AttachLiteral));
+  ret.set("name",   String(pw.pw_name,   CopyString));
+  ret.set("passwd", String(pw.pw_passwd, CopyString));
+  ret.set("uid",    (int)pw.pw_uid);
+  ret.set("gid",    (int)pw.pw_gid);
+  ret.set("gecos",  String(pw.pw_gecos,  CopyString));
+  ret.set("dir",    String(pw.pw_dir,    CopyString));
+  ret.set("shell",  String(pw.pw_shell,  CopyString));
   return ret;
 }
 
 Variant f_posix_getpwnam(CStrRef username) {
-  return php_posix_passwd_to_array(getpwnam(username.data()));
+  return php_posix_passwd_to_array(-1, username);
 }
 
 Variant f_posix_getpwuid(int uid) {
-  return php_posix_passwd_to_array(getpwuid(uid));
+  return php_posix_passwd_to_array(uid);
 }
 
 static bool posix_addlimit(int limit, const char *name, Array &ret) {
@@ -210,11 +261,17 @@ Variant f_posix_times() {
 }
 
 Variant f_posix_ttyname(CVarRef fd) {
-  char *p = ttyname(php_posix_get_fd(fd));
-  if (!p) {
+  int ttyname_maxlen = sysconf(_SC_TTY_NAME_MAX);
+  if (ttyname_maxlen <= 0) {
     return false;
   }
-  return String(p, CopyString);
+
+  String ttyname(ttyname_maxlen, ReserveString);
+  char *p = ttyname.mutableSlice().ptr;
+  if (ttyname_r(php_posix_get_fd(fd), p, ttyname_maxlen)) {
+    return false;
+  }
+  return ttyname.setSize(strlen(p));
 }
 
 Variant f_posix_uname() {

@@ -104,6 +104,10 @@ bool TestExtPosix::test_posix_getgrgid() {
   Variant ret = f_posix_getgrgid(f_posix_getgid());
   VERIFY(!same(ret, false));
   VERIFY(!ret.toArray().empty());
+
+  Variant bynam = f_posix_getgrnam(ret["name"]);
+  VS(ret, bynam);
+
   return Count(true);
 }
 
@@ -111,6 +115,10 @@ bool TestExtPosix::test_posix_getgrnam() {
   Variant ret = f_posix_getgrnam("root");
   VERIFY(!same(ret, false));
   VERIFY(!ret.toArray().empty());
+
+  Variant bygid = f_posix_getgrgid(ret["gid"]);
+  VS(ret, bygid);
+
   return Count(true);
 }
 
@@ -150,6 +158,7 @@ bool TestExtPosix::test_posix_getpwnam() {
   Variant ret = f_posix_getpwnam("root");
   VERIFY(!same(ret, false));
   VERIFY(!ret.toArray().empty());
+  VS(f_posix_getpwnam(""), false);
   return Count(true);
 }
 
@@ -157,6 +166,7 @@ bool TestExtPosix::test_posix_getpwuid() {
   Variant ret = f_posix_getpwuid(0);
   VERIFY(!same(ret, false));
   VERIFY(!ret.toArray().empty());
+  VS(f_posix_getpwuid(-1), false);
   return Count(true);
 }
 
@@ -247,7 +257,7 @@ bool TestExtPosix::test_posix_times() {
 }
 
 bool TestExtPosix::test_posix_ttyname() {
-  f_posix_ttyname(1);
+  // Jenkins doesn't have real ttys to test this with
   return Count(true);
 }
 

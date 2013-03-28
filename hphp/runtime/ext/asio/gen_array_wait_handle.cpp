@@ -99,9 +99,12 @@ Object c_GenArrayWaitHandle::ti_create(const char* cls, CArrRef dependencies) {
   }
 
   if (exception.isNull()) {
-    return c_StaticResultWaitHandle::t_create(deps);
+    TypedValue tv;
+    tv.m_type = KindOfArray;
+    tv.m_data.parr = deps.get();
+    return c_StaticResultWaitHandle::Create(&tv);
   } else {
-    return c_StaticExceptionWaitHandle::t_create(exception);
+    return c_StaticExceptionWaitHandle::Create(exception.get());
   }
 }
 

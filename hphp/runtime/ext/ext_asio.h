@@ -143,6 +143,7 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
 
 
  public:
+  static p_StaticResultWaitHandle Create(const TypedValue* result);
   String getName();
 };
 
@@ -168,6 +169,7 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
 
 
  public:
+  static p_StaticExceptionWaitHandle Create(ObjectData* exception);
   String getName();
 };
 

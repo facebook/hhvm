@@ -41,8 +41,12 @@ void c_StaticResultWaitHandle::t___construct() {
 }
 
 Object c_StaticResultWaitHandle::ti_create(const char* cls, CVarRef result) {
+  return Create(result.asTypedValue());
+}
+
+p_StaticResultWaitHandle c_StaticResultWaitHandle::Create(const TypedValue* result) {
   p_StaticResultWaitHandle wh = NEWOBJ(c_StaticResultWaitHandle)();
-  tvReadCell(result.asTypedValue(), &wh->m_resultOrException);
+  tvReadCell(result, &wh->m_resultOrException);
   return wh;
 }
 

@@ -47,8 +47,12 @@ Object c_StaticExceptionWaitHandle::ti_create(const char* cls, CObjRef exception
     throw e;
   }
 
+  return Create(exception.get());
+}
+
+p_StaticExceptionWaitHandle c_StaticExceptionWaitHandle::Create(ObjectData* exception) {
   p_StaticExceptionWaitHandle wh = NEWOBJ(c_StaticExceptionWaitHandle)();
-  tvWriteObject(exception.get(), &wh->m_resultOrException);
+  tvWriteObject(exception, &wh->m_resultOrException);
   return wh;
 }
 

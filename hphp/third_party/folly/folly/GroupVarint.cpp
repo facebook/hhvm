@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Facebook, Inc.
+ * Copyright 2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 #include "folly/GroupVarint.h"
 
+#if HAVE_GROUP_VARINT
 namespace folly {
 
 const uint32_t GroupVarint32::kMask[] = {
@@ -29,4 +30,4 @@ const uint64_t GroupVarint64::kMask[] = {
 };
 
 }  // namespace folly
-
+#endif

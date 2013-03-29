@@ -19,6 +19,7 @@
 
 #include "folly/Range.h"
 
+#include <emmintrin.h>  // __v16qi
 #include "folly/Likely.h"
 
 namespace folly {
@@ -56,6 +57,22 @@ size_t qfind_first_byte_of_memchr(const StringPiece& haystack,
 
 namespace {
 
+// It's okay if pages are bigger than this (as powers of two), but they should
+// not be smaller.
+constexpr size_t kMinPageSize = 4096;
+static_assert(kMinPageSize >= 16,
+              "kMinPageSize must be at least SSE register size");
+#define PAGE_FOR(addr) \
+  (reinterpret_cast<uintptr_t>(addr) / kMinPageSize)
+
+inline size_t nextAlignedIndex(const char* arr) {
+  auto firstPossible = reinterpret_cast<uintptr_t>(arr) + 1;
+  return 1 +                       // add 1 because the index starts at 'arr'
+    ((firstPossible + 15) & ~0xF)  // round up to next multiple of 16
+    - firstPossible;
+}
+
+#if FOLLY_HAVE_EMMINTRIN_H
 // build sse4.2-optimized version even if -msse4.2 is not passed to GCC
 size_t qfind_first_byte_of_needles16(const StringPiece& haystack,
                                      const StringPiece& needles)
@@ -64,16 +81,34 @@ size_t qfind_first_byte_of_needles16(const StringPiece& haystack,
 // helper method for case where needles.size() <= 16
 size_t qfind_first_byte_of_needles16(const StringPiece& haystack,
                                      const StringPiece& needles) {
+  DCHECK(!haystack.empty());
+  DCHECK(!needles.empty());
   DCHECK_LE(needles.size(), 16);
-  if (needles.size() <= 2 && haystack.size() >= 256) {
-    // benchmarking shows that memchr beats out SSE for small needle-sets
-    // with large haystacks.
-    // TODO(mcurtiss): could this be because of unaligned SSE loads?
+  // benchmarking shows that memchr beats out SSE for small needle-sets
+  // with large haystacks.
+  if ((needles.size() <= 2 && haystack.size() >= 256) ||
+      // must bail if we can't even SSE-load a single segment of haystack
+      (haystack.size() < 16 &&
+       PAGE_FOR(haystack.end() - 1) != PAGE_FOR(haystack.data() + 15)) ||
+      // can't load needles into SSE register if it could cross page boundary
+      PAGE_FOR(needles.end() - 1) != PAGE_FOR(needles.data() + 15)) {
     return detail::qfind_first_byte_of_memchr(haystack, needles);
   }
+
   auto arr2 = __builtin_ia32_loaddqu(needles.data());
-  for (size_t i = 0; i < haystack.size(); i+= 16) {
-    auto arr1 = __builtin_ia32_loaddqu(haystack.data() + i);
+  // do an unaligned load for first block of haystack
+  auto arr1 = __builtin_ia32_loaddqu(haystack.data());
+  auto index = __builtin_ia32_pcmpestri128(arr2, needles.size(),
+                                           arr1, haystack.size(), 0);
+  if (index < 16) {
+    return index;
+  }
+
+  // Now, we can do aligned loads hereafter...
+  size_t i = nextAlignedIndex(haystack.data());
+  for (; i < haystack.size(); i+= 16) {
+    void* ptr1 = __builtin_assume_aligned(haystack.data() + i, 16);
+    auto arr1 = *reinterpret_cast<const __v16qi*>(ptr1);
     auto index = __builtin_ia32_pcmpestri128(arr2, needles.size(),
                                              arr1, haystack.size() - i, 0);
     if (index < 16) {
@@ -82,6 +117,7 @@ size_t qfind_first_byte_of_needles16(const StringPiece& haystack,
   }
   return StringPiece::npos;
 }
+#endif // FOLLY_HAVE_EMMINTRIN_H
 
 // Aho, Hopcroft, and Ullman refer to this trick in "The Design and Analysis
 // of Computer Algorithms" (1974), but the best description is here:
@@ -127,6 +163,57 @@ size_t qfind_first_byte_of_byteset(const StringPiece& haystack,
   return StringPiece::npos;
 }
 
+#if FOLLY_HAVE_EMMINTRIN_H
+
+template <bool HAYSTACK_ALIGNED>
+inline size_t scanHaystackBlock(const StringPiece& haystack,
+                                const StringPiece& needles,
+                                int64_t idx)
+// inline is okay because it's only called from other sse4.2 functions
+  __attribute__ ((__target__("sse4.2")));
+
+// Scans a 16-byte block of haystack (starting at blockStartIdx) to find first
+// needle. If HAYSTACK_ALIGNED, then haystack must be 16byte aligned.
+// If !HAYSTACK_ALIGNED, then caller must ensure that it is safe to load the
+// block.
+template <bool HAYSTACK_ALIGNED>
+inline size_t scanHaystackBlock(const StringPiece& haystack,
+                                const StringPiece& needles,
+                                int64_t blockStartIdx) {
+  DCHECK_GT(needles.size(), 16);  // should handled by *needles16() method
+  DCHECK(blockStartIdx + 16 <= haystack.size() ||
+         (PAGE_FOR(haystack.data() + blockStartIdx) ==
+          PAGE_FOR(haystack.data() + blockStartIdx + 15)));
+
+  __v16qi arr1;
+  if (HAYSTACK_ALIGNED) {
+    void* ptr1 = __builtin_assume_aligned(haystack.data() + blockStartIdx, 16);
+    arr1 = *reinterpret_cast<const __v16qi*>(ptr1);
+  } else {
+    arr1 = __builtin_ia32_loaddqu(haystack.data() + blockStartIdx);
+  }
+
+  // This load is safe because needles.size() >= 16
+  auto arr2 = __builtin_ia32_loaddqu(needles.data());
+  size_t b = __builtin_ia32_pcmpestri128(
+    arr2, 16, arr1, haystack.size() - blockStartIdx, 0);
+
+  size_t j = nextAlignedIndex(needles.data());
+  for (; j < needles.size(); j += 16) {
+    void* ptr2 = __builtin_assume_aligned(needles.data() + j, 16);
+    arr2 = *reinterpret_cast<const __v16qi*>(ptr2);
+
+    auto index = __builtin_ia32_pcmpestri128(
+      arr2, needles.size() - j, arr1, haystack.size() - blockStartIdx, 0);
+    b = std::min<size_t>(index, b);
+  }
+
+  if (b < 16) {
+    return blockStartIdx + b;
+  }
+  return StringPiece::npos;
+}
+
 size_t qfind_first_byte_of_sse42(const StringPiece& haystack,
                                  const StringPiece& needles)
   __attribute__ ((__target__("sse4.2"), noinline));
@@ -141,22 +228,31 @@ size_t qfind_first_byte_of_sse42(const StringPiece& haystack,
     return qfind_first_byte_of_needles16(haystack, needles);
   }
 
-  size_t index = haystack.size();
-  for (size_t i = 0; i < haystack.size(); i += 16) {
-    size_t b = 16;
-    auto arr1 = __builtin_ia32_loaddqu(haystack.data() + i);
-    for (size_t j = 0; j < needles.size(); j += 16) {
-      auto arr2 = __builtin_ia32_loaddqu(needles.data() + j);
-      auto index = __builtin_ia32_pcmpestri128(arr2, needles.size() - j,
-                                               arr1, haystack.size() - i, 0);
-      b = std::min<size_t>(index, b);
+  if (haystack.size() < 16 &&
+      PAGE_FOR(haystack.end() - 1) != PAGE_FOR(haystack.data() + 16)) {
+    // We can't safely SSE-load haystack. Use a different approach.
+    if (haystack.size() <= 2) {
+      return qfind_first_of(haystack, needles, asciiCaseSensitive);
     }
-    if (b < 16) {
-      return i + b;
+    return qfind_first_byte_of_byteset(haystack, needles);
+  }
+
+  auto ret = scanHaystackBlock<false>(haystack, needles, 0);
+  if (ret != StringPiece::npos) {
+    return ret;
+  }
+
+  size_t i = nextAlignedIndex(haystack.data());
+  for (; i < haystack.size(); i += 16) {
+    auto ret = scanHaystackBlock<true>(haystack, needles, i);
+    if (ret != StringPiece::npos) {
+      return ret;
     }
-  };
+  }
+
   return StringPiece::npos;
 }
+#endif // FOLLY_HAVE_EMMINTRIN_H
 
 size_t qfind_first_byte_of_nosse(const StringPiece& haystack,
                                  const StringPiece& needles) {

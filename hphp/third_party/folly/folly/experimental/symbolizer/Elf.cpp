@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Facebook, Inc.
+ * Copyright 2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@
 #include <glog/logging.h>
 
 #include "folly/Conv.h"
+#include "folly/Exception.h"
 
 namespace folly {
 namespace symbolizer {
@@ -39,26 +40,29 @@ ElfFile::ElfFile()
     baseAddress_(0) {
 }
 
-ElfFile::ElfFile(const char* name)
-  : fd_(open(name, O_RDONLY)),
+ElfFile::ElfFile(const char* name, bool readOnly)
+  : fd_(open(name, (readOnly) ? O_RDONLY : O_RDWR)),
     file_(static_cast<char*>(MAP_FAILED)),
     length_(0),
     baseAddress_(0) {
   if (fd_ == -1) {
-    systemError("open ", name);
+    folly::throwSystemError("open ", name);
   }
 
   struct stat st;
   int r = fstat(fd_, &st);
   if (r == -1) {
-    systemError("fstat");
+    folly::throwSystemError("fstat");
   }
 
   length_ = st.st_size;
-  file_ = static_cast<char*>(
-      mmap(nullptr, length_, PROT_READ, MAP_SHARED, fd_, 0));
+  int prot = PROT_READ;
+  if (!readOnly) {
+    prot |= PROT_WRITE;
+  }
+  file_ = static_cast<char*>(mmap(nullptr, length_, prot, MAP_SHARED, fd_, 0));
   if (file_ == MAP_FAILED) {
-    systemError("mmap");
+    folly::throwSystemError("mmap");
   }
   init();
 }
@@ -233,40 +237,74 @@ const ElfW(Shdr)* ElfFile::getSectionByName(const char* name) const {
 ElfFile::Symbol ElfFile::getDefinitionByAddress(uintptr_t address) const {
   Symbol foundSymbol {nullptr, nullptr};
 
-  auto find = [&] (const ElfW(Shdr)& section) {
-    enforce(section.sh_entsize == sizeof(ElfW(Sym)),
-            "invalid entry size in symbol table");
-
-    const ElfW(Sym)* sym = &at<ElfW(Sym)>(section.sh_offset);
-    const ElfW(Sym)* end = &at<ElfW(Sym)>(section.sh_offset + section.sh_size);
-    for (; sym != end; ++sym) {
-      // st_info has the same representation on 32- and 64-bit platforms
-      auto type = ELF32_ST_TYPE(sym->st_info);
-
-      // TODO(tudorb): Handle STT_TLS, but then we'd have to understand
-      // thread-local relocations.  If all we're looking up is functions
-      // (instruction pointers), it doesn't matter, though.
-      if (type != STT_OBJECT && type != STT_FUNC) {
-        continue;
+  auto findSection = [&](const ElfW(Shdr)& section) {
+    auto findSymbols = [&](const ElfW(Sym)& sym) {
+      if (sym.st_shndx == SHN_UNDEF) {
+        return false;  // not a definition
       }
-      if (sym->st_shndx == SHN_UNDEF) {
-        continue;  // not a definition
-      }
-      if (address >= sym->st_value && address < sym->st_value + sym->st_size) {
+      if (address >= sym.st_value && address < sym.st_value + sym.st_size) {
         foundSymbol.first = &section;
-        foundSymbol.second = sym;
+        foundSymbol.second = &sym;
         return true;
       }
-    }
 
-    return false;
+      return false;
+    };
+
+    return iterateSymbolsWithType(section, STT_OBJECT, findSymbols) ||
+      iterateSymbolsWithType(section, STT_FUNC, findSymbols);
   };
 
   // Try the .dynsym section first if it exists, it's smaller.
-  (iterateSectionsWithType(SHT_DYNSYM, find) ||
-   iterateSectionsWithType(SHT_SYMTAB, find));
+  (iterateSectionsWithType(SHT_DYNSYM, findSection) ||
+   iterateSectionsWithType(SHT_SYMTAB, findSection));
 
   return foundSymbol;
+}
+
+ElfFile::Symbol ElfFile::getSymbolByName(const char* name) const {
+  Symbol foundSymbol{nullptr, nullptr};
+
+  auto findSection = [&](const ElfW(Shdr)& section) -> bool {
+    // This section has no string table associated w/ its symbols; hence we
+    // can't get names for them
+    if (section.sh_link == SHN_UNDEF) {
+      return false;
+    }
+
+    auto findSymbols = [&](const ElfW(Sym)& sym) -> bool {
+      if (sym.st_shndx == SHN_UNDEF) {
+        return false;  // not a definition
+      }
+      if (sym.st_name == 0) {
+        return false;  // no name for this symbol
+      }
+      const char* sym_name = getString(
+        *getSectionByIndex(section.sh_link), sym.st_name);
+      if (strcmp(sym_name, name) == 0) {
+        foundSymbol.first = &section;
+        foundSymbol.second = &sym;
+        return true;
+      }
+
+      return false;
+    };
+
+    return iterateSymbolsWithType(section, STT_OBJECT, findSymbols) ||
+      iterateSymbolsWithType(section, STT_FUNC, findSymbols);
+  };
+
+  // Try the .dynsym section first if it exists, it's smaller.
+  iterateSectionsWithType(SHT_DYNSYM, findSection) ||
+    iterateSectionsWithType(SHT_SYMTAB, findSection);
+
+  return foundSymbol;
+}
+
+const ElfW(Shdr)* ElfFile::getSectionContainingAddress(ElfW(Addr) addr) const {
+  return iterateSections([&](const ElfW(Shdr)& sh) -> bool {
+    return (addr >= sh.sh_addr) && (addr < (sh.sh_addr + sh.sh_size));
+  });
 }
 
 const char* ElfFile::getSymbolName(Symbol symbol) const {

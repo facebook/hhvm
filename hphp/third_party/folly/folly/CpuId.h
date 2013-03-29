@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Facebook, Inc.
+ * Copyright 2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,14 @@ namespace folly {
 class CpuId {
  public:
   CpuId() {
+#if defined(__x86_64__) || defined(__i386__)
     __asm__("cpuid" : "=c"(c_), "=d"(d_) : "a"(1) : "ebx");
+#else
+    // On non-Intel, none of these features exist; at least not in the same form
+    // as they do on Intel
+    c_ = 0;
+    d_ = 0;
+#endif
   }
 #define X(name, r, bit) bool name() const { return r & (1U << bit); }
 #define C(name, bit) X(name, c_, bit)

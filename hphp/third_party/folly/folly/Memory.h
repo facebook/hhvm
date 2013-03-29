@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef FOLLY_STLALLOCATOR_H_
-#define FOLLY_STLALLOCATOR_H_
+#ifndef FOLLY_MEMORY_H_
+#define FOLLY_MEMORY_H_
 
 #include "folly/Traits.h"
 
@@ -28,6 +28,18 @@
 #include <cstddef>
 
 namespace folly {
+
+/**
+ * For exception safety and consistency with make_shared. Erase me when
+ * we have std::make_unique().
+ *
+ * @author Louis Brandy (ldbrandy@fb.com)
+ */
+
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
 
 /**
  * Wrap a SimpleAllocator into a STL-compliant allocator.
@@ -264,4 +276,4 @@ std::shared_ptr<T> allocate_shared(Allocator&& allocator, Args&&... args) {
 
 }  // namespace folly
 
-#endif /* FOLLY_STLALLOCATOR_H_ */
+#endif /* FOLLY_MEMORY_H_ */

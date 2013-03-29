@@ -73,7 +73,7 @@ const None none = nullptr;
  * gcc-4.7 warns about use of uninitialized memory around the use of storage_
  * even though this is explicitly initialized at each point.
  */
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wuninitialized"
 # pragma GCC diagnostic ignored "-Wpragmas"
@@ -169,6 +169,16 @@ class Optional : boost::totally_ordered<Optional<Value>,
     return *this;
   }
 
+  Optional& operator=(Optional &&other) {
+    assign(std::move(other));
+    return *this;
+  }
+
+  Optional& operator=(const Optional &other) {
+    assign(other);
+    return *this;
+  }
+
   bool operator<(const Optional& other) const {
     if (hasValue() != other.hasValue()) {
       return hasValue() < other.hasValue();
@@ -245,7 +255,9 @@ class Optional : boost::totally_ordered<Optional<Value>,
   bool hasValue_;
 };
 
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
 
 template<class T>
 const T* get_pointer(const Optional<T>& opt) {
@@ -268,6 +280,12 @@ void swap(Optional<T>& a, Optional<T>& b) {
   }
 }
 
-}// namespace folly
+template<class T,
+         class Opt = Optional<typename std::decay<T>::type>>
+Opt make_optional(T&& v) {
+  return Opt(std::forward<T>(v));
+}
+
+} // namespace folly
 
 #endif//FOLLY_OPTIONAL_H_

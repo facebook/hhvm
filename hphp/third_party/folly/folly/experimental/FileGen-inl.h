@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Facebook, Inc.
+ * Copyright 2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,11 @@ class FileReader : public GenImpl<ByteRange, FileReader> {
       }
     }
   }
+
+  // Technically, there could be infinite files (e.g. /dev/random), but people
+  // who open those can do so at their own risk.
+  static constexpr bool infinite = false;
+
  private:
   File file_;
   std::unique_ptr<IOBuf> buffer_;

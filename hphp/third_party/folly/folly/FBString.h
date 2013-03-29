@@ -248,8 +248,10 @@ private:
  * gcc-4.7 throws what appears to be some false positive uninitialized
  * warnings for the members of the MediumLarge struct.  So, mute them here.
  */
+#if defined(__GNUC__) && !defined(__clang__)
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wuninitialized"
+#endif
 
 /**
  * This is the core of the string. The code should work on 32- and
@@ -834,7 +836,9 @@ private:
   }
 };
 
+#if defined(__GNUC__) && !defined(__clang__)
 # pragma GCC diagnostic pop
+#endif
 
 #ifndef _LIBSTDCXX_FBSTRING
 /**
@@ -1042,8 +1046,8 @@ public:
   ~basic_fbstring() {
   }
 
-  basic_fbstring& operator=(const basic_fbstring & lhs) {
-    if (&lhs == this) {
+  basic_fbstring& operator=(const basic_fbstring& lhs) {
+    if (FBSTRING_UNLIKELY(&lhs == this)) {
       return *this;
     }
     auto const oldSize = size();
@@ -1066,6 +1070,8 @@ public:
 
   // Move assignment
   basic_fbstring& operator=(basic_fbstring&& goner) {
+    // Self move assignment is illegal, see 17.6.4.9 for the explanation
+    assert(&goner != this);
     // No need of this anymore
     this->~basic_fbstring();
     // Move the goner into this
@@ -2047,7 +2053,7 @@ template <typename E, class T, class A, class S>
 inline
 bool operator==(const basic_fbstring<E, T, A, S>& lhs,
                 const basic_fbstring<E, T, A, S>& rhs) {
-  return lhs.compare(rhs) == 0; }
+  return lhs.size() == rhs.size() && lhs.compare(rhs) == 0; }
 
 template <typename E, class T, class A, class S>
 inline

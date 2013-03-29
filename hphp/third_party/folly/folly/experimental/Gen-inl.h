@@ -135,14 +135,6 @@ Composed operator|(Operator<Left>&& left,
   return Composed(std::move(left.self()), std::move(right.self()));
 }
 
-template<class Value,
-         class Source,
-         class Yield = detail::Yield<Value, Source>>
-Yield operator+(const detail::GeneratorBuilder<Value>&,
-                Source&& source) {
-  return Yield(std::forward<Source>(source));
-}
-
 /**
  * GenImpl - Core abstraction of a generator, an object which produces values by
  * passing them to a given handler lambda. All generator implementations must
@@ -176,10 +168,16 @@ class GenImpl : public FBounded<Self> {
   template<class Body>
   void foreach(Body&& body) const {
     this->self().apply([&](Value value) -> bool {
+        static_assert(!infinite, "Cannot call foreach on infinite GenImpl");
         body(std::forward<Value>(value));
         return true;
       });
   }
+
+  // Child classes should override if the sequence generated is *definitely*
+  // infinite. 'infinite' may be false_type for some infinite sequences
+  // (due the the Halting Problem).
+  static constexpr bool infinite = false;
 };
 
 template<class LeftValue,
@@ -244,6 +242,8 @@ template<class Value,
 typename std::enable_if<
   IsCompatibleSignature<Handler, void(Value)>::value>::type
 operator|(const GenImpl<Value, Gen>& gen, Handler&& handler) {
+  static_assert(!Gen::infinite,
+                "Cannot pull all values from an infinite sequence.");
   gen.self().foreach(std::forward<Handler>(handler));
 }
 
@@ -408,13 +408,14 @@ class Sequence : public GenImpl<const Value&,
                 !std::is_const<Value>::value, "Value mustn't be const or ref.");
   Value bounds_[endless ? 1 : 2];
 public:
-  explicit Sequence(const Value& begin)
-      : bounds_{begin} {
+  explicit Sequence(Value begin)
+      : bounds_{std::move(begin)} {
     static_assert(endless, "Must supply 'end'");
   }
 
-  explicit Sequence(const Value& begin, const Value& end)
-    : bounds_{begin, end} {}
+  Sequence(Value begin,
+           Value end)
+    : bounds_{std::move(begin), std::move(end)} {}
 
   template<class Handler>
   bool apply(Handler&& handler) const {
@@ -446,6 +447,8 @@ public:
       body(arg);
     }
   }
+
+  static constexpr bool infinite = endless;
 };
 
 /**
@@ -476,6 +479,20 @@ public:
   void foreach(Body&& body) const {
     first_.foreach(std::forward<Body>(body));
     second_.foreach(std::forward<Body>(body));
+  }
+
+  static constexpr bool infinite = First::infinite || Second::infinite;
+};
+
+/**
+ * GenratorBuilder - Helper for GENERTATOR macro.
+ **/
+template<class Value>
+struct GeneratorBuilder {
+  template<class Source,
+           class Yield = detail::Yield<Value, Source>>
+  Yield operator+(Source&& source) {
+    return Yield(std::forward<Source>(source));
   }
 };
 
@@ -528,10 +545,12 @@ class Yield : public GenImpl<Value, Yield<Value, Source>> {
  */
 template<class Predicate>
 class Map : public Operator<Map<Predicate>> {
-  Predicate predicate_;
+  Predicate pred_;
  public:
-  explicit Map(const Predicate& predicate = Predicate())
-    : predicate_(predicate)
+  Map() {}
+
+  explicit Map(Predicate pred)
+    : pred_(std::move(pred))
   { }
 
   template<class Value,
@@ -560,20 +579,22 @@ class Map : public Operator<Map<Predicate>> {
         return handler(pred_(std::forward<Value>(value)));
       });
     }
+
+    static constexpr bool infinite = Source::infinite;
   };
 
   template<class Source,
            class Value,
            class Gen = Generator<Value, Source>>
   Gen compose(GenImpl<Value, Source>&& source) const {
-    return Gen(std::move(source.self()), predicate_);
+    return Gen(std::move(source.self()), pred_);
   }
 
   template<class Source,
            class Value,
            class Gen = Generator<Value, Source>>
   Gen compose(const GenImpl<Value, Source>& source) const {
-    return Gen(source.self(), predicate_);
+    return Gen(source.self(), pred_);
   }
 };
 
@@ -590,10 +611,11 @@ class Map : public Operator<Map<Predicate>> {
  */
 template<class Predicate>
 class Filter : public Operator<Filter<Predicate>> {
-  Predicate predicate_;
+  Predicate pred_;
  public:
-  explicit Filter(const Predicate& predicate)
-    : predicate_(predicate)
+  Filter() {}
+  explicit Filter(Predicate pred)
+    : pred_(std::move(pred))
   { }
 
   template<class Value,
@@ -623,20 +645,22 @@ class Filter : public Operator<Filter<Predicate>> {
         return true;
       });
     }
+
+    static constexpr bool infinite = Source::infinite;
   };
 
   template<class Source,
            class Value,
            class Gen = Generator<Value, Source>>
   Gen compose(GenImpl<Value, Source>&& source) const {
-    return Gen(std::move(source.self()), predicate_);
+    return Gen(std::move(source.self()), pred_);
   }
 
   template<class Source,
            class Value,
            class Gen = Generator<Value, Source>>
   Gen compose(const GenImpl<Value, Source>& source) const {
-    return Gen(source.self(), predicate_);
+    return Gen(source.self(), pred_);
   }
 };
 
@@ -651,11 +675,12 @@ class Filter : public Operator<Filter<Predicate>> {
  */
 template<class Predicate>
 class Until : public Operator<Until<Predicate>> {
-  Predicate predicate_;
+  Predicate pred_;
  public:
-  explicit Until(const Predicate& predicate)
-    : predicate_(predicate)
-  { }
+  Until() {}
+  explicit Until(Predicate pred)
+    : pred_(std::move(pred))
+  {}
 
   template<class Value,
            class Source,
@@ -681,15 +706,18 @@ class Until : public Operator<Until<Predicate>> {
            class Value,
            class Gen = Generator<Value, Source>>
   Gen compose(GenImpl<Value, Source>&& source) const {
-    return Gen(std::move(source.self()), predicate_);
+    return Gen(std::move(source.self()), pred_);
   }
 
   template<class Source,
            class Value,
            class Gen = Generator<Value, Source>>
   Gen compose(const GenImpl<Value, Source>& source) const {
-    return Gen(source.self(), predicate_);
+    return Gen(source.self(), pred_);
   }
+
+  // Theoretically an 'until' might stop an infinite
+  static constexpr bool infinite = false;
 };
 
 /**
@@ -800,6 +828,8 @@ class Skip : public Operator<Skip> {
           return handler(std::forward<Value>(value));
         });
     }
+
+    static constexpr bool infinite = Source::infinite;
   };
 
   template<class Source,
@@ -835,9 +865,17 @@ class Order : public Operator<Order<Selector, Comparer>> {
   Selector selector_;
   Comparer comparer_;
  public:
-  explicit Order(const Selector& selector = Selector(),
-                 const Comparer& comparer = Comparer())
-    : selector_(selector) , comparer_(comparer) {}
+  Order() {}
+
+  explicit Order(Selector selector)
+    : selector_(std::move(selector))
+  {}
+
+  Order(Selector selector,
+        Comparer comparer)
+    : selector_(std::move(selector))
+    , comparer_(std::move(comparer))
+  {}
 
   template<class Value,
            class Source,
@@ -846,6 +884,7 @@ class Order : public Operator<Order<Selector, Comparer>> {
   class Generator :
     public GenImpl<StorageType&&,
                    Generator<Value, Source, StorageType, Result>> {
+    static_assert(!Source::infinite, "Cannot sort infinite source!");
     Source source_;
     Selector selector_;
     Comparer comparer_;
@@ -935,6 +974,7 @@ class Composed : public Operator<Composed<First, Second>> {
   Second second_;
  public:
   Composed() {}
+
   Composed(First first, Second second)
     : first_(std::move(first))
     , second_(std::move(second)) {}
@@ -982,14 +1022,17 @@ class FoldLeft : public Operator<FoldLeft<Seed, Fold>> {
   Seed seed_;
   Fold fold_;
  public:
-  FoldLeft(const Seed& seed, const Fold& fold)
-    : seed_(seed)
-    , fold_(fold)
+  FoldLeft() {}
+  FoldLeft(Seed seed,
+           Fold fold)
+    : seed_(std::move(seed))
+    , fold_(std::move(fold))
   {}
 
   template<class Source,
            class Value>
   Seed compose(const GenImpl<Value, Source>& source) const {
+    static_assert(!Source::infinite, "Cannot foldl infinite source");
     Seed accum = seed_;
     source | [&](Value v) {
       accum = fold_(std::move(accum), std::forward<Value>(v));
@@ -1027,11 +1070,16 @@ class First : public Operator<First> {
 
 
 /**
- * Any - For determining whether any values are contained in a sequence.
+ * Any - For determining whether any values in a sequence satisfy a predicate.
  *
  * This type is primarily used through the 'any' static value, like:
  *
  *   bool any20xPrimes = seq(200, 210) | filter(isPrime) | any;
+ *
+ * Note that it may also be used like so:
+ *
+ *   bool any20xPrimes = seq(200, 210) | any(isPrime);
+ *
  */
 class Any : public Operator<Any> {
  public:
@@ -1046,6 +1094,52 @@ class Any : public Operator<Any> {
       return false;
     };
     return any;
+  }
+
+  /**
+   * Convenience function for use like:
+   *
+   *  bool found = gen | any([](int i) { return i * i > 100; });
+   */
+  template<class Predicate,
+           class Filter = Filter<Predicate>,
+           class Composed = Composed<Filter, Any>>
+  Composed operator()(Predicate pred) const {
+    return Composed(Filter(std::move(pred)), Any());
+  }
+};
+
+/**
+ * All - For determining whether all values in a sequence satisfy a predicate.
+ *
+ * This type is primarily used through the 'any' static value, like:
+ *
+ *   bool valid = from(input) | all(validate);
+ *
+ * Note: Passing an empty sequence through 'all()' will always return true.
+ */
+template<class Predicate>
+class All : public Operator<All<Predicate>> {
+  Predicate pred_;
+ public:
+  All() {}
+  explicit All(Predicate pred)
+    : pred_(std::move(pred))
+  { }
+
+  template<class Source,
+           class Value>
+  bool compose(const GenImpl<Value, Source>& source) const {
+    static_assert(!Source::infinite, "Cannot call 'all' on infinite source");
+    bool all = true;
+    source | [&](Value v) -> bool {
+      if (!pred_(std::forward<Value>(v))) {
+        all = false;
+        return false;
+      }
+      return true;
+    };
+    return all;
   }
 };
 
@@ -1065,8 +1159,9 @@ template<class Reducer>
 class Reduce : public Operator<Reduce<Reducer>> {
   Reducer reducer_;
  public:
-  explicit Reduce(const Reducer& reducer)
-    : reducer_(reducer)
+  Reduce() {}
+  explicit Reduce(Reducer reducer)
+    : reducer_(std::move(reducer))
   {}
 
   template<class Source,
@@ -1102,6 +1197,7 @@ class Count : public Operator<Count> {
   template<class Source,
            class Value>
   size_t compose(const GenImpl<Value, Source>& source) const {
+    static_assert(!Source::infinite, "Cannot count infinite source");
     return foldl(size_t(0),
                  [](size_t accum, Value v) {
                    return accum + 1;
@@ -1118,12 +1214,13 @@ class Count : public Operator<Count> {
  */
 class Sum : public Operator<Sum> {
  public:
-  Sum() { }
+  Sum() : Operator<Sum>() {}
 
   template<class Source,
            class Value,
            class StorageType = typename std::decay<Value>::type>
   StorageType compose(const GenImpl<Value, Source>& source) const {
+    static_assert(!Source::infinite, "Cannot sum infinite source");
     return foldl(StorageType(0),
                  [](StorageType&& accum, Value v) {
                    return std::move(accum) + std::forward<Value>(v);
@@ -1151,6 +1248,9 @@ class Contains : public Operator<Contains<Needle>> {
            class Value,
            class StorageType = typename std::decay<Value>::type>
   bool compose(const GenImpl<Value, Source>& source) const {
+    static_assert(!Source::infinite,
+                  "Calling contains on an infinite source might cause "
+                  "an infinite loop.");
     return !(source | [this](Value value) {
         return !(needle_ == std::forward<Value>(value));
       });
@@ -1175,10 +1275,16 @@ class Min : public Operator<Min<Selector, Comparer>> {
   Selector selector_;
   Comparer comparer_;
  public:
-  explicit Min(const Selector& selector = Selector(),
-               const Comparer& comparer = Comparer())
-    : selector_(selector)
-    , comparer_(comparer)
+  Min() {}
+
+  explicit Min(Selector selector)
+    : selector_(std::move(selector))
+  {}
+
+  Min(Selector selector,
+        Comparer comparer)
+    : selector_(std::move(selector))
+    , comparer_(std::move(comparer))
   {}
 
   template<class Value,
@@ -1337,6 +1443,8 @@ class Concat : public Operator<Concat> {
           inner.foreach(std::forward<Body>(body));
         });
     }
+
+    static constexpr bool infinite = Source::infinite;
   };
 
   template<class Value,

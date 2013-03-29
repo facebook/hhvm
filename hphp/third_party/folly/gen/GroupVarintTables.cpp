@@ -1,3 +1,5 @@
+
+#if defined(__x86_64__) || defined(__i386__)
 #include <stdint.h>
 #include <x86intrin.h>
 
@@ -520,7 +522,9 @@ extern const uint8_t groupVarintLengths[] = {
   15,
   16,
   17,
+
 };
 
 }  // namespace detail
 }  // namespace folly
+#endif /* defined(__x86_64__) || defined(__i386__) */

@@ -888,7 +888,7 @@ public:
   virtual void requestInit() = 0;
   virtual void requestExit() = 0;
   virtual void analyzeInstr(Tracelet& t, NormalizedInstruction& i) = 0;
-  virtual TCA funcPrologue(Func* f, int nArgs) = 0;
+  virtual TCA funcPrologue(Func* f, int nArgs, ActRec* ar = nullptr) = 0;
   virtual TCA getCallToExit() = 0;
   virtual TCA getRetFromInterpretedFrame() = 0;
   virtual void defineCns(StringData* name) = 0;

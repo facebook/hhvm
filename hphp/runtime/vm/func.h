@@ -145,9 +145,9 @@ struct Func {
 #endif
   }
 
-  FuncId getFuncId() const { 
+  FuncId getFuncId() const {
     assert(m_funcId != InvalidId);
-    return m_funcId; 
+    return m_funcId;
   }
   void setFuncId(FuncId id);
   void setNewFuncId();
@@ -321,6 +321,7 @@ struct Func {
   bool top() const { return shared()->m_top; }
   const StringData* docComment() const { return shared()->m_docComment; }
   bool isClosureBody() const { return shared()->m_isClosureBody; }
+  bool isClonedClosure() const;
   bool isGenerator() const { return shared()->m_isGenerator; }
   bool isGeneratorFromClosure() const {
     return shared()->m_isGeneratorFromClosure;

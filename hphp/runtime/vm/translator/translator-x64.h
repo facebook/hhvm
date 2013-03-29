@@ -939,7 +939,7 @@ private:
   static int  shuffleArgsForMagicCall(ActRec* ar);
   static void setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
                              DataType t);
-  TCA funcPrologue(Func* func, int nArgs);
+  TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
   bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
   SrcKey emitPrologue(Func* func, int nArgs);
   int32_t emitNativeImpl(const Func*, bool emitSavedRIPReturn);

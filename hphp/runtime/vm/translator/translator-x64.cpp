@@ -2039,8 +2039,16 @@ TranslatorX64::emitPopRetIntoActRec(Asm& a) {
   a.    pop  (rStashedAR[AROFF(m_savedRip)]);
 }
 
+static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
+  assert(tl_regState == REGSTATE_DIRTY);
+  tl_regState = REGSTATE_CLEAN;
+  vmfp() = (Cell*)ar;
+  vmsp() = sp;
+  vmpc() = curUnit()->at(pcOff);
+}
+
 TCA
-TranslatorX64::funcPrologue(Func* func, int nPassed) {
+TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
   int numParams = func->numParams();
@@ -2051,6 +2059,27 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
   // Do a quick test before grabbing the write lease
   TCA prologue;
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
+  if (func->isClonedClosure()) {
+    assert(ar);
+    const Func::ParamInfoVec& paramInfo = func->params();
+    Offset entry = func->base();
+    for (int i = nPassed; i < numParams; ++i) {
+      const Func::ParamInfo& pi = paramInfo[i];
+      if (pi.hasDefaultValue()) {
+        entry = pi.funcletOff();
+        break;
+      }
+    }
+    interp_set_regs(ar, (Cell*)ar - func->numSlotsInFrame(), entry);
+    SrcKey funcBody(func, entry);
+    TCA tca = getTranslation(funcBody, false);
+    tl_regState = REGSTATE_DIRTY;
+    if (tca) {
+      // racy, but ok...
+      func->setPrologue(paramIndex, tca);
+    }
+    return tca;
+  }
 
   // If the translator is getting replaced out from under us, refuse to
   // provide a prologue; we don't know whether this request is running on the
@@ -2060,6 +2089,7 @@ TranslatorX64::funcPrologue(Func* func, int nPassed) {
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
+
   SpaceRecorder sr("_FuncPrologue", a);
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
@@ -2394,7 +2424,15 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   // code
   emitCheckSurpriseFlagsEnter(false, fixup);
 
-  emitBindJmp(funcBody);
+  if (func->isClosureBody() && func->cls()) {
+    int entry = nPassed <= numParams ? nPassed : numParams + 1;
+    // Relying on rStashedAR == rVmFp here
+    a.    loadq   (rStashedAR[AROFF(m_func)], rax);
+    a.    loadq   (rax[Func::prologueTableOff() + sizeof(TCA)*entry], rax);
+    a.    jmp     (rax);
+  } else {
+    emitBindJmp(funcBody);
+  }
   return funcBody;
 }
 
@@ -3999,14 +4037,6 @@ TranslatorX64::binaryArithLocal(const NormalizedInstruction &i,
     emitMovRegReg(a, r(scr), outReg);
     a.    storeq (r(scr), localReg[RefData::tvOffset() + TVOFF(m_data)]);
   }
-}
-
-static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
-  assert(tl_regState == REGSTATE_DIRTY);
-  tl_regState = REGSTATE_CLEAN;
-  vmfp() = (Cell*)ar;
-  vmsp() = sp;
-  vmpc() = curUnit()->at(pcOff);
 }
 
 #define O(opcode, imm, pusph, pop, flags) \

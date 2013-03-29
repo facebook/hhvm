@@ -86,9 +86,18 @@ void TranslatorX64::reqLitHelper(const ReqLitStaticArgs* args) {
  */
 
 static TCA callAndResume(ActRec *ar) {
-  VMRegAnchor _(ar, true);
-  g_vmContext->doFCall<true>(ar, g_vmContext->m_pc);
-  return Translator::Get()->getResumeHelperRet();
+  if (!ar->m_func->isClonedClosure()) {
+    /*
+     * If the func is a cloned closure, then the original
+     * closure has already run the prolog, and the prologs
+     * array is just being used as entry points for the
+     * dv funclets. Dont run the prolog again.
+     */
+    VMRegAnchor _(ar, true);
+    g_vmContext->doFCall<true>(ar, g_vmContext->m_pc);
+    return Translator::Get()->getResumeHelperRet();
+  }
+  return Translator::Get()->getResumeHelper();
 }
 
 static_assert(rStashedAR == reg::r15,
@@ -99,14 +108,22 @@ asm(
   ".globl __fcallHelperThunk\n"
 "__fcallHelperThunk:\n"
 #if defined(__x86_64__)
+  // fcallHelper is used for prologs, and (in the case of
+  // closures) for dispatch to the function body. In the first
+  // case, there's a call, in the second, there's a jmp.
+  // We can differentiate by comparing r15 and rVmFp
+  "mov %r15, %rdi\n"
+  "cmp %r15, %rbp\n"
+  "jne 1f\n"
+  "call fcallHelper\n"
+  "jmp *%rax\n"
   // fcallHelper may call doFCall. doFCall changes the return ip
   // pointed to by r15 so that it points to TranslatorX64::m_retHelper,
   // which does a REQ_POST_INTERP_RET service request. So we need to
   // to pop the return address into r15 + m_savedRip before calling
   // fcallHelper, and then push it back from r15 + m_savedRip after
   // fcallHelper returns in case it has changed it.
-  "pop 0x8(%r15)\n"
-  "mov %r15, %rdi\n"
+  "1: pop 0x8(%r15)\n"
   "call fcallHelper\n"
   "push 0x8(%r15)\n"
   "jmp *%rax\n"
@@ -122,7 +139,7 @@ extern "C"
 TCA fcallHelper(ActRec* ar) {
   try {
     TCA tca =
-      Translator::Get()->funcPrologue((Func*)ar->m_func, ar->numArgs());
+      Translator::Get()->funcPrologue((Func*)ar->m_func, ar->numArgs(), ar);
     if (tca) {
       return tca;
     }

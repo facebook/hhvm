@@ -365,6 +365,12 @@ const FPIEnt* Func::findPrecedingFPI(Offset o) const {
   return fe;
 }
 
+bool Func::isClonedClosure() const {
+  if (!isClosureBody()) return false;
+  if (!cls()) return true;
+  return cls()->lookupMethod(name()) != this;
+}
+
 bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
   if (RuntimeOption::EvalJitEnableRenameFunction ||
       m_attrs & AttrDynamicInvoke) {

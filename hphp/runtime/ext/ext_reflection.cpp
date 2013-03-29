@@ -862,6 +862,10 @@ Object f_hphp_create_object(CStrRef name, CArrRef params) {
   return g_vmContext->createObject(name.get(), params);
 }
 
+Object f_hphp_create_object_without_constructor(CStrRef name) {
+  return g_vmContext->createObject(name.get(), nullptr, false);
+}
+
 Variant f_hphp_get_property(CObjRef obj, CStrRef cls, CStrRef prop) {
   return obj->o_get(prop);
 }

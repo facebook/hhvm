@@ -253,6 +253,23 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hphp_create_object_without_constructor",
+    'desc'   => "Used by FFI interface for other languages to call into PHP.",
+    'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => String,
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
     'name'   => "hphp_get_property",
     'desc'   => "Used by FFI interface for other languages to call into PHP.",
     'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,

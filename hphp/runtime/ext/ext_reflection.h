@@ -35,6 +35,7 @@ Variant f_hphp_invoke(CStrRef name, CArrRef params);
 Variant f_hphp_invoke_method(CVarRef obj, CStrRef cls, CStrRef name, CArrRef params);
 bool f_hphp_instanceof(CObjRef obj, CStrRef name);
 Object f_hphp_create_object(CStrRef name, CArrRef params);
+Object f_hphp_create_object_without_constructor(CStrRef name);
 Variant f_hphp_get_property(CObjRef obj, CStrRef cls, CStrRef prop);
 void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop, CVarRef value);
 Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop);

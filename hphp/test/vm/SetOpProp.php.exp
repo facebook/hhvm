@@ -47,7 +47,7 @@ E Object
 
     [p] => 1
 )
-HipHop Warning:  Creating default object from empty value in hphp/test/vm/SetOpProp.php on line 59
+HipHop Warning: Creating default object from empty value in hphp/test/vm/SetOpProp.php on line 59
 stdClass Object
 (
     [a] => <a>
@@ -56,7 +56,7 @@ stdClass Object
     [q] => 1
     [r] => hello
 )
-HipHop Warning:  Attempt to assign property of non-object in hphp/test/vm/SetOpProp.php on line 68
-HipHop Warning:  Attempt to assign property of non-object in hphp/test/vm/SetOpProp.php on line 69
+HipHop Warning: Attempt to assign property of non-object in hphp/test/vm/SetOpProp.php on line 68
+HipHop Warning: Attempt to assign property of non-object in hphp/test/vm/SetOpProp.php on line 69
 42
 Test end

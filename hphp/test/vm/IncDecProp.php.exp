@@ -122,7 +122,7 @@ E Object
     [postDec] => -1
 )
 --- null ---
-HipHop Warning:  Creating default object from empty value in hphp/test/vm/IncDecProp.php on line 98
+HipHop Warning: Creating default object from empty value in hphp/test/vm/IncDecProp.php on line 98
 int(1)
 NULL
 NULL
@@ -135,7 +135,7 @@ stdClass Object
     [postDec] => <-- trailing whitespace
 )
 --- 42 ---
-HipHop Warning:  Attempt to increment/decrement property of non-object in hphp/test/vm/IncDecProp.php on line 106
+HipHop Warning: Attempt to increment/decrement property of non-object in hphp/test/vm/IncDecProp.php on line 106
 NULL
 42
 Test end

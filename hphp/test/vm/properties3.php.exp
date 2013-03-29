@@ -46,7 +46,7 @@ object(C)#3 (2) {
   ["y"]=>
   int(1)
 }
-HipHop Notice:  Undefined property: D::$y in hphp/test/vm/properties3.php on line 187
+HipHop Notice: Undefined property: D::$y in hphp/test/vm/properties3.php on line 187
 NULL
 NULL
 object(D)#4 (2) {

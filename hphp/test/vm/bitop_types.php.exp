@@ -3,7 +3,7 @@ boolean(1) & integer(42) = integer(0)
 boolean(1) & double(24.1987) = integer(0)
 boolean(1) & string(str) = integer(0)
 boolean(1) & array(Array) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 boolean(1) & object(c) = integer(1)
 boolean(1) & NULL() = integer(0)
 integer(42) & boolean(1) = integer(0)
@@ -11,7 +11,7 @@ integer(42) & integer(42) = integer(42)
 integer(42) & double(24.1987) = integer(8)
 integer(42) & string(str) = integer(0)
 integer(42) & array(Array) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 integer(42) & object(c) = integer(0)
 integer(42) & NULL() = integer(0)
 double(24.1987) & boolean(1) = integer(0)
@@ -19,7 +19,7 @@ double(24.1987) & integer(42) = integer(8)
 double(24.1987) & double(24.1987) = integer(24)
 double(24.1987) & string(str) = integer(0)
 double(24.1987) & array(Array) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 double(24.1987) & object(c) = integer(0)
 double(24.1987) & NULL() = integer(0)
 string(str) & boolean(1) = integer(0)
@@ -27,7 +27,7 @@ string(str) & integer(42) = integer(0)
 string(str) & double(24.1987) = integer(0)
 string(str) & string(str) = string(str)
 string(str) & array(Array) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 string(str) & object(c) = integer(0)
 string(str) & NULL() = integer(0)
 array(Array) & boolean(1) = integer(1)
@@ -35,30 +35,30 @@ array(Array) & integer(42) = integer(0)
 array(Array) & double(24.1987) = integer(0)
 array(Array) & string(str) = integer(0)
 array(Array) & array(Array) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 array(Array) & object(c) = integer(1)
 array(Array) & NULL() = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) & boolean(1) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) & integer(42) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) & double(24.1987) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) & string(str) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) & array(Array) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) & object(c) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) & NULL() = integer(0)
 NULL() & boolean(1) = integer(0)
 NULL() & integer(42) = integer(0)
 NULL() & double(24.1987) = integer(0)
 NULL() & string(str) = integer(0)
 NULL() & array(Array) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 NULL() & object(c) = integer(0)
 NULL() & NULL() = integer(0)
 boolean(1) ^ boolean(1) = integer(0)
@@ -66,7 +66,7 @@ boolean(1) ^ integer(42) = integer(43)
 boolean(1) ^ double(24.1987) = integer(25)
 boolean(1) ^ string(str) = integer(1)
 boolean(1) ^ array(Array) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 boolean(1) ^ object(c) = integer(0)
 boolean(1) ^ NULL() = integer(1)
 integer(42) ^ boolean(1) = integer(43)
@@ -74,7 +74,7 @@ integer(42) ^ integer(42) = integer(0)
 integer(42) ^ double(24.1987) = integer(50)
 integer(42) ^ string(str) = integer(42)
 integer(42) ^ array(Array) = integer(43)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 integer(42) ^ object(c) = integer(43)
 integer(42) ^ NULL() = integer(42)
 double(24.1987) ^ boolean(1) = integer(25)
@@ -82,14 +82,14 @@ double(24.1987) ^ integer(42) = integer(50)
 double(24.1987) ^ double(24.1987) = integer(0)
 double(24.1987) ^ string(str) = integer(24)
 double(24.1987) ^ array(Array) = integer(25)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 double(24.1987) ^ object(c) = integer(25)
 double(24.1987) ^ NULL() = integer(24)
 string(str) ^ boolean(1) = integer(1)
 string(str) ^ integer(42) = integer(42)
 string(str) ^ double(24.1987) = integer(24)
 string(str) ^ string(str) = string(string(str) ^ array(Array) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 string(str) ^ object(c) = integer(1)
 string(str) ^ NULL() = integer(0)
 array(Array) ^ boolean(1) = integer(0)
@@ -97,30 +97,30 @@ array(Array) ^ integer(42) = integer(43)
 array(Array) ^ double(24.1987) = integer(25)
 array(Array) ^ string(str) = integer(1)
 array(Array) ^ array(Array) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 array(Array) ^ object(c) = integer(0)
 array(Array) ^ NULL() = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) ^ boolean(1) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) ^ integer(42) = integer(43)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) ^ double(24.1987) = integer(25)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) ^ string(str) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) ^ array(Array) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) ^ object(c) = integer(0)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) ^ NULL() = integer(1)
 NULL() ^ boolean(1) = integer(1)
 NULL() ^ integer(42) = integer(42)
 NULL() ^ double(24.1987) = integer(24)
 NULL() ^ string(str) = integer(0)
 NULL() ^ array(Array) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 NULL() ^ object(c) = integer(1)
 NULL() ^ NULL() = integer(0)
 boolean(1) | boolean(1) = integer(1)
@@ -128,7 +128,7 @@ boolean(1) | integer(42) = integer(43)
 boolean(1) | double(24.1987) = integer(25)
 boolean(1) | string(str) = integer(1)
 boolean(1) | array(Array) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 boolean(1) | object(c) = integer(1)
 boolean(1) | NULL() = integer(1)
 integer(42) | boolean(1) = integer(43)
@@ -136,7 +136,7 @@ integer(42) | integer(42) = integer(42)
 integer(42) | double(24.1987) = integer(58)
 integer(42) | string(str) = integer(42)
 integer(42) | array(Array) = integer(43)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 integer(42) | object(c) = integer(43)
 integer(42) | NULL() = integer(42)
 double(24.1987) | boolean(1) = integer(25)
@@ -144,7 +144,7 @@ double(24.1987) | integer(42) = integer(58)
 double(24.1987) | double(24.1987) = integer(24)
 double(24.1987) | string(str) = integer(24)
 double(24.1987) | array(Array) = integer(25)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 double(24.1987) | object(c) = integer(25)
 double(24.1987) | NULL() = integer(24)
 string(str) | boolean(1) = integer(1)
@@ -152,7 +152,7 @@ string(str) | integer(42) = integer(42)
 string(str) | double(24.1987) = integer(24)
 string(str) | string(str) = string(str)
 string(str) | array(Array) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 string(str) | object(c) = integer(1)
 string(str) | NULL() = integer(0)
 array(Array) | boolean(1) = integer(1)
@@ -160,30 +160,30 @@ array(Array) | integer(42) = integer(43)
 array(Array) | double(24.1987) = integer(25)
 array(Array) | string(str) = integer(1)
 array(Array) | array(Array) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 array(Array) | object(c) = integer(1)
 array(Array) | NULL() = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) | boolean(1) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) | integer(42) = integer(43)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) | double(24.1987) = integer(25)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) | string(str) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) | array(Array) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) | object(c) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 object(c) | NULL() = integer(1)
 NULL() | boolean(1) = integer(1)
 NULL() | integer(42) = integer(42)
 NULL() | double(24.1987) = integer(24)
 NULL() | string(str) = integer(0)
 NULL() | array(Array) = integer(1)
-HipHop Notice:  Object of class c could not be converted to int
+HipHop Notice: Object of class c could not be converted to int
 NULL() | object(c) = integer(1)
 NULL() | NULL() = integer(0)
 int(0)

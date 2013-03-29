@@ -173,11 +173,11 @@ bool f_trigger_error(CStrRef error_msg,
   } else if (error_type == k_E_USER_WARNING) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::NeverThrow,
-                       "HipHop Warning:  ");
+                       "HipHop Warning: ");
   } else if (error_type == k_E_USER_NOTICE) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::NeverThrow,
-                       "HipHop Notice:  ");
+                       "HipHop Notice: ");
   } else if (error_type == k_E_USER_DEPRECATED) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::NeverThrow,

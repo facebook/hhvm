@@ -1,7 +1,7 @@
 => PHP level errors
 bad args:
 string(0) ""
-HipHop Warning:  Too many arguments for idn_to_ascii(), expected 4 in hphp/test/vm/idn-uts46-errors.php on line 7
+HipHop Warning: Too many arguments for idn_to_ascii(), expected 4 in hphp/test/vm/idn-uts46-errors.php on line 7
 NULL
 bad variant:
 bool(false)

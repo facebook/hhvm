@@ -11,17 +11,17 @@ object(A)#1 (2) {
   NULL
 }
 NULL
-HipHop Notice:  Undefined property: A::$x in hphp/test/vm/multidim_props.php on line 14
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
+HipHop Notice: Undefined property: A::$x in hphp/test/vm/multidim_props.php on line 14
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
 NULL
-HipHop Notice:  Undefined property: A::$x in hphp/test/vm/multidim_props.php on line 16
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
+HipHop Notice: Undefined property: A::$x in hphp/test/vm/multidim_props.php on line 16
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
 NULL
 NULL
 object(A)#1 (2) {
@@ -37,16 +37,16 @@ object(A)#1 (2) {
   NULL
 }
 NULL
-HipHop Notice:  Undefined property: A::$x in hphp/test/vm/multidim_props.php on line 14
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
+HipHop Notice: Undefined property: A::$x in hphp/test/vm/multidim_props.php on line 14
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 14
 NULL
-HipHop Notice:  Undefined property: A::$x in hphp/test/vm/multidim_props.php on line 16
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
-HipHop Warning:  Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
+HipHop Notice: Undefined property: A::$x in hphp/test/vm/multidim_props.php on line 16
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
+HipHop Warning: Cannot access property on non-object in hphp/test/vm/multidim_props.php on line 16
 NULL
 NULL

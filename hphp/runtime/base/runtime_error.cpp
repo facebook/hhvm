@@ -86,7 +86,7 @@ void raise_strict_warning(const std::string &msg) {
   }
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::NeverThrow,
-                         "HipHop Strict Warning:  ");
+                         "HipHop Strict Warning: ");
 }
 
 void raise_strict_warning(const char *fmt, ...) {
@@ -106,7 +106,7 @@ void raise_strict_warning(const char *fmt, ...) {
   va_end(ap);
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::NeverThrow,
-                         "HipHop Strict Warning:  ");
+                         "HipHop Strict Warning: ");
 }
 
 static int64_t g_warning_counter = 0;
@@ -123,7 +123,7 @@ void raise_warning(const std::string &msg) {
   }
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::NeverThrow,
-                         "HipHop Warning:  ");
+                         "HipHop Warning: ");
 }
 
 void raise_warning(const char *fmt, ...) {
@@ -143,13 +143,13 @@ void raise_warning(const char *fmt, ...) {
   va_end(ap);
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::NeverThrow,
-                         "HipHop Warning:  ");
+                         "HipHop Warning: ");
 }
 
 void raise_debugging(const std::string &msg) {
   g_context->handleError(msg, ErrorConstants::WARNING, true,
                          ExecutionContext::NeverThrow,
-                         "HipHop Warning:  ");
+                         "HipHop Warning: ");
 }
 
 void raise_debugging(const char *fmt, ...) {
@@ -173,7 +173,7 @@ void raise_notice(const std::string &msg) {
   }
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::NeverThrow,
-                         "HipHop Notice:  ");
+                         "HipHop Notice: ");
 }
 
 void raise_notice(const char *fmt, ...) {
@@ -193,7 +193,7 @@ void raise_notice(const char *fmt, ...) {
   va_end(ap);
   g_context->handleError(msg, errnum, true,
                          ExecutionContext::NeverThrow,
-                         "HipHop Notice:  ");
+                         "HipHop Notice: ");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

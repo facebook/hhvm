@@ -6,5 +6,5 @@ D3::foo false
 D3::foo false
 D4::foo false
 D4::foo false
-HipHop Warning:  Invalid argument: function: method 'foo' not found in hphp/test/vm/cuf-call11.php on line 97
-HipHop Warning:  Invalid argument: function: method 'foo' not found in hphp/test/vm/cuf-call11.php on line 98
+HipHop Warning: Invalid argument: function: method 'foo' not found in hphp/test/vm/cuf-call11.php on line 97
+HipHop Warning: Invalid argument: function: method 'foo' not found in hphp/test/vm/cuf-call11.php on line 98

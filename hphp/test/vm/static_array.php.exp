@@ -169,7 +169,7 @@ array(2) {
     int(0)
   }
 }
-HipHop Warning:  Invalid operand type was used: Invalid type used as key in hphp/test/vm/static_array.php on line 88
+HipHop Warning: Invalid operand type was used: Invalid type used as key in hphp/test/vm/static_array.php on line 88
 array(0) {
 }
 array(1) {

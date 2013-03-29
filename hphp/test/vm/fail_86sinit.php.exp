@@ -3,30 +3,30 @@ array(6) {
   [0]=>
   int(16777217)
   [1]=>
-  string() "Class undefined: Z"
+  string(18) "Class undefined: Z"
   [2]=>
-  string() hphp/test/vm/fail_86sinit.php"
+   "hphp/test/vm/fail_86sinit.php"
   [3]=>
   int(5)
   [4]=>
-  string() ""
+  string(0) ""
   [5]=>
   array(2) {
     [0]=>
     array(2) {
       ["file"]=>
-      string() hphp/test/vm/fail_86sinit.php"
+       "hphp/test/vm/fail_86sinit.php"
       ["line"]=>
       int(5)
     }
     [1]=>
     array(4) {
       ["file"]=>
-      string() hphp/test/vm/fail_86sinit.php"
+       "hphp/test/vm/fail_86sinit.php"
       ["line"]=>
       int(10)
       ["function"]=>
-      string() "test"
+      string(4) "test"
       ["args"]=>
       array(0) {
       }

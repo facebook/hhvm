@@ -361,10 +361,11 @@ sub run_test
         }
     }
     ($utime, $stime, $cutime, $cstime) = times;
+    my $default_filter = "$opt_srcdir/test/vm/default.filter";
     if (-e "$opt_srcdir/$test.filter") {
-        `$command 2>&1 | $opt_srcdir/$test.filter > $opt_objdir/$test.out`;
+        `$command 2>&1 | $default_filter | $opt_srcdir/$test.filter > $opt_objdir/$test.out`;
     } else {
-        `$command > $opt_objdir/$test.out 2>&1`;
+        `$command 2>&1 | $default_filter > $opt_objdir/$test.out`;
     }
     ($utime, $stime, $tutime, $tstime) = times;
 

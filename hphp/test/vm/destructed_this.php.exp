@@ -2,7 +2,7 @@ array(3) {
   [0]=>
   array(7) {
     ["file"]=>
-
+     "hphp/test/vm/destructed_this.php"
     ["line"]=>
     int(8)
     ["function"]=>
@@ -21,7 +21,7 @@ array(3) {
   [1]=>
   array(6) {
     ["file"]=>
-
+     "hphp/test/vm/destructed_this.php"
     ["line"]=>
     int(18)
     ["function"]=>
@@ -37,7 +37,7 @@ array(3) {
   [2]=>
   array(4) {
     ["file"]=>
-
+     "hphp/test/vm/destructed_this.php"
     ["line"]=>
     int(20)
     ["function"]=>

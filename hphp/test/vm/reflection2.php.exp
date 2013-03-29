@@ -2,19 +2,19 @@ array(6) {
   [0]=>
   object(ReflectionMethod) (3) {
     ["name"]=>
-    string "my_other_override"
+    string(17) "my_other_override"
     ["class"]=>
-    string "my_child"
+    string(8) "my_child"
     ["info"]=>
     array(13) {
       ["name"]=>
-      string "my_other_override"
+      string(17) "my_other_override"
       ["access"]=>
-      string "public"
+      string(6) "public"
       ["modifiers"]=>
       int(256)
       ["class"]=>
-      string "my_child"
+      string(8) "my_child"
       ["doc"]=>
       bool(false)
       ["params"]=>
@@ -31,7 +31,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string hphp/test/vm/reflection2.php"
+       "hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(20)
       ["line2"]=>
@@ -41,19 +41,19 @@ array(6) {
   [1]=>
   object(ReflectionMethod) (3) {
     ["name"]=>
-    string "my_child_method"
+    string(15) "my_child_method"
     ["class"]=>
-    string "my_child"
+    string(8) "my_child"
     ["info"]=>
     array(13) {
       ["name"]=>
-      string "my_child_method"
+      string(15) "my_child_method"
       ["access"]=>
-      string "public"
+      string(6) "public"
       ["modifiers"]=>
       int(256)
       ["class"]=>
-      string "my_child"
+      string(8) "my_child"
       ["doc"]=>
       bool(false)
       ["params"]=>
@@ -70,7 +70,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string hphp/test/vm/reflection2.php"
+       "hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(21)
       ["line2"]=>
@@ -80,19 +80,19 @@ array(6) {
   [2]=>
   object(ReflectionMethod) (3) {
     ["name"]=>
-    string "my_method"
+    string(9) "my_method"
     ["class"]=>
-    string "my_class"
+    string(8) "my_class"
     ["info"]=>
     array(13) {
       ["name"]=>
-      string "my_method"
+      string(9) "my_method"
       ["access"]=>
-      string "public"
+      string(6) "public"
       ["modifiers"]=>
       int(256)
       ["class"]=>
-      string "my_class"
+      string(8) "my_class"
       ["doc"]=>
       bool(false)
       ["params"]=>
@@ -109,7 +109,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string hphp/test/vm/reflection2.php"
+       "hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(13)
       ["line2"]=>
@@ -119,19 +119,19 @@ array(6) {
   [3]=>
   object(ReflectionMethod) (3) {
     ["name"]=>
-    string "my_override_method"
+    string(18) "my_override_method"
     ["class"]=>
-    string "my_class"
+    string(8) "my_class"
     ["info"]=>
     array(13) {
       ["name"]=>
-      string "my_override_method"
+      string(18) "my_override_method"
       ["access"]=>
-      string "public"
+      string(6) "public"
       ["modifiers"]=>
       int(256)
       ["class"]=>
-      string "my_class"
+      string(8) "my_class"
       ["doc"]=>
       bool(false)
       ["params"]=>
@@ -148,7 +148,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string hphp/test/vm/reflection2.php"
+       "hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(15)
       ["line2"]=>
@@ -158,19 +158,19 @@ array(6) {
   [4]=>
   object(ReflectionMethod) (3) {
     ["name"]=>
-    string "my_trait_method"
+    string(15) "my_trait_method"
     ["class"]=>
-    string "my_class"
+    string(8) "my_class"
     ["info"]=>
     array(13) {
       ["name"]=>
-      string "my_trait_method"
+      string(15) "my_trait_method"
       ["access"]=>
-      string "public"
+      string(6) "public"
       ["modifiers"]=>
       int(256)
       ["class"]=>
-      string "my_class"
+      string(8) "my_class"
       ["doc"]=>
       bool(false)
       ["params"]=>
@@ -187,7 +187,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string hphp/test/vm/reflection2.php"
+       "hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(4)
       ["line2"]=>
@@ -197,19 +197,19 @@ array(6) {
   [5]=>
   object(ReflectionMethod) (3) {
     ["name"]=>
-    string "my_base_method"
+    string(14) "my_base_method"
     ["class"]=>
-    string "my_base"
+    string(7) "my_base"
     ["info"]=>
     array(13) {
       ["name"]=>
-      string "my_base_method"
+      string(14) "my_base_method"
       ["access"]=>
-      string "public"
+      string(6) "public"
       ["modifiers"]=>
       int(256)
       ["class"]=>
-      string "my_base"
+      string(7) "my_base"
       ["doc"]=>
       bool(false)
       ["params"]=>
@@ -226,7 +226,7 @@ array(6) {
       ["is_generator"]=>
       bool(false)
       ["file"]=>
-      string hphp/test/vm/reflection2.php"
+       "hphp/test/vm/reflection2.php"
       ["line1"]=>
       int(8)
       ["line2"]=>
@@ -240,13 +240,13 @@ object(ReflectionParameter) (1) {
     ["index"]=>
     int(0)
     ["name"]=>
-    string "c"
+    string(1) "c"
     ["type"]=>
-    string "MyClass"
+    string(7) "MyClass"
     ["function"]=>
-    string "f"
+    string(1) "f"
     ["class"]=>
-    string "I"
+    string(1) "I"
     ["attributes"]=>
     array(0) {
     }

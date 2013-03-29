@@ -1,2 +1,2 @@
 #!/bin/bash
-./test/vm/filepath.filter | sed -e 's/\\n/\n/g' -e '/Destructor raised a fatal error/d' -e 's/\(.*\)line.*/\1/g' | sort -fu
+sed -e 's/\\n/\n/g' -e '/Destructor raised a fatal error/d' -e 's/\(.*\)line.*/\1/g' | sort -fu

@@ -2,7 +2,7 @@ array(5) {
   [0]=>
   array(6) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace.php"
+     "hphp/test/vm/debug_backtrace.php"
     ["line"]=>
     int(9)
     ["function"]=>
@@ -18,7 +18,7 @@ array(5) {
   [1]=>
   array(7) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace.php"
+     "hphp/test/vm/debug_backtrace.php"
     ["line"]=>
     int(15)
     ["function"]=>
@@ -50,7 +50,7 @@ array(5) {
   [2]=>
   array(4) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace.php"
+     "hphp/test/vm/debug_backtrace.php"
     ["line"]=>
     int(20)
     ["function"]=>
@@ -62,7 +62,7 @@ array(5) {
   [3]=>
   array(4) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace.php"
+     "hphp/test/vm/debug_backtrace.php"
     ["line"]=>
     int(29)
     ["function"]=>
@@ -74,7 +74,7 @@ array(5) {
   [4]=>
   array(4) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace.php"
+     "hphp/test/vm/debug_backtrace.php"
     ["line"]=>
     int(34)
     ["function"]=>
@@ -88,7 +88,7 @@ array(5) {
   [0]=>
   array(6) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace.php"
+     "hphp/test/vm/debug_backtrace.php"
     ["line"]=>
     int(9)
     ["function"]=>
@@ -123,7 +123,7 @@ array(5) {
   [2]=>
   array(4) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace.php"
+     "hphp/test/vm/debug_backtrace.php"
     ["line"]=>
     int(20)
     ["function"]=>
@@ -135,7 +135,7 @@ array(5) {
   [3]=>
   array(4) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace.php"
+     "hphp/test/vm/debug_backtrace.php"
     ["line"]=>
     int(29)
     ["function"]=>
@@ -147,7 +147,7 @@ array(5) {
   [4]=>
   array(4) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace.php"
+     "hphp/test/vm/debug_backtrace.php"
     ["line"]=>
     int(34)
     ["function"]=>
@@ -161,7 +161,7 @@ array(2) {
   [0]=>
   array(4) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace.php"
+     "hphp/test/vm/debug_backtrace.php"
     ["line"]=>
     int(32)
     ["function"]=>
@@ -173,7 +173,7 @@ array(2) {
       [1]=>
       string(63) "Use of undefined constant FakeConstant - assumed 'FakeConstant'"
       [2]=>
-      string() "hphp/test/vm/debug_backtrace.php"
+       "hphp/test/vm/debug_backtrace.php"
       [3]=>
       int(32)
       [4]=>
@@ -183,14 +183,14 @@ array(2) {
         [0]=>
         array(2) {
           ["file"]=>
-          string() "hphp/test/vm/debug_backtrace.php"
+           "hphp/test/vm/debug_backtrace.php"
           ["line"]=>
           int(32)
         }
         [1]=>
         array(4) {
           ["file"]=>
-          string() "hphp/test/vm/debug_backtrace.php"
+           "hphp/test/vm/debug_backtrace.php"
           ["line"]=>
           int(34)
           ["function"]=>
@@ -205,7 +205,7 @@ array(2) {
   [1]=>
   array(4) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace.php"
+     "hphp/test/vm/debug_backtrace.php"
     ["line"]=>
     int(34)
     ["function"]=>

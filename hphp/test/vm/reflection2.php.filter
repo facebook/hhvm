@@ -1,2 +1,2 @@
 #!/bin/sh
-./test/vm/filepath.filter | sed -e 's/^\([ ]*object([^)]\+)\)#[0-9]\+/\1/g' | sed -e 's/string(.*)/string/g'
+sed -e 's/^\([ ]*object([^)]\+)\)#[0-9]\+/\1/g'

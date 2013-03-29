@@ -1,2 +1,2 @@
 #!/bin/bash
-./test/vm/filepath.filter | sed -e 's/\\n/\n/g' | sed -e 's/string([0-9]*)/string/g'
+sed -e 's/\\n/\n/g' | sed -e 's/string([0-9]*)/string/g'

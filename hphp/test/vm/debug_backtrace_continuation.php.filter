@@ -1,2 +1,0 @@
-#!/bin/bash
-sed -e 's/string(.*) ".*\/hphp/string() "hphp/g'

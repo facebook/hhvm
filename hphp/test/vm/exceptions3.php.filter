@@ -1,2 +1,2 @@
 #!/bin/bash
-./test/vm/filepath.filter | sed -e 's/\\n/\n/g' | sort | uniq
+sed -e 's/\\n/\n/g' | sort | uniq

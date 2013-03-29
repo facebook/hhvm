@@ -17,7 +17,7 @@ array(3) {
   [1]=>
   array(7) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace_continuation.php"
+     "hphp/test/vm/debug_backtrace_continuation.php"
     ["line"]=>
     int(10)
     ["function"]=>
@@ -38,7 +38,7 @@ array(3) {
   [2]=>
   array(4) {
     ["file"]=>
-    string() "hphp/test/vm/debug_backtrace_continuation.php"
+     "hphp/test/vm/debug_backtrace_continuation.php"
     ["line"]=>
     int(13)
     ["function"]=>

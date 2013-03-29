@@ -11,7 +11,7 @@ int(13)
 int(20)
 
 --- getFileName("f") ---
-"hphp/test/vm/reflection.php"
+ "hphp/test/vm/reflection.php"
 
 --- getName("f") ---
 string(1) "f"
@@ -184,7 +184,7 @@ int(126)
 int(142)
 
 --- getFileName() ---
-"hphp/test/vm/reflection.php"
+ "hphp/test/vm/reflection.php"
 
 --- getInterfaceNames() ---
 array(4) {

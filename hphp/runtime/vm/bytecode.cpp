@@ -2390,7 +2390,14 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
                 prevFp->m_func->unit()->getLineNumber(pc), true);
     }
     // check for include
-    StringData *funcname = const_cast<StringData*>(fp->m_func->name());
+    String funcname = const_cast<StringData*>(fp->m_func->name());
+    if (fp->m_func->isGenerator()) {
+      // retrieve the original function name from the inner continuation
+      TypedValue* tv = frame_local(fp, 0);
+      assert(tv->m_type == HPHP::KindOfObject);
+      funcname = static_cast<c_Continuation*>(
+                       tv->m_data.pobj)->t_getorigfuncname();
+    }
     if (fp->m_func->isClosureBody()) {
       static StringData* s_closure_label =
           StringData::GetStaticString("{closure}");
@@ -2401,8 +2408,8 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       if (!prevFp) continue;
       funcname = s_include;
     }
-    frame.set(String(s_function), String(funcname), true);
-    if (funcname != s_include) {
+    frame.set(String(s_function), funcname, true);
+    if (!funcname.same(s_include)) {
       // Closures have an m_this but they aren't in object context
       Class* ctx = arGetContextClass(fp);
       if (ctx != nullptr && !fp->m_func->isClosureBody()) {
@@ -2418,7 +2425,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       }
     }
     Array args = Array::Create();
-    if (funcname == s_include) {
+    if (funcname.same(s_include)) {
       if (depth) {
         args.append(String(const_cast<StringData*>(
                              fp->m_func->unit()->filepath())));

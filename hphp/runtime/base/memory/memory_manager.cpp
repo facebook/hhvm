@@ -31,10 +31,12 @@
 #include <runtime/base/server/http_server.h>
 #include <util/alloc.h>
 #include <util/process.h>
+#include <util/trace.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+TRACE_SET_MOD(smartalloc);
 #ifdef USE_JEMALLOC
 bool MemoryManager::s_statsEnabled = false;
 size_t MemoryManager::s_cactiveLimitCeiling = 0;
@@ -460,8 +462,11 @@ void* SmartAllocatorImpl::alloc(size_t nbytes) {
   assert(nbytes == size_t(m_itemSize));
   MM().getStats().usage += nbytes;
   void* ptr = m_free.maybePop();
-  if (LIKELY(ptr != nullptr)) return ptr;
-  return MM().slabAlloc(nbytes);
+  if (UNLIKELY(!ptr)) {
+    ptr = MM().slabAlloc(nbytes);
+  }
+  TRACE(1, "alloc %zu -> %p\n", nbytes, ptr);
+  return ptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

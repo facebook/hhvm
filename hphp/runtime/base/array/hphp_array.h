@@ -522,21 +522,21 @@ enum ArrayGetFlags {
   CheckInts = 2
 };
 
-ArrayData* array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64_t key,
+ArrayData* array_setm_ik1_v(RefData* ref, ArrayData* ad, int64_t key,
                             TypedValue* value);
-ArrayData* array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64_t key,
+ArrayData* array_setm_ik1_v0(RefData* ref, ArrayData* ad, int64_t key,
                              TypedValue* value);
-ArrayData* array_setm_sk1_v(TypedValue* cell, ArrayData* ad, StringData* key,
+ArrayData* array_setm_sk1_v(RefData* ref, ArrayData* ad, StringData* key,
                             TypedValue* value);
-ArrayData* array_setm_sk1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
+ArrayData* array_setm_sk1_v0(RefData* ref, ArrayData* ad, StringData* key,
                              TypedValue* value);
-ArrayData* array_setm_s0k1_v(TypedValue* cell, ArrayData* ad, StringData* key,
+ArrayData* array_setm_s0k1_v(RefData* ref, ArrayData* ad, StringData* key,
                              TypedValue* value);
-ArrayData* array_setm_s0k1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
+ArrayData* array_setm_s0k1_v0(RefData* ref, ArrayData* ad, StringData* key,
                               TypedValue* value);
-ArrayData* array_setm_s0k1nc_v(TypedValue* cell, ArrayData* ad, StringData* key,
+ArrayData* array_setm_s0k1nc_v(RefData* ref, ArrayData* ad, StringData* key,
                                TypedValue* value);
-ArrayData* array_setm_s0k1nc_v0(TypedValue* cell, ArrayData* ad,
+ArrayData* array_setm_s0k1nc_v0(RefData* ref, ArrayData* ad,
                                 StringData* key, TypedValue* value);
 ArrayData* array_setm_wk1_v0(ArrayData* ad, TypedValue* value);
 ArrayData* array_getm_i(void* hphpArray, int64_t key, TypedValue* out);

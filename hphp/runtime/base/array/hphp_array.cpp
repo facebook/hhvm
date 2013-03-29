@@ -1752,7 +1752,7 @@ void setmDecRef(StringData* sd) { decRefStr(sd); }
 template<typename Key, bool DecRefValue, bool CheckInt, bool DecRefKey>
 static inline
 ArrayData*
-array_setm(TypedValue* cell, ArrayData* ad, Key key, TypedValue* value) {
+array_setm(RefData* ref, ArrayData* ad, Key key, TypedValue* value) {
   ArrayData* retval;
   bool copy = ad->getCount() > 1;
   // nvSet will decRef any old value that may have been overwritten
@@ -1765,12 +1765,9 @@ array_setm(TypedValue* cell, ArrayData* ad, Key key, TypedValue* value) {
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
   if (DecRefValue) tvRefcountedDecRef(value);
-  if (cell == nullptr) {
-    return arrayRefShuffle<false>(ad, retval, cell);
-  } else {
-    arrayRefShuffle<true>(ad, retval, cell);
-    return nullptr;
-  }
+  if (!ref) return arrayRefShuffle<false>(ad, retval, nullptr);
+  arrayRefShuffle<true>(ad, retval, ref->tv());
+  return nullptr;
 }
 
 /**
@@ -1781,14 +1778,14 @@ array_setm(TypedValue* cell, ArrayData* ad, Key key, TypedValue* value) {
  *    array_setm_ik1_v0 --
  *       Don't count the array's reference to the polymorphic value.
  */
-ArrayData* array_setm_ik1_v(TypedValue* cell, ArrayData* ad, int64_t key,
+ArrayData* array_setm_ik1_v(RefData* ref, ArrayData* ad, int64_t key,
                             TypedValue* value) {
-  return array_setm<int64_t, false, false, false>(cell, ad, key, value);
+  return array_setm<int64_t, false, false, false>(ref, ad, key, value);
 }
 
-ArrayData* array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64_t key,
+ArrayData* array_setm_ik1_v0(RefData* ref, ArrayData* ad, int64_t key,
                              TypedValue* value) {
-  return array_setm<int64_t, true, false, false>(cell, ad, key, value);
+  return array_setm<int64_t, true, false, false>(ref, ad, key, value);
 }
 
 /**
@@ -1809,34 +1806,34 @@ ArrayData* array_setm_ik1_v0(TypedValue* cell, ArrayData* ad, int64_t key,
  *       Dont decRef the key, and skip the check for
  *       whether the key is really an integer.
  */
-ArrayData* array_setm_sk1_v(TypedValue* cell, ArrayData* ad, StringData* key,
+ArrayData* array_setm_sk1_v(RefData* ref, ArrayData* ad, StringData* key,
                             TypedValue* value) {
-  return array_setm<StringData*, false, true, true>(cell, ad, key, value);
+  return array_setm<StringData*, false, true, true>(ref, ad, key, value);
 }
 
-ArrayData* array_setm_sk1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
+ArrayData* array_setm_sk1_v0(RefData* ref, ArrayData* ad, StringData* key,
                              TypedValue* value) {
-  return array_setm<StringData*, true, true, true>(cell, ad, key, value);
+  return array_setm<StringData*, true, true, true>(ref, ad, key, value);
 }
 
-ArrayData* array_setm_s0k1_v(TypedValue* cell, ArrayData* ad, StringData* key,
+ArrayData* array_setm_s0k1_v(RefData* ref, ArrayData* ad, StringData* key,
                              TypedValue* value) {
-  return array_setm<StringData*, false, true, false>(cell, ad, key, value);
+  return array_setm<StringData*, false, true, false>(ref, ad, key, value);
 }
 
-ArrayData* array_setm_s0k1_v0(TypedValue* cell, ArrayData* ad, StringData* key,
+ArrayData* array_setm_s0k1_v0(RefData* ref, ArrayData* ad, StringData* key,
                               TypedValue* value) {
-  return array_setm<StringData*, true, true, false>(cell, ad, key, value);
+  return array_setm<StringData*, true, true, false>(ref, ad, key, value);
 }
 
-ArrayData* array_setm_s0k1nc_v(TypedValue* cell, ArrayData* ad, StringData* key,
+ArrayData* array_setm_s0k1nc_v(RefData* ref, ArrayData* ad, StringData* key,
                                TypedValue* value) {
-  return array_setm<StringData*, false, false, false>(cell, ad, key, value);
+  return array_setm<StringData*, false, false, false>(ref, ad, key, value);
 }
 
-ArrayData* array_setm_s0k1nc_v0(TypedValue* cell, ArrayData* ad,
+ArrayData* array_setm_s0k1nc_v0(RefData* ref, ArrayData* ad,
                                 StringData* key, TypedValue* value) {
-  return array_setm<StringData*, true, false, false>(cell, ad, key, value);
+  return array_setm<StringData*, true, false, false>(ref, ad, key, value);
 }
 
 /**

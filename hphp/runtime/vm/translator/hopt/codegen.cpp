@@ -43,32 +43,8 @@
 #include "runtime/vm/translator/hopt/linearscan.h"
 #include "runtime/vm/translator/hopt/nativecalls.h"
 
-using HPHP::DataType;
-using HPHP::TypedValue;
 using HPHP::VM::Transl::TCA;
 using namespace HPHP::VM::Transl::TargetCache;
-
-// emitDispDeref --
-// emitDeref --
-//
-//   Helpers for common cell operations.
-//
-//   Dereference the cell whose address lives in src into dest.
-/*static */void
-emitDispDeref(X64Assembler &a, PhysReg src, int disp, PhysReg dest) {
-  a.    load_reg64_disp_reg64(src, disp + TVOFF(m_data), dest);
-}
-
-/*static*/ void
-emitDeref(X64Assembler &a, PhysReg src, PhysReg dest) {
-  emitDispDeref(a, src, 0, dest);
-}
-
-/* static */ void
-emitDerefIfVariant(X64Assembler &a, PhysReg reg) {
-  emitCmpTVType(a, HPHP::KindOfRef, reg[TVOFF(m_type)]);
-  a.cload_reg64_disp_reg64(CC_Z, reg, 0, reg);
-}
 
 namespace HPHP {
 namespace VM {
@@ -86,9 +62,12 @@ static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 using Transl::rVmSp;
 using Transl::rVmFp;
 
-const int64_t kTypeShiftBits = sizeof(int32_t) * CHAR_BIT;
+const size_t kTypeShiftBits = (offsetof(TypedValue, m_type) % 8) * 8;
+
+// left shift an immediate DataType, for type, to the correct position
+// within one of the registers used to pass a TypedValue by value.
 uint64_t toDataTypeForCall(Type type) {
-  return (uint64_t)type.toDataType() << (sizeof(int32_t) * CHAR_BIT);
+  return uint64_t(type.toDataType()) << kTypeShiftBits;
 }
 
 int64_t spillSlotsToSize(int n) {
@@ -803,10 +782,12 @@ void CodeGenerator::cgCallHelper(Asm& a,
 
   // copy the call result to the destination register(s)
   if (destType == DestType::TV) {
-    // rdx contains m_type and m_aux; we need to put just the type in the
-    // lower bits, so right-shift.  rax contains m_data.
-    if (kTypeShiftBits > 0) a.shrq(kTypeShiftBits, reg::rdx);
-    shuffle2(a, reg::rax, reg::rdx, dstReg0, dstReg1);
+    // rax contains m_type and m_aux but we're expecting just the
+    // type in the lower bits, so shift the type result register.
+    auto rval = packed_tv ? reg::rdx : reg::rax;
+    auto rtyp = packed_tv ? reg::rax : reg::rdx;
+    if (kTypeShiftBits > 0) a.shrq(kTypeShiftBits, rtyp);
+    shuffle2(a, rval, rtyp, dstReg0, dstReg1);
   } else if (destType == DestType::SSA) {
     // copy the single-register result to dstReg0
     assert(dstReg1 == InvalidReg);
@@ -1347,10 +1328,8 @@ void CodeGenerator::cgOpGte(IRInstruction* inst) {
 template<class OpndType>
 ConditionCode CodeGenerator::emitTypeTest(Type type, OpndType src,
                                           bool negate) {
-  ConditionCode cc;
-
   assert(!type.subtypeOf(Type::Cls));
-
+  ConditionCode cc;
   if (type.isString()) {
     emitTestTVType(m_as, KindOfStringBit, src);
     cc = CC_NZ;
@@ -1401,7 +1380,7 @@ ConditionCode CodeGenerator::emitIsTypeTest(IRInstruction* inst, bool negate) {
   assert(src->isA(Type::Gen));
   assert(!src->isConst());
   PhysReg srcReg = src->getReg(1); // type register
-  return emitTypeTest(inst, r32(srcReg), negate);
+  return emitTypeTest(inst, srcReg, negate);
 }
 
 template<class OpndType>
@@ -1857,39 +1836,27 @@ void CodeGenerator::cgUnbox(IRInstruction* inst) {
   auto srcValReg  = src->getReg(0);
   auto srcTypeReg = src->getReg(1);
 
+  assert(dstValReg != dstTypeReg);
   assert(src->getType().equals(Type::Gen));
   assert(dst->getType().notBoxed());
 
-
-  // cmpq   KindOfRef, srcTypeReg
-  // mov    srcTypeReg --> dstTypeReg
-  //
-  // -- srcTypeReg is now dead
-  // -- if srcValReg == dstTypeReg, then use scratch for dstTypeReg; otherwise,
-  // -- the next load will kill srcValReg
-  //
-  // cload.z [srcValReg + m_type] --> dstTypeReg
-  // mov    srcValReg --> dstValReg (potentially move up 1 instruction)
-  // cload.z [srcValReg + m_data] --> dstValReg
-
-  PhysReg tmpDstTypeReg = srcValReg == dstTypeReg ? PhysReg(rScratch)
-                                                  : dstTypeReg;
-
-  bool useCMov = sizeof(DataType) == 4;
-  emitMovRegReg(m_as, srcTypeReg, tmpDstTypeReg);
-  emitMovRegReg(m_as, srcValReg, dstValReg);
   emitCmpTVType(m_as, HPHP::KindOfRef, srcTypeReg);
-  // XXX: hardcodes RefData <-> TypedValue pun.
-  if (useCMov) {
-    m_as.  cload_reg64_disp_reg32(CC_Z, srcValReg, TVOFF(m_type), tmpDstTypeReg);
-    m_as.  cload_reg64_disp_reg64(CC_Z, srcValReg, TVOFF(m_data), dstValReg);
-  } else {
-    ifThen(m_as, CC_E, [&]() {
-      emitLoadTVType(m_as, srcValReg[TVOFF(m_type)], tmpDstTypeReg);
-      m_as.loadq(srcValReg[TVOFF(m_data)], dstValReg);
-    });
-  }
-  emitMovRegReg(m_as, tmpDstTypeReg, dstTypeReg);
+  ifThenElse(CC_E, [&] {
+    // srcTypeReg == KindOfRef; srcValReg is RefData*
+    const size_t ref_tv_off = RefData::tvOffset();
+    if (dstValReg != srcValReg) {
+      m_as.loadq(srcValReg[ref_tv_off + TVOFF(m_data)], dstValReg);
+      emitLoadTVType(m_as, srcValReg[ref_tv_off + TVOFF(m_type)],
+                     r32(dstTypeReg));
+    } else {
+      emitLoadTVType(m_as, srcValReg[ref_tv_off + TVOFF(m_type)],
+                     r32(dstTypeReg));
+      m_as.loadq(srcValReg[ref_tv_off + TVOFF(m_data)], dstValReg);
+    }
+  }, [&] {
+    // srcTypeReg != KindOfRef; copy src -> dst
+    shuffle2(m_as, srcValReg, srcTypeReg, dstValReg, dstTypeReg);
+  });
 }
 
 void CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
@@ -2049,16 +2016,17 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
   if (rip == TranslatorX64::Get()->getCallToExit()) {
     return;
   }
-  checkFrame(fp, sp, false);
-  assertTv(sp); // check return value
+  checkFrame(fp, sp, /*checkLocals*/ false);
+  assert(sp <= (Cell*)fp);
+  // check return value if stack not empty
+  if (sp < (Cell*)fp) assertTv(sp);
 }
 
 void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a) {
   // call to a trace function
-  // ld return ip from native stack into rdx
-  a.    loadq (*rsp, rdx);
   a.    movq  (rVmFp, rdi);
   a.    movq  (rVmSp, rsi);
+  a.    loadq (*rsp, rdx); // return ip from native stack
   // do the call; may use a trampoline
   m_tx64->emitCall(a, TCA(traceRet));
 }
@@ -2244,7 +2212,6 @@ void CodeGenerator::cgSpill(IRInstruction* inst) {
     auto sinfo = dst->getSpillInfo(locIndex);
     assert(sinfo.type() == SpillInfo::Memory);
     m_as.    storeq(srcReg, reg::rsp[sizeof(uint64_t) * sinfo.mem()]);
-
   }
 }
 
@@ -2292,7 +2259,7 @@ void CodeGenerator::cgStRefWork(IRInstruction* inst, bool genStoreType) {
   auto destReg = inst->getDst()->getReg();
   auto addrReg = inst->getSrc(0)->getReg();
   SSATmp* src  = inst->getSrc(1);
-  cgStore(addrReg, 0, src, genStoreType);
+  cgStore(addrReg, RefData::tvOffset(), src, genStoreType);
   if (destReg != InvalidReg)  emitMovRegReg(m_as, addrReg, destReg);
 }
 
@@ -2814,21 +2781,16 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
 // the type is not ref-counted.
 //
 Address CodeGenerator::cgCheckRefCountedType(PhysReg typeReg) {
-
-  m_as.cmp_imm32_reg32(KindOfRefCountThreshold, typeReg);
-
-  Address addrToPatch =  m_as.code.frontier;
+  emitCmpTVType(m_as, KindOfRefCountThreshold, typeReg);
+  Address addrToPatch = m_as.code.frontier;
   m_as.jcc8(CC_LE, addrToPatch);
-
   return addrToPatch;
 }
 
-Address CodeGenerator::cgCheckRefCountedType(PhysReg baseReg,
-                                             int64_t offset) {
+Address CodeGenerator::cgCheckRefCountedType(PhysReg baseReg, int64_t offset) {
   emitCmpTVType(m_as, KindOfRefCountThreshold, baseReg[offset + TVOFF(m_type)]);
-  Address addrToPatch =  m_as.code.frontier;
+  Address addrToPatch = m_as.code.frontier;
   m_as.jcc8(CC_LE, addrToPatch);
-
   return addrToPatch;
 }
 
@@ -2949,7 +2911,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
     return;
   }
   // Load m_data into the scratch reg
-  m_as.load_reg64_disp_reg64(baseReg, offset + TVOFF(m_data), scratchReg);
+  m_as.loadq(baseReg[offset + TVOFF(m_data)], scratchReg);
 
   // Emit check for RefCountStaticValue and the actual DecRef
   Address patchStaticCheck = cgCheckStaticBitAndDecRef(Type::Cell, scratchReg,
@@ -2960,7 +2922,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
     // Emit jump to m_astubs (to call release) if count got down to zero
     unlikelyIfBlock(CC_Z, [&] {
       // Emit call to release in m_astubs
-      m_astubs.lea_reg64_disp_reg64(baseReg, offset, scratchReg);
+      m_astubs.lea(baseReg[offset], scratchReg);
       cgCallHelper(m_astubs, getDtorGeneric(), InvalidReg, kSyncPoint,
                    ArgGroup().reg(scratchReg));
     });
@@ -2987,7 +2949,7 @@ void CodeGenerator::cgDecRefMem(Type type,
     // to load the type and the data.
     cgDecRefDynamicTypeMem(baseReg, offset, exit);
   } else if (type.maybeCounted()) {
-    m_as.load_reg64_disp_reg64(baseReg, offset, scratchReg);
+    m_as.loadq(baseReg[offset + TVOFF(m_data)], scratchReg);
     cgDecRefStaticType(type, scratchReg, exit, true);
   }
 }
@@ -3270,7 +3232,7 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
     not_reached();
   }
   cgCallHelper(m_as, tvCastHelper, nullptr,
-               kSyncPoint, args);
+               kSyncPoint, args, DestType::None);
 }
 
 void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
@@ -3626,7 +3588,7 @@ void CodeGenerator::cgLoadTypedValue(PhysReg base,
     emitLoadTVType(m_as, base[off + TVOFF(m_type)], typeDstReg);
     if (label) {
       // Check type needed
-      emitGuardType(r32(typeDstReg), inst);
+      emitGuardType(typeDstReg, inst);
     }
   } else if (label) {
     // Check type needed
@@ -3637,9 +3599,9 @@ void CodeGenerator::cgLoadTypedValue(PhysReg base,
   if (valueDstReg == InvalidReg) return;
 
   if (useScratchReg) {
-    m_as.load_reg64_disp_reg64(reg::rScratch, off + TVOFF(m_data), valueDstReg);
+    m_as.loadq(reg::rScratch[off + TVOFF(m_data)], valueDstReg);
   } else {
-    m_as.load_reg64_disp_reg64(base, off + TVOFF(m_data), valueDstReg);
+    m_as.loadq(base[off + TVOFF(m_data)], valueDstReg);
   }
 }
 
@@ -3647,9 +3609,7 @@ void CodeGenerator::cgStoreTypedValue(PhysReg base,
                                       int64_t off,
                                       SSATmp* src) {
   assert(src->getType().needsReg());
-  m_as.store_reg64_disp_reg64(src->getReg(0),
-                              off + TVOFF(m_data),
-                              base);
+  m_as.storeq(src->getReg(0),        base[off + TVOFF(m_data)]);
   emitStoreTVType(m_as, src->getReg(1), base[off + TVOFF(m_type)]);
 }
 
@@ -3678,12 +3638,10 @@ void CodeGenerator::cgStore(PhysReg base,
     } else {
       not_reached();
     }
-    m_as.store_imm64_disp_reg64(val, off + TVOFF(m_data), base);
+    m_as.storeq(val, base[off + TVOFF(m_data)]);
   } else {
     zeroExtendIfBool(m_as, src);
-    m_as.store_reg64_disp_reg64(src->getReg(),
-                                off + TVOFF(m_data),
-                                base);
+    m_as.storeq(src->getReg(), base[off + TVOFF(m_data)]);
   }
 }
 
@@ -3736,7 +3694,7 @@ void CodeGenerator::cgLdMem(IRInstruction * inst) {
 }
 
 void CodeGenerator::cgLdRef(IRInstruction* inst) {
-  cgLoad(inst->getSrc(0)->getReg(), 0, inst);
+  cgLoad(inst->getSrc(0)->getReg(), RefData::tvOffset(), inst);
 }
 
 void CodeGenerator::recordSyncPoint(Asm& as,
@@ -3805,7 +3763,7 @@ void CodeGenerator::cgGuardType(IRInstruction* inst) {
   assert(srcTypeReg != InvalidReg);
 
   ConditionCode cc;
-  cc = emitTypeTest(type, r32(srcTypeReg), true);
+  cc = emitTypeTest(type, srcTypeReg, true);
   emitFwdJcc(cc, inst->getTaken());
 
   auto dstReg = inst->getDst()->getReg();
@@ -3877,12 +3835,12 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   } else if (vals64 != 0) {
     ifThenElse(CC_NL, thenBody, /* else */ [&] {
       //   If not special builtin...
-      m_as.test_imm32_disp_reg32(AttrVariadicByRef, Func::attrsOff(), funcPtrReg);
+      m_as.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
       emitFwdJcc(CC_Z, exitLabel);
     });
   } else {
     ifThenElse(CC_NL, thenBody, /* else */ [&] {
-      m_as.test_imm32_disp_reg32(AttrVariadicByRef, Func::attrsOff(), funcPtrReg);
+      m_as.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
       emitFwdJcc(CC_NZ, exitLabel);
     });
   }
@@ -4441,7 +4399,7 @@ void CodeGenerator::cgCheckInit(IRInstruction* inst) {
   assert(typeReg != InvalidReg);
 
   static_assert(KindOfUninit == 0, "cgCheckInit assumes KindOfUninit == 0");
-  m_as.testl (r32(typeReg), r32(typeReg));
+  m_as.testb (rbyte(typeReg), rbyte(typeReg));
   emitFwdJcc(CC_Z, label);
 }
 
@@ -4452,8 +4410,7 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
   int64_t offset = inst->getSrc(1)->getValInt();
   Type t = base->getType().deref();
   if (t.isInit()) return;
-
-  m_as.cmpl (KindOfUninit, base->getReg()[offset + TVOFF(m_type)]);
+  emitCmpTVType(m_as, KindOfUninit, base->getReg()[offset + TVOFF(m_type)]);
   emitFwdJcc(CC_Z, label);
 }
 
@@ -4808,7 +4765,7 @@ void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
             << " " << rip
             << std::endl;
 #endif
-  checkFrame(fp, sp, true);
+  checkFrame(fp, sp, /*checkLocals*/true);
 }
 
 void CodeGenerator::emitTraceCall(CodeGenerator::Asm& as, int64_t pcOff,

@@ -163,54 +163,49 @@ private:
     void operator delete(void* ptr, int num) { free(ptr); }
   };
 
-  /* This macro is to help making the object layout binary compatible with
-   * Variant for primitive types. We want to have compile time assertion to
-   * guard it but still want to have anonymous struct. For non-refcounted
-   * types, m_shouldCache and m_flags are guaranteed to be 0, and other parts
-   * of runtime code will not touch the count.*/
-#ifdef WORDS_BIGENDIAN
- #define SharedVarData \
-  union {\
-    int64_t num;\
-    double dbl;\
-    StringData *str;\
-    ImmutableMap* map;\
-    VectorData* vec;\
-    ImmutableObj* obj;\
-  } m_data;\
-  int m_count;\
-  bool m_shouldCache;\
-  uint8_t m_flags;\
-  uint16_t m_type
+  /*
+   * Keep the object layout binary compatible with Variant for primitive types.
+   * We want to have compile time assertion to guard it but still want to have
+   * anonymous struct. For non-refcounted types, m_shouldCache and m_flags are
+   * guaranteed to be 0, and other parts of runtime will not touch the count.
+   */
 
-#else
- #define SharedVarData \
-  union {\
-    int64_t num;\
-    double dbl;\
-    StringData *str;\
-    ImmutableMap* map;\
-    VectorData* vec;\
-    ImmutableObj* obj;\
-  } m_data;\
-  int m_count;\
-  uint16_t m_type;\
-  bool m_shouldCache;\
-  uint8_t m_flags
-
-#endif
-
-  struct SharedVar {
-    SharedVarData;
+  union SharedData {
+    int64_t num;
+    double dbl;
+    StringData *str;
+    ImmutableMap* map;
+    VectorData* vec;
+    ImmutableObj* obj;
   };
 
   union {
-    struct {
-      SharedVarData;
-    };
     TypedValue m_tv;
+    struct {
+#if PACKED_TV
+      uint8_t _typePad;
+      DataType m_type;
+      bool m_shouldCache;
+      uint8_t m_flags;
+      uint32_t m_count;
+      SharedData m_data;
+#else
+ #ifdef WORDS_BIGENDIAN
+      SharedData m_data;
+      uint32_t m_count;
+      bool m_shouldCache;
+      uint8_t m_flags;
+      uint16_t m_type;
+ #else
+      SharedData m_data;
+      uint32_t m_count;
+      uint16_t m_type;
+      bool m_shouldCache;
+      uint8_t m_flags;
+ #endif
+#endif
+    };
   };
-#undef SharedVarData
 
   const static uint8_t SerializedArray = (1<<0);
   const static uint8_t IsVector = (1<<1);
@@ -218,12 +213,14 @@ private:
   const static uint8_t ObjAttempted = (1<<3);
 
   static void compileTimeAssertions() {
-    static_assert(offsetof(SharedVar, m_data) == offsetof(TypedValue, m_data),
+    static_assert(offsetof(SharedVariant, m_data) == offsetof(TypedValue, m_data),
                   "Offset of m_data must be equal in SharedVar and TypedValue");
-    static_assert(offsetof(SharedVar, m_count) == TypedValueAux::auxOffset,
+    static_assert(offsetof(SharedVariant, m_count) == TypedValueAux::auxOffset,
                   "Offset of m_count must equal offset of TV.m_aux");
-    static_assert(offsetof(SharedVar, m_type) == offsetof(TypedValue, m_type),
+    static_assert(offsetof(SharedVariant, m_type) == offsetof(TypedValue, m_type),
                   "Offset of m_type must be equal in SharedVar and TypedValue");
+    static_assert(sizeof(SharedVariant) == sizeof(TypedValue),
+                  "Be careful with field layout");
   }
 
   bool getSerializedArray() const { return (bool)(m_flags & SerializedArray);}

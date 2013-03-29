@@ -684,26 +684,31 @@ void Stack::toStringElm(std::ostream& os, TypedValue* tv, const ActRec* fp)
   }
   case KindOfStaticString:
   case KindOfString: {
-    assert(tv->m_data.pstr->getCount() > 0);
     int len = tv->m_data.pstr->size();
     bool truncated = false;
     if (len > 128) {
       len = 128;
       truncated = true;
     }
-    os << tv->m_data.pstr << ":\""
+    os << tv->m_data.pstr
+       << "c(" << tv->m_data.pstr->getCount() << ")"
+       << ":\""
        << Util::escapeStringForCPP(tv->m_data.pstr->data(), len)
        << "\"" << (truncated ? "..." : "");
     break;
   }
   case KindOfArray: {
     assert(tv->m_data.parr->getCount() > 0);
-    os << tv->m_data.parr << ":Array";
-    break;
+    os << tv->m_data.parr
+       << "c(" << tv->m_data.parr->getCount() << ")"
+       << ":Array";
+     break;
   }
   case KindOfObject: {
     assert(tv->m_data.pobj->getCount() > 0);
-    os << tv->m_data.pobj << ":Object("
+    os << tv->m_data.pobj
+       << "c(" << tv->m_data.pobj->getCount() << ")"
+       << ":Object("
        << tvAsVariant(tv).asObjRef().get()->o_getClassName().get()->data()
        << ")";
     break;

@@ -144,6 +144,14 @@ static const bool use_jemalloc =
 #endif
   ;
 
+static const bool packed_tv =
+#ifdef PACKED_TV
+  true
+#else
+  false
+#endif
+  ;
+
 /**
  * Guard bug-for-bug hphpi compatibility code with this predicate.
  */

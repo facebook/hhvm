@@ -33,6 +33,16 @@ namespace Transl {
 
 static const Trace::Module TRACEMOD = Trace::tx64;
 static const DataType BitwiseKindOfString = KindOfString;
+
+// Generate an if-then block into a.  thenBlock is executed if cc is true.
+template <class Then>
+void ifThen(Transl::X64Assembler& a, ConditionCode cc, Then thenBlock) {
+  Label done;
+  a.jcc8(ccNegate(cc), done);
+  thenBlock();
+  asm_label(a, done);
+}
+
 // RAII aids to machine code.
 
 // In shared stubs, we've already made the stack odd by calling
@@ -571,7 +581,7 @@ asm_label(a, likely);
 // a ref-counted cell.
 //
 // It's ok to do reconcilable register operations in the body.
-template<int FieldOffset, int FieldValue, ConditionCode Jcc,
+template<unsigned FieldOffset, unsigned FieldValue, ConditionCode Jcc,
          typename FieldType>
 struct CondBlock {
   X64Assembler& m_a;
@@ -658,6 +668,8 @@ emitStoreImm(X64Assembler& a, uint64_t imm, PhysReg r, int off,
     a.   store_reg64_disp_reg64(immReg, off, r);
   } else if (size == sz::dword) {
     a.   store_imm32_disp_reg(imm, off, r);
+  } else if (size == sz::byte) {
+    a.   store_imm8_disp_reg(imm, off, r);
   } else {
     not_implemented();
   }
@@ -713,6 +725,7 @@ static inline Reg8 toByte(const Reg64& x)   { return rbyte(x); }
 static inline Reg8 toByte(PhysReg x)        { return rbyte(x); }
 
 static inline Reg32 toReg32(const Reg64& x) { return r32(x); }
+static inline Reg32 toReg32(const Reg8& x)  { return r32(x); }
 static inline Reg32 toReg32(PhysReg x)      { return r32(x); }
 
 // For other operand types, let whatever conversions (or compile
@@ -788,6 +801,7 @@ emitStoreTVType(X64Assembler& a, OpndType tvOp, DestType dest) {
 //   dest.
 static inline void
 emitDispDeref(X64Assembler &a, Reg64 src, int disp, Reg64 dest) {
+  // src is a RefData, dest will be m_data field of inner gizmoom.
   a.    loadq (src[disp + TVOFF(m_data)], dest);
 }
 
@@ -797,9 +811,26 @@ emitDeref(X64Assembler &a, PhysReg src, PhysReg dest) {
 }
 
 static inline void
+emitDerefRef(X64Assembler &a, Reg64 src, int disp, Reg64 dest) {
+  emitDispDeref(a, src, disp + RefData::tvOffset(), dest);
+}
+
+static inline void
+emitDerefRef(X64Assembler &a, Reg64 src, Reg64 dest) {
+  emitDerefRef(a, src, 0, dest);
+}
+
+static inline void
 emitDerefIfVariant(X64Assembler &a, PhysReg reg) {
   emitCmpTVType(a, KindOfRef, reg[TVOFF(m_type)]);
-  a.cload_reg64_disp_reg64(CC_Z, reg, TVOFF(m_data), reg);
+  if (RefData::tvOffset() == 0) {
+    a.    cload_reg64_disp_reg64(CC_E, reg, TVOFF(m_data), reg);
+  } else {
+    ifThen(a, CC_E, [&] {
+      a.  loadq(reg[TVOFF(m_data)], reg);
+      a.  addq(RefData::tvOffset(), reg);
+    });
+  }
 }
 
 // NB: leaves count field unmodified. Does not store to m_data if type
@@ -812,16 +843,19 @@ emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
   }
   if (!IS_NULL_TYPE(type)) {
     assert(val != reg::noreg);
-    a.  store_reg64_disp_reg64(val, disp + TVOFF(m_data), dest);
+    a.  storeq(val, dest[disp + TVOFF(m_data)]);
   }
 }
 
 static inline void
+emitStoreToRefData(X64Assembler& a, DataType type, PhysReg val,
+                   int disp, PhysReg dest) {
+  emitStoreTypedValue(a, type, val, disp + RefData::tvOffset(), dest);
+}
+
+static inline void
 emitStoreInvalid(X64Assembler& a, int disp, PhysReg dest) {
-  static_assert(TypedValueAux::auxSize == sizeof(int32_t),
-                "emitStoreInvalid assumes m_aux is dword sized.");
   a.    storeq (0xfacefacefaceface,     dest[disp + TVOFF(m_data)]);
-  a.    storel ((signed int)0xfaceface, dest[disp + TypedValueAux::auxOffset]);
   emitStoreTVType(a, KindOfInvalid,     dest[disp + TVOFF(m_type)]);
 }
 
@@ -891,6 +925,8 @@ public:
 
   void addLoc(const Location &loc);
 
+  void addLocRef(const Location &loc);
+
   void addDeref(const Location &loc);
 
   void addReg(PhysReg reg);
@@ -918,7 +954,7 @@ public:
 private:
   struct ArgContent {
     enum ArgKind {
-      ArgImm, ArgLoc, ArgDeref, ArgReg, ArgRegPlus, ArgLocAddr
+      ArgImm, ArgLoc, ArgLocRef, ArgDeref, ArgReg, ArgRegPlus, ArgLocAddr
     } m_kind;
     PhysReg m_reg;
     const Location *m_loc;
@@ -948,6 +984,7 @@ private:
 // arguments
 #define IMM(i)       _am.addImm(i)
 #define V(loc)       _am.addLoc(loc)
+#define VREF(loc)    _am.addLocRef(loc)
 #define DEREF(loc)   _am.addDeref(loc)
 #define R(r)         _am.addReg(r)
 #define RPLUS(r,off) _am.addRegPlus(r, off)

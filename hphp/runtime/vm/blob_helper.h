@@ -121,13 +121,19 @@ struct BlobEncoder {
     const_cast<T&>(t).serde(*this);
   }
 
+  void encode(DataType t) {
+    // always encode DataType as int8 even if it's a bigger size.
+    assert(DataType(int8_t(t)) == t);
+    encode(int8_t(t));
+  }
+
   void encode(const StringData* sd) {
     if (!sd) return encode(uint32_t(-1));
     uint32_t sz = sd->size();
     encode(sz);
 
     const size_t start = m_blob.size();
-    m_blob.resize(m_blob.size() + sd->size());
+    m_blob.resize(start + sz);
     std::copy(sd->data(), sd->data() + sz, &m_blob[start]);
   }
 
@@ -218,6 +224,13 @@ struct BlobDecoder {
     IsNontrivialSerializable<T,BlobEncoder>::value
   >::type decode(T& t) {
     t.serde(*this);
+  }
+
+  void decode(DataType& t) {
+    // always decode DataType as int8 even if it's a bigger size.
+    int8_t t2;
+    decode(t2);
+    t = DataType(t2);
   }
 
   void decode(const StringData*& sd) {

@@ -27,6 +27,7 @@
 
 #include <boost/static_assert.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <type_traits>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,7 +126,8 @@ class VariableUnserializer;
  *
  */
 
-enum DataType {
+typedef std::conditional<packed_tv, int8_t, int32_t>::type DataTypeInt;
+enum DataType: DataTypeInt {
   KindOfClass            = -13,
   MinDataType            = -13,
 
@@ -173,31 +175,31 @@ enum DataType {
   KindOfUncountedInitBit = 8,
 };
 
-BOOST_STATIC_ASSERT(KindOfString       & KindOfStringBit);
-BOOST_STATIC_ASSERT(KindOfStaticString & KindOfStringBit);
-BOOST_STATIC_ASSERT(!(KindOfUninit     & KindOfStringBit));
-BOOST_STATIC_ASSERT(!(KindOfNull       & KindOfStringBit));
-BOOST_STATIC_ASSERT(!(KindOfBoolean    & KindOfStringBit));
-BOOST_STATIC_ASSERT(!(KindOfInt64      & KindOfStringBit));
-BOOST_STATIC_ASSERT(!(KindOfDouble     & KindOfStringBit));
-BOOST_STATIC_ASSERT(!(KindOfArray      & KindOfStringBit));
-BOOST_STATIC_ASSERT(!(KindOfObject     & KindOfStringBit));
-BOOST_STATIC_ASSERT(!(KindOfRef        & KindOfStringBit));
-BOOST_STATIC_ASSERT(!(KindOfIndirect   & KindOfStringBit));
-BOOST_STATIC_ASSERT(!(KindOfClass      & KindOfStringBit));
+static_assert(KindOfString       & KindOfStringBit, "");
+static_assert(KindOfStaticString & KindOfStringBit, "");
+static_assert(!(KindOfUninit     & KindOfStringBit), "");
+static_assert(!(KindOfNull       & KindOfStringBit), "");
+static_assert(!(KindOfBoolean    & KindOfStringBit), "");
+static_assert(!(KindOfInt64      & KindOfStringBit), "");
+static_assert(!(KindOfDouble     & KindOfStringBit), "");
+static_assert(!(KindOfArray      & KindOfStringBit), "");
+static_assert(!(KindOfObject     & KindOfStringBit), "");
+static_assert(!(KindOfRef        & KindOfStringBit), "");
+static_assert(!(KindOfIndirect   & KindOfStringBit), "");
+static_assert(!(KindOfClass      & KindOfStringBit), "");
 
-BOOST_STATIC_ASSERT(KindOfNull         & KindOfUncountedInitBit);
-BOOST_STATIC_ASSERT(KindOfBoolean      & KindOfUncountedInitBit);
-BOOST_STATIC_ASSERT(KindOfInt64        & KindOfUncountedInitBit);
-BOOST_STATIC_ASSERT(KindOfDouble       & KindOfUncountedInitBit);
-BOOST_STATIC_ASSERT(KindOfStaticString & KindOfUncountedInitBit);
-BOOST_STATIC_ASSERT(!(KindOfUninit     & KindOfUncountedInitBit));
-BOOST_STATIC_ASSERT(!(KindOfString     & KindOfUncountedInitBit));
-BOOST_STATIC_ASSERT(!(KindOfArray      & KindOfUncountedInitBit));
-BOOST_STATIC_ASSERT(!(KindOfObject     & KindOfUncountedInitBit));
-BOOST_STATIC_ASSERT(!(KindOfRef        & KindOfUncountedInitBit));
-BOOST_STATIC_ASSERT(!(KindOfIndirect   & KindOfUncountedInitBit));
-BOOST_STATIC_ASSERT(!(KindOfClass      & KindOfUncountedInitBit));
+static_assert(KindOfNull         & KindOfUncountedInitBit, "");
+static_assert(KindOfBoolean      & KindOfUncountedInitBit, "");
+static_assert(KindOfInt64        & KindOfUncountedInitBit, "");
+static_assert(KindOfDouble       & KindOfUncountedInitBit, "");
+static_assert(KindOfStaticString & KindOfUncountedInitBit, "");
+static_assert(!(KindOfUninit     & KindOfUncountedInitBit), "");
+static_assert(!(KindOfString     & KindOfUncountedInitBit), "");
+static_assert(!(KindOfArray      & KindOfUncountedInitBit), "");
+static_assert(!(KindOfObject     & KindOfUncountedInitBit), "");
+static_assert(!(KindOfRef        & KindOfUncountedInitBit), "");
+static_assert(!(KindOfIndirect   & KindOfUncountedInitBit), "");
+static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
 
 // assume KindOfUninit == 0 in ClsCns
 static_assert(KindOfUninit == 0,

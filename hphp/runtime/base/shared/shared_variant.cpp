@@ -26,11 +26,10 @@ namespace HPHP {
 SharedVariant::SharedVariant(CVarRef source, bool serialized,
                              bool inner /* = false */,
                              bool unserializeObj /* = false */)
-  : m_count (1), m_shouldCache(false), m_flags(0){
+  : m_shouldCache(false), m_flags(0) {
   assert(!serialized || source.isString());
-
+  m_count = 1;
   m_type = source.getType();
-
   switch (m_type) {
   case KindOfBoolean:
     {

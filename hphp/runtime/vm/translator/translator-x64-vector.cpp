@@ -130,7 +130,8 @@ static const PhysReg unsafe_rsp = rsp;
     PhysReg reg;                                                    \
     int disp;                                                       \
     locToRegDisp(val.location, &reg, &disp);                        \
-    a.  load_reg64_disp_reg64(reg, disp + TVOFF(m_data), r(rVal));  \
+    a.  loadq(reg[disp + TVOFF(m_data)], r(rVal));                  \
+    if (auto offset = RefData::tvOffset()) a.addq(offset, r(rVal)); \
   }
 #define VAL(useRVal)  \
   IE((useRVal),       \
@@ -410,7 +411,8 @@ void TranslatorX64::emitBaseLCR(const Tracelet& t,
     m_regMap.cleanSmashLoc(base.location);
     if (base.isVariant()) {
       // Get inner value.
-      a.  load_reg64_disp_reg64(pr, disp + TVOFF(m_data), r(rBase));
+      a.  loadq(pr[disp + TVOFF(m_data)], r(rBase));
+      if (auto offset = RefData::tvOffset()) a.addq (offset, r(rBase));
     } else {
       a.  lea_reg64_disp_reg64(pr, disp, r(rBase));
     }
@@ -1520,7 +1522,7 @@ void TranslatorX64::emitIssetEmptyProp(const Tracelet& t,
   BUILD_OPTABH(getKeyTypeS(memb), memb.isVariant(), useEmpty,
               m_vecState->isObj());
   EMIT_RCALL(a, ni, opFunc, CTX(), R(rBase), SML(memb));
-  a.   and_imm32_reg64(1, rax); // Mask garbage bits.
+  a.   andq(1, rax); // Mask garbage bits.
   ScratchReg rIssetEmpty(m_regMap, rax);
   assert(!ni.outLocal);
   if (useTvResult(t, ni, mii)) {
@@ -1668,7 +1670,7 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
     LazyScratchReg tmp(m_regMap);
     if (val.isVariant() && !IS_NULL_TYPE(val.rtt.valueType())) {
       tmp.alloc();
-      emitDeref(a, rhsReg, r(tmp));
+      emitDerefRef(a, rhsReg, r(tmp));
       rhsReg = r(tmp);
     }
 
@@ -1989,12 +1991,13 @@ void TranslatorX64::emitIncDecProp(const Tracelet& t,
 #undef HELPER_TABLE
 
 template <KeyType keyType, bool unboxKey>
-static inline void bindElemImpl(TypedValue* base, TypedValue* key, RefData* val,
+static inline void bindElemImpl(TypedValue* base, TypedValue* key, TypedValue* val,
                                 MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   base = ElemD<false, true, keyType>(mis->tvScratch, mis->tvRef, base, key);
+  assert(val->m_type == KindOfRef);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
-    tvBind(val->tv(), base);
+    tvBind(val, base);
   }
 }
 
@@ -2008,8 +2011,8 @@ static inline void bindElemImpl(TypedValue* base, TypedValue* key, RefData* val,
   m(bindElemS,   StrKey,  false)
 
 #define ELEM(nm, ...)                                                   \
-static void nm(TypedValue* base, TypedValue* key, RefData* val,         \
-               MInstrState* mis) {                       \
+static void nm(TypedValue* base, TypedValue* key, TypedValue* val,      \
+               MInstrState* mis) {                                      \
   bindElemImpl<__VA_ARGS__>(base, key, val, mis);                       \
 }
 HELPER_TABLE(ELEM)
@@ -2028,7 +2031,7 @@ void TranslatorX64::emitBindElem(const Tracelet& t,
   cleanOutLocal(ni);
   assert(!forceMValIncDec(t, ni, mii));
   assert(val.isVariant());
-  typedef void (*OpFunc)(TypedValue*, TypedValue*, RefData*, MInstrState*);
+  typedef void (*OpFunc)(TypedValue*, TypedValue*, TypedValue*, MInstrState*);
   BUILD_OPTAB(getKeyTypeIS(key), key.isVariant());
   EMIT_RCALL(a, ni, opFunc, R(rBase), ISML(key), A(val.location), R(mis_rsp));
   invalidateOutLocal(ni);
@@ -2037,12 +2040,13 @@ void TranslatorX64::emitBindElem(const Tracelet& t,
 
 template <KeyType keyType, bool unboxKey, bool isObj>
 static inline void bindPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
-                                RefData* val, MInstrState* mis) {
+                                TypedValue* val, MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   base = Prop<false, true, false, isObj, keyType>(mis->tvScratch, mis->tvRef,
                                                   ctx, base, key);
+  assert(val->m_type == KindOfRef);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
-    tvBind(val->tv(), base);
+    tvBind(val, base);
   }
 }
 
@@ -2059,8 +2063,8 @@ static inline void bindPropImpl(Class* ctx, TypedValue* base, TypedValue* key,
 
 #define PROP(nm, ...)                                                   \
 static inline void nm(Class* ctx, TypedValue* base, TypedValue* key,    \
-                                RefData* val,                           \
-                                MInstrState* mis) {      \
+                                TypedValue* val,                        \
+                                MInstrState* mis) {                     \
   bindPropImpl<__VA_ARGS__>(ctx, base, key, val, mis);                  \
 }
 HELPER_TABLE(PROP)
@@ -2083,7 +2087,7 @@ void TranslatorX64::emitBindProp(const Tracelet& t,
   PREP_CTX(argNumToRegName[0]);
   // Emit the appropriate helper call.
   assert(!forceMValIncDec(t, ni, mii));
-  typedef void (*OpFunc)(Class*, TypedValue*, TypedValue*, RefData*,
+  typedef void (*OpFunc)(Class*, TypedValue*, TypedValue*, TypedValue*,
                          MInstrState*);
   BUILD_OPTAB(getKeyTypeS(key), key.isVariant(), m_vecState->isObj());
   EMIT_RCALL(a, ni, opFunc,
@@ -2373,11 +2377,12 @@ void TranslatorX64::emitIncDecNewElem(const Tracelet& t,
   }
 }
 
-static inline void bindNewElem(TypedValue* base, RefData* val,
+static inline void bindNewElem(TypedValue* base, TypedValue* val,
                                MInstrState* mis) {
   base = NewElem(mis->tvScratch, mis->tvRef, base);
+  assert(val->m_type == KindOfRef);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
-    tvBind(val->tv(), base);
+    tvBind(val, base);
   }
 }
 
@@ -2390,10 +2395,8 @@ void TranslatorX64::emitBindNewElem(const Tracelet& t,
   assert(generateMVal(t, ni, mii));
   const DynLocation& val = *ni.inputs[0];
   m_regMap.cleanSmashLoc(val.location);
-  // Emit the appropriate helper call.
-  void (*bindNewElemOp)(TypedValue*, RefData*, MInstrState*) = bindNewElem;
   assert(val.isVariant());
-  EMIT_RCALL(a, ni, bindNewElemOp, R(rBase), A(val.location), R(mis_rsp));
+  EMIT_RCALL(a, ni, bindNewElem, R(rBase), A(val.location), R(mis_rsp));
 }
 
 void TranslatorX64::emitNotSuppNewElem(const Tracelet& t,
@@ -2533,7 +2536,7 @@ void TranslatorX64::emitMPre(const Tracelet& t,
                                        RegInfo::CLEAN);
     if (val.isVariant()) {
       tmp.alloc();
-      emitDeref(a, rVal, r(tmp));
+      emitDerefRef(a, rVal, r(tmp));
       rVal = r(tmp);
     }
     // Copy val to tvVal for later assignment and decref.
@@ -2850,7 +2853,7 @@ TranslatorX64::translateCGetM(const Tracelet& t,
     LazyScratchReg baseScratch(m_regMap);
     if (base.isVariant()) {
       baseScratch.alloc();
-      emitDeref(a, baseReg, r(baseScratch));
+      emitDerefRef(a, baseReg, r(baseScratch));
       baseReg = r(baseScratch);
     }
     Stats::emitInc(a, Stats::Tx64_CGetMArray);
@@ -2908,7 +2911,7 @@ void TranslatorX64::translateIssetMFast(const Tracelet& t,
   LazyScratchReg scratch(m_regMap);
   if (base.isVariant()) {
     scratch.alloc();
-    emitDeref(a, arrReg, r(scratch));
+    emitDerefRef(a, arrReg, r(scratch));
     arrReg = r(scratch);
     SKTRACE(1, ni.source, "loaded variant\n");
   }
@@ -3077,18 +3080,18 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
   bool useBoxedForm = arr.isVariant();
   void* fptr;
   if (false) { // helper type-checks
-    TypedValue* cell = nullptr;
+    RefData* ref = nullptr;
     ArrayData* arr = nullptr;
     TypedValue* rhs = nullptr;
     StringData* strKey = nullptr;
     UNUSED ArrayData* ret;
-    ret = array_setm_ik1_v(cell, arr, 12, rhs);
-    ret = array_setm_sk1_v(cell, arr, strKey, rhs);
-    ret = array_setm_sk1_v0(cell, arr, strKey, rhs);
-    ret = array_setm_s0k1_v(cell, arr, strKey, rhs);
-    ret = array_setm_s0k1_v0(cell, arr, strKey, rhs);
-    ret = array_setm_s0k1nc_v(cell, arr, strKey, rhs);
-    ret = array_setm_s0k1nc_v0(cell, arr, strKey, rhs);
+    ret = array_setm_ik1_v(ref, arr, 12, rhs);
+    ret = array_setm_sk1_v(ref, arr, strKey, rhs);
+    ret = array_setm_sk1_v0(ref, arr, strKey, rhs);
+    ret = array_setm_s0k1_v(ref, arr, strKey, rhs);
+    ret = array_setm_s0k1_v0(ref, arr, strKey, rhs);
+    ret = array_setm_s0k1nc_v(ref, arr, strKey, rhs);
+    ret = array_setm_s0k1nc_v0(ref, arr, strKey, rhs);
   }
 
   /*
@@ -3126,7 +3129,7 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
     PhysReg rhsReg = getReg(valLoc);
     if (valIsVariant) {
       tmp.alloc();
-      emitDeref(a, rhsReg, r(tmp));
+      emitDerefRef(a, rhsReg, r(tmp));
       rhsReg = r(tmp);
     }
     emitIncRef(rhsReg, KindOfArray);
@@ -3135,7 +3138,7 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
             useBoxedForm ? V(arrLoc) : IMM(0),
             useBoxedForm ? DEREF(arrLoc) : V(arrLoc),
             V(keyLoc),
-            valIsVariant ? V(valLoc) : A(valLoc));
+            valIsVariant ? VREF(valLoc) : A(valLoc));
 
   recordReentrantCall(i);
   // If we did not used boxed form, we need to tell the register allocator

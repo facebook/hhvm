@@ -21,6 +21,7 @@ namespace HPHP {
 IMPLEMENT_SMART_ALLOCATION(RefData);
 
 RefData::~RefData() {
+  assert(m_magic == kMagic);
   tvAsVariant(&m_tv).~Variant();
 }
 

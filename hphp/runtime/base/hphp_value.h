@@ -39,7 +39,7 @@ struct TypedValue;
  * when the type is known beforehand.
  */
 union Value {
-  int64_t     num;  // KindOfInt64, KindOfBool
+  int64_t     num;  // KindOfInt64, KindOfBool (must be zero-extended)
   double      dbl;  // KindOfDouble
   StringData *pstr; // KindOfString, KindOfStaticString
   ArrayData  *parr; // KindOfArray
@@ -51,30 +51,59 @@ union Value {
 
 enum VarNrFlag { NR_FLAG = 1<<29 };
 
+union AuxUnion {
+  int32_t u_hash;        // key type and hash for HphpArray and [Stable]Map
+  VarNrFlag u_varNrFlag; // magic number for asserts in VarNR
+  bool u_deepInit;       // used by Class::initPropsImpl for deep init
+  int32_t u_cacheHandle; // used by unit.cpp to squirrel away cache handles
+};
+
+/*
+ * 7pack format:
+ * experimental "Packed" format for TypedValues.  By grouping 7 tags
+ * and 7 values separately, we can fit 7 TypedValues in 63 bytes (64 with
+ * a throw-away alignment byte (t0):
+ *
+ *   0   1   2     7   8       16        56
+ *   [t0][t1][t2]..[t7][value1][value2]..[value7]
+ *
+ * With this layout, a single TypedValue requires 16 bytes, and still has
+ * room for a 32-bit padding field, which we still use in a few places:
+ *
+ *   0   1       2   3   4      8
+ *   [t0][m_type][t2][t3][m_pad][m_data]
+ */
+
 /*
  * A TypedValue is a descriminated PHP Value.  m_tag describes the contents
  * of m_data.  m_aux is described above, and must only be read or written
  * in specialized contexts.
  */
+#ifdef PACKED_TV
+// This TypedValue layout is a subset of the full 7pack format.  Client
+// code should not mess with the _t0 or _tags padding fields.
 struct TypedValue {
-  /**
-   * The order of the data members is significant. The m_aux field must
-   * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
-   */
-  Value m_data;
-private:
-  friend struct TypedValueAux;
   union {
-    int32_t u_hash;        // key type and hash for HphpArray and [Stable]Map
-    VarNrFlag u_varNrFlag; // magic number for asserts in VarNR
-    bool u_deepInit;       // used by Class::initPropsImpl for deep init
-    int32_t u_cacheHandle; // used by unit.cpp to squirrel away cache handles
-  } m_aux;
-public:
+    uint8_t _tags[8];
+    struct {
+      uint8_t _t0;
+      DataType m_type;
+      AuxUnion m_aux;
+    };
+  };
+  Value m_data;
+
+  std::string pretty() const;
+};
+#else
+struct TypedValue {
+  Value m_data;
+  AuxUnion m_aux;
   DataType m_type;
 
   std::string pretty() const; // debug formatting. see trace.h
 };
+#endif
 
 /*
  * This TypedValue subclass exposes a 32-bit "aux" field somewhere inside it.
@@ -93,6 +122,12 @@ struct TypedValueAux : TypedValue {
   const bool& deepInit() const { return m_aux.u_deepInit; }
   VarNrFlag& varNrFlag() { return m_aux.u_varNrFlag; }
   const VarNrFlag& varNrFlag() const { return m_aux.u_varNrFlag; }
+
+private:
+  static void assertions() {
+    static_assert(sizeof(TypedValueAux) <= 16,
+                  "don't add big things to AuxUnion");
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

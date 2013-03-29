@@ -27,6 +27,7 @@
 #include <runtime/base/types.h>
 #include <runtime/base/util/countable.h>
 #include <runtime/base/memory/memory_usage_stats.h>
+#include <util/trace.h>
 
 namespace HPHP {
 
@@ -181,6 +182,7 @@ public:
   void* alloc() { return alloc(m_itemSize); }
   void* alloc(size_t size);
   void dealloc(void *obj) {
+    TRACE(1, "dealloc %p\n", obj);
     assert(memset(obj, kSmartFreeFill, m_itemSize));
     m_free.push(obj);
     MemoryManager::TheMemoryManager()->getStats().usage -= m_itemSize;
@@ -195,6 +197,7 @@ public:
 
   // keep these frequently used fields together.
 private:
+  TRACE_SET_MOD(smartalloc);
   GarbageList m_free;
   const int m_itemSize;
   const Name m_name;

@@ -131,9 +131,6 @@ enum TransPerfCounter {
 static __thread int64_t s_perfCounters[tpc_num_counters];
 #define INC_TPC(n) ++s_perfCounters[tpc_ ## n];
 
-#define KindOfString \
-#error You probably do not mean to use KindOfString in this file.
-
 #define NULLCASE() \
   case KindOfUninit: case KindOfNull
 
@@ -580,6 +577,7 @@ void ArgManager::computeUsed(std::map<PhysReg, size_t> &used,
         m_args[i].m_kind == ArgContent::ArgRegPlus) {
       reg = m_args[i].m_reg;
     } else if (m_args[i].m_kind == ArgContent::ArgLoc ||
+               m_args[i].m_kind == ArgContent::ArgLocRef ||
                m_args[i].m_kind == ArgContent::ArgDeref) {
       reg = m_tx64.getReg(*m_args[i].m_loc);
     } else {
@@ -727,16 +725,22 @@ void ArgManager::shuffleRegisters(std::map<PhysReg, size_t> &used,
 
 void ArgManager::emitValues(std::vector<PhysReg> &actual) {
   for (size_t i = 0; i < m_args.size(); i++) {
-    switch(m_args[i].m_kind) {
+    auto kind = m_args[i].m_kind;
+    auto argReg = argNumToRegName[i];
+    switch (kind) {
     case ArgContent::ArgLoc:
+    case ArgContent::ArgLocRef:
     case ArgContent::ArgDeref:
     case ArgContent::ArgReg:
       TRACE(6, "ArgManager: copying arg %zd from r%d to r%d\n",
-            i, int(actual[i]), int(argNumToRegName[i]));
-      emitMovRegReg(m_a, actual[i], argNumToRegName[i]);
+            i, int(actual[i]), int(argReg));
+      emitMovRegReg(m_a, actual[i], argReg);
       // Emit dereference if needed
-      if (m_args[i].m_kind == ArgContent::ArgDeref) {
-        emitDeref(m_a, argNumToRegName[i], argNumToRegName[i]);
+      if (kind == ArgContent::ArgDeref) {
+        emitDerefRef(m_a, argReg, argReg);
+      } else if (kind == ArgContent::ArgLocRef && RefData::tvOffset()) {
+        // argReg holds a RefData*; adjust it to be TypedValue* to the value.
+        m_a.addq(RefData::tvOffset(), argReg);
       }
       break;
 
@@ -744,12 +748,12 @@ void ArgManager::emitValues(std::vector<PhysReg> &actual) {
     // If it was used previously by an input value, shuffleRegisters
     // should have moved it to the proper register from argNumToRegName.
     case ArgContent::ArgImm:
-      emitImmReg(m_a, m_args[i].m_imm, argNumToRegName[i]);
+      emitImmReg(m_a, m_args[i].m_imm, argReg);
       break;
 
     case ArgContent::ArgRegPlus:
       if (m_args[i].m_imm) {
-        m_a.  add_imm32_reg64(m_args[i].m_imm, argNumToRegName[i]);
+        m_a.  add_imm32_reg64(m_args[i].m_imm, argReg);
       }
       break;
 
@@ -758,7 +762,7 @@ void ArgManager::emitValues(std::vector<PhysReg> &actual) {
         PhysReg base;
         int disp;
         locToRegDisp(*m_args[i].m_loc, &base, &disp);
-        emitLea(m_a, base, disp, argNumToRegName[i]);
+        emitLea(m_a, base, disp, argReg);
       }
       break;
 
@@ -1159,7 +1163,7 @@ void TranslatorX64::emitDecRefGenericReg(PhysReg rData, PhysReg rType) {
   };
 
   Op op = m_curNI->op();
-  a.    cmpl   (KindOfRefCountThreshold, r32(rType));
+  emitCmpTVType(a, KindOfRefCountThreshold, rType);
   if (op == OpSetM || op == OpContSend || op == OpSetG) {
     // Semi-likely cases
     semiLikelyIfBlock(CC_A, a, std::bind(body, std::ref(a)));
@@ -2391,7 +2395,8 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     } else {
       PhysReg base;
       int disp, k;
-      if (numLocals < func->numLocals()) {
+      static_assert(KindOfUninit == 0, "");
+      if (numParams < func->numLocals()) {
         a.xorl (eax, eax);
       }
       for (k = numLocals; k < func->numLocals(); ++k) {
@@ -3881,7 +3886,7 @@ TranslatorX64::emitUnboxTopOfStack(const NormalizedInstruction& i) {
   // for the output location
   m_regMap.allocOutputRegs(i);
   PhysReg rDest = getReg(i.outStack->location);
-  emitDeref(a, rSrc, rDest);
+  emitDerefRef(a, rSrc, rDest);
   emitIncRef(rDest, outType);
   // decRef the var on the evaluation stack
   emitDecRef(i, rSrc, KindOfRef);
@@ -4031,12 +4036,12 @@ TranslatorX64::binaryArithLocal(const NormalizedInstruction &i,
     // The local is a var, so we have to read its value into outReg
     // on operate on that. We will need to write the result back
     // to the local after the operation.
-    emitDeref(a, localReg, r(scr));
+    emitDerefRef(a, localReg, r(scr));
     emitBody(r(scr));
     // We operated on outReg, so we need to write the result back to the
     // local
     emitMovRegReg(a, r(scr), outReg);
-    a.    store_reg64_disp_reg64(r(scr), 0, localReg);
+    a.    storeq (r(scr), localReg[RefData::tvOffset() + TVOFF(m_data)]);
   }
 }
 
@@ -4646,7 +4651,7 @@ TranslatorX64::translateUnaryBooleanOp(const Tracelet& t,
       PhysReg reg = getReg(inLoc);
       PhysReg outReg = getReg(i.outStack->location);
       if (boxedForm) {
-        emitDeref(a, reg, outReg);
+        emitDerefRef(a, reg, outReg);
       } else {
         emitMovRegReg(a, reg, outReg);
       }
@@ -4660,7 +4665,7 @@ TranslatorX64::translateUnaryBooleanOp(const Tracelet& t,
       PhysReg outReg = getReg(i.outStack->location);
       ScratchReg scratch(m_regMap);
       if (boxedForm) {
-        emitDeref(a, reg, r(scratch));
+        emitDerefRef(a, reg, r(scratch));
         emitConvertToBool(a, r(scratch), outReg, instrNeg);
       } else {
         emitConvertToBool(a, reg, outReg, instrNeg);
@@ -4891,7 +4896,7 @@ TranslatorX64::translateCGetL(const Tracelet& t,
     } else {
       ScratchReg rTmp(m_regMap);
       PhysReg localReg = getReg(inputs[0]->location);
-      a.store_reg64_disp_reg64(localReg, stackDisp + TVOFF(m_data), stackBase);
+      a.    storeq (localReg, stackBase[stackDisp + TVOFF(m_data)]);
       emitLoadTVType(a, locBase[locDisp + TVOFF(m_type)], r(rTmp));
       emitStoreTVType(a, r(rTmp), stackBase[stackDisp + TVOFF(m_type)]);
     }
@@ -4932,7 +4937,7 @@ TranslatorX64::translateCGetL(const Tracelet& t,
     emitMovRegReg(a, localReg, dest);
   }
   if (inputs[0]->isVariant()) {
-    emitDeref(a, dest, dest);
+    emitDerefRef(a, dest, dest);
   }
   assert(outType != KindOfStaticString);
   emitIncRef(dest, outType);
@@ -4983,7 +4988,7 @@ TranslatorX64::translateCGetL2(const Tracelet& t,
   const PhysReg cellOut = getReg(ni.outStack->location);
   assert(cellOut != stackIn);
   if (ni.inputs[locIdx]->isVariant()) {
-    emitDeref(a, localIn, cellOut);
+    emitDerefRef(a, localIn, cellOut);
   } else if (!undefinedLocal) {
     emitMovRegReg(a, localIn, cellOut);
   }
@@ -5127,20 +5132,20 @@ TranslatorX64::translateAssignToLocalOp(const Tracelet& t,
       (!locTypeRelaxed && IS_REFCOUNTED_TYPE(decRefType));
     if (useOldType) {
       oldLocalReg.alloc();
-      emitDeref(a, localReg, r(oldLocalReg));
+      emitDerefRef(a, localReg, r(oldLocalReg));
     }
     if (rhsTypeRelaxed) {
       PhysReg base;
       int disp;
       ScratchReg rTmp(m_regMap);
       locToRegDisp(ni.inputs[rhsIdx]->location, &base, &disp);
-      size_t typeOff = TVOFF(m_type);
-      size_t dataOff = TVOFF(m_data);
+      size_t typeOff = RefData::tvOffset() + TVOFF(m_type);
+      size_t dataOff = RefData::tvOffset() + TVOFF(m_data);
       emitLoadTVType(a, base[disp + TVOFF(m_type)], r(rTmp));
       a.    storeq (rhsReg, localReg[dataOff]);
       emitStoreTVType(a, r(rTmp), localReg[typeOff]);
     } else {
-      emitStoreTypedValue(a, rhsType, rhsReg, 0, localReg);
+      emitStoreToRefData(a, rhsType, rhsReg, 0, localReg);
     }
   } else if (rhsTypeRelaxed) {
     PhysReg rhsBase;
@@ -5520,14 +5525,14 @@ TranslatorX64::translateAddElemC(const Tracelet& t,
   // not (for cases where the key is a local).
   assert(key.rtt.isInt() || key.rtt.isString());
   if (false) { // type-check
-    TypedValue* cell = nullptr;
+    RefData* ref = nullptr;
     TypedValue* rhs = nullptr;
     StringData* strkey = nullptr;
     ArrayData* arr = nullptr;
     ArrayData* ret;
-    ret = array_setm_ik1_v0(cell, arr, 12, rhs);
+    ret = array_setm_ik1_v0(ref, arr, 12, rhs);
     printf("%p", ret); // use ret
-    ret = array_setm_sk1_v0(cell, arr, strkey, rhs);
+    ret = array_setm_sk1_v0(ref, arr, strkey, rhs);
     printf("%p", ret); // use ret
   }
   // Otherwise, we pass the rhs by address
@@ -6648,6 +6653,13 @@ void TranslatorX64::emitReturnVal(
   tvWriteUninit(&tv);
   tv.m_data.num = 0; // to keep the compiler happy
 
+  auto moveRetValIfNeeded = [&] {
+    if (thisBase != dstBase ||
+        thisOffset != (dstOffset + TVOFF(m_data))) {
+      a.  loadq(thisBase[thisOffset], scratch);
+      a.  storeq(scratch, dstBase[dstOffset + TVOFF(m_data)]);
+    }
+  };
   /*
    * We suppressed the write of the (literal) return value
    * to the stack. Figure out what it was.
@@ -6680,15 +6692,13 @@ void TranslatorX64::emitReturnVal(
       tv.m_data.parr = curUnit()->lookupArrayId(prev->imm[0].u_AA);
       break;
     case OpThis: {
-      if (thisBase != dstBase || thisOffset != dstOffset) {
-        a.  load_reg64_disp_reg64(thisBase, thisOffset, scratch);
-        a.  store_reg64_disp_reg64(scratch, dstOffset, dstBase);
-      }
+      moveRetValIfNeeded();
       emitStoreTVType(a, KindOfObject, dstBase[dstOffset + TVOFF(m_type)]);
       return;
     }
     case OpBareThis: {
       assert(curFunc()->cls());
+      moveRetValIfNeeded();
       a.    mov_imm32_reg32(KindOfNull, scratch);
       a.    testb(1, thisBase[thisOffset]);
       {
@@ -6696,10 +6706,6 @@ void TranslatorX64::emitReturnVal(
         a.  mov_imm32_reg32(KindOfObject, scratch);
       }
       emitStoreTVType(a, scratch, dstBase[dstOffset + TVOFF(m_type)]);
-      if (thisBase != dstBase || thisOffset != dstOffset) {
-        a.  load_reg64_disp_reg64(thisBase, thisOffset, scratch);
-        a.  store_reg64_disp_reg64(scratch, dstOffset, dstBase);
-      }
       return;
     }
     default:
@@ -6709,7 +6715,7 @@ void TranslatorX64::emitReturnVal(
   emitStoreTVType(a, tv.m_type, r64(dstBase)[dstOffset + TVOFF(m_type)]);
   if (tv.m_type != KindOfNull) {
     emitStoreImm(a, tv.m_data.num,
-                 dstBase, dstOffset, sz::qword);
+                 dstBase, dstOffset + TVOFF(m_data), sz::qword);
   }
 
 }
@@ -7218,7 +7224,7 @@ TranslatorX64::emitObjToClass(const NormalizedInstruction& i) {
   PhysReg src = getReg(in);
   ScratchReg tmp(m_regMap);
   if (i.inputs[kEmitClsLocalIdx]->rtt.isVariant()) {
-    emitDeref(a, src, r(tmp));
+    emitDerefRef(a, src, r(tmp));
     src = r(tmp);
   }
   assert(i.outStack->valueType() == KindOfClass);
@@ -7424,15 +7430,15 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
     // Deal with a potential $this local in the generator body
     if (fillThis) {
       assert(thisId != kInvalidId);
-      a.load_reg64_disp_reg64(rax, CONTOFF(m_obj), r(rScratch));
-      a.test_reg64_reg64(r(rScratch), r(rScratch));
+      a.    load_reg64_disp_reg64(rax, CONTOFF(m_obj), r(rScratch));
+      a.    test_reg64_reg64(r(rScratch), r(rScratch));
       {
         JccBlock<CC_Z> ifObj(a);
         const int thisOff = cellsToBytes(genLocals - thisId - 1);
         // We don't have to check for a static refcount since we
         // know it's an Object
-        a.add_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, r(rScratch));
-        a.store_reg64_disp_reg64(r(rScratch), thisOff + TVOFF(m_data), r(rDest));
+        a.  addl(1, r(rScratch)[FAST_REFCOUNT_OFFSET]);
+        a.  storeq(r(rScratch), r(rDest)[thisOff + TVOFF(m_data)]);
         emitStoreTVType(a, KindOfObject, r(rDest)[thisOff + TVOFF(m_type)]);
       }
     }
@@ -9447,7 +9453,7 @@ TranslatorX64::translateThis(const Tracelet &t,
          curFunc()->isClosureBody());
   m_regMap.allocOutputRegs(i);
   PhysReg out = getReg(i.outStack->location);
-  a.   load_reg64_disp_reg64(rVmFp, AROFF(m_this), out);
+  a.   loadq(rVmFp[AROFF(m_this)], out);
 
   if (!i.guardedThis) {
     emitThisCheck(i, out);
@@ -9497,7 +9503,7 @@ TranslatorX64::translateBareThis(const Tracelet &t,
   emitIncRef(out, KindOfObject);
   if (i.outStack->rtt.isVagueValue()) {
     emitStoreTVType(a, KindOfObject, base[offset + TVOFF(m_type)]);
-    a. store_reg64_disp_reg64(out, TVOFF(m_data) + offset, base);
+    a. storeq(out, base[TVOFF(m_data) + offset]);
   } else {
     assert(i.outStack->isObject());
     m_regMap.bindScratch(outScratch, i.outStack->location, KindOfObject,
@@ -9526,20 +9532,20 @@ TranslatorX64::translateInitThisLoc(const Tracelet& t,
   assert(base == rVmFp);
 
   ScratchReg thiz(m_regMap);
-  a.load_reg64_disp_reg64(rVmFp, AROFF(m_this), r(thiz));
+  a.    load_reg64_disp_reg64(rVmFp, AROFF(m_this), r(thiz));
   if (curFunc()->cls() == nullptr) {
     // If we're in a pseudomain, m_this could be NULL
-    a.test_reg64_reg64(r(thiz), r(thiz));
-    a.jz(astubs.code.frontier); // jz if_null
+    a.  testq (r(thiz), r(thiz));
+    a.  jz (astubs.code.frontier); // jz if_null
   }
   // Ok, it's not NULL but it might be a Class which should be treated
   // equivalently
-  a.testb(1, rbyte(thiz));
-  a.jnz(astubs.code.frontier); // jnz if_null
+  a.    testb(1, rbyte(thiz));
+  a.    jnz(astubs.code.frontier); // jnz if_null
 
   // We have a valid $this!
   emitStoreTVType(a, KindOfObject, base[offset + TVOFF(m_type)]);
-  a.store_reg64_disp_reg64(r(thiz), offset + TVOFF(m_data), base);
+  a.    storeq(r(thiz), base[offset + TVOFF(m_data)]);
   emitIncRef(r(thiz), KindOfObject);
 
   // if_null:
@@ -10146,11 +10152,11 @@ void TranslatorX64::translateFCallBuiltin(const Tracelet& t,
     // For bool return value, get the %al byte
     case KindOfBoolean:
       a.  movzbl (al, eax);  // sign extend byte->qword
-      emitStoreTypedValue(a, func->returnType(), rax, disp, base, true);
+      emitStoreTypedValue(a, returnType, rax, disp, base, true);
       break;
     case KindOfNull:  /* void return type */
     case KindOfInt64:
-      emitStoreTypedValue(a, func->returnType(), rax, disp, base, true);
+      emitStoreTypedValue(a, returnType, rax, disp, base, true);
       break;
     STRINGCASE():
     case KindOfArray:
@@ -10370,7 +10376,7 @@ TranslatorX64::translateVerifyParamType(const Tracelet& t,
   PhysReg src = getReg(in);
   ScratchReg inCls(m_regMap);
   if (i.inputs[0]->rtt.isVariant()) {
-    emitDeref(a, src, r(inCls));
+    emitDerefRef(a, src, r(inCls));
     src = r(inCls);
   }
   a.  load_reg64_disp_reg64(src, ObjectData::getVMClassOffset(), r(inCls));
@@ -10530,7 +10536,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
     PhysReg baseReg = srcReg;
     if (input0->rtt.isVariant()) {
       assert(input0IsLoc);
-      emitDeref(a, srcReg, r(inCls));
+      emitDerefRef(a, srcReg, r(inCls));
       baseReg = r(inCls);
     }
     a.  load_reg64_disp_reg64(baseReg, ObjectData::getVMClassOffset(),
@@ -11088,7 +11094,7 @@ TranslatorX64::emitVariantGuards(const Tracelet& t,
     }
     if (isRef && !m_useHHIR) {
       m_regMap.allocInputReg(i, in);
-      emitOneGuard(t, *base, getReg(input->location), 0,
+      emitOneGuard(t, *base, getReg(input->location), RefData::tvOffset(),
                    input->rtt.innerType(), sideExit);
     }
   }
@@ -12567,6 +12573,12 @@ void ArgManager::addLoc(const Location &loc) {
   TRACE(6, "ArgManager: push arg %zd loc:(%s, %" PRId64 ")\n",
         m_args.size(), loc.spaceName(), loc.offset);
   m_args.push_back(ArgContent(ArgContent::ArgLoc, loc));
+}
+
+void ArgManager::addLocRef(const Location &loc) {
+  TRACE(6, "ArgManager: push arg ref %zd loc:(%s, %" PRId64 ")\n",
+        m_args.size(), loc.spaceName(), loc.offset);
+  m_args.push_back(ArgContent(ArgContent::ArgLocRef, loc));
 }
 
 void ArgManager::addLocAddr(const Location &loc) {

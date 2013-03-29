@@ -30,16 +30,19 @@ namespace HPHP {
  * but the value held here must not be KindOfRef.
  */
 class RefData {
+  enum Magic : uint64_t { kMagic = 0xfacefaceb00cb00c };
 public:
-  enum NullInit {
-    nullinit,
-  };
-  RefData() {}
+  enum NullInit { nullinit };
+  RefData() { assert(m_magic = kMagic); }
   RefData(NullInit) {
+    assert(m_magic = kMagic);
     _count = 1;
     m_tv.m_type = KindOfNull;
   }
-  RefData(DataType t, int64_t datum) { init(t, datum); }
+  RefData(DataType t, int64_t datum) {
+    assert(m_magic = kMagic);
+    init(t, datum);
+  }
   ~RefData();
 
   // Don't extend Countable but use these methods to directly
@@ -50,16 +53,28 @@ public:
   DECLARE_SMART_ALLOCATION(RefData);
   void dump() const;
 
-  const TypedValue* tv() const { return &m_tv; }
-  TypedValue* tv() { return &m_tv; }
-  const Variant* var() const { return (const Variant*)&m_tv; }
-  Variant* var() { return (Variant*)&m_tv; }
+  const TypedValue* tv() const {
+    assert(m_magic == kMagic);
+    return &m_tv;
+  }
+  TypedValue* tv() {
+    assert(m_magic == kMagic);
+    return &m_tv;
+  }
+  const Variant* var() const { return (const Variant*)tv(); }
+  Variant* var() { return reinterpret_cast<Variant*>(tv()); }
 
   static constexpr size_t tvOffset() { return offsetof(RefData, m_tv); }
 
+  void assertValid() const {
+    assert(m_magic == kMagic);
+  }
+
   // TODO: t2221110: get rid of this hack.
   static RefData* refDataFromVariantIfYouDare(const Variant* var) {
-    return reinterpret_cast<RefData*>(uintptr_t(var) - tvOffset());
+    RefData* ref = reinterpret_cast<RefData*>(uintptr_t(var) - tvOffset());
+    ref->assertValid();
+    return ref;
   }
 
 private:
@@ -73,13 +88,35 @@ private:
       m_tv.m_type = KindOfNull;
     }
   }
+
+  static void compileTimeAsserts() {
+    static_assert(offsetof(RefData, _count) == FAST_REFCOUNT_OFFSET, "");
+  }
+
+#if defined(DEBUG) || defined(PACKED_TV)
+// don't overlap TypedValue with _count.  sizeof(*this) = 32.
+private: Magic m_magic;
+public:  mutable int32_t _count;
+private: TypedValue m_tv;
+  static void layoutAsserts() {
+    static_assert(offsetof(RefData, m_tv) >
+                  offsetof(RefData, _count) + sizeof(int32_t), "");
+  };
+#else
+// overlap TypedValue with count
 private:
   union {
-    // overlap TypedValue with an explicit struct to expose the _count
-    // field to the macro-expanded refcount methods above.
-    struct { void* ptr; mutable int32_t _count; int32_t type; };
+    struct {
+      void* _ptr;
+      mutable int32_t _count;
+    };
     TypedValue m_tv;
   };
+  static void layoutAsserts() {
+    static_assert(offsetof(RefData, _count) == TypedValueAux::auxOffset, "");
+    static_assert(sizeof(RefData::_count) == TypedValueAux::auxSize, "");
+  }
+#endif
 };
 
 ALWAYS_INLINE inline void decRefRef(RefData* ref) {

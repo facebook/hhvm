@@ -91,15 +91,6 @@ struct CodegenState {
   AsmInfo* asmInfo;
 };
 
-// Generate an if-then block into a.  thenBlock is executed if cc is true.
-template <class Then>
-void ifThen(Transl::X64Assembler& a, ConditionCode cc, Then thenBlock) {
-  Label done;
-  a.jcc8(ccNegate(cc), done);
-  thenBlock();
-  asm_label(a, done);
-}
-
 struct CodeGenerator {
   typedef Transl::X64Assembler Asm;
 
@@ -432,7 +423,7 @@ struct ArgGroup {
    * Pass tmp as a TypedValue passed by value.
    */
   ArgGroup& typedValue(SSATmp* tmp) {
-    return ssa(tmp).type(tmp);
+    return packed_tv ? type(tmp).ssa(tmp) : ssa(tmp).type(tmp);
   }
 
   ArgGroup& none() {
@@ -451,7 +442,7 @@ struct ArgGroup {
 private:
   ArgGroup& vectorKeyImpl(SSATmp* key, bool allowInt) {
     if (key->isString() || (allowInt && key->isA(Type::Int))) {
-      return ssa(key).none();
+      return packed_tv ? none().ssa(key) : ssa(key).none();
     }
     return typedValue(key);
   }

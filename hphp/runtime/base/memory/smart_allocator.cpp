@@ -20,6 +20,7 @@
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/runtime_option.h>
 #include <util/logger.h>
+#include <util/trace.h>
 
 /*
  * Enabling these will prevent us from allocating out of the free list
@@ -31,6 +32,8 @@
 #endif
 
 namespace HPHP {
+
+TRACE_SET_MOD(smartalloc);
 
 ///////////////////////////////////////////////////////////////////////////////
 // initializer

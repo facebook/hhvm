@@ -544,7 +544,7 @@ template<> struct ShuffleReturn<false> {
 template<bool setRef> inline
 typename ShuffleReturn<setRef>::return_type
 arrayRefShuffle(ArrayData* oldData, ArrayData* newData, TypedValue* base) {
-  if (newData == nullptr) {
+  if (newData == oldData) {
     return ShuffleReturn<setRef>::do_return(oldData);
   }
 
@@ -587,7 +587,7 @@ template <bool setResult, KeyType keyType>
 inline void SetElemArray(TypedValue* base, TypedValue* key,
                                 Cell* value) {
   ArrayData* a = base->m_data.parr;
-  ArrayData* newData = nullptr;
+  ArrayData* newData = a;
   bool copy = (a->getCount() > 1)
     || (value->m_type == KindOfArray && value->m_data.parr == a);
 
@@ -612,6 +612,7 @@ inline void SetElemArray(TypedValue* base, TypedValue* key,
 
   arrayRefShuffle<true>(a, newData, base);
 }
+
 // SetElem() leaves the result in 'value', rather than returning it as in
 // SetOpElem(), because doing so avoids a dup operation that SetOpElem() can't
 // get around.
@@ -781,11 +782,11 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
     ArrayData* a = base->m_data.parr;
     bool copy = (a->getCount() > 1)
                 || (value->m_type == KindOfArray && value->m_data.parr == a);
-    a = a->append(tvCellAsCVarRef(value), copy);
-    if (a) {
-      a->incRefCount();
+    ArrayData* a2 = a->append(tvCellAsCVarRef(value), copy);
+    if (a2 != a) {
+      a2->incRefCount();
       base->m_data.parr->decRefCount();
-      base->m_data.parr = a;
+      base->m_data.parr = a2;
     }
     break;
   }
@@ -1196,26 +1197,27 @@ inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, StringData* key,
 template <KeyType keyType>
 inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
   ArrayData* a = base->m_data.parr;
+  ArrayData* a2;
   bool copy = a->getCount() > 1;
   if (keyType == AnyKey) {
     if (IS_STRING_TYPE(key->m_type)) {
-      a = UnsetElemArrayRawKey(a, key->m_data.pstr, copy);
+      a2 = UnsetElemArrayRawKey(a, key->m_data.pstr, copy);
     } else if (key->m_type == KindOfInt64) {
-      a = UnsetElemArrayRawKey(a, key->m_data.num, copy);
+      a2 = UnsetElemArrayRawKey(a, key->m_data.num, copy);
     } else {
       VarNR varKey = tvAsCVarRef(key).toKey();
       if (varKey.isNull()) {
         return;
       }
-      a = a->remove(varKey, copy);
+      a2 = a->remove(varKey, copy);
     }
   } else {
-    a = UnsetElemArrayRawKey(a, keyAsRaw<keyType>(key), copy);
+    a2 = UnsetElemArrayRawKey(a, keyAsRaw<keyType>(key), copy);
   }
-  if (a) {
-    a->incRefCount();
+  if (a2 != a) {
+    a2->incRefCount();
     base->m_data.parr->decRefCount();
-    base->m_data.parr = a;
+    base->m_data.parr = a2;
   }
 }
 

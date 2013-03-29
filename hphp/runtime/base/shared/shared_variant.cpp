@@ -272,9 +272,8 @@ SharedVariant* SharedVariant::getValue(ssize_t pos) const {
   return m_data.map->getValIndex(pos);
 }
 
-void SharedVariant::loadElems(ArrayData *&elems,
-                              const SharedMap &sharedMap,
-                              bool mapInit /* = false */) {
+ArrayData* SharedVariant::loadElems(const SharedMap &sharedMap,
+                                    bool mapInit /* = false */) {
   assert(is(KindOfArray));
   uint count = arrSize();
   bool isVector = getIsVector();
@@ -291,8 +290,9 @@ void SharedVariant::loadElems(ArrayData *&elems,
              true);
     }
   }
-  elems = ai.create();
+  ArrayData* elems = ai.create();
   if (elems->isStatic()) elems = elems->copy();
+  return elems;
 }
 
 int SharedVariant::countReachable() const {

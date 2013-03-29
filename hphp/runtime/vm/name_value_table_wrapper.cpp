@@ -116,12 +116,12 @@ ArrayData* NameValueTableWrapper::lval(StringData* k, Variant*& ret,
     tv = m_tab->set(k, &nulVal);
   }
   ret = &tvAsVariant(tv);
-  return 0;
+  return this;
 }
 
 ArrayData* NameValueTableWrapper::lvalNew(Variant*& ret, bool copy) {
   ret = &Variant::lvalBlackHole();
-  return 0;
+  return this;
 }
 
 ArrayData* NameValueTableWrapper::set(int64_t k, CVarRef v, bool copy) {
@@ -131,7 +131,7 @@ ArrayData* NameValueTableWrapper::set(int64_t k, CVarRef v, bool copy) {
 ArrayData* NameValueTableWrapper::set(StringData* k, CVarRef v,
                                       bool copy) {
   tvAsVariant(m_tab->lookupAdd(k)).assignVal(v);
-  return 0;
+  return this;
 }
 
 ArrayData* NameValueTableWrapper::setRef(int64_t k, CVarRef v, bool copy) {
@@ -140,7 +140,7 @@ ArrayData* NameValueTableWrapper::setRef(int64_t k, CVarRef v, bool copy) {
 
 ArrayData* NameValueTableWrapper::setRef(StringData* k, CVarRef v, bool copy) {
   tvAsVariant(m_tab->lookupAdd(k)).assignRef(v);
-  return 0;
+  return this;
 }
 
 ArrayData* NameValueTableWrapper::remove(int64_t k, bool copy) {
@@ -149,7 +149,7 @@ ArrayData* NameValueTableWrapper::remove(int64_t k, bool copy) {
 
 ArrayData* NameValueTableWrapper::remove(const StringData* k, bool copy) {
   m_tab->unset(k);
-  return 0;
+  return this;
 }
 
 /*

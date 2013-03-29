@@ -926,11 +926,11 @@ bool HphpArray::nextInsert(CVarRef data) {
   return true;
 }
 
-void HphpArray::nextInsertRef(CVarRef data) {
+ArrayData* HphpArray::nextInsertRef(CVarRef data) {
   if (UNLIKELY(m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
                   "already occupied");
-    return;
+    return this;
   }
   resizeIfNeeded();
   int64_t ki = m_nextKI;
@@ -941,9 +941,10 @@ void HphpArray::nextInsertRef(CVarRef data) {
   initElmInt(allocElm(ei), ki, data, true /*byRef*/);
   // Update next free element.
   ++m_nextKI;
+  return this;
 }
 
-void HphpArray::nextInsertWithRef(CVarRef data) {
+ArrayData* HphpArray::nextInsertWithRef(CVarRef data) {
   resizeIfNeeded();
   int64_t ki = m_nextKI;
   ElmInd* ei = findForInsert(ki);
@@ -957,14 +958,15 @@ void HphpArray::nextInsertWithRef(CVarRef data) {
   e->setIntKey(ki);
   // Update next free element.
   ++m_nextKI;
+  return this;
 }
 
-void HphpArray::addLvalImpl(int64_t ki, Variant** pDest) {
+ArrayData* HphpArray::addLvalImpl(int64_t ki, Variant** pDest) {
   assert(pDest != nullptr);
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
     *pDest = &tvAsVariant(&m_data[*ei].data);
-    return;
+    return this;
   }
   Elm* e = newElm(ei, ki);
   tvWriteNull(&e->data);
@@ -973,9 +975,10 @@ void HphpArray::addLvalImpl(int64_t ki, Variant** pDest) {
   if (ki >= m_nextKI && m_nextKI >= 0) {
     m_nextKI = ki + 1;
   }
+  return this;
 }
 
-void HphpArray::addLvalImpl(StringData* key, strhash_t h, Variant** pDest) {
+ArrayData* HphpArray::addLvalImpl(StringData* key, strhash_t h, Variant** pDest) {
   assert(key != nullptr && pDest != nullptr);
   ElmInd* ei = findForInsert(key, h);
   if (validElmInd(*ei)) {
@@ -983,7 +986,7 @@ void HphpArray::addLvalImpl(StringData* key, strhash_t h, Variant** pDest) {
     TypedValue* tv;
     tv = &e->data;
     *pDest = &tvAsVariant(tv);
-    return;
+    return this;
   }
   Elm* e = newElm(ei, h);
   // Initialize element to null and store the address of the element into
@@ -993,9 +996,10 @@ void HphpArray::addLvalImpl(StringData* key, strhash_t h, Variant** pDest) {
   e->setStrKey(key, h);
   e->key->incRefCount();
   *pDest = &(tvAsVariant(&e->data));
+  return this;
 }
 
-inline void HphpArray::addVal(int64_t ki, CVarRef data) {
+inline ArrayData* HphpArray::addVal(int64_t ki, CVarRef data) {
   assert(!exists(ki));
   resizeIfNeeded();
   ElmInd* ei = findForNewInsert(ki);
@@ -1007,9 +1011,10 @@ inline void HphpArray::addVal(int64_t ki, CVarRef data) {
   if (ki >= m_nextKI && m_nextKI >= 0) {
     m_nextKI = ki + 1;
   }
+  return this;
 }
 
-inline void HphpArray::addVal(StringData* key, CVarRef data) {
+inline ArrayData* HphpArray::addVal(StringData* key, CVarRef data) {
   assert(!exists(key));
   resizeIfNeeded();
   strhash_t h = key->hash();
@@ -1022,157 +1027,139 @@ inline void HphpArray::addVal(StringData* key, CVarRef data) {
   // Set the key after data is written
   e->setStrKey(key, h);
   e->key->incRefCount();
+  return this;
 }
 
-inline void HphpArray::addValWithRef(int64_t ki, CVarRef data) {
+inline ArrayData* HphpArray::addValWithRef(int64_t ki, CVarRef data) {
   resizeIfNeeded();
   ElmInd* ei = findForInsert(ki);
-  if (validElmInd(*ei)) {
-    return;
+  if (!validElmInd(*ei)) {
+    Elm* e = allocElm(ei);
+    tvWriteNull(&e->data);
+    tvAsVariant(&e->data).setWithRef(data);
+    e->setIntKey(ki);
+    if (ki >= m_nextKI) {
+      m_nextKI = ki + 1;
+    }
   }
-  Elm* e = allocElm(ei);
-  tvWriteNull(&e->data);
-  tvAsVariant(&e->data).setWithRef(data);
-  e->setIntKey(ki);
-  if (ki >= m_nextKI) {
-    m_nextKI = ki + 1;
-  }
+  return this;
 }
 
-inline void HphpArray::addValWithRef(StringData* key, CVarRef data) {
+inline ArrayData* HphpArray::addValWithRef(StringData* key, CVarRef data) {
   resizeIfNeeded();
   strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key, h);
-  if (validElmInd(*ei)) {
-    return;
+  if (!validElmInd(*ei)) {
+    Elm* e = allocElm(ei);
+    tvWriteNull(&e->data);
+    tvAsVariant(&e->data).setWithRef(data);
+    e->setStrKey(key, h);
+    e->key->incRefCount();
   }
-  Elm* e = allocElm(ei);
-  tvWriteNull(&e->data);
-  tvAsVariant(&e->data).setWithRef(data);
-  e->setStrKey(key, h);
-  e->key->incRefCount();
+  return this;
 }
 
 inline INLINE_SINGLE_CALLER
-void HphpArray::update(int64_t ki, CVarRef data) {
+ArrayData* HphpArray::update(int64_t ki, CVarRef data) {
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
     tvAsVariant(&e->data).assignValHelper(data);
-    return;
+    return this;
   }
   newElmInt(ei, ki, data);
   if (ki >= m_nextKI && m_nextKI >= 0) {
     m_nextKI = ki + 1;
   }
+  return this;
 }
 
 inline INLINE_SINGLE_CALLER
-void HphpArray::update(StringData* key, CVarRef data) {
+ArrayData* HphpArray::update(StringData* key, CVarRef data) {
   strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key, h);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
     tvAsVariant(&e->data).assignValHelper(data);
-    return;
+    return this;
   }
   newElmStr(ei, h, key, data);
+  return this;
 }
 
-void HphpArray::updateRef(int64_t ki, CVarRef data) {
+ArrayData* HphpArray::updateRef(int64_t ki, CVarRef data) {
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
     tvAsVariant(&e->data).assignRefHelper(data);
-    return;
+    return this;
   }
   newElmInt(ei, ki, data, true /*byRef*/);
   if (ki >= m_nextKI && m_nextKI >= 0) {
     m_nextKI = ki + 1;
   }
+  return this;
 }
 
-void HphpArray::updateRef(StringData* key, CVarRef data) {
+ArrayData* HphpArray::updateRef(StringData* key, CVarRef data) {
   strhash_t h = key->hash();
   ElmInd* ei = findForInsert(key, h);
   if (validElmInd(*ei)) {
     Elm* e = &m_data[*ei];
     tvAsVariant(&e->data).assignRefHelper(data);
-    return;
+    return this;
   }
   newElmStr(ei, h, key, data, true /*byRef*/);
+  return this;
 }
 
 ArrayData* HphpArray::lval(int64_t k, Variant*& ret, bool copy,
                            bool checkExist /* = false */) {
-  if (!copy) {
-    addLvalImpl(k, &ret);
-    return nullptr;
-  }
-  if (!checkExist) {
-    HphpArray* a = copyImpl();
-    a->addLvalImpl(k, &ret);
-    return a;
-  }
-  ssize_t /*ElmInd*/ pos = find(k);
-  if (pos != (ssize_t)ElmIndEmpty) {
-    Elm* e = &m_data[pos];
-    if (tvAsVariant(&e->data).isReferenced() ||
-        tvAsVariant(&e->data).isObject()) {
-      ret = &tvAsVariant(&e->data);
-      return nullptr;
+  if (!copy) return addLvalImpl(k, &ret);
+  if (checkExist) {
+    ssize_t /*ElmInd*/ pos = find(k);
+    if (pos != (ssize_t)ElmIndEmpty) {
+      Elm* e = &m_data[pos];
+      if (tvAsVariant(&e->data).isReferenced() ||
+          tvAsVariant(&e->data).isObject()) {
+        ret = &tvAsVariant(&e->data);
+        return this;
+      }
     }
   }
-  HphpArray* a = copyImpl();
-  a->addLvalImpl(k, &ret);
-  return a;
+  return copyImpl()->addLvalImpl(k, &ret);
 }
 
 ArrayData* HphpArray::lval(StringData* key, Variant*& ret, bool copy,
                            bool checkExist /* = false */) {
   strhash_t prehash = key->hash();
-  if (!copy) {
-    addLvalImpl(key, prehash, &ret);
-    return nullptr;
-  }
-  if (!checkExist) {
-    HphpArray* a = copyImpl();
-    a->addLvalImpl(key, prehash, &ret);
-    return a;
-  }
-  ssize_t /*ElmInd*/ pos = find(key, prehash);
-  if (pos != (ssize_t)ElmIndEmpty) {
-    Elm* e = &m_data[pos];
-    TypedValue* tv = &e->data;
-    if (tvAsVariant(tv).isReferenced() ||
-        tvAsVariant(tv).isObject()) {
-      ret = &tvAsVariant(tv);
-      return nullptr;
+  if (!copy) return addLvalImpl(key, prehash, &ret);
+  if (checkExist) {
+    ssize_t /*ElmInd*/ pos = find(key, prehash);
+    if (pos != (ssize_t)ElmIndEmpty) {
+      Elm* e = &m_data[pos];
+      TypedValue* tv = &e->data;
+      if (tvAsVariant(tv).isReferenced() ||
+          tvAsVariant(tv).isObject()) {
+        ret = &tvAsVariant(tv);
+        return this;
+      }
     }
   }
-  HphpArray* a = copyImpl();
-  a->addLvalImpl(key, prehash, &ret);
-  return a;
+  return copyImpl()->addLvalImpl(key, prehash, &ret);
 }
 
 ArrayData *HphpArray::lvalPtr(StringData* key, Variant*& ret, bool copy,
                               bool create) {
   strhash_t prehash = key->hash();
-  HphpArray* a = 0;
-  HphpArray* t = this;
-  if (copy) {
-    a = t = copyImpl();
-  }
-  if (create) {
-    t->addLvalImpl(key, prehash, &ret);
+  HphpArray* a = !copy ? this : copyImpl();
+  if (create) return a->addLvalImpl(key, prehash, &ret);
+  ssize_t /*ElmInd*/ pos = a->find(key, prehash);
+  if (pos != (ssize_t)ElmIndEmpty) {
+    Elm* e = &a->m_data[pos];
+    ret = &tvAsVariant(&e->data);
   } else {
-    ssize_t /*ElmInd*/ pos = t->find(key, prehash);
-    if (pos != (ssize_t)ElmIndEmpty) {
-      Elm* e = &t->m_data[pos];
-      ret = &tvAsVariant(&e->data);
-    } else {
-      ret = nullptr;
-    }
+    ret = nullptr;
   }
   return a;
 }
@@ -1189,71 +1176,55 @@ ArrayData* HphpArray::lvalNew(Variant*& ret, bool copy) {
 }
 
 ArrayData* HphpArray::set(int64_t k, CVarRef v, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->update(k, v);
-  return t;
+  HphpArray* a = !copy ? this : copyImpl();
+  return a->update(k, v);
 }
 
 ArrayData* HphpArray::set(StringData* k, CVarRef v, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->update(k, v);
-  return t;
+  HphpArray* a = !copy ? this : copyImpl();
+  return a->update(k, v);
 }
 
 ArrayData* HphpArray::setRef(int64_t k, CVarRef v, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->updateRef(k, v);
-  return t;
+  HphpArray* a = !copy ? this : copyImpl();
+  return a->updateRef(k, v);
 }
 
 ArrayData* HphpArray::setRef(StringData* k, CVarRef v, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->updateRef(k, v);
-  return t;
+  HphpArray* a = !copy ? this : copyImpl();
+  return a->updateRef(k, v);
 }
 
 ArrayData* HphpArray::add(int64_t k, CVarRef v, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->addVal(k, v);
-  return t;
+  HphpArray* a = !copy ? this : copyImpl();
+  return a->addVal(k, v);
 }
 
 ArrayData* HphpArray::add(StringData* k, CVarRef v, bool copy) {
   assert(!exists(k));
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->addVal(k, v);
-  return t;
+  HphpArray* a = !copy ? this : copyImpl();
+  return a->addVal(k, v);
 }
 
 ArrayData* HphpArray::addLval(int64_t k, Variant*& ret, bool copy) {
   assert(!exists(k));
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->addLvalImpl(k, &ret);
-  return t;
+  HphpArray* a = !copy ? this : copyImpl();
+  return a->addLvalImpl(k, &ret);
 }
 
 ArrayData* HphpArray::addLval(StringData* k, Variant*& ret, bool copy) {
   assert(!exists(k));
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->addLvalImpl(k, k->hash(), &ret);
-  return t;
+  HphpArray* a = !copy ? this : copyImpl();
+  return a->addLvalImpl(k, k->hash(), &ret);
 }
 
 //=============================================================================
 // Delete.
 
-void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
+ArrayData* HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
   ElmInd pos = *ei;
   if (!validElmInd(pos)) {
-    return;
+    return this;
   }
 
   Elm* elms = m_data;
@@ -1324,20 +1295,17 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
     // Compact in order to keep elms from being overly sparse.
     compact();
   }
+  return this;
 }
 
 ArrayData* HphpArray::remove(int64_t k, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->erase(a->findForInsert(k));
-  return t;
+  HphpArray* a = !copy ? this : copyImpl();
+  return a->erase(a->findForInsert(k));
 }
 
 ArrayData* HphpArray::remove(const StringData* key, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->erase(a->findForInsert(key, key->hash()));
-  return t;
+  HphpArray* a = !copy ? this : copyImpl();
+  return a->erase(a->findForInsert(key, key->hash()));
 }
 
 ArrayData* HphpArray::copy() const {
@@ -1384,16 +1352,15 @@ TypedValue* HphpArray::nvGet(const StringData* k) const {
 }
 
 ArrayData* HphpArray::nvNew(TypedValue*& ret, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
+  HphpArray* a = !copy ? this : copyImpl();
   if (UNLIKELY(!a->nextInsert(uninit_null()))) {
     ret = nullptr;
-    return t;
+    return a;
   }
   assert(a->m_lastE != ElmIndEmpty);
   ssize_t lastE = (ssize_t)a->m_lastE;
   ret = &a->m_data[lastE].data;
-  return t;
+  return a;
 }
 
 TypedValue* HphpArray::nvGetValueRef(ssize_t pos) {
@@ -1487,10 +1454,9 @@ NEVER_INLINE HphpArray* HphpArray::copyImpl() const {
 }
 
 ArrayData* HphpArray::append(CVarRef v, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
+  HphpArray *a = !copy ? this : copyImpl();
   a->nextInsert(v);
-  return t;
+  return a;
 }
 
 /*
@@ -1502,7 +1468,7 @@ ArrayData* genericAddNewElemC(ArrayData* a, TypedValue value) {
   assert(a->getCount() <= 1);
   ArrayData* UNUSED r = a->append(tvAsCVarRef(&value), false);
   tvRefcountedDecRef(value);
-  assert(!r);
+  assert(r == a);
   return a;
 }
 
@@ -1534,26 +1500,17 @@ ArrayData* HphpArray::AddNewElemC(ArrayData* a, TypedValue value) {
 }
 
 ArrayData* HphpArray::appendRef(CVarRef v, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->nextInsertRef(v);
-  return t;
+  HphpArray *a = !copy ? this : copyImpl();
+  return a->nextInsertRef(v);
 }
 
 ArrayData *HphpArray::appendWithRef(CVarRef v, bool copy) {
-  HphpArray *a = this, *t = 0;
-  if (copy) a = t = copyImpl();
-  a->nextInsertWithRef(v);
-  return t;
+  HphpArray *a = !copy ? this : copyImpl();
+  return a->nextInsertWithRef(v);
 }
 
 ArrayData* HphpArray::append(const ArrayData* elems, ArrayOp op, bool copy) {
-  HphpArray* a = this;
-  HphpArray* result = nullptr;
-  if (copy) {
-    result = a = copyImpl();
-  }
-
+  HphpArray* a = !copy ? this : copyImpl();
   if (op == Plus) {
     for (ArrayIter it(elems); !it.end(); it.next()) {
       Variant key = it.first();
@@ -1579,15 +1536,11 @@ ArrayData* HphpArray::append(const ArrayData* elems, ArrayOp op, bool copy) {
       }
     }
   }
-  return result;
+  return a;
 }
 
 ArrayData* HphpArray::pop(Variant& value) {
-  HphpArray* a = this;
-  HphpArray* result = nullptr;
-  if (getCount() > 1) {
-    result = a = copyImpl();
-  }
+  HphpArray* a = getCount() <= 1 ? this : copyImpl();
   Elm* elms = a->m_data;
   ElmInd pos = a->HphpArray::iter_end();
   if (validElmInd(pos)) {
@@ -1604,15 +1557,11 @@ ArrayData* HphpArray::pop(Variant& value) {
   // To conform to PHP behavior, the pop operation resets the array's
   // internal iterator.
   a->m_pos = a->nextElm(elms, ElmIndEmpty);
-  return result;
+  return a;
 }
 
 ArrayData* HphpArray::dequeue(Variant& value) {
-  HphpArray* a = this;
-  HphpArray* result = nullptr;
-  if (getCount() > 1) {
-    result = a = copyImpl();
-  }
+  HphpArray* a = getCount() <= 1 ? this : copyImpl();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
   a->freeStrongIterators();
@@ -1631,15 +1580,11 @@ ArrayData* HphpArray::dequeue(Variant& value) {
   // To conform to PHP behavior, the dequeue operation resets the array's
   // internal iterator
   a->m_pos = ssize_t(a->nextElm(elms, ElmIndEmpty));
-  return result;
+  return a;
 }
 
 ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
-  HphpArray* a = this;
-  HphpArray* result = nullptr;
-  if (copy) {
-    result = a = copyImpl();
-  }
+  HphpArray* a = getCount() <= 1 ? this : copyImpl();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
   a->freeStrongIterators();
@@ -1669,7 +1614,7 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
   // To conform to PHP behavior, the prepend operation resets the array's
   // internal iterator
   a->m_pos = ssize_t(a->nextElm(elms, ElmIndEmpty));
-  return result;
+  return a;
 }
 
 void HphpArray::renumber() {
@@ -1770,7 +1715,7 @@ array_setm(RefData* ref, ArrayData* ad, Key key, TypedValue* value) {
   if (DecRefValue) tvRefcountedDecRef(value);
   if (!ref) return arrayRefShuffle<false>(ad, retval, nullptr);
   arrayRefShuffle<true>(ad, retval, ref->tv());
-  return nullptr;
+  return retval;
 }
 
 /**
@@ -1936,7 +1881,7 @@ ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
     if (a1 != a2) {
       ArrayData *escalated = a1->append(a2, ArrayData::Plus,
                                         a1->getCount() > 1);
-      if (escalated) {
+      if (escalated != a1) {
         escalated->incRefCount();
         decRefArr(a2);
         decRefArr(a1);

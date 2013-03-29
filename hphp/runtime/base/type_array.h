@@ -288,27 +288,19 @@ class Array : protected ArrayBase {
   const Variant operator[](CVarRef key) const;
 
   Variant &lval(int64_t key) {
-    if (!m_px) {
-      ArrayBase::operator=(ArrayData::Create());
-    }
+    if (!m_px) ArrayBase::operator=(ArrayData::Create());
     Variant *ret = nullptr;
     ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
-    if (escalated) {
-      ArrayBase::operator=(escalated);
-    }
+    if (escalated != m_px) ArrayBase::operator=(escalated);
     assert(ret);
     return *ret;
   }
 
   Variant &lval(CStrRef key) {
-    if (!m_px) {
-      ArrayBase::operator=(ArrayData::Create());
-    }
+    if (!m_px) ArrayBase::operator=(ArrayData::Create());
     Variant *ret = nullptr;
     ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
-    if (escalated) {
-      ArrayBase::operator=(escalated);
-    }
+    if (escalated != m_px) ArrayBase::operator=(escalated);
     assert(ret);
     return *ret;
   }
@@ -408,14 +400,10 @@ class Array : protected ArrayBase {
   // defined in type_variant.h
   template<typename T>
   Variant &addLvalImpl(const T &key) {
-    if (!m_px) {
-      ArrayBase::operator=(ArrayData::Create());
-    }
+    if (!m_px) ArrayBase::operator=(ArrayData::Create());
     Variant *ret = nullptr;
     ArrayData *escalated = m_px->addLval(key, ret, m_px->getCount() > 1);
-    if (escalated) {
-      ArrayBase::operator=(escalated);
-    }
+    if (escalated != m_px) ArrayBase::operator=(escalated);
     assert(ret);
     return *ret;
   }
@@ -470,11 +458,8 @@ class Array : protected ArrayBase {
   template<typename T>
   void removeImpl(const T &key) {
     if (m_px) {
-      ArrayData *escalated =
-        m_px->remove(key, (m_px->getCount() > 1));
-      if (escalated) {
-        ArrayBase::operator=(escalated);
-      }
+      ArrayData *escalated = m_px->remove(key, (m_px->getCount() > 1));
+      if (escalated != m_px) ArrayBase::operator=(escalated);
     }
   }
   void remove(bool    key) {
@@ -556,16 +541,12 @@ class Array : protected ArrayBase {
 
   template<typename T>
   Variant &lvalAtImpl(const T &key, ACCESSPARAMS_DECL) {
-    if (!m_px) {
-      ArrayBase::operator=(ArrayData::Create());
-    }
+    if (!m_px) ArrayBase::operator=(ArrayData::Create());
     Variant *ret = nullptr;
     ArrayData *escalated =
       m_px->lval(key, ret, m_px->getCount() > 1,
                  flags & AccessFlags::CheckExist);
-    if (escalated) {
-      ArrayBase::operator=(escalated);
-    }
+    if (escalated != m_px) ArrayBase::operator=(escalated);
     assert(ret);
     return *ret;
   }

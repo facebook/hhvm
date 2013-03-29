@@ -223,7 +223,7 @@ ArrayData *ArrayData::pop(Variant &value) {
     return remove(getKey(pos), getCount() > 1);
   }
   value = uninit_null();
-  return nullptr;
+  return this;
 }
 
 ArrayData *ArrayData::dequeue(Variant &value) {
@@ -233,16 +233,11 @@ ArrayData *ArrayData::dequeue(Variant &value) {
     ArrayData *ret = remove(getKey(pos), getCount() > 1);
 
     // In PHP, array_shift() will cause all numerically key-ed values re-keyed
-    if (ret) {
-      ret->renumber();
-    } else {
-      renumber();
-    }
-
+    ret->renumber();
     return ret;
   }
   value = uninit_null();
-  return nullptr;
+  return this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

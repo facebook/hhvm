@@ -851,9 +851,7 @@ class Variant : private VariantBase {
     Variant *ret = nullptr;
     ArrayData *arr = m_data.parr;
     ArrayData *escalated = arr->lval(key, ret, arr->getCount() > 1);
-    if (escalated) {
-      set(escalated);
-    }
+    if (escalated != arr) set(escalated);
     assert(ret);
     return *ret;
   }

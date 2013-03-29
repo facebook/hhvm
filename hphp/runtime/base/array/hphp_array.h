@@ -412,21 +412,21 @@ private:
   }
 
   bool nextInsert(CVarRef data);
-  void nextInsertRef(CVarRef data);
-  void nextInsertWithRef(CVarRef data);
-  void addLvalImpl(int64_t ki, Variant** pDest);
-  void addLvalImpl(StringData* key, strhash_t h, Variant** pDest);
-  void addVal(int64_t ki, CVarRef data);
-  void addVal(StringData* key, CVarRef data);
-  void addValWithRef(int64_t ki, CVarRef data);
-  void addValWithRef(StringData* key, CVarRef data);
+  ArrayData* nextInsertRef(CVarRef data);
+  ArrayData* nextInsertWithRef(CVarRef data);
+  ArrayData* addLvalImpl(int64_t ki, Variant** pDest);
+  ArrayData* addLvalImpl(StringData* key, strhash_t h, Variant** pDest);
+  ArrayData* addVal(int64_t ki, CVarRef data);
+  ArrayData* addVal(StringData* key, CVarRef data);
+  ArrayData* addValWithRef(int64_t ki, CVarRef data);
+  ArrayData* addValWithRef(StringData* key, CVarRef data);
 
-  void update(int64_t ki, CVarRef data);
-  void update(StringData* key, CVarRef data);
-  void updateRef(int64_t ki, CVarRef data);
-  void updateRef(StringData* key, CVarRef data);
+  ArrayData* update(int64_t ki, CVarRef data);
+  ArrayData* update(StringData* key, CVarRef data);
+  ArrayData* updateRef(int64_t ki, CVarRef data);
+  ArrayData* updateRef(StringData* key, CVarRef data);
 
-  void erase(ElmInd* ei, bool updateNext = false);
+  ArrayData* erase(ElmInd* ei, bool updateNext = false);
 
   HphpArray* copyImpl(HphpArray* target) const;
   HphpArray* copyImpl() const;

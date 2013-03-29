@@ -37,9 +37,7 @@ const Array null_array = Array();
 
 void Array::setEvalScalar() const {
   Array* thisPtr = const_cast<Array*>(this);
-  if (!m_px) {
-    *thisPtr = ArrayData::Create();
-  }
+  if (!m_px) *thisPtr = ArrayData::Create();
   if (!m_px->isStatic()) {
     ArrayData *ad = ArrayData::GetScalarArray(m_px);
     *thisPtr = ad;
@@ -295,9 +293,7 @@ Array &Array::mergeImpl(ArrayData *data, ArrayData::ArrayOp op) {
       ArrayBase::operator=(data);
     } else if (m_px != data || op == ArrayData::Merge) {
       ArrayData *escalated = m_px->append(data, op, m_px->getCount() > 1);
-      if (escalated) {
-        ArrayBase::operator=(escalated);
-      }
+      if (escalated != m_px) ArrayBase::operator=(escalated);
     }
   } else if (op == ArrayData::Merge) {
     m_px->renumber();
@@ -540,9 +536,7 @@ Variant Array::rvalAt(CVarRef key, ACCESSPARAMS_IMPL) const {
 
 Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
   if (create) {
-    if (!m_px) {
-      ArrayBase::operator=(ArrayData::Create());
-    }
+    if (!m_px) ArrayBase::operator=(ArrayData::Create());
     return &lvalAt(key, AccessFlags::Key);
   }
   Variant *ret = nullptr;
@@ -550,23 +544,17 @@ Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
     ArrayData *escalated = m_px->lvalPtr(key, ret,
                                          forWrite && m_px->getCount() > 1,
                                          false);
-    if (escalated) {
-      ArrayBase::operator=(escalated);
-    }
+    if (escalated != m_px) ArrayBase::operator=(escalated);
   }
   return ret;
 }
 
 Variant &Array::lvalAt() {
-  if (!m_px) {
-    ArrayBase::operator=(ArrayData::Create());
-  }
+  if (!m_px) ArrayBase::operator=(ArrayData::Create());
   Variant *ret = nullptr;
   ArrayData *arr = m_px;
   ArrayData *escalated = arr->lvalNew(ret, arr->getCount() > 1);
-  if (escalated) {
-    ArrayBase::operator=(escalated);
-  }
+  if (escalated != arr) ArrayBase::operator=(escalated);
   assert(ret);
   return *ret;
 }
@@ -596,11 +584,8 @@ CVarRef Array::setImpl(const T &key, CVarRef v) {
     ArrayData *data = ArrayData::Create(key, v);
     ArrayBase::operator=(data);
   } else {
-    ArrayData *escalated =
-      m_px->set(key, v, (m_px->getCount() > 1));
-    if (escalated) {
-      ArrayBase::operator=(escalated);
-    }
+    ArrayData *escalated = m_px->set(key, v, (m_px->getCount() > 1));
+    if (escalated != m_px) ArrayBase::operator=(escalated);
   }
   return v;
 }
@@ -613,11 +598,8 @@ CVarRef Array::setRefImpl(const T &key, CVarRef v) {
     ArrayBase::operator=(data);
   } else {
     escalate();
-    ArrayData *escalated =
-      m_px->setRef(key, v, (m_px->getCount() > 1));
-    if (escalated) {
-      ArrayBase::operator=(escalated);
-    }
+    ArrayData *escalated = m_px->setRef(key, v, (m_px->getCount() > 1));
+    if (escalated != m_px) ArrayBase::operator=(escalated);
   }
   return v;
 }
@@ -630,9 +612,7 @@ CVarRef Array::addImpl(const T &key, CVarRef v) {
     ArrayBase::operator=(data);
   } else {
     ArrayData *escalated = m_px->add(key, v, (m_px->getCount() > 1));
-    if (escalated) {
-      ArrayBase::operator=(escalated);
-    }
+    if (escalated != m_px) ArrayBase::operator=(escalated);
   }
   return v;
 }
@@ -849,9 +829,7 @@ CVarRef Array::append(CVarRef v) {
     ArrayBase::operator=(ArrayData::Create(v));
   } else {
     ArrayData *escalated = m_px->append(v, (m_px->getCount() > 1));
-    if (escalated) {
-      ArrayBase::operator=(escalated);
-    }
+    if (escalated != m_px) ArrayBase::operator=(escalated);
   }
   return v;
 }
@@ -861,33 +839,23 @@ CVarRef Array::appendRef(CVarRef v) {
     ArrayBase::operator=(ArrayData::CreateRef(v));
   } else {
     ArrayData *escalated = m_px->appendRef(v, (m_px->getCount() > 1));
-    if (escalated) {
-      ArrayBase::operator=(escalated);
-    }
+    if (escalated != m_px) ArrayBase::operator=(escalated);
   }
   return v;
 }
 
 CVarRef Array::appendWithRef(CVarRef v) {
-  if (!m_px) {
-    ArrayBase::operator=(ArrayData::Create());
-  }
+  if (!m_px) ArrayBase::operator=(ArrayData::Create());
   ArrayData *escalated = m_px->appendWithRef(v, (m_px->getCount() > 1));
-  if (escalated) {
-    ArrayBase::operator=(escalated);
-  }
+  if (escalated != m_px) ArrayBase::operator=(escalated);
   return v;
 }
 
 Variant Array::appendOpEqual(int op, CVarRef v) {
-  if (!m_px) {
-    ArrayBase::operator=(ArrayData::Create());
-  }
+  if (!m_px) ArrayBase::operator=(ArrayData::Create());
   Variant *cv = nullptr;
   ArrayData *escalated = m_px->lvalNew(cv, m_px->getCount() > 1);
-  if (escalated) {
-    ArrayBase::operator=(escalated);
-  }
+  if (escalated != m_px) ArrayBase::operator=(escalated);
   assert(cv);
   switch (op) {
   case T_CONCAT_EQUAL: return concat_assign((*cv), v);
@@ -910,9 +878,7 @@ Variant Array::pop() {
   if (m_px) {
     Variant ret;
     ArrayData *newarr = m_px->pop(ret);
-    if (newarr) {
-      ArrayBase::operator=(newarr);
-    }
+    if (newarr != m_px) ArrayBase::operator=(newarr);
     return ret;
   }
   return null_variant;
@@ -922,24 +888,17 @@ Variant Array::dequeue() {
   if (m_px) {
     Variant ret;
     ArrayData *newarr = m_px->dequeue(ret);
-    if (newarr) {
-      ArrayBase::operator=(newarr);
-    }
+    if (newarr != m_px) ArrayBase::operator=(newarr);
     return ret;
   }
   return null_variant;
 }
 
 void Array::prepend(CVarRef v) {
-  if (!m_px) {
-    operator=(Create());
-  }
+  if (!m_px) operator=(Create());
   assert(m_px);
-
   ArrayData *newarr = m_px->prepend(v, (m_px->getCount() > 1));
-  if (newarr) {
-    ArrayBase::operator=(newarr);
-  }
+  if (newarr != m_px) ArrayBase::operator=(newarr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

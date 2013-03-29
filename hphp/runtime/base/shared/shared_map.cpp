@@ -89,155 +89,90 @@ CVarRef SharedMap::get(int64_t k, bool error /* = false */) const {
   return getValueRef(index);
 }
 
+/* if a2 is modified copy of a1 (i.e. != a1), then release a1 and return a2 */
+inline ArrayData* releaseIfCopied(ArrayData* a1, ArrayData* a2) {
+  if (a1 != a2) a1->release();
+  return a2;
+}
+
 ArrayData *SharedMap::lval(int64_t k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->lval(k, ret, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->lval(k, ret, false));
 }
 
 ArrayData *SharedMap::lval(StringData* k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->lval(k, ret, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->lval(k, ret, false));
 }
 
 ArrayData *SharedMap::lvalNew(Variant *&ret, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->lvalNew(ret, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->lvalNew(ret, false));
 }
 
 ArrayData *SharedMap::set(int64_t k, CVarRef v, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->set(k, v, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->set(k, v, false));
 }
 
 ArrayData *SharedMap::set(StringData* k, CVarRef v, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->set(k, v, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->set(k, v, false));
 }
 
 ArrayData *SharedMap::setRef(int64_t k, CVarRef v, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->setRef(k, v, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->setRef(k, v, false));
 }
 
 ArrayData *SharedMap::setRef(StringData* k, CVarRef v, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->setRef(k, v, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->setRef(k, v, false));
 }
 
 ArrayData *SharedMap::remove(int64_t k, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->remove(k, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->remove(k, false));
 }
 
 ArrayData *SharedMap::remove(const StringData* k, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->remove(k, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->remove(k, false));
 }
 
 ArrayData *SharedMap::copy() const {
-  return escalate();
+  return SharedMap::escalate();
 }
 
 ArrayData *SharedMap::append(CVarRef v, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->append(v, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->append(v, false));
 }
 
 ArrayData *SharedMap::appendRef(CVarRef v, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->appendRef(v, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->appendRef(v, false));
 }
 
 ArrayData *SharedMap::appendWithRef(CVarRef v, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->appendWithRef(v, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->appendWithRef(v, false));
 }
 
 ArrayData *SharedMap::append(const ArrayData *elems, ArrayOp op, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->append(elems, op, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->append(elems, op, false));
 }
 
 ArrayData *SharedMap::prepend(CVarRef v, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->prepend(v, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
+  ArrayData *escalated = SharedMap::escalate();
+  return releaseIfCopied(escalated, escalated->prepend(v, false));
 }
 
 ArrayData *SharedMap::escalate() const {
-  ArrayData *ret = nullptr;
-  m_arr->loadElems(ret, *this);
+  ArrayData *ret = m_arr->loadElems(*this);
   assert(!ret->isStatic());
   return ret;
 }
@@ -280,8 +215,7 @@ TypedValue* SharedMap::nvGetCell(const StringData* key) const {
 }
 
 ArrayData* SharedMap::escalateForSort() {
-  ArrayData *ret = nullptr;
-  m_arr->loadElems(ret, *this, true /* mapInit */);
+  ArrayData *ret = m_arr->loadElems(*this, true /* mapInit */);
   assert(!ret->isStatic());
   return ret;
 }

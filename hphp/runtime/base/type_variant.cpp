@@ -471,10 +471,9 @@ Variant Variant::pop() {
   }
 
   Variant ret;
-  ArrayData *newarr = getArrayData()->pop(ret);
-  if (newarr) {
-    set(newarr);
-  }
+  ArrayData* a = getArrayData();
+  ArrayData* newarr = a->pop(ret);
+  if (newarr != a) set(newarr);
   return ret;
 }
 
@@ -488,10 +487,9 @@ Variant Variant::dequeue() {
   }
 
   Variant ret;
-  ArrayData *newarr = getArrayData()->dequeue(ret);
-  if (newarr) {
-    set(newarr);
-  }
+  ArrayData* a = getArrayData();
+  ArrayData* newarr = a->dequeue(ret);
+  if (newarr != a) set(newarr);
   return ret;
 }
 
@@ -500,16 +498,11 @@ void Variant::prepend(CVarRef v) {
     m_data.pref->var()->prepend(v);
     return;
   }
-  if (isNull()) {
-    set(Array::Create());
-  }
-
+  if (isNull()) set(Array::Create());
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
     ArrayData *newarr = arr->prepend(v, (arr->getCount() > 1));
-    if (newarr) {
-      set(newarr);
-    }
+    if (newarr != arr) set(newarr);
   } else {
     throw_bad_type_exception("expecting an array");
   }
@@ -518,8 +511,7 @@ void Variant::prepend(CVarRef v) {
 Variant Variant::array_iter_reset() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1 && !arr->isHead()
-     && !arr->noCopyOnWrite()) {
+    if (arr->getCount() > 1 && !arr->isHead() && !arr->noCopyOnWrite()) {
       arr = arr->copy();
       set(arr);
       assert(arr == getArrayData());
@@ -533,8 +525,7 @@ Variant Variant::array_iter_reset() {
 Variant Variant::array_iter_prev() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1 && !arr->isInvalid()
-     && !arr->noCopyOnWrite()) {
+    if (arr->getCount() > 1 && !arr->isInvalid() && !arr->noCopyOnWrite()) {
       arr = arr->copy();
       set(arr);
       assert(arr == getArrayData());
@@ -571,8 +562,7 @@ Variant Variant::array_iter_current_ref() {
 Variant Variant::array_iter_next() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1 && !arr->isInvalid()
-     && !arr->noCopyOnWrite()) {
+    if (arr->getCount() > 1 && !arr->isInvalid() && !arr->noCopyOnWrite()) {
       arr = arr->copy();
       set(arr);
       assert(arr == getArrayData());
@@ -586,8 +576,7 @@ Variant Variant::array_iter_next() {
 Variant Variant::array_iter_end() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1 && !arr->isTail()
-     && !arr->noCopyOnWrite()) {
+    if (arr->getCount() > 1 && !arr->isTail() && !arr->noCopyOnWrite()) {
       arr = arr->copy();
       set(arr);
       assert(arr == getArrayData());
@@ -609,8 +598,7 @@ Variant Variant::array_iter_key() const {
 Variant Variant::array_iter_each() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1 && !arr->isInvalid()
-     && !arr->noCopyOnWrite()) {
+    if (arr->getCount() > 1 && !arr->isInvalid() && !arr->noCopyOnWrite()) {
       arr = arr->copy();
       set(arr);
       assert(arr == getArrayData());
@@ -718,7 +706,7 @@ Variant &Variant::operator+=(CVarRef var) {
     }
     ArrayData *escalated = arr1->append(arr2, ArrayData::Plus,
                                         arr1->getCount() > 1);
-    if (escalated) set(escalated);
+    if (escalated != arr1) set(escalated);
     return *this;
   } else if (na) {
     throw BadArrayMergeException();
@@ -2276,10 +2264,10 @@ head:
       } else {
         if (blackHole) ret = &lvalBlackHole();
         else           ret = tmp;
-        escalated = 0;
+        escalated = arr;
       }
     }
-    if (escalated) {
+    if (escalated != arr) {
       self->set(escalated);
     }
     assert(ret);
@@ -2414,7 +2402,7 @@ Variant &Variant::lvalAt() {
   Variant *ret = nullptr;
   ArrayData *arr = m_data.parr;
   ArrayData *escalated = arr->lvalNew(ret, arr->getCount() > 1);
-  if (escalated) {
+  if (escalated != arr) {
     set(escalated);
   }
   assert(ret);
@@ -2510,7 +2498,7 @@ inline ALWAYS_INLINE CVarRef Variant::SetImpl(Variant *self, T key,
       if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
       escalated = self->m_data.parr->set(k, v, self->needCopyForSet(v));
     }
-    if (escalated) {
+    if (escalated != self->m_data.parr) {
       self->set(escalated);
     }
     return v;
@@ -2599,7 +2587,7 @@ CVarRef Variant::append(CVarRef v) {
   case KindOfArray:
     {
       ArrayData *escalated = m_data.parr->append(v, needCopyForSet(v));
-      if (escalated) {
+      if (escalated != m_data.parr) {
         set(escalated);
       }
     }
@@ -2644,7 +2632,7 @@ inline ALWAYS_INLINE CVarRef Variant::SetRefImpl(Variant *self, T key,
       if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
       escalated = self->m_data.parr->setRef(k, v, self->needCopyForSetRef(v));
     }
-    if (escalated) {
+    if (escalated != self->m_data.parr) {
       self->set(escalated);
     }
     return v;
@@ -2728,7 +2716,7 @@ CVarRef Variant::appendRef(CVarRef v) {
   case KindOfArray:
     {
       ArrayData *escalated = m_data.parr->appendRef(v, needCopyForSetRef(v));
-      if (escalated) {
+      if (escalated != m_data.parr) {
         set(escalated);
       }
     }
@@ -2768,7 +2756,7 @@ void Variant::removeImpl(double key) {
       ArrayData *arr = getArrayData();
       if (arr) {
         ArrayData *escalated = arr->remove(ToKey(key), (arr->getCount() > 1));
-        if (escalated) {
+        if (escalated != arr) {
           set(escalated);
         }
       }
@@ -2793,7 +2781,7 @@ void Variant::removeImpl(int64_t key) {
       ArrayData *arr = getArrayData();
       if (arr) {
         ArrayData *escalated = arr->remove(key, (arr->getCount() > 1));
-        if (escalated) {
+        if (escalated != arr) {
           set(escalated);
         }
       }
@@ -2818,7 +2806,7 @@ void Variant::removeImpl(bool key) {
       ArrayData *arr = getArrayData();
       if (arr) {
         ArrayData *escalated = arr->remove(ToKey(key), (arr->getCount() > 1));
-        if (escalated) {
+        if (escalated != arr) {
           set(escalated);
         }
       }
@@ -2850,7 +2838,7 @@ void Variant::removeImpl(CVarRef key, bool isString /* false */) {
           if (k.isNull()) return;
           escalated = arr->remove(k, (arr->getCount() > 1));
         }
-        if (escalated) {
+        if (escalated != arr) {
           set(escalated);
         }
       }
@@ -2880,7 +2868,7 @@ void Variant::removeImpl(CStrRef key, bool isString /* false */) {
         } else {
           escalated = arr->remove(key.toKey(), (arr->getCount() > 1));
         }
-        if (escalated) {
+        if (escalated != arr) {
           set(escalated);
         }
       }

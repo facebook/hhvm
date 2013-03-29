@@ -167,6 +167,12 @@ void VectorEffects::init(Opcode op, const Type origBase,
     valType = definitelyFail ? Type::InitNull : (valType | Type::InitNull);
   }
 
+  if (op == SetElem && baseType.maybe(Type::Str)) {
+    // If the base is a String, the result will be different from the value
+    // use valTypeChanged (even though the type may not have)
+    valTypeChanged = true;
+  }
+
   // The final baseType should be a pointer/box iff the input was
   baseType = baseBoxed ? baseType.box() : baseType;
   baseType = basePtr   ? baseType.ptr() : baseType;

@@ -83,6 +83,3 @@ add_library(afdt STATIC src/lowlevel.c src/strlcpy.c src/sync.c src/util.c ${ASY
 IF(LibEvent_FOUND)
 	target_link_libraries(afdt ${LIBEVENT_LIB})
 ENDIF()
-
-INSTALL(TARGETS afdt DESTINATION lib)
-INSTALL(FILES src/afdt.h DESTINATION include)

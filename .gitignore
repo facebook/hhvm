@@ -53,6 +53,7 @@ hphp.log
 CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
+install_manifest.txt
 
 /output_gd/
 

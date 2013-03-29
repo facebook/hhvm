@@ -688,7 +688,7 @@ Variant f_shm_get_var(int64_t shm_identifier, int64_t variable_key) {
 
   sysvshm_chunk *shm_var =
     (sysvshm_chunk*)((char *)shm_list_ptr->ptr + shm_varpos);
-  return f_unserialize(String(&shm_var->mem, shm_var->length, AttachLiteral));
+  return unserialize_from_buffer(&shm_var->mem, shm_var->length);
 }
 
 bool f_shm_has_var(int64_t shm_identifier, int64_t variable_key) {

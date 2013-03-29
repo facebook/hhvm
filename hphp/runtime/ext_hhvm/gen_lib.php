@@ -52,13 +52,10 @@ function generateMangleMap() {
     if ($m == '' || $d == '') continue;
     if (isset($ignoreList[$d])) continue;
     /*
-     * We only care about functions that start with "f_" or "fni_"
+     * We only care about functions that start with "f_"
      * and methods that start with "t_" ot "ti_"
-     *
-     * fni_ are our stubs in noinline.cpp for extensions that are
-     * normally defined inline only.
      */
-    if (preg_match('/^HPHP::f(ni)?_/', $d) ||
+    if (preg_match('/^HPHP::f_/', $d) ||
         preg_match('/^HPHP::c_[A-Za-z0-9_]*::t(i)?_/', $d)) {
       $mangleMap[$d] = $m;
     }
@@ -101,13 +98,6 @@ function parseIDLFunc($idlFunc, $mangleMap) {
   $obj = new PhpExtFunc();
   $obj->initFunc($name, $returnType, $returnByRef, $params, $isVarargs);
   $sig = $obj->getHphpSig();
-
-  // The implementation of some extension functions are in the .h file,
-  // so we don't have a mangled names for them.
-  if (!isset($mangleMap[$sig])) {
-    $obj->prefix = 'fni_';
-    $sig = $obj->getHphpSig();
-  }
 
   if (isset($mangleMap[$sig])) {
     $obj->mangledName = $mangleMap[$sig];

@@ -685,7 +685,7 @@ xmlNodePtr to_xml_user(encodeTypePtr type, CVarRef data, int style,
                        xmlNodePtr parent) {
   xmlNodePtr ret = NULL;
   if (type && type->map && !type->map->to_xml.isNull()) {
-    Variant return_value = f_call_user_func_array(type->map->to_xml,
+    Variant return_value = vm_call_user_func(type->map->to_xml,
                                                   CREATE_VECTOR1(data));
     if (return_value.isString()) {
       String sdoc = return_value.toString();
@@ -716,7 +716,7 @@ Variant to_zval_user(encodeTypePtr type, xmlNodePtr node) {
     xmlBufferFree(buf);
     xmlFreeNode(copy);
 
-    return_value = f_call_user_func_array(type->map->to_zval,
+    return_value = vm_call_user_func(type->map->to_zval,
                                           CREATE_VECTOR1(data));
   }
   return return_value;

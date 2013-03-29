@@ -315,7 +315,7 @@ bool c_Memcached::t_getdelayedbykey(CStrRef server_key, CArrRef keys,
 
   MemcachedResultWrapper result(&m_impl->memcached); Array item;
   while (fetchImpl(result.value, item)) {
-    f_call_user_func_array(value_cb, CREATE_VECTOR2(Variant(this), item));
+    vm_call_user_func(value_cb, CREATE_VECTOR2(Variant(this), item));
   }
 
   if (m_impl->rescode != q_Memcached$$RES_END) return false;
@@ -948,7 +948,7 @@ bool c_Memcached::toObject(Variant& value, const memcached_result_st &result) {
     value = f_json_decode(decompPayload);
     break;
   case MEMC_VAL_IS_SERIALIZED:
-    value = f_unserialize(decompPayload);
+    value = unserialize_from_string(decompPayload);
     break;
   case MEMC_VAL_IS_IGBINARY:
     raise_warning("could not unserialize value, no igbinary support");
@@ -965,7 +965,7 @@ memcached_return c_Memcached::doCacheCallback(CVarRef callback, CStrRef key,
   Array params(ArrayInit(3).set(Variant(this))
                            .set(key)
                            .setRef(value).create());
-  if (!f_call_user_func_array(callback, params)) {
+  if (!vm_call_user_func(callback, params)) {
     return MEMCACHED_NOTFOUND;
   }
 

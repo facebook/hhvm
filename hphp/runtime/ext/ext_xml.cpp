@@ -341,7 +341,7 @@ static Variant xml_call_handler(XmlParser *parser, CVarRef handler,
     } else if (handler.isArray() && handler.getArrayData()->size() == 2 &&
                (handler[0].isString() || handler[0].isObject()) &&
                handler[1].isString()) {
-      f_call_user_func_array(handler, args);
+      vm_call_user_func(handler, args);
     } else {
       raise_warning("Handler is invalid");
     }

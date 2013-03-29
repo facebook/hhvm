@@ -5976,7 +5976,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
       emitBuiltinCallArg(e, (*params)[i], i, byRef);
     }
     for (; i < func->getMaxParamCount(); i++) {
-      Variant v = f_unserialize(func->getParamDefault(i));
+      Variant v = unserialize_from_string(func->getParamDefault(i));
       TypePtr t = func->getParamType(i);
       emitBuiltinDefaultArg(e, v, t->getDataType(), i);
     }

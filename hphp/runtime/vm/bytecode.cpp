@@ -4855,13 +4855,13 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIs ## what ## C(PC& pc) { \
   IOP_TYPE_CHECK_INSTR_C(checkInit, what, predicate)              \
 
 IOP_TYPE_CHECK_INSTR_L(false,   set, isset)
-IOP_TYPE_CHECK_INSTR(true,   Null, f_is_null)
-IOP_TYPE_CHECK_INSTR(true,  Array, f_is_array)
-IOP_TYPE_CHECK_INSTR(true, String, f_is_string)
-IOP_TYPE_CHECK_INSTR(true, Object, f_is_object)
-IOP_TYPE_CHECK_INSTR(true,    Int, f_is_int)
-IOP_TYPE_CHECK_INSTR(true, Double, f_is_double)
-IOP_TYPE_CHECK_INSTR(true,   Bool, f_is_bool)
+IOP_TYPE_CHECK_INSTR(true,   Null, is_null)
+IOP_TYPE_CHECK_INSTR(true,  Array, is_array)
+IOP_TYPE_CHECK_INSTR(true, String, is_string)
+IOP_TYPE_CHECK_INSTR(true, Object, is_object)
+IOP_TYPE_CHECK_INSTR(true,    Int, is_int)
+IOP_TYPE_CHECK_INSTR(true, Double, is_double)
+IOP_TYPE_CHECK_INSTR(true,   Bool, is_bool)
 #undef IOP_TYPE_CHECK_INSTR
 
 inline void OPTBLD_INLINE VMExecutionContext::iopEmptyL(PC& pc) {

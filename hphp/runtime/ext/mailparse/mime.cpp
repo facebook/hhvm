@@ -959,7 +959,7 @@ int MimePart::extractImpl(int decode, File *src) {
 }
 
 void MimePart::callUserFunc(CStrRef s) {
-  f_call_user_func_array(m_extract_context, CREATE_VECTOR1(s));
+  vm_call_user_func(m_extract_context, CREATE_VECTOR1(s));
 }
 
 void MimePart::outputToStdout(CStrRef s) {

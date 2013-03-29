@@ -808,8 +808,7 @@ void ArrayUtil::InitScalarArrays(Array arrs[], int nArrs,
   if (uncompressed == nullptr) {
     throw Exception("Bad scalarArrayData %p", scalarArrayData);
   }
-  String s = String(uncompressed, len, AttachString);
-  Variant v(f_unserialize(s));
+  Variant v(unserialize_from_buffer(uncompressed, len));
   assert(v.isArray());
   Array scalarArrays =  v;
   assert(scalarArrays.size() == nArrs);

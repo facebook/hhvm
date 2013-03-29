@@ -327,7 +327,7 @@ bool BaseExecutionContext::obFlush() {
       } else {
         try {
           Variant tout =
-            f_call_user_func_array(last->handler,
+            vm_call_user_func(last->handler,
                                    CREATE_VECTOR2(last->oss.detach(), flag));
           prev->oss.append(tout.toString());
           last->oss.reset();
@@ -341,7 +341,7 @@ bool BaseExecutionContext::obFlush() {
     if (!last->handler.isNull()) {
       try {
         Variant tout =
-          f_call_user_func_array(last->handler,
+          vm_call_user_func(last->handler,
                                  CREATE_VECTOR2(last->oss.detach(), flag));
         String sout = tout.toString();
         writeStdout(sout.data(), sout.size());
@@ -528,7 +528,7 @@ void BaseExecutionContext::onRequestShutdown() {
 void BaseExecutionContext::executeFunctions(CArrRef funcs) {
   for (ArrayIter iter(funcs); iter; ++iter) {
     Array callback = iter.second();
-    f_call_user_func_array(callback["name"], callback["args"]);
+    vm_call_user_func(callback["name"], callback["args"]);
   }
 }
 
@@ -688,7 +688,7 @@ bool BaseExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
     }
     try {
       ErrorStateHelper esh(this, ExecutingUserHandler);
-      if (!same(f_call_user_func_array
+      if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  CREATE_VECTOR6(errnum, String(e.getMessage()), errfile,
                                 errline, "", backtrace)),
@@ -746,7 +746,7 @@ bool BaseExecutionContext::onUnhandledException(Object e) {
   if (e.instanceof(SystemLib::s_ExceptionClass)) {
     // user thrown exception
     if (!m_userExceptionHandlers.empty()) {
-      if (!same(f_call_user_func_array
+      if (!same(vm_call_user_func
                 (m_userExceptionHandlers.back(),
                  CREATE_VECTOR1(e)),
                 false)) {

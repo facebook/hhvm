@@ -344,7 +344,7 @@ vm_decode_function(CVarRef function,
     this_ = function.asCObjRef().get();
     cls = nullptr;
     const HPHP::VM::Func *f = this_->getVMClass()->lookupMethod(invokeStr);
-    if (f != nullptr && 
+    if (f != nullptr &&
         ((f->attrs() & HPHP::VM::AttrStatic) && !f->isClosureBody())) {
       // If __invoke is static, invoke it as such
       cls = this_->getVMClass();
@@ -373,11 +373,6 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
   g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
                           nullptr, invName);
   return ret;
-}
-
-Variant f_call_user_func_array(CVarRef function, CArrRef params,
-                               bool bound /* = false */) {
-  return vm_call_user_func(function, params, bound);
 }
 
 Variant invoke(CStrRef function, CArrRef params, strhash_t hash /* = -1 */,
@@ -1355,7 +1350,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
     //  - true means the map was updated. try again
     //  - false means we should stop applying autoloaders (only affects classes)
     //  - anything else means keep going
-    Variant action = f_call_user_func_array(func, CREATE_VECTOR2(kind, name));
+    Variant action = vm_call_user_func(func, CREATE_VECTOR2(kind, name));
     tva = action.getTypedAccessor();
     if (Variant::GetAccessorType(tva) == KindOfBoolean) {
       if (Variant::GetBoolean(tva)) continue;
@@ -1410,7 +1405,7 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
   Object autoloadException;
   for (ArrayIter iter(m_handlers); iter; ++iter) {
     try {
-      f_call_user_func_array(iter.second(), params);
+      vm_call_user_func(iter.second(), params);
     } catch (Object& ex) {
       assert(ex.instanceof(SystemLib::s_ExceptionClass));
       if (autoloadException.isNull()) {

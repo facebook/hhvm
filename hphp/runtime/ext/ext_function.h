@@ -28,6 +28,7 @@ bool f_function_exists(CStrRef function_name, bool autoload = true);
 bool f_is_callable(CVarRef v, bool syntax = false,
                    VRefParam name = uninit_null());
 Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv = null_array);
+Variant f_call_user_func_array(CVarRef function, CArrRef params);
 Object f_call_user_func_array_async(CVarRef function, CArrRef params);
 Object f_call_user_func_async(int _argc, CVarRef function, CArrRef _argv = null_array);
 Variant f_check_user_func_async(CVarRef handles, int timeout = -1);

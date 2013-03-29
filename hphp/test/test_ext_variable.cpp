@@ -153,7 +153,7 @@ bool TestExtVariable::test_is_array() {
 bool TestExtVariable::test_is_object() {
   VERIFY(!f_is_object(123));
   VERIFY(!f_is_object("test"));
-  VERIFY(f_is_object(Object()));
+  VERIFY(f_is_object(Object(SystemLib::AllocStdClassObject())));
   return Count(true);
 }
 
@@ -187,9 +187,9 @@ bool TestExtVariable::test_gettype() {
   VS(f_gettype(uninit_null()), "NULL");
   VS(f_gettype(0), "integer");
   VS(f_gettype("test"), "string");
-  VS(f_gettype(String()), "string");
-  VS(f_gettype(Array()), "array");
-  VS(f_gettype(Object()), "object");
+  VS(f_gettype(String("hi")), "string");
+  VS(f_gettype(Array::Create()), "array");
+  VS(f_gettype(Object(SystemLib::AllocStdClassObject())), "object");
   return Count(true);
 }
 
@@ -364,17 +364,17 @@ bool TestExtVariable::test_serialize() {
 bool TestExtVariable::test_unserialize() {
   {
     // this was crashing
-    f_unserialize(StringUtil::HexDecode("53203a20224c612072756f74612067697261207065722074757474692220204d203a20227365636f6e646f206d6520736920c3a820696e6361737472617461206461207175616c6368652070617274652122"));
+    unserialize_from_string(StringUtil::HexDecode("53203a20224c612072756f74612067697261207065722074757474692220204d203a20227365636f6e646f206d6520736920c3a820696e6361737472617461206461207175616c6368652070617274652122"));
   }
   {
-    Variant v = f_unserialize("O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
+    Variant v = unserialize_from_string("O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
     VERIFY(v.is(KindOfObject));
     Object obj = v.toObject();
     VS(obj->o_getClassName(), "stdClass");
     VS(obj.o_get("name"), "value");
   }
   {
-    Variant v = f_unserialize(String("O:8:\"stdClass\":1:{s:7:\"\0*\0name\";s:5:\"value\";}", 45, AttachLiteral));
+    Variant v = unserialize_from_string(String("O:8:\"stdClass\":1:{s:7:\"\0*\0name\";s:5:\"value\";}", 45, AttachLiteral));
     VERIFY(v.is(KindOfObject));
     Object obj = v.toObject();
     VS(obj->o_getClassName(), "stdClass");
@@ -382,7 +382,7 @@ bool TestExtVariable::test_unserialize() {
   }
   {
     Variant v1 = CREATE_MAP3("a","apple","b",2,"c",CREATE_VECTOR3(1,"y",3));
-    Variant v2 = f_unserialize("a:3:{s:1:\"a\";s:5:\"apple\";s:1:\"b\";i:2;s:1:\"c\";a:3:{i:0;i:1;i:1;s:1:\"y\";i:2;i:3;}}");
+    Variant v2 = unserialize_from_string("a:3:{s:1:\"a\";s:5:\"apple\";s:1:\"b\";i:2;s:1:\"c\";a:3:{i:0;i:1;i:1;s:1:\"y\";i:2;i:3;}}");
     VS(v1, v2);
   }
   return Count(true);

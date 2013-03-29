@@ -709,20 +709,20 @@ public:
   UserSessionModule() : SessionModule("user") {}
 
   virtual bool open(const char *save_path, const char *session_name) {
-    return f_call_user_func_array
+    return vm_call_user_func
       (String(PS(ps_open)),
        CREATE_VECTOR2(String(save_path, CopyString),
                       String(session_name, CopyString)));
   }
 
   virtual bool close() {
-    return f_call_user_func_array
+    return vm_call_user_func
       (String(PS(ps_close)),
        Array::Create());
   }
 
   virtual bool read(const char *key, String &value) {
-    Variant ret = f_call_user_func_array
+    Variant ret = vm_call_user_func
       (String(PS(ps_read)),
        CREATE_VECTOR1(String(key, CopyString)));
     if (ret.isString()) {
@@ -733,19 +733,19 @@ public:
   }
 
   virtual bool write(const char *key, CStrRef value) {
-    return f_call_user_func_array
+    return vm_call_user_func
       (String(PS(ps_write)),
        CREATE_VECTOR2(String(key, CopyString), value));
   }
 
   virtual bool destroy(const char *key) {
-    return f_call_user_func_array
+    return vm_call_user_func
       (String(PS(ps_destroy)),
        CREATE_VECTOR1(String(key, CopyString)));
   }
 
   virtual bool gc(int maxlifetime, int *nrdels) {
-    return f_call_user_func_array
+    return vm_call_user_func
       (String(PS(ps_gc)),
        CREATE_VECTOR1((int64_t)maxlifetime));
   }

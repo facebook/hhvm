@@ -480,7 +480,7 @@ void const_load_impl(struct cache_info *info,
       }
     }
   }
-  // f_unserialize object is extreamly slow here;
+  // unserialize_from_string object is extremely slow here;
   // currently turned off: no objects in haste_maps.
   if (false) {
     int count = count_items(objects, 4);
@@ -489,7 +489,7 @@ void const_load_impl(struct cache_info *info,
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64_t)*(p+1), CopyString);
         String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
-        const_load_set(key, f_unserialize(value));
+        const_load_set(key, unserialize_from_string(value));
       }
     }
   }
@@ -517,9 +517,9 @@ void const_load_impl(struct cache_info *info,
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64_t)*(p+1), CopyString);
         String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
-        Variant v = f_unserialize(value);
+        Variant v = unserialize_from_string(value);
         if (same(v, false)) {
-          throw Exception("bad apc archive, f_unserialize failed");
+          throw Exception("bad apc archive, unserialize_from_string failed");
         }
         const_load_set(key, v);
       }
@@ -636,11 +636,11 @@ void apc_load_impl(struct cache_info *info,
         item.len = (int)(int64_t)*(p+1);
 
         String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
-        Variant v = f_unserialize(value);
+        Variant v = unserialize_from_string(value);
         if (same(v, false)) {
           // we can't possibly get here if it was a boolean "false" that's
           // supposed to be serialized as a char
-          throw Exception("bad apc archive, f_unserialize failed");
+          throw Exception("bad apc archive, unserialize_from_string failed");
         }
         s.constructPrime(v, item);
       }
@@ -723,7 +723,7 @@ void const_load_impl_compressed
       assert((p - decoded) == len);
     }
   }
-  // f_unserialize object is extreamly slow here;
+  // unserialize_from_string object is extremely slow here;
   // currently turned off: no objects in haste_maps.
   if (false) {
     int count = object_lens[0] / 2;
@@ -737,7 +737,7 @@ void const_load_impl_compressed
         String key(p, object_lens[i + i + 2], CopyString);
         p += object_lens[i + i + 2] + 1;
         String value(p, object_lens[i + i + 3], AttachLiteral);
-        const_load_set(key, f_unserialize(value));
+        const_load_set(key, unserialize_from_string(value));
         p += object_lens[i + i + 3] + 1;
       }
       assert((p - decoded) == len);
@@ -778,9 +778,9 @@ void const_load_impl_compressed
         String key(p, other_lens[i + i + 2], CopyString);
         p += other_lens[i + i + 2] + 1;
         String value(p, other_lens[i + i + 3], AttachLiteral);
-        Variant v = f_unserialize(value);
+        Variant v = unserialize_from_string(value);
         if (same(v, false)) {
-          throw Exception("bad apc archive, f_unserialize failed");
+          throw Exception("bad apc archive, unserialize_from_string failed");
         }
         const_load_set(key, v);
         p += other_lens[i + i + 3] + 1;
@@ -939,11 +939,11 @@ void apc_load_impl_compressed
         item.len = other_lens[i + i + 2];
         p += other_lens[i + i + 2] + 1; // skip \0
         String value(p, other_lens[i + i + 3], AttachLiteral);
-        Variant v = f_unserialize(value);
+        Variant v = unserialize_from_string(value);
         if (same(v, false)) {
           // we can't possibly get here if it was a boolean "false" that's
           // supposed to be serialized as a char
-          throw Exception("bad apc archive, f_unserialize failed");
+          throw Exception("bad apc archive, unserialize_from_string failed");
         }
         s.constructPrime(v, item);
         p += other_lens[i + i + 3] + 1; // skip \0

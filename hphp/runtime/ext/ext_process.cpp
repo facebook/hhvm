@@ -305,7 +305,7 @@ bool f_pcntl_signal_dispatch() {
     if (signaled[i]) {
       signaled[i] = 0;
       if (s_signal_handlers->handlers.exists(i)) {
-        f_call_user_func_array(s_signal_handlers->handlers[i],
+        vm_call_user_func(s_signal_handlers->handlers[i],
                                CREATE_VECTOR1(i));
       }
     }

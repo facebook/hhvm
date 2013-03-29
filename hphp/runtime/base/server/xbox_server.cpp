@@ -264,7 +264,7 @@ bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
     if (code > 0) {
       ret.set("code", code);
       if (code == 200) {
-        ret.set("response", f_unserialize(response));
+        ret.set("response", unserialize_from_string(response));
       } else {
         ret.set("error", response);
       }
@@ -296,7 +296,7 @@ bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
         String sresponse(response, len, AttachString);
         ret.set("code", code);
         if (code == 200) {
-          ret.set("response", f_unserialize(sresponse));
+          ret.set("response", unserialize_from_string(sresponse));
         } else {
           ret.set("error", sresponse);
         }
@@ -341,7 +341,7 @@ bool XboxServer::PostMessage(CStrRef message,
         int len = 0;
         char *response = http->recv(len);
         String sresponse(response, len, AttachString);
-        if (code == 200 && same(f_unserialize(sresponse), true)) {
+        if (code == 200 && same(unserialize_from_string(sresponse), true)) {
           return true;
         }
       }
@@ -424,7 +424,7 @@ int XboxServer::TaskResult(CObjRef task, int timeout_ms, Variant &ret) {
   int code = 0;
   String response = ptask->getJob()->getResults(code, timeout_ms);
   if (code == 200) {
-    ret = f_unserialize(response);
+    ret = unserialize_from_string(response);
   } else {
     ret = response;
   }

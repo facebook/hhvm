@@ -125,7 +125,11 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
 }
 
 Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
-  return f_call_user_func_array(function, _argv);
+  return vm_call_user_func(function, _argv);
+}
+
+Variant f_call_user_func_array(CVarRef function, CArrRef params) {
+  return vm_call_user_func(function, params);
 }
 
 Object f_call_user_func_array_async(CVarRef function, CArrRef params) {
@@ -154,8 +158,8 @@ Variant f_end_user_func_async(CObjRef handle,
 String f_call_user_func_serialized(CStrRef input) {
   Variant out;
   try {
-    Variant in = f_unserialize(input);
-    out.set("ret", f_call_user_func_array(in["func"], in["args"]));
+    Variant in = unserialize_from_string(input);
+    out.set("ret", vm_call_user_func(in["func"], in["args"]));
   } catch (Object &e) {
     out.set("exception", e);
   }
@@ -215,7 +219,7 @@ Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
 
   // This double decoding can be avoided by modifying RPC server to directly
   // take PHP serialization format.
-  Variant res = f_unserialize(f_json_decode(sresponse));
+  Variant res = unserialize_from_string(f_json_decode(sresponse));
   if (!res.isArray()) {
     raise_error("Internal protocol error");
     return false;
@@ -232,9 +236,9 @@ Variant f_forward_static_call_array(CVarRef function, CArrRef params) {
 }
 
 Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
-  // Setting the bound parameter to true tells f_call_user_func_array()
+  // Setting the bound parameter to true tells vm_call_user_func()
   // propogate the current late bound class
-  return f_call_user_func_array(function, _argv, true);
+  return vm_call_user_func(function, _argv, true);
 }
 
 Variant f_get_called_class() {

@@ -293,6 +293,20 @@ inline Array setNull(Array &v)                 { v.reset();   return Array();}
 inline String setNull(String &v)               { v.reset();   return String();}
 inline Variant unset(Object &v)                { v.reset();   return uninit_null();}
 inline Variant unset(Array &v)                 { v.reset();   return uninit_null();}
+
+///////////////////////////////////////////////////////////////////////////////
+// type testing
+
+inline bool is_null(CVarRef v)   { return v.isNull();}
+inline bool is_bool(CVarRef v)   { return v.is(KindOfBoolean);}
+inline bool is_int(CVarRef v)    { return v.isInteger();}
+inline bool is_double(CVarRef v) { return v.is(KindOfDouble);}
+inline bool is_string(CVarRef v) { return v.isString();}
+inline bool is_array(CVarRef v)  { return v.is(KindOfArray);}
+inline bool is_object(CVarRef var) {
+  return var.is(KindOfObject) && !var.isResource();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // special variable contexts
 
@@ -348,9 +362,6 @@ bool array_is_valid_callback(CArrRef arr);
 
 bool class_exists(CStrRef class_name, bool autoload = true);
 String get_static_class_name(CVarRef objOrClassName);
-
-Variant f_call_user_func_array(CVarRef function, CArrRef params,
-                               bool bound = false);
 
 const HPHP::VM::Func*
 vm_decode_function(CVarRef function,
@@ -488,7 +499,7 @@ inline Variant unserialize_from_buffer(const char* str, int len) {
   return unserialize_ex(str, len, VariableUnserializer::Serialize);
 }
 
-inline Variant f_unserialize(CStrRef str) {
+inline Variant unserialize_from_string(CStrRef str) {
   return unserialize_from_buffer(str.data(), str.size());
 }
 

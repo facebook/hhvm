@@ -107,7 +107,7 @@ static void sqlite3_do_callback(sqlite3_context *context, CVarRef callback,
   for (int i = 0; i < argc; i++) {
     params.append(get_value(argv[i]));
   }
-  Variant ret = f_call_user_func_array(callback, params);
+  Variant ret = vm_call_user_func(callback, params);
 
   if (!is_agg || !argv) {
     /* only set the sqlite return value if we are a scalar function,

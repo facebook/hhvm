@@ -182,7 +182,7 @@ int64_t f_xbox_task_result(CObjRef task, int64_t timeout_ms, VRefParam ret) {
 }
 
 Variant f_xbox_process_call_message(CStrRef msg) {
-  Variant v = f_unserialize(msg);
+  Variant v = unserialize_from_string(msg);
   if (!v.isArray()) {
     raise_error("Error decoding xbox call message");
   }
@@ -203,7 +203,7 @@ Variant f_xbox_process_call_message(CStrRef msg) {
   if (!args.isArray()) {
     raise_error("Error decoding xbox call message");
   }
-  return f_call_user_func_array(fn, args.toArray());
+  return vm_call_user_func(fn, args.toArray());
 }
 
 int64_t f_xbox_get_thread_timeout() {

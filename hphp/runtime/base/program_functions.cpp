@@ -287,7 +287,7 @@ static void handle_exception_helper(bool& ret,
         f_is_callable(context->getExitCallback())) {
       Array stack = e.getBackTrace();
       Array argv = CREATE_VECTOR2(e.ExitCode, stack);
-      f_call_user_func_array(context->getExitCallback(), argv);
+      vm_call_user_func(context->getExitCallback(), argv);
     }
   } catch (const PhpFileDoesNotExistException &e) {
     ret = false;

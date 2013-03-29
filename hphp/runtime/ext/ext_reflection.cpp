@@ -260,7 +260,7 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
           }
           param.set(s_default, v);
         } else {
-          param.set(s_default, f_unserialize(p->value));
+          param.set(s_default, unserialize_from_string(p->value));
         }
         param.set(s_defaultText, defText);
       }

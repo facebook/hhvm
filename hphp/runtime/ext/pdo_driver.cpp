@@ -88,7 +88,7 @@ void PDOConnection::persistentSave() {
 
 void PDOConnection::persistentRestore() {
   if (!serialized_def_stmt_ctor_args.empty()) {
-    def_stmt_ctor_args = f_unserialize(serialized_def_stmt_ctor_args);
+    def_stmt_ctor_args = unserialize_from_string(serialized_def_stmt_ctor_args);
   }
 }
 

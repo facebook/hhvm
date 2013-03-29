@@ -161,7 +161,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
         bool ret = transport->getFiles(files);
         if (ret) {
-          g->GV(_FILES) = f_unserialize(files);
+          g->GV(_FILES) = unserialize_from_string(files);
         }
       }
       CopyParams(request, g->GV(_POST));

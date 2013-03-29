@@ -17,6 +17,116 @@
 namespace HPHP {
 
 /*
+bool HPHP::f_is_bool(HPHP::Variant const&)
+_ZN4HPHP9f_is_boolERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_bool(TypedValue* var) asm("_ZN4HPHP9f_is_boolERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_int(HPHP::Variant const&)
+_ZN4HPHP8f_is_intERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_int(TypedValue* var) asm("_ZN4HPHP8f_is_intERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_integer(HPHP::Variant const&)
+_ZN4HPHP12f_is_integerERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_integer(TypedValue* var) asm("_ZN4HPHP12f_is_integerERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_long(HPHP::Variant const&)
+_ZN4HPHP9f_is_longERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_long(TypedValue* var) asm("_ZN4HPHP9f_is_longERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_double(HPHP::Variant const&)
+_ZN4HPHP11f_is_doubleERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_double(TypedValue* var) asm("_ZN4HPHP11f_is_doubleERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_float(HPHP::Variant const&)
+_ZN4HPHP10f_is_floatERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_float(TypedValue* var) asm("_ZN4HPHP10f_is_floatERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_numeric(HPHP::Variant const&)
+_ZN4HPHP12f_is_numericERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_numeric(TypedValue* var) asm("_ZN4HPHP12f_is_numericERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_real(HPHP::Variant const&)
+_ZN4HPHP9f_is_realERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_real(TypedValue* var) asm("_ZN4HPHP9f_is_realERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_string(HPHP::Variant const&)
+_ZN4HPHP11f_is_stringERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_string(TypedValue* var) asm("_ZN4HPHP11f_is_stringERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_scalar(HPHP::Variant const&)
+_ZN4HPHP11f_is_scalarERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_scalar(TypedValue* var) asm("_ZN4HPHP11f_is_scalarERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_array(HPHP::Variant const&)
+_ZN4HPHP10f_is_arrayERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_array(TypedValue* var) asm("_ZN4HPHP10f_is_arrayERKNS_7VariantE");
+
+/*
 bool HPHP::f_is_object(HPHP::Variant const&)
 _ZN4HPHP11f_is_objectERKNS_7VariantE
 
@@ -25,6 +135,26 @@ var => rdi
 */
 
 bool fh_is_object(TypedValue* var) asm("_ZN4HPHP11f_is_objectERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_resource(HPHP::Variant const&)
+_ZN4HPHP13f_is_resourceERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_resource(TypedValue* var) asm("_ZN4HPHP13f_is_resourceERKNS_7VariantE");
+
+/*
+bool HPHP::f_is_null(HPHP::Variant const&)
+_ZN4HPHP9f_is_nullERKNS_7VariantE
+
+(return value) => rax
+var => rdi
+*/
+
+bool fh_is_null(TypedValue* var) asm("_ZN4HPHP9f_is_nullERKNS_7VariantE");
 
 /*
 HPHP::String HPHP::f_gettype(HPHP::Variant const&)
@@ -144,6 +274,17 @@ variable => rdi
 */
 
 void fh_debug_zval_dump(TypedValue* variable) asm("_ZN4HPHP17f_debug_zval_dumpERKNS_7VariantE");
+
+/*
+HPHP::Variant HPHP::f_unserialize(HPHP::String const&)
+_ZN4HPHP13f_unserializeERKNS_6StringE
+
+(return value) => rax
+_rv => rdi
+str => rsi
+*/
+
+TypedValue* fh_unserialize(TypedValue* _rv, Value* str) asm("_ZN4HPHP13f_unserializeERKNS_6StringE");
 
 /*
 HPHP::Array HPHP::f_get_defined_vars()

@@ -731,7 +731,7 @@ static String preg_do_repl_func(CVarRef function, CStrRef subject,
 
   Array args;
   args.set(0, subpats);
-  return f_call_user_func_array(function, args);
+  return vm_call_user_func(function, args);
 }
 
 static bool preg_get_backref(const char **str, int *backref) {
@@ -946,7 +946,7 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
           }
           *walkbuf = '\0';
           if (eval) {
-            eval_result = f_call_user_func_array(eval_fn, params);
+            eval_result = vm_call_user_func(eval_fn, params);
             memcpy(result + result_len, eval_result.data(), eval_result.size());
             result_len += eval_result.size();
           } else {

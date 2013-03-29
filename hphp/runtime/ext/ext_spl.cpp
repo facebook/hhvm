@@ -217,7 +217,7 @@ Variant f_iterator_apply(CVarRef obj, CVarRef func,
   pobj->o_invoke("rewind", null_array, -1);
   int64_t count = 0;
   while (same(pobj->o_invoke("valid", null_array, -1), true)) {
-    if (!same(f_call_user_func_array(func, params), true)) {
+    if (!same(vm_call_user_func(func, params), true)) {
       break;
     }
     ++count;

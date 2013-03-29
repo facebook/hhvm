@@ -2147,10 +2147,10 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
     if (valid_function(this, soap_obj, fn_name)) {
       try {
         if (m_type == SOAP_CLASS || m_type == SOAP_OBJECT) {
-          h->retval = f_call_user_func_array
+          h->retval = vm_call_user_func
             (CREATE_VECTOR2(soap_obj, fn_name), h->parameters);
         } else {
-          h->retval = f_call_user_func_array(fn_name, h->parameters);
+          h->retval = vm_call_user_func(fn_name, h->parameters);
         }
       } catch (Exception &e) {
         send_soap_server_fault(function, e, h);
@@ -2172,10 +2172,10 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
   if (valid_function(this, soap_obj, fn_name)) {
     try {
       if (m_type == SOAP_CLASS || m_type == SOAP_OBJECT) {
-        retval = f_call_user_func_array
+        retval = vm_call_user_func
           (CREATE_VECTOR2(soap_obj, fn_name), params);
       } else {
-        retval = f_call_user_func_array(fn_name, params);
+        retval = vm_call_user_func(fn_name, params);
       }
     } catch (Exception &e) {
       send_soap_server_fault(function, e, NULL);

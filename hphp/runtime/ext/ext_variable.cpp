@@ -68,8 +68,60 @@ bool f_settype(VRefParam var, CStrRef type) {
   return true;
 }
 
-bool f_is_object(CVarRef var) {
-  return var.is(KindOfObject) && !var.isResource();
+bool f_is_bool(CVarRef v) {
+  return is_bool(v);
+}
+
+bool f_is_int(CVarRef v) {
+  return is_int(v);
+}
+
+bool f_is_integer(CVarRef v) {
+  return is_int(v);
+}
+
+bool f_is_long(CVarRef v) {
+  return is_int(v);
+}
+
+bool f_is_double(CVarRef v) {
+  return is_double(v);
+}
+
+bool f_is_float(CVarRef v) {
+  return is_double(v);
+}
+
+bool f_is_numeric(CVarRef v) {
+  return v.isNumeric(true);
+}
+
+bool f_is_real(CVarRef v) {
+  return is_double(v);
+}
+
+bool f_is_string(CVarRef v) {
+  return is_string(v);
+}
+
+bool f_is_scalar(CVarRef v) {
+  return v.isScalar();
+}
+
+bool f_is_array(CVarRef v) {
+  return is_array(v);
+}
+
+bool f_is_object(CVarRef v) {
+  return is_object(v);
+}
+
+bool f_is_resource(CVarRef v) {
+  return v.isResource();
+}
+
+bool f_is_null(CVarRef v) {
+  return is_null(v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -128,6 +180,10 @@ void f_var_dump(int _argc, CVarRef expression,
 void f_debug_zval_dump(CVarRef variable) {
   VariableSerializer vs(VariableSerializer::DebugDump);
   vs.serialize(variable, false);
+}
+
+Variant f_unserialize(CStrRef str) {
+  return unserialize_from_string(str);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

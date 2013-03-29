@@ -434,7 +434,7 @@ bool TestExtFile::test_file_get_contents() {
   VS(f_file_get_contents("test/test_ext_file.tmp"),
      "testing file_get_contents");
 
-  VS(f_unserialize(f_file_get_contents("compress.zlib://test/test_zlib_file")),
+  VS(unserialize_from_string(f_file_get_contents("compress.zlib://test/test_zlib_file")),
      CREATE_VECTOR1("rblock:216105"));
   return Count(true);
 }

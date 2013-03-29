@@ -92,7 +92,7 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
   params.append(VarNR(ar->m_func->fullName()));
   params.append(frameinfo);
 
-  f_call_user_func_array(g_vmContext->m_setprofileCallback, params);
+  vm_call_user_func(g_vmContext->m_setprofileCallback, params);
 }
 
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType) {

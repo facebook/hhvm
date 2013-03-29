@@ -1408,9 +1408,9 @@ Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj,
                                        CArrRef params, CVarRef data,
                                        VRefParam done) {
   if (obj.isNull()) {
-    return f_call_user_func_array(data, params);
+    return vm_call_user_func(data, params);
   }
-  return f_call_user_func_array(CREATE_VECTOR2(obj, data), params);
+  return vm_call_user_func(CREATE_VECTOR2(obj, data), params);
 }
 
 Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params,
@@ -1507,14 +1507,14 @@ Variant f_fb_call_user_func_safe_return(int _argc, CVarRef function,
                                         CVarRef def,
                                         CArrRef _argv /* = null_array */) {
   if (f_is_callable(function)) {
-    return f_call_user_func_array(function, _argv);
+    return vm_call_user_func(function, _argv);
   }
   return def;
 }
 
 Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
   if (f_is_callable(function)) {
-    return CREATE_VECTOR2(true, f_call_user_func_array(function, params));
+    return CREATE_VECTOR2(true, vm_call_user_func(function, params));
   }
   return CREATE_VECTOR2(false, uninit_null());
 }

@@ -52,8 +52,6 @@ if [ "$1" = "hhvm" -o "$1" = "all" ]; then
     make_hhvm $RUNTIME_BUILD/runtime/ext/$i.cpp.o ../ext/$i.ext_hhvm.cpp
   done
   make_hhvm $RUNTIME_BUILD/runtime/base/builtin_functions.cpp.o ../base/builtin_functions.ext_hhvm.cpp
-  EXTHHVM_BUILD=$HPHP_HOME/hphp/runtime/ext_hhvm/CMakeFiles/ext_hhvm_static.dir
-  make_hhvm $EXTHHVM_BUILD/ext_hhvm_noinline.cpp.o ext_hhvm_noinline.ext_hhvm.cpp
 fi
 
 if [ "$1" = "infotabs" -o "$1" = "all" ]; then
@@ -61,7 +59,7 @@ if [ "$1" = "infotabs" -o "$1" = "all" ]; then
 
   SOURCES=`find ../ext -name '*.ext_hhvm.cpp'`
   [ $VERBOSE -eq 1 ] && echo "Generating hphp/runtime/ext_hhvm/ext_hhvm_infotabs.h"
-  $HHVM gen_infotabs_header.php ext_hhvm_infotabs.h $SOURCES ../base/builtin_functions.ext_hhvm.cpp ext_hhvm_noinline.ext_hhvm.cpp
+  $HHVM gen_infotabs_header.php ext_hhvm_infotabs.h $SOURCES ../base/builtin_functions.ext_hhvm.cpp
 
   [ $VERBOSE -eq 1 ] && echo "Generating hphp/runtime/ext_hhvm/ext_hhvm_infotabs.cpp"
   $HHVM gen_infotabs.php ext_hhvm_infotabs.cpp . "" "" ""

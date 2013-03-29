@@ -594,7 +594,7 @@ public:
   Variant do_callback(CVarRef cb, CArrRef args) {
     assert(!m_exception);
     try {
-      return f_call_user_func_array(cb, args);
+      return vm_call_user_func(cb, args);
     } catch (Object &e) {
       ObjectData *od = e.get();
       od->incRefCount();

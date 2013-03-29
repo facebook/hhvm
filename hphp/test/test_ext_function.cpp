@@ -68,7 +68,7 @@ bool TestExtFunction::test_is_callable() {
 }
 
 bool TestExtFunction::test_call_user_func_array() {
-  Variant ret = f_call_user_func_array("TEst", CREATE_VECTOR1("param"));
+  Variant ret = vm_call_user_func("TEst", CREATE_VECTOR1("param"));
   VS(ret, "param");
   return Count(true);
 }

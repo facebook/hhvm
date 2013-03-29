@@ -1627,7 +1627,7 @@ void UnitRepoProxy::GetUnitArraysStmt
       Id arrayId;        /**/ query.getId(0, arrayId);
       StringData* array; /**/ query.getStaticString(1, array);
       String s(array);
-      Variant v = f_unserialize(s);
+      Variant v = unserialize_from_string(s);
       Id id UNUSED = ue.mergeArray(v.asArrRef().get(), array);
       assert(id == arrayId);
     }

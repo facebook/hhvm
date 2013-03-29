@@ -1938,7 +1938,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
         ret.toObject()->o_set(name, val);
       } else {
 #ifdef MBO_0
-        ret = f_unserialize(val);
+        ret = unserialize_from_string(val);
         if (same(ret, false)) {
           pdo_raise_impl_error(stmt->dbh, stmt, "HY000",
                                "cannot unserialize data");
@@ -1977,7 +1977,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
     break;
 
   case PDO_FETCH_FUNC:
-    ret = f_call_user_func_array(stmt->fetch.func, stmt->fetch.values);
+    ret = vm_call_user_func(stmt->fetch.func, stmt->fetch.values);
     break;
 
   default:

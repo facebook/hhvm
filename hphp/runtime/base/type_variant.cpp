@@ -3298,7 +3298,7 @@ Variant Variant::share(bool save) const {
       obj->o_set(s_s, f_serialize(*this));
       return obj;
     } else {
-      return f_unserialize(m_data.pobj->o_get(s_s));
+      return unserialize_from_string(m_data.pobj->o_get(s_s));
     }
     break;
   default:

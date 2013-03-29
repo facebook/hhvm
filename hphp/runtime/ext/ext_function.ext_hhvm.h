@@ -50,6 +50,18 @@ name => rdx
 bool fh_is_callable(TypedValue* v, bool syntax, TypedValue* name) asm("_ZN4HPHP13f_is_callableERKNS_7VariantEbRKNS_14VRefParamValueE");
 
 /*
+HPHP::Variant HPHP::f_call_user_func_array(HPHP::Variant const&, HPHP::Array const&)
+_ZN4HPHP22f_call_user_func_arrayERKNS_7VariantERKNS_5ArrayE
+
+(return value) => rax
+_rv => rdi
+function => rsi
+params => rdx
+*/
+
+TypedValue* fh_call_user_func_array(TypedValue* _rv, TypedValue* function, Value* params) asm("_ZN4HPHP22f_call_user_func_arrayERKNS_7VariantERKNS_5ArrayE");
+
+/*
 HPHP::Variant HPHP::f_call_user_func(int, HPHP::Variant const&, HPHP::Array const&)
 _ZN4HPHP16f_call_user_funcEiRKNS_7VariantERKNS_5ArrayE
 

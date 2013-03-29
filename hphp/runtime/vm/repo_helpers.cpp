@@ -346,7 +346,7 @@ void RepoQuery::getTypedValue(int iCol, TypedValue& tv) {
   tvWriteUninit(&tv);
   if (size > 0) {
     String s = String((const char*)blob, size, CopyString);
-    Variant v = f_unserialize(s);
+    Variant v = unserialize_from_string(s);
     if (v.isString()) {
       v = String(StringData::GetStaticString(v.asCStrRef().get()));
     } else if (v.isArray()) {

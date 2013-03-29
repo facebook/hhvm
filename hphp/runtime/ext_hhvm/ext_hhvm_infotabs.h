@@ -129,4 +129,3 @@
 #include "../ext/soap/sdl.ext_hhvm.h"
 #include "../ext/soap/encoding.ext_hhvm.h"
 #include "../base/builtin_functions.ext_hhvm.h"
-#include "ext_hhvm_noinline.ext_hhvm.h"

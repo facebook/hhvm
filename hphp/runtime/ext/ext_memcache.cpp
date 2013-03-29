@@ -152,8 +152,7 @@ Variant static memcache_fetch_from_storage(const char *payload,
   }
 
   if (flags & MMC_SERIALIZED) {
-    ret = f_unserialize(String(payload, payload_len, AttachLiteral));
-    // raise_notice("unable to unserialize data");
+    ret = unserialize_from_buffer(payload, payload_len);
   } else {
     ret = String(payload, payload_len, CopyString);
   }

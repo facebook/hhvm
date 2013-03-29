@@ -1131,7 +1131,7 @@ Variant parse_php_serialized(AsmState& as) {
   // it.
   buffer.push_back('\0');
   String data(&buffer[0], buffer.size() - 1, AttachLiteral);
-  return f_unserialize(data);
+  return unserialize_from_string(data);
 }
 
 /*

@@ -172,6 +172,57 @@ TypedValue* fg_is_callable(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Variant HPHP::f_call_user_func_array(HPHP::Variant const&, HPHP::Array const&)
+_ZN4HPHP22f_call_user_func_arrayERKNS_7VariantERKNS_5ArrayE
+
+(return value) => rax
+_rv => rdi
+function => rsi
+params => rdx
+*/
+
+TypedValue* fh_call_user_func_array(TypedValue* _rv, TypedValue* function, Value* params) asm("_ZN4HPHP22f_call_user_func_arrayERKNS_7VariantERKNS_5ArrayE");
+
+TypedValue * fg1_call_user_func_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_call_user_func_array(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToArrayInPlace(args-1);
+  fh_call_user_func_array((rv), (args-0), &args[-1].m_data);
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
+  return rv;
+}
+
+TypedValue* fg_call_user_func_array(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 2LL) {
+      if ((args-1)->m_type == KindOfArray) {
+        fh_call_user_func_array((&(rv)), (args-0), &args[-1].m_data);
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_call_user_func_array(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 2);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("call_user_func_array", count, 2, 2, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 2);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::f_call_user_func(int, HPHP::Variant const&, HPHP::Array const&)
 _ZN4HPHP16f_call_user_funcEiRKNS_7VariantERKNS_5ArrayE
 

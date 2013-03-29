@@ -241,7 +241,7 @@ struct ElmUCompare {
   const Variant* callback;
   bool operator()(ElmT left, ElmT right) const {
     Variant ret =
-      f_call_user_func_array(
+      vm_call_user_func(
         *callback,
         CREATE_VECTOR2(acc.getValue(left), acc.getValue(right))
       );
@@ -270,7 +270,7 @@ struct ElmUCompare {
         return false;
       }
       Variant ret2 =
-        f_call_user_func_array(
+        vm_call_user_func(
           *callback,
           CREATE_VECTOR2(acc.getValue(right), acc.getValue(left))
         );

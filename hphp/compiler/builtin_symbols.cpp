@@ -328,6 +328,8 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   if ((flags & ClassInfo::IgnoreRedefinition) && !method) {
     f->setIgnoreRedefinition();
   }
+
+  FunctionScope::RecordFunctionInfo(f->getName(), f);
   return f;
 }
 
@@ -531,30 +533,13 @@ AnalysisResultPtr BuiltinSymbols::LoadGlobalSymbols(const char *fileName) {
 void BuiltinSymbols::LoadFunctions(AnalysisResultPtr ar,
                                    StringToFunctionScopePtrMap &functions) {
   assert(Loaded);
-  for (StringToFunctionScopePtrMap::const_iterator it = s_functions.begin();
-       it != s_functions.end(); ++it) {
-    if (functions.find(it->first) == functions.end()) {
-      functions[it->first] = it->second;
-      FunctionScope::RecordFunctionInfo(it->first, it->second);
-    }
-  }
+  functions.insert(s_functions.begin(), s_functions.end());
 }
 
 void BuiltinSymbols::LoadClasses(AnalysisResultPtr ar,
                                  StringToClassScopePtrMap &classes) {
   assert(Loaded);
   classes.insert(s_classes.begin(), s_classes.end());
-
-  // we are adding these builtin functions, so that user-defined functions
-  // will not overwrite them with their own file and line number information
-  for (StringToClassScopePtrMap::const_iterator iter =
-         s_classes.begin(); iter != s_classes.end(); ++iter) {
-    const StringToFunctionScopePtrMap &funcs = iter->second->getFunctions();
-    for (StringToFunctionScopePtrMap::const_iterator iter =
-           funcs.begin(); iter != funcs.end(); ++iter) {
-      FunctionScope::RecordFunctionInfo(iter->first, iter->second);
-    }
-  }
 }
 
 void BuiltinSymbols::LoadVariables(AnalysisResultPtr ar,

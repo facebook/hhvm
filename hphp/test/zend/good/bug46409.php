@@ -1,7 +1,7 @@
 <?php
 class Callback {
     protected $val = 'hello, world';
-
+    
     public function __invoke() {
         return $this->val;
     }

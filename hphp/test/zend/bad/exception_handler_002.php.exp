@@ -1,5 +1,4 @@
 string(12) "test thrown!"
-
 HipHop Fatal error: Uncaught exception 'Exception' in %sexception_handler_002.php:7
 Stack trace:
 #0 [internal function]: foo(Object(test))

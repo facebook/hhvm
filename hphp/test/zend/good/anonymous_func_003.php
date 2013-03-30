@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 try {
 	$a = create_function('', 'return new Exception("test");');

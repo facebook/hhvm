@@ -10,7 +10,7 @@ class_alias(__NAMESPACE__ .'\foo', 'foo');
 
 namespace foo\bar;
 
-class foo {
+class foo { 
 }
 
 class_alias(__NAMESPACE__ .'\foo', 'bar');

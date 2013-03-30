@@ -1,6 +1,5 @@
 %unicode|string%(3) "Foo"
 %unicode|string%(3) "Bar"
-
 HipHop Fatal error: Uncaught exception 'Exception' with message 'Bar' in %s:%d
 Stack trace:
 #0 %s(7): __autoload('Bar')

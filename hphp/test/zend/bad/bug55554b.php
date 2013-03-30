@@ -13,7 +13,7 @@ class OverridingIsSilent1 {
     use TConstructor {
 	    foo as __construct;
 	}
-
+	
 	public function __construct() {
 	    echo "OverridingIsSilent1 __construct\n";
 	}
@@ -25,7 +25,7 @@ class OverridingIsSilent2 {
     use TConstructor {
 	    foo as OverridingIsSilent2;
 	}
-
+	
 	public function OverridingIsSilent2() {
 	    echo "OverridingIsSilent2 OverridingIsSilent2\n";
 	}

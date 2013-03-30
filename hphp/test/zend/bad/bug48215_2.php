@@ -4,7 +4,7 @@ class a {
 	public function a() { echo __METHOD__ . "\n"; }
 }
 class b extends a {}
-class c extends b {
+class c extends b { 
 	function C() {
 		b::b();
 	}

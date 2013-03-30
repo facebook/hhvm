@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot use 'self' as class name as it is reserved in hphp/test/zend/good/errmsg_028.php on line 3

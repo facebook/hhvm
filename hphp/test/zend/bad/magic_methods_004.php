@@ -1,6 +1,6 @@
 <?php
 
-class foo {
+class foo {	
 	protected function __unset($a) {
 		print "unset\n";
 	}

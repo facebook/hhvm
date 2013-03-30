@@ -1,0 +1,1 @@
+HipHop Fatal error: Method test::__set() cannot take arguments by reference in hphp/test/zend/good/magic_by_ref_001.php on line 4

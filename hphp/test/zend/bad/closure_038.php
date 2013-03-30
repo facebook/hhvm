@@ -2,11 +2,11 @@
 
 class A {
 	private $x;
-
+	
 	public function __construct($v) {
 		$this->x = $v;
 	}
-
+	
 	public function getIncrementor() {
 		return function() { return ++$this->x; };
 	}

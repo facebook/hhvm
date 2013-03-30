@@ -5,7 +5,7 @@ class A
 	{
 		echo 'Hello from '.get_class($this)."\n";
 	}
-
+	
 	public function call($method, $args = array())
 	{
 		$this->Test();

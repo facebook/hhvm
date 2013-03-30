@@ -1,8 +1,8 @@
 <?php
 define("FIRST_KEY", "a");
 define("THIRD_KEY", "c");
-
-
+                                                                        
+                 
 function test()
 {
         static $arr = array(
@@ -13,7 +13,7 @@ function test()
         );
         print_r($arr);
 }
-
+                                                                        
 function test2()
 {
         static $arr = array(
@@ -24,7 +24,7 @@ function test2()
         );
         print_r($arr);
 }
-
+                 
 test();
 test2();
 ?>

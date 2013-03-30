@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 $arr = array(new stdClass, 'stdClass');
 

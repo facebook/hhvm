@@ -2,5 +2,4 @@ PRE-CLASS-GUARD
 
 Strict Standards: Notice and THello1 define the same property ($hello) in the composition of Notice. This might be incompatible, to improve maintainability consider using accessor methods in traits instead. Class was composed in hphp/test/zend/bad/property005.php on line %d
 POST-CLASS-GUARD
-
 HipHop Fatal error: TraitsTest and THello1 define the same property ($hello) in the composition of TraitsTest. However, the definition differs and is considered incompatible. Class was composed in hphp/test/zend/bad/property005.php on line %d

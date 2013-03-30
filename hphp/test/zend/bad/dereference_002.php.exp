@@ -33,10 +33,7 @@ array(2) {
 }
 int(1)
 NULL
-
 HipHop Notice: Undefined offset: 4 in hphp/test/zend/bad/dereference_002.php on line %d
 NULL
-
 HipHop Notice: Undefined offset: 3 in hphp/test/zend/bad/dereference_002.php on line %d
-
 HipHop Fatal error: Call to a member function bar() on a non-object in hphp/test/zend/bad/dereference_002.php on line %d

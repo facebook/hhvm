@@ -4,7 +4,7 @@ trait T1 {
   function m2() { echo "T:m2\n"; }
 }
 
-class C1 {
+class C1 { 
   use T1 { m1 as a1; }
 }
 

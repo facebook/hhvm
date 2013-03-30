@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 trait THelloB {
   public function hello() {
     echo 'Hello';
-  }
+  }  
 }
 
 trait THelloA {

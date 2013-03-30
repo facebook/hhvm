@@ -1,6 +1,6 @@
 <?php
 
-trait foo {
+trait foo {	
 	public function foo() {
 		return 1;
 	}

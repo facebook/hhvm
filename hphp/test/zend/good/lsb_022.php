@@ -9,7 +9,7 @@ class A {
 }
 class B extends A {
 	static function test() {
-		echo "B\n";
+	  	echo "B\n";
 	}
 	static function __callstatic($name, $args) {
 		parent::__callstatic($name, $args);

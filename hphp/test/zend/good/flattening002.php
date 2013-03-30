@@ -6,7 +6,7 @@ class Base {
      echo 'Hello ';
    }
 }
-
+ 
 trait SayWorld {
    public function sayHello() {
      parent::sayHello();

@@ -1,4 +1,0 @@
-int(9)
-int(81)
-
-HipHop Fatal error: Cannot pass parameter 1 by reference in hphp/test/zend/bad/closure_019.php on line %d

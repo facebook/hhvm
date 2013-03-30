@@ -1,9 +1,9 @@
 <?php
-class foo {
-  function foo($arrayobj) {
+class foo { 	
+  function foo($arrayobj) { 
     var_dump($arrayobj);
-  }
-}
+  } 
+} 
 
-new foo(array(new stdClass));
+new foo(array(new stdClass)); 
 ?>

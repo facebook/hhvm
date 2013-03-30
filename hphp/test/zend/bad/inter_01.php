@@ -8,6 +8,6 @@ class foobar implements foo {
     const foo = 'bar';
     public function bar($x = foo::foo) {
         var_dump($x);
-    }
+    }    
 }
 ?>

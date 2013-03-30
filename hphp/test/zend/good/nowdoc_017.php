@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 class foo {
     public $bar = <<<'EOT'

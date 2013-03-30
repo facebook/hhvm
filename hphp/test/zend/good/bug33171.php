@@ -7,7 +7,7 @@ class A
 class B extends A
 {
 	private $c = "B's c";
-
+		
 	public function go()
 	{
 		foreach ($this as $key => $val)

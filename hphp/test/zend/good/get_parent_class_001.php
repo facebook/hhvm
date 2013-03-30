@@ -1,7 +1,7 @@
 <?php
 
 interface ITest {
-	function foo();
+	function foo();	
 }
 
 abstract class bar implements ITest {

@@ -1,35 +1,24 @@
 string(1) "i"
-
 HipHop Notice: String offset cast occurred in hphp/test/zend/bad/offset_string.php on line %d
 string(1) "S"
-
 HipHop Notice: String offset cast occurred in hphp/test/zend/bad/offset_string.php on line %d
 string(1) "S"
-
 HipHop Warning: Illegal string offset 'run away' in hphp/test/zend/bad/offset_string.php on line %d
 string(1) "S"
 string(1) "c"
-
 HipHop Warning: Illegal string offset '14.5' in hphp/test/zend/bad/offset_string.php on line %d
 string(1) "o"
-
 HipHop Notice: A non well formed numeric value encountered in hphp/test/zend/bad/offset_string.php on line %d
 string(1) "r"
-
 HipHop Notice: String offset cast occurred in hphp/test/zend/bad/offset_string.php on line %d
 string(1) "i"
-
 HipHop Notice: String offset cast occurred in hphp/test/zend/bad/offset_string.php on line %d
 string(1) "S"
-
 HipHop Warning: Illegal offset type in hphp/test/zend/bad/offset_string.php on line %d
 string(1) "%s"
-
 HipHop Warning: Illegal offset type in hphp/test/zend/bad/offset_string.php on line %d
-
 HipHop Notice: Object of class stdClass could not be converted to int in hphp/test/zend/bad/offset_string.php on line %d
 string(1) "%s"
-
 HipHop Warning: Illegal offset type in hphp/test/zend/bad/offset_string.php on line %d
 string(1) "i"
 Done

@@ -1,7 +1,7 @@
 <?php
 
 error_reporting(E_ALL);
-
+	
 class test {
 	function __get($name) {
 		return $undef_name;

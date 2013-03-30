@@ -1,13 +1,12 @@
 HipHop Notice: Undefined variable: ENDOFHEREDOC in hphp/test/zend/bad/heredoc_009.php on line %d
 ENDOFHEREDOC    ;
     ENDOFHEREDOC;
-ENDOFHEREDOC
+ENDOFHEREDOC    
     ENDOFHEREDOC
 ;
-
 HipHop Notice: Undefined variable: ENDOFHEREDOC in hphp/test/zend/bad/heredoc_009.php on line %d
 ENDOFHEREDOC    ;
     ENDOFHEREDOC;
-ENDOFHEREDOC
+ENDOFHEREDOC    
     ENDOFHEREDOC
 ;

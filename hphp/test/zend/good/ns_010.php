@@ -1,7 +1,7 @@
 <?php
 namespace X;
 use X as Y;
-class Foo {
+class Foo {	
 	const C = "const ok\n";
 	static $var = "var ok\n";
 	function __construct() {

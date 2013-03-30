@@ -1,5 +1,5 @@
 <?php
-
+ 
 trait myTrait {
      public function run() {}
 }

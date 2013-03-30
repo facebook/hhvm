@@ -13,7 +13,7 @@ class Faulty
 
     function NormalMethod($Args)
     {
-       echo "I heart me\n";
+       echo "I heart me\n"; 
     }
 }
 

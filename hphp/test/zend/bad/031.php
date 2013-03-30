@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 function test($var) { }
 test($arr[]);

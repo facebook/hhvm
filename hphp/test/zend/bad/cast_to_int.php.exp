@@ -10,7 +10,6 @@ int(0)
 int(1)
 int(0)
 int(%d)
-
 HipHop Notice: Object of class test could not be converted to int in hphp/test/zend/bad/cast_to_int.php on line %d
 int(1)
 Done

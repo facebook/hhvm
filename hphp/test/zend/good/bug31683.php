@@ -3,42 +3,42 @@
 class Foo implements ArrayAccess {
 
   function __get($test) {
-    var_dump($test);
+    var_dump($test);         
     $test = 'bug';
   }
 
   function __set($test, $val) {
-    var_dump($test);
+    var_dump($test);         
     var_dump($val);
     $test = 'bug';
     $val = 'bug';
   }
 
   function __call($test, $arg) {
-    var_dump($test);
+    var_dump($test);         
     $test = 'bug';
   }
 
   function offsetget($test) {
-    var_dump($test);
+    var_dump($test);         
     $test = 'bug';
     return 123;
   }
 
   function offsetset($test, $val) {
-    var_dump($test);
-    var_dump($val);
+    var_dump($test);         
+    var_dump($val);         
     $test = 'bug';
     $val  = 'bug';
   }
 
   function offsetexists($test) {
-    var_dump($test);
+    var_dump($test);         
     $test = 'bug';
   }
 
   function offsetunset($test) {
-    var_dump($test);
+    var_dump($test);         
     $test = 'bug';
   }
 

@@ -47,12 +47,17 @@ def walk(filename):
 
     test_files.append(full_dest_filename)
 
-    if 'in %s on' in exp:
+    if '%s' in exp:
         exp = exp.replace('in %s on', 'in %s/%s on' % ('hphp/test/zend/bad', dest_filename))
+
+    # PHP puts a newline in that we don't
+    exp = exp.replace('\n\nFatal error:', '\nFatal error:')
+    exp = exp.replace('\n\nWarning:', '\nWarning:')
+    exp = exp.replace('\n\nNotice:', '\nNotice:')
+
     exp = exp.replace('Fatal error:', 'HipHop Fatal error:')
     exp = exp.replace('Warning:', 'HipHop Warning:')
     exp = exp.replace('Notice:', 'HipHop Notice:')
-    # you'll have to fix up the line %d yourself
 
     file(full_dest_filename, 'w').write(test)
     file(full_dest_filename+'.exp', 'w').write(exp)
@@ -69,17 +74,34 @@ env.update({'VQ':'interp', 'TEST_PATH':'zend/bad'})
 proc = subprocess.Popen(['tools/run_verify.sh'], env=env)
 proc.wait()
 
-def isOkDiff(file):
-    if not os.path.exists(file+'.diff') or os.stat(file+'.diff')[6] == 0:
+def isOkDiff(original_name):
+    filename = original_name + '.diff'
+    # no diff file or is empty
+    if not os.path.exists(filename) or os.stat(filename)[6] == 0:
         return True
-    return False
 
-for file in test_files:
-    for ext in ['', '.exp']:
-        goodFile = file.replace('bad', 'good', 1)
-        if isOkDiff(file):
-            if os.path.exists(file+ext):
-                os.rename(file+ext, goodFile+ext)
-        else:
-            if os.path.exists(goodFile+ext):
-                os.unlink(goodFile+ext)
+    lines = file(filename).read()
+    # kill header
+    lines = re.sub(r'---.*', '', lines)
+    lines = re.sub(r'\+\+\+.*', '', lines)
+    # line 123 -> line %d
+    lines = re.sub(r'line \d+\n', 'line %d\n', lines)
+    # kill identical lines
+    lines = re.sub(r'-(.*)\n\+\1\n', '', lines)
+    
+    return re.search(r'\n(\+|\-)', lines) is None
+
+for filename in set(test_files):
+    good_file = filename.replace('bad', 'good', 1)
+    if isOkDiff(filename):
+        os.rename(filename, good_file)
+        file(good_file+'.exp', 'w').write(
+            file(filename+'.out').read().replace('/bad', '/good')
+        )
+        os.unlink(filename+'.exp')
+
+    else:
+        if not os.path.exists(good_file):
+            continue
+        os.unlink(good_file)
+        os.unlink(good_file+'.exp')

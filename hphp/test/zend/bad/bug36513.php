@@ -1,4 +1,4 @@
-<?php
+<?php 
 function test($s) {
   echo "'".trim(str_replace("&nbsp;", " ", htmlspecialchars_decode(strip_tags(highlight_string($s,1)))))."'\n";
 }

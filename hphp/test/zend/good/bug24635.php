@@ -10,14 +10,14 @@ class PageClass {
 class SectionClass {
 	function __construct($comment) {
 		$this->Comment = $comment;
-	}
+ 	}
 	function __destruct() {
-		out($this->Comment); // this line doesn't crash PHP
-		out("\n<!-- End Section: " . $this->Comment . "-->"); // this line
-	}
+		out($this->Comment); // this line doesn't crash PHP 
+ 		out("\n<!-- End Section: " . $this->Comment . "-->"); // this line
+ 	}
 }
 function out($code) { return; }
-$site = new SiteClass();
+$site = new SiteClass(); 
 $site->page->Display();
 echo "OK\n";
 ?>

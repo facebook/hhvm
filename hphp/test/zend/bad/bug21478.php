@@ -20,7 +20,7 @@ fwrite($fp, "This is a test.\n");
 print "Done.\n";
 fclose($fp);
 // Uncommenting the following 'print' line causes the segfault to stop occuring
-// print "2\n";
+// print "2\n";  
 readfile(dirname(__FILE__)."/test.txt");
 unlink(dirname(__FILE__)."/test.txt");
 ?>

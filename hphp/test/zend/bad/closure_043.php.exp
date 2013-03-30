@@ -13,11 +13,9 @@ bool(false)
 bool(false)
 
 After binding, null scope, with instance
-
 HipHop Warning: Cannot bind an instance to a static closure in hphp/test/zend/bad/closure_043.php on line %d
 bool(false)
 bool(false)
-
 
 HipHop Warning: Cannot bind an instance to a static closure in hphp/test/zend/bad/closure_043.php on line %d
 bool(false)
@@ -31,11 +29,9 @@ bool(true)
 bool(false)
 
 After binding, with scope, with instance
-
 HipHop Warning: Cannot bind an instance to a static closure in hphp/test/zend/bad/closure_043.php on line %d
 bool(true)
 bool(false)
-
 
 HipHop Warning: Cannot bind an instance to a static closure in hphp/test/zend/bad/closure_043.php on line %d
 bool(true)

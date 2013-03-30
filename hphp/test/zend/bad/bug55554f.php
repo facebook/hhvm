@@ -11,7 +11,7 @@ trait TNew {
 
 class ReportCollision {
     use TNew;
-
+	
 	public function ReportCollision() {
 	    echo "ReportCollision executed\n";
 	}

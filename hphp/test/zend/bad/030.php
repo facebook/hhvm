@@ -4,7 +4,7 @@ class foo {
 	public $test = 0;
 	private $test_2 = 1;
 	protected $test_3 = 2;
-
+	
 	public function bar() {
 		try {
 			throw new Exception('foo');
@@ -12,13 +12,13 @@ class foo {
 			var_dump($this);
 		}
 
-		$this->baz();
+		$this->baz();		
 	}
-
+	
 	public function baz() {
 		foreach ($this as $k => $v) {
 			printf("'%s' => '%s'\n", $k, $v);
-		}
+		}		
 		print "ok\n";
 	}
 }

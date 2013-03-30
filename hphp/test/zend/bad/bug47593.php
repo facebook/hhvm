@@ -9,7 +9,7 @@ class foo {
 }
 
 interface baz {
-}
+}	
 
 function bar() {
 }

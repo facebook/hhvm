@@ -9,7 +9,7 @@ function bar() {
 	error_reporting(E_ALL|E_STRICT);
 	throw new Exception("test");
 }
-
+	
 try {
 	@foo(@bar());
 } catch (Exception $e) {

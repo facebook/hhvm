@@ -8,7 +8,7 @@ function foo($arg) {
 function bar() {
 	throw new Exception("test");
 }
-
+	
 try {
 	@foo(@bar());
 } catch (Exception $e) {

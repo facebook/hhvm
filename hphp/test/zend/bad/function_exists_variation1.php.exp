@@ -18,15 +18,12 @@ bool(false)
 -- Iteration 9 --
 bool(false)
 -- Iteration 10 --
-
 HipHop Warning: function_exists() expects parameter 1 to be string, array given in hphp/test/zend/bad/function_exists_variation1.php on line %d
 NULL
 -- Iteration 11 --
-
 HipHop Warning: function_exists() expects parameter 1 to be string, array given in hphp/test/zend/bad/function_exists_variation1.php on line %d
 NULL
 -- Iteration 12 --
-
 HipHop Warning: function_exists() expects parameter 1 to be string, array given in hphp/test/zend/bad/function_exists_variation1.php on line %d
 NULL
 -- Iteration 13 --
@@ -44,7 +41,6 @@ bool(false)
 -- Iteration 19 --
 bool(false)
 -- Iteration 20 --
-
 HipHop Warning: function_exists() expects parameter 1 to be string, resource given in hphp/test/zend/bad/function_exists_variation1.php on line %d
 NULL
 -- Iteration 21 --
@@ -52,3 +48,4 @@ bool(false)
 -- Iteration 22 --
 bool(false)
 ===Done===
+	

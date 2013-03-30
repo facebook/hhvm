@@ -1,5 +1,4 @@
 HipHop Warning: feof(): wrapper::stream_eof is not implemented! Assuming EOF in hphp/test/zend/bad/bug41421.php on line %d
-
 HipHop Fatal error: Uncaught exception 'Exception' in %s:%d
 Stack trace:
 #0 [internal function]: wrapper->stream_eof()

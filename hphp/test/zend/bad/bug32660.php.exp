@@ -3,7 +3,5 @@ A Object
 (
     [q] => 3
 )
-
 HipHop Notice: Indirect modification of overloaded property A::$whatever has no effect in %sbug32660.php on line 23
-
 HipHop Fatal error: Cannot assign by reference to overloaded object in %sbug32660.php on line 23

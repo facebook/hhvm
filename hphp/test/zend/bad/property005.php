@@ -2,7 +2,7 @@
 error_reporting(E_ALL | E_STRICT);
 
 class Base {
-  private $hello;
+  private $hello;    
 }
 
 trait THello1 {

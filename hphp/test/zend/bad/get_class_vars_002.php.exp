@@ -10,9 +10,7 @@ array(3) {
   ["cc"]=>
   int(6)
 }
-
 HipHop Notice: Undefined property: C::$b in hphp/test/zend/bad/get_class_vars_002.php on line %d
-
 HipHop Notice: Undefined property: C::$c in hphp/test/zend/bad/get_class_vars_002.php on line %d
 int(1)
 NULL

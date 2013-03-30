@@ -1,7 +1,7 @@
 <?php
 
 error_reporting(E_ALL);
-
+	
 function foo1($arg) {
 }
 

@@ -1,9 +1,7 @@
 HipHop Warning: each() expects exactly 1 parameter, 0 given in hphp/test/zend/bad/007.php on line %d
 NULL
-
 HipHop Warning: Variable passed to each() is not an array or object in hphp/test/zend/bad/007.php on line %d
 NULL
-
 HipHop Warning: Variable passed to each() is not an array or object in hphp/test/zend/bad/007.php on line %d
 NULL
 array(4) {

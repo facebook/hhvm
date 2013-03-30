@@ -1,9 +1,9 @@
 <?php
 
-/*
+/* 
  * proto bool function_exists(string function_name)
  * Function is implemented in Zend/zend_builtin_functions.c
-*/
+*/ 
 
 echo "*** Testing function_exists() function: with unexpected inputs for 'str' argument ***\n";
 
@@ -15,7 +15,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  }
+  } 
 }
 
 //getting the resource

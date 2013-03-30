@@ -6,7 +6,7 @@ class foo {
 class_alias('foo', 'bar');
 
 
-class baz extends bar {
+class baz extends bar { 
 }
 
 var_dump(is_subclass_of(new foo, 'foo'));

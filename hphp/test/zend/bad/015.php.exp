@@ -1,18 +1,13 @@
 HipHop Warning: trigger_error() expects at least 1 parameter, 0 given in hphp/test/zend/bad/015.php on line %d
 NULL
-
 HipHop Notice: error in hphp/test/zend/bad/015.php on line %d
 bool(true)
-
 HipHop Warning: trigger_error() expects parameter 1 to be string, array given in hphp/test/zend/bad/015.php on line %d
 NULL
-
 HipHop Warning: Invalid error type specified in hphp/test/zend/bad/015.php on line %d
 bool(false)
-
 HipHop Warning: Invalid error type specified in hphp/test/zend/bad/015.php on line %d
 bool(false)
-
 HipHop Warning: error in hphp/test/zend/bad/015.php on line %d
 bool(true)
 

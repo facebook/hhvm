@@ -1,9 +1,7 @@
 object(stdClass)#%d (0) {
 }
 NULL
-
 HipHop Notice: Undefined variable: y in hphp/test/zend/bad/closure_027.php on line %d
-
 HipHop Warning: Missing argument 1 for {closure}(), called in hphp/test/zend/bad/closure_027.php on line %d and defined in hphp/test/zend/bad/closure_027.php on line %d
 NULL
 

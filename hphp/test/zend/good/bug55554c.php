@@ -25,7 +25,7 @@ trait TC2 {
 
 class ReportCollision {
 	use TC1, TC2;
-
+	
 	public function __construct() {
         echo "New constructor executed\n";
     }

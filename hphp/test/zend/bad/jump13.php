@@ -10,11 +10,11 @@ try {
     }
     catch(Exception $e) {
         c: print 3;
-        goto d;
-    }
+        goto d;    
+    }    
 }
 catch(Exception $e) {
     d: print 4;
-    goto e;
+    goto e;    
 }
 ?>

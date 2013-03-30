@@ -4,5 +4,4 @@ test2
 test3
 test4
 test5
-
 HipHop Fatal error: Call to undefined method C::test6() in %sbug42937.php on line 21

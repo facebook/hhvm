@@ -1,7 +1,7 @@
 <?php
 
 class foo {
-
+	
 }
 
 var_dump(class_exists(''));

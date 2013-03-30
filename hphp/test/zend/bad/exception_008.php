@@ -10,7 +10,7 @@ class TestFirst
 class TestSecond
 {
 	function __destruct() {
-		throw new Exception("Second");
+		throw new Exception("Second");		
 	}
 }
 

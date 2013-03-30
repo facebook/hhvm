@@ -12,14 +12,14 @@ trait World {
      echo ' World';
    }
 }
-
+ 
 class MyHelloWorld {
    use Hello, World {
      Hello::saySomething insteadof World;
 	 World::saySomething as sayWorld;
    }
 }
-
+ 
 $o = new MyHelloWorld();
 $o->saySomething();
 $o->sayWorld();

@@ -17,17 +17,17 @@ function get_error_context() {
   $backtrace = debug_backtrace();
   $n = 1;
   foreach ($backtrace as $call) {
-	echo $n++." ";
-	if (isset($call["file"])) {
-		echo $call["file"];
-		if (isset($call["line"])) {
-			echo ":".$call["line"];
-		}
-	}
-	if (isset($call["function"])) {
-		echo " ".$call["function"]."()";
-	}
-	echo "\n";
+  	echo $n++." ";
+  	if (isset($call["file"])) {
+  		echo $call["file"];
+  		if (isset($call["line"])) {
+  			echo ":".$call["line"];
+  		}
+  	}
+  	if (isset($call["function"])) {
+  		echo " ".$call["function"]."()";
+  	}
+  	echo "\n";
   }
   echo "\n";
 }

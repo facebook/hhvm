@@ -1,5 +1,4 @@
 isset
 empty
-
 HipHop Notice: Undefined property: myclass::$foo in hphp/test/zend/bad/bug44899.php on line %d
 empty

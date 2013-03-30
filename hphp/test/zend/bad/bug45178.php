@@ -1,7 +1,7 @@
 <?php
 class Foo {
     function __construct() {
-	$this->error = array($this,$this);
+    	$this->error = array($this,$this);
     }
 }
 $a =& new Foo();

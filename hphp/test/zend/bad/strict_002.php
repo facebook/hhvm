@@ -1,10 +1,10 @@
 <?php
 
-class test {
+class test { 
 	static $foo = 1;
-}
+} 
 
-$t = new test;
+$t = new test; 
 $t->foo = 5;
 
 $fp = fopen(__FILE__, 'r');

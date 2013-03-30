@@ -3,7 +3,7 @@
 namespace foo;
 
 interface foo {
-
+	
 }
 
 class bar {
@@ -13,7 +13,7 @@ class bar {
 }
 
 class test implements foo {
-
+	
 }
 
 

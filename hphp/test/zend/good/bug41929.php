@@ -7,7 +7,7 @@ class C {
     foreach ($this as $k=>$v) {
       echo "$k: $v\n";
     }
-  }
+  } 
 }
 
 class D extends C {

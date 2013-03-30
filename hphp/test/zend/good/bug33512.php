@@ -38,7 +38,7 @@ class TheObj {
 
 	var_dump($SomeObj->RealVar1);
 	print $SomeObj->{'RealVar'.(3)}."\n";
-
+	
 	unset($SomeObj->RealVar1);
 	unset($SomeObj->{'RealVar'.(3)});
 

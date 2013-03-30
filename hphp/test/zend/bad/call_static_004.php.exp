@@ -1,3 +1,0 @@
-string(3) "AaA"
-
-HipHop Fatal error: Function name must be a string in hphp/test/zend/bad/call_static_004.php on line %d

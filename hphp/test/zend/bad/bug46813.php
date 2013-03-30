@@ -3,7 +3,7 @@ namespace test;
 {
 	class inner
 	{
-
+		
 	}
 }
 

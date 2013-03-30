@@ -5,7 +5,7 @@ class A
 	{
 		gc_collect_cycles();
 	}
-
+	
 	public function getB()
 	{
 		$this->data['foo'] = new B($this);

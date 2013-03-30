@@ -13,7 +13,7 @@ $c = new Foo();
 $c->arr[0]["k"] = 1;
 $c->arr[0]["k2"] = $ref;
 for($cnt=0;$cnt<6;$cnt++) {
-	$ref = chop($undef);
+	$ref = chop($undef);	
 	$c->arr[$cnt]["k2"] = $ref;
 }
 echo "ok\n";

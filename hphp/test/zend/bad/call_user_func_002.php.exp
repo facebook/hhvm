@@ -1,13 +1,7 @@
 %unicode|string%(3) "foo"
-
 HipHop Warning: call_user_func() expects parameter 1 to be a valid callback, class 'foo' not found in hphp/test/zend/bad/call_user_func_002.php on line %d
-
 HipHop Warning: call_user_func() expects parameter 1 to be a valid callback, class '' not found in hphp/test/zend/bad/call_user_func_002.php on line %d
-
 HipHop Notice: Undefined variable: foo in hphp/test/zend/bad/call_user_func_002.php on line %d
-
 HipHop Warning: call_user_func() expects parameter 1 to be a valid callback, first array member is not a valid class name or object in hphp/test/zend/bad/call_user_func_002.php on line %d
-
 HipHop Notice: Undefined variable: foo in hphp/test/zend/bad/call_user_func_002.php on line %d
-
 HipHop Warning: call_user_func() expects parameter 1 to be a valid callback, first array member is not a valid class name or object in hphp/test/zend/bad/call_user_func_002.php on line %d

@@ -13,5 +13,5 @@ echo "\n-- Testing get_defined_functions() function with more than expected no. 
 $extra_arg = 10;
 var_dump( get_defined_functions($extra_arg) );
 
-?>
+?> 
 ===Done===

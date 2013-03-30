@@ -31,7 +31,7 @@ $arr = get_defined_vars();
 
 /* Displaying various variable through the array captured by the get_defined_vars function call */
 echo "\n*** Displaying various variables through the array captured by the get_defined_vars function call ***\n";
-var_dump( $arr["argc"] );
+var_dump( $arr["argc"] ); 
 var_dump( $arr["number"] );
 var_dump( $arr["string"] );
 var_dump( $arr["array1"] );
@@ -60,4 +60,4 @@ func2();
 func1();
 
 echo "\nDone";
-?>
+?> 

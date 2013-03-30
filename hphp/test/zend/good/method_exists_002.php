@@ -2,12 +2,12 @@
 
 class bar {
 	static public function stat_a2() {
-	}
+	}	
 	static private function stat_b2() {
 	}
 	static protected function stat_c2() {
 	}
-
+	
 	private function method_a() {
 	}
 	protected function method_b() {
@@ -20,12 +20,12 @@ class bar {
 
 class baz extends bar {
 	static public function stat_a() {
-	}
+	}	
 	static private function stat_b() {
 	}
 	static protected function stat_c() {
 	}
-
+	
 	private function method_a() {
 	}
 	protected function method_b() {

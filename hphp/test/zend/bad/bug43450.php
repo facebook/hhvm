@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL|E_STRICT);
 
-class Foo
+class Foo 
 {
     public function __toString()
 	{
@@ -12,7 +12,7 @@ class Foo
 $num_repeats = 100000;
 
 $start = (memory_get_usage() / 1024) + 16;
-for ($i=1;$i<$num_repeats;$i++)
+for ($i=1;$i<$num_repeats;$i++) 
 {
 	$foo = new Foo();
 	md5($foo);

@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 
 class foo {
 	public $arr;
-
+	
 	public function &a() {
 		return $this->arr;
 	}

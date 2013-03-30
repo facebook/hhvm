@@ -1,3 +1,0 @@
-HipHop Warning: Division by zero in hphp/test/zend/bad/mod_001.php on line %d
-bool(false)
-Done

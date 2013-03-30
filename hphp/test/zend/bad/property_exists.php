@@ -10,7 +10,7 @@ class aParent {
 		var_dump(property_exists("A", "prot"));
 		var_dump(property_exists("A", "prot2"));
 		var_dump(property_exists("A", "prot3"));
-		print "------------------\n";
+		print "------------------\n";		
 	}
 	public function nonstaticTest() {
 		$a = new A;

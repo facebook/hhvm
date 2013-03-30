@@ -5,7 +5,7 @@ function error_handler($errno, $errstr, $errfile, $errline, $context) {
 
 set_error_handler('error_handler');
 
-class Foo {
+class Foo {	
 	function bar(array $foo) {
 	}
 }

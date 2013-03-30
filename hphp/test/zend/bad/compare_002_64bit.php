@@ -39,7 +39,7 @@ foreach($a as $var) {
 		my_dump($a[$i]);
 		echo "\n";
 	}
-}
+}	
 
 echo "Done\n";
 ?>

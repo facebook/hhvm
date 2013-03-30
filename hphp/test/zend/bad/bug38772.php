@@ -1,10 +1,10 @@
 <?php
 class A {
-
+	
 	public function __construct() {
 		$this -> foo();
 	}
-
+	
 	private function foo() {
 		echo __METHOD__ . "\r\n";
 	}
@@ -16,7 +16,7 @@ class B extends A {
 	}
 }
 
-class C extends A {
+class C extends A {	
 	protected function foo() {
 		echo __METHOD__ . "\r\n";
 	}

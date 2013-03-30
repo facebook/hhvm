@@ -13,7 +13,7 @@ trait THelloA {
 
 class TraitsTest1 {
 	use THelloB;
-	use THelloA;
+	use THelloA;  
 }
 
 

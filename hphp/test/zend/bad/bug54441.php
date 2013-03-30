@@ -6,7 +6,7 @@ trait Foo {
 
 class Boo {
   use Foo {
-    bar as dontKnow;
+    bar as dontKnow; 
     dontKnow as protected;
   }
 }

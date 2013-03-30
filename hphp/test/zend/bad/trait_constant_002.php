@@ -5,11 +5,11 @@
 		  return __TRAIT__;
 		}
 	}
-
+	
 	function someFun() {
 	  return __TRAIT__;
 	}
-
+	
 
 	$t = __TRAIT__;
 	var_dump($t);

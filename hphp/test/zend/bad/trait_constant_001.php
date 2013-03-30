@@ -11,7 +11,7 @@ class Direct {
 }
 
 class IndirectInheritance extends Direct {
-
+  
 }
 
 trait TestTraitIndirect {

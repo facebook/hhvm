@@ -2,7 +2,6 @@ HipHop Warning: class_exists() expects at least 1 parameter, 0 given in hphp/tes
 NULL
 bool(false)
 bool(false)
-
 HipHop Warning: class_exists() expects parameter 1 to be string, array given in hphp/test/zend/bad/012.php on line %d
 NULL
 bool(false)

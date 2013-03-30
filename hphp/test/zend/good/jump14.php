@@ -1,10 +1,10 @@
-<?php
+<?php 
 
 goto A;
 
 {
 	B:
-		goto C;
+		goto C;	
 		return;
 }
 

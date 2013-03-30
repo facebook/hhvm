@@ -1,3 +1,2 @@
 World!
-
 HipHop Fatal error: Declaration of SayWorld::sayHello(Base $d) must be compatible with Base::sayHello(array $a) in hphp/test/zend/bad/inheritance003.php on line %d

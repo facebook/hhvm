@@ -1,0 +1,1 @@
+HipHop Fatal error: Non-abstract method Impl::Foo() must contain body in hphp/test/zend/good/errmsg_001.php on line 7

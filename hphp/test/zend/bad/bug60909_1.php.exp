@@ -5,7 +5,6 @@ Stack trace:
 #1 %sbug60909_1.php(8): require()
 #2 {main}
   thrown in %sbug60909_1.php on line 5
-
 HipHop Fatal error: main(): Failed opening required 'notfound.php' (include_path='%s') in %sbug60909_1.php on line 8
 
 

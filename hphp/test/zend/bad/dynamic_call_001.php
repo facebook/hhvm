@@ -1,8 +1,8 @@
-<?php
+<?php 
 
-class foo {
+class foo { 
 	public function foo() {
-	}
+	}	
 }
 
 $a = 'foo';

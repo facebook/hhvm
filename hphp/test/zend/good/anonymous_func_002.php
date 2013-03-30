@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 $test = create_function('$v', 'return $v;');
 

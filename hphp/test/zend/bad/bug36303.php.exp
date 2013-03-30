@@ -1,4 +1,3 @@
 HipHop Warning: Attempt to modify property of non-object in %sbug36303.php on line 3
-
 HipHop Warning: Invalid argument supplied for foreach() in %sbug36303.php on line 3
 ok

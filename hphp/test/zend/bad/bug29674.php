@@ -3,7 +3,7 @@
 class BaseClass
 {
 	private $private_base = "Base";
-
+	
 	function printVars ()
 	{
 		var_dump($this->private_base);

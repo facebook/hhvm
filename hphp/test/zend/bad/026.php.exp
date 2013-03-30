@@ -1,5 +1,4 @@
 HipHop Notice: Trying to get property of non-object in hphp/test/zend/bad/026.php on line %d
 ok
-
 HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/026.php on line %d
 ok

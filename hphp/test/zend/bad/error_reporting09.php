@@ -1,7 +1,7 @@
 <?php
 
 error_reporting(E_ALL);
-
+	
 function bar() {
 	echo @$blah;
 	echo $undef2;
@@ -13,8 +13,8 @@ function foo() {
 	echo $blah;
 	return bar();
 }
-
-@foo();
+	
+@foo();					
 
 var_dump(error_reporting());
 

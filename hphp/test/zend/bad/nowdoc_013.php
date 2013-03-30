@@ -2,7 +2,7 @@
 $code = <<<'EOF'
 <?php
   $x = <<<'EOT'
-some string
+some string    
 EOT
   $y = 2;
 ?>

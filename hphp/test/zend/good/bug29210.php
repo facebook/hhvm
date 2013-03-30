@@ -1,16 +1,16 @@
 <?php
 class test_class {
    private function test_func1() {
-	 echo "test_func1\n";
+   	 echo "test_func1\n";
    }
    protected function test_func2() {
-	 echo "test_func2\n";
+   	 echo "test_func2\n";
    }
    static private function test_func3() {
-	 echo "test_func3\n";
+   	 echo "test_func3\n";
    }
    static protected function test_func4() {
-	 echo "test_func4\n";
+   	 echo "test_func4\n";
    }
    function test() {
      if (is_callable(array($this,'test_func1'))) {

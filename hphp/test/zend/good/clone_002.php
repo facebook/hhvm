@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 $a = clone clone $b = new stdClass;
 var_dump($a == $b);

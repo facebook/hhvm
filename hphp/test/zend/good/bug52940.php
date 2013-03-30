@@ -1,7 +1,7 @@
 <?php
 function foo($a) {
 	$a++;
-	var_dump($a);
+	var_dump($a);	
 }
 function bar(&$a) {
         $a++;

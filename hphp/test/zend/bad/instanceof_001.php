@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 $a = new stdClass;
 var_dump($a instanceof stdClass);

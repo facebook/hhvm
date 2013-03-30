@@ -1,6 +1,6 @@
 <?php
 
-class foo {
+class foo { 
 	static public function test() {
 		print "hello\n";
 	}

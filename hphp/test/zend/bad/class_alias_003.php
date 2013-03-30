@@ -3,7 +3,7 @@
 class bar {
 }
 
-class foo {
+class foo { 
 	public function test() {
 		class_alias('bar', 'static');
 		return new static;

@@ -1,16 +1,13 @@
 int(0)
 int(1)
-
 HipHop Warning: Missing argument 1 for test2(), called in hphp/test/zend/bad/001.php on line %d
 int(0)
 int(2)
 int(0)
-
 HipHop Warning: Missing argument 2 for test3() in hphp/test/zend/bad/001.php on line %d
 int(1)
 int(2)
 int(1)
-
 HipHop Warning: func_num_args():  Called from the global scope - no function context in hphp/test/zend/bad/001.php on line %d
 int(-1)
 Done

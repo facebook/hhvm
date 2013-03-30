@@ -1,5 +1,5 @@
 foo: foo foo2
-bar: bar
+bar: bar 
 HipHop Notice: Undefined property: bar::$foo2 in hphp/test/zend/bad/bug29689.php on line %d
 
 ---baz--

@@ -9,7 +9,7 @@ class Foo {
     }
 }
 
-trait T1 {
+trait T1 { 
     public function func() {
         echo "From T1\n";
     }
@@ -36,7 +36,7 @@ class Bar {
     }
 }
 
-trait T2 {
+trait T2 { 
     public function func2() {
         echo "From T2\n";
     }

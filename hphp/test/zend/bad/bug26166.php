@@ -45,7 +45,7 @@ echo $o;
 
 echo "===THROW===\n";
 
-class Error
+class Error 
 {
 	function __toString() {
 		throw new Exception("This is an error!");

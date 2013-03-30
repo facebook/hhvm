@@ -2,8 +2,8 @@
 
 namespace foo;
 
-$x = function (\stdclass $x = NULL) {
-	var_dump($x);
+$x = function (\stdclass $x = NULL) { 
+	var_dump($x);	
 };
 
 class stdclass extends \stdclass { }

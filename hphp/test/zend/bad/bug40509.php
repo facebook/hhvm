@@ -2,7 +2,7 @@
 function foo()
 {
 	global $arr;
-
+	
 	$c = $arr["v"];
 	foreach ($c as $v) {}
 }

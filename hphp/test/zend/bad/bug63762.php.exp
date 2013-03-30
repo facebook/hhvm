@@ -1,5 +1,4 @@
 Array of NULL:
-
 HipHop Warning: Expected array for frame 0 in hphp/test/zend/bad/bug63762.php on line %d
 string(9) "#0 {main}"
 
@@ -8,15 +7,11 @@ string(36) "#0 [internal function]: ()
 #1 {main}"
 
 Array of array of NULL values:
-
 HipHop Warning: Function name is no string in hphp/test/zend/bad/bug63762.php on line %d
-
 HipHop Warning: Value for class is no string in hphp/test/zend/bad/bug63762.php on line %d
-
 HipHop Warning: Value for type is no string in hphp/test/zend/bad/bug63762.php on line %d
-
 HipHop Warning: Value for function is no string in hphp/test/zend/bad/bug63762.php on line %d
-
 HipHop Warning: args element is no array in hphp/test/zend/bad/bug63762.php on line %d
 string(60) "#0 [unknown function][unknown][unknown][unknown]()
 #1 {main}"
+

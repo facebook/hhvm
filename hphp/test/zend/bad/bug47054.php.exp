@@ -1,9 +1,7 @@
 Called class: D
 Called class: C
 Called class: C
-
 HipHop Warning: get_called_class() called from outside a class in hphp/test/zend/bad/bug47054.php on line %d
 
 Strict Standards: Non-static method D::m() should not be called statically in hphp/test/zend/bad/bug47054.php on line %d
-
 HipHop Fatal error: Using $this when not in object context in hphp/test/zend/bad/bug47054.php on line %d

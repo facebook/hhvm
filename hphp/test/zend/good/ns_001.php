@@ -6,11 +6,11 @@ class Foo {
   function __construct() {
     echo __CLASS__,"\n";
   }
-
+  
   function bar() {
     echo __CLASS__,"\n";
   }
-
+  
   static function baz() {
     echo __CLASS__,"\n";
   }

@@ -3,7 +3,7 @@
 namespace foo;
 
 class foo {
-
+	
 }
 
 class_alias(__NAMESPACE__ .'\foo', 'bar');

@@ -134,7 +134,7 @@ void VectorEffects::init(Opcode op, const Type origBase,
        */
       baseType = baseType.isNull() ? newBase : (baseType | newBase);
     }
-    baseValChanged = true;
+    baseValChanged = !baseBoxed;
   }
   if ((op == SetElem || op == UnsetElem) && baseType.maybe(Type::Arr)) {
     // possible COW when modifying an array, unless the base was boxed. If the

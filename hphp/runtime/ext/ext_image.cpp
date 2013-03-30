@@ -6016,6 +6016,7 @@ static int exif_process_string_raw(char **result, char *value,
    * chars up to byte_count, we also have to add a single NUL character to
    * force end of string.
    */
+  *result = 0;
   if (byte_count) {
     (*result) = (char*)IM_MALLOC(byte_count + 1);
     CHECK_ALLOC_R((*result), byte_count + 1, 0);

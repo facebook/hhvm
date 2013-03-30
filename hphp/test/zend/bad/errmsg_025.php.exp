@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot inherit previously-inherited or override constant FOO from interface test2 in hphp/test/zend/bad/errmsg_025.php on line %d

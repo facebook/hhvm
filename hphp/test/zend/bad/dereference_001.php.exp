@@ -1,0 +1,7 @@
+int(5)
+
+HipHop Notice: Undefined offset: 0 in hphp/test/zend/bad/dereference_001.php on line %d
+NULL
+int(1)
+string(1) "b"
+string(3) "bar"

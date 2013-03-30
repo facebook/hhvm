@@ -1,0 +1,39 @@
+HipHop Notice: String offset cast occurred in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: 0 in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: 0 in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: String offset cast occurred in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: %i in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: String offset cast occurred in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: %i in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: 0 in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: 4 in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: 4 in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: 4 in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: 4 in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: 4 in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: String offset cast occurred in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: 12 in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: String offset cast occurred in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: Uninitialized string offset: 12 in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: String offset cast occurred in hphp/test/zend/bad/bug39018.php on line %d
+
+HipHop Notice: String offset cast occurred in hphp/test/zend/bad/bug39018.php on line %d
+b
+Done

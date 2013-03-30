@@ -1,0 +1,28 @@
+Before binding
+bool(false)
+bool(false)
+
+bool(true)
+bool(true)
+
+After binding, no instance
+bool(false)
+bool(false)
+
+bool(true)
+bool(false)
+
+
+HipHop Warning: Cannot bind an instance to a static closure in hphp/test/zend/bad/closure_046.php on line %d
+After binding, with same-class instance for the bound one
+bool(false)
+bool(true)
+
+bool(true)
+bool(true)
+
+After binding, with different instance for the bound one
+bool(true)
+bool(true)
+
+Done.

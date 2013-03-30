@@ -1,0 +1,36 @@
+Before binding
+bool(false)
+bool(false)
+
+bool(true)
+bool(true)
+
+After binding, null scope, no instance
+bool(false)
+bool(false)
+
+bool(false)
+bool(false)
+
+After binding, null scope, with instance
+bool(false)
+bool(true)
+
+bool(false)
+bool(true)
+
+After binding, with scope, no instance
+bool(true)
+bool(false)
+
+bool(true)
+bool(false)
+
+After binding, with scope, with instance
+bool(true)
+bool(true)
+
+bool(true)
+bool(true)
+
+Done.

@@ -1,0 +1,8 @@
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+
+HipHop Warning: class_exists() expects parameter 1 to be string, object given in hphp/test/zend/bad/class_exists_002.php on line %d
+NULL

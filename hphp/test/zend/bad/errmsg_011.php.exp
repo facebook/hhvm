@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot redeclare test::foo() in hphp/test/zend/bad/errmsg_011.php on line %d

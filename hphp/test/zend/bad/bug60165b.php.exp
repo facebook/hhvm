@@ -1,0 +1,1 @@
+HipHop Fatal error: An alias was defined for A::nonExistent but this method does not exist in hphp/test/zend/bad/bug60165b.php on line %d

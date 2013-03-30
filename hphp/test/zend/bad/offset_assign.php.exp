@@ -1,0 +1,3 @@
+HipHop Warning: Illegal string offset 'x' in %soffset_assign.php on line %d
+
+HipHop Fatal error: Cannot use string offset as an array in %soffset_assign.php on line %d

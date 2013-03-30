@@ -1,0 +1,1 @@
+HipHop Fatal error: Trait method hello has not been applied, because there are collisions with other trait methods on TraitsTest in hphp/test/zend/bad/conflict001.php on line %d

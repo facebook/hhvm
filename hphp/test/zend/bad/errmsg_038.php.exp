@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot declare property test::$var final, the final modifier is allowed only for methods and classes in hphp/test/zend/bad/errmsg_038.php on line %d

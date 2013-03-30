@@ -1,0 +1,7 @@
+Deprecated: Assigning the return value of new by reference is deprecated in %sbug45178.php on line 7
+
+Deprecated: Assigning the return value of new by reference is deprecated in %sbug45178.php on line 15
+object(Bar)#%d (1) {
+  ["_rme2"]=>
+  int(0)
+}

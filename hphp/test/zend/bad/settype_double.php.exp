@@ -1,0 +1,16 @@
+float(0)
+float(8754456)
+float(0)
+float(0)
+float(9876545)
+float(0.1)
+float(0)
+float(1)
+float(0)
+float(1)
+float(0)
+float(%d)
+
+HipHop Notice: Object of class test could not be converted to double in hphp/test/zend/bad/settype_double.php on line %d
+float(1)
+Done

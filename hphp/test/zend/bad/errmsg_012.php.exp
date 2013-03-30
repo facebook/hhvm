@@ -1,0 +1,1 @@
+HipHop Fatal error: __autoload() must take exactly 1 argument in hphp/test/zend/bad/errmsg_012.php on line %d

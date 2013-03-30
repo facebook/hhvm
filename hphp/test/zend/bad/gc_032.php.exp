@@ -1,0 +1,26 @@
+array(1) refcount(1){
+  [0]=>
+  array(1) refcount(3){
+    [0]=>
+    array(1) refcount(3){
+      [0]=>
+      *RECURSION*
+    }
+  }
+}
+array(1) refcount(1){
+  [0]=>
+  array(1) refcount(3){
+    [0]=>
+    array(1) refcount(1){
+      [0]=>
+      array(1) refcount(3){
+        [0]=>
+        array(1) refcount(1){
+          [0]=>
+          *RECURSION*
+        }
+      }
+    }
+  }
+}

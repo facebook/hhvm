@@ -1,0 +1,16 @@
+bool(true)
+Foo::__invoke
+bool(true)
+Foo::__invoke
+bool(true)
+Foo::__invoke
+bool(true)
+Foo::__invoke
+bool(true)
+Closure::__invoke
+bool(true)
+Closure::__invoke
+bool(true)
+Closure::__invoke
+bool(true)
+Closure::__invoke

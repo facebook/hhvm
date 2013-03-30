@@ -1,0 +1,1 @@
+HipHop Fatal error: __clone method called on non-object in %sbug42817.php on line 2

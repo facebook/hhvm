@@ -1,0 +1,11 @@
+HipHop Notice: Use of undefined constant bar - assumed 'bar' in %sbug43344_1.php on line 13
+bar
+
+HipHop Notice: Use of undefined constant bar - assumed 'bar' in %sbug43344_1.php on line 3
+bar
+
+HipHop Notice: Use of undefined constant bar - assumed 'bar' in %sbug43344_1.php on line 6
+bar
+
+HipHop Notice: Use of undefined constant bar - assumed 'bar' in %sbug43344_1.php on line 9
+bar

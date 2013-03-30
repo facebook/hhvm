@@ -1,0 +1,6 @@
+%unicode|string%(27) "A::func2: This should work!"
+%unicode|string%(27) "A::func3: This should work!"
+
+HipHop Warning: call_user_func_array() expects parameter 1 to be a valid callback, cannot access private method A::func22() in hphp/test/zend/bad/bug48770_2.php on line %d
+
+HipHop Warning: call_user_func_array() expects parameter 1 to be a valid callback, class 'A' does not have a method 'inexistent' in hphp/test/zend/bad/bug48770_2.php on line %d

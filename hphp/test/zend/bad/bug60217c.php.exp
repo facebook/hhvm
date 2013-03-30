@@ -1,0 +1,1 @@
+HipHop Fatal error: Declaration of TBroken2::foo($a) must be compatible with TBroken1::foo($a, $b = 0) in hphp/test/zend/bad/bug60217c.php on line %d

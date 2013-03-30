@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot instantiate abstract class foo in hphp/test/zend/bad/class_alias_008.php on line %d

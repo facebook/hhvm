@@ -1,0 +1,12 @@
+bool(true)
+bool(false)
+string(5) "array"
+int(%d)
+string(%d) "%s"
+
+HipHop Notice: Undefined index: PHP_SELF in hphp/test/zend/bad/globals_003.php on line %d
+NULL
+
+HipHop Notice: Undefined variable: _SERVER in hphp/test/zend/bad/globals_003.php on line %d
+NULL
+Done

@@ -1,0 +1,4 @@
+fopen(/tmp/blah): failed to open stream: No such file or directory (2) in %s:%d
+
+HipHop Warning: fopen(/tmp/blah): failed to open stream: No such file or directory in hphp/test/zend/bad/bug30998.php on line %d
+===DONE===

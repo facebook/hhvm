@@ -1,0 +1,6 @@
+bool(true)
+bool(false)
+bool(false)
+
+HipHop Warning: trait_exists() expects parameter 1 to be string, object given in hphp/test/zend/bad/trait_exists_001.php on line %d
+NULL

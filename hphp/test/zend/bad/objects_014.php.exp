@@ -1,0 +1,1 @@
+HipHop Fatal error: Class bar cannot implement previously implemented interface foo in hphp/test/zend/bad/objects_014.php on line %d

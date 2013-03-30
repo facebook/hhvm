@@ -1,0 +1,3 @@
+<?php
+$foo = clone(array());
+?>

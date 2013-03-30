@@ -1,0 +1,9 @@
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+
+HipHop Fatal error: Uncaught exception 'Exception' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in hphp/test/zend/bad/exception_001.php on line %d

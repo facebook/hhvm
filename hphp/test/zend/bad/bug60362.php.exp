@@ -1,0 +1,12 @@
+sub-key 'non_existent' is not set.
+sub-key 1 is set: string(1) "o"
+-------------------
+sub-sub-key 'sub_sub' is not set.
+sub-sub-key 0 is set: string(1) "o"
+-------------------
+sub-key 'non_existent' is empty.
+sub-key 1 is not empty: string(1) "o"
+-------------------
+sub-sub-key 'sub_sub' is empty.
+sub-sub-key 0 is not empty: string(1) "o"
+DONE

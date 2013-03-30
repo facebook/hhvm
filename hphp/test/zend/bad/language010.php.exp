@@ -1,0 +1,1 @@
+HipHop Fatal error: Trait method world has not been applied, because there are collisions with other trait methods on MyClass in hphp/test/zend/bad/language010.php on line %d

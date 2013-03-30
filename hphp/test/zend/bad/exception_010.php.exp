@@ -1,0 +1,13 @@
+HipHop Warning: Exception::getTraceAsString() expects exactly 0 parameters, 1 given in hphp/test/zend/bad/exception_010.php on line %d
+
+HipHop Warning: Exception::__toString() expects exactly 0 parameters, 1 given in hphp/test/zend/bad/exception_010.php on line %d
+
+HipHop Warning: Exception::getTrace() expects exactly 0 parameters, 1 given in hphp/test/zend/bad/exception_010.php on line %d
+
+HipHop Warning: Exception::getLine() expects exactly 0 parameters, 1 given in hphp/test/zend/bad/exception_010.php on line %d
+
+HipHop Warning: Exception::getFile() expects exactly 0 parameters, 1 given in hphp/test/zend/bad/exception_010.php on line %d
+
+HipHop Warning: Exception::getMessage() expects exactly 0 parameters, 1 given in hphp/test/zend/bad/exception_010.php on line %d
+
+HipHop Warning: Exception::getCode() expects exactly 0 parameters, 1 given in hphp/test/zend/bad/exception_010.php on line %d

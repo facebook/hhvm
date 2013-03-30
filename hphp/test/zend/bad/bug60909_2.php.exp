@@ -1,0 +1,4 @@
+HipHop Fatal error: Method Bad::__toString() must not throw an exception in %sbug60909_2.php on line 0
+
+
+!!!shutdown!!!

@@ -1,0 +1,6 @@
+array(1) {
+  [0]=>
+  string(2) "ok"
+}
+
+HipHop Fatal error: Cannot use [] for reading in %sbug34064.php on line 18

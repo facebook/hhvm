@@ -1,0 +1,5 @@
+HipHop Warning: Creating default object from empty value in %sbug62005.php on line %d
+stdClass Object
+(
+    [energy] => 2
+)

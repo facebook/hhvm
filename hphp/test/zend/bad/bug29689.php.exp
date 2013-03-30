@@ -1,0 +1,10 @@
+foo: foo foo2
+bar: bar
+HipHop Notice: Undefined property: bar::$foo2 in hphp/test/zend/bad/bug29689.php on line %d
+
+---baz--
+foo: foo foo2
+bar: baz baz2
+---baz2--
+foo: foo foo2
+bar2: baz2 baz22

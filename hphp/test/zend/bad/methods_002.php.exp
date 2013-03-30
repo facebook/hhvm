@@ -1,0 +1,1 @@
+HipHop Fatal error: Trait method __clone has not been applied, because there are collisions with other trait methods on bar in hphp/test/zend/bad/methods_002.php on line %d

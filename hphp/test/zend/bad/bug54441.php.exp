@@ -1,0 +1,1 @@
+HipHop Fatal error: The modifiers for the trait alias dontKnow() need to be changed in the same statment in which the alias is defined. Error in hphp/test/zend/bad/bug54441.php on line %d

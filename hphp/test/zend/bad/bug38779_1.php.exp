@@ -1,0 +1,3 @@
+Parse error: %s error%sin hphp/test/zend/bad/bug38779_1.php on line %d
+string(6) "flush!"
+string(6) "close!"

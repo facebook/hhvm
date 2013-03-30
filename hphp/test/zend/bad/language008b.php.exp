@@ -1,0 +1,2 @@
+Hello World!Hello World!
+HipHop Fatal error: Call to private method MyClass::sayHelloWorld() from context '' in hphp/test/zend/bad/language008b.php on line %d

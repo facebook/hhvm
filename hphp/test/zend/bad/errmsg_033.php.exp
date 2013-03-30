@@ -1,0 +1,1 @@
+HipHop Fatal error: Destructor test::__destruct() cannot be static in hphp/test/zend/bad/errmsg_033.php on line %d

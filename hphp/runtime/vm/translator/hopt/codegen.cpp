@@ -1885,8 +1885,10 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
   if (rip == TranslatorX64::Get()->getCallToExit()) {
     return;
   }
-  checkFrame(fp, sp, false);
-  assertTv(sp); // check return value
+  checkFrame(fp, sp, /*checkLocals*/ false);
+  assert(sp <= (Cell*)fp || fp->m_func->isGenerator());
+  // check return value if stack not empty
+  if (sp < (Cell*)fp) assertTv(sp);
 }
 
 void CodeGenerator::emitTraceRet(CodeGenerator::Asm& a) {

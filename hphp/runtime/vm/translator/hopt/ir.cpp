@@ -450,16 +450,20 @@ bool IRInstruction::killsSources() const {
 
 bool IRInstruction::killsSource(int idx) const {
   if (!killsSources()) return false;
-
-  if (m_op == DecRef || m_op == DecRefKillThis) {
-    assert(idx == 0);
-    return true;
+  switch (m_op) {
+    case DecRef:
+    case DecRefKillThis:
+    case ConvObjToArr:
+    case ConvGenToArr:
+      assert(idx == 0);
+      return true;
+    case ArraySet:
+    case ArraySetRef:
+      return idx == 1;
+    default:
+      not_reached();
+      break;
   }
-  if (m_op == ArraySet || m_op == ArraySetRef) {
-    // Kills its input array
-    return idx == 1;
-  }
-  not_reached();
 }
 
 bool IRInstruction::modifiesStack() const {

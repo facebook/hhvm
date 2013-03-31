@@ -170,9 +170,9 @@ O(OpMul,                        DParam, SNum SNum,                         C) \
 O(ConvBoolToArr,                D(Arr), S(Bool),                         C|N) \
 O(ConvDblToArr,                 D(Arr), S(Dbl),                          C|N) \
 O(ConvIntToArr,                 D(Arr), S(Int),                          C|N) \
-O(ConvObjToArr,                 D(Arr), S(Obj),                        N|CRc) \
+O(ConvObjToArr,                 D(Arr), S(Obj),                      N|CRc|K) \
 O(ConvStrToArr,                 D(Arr), S(Str),                        N|CRc) \
-O(ConvGenToArr,                 D(Arr), S(Gen),                        N|CRc) \
+O(ConvGenToArr,                 D(Arr), S(Gen),                      N|CRc|K) \
 O(ConvToBool,                  D(Bool), S(Gen),                          C|N) \
 O(ConvArrToDbl,                 D(Dbl), S(Arr),                        N|CRc) \
 O(ConvBoolToDbl,                D(Dbl), S(Bool),                         C|N) \
@@ -2393,7 +2393,7 @@ void forEachTraceInst(Trace* main, Body body) {
   });
 }
 
-/* 
+/*
  * Some utilities related to dumping. Rather than file-by-file control, we control
  * most IR logging via the hhir trace module.
  */

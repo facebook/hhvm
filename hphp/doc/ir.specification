@@ -256,9 +256,14 @@ CallsNative
 
 ConsumesRC
 
-  The instruction decrefs its sources.
+  The instruction consumes a reference to one or more of its sources, either by
+  decreasing its refcount or storing the reference to memory.
 
-  TODO: explain better
+KillsSource
+
+  The instruction calls decref on one or more of its sources. Unless a source
+  is known to have a refcount > 1 before the instruction executes, it cannot
+  safely be used after the instruction has executed.
 
 ProducesRC
 
@@ -291,11 +296,6 @@ Passthrough
   differs only in the refcount of the underlying object, the type of the
   variable, or some other property that doesn't affect the value of the
   variable itself.
-
-KillsSource
-
-  The instruction might destroy one or more of its sources, so they
-  cannot be safely used after it has executed.
 
 ModifiesStack
 

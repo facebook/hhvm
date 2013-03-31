@@ -1622,7 +1622,7 @@ void CodeGenerator::cgConvStrToArr(IRInstruction* inst) {
 // of just ConvGenToArr? Because we need at least two variants
 // and we don't want to overload opcodes and we want consistency.
 
-ArrayData* new_singleton_array_helper(TypedValue value) {
+ArrayData* convGenToArrHelper(TypedValue value) {
   // Note: the call sites of this function all assume that
   // no user code will run and no recoverable exceptions will
   // occur while running this code. This seems trivially true
@@ -1631,7 +1631,7 @@ ArrayData* new_singleton_array_helper(TypedValue value) {
   // is essentially metadata for the object. If that is not true,
   // you might end up looking at this code in a debugger and now
   // you know why.
-  tvCastToArrayInPlace(&value);
+  tvCastToArrayInPlace(&value); // consumes a ref on counted values
   return value.m_data.parr;
 }
 
@@ -1641,7 +1641,7 @@ void CodeGenerator::cgConvGenToArr(IRInstruction* inst) {
 
   ArgGroup args;
   args.typedValue(src);
-  ArrayData*(*fPtr)(TypedValue) = new_singleton_array_helper;
+  ArrayData*(*fPtr)(TypedValue) = convGenToArrHelper;
   cgCallHelper(m_as, (TCA)fPtr, dst, kNoSyncPoint, args);
 }
 

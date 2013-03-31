@@ -167,22 +167,29 @@ O(OpAnd,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpOr,                         D(Int), SNum SNum,                         C) \
 O(OpXor,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpMul,                        DParam, SNum SNum,                         C) \
+                                                                              \
 O(ConvBoolToArr,                D(Arr), S(Bool),                         C|N) \
 O(ConvDblToArr,                 D(Arr), S(Dbl),                          C|N) \
 O(ConvIntToArr,                 D(Arr), S(Int),                          C|N) \
 O(ConvObjToArr,                 D(Arr), S(Obj),                      N|CRc|K) \
 O(ConvStrToArr,                 D(Arr), S(Str),                        N|CRc) \
 O(ConvGenToArr,                 D(Arr), S(Gen),                      N|CRc|K) \
+                                                                              \
 O(ConvToBool,                  D(Bool), S(Gen),                          C|N) \
-O(ConvArrToDbl,                 D(Dbl), S(Arr),                        N|CRc) \
-O(ConvBoolToDbl,                D(Dbl), S(Bool),                         C|N) \
-O(ConvIntToDbl,                 D(Dbl), S(Int),                          C|N) \
-O(ConvObjToDbl,                 D(Dbl), S(Obj),                     N|Er|CRc) \
-O(ConvStrToDbl,                 D(Dbl), S(Str),                        N|CRc) \
-O(ConvGenToDbl,                 D(Dbl), S(Gen),                     N|Er|CRc) \
+                                                                              \
+O(ConvArrToDbl,                 D(Dbl), S(Arr),                            N) \
+O(ConvBoolToDbl,                D(Dbl), S(Bool),                        C|Rm) \
+O(ConvIntToDbl,                 D(Dbl), S(Int),                         C|Rm) \
+O(ConvObjToDbl,                 D(Dbl), S(Obj),                   N|Er|CRc|K) \
+O(ConvStrToDbl,                 D(Dbl), S(Str),                      N|CRc|K) \
+O(ConvGenToDbl,                 D(Dbl), S(Gen),                   N|Er|CRc|K) \
+                                                                              \
 O(ConvToInt,                    D(Int), S(Gen),                          C|N) \
+                                                                              \
 O(ConvToObj,                    D(Obj), S(Gen),                          C|N) \
+                                                                              \
 O(ConvToStr,                    D(Str), S(Gen),                          C|N) \
+                                                                              \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
 O(IsNTypeMem,                  D(Bool), S(PtrToGen),                      NA) \

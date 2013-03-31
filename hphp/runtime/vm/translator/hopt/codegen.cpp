@@ -1708,16 +1708,72 @@ void CodeGenerator::cgConvToBool(IRInstruction* inst) {
   }
 }
 
+static int64_t arrayToDoubleHelper(ArrayData* value) {
+  union {
+    int64_t intval;
+    double dblval;
+  } u;
+  u.dblval = value->empty() ? 0 : 1;
+  return u.intval;
+}
+
 void CodeGenerator::cgConvArrToDbl(IRInstruction* inst) {
-  cgConvGenToDbl(inst);
+  SSATmp* dst = inst->getDst();
+  SSATmp* src = inst->getSrc(0);
+  ArgGroup args;
+  args.ssa(src);
+  int64_t (*fPtr)(ArrayData*) = arrayToDoubleHelper;
+  cgCallHelper(m_as, (TCA)fPtr, dst, kNoSyncPoint, args);
 }
 
 void CodeGenerator::cgConvBoolToDbl(IRInstruction* inst) {
-  cgConvPrimitiveToDbl(inst);
+  // cvtsi2sd doesn't modify the high bits of its target, which can
+  // cause false dependencies to prevent register renaming from kicking
+  // in. Break the dependency chain by zeroing out xmm0.
+  m_as.pxor_xmm_xmm(xmm0, xmm0);
+  SSATmp* dst = inst->getDst();
+  auto dstReg = dst->getReg();
+  assert(dstReg != InvalidReg);
+  SSATmp* src = inst->getSrc(0);
+  auto srcReg = src->getReg();
+  if (srcReg == InvalidReg) {
+    assert(src->isConst());
+    int64_t constVal = src->getValRawInt();
+    if (constVal == 0) {
+      m_as.xor_reg64_reg64(dstReg, dstReg);
+    } else {
+      m_as.mov_imm64_reg(1, dstReg);
+    }
+  } else {
+    m_as.movzbl(rbyte(srcReg), r32(dstReg));
+  }
+  m_as.cvtsi2sd_reg64_xmm(dstReg, xmm0);
+  m_as.mov_xmm_reg64(xmm0, dstReg);
 }
 
 void CodeGenerator::cgConvIntToDbl(IRInstruction* inst) {
-  cgConvPrimitiveToDbl(inst);
+  // cvtsi2sd doesn't modify the high bits of its target, which can
+  // cause false dependencies to prevent register renaming from kicking
+  // in. Break the dependency chain by zeroing out xmm0.
+  m_as.pxor_xmm_xmm(xmm0, xmm0);
+  SSATmp* dst = inst->getDst();
+  auto dstReg = dst->getReg();
+  assert(dstReg != InvalidReg);
+  SSATmp* src = inst->getSrc(0);
+  auto srcReg = src->getReg();
+  if (srcReg == InvalidReg) {
+    assert(src->isConst());
+    int64_t constVal = src->getValRawInt();
+    if (constVal == 0) {
+      m_as.xor_reg64_reg64(dstReg, dstReg);
+    } else {
+      m_as.mov_imm64_reg(constVal, dstReg);
+    }
+    m_as.cvtsi2sd_reg64_xmm(dstReg, xmm0);
+  } else {
+    m_as.cvtsi2sd_reg64_xmm(srcReg, xmm0);
+  }
+  m_as.mov_xmm_reg64(xmm0, dstReg);
 }
 
 void CodeGenerator::cgConvObjToDbl(IRInstruction* inst) {
@@ -1741,14 +1797,6 @@ void CodeGenerator::cgConvGenToDbl(IRInstruction* inst) {
   args.typedValue(src);
   int64_t (*fPtr)(TypedValue) = genToDblHelper;
   cgCallHelper(m_as, (TCA)fPtr, dst, kSyncPoint, args);
-}
-
-void CodeGenerator::cgConvPrimitiveToDbl(IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
-  SSATmp* src = inst->getSrc(0);
-  prepUnaryXmmOp(m_as, src, xmm0);
-  m_as.mov_xmm_reg64(xmm0, dst->getReg());
-  return;
 }
 
 void CodeGenerator::cgConvToInt(IRInstruction* inst) {

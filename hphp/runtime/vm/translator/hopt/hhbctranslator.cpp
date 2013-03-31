@@ -2046,6 +2046,7 @@ void HhbcTranslator::emitCastDouble() {
     push(m_tb->genDefConst(0.0));
   } else if (fromType.isArray()) {
     push(m_tb->gen(ConvArrToDbl, src));
+    m_tb->genDecRef(src);
   } else if (fromType.isBool()) {
     push(m_tb->gen(ConvBoolToDbl, src));
   } else if (fromType.isInt()) {

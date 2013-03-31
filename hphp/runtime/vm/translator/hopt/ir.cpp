@@ -454,6 +454,9 @@ bool IRInstruction::killsSource(int idx) const {
     case DecRef:
     case ConvObjToArr:
     case ConvGenToArr:
+    case ConvObjToDbl:
+    case ConvStrToDbl:
+    case ConvGenToDbl:
       assert(idx == 0);
       return true;
     case ArraySet:

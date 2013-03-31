@@ -2073,7 +2073,7 @@ int32_t spillValueCells(IRInstruction* spillStack);
  * When SpillStack takes an ActRec, it has this many extra
  * dependencies in the spill vector for the values in the ActRec.
  */
-constexpr int kSpillStackActRecExtraArgs = 4;
+constexpr int kSpillStackActRecExtraArgs = 5;
 
 inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
   if (!(instr->getOpcode() == Conv &&

@@ -2020,15 +2020,15 @@ void HhbcTranslator::emitCastArray() {
     push(src);
   } else if (fromType.isNull()) {
     push(m_tb->genDefConst(HphpArray::GetStaticEmptyArray()));
-  } else if (fromType.equals(Type::Bool)) {
+  } else if (fromType.isBool()) {
     push(m_tb->gen(ConvBoolToArr, src));
-  } else if (fromType.equals(Type::Dbl)) {
+  } else if (fromType.isDbl()) {
     push(m_tb->gen(ConvDblToArr, src));
-  } else if (fromType.equals(Type::Int)) {
+  } else if (fromType.isInt()) {
     push(m_tb->gen(ConvIntToArr, src));
   } else if (fromType.isString()) {
     push(m_tb->gen(ConvStrToArr, src));
-  } else if (fromType.subtypeOf(Type::Obj)) {
+  } else if (fromType.isObj()) {
     push(m_tb->gen(ConvObjToArr, src));
   } else {
     push(m_tb->gen(ConvGenToArr, src));
@@ -2044,19 +2044,19 @@ void HhbcTranslator::emitCastBool() {
 void HhbcTranslator::emitCastDouble() {
   SSATmp* src = popC();
   Type fromType = src->getType();
-  if (fromType.equals(Type::Dbl)) {
+  if (fromType.isDbl()) {
     push(src);
   } else if (fromType.isNull()) {
     push(m_tb->genDefConst(0.0));
   } else if (fromType.isArray()) {
     push(m_tb->gen(ConvArrToDbl, src));
-  } else if (fromType.equals(Type::Bool)) {
+  } else if (fromType.isBool()) {
     push(m_tb->gen(ConvBoolToDbl, src));
-  } else if (fromType.equals(Type::Int)) {
+  } else if (fromType.isInt()) {
     push(m_tb->gen(ConvIntToDbl, src));
   } else if (fromType.isString()) {
     push(m_tb->gen(ConvStrToDbl, src));
-  } else if (fromType.subtypeOf(Type::Obj)) {
+  } else if (fromType.isObj()) {
     spillStack(); // may throw
     push(m_tb->gen(ConvObjToDbl, src));
   } else {

@@ -1161,12 +1161,28 @@ public:
     return subtypeOf(Arr);
   }
 
-  bool isString() const {
-    return subtypeOf(Str);
+  bool isBool() const {
+    return subtypeOf(Bool);
+  }
+
+  bool isDbl() const {
+    return subtypeOf(Dbl);
+  }
+
+  bool isInt() const {
+    return subtypeOf(Int);
   }
 
   bool isNull() const {
     return subtypeOf(Null);
+  }
+
+  bool isObj() const {
+    return subtypeOf(Obj);
+  }
+
+  bool isString() const {
+    return subtypeOf(Str);
   }
 
   Type innerType() const {

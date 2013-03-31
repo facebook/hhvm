@@ -2023,7 +2023,7 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
     return;
   }
   checkFrame(fp, sp, /*checkLocals*/ false);
-  assert(sp <= (Cell*)fp);
+  assert(sp <= (Cell*)fp || fp->m_func->isGenerator());
   // check return value if stack not empty
   if (sp < (Cell*)fp) assertTv(sp);
 }

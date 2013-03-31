@@ -2444,6 +2444,7 @@ std::vector<SSATmp*> HhbcTranslator::getSpillValues() const {
        */
       auto* inst = elem->getInstruction();
       assert(inst->getNumSrcs() == 5);
+      ret.push_back(inst->getSrc(0)); // fp
       ret.push_back(inst->getSrc(1)); // func
       ret.push_back(inst->getSrc(2)); // objOrCls
       ret.push_back(inst->getSrc(3)); // numArgs

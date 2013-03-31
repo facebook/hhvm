@@ -6702,7 +6702,7 @@ VMExecutionContext::createContinuation(ActRec* fp,
     Class* cls = frameStaticClass(fp);
 
     if (origFunc->isClosureBody()) {
-      genFunc = genFunc->cloneAndSetClass(cls);
+      genFunc = genFunc->cloneAndSetClass(fp->m_func->cls());
     }
 
     if (obj.get()) {

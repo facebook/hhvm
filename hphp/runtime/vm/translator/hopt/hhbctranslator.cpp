@@ -1184,23 +1184,20 @@ void HhbcTranslator::emitFPushActRec(SSATmp* func,
   SSATmp* actRec = m_tb->genDefActRec(func, objOrClass, numArgs, invName);
   m_evalStack.push(actRec);
   spillStack(); // TODO(#2036900)
-  m_fpiStack.push(actRec);
 }
 
 void HhbcTranslator::emitFPushCtor(int32_t numParams) {
   TRACE(3, "%u: FPushFuncCtor %d\n", m_bcOff, numParams);
   SSATmp* cls = popA();
   spillStack();
-  SSATmp* newObj = m_tb->genNewObj(numParams, cls);
-  m_fpiStack.push(newObj);
+  m_tb->genNewObj(numParams, cls);
 }
 
 void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   const StringData* className = lookupStringId(classNameStrId);
   TRACE(3, "%u: FPushFuncCtorD %d %s\n", m_bcOff, numParams, className->data());
   spillStack();
-  SSATmp* newObj = m_tb->genNewObj(numParams, className);
-  m_fpiStack.push(newObj);
+  m_tb->genNewObj(numParams, className);
 }
 
 void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {
@@ -1435,25 +1432,8 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
   for (uint32_t i = 0; i < numParams; i++) {
     params[numParams - i - 1] = popF();
   }
-  SSATmp* actRec = spillStack();
-
-  // pop the DefActRec or NewObj instruction from FPI stack
-  SSATmp* actRecOrNewObj = m_fpiStack.pop();
-
-  SSATmp* func = callee ? m_tb->genDefConst(callee) : nullptr;
-  if (!func) {
-    IRInstruction* actRecInst = actRecOrNewObj
-                                ? actRecOrNewObj->getInstruction() : nullptr;
-    SSATmp* funcTmp = actRecInst && actRecInst->getOpcode() == DefActRec
-                      ? actRecInst->getSrc(1) : nullptr;
-
-    if (funcTmp && funcTmp->getType() == Type::Func && funcTmp->isConst()) {
-      func = funcTmp;
-    } else {
-      func = m_tb->genDefNull();
-    }
-  }
-
+  auto actRec = spillStack();
+  auto func = callee ? cns(callee) : m_tb->genDefNull();
   m_tb->genCall(actRec,
                 returnBcOffset,
                 func,

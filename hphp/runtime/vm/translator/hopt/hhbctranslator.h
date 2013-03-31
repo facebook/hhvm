@@ -77,23 +77,6 @@ private:
   std::vector<SSATmp*> m_vector;
 };
 
-class FpiStack {
-public:
-  void push(SSATmp* tmp) {
-    stack.push(tmp);
-  }
-  SSATmp* pop() {
-    if (stack.empty()) {
-      return nullptr;
-    }
-    SSATmp* tmp = stack.top();
-    stack.pop();
-    return tmp;
-  }
-private:
-  std::stack<SSATmp*> stack;
-};
-
 class TypeGuard {
  public:
   enum Kind {
@@ -616,17 +599,13 @@ private:
    *   since the last SpillStack.
    *
    *   The EvalStack contains cells and ActRecs that need to be
-   *   spilled in order to materialize the stack.  The FpiStack tracks
-   *   calls between FPush* and FCall, and contains either Func* or
-   *   ActRecs.  (It contains Func* when we will need to use a
-   *   runtime value for the Func*.)
+   *   spilled in order to materialize the stack.
    *
    *   m_stackDeficit represents the number of cells we've popped off
    *   the virtual stack since the last sync.
    */
   uint32_t          m_stackDeficit;
   EvalStack         m_evalStack;
-  FpiStack          m_fpiStack;
 
   vector<TypeGuard> m_typeGuards;
   Trace* const      m_exitGuardFailureTrace;

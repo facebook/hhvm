@@ -377,6 +377,16 @@ SSATmp* TraceBuilder::genDefNull() {
   return gen(DefConst, Type::Null, &cdata);
 }
 
+SSATmp* TraceBuilder::genPtrToInitNull() {
+  ConstData cdata(&null_variant);
+  return gen(DefConst, Type::PtrToUninit, &cdata);
+}
+
+SSATmp* TraceBuilder::genPtrToUninit() {
+  ConstData cdata(&init_null_variant);
+  return gen(DefConst, Type::PtrToInitNull, &cdata);
+}
+
 SSATmp* TraceBuilder::genDefNone() {
   ConstData cdata(0);
   return gen(DefConst, Type::None, &cdata);

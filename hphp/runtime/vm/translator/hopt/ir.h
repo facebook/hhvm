@@ -427,6 +427,10 @@ O_STK(SetProp,                 DVector, C(TCA)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Gen)                              \
                                           S(Cell),     VProp|E|N|Mem|Refs|Er) \
+O(UnsetProp,                        ND, C(TCA)                                \
+                                          C(Cls)                              \
+                                          S(Obj,PtrToGen)                     \
+                                          S(Gen),            E|N|Mem|Refs|Er) \
 O_STK(SetOpProp,               D(Cell), C(TCA)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Gen)                              \
@@ -1237,6 +1241,12 @@ public:
   Type derefIfPtr() const {
     assert(subtypeOf(Gen | PtrToGen));
     return isPtr() ? deref() : *this;
+  }
+
+  // Returns the "stripped" version of this: dereferenced and unboxed,
+  // if applicable.
+  Type strip() const {
+    return derefIfPtr().unbox();
   }
 
   Type ptr() const {

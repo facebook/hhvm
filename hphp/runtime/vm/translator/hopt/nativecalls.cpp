@@ -120,6 +120,8 @@ static CallMap s_callMap({
                  {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}, {SSA, 4}, {SSA, 5}}},
     {SetProp,  {FSSA, 0}, DTV, SSync,
                  {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}, {TV, 4}}},
+    {UnsetProp, {FSSA, 0}, DNone, SSync,
+                 {{SSA, 1}, {SSA, 2}, {VecKeyS, 3}}},
     {SetOpProp, {FSSA, 0}, DTV, SSync,
                  {{SSA, 1}, {VecKeyS, 2}, {TV, 3}, {SSA, 4}}},
     {IncDecProp, {FSSA, 0}, DTV, SSync,

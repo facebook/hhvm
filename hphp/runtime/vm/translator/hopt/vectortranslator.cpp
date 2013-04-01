@@ -117,7 +117,8 @@ void VectorEffects::init(Opcode op, const Type origBase,
   assert(key.equals(Type::None) || key.isKnownDataType());
   assert(origVal.equals(Type::None) || origVal.isKnownDataType());
 
-  if (op != UnsetElem && baseType.maybe(Type::Null | Type::Bool | Type::Str)) {
+  if ((op == SetElem || op == SetProp) &&
+      baseType.maybe(Type::Null | Type::Bool | Type::Str)) {
     // stdClass or array promotion might happen
     auto newBase = op == SetElem ? Type::Arr : Type::Obj;
     // If the base is known to be null, promotion will happen. If we can ever
@@ -689,10 +690,7 @@ void HhbcTranslator::VectorTranslator::emitProp() {
   const int propOffset  = getPropertyOffset(m_ni, knownCls, m_mii,
                                             m_mInd, m_iInd);
   auto mia = m_mii.getAttr(m_ni.immVecM[m_mInd]);
-  if (mia & Unset) {
-    PUNT(emitProp-Unset);
-  }
-  if (propOffset == -1) {
+  if (propOffset == -1 || (mia & Unset)) {
     emitPropGeneric();
   } else {
     emitPropSpecialized(mia, propOffset);
@@ -764,6 +762,11 @@ HELPER_TABLE(PROP)
 void HhbcTranslator::VectorTranslator::emitPropGeneric() {
   MemberCode mCode = m_ni.immVecM[m_mInd];
   MInstrAttr mia = MInstrAttr(m_mii.getAttr(mCode) & MIA_intermediate_prop);
+
+  if ((mia & Unset) && m_base->getType().strip().not(Type::Obj)) {
+    m_base = m_tb.genPtrToInitNull();
+    return;
+  }
 
   typedef TypedValue* (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
   SSATmp* key = getInput(m_iInd);
@@ -973,9 +976,8 @@ void HhbcTranslator::VectorTranslator::emitElem() {
   const bool define = mia & Define;
   assert(!(define && unset));
   if (unset) {
-    ConstData cdata(&null_variant);
-    SSATmp* uninit = m_tb.gen(DefConst, Type::PtrToUninit, &cdata);
-    Type baseType = m_base->getType().deref().unbox();
+    SSATmp* uninit = m_tb.genPtrToUninit();
+    Type baseType = m_base->getType().strip();
     if (baseType.subtypeOf(Type::Str)) {
       m_ht.spillStack();
       m_tb.gen(
@@ -1451,9 +1453,47 @@ void HhbcTranslator::VectorTranslator::emitBindProp() {
 }
 #undef HELPER_TABLE
 
-void HhbcTranslator::VectorTranslator::emitUnsetProp() {
-  SPUNT(__func__);
+template <KeyType keyType, bool unboxKey, bool isObj>
+static inline void unsetPropImpl(Class* ctx, TypedValue* base,
+                                 TypedValue keyVal) {
+  TypedValue* key = keyPtr<keyType>(keyVal);
+  key = unbox<keyType, unboxKey>(key);
+  VM::UnsetProp<isObj, keyType>(ctx, base, key);
 }
+
+#define HELPER_TABLE(m)                    \
+  /* name           key unboxKey isObj */  \
+  m(unsetPropC,   AnyKey, false, false)    \
+  m(unsetPropCO,  AnyKey, false,  true)    \
+  m(unsetPropL,   AnyKey,  true, false)    \
+  m(unsetPropLO,  AnyKey,  true,  true)    \
+  m(unsetPropLS,  StrKey,  true, false)    \
+  m(unsetPropLSO, StrKey,  true,  true)    \
+  m(unsetPropS,   StrKey, false, false)    \
+  m(unsetPropSO,  StrKey, false,  true)
+
+#define PROP(nm, ...)                                                   \
+  static void nm(Class* ctx, TypedValue* base, TypedValue key) {        \
+    unsetPropImpl<__VA_ARGS__>(ctx, base, key);                         \
+  }
+namespace VectorHelpers {
+HELPER_TABLE(PROP)
+}
+#undef PROP
+
+void HhbcTranslator::VectorTranslator::emitUnsetProp() {
+  SSATmp* key = getInput(m_iInd);
+
+  if (m_base->getType().strip().not(Type::Obj)) {
+    // Noop
+    return;
+  }
+
+  typedef void (*OpFunc)(Class*, TypedValue*, TypedValue);
+  BUILD_OPTAB(getKeyTypeS(key), key->isBoxed(), m_base->isA(Type::Obj));
+  m_tb.gen(UnsetProp, cns((TCA)opFunc), CTX(), m_base, key);
+}
+#undef HELPER_TABLE
 
 void HhbcTranslator::VectorTranslator::checkStrictlyInteger(
   SSATmp*& key, KeyType& keyType, bool& checkForInt) {
@@ -2024,7 +2064,7 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::VectorTranslator::emitUnsetElem() {
   SSATmp* key = getInput(m_iInd);
 
-  Type baseType = m_base->getType().deref().unbox();
+  Type baseType = m_base->getType().strip();
   if (baseType.subtypeOf(Type::Str)) {
     m_ht.spillStack();
     m_tb.gen(RaiseError,

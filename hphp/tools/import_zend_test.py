@@ -5,16 +5,11 @@ Copies all the Zend tests to test/zend/bad, runs them in interp mode,
 then copies the good ones to test/zend/good
 """
 
+import argparse
 import os
 import re
 import subprocess
 import sys
-
-if len(sys.argv) == 1:
-    print "Usage: \n\n  %s /tmp/php-5.4.11/" % sys.argv[0]
-    sys.exit(0)
-
-test_files = []
 
 bad_tests = (
     'unset_cv05.php', 
@@ -24,6 +19,22 @@ bad_tests = (
 errors = (
     ('([^\s]+)\(\) expects exactly (\d+) parameters, \d+ given', r'Missing argument \2 for \1()'),
 )
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-z",
+    "--zend_path",
+    type=str,
+    help="zend path to import tests from."
+)
+parser.add_argument(
+    "-n",
+    "--dont_run",
+    action='store_true',
+    help="don't run run_verify.sh. Just parse the .diff files."
+)
+args = parser.parse_args()
+
 
 def split(pattern, str):
     return re.split(r'\n\s*--'+pattern+'--\s*\n', str, 1)
@@ -54,8 +65,6 @@ def walk(filename):
     dest_dir = os.path.join(cur_dir, '../test/zend/bad')
     full_dest_filename = os.path.join(dest_dir, dest_filename)
 
-    test_files.append(full_dest_filename)
-
     if 'bug60771.php' in full_dest_filename:
         test = test.replace("?>", "unlink('test.php');\n?>")
 
@@ -76,16 +85,17 @@ def walk(filename):
     file(full_dest_filename, 'w').write(test)
     file(full_dest_filename+'.exp', 'w').write(exp)
 
-path = os.path.join(sys.argv[1], 'Zend/tests/')
-for root, dirs, files in os.walk(path):
-    for filename in files:
-        if not '.phpt' in filename:
-            continue
-        walk(os.path.join(root, filename))
+if args.zend_path:
+    path = os.path.join(args.zend_path, 'Zend/tests/')
+    for root, dirs, files in os.walk(path):
+        for filename in files:
+            if not '.phpt' in filename:
+                continue
+            walk(os.path.join(root, filename))
 
-env = os.environ
-env.update({'VQ':'interp', 'TEST_PATH':'zend/bad'})
-if not os.environ.has_key('NO_TEST'):
+if not args.dont_run:
+    env = os.environ
+    env.update({'VQ':'interp', 'TEST_PATH':'zend/bad'})
     proc = subprocess.Popen(['tools/run_verify.sh'], env=env)
     proc.wait()
 
@@ -152,17 +162,21 @@ def isOkDiff(original_name):
 
     return True
 
-for filename in set(test_files):
-    good_file = filename.replace('bad', 'good', 1)
-    if isOkDiff(filename):
-        os.rename(filename, good_file)
-        file(good_file+'.exp', 'w').write(
-            file(filename+'.out').read().replace('/bad', '/good')
-        )
-        os.unlink(filename+'.exp')
-
-    else:
-        if not os.path.exists(good_file):
+for root, dirs, files in os.walk('test/zend/bad'):
+    for filename in files:
+        if not filename.endswith('.php'):
             continue
-        os.unlink(good_file)
-        os.unlink(good_file+'.exp')
+        filename = os.path.join(root, filename)
+        good_file = filename.replace('bad', 'good', 1)
+        if isOkDiff(filename):
+            os.rename(filename, good_file)
+            file(good_file+'.exp', 'w').write(
+                file(filename+'.out').read().replace('/bad', '/good')
+            )
+            os.unlink(filename+'.exp')
+
+        else:
+            if not os.path.exists(good_file):
+                continue
+            os.unlink(good_file)
+            os.unlink(good_file+'.exp')

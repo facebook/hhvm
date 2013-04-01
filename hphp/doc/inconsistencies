@@ -47,10 +47,13 @@ behavior may differ from Zend PHP.
 
 (1) Exceptions thrown from destructors
 
-Under HipHop VM, exceptions and fatals thrown from destructors will be
+Under HipHop VM, PHP exceptions thrown from destructors will be
 swallowed while logging an error. Effectively, there is a try/catch enclosing
 the body of the __destruct method. These exceptions are catchable under Zend
 PHP outside of the __destruct method.
+
+Fatals thrown from destructors will log an error, and prevent further PHP code
+from executing as the fatal propagates. This includes other __destruct methods.
 
 (2) __destruct behavior at end of request
 
@@ -149,3 +152,5 @@ Example unsupported case: phpt...bug24403
 
 Under HipHop VM, this is not allowed or not working at present.
 
+(8) All fatals prevent further PHP code from executing, including __destruct
+methods. N.B.: exit() is a fatal.

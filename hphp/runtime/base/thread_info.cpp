@@ -50,7 +50,7 @@ ThreadInfo::ThreadInfo()
   m_mm = MemoryManager::TheMemoryManager();
 
   m_profiler = nullptr;
-  m_pendingException = false;
+  m_pendingException = nullptr;
   m_coverage = new CodeCoverage();
 
   VM::Transl::TargetCache::threadInit();
@@ -104,11 +104,15 @@ void ThreadInfo::onSessionInit() {
 }
 
 void ThreadInfo::clearPendingException() {
-  if (m_pendingException) {
-    m_pendingException = false;
-    m_exceptionMsg.clear();
-    m_exceptionStack.reset();
-  }
+  m_reqInjectionData.clearPendingExceptionFlag();
+  if (m_pendingException != nullptr) delete m_pendingException;
+  m_pendingException = nullptr;
+}
+
+void ThreadInfo::setPendingException(Exception* e) {
+  m_reqInjectionData.setPendingExceptionFlag();
+  if (m_pendingException != nullptr) delete m_pendingException;
+  m_pendingException = e;
 }
 
 void ThreadInfo::onSessionExit() {
@@ -154,6 +158,16 @@ void RequestInjectionData::setEventHookFlag() {
 void RequestInjectionData::clearEventHookFlag() {
   __sync_fetch_and_and(getConditionFlags(),
                        ~RequestInjectionData::EventHookFlag);
+}
+
+void RequestInjectionData::setPendingExceptionFlag() {
+  __sync_fetch_and_or(getConditionFlags(),
+                      RequestInjectionData::PendingExceptionFlag);
+}
+
+void RequestInjectionData::clearPendingExceptionFlag() {
+  __sync_fetch_and_and(getConditionFlags(),
+                       ~RequestInjectionData::PendingExceptionFlag);
 }
 
 ssize_t RequestInjectionData::fetchAndClearFlags() {

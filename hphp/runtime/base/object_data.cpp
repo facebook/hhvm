@@ -72,6 +72,14 @@ void ObjectData::destruct() {
   if (!noDestruct()) {
     setNoDestruct();
     if (auto meth = m_cls->getDtor()) {
+      // We don't run PHP destructors while we're unwinding for a C++ exception.
+      // We want to minimize the PHP code we run while propagating fatals, so
+      // we do this check here on a very common path, in the relativley slower
+      // case.
+      auto& faults = g_vmContext->m_faults;
+      if (!faults.empty()) {
+        if (faults.back().m_faultType == HPHP::VM::Fault::CppException) return;
+      }
       // We raise the refcount around the call to __destruct(). This is to
       // prevent the refcount from going to zero when the destructor returns.
       CountableHelper h(this);
@@ -351,7 +359,7 @@ void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
 
   // Iterate over declared properties and insert {mangled name --> prop} pairs.
   const VM::Class* cls = m_cls;
-  auto thiz = static_cast<const VM::Instance*>(this); 
+  auto thiz = static_cast<const VM::Instance*>(this);
   do {
     thiz->getProps(cls, pubOnly, cls->m_preClass.get(), props, inserted);
     const std::vector<VM::ClassPtr> &usedTraits = cls->m_usedTraits;

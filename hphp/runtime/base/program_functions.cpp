@@ -401,10 +401,12 @@ static bool hphp_chdir_file(const string filename) {
 
 void handle_destructor_exception(const char* situation) {
   string errorMsg;
+
   try {
     throw;
   } catch (ExitException &e) {
-    // ExitException is fine
+    // ExitException is fine, no need to show a warning.
+    ThreadInfo::s_threadInfo->setPendingException(e.clone());
     return;
   } catch (Object &e) {
     // For user exceptions, invoke the user exception handler
@@ -416,6 +418,7 @@ void handle_destructor_exception(const char* situation) {
       errorMsg += "(unable to call toString())";
     }
   } catch (Exception &e) {
+    ThreadInfo::s_threadInfo->setPendingException(e.clone());
     errorMsg = situation;
     errorMsg += " raised a fatal error: ";
     errorMsg += e.what();

@@ -43,9 +43,6 @@ void EventHook::Disable() {
 void EventHook::CheckSurprise() {
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   check_request_surprise(info);
-  if (info->m_pendingException) {
-    throw_pending_exception(info);
-  }
 }
 
 class ExecutingSetprofileCallbackGuard {
@@ -128,13 +125,21 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
 }
 
 void EventHook::onFunctionExit(const ActRec* ar) {
-  RunUserProfiler(ar, ProfileExit);
 #ifdef HOTPROFILER
   Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
   if (profiler != nullptr) {
     end_profiler_frame(profiler);
   }
 #endif
+
+  // If we have a pending exception, then we're in the process of unwinding
+  // for that exception. We avoid running more PHP code (the user profiler) and
+  // also avoid raising more exceptions for surprises (including the pending
+  // exception).
+  if (ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
+    RunUserProfiler(ar, ProfileExit);
+    CheckSurprise();
+  }
 }
 
 } // namespace VM

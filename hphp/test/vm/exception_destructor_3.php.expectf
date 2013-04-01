@@ -1,0 +1,7 @@
+Calling main()
+main() starting
+Calling foo()
+Calling bar()
+In ThrowDestruct2::__destruct()
+HipHop Warning: Destructor threw an object exception: exception 'Ex2' with message 'Exception leaked out of ThrowDestruct2::__destruct()' in %a on line 37
+After bar()

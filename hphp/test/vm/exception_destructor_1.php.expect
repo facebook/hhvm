@@ -1,0 +1,5 @@
+Calling main()
+main() starting
+Calling foo()
+Calling bar()
+In ExitDestruct::__destruct()

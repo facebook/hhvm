@@ -1,0 +1,7 @@
+Calling main()
+main() starting
+Calling foo()
+Calling bar()
+Throwing in bar()
+In ExitDestruct::__destruct()
+HipHop Fatal error: Uncaught exception 'Exception' with message 'Exception from bar()' in %a

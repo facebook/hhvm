@@ -371,14 +371,15 @@ namespace VM {
 
 class RequestInjectionData {
 public:
-  static const ssize_t MemExceededFlag = 1 << 0;
-  static const ssize_t TimedOutFlag    = 1 << 1;
-  static const ssize_t SignaledFlag    = 1 << 2;
-  static const ssize_t EventHookFlag   = 1 << 3;
-  static const ssize_t LastFlag        = EventHookFlag;
+  static const ssize_t MemExceededFlag      = 1 << 0;
+  static const ssize_t TimedOutFlag         = 1 << 1;
+  static const ssize_t SignaledFlag         = 1 << 2;
+  static const ssize_t EventHookFlag        = 1 << 3;
+  static const ssize_t PendingExceptionFlag = 1 << 4;
+  static const ssize_t LastFlag             = PendingExceptionFlag;
 
   RequestInjectionData()
-    : conditionFlags(0), surprisePage(nullptr), started(0), timeoutSeconds(-1),
+    : cflagsPtr(nullptr), surprisePage(nullptr), started(0), timeoutSeconds(-1),
       debugger(false), debuggerIdle(0), dummySandbox(false),
       debuggerIntr(false), coverage(false) {
   }
@@ -388,17 +389,11 @@ public:
     return cflagsPtr;
   }
 
-  union {
-    volatile ssize_t conditionFlags; // condition flags can indicate if a
-                                     // thread has exceeded the memory limit,
-                                     // timed out, or received a signal
-    ssize_t* cflagsPtr;              // under hhvm, this will point to the real
-                                     // condition flags, somewhere in the
-                                     // thread's targetcache
-  };
-  void *surprisePage;              // beginning address of page to
-                                   // protect for error conditions
-  Mutex surpriseLock;              // mutex controlling access to surprisePage
+  ssize_t* cflagsPtr;  // this points to the real condition flags,
+                       // somewhere in the thread's targetcache
+  void *surprisePage;  // beginning address of page to
+                       // protect for error conditions
+  Mutex surpriseLock;  // mutex controlling access to surprisePage
 
   time_t started;      // when a request was started
   int timeoutSeconds;  // how many seconds to timeout
@@ -417,6 +412,8 @@ public:
   void setSignaledFlag();
   void setEventHookFlag();
   void clearEventHookFlag();
+  void setPendingExceptionFlag();
+  void clearPendingExceptionFlag();
   ssize_t fetchAndClearFlags();
 
   void onSessionInit();
@@ -480,15 +477,16 @@ public:
 
   GlobalVariables *m_globals;
   Executing m_executing;
-  bool m_pendingException;
-  ArrayHolder m_exceptionStack;
-  std::string m_exceptionMsg;
+
+  // A C++ exception which will be thrown by the next surprise check.
+  Exception* m_pendingException;
 
   ThreadInfo();
   ~ThreadInfo();
 
   void onSessionInit();
   void onSessionExit();
+  void setPendingException(Exception* e);
   void clearPendingException();
   ObjectAllocatorBase* instanceSizeAllocator(size_t size) {
     int index = object_alloc_size_to_index(size);
@@ -527,27 +525,7 @@ inline void check_recursion(ThreadInfo *&info) {
 }
 
 // implemented in runtime/base/builtin_functions.cpp
-extern void pause_forever() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 extern void check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
-
-extern bool SegFaulting;
-
-inline void check_request_timeout(ThreadInfo *info) {
-  if (SegFaulting) pause_forever();
-  info->m_mm->refreshStats();
-  if (info->m_reqInjectionData.conditionFlags) check_request_surprise(info);
-}
-
-inline void check_request_timeout_nomemcheck(ThreadInfo *info) {
-  if (SegFaulting) pause_forever();
-  if (info->m_reqInjectionData.conditionFlags) check_request_surprise(info);
-}
-
-void throw_pending_exception(ThreadInfo *info) ATTRIBUTE_COLD
-  ATTRIBUTE_NORETURN;
-
-void check_request_timeout_info(ThreadInfo *info, int lc);
-void check_request_timeout_ex(int lc);
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p, const char *symbol);

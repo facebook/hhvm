@@ -38,10 +38,6 @@ class EventHook {
     PseudoMain,
     Eval,
   };
-  enum {
-    ProfileEnter,
-    ProfileExit,
-  };
 
   static void Enable();
   static void Disable();
@@ -65,6 +61,11 @@ class EventHook {
   DECLARE_HOOK(FunctionExit, (const ActRec* ar), (ar));
 
 private:
+  enum {
+    ProfileEnter,
+    ProfileExit,
+  };
+
   static void RunUserProfiler(const ActRec* ar, int mode);
 };
 

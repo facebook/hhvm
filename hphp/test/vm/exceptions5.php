@@ -7,6 +7,8 @@ class D {
   public function yar($y) {
     $x = $y;
   }
+  // C++ exceptions, like stack overflow, now prevent further php code from
+  // running. So this destructor should not run.
   public function __destruct() {
     g($this);
   }

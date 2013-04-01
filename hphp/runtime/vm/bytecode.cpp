@@ -946,7 +946,11 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
           pc = (uchar*)(func->unit()->entry() + eh->m_fault);
           return UnwindResumeVM;
         case EHEnt::EHType_Catch:
-          if (fault.m_faultType == Fault::UserException) {
+          // Note: we skip catch clauses if we have a pending C++ exception
+          // as part of our efforts to avoid running more PHP code in the
+          // face of such exceptions.
+          if ((fault.m_faultType == Fault::UserException) &&
+              (ThreadInfo::s_threadInfo->m_pendingException == nullptr)) {
             ObjectData* obj = fault.m_userException;
             for (auto& idOff : eh->m_catches) {
               auto handler = func->unit()->at(idOff.second);

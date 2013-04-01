@@ -545,22 +545,21 @@ void check_request_surprise(ThreadInfo *info) {
   do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
   do_signaled = (flags & RequestInjectionData::SignaledFlag);
 
-  if (do_timedout && !info->m_pendingException) {
-    generate_request_timeout_exception();
+  // Start with any pending exception that might be on the thread.
+  Exception* pendingException = info->m_pendingException;
+  info->m_pendingException = nullptr;
+
+  if (do_timedout && !pendingException) {
+    pendingException = generate_request_timeout_exception();
   }
-  if (do_memExceeded && !info->m_pendingException) {
-    generate_memory_exceeded_exception();
+  if (do_memExceeded && !pendingException) {
+    pendingException = generate_memory_exceeded_exception();
   }
   if (do_signaled) f_pcntl_signal_dispatch();
-}
 
-void throw_pending_exception(ThreadInfo *info) {
-  assert(info->m_pendingException);
-  info->m_pendingException = false;
-  FatalErrorException e(info->m_exceptionMsg, info->m_exceptionStack.get());
-  info->m_exceptionMsg.clear();
-  info->m_exceptionStack.reset();
-  throw e;
+  if (pendingException) {
+    pendingException->throwException();
+  }
 }
 
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
@@ -643,22 +642,6 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
   return uninit_null();
 }
 
-void check_request_timeout_info(ThreadInfo *info, int lc) {
-  check_request_timeout(info);
-  if (info->m_pendingException) {
-    throw_pending_exception(info);
-  }
-  if (RuntimeOption::MaxLoopCount > 0 && lc > RuntimeOption::MaxLoopCount) {
-    throw FatalErrorException(0, "loop iterated over %d times",
-        RuntimeOption::MaxLoopCount);
-  }
-}
-
-void check_request_timeout_ex(int lc) {
-  ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
-  check_request_timeout_info(info, lc);
-}
-
 void throw_infinite_recursion_exception() {
   if (!RuntimeOption::NoInfiniteRecursionDetection) {
     // Reset profiler otherwise it might recurse further causing segfault
@@ -667,7 +650,8 @@ void throw_infinite_recursion_exception() {
     throw UncatchableException("infinite recursion detected");
   }
 }
-void generate_request_timeout_exception() {
+Exception* generate_request_timeout_exception() {
+  Exception* ret = nullptr;
   ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
   RequestInjectionData &data = info->m_reqInjectionData;
   if (data.timeoutSeconds > 0) {
@@ -676,27 +660,26 @@ void generate_request_timeout_exception() {
     // right before a new requets resets "started". In this case, we flag
     // "timedout" back to "false".
     if (time(0) - data.started >= data.timeoutSeconds) {
-      info->m_pendingException = true;
-      info->m_exceptionMsg = "entire web request took longer than ";
-      info->m_exceptionMsg +=
-        boost::lexical_cast<std::string>(data.timeoutSeconds);
-      info->m_exceptionMsg += " seconds and timed out";
+      std::string exceptionMsg = "entire web request took longer than ";
+      exceptionMsg += boost::lexical_cast<std::string>(data.timeoutSeconds);
+      exceptionMsg += " seconds and timed out";
+      ArrayHolder exceptionStack;
       if (RuntimeOption::InjectedStackTrace) {
-        info->m_exceptionStack =
-          g_vmContext->debugBacktrace(false, true, true).get();
+        exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
       }
+      ret = new FatalErrorException(exceptionMsg, exceptionStack.get());
     }
   }
+  return ret;
 }
 
-void generate_memory_exceeded_exception() {
-  ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
-  info->m_pendingException = true;
-  info->m_exceptionMsg = "request has exceeded memory limit";
+Exception* generate_memory_exceeded_exception() {
+  ArrayHolder exceptionStack;
   if (RuntimeOption::InjectedStackTrace) {
-    info->m_exceptionStack =
-      g_vmContext->debugBacktrace(false, true, true).get();
+    exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
   }
+  return new FatalErrorException(
+    "request has exceeded memory limit", exceptionStack.get());
 }
 
 void throw_call_non_object() {

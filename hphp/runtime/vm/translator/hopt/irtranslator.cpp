@@ -1008,7 +1008,7 @@ void TranslatorX64::irTranslateFPushCtorD(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateThis(const Tracelet &t,
-                             const NormalizedInstruction &i) {
+                               const NormalizedInstruction &i) {
   assert(i.outStack && !i.outLocal);
   assert(curFunc()->isPseudoMain() || curFunc()->cls() ||
          curFunc()->isClosureBody());

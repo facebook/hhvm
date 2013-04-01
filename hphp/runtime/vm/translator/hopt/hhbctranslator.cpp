@@ -653,10 +653,6 @@ void HhbcTranslator::emitIterFree(uint32_t iterId) {
 
 void HhbcTranslator::emitCreateCont(bool getArgs,
                                     Id funNameStrId) {
-  emitInterpOneOrPunt(Type::Cell);
-  return;
-  // Task #2036200: Fix and re-enable this
-
   /* Runtime-determined slow path punts to TranslatorX64 for now */
   m_tb->genExitOnVarEnv(getExitSlowTrace());
 
@@ -666,7 +662,7 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
   int origLocals = origFunc->numLocals();
   int genLocals = genFunc->numLocals();
 
-  TCA helper = getCurFunc()->isNonClosureMethod() ?
+  TCA helper = origFunc->isMethod() ?
     (TCA)&VMExecutionContext::createContinuation<true> :
     (TCA)&VMExecutionContext::createContinuation<false>;
   SSATmp* cont = m_tb->gen(CreateCont, cns(helper), m_tb->getFP(),
@@ -682,7 +678,7 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
       (origFunc->lookupVarId(thisStr) == kInvalidId);
     SSATmp* locals = m_tb->gen(LdContLocalsPtr, cont);
     for (int i = 0; i < origLocals; ++i) {
-      SSATmp* loc = m_tb->genIncRef(m_tb->genLdLoc(i));
+      SSATmp* loc = m_tb->genIncRef(m_tb->genLdAssertedLoc(i, Type::Gen));
       m_tb->genStMem(locals, cellsToBytes(genLocals - params[i] - 1), loc,
                      true);
     }

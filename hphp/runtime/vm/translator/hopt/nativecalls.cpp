@@ -101,10 +101,10 @@ static CallMap s_callMap({
 
     /* Continuation support helpers */
     {CreateCont,         {FSSA, 0}, DSSA, SNone,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+                           {{SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
     {FillContLocals, (TCA)&VMExecutionContext::fillContinuationVars,
               DNone, SNone,
-              {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+              {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 
     /* VectorTranslator helpers */
     {BaseG,    {FSSA, 0}, DSSA, SSync, {{TV, 1}, {SSA, 2}}},

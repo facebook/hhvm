@@ -1,2 +1,0 @@
-Strict Standards: Declaration of test3::foo() should be compatible with test::foo() in hphp/test/zend/bad/objects_002.php on line %d
-Done

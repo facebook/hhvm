@@ -16,6 +16,11 @@ if len(sys.argv) == 1:
 
 test_files = []
 
+bad_tests = (
+    'unset_cv05.php', 
+    'unset_cv06.php',
+)
+
 def split(pattern, str):
     return re.split(r'\n\s*--'+pattern+'--\s*\n', str, 1)
 
@@ -71,25 +76,72 @@ for root, dirs, files in os.walk(path):
 
 env = os.environ
 env.update({'VQ':'interp', 'TEST_PATH':'zend/bad'})
-proc = subprocess.Popen(['tools/run_verify.sh'], env=env)
-proc.wait()
+if not os.environ.has_key('NO_TEST'):
+    proc = subprocess.Popen(['tools/run_verify.sh'], env=env)
+    proc.wait()
 
 def isOkDiff(original_name):
+    for test in bad_tests:
+        if test in original_name:
+            return False
+
     filename = original_name + '.diff'
     # no diff file or is empty
     if not os.path.exists(filename) or os.stat(filename)[6] == 0:
         return True
 
     lines = file(filename).read()
-    # kill header
-    lines = re.sub(r'---.*', '', lines)
-    lines = re.sub(r'\+\+\+.*', '', lines)
     # line 123 -> line %d
     lines = re.sub(r'line \d+\n', 'line %d\n', lines)
     # kill identical lines
-    lines = re.sub(r'-(.*)\n\+\1\n', '', lines)
-    
-    return re.search(r'\n(\+|\-)', lines) is None
+    lines = re.sub(r'-(.*)\n\+\1\n', '', lines, re.DOTALL)
+
+    # kill header
+    lines = re.sub(r'---.*', '', lines)
+    lines = re.sub(r'\+\+\+.*', '', lines)
+
+    lines = lines.split('\n')
+    matches = []
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        if line[0] == '-':
+            line = '+' + line[1:]
+            line = line.replace('%unicode|string%', 'string')
+            matches.append(line)
+        elif line[0] == '+':
+            if not matches:
+                return False
+            match = matches.pop(0)
+
+            # emulate run-tests.php I guess...
+            i,j = 0,0
+            mode = None
+            while j < len(line) and i < len(match):
+                if match[i] == '%':
+                    mode = match[i+1]
+                    i += 2
+                elif mode is None:
+                    if match[i] != line[j]:
+                        return False
+                    i += 1
+                elif mode == 's':
+                    if line[j] == ' ':
+                        mode = None
+                elif mode == 'd':
+                    if not line[j].isdigit():
+                        mode = None
+                elif mode == 'a':
+                    pass
+                else:
+                    raise Exception('what is %' + mode + '\n' + line)
+                j += 1
+            
+            if i < len(match) - 1:
+                return False
+
+    return True
 
 for filename in set(test_files):
     good_file = filename.replace('bad', 'good', 1)

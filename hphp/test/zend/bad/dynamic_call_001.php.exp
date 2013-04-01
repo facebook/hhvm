@@ -1,1 +1,0 @@
-HipHop Fatal error: Non-static method foo::foo() cannot be called statically in hphp/test/zend/bad/dynamic_call_001.php on line %d

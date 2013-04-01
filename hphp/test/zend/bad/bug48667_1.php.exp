@@ -1,1 +1,0 @@
-HipHop Fatal error: Class A cannot implement both IteratorAggregate and Iterator at the same time in hphp/test/zend/bad/bug48667_1.php on line %d

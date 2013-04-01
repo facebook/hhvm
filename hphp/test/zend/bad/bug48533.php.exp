@@ -1,8 +1,0 @@
-%unicode|string%(9) "__call::a"
-int(2)
-%unicode|string%(9) "__call::c"
-%unicode|string%(15) "__callStatic::a"
-
-Strict Standards: Non-static method foo::b() should not be called statically in hphp/test/zend/bad/bug48533.php on line %d
-int(2)
-%unicode|string%(15) "__callStatic::c"

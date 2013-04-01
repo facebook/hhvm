@@ -1,0 +1,6 @@
+string(9) "__call::a"
+int(2)
+string(9) "__call::c"
+string(15) "__callStatic::a"
+int(2)
+string(15) "__callStatic::c"

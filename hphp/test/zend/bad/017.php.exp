@@ -1,4 +1,4 @@
-HipHop Warning: get_resource_type() expects exactly 1 parameter, 0 given in hphp/test/zend/bad/017.php on line %d
+HipHop Warning: Missing argument 1 for get_resource_type() in hphp/test/zend/bad/017.php on line %d
 NULL
 HipHop Warning: get_resource_type() expects parameter 1 to be resource, string given in hphp/test/zend/bad/017.php on line %d
 NULL
@@ -23,7 +23,7 @@ HipHop Warning: Missing argument 0 for get_declared_interfaces() in hphp/test/ze
 NULL
 string(5) "array"
 int(%d)
-HipHop Warning: get_extension_funcs() expects exactly 1 parameter, 0 given in hphp/test/zend/bad/017.php on line %d
+HipHop Warning: Missing argument 1 for get_extension_funcs() in hphp/test/zend/bad/017.php on line %d
 NULL
 bool(false)
 string(5) "array"

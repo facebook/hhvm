@@ -1,1 +1,0 @@
-HipHop Warning: Variable passed to each() is not an array or object in hphp/test/zend/bad/each_001.php on line %d

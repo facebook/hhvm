@@ -21,6 +21,10 @@ bad_tests = (
     'unset_cv06.php',
 )
 
+errors = (
+    ('([^\s]+)\(\) expects exactly (\d+) parameters, \d+ given', r'Missing argument \2 for \1()'),
+)
+
 def split(pattern, str):
     return re.split(r'\n\s*--'+pattern+'--\s*\n', str, 1)
 
@@ -65,6 +69,9 @@ def walk(filename):
     exp = exp.replace('Fatal error:', 'HipHop Fatal error:')
     exp = exp.replace('Warning:', 'HipHop Warning:')
     exp = exp.replace('Notice:', 'HipHop Notice:')
+
+    for error in errors:
+        exp = re.sub(error[0], error[1], exp)
 
     file(full_dest_filename, 'w').write(test)
     file(full_dest_filename+'.exp', 'w').write(exp)

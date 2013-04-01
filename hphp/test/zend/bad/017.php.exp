@@ -15,11 +15,11 @@ NULL
 string(5) "array"
 string(5) "array"
 int(%d)
-HipHop Warning: get_defined_functions() expects exactly 0 parameters, 1 given in hphp/test/zend/bad/017.php on line %d
+HipHop Warning: Missing argument 0 for get_defined_functions() in hphp/test/zend/bad/017.php on line %d
 NULL
 string(5) "array"
 int(%d)
-HipHop Warning: get_declared_interfaces() expects exactly 0 parameters, 1 given in hphp/test/zend/bad/017.php on line %d
+HipHop Warning: Missing argument 0 for get_declared_interfaces() in hphp/test/zend/bad/017.php on line %d
 NULL
 string(5) "array"
 int(%d)

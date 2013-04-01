@@ -1,0 +1,10 @@
+HipHop Warning: Missing argument 2 for strcasecmp() in hphp/test/zend/good/005.php on line 3
+NULL
+int(0)
+int(-3)
+int(-1)
+int(0)
+int(0)
+int(0)
+int(0)
+Done

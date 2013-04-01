@@ -1353,7 +1353,11 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
     SSATmp* objOrCls;
     if (!mightNotBeStatic) { // definitely static
       // static function: store base class into the m_cls/m_this slot
-      objOrCls = m_tb->genDefConst(baseClass);
+      if (TargetCache::isPersistentHandle(baseClass->m_cachedOffset)) {
+        objOrCls = m_tb->genDefConst(baseClass);
+      } else {
+        objOrCls = m_tb->gen(LdClsCached, m_tb->genDefConst(className));
+      }
     } else if (m_tb->isThisAvailable()) {
       // 'this' pointer is available, so use it.
       assert(getCurClass());

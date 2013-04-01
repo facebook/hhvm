@@ -52,8 +52,10 @@ def walk(filename):
 
     test_files.append(full_dest_filename)
 
-    if '%s' in exp:
-        exp = exp.replace('in %s on', 'in %s/%s on' % ('hphp/test/zend/bad', dest_filename))
+    if 'bug60771.php' in full_dest_filename:
+        test = test.replace("?>", "unlink('test.php');\n?>")
+
+    exp = exp.replace('in %s on', 'in %s/%s on' % ('hphp/test/zend/bad', dest_filename))
 
     # PHP puts a newline in that we don't
     exp = exp.replace('\n\nFatal error:', '\nFatal error:')

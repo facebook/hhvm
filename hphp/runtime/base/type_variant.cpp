@@ -31,7 +31,6 @@
 #include <system/lib/systemlib.h>
 #include <runtime/ext/ext_collections.h>
 #include <util/util.h>
-
 #include <util/logger.h>
 
 namespace HPHP {

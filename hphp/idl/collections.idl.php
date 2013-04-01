@@ -88,7 +88,7 @@ CPP
 BeginClass(
   array(
     'name'   => "Vector",
-    'ifaces' => array('KeyedIterable', 'Countable'),
+    'ifaces' => array('MutableVector'),
     'desc'   => "An ordered collection where values are keyed using integers ".
                 "0 thru n-1 in order.",
     'flags'  =>  IsFinal | HasDocComment,
@@ -729,7 +729,7 @@ EndClass(
 BeginClass(
   array(
     'name'   => "Map",
-    'ifaces' => array('KeyedIterable', 'Countable'),
+    'ifaces' => array('MutableMap'),
     'desc'   => "An unordered dictionary-style collection.",
     'flags'  =>  IsFinal | HasDocComment,
   ));
@@ -1330,7 +1330,7 @@ EndClass(
 BeginClass(
   array(
     'name'   => "StableMap",
-    'ifaces' => array('KeyedIterable', 'Countable'),
+    'ifaces' => array('MutableMap'),
     'desc'   => "An ordered dictionary-style collection.",
     'flags'  =>  IsFinal | HasDocComment,
   ));
@@ -1933,7 +1933,7 @@ EndClass(
 BeginClass(
   array(
     'name'   => "Tuple",
-    'ifaces' => array('KeyedIterable', 'Countable'),
+    'ifaces' => array('ConstVector'),
     'desc'   => "An ordered fixed-sized container.",
     'flags'  =>  IsFinal | HasDocComment,
     'footer' => <<<EOT

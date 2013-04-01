@@ -2287,6 +2287,81 @@ class MapItemsIterable implements Iterable {
   }
 }
 
+interface ConstCollection extends Countable {
+  public function isEmpty();
+  public function count();
+  public function items();
+}
+
+interface OutputCollection {
+  public function add($e);
+  public function addAll($iterable);
+}
+
+interface Collection extends ConstCollection,
+                             OutputCollection {
+  public function clear();
+}
+
+interface ConstSetAccess {
+  public function contains($m);
+}
+
+interface SetAccess extends ConstSetAccess {
+  public function remove($m);
+}
+
+interface ConstIndexAccess {
+  public function at($k);
+  public function get($k);
+  public function containsKey($k);
+}
+
+interface IndexAccess extends ConstIndexAccess {
+  public function set($k,$v);
+  public function setAll($iterable);
+  public function removeKey($k);
+}
+
+interface ConstMapAccess extends ConstSetAccess,
+                                 ConstIndexAccess {
+}
+
+interface MapAccess extends ConstMapAccess,
+                            SetAccess,
+                            IndexAccess {
+}
+
+interface ConstVector extends ConstCollection,
+                              ConstIndexAccess,
+                              KeyedIterable {
+}
+
+interface MutableVector extends ConstVector,
+                                Collection,
+                                IndexAccess {
+}
+
+interface ConstMap extends ConstCollection,
+                           ConstMapAccess,
+                           KeyedIterable {
+}
+
+interface MutableMap extends ConstMap,
+                             Collection,
+                             MapAccess {
+}
+
+interface ConstSet extends ConstCollection,
+                           ConstSetAccess,
+                           Iterable {
+}
+
+interface MutableSet extends ConstSet,
+                             Collection,
+                             SetAccess {
+}
+
 
 interface DebuggerCommand {
   /**

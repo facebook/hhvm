@@ -27,8 +27,6 @@
 #include <runtime/ext/ext_collections.h>
 #include <runtime/vm/class.h>
 
-#include <system/lib/systemlib.h>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // statics

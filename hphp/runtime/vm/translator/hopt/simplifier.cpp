@@ -154,47 +154,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case SpillStack:   return simplifySpillStack(inst);
   case Call:         return simplifyCall(inst);
 
-  case Jmp_:
-  case JmpInstanceOf:
-  case JmpNInstanceOf:
-  case JmpInstanceOfBitmask:
-  case JmpNInstanceOfBitmask:
-    return nullptr;
-
-  case LdObjClass:
-  case LdCachedClass:
-  case DecRefLoc:
-  case DecRefStack:
-  case GuardLoc:
-  case GuardStk:
-  case LdThis:
-  case LdLoc:
-  case LdMem:
-  case LdRef:
-  case LdStack:
-  case LdPropAddr:
-  case LdClsCns:
-  case LdObjMethod:
-  case RetVal:
-  case FreeActRec:
-  case LdClsMethodCache:
-  case LdClsMethodFCache:
-  case LdClsMethod:
-  case ExitTrace:
-  case ExitSlow:
-  case ExitGuardFailure:
-  case StMem:
-  case StMemNT:
-  case StLoc:
-  case DefFP:
-  case DefSP:
-  case LdFunc:
-  case LdFixedFunc:
-  case Box:
-  case DefLabel:
-  case Marker:
-    return nullptr;
-
   default:
     unimplementedSimplify(inst->getOpcode());
     return nullptr;
@@ -346,8 +305,8 @@ SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
   if (clsName->isConst()) {
     const Class* cls = Unit::lookupClass(clsName->getValStr());
     if (cls) {
-      if (RuntimeOption::RepoAuthoritative && (cls->attrs() & AttrUnique)) {
-        // the class is unique
+      if (TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
+        // the class is always defined
         return m_tb->genDefConst(cls);
       }
       const Class* ctx = inst->getSrc(1)->getValClass();

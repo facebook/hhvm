@@ -213,11 +213,14 @@ struct HhbcTranslator {
   void emitFPassCOp();
   void emitFPassR();
   void emitFPassV();
+  void emitFPushCufOp(VM::Op op, Class* cls, StringData* invName,
+                      const Func* func, int numArgs);
   void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
                        const StringData* invName);
   void emitFPushFuncD(int32_t numParams, int32_t funcId);
   void emitFPushFunc(int32_t numParams);
   void emitFPushFunc(int32_t numParams, SSATmp* funcName);
+  SSATmp* getClsMethodCtx(const Func* callee, const Class* cls);
   void emitFPushClsMethodD(int32_t numParams,
                            int32_t methodNameStrId,
                            int32_t clssNamedEntityPairId);

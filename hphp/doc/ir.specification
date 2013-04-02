@@ -670,10 +670,10 @@ D:Cls = LdClsCached S0:ConstStr
   Loads the class named S0 via the target cache. Invokes autoload and
   may raise an error if the class is not defined.
 
-D:Cls = LdCachedClass S0:ConstStr
+D:Cls = LdClsCachedSafe S0:ConstStr [ -> L ]
 
-  Loads the class whose name is S0 out of the target cache. Returns
-  null and has no side effects if the class is not defined.
+  Loads the class whose name is S0 out of the target cache. If the class is not
+  defined, returns null and optionally branches to L.
 
 D:T = LdClsCns<T> S0:ConstStr S1:ConstStr [ -> L ]
 
@@ -696,10 +696,11 @@ D:FuncCtx = LdClsMethodFCache S0:ConstStr S1:ConstStr
   the MethodFCache if needed.  In case the given method is not found,
   control is transferred to label L.
 
-D:Ctx = GetCtxFwdCall S0:{Obj|Cls|Ctx} S1:Func
+D:Ctx = GetCtxFwdCall S0:Ctx S1:Func
 
-  Loads the context (ActRec's m_this/m_cls slot) for a forwarding call
-  into D.  S0 is the current context, and S1 is the method being called.
+  If S0 is an object and S1 is static, this opcode returns S0's
+  class. If S0 is an object and S1 is not static, this opcode increfs
+  S0 and returns it. If S0 is a Cctx, this opcode returns S0.
 
 LdClsMethodCache
 LdClsMethod
@@ -753,10 +754,16 @@ D:Func = LdFunc S0:Str
   Loads the Func whose name is S0.  Fatal if the named function is
   not defined, and the function autoloader fails to define it.
 
-D:Func = LdFixedFunc S0:ConstStr
+D:Func = LdFuncCached S0:ConstStr
 
-  Loads the Func whose name is S0.  Fatal if the named function is
-  not defined, and the function autoloader fails to define it.
+  Loads the Func whose name is S0 from the target cache. Fatal if the
+  named function is not defined, and the function autoloader fails to
+  define it.
+
+D:Func = LdFuncCachedSafe S0:ConstStr [ -> L ]
+
+  Loads the Func named S0 from the target cache. If the function is not
+  defined, returns null and optionally branches to L.
 
 D:Func = LdCurFuncPtr
 

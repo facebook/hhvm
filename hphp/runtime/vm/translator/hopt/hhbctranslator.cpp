@@ -1194,6 +1194,56 @@ void HhbcTranslator::emitFPassV() {
   m_tb->genDecRef(tmp);
 }
 
+void HhbcTranslator::emitFPushCufOp(VM::Op op, Class* cls, StringData* invName,
+                                    const Func* callee, int numArgs) {
+  const Func* curFunc = getCurFunc();
+  const bool safe = op == OpFPushCufSafe;
+  const bool forward = op == OpFPushCufF;
+
+  if (!callee) {
+    SSATmp* callable = topC(safe ? 1 : 0);
+    // The most common type for the callable in this case is Arr. We
+    // can't really do better than the interpreter here, so punt.
+    SPUNT(StringData::GetStaticString(
+            folly::format("FPushCuf-{}",
+                          callable->getType().toString()).str())
+          ->data());
+  }
+
+  SSATmp* ctx;
+  SSATmp* safeFlag = cns(true); // This is always true until the slow exits
+                                // below are implemented
+  SSATmp* func = cns(callee);
+  if (cls) {
+    if (forward) {
+      ctx = m_tb->gen(LdCtx, m_tb->getFp(), cns(curFunc));
+      ctx = m_tb->gen(GetCtxFwdCall, ctx, cns(callee));
+    } else {
+      ctx = getClsMethodCtx(callee, cls);
+    }
+    if (!TargetCache::isPersistentHandle(cls->m_cachedOffset)) {
+      // The miss path is complicated and rare. Punt for now.
+      m_tb->gen(LdClsCachedSafe, getExitSlowTrace(), cns(cls->name()));
+    }
+  } else {
+    ctx = m_tb->genDefInitNull();
+    if (!TargetCache::isPersistentHandle(callee->getCachedOffset())) {
+      // The miss path is complicated and rare. Punt for now.
+      func = m_tb->gen(LdFuncCachedSafe, getExitSlowTrace(),
+                       cns(callee->name()));
+    }
+  }
+
+  SSATmp* defaultVal = safe ? popC() : nullptr;
+  popDecRef(Type::Cell); // callable
+  if (safe) {
+    push(defaultVal);
+    push(safeFlag);
+  }
+
+  emitFPushActRec(func, ctx, numArgs, invName);
+}
+
 void HhbcTranslator::emitNativeImpl() {
   TRACE(3, "%u: NativeImpl\n", m_bcOff);
   m_tb->genNativeImpl();
@@ -1260,10 +1310,10 @@ void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {
   const bool immutable = func->isNameBindingImmutable(getCurUnit());
 
   if (!immutable) {
-    spillStack();  // LdFixedFunc can reenter
+    spillStack();  // LdFuncCached can reenter
   }
   SSATmp* ssaFunc = immutable ? m_tb->genDefConst(func)
-                              : m_tb->gen(LdFixedFunc, m_tb->genDefConst(name));
+                              : m_tb->gen(LdFuncCached, m_tb->genDefConst(name));
   emitFPushActRec(ssaFunc,
                   m_tb->genDefInitNull(),
                   numParams,
@@ -1369,13 +1419,38 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
   }
 }
 
+SSATmp* HhbcTranslator::getClsMethodCtx(const Func* callee, const Class* cls) {
+  bool mightNotBeStatic = false;
+  assert(callee);
+  if (!(callee->attrs() & AttrStatic) &&
+      !(getCurFunc()->attrs() & AttrStatic) &&
+      getCurClass() &&
+      getCurClass()->classof(cls)) {
+    mightNotBeStatic = true;
+  }
+
+  if (!mightNotBeStatic) {
+    // static function: ctx is just the Class*. LdCls will simplify to a
+    // DefConst or LdClsCached.
+    return m_tb->gen(LdCls, cns(cls->name()), cns(getCurClass()));
+  } else if (m_tb->isThisAvailable()) {
+    // might not be a static call and $this is available, so we know it's
+    // definitely not static
+    assert(getCurClass());
+    return m_tb->genIncRef(m_tb->genLdThis(nullptr));
+  } else {
+    // might be a non-static call. we have to inspect the func at runtime
+    PUNT(getClsMethodCtx-MightNotBeStatic);
+  }
+}
+
 void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
                                          int32_t methodNameStrId,
                                          int32_t clssNamedEntityPairId) {
 
   const StringData* methodName = lookupStringId(methodNameStrId);
   const NamedEntityPair& np = lookupNamedEntityPairId(clssNamedEntityPairId);
-  UNUSED const StringData* className = np.first;
+  const StringData* className = np.first;
   TRACE(3, "%u: FPushClsMethodD %s::%s %d\n", m_bcOff, className->data(),
         methodName->data(), numParams);
   const Class* baseClass = Unit::lookupUniqueClass(np.second);
@@ -1385,35 +1460,8 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
                                                              magicCall,
                                                          /* staticLookup: */
                                                              true);
-  bool mightNotBeStatic = false;
-  if (func &&
-      !(func->attrs() & AttrStatic) &&
-      !(getCurFunc()->attrs() & AttrStatic) &&
-      getCurClass() &&
-      getCurClass()->classof(baseClass)) {
-    mightNotBeStatic = true;
-  }
-
   if (func) {
-    SSATmp* objOrCls;
-    if (!mightNotBeStatic) { // definitely static
-      // static function: store base class into the m_cls/m_this slot
-      if (TargetCache::isPersistentHandle(baseClass->m_cachedOffset)) {
-        objOrCls = m_tb->genDefConst(baseClass);
-      } else {
-        objOrCls = m_tb->gen(LdClsCached, m_tb->genDefConst(className));
-      }
-    } else if (m_tb->isThisAvailable()) {
-      // 'this' pointer is available, so use it.
-      assert(getCurClass());
-      objOrCls = m_tb->genIncRef(m_tb->genLdThis(nullptr));
-    } else {
-      // might be a non-static call
-      // generate code that tests at runtime whether to use
-      // this pointer or class
-      PUNT(FPushClsMethodD_MightNotBeStatic);
-      assert(0);
-    }
+    SSATmp* objOrCls = getClsMethodCtx(func, baseClass);
     emitFPushActRec(m_tb->genDefConst(func),
                     objOrCls,
                     numParams,
@@ -1421,7 +1469,6 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
   } else {
     // lookup static method & class in the target cache
     Trace* exitTrace = getExitSlowTrace();
-    const StringData* className = np.first;
     SSATmp* funcClassTmp =
       m_tb->genLdClsMethodCache(m_tb->genDefConst(className),
                                 m_tb->genDefConst(methodName),
@@ -1954,7 +2001,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   Class::initInstanceBits();
   bool haveBit = Class::haveInstanceBit(clsName);
   SSATmp* constraint = knownConstraint ? cns(knownConstraint)
-                                       : m_tb->gen(LdCachedClass, cns(clsName));
+                                       : m_tb->gen(LdClsCachedSafe, cns(clsName));
   locVal = m_tb->gen(Unbox, getExitTrace(), locVal);
   SSATmp* objClass = m_tb->gen(LdObjClass, locVal);
   if (haveBit || classIsUniqueNormalClass(knownConstraint)) {
@@ -2016,14 +2063,14 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
    * don't need to load it out of target cache because it must
    * already exist and be defined.
    *
-   * Otherwise, we only use LdCachedClass---instanceof with an
+   * Otherwise, we only use LdClsCachedSafe---instanceof with an
    * undefined class doesn't invoke autoload.
    */
   SSATmp* checkClass =
     isUnique || (maybeCls && getCurClass() &&
                   getCurClass()->classof(maybeCls))
       ? m_tb->genDefConst(maybeCls)
-      : m_tb->gen(LdCachedClass, ssaClassName);
+      : m_tb->gen(LdClsCachedSafe, ssaClassName);
 
   push(
     haveBit ? m_tb->gen(InstanceOfBitmask,

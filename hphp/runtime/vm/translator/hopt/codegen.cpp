@@ -695,7 +695,7 @@ static void shuffleArgs(Asm& a, ArgGroup& args) {
   }
 }
 
-void CodeGenerator::cgCallNative(IRInstruction* inst) {
+void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
   using namespace NativeCalls;
   Opcode opc = inst->getOpcode();
   always_assert(CallMap::hasInfo(opc));
@@ -729,7 +729,7 @@ void CodeGenerator::cgCallNative(IRInstruction* inst) {
       addr = inst->getSrc(info.func.srcIdx)->getValTCA();
       break;
   }
-  cgCallHelper(m_as,
+  cgCallHelper(a,
                addr,
                info.dest != DestType::None ? inst->getDst(0) : nullptr,
                info.sync,
@@ -1983,13 +1983,12 @@ void CodeGenerator::cgUnbox(IRInstruction* inst) {
   });
 }
 
-void CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
+void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
   SSATmp* dst        = inst->getDst();
   SSATmp* methodName = inst->getSrc(0);
 
-  using namespace TargetCache;
   const StringData* name = methodName->getValStr();
-  CacheHandle ch = allocFixedFunction(name);
+  CacheHandle ch = TargetCache::allocFixedFunction(name);
   size_t funcCacheOff = ch + offsetof(FixedFuncCache, m_func);
 
   auto dstReg = dst->getReg();
@@ -2000,12 +1999,23 @@ void CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
     m_as.   loadq (rVmTl[funcCacheOff], dstReg);
     m_as.   testq (dstReg, dstReg);
   }
+}
+
+void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
+  cgLdFuncCachedCommon(inst);
   // jz off to the helper call in astubs
   unlikelyIfBlock(CC_Z, [&] (Asm& a) {
     // this helper tries the autoload map, and fatals on failure
-    cgCallHelper(a, (TCA)FixedFuncCache::lookupUnknownFunc,
-                 dstReg, kSyncPoint, ArgGroup().immPtr(name));
+    cgCallNative(a, inst);
   });
+}
+
+
+void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
+  cgLdFuncCachedCommon(inst);
+  if (Block* taken = inst->getTaken()) {
+    emitFwdJcc(m_as, CC_Z, taken);
+  }
 }
 
 void CodeGenerator::cgLdFunc(IRInstruction* inst) {
@@ -4349,18 +4359,11 @@ void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgLdCachedClass(IRInstruction* inst) {
-  const StringData* classNameString = inst->getSrc(0)->getValStr();
-  auto ch = TargetCache::allocKnownClass(classNameString);
-  m_as.  loadq  (rVmTl[ch], inst->getDst()->getReg());
-}
-
-void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
+TargetCache::CacheHandle CodeGenerator::cgLdClsCachedCommon(
+  IRInstruction* inst) {
   SSATmp* dst = inst->getDst();
-  SSATmp* className = inst->getSrc(0);
-  // Note the redundancy with LdCachedClass above...
-  const StringData* classNameString = className->getValStr();
-  auto ch = TargetCache::allocKnownClass(classNameString);
+  const StringData* className = inst->getSrc(0)->getValStr();
+  auto ch = TargetCache::allocKnownClass(className);
   auto dstReg = dst->getReg();
   if (dstReg == InvalidReg) {
     m_as. cmpq   (0, rVmTl[ch]);
@@ -4368,15 +4371,28 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
     m_as.  loadq  (rVmTl[ch], dstReg);
     m_as.  testq  (dstReg, dstReg);
   }
+
+  return ch;
+}
+
+void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
+  auto ch = cgLdClsCachedCommon(inst);
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
     // Passing only two arguments to lookupKnownClass, since the
     // third is ignored in the checkOnly==false case.
     cgCallHelper(a,
                  (TCA)TargetCache::lookupKnownClass<false>,
-                 dst,
+                 inst->getDst(),
                  kSyncPoint,
-                 ArgGroup().addr(rVmTl, intptr_t(ch)).ssa(className));
+                 ArgGroup().addr(rVmTl, intptr_t(ch)).ssas(inst, 0));
   });
+}
+
+void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
+  cgLdClsCachedCommon(inst);
+  if (Block* taken = inst->getTaken()) {
+    emitFwdJcc(CC_Z, taken);
+  }
 }
 
 void CodeGenerator::cgLdCls(IRInstruction* inst) {

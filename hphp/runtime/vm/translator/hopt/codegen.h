@@ -115,7 +115,10 @@ private:
 #undef O
 
   // helper functions for code generation
-  void cgCallNative(IRInstruction* inst);
+  void cgCallNative(IRInstruction* inst) {
+    cgCallNative(m_as, inst);
+  }
+  void cgCallNative(Asm& a, IRInstruction* inst);
   void cgCallHelper(Asm&,
                     TCA addr,
                     SSATmp* dst,
@@ -258,6 +261,8 @@ private:
 
   void cgIterNextCommon(IRInstruction* inst, bool isNextK);
   void cgIterInitCommon(IRInstruction* inst, bool isInitK);
+  void cgLdFuncCachedCommon(IRInstruction* inst);
+  TargetCache::CacheHandle cgLdClsCachedCommon(IRInstruction* inst);
   Address emitFwdJcc(ConditionCode cc, Block* target);
   Address emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
   Address emitFwdJmp(Asm& as, Block* target);
@@ -405,7 +410,7 @@ struct ArgGroup {
     return *this;
   }
 
-  ArgGroup& ssas(IRInstruction* inst, unsigned begin, unsigned count) {
+  ArgGroup& ssas(IRInstruction* inst, unsigned begin, unsigned count = 1) {
     for (SSATmp* s : inst->getSrcs().subpiece(begin, count)) {
       m_args.push_back(ArgDesc(s));
     }

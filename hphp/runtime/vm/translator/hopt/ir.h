@@ -264,7 +264,7 @@ O(LdCtx,                        D(Ctx), S(StkPtr) S(Func),              C|Rm) \
 O(LdCctx,                      D(Cctx), S(StkPtr),                      C|Rm) \
 O(LdCls,                        D(Cls), S(Str) C(Cls),     C|E|N|Refs|Er|Mem) \
 O(LdClsCached,                  D(Cls), CStr,              C|E|N|Refs|Er|Mem) \
-O(LdCachedClass,                D(Cls), CStr,                              C) \
+O(LdClsCachedSafe,              D(Cls), CStr,                              C) \
 O(LdClsCtx,                     D(Cls), S(Ctx),                            C) \
 O(LdClsCctx,                    D(Cls), S(Cctx),                           C) \
 O(LdClsCns,                     DParam, CStr CStr,                         C) \
@@ -281,7 +281,8 @@ O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                        N    ) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
 O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
-O(LdFixedFunc,                 D(Func), CStr,                       N|C|E|Er) \
+O(LdFuncCached,                D(Func), CStr,                       N|C|E|Er) \
+O(LdFuncCachedSafe,            D(Func), CStr,                              C) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr) C(Int),                  C) \
 O(LdContLocalsPtr,        D(PtrToCell), S(Obj),                            C) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \

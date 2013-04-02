@@ -1076,6 +1076,16 @@ TranslatorX64::irTranslateFPassV(const Tracelet& t,
 }
 
 void
+TranslatorX64::irTranslateFPushCufOp(const Tracelet& t,
+                                     const NormalizedInstruction& i) {
+  Class* cls = nullptr;
+  StringData* invName = nullptr;
+  bool forward = false;
+  const Func* func = findCuf(i, cls, invName, forward);
+  HHIR_EMIT(FPushCufOp, i.op(), cls, invName, func, i.imm[0].u_IVA);
+}
+
+void
 TranslatorX64::irTranslateFPassR(const Tracelet& t,
                                  const NormalizedInstruction& i) {
   /*
@@ -1247,6 +1257,10 @@ TranslatorX64::irTranslateIterFree(const Tracelet& t,
   case OpFPassCW:                               \
   case OpFPassCE:                               \
     func(FPassCOp, t, i)                        \
+  case OpFPushCuf:                              \
+  case OpFPushCufF:                             \
+  case OpFPushCufSafe:                          \
+    func(FPushCufOp, t, i)                      \
   case OpIssetL:                                \
   case OpIsNullL:                               \
   case OpIsStringL:                             \

@@ -9768,9 +9768,8 @@ TranslatorX64::setupActRecClsForStaticCall(const NormalizedInstruction &i,
   }
 }
 
-template <bool warn>
 int64_t checkClass(TargetCache::CacheHandle ch, StringData* clsName,
-                 ActRec *ar) {
+                   ActRec *ar) {
   VMRegAnchor _;
   AutoloadHandler::s_instance->invokeHandler(clsName->data());
   if (*(Class**)TargetCache::handleToPtr(ch)) return true;
@@ -9835,10 +9834,9 @@ TranslatorX64::translateFPushCufOp(const Tracelet& t,
       {
         UnlikelyIfBlock ifNull(CC_Z, a, astubs);
         if (false) {
-          checkClass<false>(0, nullptr, nullptr);
-          checkClass<true>(0, nullptr, nullptr);
+          checkClass(0, nullptr, nullptr);
         }
-        EMIT_CALL(astubs, TCA(safe ? checkClass<false> : checkClass<true>),
+        EMIT_CALL(astubs, TCA(checkClass),
                   IMM(ch), IMM(uintptr_t(cls->name())),
                   RPLUS(rVmSp, vstackOffset(ni, startOfActRec)));
         recordReentrantStubCall(ni, true);

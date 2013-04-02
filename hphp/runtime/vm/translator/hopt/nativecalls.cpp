@@ -25,6 +25,7 @@
 namespace HPHP { namespace VM { namespace JIT { namespace NativeCalls {
 
 using namespace HPHP::VM::Transl;
+using namespace HPHP::VM::Transl::TargetCache;
 
 static const SyncOptions SNone = kNoSyncPoint;
 static const SyncOptions SSync = kSyncPoint;
@@ -98,6 +99,8 @@ static CallMap s_callMap({
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {StaticLocInitCached, (TCA)staticLocInitCached, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}, {SSA, 3}}},
+    {LdFuncCached,       (TCA)FixedFuncCache::lookupUnknownFunc, DSSA, SSync,
+                           {{SSA, 0}}},
 
     /* Switch helpers */
     {LdSwitchDblIndex,   (TCA)switchDoubleHelper, DSSA, SSync,

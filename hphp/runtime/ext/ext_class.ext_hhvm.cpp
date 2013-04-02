@@ -906,6 +906,70 @@ TypedValue* fg_call_user_method(HPHP::VM::ActRec *ar) {
 
 
 
+/*
+bool HPHP::f_class_alias(HPHP::String const&, HPHP::String const&, bool)
+_ZN4HPHP13f_class_aliasERKNS_6StringES2_b
+
+(return value) => rax
+original => rdi
+alias => rsi
+autoload => rdx
+*/
+
+bool fh_class_alias(Value* original, Value* alias, bool autoload) asm("_ZN4HPHP13f_class_aliasERKNS_6StringES2_b");
+
+TypedValue * fg1_class_alias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_class_alias(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  rv->m_type = KindOfBoolean;
+  switch (count) {
+  default: // count >= 3
+    if ((args-2)->m_type != KindOfBoolean) {
+      tvCastToBooleanInPlace(args-2);
+    }
+  case 2:
+    break;
+  }
+  if (!IS_STRING_TYPE((args-1)->m_type)) {
+    tvCastToStringInPlace(args-1);
+  }
+  if (!IS_STRING_TYPE((args-0)->m_type)) {
+    tvCastToStringInPlace(args-0);
+  }
+  rv->m_data.num = (fh_class_alias(&args[-0].m_data, &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+  return rv;
+}
+
+TypedValue* fg_class_alias(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 2LL && count <= 3LL) {
+      if ((count <= 2 || (args-2)->m_type == KindOfBoolean) && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
+        rv.m_type = KindOfBoolean;
+        rv.m_data.num = (fh_class_alias(&args[-0].m_data, &args[-1].m_data, (count > 2) ? (bool)(args[-2].m_data.num) : (bool)(true))) ? 1LL : 0LL;
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        fg1_class_alias(&rv, ar, count);
+        frame_free_locals_no_this_inl(ar, 3);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      }
+    } else {
+      throw_wrong_arguments_nr("class_alias", count, 2, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
 
 } // !HPHP
 

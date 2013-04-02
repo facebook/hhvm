@@ -54,6 +54,7 @@ bool TestExtClass::RunTests(const std::string &which) {
   RUN_TEST(test_get_object_vars);
   RUN_TEST(test_call_user_method_array);
   RUN_TEST(test_call_user_method);
+  RUN_TEST(test_class_alias);
 
   return ret;
 }
@@ -143,5 +144,11 @@ bool TestExtClass::test_call_user_method_array() {
 
 bool TestExtClass::test_call_user_method() {
   // TestCodeRun covers this
+  return Count(true);
+}
+
+bool TestExtClass::test_class_alias() {
+  VERIFY(f_class_alias("TEst", "TEst_alias"));
+  VERIFY(f_property_exists("TEst_alias", "prop"));
   return Count(true);
 }

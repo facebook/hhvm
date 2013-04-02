@@ -21445,6 +21445,16 @@ bool TestCodeRun::TestSwitchStatement() {
        "}\n"
        "f(32);\n");
 
+  MVCR("<?php "
+       "class X {}"
+       "function test($x) {"
+       "  switch (true) {"
+       "    case $x instanceof X: var_dump('X'); break;"
+       "    default: var_dump('Other'); break;"
+       "  }"
+       "}"
+       "test(new X);");
+
   return true;
 }
 

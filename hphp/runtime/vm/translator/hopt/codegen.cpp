@@ -544,17 +544,21 @@ void CodeGenerator::cgJcc(IRInstruction* inst) {
       // TODO: use compare with immediate or make sure simplifier
       // canonicalizes this so that constant is src2
       srcReg1 = rScratch;
-      m_as.mov_imm64_reg(src1->getValRawInt(), srcReg1);
+      m_as.      mov_imm64_reg(src1->getValRawInt(), srcReg1);
     }
     if (src2->isConst()) {
-      m_as.cmp_imm64_reg64(src2->getValRawInt(), srcReg1);
+      if (src1Type.subtypeOf(Type::Bool)) {
+        m_as.    cmpb (src2->getValRawInt(), Reg8(int(srcReg1)));
+      } else {
+        m_as.    cmp_imm64_reg64(src2->getValRawInt(), srcReg1);
+      }
     } else {
       // Note the reverse syntax in the assembler.
       // This cmp will compute srcReg1 - srcReg2
-      if (src1Type == Type::Bool) {
+      if (src1Type.subtypeOf(Type::Bool)) {
         m_as.    cmpb (Reg8(int(srcReg2)), Reg8(int(srcReg1)));
       } else {
-        m_as.cmp_reg64_reg64(srcReg2, srcReg1);
+        m_as.    cmp_reg64_reg64(srcReg2, srcReg1);
       }
     }
   }

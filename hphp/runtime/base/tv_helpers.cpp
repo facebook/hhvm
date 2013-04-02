@@ -222,6 +222,8 @@ bool tvIsPlausible(const TypedValue* tv) {
     case KindOfStaticString:
       return okPtr(tv->m_data.pstr) && tv->m_data.pstr->isStatic();
     case KindOfString:
+      return okPtr(tv->m_data.pstr) &&
+        is_refcount_realistic(tv->m_data.pstr->getCount());
     case KindOfArray:
       return okPtr(tv->m_data.parr) &&
              is_refcount_realistic(tv->m_data.parr->getCount());

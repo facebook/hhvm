@@ -972,7 +972,7 @@ public:
 
   explicit Type(bits_t bits = kNone)
     : m_bits(bits)
-    {}
+  {}
 
   size_t hash() const {
     return hash_int64(m_bits);

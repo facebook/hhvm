@@ -48,12 +48,19 @@ Type builtinReturn(const IRInstruction* inst) {
 
 Type boxReturn(const IRInstruction* inst, int srcId) {
   auto t = inst->getSrc(srcId)->getType();
-  // If t contains Uninit, replace it with InitNull. Otherwise, leave
-  // the type alone.
+  // If t contains Uninit, replace it with InitNull.
   t = t.maybe(Type::Uninit) ? (t - Type::Uninit) | Type::InitNull : t;
+  // We don't try to track when a BoxedStaticStr might be converted to
+  // a BoxedStr, and we never guard on staticness for strings, so
+  // boxing a string needs to forget this detail.  Same thing for
+  // arrays.
+  if (t.subtypeOf(Type::Str)) {
+    t = Type::Str;
+  } else if (t.subtypeOf(Type::Arr)) {
+    t = Type::Arr;
+  }
+  // Everything else is just a pure type-system boxing operation.
   return t.box();
-}
-
 }
 
 Type stkReturn(const IRInstruction* inst, int dstId,
@@ -66,6 +73,8 @@ Type stkReturn(const IRInstruction* inst, int dstId,
   // The instruction modifies the stack and this isn't the main dest,
   // so it's a StkPtr.
   return Type::StkPtr;
+}
+
 }
 
 Type outputType(const IRInstruction* inst, int dstId) {

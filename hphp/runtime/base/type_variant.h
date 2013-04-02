@@ -197,6 +197,8 @@ class Variant : private VariantBase {
   Variant(const ArrayData *v) = delete;
   Variant(const ObjectData *v) = delete;
   Variant(const RefData *v) = delete;
+  Variant(const TypedValue *v) = delete;
+  Variant(TypedValue *v) = delete;
   Variant(const Variant *v) = delete;
   Variant(Variant *v) = delete;
 

@@ -108,6 +108,19 @@ void ScalarExpression::toLower(bool funcCall /* = false */) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+bool ScalarExpression::needsTranslation() const {
+  switch (m_type) {
+    case T_LINE:
+    case T_NS_C:
+    case T_CLASS_C:
+    case T_METHOD_C:
+    case T_FUNC_C:
+      return true;
+    default:
+      return false;
+  }
+}
+
 void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     string id = Util::toLower(getIdentifier());

@@ -663,6 +663,10 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
   }
 
   out->exp = bop;
+
+  // If the operands are simple enough we can fold this expression right
+  // here and keep the parse tree smaller.
+  if (ExpressionPtr optExp = bop->foldConst(m_ar)) out->exp = optExp;
 }
 
 void Parser::onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo) {

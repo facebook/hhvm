@@ -422,13 +422,21 @@ static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
   return result;
 }
 
+// foldConst() is callable from the parse phase as well as the analysis phase.
+// We take advantage of this during the parse phase to reduce very simple
+// expressions down to a single scalar and keep the parse tree smaller,
+// especially in cases of long chains of binary operators. However, we limit
+// the effectivness of this during parse to ensure that we eliminate only
+// very simple scalars that don't require analysis in later phases. For now,
+// that's just simply scalar values.
 ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
   ExpressionPtr optExp;
   Variant v1;
   Variant v2;
 
   if (!m_exp2->getScalarValue(v2)) {
-    if (m_exp1->isScalar() && m_exp1->getScalarValue(v1)) {
+    if ((ar->getPhase() != AnalysisResult::ParseAllFiles) &&
+        m_exp1->isScalar() && m_exp1->getScalarValue(v1)) {
       switch (m_op) {
         case T_IS_IDENTICAL:
         case T_IS_NOT_IDENTICAL:
@@ -486,15 +494,23 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
   if (m_exp1->isScalar()) {
     if (!m_exp1->getScalarValue(v1)) return ExpressionPtr();
     try {
+      ScalarExpressionPtr scalar1 =
+        dynamic_pointer_cast<ScalarExpression>(m_exp1);
+      ScalarExpressionPtr scalar2 =
+        dynamic_pointer_cast<ScalarExpression>(m_exp2);
+      // Some data, like the values of __CLASS__ and friends, are not available
+      // while we're still in the initial parse phase.
+      if (ar->getPhase() == AnalysisResult::ParseAllFiles) {
+        if ((scalar1 && scalar1->needsTranslation()) ||
+            (scalar2 && scalar2->needsTranslation())) {
+          return ExpressionPtr();
+        }
+      }
       if (!Option::WholeProgram || !Option::ParseTimeOpts) {
         // In the VM, don't optimize __CLASS__ if within a trait, since
         // __CLASS__ is not resolved yet.
         ClassScopeRawPtr clsScope = getOriginalClass();
         if (clsScope && clsScope->isTrait()) {
-          ScalarExpressionPtr scalar1 =
-            dynamic_pointer_cast<ScalarExpression>(m_exp1);
-          ScalarExpressionPtr scalar2 =
-            dynamic_pointer_cast<ScalarExpression>(m_exp2);
           if ((scalar1 && scalar1->getType() == T_CLASS_C) ||
               (scalar2 && scalar2->getType() == T_CLASS_C)) {
             return ExpressionPtr();
@@ -565,7 +581,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
       return makeScalarExpression(ar, result);
     } catch (...) {
     }
-  } else {
+  } else if (ar->getPhase() != AnalysisResult::ParseAllFiles) {
     switch (m_op) {
       case T_LOGICAL_AND:
       case T_BOOLEAN_AND:

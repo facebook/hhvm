@@ -106,10 +106,11 @@ CacheHandle ptrToHandle(const void*);
 
 TCA fcallHelper(ActRec* ar);
 
-static inline void*
+template<typename T = void>
+static inline T*
 handleToPtr(CacheHandle h) {
   assert(h < RuntimeOption::EvalJitTargetCacheSize);
-  return (char*)tl_targetCaches + h;
+  return (T*)((char*)tl_targetCaches + h);
 }
 
 template<class T>

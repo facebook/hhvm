@@ -90,6 +90,10 @@ static CallMap s_callMap({
     {RaiseError,         (TCA)raise_error_sd, DNone, SSync, {{SSA, 0}}},
     {IncStatGrouped,     (TCA)Stats::incStatGrouped, DNone, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
+    {StaticLocInit,      (TCA)staticLocInit, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
+    {StaticLocInitCached, (TCA)staticLocInitCached, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}, {TV, 2}, {SSA, 3}}},
 
     /* Switch helpers */
     {LdSwitchDblIndex,   (TCA)switchDoubleHelper, DSSA, SSync,

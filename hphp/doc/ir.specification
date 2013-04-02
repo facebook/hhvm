@@ -775,6 +775,10 @@ D:T = LdRaw<T> S0:Ptr S1:ConstInt
   describes the offset from the base, and the size.  The value in D is
   assumed to be of type T.
 
+D:BoxedCell = LdStaticLocCached S0:ConstCacheHandle -> L
+
+  Load static local value from the targetcache from handle S0. If the
+  slot is uninitialized, branch to L.
 
 8. Allocation
 
@@ -1084,6 +1088,22 @@ ThrowNonObjProp
 RaiseUndefProp S0:Obj S1:ConstStr
 
   Raise a notice for an undefined property named S1 on the class of S0.
+
+D:BoxedCell = StaticLocInit S0:ConstStr S1:StkPtr S2:Cell
+
+  Get boxed value to initialize static local named S0 in frame S1. If
+  the static local has not yet been initialized, its value will be set
+  to S2. The returned value is not stored in the frame S1.
+
+D:BoxedCell = StaticLocInitCached S0:ConstStr S1:StkPtr S2:Cell
+                                  S3:ConstCacheHandle
+
+  Get boxed value to initialize static local named S0 in frame S1. If
+  the static local has not yet been initialized, its value will be set
+  to S2. The returned value is stored in the targetcache at handle S3,
+  but is not stored in the frame S1. This instruction assumes that the
+  current function is not a closure body or a generator from a
+  closure.
 
 Print
 AddElem

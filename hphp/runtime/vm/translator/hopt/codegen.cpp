@@ -333,6 +333,8 @@ CALL_OPCODE(ThrowNonObjProp)
 CALL_OPCODE(RaiseUndefProp)
 CALL_OPCODE(RaiseError)
 CALL_OPCODE(IncStatGrouped)
+CALL_OPCODE(StaticLocInit)
+CALL_OPCODE(StaticLocInitCached)
 
 // Vector instruction helpers
 CALL_OPCODE(BaseG)
@@ -3688,6 +3690,15 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
       m_as.storeb(rbyte(value->getReg()), dest);
     }
   }
+}
+
+void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {
+  auto ch = inst->getSrc(0)->getValRawInt();
+  auto outReg = inst->getDst()->getReg();
+
+  m_as.loadq (rVmTl[ch], outReg);
+  m_as.testq (outReg, outReg);
+  emitFwdJcc(m_as, CC_Z, inst->getTaken());
 }
 
 // If label is set and type is not Gen, this method generates a check

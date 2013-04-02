@@ -18,6 +18,7 @@
 
 #include "runtime/base/types.h"
 #include "runtime/vm/translator/abi-x64.h"
+#include "runtime/vm/translator/targetcache.h"
 
 namespace HPHP { namespace VM { namespace Transl {
 
@@ -72,6 +73,10 @@ void raise_error_sd(const StringData* sd);
 int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
+
+RefData* staticLocInit(StringData* name, ActRec* fp, TypedValue val);
+RefData* staticLocInitCached(StringData* name, ActRec* fp, TypedValue val,
+                             TargetCache::CacheHandle ch);
 
 } } }
 

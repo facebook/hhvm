@@ -590,8 +590,37 @@ void HhbcTranslator::emitTraitExists(const StringData* traitName) {
   emitClassExists(traitName);
 }
 
-void HhbcTranslator::emitStaticLocInit(uint32_t varId, uint32_t listStrId) {
-  emitInterpOneOrPunt(Type::None, 1);
+void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
+  const StringData* name = lookupStringId(litStrId);
+  LocalId id(locId);
+  SSATmp* value = popC();
+  SSATmp* box;
+
+  // Closures and generators from closures don't satisfy the "one static per
+  // source location" rule that the inline fastpath requires
+  if (getCurFunc()->isClosureBody() || getCurFunc()->isGeneratorFromClosure()) {
+    box = m_tb->gen(StaticLocInit, cns(name), m_tb->getFp(), value);
+  } else {
+    SSATmp* ch =
+      m_tb->genDefConst(TargetCache::allocStatic(), Type::CacheHandle);
+    SSATmp* cachedBox = nullptr;
+    box = m_tb->cond(getCurFunc(),
+      [&](Block* taken) {
+        // Careful: cachedBox is only ok to use in the 'next' branch.
+        cachedBox = m_tb->gen(LdStaticLocCached, taken, ch);
+      },
+      [&] { // next: The local is already initialized
+        return m_tb->gen(IncRef, cachedBox);
+      },
+      [&] { // taken: We missed in the cache
+        m_tb->hint(Block::Unlikely);
+        return m_tb->gen(StaticLocInitCached,
+                         cns(name), m_tb->getFp(), value, ch);
+      }
+    );
+  }
+  m_tb->gen(StLoc, &id, m_tb->getFp(), box);
+  m_tb->gen(DecRef, value);
 }
 
 void HhbcTranslator::emitReqDoc(const StringData* name) {

@@ -321,6 +321,12 @@ O(StLocNT,                          ND, S(StkPtr) S(Gen),          E|Mem|CRc) \
 O(StRef,                       DBox(1), SUnk,                 E|Mem|CRc|Refs) \
 O(StRefNT,                     DBox(1), SUnk,                      E|Mem|CRc) \
 O(StRaw,                            ND, SUnk,                          E|Mem) \
+O(LdStaticLocCached,      D(BoxedCell), C(CacheHandle),                   NF) \
+O(StaticLocInit,          D(BoxedCell), CStr S(StkPtr) S(Cell),  PRc|E|N|Mem) \
+O(StaticLocInitCached,    D(BoxedCell), CStr                                  \
+                                          S(StkPtr)                           \
+                                          S(Cell)                             \
+                                            C(CacheHandle),      PRc|E|N|Mem) \
 O(SpillStack,                D(StkPtr), SUnk,                      E|Mem|CRc) \
 O(ExitTrace,                        ND, SUnk,                            T|E) \
 O(ExitTraceCc,                      ND, SUnk,                            T|E) \
@@ -938,7 +944,8 @@ Opcode getStackModifyingOpcode(Opcode opc);
   IRT(StkPtr,      1ULL << 48) /* any pointer into VM stack: VmSP or VmFP*/ \
   IRT(TCA,         1ULL << 49)                                          \
   IRT(ActRec,      1ULL << 50)                                          \
-  IRT(None,        1ULL << 51)
+  IRT(None,        1ULL << 51)                                          \
+  IRT(CacheHandle, 1ULL << 52) /* TargetCache::CacheHandle */
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
@@ -2150,9 +2157,10 @@ struct Block : boost::noncopyable {
     return m_instrs.iterator_to(*inst);
   }
 
-  // visit each src that provides a value to label->dsts[i]
-  template <class Body>
-  void forEachSrc(unsigned i, Body body) {
+  // visit each src that provides a value to label->dsts[i]. body
+  // should take an IRInstruction* and an SSATmp*.
+  template<typename L>
+  void forEachSrc(unsigned i, L body) {
     for (const EdgeData* n = m_preds; n; n = n->next) {
       assert(n->jmp->getOpcode() == Jmp_ && n->jmp->getTaken() == this);
       body(n->jmp, n->jmp->getSrc(i));
@@ -2161,8 +2169,8 @@ struct Block : boost::noncopyable {
 
   // return the first src providing a value to label->dsts[i] for
   // which body(src) returns true, or nullptr if none are found.
-  SSATmp* findSrc(unsigned i,
-                  std::function<bool(SSATmp*)> body) {
+  template<typename L>
+  SSATmp* findSrc(unsigned i, L body) {
     for (const EdgeData* n = m_preds; n; n = n->next) {
       SSATmp* src = n->jmp->getSrc(i);
       if (body(src)) return src;

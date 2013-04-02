@@ -110,4 +110,46 @@ void VerifyParamTypeSlow(const Class* cls,
   VerifyParamTypeFail(param);
 }
 
+template<bool useTargetCache>
+RefData* staticLocInitImpl(StringData* name, ActRec* fp, TypedValue val,
+                           TargetCache::CacheHandle ch) {
+  assert(useTargetCache == (bool)ch);
+  HphpArray* map;
+  if (useTargetCache) {
+    // If we have a cache handle, we know the current func isn't a
+    // closure or generator closure so we can directly grab its static
+    // locals map.
+    const Func* func = fp->m_func;
+    assert(!(func->isClosureBody() || func->isGeneratorFromClosure()));
+    map = func->getStaticLocals();
+  } else {
+    map = get_static_locals(fp);
+  }
+
+  TypedValue *mapVal = map->nvGet(name);
+  if (!mapVal) {
+    map->nvSet(name, &val, false);
+    mapVal = map->nvGet(name);
+  }
+  if (mapVal->m_type != KindOfRef) {
+    tvBox(mapVal);
+  }
+  assert(mapVal->m_type == KindOfRef);
+  RefData* ret = mapVal->m_data.pref;
+  if (useTargetCache) {
+    *TargetCache::handleToPtr<RefData*>(ch) = ret;
+  }
+  ret->incRefCount();
+  return ret;
+}
+
+RefData* staticLocInit(StringData* name, ActRec* fp, TypedValue val) {
+  return staticLocInitImpl<false>(name, fp, val, 0);
+}
+
+RefData* staticLocInitCached(StringData* name, ActRec* fp, TypedValue val,
+                             TargetCache::CacheHandle ch) {
+  return staticLocInitImpl<true>(name, fp, val, ch);
+}
+
 } } }

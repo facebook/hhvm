@@ -1143,7 +1143,7 @@ TranslatorX64::irTranslateColAddElemC(const Tracelet& t,
 
 void
 TranslatorX64::irTranslateStaticLocInit(const Tracelet& t,
-                                      const NormalizedInstruction& i) {
+                                        const NormalizedInstruction& i) {
   HHIR_EMIT(StaticLocInit, i.imm[0].u_IVA, i.imm[1].u_SA);
 }
 

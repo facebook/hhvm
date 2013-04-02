@@ -851,26 +851,28 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
     }
   } else if (t.isNull()) {
     os << t.toString();
-  } else if (t == Type::Func) {
+  } else if (t.subtypeOf(Type::Func)) {
     auto func = c->as<const Func*>();
     os << "Func(" << (func ? func->fullName()->data() : "0") << ")";
-  } else if (t == Type::Cls) {
+  } else if (t.subtypeOf(Type::Cls)) {
     auto cls = c->as<const Class*>();
     os << "Cls(" << (cls ? cls->name()->data() : "0") << ")";
-  } else if (t == Type::NamedEntity) {
+  } else if (t.subtypeOf(Type::NamedEntity)) {
     auto ne = c->as<const NamedEntity*>();
     os << "NamedEntity(" << ne << ")";
-  } else if (t == Type::TCA) {
+  } else if (t.subtypeOf(Type::TCA)) {
     TCA tca = c->as<TCA>();
     char* nameRaw = Util::getNativeFunctionName(tca);
     SCOPE_EXIT { free(nameRaw); };
     std::string name(nameRaw);
     boost::algorithm::trim(name);
     os << folly::format("TCA: {}({})", tca, name);
-  } else if (t == Type::None) {
+  } else if (t.subtypeOf(Type::None)) {
     os << "None:" << c->as<int64_t>();
   } else if (t.isPtr()) {
     os << folly::format("{}({:#x})", t.toString(), c->as<uint64_t>());
+  } else if (t.subtypeOf(Type::CacheHandle)) {
+    os << folly::format("CacheHandle({:#x})", c->as<int64_t>());
   } else {
     not_reached();
   }

@@ -273,6 +273,12 @@ public:
   }
 
   template<typename T>
+  SSATmp* genDefConst(T val, Type type) {
+    ConstData cdata(val);
+    return gen(DefConst, type, &cdata);
+  }
+
+  template<typename T>
   SSATmp* genLdConst(T val) {
     ConstData cdata(val);
     return gen(LdConst, typeForConst(val), &cdata);

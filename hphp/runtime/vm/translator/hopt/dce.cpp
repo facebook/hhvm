@@ -83,6 +83,8 @@ static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 
 // DCE state indexed by instr->getIId.
 typedef StateVector<IRInstruction, DceFlags> DceState;
+typedef hphp_hash_set<const SSATmp*, pointer_hash<SSATmp>> SSASet;
+typedef StateVector<SSATmp, SSASet> SSACache;
 typedef std::list<const IRInstruction*> WorkList;
 
 void removeDeadInstructions(Trace* trace, const DceState& state) {
@@ -331,6 +333,72 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
   copyProp(trace);
 }
 
+// Assuming that the 'consumer' instruction consumes 'src', trace back through
+// src's instruction to the real origin of the value. Currently this traces
+// through GuardType and DefLabel.
+void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
+                   DceState& state, SSACache& ssas, SSASet visitedSrcs) {
+  assert(!visitedSrcs.count(src) && "Cycle detected in dataflow graph");
+  auto const& cache = ssas[src];
+  if (!cache.empty()) {
+    // We've already traced this path. Use the cache.
+    for (const SSATmp* cached : cache) {
+      consumeIncRef(consumer, cached, state, ssas, SSASet());
+    }
+    return;
+  }
+
+  const IRInstruction* srcInst = src->getInstruction();
+  visitedSrcs.insert(src);
+  if (srcInst->getOpcode() == GuardType &&
+      srcInst->getTypeParam().maybeCounted()) {
+    // srcInst is a GuardType that guards to a refcounted type. We need to
+    // trace through to its source. If the GuardType guards to a non-refcounted
+    // type then the reference is consumed by GuardType itself.
+    consumeIncRef(consumer, srcInst->getSrc(0), state, ssas, visitedSrcs);
+  } else if (srcInst->getOpcode() == DefLabel) {
+    // srcInst is a DefLabel that may be a join node. We need to find
+    // the dst index of src in srcInst and trace through to each jump
+    // providing a value for it.
+    for (unsigned i = 0, n = srcInst->getNumDsts(); i < n; ++i) {
+      if (srcInst->getDst(i) == src) {
+        srcInst->getBlock()->forEachSrc(i,
+          [&](IRInstruction* jmp, SSATmp* val) {
+            consumeIncRef(consumer, val, state, ssas, visitedSrcs);
+          }
+        );
+        break;
+      }
+    }
+  } else {
+    // src is the canonical representation of everything in visitedSrcs. Put
+    // that knowledge in the cache.
+    for (const SSATmp* visited : visitedSrcs) {
+      // We don't need to store the fact that src is its own canonical
+      // representation.
+      if (visited != src) {
+        ssas[visited].insert(src);
+      }
+    }
+
+    if (srcInst->getOpcode() == IncRef) {
+      // <inst> consumes <srcInst> which is an IncRef, so we mark <srcInst> as
+      // REFCOUNT_CONSUMED.
+      if (consumer->getTrace()->isMain() || !srcInst->getTrace()->isMain()) {
+        // <srcInst> is consumed from its own trace.
+        state[srcInst].setCountConsumed();
+      } else {
+        // <srcInst> is consumed off trace.
+        if (!state[srcInst].countConsumed()) {
+          // mark <srcInst> as REFCOUNT_CONSUMED_OFF_TRACE unless it is
+          // also consumed from its own trace.
+          state[srcInst].setCountConsumedOffTrace();
+        }
+      }
+    }
+  }
+}
+
 } // anonymous namespace
 
 // Publicly exported functions:
@@ -363,6 +431,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   // work list; this will also mark reachable exit traces. All
   // other instructions marked dead.
   DceState state(irFactory, DceFlags());
+  SSACache ssaOriginals(irFactory, SSASet());
   WorkList wl = initInstructions(blocks, state);
 
   // process the worklist
@@ -380,26 +449,11 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
         state[srcInst].setLive();
         wl.push_back(srcInst);
       }
-      // <inst> consumes <srcInst> which is an IncRef, so we mark <srcInst> as
-      // REFCOUNT_CONSUMED. If the source instruction is a GuardType and guards
-      // to a maybeCounted type, we need to trace through to the source for
-      // refcounting purposes.
-      while (srcInst->getOpcode() == GuardType &&
-             srcInst->getTypeParam().maybeCounted()) {
-        srcInst = srcInst->getSrc(0)->getInstruction();
-      }
-      if (inst->consumesReference(i) && srcInst->getOpcode() == IncRef) {
-        if (inst->getTrace()->isMain() || !srcInst->getTrace()->isMain()) {
-          // <srcInst> is consumed from its own trace.
-          state[srcInst].setCountConsumed();
-        } else {
-          // <srcInst> is consumed off trace.
-          if (!state[srcInst].countConsumed()) {
-            // mark <srcInst> as REFCOUNT_CONSUMED_OFF_TRACE unless it is
-            // also consumed from its own trace.
-            state[srcInst].setCountConsumedOffTrace();
-          }
-        }
+
+      // If inst consumes this source, find the true source instruction and
+      // mark it as consumed if it's an IncRef.
+      if (inst->consumesReference(i)) {
+        consumeIncRef(inst, src, state, ssaOriginals, SSASet());
       }
     }
   }

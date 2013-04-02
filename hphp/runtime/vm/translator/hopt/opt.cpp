@@ -99,64 +99,38 @@ static void insertAsserts(Trace* trace, IRFactory* factory) {
 
 void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
   IRFactory* irFactory = traceBuilder->getIrFactory();
+  auto finishPass = [&](const char* msg) {
+    dumpTrace(6, trace, msg);
+    assert(JIT::checkCfg(trace, *irFactory));
+  };
   if (RuntimeOption::EvalHHIRMemOpt) {
     optimizeMemoryAccesses(trace, irFactory);
-    if (RuntimeOption::EvalDumpIR > 5) {
-      std::cout << "----- HHIR after MemElim -----\n";
-      trace->print(std::cout);
-      std::cout << "---------------------------\n";
-    }
-    assert(JIT::checkCfg(trace, *irFactory));
+    finishPass("after MemeLim");
   }
   if (RuntimeOption::EvalHHIRDeadCodeElim) {
     eliminateDeadCode(trace, irFactory);
-    if (RuntimeOption::EvalDumpIR > 5) {
-      std::cout << "----- HHIR after DCE -----\n";
-      trace->print(std::cout);
-      std::cout << "---------------------------\n";
-    }
-    assert(JIT::checkCfg(trace, *irFactory));
+    finishPass("after DCE");
   }
   if (RuntimeOption::EvalHHIRExtraOptPass
       && (RuntimeOption::EvalHHIRCse
           || RuntimeOption::EvalHHIRSimplification)) {
     traceBuilder->optimizeTrace();
-    if (RuntimeOption::EvalDumpIR > 5) {
-      std::cout << "----- HHIR after CSE/Simplification -----\n";
-      trace->print(std::cout);
-      std::cout << "---------------------------\n";
-    }
-    assert(JIT::checkCfg(trace, *irFactory));
+    finishPass("after CSE/Simplification");
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned
     // by optimzeTrace indicating whether DCE is necessary
     if (RuntimeOption::EvalHHIRDeadCodeElim) {
       eliminateDeadCode(trace, irFactory);
-      if (RuntimeOption::EvalDumpIR > 5) {
-        std::cout << "----- HHIR after DCE -----\n";
-        trace->print(std::cout);
-        std::cout << "---------------------------\n";
-      }
-      assert(JIT::checkCfg(trace, *irFactory));
+      finishPass("after DCE");
     }
   }
   if (RuntimeOption::EvalHHIRJumpOpts) {
     optimizeJumps(trace, irFactory);
-    if (RuntimeOption::EvalDumpIR > 5) {
-      std::cout << "----- HHIR after jump opts -----\n";
-      trace->print(std::cout);
-      std::cout << "---------------------------\n";
-    }
-    assert(JIT::checkCfg(trace, *irFactory));
+    finishPass("jump opts");
   }
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     insertAsserts(trace, irFactory);
-    if (RuntimeOption::EvalDumpIR > 5) {
-      std::cout << "----- HHIR after inserting RefCnt asserts -----\n";
-      trace->print(std::cout);
-      std::cout << "---------------------------\n";
-    }
-    assert(JIT::checkCfg(trace, *irFactory));
+    finishPass("RefCnt asserts");
   }
 }
 

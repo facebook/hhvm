@@ -75,7 +75,7 @@ int64_t spillSlotsToSize(int n) {
 }
 
 void cgPunt(const char* file, int line, const char* func) {
-  if (RuntimeOption::EvalDumpIR) {
+  if (dumpIREnabled()) {
     HPHP::Trace::trace("--------- CG_PUNT %s %d %s\n", file, line, func);
   }
   throw FailedCodeGen(file, line, func);
@@ -3656,7 +3656,7 @@ void CodeGenerator::emitGuardOrFwdJcc(IRInstruction* inst, ConditionCode cc) {
   if (cc == CC_None) return;
   Block* label = inst->getTaken();
   if (inst && inst->getTCA() == kIRDirectGuardActive) {
-    if (RuntimeOption::EvalDumpIR) {
+    if (dumpIREnabled()) {
       m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpccLen);
       inst->setTCA(m_as.code.frontier);
     }

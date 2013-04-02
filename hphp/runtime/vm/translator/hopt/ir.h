@@ -30,6 +30,7 @@
 #include <boost/checked_delete.hpp>
 #include <boost/type_traits/has_trivial_destructor.hpp>
 #include "util/asm-x64.h"
+#include "util/trace.h"
 #include "runtime/ext/ext_continuation.h"
 #include "runtime/vm/translator/physreg.h"
 #include "runtime/vm/translator/abi-x64.h"
@@ -2207,6 +2208,8 @@ public:
   std::list<Block*>& getBlocks() { return m_blocks; }
   Block* front() { return *m_blocks.begin(); }
   Block* back() { auto it = m_blocks.end(); return *(--it); }
+  const Block* front() const { return *m_blocks.begin(); }
+  const Block* back()  const { auto it = m_blocks.end(); return *(--it); }
 
   Block* push_back(Block* b) {
     b->setTrace(this);
@@ -2214,7 +2217,15 @@ public:
     return b;
   }
 
-  uint32_t getBcOff() { return m_bcOff; }
+  const Func* getFunc() const {
+    return front()->getFunc();
+  }
+
+  const Unit* getUnit() const {
+    return getFunc()->unit();
+  }
+
+  uint32_t getBcOff() const { return m_bcOff; }
   Trace* addExitTrace(Trace* exit) {
     m_exitTraces.push_back(exit);
     exit->setMain(this);
@@ -2381,6 +2392,19 @@ void forEachTraceInst(Trace* main, Body body) {
     forEachInst(t, body);
   });
 }
+
+/* 
+ * Some utilities related to dumping. Rather than file-by-file control, we control
+ * most IR logging via the hhir trace module.
+ */
+static inline bool dumpIREnabled(int level = 1) {
+  return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::hhir, level);
+}
+
+void dumpTraceImpl(const Trace* trace, std::ostream& out,
+                   const AsmInfo* asmInfo = nullptr);
+void dumpTrace(int level, const Trace* trace, const char* caption,
+               AsmInfo* ai = nullptr);
 
 }}}
 

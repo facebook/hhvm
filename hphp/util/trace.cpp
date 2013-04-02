@@ -51,7 +51,7 @@ const char *tokNames[] = {
 class Init {
   Module name2mod(const char *name) {
     for (int i = 0; i < NumModules; i++) {
-      if (!strcmp(tokNames[i], name)) {
+      if (!strcasecmp(tokNames[i], name)) {
         return (Module)i;
       }
     }

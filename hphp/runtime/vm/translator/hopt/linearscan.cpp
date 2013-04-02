@@ -236,13 +236,18 @@ void LinearScan::computeLiveRegs() {
   }
 }
 
+template<typename Inner, int DumpVal=4>
+static inline void dumpIR(const Inner* in, const char* msg) {
+  if (dumpIREnabled(DumpVal)) {
+    std::ostringstream str;
+    in->print(str);
+    HPHP::Trace::traceRelease("--- %s: %s\n", msg, str.str().c_str());
+  }
+}
+
 void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   IRInstruction* inst = &*it;
-  if (RuntimeOption::EvalDumpIR > 3) {
-    std::cout << "--- allocating to instruction: ";
-    inst->print(std::cout);
-    std::cout << std::endl;
-  }
+  dumpIR<IRInstruction, 4>(inst, "allocating to instruction");
 
   // Reload all source operands if necessary.
   // Mark registers as unpinned.
@@ -293,11 +298,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
       }
       // Remember this reload tmp in case we can reuse it in later blocks.
       m_slots[slotId].m_latestReload = reloadTmp;
-      if (RuntimeOption::EvalDumpIR > 4) {
-        std::cout << "--- created reload: ";
-        reload->print(std::cout);
-        std::cout << std::endl;
-      }
+      dumpIR<IRInstruction, 5>(reload, "created reload");
     }
   }
 
@@ -792,11 +793,7 @@ void LinearScan::allocRegs(Trace* trace) {
 
   if (RuntimeOption::EvalHHIREnableRematerialization && m_slots.size() > 0) {
     // Don't bother rematerializing the trace if it has no Spill/Reload.
-    if (RuntimeOption::EvalDumpIR > 5) {
-      std::cout << "--------- HHIR before rematerialization ---------\n";
-      trace->print(std::cout);
-      std::cout << "-------------------------------------------------\n";
-    }
+    dumpTrace(6, trace, "before rematerialization");
     rematerialize();
   }
 
@@ -843,11 +840,7 @@ void LinearScan::allocRegsToTrace() {
     }
     for (auto it = block->begin(), end = block->end(); it != end; ++it) {
       allocRegToInstruction(it);
-      if (RuntimeOption::EvalDumpIR > 3) {
-        std::cout << "--- allocated to instruction: ";
-        it->print(std::cout);
-        std::cout << "\n";
-      }
+      dumpIR<IRInstruction, 4>(&*it, "allocated to instruction");
     }
   }
 
@@ -1143,11 +1136,7 @@ LinearScan::RegState* LinearScan::popFreeReg(std::list<RegState*>& freeList) {
 }
 
 void LinearScan::spill(SSATmp* tmp) {
-  if (RuntimeOption::EvalDumpIR > 4) {
-    std::cout << "--- spilling ";
-    tmp->print(std::cout);
-    std::cout << "\n";
-  }
+  dumpIR<SSATmp, 5>(tmp, "spilling");
   // If we're spilling, we better actually have registers allocated.
   assert(tmp->numAllocatedRegs() > 0);
   assert(tmp->numAllocatedRegs() == tmp->numNeededRegs());

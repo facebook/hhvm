@@ -1072,7 +1072,7 @@ void Trace::print() const {
 void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
   static const int kIndent = 4;
   Disasm disasm(Disasm::Options().indent(kIndent + 4)
-                                 .printEncoding(RuntimeOption::EvalDumpIR > 5));
+                                 .printEncoding(dumpIREnabled(6)));
 
   // Print unlikely blocks at the end
   BlockList blocks, unlikely;
@@ -1369,6 +1369,34 @@ bool hasInternalFlow(Trace* trace) {
     }
   }
   return false;
+}
+
+void dumpTraceImpl(const Trace* trace, std::ostream& out,
+                   const AsmInfo* asmInfo) {
+  auto func = trace->getFunc();
+  auto unitName = func->unit()->filepath()->empty()
+    ? "<systemlib>"
+    : func->unit()->filepath()->data();
+  out << folly::format("{}() @{} ({})\n",
+                       func->fullName()->data(),
+                       trace->getBcOff(),
+                       unitName);
+  trace->print(out, asmInfo);
+}
+
+// Suggested captions: "before jiffy removal", "after goat saturation",
+// etc.
+void dumpTrace(int level, const Trace* trace, const char* caption,
+               AsmInfo* ai) {
+  if (dumpIREnabled(level)) {
+    std::ostringstream str;
+    auto bannerFmt = "{:-^40}\n";
+    str << folly::format(bannerFmt, caption);
+    dumpTraceImpl(trace, str, ai);
+    trace->print(str);
+    str << folly::format(bannerFmt, "");
+    HPHP::Trace::traceRelease("%s", str.str().c_str());
+  }
 }
 
 }}}

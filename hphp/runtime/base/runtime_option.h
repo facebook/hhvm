@@ -433,7 +433,6 @@ public:
   F(uint64_t, MaxHHIRTrans,            -1)                              \
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, DumpBytecode,                false)                           \
-  F(uint32_t, DumpIR,                  0)                               \
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTCHuge,                   true)                            \

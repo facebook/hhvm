@@ -1588,63 +1588,27 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   assert(m_useHHIR);
 
   JIT::Trace* trace = m_hhbcTrans->getTrace();
-
-  auto traceTraceImpl = [&](std::ostream& out,
-                            const JIT::AsmInfo* asmInfo = nullptr) {
-    auto unitName = curUnit()->filepath()->empty()
-      ? "<systemlib>"
-      : curUnit()->filepath()->data();
-    out << folly::format("{}() @{} ({})\n",
-             curFunc()->fullName()->data(),
-             trace->getBcOff(),
-             unitName);
-    trace->print(out, asmInfo);
+  auto finishPass = [&](const char* msg) {
+    dumpTrace(1, trace, msg);
+    assert(JIT::checkCfg(trace, *m_irFactory));
   };
 
-  auto traceTrace = [&] (const char* banner,
-                         const JIT::AsmInfo* asmInfo = nullptr) {
-    std::ostringstream str;
-    str << folly::format("{:-^40}\n", banner);
-    traceTraceImpl(str, asmInfo);
-    str << folly::format("{:-^40}\n", "");
-    if (Trace::moduleEnabled(TRACEMOD, 1)) {
-      // If tracing is enabled, print using the trace facility so IR dumps
-      // interleave properly with traced output.
-      FTRACE(1, "{}", str.str());
-    } else {
-      std::cout << str.str();
-    }
-  };
-
-  if (RuntimeOption::EvalDumpIR) {
-    traceTrace(" HHIR after initial translation ");
-  }
-  assert(JIT::checkCfg(trace, *m_irFactory));
-
+  finishPass(" after initial translation ");
   JIT::optimizeTrace(trace, m_hhbcTrans->getTraceBuilder());
-
-  if (RuntimeOption::EvalDumpIR > 1) {
-    traceTrace(" HHIR after optimizing ");
-  }
-  assert(JIT::checkCfg(trace, *m_irFactory));
-
+  finishPass(" after optimizing ");
   JIT::allocRegsForTrace(trace, m_irFactory.get());
-
-  if (RuntimeOption::EvalDumpIR) {
-    traceTrace(" HHIR after reg alloc ");
-  }
-  assert(JIT::checkCfg(trace, *m_irFactory));
+  finishPass(" after reg alloc ");
 
   auto* factory = m_irFactory.get();
-  if (RuntimeOption::EvalDumpIR || RuntimeOption::EvalJitCompareHHIR) {
+  if (JIT::dumpIREnabled() || RuntimeOption::EvalJitCompareHHIR) {
     JIT::AsmInfo ai(factory);
     JIT::genCodeForTrace(trace, a, astubs, factory, bcMap, this, &ai);
     if (RuntimeOption::EvalJitCompareHHIR) {
       std::ostringstream out;
-      traceTraceImpl(out, &ai);
+      dumpTraceImpl(trace, out, &ai);
       m_lastHHIRDump = out.str();
     } else {
-      traceTrace(" HHIR after code gen ", &ai);
+      dumpTrace(1, trace, " after code gen ", &ai);
     }
   } else {
     JIT::genCodeForTrace(trace, a, astubs, factory, bcMap, this);

@@ -2493,9 +2493,6 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
   SSATmp* src    = inst->getSrc(0);
   Type type = src->getType();
 
-  if (m_curTrace->isMain()) {
-    TRACE(3, "[counter] 1 IncRef in main traces\n");
-  }
   cgIncRefWork(type, src);
   shuffle2(m_as, src->getReg(0), src->getReg(1),
            dst->getReg(0), dst->getReg(1));
@@ -4854,7 +4851,6 @@ void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
              vector<TransBCMapping>* bcMap, CodegenState& state) {
   state.firstMarkerSeen = false;
   state.lastMarker = nullptr;
-  TCA traceStart = amain.code.frontier;
   if (RuntimeOption::EvalHHIRGenerateAsserts && trace->isMain()) {
     CodeGenerator::emitTraceCall(amain, trace->getBcOff(), tx64);
   }
@@ -4899,12 +4895,6 @@ void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
                                                      astubs.code.frontier);
       }
     }
-  }
-  size_t UNUSED traceSize = amain.code.frontier - traceStart;
-  TRACE(3, "[counter] %lu bytes of code generated\n", traceSize);
-  if (trace->isMain()) {
-    TRACE(3, "[counter] %lu bytes of code generated in main traces\n",
-          traceSize);
   }
 }
 

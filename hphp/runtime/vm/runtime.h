@@ -35,7 +35,7 @@ ArrayData* new_tuple(int numArgs, const TypedValue* args);
 ObjectData* newVectorHelper(int nElms);
 ObjectData* newMapHelper(int nElms);
 ObjectData* newStableMapHelper(int nElms);
-ObjectData* newTupleHelper(int nElms);
+ObjectData* newPairHelper();
 
 StringData* concat_is(int64_t v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64_t v2);

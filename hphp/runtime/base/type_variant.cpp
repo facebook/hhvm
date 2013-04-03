@@ -3149,10 +3149,9 @@ void Variant::unserialize(VariableUnserializer *uns,
       VM::Class* cls = VM::Unit::loadClass(clsName.get());
       Object obj;
       if (cls) {
-        if (LIKELY(cls != c_Tuple::s_cls)) {
-          obj = VM::Instance::newInstance(cls);
-        } else {
-          obj = c_Tuple::alloc(size);
+        obj = VM::Instance::newInstance(cls);
+        if (UNLIKELY(cls == c_Pair::s_cls && size != 2)) {
+          throw Exception("Pair objects must have exactly 2 elements");
         }
       } else {
         obj = VM::Instance::newInstance(

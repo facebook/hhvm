@@ -71,8 +71,8 @@ BinaryOpExpression::BinaryOpExpression
       cType = Collection::MapType;
     } else if (strcasecmp(s.c_str(), "stablemap") == 0) {
       cType = Collection::StableMapType;
-    } else if (strcasecmp(s.c_str(), "tuple") == 0) {
-      cType = Collection::TupleType;
+    } else if (strcasecmp(s.c_str(), "pair") == 0) {
+      cType = Collection::PairType;
     }
     ExpressionListPtr el = static_pointer_cast<ExpressionList>(m_exp2);
     el->setCollectionType(cType);

@@ -75,7 +75,7 @@ ArrayData* new_array(int capacity) {
 ArrayData* new_tuple(int n, const TypedValue* values) {
   HphpArray* a = NEW(HphpArray)(n, values);
   a->incRefCount();
-  TRACE(2, "newTupleHelper: size %d\n", n);
+  TRACE(2, "new_tuple: size %d\n", n);
   return a;
 }
 
@@ -95,10 +95,10 @@ NEW_COLLECTION_HELPER(Vector)
 NEW_COLLECTION_HELPER(Map)
 NEW_COLLECTION_HELPER(StableMap)
   
-ObjectData* newTupleHelper(int nElms) {
-  ObjectData *obj = c_Tuple::alloc(nElms);
+ObjectData* newPairHelper() {
+  ObjectData *obj = NEWOBJ(c_Pair)();
   obj->incRefCount();
-  TRACE(2, "newTupleHelper: capacity %d\n", nElms);
+  TRACE(2, "newPairHelper: capacity 2\n");
   return obj;
 }
 
@@ -425,9 +425,9 @@ void collection_setm_ik1_v0(ObjectData* obj, int64_t key, TypedValue* value) {
       smp->set(key, value);
       break;
     }
-    case Collection::TupleType: {
+    case Collection::PairType: {
       Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Tuple"));
+        "Cannot assign to an element of a Pair"));
       throw e;
     }
     default:
@@ -454,9 +454,9 @@ void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
       smp->set(key, value);
       break;
     }
-    case Collection::TupleType: {
+    case Collection::PairType: {
       Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Tuple"));
+        "Cannot assign to an element of a Pair"));
       throw e;
     }
     default:

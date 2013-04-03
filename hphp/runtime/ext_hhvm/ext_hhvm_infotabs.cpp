@@ -2401,24 +2401,24 @@ TypedValue* tg_17StableMapIterator_key(VM::ActRec *ar);
 TypedValue* tg_17StableMapIterator_valid(VM::ActRec *ar);
 TypedValue* tg_17StableMapIterator_next(VM::ActRec *ar);
 TypedValue* tg_17StableMapIterator_rewind(VM::ActRec *ar);
-VM::Instance* new_Tuple_Instance(VM::Class*);
-TypedValue* tg_5Tuple___construct(VM::ActRec *ar);
-TypedValue* tg_5Tuple_isEmpty(VM::ActRec *ar);
-TypedValue* tg_5Tuple_count(VM::ActRec *ar);
-TypedValue* tg_5Tuple_items(VM::ActRec *ar);
-TypedValue* tg_5Tuple_keys(VM::ActRec *ar);
-TypedValue* tg_5Tuple_toArray(VM::ActRec *ar);
-TypedValue* tg_5Tuple_getIterator(VM::ActRec *ar);
-TypedValue* tg_5Tuple_at(VM::ActRec *ar);
-TypedValue* tg_5Tuple_get(VM::ActRec *ar);
-TypedValue* tg_5Tuple_containsKey(VM::ActRec *ar);
-VM::Instance* new_TupleIterator_Instance(VM::Class*);
-TypedValue* tg_13TupleIterator___construct(VM::ActRec *ar);
-TypedValue* tg_13TupleIterator_current(VM::ActRec *ar);
-TypedValue* tg_13TupleIterator_key(VM::ActRec *ar);
-TypedValue* tg_13TupleIterator_valid(VM::ActRec *ar);
-TypedValue* tg_13TupleIterator_next(VM::ActRec *ar);
-TypedValue* tg_13TupleIterator_rewind(VM::ActRec *ar);
+VM::Instance* new_Pair_Instance(VM::Class*);
+TypedValue* tg_4Pair___construct(VM::ActRec *ar);
+TypedValue* tg_4Pair_isEmpty(VM::ActRec *ar);
+TypedValue* tg_4Pair_count(VM::ActRec *ar);
+TypedValue* tg_4Pair_items(VM::ActRec *ar);
+TypedValue* tg_4Pair_keys(VM::ActRec *ar);
+TypedValue* tg_4Pair_toArray(VM::ActRec *ar);
+TypedValue* tg_4Pair_getIterator(VM::ActRec *ar);
+TypedValue* tg_4Pair_at(VM::ActRec *ar);
+TypedValue* tg_4Pair_get(VM::ActRec *ar);
+TypedValue* tg_4Pair_containsKey(VM::ActRec *ar);
+VM::Instance* new_PairIterator_Instance(VM::Class*);
+TypedValue* tg_12PairIterator___construct(VM::ActRec *ar);
+TypedValue* tg_12PairIterator_current(VM::ActRec *ar);
+TypedValue* tg_12PairIterator_key(VM::ActRec *ar);
+TypedValue* tg_12PairIterator_valid(VM::ActRec *ar);
+TypedValue* tg_12PairIterator_next(VM::ActRec *ar);
+TypedValue* tg_12PairIterator_rewind(VM::ActRec *ar);
 VM::Instance* new_Continuation_Instance(VM::Class*);
 TypedValue* tg_12Continuation___construct(VM::ActRec *ar);
 TypedValue* tg_12Continuation_update(VM::ActRec *ar);
@@ -5481,28 +5481,28 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StableMapIterator[] = {
   { "rewind", tg_17StableMapIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Tuple = 10;
-static const HhbcExtMethodInfo hhbc_ext_methods_Tuple[] = {
-  { "__construct", tg_5Tuple___construct },
-  { "isEmpty", tg_5Tuple_isEmpty },
-  { "count", tg_5Tuple_count },
-  { "items", tg_5Tuple_items },
-  { "keys", tg_5Tuple_keys },
-  { "toArray", tg_5Tuple_toArray },
-  { "getIterator", tg_5Tuple_getIterator },
-  { "at", tg_5Tuple_at },
-  { "get", tg_5Tuple_get },
-  { "containsKey", tg_5Tuple_containsKey }
+static const long long hhbc_ext_method_count_Pair = 10;
+static const HhbcExtMethodInfo hhbc_ext_methods_Pair[] = {
+  { "__construct", tg_4Pair___construct },
+  { "isEmpty", tg_4Pair_isEmpty },
+  { "count", tg_4Pair_count },
+  { "items", tg_4Pair_items },
+  { "keys", tg_4Pair_keys },
+  { "toArray", tg_4Pair_toArray },
+  { "getIterator", tg_4Pair_getIterator },
+  { "at", tg_4Pair_at },
+  { "get", tg_4Pair_get },
+  { "containsKey", tg_4Pair_containsKey }
 };
 
-static const long long hhbc_ext_method_count_TupleIterator = 6;
-static const HhbcExtMethodInfo hhbc_ext_methods_TupleIterator[] = {
-  { "__construct", tg_13TupleIterator___construct },
-  { "current", tg_13TupleIterator_current },
-  { "key", tg_13TupleIterator_key },
-  { "valid", tg_13TupleIterator_valid },
-  { "next", tg_13TupleIterator_next },
-  { "rewind", tg_13TupleIterator_rewind }
+static const long long hhbc_ext_method_count_PairIterator = 6;
+static const HhbcExtMethodInfo hhbc_ext_methods_PairIterator[] = {
+  { "__construct", tg_12PairIterator___construct },
+  { "current", tg_12PairIterator_current },
+  { "key", tg_12PairIterator_key },
+  { "valid", tg_12PairIterator_valid },
+  { "next", tg_12PairIterator_next },
+  { "rewind", tg_12PairIterator_rewind }
 };
 
 static const long long hhbc_ext_method_count_Continuation = 16;
@@ -6305,8 +6305,8 @@ const HhbcExtClassInfo hhbc_ext_classes[] = {
   { "MapIterator", new_MapIterator_Instance, sizeof(c_MapIterator), hhbc_ext_method_count_MapIterator, hhbc_ext_methods_MapIterator, &c_MapIterator::s_cls },
   { "StableMap", new_StableMap_Instance, sizeof(c_StableMap), hhbc_ext_method_count_StableMap, hhbc_ext_methods_StableMap, &c_StableMap::s_cls },
   { "StableMapIterator", new_StableMapIterator_Instance, sizeof(c_StableMapIterator), hhbc_ext_method_count_StableMapIterator, hhbc_ext_methods_StableMapIterator, &c_StableMapIterator::s_cls },
-  { "Tuple", new_Tuple_Instance, sizeof(c_Tuple), hhbc_ext_method_count_Tuple, hhbc_ext_methods_Tuple, &c_Tuple::s_cls },
-  { "TupleIterator", new_TupleIterator_Instance, sizeof(c_TupleIterator), hhbc_ext_method_count_TupleIterator, hhbc_ext_methods_TupleIterator, &c_TupleIterator::s_cls },
+  { "Pair", new_Pair_Instance, sizeof(c_Pair), hhbc_ext_method_count_Pair, hhbc_ext_methods_Pair, &c_Pair::s_cls },
+  { "PairIterator", new_PairIterator_Instance, sizeof(c_PairIterator), hhbc_ext_method_count_PairIterator, hhbc_ext_methods_PairIterator, &c_PairIterator::s_cls },
   { "Continuation", new_Continuation_Instance, sizeof(c_Continuation), hhbc_ext_method_count_Continuation, hhbc_ext_methods_Continuation, &c_Continuation::s_cls },
   { "DummyContinuation", new_DummyContinuation_Instance, sizeof(c_DummyContinuation), hhbc_ext_method_count_DummyContinuation, hhbc_ext_methods_DummyContinuation, &c_DummyContinuation::s_cls },
   { "DateTime", new_DateTime_Instance, sizeof(c_DateTime), hhbc_ext_method_count_DateTime, hhbc_ext_methods_DateTime, &c_DateTime::s_cls },

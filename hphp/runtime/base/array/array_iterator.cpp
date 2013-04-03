@@ -102,7 +102,7 @@ void ArrayIter::objInit(ObjectData *obj) {
       m_pos = smp->iter_begin();
       break;
     }
-    case Collection::TupleType: {
+    case Collection::PairType: {
       m_pos = 0;
       break;
     }
@@ -159,9 +159,9 @@ bool ArrayIter::endHelper() {
     case Collection::StableMapType: {
       return m_pos == 0;
     }
-    case Collection::TupleType: {
-      c_Tuple* tup = getTuple();
-      return m_pos >= tup->t_count();
+    case Collection::PairType: {
+      c_Pair* pair = getPair();
+      return m_pos >= pair->t_count();
     }
     default: {
       ObjectData* obj = getIteratorObj();
@@ -194,7 +194,7 @@ void ArrayIter::nextHelper() {
       m_pos = smp->iter_next(m_pos);
       return;
     }
-    case Collection::TupleType: {
+    case Collection::PairType: {
       m_pos++;
       return;
     }
@@ -225,7 +225,7 @@ Variant ArrayIter::firstHelper() {
       }
       return smp->iter_key(m_pos);
     }
-    case Collection::TupleType: {
+    case Collection::PairType: {
       return m_pos;
     }
     default: {
@@ -265,8 +265,8 @@ Variant ArrayIter::second() {
       }
       return smp->iter_value(m_pos);
     }
-    case Collection::TupleType: {
-      return tvAsCVarRef(getTuple()->at(m_pos));
+    case Collection::PairType: {
+      return tvAsCVarRef(getPair()->at(m_pos));
     }
     default: {
       ObjectData* obj = getIteratorObj();
@@ -301,8 +301,8 @@ void ArrayIter::secondHelper(Variant& v) {
       v = smp->iter_value(m_pos);
       break;
     }
-    case Collection::TupleType: {
-      v = tvAsCVarRef(getTuple()->at(m_pos));
+    case Collection::PairType: {
+      v = tvAsCVarRef(getPair()->at(m_pos));
       break;
     }
     default: {

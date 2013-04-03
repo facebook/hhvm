@@ -776,8 +776,8 @@ DefineFunction(
   array(
     'name'   => "items",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an Iterable that produces the key/value pairs as ".
-                "Tuples from this Map.",
+    'desc'   => "Returns an Iterable that produces the key/value Pairs ".
+                "from this Map.",
     'return' => array(
       'type'   => Object,
     ),
@@ -986,7 +986,7 @@ DefineFunction(
   array(
     'name'   => "add",
     'flags'  =>  HasDocComment,
-    'desc'   => "Adds the specified key/value Tuple to this Map. If an ".
+    'desc'   => "Adds the specified key/value Pair to this Map. If an ".
                 "element with the same key is already present, an exception ".
                 "is thrown.",
     'return' => array(
@@ -1004,7 +1004,7 @@ DefineFunction(
   array(
     'name'   => "addAll",
     'flags'  =>  HasDocComment,
-    'desc'   => "Adds the key/value Tuples produced by the specified ".
+    'desc'   => "Adds the key/value Pairs produced by the specified ".
                 "Iterable to this Map.",
     'return' => array(
       'type'   => Object,
@@ -1205,7 +1205,7 @@ DefineFunction(
   array(
     'name'   => "fromItems",
     'flags'  =>  IsStatic | HasDocComment,
-    'desc'   => "Returns a Map built from the key/value Tuples produced by ".
+    'desc'   => "Returns a Map built from the key/value Pairs produced by ".
                 "the specified Iterable.",
     'return' => array(
       'type'   => Object,
@@ -1377,8 +1377,8 @@ DefineFunction(
   array(
     'name'   => "items",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an Iterable that produces the key/value pairs as ".
-                "Tuples from this StableMap.",
+    'desc'   => "Returns an Iterable that produces the key/value Pairs ".
+                "from this StableMap.",
     'return' => array(
       'type'   => Object,
     ),
@@ -1588,7 +1588,7 @@ DefineFunction(
   array(
     'name'   => "add",
     'flags'  =>  HasDocComment,
-    'desc'   => "Adds the specified key/value Tuple to this StableMap. If an ".
+    'desc'   => "Adds the specified key/value Pair to this StableMap. If an ".
                 "element with the same key is already present, an exception ".
                 "is thrown.",
     'return' => array(
@@ -1606,7 +1606,7 @@ DefineFunction(
   array(
     'name'   => "addAll",
     'flags'  =>  HasDocComment,
-    'desc'   => "Adds the key/value Tuples produced by the specified ".
+    'desc'   => "Adds the key/value Pairs produced by the specified ".
                 "Iterable to the end of this StableMap.",
     'return' => array(
       'type'   => Object,
@@ -1800,7 +1800,7 @@ DefineFunction(
   array(
     'name'   => "fromItems",
     'flags'  =>  IsStatic | HasDocComment,
-    'desc'   => "Returns a StableMap built from the key/value Tuples produced ".
+    'desc'   => "Returns a StableMap built from the key/value Pairs produced ".
                 "by the specified Iterable.",
     'return' => array(
       'type'   => Object,
@@ -1932,7 +1932,7 @@ EndClass(
 
 BeginClass(
   array(
-    'name'   => "Tuple",
+    'name'   => "Pair",
     'ifaces' => array('ConstVector'),
     'desc'   => "An ordered fixed-sized container.",
     'flags'  =>  IsFinal | HasDocComment,
@@ -1957,7 +1957,7 @@ DefineFunction(
   array(
     'name'   => "isEmpty",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns true if this Tuple is empty, false otherwise.",
+    'desc'   => "Returns true if this Pair is empty, false otherwise.",
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1967,7 +1967,7 @@ DefineFunction(
   array(
     'name'   => "count",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns the number of values in the Tuple.",
+    'desc'   => "Returns the number of values in the Pair.",
     'return' => array(
       'type'   => Int64,
     ),
@@ -1978,7 +1978,7 @@ DefineFunction(
     'name'   => "items",
     'flags'  =>  HasDocComment,
     'desc'   => "Returns an Iterable that produces the values from this ".
-                "Tuple.",
+                "Pair.",
     'return' => array(
       'type'   => Object,
     ),
@@ -1988,7 +1988,7 @@ DefineFunction(
   array(
     'name'   => "keys",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an Iterable that produces the keys from this Tuple.",
+    'desc'   => "Returns an Iterable that produces the keys from this Pair.",
     'return' => array(
       'type'   => Object,
     ),
@@ -1998,7 +1998,7 @@ DefineFunction(
   array(
     'name'   => "toArray",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns an array built from the values from this Tuple.",
+    'desc'   => "Returns an array built from the values from this Pair.",
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -2009,7 +2009,7 @@ DefineFunction(
     'name'   => "getIterator",
     'flags'  =>  HasDocComment,
     'desc'   => "Returns an iterator that points to beginning of this ".
-                "Tuple.",
+                "Pair.",
     'return' => array(
       'type'   => Object,
     ),
@@ -2053,7 +2053,7 @@ DefineFunction(
   array(
     'name'   => "containsKey",
     'flags'  =>  HasDocComment,
-    'desc'   => "Returns true if the specified key is present in the Tuple, ".
+    'desc'   => "Returns true if the specified key is present in the Pair, ".
                 "returns false otherwise.",
     'return' => array(
       'type'   => Boolean,
@@ -2071,9 +2071,9 @@ EndClass(
 
 BeginClass(
   array(
-    'name'   => "TupleIterator",
+    'name'   => "PairIterator",
     'ifaces' => array('KeyedIterator'),
-    'desc'   => "An iterator implementation for iterating over a Tuple.",
+    'desc'   => "An iterator implementation for iterating over a Pair.",
     'flags'  =>  IsFinal | HasDocComment,
   ));
 

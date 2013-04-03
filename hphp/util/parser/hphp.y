@@ -2317,7 +2317,8 @@ sm_type:
   | '(' T_FUNCTION
     '(' sm_func_type_list ')'
     ':' sm_type ')'                   { only_in_strict_mode(_p); $$.reset(); }
-  | '(' sm_type_list ',' sm_type ')'  { only_in_strict_mode(_p); $$.reset(); }
+  | '(' sm_type_list ',' sm_type ')'  { only_in_strict_mode(_p);
+                                        $$.setText("array"); }
 ;
 
 sm_type_opt:

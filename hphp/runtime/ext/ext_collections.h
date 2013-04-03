@@ -809,30 +809,25 @@ class c_StableMapIterator : public ExtObjectData {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class Tuple
+// class Pair
 
-FORWARD_DECLARE_CLASS_BUILTIN(Tuple);
-class c_Tuple : public ExtObjectDataFlags<ObjectData::TupleAttrInit|
+FORWARD_DECLARE_CLASS_BUILTIN(Pair);
+class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
                                           ObjectData::UseGet|
                                           ObjectData::UseSet|
                                           ObjectData::UseIsset|
                                           ObjectData::UseUnset> {
  public:
-  DECLARE_CLASS_NO_ALLOCATION(Tuple, Tuple, ObjectData)
-  virtual void sweep();
-  void operator delete(void* p) {
-    c_Tuple* this_ = (c_Tuple*)p;
-    DELETEOBJSZ(sizeForNumElms(this_->m_capacity))(this_);
-  }
+  DECLARE_CLASS(Pair, Pair, ObjectData)
 
-  friend class c_TupleIterator;
+  friend class c_PairIterator;
   friend class c_Vector;
   friend class c_Map;
   friend class c_StableMap;
   friend class ArrayIter;
 
-  public: c_Tuple(VM::Class* cls = c_Tuple::s_cls);
-  public: ~c_Tuple();
+  public: c_Pair(VM::Class* cls = c_Pair::s_cls);
+  public: ~c_Pair();
   public: void t___construct();
   public: bool t_isempty();
   public: int64_t t_count();
@@ -852,33 +847,33 @@ class c_Tuple : public ExtObjectDataFlags<ObjectData::TupleAttrInit|
   public: static void throwOOB(int64_t key) ATTRIBUTE_COLD;
 
   public: TypedValue* at(int64_t key) {
-    if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
+    if (UNLIKELY(uint64_t(key) >= uint64_t(2))) {
       throwOOB(key);
       return NULL;
     }
-    return &getData()[key];
+    return &getElms()[key];
   }
   public: TypedValue* get(int64_t key) {
-    if ((uint64_t)key >= (uint64_t)m_size) {
+    if (uint64_t(key) >= uint64_t(2)) {
       return NULL;
     }
-    return &getData()[key];
+    return &getElms()[key];
   }
   public: void add(TypedValue* val) {
     assert(val->m_type != KindOfRef);
-    if (m_size == m_capacity) {
+    if (m_size == 2) {
       Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot add a new element to a Tuple"));
+        "Cannot add a new element to a Pair"));
       throw e;
     }
     tvRefcountedIncRef(val);
-    TypedValue* tv = &getData()[m_size];
+    TypedValue* tv = &getElms()[m_size];
     tv->m_data.num = val->m_data.num;
     tv->m_type = val->m_type;
     ++m_size;
   }
   public: bool contains(int64_t key) {
-    return ((uint64_t)key < (uint64_t)m_size);
+    return (uint64_t(key) < uint64_t(2));
   }
 
   public: Array toArrayImpl() const;
@@ -900,41 +895,32 @@ class c_Tuple : public ExtObjectDataFlags<ObjectData::TupleAttrInit|
                                   int64_t sz,
                                   char type);
 
-  public: static size_t sizeForNumElms(int nElms) {
-    return sizeof(c_Tuple) + sizeof(TypedValue) * nElms;
-  }
-  
-  public: static c_Tuple* alloc(int nElms) {
-    c_Tuple* tup = (c_Tuple*)ALLOCOBJSZ(sizeForNumElms(nElms));
-    new ((void *)tup) c_Tuple();
-    tup->m_capacity = nElms;
-    return tup;
-  }
-
  private:
   static void throwBadKeyType();
 
   uint m_size;
-  uint m_capacity;
-  TypedValue* getData() const {
-    return (TypedValue*)(this+1);
+  TypedValue elm0;
+  TypedValue elm1;
+
+  TypedValue* getElms() const {
+    return (TypedValue*)(&elm0);
   }
 
-  friend ObjectData* collectionDeepCopyTuple(c_Tuple* tup);
+  friend ObjectData* collectionDeepCopyPair(c_Pair* pair);
 } __attribute__((aligned(16)));
 
 ///////////////////////////////////////////////////////////////////////////////
-// class TupleIterator
+// class PairIterator
 
-FORWARD_DECLARE_CLASS_BUILTIN(TupleIterator);
-class c_TupleIterator : public ExtObjectData {
+FORWARD_DECLARE_CLASS_BUILTIN(PairIterator);
+class c_PairIterator : public ExtObjectData {
  public:
-  DECLARE_CLASS(TupleIterator, TupleIterator, ObjectData)
-  friend class c_Tuple;
+  DECLARE_CLASS(PairIterator, PairIterator, ObjectData)
+  friend class c_Pair;
 
   // need to implement
-  public: c_TupleIterator(VM::Class* cls = c_TupleIterator::s_cls);
-  public: ~c_TupleIterator();
+  public: c_PairIterator(VM::Class* cls = c_PairIterator::s_cls);
+  public: ~c_PairIterator();
   public: void t___construct();
   public: Variant t_current();
   public: Variant t_key();
@@ -943,7 +929,7 @@ class c_TupleIterator : public ExtObjectData {
   public: void t_rewind();
 
  private:
-  SmartPtr<c_Tuple> m_obj;
+  SmartPtr<c_Pair> m_obj;
   ssize_t m_pos;
 };
 
@@ -962,8 +948,8 @@ inline TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
       return c_Map::OffsetGet(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetGet(obj, key);
-    case Collection::TupleType:
-      return c_Tuple::OffsetGet(obj, key);
+    case Collection::PairType:
+      return c_Pair::OffsetGet(obj, key);
     default:
       assert(false);
       return NULL;
@@ -984,8 +970,8 @@ inline void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
     case Collection::StableMapType:
       c_StableMap::OffsetSet(obj, key, val);
       break;
-    case Collection::TupleType:
-      c_Tuple::OffsetSet(obj, key, val);
+    case Collection::PairType:
+      c_Pair::OffsetSet(obj, key, val);
       break;
     default:
       assert(false);
@@ -1001,8 +987,8 @@ inline bool collectionIsset(ObjectData* obj, TypedValue* key) {
       return c_Map::OffsetIsset(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetIsset(obj, key);
-    case Collection::TupleType:
-      return c_Tuple::OffsetIsset(obj, key);
+    case Collection::PairType:
+      return c_Pair::OffsetIsset(obj, key);
     default: 
       assert(false);
       return false;
@@ -1018,8 +1004,8 @@ inline bool collectionEmpty(ObjectData* obj, TypedValue* key) {
       return c_Map::OffsetEmpty(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetEmpty(obj, key);
-    case Collection::TupleType:
-      return c_Tuple::OffsetEmpty(obj, key);
+    case Collection::PairType:
+      return c_Pair::OffsetEmpty(obj, key);
     default: 
       assert(false);
       return false;
@@ -1038,8 +1024,8 @@ inline void collectionUnset(ObjectData* obj, TypedValue* key) {
     case Collection::StableMapType:
       c_StableMap::OffsetUnset(obj, key);
       break;
-    case Collection::TupleType:
-      c_Tuple::OffsetUnset(obj, key);
+    case Collection::PairType:
+      c_Pair::OffsetUnset(obj, key);
       break;
     default: 
       assert(false);
@@ -1059,8 +1045,8 @@ inline void collectionAppend(ObjectData* obj, TypedValue* val) {
     case Collection::StableMapType:
       c_StableMap::OffsetAppend(obj, val);
       break;
-    case Collection::TupleType:
-      c_Tuple::OffsetAppend(obj, val);
+    case Collection::PairType:
+      c_Pair::OffsetAppend(obj, val);
       break;
     default:
       assert(false);
@@ -1081,9 +1067,9 @@ inline Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
       return tvAsVariant(smp->at(offset));
     }
-    case Collection::TupleType: {
-      c_Tuple* tup = static_cast<c_Tuple*>(obj);
-      return tvAsVariant(tup->at(offset));
+    case Collection::PairType: {
+      c_Pair* pair = static_cast<c_Pair*>(obj);
+      return tvAsVariant(pair->at(offset));
     }
     default:
       assert(false);
@@ -1107,9 +1093,9 @@ inline Variant& collectionOffsetGet(ObjectData* obj, CStrRef offset) {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
       return tvAsVariant(smp->at(key));
     }
-    case Collection::TupleType: {
+    case Collection::PairType: {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Only integer keys may be used with Tuples"));
+        "Only integer keys may be used with Pairs"));
       throw e;
     }
     default:
@@ -1127,8 +1113,8 @@ inline Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
       return tvAsVariant(c_Map::OffsetGet(obj, key));
     case Collection::StableMapType:
       return tvAsVariant(c_StableMap::OffsetGet(obj, key));
-    case Collection::TupleType:
-      return tvAsVariant(c_Tuple::OffsetGet(obj, key));
+    case Collection::PairType:
+      return tvAsVariant(c_Pair::OffsetGet(obj, key));
     default:
       assert(false);
       return tvAsVariant(NULL);
@@ -1168,9 +1154,9 @@ inline void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
       smp->set(offset, tv);
       break;
     }
-    case Collection::TupleType: {
+    case Collection::PairType: {
       Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Tuple"));
+        "Cannot assign to an element of a Pair"));
       throw e;
     }
     default:
@@ -1200,9 +1186,9 @@ inline void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val) {
       smp->set(key, tv);
       break;
     }
-    case Collection::TupleType: {
+    case Collection::PairType: {
       Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Tuple"));
+        "Cannot assign to an element of a Pair"));
       throw e;
     }
     default:
@@ -1229,8 +1215,8 @@ inline void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
       c_StableMap::OffsetSet(obj, key, tv);
       break;
     }
-    case Collection::TupleType: {
-      c_Tuple::OffsetSet(obj, key, tv);
+    case Collection::PairType: {
+      c_Pair::OffsetSet(obj, key, tv);
       break;
     }
     default:
@@ -1259,8 +1245,8 @@ inline bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
       return c_Map::OffsetContains(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetContains(obj, key);
-    case Collection::TupleType:
-      return c_Tuple::OffsetContains(obj, key);
+    case Collection::PairType:
+      return c_Pair::OffsetContains(obj, key);
     default:
       assert(false);
       return false;
@@ -1276,8 +1262,8 @@ inline bool collectionOffsetIsset(ObjectData* obj, CVarRef offset) {
       return c_Map::OffsetIsset(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetIsset(obj, key);
-    case Collection::TupleType:
-      return c_Tuple::OffsetIsset(obj, key);
+    case Collection::PairType:
+      return c_Pair::OffsetIsset(obj, key);
     default:
       assert(false);
       return false;
@@ -1293,8 +1279,8 @@ inline bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset) {
       return c_Map::OffsetEmpty(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetEmpty(obj, key);
-    case Collection::TupleType:
-      return c_Tuple::OffsetEmpty(obj, key);
+    case Collection::PairType:
+      return c_Pair::OffsetEmpty(obj, key);
     default:
       assert(false);
       return true;
@@ -1319,8 +1305,8 @@ inline int64_t collectionSize(ObjectData* obj) {
       return static_cast<c_Map*>(obj)->t_count();
     case Collection::StableMapType:
       return static_cast<c_StableMap*>(obj)->t_count();
-    case Collection::TupleType:
-      return static_cast<c_Tuple*>(obj)->t_count();
+    case Collection::PairType:
+      return static_cast<c_Pair*>(obj)->t_count();
     default:
       assert(false);
       return 0;
@@ -1338,7 +1324,7 @@ inline void collectionReserve(ObjectData* obj, int64_t sz) {
     case Collection::StableMapType:
       static_cast<c_StableMap*>(obj)->reserve(sz);
       break;
-    case Collection::TupleType:
+    case Collection::PairType:
       // do nothing
       break;
     default:
@@ -1357,8 +1343,8 @@ inline void collectionUnserialize(ObjectData* obj,
     case Collection::VectorType:
       c_Vector::Unserialize(obj, uns, sz, type);
       break;
-    case Collection::TupleType:
-      c_Tuple::Unserialize(obj, uns, sz, type);
+    case Collection::PairType:
+      c_Pair::Unserialize(obj, uns, sz, type);
       break;
     case Collection::MapType:
       c_Map::Unserialize(obj, uns, sz, type);
@@ -1381,8 +1367,8 @@ inline bool collectionEquals(ObjectData* obj1, ObjectData* obj2) {
       return c_Map::Equals(obj1, obj2);
     case Collection::StableMapType:
       return c_StableMap::Equals(obj1, obj2);
-    case Collection::TupleType:
-      return c_Tuple::Equals(obj1, obj2);
+    case Collection::PairType:
+      return c_Pair::Equals(obj1, obj2);
     default:
       assert(false);
       return false;
@@ -1394,7 +1380,7 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);
 ObjectData* collectionDeepCopyMap(c_Map* mp);
 ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
-ObjectData* collectionDeepCopyTuple(c_Tuple* tup);
+ObjectData* collectionDeepCopyPair(c_Pair* pair);
 
 class CollectionInit {
 public:

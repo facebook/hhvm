@@ -5438,8 +5438,8 @@ void TranslatorX64::translateNewTuple(const Tracelet& t,
     printf("%p", ret); // use ret
   }
   EMIT_CALL(a, new_tuple, IMM(arity), A(i.inputs[0]->location));
-  // newTupleHelper returns the up-to-date array pointer in rax.
-  // Therefore, we can bind rax to the result location and mark it as dirty.
+  // new_tuple() returns the up-to-date array pointer in rax. Therefore, we
+  // can bind rax to the result location and mark it as dirty.
   m_regMap.bind(rax, i.inputs[arity-1]->location, KindOfArray, RegInfo::DIRTY);
 }
 
@@ -5450,22 +5450,28 @@ TranslatorX64::translateNewCol(const Tracelet& t,
   assert(i.outStack && !i.outLocal);
   assert(i.outStack->outerType() == KindOfObject);
   int cType = i.imm[0].u_IVA;
-  int nElems = i.imm[1].u_IVA;
+  int nElms = i.imm[1].u_IVA;
   void* fptr = nullptr;
   switch (cType) {
     case Collection::VectorType: fptr = (void*)newVectorHelper; break;
     case Collection::MapType: fptr = (void*)newMapHelper; break;
     case Collection::StableMapType: fptr = (void*)newStableMapHelper; break;
-    case Collection::TupleType: fptr = (void*)newTupleHelper; break;
+    case Collection::PairType: fptr = (void*)newPairHelper; break;
     default: assert(false); break;
   }
   if (false) {
     ObjectData* obj1 UNUSED = newVectorHelper(42);
     ObjectData* obj2 UNUSED = newMapHelper(42);
     ObjectData* obj3 UNUSED = newStableMapHelper(42);
-    ObjectData* obj4 UNUSED = newTupleHelper(42);
+    ObjectData* obj4 UNUSED = newPairHelper();
   }
-  EMIT_CALL(a, fptr, IMM(nElems));
+  if (cType == Collection::PairType) {
+    // newPairHelper does not take any arguments, since Pairs always
+    // have exactly two elements
+    EMIT_CALL(a, fptr);
+  } else {
+    EMIT_CALL(a, fptr, IMM(nElms));
+  }
   m_regMap.bind(rax, i.outStack->location, KindOfObject, RegInfo::DIRTY);
 }
 

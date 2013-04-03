@@ -1295,19 +1295,14 @@ Object c_Map::ti_fromitems(const char* cls, CVarRef iterable) {
     Variant v = iter.second();
     TypedValue* tv = tvToCell(v.asTypedValue());
     if (UNLIKELY(tv->m_type != KindOfObject ||
-                 !tv->m_data.pobj->instanceof(c_Tuple::s_cls))) {
+                 !tv->m_data.pobj->instanceof(c_Pair::s_cls))) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Parameter must be an instance of Iterable<Tuple>"));
+        "Parameter must be an instance of Iterable<Pair>"));
       throw e;
     }
-    auto tup = static_cast<c_Tuple*>(tv->m_data.pobj);
-    if (UNLIKELY(tup->t_count() != 2)) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected Tuples containing exactly two elements"));
-      throw e;
-    }
-    TypedValue* tvKey = &tup->getData()[0];
-    TypedValue* tvValue = &tup->getData()[1];
+    auto pair = static_cast<c_Pair*>(tv->m_data.pobj);
+    TypedValue* tvKey = &pair->elm0;
+    TypedValue* tvValue = &pair->elm1;
     assert(tvKey->m_type != KindOfRef);
     assert(tvValue->m_type != KindOfRef);
     if (tvKey->m_type == KindOfInt64) {
@@ -1382,19 +1377,14 @@ void c_Map::throwOOB(StringData* key) {
 
 void c_Map::add(TypedValue* val) {
   if (UNLIKELY(val->m_type != KindOfObject ||
-               !val->m_data.pobj->instanceof(c_Tuple::s_cls))) {
+               !val->m_data.pobj->instanceof(c_Pair::s_cls))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be an instance of Tuple"));
+      "Parameter must be an instance of Pair"));
     throw e;
   }
-  auto tup = static_cast<c_Tuple*>(val->m_data.pobj);
-  if (UNLIKELY(tup->t_count() != 2)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected Tuple containing exactly two elements"));
-    throw e;
-  }
-  TypedValue* tvKey = &tup->getData()[0];
-  TypedValue* tvValue = &tup->getData()[1];
+  auto pair = static_cast<c_Pair*>(val->m_data.pobj);
+  TypedValue* tvKey = &pair->elm0;
+  TypedValue* tvValue = &pair->elm1;
   assert(tvKey->m_type != KindOfRef);
   assert(tvValue->m_type != KindOfRef);
   if (tvKey->m_type == KindOfInt64) {
@@ -2346,19 +2336,14 @@ Object c_StableMap::ti_fromitems(const char* cls, CVarRef iterable) {
     Variant v = iter.second();
     TypedValue* tv = cvarToCell(&v);
     if (UNLIKELY(tv->m_type != KindOfObject ||
-                 !tv->m_data.pobj->instanceof(c_Tuple::s_cls))) {
+                 !tv->m_data.pobj->instanceof(c_Pair::s_cls))) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Parameter must be an instance of Iterable<Tuple>"));
+        "Parameter must be an instance of Iterable<Pair>"));
       throw e;
     }
-    auto tup = static_cast<c_Tuple*>(tv->m_data.pobj);
-    if (UNLIKELY(tup->t_count() != 2)) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected Tuples containing exactly two elements"));
-      throw e;
-    }
-    TypedValue* tvKey = &tup->getData()[0];
-    TypedValue* tvValue = &tup->getData()[1];
+    auto pair = static_cast<c_Pair*>(tv->m_data.pobj);
+    TypedValue* tvKey = &pair->elm0;
+    TypedValue* tvValue = &pair->elm1;
     assert(tvKey->m_type != KindOfRef);
     assert(tvValue->m_type != KindOfRef);
     if (tvKey->m_type == KindOfInt64) {
@@ -2434,19 +2419,14 @@ void c_StableMap::throwOOB(StringData* key) {
 
 void c_StableMap::add(TypedValue* val) {
   if (UNLIKELY(val->m_type != KindOfObject ||
-               !val->m_data.pobj->instanceof(c_Tuple::s_cls))) {
+               !val->m_data.pobj->instanceof(c_Pair::s_cls))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be an instance of Tuple"));
+      "Parameter must be an instance of Pair"));
     throw e;
   }
-  auto tup = static_cast<c_Tuple*>(val->m_data.pobj);
-  if (UNLIKELY(tup->t_count() != 2)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected Tuple containing exactly two elements"));
-    throw e;
-  }
-  TypedValue* tvKey = &tup->getData()[0];
-  TypedValue* tvValue = &tup->getData()[1];
+  auto pair = static_cast<c_Pair*>(val->m_data.pobj);
+  TypedValue* tvKey = &pair->elm0;
+  TypedValue* tvValue = &pair->elm1;
   assert(tvKey->m_type != KindOfRef);
   assert(tvValue->m_type != KindOfRef);
   if (tvKey->m_type == KindOfInt64) {
@@ -3060,71 +3040,70 @@ void c_StableMapIterator::t_rewind() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Tuple::c_Tuple(VM::Class* cb) :
-    ExtObjectDataFlags<ObjectData::TupleAttrInit|
+c_Pair::c_Pair(VM::Class* cb) :
+    ExtObjectDataFlags<ObjectData::PairAttrInit|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
                        ObjectData::UseUnset>(cb),
-    m_size(0), m_capacity(0) {
+    m_size(0) {
 }
 
-c_Tuple::~c_Tuple() {
-  uint sz = m_size;
-  for (uint i = 0; i < sz; ++i) {
-    tvRefcountedDecRef(&getData()[i]);
+c_Pair::~c_Pair() {
+  if (LIKELY(m_size == 2)) {
+    tvRefcountedDecRef(&elm0);
+    tvRefcountedDecRef(&elm1);
+    return;
+  }
+  if (m_size == 1) {
+    tvRefcountedDecRef(&elm0);
   }
 }
 
-void c_Tuple::t___construct() {
+void c_Pair::t___construct() {
   Object e(SystemLib::AllocRuntimeExceptionObject(
-    "Tuples cannot be created using the new operator"));
+    "Pairs cannot be created using the new operator"));
   throw e;
 }
 
-Array c_Tuple::toArrayImpl() const {
-  ArrayInit ai(m_size, ArrayInit::vectorInit);
-  uint sz = m_size;
-  for (uint i = 0; i < sz; ++i) {
-    ai.set(tvAsCVarRef(&getData()[i]));
-  }
+Array c_Pair::toArrayImpl() const {
+  ArrayInit ai(2, ArrayInit::vectorInit);
+  ai.set(tvAsCVarRef(&elm0));
+  ai.set(tvAsCVarRef(&elm1));
   return ai.create();
 }
 
-Array c_Tuple::o_toArray() const {
+Array c_Pair::o_toArray() const {
   check_collection_cast_to_array();
   return toArrayImpl();
 }
 
-ObjectData* c_Tuple::clone() {
-  auto tup = c_Tuple::alloc(m_size);
-  tup->incRefCount();
-  uint sz = tup->m_size = m_size;
-  TypedValue* src = getData();
-  TypedValue* dst = tup->getData();
-  for (int i = 0; i < sz; ++i) {
-    tvDup(&src[i], &dst[i]);
-  }
-  return tup;
+ObjectData* c_Pair::clone() {
+  auto pair = NEWOBJ(c_Pair)();
+  pair->incRefCount();
+  pair->m_size = 2;
+  tvDup(&elm0, &pair->elm0);
+  tvDup(&elm1, &pair->elm1);
+  return pair;
 }
 
-bool c_Tuple::t_isempty() {
-  return (m_size == 0);
+bool c_Pair::t_isempty() {
+  return false;
 }
 
-int64_t c_Tuple::t_count() {
-  return m_size;
+int64_t c_Pair::t_count() {
+  return 2;
 }
 
-Object c_Tuple::t_items() {
+Object c_Pair::t_items() {
   return this;
 }
 
-Object c_Tuple::t_keys() {
+Object c_Pair::t_keys() {
   return SystemLib::AllocKeysIterableObject(this);
 }
 
-Variant c_Tuple::t_at(CVarRef key) {
+Variant c_Pair::t_at(CVarRef key) {
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
   }
@@ -3132,7 +3111,7 @@ Variant c_Tuple::t_at(CVarRef key) {
   return init_null_variant;
 }
 
-Variant c_Tuple::t_get(CVarRef key) {
+Variant c_Pair::t_get(CVarRef key) {
   if (key.isInteger()) {
     TypedValue* tv = get(key.toInt64());
     if (tv) {
@@ -3145,7 +3124,7 @@ Variant c_Tuple::t_get(CVarRef key) {
   return init_null_variant;
 }
 
-bool c_Tuple::t_containskey(CVarRef key) {
+bool c_Pair::t_containskey(CVarRef key) {
   if (key.isInteger()) {
     return contains(key.toInt64());
   }
@@ -3153,49 +3132,49 @@ bool c_Tuple::t_containskey(CVarRef key) {
   return false;
 }
 
-Array c_Tuple::t_toarray() {
+Array c_Pair::t_toarray() {
   return toArrayImpl();
 }
 
-Object c_Tuple::t_getiterator() {
-  c_TupleIterator* it = NEWOBJ(c_TupleIterator)();
+Object c_Pair::t_getiterator() {
+  c_PairIterator* it = NEWOBJ(c_PairIterator)();
   it->m_obj = this;
   it->m_pos = 0;
   return it;
 }
 
-void c_Tuple::throwOOB(int64_t key) {
+void c_Pair::throwOOB(int64_t key) {
   throwIntOOB(key, true);
 }
 
-void c_Tuple::throwBadKeyType() {
+void c_Pair::throwBadKeyType() {
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-    "Only integer keys may be used with Tuples"));
+    "Only integer keys may be used with Pairs"));
   throw e;
 }
 
-TypedValue* c_Tuple::OffsetGet(ObjectData* obj, TypedValue* key) {
+TypedValue* c_Pair::OffsetGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  auto tup = static_cast<c_Tuple*>(obj);
+  auto pair = static_cast<c_Pair*>(obj);
   if (key->m_type == KindOfInt64) {
-    return tup->at(key->m_data.num);
+    return pair->at(key->m_data.num);
   }
   throwBadKeyType();
   return NULL;
 }
 
-void c_Tuple::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
+void c_Pair::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   Object e(SystemLib::AllocRuntimeExceptionObject(
-    "Cannot assign to an element of a Tuple"));
+    "Cannot assign to an element of a Pair"));
   throw e;
 }
 
-bool c_Tuple::OffsetIsset(ObjectData* obj, TypedValue* key) {
+bool c_Pair::OffsetIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  auto tup = static_cast<c_Tuple*>(obj);
+  auto pair = static_cast<c_Pair*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
-    result = tup->get(key->m_data.num);
+    result = pair->get(key->m_data.num);
   } else {
     throwBadKeyType();
     result = NULL;
@@ -3203,12 +3182,12 @@ bool c_Tuple::OffsetIsset(ObjectData* obj, TypedValue* key) {
   return result ? isset(tvAsCVarRef(result)) : false;
 }
 
-bool c_Tuple::OffsetEmpty(ObjectData* obj, TypedValue* key) {
+bool c_Pair::OffsetEmpty(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  auto tup = static_cast<c_Tuple*>(obj);
+  auto pair = static_cast<c_Pair*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
-    result = tup->get(key->m_data.num);
+    result = pair->get(key->m_data.num);
   } else {
     throwBadKeyType();
     result = NULL;
@@ -3216,101 +3195,90 @@ bool c_Tuple::OffsetEmpty(ObjectData* obj, TypedValue* key) {
   return result ? empty(tvAsCVarRef(result)) : true;
 }
 
-bool c_Tuple::OffsetContains(ObjectData* obj, TypedValue* key) {
+bool c_Pair::OffsetContains(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
-  auto tup = static_cast<c_Tuple*>(obj);
+  auto pair = static_cast<c_Pair*>(obj);
   if (key->m_type == KindOfInt64) {
-    return tup->contains(key->m_data.num);
+    return pair->contains(key->m_data.num);
   } else {
     throwBadKeyType();
     return false;
   }
 }
 
-void c_Tuple::OffsetAppend(ObjectData* obj, TypedValue* val) {
+void c_Pair::OffsetAppend(ObjectData* obj, TypedValue* val) {
   assert(val->m_type != KindOfRef);
-  auto tup = static_cast<c_Tuple*>(obj);
-  tup->add(val);
+  auto pair = static_cast<c_Pair*>(obj);
+  pair->add(val);
 }
 
-void c_Tuple::OffsetUnset(ObjectData* obj, TypedValue* key) {
+void c_Pair::OffsetUnset(ObjectData* obj, TypedValue* key) {
   Object e(SystemLib::AllocRuntimeExceptionObject(
-    "Cannot unset element of a Tuple"));
+    "Cannot unset element of a Pair"));
   throw e;
 }
 
-bool c_Tuple::Equals(ObjectData* obj1, ObjectData* obj2) {
-  auto tup1 = static_cast<c_Tuple*>(obj1);
-  auto tup2 = static_cast<c_Tuple*>(obj2);
-  uint sz = tup1->m_size;
-  if (sz != tup2->m_size) {
-    return false;
-  }
-  TypedValue* data1 = tup1->getData();
-  TypedValue* data2 = tup2->getData();
-  for (uint i = 0; i < sz; ++i) {
-    if (!equal(tvAsCVarRef(&data1[i]),
-               tvAsCVarRef(&data2[i]))) {
-      return false;
-    }
-  }
-  return true;
+bool c_Pair::Equals(ObjectData* obj1, ObjectData* obj2) {
+  auto pair1 = static_cast<c_Pair*>(obj1);
+  auto pair2 = static_cast<c_Pair*>(obj2);
+  return equal(tvAsCVarRef(&pair1->elm0), tvAsCVarRef(&pair2->elm0)) &&
+         equal(tvAsCVarRef(&pair1->elm1), tvAsCVarRef(&pair2->elm1));
 }
 
-void c_Tuple::Unserialize(ObjectData* obj,
+void c_Pair::Unserialize(ObjectData* obj,
                           VariableUnserializer* uns,
                           int64_t sz,
                           char type) {
+  assert(sz == 2);
   if (type != 'V') {
-    throw Exception("Tuple does not support the '%c' serialization "
+    throw Exception("Pair does not support the '%c' serialization "
                     "format", type);
   }
-  auto tup = static_cast<c_Tuple*>(obj);
-  for (int64_t i = 0; i < sz; ++i) {
-    auto tv = &tup->getData()[tup->m_size];
-    tv->m_type = KindOfNull;
-    ++tup->m_size;
-    tvAsVariant(tv).unserialize(uns, Uns::ColValueMode);
-  }
+  auto pair = static_cast<c_Pair*>(obj);
+  pair->m_size = 2;
+  pair->elm0.m_type = KindOfNull;
+  pair->elm1.m_type = KindOfNull;
+  tvAsVariant(&pair->elm0).unserialize(uns, Uns::ColValueMode);
+  tvAsVariant(&pair->elm1).unserialize(uns, Uns::ColValueMode);
 }
 
-c_TupleIterator::c_TupleIterator(VM::Class* cb) :
+c_PairIterator::c_PairIterator(VM::Class* cb) :
     ExtObjectData(cb) {
 }
 
-c_TupleIterator::~c_TupleIterator() {
+c_PairIterator::~c_PairIterator() {
 }
 
-void c_TupleIterator::t___construct() {
+void c_PairIterator::t___construct() {
 }
 
-Variant c_TupleIterator::t_current() {
-  c_Tuple* tup = m_obj.get();
-  if (!tup->contains(m_pos)) {
+Variant c_PairIterator::t_current() {
+  c_Pair* pair = m_obj.get();
+  if (!pair->contains(m_pos)) {
     throw_iterator_not_valid();
   }
-  return tvAsCVarRef(&tup->getData()[m_pos]);
+  return tvAsCVarRef(&pair->getElms()[m_pos]);
 }
 
-Variant c_TupleIterator::t_key() {
-  c_Tuple* tup = m_obj.get();
-  if (!tup->contains(m_pos)) {
+Variant c_PairIterator::t_key() {
+  c_Pair* pair = m_obj.get();
+  if (!pair->contains(m_pos)) {
     throw_iterator_not_valid();
   }
   return m_pos;
 }
 
-bool c_TupleIterator::t_valid() {
+bool c_PairIterator::t_valid() {
   assert(m_pos >= 0);
-  c_Tuple* tup = m_obj.get();
-  return tup && (m_pos < (ssize_t)tup->m_size);
+  c_Pair* pair = m_obj.get();
+  return pair && (m_pos < ssize_t(2));
 }
 
-void c_TupleIterator::t_next() {
+void c_PairIterator::t_next() {
   m_pos++;
 }
 
-void c_TupleIterator::t_rewind() {
+void c_PairIterator::t_rewind() {
   m_pos = 0;
 }
 
@@ -3336,7 +3304,7 @@ void c_TupleIterator::t_rewind() {
 COLLECTION_MAGIC_METHODS(Vector)
 COLLECTION_MAGIC_METHODS(Map)
 COLLECTION_MAGIC_METHODS(StableMap)
-COLLECTION_MAGIC_METHODS(Tuple)
+COLLECTION_MAGIC_METHODS(Pair)
 
 #undef COLLECTION_MAGIC_METHODS
 
@@ -3344,7 +3312,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());
   int64_t sz = collectionSize(obj);
   if (obj->getCollectionType() == Collection::VectorType ||
-      obj->getCollectionType() == Collection::TupleType) {
+      obj->getCollectionType() == Collection::PairType) {
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
     serializer->writeArrayHeader(sz, true);
     if (serializer->getType() == VariableSerializer::Serialize ||
@@ -3398,8 +3366,8 @@ void collectionDeepCopyTV(TypedValue* tv) {
         case Collection::StableMapType:
           obj = collectionDeepCopyStableMap(static_cast<c_StableMap*>(obj));
           break;
-        case Collection::TupleType:
-          obj = collectionDeepCopyTuple(static_cast<c_Tuple*>(obj));
+        case Collection::PairType:
+          obj = collectionDeepCopyPair(static_cast<c_Pair*>(obj));
           break;
         default:
           assert(false);
@@ -3457,13 +3425,10 @@ ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
   return o.detach();
 }
 
-ObjectData* collectionDeepCopyTuple(c_Tuple* tup) {
-  Object o = tup = static_cast<c_Tuple*>(tup->clone());
-  size_t sz = tup->m_size;
-  TypedValue* data = tup->getData();
-  for (size_t i = 0; i < sz; ++i) {
-    collectionDeepCopyTV(&data[i]);
-  }
+ObjectData* collectionDeepCopyPair(c_Pair* pair) {
+  Object o = pair = static_cast<c_Pair*>(pair->clone());
+  collectionDeepCopyTV(&pair->elm0);
+  collectionDeepCopyTV(&pair->elm1);
   return o.detach();
 }
 
@@ -3472,7 +3437,7 @@ CollectionInit::CollectionInit(int cType, ssize_t nElms) {
     case Collection::VectorType: m_data = NEWOBJ(c_Vector)(); break;
     case Collection::MapType: m_data = NEWOBJ(c_Map)(); break;
     case Collection::StableMapType: m_data = NEWOBJ(c_StableMap)(); break;
-    case Collection::TupleType: m_data = c_Tuple::alloc(nElms); break;
+    case Collection::PairType: m_data = NEWOBJ(c_Pair)(); break;
     default:
       assert(false);
       break;

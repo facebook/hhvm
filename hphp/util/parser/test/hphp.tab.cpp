@@ -1595,7 +1595,7 @@ static const yytype_uint16 yyrline[] =
     2220,  2221,  2222,  2223,  2224,  2225,  2226,  2230,  2231,  2235,
     2244,  2245,  2251,  2252,  2260,  2263,  2267,  2268,  2272,  2273,
     2274,  2275,  2279,  2280,  2284,  2285,  2286,  2288,  2296,  2297,
-    2298,  2309,  2310,  2313,  2316,  2317,  2320,  2324,  2325
+    2298,  2309,  2310,  2313,  2316,  2317,  2320,  2325,  2326
 };
 #endif
 
@@ -10111,27 +10111,28 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2320 "../../../../hphp/util/parser/hphp.y"
-    { only_in_strict_mode(_p); (yyval).reset(); ;}
+    { only_in_strict_mode(_p);
+                                        (yyval).setText("array"); ;}
     break;
 
   case 677:
 
 /* Line 1455 of yacc.c  */
-#line 2324 "../../../../hphp/util/parser/hphp.y"
+#line 2325 "../../../../hphp/util/parser/hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); ;}
     break;
 
   case 678:
 
 /* Line 1455 of yacc.c  */
-#line 2325 "../../../../hphp/util/parser/hphp.y"
+#line 2326 "../../../../hphp/util/parser/hphp.y"
     { (yyval).reset(); ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 10138 "hphp.tab.cpp"
+#line 10139 "hphp.tab.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -10351,7 +10352,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 2328 "../../../../hphp/util/parser/hphp.y"
+#line 2329 "../../../../hphp/util/parser/hphp.y"
 
 bool Parser::parseImpl() {
   return yyparse(this) == 0;

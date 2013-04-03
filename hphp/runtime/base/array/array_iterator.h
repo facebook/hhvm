@@ -30,7 +30,7 @@ struct TypedValue;
 class c_Vector;
 class c_Map;
 class c_StableMap;
-class c_Tuple;
+class c_Pair;
 namespace VM {
   struct Iter;
 }
@@ -194,9 +194,9 @@ class ArrayIter {
     assert(hasCollection() && getCollectionType() == Collection::StableMapType);
     return (c_StableMap*)((intptr_t)m_obj & ~1);
   }
-  c_Tuple* getTuple() {
-    assert(hasCollection() && getCollectionType() == Collection::TupleType);
-    return (c_Tuple*)((intptr_t)m_obj & ~1);
+  c_Pair* getPair() {
+    assert(hasCollection() && getCollectionType() == Collection::PairType);
+    return (c_Pair*)((intptr_t)m_obj & ~1);
   }
   ObjectData* getObject() {
     assert(!hasArrayData());

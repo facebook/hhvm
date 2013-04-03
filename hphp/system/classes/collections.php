@@ -52,7 +52,7 @@ class MapItemsIterator implements Iterator {
       "Call to undefined method MapItemsIterator::keys()");
   }
   public function current() {
-    return Tuple {$this->it->key(), $this->it->current()};
+    return Pair {$this->it->key(), $this->it->current()};
   }
 }
 

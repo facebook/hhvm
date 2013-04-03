@@ -309,7 +309,7 @@ enum Type {
   VectorType = 1,
   MapType = 2,
   StableMapType = 3,
-  TupleType = 4,
+  PairType = 4,
   MaxNumTypes = 5
 };
 }

@@ -2858,6 +2858,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         if (op == T_COLLECTION) {
           ScalarExpressionPtr cls =
             static_pointer_cast<ScalarExpression>(b->getExp1());
+          int nElms = 0;
+          ExpressionListPtr el;
+          if (b->getExp2()) {
+            el = static_pointer_cast<ExpressionList>(b->getExp2());
+            nElms = el->getCount();
+          }
           const std::string* clsName = nullptr;
           cls->getString(clsName);
           int cType = 0;
@@ -2867,24 +2873,21 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             cType = Collection::MapType;
           } else if (!strcasecmp(clsName->c_str(), "stablemap")) {
             cType = Collection::StableMapType;
-          } else if (!strcasecmp(clsName->c_str(), "tuple")) {
-            cType = Collection::TupleType;
+          } else if (!strcasecmp(clsName->c_str(), "pair")) {
+            cType = Collection::PairType;
+            if (nElms != 2) {
+              throw IncludeTimeFatalException(b,
+                "Pair objects must have exactly 2 elements");
+            }
           } else {
             throw IncludeTimeFatalException(b,
-              "Cannot use collection initialization for "
-              "non-collection class");
+              "Cannot use collection initialization for non-collection class");
           }
           bool kvPairs = (cType == Collection::MapType ||
                           cType == Collection::StableMapType);
-          int nElems = 0;
-          ExpressionListPtr el;
-          if (b->getExp2()) {
-            el = static_pointer_cast<ExpressionList>(b->getExp2());
-            nElems = el->getCount();
-          }
-          e.NewCol(cType, nElems);
+          e.NewCol(cType, nElms);
           if (kvPairs) {
-            for (int i = 0; i < nElems; i++) {
+            for (int i = 0; i < nElms; i++) {
               ArrayPairExpressionPtr ap(
                 static_pointer_cast<ArrayPairExpression>((*el)[i]));
               ExpressionPtr key = ap->getName();
@@ -2900,7 +2903,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               e.ColAddElemC();
             }
           } else {
-            for (int i = 0; i < nElems; i++) {
+            for (int i = 0; i < nElms; i++) {
               ArrayPairExpressionPtr ap(
                 static_pointer_cast<ArrayPairExpression>((*el)[i]));
               ExpressionPtr key = ap->getName();

@@ -470,8 +470,9 @@ DefineFunction(
     'desc'   => "Gets an array of the function's argument list.\n\nThis function may be used in conjunction with func_get_arg() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => VariantVec,
+      'type'   => Variant,
       'desc'   => "Returns an array in which each element is a copy of the corresponding member of the current user-defined function's argument list.",
+      'predicted_type' => VariantVec,
     ),
     'taint_observer' => false,
   ));

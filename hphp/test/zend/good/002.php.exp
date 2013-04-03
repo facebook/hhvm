@@ -1,0 +1,45 @@
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in hphp/test/zend/good/002.php on line 4
+bool(false)
+HipHop Warning: func_get_arg():  Argument 0 not passed to function in hphp/test/zend/good/002.php on line 5
+bool(false)
+HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/good/002.php on line 6
+bool(false)
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in hphp/test/zend/good/002.php on line 4
+bool(false)
+int(10)
+HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/good/002.php on line 6
+bool(false)
+int(1)
+HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/good/002.php on line 11
+bool(false)
+HipHop Warning: test2() expects exactly 1 parameter, 0 given in hphp/test/zend/good/002.php on line 10
+HipHop Warning: func_get_arg():  Argument 0 not passed to function in hphp/test/zend/good/002.php on line 10
+bool(false)
+HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/good/002.php on line 11
+bool(false)
+int(1)
+int(2)
+HipHop Warning: func_get_arg():  Argument 2 not passed to function in hphp/test/zend/good/002.php on line 17
+bool(false)
+HipHop Warning: func_get_arg():  The argument number should be >= 0 in hphp/test/zend/good/002.php on line 4
+bool(false)
+HipHop Warning: func_get_arg():  Argument 0 not passed to function in hphp/test/zend/good/002.php on line 5
+bool(false)
+HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/good/002.php on line 6
+bool(false)
+HipHop Warning: test3() expects exactly 2 parameters, 1 given in hphp/test/zend/good/002.php on line 15
+int(1)
+HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/good/002.php on line 16
+bool(false)
+HipHop Warning: func_get_arg():  Argument 2 not passed to function in hphp/test/zend/good/002.php on line 17
+bool(false)
+int(1)
+int(2)
+HipHop Warning: func_get_arg():  Argument 2 not passed to function in hphp/test/zend/good/002.php on line 17
+bool(false)
+int(1)
+HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/good/002.php on line 33
+bool(false)
+HipHop Warning: func_get_arg():  Called from the global scope - no function context in hphp/test/zend/good/002.php on line 38
+bool(false)
+Done

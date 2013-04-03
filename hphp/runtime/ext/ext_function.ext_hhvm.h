@@ -215,14 +215,14 @@ arg_num => rsi
 TypedValue* fh_func_get_arg(TypedValue* _rv, int arg_num) asm("_ZN4HPHP14f_func_get_argEi");
 
 /*
-HPHP::Array HPHP::f_func_get_args()
+HPHP::Variant HPHP::f_func_get_args()
 _ZN4HPHP15f_func_get_argsEv
 
 (return value) => rax
 _rv => rdi
 */
 
-Value* fh_func_get_args(Value* _rv) asm("_ZN4HPHP15f_func_get_argsEv");
+TypedValue* fh_func_get_args(TypedValue* _rv) asm("_ZN4HPHP15f_func_get_argsEv");
 
 /*
 long HPHP::f_func_num_args()

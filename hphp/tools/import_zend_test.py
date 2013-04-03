@@ -12,8 +12,14 @@ import subprocess
 import sys
 
 bad_tests = (
-    'unset_cv05.php', 
-    'unset_cv06.php',
+    '/unset_cv05.php',
+    '/unset_cv06.php',
+)
+
+use_hhvm_output = (
+    '/001.php',
+    '/002.php',
+    '/003.php',
 )
 
 errors = (
@@ -104,6 +110,9 @@ def isOkDiff(original_name):
     for test in bad_tests:
         if test in original_name:
             return False
+    for test in use_hhvm_output:
+        if test in original_name:
+            return True
 
     filename = original_name + '.diff'
     # no diff file or is empty

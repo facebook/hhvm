@@ -895,23 +895,22 @@ TypedValue* fg_func_get_arg(HPHP::VM::ActRec *ar) {
 
 
 /*
-HPHP::Array HPHP::f_func_get_args()
+HPHP::Variant HPHP::f_func_get_args()
 _ZN4HPHP15f_func_get_argsEv
 
 (return value) => rax
 _rv => rdi
 */
 
-Value* fh_func_get_args(Value* _rv) asm("_ZN4HPHP15f_func_get_argsEv");
+TypedValue* fh_func_get_args(TypedValue* _rv) asm("_ZN4HPHP15f_func_get_argsEv");
 
 TypedValue* fg_func_get_args(HPHP::VM::ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 0LL) {
-      rv.m_type = KindOfArray;
-      fh_func_get_args((&rv.m_data));
-      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+      fh_func_get_args((&(rv)));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
       frame_free_locals_no_this_inl(ar, 0);
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;

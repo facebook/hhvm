@@ -263,7 +263,25 @@ Variant f_func_get_arg(int arg_num) {
   CallerFrame cf;
   ActRec* ar = cf();
 
-  if (ar == NULL || arg_num < 0 || arg_num >= ar->numArgs()) {
+  if (ar == NULL) {
+    return false;
+  }
+  if (ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
+    raise_warning(
+      "func_get_arg():  Called from the global scope - no function context"
+    );
+    return false;
+  }
+  if (arg_num < 0) {
+    raise_warning(
+      "func_get_arg():  The argument number should be >= 0"
+    );
+    return false;
+  }
+  if (arg_num >= ar->numArgs()) {
+    raise_warning(
+      "func_get_arg():  Argument %d not passed to function", arg_num
+    );
     return false;
   }
 
@@ -332,9 +350,16 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   return Array(retval);
 }
 
-Array f_func_get_args() {
+Variant f_func_get_args() {
   CallerFrame cf;
-  return hhvm_get_frame_args(cf());
+  ActRec* ar = cf();
+  if (ar && ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
+    raise_warning(
+      "func_get_args():  Called from the global scope - no function context"
+    );
+    return false;
+  }
+  return hhvm_get_frame_args(ar);
 }
 
 Array func_get_args(int num_args, CArrRef params, CArrRef args) {
@@ -361,6 +386,12 @@ int64_t f_func_num_args() {
   CallerFrame cf;
   ActRec* ar = cf();
   if (ar == NULL) {
+    return -1;
+  }
+  if (ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
+    raise_warning(
+      "func_num_args():  Called from the global scope - no function context"
+    );
     return -1;
   }
   return ar->numArgs();

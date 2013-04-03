@@ -398,10 +398,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
   } else {
     const string &s = name.text();
     if (s == "func_num_args" || s == "func_get_args" || s == "func_get_arg") {
-      if (m_hasCallToGetArgs.empty()) {
-        PARSE_ERROR("%s() Called from the global scope - no function context",
-                    s.c_str());
-      }
       m_hasCallToGetArgs.back() = true;
     }
 

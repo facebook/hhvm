@@ -7565,7 +7565,7 @@ void TranslatorX64::translateContEnter(const Tracelet& t,
 
   // We're between tracelets; hardcode the register
   a.    loadq  (rStashedAR[AROFF(m_func)], rax);
-  a.    loadq  (rax[Func::funcBodyOff()], rax);
+  a.    loadq  (rax[Func::prologueTableOff() + sizeof(TCA)], rax);
 
   a.    call   (rax);
 }

@@ -187,35 +187,9 @@ asm (
 #endif
 );
 
-asm (
-  ".byte 0\n"
-  ".align 16\n"
-  ".globl __contEnterHelperThunk\n"
-"__contEnterHelperThunk:\n"
-#if defined(__x86_64__)
-  // The generator body's AR is in rStashedAR. rVmFp still points to the frame
-  // above the generator. The prologue is responsible for setting rVmFp. Even
-  // if we can't get a prologue, funcBodyHelper syncs the new FP, and the
-  // "resume helper" sets the hardware FP from that.
-  // This helper is called from the tc - so we need to maintain stack parity,
-  // hence the pop/push
-  "pop 0x8(%r15)\n"
-  "mov %r15, %rdi\n"
-  "call funcBodyHelper\n"
-  "push 0x8(%r15)\n"
-  "jmp *%rax\n"
-  "ud2\n"
-#elif defined(__AARCH64EL__)
-  "brk 0\n"
-#else
-# error You sure have your work cut out for you
-#endif
-);
-
 /*
- * Two different "function"-entry paths come through here: entering functions
- * via FCallArray, and entering generator bodies. The common element is that
- * neither requires different entry points for different callsite arities.
+ * This is used to generate an entry point for the entry
+ * to a function, after the prologue has run.
  */
 TCA funcBodyHelper(ActRec* fp) {
   g_vmContext->m_fp = fp;
@@ -242,22 +216,12 @@ TCA funcBodyHelper(ActRec* fp) {
   Func* func = const_cast<Func*>(fp->m_func);
   SrcKey sk(func, func->base());
 
-  TCA tca;
-  if (func->isGenerator()) {
-    assert(nargs == 1);
-    tca = tx64->funcPrologue(func, nargs);
-  } else {
-    tca = tx64->getCallArrayProlog(func);
-  }
+  TCA tca = tx64->getCallArrayProlog(func);
 
   if (tca) {
     func->setFuncBody(tca);
   } else {
-    if (func->isGenerator()) {
-      tca = Translator::Get()->getResumeHelperRet();
-    } else {
-      tca = Translator::Get()->getResumeHelper();
-    }
+    tca = Translator::Get()->getResumeHelper();
   }
   tl_regState = REGSTATE_DIRTY;
   return tca;

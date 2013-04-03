@@ -63,7 +63,7 @@ for x in $QTESTS_SKIP ; do
 done
 
 qtests=$(comm -23 \
-    <(find test/$TEST_PATH -maxdepth 1 -name \*.php -o -name \*.hhas | sort) \
+    <(find test/$TEST_PATH -name \*.php -o -name \*.hhas | sort) \
     <(echo $skip_list|sed -e 's/ /\n/g'|sort))
 
 repo_args="-v Repo.Local.Mode=-- -v Repo.Central.Path=$VERIFY_HHBC"
@@ -73,7 +73,7 @@ hhir_args="$jit_args -v Eval.JitUseIR=true -v Eval.HHIRDisableTx64=true"
 
 ######################################################################
 
-cmd="$HHVM --config test/$TEST_PATH/cli.hdf "
+cmd="$HHVM --config test/cli.hdf "
 if [ x"$MODE" = x"server" ] ; then
     : ${PORT:=8080}
     : ${TEST_HOME:=.}

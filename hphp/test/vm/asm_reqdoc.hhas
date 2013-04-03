@@ -33,7 +33,7 @@
   Print
   PopC
 
-  String "reqtests/mod.php"
+  String "reqtests/mod.inc"
   Req
   PopC
 
@@ -69,7 +69,7 @@
     Print
     PopC
 
-    String "test/vm/reqtests/mod.php"
+    String "test/vm/reqtests/mod.inc"
     ReqDoc
     PopC
 

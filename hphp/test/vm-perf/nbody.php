@@ -142,4 +142,3 @@ function n_body($n) {
 }
 
 n_body(100000);
-

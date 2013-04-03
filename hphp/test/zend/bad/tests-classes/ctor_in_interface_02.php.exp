@@ -1,0 +1,1 @@
+HipHop Fatal error: Declaration of implem13::__construct() must be compatible with constr3::__construct($a) in hphp/test/zend/bad/tests-classes/ctor_in_interface_02.php on line %d

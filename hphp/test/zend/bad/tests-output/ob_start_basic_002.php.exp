@@ -1,0 +1,16 @@
+--> Use callback 'return_empty_string':
+
+
+--> Use callback 'return_false':
+My output.
+
+--> Use callback 'return_null':
+
+
+--> Use callback 'return_string':
+I stole your output.
+
+--> Use callback 'return_zero':
+0
+
+==DONE==

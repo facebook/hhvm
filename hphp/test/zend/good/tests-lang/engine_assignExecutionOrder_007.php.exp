@@ -1,0 +1,27 @@
+Array
+(
+    [2] => Array
+        (
+            [3] => stdClass
+        )
+
+    [0] => Array
+        (
+            [1] => stdClass Object
+                (
+                )
+
+        )
+
+)
+stdClass Object
+(
+    [a] => stdClass Object
+        (
+            [b] => stdClass Object
+                (
+                )
+
+        )
+
+)

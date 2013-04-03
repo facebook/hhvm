@@ -1,0 +1,17 @@
+string(3) "Joe"
+string(6) "JoeFoo"
+string(9) "JoeFooBar"
+---ArrayOverloading---
+array(1) {
+  ["name"]=>
+  string(3) "Joe"
+}
+string(3) "Joe"
+string(6) "JoeFoo"
+array(1) {
+  ["name"]=>
+  string(6) "JoeFoo"
+}
+string(6) "JoeFoo"
+string(6) "JoeFoo"
+===DONE===

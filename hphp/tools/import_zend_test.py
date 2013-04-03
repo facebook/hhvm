@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """
-Copies all the Zend tests to test/zend/bad, runs them in interp mode,
-then copies the good ones to test/zend/good
+Copies all the Zend tests to a temporary directory, runs them in interp mode,
+then copies the good ones to test/zend/good and the bad ones to test/zend/bad.
 """
 
 import argparse
@@ -17,6 +17,7 @@ bad_tests = (
     'unset_cv06.php',
 
     # unpredictable numbers - we need param matching
+    'bug29971.php',
     'bug35143.php',
     'gettimeofday_basic.php',
     'localtime_basic.php',
@@ -44,6 +45,9 @@ bad_tests = (
    
     # not implemented extensions
     'phar',
+
+    # works in interp but not others
+    'bug25922.php',
 )
 
 errors = (
@@ -74,6 +78,11 @@ parser.add_argument(
     type=str,
     help="only import tests whose path matches this regex."
 )
+parser.add_argument(
+    "--dirty",
+    action='store_true',
+    help="leave around test/zend/all directory."
+)
 args = parser.parse_args()
 
 
@@ -102,33 +111,58 @@ def walk(filename, source):
         return sections
 
     sections = parse_headers(file(filename).read())
+    for i in sections.keys():
+        sections[i] = '\n'.join(sections[i])
+
     if not sections.has_key('FILE'):
         print "Malformed test, no --FILE--: ", filename
         return
 
-    test = '\n'.join(sections['FILE'])
+    test = sections['FILE']
     
     if sections.has_key('EXPECT'):
-        exp = '\n'.join(sections['EXPECT'])
+        exp = sections['EXPECT']
     elif sections.has_key('EXPECTF'):
-        exp = '\n'.join(sections['EXPECTF'])
+        exp = sections['EXPECTF']
     else:
         print "Malformed test, no --EXPECT-- or --EXPECTF--: ", filename
         return
 
+    if sections.has_key('POST'):
+        test = test.replace(
+            '<?php', 
+            '<?php\nparse_str("' + sections['POST'] + '", $_POST);\n'
+        )
+    if sections.has_key('GET'):
+        test = test.replace(
+            '<?php', 
+            '<?php\nparse_str("' + sections['GET'] + '", $_GET);\n'
+        )
+    if sections.has_key('COOKIE'):
+        test = test.replace(
+            '<?php', 
+            '<?php\n$_COOKIE = http_parse_cookie("' + sections['COOKIE'] + '");\n'
+        )
+
+    unsupported_sections = ('INI', 'POST_RAW')
+    for name in unsupported_sections:
+        if sections.has_key(name):
+            print "Unsupported test with section --%s--: " % name, filename
+            return
+
     dest_filename = os.path.basename(filename).replace('.phpt', '.php')
     cur_dir = os.path.dirname(__file__)
     source_dir = source.lower().replace('/tests', '').replace('/', '-')
-    dest_dir = os.path.join(cur_dir, '../test/zend/bad', source_dir)
-    mkdir_p(dest_dir)
-    full_dest_filename = os.path.join(dest_dir, dest_filename)
+    dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)
+    mkdir_p(dest_subdir)
+    full_dest_filename = os.path.join(dest_subdir, dest_filename)
 
     if 'bug60771.php' in full_dest_filename:
         test = test.replace("?>", "unlink('test.php');\n?>")
     if 'bug44805.php' in full_dest_filename:
         test = test.replace("1)) {\n\tunlink($file2", "2)) {\n\tunlink($file2")
 
-    exp = exp.replace('in %s on', 'in %s/%s on' % ('hphp/test/zend/bad', dest_filename))
+    exp = exp.replace('in %s on', 'in %s/%s/%s on' % ('hphp/test/zend/all', source_dir, dest_filename))
 
     # PHP puts a newline in that we don't
     exp = exp.replace('\n\nFatal error:', '\nFatal error:')
@@ -184,11 +218,11 @@ if args.zend_path:
 
 if not args.dont_run:
     env = os.environ
-    env.update({'VQ':'interp', 'TEST_PATH':'zend/bad'})
+    env.update({'VQ':'interp', 'TEST_PATH':'zend/all'})
     proc = subprocess.Popen(['tools/run_verify.sh'], env=env)
     proc.wait()
 
-for root, dirs, files in os.walk('test/zend/bad'):
+for root, dirs, files in os.walk('test/zend/all'):
     for filename in files:
         if not filename.endswith('.php'):
             continue
@@ -204,8 +238,10 @@ for root, dirs, files in os.walk('test/zend/bad'):
         if not all_exist(filename):
             continue
 
-        good_file = filename.replace('bad', 'good', 1)
+        good_file = filename.replace('all', 'good', 1)
+        bad_file = filename.replace('all', 'bad', 1)
         mkdir_p(os.path.dirname(good_file))
+        mkdir_p(os.path.dirname(bad_file))
 
         def isOkDiff(original_name):
             for test in bad_tests:
@@ -288,14 +324,25 @@ for root, dirs, files in os.walk('test/zend/bad'):
             return True
 
         if isOkDiff(filename):
-            os.rename(filename, good_file)
-            file(good_file+'.exp', 'w').write(
-                file(filename+'.out').read().replace('/bad', '/good')
-            )
-            os.unlink(filename+'.exp')
-
+            dest_file = good_file
+            source_file_exp = filename+'.out'
+            delete_file = bad_file
+            subpath = 'good'
         else:
-            if not os.path.exists(good_file):
-                continue
-            os.unlink(good_file)
-            os.unlink(good_file+'.exp')
+            dest_file = bad_file
+            source_file_exp = filename+'.exp'
+            delete_file = good_file
+            subpath = 'bad'
+
+        os.rename(filename, dest_file)
+        file(dest_file+'.exp', 'w').write(
+            file(source_file_exp).read().replace('/all', '/' + subpath)
+        )
+        if os.path.exists(delete_file):
+            os.unlink(delete_file)
+        if os.path.exists(delete_file+'.exp'):
+            os.unlink(delete_file+'.exp')
+
+if not args.dirty:
+    import shutil
+    shutil.rmtree('test/zend/all')

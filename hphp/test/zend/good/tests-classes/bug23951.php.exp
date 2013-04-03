@@ -1,0 +1,15 @@
+A Object
+(
+    [a_var] => Array
+        (
+            [1] => foo1_value
+            [2] => foo2_value
+        )
+
+)
+Array
+(
+    [1] => foo1_value
+    [2] => foo2_value
+)
+foo

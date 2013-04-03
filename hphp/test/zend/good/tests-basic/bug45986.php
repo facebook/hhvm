@@ -1,0 +1,3 @@
+<?php
+rename('foo', 'bar');
+?>

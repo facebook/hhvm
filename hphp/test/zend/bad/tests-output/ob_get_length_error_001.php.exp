@@ -1,0 +1,4 @@
+
+Too many arguments
+HipHop Warning: Missing argument 0 for ob_get_length() in hphp/test/zend/bad/tests-output/ob_get_length_error_001.php on line 10
+NULL

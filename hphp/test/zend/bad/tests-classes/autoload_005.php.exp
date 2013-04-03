@@ -1,0 +1,10 @@
+bool(false)
+bool(false)
+Test::__destruct
+bool(false)
+bool(false)
+__autoload(autoload_root)
+__autoload(autoload_derived)
+object(autoload_derived)#%d (0) {
+}
+===DONE===

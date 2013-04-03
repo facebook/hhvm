@@ -1,0 +1,68 @@
+string(3) "Foo"
+string(6) "FooBar"
+string(9) "FooBarBaz"
+===ArrayOverloading===
+ArrayReferenceProxy::__construct(Array)
+object(ArrayReferenceProxy)#%d (2) {
+  ["object":"ArrayReferenceProxy":private]=>
+  object(Peoples)#%d (1) {
+    ["person"]=>
+    array(1) {
+      [0]=>
+      &array(1) {
+        ["name"]=>
+        string(3) "Foo"
+      }
+    }
+  }
+  ["element":"ArrayReferenceProxy":private]=>
+  &array(1) {
+    ["name"]=>
+    string(3) "Foo"
+  }
+}
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+string(3) "Foo"
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetSet(Array, name, FooBar)
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+string(6) "FooBar"
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetSet(Array, name, FooBarBar)
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+string(9) "FooBarBar"
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+ArrayReferenceProxy::offsetSet(Array, name, FooBarBarBaz)
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+string(12) "FooBarBarBaz"
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetUnset(Array, name)
+ArrayReferenceProxy::__construct(Array)
+object(ArrayReferenceProxy)#%d (2) {
+  ["object":"ArrayReferenceProxy":private]=>
+  object(Peoples)#%d (1) {
+    ["person"]=>
+    array(1) {
+      [0]=>
+      &array(0) {
+      }
+    }
+  }
+  ["element":"ArrayReferenceProxy":private]=>
+  &array(0) {
+  }
+}
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+NULL
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetSet(Array, name, BlaBla)
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+string(6) "BlaBla"
+===DONE===

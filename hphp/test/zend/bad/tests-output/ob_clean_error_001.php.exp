@@ -1,0 +1,6 @@
+*** Testing ob_clean() : error conditions ***
+
+-- Testing ob_clean() function with one argument --
+HipHop Warning: Missing argument 0 for ob_clean() in hphp/test/zend/bad/tests-output/ob_clean_error_001.php on line 13
+NULL
+Done

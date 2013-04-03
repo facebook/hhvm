@@ -1,0 +1,1 @@
+HipHop Fatal error: derived cannot implement base - it is not an interface in hphp/test/zend/good/tests-classes/interface_class.php on line 5

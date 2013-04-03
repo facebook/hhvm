@@ -1,0 +1,19 @@
+array(1) {
+  [0]=>
+  array(7) {
+    ["name"]=>
+    string(22) "default output handler"
+    ["type"]=>
+    int(0)
+    ["flags"]=>
+    int(112)
+    ["level"]=>
+    int(0)
+    ["chunk_size"]=>
+    int(0)
+    ["buffer_size"]=>
+    int(16384)
+    ["buffer_used"]=>
+    int(0)
+  }
+}

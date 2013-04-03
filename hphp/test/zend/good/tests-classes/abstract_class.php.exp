@@ -1,0 +1,2 @@
+Call to function show()
+HipHop Fatal error: Cannot instantiate abstract class fail in hphp/test/zend/good/tests-classes/abstract_class.php on line 16

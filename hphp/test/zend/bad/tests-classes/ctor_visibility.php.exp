@@ -1,0 +1,5 @@
+Derived::__construct()
+Test::__construct()
+TestPriv::__construct()
+DerivedPriv::__construct()
+HipHop Fatal error: Cannot call private TestPriv::__construct() in %sctor_visibility.php on line %d

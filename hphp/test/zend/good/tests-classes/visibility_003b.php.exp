@@ -1,0 +1,1 @@
+HipHop Fatal error: Access level to fail::f3() must be protected (as in class same) or weaker in hphp/test/zend/good/tests-classes/visibility_003b.php on line 21

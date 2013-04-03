@@ -1,0 +1,1 @@
+HipHop Fatal error: ob_start(): Cannot use output buffering in output buffering display handlers in hphp/test/zend/bad/tests-output/ob_start_error_005.php on line 9

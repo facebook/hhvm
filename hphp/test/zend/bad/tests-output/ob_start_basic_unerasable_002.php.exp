@@ -1,0 +1,9 @@
+[callback:1]All of the following calls will fail to clean/remove the topmost buffer:
+HipHop Notice: ob_clean(): failed to delete buffer of callback (0) in hphp/test/zend/bad/tests-output/ob_start_basic_unerasable_002.php on line 11
+bool(false)
+HipHop Notice: ob_end_clean(): failed to discard buffer of callback (0) in hphp/test/zend/bad/tests-output/ob_start_basic_unerasable_002.php on line 12
+bool(false)
+HipHop Notice: ob_end_flush(): failed to send buffer of callback (0) in hphp/test/zend/bad/tests-output/ob_start_basic_unerasable_002.php on line 13
+bool(false)
+The OB nesting will still be 1 level deep:
+int(1)

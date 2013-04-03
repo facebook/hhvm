@@ -1,0 +1,4 @@
+[callback:1]This call will obtain the content, but will not flush the buffer.
+HipHop Notice: ob_get_flush(): failed to send buffer of callback (0) in hphp/test/zend/bad/tests-output/ob_start_basic_unerasable_004.php on line 11
+HipHop Notice: ob_get_flush(): failed to delete buffer of callback (0) in hphp/test/zend/bad/tests-output/ob_start_basic_unerasable_004.php on line 11
+string(65) "This call will obtain the content, but will not flush the buffer."

@@ -1,0 +1,4 @@
+HipHop Warning: ob_start(): array must have exactly two members in hphp/test/zend/bad/tests-output/ob_start_error_003.php on line %d
+HipHop Notice: ob_start(): failed to create buffer in hphp/test/zend/bad/tests-output/ob_start_error_003.php on line 11
+bool(false)
+done

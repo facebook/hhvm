@@ -1,0 +1,7 @@
+[callback:1]Attempt to flush unerasable buffer - should fail... 
+HipHop Notice: ob_flush(): failed to flush buffer of callback (0) in hphp/test/zend/bad/tests-output/ob_start_basic_unerasable_005.php on line 11
+bool(false)
+string(%d) "Attempt to flush unerasable buffer - should fail... 
+HipHop Notice: ob_flush(): failed to flush buffer of callback (0) in hphp/test/zend/bad/tests-output/ob_start_basic_unerasable_005.php on line 11
+bool(false)
+"

@@ -1,0 +1,3 @@
+HipHop Notice: Undefined property: foo::$x in %sbug27468.php on line 4
+HipHop Warning: Invalid argument supplied for foreach() in %sbug27468.php on line 4
+OK

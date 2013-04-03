@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot override final method pass::show() in hphp/test/zend/good/tests-classes/final_redeclare.php on line 11

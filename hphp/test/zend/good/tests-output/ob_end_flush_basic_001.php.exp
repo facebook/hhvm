@@ -1,0 +1,9 @@
+*** Testing ob_end_flush() : basic functionality ***
+
+-- Testing ob_end_flush() function with Zero arguments --
+bool(false)
+bool(true)
+Hello
+bool(true)
+bool(false)
+Done

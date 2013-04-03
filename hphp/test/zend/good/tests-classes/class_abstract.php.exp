@@ -1,0 +1,2 @@
+base
+HipHop Fatal error: Cannot instantiate abstract class base in hphp/test/zend/good/tests-classes/class_abstract.php on line 15

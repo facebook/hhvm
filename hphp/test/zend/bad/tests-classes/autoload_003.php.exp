@@ -1,0 +1,4 @@
+__autoload(autoload_root)
+__autoload(autoload_derived)
+bool(true)
+===DONE===

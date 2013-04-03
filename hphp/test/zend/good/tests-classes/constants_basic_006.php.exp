@@ -1,0 +1,21 @@
+string(5) "hello"
+array(2) {
+  ["nasty"]=>
+  string(4) "test"
+  ["hello"]=>
+  string(5) "nasty"
+}
+string(5) "hello"
+array(2) {
+  ["nasty"]=>
+  string(4) "test"
+  ["hello"]=>
+  string(5) "nasty"
+}
+string(5) "hello"
+array(2) {
+  ["nasty"]=>
+  string(4) "test"
+  ["hello"]=>
+  string(5) "nasty"
+}

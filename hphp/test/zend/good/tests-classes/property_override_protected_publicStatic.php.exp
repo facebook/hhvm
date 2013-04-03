@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot redeclare non-static A::$p as static B::$p in hphp/test/zend/good/tests-classes/property_override_protected_publicStatic.php on line 11

@@ -1,0 +1,1 @@
+HipHop Fatal error: Call to private Derived::__destruct() from context '' in %sdestructor_visibility_001.php on line %d

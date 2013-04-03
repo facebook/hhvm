@@ -1,0 +1,1 @@
+HipHop Fatal error: Access to undeclared static property: C::$p in hphp/test/zend/bad/tests-classes/static_properties_undeclared_assign.php on line 3

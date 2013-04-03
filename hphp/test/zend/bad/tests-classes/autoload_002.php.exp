@@ -1,0 +1,6 @@
+__autoload(autoload_root)
+array(1) {
+  [0]=>
+  string(12) "testFunction"
+}
+===DONE===

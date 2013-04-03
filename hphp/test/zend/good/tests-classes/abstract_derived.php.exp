@@ -1,0 +1,1 @@
+HipHop Fatal error: Class derived contains abstract method show and must therefore be declared abstract in hphp/test/zend/good/tests-classes/abstract_derived.php on line 7

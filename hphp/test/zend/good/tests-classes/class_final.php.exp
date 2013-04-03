@@ -1,0 +1,1 @@
+HipHop Fatal error: Class derived may not inherit from final class (base) in hphp/test/zend/good/tests-classes/class_final.php on line 11

@@ -1,0 +1,49 @@
+ ---> Test arrays: 
+HipHop Warning: ob_start(): array must have exactly two members in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 44
+HipHop Notice: ob_start(): failed to create buffer in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 44
+bool(false)
+Array
+(
+)
+HipHop Warning: ob_start(): class 'f' not found in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 47
+HipHop Notice: ob_start(): failed to create buffer in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 47
+bool(false)
+Array
+(
+)
+HipHop Warning: ob_start(): array must have exactly two members in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 50
+HipHop Notice: ob_start(): failed to create buffer in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 50
+bool(false)
+Array
+(
+)
+HipHop Warning: ob_start(): array must have exactly two members in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 53
+HipHop Notice: ob_start(): failed to create buffer in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 53
+bool(false)
+Array
+(
+)
+HipHop Warning: ob_start(): array must have exactly two members in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 56
+HipHop Notice: ob_start(): failed to create buffer in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 56
+bool(false)
+Array
+(
+)
+C::h[call:1; len:37; id:originalID] - bool(true)
+Array
+(
+    [0] => C::h
+)
+
+C::h[call:2; len:37; id:changedID] - bool(true)
+Array
+(
+    [0] => C::h
+)
+
+HipHop Warning: ob_start(): array must have exactly two members in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 68
+HipHop Notice: ob_start(): failed to create buffer in hphp/test/zend/bad/tests-output/ob_start_basic_006.php on line 68
+bool(false)
+Array
+(
+)

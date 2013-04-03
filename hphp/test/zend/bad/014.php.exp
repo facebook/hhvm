@@ -8,7 +8,7 @@ array(2) {
   [1]=>
   string(%d) "%s"
 }
-HipHop Warning: Missing argument 0 for get_included_files() in hphp/test/zend/bad/014.php on line %d
+HipHop Warning: get_included_files() expects exactly 0 parameters, 2 given in hphp/test/zend/bad/014.php on line %d
 NULL
 array(2) {
   [0]=>
@@ -16,7 +16,7 @@ array(2) {
   [1]=>
   string(%d) "%s"
 }
-HipHop Warning: Missing argument 0 for get_included_files() in hphp/test/zend/bad/014.php on line %d
+HipHop Warning: get_included_files() expects exactly 0 parameters, 1 given in hphp/test/zend/bad/014.php on line %d
 NULL
 array(2) {
   [0]=>

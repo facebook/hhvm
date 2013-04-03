@@ -480,7 +480,7 @@ TypedValue* fg_mb_convert_variables(HPHP::VM::ActRec *ar) {
         return &ar->m_r;
       }
     } else {
-      throw_missing_arguments_nr("mb_convert_variables", count+1, 1);
+      throw_missing_arguments_nr("mb_convert_variables", 3, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

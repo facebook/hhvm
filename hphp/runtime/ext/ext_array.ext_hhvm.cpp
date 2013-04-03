@@ -525,7 +525,7 @@ TypedValue* fg_array_map(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_map", count+1, 1);
+      throw_missing_arguments_nr("array_map", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -574,7 +574,7 @@ TypedValue* fg_array_merge_recursive(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_merge_recursive", count+1, 1);
+      throw_missing_arguments_nr("array_merge_recursive", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -623,7 +623,7 @@ TypedValue* fg_array_merge(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_merge", count+1, 1);
+      throw_missing_arguments_nr("array_merge", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -672,7 +672,7 @@ TypedValue* fg_array_replace_recursive(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_replace_recursive", count+1, 1);
+      throw_missing_arguments_nr("array_replace_recursive", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -721,7 +721,7 @@ TypedValue* fg_array_replace(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_replace", count+1, 1);
+      throw_missing_arguments_nr("array_replace", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -769,7 +769,7 @@ TypedValue* fg_array_multisort(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_multisort", count+1, 1);
+      throw_missing_arguments_nr("array_multisort", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -939,7 +939,7 @@ TypedValue* fg_array_push(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_push", count+1, 1);
+      throw_missing_arguments_nr("array_push", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -1414,7 +1414,7 @@ TypedValue* fg_array_unshift(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_unshift", count+1, 1);
+      throw_missing_arguments_nr("array_unshift", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -1568,7 +1568,7 @@ TypedValue* fg_compact(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("compact", count+1, 1);
+      throw_missing_arguments_nr("compact", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2213,7 +2213,7 @@ TypedValue* fg_array_diff(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_diff", count+1, 1);
+      throw_missing_arguments_nr("array_diff", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2264,7 +2264,7 @@ TypedValue* fg_array_udiff(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_udiff", count+1, 1);
+      throw_missing_arguments_nr("array_udiff", 3, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2314,7 +2314,7 @@ TypedValue* fg_array_diff_assoc(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_diff_assoc", count+1, 1);
+      throw_missing_arguments_nr("array_diff_assoc", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2365,7 +2365,7 @@ TypedValue* fg_array_diff_uassoc(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_diff_uassoc", count+1, 1);
+      throw_missing_arguments_nr("array_diff_uassoc", 3, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2416,7 +2416,7 @@ TypedValue* fg_array_udiff_assoc(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_udiff_assoc", count+1, 1);
+      throw_missing_arguments_nr("array_udiff_assoc", 3, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2468,7 +2468,7 @@ TypedValue* fg_array_udiff_uassoc(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_udiff_uassoc", count+1, 1);
+      throw_missing_arguments_nr("array_udiff_uassoc", 4, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2518,7 +2518,7 @@ TypedValue* fg_array_diff_key(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_diff_key", count+1, 1);
+      throw_missing_arguments_nr("array_diff_key", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2569,7 +2569,7 @@ TypedValue* fg_array_diff_ukey(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_diff_ukey", count+1, 1);
+      throw_missing_arguments_nr("array_diff_ukey", 3, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2619,7 +2619,7 @@ TypedValue* fg_array_intersect(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_intersect", count+1, 1);
+      throw_missing_arguments_nr("array_intersect", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2670,7 +2670,7 @@ TypedValue* fg_array_uintersect(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_uintersect", count+1, 1);
+      throw_missing_arguments_nr("array_uintersect", 3, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2720,7 +2720,7 @@ TypedValue* fg_array_intersect_assoc(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_intersect_assoc", count+1, 1);
+      throw_missing_arguments_nr("array_intersect_assoc", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2771,7 +2771,7 @@ TypedValue* fg_array_intersect_uassoc(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_intersect_uassoc", count+1, 1);
+      throw_missing_arguments_nr("array_intersect_uassoc", 3, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2822,7 +2822,7 @@ TypedValue* fg_array_uintersect_assoc(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_uintersect_assoc", count+1, 1);
+      throw_missing_arguments_nr("array_uintersect_assoc", 3, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2874,7 +2874,7 @@ TypedValue* fg_array_uintersect_uassoc(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_uintersect_uassoc", count+1, 1);
+      throw_missing_arguments_nr("array_uintersect_uassoc", 4, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2924,7 +2924,7 @@ TypedValue* fg_array_intersect_key(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_intersect_key", count+1, 1);
+      throw_missing_arguments_nr("array_intersect_key", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -2975,7 +2975,7 @@ TypedValue* fg_array_intersect_ukey(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("array_intersect_ukey", count+1, 1);
+      throw_missing_arguments_nr("array_intersect_ukey", 3, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

@@ -1,4 +1,4 @@
-HipHop Warning: Missing argument 2 for strcasecmp() in hphp/test/zend/good/005.php on line 3
+HipHop Warning: strcasecmp() expects exactly 2 parameters, 1 given in hphp/test/zend/good/005.php on line 3
 NULL
 int(0)
 int(-3)

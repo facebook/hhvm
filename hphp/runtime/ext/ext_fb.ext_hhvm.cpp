@@ -844,7 +844,7 @@ TypedValue* fg_fb_call_user_func_safe(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("fb_call_user_func_safe", count+1, 1);
+      throw_missing_arguments_nr("fb_call_user_func_safe", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -894,7 +894,7 @@ TypedValue* fg_fb_call_user_func_safe_return(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("fb_call_user_func_safe_return", count+1, 1);
+      throw_missing_arguments_nr("fb_call_user_func_safe_return", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

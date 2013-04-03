@@ -19,10 +19,6 @@ bad_tests = (
 errors = (
     # generic inconsistencies
     ('Variable passed to ([^\s]+)\(\) is not an array or object', 'Invalid operand type was used: expecting an array'),
-
-    # I can't do math with backreferences so write them out
-    ('([^\s]+)\(\) expects exactly 1 parameter, 0 given', r'Missing argument 1 for \1()'),
-    ('([^\s]+)\(\) expects exactly (\d+) parameters, \d+ given', r'Missing argument \2 for \1()'),
 )
 
 parser = argparse.ArgumentParser()

@@ -893,7 +893,7 @@ TypedValue* fg_call_user_method(HPHP::VM::ActRec *ar) {
         return &ar->m_r;
       }
     } else {
-      throw_missing_arguments_nr("call_user_method", count+1, 1);
+      throw_missing_arguments_nr("call_user_method", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

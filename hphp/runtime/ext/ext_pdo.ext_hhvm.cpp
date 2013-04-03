@@ -1750,7 +1750,7 @@ TypedValue* tg_12PDOStatement_setfetchmode(HPHP::VM::ActRec *ar) {
           return &ar->m_r;
         }
       } else {
-        throw_missing_arguments_nr("PDOStatement::setfetchmode", count+1, 1);
+        throw_missing_arguments_nr("PDOStatement::setfetchmode", 1, count, 1);
       }
     } else {
       throw_instance_method_fatal("PDOStatement::setfetchmode");

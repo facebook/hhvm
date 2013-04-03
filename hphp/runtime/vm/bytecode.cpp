@@ -1825,7 +1825,12 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
     for (int i = nargs; i < nparams; ++i) {
       Offset dvInitializer = paramInfo[i].funcletOff();
       if (dvInitializer == InvalidAbsoluteOffset) {
-        raise_warning(Strings::MISSING_ARGUMENT, i + 1, func->name()->data());
+        const char* name = func->name()->data();
+        if (nparams == 1) {
+          raise_warning(Strings::MISSING_ARGUMENT, name, i);
+        } else {
+          raise_warning(Strings::MISSING_ARGUMENTS, name, nparams, i);
+        }
       }
     }
   }

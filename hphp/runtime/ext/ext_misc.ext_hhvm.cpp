@@ -801,7 +801,7 @@ TypedValue* fg_pack(HPHP::VM::ActRec *ar) {
         return &ar->m_r;
       }
     } else {
-      throw_missing_arguments_nr("pack", count+1, 1);
+      throw_missing_arguments_nr("pack", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

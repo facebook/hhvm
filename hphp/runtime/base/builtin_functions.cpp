@@ -567,12 +567,9 @@ void throw_pending_exception(ThreadInfo *info) {
   throw e;
 }
 
-Variant throw_missing_arguments(const char *fn, int num, int level /* = 0 */) {
-  if (level == 2 || RuntimeOption::ThrowMissingArguments) {
-    raise_error("Missing argument %d for %s()", num, fn);
-  } else {
-    raise_warning("Missing argument %d for %s()", num, fn);
-  }
+Variant throw_missing_arguments(const char *fn, int expected, int got,
+                                int level /* = 0 */) {
+  throw_missing_arguments_nr(fn, expected, got, level);
   return uninit_null();
 }
 
@@ -588,7 +585,7 @@ Variant throw_toomany_arguments(const char *fn, int num, int level /* = 0 */) {
 Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
                               int level /* = 0 */) {
   if (cmin >= 0 && count < cmin) {
-    return throw_missing_arguments(fn, count + 1, level);
+    return throw_missing_arguments(fn, cmin, count, level);
   }
   if (cmax >= 0 && count > cmax) {
     return throw_toomany_arguments(fn, cmax, level);
@@ -597,11 +594,20 @@ Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
   return uninit_null();
 }
 
-void throw_missing_arguments_nr(const char *fn, int num, int level /* = 0 */) {
+void throw_missing_arguments_nr(const char *fn, int expected, int got,
+                                int level /* = 0 */) {
   if (level == 2 || RuntimeOption::ThrowMissingArguments) {
-    raise_error("Missing argument %d for %s()", num, fn);
+    if (expected == 1) {
+      raise_error(Strings::MISSING_ARGUMENT, fn, got);
+    } else {
+      raise_error(Strings::MISSING_ARGUMENTS, fn, expected, got);
+    }
   } else {
-    raise_warning("Missing argument %d for %s()", num, fn);
+    if (expected == 1) {
+      raise_warning(Strings::MISSING_ARGUMENT, fn, got);
+    } else {
+      raise_warning(Strings::MISSING_ARGUMENTS, fn, expected, got);
+    }
   }
 }
 
@@ -616,11 +622,11 @@ void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */) {
 void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
                            int level /* = 0 */) {
   if (cmin >= 0 && count < cmin) {
-    throw_missing_arguments(fn, count + 1, level);
+    throw_missing_arguments_nr(fn, cmin, count, level);
     return;
   }
   if (cmax >= 0 && count > cmax) {
-    throw_toomany_arguments(fn, cmax, level);
+    throw_toomany_arguments_nr(fn, cmax, level);
     return;
   }
   assert(false);

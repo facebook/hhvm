@@ -2237,8 +2237,12 @@ TranslatorX64::interceptPrologues(Func* func) {
   }
 }
 
-static void raiseMissingArgument(int idx, const char* name) {
-  raise_warning(Strings::MISSING_ARGUMENT, idx, name);
+static void raiseMissingArgument(const char* name, int expected, int got) {
+  if (expected == 1) {
+    raise_warning(Strings::MISSING_ARGUMENT, name, got);
+  } else {
+    raise_warning(Strings::MISSING_ARGUMENTS, name, expected, got);
+  }
 }
 
 SrcKey
@@ -2411,8 +2415,9 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
   if (!func->isBuiltin()) {
     for (int i = nPassed; i < numParams; ++i) {
       if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
-        emitImmReg(a, i + 1, argNumToRegName[0]);
-        emitImmReg(a, (intptr_t)func->name()->data(), argNumToRegName[1]);
+        emitImmReg(a, (intptr_t)func->name()->data(), argNumToRegName[0]);
+        emitImmReg(a, numParams, argNumToRegName[1]);
+        emitImmReg(a, i, argNumToRegName[2]);
         emitCall(a, (TCA)raiseMissingArgument);
         m_fixupMap.recordFixup(a.code.frontier, fixup);
       }

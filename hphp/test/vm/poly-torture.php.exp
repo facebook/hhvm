@@ -11,11 +11,11 @@ T2::dubiousArgs 1
     randObj: C
     randObj: B
 T1::dubiousArgs 2, 2
---HipHop Warning: Missing argument 1 to noSuchMethodBoyeee() in hphp/test/vm/poly-torture.php on line 41
-HipHop Warning: Missing argument 2 to noSuchMethodBoyeee() in hphp/test/vm/poly-torture.php on line 41
-HipHop Warning: Missing argument 3 to noSuchMethodBoyeee() in hphp/test/vm/poly-torture.php on line 41
-HipHop Warning: Missing argument 4 to noSuchMethodBoyeee() in hphp/test/vm/poly-torture.php on line 41
-HipHop Warning: Missing argument 5 to noSuchMethodBoyeee() in hphp/test/vm/poly-torture.php on line 41
+--HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 0 given in hphp/test/vm/poly-torture.php on line 41
+HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 1 given in hphp/test/vm/poly-torture.php on line 41
+HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 2 given in hphp/test/vm/poly-torture.php on line 41
+HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 3 given in hphp/test/vm/poly-torture.php on line 41
+HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 4 given in hphp/test/vm/poly-torture.php on line 41
 HipHop Notice: Undefined variable: d in hphp/test/vm/poly-torture.php on line 41
 HipHop Notice: Undefined variable: e in hphp/test/vm/poly-torture.php on line 41
 C also has this method with params:  

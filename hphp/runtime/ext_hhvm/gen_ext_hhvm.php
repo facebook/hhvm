@@ -774,7 +774,8 @@ function phase2() {
         $indent .= '  ';
         if ($obj->isVarargs) {
           fwrite($ext_hhvm_cpp, $indent . 'throw_missing_arguments_nr("' .
-                 $obj->name . '", count+1, 1);' . "\n");
+                 $obj->name . '", ' . $obj->minNumParams .
+                 ', count, 1);' . "\n");
         } else {
           if ($obj->minNumParams == 0) {
             fwrite($ext_hhvm_cpp, $indent . 'throw_toomany_arguments_nr("' .
@@ -906,7 +907,8 @@ function phase2() {
           $indent .= '  ';
           if ($obj->isVarargs) {
             fwrite($ext_hhvm_cpp, $indent . 'throw_missing_arguments_nr("' .
-                   $obj->className . '::' . $obj->name . '", count+1, 1);' .
+                   $obj->className . '::' . $obj->name . '", ' .
+                   $obj->minNumParams . ', count, 1);' .
                    "\n");
           } else {
             if ($obj->minNumParams == 0) {

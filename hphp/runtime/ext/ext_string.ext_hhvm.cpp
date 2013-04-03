@@ -3049,7 +3049,7 @@ TypedValue* fg_setlocale(HPHP::VM::ActRec *ar) {
         return &ar->m_r;
       }
     } else {
-      throw_missing_arguments_nr("setlocale", count+1, 1);
+      throw_missing_arguments_nr("setlocale", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -3213,7 +3213,7 @@ TypedValue* fg_printf(HPHP::VM::ActRec *ar) {
         return &ar->m_r;
       }
     } else {
-      throw_missing_arguments_nr("printf", count+1, 1);
+      throw_missing_arguments_nr("printf", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -3347,7 +3347,7 @@ TypedValue* fg_sprintf(HPHP::VM::ActRec *ar) {
         return &ar->m_r;
       }
     } else {
-      throw_missing_arguments_nr("sprintf", count+1, 1);
+      throw_missing_arguments_nr("sprintf", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -3487,7 +3487,7 @@ TypedValue* fg_sscanf(HPHP::VM::ActRec *ar) {
         return &ar->m_r;
       }
     } else {
-      throw_missing_arguments_nr("sscanf", count+1, 1);
+      throw_missing_arguments_nr("sscanf", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

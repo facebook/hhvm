@@ -816,7 +816,7 @@ TypedValue* fg_fscanf(HPHP::VM::ActRec *ar) {
         return &ar->m_r;
       }
     } else {
-      throw_missing_arguments_nr("fscanf", count+1, 1);
+      throw_missing_arguments_nr("fscanf", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -1080,7 +1080,7 @@ TypedValue* fg_fprintf(HPHP::VM::ActRec *ar) {
         return &ar->m_r;
       }
     } else {
-      throw_missing_arguments_nr("fprintf", count+1, 1);
+      throw_missing_arguments_nr("fprintf", 2, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

@@ -51,7 +51,9 @@ const char* const FUNCTION_NAME_MUST_BE_STRING =
 const char* const METHOD_NAME_MUST_BE_STRING =
   "Method name must be a string";
 const char* const MISSING_ARGUMENT =
-  "Missing argument %d to %s()";
+  "%s() expects exactly 1 parameter, %d given";
+const char* const MISSING_ARGUMENTS =
+  "%s() expects exactly %d parameters, %d given";
 const char* const CANT_UNSET_STRING =
   "Cannot unset string offsets";
 const char* const OP_NOT_SUPPORTED_STRING =

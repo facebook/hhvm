@@ -558,7 +558,7 @@ TypedValue* tg_21DebuggerClientCmdUser_print(HPHP::VM::ActRec *ar) {
           return &ar->m_r;
         }
       } else {
-        throw_missing_arguments_nr("DebuggerClientCmdUser::print", count+1, 1);
+        throw_missing_arguments_nr("DebuggerClientCmdUser::print", 1, count, 1);
       }
     } else {
       throw_instance_method_fatal("DebuggerClientCmdUser::print");
@@ -640,7 +640,7 @@ TypedValue* tg_21DebuggerClientCmdUser_help(HPHP::VM::ActRec *ar) {
           return &ar->m_r;
         }
       } else {
-        throw_missing_arguments_nr("DebuggerClientCmdUser::help", count+1, 1);
+        throw_missing_arguments_nr("DebuggerClientCmdUser::help", 1, count, 1);
       }
     } else {
       throw_instance_method_fatal("DebuggerClientCmdUser::help");
@@ -722,7 +722,7 @@ TypedValue* tg_21DebuggerClientCmdUser_info(HPHP::VM::ActRec *ar) {
           return &ar->m_r;
         }
       } else {
-        throw_missing_arguments_nr("DebuggerClientCmdUser::info", count+1, 1);
+        throw_missing_arguments_nr("DebuggerClientCmdUser::info", 1, count, 1);
       }
     } else {
       throw_instance_method_fatal("DebuggerClientCmdUser::info");
@@ -804,7 +804,7 @@ TypedValue* tg_21DebuggerClientCmdUser_output(HPHP::VM::ActRec *ar) {
           return &ar->m_r;
         }
       } else {
-        throw_missing_arguments_nr("DebuggerClientCmdUser::output", count+1, 1);
+        throw_missing_arguments_nr("DebuggerClientCmdUser::output", 1, count, 1);
       }
     } else {
       throw_instance_method_fatal("DebuggerClientCmdUser::output");
@@ -886,7 +886,7 @@ TypedValue* tg_21DebuggerClientCmdUser_error(HPHP::VM::ActRec *ar) {
           return &ar->m_r;
         }
       } else {
-        throw_missing_arguments_nr("DebuggerClientCmdUser::error", count+1, 1);
+        throw_missing_arguments_nr("DebuggerClientCmdUser::error", 1, count, 1);
       }
     } else {
       throw_instance_method_fatal("DebuggerClientCmdUser::error");
@@ -1043,7 +1043,7 @@ TypedValue* tg_21DebuggerClientCmdUser_ask(HPHP::VM::ActRec *ar) {
           return &ar->m_r;
         }
       } else {
-        throw_missing_arguments_nr("DebuggerClientCmdUser::ask", count+1, 1);
+        throw_missing_arguments_nr("DebuggerClientCmdUser::ask", 1, count, 1);
       }
     } else {
       throw_instance_method_fatal("DebuggerClientCmdUser::ask");
@@ -1241,7 +1241,7 @@ TypedValue* tg_21DebuggerClientCmdUser_helpCmds(HPHP::VM::ActRec *ar) {
           return &ar->m_r;
         }
       } else {
-        throw_missing_arguments_nr("DebuggerClientCmdUser::helpCmds", count+1, 1);
+        throw_missing_arguments_nr("DebuggerClientCmdUser::helpCmds", 2, count, 1);
       }
     } else {
       throw_instance_method_fatal("DebuggerClientCmdUser::helpCmds");

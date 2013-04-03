@@ -208,7 +208,7 @@ TypedValue* fg_call_user_func(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("call_user_func", count+1, 1);
+      throw_missing_arguments_nr("call_user_func", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -311,7 +311,7 @@ TypedValue* fg_call_user_func_async(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("call_user_func_async", count+1, 1);
+      throw_missing_arguments_nr("call_user_func_async", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -641,7 +641,7 @@ TypedValue* fg_call_user_func_rpc(HPHP::VM::ActRec *ar) {
         return &ar->m_r;
       }
     } else {
-      throw_missing_arguments_nr("call_user_func_rpc", count+1, 1);
+      throw_missing_arguments_nr("call_user_func_rpc", 5, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -741,7 +741,7 @@ TypedValue* fg_forward_static_call(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("forward_static_call", count+1, 1);
+      throw_missing_arguments_nr("forward_static_call", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -996,7 +996,7 @@ TypedValue* fg_register_postsend_function(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("register_postsend_function", count+1, 1);
+      throw_missing_arguments_nr("register_postsend_function", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -1044,7 +1044,7 @@ TypedValue* fg_register_shutdown_function(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("register_shutdown_function", count+1, 1);
+      throw_missing_arguments_nr("register_shutdown_function", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -1092,7 +1092,7 @@ TypedValue* fg_register_cleanup_function(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("register_cleanup_function", count+1, 1);
+      throw_missing_arguments_nr("register_cleanup_function", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -1140,7 +1140,7 @@ TypedValue* fg_register_tick_function(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("register_tick_function", count+1, 1);
+      throw_missing_arguments_nr("register_tick_function", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

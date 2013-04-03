@@ -93,7 +93,7 @@ TypedValue* fg_min(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("min", count+1, 1);
+      throw_missing_arguments_nr("min", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -142,7 +142,7 @@ TypedValue* fg_max(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("max", count+1, 1);
+      throw_missing_arguments_nr("max", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

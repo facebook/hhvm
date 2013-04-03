@@ -838,7 +838,7 @@ TypedValue* fg_session_register(HPHP::VM::ActRec *ar) {
       memcpy(&ar->m_r, &rv, sizeof(TypedValue));
       return &ar->m_r;
     } else {
-      throw_missing_arguments_nr("session_register", count+1, 1);
+      throw_missing_arguments_nr("session_register", 1, count, 1);
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;

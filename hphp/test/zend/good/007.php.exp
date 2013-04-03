@@ -1,4 +1,4 @@
-HipHop Warning: Missing argument 1 for each() in hphp/test/zend/good/007.php on line 3
+HipHop Warning: each() expects exactly 1 parameter, 0 given in hphp/test/zend/good/007.php on line 3
 NULL
 HipHop Warning: Invalid operand type was used: expecting an array in hphp/test/zend/good/007.php on line 5
 NULL

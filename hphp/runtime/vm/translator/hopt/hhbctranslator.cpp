@@ -1555,10 +1555,6 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     int retValLocId = (retValSrcLoc && retValSrcOpc == LdLoc) ?
       retValSrcLoc->getInstruction()->getExtra<LocalId>()->locId : -1;
     for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
-      /*
-       * TODO(#1980291): this doesn't correctly handle
-       * debug_backtrace.
-       */
       if (retValLocId == id) {
         m_tb->genDecRef(retVal);
       } else {

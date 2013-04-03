@@ -611,15 +611,26 @@ void TraceBuilder::genInitLoc(uint32_t id, SSATmp* t0) {
 }
 
 void TraceBuilder::genDecRefLoc(int id) {
-  SSATmp* val = getLocalValue(id);
-  if (val != nullptr) {
-    genDecRef(val);
-    return;
-  }
   Type type = getLocalType(id);
 
   // Don't generate code if type is not refcounted
   if (type != Type::None && type.notCounted()) {
+    return;
+  }
+  // When a parameter goes out of scope, we need to null
+  // it out so that debug_backtrace can't capture stale
+  // values.
+  bool setNull = id < m_curFunc->getValFunc()->numParams();
+  SSATmp* val = getLocalValue(id);
+  if (val == nullptr && setNull) {
+    LocalId locId(id);
+    val = gen(LdLoc, type, &locId, m_fpValue);
+  }
+  if (val) {
+    if (setNull) {
+      genStLocAux(id, genDefUninit(), true);
+    }
+    genDecRef(val);
     return;
   }
 

@@ -6825,14 +6825,15 @@ void TranslatorX64::emitInlineReturn(Location retvalSrcLoc,
     if (GuardType(t).isCounted()) {
       PhysReg reg = m_regMap.allocReg(m_curNI->inputs[k]->location, t,
                                       RegInfo::CLEAN);
-      emitDecRef(*m_curNI, reg, t);
-
       // We currently need to zero the type just in case the event
-      // hook throws (see #2088495).
+      // hook throws (see #2088495), or a destructor captures a
+      // backtrace
       PhysReg base;
       int disp;
       locToRegDisp(m_curNI->inputs[k]->location, &base, &disp);
       emitStoreTVType(a, KindOfUninit, base[disp + TVOFF(m_type)]);
+
+      emitDecRef(*m_curNI, reg, t);
     }
   }
 

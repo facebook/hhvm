@@ -199,6 +199,9 @@ if args.zend_path:
             'socket_select-wrongparams-1.php',
             'test010.php',
             'usleep_error.php',
+
+            # not implemented extensions
+            '/sapi',
         )
         if not '.phpt' in filename:
             return False
@@ -213,8 +216,12 @@ if args.zend_path:
                 full_file = os.path.join(root, filename)
                 if args.only and not re.search(args.only, full_file):
                     continue
-                if should_import(filename):
+                if should_import(full_file):
                     walk(full_file, root.replace(args.zend_path, ''))
+
+if not os.path.isdir('test/zend/all'):
+    print "No test/zend/all. Maybe no tests were imported?"
+    sys.exit(0)
 
 if not args.dont_run:
     env = os.environ

@@ -261,20 +261,27 @@ bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
   return false;
 }
 
-bool f_property_exists(CVarRef class_or_object, CStrRef property) {
+Variant f_property_exists(CVarRef class_or_object, CStrRef property) {
   if (class_or_object.isObject()) {
     CStrRef context = ctxClassName();
     // Call o_exists for objects, to include dynamic properties.
     return class_or_object.toObject()->o_propExists(property, context);
   }
-  const ClassInfo *classInfo =
-    ClassInfo::FindClass(get_classname(class_or_object));
-  while (classInfo) {
-    if (classInfo->hasProperty(property)) {
-      return true;
-    } else {
-      classInfo = classInfo->getParentClassInfo();
-    }
+  if (!class_or_object.isString()) {
+    raise_warning(
+      "First parameter must either be an object or the name of an existing class"
+    );
+    return Variant(Variant::nullInit);
+  }
+
+  VM::Class* cls = VM::Unit::lookupClass(get_classname(class_or_object).get());
+  if (!cls) {
+    return false;
+  }
+  bool accessible;
+  VM::Slot propInd = cls->getDeclPropIndex(cls, property.get(), accessible);
+  if (propInd != VM::kInvalidSlot) {
+    return true;
   }
   return false;
 }

@@ -345,8 +345,9 @@ DefineFunction(
     'desc'   => "This function checks if the given property exists in the specified class.\n\nAs opposed with isset(), property_exists() returns TRUE even if the property has the value NULL.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => Boolean,
+      'type'   => Variant,
       'desc'   => "Returns TRUE if the property exists, FALSE if it doesn't exist or NULL in case of an error.",
+      'predicted_type' => Boolean,
     ),
     'args'   => array(
       array(

@@ -686,22 +686,23 @@ TypedValue* fg_method_exists(HPHP::VM::ActRec *ar) {
 
 
 /*
-bool HPHP::f_property_exists(HPHP::Variant const&, HPHP::String const&)
+HPHP::Variant HPHP::f_property_exists(HPHP::Variant const&, HPHP::String const&)
 _ZN4HPHP17f_property_existsERKNS_7VariantERKNS_6StringE
 
 (return value) => rax
-class_or_object => rdi
-property => rsi
+_rv => rdi
+class_or_object => rsi
+property => rdx
 */
 
-bool fh_property_exists(TypedValue* class_or_object, Value* property) asm("_ZN4HPHP17f_property_existsERKNS_7VariantERKNS_6StringE");
+TypedValue* fh_property_exists(TypedValue* _rv, TypedValue* class_or_object, Value* property) asm("_ZN4HPHP17f_property_existsERKNS_7VariantERKNS_6StringE");
 
 TypedValue * fg1_property_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_property_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-1);
-  rv->m_data.num = (fh_property_exists((args-0), (Value*)(args-1))) ? 1LL : 0LL;
+  fh_property_exists((rv), (args-0), (Value*)(args-1));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
 
@@ -711,8 +712,8 @@ TypedValue* fg_property_exists(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
       if (IS_STRING_TYPE((args-1)->m_type)) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_property_exists((args-0), (Value*)(args-1))) ? 1LL : 0LL;
+        fh_property_exists((&(rv)), (args-0), (Value*)(args-1));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;

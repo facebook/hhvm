@@ -1,7 +1,0 @@
-*** Testing get_defined_functions() : error conditions ***
-
--- Testing get_defined_functions() function with more than expected no. of arguments --
-HipHop Warning: get_defined_functions() expects exactly 0 parameters, 1 given in hphp/test/zend/bad/get_defined_functions_error.php on line %d
-NULL
- 
-===Done===

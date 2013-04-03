@@ -1,1 +1,0 @@
-HipHop Fatal error: Constructor baz::baz() cannot be static in hphp/test/zend/good/bug52160.php on line 22

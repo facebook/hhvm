@@ -1,0 +1,37 @@
+HipHop Warning: Missing argument 1 for each() in hphp/test/zend/bad/007.php on line %d
+NULL
+HipHop Warning: Invalid operand type was used: expecting an array in hphp/test/zend/bad/007.php on line %d
+NULL
+HipHop Warning: Invalid operand type was used: expecting an array in hphp/test/zend/bad/007.php on line %d
+NULL
+array(4) {
+  [1]=>
+  int(1)
+  ["value"]=>
+  int(1)
+  [0]=>
+  int(0)
+  ["key"]=>
+  int(0)
+}
+array(4) {
+  [1]=>
+  int(1)
+  ["value"]=>
+  int(1)
+  [0]=>
+  string(1) "a"
+  ["key"]=>
+  string(1) "a"
+}
+array(4) {
+  [1]=>
+  int(1)
+  ["value"]=>
+  int(1)
+  [0]=>
+  int(0)
+  ["key"]=>
+  int(0)
+}
+Done

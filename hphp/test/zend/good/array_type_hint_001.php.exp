@@ -1,2 +1,0 @@
-3
-HipHop Fatal error: Argument 1 passed to foo() must be an instance of array, int given in hphp/test/zend/good/array_type_hint_001.php on line 4

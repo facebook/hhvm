@@ -1,9 +1,0 @@
-HipHop Warning: func_get_arg() expects exactly 1 parameter, 3 given in hphp/test/zend/bad/020.php on line %d
-NULL
-HipHop Warning: func_get_arg():  Called from the global scope - no function context in hphp/test/zend/bad/020.php on line %d
-bool(false)
-HipHop Warning: func_get_arg() expects exactly 1 parameter, 0 given in hphp/test/zend/bad/020.php on line %d
-NULL
-HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/bad/020.php on line %d
-bool(false)
-Done

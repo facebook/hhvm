@@ -1,3 +1,0 @@
-PRE-CLASS-GUARD
-POST-CLASS-GUARD
-HipHop Fatal error: trait declaration of property 'hello' is incompatible with previous declaration in hphp/test/zend/good/bug60536_002.php on line 21

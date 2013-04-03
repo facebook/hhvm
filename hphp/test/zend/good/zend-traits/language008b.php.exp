@@ -1,0 +1,1 @@
+Hello World!Hello World!HipHop Fatal error: Call to private method MyClass::sayHelloWorld from anonymous context in hphp/test/zend/good/zend-traits/language008b.php on line 21

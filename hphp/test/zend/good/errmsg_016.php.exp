@@ -1,1 +1,0 @@
-HipHop Fatal error: Method test::__isset() must take exactly 1 argument in hphp/test/zend/good/errmsg_016.php on line 4

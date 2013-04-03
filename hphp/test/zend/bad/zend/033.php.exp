@@ -1,0 +1,7 @@
+
+HipHop Notice: Undefined variable: arr in hphp/test/zend/bad/033.php on line %d
+HipHop Notice: Undefined variable: arr in hphp/test/zend/bad/033.php on line %d
+HipHop Notice: Undefined variable: arr in hphp/test/zend/bad/033.php on line %d
+HipHop Notice: Trying to get property of non-object in hphp/test/zend/bad/033.php on line %d
+HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/033.php on line %d
+HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/033.php on line %d

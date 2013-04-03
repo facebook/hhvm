@@ -1,0 +1,1 @@
+HipHop Fatal error: foo cannot implement abc - it is not an interface in hphp/test/zend/bad/error_008.php on line %d

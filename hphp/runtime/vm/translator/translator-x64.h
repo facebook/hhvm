@@ -991,7 +991,7 @@ public:
    * a given nested invocation of the intepreter (calling back into it
    * as necessary for blocks that need to be interpreted).
    */
-  void enterTC(SrcKey sk);
+  void enterTC(SrcKey sk, TCA start);
 
   TranslatorX64();
   virtual ~TranslatorX64();

@@ -1850,9 +1850,11 @@ void VMExecutionContext::syncGdbState() {
 }
 
 void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
+  TCA start = nullptr;
   if (enterFnAr) {
     EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc);
     INST_HOOK_FENTRY(enterFnAr->m_func->fullName());
+    start = enterFnAr->m_func->getFuncBody();
   }
   Stats::inc(Stats::VMEnter);
   if (RuntimeOption::EvalJit &&
@@ -1862,7 +1864,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
       LIKELY(!DEBUGGER_FORCE_INTR)) {
     Transl::SrcKey sk(Transl::curFunc(), m_pc);
     (void) curUnit()->offsetOf(m_pc); /* assert */
-    tx64->enterTC(sk);
+    tx64->enterTC(sk, start);
   } else {
     dispatch();
   }

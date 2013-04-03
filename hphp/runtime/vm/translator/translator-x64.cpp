@@ -3278,7 +3278,7 @@ void enterTCHelper(Cell* vm_sp,
                    void* targetCacheBase) asm ("__enterTCHelper");
 
 void
-TranslatorX64::enterTC(SrcKey sk) {
+TranslatorX64::enterTC(SrcKey sk, TCA start) {
   using namespace TargetCache;
 
   if (debug) {
@@ -3289,7 +3289,7 @@ TranslatorX64::enterTC(SrcKey sk) {
   TReqInfo info;
   info.requestNum = -1;
   info.saved_rStashedAr = 0;
-  TCA start = getTranslation(sk, true);
+  if (UNLIKELY(!start)) start = getTranslation(sk, true);
   for (;;) {
     assert(sizeof(Cell) == 16);
     assert(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
@@ -3308,7 +3308,8 @@ TranslatorX64::enterTC(SrcKey sk) {
       sk = SrcKey(curFunc(), newPc);
       start = getTranslation(sk, true);
     }
-    assert(isValidCodeAddress(start));
+    assert(start == (TCA)HPHP::VM::Transl::funcBodyHelperThunk ||
+           isValidCodeAddress(start));
     assert(!s_writeLease.amOwner());
     curFunc()->validate();
     INC_TPC(enter_tc);

@@ -170,15 +170,16 @@ method_name => rsi
 bool fh_method_exists(TypedValue* class_or_object, Value* method_name) asm("_ZN4HPHP15f_method_existsERKNS_7VariantERKNS_6StringE");
 
 /*
-bool HPHP::f_property_exists(HPHP::Variant const&, HPHP::String const&)
+HPHP::Variant HPHP::f_property_exists(HPHP::Variant const&, HPHP::String const&)
 _ZN4HPHP17f_property_existsERKNS_7VariantERKNS_6StringE
 
 (return value) => rax
-class_or_object => rdi
-property => rsi
+_rv => rdi
+class_or_object => rsi
+property => rdx
 */
 
-bool fh_property_exists(TypedValue* class_or_object, Value* property) asm("_ZN4HPHP17f_property_existsERKNS_7VariantERKNS_6StringE");
+TypedValue* fh_property_exists(TypedValue* _rv, TypedValue* class_or_object, Value* property) asm("_ZN4HPHP17f_property_existsERKNS_7VariantERKNS_6StringE");
 
 /*
 HPHP::Variant HPHP::f_get_object_vars(HPHP::Variant const&)

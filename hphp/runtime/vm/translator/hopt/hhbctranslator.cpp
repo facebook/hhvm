@@ -702,7 +702,7 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
   SSATmp* contAR = m_tb->genLdRaw(cont, RawMemSlot::ContARPtr, Type::StkPtr);
 
   SSATmp* func = m_tb->genLdARFuncPtr(contAR, m_tb->genDefConst<int64_t>(0));
-  SSATmp* funcBody = m_tb->genLdRaw(func, RawMemSlot::FuncBody, Type::TCA);
+  SSATmp* funcBody = m_tb->genLdRaw(func, RawMemSlot::ContEntry, Type::TCA);
 
   m_tb->genContEnter(contAR, funcBody, returnBcOffset);
 

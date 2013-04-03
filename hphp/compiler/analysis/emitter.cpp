@@ -3816,7 +3816,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         TypedValue uninit;
         tvWriteUninit(&uninit);
         for (auto& useVar : useVars) {
-          pce->addProperty(useVar.first, AttrPrivate, nullptr, nullptr, &uninit);
+          pce->addProperty(useVar.first, AttrPrivate, nullptr, nullptr,
+                           &uninit, KindOfInvalid);
         }
 
         // The constructor. This is entirely generated; all it does is stash its
@@ -6230,6 +6231,13 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
             var = static_pointer_cast<SimpleVariable>(exp);
           }
 
+          // A non-invalid HPHPC type for a property implies the
+          // property's type is !KindOfUninit, and always
+          // hphpcType|KindOfNull.
+          const auto hphpcType = var->getSymbol()
+            ? var->getSymbol()->getFinalType()->getDataType()
+            : KindOfInvalid;
+
           StringData* propName = StringData::GetStaticString(var->getName());
           StringData* propDoc = empty_string.get();
           TypedValue tvVal;
@@ -6257,7 +6265,8 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
             tvWriteNull(&tvVal);
           }
           bool added UNUSED =
-            pce->addProperty(propName, attrs, typeConstraint, propDoc, &tvVal);
+            pce->addProperty(propName, attrs, typeConstraint, propDoc, &tvVal,
+                             hphpcType);
           assert(added);
         }
       } else if (ClassConstantPtr cc =
@@ -7218,7 +7227,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           Attr(attr),
           nullptr,
           propInfo->docComment ? StringData::GetStaticString(propInfo->docComment) : nullptr,
-          &tvNull
+          &tvNull,
+          KindOfInvalid
         );
       }
     }

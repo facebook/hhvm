@@ -30,8 +30,8 @@
 using namespace HPHP::VM::Transl;
 
 namespace HPHP {
-class StringData;
 namespace VM {
+namespace Transl { struct PropInfo; }
 namespace JIT {
 
 struct EvalStack {
@@ -380,7 +380,7 @@ private:
     void emitIntermediateOp();
     void emitProp();
     void emitPropGeneric();
-    void emitPropSpecialized(const MInstrAttr mia, int propOffset);
+    void emitPropSpecialized(const MInstrAttr mia, PropInfo);
     void emitElem();
     void emitNewElem();
     void emitRatchetRefs();
@@ -415,8 +415,11 @@ private:
       const int kValIdx = 0;
       return getInput(kValIdx);
     }
-    SSATmp* checkInitProp(SSATmp* baseAsObj, SSATmp* propAddr, int propOffset,
-                          bool warn, bool define);
+    SSATmp* checkInitProp(SSATmp* baseAsObj,
+                          SSATmp* propAddr,
+                          PropInfo propOffset,
+                          bool warn,
+                          bool define);
 
     /*
      * genStk is a wrapper around TraceBuilder::gen() to deal with instructions

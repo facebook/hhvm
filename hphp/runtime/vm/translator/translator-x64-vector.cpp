@@ -859,10 +859,10 @@ void TranslatorX64::emitPropGeneric(const Tracelet& t,
 }
 #undef HELPER_TABLE
 
-int getPropertyOffset(const NormalizedInstruction& ni,
-                      const Class*& baseClass,
-                      const MInstrInfo& mii,
-                      unsigned mInd, unsigned iInd) {
+PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+                           const Class*& baseClass,
+                           const MInstrInfo& mii,
+                           unsigned mInd, unsigned iInd) {
   if (mInd == 0) {
     auto const baseIndex = mii.valCount();
     baseClass = ni.inputs[baseIndex]->rtt.isObject()
@@ -871,13 +871,13 @@ int getPropertyOffset(const NormalizedInstruction& ni,
   } else {
     baseClass = ni.immVecClasses[mInd - 1];
   }
-  if (!baseClass) return -1;
+  if (!baseClass) return PropInfo();
 
   if (!ni.inputs[iInd]->rtt.isString()) {
-    return -1;
+    return PropInfo();
   }
   auto* const name = ni.inputs[iInd]->rtt.valueString();
-  if (!name) return -1;
+  if (!name) return PropInfo();
 
   bool accessible;
   Class* ctx = curFunc()->cls();
@@ -885,7 +885,7 @@ int getPropertyOffset(const NormalizedInstruction& ni,
   // baseClass cannot change in between requests
   if (!RuntimeOption::RepoAuthoritative ||
       !(baseClass->preClass()->attrs() & AttrUnique)) {
-    if (!ctx) return -1;
+    if (!ctx) return PropInfo();
     if (!ctx->classof(baseClass)) {
       if (baseClass->classof(ctx)) {
         // baseClass can change on us in between requests, but since
@@ -895,7 +895,7 @@ int getPropertyOffset(const NormalizedInstruction& ni,
       } else {
         // baseClass can change on us in between requests and it is
         // not related to ctx, so bail out
-        return -1;
+        return PropInfo();
       }
     }
   }
@@ -904,12 +904,24 @@ int getPropertyOffset(const NormalizedInstruction& ni,
   // If we couldn't find a property that is accessible in the current
   // context, bail out
   if (idx == kInvalidSlot || !accessible) {
-    return -1;
+    return PropInfo();
   }
   // If it's a declared property we're good to go: even if a subclass
   // redefines an accessible property with the same name it's guaranteed
   // to be at the same offset
-  return baseClass->declPropOffset(idx);
+  return PropInfo(
+    baseClass->declPropOffset(idx),
+    baseClass->declPropHphpcType(idx)
+  );
+}
+
+PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
+                                const MInstrInfo& mii) {
+  unsigned mInd = ni.immVecM.size() - 1;
+  unsigned iInd = mii.valCount() + 1 + mInd;
+
+  const Class* cls = nullptr;
+  return getPropertyOffset(ni, cls, mii, mInd, iInd);
 }
 
 void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
@@ -1030,14 +1042,14 @@ void TranslatorX64::emitProp(const MInstrInfo& mii,
           __func__, long(a.code.frontier), mInd, iInd);
 
   const Class* knownCls = nullptr;
-  const int propOffset  = getPropertyOffset(*m_curNI, knownCls, mii,
+  const auto propInfo   = getPropertyOffset(*m_curNI, knownCls, mii,
                                             mInd, iInd);
 
-  if (propOffset == -1) {
+  if (propInfo.offset == -1) {
     emitPropGeneric(*m_curTrace, *m_curNI, mii, mInd, iInd, rBase);
   } else {
     auto attrs = mii.getAttr(m_curNI->immVecM[mInd]);
-    emitPropSpecialized(attrs, knownCls, propOffset, mInd, iInd, rBase);
+    emitPropSpecialized(attrs, knownCls, propInfo.offset, mInd, iInd, rBase);
   }
 }
 
@@ -1244,10 +1256,11 @@ void TranslatorX64::emitCGetProp(const Tracelet& t,
    * access.
    */
   const Class* knownCls = nullptr;
-  const int propOffset  = getPropertyOffset(*m_curNI, knownCls,
+  const auto propInfo  = getPropertyOffset(*m_curNI, knownCls,
                                             mii, mInd, iInd);
-  if (propOffset != -1) {
-    emitPropSpecialized(MIA_warn, knownCls, propOffset, mInd, iInd, rBase);
+  if (propInfo.offset != -1) {
+    emitPropSpecialized(MIA_warn, knownCls, propInfo.offset,
+                        mInd, iInd, rBase);
     emitDerefIfVariant(a, r(rBase));
     emitIncRefGeneric(r(rBase), 0);
 
@@ -1660,10 +1673,11 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
    * set.
    */
   const Class* knownCls = nullptr;
-  const int propOffset  = getPropertyOffset(*m_curNI, knownCls,
+  const auto propInfo   = getPropertyOffset(*m_curNI, knownCls,
                                             mii, mInd, iInd);
-  if (propOffset != -1 && !ni.outLocal && !ni.outStack) {
-    emitPropSpecialized(MIA_define, knownCls, propOffset, mInd, iInd, rBase);
+  if (propInfo.offset != -1 && !ni.outLocal && !ni.outStack) {
+    emitPropSpecialized(MIA_define, knownCls, propInfo.offset,
+                        mInd, iInd, rBase);
 
     m_regMap.allocInputReg(*m_curNI, kRhsIdx);
     PhysReg rhsReg = getReg(val.location);
@@ -2706,14 +2720,6 @@ isNormalPropertyAccess(const NormalizedInstruction& i,
     i.inputs[objInput]->valueType() == KindOfObject;
 }
 
-int getNormalPropertyOffset(const NormalizedInstruction& i,
-                            const MInstrInfo& mii,
-                            int propInput, int objInput) {
-  assert(isNormalPropertyAccess(i, propInput, objInput));
-  const Class* baseClass = nullptr;
-  return getPropertyOffset(i, baseClass, mii, objInput, propInput);
-}
-
 bool
 mInstrHasUnknownOffsets(const NormalizedInstruction& ni) {
   const MInstrInfo& mii = getMInstrInfo(ni.mInstrOp());
@@ -2723,7 +2729,7 @@ mInstrHasUnknownOffsets(const NormalizedInstruction& ni) {
     MemberCode mc = ni.immVecM[mi];
     if (mcodeMaybePropName(mc)) {
       const Class* cls = nullptr;
-      if (getPropertyOffset(ni, cls, mii, mi, ii) == -1) {
+      if (getPropertyOffset(ni, cls, mii, mi, ii).offset == -1) {
         return true;
       }
       ++ii;

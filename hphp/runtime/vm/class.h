@@ -122,9 +122,13 @@ class PreClass : public AtomicCountable {
 
   struct Prop {
     Prop() {}
-    Prop(PreClass* preClass, const StringData* n, Attr attrs,
-         const StringData* typeConstraint, const StringData* docComment,
-         const TypedValue& val);
+    Prop(PreClass* preClass,
+         const StringData* n,
+         Attr attrs,
+         const StringData* typeConstraint,
+         const StringData* docComment,
+         const TypedValue& val,
+         DataType hphpcType);
 
     void prettyPrint(std::ostream& out) const;
 
@@ -135,6 +139,7 @@ class PreClass : public AtomicCountable {
     CStrRef mangledNameRef() const { return *(String*)(&m_mangledName); }
     Attr attrs() const { return m_attrs; }
     const StringData* typeConstraint() const { return m_typeConstraint; }
+    DataType hphpcType() const { return m_hphpcType; }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
 
@@ -146,6 +151,7 @@ class PreClass : public AtomicCountable {
     const StringData* m_typeConstraint;
     const StringData* m_docComment;
     TypedValue m_val;
+    DataType m_hphpcType;
   };
 
   struct Const {
@@ -367,11 +373,16 @@ class PreClassEmitter {
       , m_attrs(AttrNone)
       , m_typeConstraint(0)
       , m_docComment(0)
+      , m_hphpcType(KindOfInvalid)
     {}
 
-    Prop(const PreClassEmitter* pce, const StringData* n, Attr attrs,
-         const StringData* typeConstraint, const StringData* docComment,
-         TypedValue* val);
+    Prop(const PreClassEmitter* pce,
+         const StringData* n,
+         Attr attrs,
+         const StringData* typeConstraint,
+         const StringData* docComment,
+         TypedValue* val,
+         DataType hphpcType);
     ~Prop();
 
     const StringData* name() const { return m_name; }
@@ -380,6 +391,7 @@ class PreClassEmitter {
     const StringData* typeConstraint() const { return m_typeConstraint; }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
+    DataType hphpcType() const { return m_hphpcType; }
 
     template<class SerDe> void serde(SerDe& sd) {
       sd(m_name)
@@ -388,6 +400,7 @@ class PreClassEmitter {
         (m_typeConstraint)
         (m_docComment)
         (m_val)
+        (m_hphpcType)
         ;
     }
 
@@ -398,6 +411,7 @@ class PreClassEmitter {
     const StringData* m_typeConstraint;
     const StringData* m_docComment;
     TypedValue m_val;
+    DataType m_hphpcType;
   };
 
   class Const {
@@ -446,9 +460,12 @@ class PreClassEmitter {
 
   void addInterface(const StringData* n);
   bool addMethod(FuncEmitter* method);
-  bool addProperty(const StringData* n, Attr attrs,
-		               const StringData* typeConstraint,
-                   const StringData* docComment, TypedValue* val);
+  bool addProperty(const StringData* n,
+                   Attr attrs,
+                   const StringData* typeConstraint,
+                   const StringData* docComment,
+                   TypedValue* val,
+                   DataType hphpcType);
   const Prop& lookupProp(const StringData* propName) const;
   bool addConstant(const StringData* n, const StringData* typeConstraint,
 		           TypedValue* val, const StringData* phpCode);
@@ -561,6 +578,15 @@ public:
     Class* m_class; // First parent class that declares this property.
     Attr m_attrs;
     const StringData* m_typeConstraint;
+
+    /*
+     * Set when the frontend can infer a particular type for a
+     * declared property.  When this is not KindOfInvalid, the type
+     * here is actually m_hphpcType OR KindOfNull, but we know
+     * KindOfUninit is not possible.
+     */
+    DataType m_hphpcType;
+
     const StringData* m_docComment;
   };
 
@@ -803,6 +829,12 @@ public:
     return sizeof(ObjectData) + m_builtinPropSize
       + index * sizeof(TypedValue);
   }
+
+  DataType declPropHphpcType(Slot index) const {
+    auto& prop = m_declProperties[index];
+    return prop.m_hphpcType;
+  }
+
   unsigned classVecLen() const {
     return m_classVecLen;
   }

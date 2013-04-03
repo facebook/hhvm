@@ -84,11 +84,20 @@ static const StringData* manglePropName(const StringData* className,
 //=============================================================================
 // PreClass::Prop.
 
-PreClass::Prop::Prop(PreClass* preClass, const StringData* n, Attr attrs,
+PreClass::Prop::Prop(PreClass* preClass,
+                     const StringData* n,
+                     Attr attrs,
                      const StringData* typeConstraint,
-                     const StringData* docComment, const TypedValue& val)
-  : m_preClass(preClass), m_name(n), m_attrs(attrs),
-    m_typeConstraint(typeConstraint), m_docComment(docComment) {
+                     const StringData* docComment,
+                     const TypedValue& val,
+                     DataType hphpcType)
+  : m_preClass(preClass)
+  , m_name(n)
+  , m_attrs(attrs)
+  , m_typeConstraint(typeConstraint)
+  , m_docComment(docComment)
+  , m_hphpcType(hphpcType)
+{
   m_mangledName = manglePropName(preClass->name(), n, attrs);
   memcpy(&m_val, &val, sizeof(TypedValue));
 }
@@ -193,11 +202,19 @@ void PreClass::prettyPrint(std::ostream &out) const {
 //=============================================================================
 // PreClassEmitter::Prop.
 
-PreClassEmitter::Prop::Prop(const PreClassEmitter* pce, const StringData* n,
-                            Attr attrs, const StringData* typeConstraint,
-                            const StringData* docComment, TypedValue* val)
-  : m_name(n), m_attrs(attrs), m_typeConstraint(typeConstraint),
-    m_docComment(docComment) {
+PreClassEmitter::Prop::Prop(const PreClassEmitter* pce,
+                            const StringData* n,
+                            Attr attrs,
+                            const StringData* typeConstraint,
+                            const StringData* docComment,
+                            TypedValue* val,
+                            DataType hphpcType)
+  : m_name(n)
+  , m_attrs(attrs)
+  , m_typeConstraint(typeConstraint)
+  , m_docComment(docComment)
+  , m_hphpcType(hphpcType)
+{
   m_mangledName = manglePropName(pce->name(), n, attrs);
   memcpy(&m_val, val, sizeof(TypedValue));
 }
@@ -255,12 +272,14 @@ bool PreClassEmitter::addMethod(FuncEmitter* method) {
 bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
 		                          const StringData* typeConstraint,
                                   const StringData* docComment,
-                                  TypedValue* val) {
+                                  TypedValue* val,
+                                  DataType hphpcType) {
   PropMap::Builder::const_iterator it = m_propMap.find(n);
   if (it != m_propMap.end()) {
     return false;
   }
-  PreClassEmitter::Prop prop(this, n, attrs, typeConstraint, docComment, val);
+  PreClassEmitter::Prop prop(this, n, attrs, typeConstraint, docComment, val,
+    hphpcType);
   m_propMap.add(prop.name(), prop);
   return true;
 }
@@ -368,7 +387,8 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
                                               prop.attrs(),
                                               prop.typeConstraint(),
                                               prop.docComment(),
-                                              prop.val()));
+                                              prop.val(),
+                                              prop.hphpcType()));
   }
   pc->m_properties.create(propBuild);
 
@@ -1841,6 +1861,7 @@ void Class::setProperties() {
       prop.m_docComment = parentProp.m_docComment;
       prop.m_typeConstraint = parentProp.m_typeConstraint;
       prop.m_name = parentProp.m_name;
+      prop.m_hphpcType = parentProp.m_hphpcType;
       if (!(parentProp.m_attrs & AttrPrivate)) {
         curPropMap.add(prop.m_name, prop);
       } else {
@@ -1914,6 +1935,7 @@ void Class::setProperties() {
         prop.m_class = this;
         prop.m_typeConstraint = preProp->typeConstraint();
         prop.m_docComment = preProp->docComment();
+        prop.m_hphpcType = preProp->hphpcType();
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1943,6 +1965,7 @@ void Class::setProperties() {
         // This is the first class to declare this property
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
+        prop.m_hphpcType = preProp->hphpcType();
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1979,6 +2002,7 @@ void Class::setProperties() {
         // This is the first class to declare this property
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
+        prop.m_hphpcType = preProp->hphpcType();
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());

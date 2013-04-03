@@ -1159,14 +1159,29 @@ SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i);
 bool isNormalPropertyAccess(const NormalizedInstruction& i,
                        int propInput,
                        int objInput);
-int getNormalPropertyOffset(const NormalizedInstruction& i,
-                            const MInstrInfo&,
-                            int propInput, int objInput);
 bool mInstrHasUnknownOffsets(const NormalizedInstruction& i);
-int getPropertyOffset(const NormalizedInstruction& ni,
-                      const Class*& baseClass,
-                      const MInstrInfo& mii,
-                      unsigned mInd, unsigned iInd);
+
+struct PropInfo {
+  PropInfo()
+    : offset(-1)
+    , hphpcType(KindOfInvalid)
+  {}
+  explicit PropInfo(int offset, DataType hphpcType)
+    : offset(offset)
+    , hphpcType(hphpcType)
+  {}
+
+  int offset;
+  DataType hphpcType;
+};
+
+PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+                           const Class*& baseClass,
+                           const MInstrInfo& mii,
+                           unsigned mInd, unsigned iInd);
+PropInfo getFinalPropertyOffset(const NormalizedInstruction&,
+                                const MInstrInfo&);
+
 bool isSupportedCGetM_LE(const NormalizedInstruction& i);
 bool isSupportedCGetM_RE(const NormalizedInstruction& i);
 bool isSupportedCGetM(const NormalizedInstruction& i);

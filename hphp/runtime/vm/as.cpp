@@ -1517,7 +1517,8 @@ void parse_property(AsmState& as) {
   as.pce->addProperty(StringData::GetStaticString(name),
                       attrs, empty_string.get(),
                       empty_string.get(),
-                      &tvInit);
+                      &tvInit,
+                      KindOfInvalid);
 }
 
 /*

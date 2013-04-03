@@ -357,8 +357,20 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
    * that can throw. Currently this means we have to have a spillStack
    * so the unwinder can handle it (eventually we'll hook this into an
    * unwind codepath).  TODO(#2162354)
+   *
+   * We handle one special case where we know a spillStack won't be
+   * needed: in a simple CGetM of a single property where hphpc has
+   * told us it can't be KindOfUninit.
    */
-  m_ht.spillStack();
+  if (isCGetM && isSingle && simpleProp) {
+    auto info = getFinalPropertyOffset(m_ni, m_mii);
+    assert(info.offset != -1);
+    if (info.hphpcType == KindOfInvalid) {
+      m_ht.spillStack();
+    }
+  } else {
+    m_ht.spillStack();
+  }
 }
 
 void HhbcTranslator::VectorTranslator::emitMPre() {
@@ -694,13 +706,13 @@ void HhbcTranslator::VectorTranslator::emitIntermediateOp() {
 
 void HhbcTranslator::VectorTranslator::emitProp() {
   const Class* knownCls = nullptr;
-  const int propOffset  = getPropertyOffset(m_ni, knownCls, m_mii,
+  const auto propInfo   = getPropertyOffset(m_ni, knownCls, m_mii,
                                             m_mInd, m_iInd);
   auto mia = m_mii.getAttr(m_ni.immVecM[m_mInd]);
-  if (propOffset == -1 || (mia & Unset)) {
+  if (propInfo.offset == -1 || (mia & Unset)) {
     emitPropGeneric();
   } else {
-    emitPropSpecialized(mia, propOffset);
+    emitPropSpecialized(mia, propInfo);
   }
 }
 
@@ -791,45 +803,61 @@ void HhbcTranslator::VectorTranslator::emitPropGeneric() {
  * Helper for emitPropSpecialized to check if a property is Uninit. It
  * returns a pointer to the property's address, or init_null_variant
  * if the property was Uninit and doDefine is false.
+ *
+ * We can omit the uninit check for properties that we know may not be
+ * uninit due to the frontend's type inference.
  */
 SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
-  SSATmp* baseAsObj, SSATmp* propAddr,
-  int propOffset, bool doWarn, bool doDefine) {
+    SSATmp* baseAsObj,
+    SSATmp* propAddr,
+    PropInfo propInfo,
+    bool doWarn,
+    bool doDefine) {
   SSATmp* key = getInput(m_iInd);
   assert(key->isA(Type::StaticStr));
   assert(baseAsObj->isA(Type::Obj));
   assert(propAddr->getType().isPtr());
-  // The m_mInd check is to avoid initializing a property to
-  // InitNull right before it's going to be set to something else.
-  if (doWarn || (doDefine && m_mInd < m_ni.immVecM.size() - 1)) {
-    return m_tb.cond(m_ht.getCurFunc(),
-      [&] (Block* taken) {
-        m_tb.gen(CheckInitMem, taken, propAddr, cns(0));
-      },
-      [&] { // Next: Property isn't Uninit. Do nothing.
-        return propAddr;
-      },
-      [&] { // Taken: Property is Uninit. Raise a warning and return
-            // a pointer to InitNull, either in the object or
-            // init_null_variant.
-        m_tb.hint(Block::Unlikely);
-        if (doWarn) {
-          m_tb.gen(RaiseUndefProp, baseAsObj, key);
-        }
-        if (doDefine) {
-          m_tb.gen(StProp, baseAsObj, cns(propOffset), m_tb.genDefInitNull());
-          return propAddr;
-        }
-        return cns((const TypedValue*)&init_null_variant);;
+
+  auto const needsCheck =
+    propInfo.hphpcType == KindOfInvalid &&
+    // The m_mInd check is to avoid initializing a property to
+    // InitNull right before it's going to be set to something else.
+    (doWarn || (doDefine && m_mInd < m_ni.immVecM.size() - 1));
+
+  if (!needsCheck) return propAddr;
+
+  return m_tb.cond(m_ht.getCurFunc(),
+    [&] (Block* taken) {
+      m_tb.gen(CheckInitMem, taken, propAddr, cns(0));
+    },
+    [&] { // Next: Property isn't Uninit. Do nothing.
+      return propAddr;
+    },
+    [&] { // Taken: Property is Uninit. Raise a warning and return
+          // a pointer to InitNull, either in the object or
+          // init_null_variant.
+      m_tb.hint(Block::Unlikely);
+      if (doWarn) {
+        // We did the spillStack for this back in emitMPre.
+        m_tb.gen(RaiseUndefProp, baseAsObj, key);
       }
-    );
-  }
-  // No need to do the check
-  return propAddr;
+      if (doDefine) {
+        m_tb.gen(
+          StProp,
+          baseAsObj,
+          cns(propInfo.offset),
+          m_tb.genDefInitNull()
+        );
+        return propAddr;
+      }
+      return cns((const TypedValue*)&init_null_variant);
+    }
+  );
 }
 
-void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
-                                                           int propOffset) {
+void HhbcTranslator::VectorTranslator::emitPropSpecialized(
+    const MInstrAttr mia,
+    PropInfo propInfo) {
   assert(!(mia & MIA_warn) || !(mia & MIA_unset));
   const bool doWarn   = mia & MIA_warn;
   const bool doDefine = mia & MIA_define || mia & MIA_unset;
@@ -849,8 +877,8 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
    * check against null here in the intermediate cases.
    */
   if (m_base->isA(Type::Obj)) {
-    SSATmp* propAddr = m_tb.genLdPropAddr(m_base, cns(propOffset));
-    m_base = checkInitProp(m_base, propAddr, propOffset, doWarn, doDefine);
+    SSATmp* propAddr = m_tb.genLdPropAddr(m_base, cns(propInfo.offset));
+    m_base = checkInitProp(m_base, propAddr, propInfo, doWarn, doDefine);
   } else {
     SSATmp* baseAsObj = nullptr;
     m_base = m_tb.cond(m_ht.getCurFunc(),
@@ -861,8 +889,11 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
       [&] { // Next: Base is an object. Load property address and
             // check for uninit
         return checkInitProp(baseAsObj,
-                             m_tb.genLdPropAddr(baseAsObj, cns(propOffset)),
-                             propOffset, doWarn, doDefine);
+                             m_tb.genLdPropAddr(baseAsObj,
+                                                cns(propInfo.offset)),
+                             propInfo,
+                             doWarn,
+                             doDefine);
       },
       [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
         m_tb.hint(Block::Unlikely);
@@ -1129,10 +1160,10 @@ void HhbcTranslator::VectorTranslator::emitCGetProp() {
   assert(!m_ni.outLocal);
 
   const Class* knownCls = nullptr;
-  const int propOffset  = getPropertyOffset(m_ni, knownCls,
+  const auto propInfo   = getPropertyOffset(m_ni, knownCls,
                                             m_mii, m_mInd, m_iInd);
-  if (propOffset != -1) {
-    emitPropSpecialized(MIA_warn, propOffset);
+  if (propInfo.offset != -1) {
+    emitPropSpecialized(MIA_warn, propInfo);
     SSATmp* cellPtr = m_tb.genUnboxPtr(m_base);
     SSATmp* propVal = m_tb.gen(LdMem, Type::Cell, cellPtr, cns(0));
     m_result = m_tb.genIncRef(propVal);
@@ -1292,10 +1323,10 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
 
   /* If we know the class for the current base, emit a direct property set. */
   const Class* knownCls = nullptr;
-  const int propOffset  = getPropertyOffset(m_ni, knownCls,
+  const auto propInfo   = getPropertyOffset(m_ni, knownCls,
                                             m_mii, m_mInd, m_iInd);
-  if (propOffset != -1) {
-    emitPropSpecialized(MIA_define, propOffset);
+  if (propInfo.offset != -1) {
+    emitPropSpecialized(MIA_define, propInfo);
     SSATmp* cellPtr = m_tb.genUnboxPtr(m_base);
     SSATmp* oldVal = m_tb.gen(LdMem, Type::Cell, cellPtr, cns(0));
     // The object owns a reference now

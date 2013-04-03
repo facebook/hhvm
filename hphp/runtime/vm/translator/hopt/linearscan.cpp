@@ -112,6 +112,8 @@ private:
   void rematerializeAux();
   void removeUnusedSpills();
   void collectNatives();
+  void collectJmps();
+  RegNumber getJmpPreColor(SSATmp* tmp, uint32_t regIndx, bool isReload);
   void computePreColoringHint();
   IRInstruction* getNextNative() const;
   uint32_t getNextNativeId() const;
@@ -139,8 +141,14 @@ private:
   // the list of native instructions in the trace sorted by instruction ID;
   // i.e. a filtered list in the same order as visited by m_blocks.
   std::list<IRInstruction*> m_natives;
+
   // stores pre-coloring hints
   PreColoringHint m_preColoringHint;
+
+  // a map from SSATmp* to a list of Jmp_ instructions that have it as
+  // a source.
+  typedef std::vector<IRInstruction*> JmpList;
+  StateVector<SSATmp, JmpList> m_jmps;
 };
 
 // This value must be consistent with the number of pre-allocated
@@ -172,6 +180,7 @@ static SSATmp* canonicalize(SSATmp* tmp) {
 
 LinearScan::LinearScan(IRFactory* irFactory)
   : m_irFactory(irFactory)
+  , m_jmps(irFactory, JmpList())
 {
   for (int i = 0; i < kNumX64Regs; i++) {
     m_regs[i].m_ssaTmp = nullptr;
@@ -376,8 +385,12 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
     // Pre-colors ssaTmp if it's used as an argument of next native.
     // Search for the original tmp instead of <ssaTmp> itself, because
     // the pre-coloring hint is not aware of reloaded tmps.
+    SSATmp* orig = getOrigTmp(ssaTmp);
     RegNumber targetRegNo =
-      m_preColoringHint.getPreColoringReg(getOrigTmp(ssaTmp), index);
+      m_preColoringHint.getPreColoringReg(orig, index);
+    if (targetRegNo == reg::noreg) {
+      targetRegNo = getJmpPreColor(orig, index, orig != ssaTmp);
+    }
     if (targetRegNo != reg::noreg) {
       reg = getReg(&m_regs[int(targetRegNo)]);
     }
@@ -528,6 +541,19 @@ void LinearScan::collectNatives() {
   for (Block* block : m_blocks) {
     for (IRInstruction& inst : *block) {
       if (inst.isNative()) m_natives.push_back(&inst);
+    }
+  }
+}
+
+// Build a mapping from SSATmps to the Jmp_ instructions that consume
+// them.
+void LinearScan::collectJmps() {
+  m_jmps.reset();
+  for (Block* block : m_blocks) {
+    IRInstruction* jmp = block->back();
+    if (jmp->getOpcode() != Jmp_ || jmp->getNumSrcs() == 0) continue;
+    for (SSATmp* src : jmp->getSrcs()) {
+      m_jmps[src].push_back(jmp);
     }
   }
 }
@@ -693,6 +719,77 @@ void LinearScan::computePreColoringHint() {
   }
 }
 
+// Given a label, dest index for that label, and register index, scan
+// the sources of all incoming Jmp_s to see if any have a register
+// allocated at the specified index.
+static RegNumber findLabelSrcReg(IRInstruction* label, unsigned dstIdx,
+                                 uint32_t regIndex) {
+  assert(label->getOpcode() == DefLabel);
+  SSATmp* withReg = label->getBlock()->findSrc(dstIdx, [&](SSATmp* src) {
+    return src->getReg(regIndex) != InvalidReg &&
+      src->getInstruction()->getBlock()->getHint() != Block::Unlikely;
+  });
+  return withReg ? withReg->getReg(regIndex) : reg::noreg;
+}
+
+// This function attempts to find a pre-coloring hint from two
+// different sources: If tmp comes from a DefLabel, it will scan up to
+// the SSATmps providing values to incoming Jmp_s to look for a
+// hint. If tmp is consumed by a Jmp_, look for other incoming Jmp_s
+// to its destination and see if any of them have already been given a
+// register. If all of these fail, let normal register allocation
+// proceed unhinted.
+RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
+                                     bool isReload) {
+  IRInstruction* srcInst = tmp->getInstruction();
+  const JmpList& jmps = m_jmps[tmp];
+  if (isReload && (srcInst->getOpcode() == DefLabel || !jmps.empty())) {
+    // If we're precoloring a Reload of a temp that we'd normally find
+    // a hint for, just return the register allocated to the spilled
+    // temp.
+    auto reg = tmp->getReg(regIndex);
+    assert(reg != reg::noreg);
+    return reg;
+  }
+
+  if (srcInst->getOpcode() == DefLabel) {
+    // Figure out which dst of the label is tmp
+    for (unsigned i = 0, n = srcInst->getNumDsts(); i < n; ++i) {
+      if (srcInst->getDst(i) == tmp) {
+        auto reg = findLabelSrcReg(srcInst, i, regIndex);
+        // Until we handle loops, it's a bug to try and allocate a
+        // register to a DefLabel's dest before all of its incoming
+        // Jmp_s have had their srcs allocated.
+        always_assert(reg != reg::noreg);
+        return reg;
+      }
+    }
+    not_reached();
+  }
+
+  // If srcInst wasn't a label, check if tmp is used by any Jmp_
+  // instructions. If it is, trace to the Jmp_'s label and use the
+  // same procedure as above.
+  for (unsigned ji = 0, jn = jmps.size(); ji < jn; ++ji) {
+    IRInstruction* jmp = jmps[ji];
+    IRInstruction* label = jmp->getTaken()->front();
+
+    // Figure out which src of the Jmp_ is tmp
+    for (unsigned si = 0, sn = jmp->getNumSrcs(); si < sn; ++si) {
+      SSATmp* src = jmp->getSrc(si);
+      if (tmp == src) {
+        // For now, a DefLabel should never have a register assigned
+        // to it before any of its incoming Jmp_ instructions.
+        always_assert(label->getDst(si)->getReg(regIndex) == reg::noreg);
+        auto reg = findLabelSrcReg(label, si, regIndex);
+        if (reg != reg::noreg) return reg;
+      }
+    }
+  }
+
+  return reg::noreg;
+}
+
 // Create the initial free list.
 // It must be called after computePreColoringHint, because the order of
 // caller-saved regs depends on pre-coloring hints.
@@ -785,6 +882,7 @@ void LinearScan::allocRegs(Trace* trace) {
   numberInstructions(m_blocks);
 
   collectNatives();
+  collectJmps();
   computePreColoringHint();
   initFreeList();
   allocRegsToTrace();

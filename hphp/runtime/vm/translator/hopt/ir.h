@@ -2143,6 +2143,17 @@ struct Block : boost::noncopyable {
     }
   }
 
+  // return the first src providing a value to label->dsts[i] for
+  // which body(src) returns true, or nullptr if none are found.
+  SSATmp* findSrc(unsigned i,
+                  std::function<bool(SSATmp*)> body) {
+    for (const EdgeData* n = m_preds; n; n = n->next) {
+      SSATmp* src = n->jmp->getSrc(i);
+      if (body(src)) return src;
+    }
+    return nullptr;
+  }
+
   // list-compatible interface; these delegate to m_instrs but also update
   // inst.m_block
   InstructionList& getInstrs()   { return m_instrs; }

@@ -515,6 +515,31 @@ static uint32_t get_random()
 static const int kTooPolyPred = 2;
 static const int kTooPolyRet = 6;
 
+static std::pair<DataType,double>
+predictMVec(const NormalizedInstruction* ni) {
+  auto info = getFinalPropertyOffset(*ni, getMInstrInfo(ni->mInstrOp()));
+  if (info.offset != -1 && info.hphpcType != KindOfInvalid) {
+    FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
+           int(info.hphpcType));
+    return std::make_pair(info.hphpcType, 1.0);
+  }
+
+  auto& immVec = ni->immVec;
+  StringData* name;
+  MemberCode mc;
+  if (immVec.decodeLastMember(curUnit(), name, mc)) {
+    auto pred = predictType(TypeProfileKey(mc, name));
+    TRACE(1, "prediction for CGetM %s named %s: %d, %f\n",
+          mc == MET ? "elt" : "prop",
+          name->data(),
+          pred.first,
+          pred.second);
+    return pred;
+  }
+
+  return std::make_pair(KindOfInvalid, 0.0);
+}
+
 /*
  * predictOutputs --
  *
@@ -587,17 +612,7 @@ predictOutputs(const Tracelet& t,
   // polymorphic tracelet.
   if (tx64->numTranslations(t.m_sk) >= kTooPolyPred) return KindOfInvalid;
   if (hasImmVector(ni->op())) {
-    const ImmVector& immVec = ni->immVec;
-    StringData* name;
-    MemberCode mc;
-    if (immVec.decodeLastMember(curUnit(), name, mc)) {
-      pred = predictType(TypeProfileKey(mc, name));
-      TRACE(1, "prediction for CGetM %s named %s: %d, %f\n",
-            mc == MET ? "elt" : "prop",
-            name->data(),
-            pred.first,
-            pred.second);
-    }
+    pred = predictMVec(ni);
   }
   if (debug && pred.second < kAccept) {
     if (const StringData* invName = fcallToFuncName(ni)) {

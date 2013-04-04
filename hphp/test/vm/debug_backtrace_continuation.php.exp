@@ -1,10 +1,6 @@
 array(3) {
   [0]=>
-  array(4) {
-    ["file"]=>
-    string(0) ""
-    ["line"]=>
-    int(-1)
+  array(2) {
     ["function"]=>
     string(12) "my_generator"
     ["args"]=>

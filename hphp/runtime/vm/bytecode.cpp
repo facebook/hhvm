@@ -2386,8 +2386,9 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     if (fp->m_func->isNoInjection()) {
       continue;
     }
-    // Builtins don't have a file and line number
-    if (prevFp && !prevFp->m_func->isBuiltin()) {
+    // Builtins don't have a file and line number and Zend 5.5 does not
+    // include this information for generators
+    if (prevFp && !prevFp->m_func->isBuiltin() && !fp->m_func->isGenerator()) {
       Unit* unit = prevFp->m_func->unit();
       assert(unit);
       const char *filename = unit->filepath()->data();

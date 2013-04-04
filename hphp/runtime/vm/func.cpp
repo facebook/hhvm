@@ -114,7 +114,9 @@ void Func::setFullName() {
 }
 
 void Func::initPrologues(int numParams, bool isGenerator) {
-  m_funcBody = (TCA)HPHP::VM::Transl::funcBodyHelperThunk;
+  m_funcBody = (isGenerator ?
+                (TCA)HPHP::VM::Transl::contEnterHelperThunk :
+                (TCA)HPHP::VM::Transl::funcBodyHelperThunk);
 
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numPrologues =

@@ -600,8 +600,7 @@ static inline TypedValue* baseGImpl(TypedValue *key,
       varEnv->set(name, &tv);
       base = varEnv->lookup(name);
     } else {
-      tvWriteNull(&mis->tvScratch);
-      base = &mis->tvScratch;
+      return const_cast<TypedValue*>(init_null_variant.asTypedValue());
     }
   }
   decRefStr(name);

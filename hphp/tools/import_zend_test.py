@@ -124,6 +124,8 @@ def walk(filename, source):
         exp = sections['EXPECT']
     elif sections.has_key('EXPECTF'):
         exp = sections['EXPECTF']
+    elif sections.has_key('EXPECTREGEX'):
+        exp = sections['EXPECTREGEX']
     else:
         print "Malformed test, no --EXPECT-- or --EXPECTF--: ", filename
         return
@@ -257,78 +259,62 @@ for root, dirs, files in os.walk('test/zend/all'):
 
             filename = original_name + '.diff'
             # no diff file or is empty
-            if not os.path.exists(filename) or os.stat(filename)[6] == 0:
+            if not os.path.exists(original_name + '.diff') or os.stat(filename)[6] == 0:
                 return True
 
-            lines = file(filename).read()
-            # line 123 -> line %d
-            lines = re.sub(r'line \d+\n', 'line %d\n', lines)
-            # kill identical lines
-            lines = re.sub(r'-(.*)\n\+\1\n', '', lines, re.DOTALL)
+            wanted_re = file(original_name + '.exp').read().strip()
+            output = file(original_name + '.out').read().strip()
 
-            # kill header
-            lines = re.sub(r'---.*', '', lines)
-            lines = re.sub(r'\+\+\+.*', '', lines)
-            lines = lines.replace('\n\ No newline at end of file', '')
+            # from run-tests.php
+            temp = "";
+            r = "%r";
+            startOffset = 0;
+            length = len(wanted_re);
+            while startOffset < length:
+                start = wanted_re.find(r, startOffset)
+                if start != -1:
+                    end = wanted_re.find(r, start+2);
+                    if ent == -1:
+                        # unbalanced tag, ignore it.
+                        end = start = length;
+                else:
+                    start = end = length;
+            
+                temp = temp + re.escape(wanted_re[startOffset:start - startOffset])
+                if (end > start):
+                    temp = temp + '(' + wanted_re[start+2:end - start-2] + ')'
+                
+                startOffset = end + 2
 
-            lines = lines.split('\n')
-            matches = []
-            for line in lines:
-                line = line.strip()
-                if not line:
-                    continue
-                if line[0] == '-':
-                    line = '+' + line[1:]
-                    line = line.replace('%unicode|string%', 'string')
-                    line = line.replace('%u|b%', '')
-                    line = line.replace('%b|u%', '')
-                    line = line.replace('%e', '/')
-                    matches.append(line)
-                elif line[0] == '+':
-                    if not matches:
-                        return False
-                    match = matches.pop(0)
+            wanted_re = temp
 
-                    # emulate run-tests.php I guess...
-                    i,j = 0,0
-                    mode = None
-                    while j < len(line) and i < len(match):
-                        if match[i] == '%':
-                            mode = match[i+1]
-                            i += 2
-                        elif mode is None:
-                            if match[i] != line[j]:
-                                return False
-                            i += 1
-                        elif mode == 's':
-                            if line[j] == ' ':
-                                mode = None
-                        elif mode == 'd' or mode == 'i' or mode == 'r':
-                            if not line[j].isdigit():
-                                mode = None
-                        elif mode == 'f':
-                            if not line[j].isdigit() and line[j] != '.':
-                                mode = None
-                        elif mode == 'a': # anything
-                            pass
-                        elif mode == 'c': # one character
-                            mode = None
-                        elif mode == '\0': # literal percent
-                            if line[j] != '%':
-                                return False
-                            mode = None
-                        elif mode == 'w': # not quite sure...
-                            mode = None
-                        elif mode == 'C' or mode == 'A': # again, not sure
-                            mode = None
-                        else:
-                            raise Exception('what is "%' + mode + '"\n' + match + '\n' + original_name)
-                        j += 1
-                    
-                    if i < len(match) - 1:
-                        return False
+            ## different from php, since python escapes %
+            wanted_re = wanted_re.replace('\\%', '%')
 
-            return True
+            wanted_re = wanted_re.replace('%binary_string_optional%', 'string')
+            wanted_re = wanted_re.replace('%unicode_string_optional%', 'string')
+            wanted_re = wanted_re.replace('%unicode\|string%', 'string')
+            wanted_re = wanted_re.replace('%string\|unicode%', 'string')
+            wanted_re = wanted_re.replace('%u\|b%', '')
+            wanted_re = wanted_re.replace('%b\|u%', '')
+            
+            # Stick to basics
+            wanted_re = wanted_re.replace('%e', '\\/')
+            wanted_re = wanted_re.replace('%s', '[^\r\n]+')
+            wanted_re = wanted_re.replace('%S', '[^\r\n]*')
+            wanted_re = wanted_re.replace('%a', '.+')
+            wanted_re = wanted_re.replace('%A', '.*')
+            wanted_re = wanted_re.replace('%w', '\s*')
+            wanted_re = wanted_re.replace('%i', '[+-]?\d+')
+            wanted_re = wanted_re.replace('%d', '\d+')
+            wanted_re = wanted_re.replace('%x', '[0-9a-fA-F]+')
+            wanted_re = wanted_re.replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?')
+            wanted_re = wanted_re.replace('%c', '.')
+
+            # print repr(wanted_re), '\n', repr(output), '\n', re.match(wanted_re, output)
+            match = re.match(wanted_re, output)
+            return match and match.group() == output
+
 
         if isOkDiff(filename):
             dest_file = good_file

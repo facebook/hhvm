@@ -78,6 +78,29 @@ void TranslatorX64::reqLitHelper(const ReqLitStaticArgs* args) {
   framePtr->m_savedRbp = (uint64_t)ec->m_fp;
 }
 
+static void setupAfterProlog(ActRec* fp) {
+  g_vmContext->m_fp = fp;
+  g_vmContext->m_stack.top() = sp;
+  int nargs = fp->numArgs();
+  int nparams = fp->m_func->numParams();
+  Offset firstDVInitializer = InvalidAbsoluteOffset;
+  if (nargs < nparams) {
+    const Func::ParamInfoVec& paramInfo = fp->m_func->params();
+    for (int i = nargs; i < nparams; ++i) {
+      Offset dvInitializer = paramInfo[i].funcletOff();
+      if (dvInitializer != InvalidAbsoluteOffset) {
+        firstDVInitializer = dvInitializer;
+        break;
+      }
+    }
+  }
+  if (firstDVInitializer != InvalidAbsoluteOffset) {
+    g_vmContext->m_pc = fp->m_func->unit()->entry() + firstDVInitializer;
+  } else {
+    g_vmContext->m_pc = fp->m_func->getEntry();
+  }
+}
+
 /*
  * fcallHelperThunk--
  *
@@ -93,10 +116,13 @@ static TCA callAndResume(ActRec *ar) {
      * array is just being used as entry points for the
      * dv funclets. Dont run the prolog again.
      */
-    VMRegAnchor _(ar, true);
+    VMRegAnchor _(ar);
+    uint64_t rip = ar->m_savedRip;
     g_vmContext->doFCall<true>(ar, g_vmContext->m_pc);
+    ar->m_savedRip = rip;
     return Translator::Get()->getResumeHelperRet();
   }
+  setupAfterProlog(ar);
   return Translator::Get()->getResumeHelper();
 }
 
@@ -218,34 +244,14 @@ asm (
  * neither requires different entry points for different callsite arities.
  */
 TCA funcBodyHelper(ActRec* fp) {
-  g_vmContext->m_fp = fp;
-  g_vmContext->m_stack.top() = sp;
-  int nargs = fp->numArgs();
-  int nparams = fp->m_func->numParams();
-  Offset firstDVInitializer = InvalidAbsoluteOffset;
-  if (nargs < nparams) {
-    const Func::ParamInfoVec& paramInfo = fp->m_func->params();
-    for (int i = nargs; i < nparams; ++i) {
-      Offset dvInitializer = paramInfo[i].funcletOff();
-      if (dvInitializer != InvalidAbsoluteOffset) {
-        firstDVInitializer = dvInitializer;
-        break;
-      }
-    }
-  }
-  if (firstDVInitializer != InvalidAbsoluteOffset) {
-    g_vmContext->m_pc = fp->m_func->unit()->entry() + firstDVInitializer;
-  } else {
-    g_vmContext->m_pc = fp->m_func->getEntry();
-  }
+  setupAfterProlog(fp);
   tl_regState = REGSTATE_CLEAN;
   Func* func = const_cast<Func*>(fp->m_func);
-  SrcKey sk(func, func->base());
 
   TCA tca;
   if (func->isGenerator()) {
-    assert(nargs == 1);
-    tca = tx64->funcPrologue(func, nargs);
+    assert(fp->numArgs() == 1);
+    tca = tx64->funcPrologue(func, 1);
   } else {
     tca = tx64->getCallArrayProlog(func);
   }

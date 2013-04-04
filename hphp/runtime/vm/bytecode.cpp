@@ -1790,7 +1790,14 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
     func = ar->m_func;
   }
 
-  pushLocalsAndIterators(func, nlocals);
+  if (LIKELY(!func->isGenerator())) {
+    /*
+     * we only get here from callAndResume
+     * if we failed to get a translation for
+     * a generator's prologue
+     */
+    pushLocalsAndIterators(func, nlocals);
+  }
 
   /*
    * If we're reentering, make sure to finalize the ActRec before

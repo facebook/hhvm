@@ -90,27 +90,21 @@ struct VMRegAnchor : private boost::noncopyable {
     m_old = tl_regState;
     Translator::Get()->sync();
   }
-  VMRegAnchor(ActRec* ar, bool atFCall=false) {
+  VMRegAnchor(ActRec* ar) {
     // Some C++ entry points have an ActRec prepared from after a call
     // instruction. This syncs us to right after the call instruction.
     assert(tl_regState == REGSTATE_DIRTY);
     m_old = REGSTATE_DIRTY;
     tl_regState = REGSTATE_CLEAN;
-    int numArgs = ar->numArgs();
 
-    const Func* prevF = ((ActRec*)(ar->m_savedRbp))->m_func;
-    vmsp() = (TypedValue*)ar - numArgs;
+    auto prevAr = (ActRec*)ar->m_savedRbp;
+    const Func* prevF = prevAr->m_func;
+    vmsp() = ar->m_func->isGenerator() ?
+      Stack::generatorStackBase(ar) :
+      (TypedValue*)ar - ar->numArgs();
     assert(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));
     vmpc() = prevF->unit()->at(prevF->base() + ar->m_soff);
-    if (atFCall) {
-      // VMExecutionContext::doFCall expects vmfp to be the caller's
-      // ActRec, but if we call VMRegAnchor while executing the FCall
-      // sequence (in TargetCache::callAndResume), we actually have the
-      // callee's ActRec.
-      vmfp() = (TypedValue*)ar->m_savedRbp;
-    } else {
-      vmfp() = (TypedValue*)ar;
-    }
+    vmfp() = (TypedValue*)prevAr;
   }
   ~VMRegAnchor() {
     tl_regState = m_old;

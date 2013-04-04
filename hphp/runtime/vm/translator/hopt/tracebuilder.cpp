@@ -28,6 +28,10 @@ namespace JIT {
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
+static inline Type noneToGen(Type t) {
+  return t.subtypeOf(Type::None) ? Type::Gen : t;
+}
+
 TraceBuilder::TraceBuilder(Offset initialBcOffset,
                            uint32_t initialSpOffsetFromFp,
                            IRFactory& irFactory,
@@ -617,6 +621,7 @@ void TraceBuilder::genDecRefLoc(int id) {
   if (type != Type::None && type.notCounted()) {
     return;
   }
+  type = noneToGen(type);
   // When a parameter goes out of scope, we need to null
   // it out so that debug_backtrace can't capture stale
   // values.
@@ -642,7 +647,7 @@ void TraceBuilder::genDecRefLoc(int id) {
   }
 
   LocalId local(id);
-  gen(DecRefLoc, (type == Type::None ? Type::Gen : type), &local, m_fpValue);
+  gen(DecRefLoc, type, &local, m_fpValue);
 }
 
 /*
@@ -942,7 +947,7 @@ SSATmp* TraceBuilder::genLdStackAddr(SSATmp* sp, int64_t index) {
   Type type;
   bool spansCall;
   UNUSED SSATmp* val = getStackValue(sp, index, spansCall, type);
-  type = type.subtypeOf(Type::None) ? Type::Gen : type;
+  type = noneToGen(type);
   assert(IMPLIES(val != nullptr, val->getType().equals(type)));
   assert(type.notPtr());
   return gen(LdStackAddr, type.ptr(), sp, genDefConst(index));

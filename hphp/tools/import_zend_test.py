@@ -53,6 +53,9 @@ bad_tests = (
 errors = (
     # generic inconsistencies
     ('Variable passed to ([^\s]+)\(\) is not an array or object', 'Invalid operand type was used: expecting an array'),
+    ('bcdiv\(\): ', ''),
+    ('bcsqrt\(\): ', ''),
+    ('bcpowmod\(\): ', ''),
 
     # I can't do math with backreferences so write them out
     ('([^\s]+)\(\) expects exactly 1 parameter, 0 given', r'Missing argument 1 for \1()'),
@@ -82,6 +85,12 @@ parser.add_argument(
     "--dirty",
     action='store_true',
     help="leave around test/zend/all directory."
+)
+parser.add_argument(
+    "-v",
+    "--verbose",
+    action='store_true',
+    help="print out extra stuff."
 )
 args = parser.parse_args()
 
@@ -127,7 +136,7 @@ def walk(filename, source):
     elif sections.has_key('EXPECTREGEX'):
         exp = sections['EXPECTREGEX']
     else:
-        print "Malformed test, no --EXPECT-- or --EXPECTF--: ", filename
+        print "Malformed test, no --EXPECT-- or --EXPECTF-- or --EXPECTREGEX--: ", filename
         return
 
     if sections.has_key('POST'):
@@ -253,13 +262,14 @@ for root, dirs, files in os.walk('test/zend/all'):
         mkdir_p(os.path.dirname(bad_file))
 
         def isOkDiff(original_name):
+            global args
             for test in bad_tests:
                 if test in original_name:
                     return False
 
-            filename = original_name + '.diff'
             # no diff file or is empty
-            if not os.path.exists(original_name + '.diff') or os.stat(filename)[6] == 0:
+            if (not os.path.exists(original_name + '.diff') or \
+                os.stat(original_name + '.diff')[6] == 0):
                 return True
 
             wanted_re = file(original_name + '.exp').read().strip()
@@ -311,8 +321,9 @@ for root, dirs, files in os.walk('test/zend/all'):
             wanted_re = wanted_re.replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?')
             wanted_re = wanted_re.replace('%c', '.')
 
-            # print repr(wanted_re), '\n', repr(output), '\n', re.match(wanted_re, output)
             match = re.match(wanted_re, output)
+            if args.verbose:
+                print '\n', original_name, '\n', repr(wanted_re), '\n', repr(output), '\n', match is not None
             return match and match.group() == output
 
 

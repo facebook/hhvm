@@ -371,6 +371,17 @@ vm_decode_function(CVarRef function,
                    HPHP::VM::Class*& cls,
                    StringData*& invName,
                    bool warn = true);
+
+inline void
+vm_decode_function(CVarRef function,
+                   HPHP::VM::ActRec* ar,
+                   bool forwarding,
+                   HPHP::VM::CallCtx& ctx,
+                   bool warn = true) {
+  ctx.func = vm_decode_function(function, ar, forwarding, ctx.this_, ctx.cls,
+                                ctx.invName, warn);
+}
+
 HPHP::VM::ActRec* vm_get_previous_frame();
 Variant vm_call_user_func(CVarRef function, CArrRef params,
                           bool forwarding = false);

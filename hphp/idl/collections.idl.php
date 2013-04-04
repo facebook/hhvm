@@ -163,6 +163,27 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "view",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a lazy iterable view of this Vector.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "kvzip",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the key/value pairs from ".
+                "this Vector.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "at",
     'flags'  =>  HasDocComment,
     'desc'   => "Returns the value at the specified key. If the key is ".
@@ -417,6 +438,57 @@ DefineFunction(
     'desc'   => "Returns an iterator that points to beginning of this Vector.",
     'return' => array(
       'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "map",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable of the values produced by applying ".
+                "the specified callback on the values of this Vector.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "callback",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "filter",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable of all the values from this Vector ".
+                "for which the specified callback returns true.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "callback",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "zip",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable produced by combined the specified ".
+                "Iterables pair-wise.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+      ),
     ),
   ));
 
@@ -795,6 +867,27 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "view",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a lazy iterable view of this Map.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "kvzip",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the key/value pairs from ".
+                "this Map.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "at",
     'flags'  =>  HasDocComment,
     'desc'   => "Returns the value at the specified key. If the key is ".
@@ -1131,6 +1224,57 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "map",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable of the values produced by applying ".
+                "the specified callback on the values of this Map.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "callback",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "filter",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable of all the values from this Map ".
+                "for which the specified callback returns true.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "callback",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "zip",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable produced by combined the specified ".
+                "Iterables pair-wise.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "__toString",
     'return' => array(
       'type'   => String,
@@ -1390,6 +1534,27 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'desc'   => "Returns an Iterable that produces the keys from this ".
                 "StableMap.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "view",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a lazy iterable view of this StableMap.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "kvzip",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the key/value pairs from ".
+                "this StableMap.",
     'return' => array(
       'type'   => Object,
     ),
@@ -1734,6 +1899,57 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "map",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable of the values produced by applying ".
+                "the specified callback on the values of this StableMap.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "callback",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "filter",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable of all the values from this ".
+                "StableMap for which the specified callback returns true.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "callback",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "zip",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable produced by combined the specified ".
+                "Iterables pair-wise.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "__get",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1996,6 +2212,27 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "view",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a lazy iterable view of this Pair.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "kvzip",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns an Iterable that produces the key/value pairs from ".
+                "this Pair.",
+    'return' => array(
+      'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "toArray",
     'flags'  =>  HasDocComment,
     'desc'   => "Returns an array built from the values from this Pair.",
@@ -2012,6 +2249,57 @@ DefineFunction(
                 "Pair.",
     'return' => array(
       'type'   => Object,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "map",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable of the values produced by applying ".
+                "the specified callback on the values of this Pair.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "callback",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "filter",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable of all the values from this Pair ".
+                "for which the specified callback returns true.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "callback",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "zip",
+    'flags'  =>  HasDocComment,
+    'desc'   => "Returns a KeyedIterable produced by combined the specified ".
+                "Iterables pair-wise.",
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant,
+      ),
     ),
   ));
 

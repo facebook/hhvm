@@ -221,6 +221,82 @@ TypedValue* tg_6Vector_keys(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Vector::t_view()
+_ZN4HPHP8c_Vector6t_viewEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_6Vector_view(Value* _rv, ObjectData* this_) asm("_ZN4HPHP8c_Vector6t_viewEv");
+
+TypedValue* tg_6Vector_view(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_6Vector_view((&rv.m_data), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Vector::view", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::view");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Vector::t_kvzip()
+_ZN4HPHP8c_Vector7t_kvzipEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_6Vector_kvzip(Value* _rv, ObjectData* this_) asm("_ZN4HPHP8c_Vector7t_kvzipEv");
+
+TypedValue* tg_6Vector_kvzip(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_6Vector_kvzip((&rv.m_data), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Vector::kvzip", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::kvzip");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Variant HPHP::c_Vector::t_at(HPHP::Variant const&)
 _ZN4HPHP8c_Vector4t_atERKNS_7VariantE
 
@@ -829,6 +905,123 @@ TypedValue* tg_6Vector_getIterator(HPHP::VM::ActRec *ar) {
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Vector::t_map(HPHP::Variant const&)
+_ZN4HPHP8c_Vector5t_mapERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+callback => rdx
+*/
+
+Value* th_6Vector_map(Value* _rv, ObjectData* this_, TypedValue* callback) asm("_ZN4HPHP8c_Vector5t_mapERKNS_7VariantE");
+
+TypedValue* tg_6Vector_map(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_6Vector_map((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::map", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::map");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Vector::t_filter(HPHP::Variant const&)
+_ZN4HPHP8c_Vector8t_filterERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+callback => rdx
+*/
+
+Value* th_6Vector_filter(Value* _rv, ObjectData* this_, TypedValue* callback) asm("_ZN4HPHP8c_Vector8t_filterERKNS_7VariantE");
+
+TypedValue* tg_6Vector_filter(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_6Vector_filter((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::filter", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::filter");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Vector::t_zip(HPHP::Variant const&)
+_ZN4HPHP8c_Vector5t_zipERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+iterable => rdx
+*/
+
+Value* th_6Vector_zip(Value* _rv, ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP8c_Vector5t_zipERKNS_7VariantE");
+
+TypedValue* tg_6Vector_zip(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_6Vector_zip((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Vector::zip", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Vector::zip");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;
@@ -1776,6 +1969,82 @@ TypedValue* tg_3Map_keys(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Map::t_view()
+_ZN4HPHP5c_Map6t_viewEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_3Map_view(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map6t_viewEv");
+
+TypedValue* tg_3Map_view(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_view((&rv.m_data), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Map::view", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::view");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Map::t_kvzip()
+_ZN4HPHP5c_Map7t_kvzipEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_3Map_kvzip(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_Map7t_kvzipEv");
+
+TypedValue* tg_3Map_kvzip(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_kvzip((&rv.m_data), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Map::kvzip", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::kvzip");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Variant HPHP::c_Map::t_at(HPHP::Variant const&)
 _ZN4HPHP5c_Map4t_atERKNS_7VariantE
 
@@ -2623,6 +2892,123 @@ TypedValue* tg_3Map_getIterator(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Map::t_map(HPHP::Variant const&)
+_ZN4HPHP5c_Map5t_mapERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+callback => rdx
+*/
+
+Value* th_3Map_map(Value* _rv, ObjectData* this_, TypedValue* callback) asm("_ZN4HPHP5c_Map5t_mapERKNS_7VariantE");
+
+TypedValue* tg_3Map_map(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_map((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::map", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::map");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Map::t_filter(HPHP::Variant const&)
+_ZN4HPHP5c_Map8t_filterERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+callback => rdx
+*/
+
+Value* th_3Map_filter(Value* _rv, ObjectData* this_, TypedValue* callback) asm("_ZN4HPHP5c_Map8t_filterERKNS_7VariantE");
+
+TypedValue* tg_3Map_filter(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_filter((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::filter", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::filter");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Map::t_zip(HPHP::Variant const&)
+_ZN4HPHP5c_Map5t_zipERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+iterable => rdx
+*/
+
+Value* th_3Map_zip(Value* _rv, ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP5c_Map5t_zipERKNS_7VariantE");
+
+TypedValue* tg_3Map_zip(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_3Map_zip((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Map::zip", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Map::zip");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::String HPHP::c_Map::t___tostring()
 _ZN4HPHP5c_Map12t___tostringEv
 
@@ -3329,6 +3715,82 @@ TypedValue* tg_9StableMap_keys(HPHP::VM::ActRec *ar) {
       }
     } else {
       throw_instance_method_fatal("StableMap::keys");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_StableMap::t_view()
+_ZN4HPHP11c_StableMap6t_viewEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_9StableMap_view(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c_StableMap6t_viewEv");
+
+TypedValue* tg_9StableMap_view(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_view((&rv.m_data), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("StableMap::view", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::view");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_StableMap::t_kvzip()
+_ZN4HPHP11c_StableMap7t_kvzipEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_9StableMap_kvzip(Value* _rv, ObjectData* this_) asm("_ZN4HPHP11c_StableMap7t_kvzipEv");
+
+TypedValue* tg_9StableMap_kvzip(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_kvzip((&rv.m_data), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("StableMap::kvzip", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::kvzip");
     }
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
@@ -4186,6 +4648,123 @@ TypedValue* tg_9StableMap_getIterator(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_StableMap::t_map(HPHP::Variant const&)
+_ZN4HPHP11c_StableMap5t_mapERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+callback => rdx
+*/
+
+Value* th_9StableMap_map(Value* _rv, ObjectData* this_, TypedValue* callback) asm("_ZN4HPHP11c_StableMap5t_mapERKNS_7VariantE");
+
+TypedValue* tg_9StableMap_map(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_map((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::map", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::map");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_StableMap::t_filter(HPHP::Variant const&)
+_ZN4HPHP11c_StableMap8t_filterERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+callback => rdx
+*/
+
+Value* th_9StableMap_filter(Value* _rv, ObjectData* this_, TypedValue* callback) asm("_ZN4HPHP11c_StableMap8t_filterERKNS_7VariantE");
+
+TypedValue* tg_9StableMap_filter(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_filter((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::filter", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::filter");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_StableMap::t_zip(HPHP::Variant const&)
+_ZN4HPHP11c_StableMap5t_zipERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+iterable => rdx
+*/
+
+Value* th_9StableMap_zip(Value* _rv, ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP11c_StableMap5t_zipERKNS_7VariantE");
+
+TypedValue* tg_9StableMap_zip(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_9StableMap_zip((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("StableMap::zip", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("StableMap::zip");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Variant HPHP::c_StableMap::t___get(HPHP::Variant)
 _ZN4HPHP11c_StableMap7t___getENS_7VariantE
 
@@ -4900,6 +5479,82 @@ TypedValue* tg_4Pair_keys(HPHP::VM::ActRec *ar) {
 }
 
 /*
+HPHP::Object HPHP::c_Pair::t_view()
+_ZN4HPHP6c_Pair6t_viewEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_4Pair_view(Value* _rv, ObjectData* this_) asm("_ZN4HPHP6c_Pair6t_viewEv");
+
+TypedValue* tg_4Pair_view(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_4Pair_view((&rv.m_data), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Pair::view", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Pair::view");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Pair::t_kvzip()
+_ZN4HPHP6c_Pair7t_kvzipEv
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+*/
+
+Value* th_4Pair_kvzip(Value* _rv, ObjectData* this_) asm("_ZN4HPHP6c_Pair7t_kvzipEv");
+
+TypedValue* tg_4Pair_kvzip(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 0LL) {
+        rv.m_type = KindOfObject;
+        th_4Pair_kvzip((&rv.m_data), (this_));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 0);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_toomany_arguments_nr("Pair::kvzip", 0, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Pair::kvzip");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
 HPHP::Array HPHP::c_Pair::t_toarray()
 _ZN4HPHP6c_Pair9t_toarrayEv
 
@@ -4970,6 +5625,123 @@ TypedValue* tg_4Pair_getIterator(HPHP::VM::ActRec *ar) {
     rv.m_data.num = 0LL;
     rv.m_type = KindOfNull;
     frame_free_locals_inl(ar, 0);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Pair::t_map(HPHP::Variant const&)
+_ZN4HPHP6c_Pair5t_mapERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+callback => rdx
+*/
+
+Value* th_4Pair_map(Value* _rv, ObjectData* this_, TypedValue* callback) asm("_ZN4HPHP6c_Pair5t_mapERKNS_7VariantE");
+
+TypedValue* tg_4Pair_map(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_4Pair_map((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Pair::map", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Pair::map");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Pair::t_filter(HPHP::Variant const&)
+_ZN4HPHP6c_Pair8t_filterERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+callback => rdx
+*/
+
+Value* th_4Pair_filter(Value* _rv, ObjectData* this_, TypedValue* callback) asm("_ZN4HPHP6c_Pair8t_filterERKNS_7VariantE");
+
+TypedValue* tg_4Pair_filter(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_4Pair_filter((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Pair::filter", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Pair::filter");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+/*
+HPHP::Object HPHP::c_Pair::t_zip(HPHP::Variant const&)
+_ZN4HPHP6c_Pair5t_zipERKNS_7VariantE
+
+(return value) => rax
+_rv => rdi
+this_ => rsi
+iterable => rdx
+*/
+
+Value* th_4Pair_zip(Value* _rv, ObjectData* this_, TypedValue* iterable) asm("_ZN4HPHP6c_Pair5t_zipERKNS_7VariantE");
+
+TypedValue* tg_4Pair_zip(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
+    if (this_) {
+      if (count == 1LL) {
+        rv.m_type = KindOfObject;
+        th_4Pair_zip((&rv.m_data), (this_), (args-0));
+        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
+        frame_free_locals_inl(ar, 1);
+        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+        return &ar->m_r;
+      } else {
+        throw_wrong_arguments_nr("Pair::zip", count, 1, 1, 1);
+      }
+    } else {
+      throw_instance_method_fatal("Pair::zip");
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_inl(ar, 1);
     memcpy(&ar->m_r, &rv, sizeof(TypedValue));
     return &ar->m_r;
   return &ar->m_r;

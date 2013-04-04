@@ -60,7 +60,12 @@ namespace Eval {
   x(Traversable)                                \
   x(Countable)                                  \
   x(KeysIterable)                               \
-  x(MapItemsIterable)                           \
+  x(KVZippedIterable)                           \
+  x(MappedKeyedIterable)                        \
+  x(FilteredKeyedIterable)                      \
+  x(ZippedKeyedIterable)                        \
+  x(IterableView)                               \
+  x(KeyedIterableView)                          \
   x(__PHP_Incomplete_Class)                     \
 
 class SystemLib {
@@ -105,7 +110,16 @@ class SystemLib {
                                           CVarRef name = null_variant,
                                           CVarRef header = null_variant);
   static ObjectData* AllocKeysIterableObject(CVarRef mp);
-  static ObjectData* AllocMapItemsIterableObject(CVarRef mp);
+  static ObjectData* AllocKVZippedIterableObject(CVarRef mp);
+  static ObjectData* AllocMappedKeyedIterableObject(CVarRef iterable,
+                                                    CVarRef callback);
+  static ObjectData* AllocFilteredKeyedIterableObject(CVarRef iterable,
+                                                      CVarRef callback);
+  static ObjectData* AllocZippedKeyedIterableObject(CVarRef iterable1,
+                                                    CVarRef iterable2);
+
+  static ObjectData* AllocIterableViewObject(CVarRef iterable);
+  static ObjectData* AllocKeyedIterableViewObject(CVarRef iterable);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

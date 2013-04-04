@@ -38,6 +38,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   friend class c_VectorIterator;
   friend class c_Map;
   friend class c_StableMap;
+  friend class c_Pair;
   friend class ArrayIter;
 
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
@@ -56,6 +57,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: int64_t t_count();
   public: Object t_items();
   public: Object t_keys();
+  public: Object t_view();
+  public: Object t_kvzip();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
@@ -72,6 +75,9 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   public: int64_t t_linearsearch(CVarRef search_value);
   public: void t_shuffle();
   public: Object t_getiterator();
+  public: Object t_map(CVarRef callback);
+  public: Object t_filter(CVarRef callback);
+  public: Object t_zip(CVarRef iterable);
   public: String t___tostring();
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
@@ -127,7 +133,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   }
   public: void add(TypedValue* val) {
     assert(val->m_type != KindOfRef);
-    ++m_versionNumber;
+    ++m_version;
     if (m_capacity <= m_size) {
       grow();
     }
@@ -142,8 +148,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     return ((uint64_t)key < (uint64_t)m_size);
   }
   public: void reserve(int64_t sz);
-  public: int getVersionNumber() {
-    return m_versionNumber;
+  public: int getVersion() {
+    return m_version;
   }
 
   public: Array toArrayImpl() const;
@@ -179,7 +185,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   TypedValue* m_data;
   uint m_size;
   uint m_capacity;
-  int m_versionNumber;
+  int32_t m_version;
 
   friend ObjectData* collectionDeepCopyVector(c_Vector* vec);
 };
@@ -207,7 +213,7 @@ class c_VectorIterator : public ExtObjectData {
  private:
   SmartPtr<c_Vector> m_obj;
   ssize_t m_pos;
-  int m_versionNumber;
+  int32_t m_version;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -239,6 +245,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: int64_t t_count();
   public: Object t_items();
   public: Object t_keys();
+  public: Object t_view();
+  public: Object t_kvzip();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
@@ -258,6 +266,9 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   public: Object t_updatefromiterable(CVarRef it);
   public: Object t_differencebykey(CVarRef it);
   public: Object t_getiterator();
+  public: Object t_map(CVarRef callback);
+  public: Object t_filter(CVarRef callback);
+  public: Object t_zip(CVarRef iterable);
   public: String t___tostring();
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
@@ -313,11 +324,11 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   }
   public: void add(TypedValue* val);
   public: void remove(int64_t key) {
-    ++m_versionNumber;
+    ++m_version;
     erase(find(key));
   }
   public: void remove(StringData* key) {
-    ++m_versionNumber;
+    ++m_version;
     erase(find(key->data(), key->size(), key->hash()));
   }
   public: bool contains(int64_t key) {
@@ -331,8 +342,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
       growImpl(sz);
     }
   }
-  public: int getVersionNumber() {
-    return m_versionNumber;
+  public: int getVersion() {
+    return m_version;
   }
   public: Array toArrayImpl() const;
 
@@ -433,7 +444,7 @@ private:
   uint             m_size;
   uint             m_load;
   uint             m_nLastSlot;
-  int              m_versionNumber;
+  int32_t          m_version;
 
   size_t numSlots() const {
     return m_nLastSlot + 1;
@@ -526,7 +537,7 @@ class c_MapIterator : public ExtObjectData {
  private:
   SmartPtr<c_Map> m_obj;
   ssize_t m_pos;
-  int m_versionNumber;
+  int32_t m_version;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -558,6 +569,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: int64_t t_count();
   public: Object t_items();
   public: Object t_keys();
+  public: Object t_view();
+  public: Object t_kvzip();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: Object t_set(CVarRef key, CVarRef value);
@@ -577,6 +590,9 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   public: Object t_updatefromiterable(CVarRef it);
   public: Object t_differencebykey(CVarRef it);
   public: Object t_getiterator();
+  public: Object t_map(CVarRef callback);
+  public: Object t_filter(CVarRef callback);
+  public: Object t_zip(CVarRef iterable);
   public: String t___tostring();
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
@@ -630,11 +646,11 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   }
   public: void add(TypedValue* val);
   public: void remove(int64_t key) {
-    ++m_versionNumber;
+    ++m_version;
     erase(findForErase(key));
   }
   public: void remove(StringData* key) {
-    ++m_versionNumber;
+    ++m_version;
     erase(findForErase(key->data(), key->size(), key->hash()));
   }
   public: bool contains(int64_t key) {
@@ -648,8 +664,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
       growImpl(sz);
     }
   }
-  public: int getVersionNumber() {
-    return m_versionNumber;
+  public: int getVersion() {
+    return m_version;
   }
   public: Array toArrayImpl() const;
 
@@ -742,7 +758,7 @@ private:
   uint             m_size;
   uint             m_nTableSize;
   uint             m_nTableMask;
-  int              m_versionNumber;
+  int32_t          m_version;
   Bucket*          m_pListHead;
   Bucket*          m_pListTail;
   Bucket**         m_arBuckets;
@@ -805,7 +821,7 @@ class c_StableMapIterator : public ExtObjectData {
  private:
   SmartPtr<c_StableMap> m_obj;
   ssize_t m_pos;
-  int m_versionNumber;
+  int32_t m_version;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -833,11 +849,16 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   public: int64_t t_count();
   public: Object t_items();
   public: Object t_keys();
+  public: Object t_view();
+  public: Object t_kvzip();
   public: Variant t_at(CVarRef key);
   public: Variant t_get(CVarRef key);
   public: bool t_containskey(CVarRef key);
   public: Array t_toarray();
   public: Object t_getiterator();
+  public: Object t_map(CVarRef callback);
+  public: Object t_filter(CVarRef callback);
+  public: Object t_zip(CVarRef iterable);
   public: String t___tostring();
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
@@ -870,6 +891,17 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
     TypedValue* tv = &getElms()[m_size];
     tv->m_data.num = val->m_data.num;
     tv->m_type = val->m_type;
+    ++m_size;
+  }
+  public: void addInt(int64_t val) {
+    if (m_size == 2) {
+      Object e(SystemLib::AllocRuntimeExceptionObject(
+        "Cannot add a new element to a Pair"));
+      throw e;
+    }
+    TypedValue* tv = &getElms()[m_size];
+    tv->m_data.num = val;
+    tv->m_type = KindOfInt64;
     ++m_size;
   }
   public: bool contains(int64_t key) {

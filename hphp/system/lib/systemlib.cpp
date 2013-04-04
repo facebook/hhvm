@@ -123,8 +123,34 @@ ObjectData* SystemLib::AllocKeysIterableObject(CVarRef mp) {
   CREATE_AND_CONSTRUCT(KeysIterable, CREATE_VECTOR1(mp));
 }
 
-ObjectData* SystemLib::AllocMapItemsIterableObject(CVarRef mp) {
-  CREATE_AND_CONSTRUCT(MapItemsIterable, CREATE_VECTOR1(mp));
+ObjectData* SystemLib::AllocKVZippedIterableObject(CVarRef mp) {
+  CREATE_AND_CONSTRUCT(KVZippedIterable, CREATE_VECTOR1(mp));
+}
+
+ObjectData* SystemLib::AllocMappedKeyedIterableObject(CVarRef iterable,
+                                                      CVarRef callback) {
+  CREATE_AND_CONSTRUCT(MappedKeyedIterable, CREATE_VECTOR2(iterable,
+                                                           callback));
+}
+
+ObjectData* SystemLib::AllocFilteredKeyedIterableObject(CVarRef iterable,
+                                                        CVarRef callback) {
+  CREATE_AND_CONSTRUCT(FilteredKeyedIterable, CREATE_VECTOR2(iterable,
+                                                             callback));
+}
+
+ObjectData* SystemLib::AllocZippedKeyedIterableObject(CVarRef iterable1,
+                                                      CVarRef iterable2) {
+  CREATE_AND_CONSTRUCT(ZippedKeyedIterable, CREATE_VECTOR2(iterable1,
+                                                           iterable2));
+}
+
+ObjectData* SystemLib::AllocIterableViewObject(CVarRef iterable) {
+  CREATE_AND_CONSTRUCT(IterableView, CREATE_VECTOR1(iterable));
+}
+
+ObjectData* SystemLib::AllocKeyedIterableViewObject(CVarRef iterable) {
+  CREATE_AND_CONSTRUCT(KeyedIterableView, CREATE_VECTOR1(iterable));
 }
 
 #undef CREATE_AND_CONSTRUCT

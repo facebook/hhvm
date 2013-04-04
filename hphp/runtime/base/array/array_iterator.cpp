@@ -86,19 +86,19 @@ void ArrayIter::objInit(ObjectData *obj) {
   switch (getCollectionType()) {
     case Collection::VectorType: {
       c_Vector* vec = getVector();
-      m_versionNumber = vec->getVersionNumber();
+      m_version = vec->getVersion();
       m_pos = 0;
       break;
     }
     case Collection::MapType: {
       c_Map* mp = getMap();
-      m_versionNumber = mp->getVersionNumber();
+      m_version = mp->getVersion();
       m_pos = mp->iter_begin();
       break;
     }
     case Collection::StableMapType: {
       c_StableMap* smp = getStableMap();
-      m_versionNumber = smp->getVersionNumber();
+      m_version = smp->getVersion();
       m_pos = smp->iter_begin();
       break;
     }
@@ -179,7 +179,7 @@ void ArrayIter::nextHelper() {
     case Collection::MapType: {
       assert(m_pos != 0);
       c_Map* mp = getMap();
-      if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
+      if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
       }
       m_pos = mp->iter_next(m_pos);
@@ -188,7 +188,7 @@ void ArrayIter::nextHelper() {
     case Collection::StableMapType: {
       assert(m_pos != 0);
       c_StableMap* smp = getStableMap();
-      if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
+      if (UNLIKELY(m_version != smp->getVersion())) {
         throw_collection_modified();
       }
       m_pos = smp->iter_next(m_pos);
@@ -212,7 +212,7 @@ Variant ArrayIter::firstHelper() {
     case Collection::MapType: {
       assert(m_pos != 0);
       c_Map* mp = getMap();
-      if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
+      if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
       }
       return mp->iter_key(m_pos);
@@ -220,7 +220,7 @@ Variant ArrayIter::firstHelper() {
     case Collection::StableMapType: {
       assert(m_pos != 0);
       c_StableMap* smp = getStableMap();
-      if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
+      if (UNLIKELY(m_version != smp->getVersion())) {
         throw_collection_modified();
       }
       return smp->iter_key(m_pos);
@@ -246,21 +246,21 @@ Variant ArrayIter::second() {
   switch (getCollectionType()) {
     case Collection::VectorType: {
       c_Vector* vec = getVector();
-      if (UNLIKELY(m_versionNumber != vec->getVersionNumber())) {
+      if (UNLIKELY(m_version != vec->getVersion())) {
         throw_collection_modified();
       }
       return tvAsCVarRef(vec->at(m_pos));
     }
     case Collection::MapType: {
       c_Map* mp = getMap();
-      if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
+      if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
       }
       return mp->iter_value(m_pos);
     }
     case Collection::StableMapType: {
       c_StableMap* smp = getStableMap();
-      if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
+      if (UNLIKELY(m_version != smp->getVersion())) {
         throw_collection_modified();
       }
       return smp->iter_value(m_pos);
@@ -279,7 +279,7 @@ void ArrayIter::secondHelper(Variant& v) {
   switch (getCollectionType()) {
     case Collection::VectorType: {
       c_Vector* vec = getVector();
-      if (UNLIKELY(m_versionNumber != vec->getVersionNumber())) {
+      if (UNLIKELY(m_version != vec->getVersion())) {
         throw_collection_modified();
       }
       v = tvAsCVarRef(vec->at(m_pos));
@@ -287,7 +287,7 @@ void ArrayIter::secondHelper(Variant& v) {
     }
     case Collection::MapType: {
       c_Map* mp = getMap();
-      if (UNLIKELY(m_versionNumber != mp->getVersionNumber())) {
+      if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
       }
       v = mp->iter_value(m_pos);
@@ -295,7 +295,7 @@ void ArrayIter::secondHelper(Variant& v) {
     }
     case Collection::StableMapType: {
       c_StableMap* smp = getStableMap();
-      if (UNLIKELY(m_versionNumber != smp->getVersionNumber())) {
+      if (UNLIKELY(m_version != smp->getVersion())) {
         throw_collection_modified();
       }
       v = smp->iter_value(m_pos);

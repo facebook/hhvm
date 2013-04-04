@@ -2278,6 +2278,8 @@ TypedValue* tg_6Vector_isEmpty(VM::ActRec *ar);
 TypedValue* tg_6Vector_count(VM::ActRec *ar);
 TypedValue* tg_6Vector_items(VM::ActRec *ar);
 TypedValue* tg_6Vector_keys(VM::ActRec *ar);
+TypedValue* tg_6Vector_view(VM::ActRec *ar);
+TypedValue* tg_6Vector_kvzip(VM::ActRec *ar);
 TypedValue* tg_6Vector_at(VM::ActRec *ar);
 TypedValue* tg_6Vector_get(VM::ActRec *ar);
 TypedValue* tg_6Vector_set(VM::ActRec *ar);
@@ -2294,6 +2296,9 @@ TypedValue* tg_6Vector_pop(VM::ActRec *ar);
 TypedValue* tg_6Vector_resize(VM::ActRec *ar);
 TypedValue* tg_6Vector_toArray(VM::ActRec *ar);
 TypedValue* tg_6Vector_getIterator(VM::ActRec *ar);
+TypedValue* tg_6Vector_map(VM::ActRec *ar);
+TypedValue* tg_6Vector_filter(VM::ActRec *ar);
+TypedValue* tg_6Vector_zip(VM::ActRec *ar);
 TypedValue* tg_6Vector_sort(VM::ActRec *ar);
 TypedValue* tg_6Vector_reverse(VM::ActRec *ar);
 TypedValue* tg_6Vector_splice(VM::ActRec *ar);
@@ -2321,6 +2326,8 @@ TypedValue* tg_3Map_isEmpty(VM::ActRec *ar);
 TypedValue* tg_3Map_count(VM::ActRec *ar);
 TypedValue* tg_3Map_items(VM::ActRec *ar);
 TypedValue* tg_3Map_keys(VM::ActRec *ar);
+TypedValue* tg_3Map_view(VM::ActRec *ar);
+TypedValue* tg_3Map_kvzip(VM::ActRec *ar);
 TypedValue* tg_3Map_at(VM::ActRec *ar);
 TypedValue* tg_3Map_get(VM::ActRec *ar);
 TypedValue* tg_3Map_set(VM::ActRec *ar);
@@ -2343,6 +2350,9 @@ TypedValue* tg_3Map_updateFromArray(VM::ActRec *ar);
 TypedValue* tg_3Map_updateFromIterable(VM::ActRec *ar);
 TypedValue* tg_3Map_differenceByKey(VM::ActRec *ar);
 TypedValue* tg_3Map_getIterator(VM::ActRec *ar);
+TypedValue* tg_3Map_map(VM::ActRec *ar);
+TypedValue* tg_3Map_filter(VM::ActRec *ar);
+TypedValue* tg_3Map_zip(VM::ActRec *ar);
 TypedValue* tg_3Map___toString(VM::ActRec *ar);
 TypedValue* tg_3Map___get(VM::ActRec *ar);
 TypedValue* tg_3Map___set(VM::ActRec *ar);
@@ -2364,6 +2374,8 @@ TypedValue* tg_9StableMap_isEmpty(VM::ActRec *ar);
 TypedValue* tg_9StableMap_count(VM::ActRec *ar);
 TypedValue* tg_9StableMap_items(VM::ActRec *ar);
 TypedValue* tg_9StableMap_keys(VM::ActRec *ar);
+TypedValue* tg_9StableMap_view(VM::ActRec *ar);
+TypedValue* tg_9StableMap_kvzip(VM::ActRec *ar);
 TypedValue* tg_9StableMap_at(VM::ActRec *ar);
 TypedValue* tg_9StableMap_get(VM::ActRec *ar);
 TypedValue* tg_9StableMap_set(VM::ActRec *ar);
@@ -2386,6 +2398,9 @@ TypedValue* tg_9StableMap_updateFromArray(VM::ActRec *ar);
 TypedValue* tg_9StableMap_updateFromIterable(VM::ActRec *ar);
 TypedValue* tg_9StableMap_differenceByKey(VM::ActRec *ar);
 TypedValue* tg_9StableMap_getIterator(VM::ActRec *ar);
+TypedValue* tg_9StableMap_map(VM::ActRec *ar);
+TypedValue* tg_9StableMap_filter(VM::ActRec *ar);
+TypedValue* tg_9StableMap_zip(VM::ActRec *ar);
 TypedValue* tg_9StableMap___get(VM::ActRec *ar);
 TypedValue* tg_9StableMap___set(VM::ActRec *ar);
 TypedValue* tg_9StableMap___isset(VM::ActRec *ar);
@@ -2407,8 +2422,13 @@ TypedValue* tg_4Pair_isEmpty(VM::ActRec *ar);
 TypedValue* tg_4Pair_count(VM::ActRec *ar);
 TypedValue* tg_4Pair_items(VM::ActRec *ar);
 TypedValue* tg_4Pair_keys(VM::ActRec *ar);
+TypedValue* tg_4Pair_view(VM::ActRec *ar);
+TypedValue* tg_4Pair_kvzip(VM::ActRec *ar);
 TypedValue* tg_4Pair_toArray(VM::ActRec *ar);
 TypedValue* tg_4Pair_getIterator(VM::ActRec *ar);
+TypedValue* tg_4Pair_map(VM::ActRec *ar);
+TypedValue* tg_4Pair_filter(VM::ActRec *ar);
+TypedValue* tg_4Pair_zip(VM::ActRec *ar);
 TypedValue* tg_4Pair_at(VM::ActRec *ar);
 TypedValue* tg_4Pair_get(VM::ActRec *ar);
 TypedValue* tg_4Pair_containsKey(VM::ActRec *ar);
@@ -5334,13 +5354,15 @@ static const HhbcExtMethodInfo hhbc_ext_methods_DummyClosure[] = {
   { "__construct", tg_12DummyClosure___construct }
 };
 
-static const long long hhbc_ext_method_count_Vector = 35;
+static const long long hhbc_ext_method_count_Vector = 40;
 static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "__construct", tg_6Vector___construct },
   { "isEmpty", tg_6Vector_isEmpty },
   { "count", tg_6Vector_count },
   { "items", tg_6Vector_items },
   { "keys", tg_6Vector_keys },
+  { "view", tg_6Vector_view },
+  { "kvzip", tg_6Vector_kvzip },
   { "at", tg_6Vector_at },
   { "get", tg_6Vector_get },
   { "set", tg_6Vector_set },
@@ -5357,6 +5379,9 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Vector[] = {
   { "resize", tg_6Vector_resize },
   { "toArray", tg_6Vector_toArray },
   { "getIterator", tg_6Vector_getIterator },
+  { "map", tg_6Vector_map },
+  { "filter", tg_6Vector_filter },
+  { "zip", tg_6Vector_zip },
   { "sort", tg_6Vector_sort },
   { "reverse", tg_6Vector_reverse },
   { "splice", tg_6Vector_splice },
@@ -5383,13 +5408,15 @@ static const HhbcExtMethodInfo hhbc_ext_methods_VectorIterator[] = {
   { "rewind", tg_14VectorIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Map = 35;
+static const long long hhbc_ext_method_count_Map = 40;
 static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "__construct", tg_3Map___construct },
   { "isEmpty", tg_3Map_isEmpty },
   { "count", tg_3Map_count },
   { "items", tg_3Map_items },
   { "keys", tg_3Map_keys },
+  { "view", tg_3Map_view },
+  { "kvzip", tg_3Map_kvzip },
   { "at", tg_3Map_at },
   { "get", tg_3Map_get },
   { "set", tg_3Map_set },
@@ -5412,6 +5439,9 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Map[] = {
   { "updateFromIterable", tg_3Map_updateFromIterable },
   { "differenceByKey", tg_3Map_differenceByKey },
   { "getIterator", tg_3Map_getIterator },
+  { "map", tg_3Map_map },
+  { "filter", tg_3Map_filter },
+  { "zip", tg_3Map_zip },
   { "__toString", tg_3Map___toString },
   { "__get", tg_3Map___get },
   { "__set", tg_3Map___set },
@@ -5432,13 +5462,15 @@ static const HhbcExtMethodInfo hhbc_ext_methods_MapIterator[] = {
   { "rewind", tg_11MapIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_StableMap = 35;
+static const long long hhbc_ext_method_count_StableMap = 40;
 static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "__construct", tg_9StableMap___construct },
   { "isEmpty", tg_9StableMap_isEmpty },
   { "count", tg_9StableMap_count },
   { "items", tg_9StableMap_items },
   { "keys", tg_9StableMap_keys },
+  { "view", tg_9StableMap_view },
+  { "kvzip", tg_9StableMap_kvzip },
   { "at", tg_9StableMap_at },
   { "get", tg_9StableMap_get },
   { "set", tg_9StableMap_set },
@@ -5461,6 +5493,9 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StableMap[] = {
   { "updateFromIterable", tg_9StableMap_updateFromIterable },
   { "differenceByKey", tg_9StableMap_differenceByKey },
   { "getIterator", tg_9StableMap_getIterator },
+  { "map", tg_9StableMap_map },
+  { "filter", tg_9StableMap_filter },
+  { "zip", tg_9StableMap_zip },
   { "__get", tg_9StableMap___get },
   { "__set", tg_9StableMap___set },
   { "__isset", tg_9StableMap___isset },
@@ -5481,15 +5516,20 @@ static const HhbcExtMethodInfo hhbc_ext_methods_StableMapIterator[] = {
   { "rewind", tg_17StableMapIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Pair = 10;
+static const long long hhbc_ext_method_count_Pair = 15;
 static const HhbcExtMethodInfo hhbc_ext_methods_Pair[] = {
   { "__construct", tg_4Pair___construct },
   { "isEmpty", tg_4Pair_isEmpty },
   { "count", tg_4Pair_count },
   { "items", tg_4Pair_items },
   { "keys", tg_4Pair_keys },
+  { "view", tg_4Pair_view },
+  { "kvzip", tg_4Pair_kvzip },
   { "toArray", tg_4Pair_toArray },
   { "getIterator", tg_4Pair_getIterator },
+  { "map", tg_4Pair_map },
+  { "filter", tg_4Pair_filter },
+  { "zip", tg_4Pair_zip },
   { "at", tg_4Pair_at },
   { "get", tg_4Pair_get },
   { "containsKey", tg_4Pair_containsKey }

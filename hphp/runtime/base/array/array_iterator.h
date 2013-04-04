@@ -232,7 +232,7 @@ class ArrayIter {
  public:
   ssize_t m_pos;
  private:
-  int m_versionNumber;
+  int m_version;
   Type m_itype;
 
   friend struct VM::Iter;

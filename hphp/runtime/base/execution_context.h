@@ -704,6 +704,14 @@ public:
                   HPHP::VM::VarEnv* varEnv = nullptr,
                   StringData* invName = nullptr,
                   HPHP::VM::Unit* mergeUnit = nullptr);
+  void invokeFunc(TypedValue* retval,
+                  HPHP::VM::CallCtx& ctx,
+                  CArrRef params,
+                  HPHP::VM::VarEnv* varEnv = nullptr,
+                  HPHP::VM::Unit* toMerge = nullptr) {
+    invokeFunc(retval, ctx.func, params, ctx.this_, ctx.cls, varEnv,
+               ctx.invName, toMerge);
+  }
   void invokeContFunc(const HPHP::VM::Func* f,
                       ObjectData* this_,
                       TypedValue* param = nullptr);

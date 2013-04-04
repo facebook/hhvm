@@ -912,13 +912,12 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   if (src1Reg == InvalidReg && src2Reg == InvalidReg) {
     assert(src1->isConst() && src2->isConst());
     int64_t value = oper(src1->getValRawInt(),
-                       src2->getValRawInt());
+                         src2->getValRawInt());
     emitLoadImm(a, value, dstReg);
     return;
   }
 
   // One register, and one immediate.
-
   if (commutative) {
     int64_t immed = (src2Reg == InvalidReg
                      ? src2 : src1)->getValRawInt();
@@ -933,7 +932,6 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   }
 
   // NonCommutative:
-
   if (src1Reg == InvalidReg) {
     if (dstReg == src2Reg) {
       emitLoadImm(a, src1->getValRawInt(), rScratch);
@@ -964,9 +962,9 @@ void CodeGenerator::cgBinaryOp(IRInstruction* inst,
   if (!(src1->isA(Type::Bool) || src1->isA(Type::Int) || src1->isA(Type::Dbl))
       ||
       !(src2->isA(Type::Bool) || src2->isA(Type::Int) || src2->isA(Type::Dbl)) )
-    {
-      CG_PUNT(cgBinaryOp);
-    }
+  {
+    CG_PUNT(cgBinaryOp);
+  }
   if (src1->isA(Type::Dbl) || src2->isA(Type::Dbl)) {
     prepBinaryXmmOp(m_as, src1, src2);
     (m_as.*fpInstr)(xmm1, xmm0);
@@ -2447,12 +2445,12 @@ void CodeGenerator::cgExitGuardFailure(IRInstruction* inst) {
 }
 
 static void emitAssertFlagsNonNegative(CodeGenerator::Asm& as) {
-  ifThen(as, CC_NGE, [&] { as.int3(); });
+  ifThen(as, CC_NGE, [&] { as.ud2(); });
 }
 
 static void emitAssertRefCount(CodeGenerator::Asm& as, PhysReg base) {
   as.cmpl(HPHP::RefCountStaticValue, base[FAST_REFCOUNT_OFFSET]);
-  ifThen(as, CC_NBE, [&] { as.int3(); });
+  ifThen(as, CC_NBE, [&] { as.ud2(); });
 }
 
 static void emitIncRef(CodeGenerator::Asm& as, PhysReg base) {
@@ -2460,7 +2458,7 @@ static void emitIncRef(CodeGenerator::Asm& as, PhysReg base) {
     emitAssertRefCount(as, base);
   }
   // emit incref
-  as.addl(1, base[FAST_REFCOUNT_OFFSET]);
+  as.incl(base[FAST_REFCOUNT_OFFSET]);
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     // Assert that the ref count is greater than zero
     emitAssertFlagsNonNegative(as);
@@ -2724,7 +2722,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
       emitAssertRefCount(m_as, dataReg);
     }
     // Load _count in scratchReg
-    m_as.load_reg64_disp_reg32(dataReg, FAST_REFCOUNT_OFFSET, scratchReg);
+    m_as.loadl(dataReg[FAST_REFCOUNT_OFFSET], r32(scratchReg));
 
     // Check for RefCountStaticValue
     patchStaticCheck = cgCheckStaticBit(type, scratchReg,
@@ -2732,7 +2730,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
 
     // Decrement count and store it back in memory.
     // If there's an exit, emit jump to it when _count would get down to 0
-    m_as.sub_imm32_reg32(1, scratchReg);
+    m_as.decq(scratchReg);
     if (exit) {
       emitFwdJcc(CC_E, exit);
     }
@@ -2772,7 +2770,7 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
     }
 
     // Decrement _count
-    m_as.sub_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, dataReg);
+    m_as.decl(dataReg[FAST_REFCOUNT_OFFSET]);
 
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       // Assert that the ref count is not less than zero
@@ -3426,7 +3424,7 @@ static void emitLdClsCctx(CodeGenerator::Asm& a,
                           PhysReg srcReg,
                           PhysReg dstReg) {
   emitMovRegReg(a, srcReg, dstReg);
-  a.    subq(1, dstReg);
+  a.    decq(dstReg);
 }
 
 void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {

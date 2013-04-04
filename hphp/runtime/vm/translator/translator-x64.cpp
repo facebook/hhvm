@@ -873,7 +873,7 @@ TranslatorX64::emitIncRef(X64Assembler &a, PhysReg base, DataType dtype) {
      * compact, it only writes the low-order 8 bits of eflags, causing a
      * partial dependency for any downstream flags-dependent code.
      */
-    a.    add_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, base);
+    a.    incl(base[FAST_REFCOUNT_OFFSET]);
   } // endif
 }
 
@@ -888,7 +888,7 @@ TranslatorX64::emitIncRefGenericRegSafe(PhysReg base,
                                 tmpReg);
     { // if !static
       IfCountNotStatic ins(a, tmpReg);
-      a.  add_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, tmpReg);
+      a.  incl(tmpReg[FAST_REFCOUNT_OFFSET]);
     } // endif
   } // endif
 }
@@ -992,7 +992,7 @@ void TranslatorX64::emitDecRef(Asm& a,
   SpaceRecorder sr("_DecRef", a);
   { // if !static
     IfCountNotStatic ins(a, rDatum, type);
-    a.    sub_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, rDatum);
+    a.    decl(rDatum[FAST_REFCOUNT_OFFSET]);
 
     assert(type >= 0 && type < MaxNumDataTypes);
     if (&a == &this->astubs) {
@@ -1201,7 +1201,7 @@ void TranslatorX64::emitGenericDecRefHelpers() {
   m_dtorGenericStubRegs = a.code.frontier;
   a.    cmpl   (RefCountStaticValue, rdi[FAST_REFCOUNT_OFFSET]);
   jccBlock<CC_Z>(a, [&] {
-    a.  subl   (1, rdi[FAST_REFCOUNT_OFFSET]);
+    a.  decl   (rdi[FAST_REFCOUNT_OFFSET]);
     release.jcc8(a, CC_Z);
   });
   a.    ret    ();
@@ -2288,7 +2288,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     // rather than execution speed; i.e., don't unroll the loop.
     TCA loopTop = a.code.frontier;
     a.  sub_imm32_reg64(sizeof(Cell), rVmSp);
-    a.  add_imm32_reg32(1, rax);
+    a.  incl(eax);
     emitStoreUninitNull(a, 0, rVmSp);
     a.  cmp_imm32_reg32(numParams, rax);
     a.  jcc8(CC_L, loopTop);
@@ -7429,7 +7429,7 @@ void TranslatorX64::translateCreateCont(const Tracelet& t,
         const int thisOff = cellsToBytes(genLocals - thisId - 1);
         // We don't have to check for a static refcount since we
         // know it's an Object
-        a.  addl(1, r(rScratch)[FAST_REFCOUNT_OFFSET]);
+        a.  incl(r(rScratch)[FAST_REFCOUNT_OFFSET]);
         a.  storeq(r(rScratch), r(rDest)[thisOff + TVOFF(m_data)]);
         emitStoreTVType(a, KindOfObject, r(rDest)[thisOff + TVOFF(m_type)]);
       }
@@ -7624,7 +7624,7 @@ void TranslatorX64::emitContPreNext(const NormalizedInstruction& i,
   }
 
   // ++m_index
-  a.    add_imm64_disp_reg64(0x1, CONTOFF(m_index), r(rCont));
+  a.    incq(r(rCont)[CONTOFF(m_index)]);
   // m_running = true
   a.    store_imm8_disp_reg(0x1, CONTOFF(m_running), r(rCont));
 }
@@ -8561,9 +8561,9 @@ TranslatorX64::translateIncDecL(const Tracelet& t,
     emitMovRegReg(a, localVal, output);
   }
   if (inc) {
-    a.  add_imm32_reg64(1, localVal);
+    a.    incq(localVal);
   } else {
-    a.  sub_imm32_reg64(1, localVal);
+    a.    decq(localVal);
   }
   if (i.outStack && pre) { // --$a, ++$a
     PhysReg output   = getReg(i.outStack->location);
@@ -9396,7 +9396,7 @@ TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
   if (i.noCtor) {
     // If we're not running the constructor, just incref the object once and
     // don't set up the ActRec.
-    a.add_imm32_disp_reg32(1, FAST_REFCOUNT_OFFSET, rax);
+    a.incl(rax[FAST_REFCOUNT_OFFSET]);
     return;
   } else {
     // Incref the object twice: once for the stack and once for $this in the
@@ -11627,7 +11627,7 @@ asm_label(a, release);
   a.    loadq  (rIter[TVOFF(m_data)], rData);
   a.    cmpl   (RefCountStaticValue, rData[FAST_REFCOUNT_OFFSET]);
   jccBlock<CC_Z>(a, [&] {
-    a.  subl   (1, rData[FAST_REFCOUNT_OFFSET]);
+    a.  decl   (rData[FAST_REFCOUNT_OFFSET]);
     a.  jz8    (doRelease);
   });
   a.    ret    ();

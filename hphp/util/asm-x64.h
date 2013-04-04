@@ -1053,7 +1053,7 @@ struct X64Assembler {
   void incq(Reg64 r)  { instrR(instr_inc,  r); }
   void incl(Reg32 r)  { instrR(instr_inc,  r); }
   void decq(Reg64 r)  { instrR(instr_dec,  r); }
-  void decl(Reg32 r)  { instrR(instr_dec,  r); }
+  // decl(Reg32) cannot be encoded; it's REX.
   void notb(Reg8 r)   { instrR(instr_notb, r); }
   void not(Reg64 r)   { instrR(instr_not,  r); }
   void neg(Reg64 r)   { instrR(instr_neg,  r); }
@@ -1072,7 +1072,7 @@ struct X64Assembler {
   void incq(MemoryRef m) { instrM(instr_inc,  m); }
   void incl(MemoryRef m) { instrM32(instr_inc, m); }
   void decq(MemoryRef m) { instrM(instr_dec,  m); }
-  void decl(MemoryRef m) { instrM32(instr_inc, m); }
+  void decl(MemoryRef m) { instrM32(instr_dec, m); }
 
   void movdqu(RegXMM x, MemoryRef m)        { instrRM(instr_movdqu, x, m); }
   void movdqu(RegXMM x, IndexedMemoryRef m) { instrRM(instr_movdqu, x, m); }

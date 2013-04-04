@@ -415,14 +415,6 @@ Object create_object(CStrRef s, const Array &params, bool init = true);
  *   - When level is 1, it's from system funcs that turn both into warnings
  *   - When level is 0, it's from user funcs that turn missing arg in warnings
  */
-Variant throw_missing_arguments(const char *fn, int expected, int got,
-                                int level = 0);
-Variant throw_toomany_arguments(const char *fn, int num, int level = 0);
-Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
-                              int level = 0);
-Variant throw_missing_typed_argument(const char *fn, const char *type, int arg);
-Variant throw_assign_this();
-
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
                                 int level = 0)
   __attribute__((cold));
@@ -430,14 +422,6 @@ void throw_toomany_arguments_nr(const char *fn, int num, int level = 0)
   __attribute__((cold));
 void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
                               int level = 0) __attribute__((cold));
-
-/**
- * When fatal coding errors are transformed to this function call.
- */
-inline Object throw_fatal_object(const char *msg, void *dummy = nullptr) {
-  throw FatalErrorException(msg);
-}
-
 void throw_unexpected_argument_type(int argNum, const char *fnName,
                                     const char *expected, CVarRef val);
 

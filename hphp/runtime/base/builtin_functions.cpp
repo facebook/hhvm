@@ -567,33 +567,6 @@ void throw_pending_exception(ThreadInfo *info) {
   throw e;
 }
 
-Variant throw_missing_arguments(const char *fn, int expected, int got,
-                                int level /* = 0 */) {
-  throw_missing_arguments_nr(fn, expected, got, level);
-  return uninit_null();
-}
-
-Variant throw_toomany_arguments(const char *fn, int num, int level /* = 0 */) {
-  if (level == 2 || RuntimeOption::ThrowTooManyArguments) {
-    raise_error("Too many arguments for %s(), expected %d", fn, num);
-  } else if (level == 1 || RuntimeOption::WarnTooManyArguments) {
-    raise_warning("Too many arguments for %s(), expected %d", fn, num);
-  }
-  return uninit_null();
-}
-
-Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
-                              int level /* = 0 */) {
-  if (cmin >= 0 && count < cmin) {
-    return throw_missing_arguments(fn, cmin, count, level);
-  }
-  if (cmax >= 0 && count > cmax) {
-    return throw_toomany_arguments(fn, cmax, level);
-  }
-  assert(false);
-  return uninit_null();
-}
-
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
                                 int level /* = 0 */) {
   if (level == 2 || RuntimeOption::ThrowMissingArguments) {
@@ -620,7 +593,7 @@ void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */) {
 }
 
 void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
-                           int level /* = 0 */) {
+                              int level /* = 0 */) {
   if (cmin >= 0 && count < cmin) {
     throw_missing_arguments_nr(fn, cmin, count, level);
     return;
@@ -630,18 +603,6 @@ void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
     return;
   }
   assert(false);
-}
-
-Variant throw_missing_typed_argument(const char *fn,
-                                     const char *type, int arg) {
-  if (!type) {
-    raise_error("Argument %d passed to %s() must be an array, none given",
-                arg, fn);
-  } else {
-    raise_error("Argument %d passed to %s() must be "
-                "an instance of %s, none given", arg, fn, type);
-  }
-  return uninit_null();
 }
 
 void throw_bad_type_exception(const char *fmt, ...) {
@@ -763,10 +724,6 @@ void throw_call_non_object(const char *methodName) {
   }
 
   throw FatalErrorException(msg.c_str());
-}
-
-Variant throw_assign_this() {
-  throw FatalErrorException("Cannot re-assign $this");
 }
 
 void throw_unexpected_argument_type(int argNum, const char *fnName,

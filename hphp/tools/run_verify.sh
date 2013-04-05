@@ -84,10 +84,13 @@ else
 fi
 verify_args="$verify_args --hhvm $HHVM"
 
-cmd="$cmd \
-  -v Eval.EnableHipHopSyntax=true \
-  -v Eval.EnableObjDestructCall=true \
-  -v Eval.AllowHhas=true"
+cmd="$cmd -v Eval.EnableObjDestructCall=true"
+
+echo $TEST_PATH | grep -q zend
+if [ $? -ne 0 ] ; then
+    cmd="$cmd -v Eval.AllowHhas=true \
+              -v Eval.EnableHipHopSyntax=true"
+fi
 
 case $VQ in
     jit)

@@ -3706,8 +3706,18 @@ void CodeGenerator::cgLdRef(IRInstruction* inst) {
 void CodeGenerator::recordSyncPoint(Asm& as,
                                     SyncOptions sync /* = kSyncPoint */) {
   assert(m_state.lastMarker);
-  assert(sync != kNoSyncPoint);
-  Offset stackOff = m_state.lastMarker->stackOff - (sync - kSyncPoint);
+
+  Offset stackOff = m_state.lastMarker->stackOff;
+  switch (sync) {
+  case kSyncPointAdjustOne:
+    stackOff -= 1;
+    break;
+  case kSyncPoint:
+    break;
+  case kNoSyncPoint:
+    assert(0);
+  }
+
   Offset pcOff = m_state.lastMarker->bcOff - m_state.lastMarker->func->base();
   m_tx64->recordSyncPoint(as, pcOff, stackOff);
 }

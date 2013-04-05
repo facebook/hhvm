@@ -31,9 +31,16 @@
 
 #define SORT_DESC               3
 #define SORT_ASC                4
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+static StaticString s_Iterator("Iterator");
+static StaticString s_IteratorAggregate("IteratorAggregate");
+static StaticString s_ArrayIterator("ArrayIterator");
+static StaticString s_MutableArrayIterator("MutableArrayIterator");
+
+static StaticString s_getIterator("getIterator");
+static StaticString s_count("count");
 
 const int64_t k_UCOL_DEFAULT = UCOL_DEFAULT;
 
@@ -603,7 +610,7 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
     {
       Object obj = var.toObject();
       if (obj.instanceof(SystemLib::s_CountableClass)) {
-        return obj->o_invoke("count", null_array, -1);
+        return obj->o_invoke(s_count, null_array, -1);
       }
     }
     break;
@@ -654,13 +661,6 @@ Variant f_key(VRefParam array) {
   return array.array_iter_key();
 }
 
-
-static StaticString s_Iterator("Iterator");
-static StaticString s_IteratorAggregate("IteratorAggregate");
-static StaticString s_ArrayIterator("ArrayIterator");
-static StaticString s_MutableArrayIterator("MutableArrayIterator");
-
-static StaticString s_getIterator("getIterator");
 
 static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
   if (iterable.isArray()) {

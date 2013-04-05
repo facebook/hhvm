@@ -28,6 +28,12 @@ static StaticString s_spl_autoload("spl_autoload");
 static StaticString s_spl_autoload_call("spl_autoload_call");
 static StaticString s_default_extensions(".inc,.php");
 
+static StaticString s_rewind("rewind");
+static StaticString s_valid("valid");
+static StaticString s_next("next");
+static StaticString s_current("current");
+static StaticString s_key("key");
+
 #define SPL_ADD_CLASS(cls) ret.set(#cls, #cls)
 
 Array f_spl_classes() {
@@ -214,14 +220,14 @@ Variant f_iterator_apply(CVarRef obj, CVarRef func,
     return false;
   }
   Object pobj = obj.toObject();
-  pobj->o_invoke("rewind", null_array, -1);
+  pobj->o_invoke(s_rewind, null_array, -1);
   int64_t count = 0;
-  while (same(pobj->o_invoke("valid", null_array, -1), true)) {
+  while (same(pobj->o_invoke(s_valid, null_array, -1), true)) {
     if (!same(vm_call_user_func(func, params), true)) {
       break;
     }
     ++count;
-    pobj->o_invoke("next", null_array, -1);
+    pobj->o_invoke(s_next, null_array, -1);
   }
   return count;
 }
@@ -231,11 +237,11 @@ Variant f_iterator_count(CVarRef obj) {
     return false;
   }
   Object pobj = obj.toObject();
-  pobj->o_invoke("rewind", null_array, -1);
+  pobj->o_invoke(s_rewind, null_array, -1);
   int64_t count = 0;
-  while (same(pobj->o_invoke("valid", null_array, -1), true)) {
+  while (same(pobj->o_invoke(s_valid, null_array, -1), true)) {
     ++count;
-    pobj->o_invoke("next", null_array, -1);
+    pobj->o_invoke(s_next, null_array, -1);
   }
   return count;
 }
@@ -246,16 +252,16 @@ Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
   }
   Array ret(Array::Create());
   Object pobj = obj.toObject();
-  pobj->o_invoke("rewind", null_array, -1);
-  while (same(pobj->o_invoke("valid", null_array, -1), true)) {
-    Variant val = pobj->o_invoke("current", null_array, -1);
+  pobj->o_invoke(s_rewind, null_array, -1);
+  while (same(pobj->o_invoke(s_valid, null_array, -1), true)) {
+    Variant val = pobj->o_invoke(s_current, null_array, -1);
     if (use_keys) {
-      Variant key = pobj->o_invoke("key", null_array, -1);
+      Variant key = pobj->o_invoke(s_key, null_array, -1);
       ret.set(key, val);
     } else {
       ret.append(val);
     }
-    pobj->o_invoke("next", null_array, -1);
+    pobj->o_invoke(s_next, null_array, -1);
   }
   return ret;
 }

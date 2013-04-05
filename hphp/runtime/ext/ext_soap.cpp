@@ -33,6 +33,8 @@
 #include <system/lib/systemlib.h>
 
 namespace HPHP {
+
+static StaticString s___dorequest("__dorequest");
 IMPLEMENT_DEFAULT_EXTENSION(soap);
 ///////////////////////////////////////////////////////////////////////////////
 // helper classes for setting/resetting globals within a method call
@@ -473,7 +475,7 @@ static bool do_request(c_SoapClient *client, xmlDoc *request,
   if (client->m_trace) {
     client->m_last_request = String((char*)buf, buf_size, CopyString);
   }
-  response = client->o_invoke_few_args("__dorequest", -1, 5,
+  response = client->o_invoke_few_args(s___dorequest, -1, 5,
       String(buf, buf_size, AttachLiteral),
       String(location, AttachLiteral),
       String(action, AttachLiteral),

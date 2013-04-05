@@ -21,15 +21,19 @@
 #include <runtime/base/builtin_functions.h>
 
 namespace HPHP {
+
+static StaticString s_read("read");
+static StaticString s_write("write");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 String PhpThriftBuffer::readImpl() {
   Array args(CREATE_VECTOR1(m_size));
-  return m_xin->o_invoke("read", args, -1);
+  return m_xin->o_invoke(s_read, args, -1);
 }
 
 void PhpThriftBuffer::flushImpl(CStrRef data) {
-  m_xout->o_invoke("write", CREATE_VECTOR1(data), -1);
+  m_xout->o_invoke(s_write, CREATE_VECTOR1(data), -1);
 }
 
 void PhpThriftBuffer::throwError(const char *msg, int code) {

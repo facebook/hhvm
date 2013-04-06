@@ -44,7 +44,7 @@ bad_tests = (
     'getrusage_basic.php',
    
     # not implemented extensions
-    'phar',
+    'phar', # this appears in filenames
 
     # works in interp but not others
     'bug25922.php',
@@ -170,7 +170,7 @@ def walk(filename, source):
             start = wanted_re.find(r, startOffset)
             if start != -1:
                 end = wanted_re.find(r, start+2);
-                if ent == -1:
+                if end == -1:
                     # unbalanced tag, ignore it.
                     end = start = length;
             else:
@@ -272,6 +272,45 @@ if args.zend_path:
 
             # not implemented extensions
             '/sapi',
+            '/ext/calendar',
+            '/ext/com_dotnet',
+            '/ext/dba',
+            '/ext/dom',
+            '/ext/enchant',
+            '/ext/ereg',
+            '/ext/fileinfo',
+            '/ext/filter',
+            '/ext/ftp',
+            '/ext/gett/ext',
+            '/ext/gmp',
+            '/ext/interbase',
+            '/ext/mssql',
+            '/ext/mysqli',
+            '/ext/mysqlnd',
+            '/ext/opcache',
+            '/ext/odbc',
+            '/ext/pdo_dblib',
+            '/ext/pdo_firebird',
+            '/ext/pdo_odbc',
+            '/ext/pdo_pgsql',
+            '/ext/pdo_oci',
+            '/ext/phar',
+            '/ext/pspell',
+            '/ext/readline',
+            '/ext/recode',
+            '/ext/reflection',
+            '/ext/shmop',
+            '/ext/snmp',
+            '/ext/sybase_ct',
+            '/ext/sysvmsg',
+            '/ext/sysvsem',
+            '/ext/sysvshm',
+            '/ext/tidy',
+            '/ext/tokenizer',
+            '/ext/wddx',
+            '/ext/xmlrpc',
+            '/ext/xsl',
+            '/ext/zip',
         )
         if not '.phpt' in filename:
             return False

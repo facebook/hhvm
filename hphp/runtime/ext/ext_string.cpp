@@ -435,7 +435,11 @@ String f_number_format(double number, int decimals /* = 0 */,
 int64_t f_strcmp(CStrRef str1, CStrRef str2) {
   return string_strcmp(str1.data(), str1.size(), str2.data(), str2.size());
 }
-int64_t f_strncmp(CStrRef str1, CStrRef str2, int len) {
+Variant f_strncmp(CStrRef str1, CStrRef str2, int len) {
+  if (len < 0) {
+    raise_warning("Length must be greater than or equal to 0");
+    return false;
+  }
   return string_strncmp(str1.data(), str1.size(), str2.data(), str2.size(),
                         len);
 }
@@ -446,7 +450,11 @@ int64_t f_strnatcmp(CStrRef str1, CStrRef str2) {
 int64_t f_strcasecmp(CStrRef str1, CStrRef str2) {
   return bstrcasecmp(str1.data(), str1.size(), str2.data(), str2.size());
 }
-int64_t f_strncasecmp(CStrRef str1, CStrRef str2, int len) {
+Variant f_strncasecmp(CStrRef str1, CStrRef str2, int len) {
+  if (len < 0) {
+    raise_warning("Length must be greater than or equal to 0");
+    return false;
+  }
   return string_strncasecmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             len);
 }
@@ -1091,7 +1099,7 @@ static const HtmlBasicEntity basic_entities[] = {
   { 0, NULL, 0, 0 }
 };
 
-Array f_get_html_translation_table(int table, int quote_style) {
+Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_ENT_COMPAT */) {
   static entity_charset charset = determine_charset(nullptr); // get default one
   char ind[2]; ind[1] = 0;
 

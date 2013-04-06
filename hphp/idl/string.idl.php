@@ -1790,8 +1790,9 @@ DefineFunction(
     'desc'   => "This function is similar to strcmp(), with the difference that you can specify the (upper limit of the) number of characters from each string to be used in the comparison.\n\nNote that this comparison is case sensitive.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int64,
-      'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
+      'type' => Variant,
+      'desc' => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
+      'predicted_type' => Int64,
     ),
     'args'   => array(
       array(
@@ -1867,8 +1868,9 @@ DefineFunction(
     'desc'   => "This function is similar to strcasecmp(), with the difference that you can specify the (upper limit of the) number of characters from each string to be used in the comparison.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
-      'type'   => Int64,
-      'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
+      'type' => Variant,
+      'desc' => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
+      'predicted_type' => Int64,
     ),
     'args'   => array(
       array(
@@ -2355,7 +2357,7 @@ DefineFunction(
     ),
     'args'   => array(
       array(
-        'name'   => "str",
+        'name'   => "vstr",
         'type'   => Variant,
         'desc'   => "The string being measured for length.",
       ),

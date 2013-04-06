@@ -1794,15 +1794,11 @@ bool TestCodeRun::TestString() {
        "}"
        "foo();");
 
-  MVCRO("<?php "
-        "var_dump(strncmp('foo', 'foo', -100));"
-        "var_dump(strncasecmp('foo', 'foo', -100));"
-        "var_dump(substr_compare('foo', 'foo', 0, -100, true));"
-        "var_dump(substr_compare('foo', 'bar', -3));",
-        "int(0)\n" // zend returns false
-        "int(0)\n" // zend returns false
-        "bool(false)\n"
-        "int(1)\n");
+  MVCR("<?php "
+       "var_dump(strncmp('foo', 'foo', -100));"
+       "var_dump(strncasecmp('foo', 'foo', -100));"
+       "var_dump(substr_compare('foo', 'foo', 0, -100, true));"
+       "var_dump(substr_compare('foo', 'bar', -3));");
 
  return true;
 }

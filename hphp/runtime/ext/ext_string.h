@@ -136,10 +136,10 @@ String f_number_format(double number, int decimals = 0, CStrRef dec_point = ".",
 // analysis
 
 int64_t f_strcmp(CStrRef str1, CStrRef str2);
-int64_t f_strncmp(CStrRef str1, CStrRef str2, int len);
+Variant f_strncmp(CStrRef str1, CStrRef str2, int len);
 int64_t f_strnatcmp(CStrRef str1, CStrRef str2);
 int64_t f_strcasecmp(CStrRef str1, CStrRef str2);
-int64_t f_strncasecmp(CStrRef str1, CStrRef str2, int len);
+Variant f_strncasecmp(CStrRef str1, CStrRef str2, int len);
 int64_t f_strnatcasecmp(CStrRef str1, CStrRef str2);
 int64_t f_strcoll(CStrRef str1, CStrRef str2);
 

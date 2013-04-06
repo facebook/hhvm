@@ -799,16 +799,17 @@ str2 => rsi
 long fh_strcmp(Value* str1, Value* str2) asm("_ZN4HPHP8f_strcmpERKNS_6StringES2_");
 
 /*
-long HPHP::f_strncmp(HPHP::String const&, HPHP::String const&, int)
+HPHP::Variant HPHP::f_strncmp(HPHP::String const&, HPHP::String const&, int)
 _ZN4HPHP9f_strncmpERKNS_6StringES2_i
 
 (return value) => rax
-str1 => rdi
-str2 => rsi
-len => rdx
+_rv => rdi
+str1 => rsi
+str2 => rdx
+len => rcx
 */
 
-long fh_strncmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP9f_strncmpERKNS_6StringES2_i");
+TypedValue* fh_strncmp(TypedValue* _rv, Value* str1, Value* str2, int len) asm("_ZN4HPHP9f_strncmpERKNS_6StringES2_i");
 
 /*
 long HPHP::f_strnatcmp(HPHP::String const&, HPHP::String const&)
@@ -833,16 +834,17 @@ str2 => rsi
 long fh_strcasecmp(Value* str1, Value* str2) asm("_ZN4HPHP12f_strcasecmpERKNS_6StringES2_");
 
 /*
-long HPHP::f_strncasecmp(HPHP::String const&, HPHP::String const&, int)
+HPHP::Variant HPHP::f_strncasecmp(HPHP::String const&, HPHP::String const&, int)
 _ZN4HPHP13f_strncasecmpERKNS_6StringES2_i
 
 (return value) => rax
-str1 => rdi
-str2 => rsi
-len => rdx
+_rv => rdi
+str1 => rsi
+str2 => rdx
+len => rcx
 */
 
-long fh_strncasecmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP13f_strncasecmpERKNS_6StringES2_i");
+TypedValue* fh_strncasecmp(TypedValue* _rv, Value* str1, Value* str2, int len) asm("_ZN4HPHP13f_strncasecmpERKNS_6StringES2_i");
 
 /*
 long HPHP::f_strnatcasecmp(HPHP::String const&, HPHP::String const&)
@@ -1042,10 +1044,10 @@ _ZN4HPHP8f_strlenERKNS_7VariantE
 
 (return value) => rax
 _rv => rdi
-str => rsi
+vstr => rsi
 */
 
-TypedValue* fh_strlen(TypedValue* _rv, TypedValue* str) asm("_ZN4HPHP8f_strlenERKNS_7VariantE");
+TypedValue* fh_strlen(TypedValue* _rv, TypedValue* vstr) asm("_ZN4HPHP8f_strlenERKNS_7VariantE");
 
 /*
 HPHP::Variant HPHP::f_count_chars(HPHP::String const&, long)

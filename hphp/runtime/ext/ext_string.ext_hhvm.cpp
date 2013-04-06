@@ -3789,21 +3789,21 @@ TypedValue* fg_strcmp(HPHP::VM::ActRec *ar) {
 
 
 /*
-long HPHP::f_strncmp(HPHP::String const&, HPHP::String const&, int)
+HPHP::Variant HPHP::f_strncmp(HPHP::String const&, HPHP::String const&, int)
 _ZN4HPHP9f_strncmpERKNS_6StringES2_i
 
 (return value) => rax
-str1 => rdi
-str2 => rsi
-len => rdx
+_rv => rdi
+str1 => rsi
+str2 => rdx
+len => rcx
 */
 
-long fh_strncmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP9f_strncmpERKNS_6StringES2_i");
+TypedValue* fh_strncmp(TypedValue* _rv, Value* str1, Value* str2, int len) asm("_ZN4HPHP9f_strncmpERKNS_6StringES2_i");
 
 TypedValue * fg1_strncmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_strncmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfInt64;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
   }
@@ -3813,7 +3813,8 @@ TypedValue * fg1_strncmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_strncmp(&args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
+  fh_strncmp((rv), &args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
 
@@ -3823,8 +3824,8 @@ TypedValue* fg_strncmp(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_strncmp(&args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
+        fh_strncmp((&(rv)), &args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -3958,21 +3959,21 @@ TypedValue* fg_strcasecmp(HPHP::VM::ActRec *ar) {
 
 
 /*
-long HPHP::f_strncasecmp(HPHP::String const&, HPHP::String const&, int)
+HPHP::Variant HPHP::f_strncasecmp(HPHP::String const&, HPHP::String const&, int)
 _ZN4HPHP13f_strncasecmpERKNS_6StringES2_i
 
 (return value) => rax
-str1 => rdi
-str2 => rsi
-len => rdx
+_rv => rdi
+str1 => rsi
+str2 => rdx
+len => rcx
 */
 
-long fh_strncasecmp(Value* str1, Value* str2, int len) asm("_ZN4HPHP13f_strncasecmpERKNS_6StringES2_i");
+TypedValue* fh_strncasecmp(TypedValue* _rv, Value* str1, Value* str2, int len) asm("_ZN4HPHP13f_strncasecmpERKNS_6StringES2_i");
 
 TypedValue * fg1_strncasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_strncasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfInt64;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
   }
@@ -3982,7 +3983,8 @@ TypedValue * fg1_strncasecmp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  rv->m_data.num = (int64_t)fh_strncasecmp(&args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
+  fh_strncasecmp((rv), &args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
+  if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
 
@@ -3992,8 +3994,8 @@ TypedValue* fg_strncasecmp(HPHP::VM::ActRec *ar) {
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 3LL) {
       if ((args-2)->m_type == KindOfInt64 && IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_strncasecmp(&args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
+        fh_strncasecmp((&(rv)), &args[-0].m_data, &args[-1].m_data, (int)(args[-2].m_data.num));
+        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 3);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));
         return &ar->m_r;
@@ -4935,10 +4937,10 @@ _ZN4HPHP8f_strlenERKNS_7VariantE
 
 (return value) => rax
 _rv => rdi
-str => rsi
+vstr => rsi
 */
 
-TypedValue* fh_strlen(TypedValue* _rv, TypedValue* str) asm("_ZN4HPHP8f_strlenERKNS_7VariantE");
+TypedValue* fh_strlen(TypedValue* _rv, TypedValue* vstr) asm("_ZN4HPHP8f_strlenERKNS_7VariantE");
 
 TypedValue* fg_strlen(HPHP::VM::ActRec *ar) {
     TypedValue rv;

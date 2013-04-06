@@ -1886,9 +1886,9 @@ void CodeGenerator::cgLdFixedFunc(IRInstruction* inst) {
     m_as.   testq (dstReg, dstReg);
   }
   // jz off to the helper call in astubs
-  unlikelyIfBlock(CC_Z, [&] {
+  unlikelyIfBlock(CC_Z, [&] (Asm& a) {
     // this helper tries the autoload map, and fatals on failure
-    cgCallHelper(m_astubs, (TCA)FixedFuncCache::lookupUnknownFunc,
+    cgCallHelper(a, (TCA)FixedFuncCache::lookupUnknownFunc,
                  dstReg, kSyncPoint, ArgGroup().immPtr(name));
   });
 }
@@ -2846,10 +2846,10 @@ void CodeGenerator::cgDecRefStaticType(Type type,
   // release call
   if (genZeroCheck && exit == nullptr) {
     // Emit jump to m_astubs (to call release) if count got down to zero
-    unlikelyIfBlock(CC_Z, [&] {
-      if (slowPathWork) slowPathWork(m_astubs);
+    unlikelyIfBlock(CC_Z, [&] (Asm& a) {
+      if (slowPathWork) slowPathWork(a);
       // Emit the call to release in m_astubs
-      cgCallHelper(m_astubs, m_tx64->getDtorCall(type.toDataType()),
+      cgCallHelper(a, m_tx64->getDtorCall(type.toDataType()),
                    InvalidReg, InvalidReg, kSyncPoint,
                    ArgGroup().reg(dataReg));
     });
@@ -2881,9 +2881,9 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
   // If not exiting on count down to zero, emit the zero-check and release call
   if (genZeroCheck && exit == nullptr) {
     // Emit jump to m_astubs (to call release) if count got down to zero
-    unlikelyIfBlock(CC_Z, [&] {
+    unlikelyIfBlock(CC_Z, [&] (Asm& a) {
       // Emit call to release in m_astubs
-      cgCallHelper(m_astubs, getDtorTyped(), InvalidReg, kSyncPoint,
+      cgCallHelper(a, getDtorTyped(), InvalidReg, kSyncPoint,
                    ArgGroup().reg(dataReg).reg(typeReg));
     });
   }
@@ -2944,10 +2944,10 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
   // If not exiting on count down to zero, emit the zero-check and release call
   if (exit == nullptr) {
     // Emit jump to m_astubs (to call release) if count got down to zero
-    unlikelyIfBlock(CC_Z, [&] {
+    unlikelyIfBlock(CC_Z, [&] (Asm& a) {
       // Emit call to release in m_astubs
-      m_astubs.lea(baseReg[offset], scratchReg);
-      cgCallHelper(m_astubs, getDtorGeneric(), InvalidReg, kSyncPoint,
+      a.lea(baseReg[offset], scratchReg);
+      cgCallHelper(a, getDtorGeneric(), InvalidReg, kSyncPoint,
                    ArgGroup().reg(scratchReg));
     });
   }
@@ -3947,12 +3947,12 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
   m_as.testq(funcDestReg, funcDestReg);
   // May have retrieved a NULL from the cache
   // handle case where method is not entered in the cache
-  unlikelyIfBlock(CC_E, [&] {
+  unlikelyIfBlock(CC_E, [&] (Asm& a) {
     if (false) { // typecheck
       const UNUSED Func* f = StaticMethodCache::lookupIR(ch, ne, cls, method);
     }
     // can raise an error if class is undefined
-    cgCallHelper(m_astubs,
+    cgCallHelper(a,
                  (TCA)StaticMethodCache::lookupIR,
                  funcDestReg,
                  kSyncPoint,
@@ -3962,10 +3962,10 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
                            .immPtr(method)     // methodName
     );
     // recordInstrCall is done in cgCallHelper
-    m_astubs.testq(funcDestReg, funcDestReg);
-    m_astubs.loadq(rVmTl[ch + offsetof_cls], classDestReg);
+    a.testq(funcDestReg, funcDestReg);
+    a.loadq(rVmTl[ch + offsetof_cls], classDestReg);
     // if StaticMethodCache::lookupIR() returned NULL, jmp to label
-    emitFwdJcc(m_astubs, CC_Z, label);
+    emitFwdJcc(a, CC_Z, label);
   });
 }
 
@@ -4058,13 +4058,13 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
   Label End;
 
   // Handle case where method is not entered in the cache
-  unlikelyIfBlock(CC_E, [&] {
+  unlikelyIfBlock(CC_E, [&] (Asm& a) {
     if (false) { // typecheck
       const UNUSED Func* f = StaticMethodFCache::lookupIR(ch, cls, methName);
     }
     // preserve destCtxReg across the call since it wouldn't be otherwise
     inst->setLiveRegs(inst->getLiveRegs().add(destCtxReg));
-    cgCallHelper(m_astubs,
+    cgCallHelper(a,
                  (TCA)StaticMethodFCache::lookupIR,
                  funcDestReg,
                  kSyncPoint,
@@ -4073,8 +4073,8 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
                            .immPtr(methName));
     // If entry found in target cache, jump back to m_as.
     // Otherwise, bail to exit label
-    m_astubs.testq(funcDestReg, funcDestReg);
-    emitFwdJcc(m_astubs, CC_Z, exitLabel);
+    a.testq(funcDestReg, funcDestReg);
+    emitFwdJcc(a, CC_Z, exitLabel);
   });
 
   auto t = srcCtxTmp->getType();
@@ -4129,16 +4129,16 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   // Could be optimized to cmp against zero when !label && dstReg == InvalidReg
   m_as.loadq(rVmTl[ch], tmpReg);
   m_as.testq(tmpReg, tmpReg);
-  unlikelyIfBlock(CC_E, [&] {
-    cgCallHelper(m_astubs,
+  unlikelyIfBlock(CC_E, [&] (Asm& a) {
+    cgCallHelper(a,
                  target ? (TCA)SPropCache::lookupIR<false>
                         : (TCA)SPropCache::lookupIR<true>, // raise on error
                  tmpReg,
                  kSyncPoint, // could re-enter to initialize properties
                  ArgGroup().imm(ch).ssa(cls).ssa(propName).ssa(cxt));
     if (target) {
-      m_astubs.testq(tmpReg, tmpReg);
-      emitFwdJcc(m_astubs, CC_Z, target);
+      a.testq(tmpReg, tmpReg);
+      emitFwdJcc(a, CC_Z, target);
     }
   });
   if (dstReg != InvalidReg) {
@@ -4189,10 +4189,10 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
     m_as.  loadq  (rVmTl[ch], dstReg);
     m_as.  testq  (dstReg, dstReg);
   }
-  unlikelyIfBlock(CC_E, [&] {
+  unlikelyIfBlock(CC_E, [&] (Asm& a) {
     // Passing only two arguments to lookupKnownClass, since the
     // third is ignored in the checkOnly==false case.
-    cgCallHelper(m_astubs,
+    cgCallHelper(a,
                  (TCA)TargetCache::lookupKnownClass<false>,
                  dst,
                  kSyncPoint,
@@ -4464,11 +4464,11 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
   auto const rFp = inst->getSrc(0)->getReg();
 
   m_as.    cmpq   (0, rFp[AROFF(m_varEnv)]);
-  unlikelyIfBlock(CC_NZ, [&] {
-    m_astubs.    testl  (ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)]);
-    emitFwdJcc(m_astubs, CC_Z, label);
+  unlikelyIfBlock(CC_NZ, [&] (Asm& a) {
+    a.    testl  (ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)]);
+    emitFwdJcc(a, CC_Z, label);
     cgCallHelper(
-      m_astubs,
+      a,
       TCA(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
       nullptr,
       kSyncPoint,
@@ -4657,8 +4657,8 @@ void CodeGenerator::emitContVarEnvHelperCall(SSATmp* fp, TCA helper) {
 
   m_as.  loadq (fp->getReg()[AROFF(m_varEnv)], scratch);
   m_as.  testq (scratch, scratch);
-  unlikelyIfBlock(CC_NZ, [&] {
-    cgCallHelper(m_astubs, helper, InvalidReg, kNoSyncPoint,
+  unlikelyIfBlock(CC_NZ, [&] (Asm& a) {
+    cgCallHelper(a, helper, InvalidReg, kNoSyncPoint,
                  ArgGroup().ssa(fp));
   });
 }

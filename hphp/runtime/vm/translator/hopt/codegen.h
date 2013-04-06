@@ -282,19 +282,21 @@ private:
    * Generate an if-block that branches around some unlikely code, handling
    * the cases when a == astubs and a != astubs.  cc is the branch condition
    * to run the unlikely block.
+   *
+   * Passes the proper assembler to use to the unlikely function.
    */
   template <class Block>
   void unlikelyIfBlock(ConditionCode cc, Block unlikely) {
     if (&m_as == &m_astubs) {
       Label done;
       m_as.jcc(ccNegate(cc), done);
-      unlikely();
+      unlikely(m_as);
       asm_label(m_as, done);
     } else {
       Label unlikelyLabel, done;
       m_as.jcc(cc, unlikelyLabel);
       asm_label(m_astubs, unlikelyLabel);
-      unlikely();
+      unlikely(m_astubs);
       m_astubs.jmp(done);
       asm_label(m_as, done);
     }

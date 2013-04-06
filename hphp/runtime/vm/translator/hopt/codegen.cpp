@@ -59,8 +59,15 @@ using namespace Transl::reg;
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
-using Transl::rVmSp;
+/*
+ * It's not normally ok to directly use tracelet abi registers in
+ * codegen, unless you're directly dealing with an instruction that
+ * does near-end-of-tracelet glue.  (Or also we sometimes use them
+ * just for some static_assertions relating to calls to helpers from
+ * tx64 that hardcode these registers.)
+ */
 using Transl::rVmFp;
+using Transl::rVmSp;
 
 const size_t kTypeShiftBits = (offsetof(TypedValue, m_type) % 8) * 8;
 
@@ -289,6 +296,8 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
 #define CALL_STK_OPCODE(opcode) \
   CALL_OPCODE(opcode)           \
   CALL_OPCODE(opcode ## Stk)
+
+PUNT_OPCODE(DefCls)
 
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
@@ -2963,6 +2972,13 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
       // by making the helpers adjust the stack for us in the cold
       // path, which calls the destructor.
       PhysRegSaverParity<0> regSaver(m_as, RegSet(rdi));
+
+      /*
+       * rVmSp is ok here because this is part of the special
+       * ABI to m_irPopRHelper.  We're not using a secret dependency
+       * on the frame or stack---we're only going to use that ABI if
+       * we happen to have that register allocated for baseReg.
+       */
       if (offset == 0 && baseReg == rVmSp) {
         // Decref'ing top of vm stack, very likely a popR
         m_tx64->emitCall(m_as, m_tx64->m_irPopRHelper);
@@ -4594,26 +4610,6 @@ void CodeGenerator::cgConcat(IRInstruction* inst) {
     cgCallHelper(m_as, (TCA)concat_value, dst, kNoSyncPoint,
                  ArgGroup().typedValue(tl).typedValue(tr));
   }
-}
-
-void CodeGenerator::cgDefCls(IRInstruction* inst) {
-  UNUSED SSATmp* dst   = inst->getDst();
-  UNUSED SSATmp* preClass    = inst->getSrc(0);
-  UNUSED SSATmp* opcodeAfter = inst->getSrc(1);
-
-  // XXX we need to compute the stack ptr to pass to the m_defClsHelper function
-  // in register rax
-#if 0
-  // ALIA:TODO
-  /*
-     compute the corrected stack ptr as a pseudo-param to m_defClsHelper
-     which it will store in g_vmContext, in case of fatals, or __autoload
-  */
-  a.   lea_reg64_disp_reg64(rVmSp, -cellsToBytes(i.stackOff), rax);
-
-  EMIT_CALL2(a, m_tx64->m_defClsHelper, IMM((uint64_t)c), IMM((uint64_t)after));
-#endif
-  CG_PUNT(DefCls);
 }
 
 void CodeGenerator::cgInterpOne(IRInstruction* inst) {

@@ -704,9 +704,13 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
   SSATmp* func = m_tb->genLdARFuncPtr(contAR, m_tb->genDefConst<int64_t>(0));
   SSATmp* funcBody = m_tb->genLdRaw(func, RawMemSlot::ContEntry, Type::TCA);
 
-  m_tb->genContEnter(contAR, funcBody, returnBcOffset);
-
-  // We shouldn't need to change vmsp here
+  m_tb->gen(
+    ContEnter,
+    contAR,
+    funcBody,
+    cns(returnBcOffset),
+    m_tb->getFP()
+  );
   assert(m_stackDeficit == 0);
 }
 

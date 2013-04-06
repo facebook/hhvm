@@ -221,7 +221,6 @@ public:
 
   void    genUnlinkContVarEnv();
   void    genLinkContVarEnv();
-  void    genContEnter(SSATmp* contAR, SSATmp* addr, int64_t returnBcOffset);
   Trace*  genContRaiseCheck(SSATmp* cont, Trace* target);
   Trace*  genContPreNext(SSATmp* cont, Trace* target);
   Trace*  genContStartedCheck(SSATmp* cont, Trace* target);

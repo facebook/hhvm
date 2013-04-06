@@ -377,7 +377,8 @@ O(FillContLocals,                   ND, S(StkPtr)                             \
                                           S(Obj),                    E|N|Mem) \
 O(FillContThis,                     ND, S(Obj)                                \
                                           S(PtrToCell) C(Int),         E|Mem) \
-O(ContEnter,                        ND, SUnk,                          E|Mem) \
+O(ContEnter,                        ND, S(StkPtr)                              \
+                                          S(TCA) C(Int) S(StkPtr),     E|Mem) \
 O(UnlinkContVarEnv,                 ND, S(StkPtr),                   E|N|Mem) \
 O(LinkContVarEnv,                   ND, S(StkPtr),                   E|N|Mem) \
 O(ContRaiseCheck,                   ND, S(Obj),                            E) \

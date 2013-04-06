@@ -4627,13 +4627,14 @@ void CodeGenerator::cgFillContThis(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {
-  SSATmp* contAR = inst->getSrc(0);
-  SSATmp* addr = inst->getSrc(1);
-  SSATmp* returnOff = inst->getSrc(2);
+  auto contAR = inst->getSrc(0);
+  auto addr = inst->getSrc(1);
+  auto returnOff = inst->getSrc(2);
+  auto curFp = inst->getSrc(3)->getReg();
   auto contARReg = contAR->getReg();
 
   m_as.  storel (returnOff->getValInt(), contARReg[AROFF(m_soff)]);
-  m_as.  storeq (rVmFp, contARReg[AROFF(m_savedRbp)]);
+  m_as.  storeq (curFp, contARReg[AROFF(m_savedRbp)]);
   m_as.  movq   (contARReg, rStashedAR);
 
   m_as.  call   (addr->getReg());

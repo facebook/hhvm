@@ -1080,11 +1080,6 @@ SSATmp* TraceBuilder::genLdStack(int32_t stackOff, Type type) {
   return tmp;
 }
 
-void TraceBuilder::genContEnter(SSATmp* contAR, SSATmp* addr,
-                                int64_t returnBcOffset) {
-  gen(ContEnter, contAR, addr, genDefConst(returnBcOffset));
-}
-
 void TraceBuilder::genUnlinkContVarEnv() {
   gen(UnlinkContVarEnv, m_fpValue);
 }

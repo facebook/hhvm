@@ -1129,11 +1129,11 @@ CreateCont
 FillContLocals
 FillContThis
 
-ContEnter S0:StkPtr S1:TCA S2:ConstInt
+ContEnter S0:StkPtr S1:TCA S2:ConstInt S3:StkPtr
 
   Enters a generator body. S0 is the ActRec embedded in the Continuation
   object. S1 is the address to jump to. S2 is the bytecode offset in the
-  caller to return to when the generator body yields.
+  caller to return to when the generator body yields. S3 is the current frame.
 
 UnlinkContVarEnv
 LinkContVarEnv

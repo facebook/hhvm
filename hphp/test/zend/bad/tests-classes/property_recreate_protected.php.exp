@@ -1,14 +1,15 @@
-Unset and recreate a protected property from property's declaring class scope:
-object(D)#%d (1) {
-  [%u|b%"p":protected]=>
-  %unicode|string%(7) "changed"
-}
-
-Unset and recreate a protected property from subclass:
-object(D)#%d (1) {
-  [%u|b%"p":protected]=>
-  %unicode|string%(12) "changed in D"
-}
-
-Unset a protected property, and attempt to recreate it outside of scope (expected failure):
-HipHop Fatal error: Cannot access protected property %s::$p in hphp/test/zend/bad/tests-classes/property_recreate_protected.php on line 32
+Unset\ and\ recreate\ a\ protected\ property\ from\ property\'s\ declaring\ class\ scope\:\
+object\(D\)\#\d+\ \(1\)\ \{\
+\ \ \[\"p\"\:protected\]\=\>\
+\ \ string\(7\)\ \"changed\"\
+\}\
+\
+Unset\ and\ recreate\ a\ protected\ property\ from\ subclass\:\
+object\(D\)\#\d+\ \(1\)\ \{\
+\ \ \[\"p\"\:protected\]\=\>\
+\ \ string\(12\)\ \"changed\ in\ D\"\
+\}\
+\
+Unset\ a\ protected\ property\,\ and\ attempt\ to\ recreate\ it\ outside\ of\ scope\ \(expected\ failure\)\:\
+HipHop\ Fatal\ error\:\ Cannot\ access\ protected\ property\ [^
+]+\:\:\$p\ in\ hphp\/test\/zend\/bad\/tests\-classes\/property\_recreate\_protected\.php\ on\ line\ 32

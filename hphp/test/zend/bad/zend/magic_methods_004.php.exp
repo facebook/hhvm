@@ -1,1 +1,1 @@
-HipHop Warning: The magic method __unset() must have public visibility and cannot be static in hphp/test/zend/bad/magic_methods_004.php on line %d
+HipHop\ Warning\:\ The\ magic\ method\ \_\_unset\(\)\ must\ have\ public\ visibility\ and\ cannot\ be\ static\ in\ hphp\/test\/zend\/bad\/zend\/magic\_methods\_004\.php\ on\ line\ \d+

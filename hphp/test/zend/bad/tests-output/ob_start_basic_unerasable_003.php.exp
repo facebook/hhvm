@@ -1,4 +1,4 @@
-[callback:1]This call will obtain the content, but will not clean the buffer.
-HipHop Notice: ob_get_clean(): failed to discard buffer of callback (0) in hphp/test/zend/bad/tests-output/ob_start_basic_unerasable_003.php on line 11
-HipHop Notice: ob_get_clean(): failed to delete buffer of callback (0) in hphp/test/zend/bad/tests-output/ob_start_basic_unerasable_003.php on line 11
-string(65) "This call will obtain the content, but will not clean the buffer."
+\[callback\:1\]This\ call\ will\ obtain\ the\ content\,\ but\ will\ not\ clean\ the\ buffer\.\
+HipHop\ Notice\:\ ob\_get\_clean\(\)\:\ failed\ to\ discard\ buffer\ of\ callback\ \(0\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_unerasable\_003\.php\ on\ line\ 11\
+HipHop\ Notice\:\ ob\_get\_clean\(\)\:\ failed\ to\ delete\ buffer\ of\ callback\ \(0\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_unerasable\_003\.php\ on\ line\ 11\
+string\(65\)\ \"This\ call\ will\ obtain\ the\ content\,\ but\ will\ not\ clean\ the\ buffer\.\"

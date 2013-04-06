@@ -1,1 +1,1 @@
-HipHop Fatal error: Declaration of TBroken2::foo($a, $b = 0) must be compatible with TBroken1::foo($a) in hphp/test/zend/bad/bug60217b.php on line %d
+HipHop\ Fatal\ error\:\ Declaration\ of\ TBroken2\:\:foo\(\$a\,\ \$b\ \=\ 0\)\ must\ be\ compatible\ with\ TBroken1\:\:foo\(\$a\)\ in\ hphp\/test\/zend\/bad\/zend\-traits\/bug60217b\.php\ on\ line\ \d+

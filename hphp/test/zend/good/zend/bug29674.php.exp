@@ -1,0 +1,7 @@
+===BASE===
+string(4) "Base"
+HipHop Notice: Undefined property: BaseClass::$private_child in hphp/test/zend/good/zend/bug29674.php on line 10
+NULL
+===CHILD===
+string(4) "Base"
+HipHop Fatal error: Cannot access private property ChildClass::$private_child in hphp/test/zend/good/zend/bug29674.php on line 10

@@ -1,39 +1,39 @@
-array(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(5)
-}
-int(5)
-int(1)
-object(foo)#2 (0) {
-}
-array(3) {
-  [0]=>
-  int(3)
-  [1]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(5)
-  }
-  [2]=>
-  object(foo)#3 (0) {
-  }
-}
-int(3)
-object(foo)#3 (0) {
-}
-array(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(5)
-}
-int(1)
-NULL
-HipHop Notice: Undefined offset: 4 in hphp/test/zend/bad/dereference_002.php on line %d
-NULL
-HipHop Notice: Undefined offset: 3 in hphp/test/zend/bad/dereference_002.php on line %d
-HipHop Fatal error: Call to a member function bar() on a non-object in hphp/test/zend/bad/dereference_002.php on line %d
+array\(2\)\ \{\
+\ \ \[0\]\=\>\
+\ \ int\(1\)\
+\ \ \[1\]\=\>\
+\ \ int\(5\)\
+\}\
+int\(5\)\
+int\(1\)\
+object\(foo\)\#2\ \(0\)\ \{\
+\}\
+array\(3\)\ \{\
+\ \ \[0\]\=\>\
+\ \ int\(3\)\
+\ \ \[1\]\=\>\
+\ \ array\(2\)\ \{\
+\ \ \ \ \[0\]\=\>\
+\ \ \ \ int\(1\)\
+\ \ \ \ \[1\]\=\>\
+\ \ \ \ int\(5\)\
+\ \ \}\
+\ \ \[2\]\=\>\
+\ \ object\(foo\)\#3\ \(0\)\ \{\
+\ \ \}\
+\}\
+int\(3\)\
+object\(foo\)\#3\ \(0\)\ \{\
+\}\
+array\(2\)\ \{\
+\ \ \[0\]\=\>\
+\ \ int\(1\)\
+\ \ \[1\]\=\>\
+\ \ int\(5\)\
+\}\
+int\(1\)\
+NULL\
+HipHop\ Notice\:\ Undefined\ offset\:\ 4\ in\ hphp\/test\/zend\/bad\/zend\/dereference\_002\.php\ on\ line\ \d+\
+NULL\
+HipHop\ Notice\:\ Undefined\ offset\:\ 3\ in\ hphp\/test\/zend\/bad\/zend\/dereference\_002\.php\ on\ line\ \d+\
+HipHop\ Fatal\ error\:\ Call\ to\ a\ member\ function\ bar\(\)\ on\ a\ non\-object\ in\ hphp\/test\/zend\/bad\/zend\/dereference\_002\.php\ on\ line\ \d+

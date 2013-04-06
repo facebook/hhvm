@@ -1,3 +1,4 @@
-Interactive %s
-
+Interactive\ [^
+]+\
+\
 ok

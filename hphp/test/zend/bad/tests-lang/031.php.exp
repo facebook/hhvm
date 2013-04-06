@@ -1,0 +1,18 @@
+Correct - with inner loop reset.
+inloop 0 for key1
+inloop 1 for key1
+inloop 0 for key2
+inloop 1 for key2
+What happens without inner loop reset.
+inloop 0 for key1
+inloop 1 for key1
+What happens without inner loop reset but copy.
+inloop 0 for key1
+inloop 1 for key1
+inloop 0 for key2
+inloop 1 for key2
+What happens with inner loop reset over copy.
+inloop 0 for key1
+inloop 1 for key1
+inloop 0 for key2
+inloop 1 for key2

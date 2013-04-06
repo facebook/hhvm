@@ -1,1 +1,2 @@
-HipHop Fatal error: Call to private Derived::__destruct() from context '' in %sdestructor_visibility_001.php on line %d
+HipHop\ Fatal\ error\:\ Call\ to\ private\ Derived\:\:\_\_destruct\(\)\ from\ context\ \'\'\ in\ [^
+]+destructor\_visibility\_001\.php\ on\ line\ \d+

@@ -1,1 +1,1 @@
-HipHop Fatal error: A trait (Foo) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error in hphp/test/zend/bad/bug55524.php on line %d
+HipHop\ Fatal\ error\:\ A\ trait\ \(Foo\)\ cannot\ extend\ a\ class\.\ Traits\ can\ only\ be\ composed\ from\ other\ traits\ with\ the\ \'use\'\ keyword\.\ Error\ in\ hphp\/test\/zend\/bad\/zend\-traits\/bug55524\.php\ on\ line\ \d+

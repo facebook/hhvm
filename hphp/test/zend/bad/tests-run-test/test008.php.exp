@@ -1,8 +1,14 @@
-%s: %sivision by zero in hphp/test/zend/bad/tests-run-test/test008.php on line %d
-string(1) "1"
-string(4) "8191"
-string(1) "0"
-string(1) "1"
-string(1) "0"
-string(%d) "%sivision by zer%s"
-string(%d) "%sivision by zer%s"
+[^
+]+\:\ [^
+]+ivision\ by\ zero\ in\ hphp\/test\/zend\/bad\/tests\-run\-test\/test008\.php\ on\ line\ \d+\
+string\(1\)\ \"1\"\
+string\(4\)\ \"8191\"\
+string\(1\)\ \"0\"\
+string\(1\)\ \"1\"\
+string\(1\)\ \"0\"\
+string\(\d+\)\ \"[^
+]+ivision\ by\ zer[^
+]+\"\
+string\(\d+\)\ \"[^
+]+ivision\ by\ zer[^
+]+\"

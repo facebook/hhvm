@@ -1,0 +1,1 @@
+HipHop Fatal error: Method Test::__call() must take exactly 2 arguments in hphp/test/zend/good/tests-classes/__call_002.php on line 4

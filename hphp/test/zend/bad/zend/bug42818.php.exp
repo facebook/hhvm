@@ -1,2 +1,2 @@
-HipHop Fatal error: __clone method called on non-object in %sbug42818.php on line 2
-
+HipHop\ Fatal\ error\:\ \_\_clone\ method\ called\ on\ non\-object\ in\ [^
+]+bug42818\.php\ on\ line\ 2

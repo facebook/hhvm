@@ -1,9 +1,9 @@
-string(1) "f"
-string(1) "o"
-string(1) "o"
-----
-NULL
-NULL
-NULL
-----
-HipHop Fatal error: Cannot use object of type stdClass as array in hphp/test/zend/bad/list_005.php on line %d
+string\(1\)\ \"f\"\
+string\(1\)\ \"o\"\
+string\(1\)\ \"o\"\
+\-\-\-\-\
+NULL\
+NULL\
+NULL\
+\-\-\-\-\
+HipHop\ Fatal\ error\:\ Cannot\ use\ object\ of\ type\ stdClass\ as\ array\ in\ hphp\/test\/zend\/bad\/zend\/list\_005\.php\ on\ line\ \d+

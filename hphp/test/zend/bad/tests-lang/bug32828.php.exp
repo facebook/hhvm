@@ -1,0 +1,8 @@
+HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ in\ [^
+]+\:\d+\
+Stack\ trace\:\
+\#0\ \[internal\ function\]\:\ output\_handler\(\'\'\,\ \d+\)\
+\#1\ [^
+]+\(\d+\)\:\ ob\_end\_clean\(\)\
+\#2\ \{main\}\
+\ \ thrown\ in\ hphp\/test\/zend\/bad\/tests\-lang\/bug32828\.php\ on\ line\ \d+

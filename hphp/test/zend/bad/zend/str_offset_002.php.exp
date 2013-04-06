@@ -1,1 +1,2 @@
-HipHop Fatal error: Cannot create references to/from string offsets in %sstr_offset_002.php on line 3
+HipHop\ Fatal\ error\:\ Cannot\ create\ references\ to\/from\ string\ offsets\ in\ [^
+]+str\_offset\_002\.php\ on\ line\ 3

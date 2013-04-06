@@ -1,9 +1,0 @@
-non-static - ok
-static - ok
-non-static - ok
-static - ok
-non-static - ok
-static - ok
-non-static - ok
-static - ok
-HipHop Fatal error: Method name must be a string in hphp/test/zend/bad/objects_025.php on line %d

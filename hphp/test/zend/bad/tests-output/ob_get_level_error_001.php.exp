@@ -1,6 +1,6 @@
-*** Testing ob_get_level() : error conditions ***
-
--- Testing ob_get_level() function with one argument --
-HipHop Warning: Missing argument 0 for ob_get_level() in hphp/test/zend/bad/tests-output/ob_get_level_error_001.php on line 13
-NULL
+\*\*\*\ Testing\ ob\_get\_level\(\)\ \:\ error\ conditions\ \*\*\*\
+\
+\-\-\ Testing\ ob\_get\_level\(\)\ function\ with\ one\ argument\ \-\-\
+HipHop\ Warning\:\ Missing\ argument\ 0\ for\ ob\_get\_level\(\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_get\_level\_error\_001\.php\ on\ line\ 13\
+NULL\
 Done

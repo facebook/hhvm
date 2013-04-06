@@ -1,5 +1,6 @@
-HipHop Notice: Undefined variable: i in %sclosure_012.php on line 2
-HipHop Notice: Undefined variable: i in %sclosure_012.php on line 7
-NULL
-int(2)
-
+HipHop\ Notice\:\ Undefined\ variable\:\ i\ in\ [^
+]+closure\_012\.php\ on\ line\ 2\
+HipHop\ Notice\:\ Undefined\ variable\:\ i\ in\ [^
+]+closure\_012\.php\ on\ line\ 7\
+NULL\
+int\(2\)

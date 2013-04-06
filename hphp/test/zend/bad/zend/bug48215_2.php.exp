@@ -1,1 +1,1 @@
-HipHop Fatal error: Call to undefined method b::b() in hphp/test/zend/bad/bug48215_2.php on line %d
+HipHop\ Fatal\ error\:\ Call\ to\ undefined\ method\ b\:\:b\(\)\ in\ hphp\/test\/zend\/bad\/zend\/bug48215\_2\.php\ on\ line\ \d+

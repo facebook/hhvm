@@ -1,1 +1,1 @@
-HipHop Warning: First argument of class_alias() must be a name of user defined class in hphp/test/zend/bad/class_alias_006.php on line %d
+HipHop\ Warning\:\ First\ argument\ of\ class\_alias\(\)\ must\ be\ a\ name\ of\ user\ defined\ class\ in\ hphp\/test\/zend\/bad\/zend\/class\_alias\_006\.php\ on\ line\ \d+

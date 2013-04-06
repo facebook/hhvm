@@ -1,16 +1,16 @@
-- Too many arguments
-HipHop Warning: ob_start() expects at most 3 parameters, 4 given in hphp/test/zend/bad/tests-output/ob_start_error_001.php on line 17
-NULL
-
-- Arg 1 wrong type
-HipHop Warning: ob_start(): no array or string given in hphp/test/zend/bad/tests-output/ob_start_error_001.php on line 20
-HipHop Notice: ob_start(): failed to create buffer in hphp/test/zend/bad/tests-output/ob_start_error_001.php on line 20
-bool(false)
-
-- Arg 2 wrong type
-HipHop Warning: ob_start() expects parameter 2 to be long, string given in hphp/test/zend/bad/tests-output/ob_start_error_001.php on line 23
-NULL
-
-- Arg 3 wrong type
-HipHop Warning: ob_start() expects parameter 3 to be long, string given in hphp/test/zend/bad/tests-output/ob_start_error_001.php on line 26
+\-\ Too\ many\ arguments\
+HipHop\ Warning\:\ ob\_start\(\)\ expects\ at\ most\ 3\ parameters\,\ 4\ given\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_001\.php\ on\ line\ 17\
+NULL\
+\
+\-\ Arg\ 1\ wrong\ type\
+HipHop\ Warning\:\ ob\_start\(\)\:\ no\ array\ or\ string\ given\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_001\.php\ on\ line\ 20\
+HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_001\.php\ on\ line\ 20\
+bool\(false\)\
+\
+\-\ Arg\ 2\ wrong\ type\
+HipHop\ Warning\:\ ob\_start\(\)\ expects\ parameter\ 2\ to\ be\ long\,\ string\ given\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_001\.php\ on\ line\ 23\
+NULL\
+\
+\-\ Arg\ 3\ wrong\ type\
+HipHop\ Warning\:\ ob\_start\(\)\ expects\ parameter\ 3\ to\ be\ long\,\ string\ given\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_001\.php\ on\ line\ 26\
 NULL

@@ -1,1 +1,1 @@
-HipHop Fatal error: Using $this when not in object context in hphp/test/zend/bad/objects_026.php on line %d
+HipHop\ Fatal\ error\:\ Using\ \$this\ when\ not\ in\ object\ context\ in\ hphp\/test\/zend\/bad\/zend\/objects\_026\.php\ on\ line\ \d+

@@ -1,2 +1,2 @@
-HipHop Warning: The magic method __set() must have public visibility and cannot be static in hphp/test/zend/bad/magic_methods_008.php on line %d
-HipHop Fatal error: Access level to a::__set() must be public (as in class b) in hphp/test/zend/bad/magic_methods_008.php on line %d
+HipHop\ Warning\:\ The\ magic\ method\ \_\_set\(\)\ must\ have\ public\ visibility\ and\ cannot\ be\ static\ in\ hphp\/test\/zend\/bad\/zend\/magic\_methods\_008\.php\ on\ line\ \d+\
+HipHop\ Fatal\ error\:\ Access\ level\ to\ a\:\:\_\_set\(\)\ must\ be\ public\ \(as\ in\ class\ b\)\ in\ hphp\/test\/zend\/bad\/zend\/magic\_methods\_008\.php\ on\ line\ \d+

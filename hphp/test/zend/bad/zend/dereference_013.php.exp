@@ -1,7 +1,7 @@
-int(2)
-array(1) {
-  [0]=>
-  int(1)
-}
-HipHop Notice: Undefined offset: %d in hphp/test/zend/bad/dereference_013.php on line %d
+int\(2\)\
+array\(1\)\ \{\
+\ \ \[0\]\=\>\
+\ \ int\(1\)\
+\}\
+HipHop\ Notice\:\ Undefined\ offset\:\ \d+\ in\ hphp\/test\/zend\/bad\/zend\/dereference\_013\.php\ on\ line\ \d+\
 NULL

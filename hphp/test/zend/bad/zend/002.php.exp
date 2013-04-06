@@ -1,45 +1,45 @@
-HipHop Warning: func_get_arg():  The argument number should be >= 0 in hphp/test/zend/bad/002.php on line %d
-bool(false)
-HipHop Warning: func_get_arg():  Argument 0 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-HipHop Warning: func_get_arg():  The argument number should be >= 0 in hphp/test/zend/bad/002.php on line %d
-bool(false)
-int(10)
-HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-int(1)
-HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-HipHop Warning: Missing argument 1 for test2(), called in hphp/test/zend/bad/002.php on line %d and defined in hphp/test/zend/bad/002.php on line %d
-HipHop Warning: func_get_arg():  Argument 0 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-int(1)
-int(2)
-HipHop Warning: func_get_arg():  Argument 2 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-HipHop Warning: func_get_arg():  The argument number should be >= 0 in hphp/test/zend/bad/002.php on line %d
-bool(false)
-HipHop Warning: func_get_arg():  Argument 0 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-HipHop Warning: Missing argument 2 for test3() in hphp/test/zend/bad/002.php on line %d
-int(1)
-HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-HipHop Warning: func_get_arg():  Argument 2 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-int(1)
-int(2)
-HipHop Warning: func_get_arg():  Argument 2 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-int(1)
-HipHop Warning: func_get_arg():  Argument 1 not passed to function in hphp/test/zend/bad/002.php on line %d
-bool(false)
-HipHop Warning: func_get_arg():  Called from the global scope - no function context in hphp/test/zend/bad/002.php on line %d
-bool(false)
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ The\ argument\ number\ should\ be\ \>\=\ 0\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 0\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 1\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ The\ argument\ number\ should\ be\ \>\=\ 0\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+int\(10\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 1\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+int\(1\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 1\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ Missing\ argument\ 1\ for\ test2\(\)\,\ called\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\ and\ defined\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 0\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 1\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+int\(1\)\
+int\(2\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 2\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ The\ argument\ number\ should\ be\ \>\=\ 0\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 0\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 1\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ Missing\ argument\ 2\ for\ test3\(\)\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+int\(1\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 1\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 2\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+int\(1\)\
+int\(2\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 2\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+int\(1\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Argument\ 1\ not\ passed\ to\ function\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ func\_get\_arg\(\)\:\ \ Called\ from\ the\ global\ scope\ \-\ no\ function\ context\ in\ hphp\/test\/zend\/bad\/zend\/002\.php\ on\ line\ \d+\
+bool\(false\)\
 Done

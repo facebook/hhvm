@@ -1,0 +1,5 @@
+3\
+\
+Catchable\ fatal\ error\:\ Argument\ 1\ passed\ to\ foo\(\)\ must\ be\ of\ the\ type\ array\,\ integer\ given\,\ called\ in\ [^
+]+array\_type\_hint\_001\.php\ on\ line\ 7\ and\ defined\ in\ [^
+]+array\_type\_hint\_001\.php\ on\ line\ 2

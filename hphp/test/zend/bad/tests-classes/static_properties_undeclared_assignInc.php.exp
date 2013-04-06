@@ -1,1 +1,1 @@
-HipHop Fatal error: Access to undeclared static property: C::$p in hphp/test/zend/bad/tests-classes/static_properties_undeclared_assignInc.php on line 3
+HipHop\ Fatal\ error\:\ Access\ to\ undeclared\ static\ property\:\ C\:\:\$p\ in\ hphp\/test\/zend\/bad\/tests\-classes\/static\_properties\_undeclared\_assignInc\.php\ on\ line\ 3

@@ -1,1 +1,1 @@
-HipHop Fatal error: Trait method smallTalk has not been applied, because there are collisions with other trait methods on Talker in hphp/test/zend/bad/conflict003.php on line %d
+HipHop\ Fatal\ error\:\ Trait\ method\ smallTalk\ has\ not\ been\ applied\,\ because\ there\ are\ collisions\ with\ other\ trait\ methods\ on\ Talker\ in\ hphp\/test\/zend\/bad\/zend\-traits\/conflict003\.php\ on\ line\ \d+

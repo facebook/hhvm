@@ -1,0 +1,14 @@
+int(1)
+int(1)
+int(1)
+
+NULL
+int(2)
+NULL
+
+object(foo)#2 (0) {
+}
+int(3)
+object(foo)#2 (0) {
+}
+

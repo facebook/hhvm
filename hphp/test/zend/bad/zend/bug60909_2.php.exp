@@ -1,4 +1,5 @@
-HipHop Fatal error: Method Bad::__toString() must not throw an exception in %sbug60909_2.php on line 0
-
-
-!!!shutdown!!!
+HipHop\ Fatal\ error\:\ Method\ Bad\:\:\_\_toString\(\)\ must\ not\ throw\ an\ exception\ in\ [^
+]+bug60909\_2\.php\ on\ line\ 0\
+\
+\
+\!\!\!shutdown\!\!\!

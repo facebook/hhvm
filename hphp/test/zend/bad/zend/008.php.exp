@@ -1,22 +1,22 @@
-HipHop Warning: define() expects at least 2 parameters, 0 given in hphp/test/zend/bad/008.php on line %d
-NULL
-HipHop Warning: define() expects at least 2 parameters, 1 given in hphp/test/zend/bad/008.php on line %d
-NULL
-bool(true)
-HipHop Warning: define() expects parameter 3 to be boolean, array given in hphp/test/zend/bad/008.php on line %d
-NULL
-HipHop Warning: define() expects parameter 1 to be string, array given in hphp/test/zend/bad/008.php on line %d
-NULL
-bool(true)
-bool(true)
-bool(true)
-HipHop Notice: Constant test const already defined in hphp/test/zend/bad/008.php on line %d
-bool(false)
-HipHop Warning: Constants may only evaluate to scalar values in hphp/test/zend/bad/008.php on line %d
-bool(false)
-HipHop Warning: Constants may only evaluate to scalar values in hphp/test/zend/bad/008.php on line %d
-bool(false)
-int(1)
-int(2)
-int(3)
+HipHop\ Warning\:\ define\(\)\ expects\ at\ least\ 2\ parameters\,\ 0\ given\ in\ hphp\/test\/zend\/bad\/zend\/008\.php\ on\ line\ \d+\
+NULL\
+HipHop\ Warning\:\ define\(\)\ expects\ at\ least\ 2\ parameters\,\ 1\ given\ in\ hphp\/test\/zend\/bad\/zend\/008\.php\ on\ line\ \d+\
+NULL\
+bool\(true\)\
+HipHop\ Warning\:\ define\(\)\ expects\ parameter\ 3\ to\ be\ boolean\,\ array\ given\ in\ hphp\/test\/zend\/bad\/zend\/008\.php\ on\ line\ \d+\
+NULL\
+HipHop\ Warning\:\ define\(\)\ expects\ parameter\ 1\ to\ be\ string\,\ array\ given\ in\ hphp\/test\/zend\/bad\/zend\/008\.php\ on\ line\ \d+\
+NULL\
+bool\(true\)\
+bool\(true\)\
+bool\(true\)\
+HipHop\ Notice\:\ Constant\ test\ const\ already\ defined\ in\ hphp\/test\/zend\/bad\/zend\/008\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ Constants\ may\ only\ evaluate\ to\ scalar\ values\ in\ hphp\/test\/zend\/bad\/zend\/008\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Warning\:\ Constants\ may\ only\ evaluate\ to\ scalar\ values\ in\ hphp\/test\/zend\/bad\/zend\/008\.php\ on\ line\ \d+\
+bool\(false\)\
+int\(1\)\
+int\(2\)\
+int\(3\)\
 Done

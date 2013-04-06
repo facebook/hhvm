@@ -1,1 +1,3 @@
-Catchable fatal error: Argument 1 passed to foobar\foo::bar() must be an instance of foobar\foo, instance of stdClass given, called in %sbug43332_1.php on line 10 and defined in %sbug43332_1.php on line 5
+Catchable\ fatal\ error\:\ Argument\ 1\ passed\ to\ foobar\\foo\:\:bar\(\)\ must\ be\ an\ instance\ of\ foobar\\foo\,\ instance\ of\ stdClass\ given\,\ called\ in\ [^
+]+bug43332\_1\.php\ on\ line\ 10\ and\ defined\ in\ [^
+]+bug43332\_1\.php\ on\ line\ 5

@@ -1,1 +1,1 @@
-HipHop Fatal error: Call to undefined function foo::() in hphp/test/zend/bad/call_static_005.php on line %d
+HipHop\ Fatal\ error\:\ Call\ to\ undefined\ function\ foo\:\:\(\)\ in\ hphp\/test\/zend\/bad\/zend\/call\_static\_005\.php\ on\ line\ \d+

@@ -1,6 +1,9 @@
-HipHop Fatal error: Uncaught exception 'Exception' with message 'doesn't work' in %s:%d
-Stack trace:
-#0 %s(%d): impl->__get('counter')
-#1 %s(%d): impl->__construct()
-#2 {main}
-  thrown in hphp/test/zend/bad/bug38624.php on line %d
+HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ with\ message\ \'doesn\'t\ work\'\ in\ [^
+]+\:\d+\
+Stack\ trace\:\
+\#0\ [^
+]+\(\d+\)\:\ impl\-\>\_\_get\(\'counter\'\)\
+\#1\ [^
+]+\(\d+\)\:\ impl\-\>\_\_construct\(\)\
+\#2\ \{main\}\
+\ \ thrown\ in\ hphp\/test\/zend\/bad\/zend\/bug38624\.php\ on\ line\ \d+

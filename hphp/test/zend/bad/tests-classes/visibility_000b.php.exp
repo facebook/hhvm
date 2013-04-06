@@ -1,1 +1,1 @@
-HipHop Fatal error: Access level to fail::f0() must be public (as in class same) in hphp/test/zend/bad/tests-classes/visibility_000b.php on line %d
+HipHop\ Fatal\ error\:\ Access\ level\ to\ fail\:\:f0\(\)\ must\ be\ public\ \(as\ in\ class\ same\)\ in\ hphp\/test\/zend\/bad\/tests\-classes\/visibility\_000b\.php\ on\ line\ \d+

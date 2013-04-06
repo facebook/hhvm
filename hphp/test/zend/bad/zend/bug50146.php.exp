@@ -1,0 +1,4 @@
+bool\(false\)\
+bool\(false\)\
+\
+Catchable\ fatal\ error\:\ Closure\ object\ cannot\ have\ properties\ in\ hphp\/test\/zend\/bad\/zend\/bug50146\.php\ on\ line\ \d+

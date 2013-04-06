@@ -1,92 +1,93 @@
-
-
----( $c->boolFalse )---
-  --> Attempting implicit conversion to object using increment...
-HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 18
-
-  --> Attempting implicit conversion to object using assignment...
-HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 22
-
-  --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 26
-
-
----( $c->emptyString )---
-  --> Attempting implicit conversion to object using increment...
-HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 18
-
-  --> Attempting implicit conversion to object using assignment...
-HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 22
-
-  --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 26
-
-
----( $c->null )---
-  --> Attempting implicit conversion to object using increment...
-HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 18
-
-  --> Attempting implicit conversion to object using assignment...
-HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 22
-
-  --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: Creating default object from empty value in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 26
-
-
----( $c->boolTrue )---
-  --> Attempting implicit conversion to object using increment...
-HipHop Warning: Attempt to %s property of non-object in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 18
-
-  --> Attempting implicit conversion to object using assignment...
-HipHop Warning: Attempt to assign property of non-object in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 22
-
-  --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: Attempt to assign property of non-object in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 26
-
-
----( $c->nonEmptyString )---
-  --> Attempting implicit conversion to object using increment...
-HipHop Warning: Attempt to %s property of non-object in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 18
-
-  --> Attempting implicit conversion to object using assignment...
-HipHop Warning: Attempt to assign property of non-object in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 22
-
-  --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: Attempt to assign property of non-object in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 26
-
-
----( $c->intZero )---
-  --> Attempting implicit conversion to object using increment...
-HipHop Warning: Attempt to %s property of non-object in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 18
-
-  --> Attempting implicit conversion to object using assignment...
-HipHop Warning: Attempt to assign property of non-object in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 22
-
-  --> Attempting implicit conversion to object using combined assignment...
-HipHop Warning: Attempt to assign property of non-object in hphp/test/zend/bad/tests-classes/implicit_instantiation_001.php on line 26
-
-
-
- --> Resulting object:object(C)#%d (6) {
-  [%u|b%"boolFalse"]=>
-  object(stdClass)#%d (1) {
-    [%u|b%"prop"]=>
-    %unicode|string%(24) " Implicit instantiation!"
-  }
-  [%u|b%"emptyString"]=>
-  object(stdClass)#%d (1) {
-    [%u|b%"prop"]=>
-    %unicode|string%(24) " Implicit instantiation!"
-  }
-  [%u|b%"null"]=>
-  object(stdClass)#%d (1) {
-    [%u|b%"prop"]=>
-    %unicode|string%(24) " Implicit instantiation!"
-  }
-  [%u|b%"boolTrue"]=>
-  bool(true)
-  [%u|b%"nonEmptyString"]=>
-  %unicode|string%(5) "hello"
-  [%u|b%"intZero"]=>
-  int(0)
-}
+\-\-\-\(\ \$c\-\>boolFalse\ \)\-\-\-\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ increment\.\.\.\
+HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 18\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ assignment\.\.\.\
+HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 22\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ combined\ assignment\.\.\.\
+HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 26\
+\
+\
+\-\-\-\(\ \$c\-\>emptyString\ \)\-\-\-\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ increment\.\.\.\
+HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 18\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ assignment\.\.\.\
+HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 22\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ combined\ assignment\.\.\.\
+HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 26\
+\
+\
+\-\-\-\(\ \$c\-\>null\ \)\-\-\-\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ increment\.\.\.\
+HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 18\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ assignment\.\.\.\
+HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 22\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ combined\ assignment\.\.\.\
+HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 26\
+\
+\
+\-\-\-\(\ \$c\-\>boolTrue\ \)\-\-\-\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ increment\.\.\.\
+HipHop\ Warning\:\ Attempt\ to\ [^
+]+\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 18\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ assignment\.\.\.\
+HipHop\ Warning\:\ Attempt\ to\ assign\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 22\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ combined\ assignment\.\.\.\
+HipHop\ Warning\:\ Attempt\ to\ assign\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 26\
+\
+\
+\-\-\-\(\ \$c\-\>nonEmptyString\ \)\-\-\-\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ increment\.\.\.\
+HipHop\ Warning\:\ Attempt\ to\ [^
+]+\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 18\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ assignment\.\.\.\
+HipHop\ Warning\:\ Attempt\ to\ assign\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 22\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ combined\ assignment\.\.\.\
+HipHop\ Warning\:\ Attempt\ to\ assign\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 26\
+\
+\
+\-\-\-\(\ \$c\-\>intZero\ \)\-\-\-\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ increment\.\.\.\
+HipHop\ Warning\:\ Attempt\ to\ [^
+]+\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 18\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ assignment\.\.\.\
+HipHop\ Warning\:\ Attempt\ to\ assign\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 22\
+\
+\ \ \-\-\>\ Attempting\ implicit\ conversion\ to\ object\ using\ combined\ assignment\.\.\.\
+HipHop\ Warning\:\ Attempt\ to\ assign\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/tests\-classes\/implicit\_instantiation\_001\.php\ on\ line\ 26\
+\
+\
+\
+\ \-\-\>\ Resulting\ object\:object\(C\)\#\d+\ \(6\)\ \{\
+\ \ \[\"boolFalse\"\]\=\>\
+\ \ object\(stdClass\)\#\d+\ \(1\)\ \{\
+\ \ \ \ \[\"prop\"\]\=\>\
+\ \ \ \ string\(24\)\ \"\ Implicit\ instantiation\!\"\
+\ \ \}\
+\ \ \[\"emptyString\"\]\=\>\
+\ \ object\(stdClass\)\#\d+\ \(1\)\ \{\
+\ \ \ \ \[\"prop\"\]\=\>\
+\ \ \ \ string\(24\)\ \"\ Implicit\ instantiation\!\"\
+\ \ \}\
+\ \ \[\"null\"\]\=\>\
+\ \ object\(stdClass\)\#\d+\ \(1\)\ \{\
+\ \ \ \ \[\"prop\"\]\=\>\
+\ \ \ \ string\(24\)\ \"\ Implicit\ instantiation\!\"\
+\ \ \}\
+\ \ \[\"boolTrue\"\]\=\>\
+\ \ bool\(true\)\
+\ \ \[\"nonEmptyString\"\]\=\>\
+\ \ string\(5\)\ \"hello\"\
+\ \ \[\"intZero\"\]\=\>\
+\ \ int\(0\)\
+\}

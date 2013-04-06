@@ -1,1 +1,1 @@
-HipHop Fatal error: Cannot use 'parent' as class name as it is reserved in hphp/test/zend/bad/errmsg_031.php on line %d
+HipHop\ Fatal\ error\:\ Cannot\ use\ \'parent\'\ as\ class\ name\ as\ it\ is\ reserved\ in\ hphp\/test\/zend\/bad\/zend\/errmsg\_031\.php\ on\ line\ \d+

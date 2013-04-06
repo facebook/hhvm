@@ -1,1 +1,1 @@
-HipHop Fatal error: Cannot unset string offsets in hphp/test/zend/bad/bug24773.php on line %d
+HipHop\ Fatal\ error\:\ Cannot\ unset\ string\ offsets\ in\ hphp\/test\/zend\/bad\/zend\/bug24773\.php\ on\ line\ \d+

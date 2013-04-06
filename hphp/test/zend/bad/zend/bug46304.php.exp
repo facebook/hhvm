@@ -1,22 +1,23 @@
-value1
-value1
-value1
-value2
-value2
-value2
-value3
-value3
-value3
-value4
-value4
-value4
-value4
-value5
-value5
-value5
-value5
-value6
-value6
-value6
-value6
-HipHop Fatal error: Undefined constant 'NS1\ns2\coNSt1' in %sbug46304.php on line %d
+value1\
+value1\
+value1\
+value2\
+value2\
+value2\
+value3\
+value3\
+value3\
+value4\
+value4\
+value4\
+value4\
+value5\
+value5\
+value5\
+value5\
+value6\
+value6\
+value6\
+value6\
+HipHop\ Fatal\ error\:\ Undefined\ constant\ \'NS1\\ns2\\coNSt1\'\ in\ [^
+]+bug46304\.php\ on\ line\ \d+

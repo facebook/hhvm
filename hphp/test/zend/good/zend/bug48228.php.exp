@@ -1,1 +1,0 @@
-HipHop Fatal error: Uncaught exception 'Exception' with message '' in hphp/test/zend/good/zend/bug48228.php:4\nStack trace:\n#0 hphp/test/zend/good/zend/bug48228.php(15): do_throw()\n#1 hphp/test/zend/good/zend/bug48228.php(20): aa->dosome()\n#2 {main}

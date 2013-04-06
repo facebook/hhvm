@@ -1,9 +1,8 @@
-From foo::__callStatic:
-string(3) "abc"
-HipHop Notice: Undefined variable: this in hphp/test/zend/bad/indirect_call_array_003.php on line %d
-NULL
-From foo::__call:
-string(3) "abc"
-object(foo)#%d (0) {
-}
-
+From\ foo\:\:\_\_callStatic\:\
+string\(3\)\ \"abc\"\
+HipHop\ Notice\:\ Undefined\ variable\:\ this\ in\ hphp\/test\/zend\/bad\/zend\/indirect\_call\_array\_003\.php\ on\ line\ \d+\
+NULL\
+From\ foo\:\:\_\_call\:\
+string\(3\)\ \"abc\"\
+object\(foo\)\#\d+\ \(0\)\ \{\
+\}

@@ -1,36 +1,36 @@
-Before binding
-scoped to A: bool(false)
-bound: no
-scoped to A: bool(false)
-bound: no
-scoped to A: bool(true)
-bound: no
-scoped to A: bool(true)
-bound: A
-After binding, no instance
-scoped to A: bool(false)
-bound: no
-scoped to A: bool(false)
-bound: no
-scoped to A: bool(true)
-bound: no
-scoped to A: bool(true)
-bound: no
-HipHop Warning: Cannot bind an instance to a static closure in hphp/test/zend/bad/closure_041.php on line %d
-After binding, with same-class instance for the bound ones
-HipHop Warning: Cannot bind an instance to a static closure in hphp/test/zend/bad/closure_041.php on line %d
-scoped to A: bool(false)
-bound: no
-scoped to A: bool(false)
-bound: A (should be scoped to dummy class)
-HipHop Warning: Cannot bind an instance to a static closure in hphp/test/zend/bad/closure_041.php on line %d
-scoped to A: bool(true)
-bound: no
-scoped to A: bool(true)
-bound: A
-After binding, with different instance for the bound ones
-scoped to A: bool(false)
-bound: B (should be scoped to dummy class)
-scoped to A: bool(true)
-bound: B
-Done.
+Before\ binding\
+scoped\ to\ A\:\ bool\(false\)\
+bound\:\ no\
+scoped\ to\ A\:\ bool\(false\)\
+bound\:\ no\
+scoped\ to\ A\:\ bool\(true\)\
+bound\:\ no\
+scoped\ to\ A\:\ bool\(true\)\
+bound\:\ A\
+After\ binding\,\ no\ instance\
+scoped\ to\ A\:\ bool\(false\)\
+bound\:\ no\
+scoped\ to\ A\:\ bool\(false\)\
+bound\:\ no\
+scoped\ to\ A\:\ bool\(true\)\
+bound\:\ no\
+scoped\ to\ A\:\ bool\(true\)\
+bound\:\ no\
+HipHop\ Warning\:\ Cannot\ bind\ an\ instance\ to\ a\ static\ closure\ in\ hphp\/test\/zend\/bad\/zend\/closure\_041\.php\ on\ line\ \d+\
+After\ binding\,\ with\ same\-class\ instance\ for\ the\ bound\ ones\
+HipHop\ Warning\:\ Cannot\ bind\ an\ instance\ to\ a\ static\ closure\ in\ hphp\/test\/zend\/bad\/zend\/closure\_041\.php\ on\ line\ \d+\
+scoped\ to\ A\:\ bool\(false\)\
+bound\:\ no\
+scoped\ to\ A\:\ bool\(false\)\
+bound\:\ A\ \(should\ be\ scoped\ to\ dummy\ class\)\
+HipHop\ Warning\:\ Cannot\ bind\ an\ instance\ to\ a\ static\ closure\ in\ hphp\/test\/zend\/bad\/zend\/closure\_041\.php\ on\ line\ \d+\
+scoped\ to\ A\:\ bool\(true\)\
+bound\:\ no\
+scoped\ to\ A\:\ bool\(true\)\
+bound\:\ A\
+After\ binding\,\ with\ different\ instance\ for\ the\ bound\ ones\
+scoped\ to\ A\:\ bool\(false\)\
+bound\:\ B\ \(should\ be\ scoped\ to\ dummy\ class\)\
+scoped\ to\ A\:\ bool\(true\)\
+bound\:\ B\
+Done\.

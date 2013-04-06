@@ -1,2 +1,3 @@
-ok
-HipHop Notice: Undefined variable: x in %sunset_cv04.php on line %d
+ok\
+HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
+]+unset\_cv04\.php\ on\ line\ \d+

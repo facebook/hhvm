@@ -1,1 +1,0 @@
-HipHop Fatal error: Cannot override final method baz::test() in hphp/test/zend/bad/error_014.php on line %d

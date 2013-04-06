@@ -1,5 +1,5 @@
-bool(true)
-bool(false)
-bool(false)
-HipHop Warning: interface_exists() expects parameter 1 to be string, object given in hphp/test/zend/bad/interface_exists_001.php on line %d
+bool\(true\)\
+bool\(false\)\
+bool\(false\)\
+HipHop\ Warning\:\ interface\_exists\(\)\ expects\ parameter\ 1\ to\ be\ string\,\ object\ given\ in\ hphp\/test\/zend\/bad\/zend\/interface\_exists\_001\.php\ on\ line\ \d+\
 NULL

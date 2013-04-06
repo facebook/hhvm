@@ -1,2 +1,3 @@
-HipHop Fatal error: Cannot use [] for reading in %s(%d) : eval()'d code on line %d
-My error handler runs.
+HipHop\ Fatal\ error\:\ Cannot\ use\ \[\]\ for\ reading\ in\ [^
+]+\(\d+\)\ \:\ eval\(\)\'d\ code\ on\ line\ \d+\
+My\ error\ handler\ runs\.

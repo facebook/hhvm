@@ -1,1 +1,1 @@
-HipHop Fatal error: Cannot use 'self' as interface name as it is reserved in hphp/test/zend/bad/errmsg_035.php on line %d
+HipHop\ Fatal\ error\:\ Cannot\ use\ \'self\'\ as\ interface\ name\ as\ it\ is\ reserved\ in\ hphp\/test\/zend\/bad\/zend\/errmsg\_035\.php\ on\ line\ \d+

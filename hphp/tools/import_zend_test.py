@@ -48,6 +48,7 @@ bad_tests = (
 
     # works in interp but not others
     'bug25922.php',
+    'bug34064.php',
 )
 
 errors = (
@@ -129,10 +130,84 @@ def walk(filename, source):
 
     test = sections['FILE']
     
+    dest_filename = os.path.basename(filename).replace('.phpt', '.php')
+    source_dir = source.lower().replace('/tests', '').replace('/', '-')
+
+    for key in ('EXPECT', 'EXPECTF', 'EXPECTREGEX'):
+        if sections.has_key(key):
+            exp = sections[key]
+            
+            # tests are really inconsistent about whitespace
+            exp = re.sub(r'(\r\n|\r|\n)', '\n', exp.strip())
+
+            exp = exp.replace('in %s on', 'in %s/%s/%s on' % ('hphp/test/zend/all', source_dir, dest_filename))
+
+            # PHP puts a newline in that we don't
+            exp = exp.replace('\n\nFatal error:', '\nFatal error:')
+            exp = exp.replace('\n\nWarning:', '\nWarning:')
+            exp = exp.replace('\n\nNotice:', '\nNotice:')
+
+            exp = exp.replace('Fatal error:', 'HipHop Fatal error:')
+            exp = exp.replace('Warning:', 'HipHop Warning:')
+            exp = exp.replace('Notice:', 'HipHop Notice:')
+
+            for error in errors:
+                exp = re.sub(error[0], error[1], exp)
+
+            sections[key] = exp
+    
     if sections.has_key('EXPECT'):
         exp = sections['EXPECT']
     elif sections.has_key('EXPECTF'):
-        exp = sections['EXPECTF']
+        wanted_re = sections['EXPECTF']
+
+        # from run-tests.php
+        temp = "";
+        r = "%r";
+        startOffset = 0;
+        length = len(wanted_re);
+        while startOffset < length:
+            start = wanted_re.find(r, startOffset)
+            if start != -1:
+                end = wanted_re.find(r, start+2);
+                if ent == -1:
+                    # unbalanced tag, ignore it.
+                    end = start = length;
+            else:
+                start = end = length;
+        
+            temp = temp + re.escape(wanted_re[startOffset:start - startOffset])
+            if (end > start):
+                temp = temp + '(' + wanted_re[start+2:end - start-2] + ')'
+            
+            startOffset = end + 2
+
+        wanted_re = temp
+
+        ## different from php, since python escapes %
+        wanted_re = wanted_re.replace('\\%', '%')
+
+        wanted_re = wanted_re.replace('%binary_string_optional%', 'string')
+        wanted_re = wanted_re.replace('%unicode_string_optional%', 'string')
+        wanted_re = wanted_re.replace('%unicode\|string%', 'string')
+        wanted_re = wanted_re.replace('%string\|unicode%', 'string')
+        wanted_re = wanted_re.replace('%u\|b%', '')
+        wanted_re = wanted_re.replace('%b\|u%', '')
+        
+        # Stick to basics
+        wanted_re = wanted_re.replace('%e', '\\/')
+        wanted_re = wanted_re.replace('%s', '[^\r\n]+')
+        wanted_re = wanted_re.replace('%S', '[^\r\n]*')
+        wanted_re = wanted_re.replace('%a', '.+')
+        wanted_re = wanted_re.replace('%A', '.*')
+        wanted_re = wanted_re.replace('%w', '\s*')
+        wanted_re = wanted_re.replace('%i', '[+-]?\d+')
+        wanted_re = wanted_re.replace('%d', '\d+')
+        wanted_re = wanted_re.replace('%x', '[0-9a-fA-F]+')
+        wanted_re = wanted_re.replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?')
+        wanted_re = wanted_re.replace('%c', '.')
+        exp = wanted_re
+
     elif sections.has_key('EXPECTREGEX'):
         exp = sections['EXPECTREGEX']
     else:
@@ -161,9 +236,7 @@ def walk(filename, source):
             print "Unsupported test with section --%s--: " % name, filename
             return
 
-    dest_filename = os.path.basename(filename).replace('.phpt', '.php')
     cur_dir = os.path.dirname(__file__)
-    source_dir = source.lower().replace('/tests', '').replace('/', '-')
     dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)
     mkdir_p(dest_subdir)
     full_dest_filename = os.path.join(dest_subdir, dest_filename)
@@ -172,20 +245,6 @@ def walk(filename, source):
         test = test.replace("?>", "unlink('test.php');\n?>")
     if 'bug44805.php' in full_dest_filename:
         test = test.replace("1)) {\n\tunlink($file2", "2)) {\n\tunlink($file2")
-
-    exp = exp.replace('in %s on', 'in %s/%s/%s on' % ('hphp/test/zend/all', source_dir, dest_filename))
-
-    # PHP puts a newline in that we don't
-    exp = exp.replace('\n\nFatal error:', '\nFatal error:')
-    exp = exp.replace('\n\nWarning:', '\nWarning:')
-    exp = exp.replace('\n\nNotice:', '\nNotice:')
-
-    exp = exp.replace('Fatal error:', 'HipHop Fatal error:')
-    exp = exp.replace('Warning:', 'HipHop Warning:')
-    exp = exp.replace('Notice:', 'HipHop Notice:')
-
-    for error in errors:
-        exp = re.sub(error[0], error[1], exp)
 
     file(full_dest_filename, 'w').write(test)
     file(full_dest_filename+'.exp', 'w').write(exp)
@@ -270,58 +329,30 @@ for root, dirs, files in os.walk('test/zend/all'):
             # no diff file or is empty
             if (not os.path.exists(original_name + '.diff') or \
                 os.stat(original_name + '.diff')[6] == 0):
+                if args.verbose:
+                    print '\n', original_name, '\nNo .diff, passed'
                 return True
 
+            # PHP is very inconsistent with whitespace in tests
+            diff = file(original_name + '.diff').read()
+            diff = re.sub(r'-(.*)\n\\ No newline at end of file\n\+\1', '', diff)
+            if not re.search(r'\n-', diff):
+                if args.verbose:
+                    print '\n', original_name, '\nOnly whitespace .diff, passed'
+                return True
+
+            # I hack a bit and store the regex in the .exp file, use that
             wanted_re = file(original_name + '.exp').read().strip()
             output = file(original_name + '.out').read().strip()
-
-            # from run-tests.php
-            temp = "";
-            r = "%r";
-            startOffset = 0;
-            length = len(wanted_re);
-            while startOffset < length:
-                start = wanted_re.find(r, startOffset)
-                if start != -1:
-                    end = wanted_re.find(r, start+2);
-                    if ent == -1:
-                        # unbalanced tag, ignore it.
-                        end = start = length;
-                else:
-                    start = end = length;
             
-                temp = temp + re.escape(wanted_re[startOffset:start - startOffset])
-                if (end > start):
-                    temp = temp + '(' + wanted_re[start+2:end - start-2] + ')'
-                
-                startOffset = end + 2
+            import sre_constants
+            try:
+                match = re.match(wanted_re, output)
+            except (OverflowError, AssertionError, sre_constants.error) as e:
+                if args.verbose:
+                    print '\n', original_name, '\nException', '\n', e
+                return False
 
-            wanted_re = temp
-
-            ## different from php, since python escapes %
-            wanted_re = wanted_re.replace('\\%', '%')
-
-            wanted_re = wanted_re.replace('%binary_string_optional%', 'string')
-            wanted_re = wanted_re.replace('%unicode_string_optional%', 'string')
-            wanted_re = wanted_re.replace('%unicode\|string%', 'string')
-            wanted_re = wanted_re.replace('%string\|unicode%', 'string')
-            wanted_re = wanted_re.replace('%u\|b%', '')
-            wanted_re = wanted_re.replace('%b\|u%', '')
-            
-            # Stick to basics
-            wanted_re = wanted_re.replace('%e', '\\/')
-            wanted_re = wanted_re.replace('%s', '[^\r\n]+')
-            wanted_re = wanted_re.replace('%S', '[^\r\n]*')
-            wanted_re = wanted_re.replace('%a', '.+')
-            wanted_re = wanted_re.replace('%A', '.*')
-            wanted_re = wanted_re.replace('%w', '\s*')
-            wanted_re = wanted_re.replace('%i', '[+-]?\d+')
-            wanted_re = wanted_re.replace('%d', '\d+')
-            wanted_re = wanted_re.replace('%x', '[0-9a-fA-F]+')
-            wanted_re = wanted_re.replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?')
-            wanted_re = wanted_re.replace('%c', '.')
-
-            match = re.match(wanted_re, output)
             if args.verbose:
                 print '\n', original_name, '\n', repr(wanted_re), '\n', repr(output), '\n', match is not None
             return match and match.group() == output

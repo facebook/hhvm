@@ -1,6 +1,6 @@
-*** Testing ob_end_flush() : error conditions ***
-
--- Testing ob_end_flush() function with one argument --
-HipHop Warning: Missing argument 0 for ob_end_flush() in hphp/test/zend/bad/tests-output/ob_end_flush_error_001.php on line 13
-NULL
+\*\*\*\ Testing\ ob\_end\_flush\(\)\ \:\ error\ conditions\ \*\*\*\
+\
+\-\-\ Testing\ ob\_end\_flush\(\)\ function\ with\ one\ argument\ \-\-\
+HipHop\ Warning\:\ Missing\ argument\ 0\ for\ ob\_end\_flush\(\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_end\_flush\_error\_001\.php\ on\ line\ 13\
+NULL\
 Done

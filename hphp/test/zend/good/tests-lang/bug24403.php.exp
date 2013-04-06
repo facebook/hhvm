@@ -1,0 +1,1 @@
+HipHop Fatal error: preg_replace is not going to be supported: Modifier /e must be used with the form f("<replacement string>") or f("<replacement string>"); in hphp/test/zend/good/tests-lang/bug24403.php on line 12

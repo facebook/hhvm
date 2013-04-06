@@ -1,9 +1,16 @@
-Non-static method A::A_ftk() should not be called statically
-1 %sbug38047.php:13 get_error_context()
-2 %sbug38047.php:36 kalus_error_handler()
-3 %sbug38047.php:36 A_ftk()
-
-Missing argument 1 for A::A_ftk(), called in %sbug38047.php on line 36 and defined
-1 %sbug38047.php:13 get_error_context()
-2 %sbug38047.php:7 kalus_error_handler()
-3 %sbug38047.php:36 A_ftk()
+Non\-static\ method\ A\:\:A\_ftk\(\)\ should\ not\ be\ called\ statically\
+1\ [^
+]+bug38047\.php\:13\ get\_error\_context\(\)\
+2\ [^
+]+bug38047\.php\:36\ kalus\_error\_handler\(\)\
+3\ [^
+]+bug38047\.php\:36\ A\_ftk\(\)\
+\
+Missing\ argument\ 1\ for\ A\:\:A\_ftk\(\)\,\ called\ in\ [^
+]+bug38047\.php\ on\ line\ 36\ and\ defined\
+1\ [^
+]+bug38047\.php\:13\ get\_error\_context\(\)\
+2\ [^
+]+bug38047\.php\:7\ kalus\_error\_handler\(\)\
+3\ [^
+]+bug38047\.php\:36\ A\_ftk\(\)

@@ -1,0 +1,9 @@
+Method\ \[\ \<user\>\ public\ method\ methodWithArgs\ \]\ \{\
+\ \ \@\@\ [^
+]+bug54305\.php\ \d+\ \-\ \d+\
+\
+\ \ \-\ Parameters\ \[2\]\ \{\
+\ \ \ \ Parameter\ \#0\ \[\ \<required\>\ \$a\ \]\
+\ \ \ \ Parameter\ \#1\ \[\ \<required\>\ \$b\ \]\
+\ \ \}\
+\}

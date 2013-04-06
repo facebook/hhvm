@@ -1,0 +1,3 @@
+HipHop Notice: Undefined property: foo::$x in hphp/test/zend/good/tests-classes/bug27468.php on line 4
+HipHop Warning: Invalid argument supplied for foreach() in hphp/test/zend/good/tests-classes/bug27468.php on line 4
+OK

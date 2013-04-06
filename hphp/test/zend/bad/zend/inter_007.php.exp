@@ -1,1 +1,1 @@
-HipHop Fatal error: Cannot make non static method c::B() static in class d in hphp/test/zend/bad/inter_007.php on line %d
+HipHop\ Fatal\ error\:\ Cannot\ make\ non\ static\ method\ c\:\:B\(\)\ static\ in\ class\ d\ in\ hphp\/test\/zend\/bad\/zend\/inter\_007\.php\ on\ line\ \d+

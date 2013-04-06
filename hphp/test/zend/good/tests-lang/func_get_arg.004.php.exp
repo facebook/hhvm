@@ -1,0 +1,3 @@
+HipHop Warning: func_get_arg():  Argument 2 not passed to function in hphp/test/zend/good/tests-lang/func_get_arg.004.php on line 5
+bool(false)
+

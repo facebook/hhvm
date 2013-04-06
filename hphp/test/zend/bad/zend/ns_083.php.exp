@@ -1,1 +1,1 @@
-HipHop Fatal error: Namespace declaration statement has to be the very first statement in the script in hphp/test/zend/bad/ns_083.php on line %d
+HipHop\ Fatal\ error\:\ Namespace\ declaration\ statement\ has\ to\ be\ the\ very\ first\ statement\ in\ the\ script\ in\ hphp\/test\/zend\/bad\/zend\/ns\_083\.php\ on\ line\ \d+

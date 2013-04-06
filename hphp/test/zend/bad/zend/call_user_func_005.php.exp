@@ -1,15 +1,15 @@
-Strict Standards: call_user_func() expects parameter 1 to be a valid callback, non-static method foo::teste() should not be called statically in hphp/test/zend/bad/call_user_func_005.php on line %d
-%string|unicode%(1) "x"
-array(1) {
-  [0]=>
-  object(Closure)#%d (1) {
-    ["parameter"]=>
-    array(2) {
-      ["$a"]=>
-      string(10) "<required>"
-      ["$b"]=>
-      string(10) "<required>"
-    }
-  }
-}
-int(1)
+Strict\ Standards\:\ call\_user\_func\(\)\ expects\ parameter\ 1\ to\ be\ a\ valid\ callback\,\ non\-static\ method\ foo\:\:teste\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/zend\/call\_user\_func\_005\.php\ on\ line\ \d+\
+string\(1\)\ \"x\"\
+array\(1\)\ \{\
+\ \ \[0\]\=\>\
+\ \ object\(Closure\)\#\d+\ \(1\)\ \{\
+\ \ \ \ \[\"parameter\"\]\=\>\
+\ \ \ \ array\(2\)\ \{\
+\ \ \ \ \ \ \[\"\$a\"\]\=\>\
+\ \ \ \ \ \ string\(10\)\ \"\<required\>\"\
+\ \ \ \ \ \ \[\"\$b\"\]\=\>\
+\ \ \ \ \ \ string\(10\)\ \"\<required\>\"\
+\ \ \ \ \}\
+\ \ \}\
+\}\
+int\(1\)

@@ -1,5 +1,5 @@
-bool(true)
-bool(true)
-bool(true)
-HipHop Notice: Undefined offset: 2 in hphp/test/zend/bad/028.php on line %d
-HipHop Fatal error: Function name must be a string in hphp/test/zend/bad/028.php on line %d
+bool\(true\)\
+bool\(true\)\
+bool\(true\)\
+HipHop\ Notice\:\ Undefined\ offset\:\ 2\ in\ hphp\/test\/zend\/bad\/zend\/028\.php\ on\ line\ \d+\
+HipHop\ Fatal\ error\:\ Function\ name\ must\ be\ a\ string\ in\ hphp\/test\/zend\/bad\/zend\/028\.php\ on\ line\ \d+

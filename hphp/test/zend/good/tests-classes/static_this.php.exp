@@ -1,0 +1,7 @@
+HipHop Notice: Undefined variable: this in hphp/test/zend/good/tests-classes/static_this.php on line 13
+NULL
+HipHop Notice: Undefined variable: this in hphp/test/zend/good/tests-classes/static_this.php on line 13
+NULL
+object(stdClass)#2 (0) {
+}
+===DONE===

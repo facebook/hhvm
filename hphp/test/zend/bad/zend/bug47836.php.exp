@@ -1,5 +1,0 @@
-HipHop Warning: Cannot add element to the array as the next element is already occupied in hphp/test/zend/bad/bug47836.php on line 4
-array(1) {
-  [%d]=>
-  int(1)
-}

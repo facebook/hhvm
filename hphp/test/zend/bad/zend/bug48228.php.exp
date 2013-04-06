@@ -1,0 +1,10 @@
+HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ in\ [^
+]+\
+Stack\ trace\:\
+\#0\ [^
+]+\(\d+\)\:\ do\_throw\(\)\
+\#1\ [^
+]+\(\d+\)\:\ aa\-\>dosome\(\)\
+\#2\ \{main\}\
+\ \ thrown\ in\ [^
+]+

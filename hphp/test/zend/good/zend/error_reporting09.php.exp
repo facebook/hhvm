@@ -1,0 +1,4 @@
+HipHop Notice: Undefined variable: blah in hphp/test/zend/good/zend/error_reporting09.php on line 13
+HipHop Notice: Undefined variable: undef2 in hphp/test/zend/good/zend/error_reporting09.php on line 7
+int(32767)
+Done

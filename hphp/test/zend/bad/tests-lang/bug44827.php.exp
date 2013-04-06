@@ -1,4 +1,3 @@
-HipHop Warning: Class constants cannot be defined or redefined in hphp/test/zend/bad/tests-lang/bug44827.php on line %d
-HipHop Warning: constant(): Couldn't find constant :: in hphp/test/zend/bad/tests-lang/bug44827.php on line %d
+HipHop\ Warning\:\ Class\ constants\ cannot\ be\ defined\ or\ redefined\ in\ hphp\/test\/zend\/bad\/tests\-lang\/bug44827\.php\ on\ line\ \d+\
+HipHop\ Warning\:\ constant\(\)\:\ Couldn\'t\ find\ constant\ \:\:\ in\ hphp\/test\/zend\/bad\/tests\-lang\/bug44827\.php\ on\ line\ \d+\
 NULL
-

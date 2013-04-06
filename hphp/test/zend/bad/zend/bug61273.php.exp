@@ -1,2 +1,3 @@
-HipHop Warning: Parameter 1 to {closure}() expected to be a reference, value given in %sbug61273.php on line %d
+HipHop\ Warning\:\ Parameter\ 1\ to\ \{closure\}\(\)\ expected\ to\ be\ a\ reference\,\ value\ given\ in\ [^
+]+bug61273\.php\ on\ line\ \d+\
 okey

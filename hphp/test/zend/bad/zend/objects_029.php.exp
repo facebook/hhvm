@@ -1,1 +1,1 @@
-HipHop Fatal error: Access to undeclared static property: foo::$f in hphp/test/zend/bad/objects_029.php on line %d
+HipHop\ Fatal\ error\:\ Access\ to\ undeclared\ static\ property\:\ foo\:\:\$f\ in\ hphp\/test\/zend\/bad\/zend\/objects\_029\.php\ on\ line\ \d+

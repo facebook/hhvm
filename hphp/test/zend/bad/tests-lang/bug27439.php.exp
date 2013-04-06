@@ -1,7 +1,7 @@
-123
-HipHop Notice: Undefined property: test::$foobar in hphp/test/zend/bad/tests-lang/bug27439.php on line %d
-HipHop Warning: Invalid argument supplied for foreach() in hphp/test/zend/bad/tests-lang/bug27439.php on line %d
-HipHop Warning: Invalid argument supplied for foreach() in hphp/test/zend/bad/tests-lang/bug27439.php on line %d
-HipHop Warning: Invalid argument supplied for foreach() in hphp/test/zend/bad/tests-lang/bug27439.php on line %d
-123
-===DONE===
+123\
+HipHop\ Notice\:\ Undefined\ property\:\ test\:\:\$foobar\ in\ hphp\/test\/zend\/bad\/tests\-lang\/bug27439\.php\ on\ line\ \d+\
+HipHop\ Warning\:\ Invalid\ argument\ supplied\ for\ foreach\(\)\ in\ hphp\/test\/zend\/bad\/tests\-lang\/bug27439\.php\ on\ line\ \d+\
+HipHop\ Warning\:\ Invalid\ argument\ supplied\ for\ foreach\(\)\ in\ hphp\/test\/zend\/bad\/tests\-lang\/bug27439\.php\ on\ line\ \d+\
+HipHop\ Warning\:\ Invalid\ argument\ supplied\ for\ foreach\(\)\ in\ hphp\/test\/zend\/bad\/tests\-lang\/bug27439\.php\ on\ line\ \d+\
+123\
+\=\=\=DONE\=\=\=

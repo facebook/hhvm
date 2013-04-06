@@ -1,15 +1,21 @@
-Error handler called (Undefined variable: undefined)
-HipHop Warning: Uncaught exception 'ErrorException' with message 'Undefined variable: undefined' in %sbug61767.php:13
-Stack trace:
-#0 %sbug61767.php(13): {closure}(8, 'Undefined varia...', '%s', 13, Array)
-#1 {main}
-  thrown in %sbug61767.php on line 13
-HipHop Fatal error: Call to a member function foo() on a non-object in %sbug61767.php on line 13
-Shutting down
-Array
-(
-    [type] => 1
-    [message] => Call to a member function foo() on a non-object
-    [file] => %sbug61767.php
-    [line] => 13
-)
+Error\ handler\ called\ \(Undefined\ variable\:\ undefined\)\
+HipHop\ Warning\:\ Uncaught\ exception\ \'ErrorException\'\ with\ message\ \'Undefined\ variable\:\ undefined\'\ in\ [^
+]+bug61767\.php\:13\
+Stack\ trace\:\
+\#0\ [^
+]+bug61767\.php\(13\)\:\ \{closure\}\(8\,\ \'Undefined\ varia\.\.\.\'\,\ \'[^
+]+\'\,\ 13\,\ Array\)\
+\#1\ \{main\}\
+\ \ thrown\ in\ [^
+]+bug61767\.php\ on\ line\ 13\
+HipHop\ Fatal\ error\:\ Call\ to\ a\ member\ function\ foo\(\)\ on\ a\ non\-object\ in\ [^
+]+bug61767\.php\ on\ line\ 13\
+Shutting\ down\
+Array\
+\(\
+\ \ \ \ \[type\]\ \=\>\ 1\
+\ \ \ \ \[message\]\ \=\>\ Call\ to\ a\ member\ function\ foo\(\)\ on\ a\ non\-object\
+\ \ \ \ \[file\]\ \=\>\ [^
+]+bug61767\.php\
+\ \ \ \ \[line\]\ \=\>\ 13\
+\)

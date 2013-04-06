@@ -1,20 +1,20 @@
-HipHop Warning: The magic method __call() must have public visibility and cannot be static in hphp/test/zend/bad/tests-classes/__call_007.php on line 3
----> Invoke __call via simple method call.
-NULL
-Exception caught OK; continuing.
-
-
----> Invoke __call via scope resolution operator within instance.
-NULL
-Exception caught OK; continuing.
-
-
----> Invoke __call via scope resolution operator within child instance.
-NULL
-Exception caught OK; continuing.
-
-
----> Invoke __call via callback.
-NULL
-Exception caught OK; continuing.
-==DONE==
+HipHop\ Warning\:\ The\ magic\ method\ \_\_call\(\)\ must\ have\ public\ visibility\ and\ cannot\ be\ static\ in\ hphp\/test\/zend\/bad\/tests\-classes\/\_\_call\_007\.php\ on\ line\ 3\
+\-\-\-\>\ Invoke\ \_\_call\ via\ simple\ method\ call\.\
+NULL\
+Exception\ caught\ OK\;\ continuing\.\
+\
+\
+\-\-\-\>\ Invoke\ \_\_call\ via\ scope\ resolution\ operator\ within\ instance\.\
+NULL\
+Exception\ caught\ OK\;\ continuing\.\
+\
+\
+\-\-\-\>\ Invoke\ \_\_call\ via\ scope\ resolution\ operator\ within\ child\ instance\.\
+NULL\
+Exception\ caught\ OK\;\ continuing\.\
+\
+\
+\-\-\-\>\ Invoke\ \_\_call\ via\ callback\.\
+NULL\
+Exception\ caught\ OK\;\ continuing\.\
+\=\=DONE\=\=

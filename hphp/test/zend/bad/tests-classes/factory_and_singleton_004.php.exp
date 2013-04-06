@@ -1,1 +1,1 @@
-HipHop Fatal error: Call to private test::__construct() from invalid context in hphp/test/zend/bad/tests-classes/factory_and_singleton_004.php on line %d
+HipHop\ Fatal\ error\:\ Call\ to\ private\ test\:\:\_\_construct\(\)\ from\ invalid\ context\ in\ hphp\/test\/zend\/bad\/tests\-classes\/factory\_and\_singleton\_004\.php\ on\ line\ \d+

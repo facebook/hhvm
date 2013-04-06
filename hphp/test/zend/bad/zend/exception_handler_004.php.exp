@@ -1,5 +1,5 @@
-HipHop Warning: set_exception_handler() expects the argument (fo) to be a valid callback in hphp/test/zend/bad/exception_handler_004.php on line %d
-HipHop Warning: set_exception_handler() expects the argument (::) to be a valid callback in hphp/test/zend/bad/exception_handler_004.php on line %d
-HipHop Warning: Missing argument 1 for set_exception_handler() in hphp/test/zend/bad/exception_handler_004.php on line %d
-HipHop Warning: set_exception_handler() expects exactly 1 parameter, 2 given in hphp/test/zend/bad/exception_handler_004.php on line %d
+HipHop\ Warning\:\ set\_exception\_handler\(\)\ expects\ the\ argument\ \(fo\)\ to\ be\ a\ valid\ callback\ in\ hphp\/test\/zend\/bad\/zend\/exception\_handler\_004\.php\ on\ line\ \d+\
+HipHop\ Warning\:\ set\_exception\_handler\(\)\ expects\ the\ argument\ \(\:\:\)\ to\ be\ a\ valid\ callback\ in\ hphp\/test\/zend\/bad\/zend\/exception\_handler\_004\.php\ on\ line\ \d+\
+HipHop\ Warning\:\ Missing\ argument\ 1\ for\ set\_exception\_handler\(\)\ in\ hphp\/test\/zend\/bad\/zend\/exception\_handler\_004\.php\ on\ line\ \d+\
+HipHop\ Warning\:\ set\_exception\_handler\(\)\ expects\ exactly\ 1\ parameter\,\ 2\ given\ in\ hphp\/test\/zend\/bad\/zend\/exception\_handler\_004\.php\ on\ line\ \d+\
 Done

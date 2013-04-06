@@ -1,3 +1,3 @@
-HipHop Notice: Undefined property: B::$test in hphp/test/zend/bad/bug48248.php on line %d
-HipHop Notice: Only variable references should be returned by reference in hphp/test/zend/bad/bug48248.php on line %d
+HipHop\ Notice\:\ Undefined\ property\:\ B\:\:\$test\ in\ hphp\/test\/zend\/bad\/zend\/bug48248\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Only\ variable\ references\ should\ be\ returned\ by\ reference\ in\ hphp\/test\/zend\/bad\/zend\/bug48248\.php\ on\ line\ \d+\
 NULL

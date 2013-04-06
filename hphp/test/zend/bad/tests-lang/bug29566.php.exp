@@ -1,3 +1,5 @@
-HipHop Warning: Illegal string offset 'nosuchkey' in %sbug29566.php on line %d
-HipHop Warning: Invalid argument supplied for foreach() in %sbug29566.php on line %d
-===DONE===
+HipHop\ Warning\:\ Illegal\ string\ offset\ \'nosuchkey\'\ in\ [^
+]+bug29566\.php\ on\ line\ \d+\
+HipHop\ Warning\:\ Invalid\ argument\ supplied\ for\ foreach\(\)\ in\ [^
+]+bug29566\.php\ on\ line\ \d+\
+\=\=\=DONE\=\=\=

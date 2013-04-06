@@ -1,1 +1,2 @@
-HipHop Fatal error: Call to undefined function bar() in %sbug36268.php on line 8
+HipHop\ Fatal\ error\:\ Call\ to\ undefined\ function\ bar\(\)\ in\ [^
+]+bug36268\.php\ on\ line\ 8

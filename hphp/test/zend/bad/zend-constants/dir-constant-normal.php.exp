@@ -1,2 +1,6 @@
-%stests%sconstants
-%stests%sconstants
+[^
+]+tests[^
+]+constants\
+[^
+]+tests[^
+]+constants

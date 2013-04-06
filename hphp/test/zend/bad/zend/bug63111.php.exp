@@ -1,10 +1,11 @@
-Strict Standards: Static function Foo::bar() should not be abstract in %sbug63111.php on line 3
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
-ok
-HipHop Fatal error: Cannot call abstract method Foo::bar() in %sbug63111.php on line 20
-
+Strict\ Standards\:\ Static\ function\ Foo\:\:bar\(\)\ should\ not\ be\ abstract\ in\ [^
+]+bug63111\.php\ on\ line\ 3\
+bool\(false\)\
+bool\(false\)\
+bool\(false\)\
+bool\(false\)\
+bool\(true\)\
+bool\(true\)\
+ok\
+HipHop\ Fatal\ error\:\ Cannot\ call\ abstract\ method\ Foo\:\:bar\(\)\ in\ [^
+]+bug63111\.php\ on\ line\ 20

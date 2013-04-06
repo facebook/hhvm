@@ -1,7 +1,7 @@
-foo
-From foo::__callStatic:
-123
-------
-foo
-From foo::__call:
+foo\
+From\ foo\:\:\_\_callStatic\:\
+123\
+\-\-\-\-\-\-\
+foo\
+From\ foo\:\:\_\_call\:\
 123

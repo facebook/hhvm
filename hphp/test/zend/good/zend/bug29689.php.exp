@@ -1,9 +1,0 @@
-foo: foo foo2
-bar: bar HipHop Notice: Undefined property: bar::$foo2 in hphp/test/zend/good/zend/bug29689.php on line 18
-
----baz--
-foo: foo foo2
-bar: baz baz2
----baz2--
-foo: foo foo2
-bar2: baz2 baz22

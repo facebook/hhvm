@@ -1,10 +1,15 @@
-HipHop Fatal error: Uncaught exception 'Exception' with message 'First' in %sexception_008.php:%d
-Stack trace:
-#0 %sexception_008.php(%d): TestFirst->__destruct()
-#1 {main}
-
-Next exception 'Exception' with message 'Second' in %sexception_008.php:%d
-Stack trace:
-#0 %sexception_008.php(%d): TestSecond->__destruct()
-#1 {main}
-  thrown in %sexception_008.php on line %d
+HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ with\ message\ \'First\'\ in\ [^
+]+exception\_008\.php\:\d+\
+Stack\ trace\:\
+\#0\ [^
+]+exception\_008\.php\(\d+\)\:\ TestFirst\-\>\_\_destruct\(\)\
+\#1\ \{main\}\
+\
+Next\ exception\ \'Exception\'\ with\ message\ \'Second\'\ in\ [^
+]+exception\_008\.php\:\d+\
+Stack\ trace\:\
+\#0\ [^
+]+exception\_008\.php\(\d+\)\:\ TestSecond\-\>\_\_destruct\(\)\
+\#1\ \{main\}\
+\ \ thrown\ in\ [^
+]+exception\_008\.php\ on\ line\ \d+

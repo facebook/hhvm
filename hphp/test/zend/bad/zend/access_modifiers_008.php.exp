@@ -1,1 +1,1 @@
-HipHop Fatal error: Call to protected method B1::f() from context 'B2' in hphp/test/zend/bad/access_modifiers_008.php on line %d
+HipHop\ Fatal\ error\:\ Call\ to\ protected\ method\ B1\:\:f\(\)\ from\ context\ \'B2\'\ in\ hphp\/test\/zend\/bad\/zend\/access\_modifiers\_008\.php\ on\ line\ \d+

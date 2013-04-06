@@ -1,22 +1,26 @@
-HipHop Notice: Undefined variable: a in hphp/test/zend/bad/024.php on line %d
-NULL
-HipHop Notice: Undefined variable: %s in hphp/test/zend/bad/024.php on line %d
-HipHop Notice: Undefined variable: %s in hphp/test/zend/bad/024.php on line %d
-NULL
-HipHop Notice: Undefined variable: a in hphp/test/zend/bad/024.php on line %d
-int(1)
-HipHop Notice: Undefined variable: %s in hphp/test/zend/bad/024.php on line %d
-HipHop Notice: Undefined variable: %s in hphp/test/zend/bad/024.php on line %d
-int(0)
-HipHop Notice: Undefined variable: a in hphp/test/zend/bad/024.php on line %d
-NULL
-HipHop Notice: Undefined variable: b in hphp/test/zend/bad/024.php on line %d
-int(1)
-HipHop Notice: Trying to get property of non-object in hphp/test/zend/bad/024.php on line %d
-NULL
-HipHop Notice: Trying to get property of non-object in hphp/test/zend/bad/024.php on line %d
-NULL
-HipHop Notice: Undefined variable: c in hphp/test/zend/bad/024.php on line %d
-HipHop Notice: Trying to get property of non-object in hphp/test/zend/bad/024.php on line %d
-HipHop Notice: Trying to get property of non-object in hphp/test/zend/bad/024.php on line %d
+HipHop\ Notice\:\ Undefined\ variable\:\ a\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+NULL\
+HipHop\ Notice\:\ Undefined\ variable\:\ [^
+]+\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Undefined\ variable\:\ [^
+]+\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+NULL\
+HipHop\ Notice\:\ Undefined\ variable\:\ a\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+int\(1\)\
+HipHop\ Notice\:\ Undefined\ variable\:\ [^
+]+\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Undefined\ variable\:\ [^
+]+\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+int\(0\)\
+HipHop\ Notice\:\ Undefined\ variable\:\ a\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+NULL\
+HipHop\ Notice\:\ Undefined\ variable\:\ b\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+int\(1\)\
+HipHop\ Notice\:\ Trying\ to\ get\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+NULL\
+HipHop\ Notice\:\ Trying\ to\ get\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+NULL\
+HipHop\ Notice\:\ Undefined\ variable\:\ c\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Trying\ to\ get\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Trying\ to\ get\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/zend\/024\.php\ on\ line\ \d+\
 NULL

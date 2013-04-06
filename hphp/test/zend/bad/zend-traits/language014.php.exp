@@ -1,1 +1,1 @@
-HipHop Fatal error: Trait method hello has not been applied, because there are collisions with other trait methods on MyClass in hphp/test/zend/bad/language014.php on line %d
+HipHop\ Fatal\ error\:\ Trait\ method\ hello\ has\ not\ been\ applied\,\ because\ there\ are\ collisions\ with\ other\ trait\ methods\ on\ MyClass\ in\ hphp\/test\/zend\/bad\/zend\-traits\/language014\.php\ on\ line\ \d+

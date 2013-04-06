@@ -1,5 +1,8 @@
-HipHop Notice: Uninitialized string offset: 0 in %sbug39304_2_4.php on line %d
-HipHop Notice: Uninitialized string offset: 1 in %sbug39304_2_4.php on line %d
-HipHop Notice: Uninitialized string offset: 0 in %sbug39304_2_4.php on line %d
-string(0) ""
-string(0) ""
+HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ 0\ in\ [^
+]+bug39304\_2\_4\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ 1\ in\ [^
+]+bug39304\_2\_4\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ 0\ in\ [^
+]+bug39304\_2\_4\.php\ on\ line\ \d+\
+string\(0\)\ \"\"\
+string\(0\)\ \"\"

@@ -1,4 +1,6 @@
 <?php
+parse_str("x=2", $_GET);
+
 $_x = "1\n";
 echo $_x;
 import_request_variables("g","_");

@@ -1,2 +1,2 @@
-HipHop Notice: Undefined variable: a in hphp/test/zend/bad/dynamic_call_004.php on line %d
-HipHop Fatal error: Class name must be a valid object or a string in hphp/test/zend/bad/dynamic_call_004.php on line %d
+HipHop\ Notice\:\ Undefined\ variable\:\ a\ in\ hphp\/test\/zend\/bad\/zend\/dynamic\_call\_004\.php\ on\ line\ \d+\
+HipHop\ Fatal\ error\:\ Class\ name\ must\ be\ a\ valid\ object\ or\ a\ string\ in\ hphp\/test\/zend\/bad\/zend\/dynamic\_call\_004\.php\ on\ line\ \d+

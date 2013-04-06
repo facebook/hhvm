@@ -1,0 +1,10 @@
+object\:\:offsetGet\(1\)\
+string\(6\)\ \"fooBar\"\
+object\:\:offsetGet\(2\)\
+int\(1\)\
+object\:\:offsetGet\(2\)\
+HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ object\ has\ no\ effect\ in\ [^
+]+array\_access\_004\.php\ on\ line\ 39\
+object\:\:offsetGet\(2\)\
+int\(1\)\
+\=\=\=DONE\=\=\=

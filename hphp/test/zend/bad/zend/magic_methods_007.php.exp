@@ -1,2 +1,2 @@
-HipHop Warning: The magic method __set() must have public visibility and cannot be static in hphp/test/zend/bad/magic_methods_007.php on line %d
-HipHop Fatal error: Method b::__set() must take exactly 2 arguments in hphp/test/zend/bad/magic_methods_007.php on line %d
+HipHop\ Warning\:\ The\ magic\ method\ \_\_set\(\)\ must\ have\ public\ visibility\ and\ cannot\ be\ static\ in\ hphp\/test\/zend\/bad\/zend\/magic\_methods\_007\.php\ on\ line\ \d+\
+HipHop\ Fatal\ error\:\ Method\ b\:\:\_\_set\(\)\ must\ take\ exactly\ 2\ arguments\ in\ hphp\/test\/zend\/bad\/zend\/magic\_methods\_007\.php\ on\ line\ \d+

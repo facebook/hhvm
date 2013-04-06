@@ -1,1 +1,0 @@
-HipHop Fatal error: Uncaught exception 'Exception' with message '' in hphp/test/zend/good/zend/bug48408.php:9\nStack trace:\n#0 hphp/test/zend/good/zend/bug48408.php(18): C->generate()\n#1 {main}

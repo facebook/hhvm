@@ -1,1 +1,2 @@
-HipHop Fatal error: Undefined constant 'bar' in %sbug43344_13.php on line %d
+HipHop\ Fatal\ error\:\ Undefined\ constant\ \'bar\'\ in\ [^
+]+bug43344\_13\.php\ on\ line\ \d+

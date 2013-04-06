@@ -1,3 +1,2 @@
-
---> Access non-visible static prop like instance prop:
-HipHop Fatal error: Cannot access protected property C::$y in hphp/test/zend/bad/tests-classes/static_properties_003_error3.php on line 8
+\-\-\>\ Access\ non\-visible\ static\ prop\ like\ instance\ prop\:\
+HipHop\ Fatal\ error\:\ Cannot\ access\ protected\ property\ C\:\:\$y\ in\ hphp\/test\/zend\/bad\/tests\-classes\/static\_properties\_003\_error3\.php\ on\ line\ 8

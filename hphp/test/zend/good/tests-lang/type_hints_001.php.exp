@@ -1,1 +1,0 @@
-HipHop Fatal error: Argument 1 passed to type_hint_foo() must be an instance of Foo, Bar given in hphp/test/zend/good/tests-lang/type_hints_001.php on line 10

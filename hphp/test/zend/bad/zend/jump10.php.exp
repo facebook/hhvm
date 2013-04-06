@@ -1,1 +1,2 @@
-HipHop Fatal error: 'goto' into loop or switch statement is disallowed in %sjump10.php on line 2
+HipHop\ Fatal\ error\:\ \'goto\'\ into\ loop\ or\ switch\ statement\ is\ disallowed\ in\ [^
+]+jump10\.php\ on\ line\ 2

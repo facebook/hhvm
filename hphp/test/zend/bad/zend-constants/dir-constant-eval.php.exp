@@ -1,1 +1,3 @@
-%stests%sconstants
+[^
+]+tests[^
+]+constants

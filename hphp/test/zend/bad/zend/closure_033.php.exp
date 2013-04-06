@@ -1,2 +1,3 @@
-Test::{closure}()
-HipHop Fatal error: Call to private method Test::func() from context '' in %sclosure_033.php on line %d
+Test\:\:\{closure\}\(\)\
+HipHop\ Fatal\ error\:\ Call\ to\ private\ method\ Test\:\:func\(\)\ from\ context\ \'\'\ in\ [^
+]+closure\_033\.php\ on\ line\ \d+

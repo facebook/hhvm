@@ -1,3 +1,3 @@
-HipHop Notice: Undefined offset: 1 in hphp/test/zend/bad/list_006.php on line %d
-HipHop Notice: Undefined offset: 1 in hphp/test/zend/bad/list_006.php on line %d
-HipHop Notice: Undefined offset: 0 in hphp/test/zend/bad/list_006.php on line %d
+HipHop\ Notice\:\ Undefined\ offset\:\ 1\ in\ hphp\/test\/zend\/bad\/zend\/list\_006\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Undefined\ offset\:\ 1\ in\ hphp\/test\/zend\/bad\/zend\/list\_006\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Undefined\ offset\:\ 0\ in\ hphp\/test\/zend\/bad\/zend\/list\_006\.php\ on\ line\ \d+

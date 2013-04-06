@@ -1,6 +1,0 @@
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(false)
-HipHop Fatal error: Bad type conversion: stdClass::__toString() was not defined. in hphp/test/zend/good/zend/instanceof_001.php on line 16

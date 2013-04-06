@@ -1,8 +1,8 @@
-int(1)
-Testing with scope given as object
-int(21)
-int(22)
-Testing with scope as string
-int(23)
-int(24)
-HipHop Fatal error: Cannot access private property B::$x in hphp/test/zend/bad/closure_038.php on line %d
+int\(1\)\
+Testing\ with\ scope\ given\ as\ object\
+int\(21\)\
+int\(22\)\
+Testing\ with\ scope\ as\ string\
+int\(23\)\
+int\(24\)\
+HipHop\ Fatal\ error\:\ Cannot\ access\ private\ property\ B\:\:\$x\ in\ hphp\/test\/zend\/bad\/zend\/closure\_038\.php\ on\ line\ \d+

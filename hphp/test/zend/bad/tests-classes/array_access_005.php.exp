@@ -1,0 +1,21 @@
+string\(3\)\ \"Joe\"\
+string\(6\)\ \"JoeFoo\"\
+string\(9\)\ \"JoeFooBar\"\
+\-\-\-ArrayOverloading\-\-\-\
+array\(1\)\ \{\
+\ \ \[\"name\"\]\=\>\
+\ \ string\(3\)\ \"Joe\"\
+\}\
+string\(3\)\ \"Joe\"\
+string\(6\)\ \"JoeFoo\"\
+array\(1\)\ \{\
+\ \ \[\"name\"\]\=\>\
+\ \ string\(6\)\ \"JoeFoo\"\
+\}\
+HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ Peoples\ has\ no\ effect\ in\ [^
+]+array\_access\_005\.php\ on\ line\ 46\
+string\(6\)\ \"JoeFoo\"\
+HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ Peoples\ has\ no\ effect\ in\ [^
+]+array\_access\_005\.php\ on\ line\ 48\
+string\(6\)\ \"JoeFoo\"\
+\=\=\=DONE\=\=\=

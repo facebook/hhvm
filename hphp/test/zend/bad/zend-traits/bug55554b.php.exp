@@ -1,4 +1,3 @@
-OverridingIsSilent1 __construct
-OverridingIsSilent2 OverridingIsSilent2
-HipHop Fatal error: ReportCollision has colliding constructor definitions coming from traits in hphp/test/zend/bad/bug55554b.php on line %d
-
+OverridingIsSilent1\ \_\_construct\
+OverridingIsSilent2\ OverridingIsSilent2\
+HipHop\ Fatal\ error\:\ ReportCollision\ has\ colliding\ constructor\ definitions\ coming\ from\ traits\ in\ hphp\/test\/zend\/bad\/zend\-traits\/bug55554b\.php\ on\ line\ \d+

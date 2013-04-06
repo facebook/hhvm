@@ -1,0 +1,8 @@
+HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ in\ [^
+]+\
+Stack\ trace\:\
+\#0\ [^
+]+\(\d+\)\:\ C\-\>generate\(0\)\
+\#1\ \{main\}\
+\ \ thrown\ in\ [^
+]+

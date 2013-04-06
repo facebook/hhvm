@@ -1,0 +1,15 @@
+string\(3\)\ \"Foo\"\
+string\(6\)\ \"FooBar\"\
+string\(9\)\ \"FooBarBaz\"\
+\=\=\=ArrayOverloading\=\=\=\
+string\(3\)\ \"Foo\"\
+HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ Peoples\ has\ no\ effect\ in\ [^
+]+array\_access\_008\.php\ on\ line\ 40\
+string\(3\)\ \"Foo\"\
+HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ Peoples\ has\ no\ effect\ in\ [^
+]+array\_access\_008\.php\ on\ line\ 42\
+string\(3\)\ \"Foo\"\
+HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ Peoples\ has\ no\ effect\ in\ [^
+]+array\_access\_008\.php\ on\ line\ 44\
+string\(3\)\ \"Foo\"\
+\=\=\=DONE\=\=\=

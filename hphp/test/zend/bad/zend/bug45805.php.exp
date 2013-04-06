@@ -1,0 +1,14 @@
+HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'RuntimeException\'\ in\ [^
+]+bug45805\.php\:\d+\
+Stack\ trace\:\
+\#0\ [^
+]+bug45805\.php\(\d+\)\:\ PHPUnit\_Util\_ErrorHandler\:\:handleError\(2048\,\ \'Only\ variables\ \.\.\.\'\,\ \'[^
+]+\'\,\ \d+\,\ Array\)\
+\#1\ \[internal\ function\]\:\ B\-\>foo\(\)\
+\#2\ [^
+]+bug45805\.php\(\d+\)\:\ ReflectionMethod\-\>invoke\(Object\(B\)\)\
+\#3\ [^
+]+bug45805\.php\(\d+\)\:\ B\-\>bar\(\)\
+\#4\ \{main\}\
+\ \ thrown\ in\ [^
+]+bug45805\.php\ on\ line\ \d+

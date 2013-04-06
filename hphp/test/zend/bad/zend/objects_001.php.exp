@@ -1,23 +1,23 @@
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-HipHop Notice: Object of class Bar could not be converted to int in hphp/test/zend/bad/objects_001.php on line %d
-bool(false)
-HipHop Notice: Object of class Bar could not be converted to int in hphp/test/zend/bad/objects_001.php on line %d
-bool(true)
-HipHop Notice: Object of class Bar could not be converted to int in hphp/test/zend/bad/objects_001.php on line %d
-bool(true)
-HipHop Notice: Object of class Bar could not be converted to int in hphp/test/zend/bad/objects_001.php on line %d
-bool(false)
-HipHop Notice: Object of class Bar could not be converted to double in hphp/test/zend/bad/objects_001.php on line %d
-bool(true)
-HipHop Notice: Object of class Bar could not be converted to double in hphp/test/zend/bad/objects_001.php on line %d
-bool(false)
-HipHop Notice: Object of class Bar could not be converted to int in hphp/test/zend/bad/objects_001.php on line %d
-bool(true)
+bool\(false\)\
+bool\(true\)\
+bool\(true\)\
+bool\(false\)\
+bool\(false\)\
+bool\(true\)\
+bool\(false\)\
+bool\(true\)\
+HipHop\ Notice\:\ Object\ of\ class\ Bar\ could\ not\ be\ converted\ to\ int\ in\ hphp\/test\/zend\/bad\/zend\/objects\_001\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Notice\:\ Object\ of\ class\ Bar\ could\ not\ be\ converted\ to\ int\ in\ hphp\/test\/zend\/bad\/zend\/objects\_001\.php\ on\ line\ \d+\
+bool\(true\)\
+HipHop\ Notice\:\ Object\ of\ class\ Bar\ could\ not\ be\ converted\ to\ int\ in\ hphp\/test\/zend\/bad\/zend\/objects\_001\.php\ on\ line\ \d+\
+bool\(true\)\
+HipHop\ Notice\:\ Object\ of\ class\ Bar\ could\ not\ be\ converted\ to\ int\ in\ hphp\/test\/zend\/bad\/zend\/objects\_001\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Notice\:\ Object\ of\ class\ Bar\ could\ not\ be\ converted\ to\ double\ in\ hphp\/test\/zend\/bad\/zend\/objects\_001\.php\ on\ line\ \d+\
+bool\(true\)\
+HipHop\ Notice\:\ Object\ of\ class\ Bar\ could\ not\ be\ converted\ to\ double\ in\ hphp\/test\/zend\/bad\/zend\/objects\_001\.php\ on\ line\ \d+\
+bool\(false\)\
+HipHop\ Notice\:\ Object\ of\ class\ Bar\ could\ not\ be\ converted\ to\ int\ in\ hphp\/test\/zend\/bad\/zend\/objects\_001\.php\ on\ line\ \d+\
+bool\(true\)\
 Done

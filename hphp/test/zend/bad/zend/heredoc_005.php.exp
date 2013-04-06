@@ -1,1 +1,3 @@
-Parse error: %s in %sheredoc_005.php on line 6
+Parse\ error\:\ [^
+]+\ in\ [^
+]+heredoc\_005\.php\ on\ line\ 6

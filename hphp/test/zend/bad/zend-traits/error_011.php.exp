@@ -1,1 +1,1 @@
-HipHop Fatal error: Trait method test has not been applied, because there are collisions with other trait methods on bar in hphp/test/zend/bad/error_011.php on line %d
+HipHop\ Fatal\ error\:\ Trait\ method\ test\ has\ not\ been\ applied\,\ because\ there\ are\ collisions\ with\ other\ trait\ methods\ on\ bar\ in\ hphp\/test\/zend\/bad\/zend\-traits\/error\_011\.php\ on\ line\ \d+

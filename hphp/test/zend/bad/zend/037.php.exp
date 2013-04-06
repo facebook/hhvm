@@ -1,2 +1,2 @@
-int(1)
-HipHop Fatal error: Access to undeclared static property: Closure::$x in hphp/test/zend/bad/037.php on line %d
+int\(1\)\
+HipHop\ Fatal\ error\:\ Access\ to\ undeclared\ static\ property\:\ Closure\:\:\$x\ in\ hphp\/test\/zend\/bad\/zend\/037\.php\ on\ line\ \d+

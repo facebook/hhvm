@@ -1,2 +1,0 @@
------( Try to iterate with &$value: )-----
-HipHop Fatal error: An iterator cannot be used with foreach by reference in hphp/test/zend/good/tests-lang/foreachLoopIterator.002.php on line 15

@@ -1,6 +1,6 @@
-HipHop Notice: Constant 1 already defined in hphp/test/zend/bad/constants_001.php on line %d
-int(2)
-int(2)
-int(2)
-int(1)
-int(3)
+HipHop\ Notice\:\ Constant\ 1\ already\ defined\ in\ hphp\/test\/zend\/bad\/zend\/constants\_001\.php\ on\ line\ \d+\
+int\(2\)\
+int\(2\)\
+int\(2\)\
+int\(1\)\
+int\(3\)

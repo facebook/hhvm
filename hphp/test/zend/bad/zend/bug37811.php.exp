@@ -1,5 +1,7 @@
-string(3) "Foo"
-HipHop Warning: Constants may only evaluate to scalar values in %sbug37811.php on line %d
-HipHop Notice: Use of undefined constant Baz - assumed 'Baz' in %sbug37811.php on line %d
-string(3) "Baz"
-===DONE===
+string\(3\)\ \"Foo\"\
+HipHop\ Warning\:\ Constants\ may\ only\ evaluate\ to\ scalar\ values\ in\ [^
+]+bug37811\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Use\ of\ undefined\ constant\ Baz\ \-\ assumed\ \'Baz\'\ in\ [^
+]+bug37811\.php\ on\ line\ \d+\
+string\(3\)\ \"Baz\"\
+\=\=\=DONE\=\=\=

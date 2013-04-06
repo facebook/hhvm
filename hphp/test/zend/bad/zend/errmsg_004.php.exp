@@ -1,1 +1,1 @@
-HipHop Fatal error: Can't use function return value in write context in hphp/test/zend/bad/errmsg_004.php on line %d
+HipHop\ Fatal\ error\:\ Can\'t\ use\ function\ return\ value\ in\ write\ context\ in\ hphp\/test\/zend\/bad\/zend\/errmsg\_004\.php\ on\ line\ \d+

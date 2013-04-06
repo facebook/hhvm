@@ -1,1 +1,1 @@
-HipHop Warning: The magic method __callStatic() must have public visibility and be static in hphp/test/zend/bad/magic_methods_009.php on line %d
+HipHop\ Warning\:\ The\ magic\ method\ \_\_callStatic\(\)\ must\ have\ public\ visibility\ and\ be\ static\ in\ hphp\/test\/zend\/bad\/zend\/magic\_methods\_009\.php\ on\ line\ \d+

@@ -1,17 +1,17 @@
-object(foo)#%d (2) {
-  ["test":"foo":private]=>
-  int(3)
-  ["a"]=>
-  object(Closure)#%d (2) {
-    ["static"]=>
-    array(1) {
-      ["a"]=>
-      *RECURSION*
-    }
-    ["this"]=>
-    *RECURSION*
-  }
-}
-bool(true)
-bool(true)
-HipHop Fatal error: Cannot access private property foo::$test in hphp/test/zend/bad/closure_020.php on line %d
+object\(foo\)\#\d+\ \(2\)\ \{\
+\ \ \[\"test\"\:\"foo\"\:private\]\=\>\
+\ \ int\(3\)\
+\ \ \[\"a\"\]\=\>\
+\ \ object\(Closure\)\#\d+\ \(2\)\ \{\
+\ \ \ \ \[\"static\"\]\=\>\
+\ \ \ \ array\(1\)\ \{\
+\ \ \ \ \ \ \[\"a\"\]\=\>\
+\ \ \ \ \ \ \*RECURSION\*\
+\ \ \ \ \}\
+\ \ \ \ \[\"this\"\]\=\>\
+\ \ \ \ \*RECURSION\*\
+\ \ \}\
+\}\
+bool\(true\)\
+bool\(true\)\
+HipHop\ Fatal\ error\:\ Cannot\ access\ private\ property\ foo\:\:\$test\ in\ hphp\/test\/zend\/bad\/zend\/closure\_020\.php\ on\ line\ \d+

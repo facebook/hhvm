@@ -1,5 +1,5 @@
-__autoload(NotExistingClass)
-bool(false)
-__autoload(NotExistingClass), done
-bool(false)
-===DONE===
+\_\_autoload\(NotExistingClass\)\
+bool\(false\)\
+\_\_autoload\(NotExistingClass\)\,\ done\
+bool\(false\)\
+\=\=\=DONE\=\=\=

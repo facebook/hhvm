@@ -1,1 +1,2 @@
-string(%d) "%sbug60825.php" refcount(2)
+string\(\d+\)\ \"[^
+]+bug60825\.php\"\ refcount\(2\)

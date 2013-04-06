@@ -1,1 +1,1 @@
-HipHop Fatal error: An alias (foobar) was defined for method baz(), but this method does not exist in hphp/test/zend/bad/bug60165c.php on line %d
+HipHop\ Fatal\ error\:\ An\ alias\ \(foobar\)\ was\ defined\ for\ method\ baz\(\)\,\ but\ this\ method\ does\ not\ exist\ in\ hphp\/test\/zend\/bad\/zend\-traits\/bug60165c\.php\ on\ line\ \d+

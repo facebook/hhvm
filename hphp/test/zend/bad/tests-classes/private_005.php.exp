@@ -1,2 +1,2 @@
-Call show()
-HipHop Fatal error: Call to private method pass::show() from context 'fail' in hphp/test/zend/bad/tests-classes/private_005.php on line %d
+Call\ show\(\)\
+HipHop\ Fatal\ error\:\ Call\ to\ private\ method\ pass\:\:show\(\)\ from\ context\ \'fail\'\ in\ hphp\/test\/zend\/bad\/tests\-classes\/private\_005\.php\ on\ line\ \d+

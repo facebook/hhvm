@@ -1,11 +1,11 @@
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-HipHop Notice: Undefined variable: c in hphp/test/zend/bad/isset_003.php on line %d
-HipHop Notice: Undefined variable: d in hphp/test/zend/bad/isset_003.php on line %d
-HipHop Notice: Trying to get property of non-object in hphp/test/zend/bad/isset_003.php on line %d
-bool(false)
-bool(true)
-bool(false)
-bool(false)
+bool\(true\)\
+bool\(true\)\
+bool\(false\)\
+bool\(false\)\
+HipHop\ Notice\:\ Undefined\ variable\:\ c\ in\ hphp\/test\/zend\/bad\/zend\/isset\_003\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Undefined\ variable\:\ d\ in\ hphp\/test\/zend\/bad\/zend\/isset\_003\.php\ on\ line\ \d+\
+HipHop\ Notice\:\ Trying\ to\ get\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/zend\/isset\_003\.php\ on\ line\ \d+\
+bool\(false\)\
+bool\(true\)\
+bool\(false\)\
+bool\(false\)

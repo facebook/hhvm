@@ -1,1 +1,3 @@
-HipHop Fatal error: Class %s contains %d abstract method and must therefore be declared abstract or implement the remaining methods (%s) in hphp/test/zend/bad/abstract-methods01.php on line %d
+HipHop\ Fatal\ error\:\ Class\ [^
+]+\ contains\ \d+\ abstract\ method\ and\ must\ therefore\ be\ declared\ abstract\ or\ implement\ the\ remaining\ methods\ \([^
+]+\)\ in\ hphp\/test\/zend\/bad\/zend\-traits\-bugs\/abstract\-methods01\.php\ on\ line\ \d+

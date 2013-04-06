@@ -1,6 +1,6 @@
-FailClass::__destruct
-Caught: FailClass
-FatalException::__construct
-FailClass::__destruct
-Caught Exception: FailClass
-===DONE===
+FailClass\:\:\_\_destruct\
+Caught\:\ FailClass\
+FatalException\:\:\_\_construct\
+FailClass\:\:\_\_destruct\
+Caught\ Exception\:\ FailClass\
+\=\=\=DONE\=\=\=

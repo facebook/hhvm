@@ -1,2 +1,5 @@
-Parse error: %s error, %s)%s in %sfunction_arguments_002.php on line %d
-
+Parse\ error\:\ [^
+]+\ error\,\ [^
+]+\)[^
+]+\ in\ [^
+]+function\_arguments\_002\.php\ on\ line\ \d+

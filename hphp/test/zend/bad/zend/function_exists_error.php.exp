@@ -1,11 +1,10 @@
-*** Testing function_exists() : error conditions ***
-
-Too many arguments
-HipHop Warning: function_exists() expects exactly 1 parameter, 2 given in hphp/test/zend/bad/function_exists_error.php on line %d
-NULL
-
-Too few arguments
-HipHop Warning: Missing argument 1 for function_exists() in hphp/test/zend/bad/function_exists_error.php on line %d
-NULL
-===Done===
-
+\*\*\*\ Testing\ function\_exists\(\)\ \:\ error\ conditions\ \*\*\*\
+\
+Too\ many\ arguments\
+HipHop\ Warning\:\ function\_exists\(\)\ expects\ exactly\ 1\ parameter\,\ 2\ given\ in\ hphp\/test\/zend\/bad\/zend\/function\_exists\_error\.php\ on\ line\ \d+\
+NULL\
+\
+Too\ few\ arguments\
+HipHop\ Warning\:\ Missing\ argument\ 1\ for\ function\_exists\(\)\ in\ hphp\/test\/zend\/bad\/zend\/function\_exists\_error\.php\ on\ line\ \d+\
+NULL\
+\=\=\=Done\=\=\=

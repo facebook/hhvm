@@ -1,1 +1,2 @@
-HipHop Fatal error: Could not find trait Typo in %sbug63219.php on line %d
+HipHop\ Fatal\ error\:\ Could\ not\ find\ trait\ Typo\ in\ [^
+]+bug63219\.php\ on\ line\ \d+

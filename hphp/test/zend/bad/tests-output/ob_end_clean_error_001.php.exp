@@ -1,4 +1,3 @@
-
-Too many arguments
-HipHop Warning: Missing argument 0 for ob_end_clean() in hphp/test/zend/bad/tests-output/ob_end_clean_error_001.php on line 10
+Too\ many\ arguments\
+HipHop\ Warning\:\ Missing\ argument\ 0\ for\ ob\_end\_clean\(\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_end\_clean\_error\_001\.php\ on\ line\ 10\
 NULL

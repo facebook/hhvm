@@ -1,1 +1,6 @@
-Parse error: %s error%sexpecting%sT_NS_SEPARATOR%sin %sbug43343.php on line 5
+Parse\ error\:\ [^
+]+\ error[^
+]+expecting[^
+]+T\_NS\_SEPARATOR[^
+]+in\ [^
+]+bug43343\.php\ on\ line\ 5

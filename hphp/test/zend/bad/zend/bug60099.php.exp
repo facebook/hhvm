@@ -1,1 +1,1 @@
-HipHop Fatal error: __HALT_COMPILER() can only be used from the outermost scope in hphp/test/zend/bad/bug60099.php on line %d
+HipHop\ Fatal\ error\:\ \_\_HALT\_COMPILER\(\)\ can\ only\ be\ used\ from\ the\ outermost\ scope\ in\ hphp\/test\/zend\/bad\/zend\/bug60099\.php\ on\ line\ \d+

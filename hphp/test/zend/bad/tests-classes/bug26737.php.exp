@@ -1,2 +1,2 @@
-HipHop Notice: serialize(): "no_such" returned as member variable from __sleep() but does not exist in hphp/test/zend/bad/tests-classes/bug26737.php on line %d
-string(130) "O:3:"foo":4:{s:12:"\0foo\0private";s:7:"private";s:12:"\0*\0protected";s:9:"protected";s:6:"public";s:6:"public";s:7:"no_such";N;}"
+HipHop\ Notice\:\ serialize\(\)\:\ \"no\_such\"\ returned\ as\ member\ variable\ from\ \_\_sleep\(\)\ but\ does\ not\ exist\ in\ hphp\/test\/zend\/bad\/tests\-classes\/bug26737\.php\ on\ line\ \d+\
+string\(130\)\ \"O\:3\:\"foo\"\:4\:\{s\:12\:\"\\0foo\\0private\"\;s\:7\:\"private\"\;s\:12\:\"\\0\*\\0protected\"\;s\:9\:\"protected\"\;s\:6\:\"public\"\;s\:6\:\"public\"\;s\:7\:\"no\_such\"\;N\;\}\"

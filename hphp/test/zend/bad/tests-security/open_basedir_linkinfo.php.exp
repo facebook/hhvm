@@ -1,17 +1,17 @@
-*** Testing open_basedir configuration [linkinfo] ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-int(%d)
-int(%d)
-int(%d)
-int(%d)
-int(%d)
-HipHop Warning: symlink(): open_basedir restriction in effect. File(%s/test/bad/bad.txt) is not within the allowed path(s): (.) in hphp/test/zend/bad/tests-security/open_basedir_linkinfo.php on line %d
-bool(false)
-int(%d)
-bool(true)
-*** Finished testing open_basedir configuration [linkinfo] ***
-
+\*\*\*\ Testing\ open\_basedir\ configuration\ \[linkinfo\]\ \*\*\*\
+bool\(true\)\
+bool\(true\)\
+bool\(true\)\
+bool\(true\)\
+bool\(true\)\
+int\(\d+\)\
+int\(\d+\)\
+int\(\d+\)\
+int\(\d+\)\
+int\(\d+\)\
+HipHop\ Warning\:\ symlink\(\)\:\ open\_basedir\ restriction\ in\ effect\.\ File\([^
+]+\/test\/bad\/bad\.txt\)\ is\ not\ within\ the\ allowed\ path\(s\)\:\ \(\.\)\ in\ hphp\/test\/zend\/bad\/tests\-security\/open\_basedir\_linkinfo\.php\ on\ line\ \d+\
+bool\(false\)\
+int\(\d+\)\
+bool\(true\)\
+\*\*\*\ Finished\ testing\ open\_basedir\ configuration\ \[linkinfo\]\ \*\*\*

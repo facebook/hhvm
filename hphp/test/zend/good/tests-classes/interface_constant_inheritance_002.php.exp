@@ -1,1 +1,0 @@
-HipHop Fatal error: Cannot override previously defined constant I::FOO in C in hphp/test/zend/good/tests-classes/interface_constant_inheritance_002.php on line 6

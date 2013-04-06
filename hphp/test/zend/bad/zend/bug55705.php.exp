@@ -1,1 +1,1 @@
-Catchable fatal error: Argument 1 passed to f() must be callable, none given, called in hphp/test/zend/bad/bug55705.php on line 3 and defined in hphp/test/zend/bad/bug55705.php on line %d
+Catchable\ fatal\ error\:\ Argument\ 1\ passed\ to\ f\(\)\ must\ be\ callable\,\ none\ given\,\ called\ in\ hphp\/test\/zend\/bad\/zend\/bug55705\.php\ on\ line\ 3\ and\ defined\ in\ hphp\/test\/zend\/bad\/zend\/bug55705\.php\ on\ line\ \d+

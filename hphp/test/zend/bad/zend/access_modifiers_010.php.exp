@@ -1,1 +1,1 @@
-HipHop Fatal error: Call to private method d::test2() from context 'a' in hphp/test/zend/bad/access_modifiers_010.php on line %d
+HipHop\ Fatal\ error\:\ Call\ to\ private\ method\ d\:\:test2\(\)\ from\ context\ \'a\'\ in\ hphp\/test\/zend\/bad\/zend\/access\_modifiers\_010\.php\ on\ line\ \d+

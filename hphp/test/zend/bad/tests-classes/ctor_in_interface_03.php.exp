@@ -1,1 +1,1 @@
-HipHop Fatal error: Declaration of derived::__construct() must be compatible with constr::__construct() in hphp/test/zend/bad/tests-classes/ctor_in_interface_03.php on line %d
+HipHop\ Fatal\ error\:\ Declaration\ of\ derived\:\:\_\_construct\(\)\ must\ be\ compatible\ with\ constr\:\:\_\_construct\(\)\ in\ hphp\/test\/zend\/bad\/tests\-classes\/ctor\_in\_interface\_03\.php\ on\ line\ \d+

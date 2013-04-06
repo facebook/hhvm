@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot instantiate trait foo in hphp/test/zend/good/zend-traits/bug60173.php on line 6

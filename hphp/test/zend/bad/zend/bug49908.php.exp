@@ -1,8 +1,11 @@
-%unicode|string%(3) "Foo"
-%unicode|string%(3) "Bar"
-HipHop Fatal error: Uncaught exception 'Exception' with message 'Bar' in %s:%d
-Stack trace:
-#0 %s(7): __autoload('Bar')
-#1 %s(13): __autoload('Foo')
-#2 {main}
-  thrown in hphp/test/zend/bad/bug49908.php on line %d
+string\(3\)\ \"Foo\"\
+string\(3\)\ \"Bar\"\
+HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ with\ message\ \'Bar\'\ in\ [^
+]+\:\d+\
+Stack\ trace\:\
+\#0\ [^
+]+\(7\)\:\ \_\_autoload\(\'Bar\'\)\
+\#1\ [^
+]+\(13\)\:\ \_\_autoload\(\'Foo\'\)\
+\#2\ \{main\}\
+\ \ thrown\ in\ hphp\/test\/zend\/bad\/zend\/bug49908\.php\ on\ line\ \d+

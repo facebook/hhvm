@@ -452,7 +452,6 @@ bool IRInstruction::killsSource(int idx) const {
   if (!killsSources()) return false;
   switch (m_op) {
     case DecRef:
-    case DecRefKillThis:
     case ConvObjToArr:
     case ConvGenToArr:
       assert(idx == 0);
@@ -460,6 +459,8 @@ bool IRInstruction::killsSource(int idx) const {
     case ArraySet:
     case ArraySetRef:
       return idx == 1;
+    case DecRefKillThis:
+      return idx == 0;
     default:
       not_reached();
       break;

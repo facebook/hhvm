@@ -985,15 +985,23 @@ DecRefStack<T> S0:StkPtr S1:ConstInt
 
   DecRef a value of type T at offset S1 on the stack pointed to by S0.
 
-DecRefThis
-  DecRef the this pointer in the ActRec, checking to see if there is
-  one. If it needs to be destroyed, zero ActRec::m_this before calling
-  the destructor.
+DecRefThis S0:StkPtr
 
-DecRefKillThis S0:Gen
-  Identical to DecRef, except that in the case it needs to destroy its
-  argument, it first zeros ActRec::m_this. It is expected that the
-  argument will be the $this pointer.
+  DecRef the $this pointer in the ActRec S0, checking to see if there
+  is one.  If it needs to be destroyed, zero the this slot before
+  calling the destructor.
+
+  This is done to prevent backtraces from seeing stale this pointers.
+
+DecRefKillThis S0:Obj S1:StkPtr
+
+  Similar to DecRefThis, except for use when we have the $this pointer
+  in S0.  This instruction does the same thing as DecRef, except that
+  in the case it needs to destroy its argument, it first zeros the
+  this pointer on the frame S1.  It is expected that the argument will
+  be the $this pointer.
+
+  This is done to prevent backtraces from seeing stale $this pointers.
 
 DecRef S0:Gen
 

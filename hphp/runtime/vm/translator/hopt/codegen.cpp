@@ -2521,8 +2521,15 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
     ifThen(m_as, CC_Z, [&] {
       // In the case where the refCount hits zero, we need to store zero
       // back to m_this in case a local destructor does debug_backtrace.
-      cgDecRefStaticType(Type::Obj, scratchReg, exit, true,
-                         [=]{m_astubs.storeq(0, fpReg[AROFF(m_this)]);});
+      cgDecRefStaticType(
+        Type::Obj,
+        scratchReg,
+        exit,
+        true /* genZeroCheck */,
+        [&] (Asm& a) {
+          a.    storeq  (0, fpReg[AROFF(m_this)]);
+        }
+      );
     });
   };
 
@@ -2536,10 +2543,20 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDecRefKillThis(IRInstruction* inst) {
-  // DecRef may bring the count to zero, and run the destructor.
-  // Generate code for this.
+  auto const src = inst->getSrc(0);
+  auto const fpReg = inst->getSrc(1)->getReg();
+
   assert(!inst->getTaken());
-  cgDecRefWork(inst, true, true);
+
+  cgDecRefStaticType(
+    src->getType(),
+    src->getReg(),
+    nullptr,
+    true /* genZeroCheck */,
+    [&] (Asm& a) {
+      a.    storeq  (0, fpReg[AROFF(m_this)]);
+    }
+  );
 }
 
 void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
@@ -2807,7 +2824,8 @@ void CodeGenerator::cgDecRefStaticType(Type type,
                                        PhysReg dataReg,
                                        Block* exit,
                                        bool genZeroCheck,
-                                       std::function<void()> slowPathWork) {
+                                       std::function<void(Asm&)>
+                                         slowPathWork) {
   assert(type != Type::Cell && type != Type::Gen);
   assert(type.isKnownDataType());
 
@@ -2829,11 +2847,11 @@ void CodeGenerator::cgDecRefStaticType(Type type,
   if (genZeroCheck && exit == nullptr) {
     // Emit jump to m_astubs (to call release) if count got down to zero
     unlikelyIfBlock(CC_Z, [&] {
-        if (slowPathWork) slowPathWork();
-        // Emit the call to release in m_astubs
-        cgCallHelper(m_astubs, m_tx64->getDtorCall(type.toDataType()),
-                     InvalidReg, InvalidReg, kSyncPoint,
-                     ArgGroup().reg(dataReg));
+      if (slowPathWork) slowPathWork(m_astubs);
+      // Emit the call to release in m_astubs
+      cgCallHelper(m_astubs, m_tx64->getDtorCall(type.toDataType()),
+                   InvalidReg, InvalidReg, kSyncPoint,
+                   ArgGroup().reg(dataReg));
     });
   }
   if (patchStaticCheck) {
@@ -2968,19 +2986,13 @@ void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
               inst->getTaken());
 }
 
-void CodeGenerator::cgDecRefWork(IRInstruction* inst,
-                                 bool genZeroCheck, bool killThis) {
+void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
   SSATmp* src   = inst->getSrc(0);
   if (!isRefCounted(src)) return;
   Block* exit = inst->getTaken();
   Type type = src->getType();
   if (type.isKnownDataType()) {
-    if (killThis) {
-      cgDecRefStaticType(type, src->getReg(), exit, genZeroCheck,
-                         [=] { m_astubs.storeq(0, rVmFp[AROFF(m_this)]);});
-    } else {
-      cgDecRefStaticType(type, src->getReg(), exit, genZeroCheck);
-    }
+    cgDecRefStaticType(type, src->getReg(), exit, genZeroCheck);
   } else {
     cgDecRefDynamicType(src->getReg(1),
                         src->getReg(0),
@@ -2993,19 +3005,19 @@ void CodeGenerator::cgDecRef(IRInstruction *inst) {
   // DecRef may bring the count to zero, and run the destructor.
   // Generate code for this.
   assert(!inst->getTaken());
-  cgDecRefWork(inst, true, false);
+  cgDecRefWork(inst, true);
 }
 
 void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   // DecRefNZ cannot bring the count to zero.
   // Therefore, we don't generate zero-checking code.
   assert(!inst->getTaken());
-  cgDecRefWork(inst, false, false);
+  cgDecRefWork(inst, false);
 }
 
 void CodeGenerator::cgDecRefNZOrBranch(IRInstruction* inst) {
   assert(inst->getTaken());
-  cgDecRefWork(inst, true, false);
+  cgDecRefWork(inst, true);
 }
 
 void CodeGenerator::emitSpillActRec(SSATmp* sp,

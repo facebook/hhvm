@@ -322,7 +322,7 @@ O(IncRef,                      DofS(0), S(Gen),                    Mem|PRc|P) \
 O(DecRefLoc,                        ND, S(StkPtr),              N|E|Mem|Refs) \
 O(DecRefStack,                      ND, S(StkPtr) C(Int),       N|E|Mem|Refs) \
 O(DecRefThis,                       ND, SUnk,                   N|E|Mem|Refs) \
-O(DecRefKillThis,                   ND, S(Gen),           N|E|Mem|CRc|Refs|K) \
+O(DecRefKillThis,                   ND, S(Obj) S(StkPtr), N|E|Mem|CRc|Refs|K) \
 O(GenericRetDecRefs,         D(StkPtr), S(StkPtr)                             \
                                           S(Gen) C(Int),        E|N|Mem|Refs) \
 O(DecRef,                           ND, S(Gen),           N|E|Mem|CRc|Refs|K) \

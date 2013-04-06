@@ -165,7 +165,7 @@ private:
   void cgStRefWork(IRInstruction* inst, bool genStoreType);
   void cgStPropWork(IRInstruction* inst, bool genStoreType);
   void cgIncRefWork(Type type, SSATmp* src);
-  void cgDecRefWork(IRInstruction* inst, bool genZeroCheck, bool killThis);
+  void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
   template<class OpInstr, class Oper>
   void cgUnaryIntOp(SSATmp* dst, SSATmp* src, OpInstr, Oper);
@@ -239,8 +239,8 @@ private:
                           PhysReg dataReg,
                           Block* exit,
                           bool genZeroCheck,
-                          std::function<void()> slowPathWork =
-                          std::function<void()>());
+                          std::function<void(Asm&)> slowPathWork =
+                            std::function<void(Asm&)>());
   void cgDecRefDynamicType(PhysReg typeReg,
                            PhysReg dataReg,
                            Block* exit,

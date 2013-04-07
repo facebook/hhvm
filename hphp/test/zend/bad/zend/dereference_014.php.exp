@@ -1,4 +1,4 @@
-HipHop\ Notice\:\ Trying\ to\ get\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/zend\/dereference\_014\.php\ on\ line\ \d+\
+HipHop Notice: .+
 NULL\
-HipHop\ Notice\:\ Trying\ to\ get\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/zend\/dereference\_014\.php\ on\ line\ \d+\
+HipHop Notice: .+
 NULL

@@ -1,0 +1,1 @@
+HipHop Fatal error: Access level to B::$p() must be public (as in class A) or weaker in hphp/test/zend/good/tests-classes/property_override_publicStatic_privateStatic.php on line 11

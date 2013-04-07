@@ -1,8 +1,4 @@
-HipHop\ Warning\:\ Unsupported\ encoding\ \[\d+\]\ in\ [^
-]+declare\_002\.php\ on\ line\ 3\
-HipHop\ Warning\:\ Unsupported\ encoding\ \[[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?\]\ in\ [^
-]+declare\_002\.php\ on\ line\ 4\
-HipHop\ Warning\:\ Unsupported\ encoding\ \[\]\ in\ [^
-]+declare\_002\.php\ on\ line\ 5\
-HipHop\ Fatal\ error\:\ Cannot\ use\ constants\ as\ encoding\ in\ [^
-]+declare\_002\.php\ on\ line\ 7
+HipHop Warning: .+
+HipHop Warning: .+
+HipHop Warning: .+
+HipHop Fatal error: .+

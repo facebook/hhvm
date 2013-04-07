@@ -1,2 +1,1 @@
-HipHop\ Fatal\ error\:\ Method\ Test\:\:\_\_toString\(\)\ must\ not\ throw\ an\ exception\ in\ [^
-]+tostring\_003\.php\ on\ line\ \d+
+HipHop Fatal error: .+

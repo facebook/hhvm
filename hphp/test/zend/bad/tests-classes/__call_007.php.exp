@@ -1,4 +1,4 @@
-HipHop\ Warning\:\ The\ magic\ method\ \_\_call\(\)\ must\ have\ public\ visibility\ and\ cannot\ be\ static\ in\ hphp\/test\/zend\/bad\/tests\-classes\/\_\_call\_007\.php\ on\ line\ 3\
+HipHop Warning: .+
 \-\-\-\>\ Invoke\ \_\_call\ via\ simple\ method\ call\.\
 NULL\
 Exception\ caught\ OK\;\ continuing\.\

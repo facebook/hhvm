@@ -1,0 +1,2 @@
+HipHop Notice: Undefined variable: b in hphp/test/zend/good/zend/dynamic_call_004.php on line 3
+HipHop Fatal error: Cls: Expected string or object in hphp/test/zend/good/zend/dynamic_call_004.php on line 3

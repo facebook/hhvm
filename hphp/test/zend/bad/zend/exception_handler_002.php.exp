@@ -1,6 +1,5 @@
 string\(12\)\ \"test\ thrown\!\"\
-HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ in\ [^
-]+exception\_handler\_002\.php\:7\
+HipHop Fatal error: .+
 Stack\ trace\:\
 \#0\ \[internal\ function\]\:\ foo\(Object\(test\)\)\
 \#1\ \{main\}\

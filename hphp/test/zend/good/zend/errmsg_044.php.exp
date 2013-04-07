@@ -1,0 +1,1 @@
+HipHop Fatal error: Object does not implement ArrayAccess in hphp/test/zend/good/zend/errmsg_044.php on line 4

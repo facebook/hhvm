@@ -1,2 +1,2 @@
-HipHop\ Warning\:\ The\ magic\ method\ \_\_toString\(\)\ must\ have\ public\ visibility\ and\ cannot\ be\ static\ in\ hphp\/test\/zend\/bad\/zend\/magic\_methods\_010\.php\ on\ line\ \d+\
-HipHop\ Fatal\ error\:\ Method\ a\:\:\_\_tostring\(\)\ cannot\ take\ arguments\ in\ hphp\/test\/zend\/bad\/zend\/magic\_methods\_010\.php\ on\ line\ \d+
+HipHop Warning: .+
+HipHop Fatal error: .+

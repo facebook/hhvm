@@ -1,51 +1,26 @@
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ [^
-]+bug52041\.php\ on\ line\ 6\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ [^
-]+bug52041\.php\ on\ line\ 7\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ [^
-]+bug52041\.php\ on\ line\ 8\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ [^
-]+bug52041\.php\ on\ line\ 9\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ [^
-]+bug52041\.php\ on\ line\ 10\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ [^
-]+bug52041\.php\ on\ line\ 11\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Notice\:\ Undefined\ offset\:\ 0\ in\ [^
-]+bug52041\.php\ on\ line\ 15\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Notice\:\ Undefined\ offset\:\ 0\ in\ [^
-]+bug52041\.php\ on\ line\ 16\
-HipHop\ Notice\:\ Undefined\ offset\:\ 0\ in\ [^
-]+bug52041\.php\ on\ line\ 16\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Notice\:\ Undefined\ offset\:\ 0\ in\ [^
-]+bug52041\.php\ on\ line\ 17\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
-HipHop\ Notice\:\ Undefined\ offset\:\ 0\ in\ [^
-]+bug52041\.php\ on\ line\ 18\
-HipHop\ Notice\:\ Undefined\ offset\:\ 0\ in\ [^
-]+bug52041\.php\ on\ line\ 18\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+bug52041\.php\ on\ line\ 3\
+HipHop Notice: .+
+HipHop Warning: .+
+HipHop Notice: .+
+HipHop Warning: .+
+HipHop Notice: .+
+HipHop Warning: .+
+HipHop Notice: .+
+HipHop Warning: .+
+HipHop Notice: .+
+HipHop Warning: .+
+HipHop Notice: .+
+HipHop Warning: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
 NULL

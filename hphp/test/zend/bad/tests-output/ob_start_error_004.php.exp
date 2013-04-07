@@ -1,4 +1,4 @@
-HipHop\ Warning\:\ ob\_start\(\)\:\ class\ \'C\'\ does\ not\ have\ a\ method\ \'f\'\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_004\.php\ on\ line\ \d+\
-HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_004\.php\ on\ line\ 11\
+HipHop Warning: .+
+HipHop Notice: .+
 bool\(false\)\
 done

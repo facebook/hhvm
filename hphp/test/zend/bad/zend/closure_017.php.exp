@@ -1,1 +1,1 @@
-HipHop\ Fatal\ error\:\ Cannot\ destroy\ active\ lambda\ function\ in\ hphp\/test\/zend\/bad\/zend\/closure\_017\.php\ on\ line\ \d+
+HipHop Fatal error: .+

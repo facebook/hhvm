@@ -1,1 +1,1 @@
-HipHop\ Warning\:\ The\ magic\ method\ \_\_call\(\)\ must\ have\ public\ visibility\ and\ cannot\ be\ static\ in\ hphp\/test\/zend\/bad\/zend\/magic\_methods\_005\.php\ on\ line\ \d+
+HipHop Warning: .+

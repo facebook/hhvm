@@ -1,5 +1,4 @@
-HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ with\ message\ \'First\'\ in\ [^
-]+exception\_008\.php\:\d+\
+HipHop Fatal error: .+
 Stack\ trace\:\
 \#0\ [^
 ]+exception\_008\.php\(\d+\)\:\ TestFirst\-\>\_\_destruct\(\)\

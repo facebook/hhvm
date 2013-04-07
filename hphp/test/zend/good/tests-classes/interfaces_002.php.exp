@@ -1,0 +1,1 @@
+HipHop Fatal error: Class Exception_foo contains abstract method (getErrno) and must therefore be declared abstract or implement the remaining methods in hphp/test/zend/good/tests-classes/interfaces_002.php on line 8

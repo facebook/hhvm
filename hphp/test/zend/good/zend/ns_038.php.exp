@@ -1,0 +1,2 @@
+ok
+HipHop Fatal error: Call to undefined method Exception::bar from anonymous context in hphp/test/zend/good/zend/ns_038.php on line 7

@@ -3,5 +3,4 @@ Strict\ Standards\:\ Declaration\ of\ Bar4\:\:setSelf\(\)\ should\ be\ compatibl
 \
 Strict\ Standards\:\ Declaration\ of\ Bar5\:\:setSelf\(\)\ should\ be\ compatible\ with\ Foo5\:\:setSelf\(Base\ \$s\)\ in\ [^
 ]+bug60573\.php\ on\ line\ \d+\
-HipHop\ Fatal\ error\:\ Declaration\ of\ Bar6\:\:setSelf\(\)\ must\ be\ compatible\ with\ Foo6\:\:setSelf\(Base\ \$s\)\ in\ [^
-]+bug60573\.php\ on\ line\ \d+
+HipHop Fatal error: .+

@@ -1,1 +1,1 @@
-HipHop\ Notice\:\ Constant\ foo\\foo\ already\ defined\ in\ hphp\/test\/zend\/bad\/zend\/constants\_004\.php\ on\ line\ \d+
+HipHop Notice: .+

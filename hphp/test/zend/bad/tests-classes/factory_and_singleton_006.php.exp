@@ -1,2 +1,1 @@
-HipHop\ Fatal\ error\:\ Call\ to\ private\ test\:\:\_\_destruct\(\)\ from\ context\ \'\'\ in\ [^
-]+factory\_and\_singleton\_006\.php\ on\ line\ \d+
+HipHop Fatal error: .+

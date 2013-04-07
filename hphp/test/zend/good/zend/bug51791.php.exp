@@ -1,0 +1,2 @@
+HipHop Warning: Couldn't find constant A::B1 in hphp/test/zend/good/zend/bug51791.php on line 6
+NULL

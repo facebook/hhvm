@@ -12,7 +12,7 @@ bool\(false\)\
 bool\(true\)\
 bool\(false\)\
 \
-HipHop\ Warning\:\ Cannot\ bind\ an\ instance\ to\ a\ static\ closure\ in\ hphp\/test\/zend\/bad\/zend\/closure\_046\.php\ on\ line\ \d+\
+HipHop Warning: .+
 After\ binding\,\ with\ same\-class\ instance\ for\ the\ bound\ one\
 bool\(false\)\
 bool\(true\)\

@@ -1,2 +1,1 @@
-HipHop\ Fatal\ error\:\ Undefined\ constant\ \'unknown\'\ in\ [^
-]+ns\_077\_\d+\.php\ on\ line\ \d+
+HipHop Fatal error: .+

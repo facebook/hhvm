@@ -1,0 +1,1 @@
+HipHop Fatal error: Call to private method X::__construct from context Y in hphp/test/zend/good/zend/bug44141.php on line 15

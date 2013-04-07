@@ -1,0 +1,1 @@
+HipHop Fatal error: trait declaration of property 'same' is incompatible with previous declaration in hphp/test/zend/good/zend-traits/bug60369.php on line 7

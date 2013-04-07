@@ -8,5 +8,4 @@ const\ ok\
 const\ ok\
 class\ ok\
 ok\
-HipHop\ Fatal\ error\:\ Undefined\ constant\ \'Test\\ns1\\unknown\'\ in\ [^
-]+ns\_057\.php\ on\ line\ \d+
+HipHop Fatal error: .+

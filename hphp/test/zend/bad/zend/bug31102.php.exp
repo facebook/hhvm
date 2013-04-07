@@ -1,7 +1,0 @@
-\_\_autoload\(Test1\,1\)\
-Caught\:\ Test1\:\:\_\_construct\
-\_\_autoload\(Test2\,2\)\
-Caught\:\ \_\_autoload\
-\_\_autoload\(Test3\,3\)\
-HipHop\ Fatal\ error\:\ Class\ \'Test3\'\ not\ found\ in\ [^
-]+bug31102\.php\(\d+\)\ \:\ eval\(\)\'d\ code\ on\ line\ 1

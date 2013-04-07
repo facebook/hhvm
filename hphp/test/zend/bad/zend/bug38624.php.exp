@@ -1,5 +1,4 @@
-HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ with\ message\ \'doesn\'t\ work\'\ in\ [^
-]+\:\d+\
+HipHop Fatal error: .+
 Stack\ trace\:\
 \#0\ [^
 ]+\(\d+\)\:\ impl\-\>\_\_get\(\'counter\'\)\

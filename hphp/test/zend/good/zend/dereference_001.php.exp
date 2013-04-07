@@ -1,0 +1,6 @@
+int(5)
+HipHop Notice: Undefined index: 0 in hphp/test/zend/good/zend/dereference_001.php on line 12
+NULL
+int(1)
+string(1) "b"
+string(3) "bar"

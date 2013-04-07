@@ -1,26 +1,20 @@
-HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ \-1\ in\ [^
-]+str\_offset\_001\.php\ on\ line\ \d+\
+HipHop Notice: .+
 string\(0\)\ \"\"\
 string\(1\)\ \"a\"\
 string\(1\)\ \"b\"\
 string\(1\)\ \"c\"\
-HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ 3\ in\ [^
-]+str\_offset\_001\.php\ on\ line\ \d+\
+HipHop Notice: .+
 string\(0\)\ \"\"\
 string\(1\)\ \"b\"\
-HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ 1\ in\ [^
-]+str\_offset\_001\.php\ on\ line\ \d+\
+HipHop Notice: .+
 string\(0\)\ \"\"\
-HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ \-1\ in\ [^
-]+str\_offset\_001\.php\ on\ line\ \d+\
+HipHop Notice: .+
 string\(0\)\ \"\"\
 string\(1\)\ \"a\"\
 string\(1\)\ \"b\"\
 string\(1\)\ \"c\"\
-HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ 3\ in\ [^
-]+str\_offset\_001\.php\ on\ line\ \d+\
+HipHop Notice: .+
 string\(0\)\ \"\"\
 string\(1\)\ \"b\"\
-HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ 1\ in\ [^
-]+str\_offset\_001\.php\ on\ line\ \d+\
+HipHop Notice: .+
 string\(0\)\ \"\"

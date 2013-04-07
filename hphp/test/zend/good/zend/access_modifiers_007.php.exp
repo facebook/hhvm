@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot declare abstract method test::foo() final in hphp/test/zend/good/zend/access_modifiers_007.php on line 4

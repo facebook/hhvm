@@ -1,2 +1,1 @@
-HipHop\ Fatal\ error\:\ print\_r\(\)\:\ Cannot\ use\ output\ buffering\ in\ output\ buffering\ display\ handlers\ in\ [^
-]+ob\_010\.php\ on\ line\ \d+
+HipHop Fatal error: .+

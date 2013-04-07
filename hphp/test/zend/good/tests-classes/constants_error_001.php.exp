@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot redeclare myclass::myConst in hphp/test/zend/good/tests-classes/constants_error_001.php on line 5

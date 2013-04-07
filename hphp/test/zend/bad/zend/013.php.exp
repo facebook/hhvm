@@ -1,8 +1,8 @@
-HipHop\ Warning\:\ interface\_exists\(\)\ expects\ at\ least\ 1\ parameter\,\ 0\ given\ in\ hphp\/test\/zend\/bad\/zend\/013\.php\ on\ line\ \d+\
+HipHop Warning: .+
 NULL\
 bool\(false\)\
 bool\(false\)\
-HipHop\ Warning\:\ interface\_exists\(\)\ expects\ parameter\ 1\ to\ be\ string\,\ array\ given\ in\ hphp\/test\/zend\/bad\/zend\/013\.php\ on\ line\ \d+\
+HipHop Warning: .+
 NULL\
 bool\(false\)\
 bool\(true\)\

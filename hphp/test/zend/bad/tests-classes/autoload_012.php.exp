@@ -1,2 +1,0 @@
-In\ autoload\:\ string\(6\)\ \"UndefC\"\
-HipHop\ Warning\:\ call\_user\_func\(\)\ expects\ parameter\ 1\ to\ be\ a\ valid\ callback\,\ class\ \'UndefC\'\ not\ found\ in\ hphp\/test\/zend\/bad\/tests\-classes\/autoload\_012\.php\ on\ line\ \d+

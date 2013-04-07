@@ -1,6 +1,0 @@
-\*\*\*\ Testing\ ob\_clean\(\)\ \:\ error\ conditions\ \*\*\*\
-\
-\-\-\ Testing\ ob\_clean\(\)\ function\ with\ one\ argument\ \-\-\
-HipHop\ Warning\:\ Missing\ argument\ 0\ for\ ob\_clean\(\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_clean\_error\_001\.php\ on\ line\ 13\
-NULL\
-Done

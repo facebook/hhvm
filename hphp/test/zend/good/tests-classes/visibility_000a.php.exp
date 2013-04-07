@@ -1,0 +1,1 @@
+HipHop Fatal error: Access level to fail::f0() must be public (as in class same) or weaker in hphp/test/zend/good/tests-classes/visibility_000a.php on line 21

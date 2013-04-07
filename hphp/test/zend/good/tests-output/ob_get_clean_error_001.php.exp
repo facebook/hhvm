@@ -1,0 +1,4 @@
+
+Too many arguments
+HipHop Warning: Too many arguments for ob_get_clean(), expected 0 in hphp/test/zend/good/tests-output/ob_get_clean_error_001.php on line 10
+NULL

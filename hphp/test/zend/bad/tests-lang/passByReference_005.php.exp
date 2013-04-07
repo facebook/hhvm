@@ -1,20 +1,20 @@
 \-\-\-\-\ Pass\ by\ ref\ \/\ pass\ by\ val\:\ functions\ \-\-\-\-\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 72\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 74\
+HipHop Notice: .+
+HipHop Notice: .+
 NULL\
 string\(11\)\ \"Ref\ changed\"\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 77\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 77\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 78\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 78\
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
 NULL\
 NULL\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 81\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 82\
+HipHop Notice: .+
+HipHop Notice: .+
 NULL\
 string\(11\)\ \"Ref\ changed\"\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 85\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 86\
+HipHop Notice: .+
+HipHop Notice: .+
 string\(11\)\ \"Ref\ changed\"\
 NULL\
 string\(12\)\ \"Ref1\ changed\"\
@@ -22,32 +22,32 @@ string\(12\)\ \"Ref2\ changed\"\
 \
 \
 \ \-\-\-\-\ Pass\ by\ ref\ \/\ pass\ by\ val\:\ static\ method\ calls\ \-\-\-\-\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 95\
+HipHop Notice: .+
 \
 Strict\ Standards\:\ Non\-static\ method\ C\:\:v\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 95\
 \
 Strict\ Standards\:\ Non\-static\ method\ C\:\:r\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 96\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 97\
+HipHop Notice: .+
 NULL\
 string\(11\)\ \"Ref\ changed\"\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 100\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 100\
+HipHop Notice: .+
+HipHop Notice: .+
 \
 Strict\ Standards\:\ Non\-static\ method\ C\:\:vv\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 100\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 101\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 101\
+HipHop Notice: .+
+HipHop Notice: .+
 NULL\
 NULL\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 104\
+HipHop Notice: .+
 \
 Strict\ Standards\:\ Non\-static\ method\ C\:\:vr\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 104\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 105\
+HipHop Notice: .+
 NULL\
 string\(11\)\ \"Ref\ changed\"\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 108\
+HipHop Notice: .+
 \
 Strict\ Standards\:\ Non\-static\ method\ C\:\:rv\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 108\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 109\
+HipHop Notice: .+
 string\(11\)\ \"Ref\ changed\"\
 NULL\
 \
@@ -57,26 +57,26 @@ string\(12\)\ \"Ref2\ changed\"\
 \
 \
 \ \-\-\-\-\ Pass\ by\ ref\ \/\ pass\ by\ val\:\ instance\ method\ calls\ \-\-\-\-\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 117\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 118\
+HipHop Notice: .+
+HipHop Notice: .+
 NULL\
 string\(11\)\ \"Ref\ changed\"\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 121\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 123\
+HipHop Notice: .+
+HipHop Notice: .+
 NULL\
 string\(11\)\ \"Ref\ changed\"\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 126\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 126\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 127\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 127\
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
 NULL\
 NULL\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 130\
-HipHop\ Notice\:\ Undefined\ variable\:\ u1\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 131\
+HipHop Notice: .+
+HipHop Notice: .+
 NULL\
 string\(11\)\ \"Ref\ changed\"\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 134\
-HipHop\ Notice\:\ Undefined\ variable\:\ u2\ in\ hphp\/test\/zend\/bad\/tests\-lang\/passByReference\_005\.php\ on\ line\ 135\
+HipHop Notice: .+
+HipHop Notice: .+
 string\(11\)\ \"Ref\ changed\"\
 NULL\
 string\(12\)\ \"Ref1\ changed\"\

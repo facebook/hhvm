@@ -3,5 +3,4 @@ C1\:\:test\
 B2\:\:doTest\
 C2\:\:test\
 B4\:\:doTest\
-HipHop\ Fatal\ error\:\ Call\ to\ protected\ C4\:\:\_\_construct\(\)\ from\ context\ \'B4\'\ in\ [^
-]+bug37632\.php\ on\ line\ \d+
+HipHop Fatal error: .+

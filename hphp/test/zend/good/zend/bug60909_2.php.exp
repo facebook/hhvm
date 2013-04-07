@@ -1,0 +1,5 @@
+HipHop Fatal error: Uncaught exception 'Exception' with message 'Oops, I cannot do this' in hphp/test/zend/good/zend/bug60909_2.php:7\nStack trace:\n#0 hphp/test/zend/good/zend/bug60909_2.php(12): Bad->__toString()\n#1 {main}
+
+
+!!!shutdown!!!
+

@@ -3,13 +3,10 @@ string\(6\)\ \"FooBar\"\
 string\(9\)\ \"FooBarBaz\"\
 \=\=\=ArrayOverloading\=\=\=\
 string\(3\)\ \"Foo\"\
-HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ Peoples\ has\ no\ effect\ in\ [^
-]+array\_access\_008\.php\ on\ line\ 40\
+HipHop Notice: .+
 string\(3\)\ \"Foo\"\
-HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ Peoples\ has\ no\ effect\ in\ [^
-]+array\_access\_008\.php\ on\ line\ 42\
+HipHop Notice: .+
 string\(3\)\ \"Foo\"\
-HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ Peoples\ has\ no\ effect\ in\ [^
-]+array\_access\_008\.php\ on\ line\ 44\
+HipHop Notice: .+
 string\(3\)\ \"Foo\"\
 \=\=\=DONE\=\=\=

@@ -1,0 +1,1 @@
+HipHop Fatal error: Exceptions must be valid objects derived from the Exception base class in hphp/test/zend/good/zend/bug33318.php on line 2

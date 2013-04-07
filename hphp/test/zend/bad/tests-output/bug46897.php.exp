@@ -1,8 +1,8 @@
 \[callback\:1\]Attempt\ to\ flush\ unerasable\ buffer\ \-\ should\ fail\.\.\.\
-HipHop\ Notice\:\ ob\_flush\(\)\:\ failed\ to\ flush\ buffer\ of\ callback\ \(0\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/bug46897\.php\ on\ line\ \d+\
+HipHop Notice: .+
 bool\(false\)\
 string\(\d+\)\ \"Attempt\ to\ flush\ unerasable\ buffer\ \-\ should\ fail\.\.\.\
-HipHop\ Notice\:\ ob\_flush\(\)\:\ failed\ to\ flush\ buffer\ of\ callback\ \(0\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/bug46897\.php\ on\ line\ \d+\
+HipHop Notice: .+
 bool\(false\)\
 \"\
 Done

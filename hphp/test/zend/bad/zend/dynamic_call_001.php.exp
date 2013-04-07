@@ -1,1 +1,1 @@
-HipHop\ Fatal\ error\:\ Non\-static\ method\ foo\:\:foo\(\)\ cannot\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/zend\/dynamic\_call\_001\.php\ on\ line\ \d+
+HipHop Fatal error: .+

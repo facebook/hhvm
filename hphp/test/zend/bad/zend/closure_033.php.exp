@@ -1,3 +1,2 @@
 Test\:\:\{closure\}\(\)\
-HipHop\ Fatal\ error\:\ Call\ to\ private\ method\ Test\:\:func\(\)\ from\ context\ \'\'\ in\ [^
-]+closure\_033\.php\ on\ line\ \d+
+HipHop Fatal error: .+

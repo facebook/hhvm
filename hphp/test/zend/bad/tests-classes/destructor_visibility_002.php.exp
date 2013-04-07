@@ -1,2 +1,2 @@
 \=\=\=DONE\=\=\=\
-HipHop\ Warning\:\ Call\ to\ private\ Derived\:\:\_\_destruct\(\)\ from\ context\ \'\'\ during\ shutdown\ ignored\ in\ Unknown\ on\ line\ \d+
+HipHop Warning: .+

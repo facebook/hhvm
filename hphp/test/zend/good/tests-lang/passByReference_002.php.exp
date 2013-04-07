@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot pass parameter 1 by reference in hphp/test/zend/good/tests-lang/passByReference_002.php on line 8

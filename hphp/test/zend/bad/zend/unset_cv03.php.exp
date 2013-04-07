@@ -1,3 +1,2 @@
 ok\
-HipHop\ Notice\:\ Undefined\ variable\:\ x\ in\ [^
-]+unset\_cv03\.php\ on\ line\ \d+
+HipHop Notice: .+

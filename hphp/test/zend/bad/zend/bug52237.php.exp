@@ -1,3 +1,2 @@
-HipHop\ Warning\:\ Attempt\ to\ modify\ property\ of\ non\-object\ in\ [^
-]+bug52237\.php\ on\ line\ 3\
+HipHop Warning: .+
 string\(4\)\ \"test\"

@@ -1,0 +1,14 @@
+Unset and recreate a protected property from property's declaring class scope:
+object(D)#1 (1) {
+  ["p":protected]=>
+  string(7) "changed"
+}
+
+Unset and recreate a protected property from subclass:
+object(D)#2 (1) {
+  ["p":protected]=>
+  string(12) "changed in D"
+}
+
+Unset a protected property, and attempt to recreate it outside of scope (expected failure):
+HipHop Fatal error: Cannot access protected property in hphp/test/zend/good/tests-classes/property_recreate_protected.php on line 32

@@ -1,6 +1,6 @@
 From\ foo\:\:\_\_callStatic\:\
 string\(3\)\ \"abc\"\
-HipHop\ Notice\:\ Undefined\ variable\:\ this\ in\ hphp\/test\/zend\/bad\/zend\/indirect\_call\_array\_003\.php\ on\ line\ \d+\
+HipHop Notice: .+
 NULL\
 From\ foo\:\:\_\_call\:\
 string\(3\)\ \"abc\"\

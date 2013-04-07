@@ -1,0 +1,1 @@
+HipHop Fatal error: syntax error, unexpected T_IMPLEMENTS, expecting '{' in hphp/test/zend/good/zend-traits-bugs/interfaces.php on line 8

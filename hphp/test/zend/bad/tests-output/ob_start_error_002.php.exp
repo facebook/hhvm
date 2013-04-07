@@ -1,13 +1,13 @@
-HipHop\ Warning\:\ ob\_start\(\)\:\ class\ \'nonExistent\'\ not\ found\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_002\.php\ on\ line\ 13\
-HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_002\.php\ on\ line\ 13\
+HipHop Warning: .+
+HipHop Notice: .+
 bool\(false\)\
-HipHop\ Warning\:\ ob\_start\(\)\:\ class\ \'C\'\ does\ not\ have\ a\ method\ \'nonExistent\'\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_002\.php\ on\ line\ 14\
-HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_002\.php\ on\ line\ 14\
+HipHop Warning: .+
+HipHop Notice: .+
 bool\(false\)\
-HipHop\ Warning\:\ ob\_start\(\)\:\ class\ \'C\'\ does\ not\ have\ a\ method\ \'no\'\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_002\.php\ on\ line\ 15\
-HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_002\.php\ on\ line\ 15\
+HipHop Warning: .+
+HipHop Notice: .+
 bool\(false\)\
-HipHop\ Warning\:\ ob\_start\(\)\:\ function\ \'no\'\ not\ found\ or\ invalid\ function\ name\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_002\.php\ on\ line\ 16\
-HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_error\_002\.php\ on\ line\ 16\
+HipHop Warning: .+
+HipHop Notice: .+
 bool\(false\)\
 done

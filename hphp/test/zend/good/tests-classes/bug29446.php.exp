@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot redeclare testClass::TEST_CONST in hphp/test/zend/good/tests-classes/bug29446.php on line 5

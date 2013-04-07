@@ -1,14 +1,10 @@
-HipHop\ Notice\:\ Use\ of\ undefined\ constant\ unknown\ \-\ assumed\ \'unknown\'\ in\ [^
-]+ns\_076\.php\ on\ line\ \d+\
-HipHop\ Notice\:\ Use\ of\ undefined\ constant\ unknown\ \-\ assumed\ \'unknown\'\ in\ [^
-]+ns\_076\.php\ on\ line\ \d+\
-HipHop\ Notice\:\ Use\ of\ undefined\ constant\ unknown\ \-\ assumed\ \'unknown\'\ in\ [^
-]+ns\_076\.php\ on\ line\ \d+\
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
 unknown\
 array\(1\)\ \{\
 \ \ \[\"unknown\"\]\=\>\
 \ \ [^
 ]+\(7\)\ \"unknown\"\
 \}\
-HipHop\ Fatal\ error\:\ Undefined\ constant\ \'unknown\'\ in\ [^
-]+ns\_076\.php\ on\ line\ \d+
+HipHop Fatal error: .+

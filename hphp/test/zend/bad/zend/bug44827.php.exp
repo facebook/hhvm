@@ -1,4 +1,2 @@
-HipHop\ Warning\:\ Class\ constants\ cannot\ be\ defined\ or\ redefined\ in\ [^
-]+bug44827\.php\ on\ line\ \d+\
-HipHop\ Warning\:\ Class\ constants\ cannot\ be\ defined\ or\ redefined\ in\ [^
-]+bug44827\.php\ on\ line\ \d+
+HipHop Warning: .+
+HipHop Warning: .+

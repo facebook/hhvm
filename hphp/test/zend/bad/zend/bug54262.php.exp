@@ -1,6 +1,4 @@
 bool\(false\)\
-HipHop\ Warning\:\ Attempt\ to\ modify\ property\ of\ non\-object\ in\ [^
-]+bug54262\.php\ on\ line\ 4\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ [^
-]+bug54262\.php\ on\ line\ 5\
+HipHop Warning: .+
+HipHop Warning: .+
 ok

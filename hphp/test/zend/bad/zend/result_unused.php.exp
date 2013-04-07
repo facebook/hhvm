@@ -1,3 +1,2 @@
-HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ 3\ in\ [^
-]+result\_unused\.php\ on\ line\ \d+\
+HipHop Notice: .+
 ok

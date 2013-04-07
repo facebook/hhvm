@@ -1,5 +1,4 @@
-HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ with\ message\ \'Another\'\ in\ [^
-]+exception\_007\.php\:\d+\
+HipHop Fatal error: .+
 Stack\ trace\:\
 \#0\ \{main\}\
 \

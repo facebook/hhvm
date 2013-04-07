@@ -1,5 +1,4 @@
-HipHop\ Warning\:\ The\ magic\ method\ \_\_call\(\)\ must\ have\ public\ visibility\ and\ cannot\ be\ static\ in\ [^
-]+\_\_call\_005\.php\ on\ line\ 3\
+HipHop Warning: .+
 In\ A\:\:\_\_call\(test1\,\ array\(1\,a\)\)\
 object\(B\)\#1\ \(0\)\ \{\
 \}\

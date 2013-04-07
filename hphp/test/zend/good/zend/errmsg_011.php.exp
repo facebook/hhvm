@@ -1,0 +1,1 @@
+HipHop Fatal error: Redeclared method test::foo in hphp/test/zend/good/zend/errmsg_011.php on line 5

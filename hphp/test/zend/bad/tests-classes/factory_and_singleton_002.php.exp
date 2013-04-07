@@ -14,4 +14,4 @@ Destruct y
 int(1)
 int(1)
 Done
-HipHop Warning: Call to protected test::__destruct() from context '' during shutdown ignored in Unknown on line 0
+HipHop Warning: .+

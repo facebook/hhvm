@@ -1,5 +1,4 @@
-HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'ErrorException\'\ with\ message\ \'Undefined\ variable\:\ id\'\ in\ [^
-]+\:\d+\
+HipHop Fatal error: .+
 Stack\ trace\:\
 \#0\ [^
 ]+\(\d+\)\:\ env\:\:errorHandler\(8\,\ \'[^

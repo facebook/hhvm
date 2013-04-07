@@ -1,11 +1,11 @@
 Strict\ Standards\:\ Non\-static\ method\ Hello\:\:world\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/zend\/fr47160\.php\ on\ line\ \d+\
 Hello\,\ you\
-HipHop\ Notice\:\ Undefined\ variable\:\ this\ in\ hphp\/test\/zend\/bad\/zend\/fr47160\.php\ on\ line\ \d+\
+HipHop Notice: .+
 NULL\
 \
 Strict\ Standards\:\ call\_user\_func\(\)\ expects\ parameter\ 1\ to\ be\ a\ valid\ callback\,\ non\-static\ method\ Hello\:\:world\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/zend\/fr47160\.php\ on\ line\ \d+\
 Hello\,\ you\
-HipHop\ Notice\:\ Undefined\ variable\:\ this\ in\ hphp\/test\/zend\/bad\/zend\/fr47160\.php\ on\ line\ \d+\
+HipHop Notice: .+
 NULL\
 \-\-\-\-\-\
 Hello\,\ again\

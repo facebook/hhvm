@@ -3,5 +3,5 @@ bool\(false\)\
 bool\(true\)\
 bool\(false\)\
 bool\(false\)\
-HipHop\ Warning\:\ class\_exists\(\)\ expects\ parameter\ 1\ to\ be\ string\,\ object\ given\ in\ hphp\/test\/zend\/bad\/zend\/class\_exists\_002\.php\ on\ line\ \d+\
+HipHop Warning: .+
 NULL

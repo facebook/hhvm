@@ -5,7 +5,7 @@ int\(5\)\
 int\(100\)\
 \
 \-\-\-\>\ 2\.\ Trying\ to\ assign\ by\ reference\ the\ return\ value\ of\ a\ function\ that\ returns\ a\ constant\ by\ ref\:\
-HipHop\ Notice\:\ Only\ variable\ references\ should\ be\ returned\ by\ reference\ in\ hphp\/test\/zend\/bad\/tests\-lang\/returnByReference\.003\.php\ on\ line\ 7\
+HipHop Notice: .+
 int\(5\)\
 int\(100\)\
 \

@@ -1,6 +1,0 @@
-Derived\:\:\_\_construct\(\)\
-Test\:\:\_\_construct\(\)\
-TestPriv\:\:\_\_construct\(\)\
-DerivedPriv\:\:\_\_construct\(\)\
-HipHop\ Fatal\ error\:\ Cannot\ call\ private\ TestPriv\:\:\_\_construct\(\)\ in\ [^
-]+ctor\_visibility\.php\ on\ line\ \d+

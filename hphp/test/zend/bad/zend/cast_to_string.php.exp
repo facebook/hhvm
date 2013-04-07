@@ -4,11 +4,9 @@ string\(0\)\ \"\"\
 string\(1\)\ \"\000\"\
 string\(7\)\ \"9876545\"\
 string\(3\)\ \"0\.1\"\
-HipHop\ Notice\:\ Array\ to\ string\ conversion\ in\ [^
-]+\ line\ \d+\
+HipHop Notice: .+
 string\(5\)\ \"Array\"\
-HipHop\ Notice\:\ Array\ to\ string\ conversion\ in\ [^
-]+\ line\ \d+\
+HipHop Notice: .+
 string\(5\)\ \"Array\"\
 string\(0\)\ \"\"\
 string\(1\)\ \"1\"\

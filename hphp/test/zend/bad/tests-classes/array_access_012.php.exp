@@ -1,4 +1,2 @@
-HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ ArrayAccessImpl\ has\ no\ effect\ in\ [^
-]+array\_access\_012\.php\ on\ line\ 24\
-HipHop\ Fatal\ error\:\ Cannot\ assign\ by\ reference\ to\ overloaded\ object\ in\ [^
-]+array\_access\_012\.php\ on\ line\ 24
+HipHop Notice: .+
+HipHop Fatal error: .+

@@ -1,5 +1,4 @@
-HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'RuntimeException\'\ in\ [^
-]+bug45805\.php\:\d+\
+HipHop Fatal error: .+
 Stack\ trace\:\
 \#0\ [^
 ]+bug45805\.php\(\d+\)\:\ PHPUnit\_Util\_ErrorHandler\:\:handleError\(2048\,\ \'Only\ variables\ \.\.\.\'\,\ \'[^

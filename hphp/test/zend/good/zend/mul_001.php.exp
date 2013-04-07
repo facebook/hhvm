@@ -1,0 +1,1 @@
+HipHop Fatal error: Invalid operand type was used: cannot perform this operation with arrays. in hphp/test/zend/good/zend/mul_001.php on line 6

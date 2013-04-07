@@ -1,7 +1,0 @@
-Method\ \-\ Foo\\Foo\:\:\_\_construct\
-Func\ \ \ \-\ Foo\\Bar\
-Method\ \-\ Foo\\Foo\:\:\_\_construct\
-Method\ \-\ Foo\\Foo\:\:Bar\
-Func\ \ \ \-\ Foo\\Bar\
-HipHop\ Fatal\ error\:\ Call\ to\ undefined\ function\ Foo\\Foo\\Bar\(\)\ in\ [^
-]+ns\_026\.php\ on\ line\ \d+

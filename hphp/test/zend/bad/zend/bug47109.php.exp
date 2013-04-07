@@ -1,4 +1,2 @@
-HipHop\ Notice\:\ Undefined\ variable\:\ a\ in\ [^
-]+bug47109\.php\ on\ line\ 2\
-HipHop\ Notice\:\ Trying\ to\ get\ property\ of\ non\-object\ in\ [^
-]+bug47109\.php\ on\ line\ 2
+HipHop Notice: .+
+HipHop Notice: .+

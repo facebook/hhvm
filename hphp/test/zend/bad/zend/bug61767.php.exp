@@ -1,6 +1,5 @@
 Error\ handler\ called\ \(Undefined\ variable\:\ undefined\)\
-HipHop\ Warning\:\ Uncaught\ exception\ \'ErrorException\'\ with\ message\ \'Undefined\ variable\:\ undefined\'\ in\ [^
-]+bug61767\.php\:13\
+HipHop Warning: .+
 Stack\ trace\:\
 \#0\ [^
 ]+bug61767\.php\(13\)\:\ \{closure\}\(8\,\ \'Undefined\ varia\.\.\.\'\,\ \'[^
@@ -8,8 +7,7 @@ Stack\ trace\:\
 \#1\ \{main\}\
 \ \ thrown\ in\ [^
 ]+bug61767\.php\ on\ line\ 13\
-HipHop\ Fatal\ error\:\ Call\ to\ a\ member\ function\ foo\(\)\ on\ a\ non\-object\ in\ [^
-]+bug61767\.php\ on\ line\ 13\
+HipHop Fatal error: .+
 Shutting\ down\
 Array\
 \(\

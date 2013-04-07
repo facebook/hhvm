@@ -1,4 +1,2 @@
-HipHop\ Warning\:\ Illegal\ string\ offset\ \'x\'\ in\ [^
-]+offset\_assign\.php\ on\ line\ \d+\
-HipHop\ Fatal\ error\:\ Cannot\ use\ string\ offset\ as\ an\ array\ in\ [^
-]+offset\_assign\.php\ on\ line\ \d+
+HipHop Warning: .+
+HipHop Fatal error: .+

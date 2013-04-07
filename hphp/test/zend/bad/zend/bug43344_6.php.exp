@@ -1,2 +1,1 @@
-HipHop\ Fatal\ error\:\ Undefined\ constant\ \'Foo\\bar\'\ in\ [^
-]+bug43344\_6\.php\ on\ line\ \d+
+HipHop Fatal error: .+

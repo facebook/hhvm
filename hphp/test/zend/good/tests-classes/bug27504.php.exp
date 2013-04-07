@@ -1,0 +1,3 @@
+Called function foo:bar(1)
+HipHop Warning: Invalid argument: function: method 'bar' not found in hphp/test/zend/good/tests-classes/bug27504.php on line 13
+HipHop Fatal error: Call to private method foo::bar from anonymous context in hphp/test/zend/good/tests-classes/bug27504.php on line 15

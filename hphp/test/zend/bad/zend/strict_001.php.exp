@@ -1,3 +1,0 @@
-Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in hphp/test/zend/bad/strict_001.php on line %d
-int(%d)
-Done

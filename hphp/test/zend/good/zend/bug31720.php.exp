@@ -1,0 +1,3 @@
+HipHop Notice: Undefined variable: nonesuchvar in hphp/test/zend/good/zend/bug31720.php on line 4
+HipHop Warning: Invalid argument: function: not a valid callback array in hphp/test/zend/good/zend/bug31720.php on line 4
+===DONE===

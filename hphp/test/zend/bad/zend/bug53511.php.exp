@@ -1,5 +1,4 @@
-HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ with\ message\ \'ops\ 2\'\ in\ [^
-]+bug53511\.php\:11\
+HipHop Fatal error: .+
 Stack\ trace\:\
 \#0\ [^
 ]+bug53511\.php\(17\)\:\ test\(\)\

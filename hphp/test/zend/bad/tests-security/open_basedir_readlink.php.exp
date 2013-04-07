@@ -4,21 +4,18 @@ bool\(true\)\
 bool\(true\)\
 bool\(true\)\
 bool\(true\)\
-HipHop\ Warning\:\ readlink\(\)\:\ open\_basedir\ restriction\ in\ effect\.\ File\(symlink\.txt\)\ is\ not\ within\ the\ allowed\ path\(s\)\:\ \(\.\)\ in\ hphp\/test\/zend\/bad\/tests\-security\/open\_basedir\_readlink\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(false\)\
-HipHop\ Warning\:\ readlink\(\)\:\ open\_basedir\ restriction\ in\ effect\.\ File\(\.\.\/ok\/symlink\.txt\)\ is\ not\ within\ the\ allowed\ path\(s\)\:\ \(\.\)\ in\ hphp\/test\/zend\/bad\/tests\-security\/open\_basedir\_readlink\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(false\)\
-HipHop\ Warning\:\ readlink\(\)\:\ open\_basedir\ restriction\ in\ effect\.\ File\(\.\.\/ok\/\.\/symlink\.txt\)\ is\ not\ within\ the\ allowed\ path\(s\)\:\ \(\.\)\ in\ hphp\/test\/zend\/bad\/tests\-security\/open\_basedir\_readlink\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(false\)\
-HipHop\ Warning\:\ readlink\(\)\:\ open\_basedir\ restriction\ in\ effect\.\ File\(\.\/symlink\.txt\)\ is\ not\ within\ the\ allowed\ path\(s\)\:\ \(\.\)\ in\ hphp\/test\/zend\/bad\/tests\-security\/open\_basedir\_readlink\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(false\)\
-HipHop\ Warning\:\ readlink\(\)\:\ open\_basedir\ restriction\ in\ effect\.\ File\([^
-]+\/test\/ok\/symlink\.txt\)\ is\ not\ within\ the\ allowed\ path\(s\)\:\ \(\.\)\ in\ hphp\/test\/zend\/bad\/tests\-security\/open\_basedir\_readlink\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(false\)\
-HipHop\ Warning\:\ symlink\(\)\:\ open\_basedir\ restriction\ in\ effect\.\ File\([^
-]+\/test\/bad\/bad\.txt\)\ is\ not\ within\ the\ allowed\ path\(s\)\:\ \(\.\)\ in\ hphp\/test\/zend\/bad\/tests\-security\/open\_basedir\_readlink\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(false\)\
-HipHop\ Warning\:\ readlink\(\)\:\ open\_basedir\ restriction\ in\ effect\.\ File\([^
-]+\/test\/ok\/symlink\.txt\)\ is\ not\ within\ the\ allowed\ path\(s\)\:\ \(\.\)\ in\ hphp\/test\/zend\/bad\/tests\-security\/open\_basedir\_readlink\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(false\)\
 \*\*\*\ Finished\ testing\ open\_basedir\ configuration\ \[readlink\]\ \*\*\*

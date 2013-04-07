@@ -6,11 +6,11 @@ array\(1\)\ \{\
 \ \ \ \ int\(1\)\
 \ \ \}\
 \}\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 int\(0\)\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 int\(1\)\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(true\)\
 array\(1\)\ \{\
 \ \ \[\"foo\"\]\=\>\
@@ -26,10 +26,10 @@ array\(1\)\ \{\
 \ \ \ \ int\(1\)\
 \ \ \}\
 \}\
-HipHop\ Warning\:\ Illegal\ string\ offset\ \'foo\'\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
-HipHop\ Notice\:\ Array\ to\ string\ conversion\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
+HipHop Notice: .+
 string\(1\)\ \"A\"\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 float\(0\.1\)\
 array\(1\)\ \{\
 \ \ \[\"foo\"\]\=\>\
@@ -47,11 +47,11 @@ array\(1\)\ \{\
 \ \ \ \ int\(1\)\
 \ \ \}\
 \}\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 int\(0\)\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 int\(1\)\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(true\)\
 array\(1\)\ \{\
 \ \ \[\"foo\"\]\=\>\
@@ -67,7 +67,7 @@ array\(1\)\ \{\
 \ \ \ \ int\(1\)\
 \ \ \}\
 \}\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 float\(0\.1\)\
 array\(1\)\ \{\
 \ \ \[\"foo\"\]\=\>\
@@ -84,11 +84,11 @@ array\(1\)\ \{\
 \ \ \ \ int\(1\)\
 \ \ \}\
 \}\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 int\(0\)\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 int\(1\)\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(true\)\
 array\(1\)\ \{\
 \ \ \[0\]\=\>\
@@ -104,7 +104,7 @@ array\(1\)\ \{\
 \ \ \ \ int\(1\)\
 \ \ \}\
 \}\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 float\(0\.1\)\
 array\(1\)\ \{\
 \ \ \[0\]\=\>\
@@ -122,11 +122,11 @@ array\(1\)\ \{\
 \ \ \ \ int\(1\)\
 \ \ \}\
 \}\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 int\(0\)\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 int\(1\)\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(true\)\
 array\(1\)\ \{\
 \ \ \[0\]\=\>\
@@ -142,7 +142,7 @@ array\(1\)\ \{\
 \ \ \ \ int\(1\)\
 \ \ \}\
 \}\
-HipHop\ Warning\:\ Cannot\ use\ a\ scalar\ value\ as\ an\ array\ in\ hphp\/test\/zend\/bad\/zend\/indexing\_001\.php\ on\ line\ \d+\
+HipHop Warning: .+
 float\(0\.1\)\
 array\(1\)\ \{\
 \ \ \[0\]\=\>\

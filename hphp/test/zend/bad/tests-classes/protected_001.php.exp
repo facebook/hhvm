@@ -1,2 +1,0 @@
-Call\ fail\(\)\
-HipHop\ Fatal\ error\:\ Call\ to\ protected\ method\ pass\:\:fail\(\)\ from\ context\ \'\'\ in\ hphp\/test\/zend\/bad\/tests\-classes\/protected\_001\.php\ on\ line\ \d+

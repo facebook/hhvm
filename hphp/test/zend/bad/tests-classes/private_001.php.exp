@@ -1,2 +1,0 @@
-Call\ show\(\)\
-HipHop\ Fatal\ error\:\ Call\ to\ private\ method\ pass\:\:show\(\)\ from\ context\ \'\'\ in\ hphp\/test\/zend\/bad\/tests\-classes\/private\_001\.php\ on\ line\ \d+

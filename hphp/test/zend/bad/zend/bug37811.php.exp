@@ -1,7 +1,5 @@
 string\(3\)\ \"Foo\"\
-HipHop\ Warning\:\ Constants\ may\ only\ evaluate\ to\ scalar\ values\ in\ [^
-]+bug37811\.php\ on\ line\ \d+\
-HipHop\ Notice\:\ Use\ of\ undefined\ constant\ Baz\ \-\ assumed\ \'Baz\'\ in\ [^
-]+bug37811\.php\ on\ line\ \d+\
+HipHop Warning: .+
+HipHop Notice: .+
 string\(3\)\ \"Baz\"\
 \=\=\=DONE\=\=\=

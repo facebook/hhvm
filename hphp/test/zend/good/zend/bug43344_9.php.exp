@@ -1,0 +1,1 @@
+HipHop Fatal error: Undefined function: \\Foo\\f in hphp/test/zend/good/zend/bug43344_9.php on line 7

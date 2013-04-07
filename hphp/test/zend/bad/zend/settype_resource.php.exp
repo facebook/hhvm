@@ -1,19 +1,19 @@
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 string\(6\)\ \"string\"\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 string\(7\)\ \"8754456\"\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 string\(0\)\ \"\"\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 string\(1\)\ \"\000\"\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 int\(9876545\)\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 float\(0\.1\)\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 array\(0\)\ \{\
 \}\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 array\(3\)\ \{\
 \ \ \[0\]\=\>\
 \ \ int\(1\)\
@@ -22,15 +22,15 @@ array\(3\)\ \{\
 \ \ \[2\]\=\>\
 \ \ int\(3\)\
 \}\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(false\)\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 bool\(true\)\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 NULL\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 resource\(\d+\)\ of\ type\ \(stream\)\
-HipHop\ Warning\:\ settype\(\)\:\ Cannot\ convert\ to\ resource\ type\ in\ hphp\/test\/zend\/bad\/zend\/settype\_resource\.php\ on\ line\ \d+\
+HipHop Warning: .+
 object\(test\)\#\d+\ \(0\)\ \{\
 \}\
 Done

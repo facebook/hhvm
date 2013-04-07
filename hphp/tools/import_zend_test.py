@@ -49,6 +49,9 @@ bad_tests = (
     # works in interp but not others
     'bug25922.php',
     'bug34064.php',
+
+    # line number is inconsistent on stack overflow
+    'bug41633_3.php',
 )
 
 errors = (
@@ -147,17 +150,23 @@ def walk(filename, source):
             exp = exp.replace('\n\nWarning:', '\nWarning:')
             exp = exp.replace('\n\nNotice:', '\nNotice:')
 
-            exp = exp.replace('Fatal error:', 'HipHop Fatal error:')
-            exp = exp.replace('Warning:', 'HipHop Warning:')
-            exp = exp.replace('Notice:', 'HipHop Notice:')
-
             for error in errors:
                 exp = re.sub(error[0], error[1], exp)
 
             sections[key] = exp
-    
+
+    def kill_error_messages(exp):
+        exp = re.sub(r'Fatal\\? error\\?:.*', 'HipHop Fatal error: .+', exp)
+        exp = re.sub(r'Warning\\?:.*', 'HipHop Warning: .+', exp)
+        exp = re.sub(r'Notice\\?:.*', 'HipHop Notice: .+', exp)
+        return exp
+
     if sections.has_key('EXPECT'):
         exp = sections['EXPECT']
+        exp = kill_error_messages(exp)
+    elif sections.has_key('EXPECTREGEX'):
+        exp = sections['EXPECTREGEX']
+        exp = kill_error_messages(exp)
     elif sections.has_key('EXPECTF'):
         wanted_re = sections['EXPECTF']
 
@@ -186,6 +195,7 @@ def walk(filename, source):
 
         ## different from php, since python escapes %
         wanted_re = wanted_re.replace('\\%', '%')
+        wanted_re = kill_error_messages(wanted_re)
 
         wanted_re = wanted_re.replace('%binary_string_optional%', 'string')
         wanted_re = wanted_re.replace('%unicode_string_optional%', 'string')
@@ -207,9 +217,6 @@ def walk(filename, source):
         wanted_re = wanted_re.replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?')
         wanted_re = wanted_re.replace('%c', '.')
         exp = wanted_re
-
-    elif sections.has_key('EXPECTREGEX'):
-        exp = sections['EXPECTREGEX']
     else:
         print "Malformed test, no --EXPECT-- or --EXPECTF-- or --EXPECTREGEX--: ", filename
         return

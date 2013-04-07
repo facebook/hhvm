@@ -1,2 +1,1 @@
-HipHop\ Warning\:\ The\ use\ statement\ with\ non\-compound\ name\ \'A\'\ has\ no\ effect\ in\ [^
-]+ns\_033\.php\ on\ line\ 2
+HipHop Warning: .+

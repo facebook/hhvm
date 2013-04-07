@@ -1,0 +1,1 @@
+HipHop Fatal error: method 'M1' declared in multiple traits in hphp/test/zend/good/zend-traits-bugs/case-sensitive.php on line 14

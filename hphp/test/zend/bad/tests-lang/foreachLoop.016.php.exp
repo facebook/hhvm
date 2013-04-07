@@ -29,14 +29,14 @@ array\(1\)\ \{\
 \}\
 \
 \$a\-\>b\
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-lang\/foreachLoop\.016\.php\ on\ line\ \d+\
+HipHop Warning: .+
 array\(1\)\ \{\
 \ \ \[0\]\=\>\
 \ \ string\(8\)\ \"original\"\
 \}\
 \
 \$a\-\>b\-\>c\
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-lang\/foreachLoop\.016\.php\ on\ line\ \d+\
+HipHop Warning: .+
 array\(1\)\ \{\
 \ \ \[0\]\=\>\
 \ \ string\(8\)\ \"original\"\
@@ -55,7 +55,7 @@ array\(1\)\ \{\
 \}\
 \
 \$a\-\>b\[0\]\-\>c\
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-lang\/foreachLoop\.016\.php\ on\ line\ \d+\
+HipHop Warning: .+
 array\(1\)\ \{\
 \ \ \[0\]\=\>\
 \ \ string\(8\)\ \"original\"\
@@ -74,7 +74,7 @@ array\(1\)\ \{\
 \}\
 \
 C\:\:\$a\[0\]\-\>b\
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-lang\/foreachLoop\.016\.php\ on\ line\ \d+\
+HipHop Warning: .+
 array\(1\)\ \{\
 \ \ \[0\]\=\>\
 \ \ string\(8\)\ \"original\"\

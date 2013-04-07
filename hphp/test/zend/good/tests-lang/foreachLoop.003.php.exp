@@ -1,0 +1,8 @@
+
+Not an array.
+HipHop Warning: Invalid argument supplied for foreach() in hphp/test/zend/good/tests-lang/foreachLoop.003.php on line 6
+HipHop Warning: Invalid argument supplied for foreach() in hphp/test/zend/good/tests-lang/foreachLoop.003.php on line 11
+HipHop Warning: Invalid argument supplied for foreach() in hphp/test/zend/good/tests-lang/foreachLoop.003.php on line 16
+HipHop Warning: Invalid argument supplied for foreach() in hphp/test/zend/good/tests-lang/foreachLoop.003.php on line 21
+HipHop Warning: Invalid argument supplied for foreach() in hphp/test/zend/good/tests-lang/foreachLoop.003.php on line 26
+done.

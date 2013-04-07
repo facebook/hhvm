@@ -1,7 +1,6 @@
 string\(3\)\ \"Foo\"\
 string\(3\)\ \"Bar\"\
-HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ with\ message\ \'Bar\'\ in\ [^
-]+\:\d+\
+HipHop Fatal error: .+
 Stack\ trace\:\
 \#0\ [^
 ]+\(7\)\:\ \_\_autoload\(\'Bar\'\)\

@@ -4,14 +4,14 @@
 \$i\[0\]\=f\(\)\:\ good\
 \$i\[0\]\[0\]\=f\(\)\:\ good\
 \$i\-\>p\=f\(\)\:\ \
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-lang\/engine\_assignExecutionOrder\_008\.php\ on\ line\ \d+\
+HipHop Warning: .+
 good\
 \$i\-\>p\-\>q\=f\(\)\:\ \
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-lang\/engine\_assignExecutionOrder\_008\.php\ on\ line\ \d+\
+HipHop Warning: .+
 good\
 \$i\-\>p\[0\]\=f\(\)\:\ good\
 \$i\-\>p\[0\]\-\>p\=f\(\)\:\ \
-HipHop\ Warning\:\ Creating\ default\ object\ from\ empty\ value\ in\ hphp\/test\/zend\/bad\/tests\-lang\/engine\_assignExecutionOrder\_008\.php\ on\ line\ \d+\
+HipHop Warning: .+
 good\
 C\:\:\$p\=f\(\)\:\ good\
 C\:\:\$p\[0\]\=f\(\)\:\ good\

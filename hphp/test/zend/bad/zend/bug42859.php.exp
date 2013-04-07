@@ -1,2 +1,1 @@
-HipHop\ Fatal\ error\:\ Cannot\ use\ Blah\\Ex\ as\ Ex\ because\ the\ name\ is\ already\ in\ use\ in\ [^
-]+bug42859\.php\ on\ line\ 6
+HipHop Fatal error: .+

@@ -6,4 +6,4 @@ NULL\
 NULL\
 NULL\
 \-\-\-\-\
-HipHop\ Fatal\ error\:\ Cannot\ use\ object\ of\ type\ stdClass\ as\ array\ in\ hphp\/test\/zend\/bad\/zend\/list\_005\.php\ on\ line\ \d+
+HipHop Fatal error: .+

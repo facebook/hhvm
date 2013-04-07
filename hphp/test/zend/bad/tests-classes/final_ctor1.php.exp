@@ -1,2 +1,1 @@
-HipHop\ Fatal\ error\:\ Cannot\ override\ final\ Base\:\:\_\_construct\(\)\ with\ Extended\:\:Extended\(\)\ in\ [^
-]+final\_ctor1\.php\ on\ line\ \d+
+HipHop Fatal error: .+

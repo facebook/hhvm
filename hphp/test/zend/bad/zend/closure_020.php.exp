@@ -14,4 +14,4 @@ object\(foo\)\#\d+\ \(2\)\ \{\
 \}\
 bool\(true\)\
 bool\(true\)\
-HipHop\ Fatal\ error\:\ Cannot\ access\ private\ property\ foo\:\:\$test\ in\ hphp\/test\/zend\/bad\/zend\/closure\_020\.php\ on\ line\ \d+
+HipHop Fatal error: .+

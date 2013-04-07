@@ -1,0 +1,6 @@
+*** Testing ob_clean() : error conditions ***
+
+-- Testing ob_clean() function with one argument --
+HipHop Warning: Too many arguments for ob_clean(), expected 0 in hphp/test/zend/good/tests-output/ob_clean_error_001.php on line 13
+NULL
+Done

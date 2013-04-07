@@ -1,5 +1,2 @@
-HipHop\ Warning\:\ include\(file\-which\-does\-not\-exist\-on\-purpose\.php\)\:\ failed\ to\ open\ stream\:\ No\ such\ file\ or\ directory\ in\ [^
-]+bug43958\.php\ on\ line\ 5\
-HipHop\ Warning\:\ include\(\)\:\ Failed\ opening\ \'file\-which\-does\-not\-exist\-on\-purpose\.php\'\ for\ inclusion\ \(include\_path\=\'[^
-]+\'\)\ in\ [^
-]+bug43958\.php\ on\ line\ 5
+HipHop Warning: .+
+HipHop Warning: .+

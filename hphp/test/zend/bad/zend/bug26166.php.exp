@@ -2,5 +2,4 @@ Hello\ World\!\
 \=\=\=NONE\=\=\=\
 string\(52\)\ \"Method\ None\:\:\_\_toString\(\)\ must\ return\ a\ string\ value\"\
 \=\=\=THROW\=\=\=\
-HipHop\ Fatal\ error\:\ Method\ Error\:\:\_\_toString\(\)\ must\ not\ throw\ an\ exception\ in\ [^
-]+bug26166\.php\ on\ line\ \d+
+HipHop Fatal error: .+

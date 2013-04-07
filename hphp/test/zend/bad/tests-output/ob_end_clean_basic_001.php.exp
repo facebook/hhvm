@@ -1,6 +1,6 @@
-HipHop\ Notice\:\ ob\_end\_clean\(\)\:\ failed\ to\ delete\ buffer\.\ No\ buffer\ to\ delete\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_end\_clean\_basic\_001\.php\ on\ line\ 7\
+HipHop Notice: .+
 bool\(false\)\
 bool\(true\)\
 bool\(true\)\
-HipHop\ Notice\:\ ob\_end\_clean\(\)\:\ failed\ to\ delete\ buffer\.\ No\ buffer\ to\ delete\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_end\_clean\_basic\_001\.php\ on\ line\ 16\
+HipHop Notice: .+
 bool\(false\)

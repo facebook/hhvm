@@ -1,0 +1,5 @@
+bool(true)
+bool(true)
+bool(true)
+HipHop Notice: Undefined index: 2 in hphp/test/zend/good/zend/028.php on line 10
+HipHop Fatal error: Function name must be a string in hphp/test/zend/good/zend/028.php on line 10

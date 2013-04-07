@@ -11,7 +11,7 @@ array\(2\)\ \{\
 \ \ string\(\d+\)\ \"[^
 ]+\"\
 \}\
-HipHop\ Warning\:\ Missing\ argument\ 0\ for\ get\_included\_files\(\)\ in\ hphp\/test\/zend\/bad\/zend\/014\.php\ on\ line\ \d+\
+HipHop Warning: .+
 NULL\
 array\(2\)\ \{\
 \ \ \[0\]\=\>\
@@ -21,7 +21,7 @@ array\(2\)\ \{\
 \ \ string\(\d+\)\ \"[^
 ]+\"\
 \}\
-HipHop\ Warning\:\ Missing\ argument\ 0\ for\ get\_included\_files\(\)\ in\ hphp\/test\/zend\/bad\/zend\/014\.php\ on\ line\ \d+\
+HipHop Warning: .+
 NULL\
 array\(2\)\ \{\
 \ \ \[0\]\=\>\

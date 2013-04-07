@@ -1,0 +1,6 @@
+*** Testing ob_flush() : error conditions ***
+
+-- Testing ob_flush() function with one argument --
+HipHop Warning: Too many arguments for ob_flush(), expected 0 in hphp/test/zend/good/tests-output/ob_flush_error_001.php on line 13
+NULL
+Done

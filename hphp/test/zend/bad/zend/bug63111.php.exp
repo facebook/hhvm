@@ -7,5 +7,4 @@ bool\(false\)\
 bool\(true\)\
 bool\(true\)\
 ok\
-HipHop\ Fatal\ error\:\ Cannot\ call\ abstract\ method\ Foo\:\:bar\(\)\ in\ [^
-]+bug63111\.php\ on\ line\ 20
+HipHop Fatal error: .+

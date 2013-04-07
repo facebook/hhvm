@@ -1,0 +1,5 @@
+Derived::__construct()
+Test::__construct()
+TestPriv::__construct()
+DerivedPriv::__construct()
+HipHop Fatal error: Call to private method TestPriv::__construct from context DerivedPriv in hphp/test/zend/good/tests-classes/ctor_visibility.php on line 47

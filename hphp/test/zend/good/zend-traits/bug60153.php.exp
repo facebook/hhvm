@@ -1,0 +1,1 @@
+HipHop Fatal error: Declaration of C::oneArgument() must be compatible with that of IFoo::oneArgument() in hphp/test/zend/good/zend-traits/bug60153.php on line 11

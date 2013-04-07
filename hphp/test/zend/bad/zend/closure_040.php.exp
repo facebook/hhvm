@@ -1,6 +1,6 @@
-HipHop\ Notice\:\ Array\ to\ string\ conversion\ in\ hphp\/test\/zend\/bad\/zend\/closure\_040\.php\ on\ line\ \d+\
-HipHop\ Warning\:\ Class\ \'Array\'\ not\ found\ in\ hphp\/test\/zend\/bad\/zend\/closure\_040\.php\ on\ line\ \d+\
-HipHop\ Warning\:\ Closure\:\:bindTo\(\)\ expects\ parameter\ 1\ to\ be\ object\,\ array\ given\ in\ hphp\/test\/zend\/bad\/zend\/closure\_040\.php\ on\ line\ 25\
-HipHop\ Warning\:\ Closure\:\:bindTo\(\)\ expects\ at\ most\ 2\ parameters\,\ 3\ given\ in\ hphp\/test\/zend\/bad\/zend\/closure\_040\.php\ on\ line\ \d+\
-HipHop\ Warning\:\ Closure\:\:bindTo\(\)\ expects\ at\ least\ 1\ parameter\,\ 0\ given\ in\ hphp\/test\/zend\/bad\/zend\/closure\_040\.php\ on\ line\ \d+\
-HipHop\ Warning\:\ Cannot\ bind\ an\ instance\ to\ a\ static\ closure\ in\ hphp\/test\/zend\/bad\/zend\/closure\_040\.php\ on\ line\ \d+
+HipHop Notice: .+
+HipHop Warning: .+
+HipHop Warning: .+
+HipHop Warning: .+
+HipHop Warning: .+
+HipHop Warning: .+

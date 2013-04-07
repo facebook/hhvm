@@ -1,7 +1,7 @@
-HipHop\ Notice\:\ Undefined\ variable\:\ undef\ in\ hphp\/test\/zend\/bad\/tests\-classes\/constants\_basic\_001\.php\ on\ line\ 5\
+HipHop Notice: .+
 \
 Attempt\ to\ access\ various\ kinds\ of\ class\ constants\:\
-HipHop\ Notice\:\ Use\ of\ undefined\ constant\ UNDEFINED\ \-\ assumed\ \'UNDEFINED\'\ in\ hphp\/test\/zend\/bad\/tests\-classes\/constants\_basic\_001\.php\ on\ line\ \d+\
+HipHop Notice: .+
 string\(9\)\ \"UNDEFINED\"\
 int\(1\)\
 float\(1\.5\)\
@@ -24,4 +24,4 @@ string\(6\)\ \"hello2\"\
 string\(6\)\ \"hello2\"\
 \
 Expecting\ fatal\ error\:\
-HipHop\ Fatal\ error\:\ Undefined\ class\ constant\ \'c19\'\ in\ hphp\/test\/zend\/bad\/tests\-classes\/constants\_basic\_001\.php\ on\ line\ 53
+HipHop Fatal error: .+

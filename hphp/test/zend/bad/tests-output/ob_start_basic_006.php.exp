@@ -1,30 +1,30 @@
 \-\-\-\>\ Test\ arrays\:\ \
-HipHop\ Warning\:\ ob\_start\(\)\:\ array\ must\ have\ exactly\ two\ members\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 44\
-HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 44\
+HipHop Warning: .+
+HipHop Notice: .+
 bool\(false\)\
 Array\
 \(\
 \)\
-HipHop\ Warning\:\ ob\_start\(\)\:\ class\ \'f\'\ not\ found\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 47\
-HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 47\
+HipHop Warning: .+
+HipHop Notice: .+
 bool\(false\)\
 Array\
 \(\
 \)\
-HipHop\ Warning\:\ ob\_start\(\)\:\ array\ must\ have\ exactly\ two\ members\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 50\
-HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 50\
+HipHop Warning: .+
+HipHop Notice: .+
 bool\(false\)\
 Array\
 \(\
 \)\
-HipHop\ Warning\:\ ob\_start\(\)\:\ array\ must\ have\ exactly\ two\ members\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 53\
-HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 53\
+HipHop Warning: .+
+HipHop Notice: .+
 bool\(false\)\
 Array\
 \(\
 \)\
-HipHop\ Warning\:\ ob\_start\(\)\:\ array\ must\ have\ exactly\ two\ members\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 56\
-HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 56\
+HipHop Warning: .+
+HipHop Notice: .+
 bool\(false\)\
 Array\
 \(\
@@ -41,8 +41,8 @@ Array\
 \ \ \ \ \[0\]\ \=\>\ C\:\:h\
 \)\
 \
-HipHop\ Warning\:\ ob\_start\(\)\:\ array\ must\ have\ exactly\ two\ members\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 68\
-HipHop\ Notice\:\ ob\_start\(\)\:\ failed\ to\ create\ buffer\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_006\.php\ on\ line\ 68\
+HipHop Warning: .+
+HipHop Notice: .+
 bool\(false\)\
 Array\
 \(\

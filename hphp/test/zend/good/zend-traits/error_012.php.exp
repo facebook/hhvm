@@ -1,0 +1,1 @@
+HipHop Fatal error: Call to protected method bar::test from anonymous context in hphp/test/zend/good/zend-traits/error_012.php on line 12

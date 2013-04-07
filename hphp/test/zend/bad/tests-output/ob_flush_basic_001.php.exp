@@ -1,7 +1,7 @@
 \*\*\*\ Testing\ ob\_flush\(\)\ \:\ basic\ functionality\ \*\*\*\
 \
 \-\-\ Testing\ ob\_flush\(\)\ function\ with\ Zero\ arguments\ \-\-\
-HipHop\ Notice\:\ ob\_flush\(\)\:\ failed\ to\ flush\ buffer\.\ No\ buffer\ to\ flush\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_flush\_basic\_001\.php\ on\ line\ 12\
+HipHop Notice: .+
 bool\(false\)\
 This\ should\ get\ flushed\.\
 bool\(true\)\

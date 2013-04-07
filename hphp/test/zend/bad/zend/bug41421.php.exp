@@ -1,6 +1,5 @@
-HipHop\ Warning\:\ feof\(\)\:\ wrapper\:\:stream\_eof\ is\ not\ implemented\!\ Assuming\ EOF\ in\ hphp\/test\/zend\/bad\/zend\/bug41421\.php\ on\ line\ \d+\
-HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ in\ [^
-]+\:\d+\
+HipHop Warning: .+
+HipHop Fatal error: .+
 Stack\ trace\:\
 \#0\ \[internal\ function\]\:\ wrapper\-\>stream\_eof\(\)\
 \#1\ [^

@@ -1,7 +1,7 @@
 \*\*\*\ Testing\ ob\_clean\(\)\ \:\ basic\ functionality\ \*\*\*\
 \
 \-\-\ Testing\ ob\_clean\(\)\ function\ with\ Zero\ arguments\ \-\-\
-HipHop\ Notice\:\ ob\_clean\(\)\:\ failed\ to\ delete\ buffer\.\ No\ buffer\ to\ delete\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_clean\_basic\_001\.php\ on\ line\ 12\
+HipHop Notice: .+
 bool\(false\)\
 string\(61\)\ \"bool\(true\)\
 Ensure\ the\ buffer\ is\ still\ active\ after\ the\ clean\.\"\

@@ -1,2 +1,1 @@
-HipHop\ Fatal\ error\:\ Call\ to\ protected\ test\:\:\_\_clone\(\)\ from\ context\ \'\'\ [^
-]+factory\_and\_singleton\_007\.php\ on\ line\ \d+
+HipHop Fatal error: .+

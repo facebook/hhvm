@@ -1,0 +1,2 @@
+World!
+HipHop Fatal error: Declaration of MyHelloWorld::sayHello() must be compatible with that of Base::sayHello() in hphp/test/zend/good/zend-traits/inheritance003.php on line 24

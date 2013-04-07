@@ -1,4 +1,4 @@
-HipHop\ Warning\:\ ob\_start\(\)\:\ non\-static\ method\ C\:\:h\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_005\.php\ on\ line\ 20\
+HipHop Warning: .+
 bool\(true\)\
 Array\
 \(\

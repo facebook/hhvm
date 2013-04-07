@@ -1,6 +1,0 @@
-\*\*\*\ Testing\ ob\_flush\(\)\ \:\ error\ conditions\ \*\*\*\
-\
-\-\-\ Testing\ ob\_flush\(\)\ function\ with\ one\ argument\ \-\-\
-HipHop\ Warning\:\ Missing\ argument\ 0\ for\ ob\_flush\(\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_flush\_error\_001\.php\ on\ line\ 13\
-NULL\
-Done

@@ -1,8 +1,8 @@
 object\(stdClass\)\#\d+\ \(0\)\ \{\
 \}\
 NULL\
-HipHop\ Notice\:\ Undefined\ variable\:\ y\ in\ hphp\/test\/zend\/bad\/zend\/closure\_027\.php\ on\ line\ \d+\
-HipHop\ Warning\:\ Missing\ argument\ 1\ for\ \{closure\}\(\)\,\ called\ in\ hphp\/test\/zend\/bad\/zend\/closure\_027\.php\ on\ line\ \d+\ and\ defined\ in\ hphp\/test\/zend\/bad\/zend\/closure\_027\.php\ on\ line\ \d+\
+HipHop Notice: .+
+HipHop Warning: .+
 NULL\
 \
 Catchable\ fatal\ error\:\ Argument\ 1\ passed\ to\ test\(\)\ must\ be\ an\ instance\ of\ Closure\,\ instance\ of\ stdClass\ given\,\ called\ in\ hphp\/test\/zend\/bad\/zend\/closure\_027\.php\ on\ line\ \d+\ and\ defined\ in\ hphp\/test\/zend\/bad\/zend\/closure\_027\.php\ on\ line\ \d+

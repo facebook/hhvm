@@ -1,0 +1,1 @@
+HipHop Fatal error: Class Sub contains abstract method (offsetExists) and must therefore be declared abstract or implement the remaining methods in hphp/test/zend/good/zend/argument_restriction_005.php on line 2

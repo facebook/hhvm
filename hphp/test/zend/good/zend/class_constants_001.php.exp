@@ -1,0 +1,3 @@
+string(6) "string"
+int(1)
+HipHop Fatal error: Couldn't find constant test::val3 in hphp/test/zend/good/zend/class_constants_001.php on line 11

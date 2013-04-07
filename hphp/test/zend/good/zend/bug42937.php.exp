@@ -1,0 +1,7 @@
+test
+test1
+test2
+test3
+test4
+test5
+HipHop Fatal error: Call to undefined method C::test6 from context B in hphp/test/zend/good/zend/bug42937.php on line 21

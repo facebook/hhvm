@@ -1,5 +1,4 @@
-HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ in\ [^
-]+\:\d+\
+HipHop Fatal error: .+
 Stack\ trace\:\
 \#0\ \[internal\ function\]\:\ output\_handler\(\'\'\,\ \d+\)\
 \#1\ [^

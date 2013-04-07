@@ -1,0 +1,1 @@
+HipHop Fatal error: Default value for parameter p with a class type hint can only be NULL in hphp/test/zend/good/tests-lang/type_hints_003.php on line 3

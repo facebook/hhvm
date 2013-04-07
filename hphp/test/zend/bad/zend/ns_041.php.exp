@@ -1,6 +1,5 @@
 ok\
 ok\
 ok\
-HipHop\ Notice\:\ Use\ of\ undefined\ constant\ BAR\ \-\ assumed\ \'BAR\'\ in\ [^
-]+ns\_041\.php\ on\ line\ 9\
+HipHop Notice: .+
 BAR

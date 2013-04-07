@@ -1,7 +1,4 @@
-HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ 0\ in\ [^
-]+bug39304\.php\ on\ line\ \d+\
-HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ 1\ in\ [^
-]+bug39304\.php\ on\ line\ \d+\
-HipHop\ Notice\:\ Uninitialized\ string\ offset\:\ 0\ in\ [^
-]+bug39304\.php\ on\ line\ \d+\
+HipHop Notice: .+
+HipHop Notice: .+
+HipHop Notice: .+
 I\ am\ alive

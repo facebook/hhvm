@@ -1,1 +1,1 @@
-HipHop\ Fatal\ error\:\ \_\_autoload\(\)\ must\ take\ exactly\ 1\ argument\ in\ hphp\/test\/zend\/bad\/zend\/errmsg\_012\.php\ on\ line\ \d+
+HipHop Fatal error: .+

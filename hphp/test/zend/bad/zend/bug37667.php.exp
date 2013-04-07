@@ -1,6 +1,5 @@
 string\(3\)\ \"bar\"\
-HipHop\ Notice\:\ Undefined\ offset\:\ 2\ in\ [^
-]+bug37667\.php\ on\ line\ 16\
+HipHop Notice: .+
 NULL\
 object\(Test\)\#\d+\ \(1\)\ \{\
 \ \ \[\"property\"\:protected\]\=\>\
@@ -9,10 +8,8 @@ object\(Test\)\#\d+\ \(1\)\ \{\
 \ \ \ \ string\(3\)\ \"bar\"\
 \ \ \}\
 \}\
-HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ property\ Test\:\:\$property\ has\ no\ effect\ in\ [^
-]+bug37667\.php\ on\ line\ 20\
-HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ property\ Test\:\:\$property\ has\ no\ effect\ in\ [^
-]+bug37667\.php\ on\ line\ 21\
+HipHop Notice: .+
+HipHop Notice: .+
 object\(Test\)\#\d+\ \(1\)\ \{\
 \ \ \[\"property\"\:protected\]\=\>\
 \ \ array\(1\)\ \{\

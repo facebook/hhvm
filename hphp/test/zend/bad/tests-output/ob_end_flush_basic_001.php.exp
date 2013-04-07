@@ -1,11 +1,11 @@
 \*\*\*\ Testing\ ob\_end\_flush\(\)\ \:\ basic\ functionality\ \*\*\*\
 \
 \-\-\ Testing\ ob\_end\_flush\(\)\ function\ with\ Zero\ arguments\ \-\-\
-HipHop\ Notice\:\ ob\_end\_flush\(\)\:\ failed\ to\ delete\ and\ flush\ buffer\.\ No\ buffer\ to\ delete\ or\ flush\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_end\_flush\_basic\_001\.php\ on\ line\ 12\
+HipHop Notice: .+
 bool\(false\)\
 bool\(true\)\
 Hello\
 bool\(true\)\
-HipHop\ Notice\:\ ob\_end\_flush\(\)\:\ failed\ to\ delete\ and\ flush\ buffer\.\ No\ buffer\ to\ delete\ or\ flush\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_end\_flush\_basic\_001\.php\ on\ line\ 21\
+HipHop Notice: .+
 bool\(false\)\
 Done

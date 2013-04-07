@@ -1,4 +1,4 @@
 string\(27\)\ \"A\:\:func2\:\ This\ should\ work\!\"\
 string\(27\)\ \"A\:\:func3\:\ This\ should\ work\!\"\
-HipHop\ Warning\:\ call\_user\_func\_array\(\)\ expects\ parameter\ 1\ to\ be\ a\ valid\ callback\,\ cannot\ access\ private\ method\ A\:\:func22\(\)\ in\ hphp\/test\/zend\/bad\/zend\/bug48770\_2\.php\ on\ line\ \d+\
-HipHop\ Warning\:\ call\_user\_func\_array\(\)\ expects\ parameter\ 1\ to\ be\ a\ valid\ callback\,\ class\ \'A\'\ does\ not\ have\ a\ method\ \'inexistent\'\ in\ hphp\/test\/zend\/bad\/zend\/bug48770\_2\.php\ on\ line\ \d+
+HipHop Warning: .+
+HipHop Warning: .+

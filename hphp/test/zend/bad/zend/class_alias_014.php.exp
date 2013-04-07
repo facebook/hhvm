@@ -1,1 +1,1 @@
-HipHop\ Warning\:\ Class\ \'bar\'\ not\ found\ in\ hphp\/test\/zend\/bad\/zend\/class\_alias\_014\.php\ on\ line\ \d+
+HipHop Warning: .+

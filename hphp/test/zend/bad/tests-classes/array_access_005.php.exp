@@ -12,10 +12,8 @@ array\(1\)\ \{\
 \ \ \[\"name\"\]\=\>\
 \ \ string\(6\)\ \"JoeFoo\"\
 \}\
-HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ Peoples\ has\ no\ effect\ in\ [^
-]+array\_access\_005\.php\ on\ line\ 46\
+HipHop Notice: .+
 string\(6\)\ \"JoeFoo\"\
-HipHop\ Notice\:\ Indirect\ modification\ of\ overloaded\ element\ of\ Peoples\ has\ no\ effect\ in\ [^
-]+array\_access\_005\.php\ on\ line\ 48\
+HipHop Notice: .+
 string\(6\)\ \"JoeFoo\"\
 \=\=\=DONE\=\=\=

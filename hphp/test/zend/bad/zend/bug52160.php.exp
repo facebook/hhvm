@@ -1,2 +1,2 @@
 Strict\ Standards\:\ Redefining\ already\ defined\ constructor\ for\ class\ foo\ in\ hphp\/test\/zend\/bad\/zend\/bug52160\.php\ on\ line\ \d+\
-HipHop\ Fatal\ error\:\ Constructor\ baz\:\:baz\(\)\ cannot\ be\ static\ in\ hphp\/test\/zend\/bad\/zend\/bug52160\.php\ on\ line\ \d+
+HipHop Fatal error: .+

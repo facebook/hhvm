@@ -1,6 +1,0 @@
-\*\*\*\ Testing\ ob\_get\_contents\(\)\ \:\ error\ cases\ \*\*\*\
-HipHop\ Warning\:\ Missing\ argument\ 0\ for\ ob\_get\_contents\(\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_get\_contents\_error\_001\.php\ on\ line\ 11\
-NULL\
-HipHop\ Warning\:\ Missing\ argument\ 0\ for\ ob\_get\_contents\(\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_get\_contents\_error\_001\.php\ on\ line\ 15\
-NULL\
-Done

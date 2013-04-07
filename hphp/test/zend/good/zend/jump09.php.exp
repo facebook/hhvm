@@ -1,0 +1,1 @@
+HipHop Fatal error: 'goto' into loop or switch statement is disallowed: (Line: 7, Char: 8) in hphp/test/zend/good/zend/jump09.php on line 1

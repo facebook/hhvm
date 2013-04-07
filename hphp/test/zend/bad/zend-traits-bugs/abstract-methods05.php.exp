@@ -1,1 +1,1 @@
-HipHop\ Fatal\ error\:\ Declaration\ of\ THelloA\:\:hello\(\$a\)\ must\ be\ compatible\ with\ THelloB\:\:hello\(\)\ in\ hphp\/test\/zend\/bad\/zend\-traits\-bugs\/abstract\-methods05\.php\ on\ line\ \d+
+HipHop Fatal error: .+

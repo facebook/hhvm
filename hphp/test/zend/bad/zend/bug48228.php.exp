@@ -1,5 +1,4 @@
-HipHop\ Fatal\ error\:\ Uncaught\ exception\ \'Exception\'\ in\ [^
-]+\
+HipHop Fatal error: .+
 Stack\ trace\:\
 \#0\ [^
 ]+\(\d+\)\:\ do\_throw\(\)\

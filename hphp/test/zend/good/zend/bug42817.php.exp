@@ -1,0 +1,1 @@
+HipHop Fatal error: clone called on non-object in hphp/test/zend/good/zend/bug42817.php on line 2

@@ -1,1 +1,1 @@
-HipHop\ Notice\:\ Constant\ \_\_COMPILER\_HALT\_OFFSET\_\_\ already\ defined\ in\ hphp\/test\/zend\/bad\/zend\/halt\_compiler4\.php\ on\ line\ \d+
+HipHop Notice: .+

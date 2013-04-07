@@ -1,12 +1,8 @@
-HipHop\ Notice\:\ Use\ of\ undefined\ constant\ bar\ \-\ assumed\ \'bar\'\ in\ [^
-]+bug43344\_1\.php\ on\ line\ 13\
+HipHop Notice: .+
 bar\
-HipHop\ Notice\:\ Use\ of\ undefined\ constant\ bar\ \-\ assumed\ \'bar\'\ in\ [^
-]+bug43344\_1\.php\ on\ line\ 3\
+HipHop Notice: .+
 bar\
-HipHop\ Notice\:\ Use\ of\ undefined\ constant\ bar\ \-\ assumed\ \'bar\'\ in\ [^
-]+bug43344\_1\.php\ on\ line\ 6\
+HipHop Notice: .+
 bar\
-HipHop\ Notice\:\ Use\ of\ undefined\ constant\ bar\ \-\ assumed\ \'bar\'\ in\ [^
-]+bug43344\_1\.php\ on\ line\ 9\
+HipHop Notice: .+
 bar

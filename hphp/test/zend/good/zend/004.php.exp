@@ -1,0 +1,9 @@
+HipHop Warning: strncmp() expects exactly 3 parameters, 2 given in hphp/test/zend/good/zend/004.php on line 3
+NULL
+int(0)
+HipHop Warning: Length must be greater than or equal to 0 in hphp/test/zend/good/zend/004.php on line 5
+bool(false)
+int(0)
+int(0)
+int(-1)
+Done

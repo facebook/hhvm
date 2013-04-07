@@ -1,0 +1,39 @@
+array(0) {
+}
+array(1) {
+  [0]=>
+  int(10)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+HipHop Warning: test2() expects exactly 1 parameter, 0 given in hphp/test/zend/good/zend/003.php on line 8
+array(0) {
+}
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+array(0) {
+}
+HipHop Warning: test3() expects exactly 2 parameters, 1 given in hphp/test/zend/good/zend/003.php on line 12
+array(1) {
+  [0]=>
+  int(1)
+}
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+HipHop Warning: func_get_args():  Called from the global scope - no function context in hphp/test/zend/good/zend/003.php on line 32
+bool(false)
+Done

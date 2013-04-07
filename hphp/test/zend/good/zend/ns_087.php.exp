@@ -1,0 +1,1 @@
+HipHop Fatal error: No code may exist outside of namespace {}: (Line: 10, Char: 12) in hphp/test/zend/good/zend/ns_087.php on line 10

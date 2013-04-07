@@ -1,0 +1,1 @@
+HipHop Fatal error: Class Tester may not inherit from interface (Test) in hphp/test/zend/good/tests-classes/interface_and_extends.php on line 8

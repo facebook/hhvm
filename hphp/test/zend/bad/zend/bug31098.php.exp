@@ -11,10 +11,10 @@ ok\
 ok\
 ok\
 ok\
-HipHop\ Notice\:\ Trying\ to\ get\ property\ of\ non\-object\ in\ hphp\/test\/zend\/bad\/zend\/bug31098\.php\ on\ line\ \d+\
+HipHop Notice: .+
 ok\
-HipHop\ Warning\:\ Illegal\ string\ offset\ \'wrong\'\ in\ hphp\/test\/zend\/bad\/zend\/bug31098\.php\ on\ line\ \d+\
+HipHop Warning: .+
 ok\
 ok\
-HipHop\ Warning\:\ Illegal\ string\ offset\ \'wrong\'\ in\ hphp\/test\/zend\/bad\/zend\/bug31098\.php\ on\ line\ \d+\
+HipHop Warning: .+
 ok

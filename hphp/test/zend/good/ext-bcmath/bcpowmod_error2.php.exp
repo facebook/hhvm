@@ -1,0 +1,1 @@
+HipHop Warning: bcpowmod() expects exactly 3 parameters, 2 given in hphp/test/zend/good/ext-bcmath/bcpowmod_error2.php on line 2

@@ -1,0 +1,5 @@
+base
+test
+derived
+base
+HipHop Fatal error: Call to private method base::show from context derived in hphp/test/zend/good/tests-classes/private_redeclare.php on line 22

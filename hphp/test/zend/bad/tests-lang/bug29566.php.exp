@@ -1,5 +1,3 @@
-HipHop\ Warning\:\ Illegal\ string\ offset\ \'nosuchkey\'\ in\ [^
-]+bug29566\.php\ on\ line\ \d+\
-HipHop\ Warning\:\ Invalid\ argument\ supplied\ for\ foreach\(\)\ in\ [^
-]+bug29566\.php\ on\ line\ \d+\
+HipHop Warning: .+
+HipHop Warning: .+
 \=\=\=DONE\=\=\=

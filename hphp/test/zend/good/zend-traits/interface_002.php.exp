@@ -1,0 +1,1 @@
+HipHop Fatal error: Class bar contains abstract method (abc) and must therefore be declared abstract or implement the remaining methods in hphp/test/zend/good/zend-traits/interface_002.php on line 12

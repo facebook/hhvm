@@ -1,0 +1,1 @@
+HipHop Fatal error: syntax error, unexpected T_NS_SEPARATOR, expecting '&' or T_VARIABLE in hphp/test/zend/good/zend/bug43332_2.php on line 5

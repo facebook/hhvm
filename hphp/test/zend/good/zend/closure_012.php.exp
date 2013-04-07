@@ -1,0 +1,4 @@
+HipHop Notice: Undefined variable: i in hphp/test/zend/good/zend/closure_012.php on line 4
+HipHop Notice: Undefined variable: i in hphp/test/zend/good/zend/closure_012.php on line 7
+NULL
+int(2)

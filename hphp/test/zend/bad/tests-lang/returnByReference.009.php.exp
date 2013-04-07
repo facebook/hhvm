@@ -1,6 +1,6 @@
 \-\-\-\>\ 1\.\ Return\ a\ variable\ by\ reference\ \-\>\ No\ warning\:\
 int\(1\)\
 \
-\-\-\-\>\ 2\.\ Return\ a\ value\ by\ reference\ \-\>\ HipHop\ Warning\:\
-HipHop\ Notice\:\ Only\ variable\ references\ should\ be\ returned\ by\ reference\ in\ hphp\/test\/zend\/bad\/tests\-lang\/returnByReference\.009\.php\ on\ line\ \d+\
+\-\-\-\>\ 2\.\ Return\ a\ value\ by\ reference\ \-\>\ HipHop Warning: .+
+HipHop Notice: .+
 int\(1\)

@@ -1,4 +1,4 @@
 \[callback\:1\]This\ call\ will\ obtain\ the\ content\,\ but\ will\ not\ flush\ the\ buffer\.\
-HipHop\ Notice\:\ ob\_get\_flush\(\)\:\ failed\ to\ send\ buffer\ of\ callback\ \(0\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_unerasable\_004\.php\ on\ line\ 11\
-HipHop\ Notice\:\ ob\_get\_flush\(\)\:\ failed\ to\ delete\ buffer\ of\ callback\ \(0\)\ in\ hphp\/test\/zend\/bad\/tests\-output\/ob\_start\_basic\_unerasable\_004\.php\ on\ line\ 11\
+HipHop Notice: .+
+HipHop Notice: .+
 string\(65\)\ \"This\ call\ will\ obtain\ the\ content\,\ but\ will\ not\ flush\ the\ buffer\.\"

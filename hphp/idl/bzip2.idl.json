@@ -34,7 +34,7 @@
             "args": [
                 {
                     "name": "filename",
-                    "type": "String",
+                    "type": "Variant",
                     "desc": "The name of the file to open."
                 },
                 {

@@ -34,19 +34,64 @@ Variant f_bzwrite(CObjRef bz, CStrRef data, int length /* = 0 */) {
   return f_fwrite(bz, data, length);
 }
 
-Variant f_bzopen(CStrRef filename, CStrRef mode) {
+Variant f_bzopen(CVarRef filename, CStrRef mode) {
   if (mode != "r" && mode != "w") {
+    raise_warning(
+      "'%s' is not a valid mode for bzopen(). "
+      "Only 'w' and 'r' are supported.",
+      mode.data()
+    );
     return false;
   }
 
-  BZ2File *bz = NEWOBJ(BZ2File)();
+  BZ2File *bz;
+  if (filename.isString()) {
+    if (filename.asCStrRef().empty()) {
+      raise_warning("filename cannot be empty");
+      return false;
+    }
+    bz = NEWOBJ(BZ2File)();
+    bool ret = bz->open(File::TranslatePath(filename), mode);
+    if (!ret) {
+      raise_warning("%s", Util::safe_strerror(errno).c_str());
+      return false;
+    }
+  } else {
+    if (!filename.isResource()) {
+      raise_warning("first parameter has to be string or file-resource");
+      return false;
+    }
+    PlainFile* f = filename.cast<PlainFile>();
+    if (!f) {
+      return false;
+    }
+
+    std::string stream_mode = f->getMode();
+    int stream_mode_len = stream_mode.length();
+
+    if (stream_mode_len != 1 &&
+        !(stream_mode_len == 2 && stream_mode.find('b') != string::npos)) {
+      raise_warning("cannot use stream opened in mode '%s'", stream_mode.c_str());
+      return false;
+    } else if (stream_mode_len == 1 &&
+        stream_mode[0] != 'r' && stream_mode[0] != 'w' &&
+        stream_mode[0] != 'a' && stream_mode[0] != 'x') {
+      raise_warning("cannot use stream opened in mode '%s'", stream_mode.c_str());
+      return false;
+    }
+
+    const char rw_mode = stream_mode[0];
+    if (mode == "r" && rw_mode != 'r') {
+      raise_warning("cannot write to a stream opened in read only mode");
+      return false;
+    } else if (mode == "w" && rw_mode != 'w' && rw_mode != 'a' && rw_mode != 'x') {
+      raise_warning("cannot read from a stream opened in write only mode");
+      return false;
+    }
+
+    bz = NEWOBJ(BZ2File)(f);
+  }
   Object handle(bz);
-
-  bool ret = bz->open(File::TranslatePath(filename), mode);
-  if (!ret) {
-    raise_warning("%s", Util::safe_strerror(errno).c_str());
-    return false;
-  }
   return handle;
 }
 

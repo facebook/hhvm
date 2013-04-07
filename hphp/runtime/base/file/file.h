@@ -121,6 +121,8 @@ public:
   virtual Array getWrapperMetaData() { return null_array; }
   virtual const char *getStreamType() const { return "";}
 
+  std::string getMode() { return m_mode; }
+
   /**
    * Read one line a time. Returns a null string on failure or eof.
    */

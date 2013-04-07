@@ -111,6 +111,18 @@ def mkdir_p(path):
 def walk(filename, source):
     print "Importing %s" % filename
 
+    dest_filename = os.path.basename(filename).replace('.phpt', '.php')
+    source_dir = source.lower().replace('/tests', '').replace('/', '-')
+
+    cur_dir = os.path.dirname(__file__)
+    dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)
+    mkdir_p(dest_subdir)
+    full_dest_filename = os.path.join(dest_subdir, dest_filename)
+
+    if not '.phpt' in filename:
+        shutil.copyfile(filename, full_dest_filename)
+        return
+
     def split(pattern, str):
         return re.split(r'\n\s*--'+pattern+'--\s*\n', str, 1)
 
@@ -139,9 +151,6 @@ def walk(filename, source):
     if not sections.has_key('FILE'):
         print "Malformed test, no --FILE--: ", filename
         return
-    
-    dest_filename = os.path.basename(filename).replace('.phpt', '.php')
-    source_dir = source.lower().replace('/tests', '').replace('/', '-')
 
     for key in ('EXPECT', 'EXPECTF', 'EXPECTREGEX'):
         if sections.has_key(key):
@@ -169,11 +178,6 @@ def walk(filename, source):
                 exp = re.sub(error[0], error[1], exp)
 
             sections[key] = exp
-
-    cur_dir = os.path.dirname(__file__)
-    dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)
-    mkdir_p(dest_subdir)
-    full_dest_filename = os.path.join(dest_subdir, dest_filename)
 
     if sections.has_key('EXPECT'):
         exp = sections['EXPECT']
@@ -287,8 +291,6 @@ if args.zend_path:
             '/ext/xsl',
             '/ext/zip',
         )
-        if not '.phpt' in filename:
-            return False
         for bad in no_import:
             if bad in filename:
                 return False

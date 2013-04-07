@@ -35,6 +35,7 @@ public:
   CStrRef o_getClassNameHook() const { return s_class_name; }
 
   BZ2File();
+  BZ2File(PlainFile* innerFile);
   virtual ~BZ2File();
 
   bool open(CStrRef filename, CStrRef mode);

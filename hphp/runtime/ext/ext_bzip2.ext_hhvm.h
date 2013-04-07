@@ -28,8 +28,8 @@ bz => rsi
 TypedValue* fh_bzclose(TypedValue* _rv, Value* bz) asm("_ZN4HPHP9f_bzcloseERKNS_6ObjectE");
 
 /*
-HPHP::Variant HPHP::f_bzopen(HPHP::String const&, HPHP::String const&)
-_ZN4HPHP8f_bzopenERKNS_6StringES2_
+HPHP::Variant HPHP::f_bzopen(HPHP::Variant const&, HPHP::String const&)
+_ZN4HPHP8f_bzopenERKNS_7VariantERKNS_6StringE
 
 (return value) => rax
 _rv => rdi
@@ -37,7 +37,7 @@ filename => rsi
 mode => rdx
 */
 
-TypedValue* fh_bzopen(TypedValue* _rv, Value* filename, Value* mode) asm("_ZN4HPHP8f_bzopenERKNS_6StringES2_");
+TypedValue* fh_bzopen(TypedValue* _rv, TypedValue* filename, Value* mode) asm("_ZN4HPHP8f_bzopenERKNS_7VariantERKNS_6StringE");
 
 /*
 HPHP::Variant HPHP::f_bzread(HPHP::Object const&, int)

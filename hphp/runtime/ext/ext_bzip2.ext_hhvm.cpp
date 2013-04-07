@@ -75,8 +75,8 @@ TypedValue* fg_bzclose(HPHP::VM::ActRec *ar) {
 
 
 /*
-HPHP::Variant HPHP::f_bzopen(HPHP::String const&, HPHP::String const&)
-_ZN4HPHP8f_bzopenERKNS_6StringES2_
+HPHP::Variant HPHP::f_bzopen(HPHP::Variant const&, HPHP::String const&)
+_ZN4HPHP8f_bzopenERKNS_7VariantERKNS_6StringE
 
 (return value) => rax
 _rv => rdi
@@ -84,18 +84,13 @@ filename => rsi
 mode => rdx
 */
 
-TypedValue* fh_bzopen(TypedValue* _rv, Value* filename, Value* mode) asm("_ZN4HPHP8f_bzopenERKNS_6StringES2_");
+TypedValue* fh_bzopen(TypedValue* _rv, TypedValue* filename, Value* mode) asm("_ZN4HPHP8f_bzopenERKNS_7VariantERKNS_6StringE");
 
 TypedValue * fg1_bzopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
 TypedValue * fg1_bzopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  if (!IS_STRING_TYPE((args-1)->m_type)) {
-    tvCastToStringInPlace(args-1);
-  }
-  if (!IS_STRING_TYPE((args-0)->m_type)) {
-    tvCastToStringInPlace(args-0);
-  }
-  fh_bzopen((rv), &args[-0].m_data, &args[-1].m_data);
+  tvCastToStringInPlace(args-1);
+  fh_bzopen((rv), (args-0), &args[-1].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
   return rv;
 }
@@ -105,8 +100,8 @@ TypedValue* fg_bzopen(HPHP::VM::ActRec *ar) {
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
     if (count == 2LL) {
-      if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        fh_bzopen((&(rv)), &args[-0].m_data, &args[-1].m_data);
+      if (IS_STRING_TYPE((args-1)->m_type)) {
+        fh_bzopen((&(rv)), (args-0), &args[-1].m_data);
         if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
         frame_free_locals_no_this_inl(ar, 2);
         memcpy(&ar->m_r, &rv, sizeof(TypedValue));

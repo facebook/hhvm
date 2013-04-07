@@ -30,6 +30,10 @@ BZ2File::BZ2File(): m_bzFile(nullptr), m_eof(false) {
   m_innerFile->unregister();
 }
 
+BZ2File::BZ2File(PlainFile* innerFile): m_bzFile(nullptr), m_eof(false) {
+  m_innerFile = innerFile;
+}
+
 BZ2File::~BZ2File() {
   if (m_bzFile)
     closeImpl();

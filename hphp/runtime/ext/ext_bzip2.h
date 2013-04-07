@@ -30,7 +30,7 @@ Variant f_bzclose(CObjRef bz);
 Variant f_bzread(CObjRef bz, int length = 1024);
 Variant f_bzwrite(CObjRef bz, CStrRef data, int length = 0);
 
-Variant f_bzopen(CStrRef filename, CStrRef mode);
+Variant f_bzopen(CVarRef filename, CStrRef mode);
 Variant f_bzflush(CObjRef bz);
 String f_bzerrstr(CObjRef bz);
 Variant f_bzerror(CObjRef bz);

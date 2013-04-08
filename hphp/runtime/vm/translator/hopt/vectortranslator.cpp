@@ -281,6 +281,14 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   if (simpleProp || simpleArraySet || simpleArrayGet) {
     setNoMIState();
   }
+
+  /*
+   * In pretty much any case the vector translator will do operations
+   * that can throw. Currently this means we have to have a spillStack
+   * so the unwinder can handle it (eventually we'll hook this into an
+   * unwind codepath).  TODO(#2162354)
+   */
+  m_ht.spillStack();
 }
 
 void HhbcTranslator::VectorTranslator::emitMPre() {

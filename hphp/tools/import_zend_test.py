@@ -9,6 +9,7 @@ import argparse
 import os
 import re
 import subprocess
+import shutil
 import sys
 
 bad_tests = (
@@ -336,13 +337,25 @@ if args.zend_path:
                     walk(full_file, root.replace(args.zend_path, ''))
 
 if not os.path.isdir('test/zend/all'):
-    print "No test/zend/all. Maybe no tests were imported?"
-    sys.exit(0)
+    if args.zend_path:
+        print "No test/zend/all. Maybe no tests were imported?"
+        sys.exit(0)
+    else:
+        print "Running all tests from test/zend/bad"
+        shutil.copytree('test/zend/bad', 'test/zend/all')
 
 if not args.dont_run:
     env = os.environ
     env.update({'VQ':'interp', 'TEST_PATH':'zend/all'})
-    proc = subprocess.Popen(['tools/run_verify.sh'], env=env)
+    stdout = open(os.devnull, 'wb')
+    if args.verbose:
+        stdout = None
+    proc = subprocess.Popen(
+        ['tools/run_verify.sh'],
+        env=env,
+        stdout=stdout,
+        stderr=subprocess.STDOUT
+    )
     proc.wait()
 
 for root, dirs, files in os.walk('test/zend/all'):
@@ -425,5 +438,4 @@ for root, dirs, files in os.walk('test/zend/all'):
             os.unlink(delete_file+'.exp')
 
 if not args.dirty:
-    import shutil
     shutil.rmtree('test/zend/all')

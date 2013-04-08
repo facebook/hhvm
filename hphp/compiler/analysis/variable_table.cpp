@@ -178,6 +178,8 @@ bool VariableTable::isLocal(const Symbol *sym) const {
     */
     return (!sym->isStatic() &&
             !sym->isGlobal() &&
+            !sym->isGeneratorParameter() &&
+            !sym->isRefGeneratorParameter() &&
             !sym->isParameter());
   }
   return false;

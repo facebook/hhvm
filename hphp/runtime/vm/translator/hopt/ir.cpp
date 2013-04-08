@@ -1239,35 +1239,16 @@ int32_t spillValueCells(IRInstruction* spillStack) {
 }
 
 /**
- * TopoSort encapsulates a depth-first search which identifies basic
- * blocks and populates a list of blocks in reverse-postorder.
+ * Return a list of blocks in reverse postorder
  */
-struct TopoSort {
-  TopoSort(BlockList& blocks, unsigned num_blocks) : m_visited(num_blocks),
-    m_blocks(blocks), m_next_id(0) {
-    blocks.clear();
-  }
-
-  void visit(Block* block) {
-    assert(!block->empty());
-    if (m_visited.test(block->getId())) return;
-    m_visited.set(block->getId());
-    if (Block* next = block->getNext()) visit(next);
-    if (Block* taken = block->getTaken()) visit(taken);
-    block->setPostId(m_next_id++);
-    m_blocks.push_front(block);
-  }
-private:
-  boost::dynamic_bitset<> m_visited;
-  BlockList& m_blocks;
-  unsigned m_next_id; // next postorder id to assign
-};
-
 BlockList sortCfg(Trace* trace, const IRFactory& factory) {
   assert(trace->isMain());
   BlockList blocks;
-  TopoSort sorter(blocks, factory.numBlocks());
-  sorter.visit(trace->front());
+  unsigned next_id = 0;
+  postorderWalk([&](Block* block) {
+      block->setPostId(next_id++);
+      blocks.push_front(block);
+    }, factory.numBlocks(), trace->front());
   return blocks;
 }
 

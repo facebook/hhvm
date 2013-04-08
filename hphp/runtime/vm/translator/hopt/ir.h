@@ -2211,6 +2211,8 @@ struct Block : boost::noncopyable {
   void        addEdge(IRInstruction* jmp);
   void        removeEdge(IRInstruction* jmp);
 
+  inline bool isMain() const;
+
   // return the last instruction in the block
   IRInstruction* back() const {
     assert(!m_instrs.empty());
@@ -2358,6 +2360,14 @@ public:
     return b;
   }
 
+  // temporary data field for use by individual passes
+  //
+  // Used by LinearScan as a "fake" instruction id, that comes
+  // between the id of the last instruction that branches to
+  // this exit trace, and the next instruction on the main trace.
+  uint32_t getData() const { return m_data; }
+  void setData(uint32_t d) { m_data = d; }
+
   uint32_t getBcOff() const { return m_bcOff; }
   Trace* addExitTrace(Trace* exit) {
     m_exitTraces.push_back(exit);
@@ -2385,14 +2395,53 @@ private:
   // offset of the first bytecode in this trace; 0 if this trace doesn't
   // represent a bytecode boundary.
   uint32_t m_bcOff;
+  uint32_t m_data;
   std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
   ExitList m_exitTraces;      // traces to which this trace exits
   Trace* m_main;              // ptr to parent trace if this is an exit trace
 };
 
+inline bool Block::isMain() const { return m_trace->isMain(); }
+
 /*
  * Some utility micro-passes used from other major passes.
  */
+
+/**
+ * PostorderSort encapsulates a depth-first postorder walk
+ */
+template <class Visitor>
+struct PostorderSort {
+  PostorderSort(Visitor &visitor, unsigned num_blocks) :
+      m_visited(num_blocks), m_visitor(visitor) {
+  }
+
+  void walk(Block* block) {
+    assert(!block->empty());
+    if (m_visited.test(block->getId())) return;
+    m_visited.set(block->getId());
+    Block* taken = block->getTaken();
+    if (taken && taken->getTrace()->isMain() != block->getTrace()->isMain()) {
+      walk(taken);
+      taken = nullptr;
+    }
+    if (Block* next = block->getNext()) walk(next);
+    if (taken) walk(taken);
+    m_visitor(block);
+  }
+private:
+  boost::dynamic_bitset<> m_visited;
+  Visitor &m_visitor;
+};
+
+/**
+ * perform a depth-first postorder walk
+ */
+template <class Visitor>
+void postorderWalk(Visitor visitor, unsigned num_blocks, Block* head) {
+  PostorderSort<Visitor> ps(visitor, num_blocks);
+  ps.walk(head);
+}
 
 /*
  * Remove any instruction if live[iid] == false

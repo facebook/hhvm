@@ -58,7 +58,7 @@ private:
     // A non-reserved reg is in either LinearScan::m_freeCallerSaved,
     // LinearScan::m_freeCalleeSaved, or LinearScan::m_allocatedRegs.
     // <m_pos> of a reserved reg is undefined.
-    std::list<RegState*>::iterator m_pos;
+    smart::list<RegState*>::iterator m_pos;
     uint16_t  m_regNo;
     bool      m_pinned; // do not free this register if pinned
     // We stress test register allocation by reducing the number of
@@ -89,6 +89,16 @@ private:
     std::pair<SSATmp*, uint32_t> m_preColoredTmps[LinearScan::NumRegs];
   };
 
+  class StateSave {
+   public:
+    StateSave() {}
+    void save(LinearScan* ls);
+    void restore(LinearScan* ls);
+   private:
+    RegState m_regs[NumRegs];
+  };
+  typedef smart::map<Block*, StateSave> ExitTraceMap;
+
 private:
   void allocRegToInstruction(InstructionList::iterator it);
   void allocRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index);
@@ -96,10 +106,14 @@ private:
   void freeRegsAtId(uint32_t id);
   void spill(SSATmp* tmp);
   void computeLiveRegs();
-  static RegSet computeLiveRegs(IRInstruction* inst, RegSet liveRegs);
 
+  template<typename T> SSATmp* cns(T val) {
+    return m_irFactory->defConst(val);
+  }
   void initFreeList();
   void coalesce(Trace* trace);
+  void genSpillStats(Trace* trace, int numSpillLocs);
+  void allocRegsOneTrace(BlockList::iterator& blockIt, ExitTraceMap& etm);
   void allocRegsToTrace();
   uint32_t createSpillSlot(SSATmp* tmp);
   static SSATmp* getSpilledTmp(SSATmp* tmp);
@@ -111,15 +125,14 @@ private:
   void rematerialize();
   void rematerializeAux();
   void removeUnusedSpills();
-  void collectNatives();
-  void collectJmps();
+  void collectInfo(BlockList::iterator it, Trace* trace);
   RegNumber getJmpPreColor(SSATmp* tmp, uint32_t regIndx, bool isReload);
   void computePreColoringHint();
   IRInstruction* getNextNative() const;
   uint32_t getNextNativeId() const;
 
   void pushFreeReg(RegState* reg);
-  RegState* popFreeReg(std::list<RegState*>& freeList);
+  RegState* popFreeReg(smart::list<RegState*>& freeList);
   void freeReg(RegState* reg);
   RegState* getFreeReg(bool preferCallerSaved);
   RegState* getReg(RegState* reg);
@@ -129,25 +142,25 @@ private:
   IRFactory* const m_irFactory;
   RegState   m_regs[NumRegs];
   // Lists of free caller and callee-saved registers, respectively.
-  std::list<RegState*> m_freeCallerSaved;
-  std::list<RegState*> m_freeCalleeSaved;
+  smart::list<RegState*> m_freeCallerSaved;
+  smart::list<RegState*> m_freeCalleeSaved;
   // List of assigned registers, sorted high to low by lastUseId.
-  std::list<RegState*> m_allocatedRegs;
+  smart::list<RegState*> m_allocatedRegs;
 
-  std::vector<SlotInfo> m_slots;  // Spill info indexed by slot id
+  smart::vector<SlotInfo> m_slots;  // Spill info indexed by slot id
   BlockList m_blocks;             // all basic blocks in reverse postorder
   IdomVector m_idoms;             // immediate dominator vector
 
   // the list of native instructions in the trace sorted by instruction ID;
   // i.e. a filtered list in the same order as visited by m_blocks.
-  std::list<IRInstruction*> m_natives;
+  smart::list<IRInstruction*> m_natives;
 
   // stores pre-coloring hints
   PreColoringHint m_preColoringHint;
 
   // a map from SSATmp* to a list of Jmp_ instructions that have it as
   // a source.
-  typedef std::vector<IRInstruction*> JmpList;
+  typedef smart::vector<IRInstruction*> JmpList;
   StateVector<SSATmp, JmpList> m_jmps;
 };
 
@@ -175,6 +188,32 @@ static SSATmp* canonicalize(SSATmp* tmp) {
       return tmp;
     }
     tmp = inst->getSrc(0);
+  }
+}
+
+void LinearScan::StateSave::save(LinearScan* ls) {
+  std::copy(ls->m_regs, ls->m_regs + NumRegs, m_regs);
+}
+
+void LinearScan::StateSave::restore(LinearScan* ls) {
+  ls->m_allocatedRegs.clear();
+  ls->m_freeCalleeSaved.clear();
+  ls->m_freeCallerSaved.clear();
+
+  for (size_t i = 0; i < NumRegs; i++) {
+    ls->m_regs[i] = m_regs[i];
+    RegState* reg = &ls->m_regs[i];
+    if (reg->isReserved()) continue;
+    if (reg->isAllocated()) {
+      SSATmp* tmp = reg->m_ssaTmp;
+      for (int r = 0; r < tmp->numAllocatedRegs(); r++) {
+        if ((int)tmp->getReg(r) == i) {
+          ls->allocRegToTmp(reg, tmp, r);
+        }
+      }
+    } else {
+      ls->pushFreeReg(reg);
+    }
   }
 }
 
@@ -210,39 +249,29 @@ LinearScan::LinearScan(IRFactory* irFactory)
 }
 
 /*
- * Compute and save registers that are live *across* inst, not including
+ * Compute and save registers that are live *across* each inst, not including
  * registers whose lifetimes end at inst, nor registers defined by inst.
- * Return the updated live set, including registers defined by inst.
- */
-RegSet LinearScan::computeLiveRegs(IRInstruction* inst, RegSet live) {
-  uint32_t instId = inst->getId();
-  for (SSATmp* src : inst->getSrcs()) {
-    if (src->getLastUseId() <= instId) live -= src->getRegs();
-  }
-  RegSet def, defOut;
-  for (const SSATmp& dst : inst->getDsts()) {
-    RegSet d = dst.getRegs();
-    if (dst.getLastUseId() > instId) defOut |= d;
-    live -= d;
-  }
-  inst->setLiveRegs(live);
-  return live | defOut;
-}
-
-/*
- * Computes the live regs at each instruction in a trace.
- * The function uses the same last use information and instruction
- * ordering used by the linear scan register allocator, so its
- * important that this function iterates over the instruction in
- * the same order that linear scan orders the instructions.
  */
 void LinearScan::computeLiveRegs() {
-  RegSet liveRegs;
-  for (Block* block : m_blocks) {
-    for (IRInstruction& inst : *block) {
-      liveRegs = LinearScan::computeLiveRegs(&inst, liveRegs);
-    }
-  }
+  StateVector<Block, RegSet> liveMap(m_irFactory, RegSet());
+  postorderWalk(
+    [&](Block* block) {
+      RegSet& live = liveMap[block];
+      if (Block* taken = block->getTaken()) live = liveMap[taken];
+      if (Block* next = block->getNext()) live |= liveMap[next];
+      for (auto it = block->end(); it != block->begin(); ) {
+        IRInstruction& inst = *--it;
+        for (const SSATmp& dst : inst.getDsts()) {
+          RegSet d = dst.getRegs();
+          live -= d;
+        }
+        inst.setLiveRegs(live);
+        for (SSATmp* src : inst.getSrcs()) {
+          live |= src->getRegs();
+        }
+      }
+    },
+    m_irFactory->numBlocks(), m_blocks.front());
 }
 
 template<typename Inner, int DumpVal=4>
@@ -263,7 +292,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   for (int regNo = 0; regNo < kNumX64Regs; ++regNo) {
     m_regs[regNo].m_pinned = false;
   }
-  std::vector<bool> needsReloading(inst->getNumSrcs(), true);
+  smart::vector<bool> needsReloading(inst->getNumSrcs(), true);
   for (uint32_t i = 0; i < inst->getNumSrcs(); ++i) {
     SSATmp* tmp = inst->getSrc(i);
     int32_t slotId = tmp->getSpillSlot();
@@ -464,7 +493,7 @@ void LinearScan::allocRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index) {
     return;
   }
   // insert into the list of assigned registers sorted by last use id
-  std::list<RegState*>::iterator it = m_allocatedRegs.begin();
+  auto it = m_allocatedRegs.begin();
   for (; it != m_allocatedRegs.end(); ++it) {
     if (lastUseId > (*it)->m_ssaTmp->getLastUseId()) {
       break;
@@ -476,14 +505,22 @@ void LinearScan::allocRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index) {
 // Assign spill location numbers to Spill/Reload.
 uint32_t LinearScan::assignSpillLoc() {
   uint32_t nextSpillLoc = 0;
+  uint32_t maxSpillLoc = 0;
 
   // visit blocks in reverse postorder and instructions in forward order,
   // assigning a spill slot id to each Spill. We don't reuse slot id's,
   // but both could be reused either by visiting the dominator tree in
   // preorder or by analyzing lifetimes and reusing id/registers between
   // non-conflicting spills.
+  // As an intermediate step, re-use id's for exit traces
+
+  smart::map<Block*, uint32_t> exitLocMap;
 
   for (Block* block : m_blocks) {
+    auto it = exitLocMap.find(block);
+    if (it != exitLocMap.end()) {
+      nextSpillLoc = it->second;
+    }
     for (IRInstruction& inst : *block) {
       if (getNextNative() == &inst) {
         assert(!m_natives.empty());
@@ -514,11 +551,20 @@ uint32_t LinearScan::assignSpillLoc() {
         }
       }
     }
+    if (nextSpillLoc > maxSpillLoc) maxSpillLoc = nextSpillLoc;
+    if (block->getTrace()->isMain()) {
+      if (Block* taken = block->getTaken()) {
+        if (!taken->getTrace()->isMain()) {
+          exitLocMap[taken] = nextSpillLoc;
+        }
+      }
+    }
   }
-  return nextSpillLoc;
+  return maxSpillLoc;
 }
 
-void LinearScan::insertAllocFreeSpill(Trace* trace, uint32_t numExtraSpillLocs) {
+void LinearScan::insertAllocFreeSpill(Trace* trace,
+                                      uint32_t numExtraSpillLocs) {
   insertAllocFreeSpillAux(trace, numExtraSpillLocs);
   for (Trace* exit : trace->getExitTraces()) {
     insertAllocFreeSpillAux(exit, numExtraSpillLocs);
@@ -558,25 +604,44 @@ void LinearScan::insertAllocFreeSpillAux(Trace* trace,
   }
 }
 
-void LinearScan::collectNatives() {
-  // May be re-executed. Need initialize <m_natives> each time.
+void LinearScan::collectInfo(BlockList::iterator it, Trace* trace) {
   m_natives.clear();
-  for (Block* block : m_blocks) {
-    for (IRInstruction& inst : *block) {
-      if (inst.isNative()) m_natives.push_back(&inst);
+  m_jmps.reset();
+  for (auto* block : m_blocks) {
+    for (auto& inst : *block) {
+      for (auto& dst : inst.getDsts()) {
+        dst.setLastUseId(0);
+      }
     }
   }
-}
 
-// Build a mapping from SSATmps to the Jmp_ instructions that consume
-// them.
-void LinearScan::collectJmps() {
-  m_jmps.reset();
-  for (Block* block : m_blocks) {
-    IRInstruction* jmp = block->back();
-    if (jmp->op() != Jmp_ || jmp->getNumSrcs() == 0) continue;
-    for (SSATmp* src : jmp->getSrcs()) {
-      m_jmps[src].push_back(jmp);
+  while (it != m_blocks.end()) {
+    Block* block = *it++;
+    bool offTrace = block->getTrace() != trace;
+    if (offTrace) {
+      if (!trace->isMain()) return;
+      int lastId = block->getTrace()->getData();
+      for (IRInstruction& inst : *block) {
+        for (auto* src : inst.getSrcs()) {
+          if (lastId > src->getLastUseId()) {
+            src->setLastUseId(lastId);
+          }
+        }
+      }
+    } else {
+      for (IRInstruction& inst : *block) {
+        for (auto* src : inst.getSrcs()) {
+          src->setLastUseId(inst.getId());
+        }
+        if (inst.isNative()) m_natives.push_back(&inst);
+      }
+
+      IRInstruction* jmp = block->back();
+      if (jmp->op() == Jmp_ && jmp->getNumSrcs() != 0) {
+        for (SSATmp* src : jmp->getSrcs()) {
+          m_jmps[src].push_back(jmp);
+        }
+      }
     }
   }
 }
@@ -833,23 +898,88 @@ void LinearScan::preAllocSpillLoc(uint32_t numSpillLocs) {
 
 // Assign ids to each instruction in linear order.
 void numberInstructions(const BlockList& blocks) {
-  forEachInst(blocks, [](IRInstruction* inst) {
-    for (SSATmp& dst : inst->getDsts()) {
-      dst.setLastUseId(0);
-      dst.setUseCount(0);
-      dst.setSpillSlot(-1);
+  forEachInst(
+    blocks,
+    [](IRInstruction* inst) {
+      for (SSATmp& dst : inst->getDsts()) {
+        dst.setLastUseId(0);
+        dst.setUseCount(0);
+        dst.setSpillSlot(-1);
+      }
     }
-  });
+  );
   uint32_t nextId = 1;
-  forEachInst(blocks, [&](IRInstruction* inst) {
-    if (inst->op() == Marker) return; // don't number markers
-    uint32_t id = nextId++;
-    inst->setId(id);
-    for (SSATmp* tmp : inst->getSrcs()) {
-      tmp->setLastUseId(id);
-      tmp->incUseCount();
+  for (auto* block : blocks) {
+    for (auto& inst : *block) {
+      if (inst.op() == Marker) continue; // don't number markers
+      uint32_t id = nextId++;
+      inst.setId(id);
+      for (SSATmp* tmp : inst.getSrcs()) {
+        tmp->setLastUseId(id);
+        tmp->incUseCount();
+      }
     }
-  });
+    if (block->getTaken() && block->isMain() && !block->getTaken()->isMain()) {
+      // reserve a spot for the lastUseId when we're processing the main
+      // trace, if the last use is really in an exit trace.
+      block->getTaken()->getTrace()->setData(nextId++);
+    }
+  }
+}
+
+void LinearScan::genSpillStats(Trace* trace, int numSpillLocs) {
+  if (!moduleEnabled(HPHP::Trace::statgroups, 1)) return;
+
+  int numMainSpills = 0;
+  int numExitSpills = 0;
+  int numMainReloads = 0;
+  int numExitReloads = 0;
+  forEachInst(
+    m_blocks,
+    [&](IRInstruction* inst) {
+      if (inst->op() == Spill) {
+        if (inst->getBlock()->isMain()) {
+          numMainSpills++;
+        } else {
+          numExitSpills++;
+        }
+      } else if (inst->op() == Reload) {
+        if (inst->getBlock()->isMain()) {
+          numMainReloads++;
+        } else {
+          numExitReloads++;
+        }
+      }
+    }
+  );
+
+  static StringData* spillStats = StringData::GetStaticString("SpillStats");
+  static StringData* mainSpills = StringData::GetStaticString("MainSpills");
+  static StringData* mainReloads = StringData::GetStaticString("MainReloads");
+  static StringData* exitSpills = StringData::GetStaticString("ExitSpills");
+  static StringData* exitReloads = StringData::GetStaticString("ExitReloads");
+  static StringData* spillSpace = StringData::GetStaticString("SpillSpace");
+  trace->front()->prepend(m_irFactory->gen(
+                            IncStatGrouped,
+                            cns(spillStats),
+                            cns(mainSpills), cns(numMainSpills)));
+  trace->front()->prepend(m_irFactory->gen(
+                            IncStatGrouped,
+                            cns(spillStats),
+                            cns(mainReloads), cns(numMainReloads)));
+  trace->front()->prepend(m_irFactory->gen(
+                            IncStatGrouped,
+                            cns(spillStats),
+                            cns(exitSpills), cns(numExitSpills)));
+  trace->front()->prepend(m_irFactory->gen(
+                            IncStatGrouped,
+                            cns(spillStats),
+                            cns(exitReloads), cns(numExitReloads)));
+  trace->front()->prepend(m_irFactory->gen(
+                            IncStatGrouped,
+                            cns(spillStats),
+                            cns(spillSpace), cns(numSpillLocs)));
+
 }
 
 void LinearScan::allocRegs(Trace* trace) {
@@ -860,21 +990,14 @@ void LinearScan::allocRegs(Trace* trace) {
 
   m_blocks = sortCfg(trace, *m_irFactory);
   m_idoms = findDominators(m_blocks);
-  numberInstructions(m_blocks);
 
-  collectNatives();
-  collectJmps();
-  computePreColoringHint();
-  initFreeList();
   allocRegsToTrace();
-  // Renumber instructions, because we added spills and reloads.
-  numberInstructions(m_blocks);
 
   if (RuntimeOption::EvalHHIREnableRematerialization && m_slots.size() > 0) {
     // Don't bother rematerializing the trace if it has no Spill/Reload.
-    dumpTrace(6, trace, "before rematerialization");
     rematerialize();
   }
+  numberInstructions(m_blocks);
 
   // Make sure rsp is 16-aligned.
   uint32_t numSpillLocs = assignSpillLoc();
@@ -899,16 +1022,38 @@ void LinearScan::allocRegs(Trace* trace) {
       insertAllocFreeSpill(trace, numSpillLocs - NumPreAllocatedSpillLocs);
     }
   }
-  numberInstructions(m_blocks);
+
+  if (m_slots.size()) genSpillStats(trace, numSpillLocs);
 
   // record the live register set at each instruction
   computeLiveRegs();
 }
 
-void LinearScan::allocRegsToTrace() {
+void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
+                                   ExitTraceMap& etm) {
+  Trace* trace = (*blockIt)->getTrace();
+  collectInfo(blockIt, trace);
+  computePreColoringHint();
+
+  auto v = etm.find(*blockIt);
+  if (v != etm.end()) {
+    assert(!trace->isMain());
+    v->second.restore(this);
+  } else {
+    assert(blockIt == m_blocks.begin() && trace->isMain());
+    initFreeList();
+  }
+
   // First, visit every instruction, allocating registers as we go,
   // and inserting Reload instructions where necessary.
-  for (Block* block : m_blocks) {
+  bool isMain = trace->isMain();
+  size_t sz = m_slots.size();
+  while (blockIt != m_blocks.end()) {
+    Block* block = *blockIt;
+    if (block->getTrace() != trace) {
+      break;
+    }
+
     // clear remembered reloads that don't dominate this block
     for (SlotInfo& slot : m_slots) {
       if (SSATmp* reload = slot.m_latestReload) {
@@ -921,18 +1066,42 @@ void LinearScan::allocRegsToTrace() {
       allocRegToInstruction(it);
       dumpIR<IRInstruction, 4>(&*it, "allocated to instruction");
     }
+    if (isMain) {
+      assert(block->getTrace()->isMain());
+      if (block->getTaken() &&
+          !block->getTaken()->getTrace()->isMain()) {
+        etm[block->getTaken()].save(this);
+      }
+    }
+    ++blockIt;
   }
 
-  // Now that we have visited all instructions and inserted Reloads
-  // for SSATmps which needed to be spilled, we can go back and insert
-  // the spills.  All uses must have been visited before we do this.
-  // For each spill slot, insert the spill right after the instruction
+  // Now that we have visited all instructions on this trace,
+  // and inserted Reloads for SSATmps which needed to be spilled,
+  // we can go back and insert the spills.
+  // On the main trace, insert the spill right after the instruction
   // that generated the value (without traversing everything else).
-  for (SlotInfo& slot : m_slots) {
+  // On exit traces, if the instruction that generated the value
+  // is on the main trace, insert the spill at the start of the trace,
+  // otherwise, after the instruction that generated the value
+  size_t begin = sz;
+  size_t end = m_slots.size();
+
+  while (begin < end) {
+    SlotInfo& slot = m_slots[begin++];
     IRInstruction* spill = slot.m_spillTmp->inst();
     IRInstruction* inst = spill->getSrc(0)->inst();
     Block* block = inst->getBlock();
-    if (inst->isBlockEnd()) {
+    if (!isMain && block->getTrace()->isMain()) {
+      // We're on an exit trace, but the def is on the
+      // main trace, so put it at the start of this trace
+      if (spill->getBlock()) {
+        // its already been inserted in another exit trace
+        assert(!spill->getBlock()->getTrace()->isMain());
+        spill = spill->clone(m_irFactory);
+      }
+      block->getTrace()->front()->prepend(spill);
+    } else if (inst->isBlockEnd()) {
       block->getNext()->prepend(spill);
     } else {
       auto pos = block->iteratorTo(inst);
@@ -941,26 +1110,38 @@ void LinearScan::allocRegsToTrace() {
   }
 }
 
-void LinearScan::rematerialize() {
-  rematerializeAux();
+void LinearScan::allocRegsToTrace() {
+  ExitTraceMap etm;
+
   numberInstructions(m_blocks);
 
+  BlockList::iterator it = m_blocks.begin();
+  while (it != m_blocks.end()) {
+    allocRegsOneTrace(it, etm);
+  }
+}
+
+void LinearScan::rematerialize() {
+  numberInstructions(m_blocks);
+  dumpTrace(6, m_blocks.front()->getTrace(), "before rematerialization");
+
+  rematerializeAux();
+  numberInstructions(m_blocks);
   // We only replaced Reloads in rematerializeAux().
   // Here, we remove Spills that are never reloaded.
   removeUnusedSpills();
-  numberInstructions(m_blocks);
 }
 
 void LinearScan::rematerializeAux() {
   struct State {
     SSATmp *sp, *fp;
-    std::vector<SSATmp*> values;
+    smart::vector<SSATmp*> values;
   };
   StateVector<Block, State*> states(m_irFactory, nullptr);
   SCOPE_EXIT { for (State* s : states) delete s; };
   SSATmp* curSp = nullptr;
   SSATmp* curFp = nullptr;
-  std::vector<SSATmp*> localValues;
+  smart::vector<SSATmp*> localValues;
   auto killLocal = [&](IRInstruction& inst, unsigned src) {
     if (src < inst.getNumSrcs()) {
       unsigned loc = inst.getSrc(src)->getValInt();
@@ -1013,8 +1194,7 @@ void LinearScan::rematerializeAux() {
       if (opc == DefFP || opc == FreeActRec) {
         assert(inst.getDst()->getReg() == rVmFp);
         curFp = inst.getDst();
-      }
-      else if (opc == Reload) {
+      } else if (opc == Reload) {
         // s = Spill t0
         // t = Reload s
         SSATmp* dst = inst.getDst();
@@ -1088,7 +1268,8 @@ void LinearScan::rematerializeAux() {
 
 void LinearScan::removeUnusedSpills() {
   for (SlotInfo& slot : m_slots) {
-    IRInstruction* spill = slot.m_spillTmp->inst();
+    SSATmp* spillTmp = slot.m_spillTmp;
+    IRInstruction* spill = spillTmp->inst();
     if (spill->getDst()->getUseCount() == 0) {
       Block* block = spill->getBlock();
       block->erase(block->iteratorTo(spill));
@@ -1113,7 +1294,7 @@ void LinearScan::freeRegsAtId(uint32_t id) {
   // to this instruction, so we have to be careful to finish using
   // a register before over-writing it.
   for (auto it = m_allocatedRegs.begin(); it != m_allocatedRegs.end(); ) {
-    std::list<RegState*>::iterator next = it; ++next;
+    auto next = it; ++next;
     RegState* reg = *it;
     assert(reg->m_ssaTmp);
     if (reg->m_ssaTmp->getLastUseId() <= id) {
@@ -1131,9 +1312,8 @@ LinearScan::RegState* LinearScan::getReg(RegState* reg) {
   if (reg->isReserved() || reg->isAllocated()) {
     return nullptr;
   }
-  std::list<RegState*>& freeList = (reg->isCallerSaved() ?
-                                    m_freeCallerSaved :
-                                    m_freeCalleeSaved);
+  auto& freeList = (reg->isCallerSaved() ?
+                    m_freeCallerSaved : m_freeCalleeSaved);
   freeList.erase(reg->m_pos);
   // Pin it so that other operands in the same instruction will not reuse it.
   reg->m_pinned = true;
@@ -1142,10 +1322,9 @@ LinearScan::RegState* LinearScan::getReg(RegState* reg) {
 
 LinearScan::RegState* LinearScan::getFreeReg(bool preferCallerSaved) {
   if (m_freeCallerSaved.empty() && m_freeCalleeSaved.empty()) {
-    // no free registers --> free the first register in the allocatedRegs
-    // list; this register is the one whose last use is the most distant
     assert(!m_allocatedRegs.empty());
 
+    // no free registers --> free a register from the allocatedRegs
     // Pick the first register in <m_allocatedRegs> that is:
     // 1. not used for any source operand in the current instruction, and
     // 2. not used for the return address of a function.
@@ -1160,8 +1339,8 @@ LinearScan::RegState* LinearScan::getFreeReg(bool preferCallerSaved) {
     spill((*pos)->m_ssaTmp);
   }
 
-  std::list<RegState*>* preferred = nullptr;
-  std::list<RegState*>* other = nullptr;
+  smart::list<RegState*>* preferred = nullptr;
+  smart::list<RegState*>* other = nullptr;
   if (preferCallerSaved) {
     preferred = &m_freeCallerSaved;
     other = &m_freeCalleeSaved;
@@ -1194,9 +1373,8 @@ void LinearScan::freeReg(RegState* reg) {
 }
 
 void LinearScan::pushFreeReg(RegState* reg) {
-  std::list<RegState*>& freeList = (reg->isCallerSaved() ?
-                                    m_freeCallerSaved :
-                                    m_freeCalleeSaved);
+  auto& freeList = (reg->isCallerSaved() ?
+                    m_freeCallerSaved : m_freeCalleeSaved);
   // If next native is going to use <reg>, put <reg> to the back of the
   // queue so that it's unlikely to be misused by irrelevant tmps.
   if (RuntimeOption::EvalHHIREnablePreColoring &&
@@ -1209,7 +1387,7 @@ void LinearScan::pushFreeReg(RegState* reg) {
   }
 }
 
-LinearScan::RegState* LinearScan::popFreeReg(std::list<RegState*>& freeList) {
+LinearScan::RegState* LinearScan::popFreeReg(smart::list<RegState*>& freeList) {
   if (freeList.empty()) {
     return nullptr;
   }
@@ -1226,9 +1404,8 @@ void LinearScan::spill(SSATmp* tmp) {
 
   // Free the registers used by <tmp>.
   // Need call freeReg and modify <m_allocatedRegs>.
-  for (std::list<RegState*>::iterator it = m_allocatedRegs.begin();
-       it != m_allocatedRegs.end(); ) {
-    std::list<RegState*>::iterator next = it; ++next;
+  for (auto it = m_allocatedRegs.begin(); it != m_allocatedRegs.end(); ) {
+    auto next = it; ++next;
     RegState* reg = *it;
     if (reg->m_ssaTmp == tmp) {
       freeReg(reg);

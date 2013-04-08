@@ -96,8 +96,12 @@ inline int64_t toInt64(short   v) { return v;}
 inline int64_t toInt64(int     v) { return v;}
 inline int64_t toInt64(int64_t   v) { return v;}
 inline int64_t toInt64(double  v) {
-  return (v >= 0 ? v > std::numeric_limits<uint64_t>::max() ? 0u :
-          (uint64_t)v : (int64_t)v);
+  // If v >= 0 is false and v < 0 is false, then v is NaN. In that case, on
+  // Intel, you get 0x800..00, a.k.a. the minimum int64_t. We mimic that on all
+  // platforms, though this makes us sad.
+  return (v >= 0
+          ? (v > std::numeric_limits<uint64_t>::max() ? 0u : (uint64_t)v)
+          : (v < 0 ? (int64_t)v : std::numeric_limits<int64_t>::min()));
 }
 inline int64_t toInt64(litstr  v) { return StringData(v).toInt64();}
 inline int64_t toInt64(const StringData *v) { return v ? v->toInt64() : 0;}

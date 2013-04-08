@@ -109,8 +109,6 @@ struct UnitMergeInfo {
   void* mergeableData(int ix) { return (char*)m_mergeables + ix*sizeof(void*); }
 };
 
-typedef const uchar* PC;
-
 // Exception handler table entry.
 class EHEnt {
  public:
@@ -659,9 +657,9 @@ private:
   // pseudoMain's return value, or KindOfUninit if its not known.
   TypedValue m_mainReturn;
   int64_t m_sn;
-  uchar* m_bc;
+  uchar const* m_bc;
   size_t m_bclen;
-  uchar* m_bc_meta;
+  uchar const* m_bc_meta;
   size_t m_bc_meta_len;
   const StringData* m_filepath;
   const StringData* m_dirpath;

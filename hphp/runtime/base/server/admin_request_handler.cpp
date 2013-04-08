@@ -555,6 +555,10 @@ static bool send_status(Transport *transport, ServerStats::Format format,
   return true;
 }
 
+namespace VM {
+  extern size_t hhbc_arena_capacity();
+}
+
 bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                              Transport *transport) {
   if (cmd == "check-load") {
@@ -585,6 +589,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
     VM::Transl::Translator* tx = VM::Transl::Translator::Get();
+    appendStat("hhbc-roarena-capac", VM::hhbc_arena_capacity());
     appendStat("tc-size", tx->getCodeSize());
     appendStat("tc-stubsize", tx->getStubSize());
     appendStat("targetcache", tx->getTargetCacheSize());

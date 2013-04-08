@@ -16,30 +16,32 @@
 
 #include <sys/mman.h>
 
-#include "folly/ScopeGuard.h"
-
 #include <iostream>
 #include <iomanip>
 #include <tbb/concurrent_unordered_map.h>
 #include <boost/algorithm/string.hpp>
 
-#include <util/lock.h>
-#include <util/util.h>
-#include <util/atomic.h>
-#include <runtime/ext/ext_variable.h>
-#include <runtime/vm/bytecode.h>
-#include <runtime/vm/repo.h>
-#include <runtime/vm/blob_helper.h>
-#include <runtime/vm/translator/targetcache.h>
-#include <runtime/vm/translator/translator-deps.h>
-#include <runtime/vm/translator/translator-inline.h>
-#include <runtime/vm/translator/translator-x64.h>
-#include <runtime/vm/verifier/check.h>
-#include <runtime/base/strings.h>
-#include <runtime/vm/func_inline.h>
-#include <runtime/eval/runtime/file_repository.h>
-#include <runtime/vm/stats.h>
-#include <runtime/vm/treadmill.h>
+#include "folly/ScopeGuard.h"
+
+#include "util/lock.h"
+#include "util/util.h"
+#include "util/atomic.h"
+#include "util/read_only_arena.h"
+
+#include "runtime/ext/ext_variable.h"
+#include "runtime/vm/bytecode.h"
+#include "runtime/vm/repo.h"
+#include "runtime/vm/blob_helper.h"
+#include "runtime/vm/translator/targetcache.h"
+#include "runtime/vm/translator/translator-deps.h"
+#include "runtime/vm/translator/translator-inline.h"
+#include "runtime/vm/translator/translator-x64.h"
+#include "runtime/vm/verifier/check.h"
+#include "runtime/base/strings.h"
+#include "runtime/vm/func_inline.h"
+#include "runtime/eval/runtime/file_repository.h"
+#include "runtime/vm/stats.h"
+#include "runtime/vm/treadmill.h"
 
 namespace HPHP {
 namespace VM {
@@ -48,6 +50,32 @@ namespace VM {
 using Util::getDataRef;
 
 static const Trace::Module TRACEMOD = Trace::hhbc;
+
+ReadOnlyArena& get_readonly_arena() {
+  static ReadOnlyArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
+  return arena;
+}
+
+// Exports for the admin server.
+size_t hhbc_arena_capacity() {
+  if (!RuntimeOption::RepoAuthoritative) return 0;
+  return get_readonly_arena().capacity();
+}
+
+static const unsigned char*
+allocateBCRegion(const unsigned char* bc, size_t bclen) {
+  if (RuntimeOption::RepoAuthoritative) {
+    // In RepoAuthoritative, we assume we won't ever deallocate units
+    // and that this is read-only, mostly cold data.  So we throw it
+    // in a bump-allocator that's mprotect'd to prevent writes.
+    return static_cast<const unsigned char*>(
+      get_readonly_arena().allocate(bc, bclen)
+    );
+  }
+  auto mem = static_cast<unsigned char*>(std::malloc(bclen));
+  std::copy(bc, bc + bclen, mem);
+  return mem;
+}
 
 Mutex Unit::s_classesMutex;
 /*
@@ -333,12 +361,14 @@ Unit::Unit()
 }
 
 Unit::~Unit() {
-  if (debug) {
-    // poison released bytecode
-    memset(m_bc, 0xff, m_bclen);
+  if (!RuntimeOption::RepoAuthoritative) {
+    if (debug) {
+      // poison released bytecode
+      memset(const_cast<unsigned char*>(m_bc), 0xff, m_bclen);
+    }
+    free(const_cast<unsigned char*>(m_bc));
+    free(const_cast<unsigned char*>(m_bc_meta));
   }
-  free(m_bc);
-  free(m_bc_meta);
 
   if (m_mergeInfo) {
     // Delete all Func's.
@@ -2418,12 +2448,10 @@ Unit* UnitEmitter::create() {
   Unit* u = new Unit();
   u->m_repoId = m_repoId;
   u->m_sn = m_sn;
-  u->m_bc = (uchar*)malloc(m_bclen);
-  memcpy(u->m_bc, m_bc, m_bclen);
+  u->m_bc = allocateBCRegion(m_bc, m_bclen);
   u->m_bclen = m_bclen;
   if (m_bc_meta_len) {
-    u->m_bc_meta = (uchar*)malloc(m_bc_meta_len);
-    memcpy(u->m_bc_meta, m_bc_meta, m_bc_meta_len);
+    u->m_bc_meta = allocateBCRegion(m_bc_meta, m_bc_meta_len);
     u->m_bc_meta_len = m_bc_meta_len;
   }
   u->m_filepath = m_filepath;

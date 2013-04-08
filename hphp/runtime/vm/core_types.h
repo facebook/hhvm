@@ -41,6 +41,15 @@ typedef TypedValue Var;
 typedef uint8_t Opcode;
 
 /*
+ * Program counters in the bytecode interpreter.
+ *
+ * Normally points to an Opcode, but has type const uchar* because
+ * during a given instruction it is incremented while decoding
+ * immediates and may point to arbitrary bytes.
+ */
+typedef const uchar* PC;
+
+/*
  * Id type for various components of a unit that have to have unique
  * identifiers.  For example, function ids, class ids, string literal
  * ids.

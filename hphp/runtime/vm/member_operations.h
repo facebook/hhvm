@@ -60,7 +60,7 @@ template<> struct KeyTypeTraits<IntKey> {
   typedef int64_t rawType;
 };
 
-static inline DataType keyDataType(KeyType t) {
+inline DataType keyDataType(KeyType t) {
   if (t == StrKey) {
     return KindOfString;
   } else if (t == IntKey) {
@@ -119,7 +119,7 @@ void objOffsetUnset(Instance* base, CVarRef offset);
 StringData* prepareAnyKey(TypedValue* tv);
 
 template <KeyType keyType = AnyKey>
-static inline StringData* prepareKey(TypedValue* tv) {
+inline StringData* prepareKey(TypedValue* tv) {
   if (keyType == StrKey) {
     return reinterpret_cast<StringData*>(tv);
   } else if (keyType == AnyKey) {
@@ -130,7 +130,7 @@ static inline StringData* prepareKey(TypedValue* tv) {
 }
 
 template <KeyType keyType>
-static inline void releaseKey(StringData* keySD) {
+inline void releaseKey(StringData* keySD) {
   if (keyType == AnyKey) {
     decRefStr(keySD);
   } else {
@@ -138,7 +138,7 @@ static inline void releaseKey(StringData* keySD) {
   }
 }
 
-static inline void opPre(TypedValue*& base, DataType& type) {
+inline void opPre(TypedValue*& base, DataType& type) {
   // Get inner variant if necessary.
   type = base->m_type;
   if (type == KindOfRef) {
@@ -147,13 +147,13 @@ static inline void opPre(TypedValue*& base, DataType& type) {
   }
 }
 
-static inline TypedValue* ElemArrayRawKey(ArrayData* base,
+inline TypedValue* ElemArrayRawKey(ArrayData* base,
                                           int64_t key) {
   TypedValue* result = base->nvGet(key);
   return result ? result : (TypedValue*)&null_variant;
 }
 
-static inline TypedValue* ElemArrayRawKey(ArrayData* base,
+inline TypedValue* ElemArrayRawKey(ArrayData* base,
                                           StringData* key) {
   int64_t n;
   TypedValue* result = !key->isStrictlyInteger(n) ? base->nvGet(key) :
@@ -162,7 +162,7 @@ static inline TypedValue* ElemArrayRawKey(ArrayData* base,
 }
 
 template <bool warn, KeyType keyType>
-static inline TypedValue* ElemArray(ArrayData* base,
+inline TypedValue* ElemArray(ArrayData* base,
                                     TypedValue* key) {
   TypedValue* result;
   if (keyType == AnyKey) {
@@ -193,7 +193,7 @@ static inline TypedValue* ElemArray(ArrayData* base,
 
 // $result = $base[$key];
 template <bool warn, KeyType keyType = AnyKey>
-static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
                                TypedValue* base, bool& baseStrOff,
                                TypedValue* key) {
   TypedValue* result;
@@ -271,7 +271,7 @@ static inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template <bool warn, KeyType keyType>
-static inline TypedValue* ElemDArray(TypedValue* base, TypedValue* key) {
+inline TypedValue* ElemDArray(TypedValue* base, TypedValue* key) {
   TypedValue* result;
   bool defined = !warn ||
     tvAsCVarRef(base).asCArrRef().exists(keyAsValue<keyType>(key));
@@ -301,7 +301,7 @@ static inline TypedValue* ElemDArray(TypedValue* base, TypedValue* key) {
 //      v
 //   $result
 template <bool warn, bool reffy, KeyType keyType = AnyKey>
-static inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
                                 TypedValue* base, TypedValue* key) {
   TypedValue scratch;
   TypedValue* result;
@@ -392,7 +392,7 @@ static inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
 //      v
 //   $result
 template <KeyType keyType = AnyKey>
-static inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
                                 TypedValue* base, TypedValue* key) {
   TypedValue* result = nullptr;
   DataType type;
@@ -448,7 +448,7 @@ static inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 // $result = ($base[] = ...);
-static inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
                                   TypedValue* base) {
   TypedValue* result;
   DataType type;
@@ -509,14 +509,14 @@ static inline TypedValue* NewElem(TypedValue& tvScratch, TypedValue& tvRef,
   return result;
 }
 
-static inline void SetElemEmptyish(TypedValue* base, TypedValue* key,
+inline void SetElemEmptyish(TypedValue* base, TypedValue* key,
                                    Cell* value) {
   Array a = Array::Create();
   a.set(tvAsCVarRef(key), tvAsCVarRef(value));
   tvAsVariant(base) = a;
 }
 template <bool setResult>
-static inline void SetElemNumberish(Cell* value) {
+inline void SetElemNumberish(Cell* value) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   if (setResult) {
     tvRefcountedDecRefCell((TypedValue*)value);
@@ -564,14 +564,14 @@ arrayRefShuffle(ArrayData* oldData, ArrayData* newData, TypedValue* base) {
   return ShuffleReturn<setRef>::do_return(newData);
 }
 
-static inline ArrayData* SetElemArrayRawKey(ArrayData* a,
+inline ArrayData* SetElemArrayRawKey(ArrayData* a,
                                             int64_t key,
                                             Cell* value,
                                             bool copy) {
   return a->set(key, tvCellAsCVarRef(value), copy);
 }
 
-static inline ArrayData* SetElemArrayRawKey(ArrayData* a,
+inline ArrayData* SetElemArrayRawKey(ArrayData* a,
                                             StringData* key,
                                             Cell* value,
                                             bool copy) {
@@ -584,7 +584,7 @@ static inline ArrayData* SetElemArrayRawKey(ArrayData* a,
 }
 
 template <bool setResult, KeyType keyType>
-static inline void SetElemArray(TypedValue* base, TypedValue* key,
+inline void SetElemArray(TypedValue* base, TypedValue* key,
                                 Cell* value) {
   ArrayData* a = base->m_data.parr;
   ArrayData* newData = nullptr;
@@ -616,7 +616,7 @@ static inline void SetElemArray(TypedValue* base, TypedValue* key,
 // SetOpElem(), because doing so avoids a dup operation that SetOpElem() can't
 // get around.
 template <bool setResult, KeyType keyType = AnyKey>
-static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
+inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
   TypedValue scratch;
   DataType type;
   opPre(base, type);
@@ -731,13 +731,13 @@ static inline void SetElem(TypedValue* base, TypedValue* key, Cell* value) {
   }
 }
 
-static inline void SetNewElemEmptyish(TypedValue* base, Cell* value) {
+inline void SetNewElemEmptyish(TypedValue* base, Cell* value) {
   Array a = Array::Create();
   a.append(tvCellAsCVarRef(value));
   tvAsVariant(base) = a;
 }
 template <bool setResult>
-static inline void SetNewElemNumberish(Cell* value) {
+inline void SetNewElemNumberish(Cell* value) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   if (setResult) {
     tvRefcountedDecRefCell((TypedValue*)value);
@@ -745,7 +745,7 @@ static inline void SetNewElemNumberish(Cell* value) {
   }
 }
 template <bool setResult>
-static inline void SetNewElem(TypedValue* base, Cell* value) {
+inline void SetNewElem(TypedValue* base, Cell* value) {
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -801,7 +801,7 @@ static inline void SetNewElem(TypedValue* base, Cell* value) {
   }
 }
 
-static inline TypedValue* SetOpElemEmptyish(unsigned char op, TypedValue* base,
+inline TypedValue* SetOpElemEmptyish(unsigned char op, TypedValue* base,
                                             TypedValue* key, Cell* rhs) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt(tvAsCVarRef(key));
@@ -813,14 +813,14 @@ static inline TypedValue* SetOpElemEmptyish(unsigned char op, TypedValue* base,
   SETOP_BODY(result, op, rhs);
   return result;
 }
-static inline TypedValue* SetOpElemNumberish(TypedValue& tvScratch) {
+inline TypedValue* SetOpElemNumberish(TypedValue& tvScratch) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   tvWriteNull(&tvScratch);
   return &tvScratch;
 }
 
 template <KeyType keyType = AnyKey>
-static inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
                                     unsigned char op, TypedValue* base,
                                     TypedValue* key, Cell* rhs) {
   TypedValue scratch;
@@ -882,7 +882,7 @@ static inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
   return result;
 }
 
-static inline TypedValue* SetOpNewElemEmptyish(unsigned char op,
+inline TypedValue* SetOpNewElemEmptyish(unsigned char op,
                                                TypedValue* base, Cell* rhs) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt();
@@ -890,12 +890,12 @@ static inline TypedValue* SetOpNewElemEmptyish(unsigned char op,
   SETOP_BODY(result, op, rhs);
   return result;
 }
-static inline TypedValue* SetOpNewElemNumberish(TypedValue& tvScratch) {
+inline TypedValue* SetOpNewElemNumberish(TypedValue& tvScratch) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   tvWriteNull(&tvScratch);
   return &tvScratch;
 }
-static inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
                                        unsigned char op, TypedValue* base,
                                        Cell* rhs) {
   TypedValue* result;
@@ -953,7 +953,7 @@ static inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template <bool setResult>
-static inline void IncDecBody(unsigned char op, TypedValue* fr,
+inline void IncDecBody(unsigned char op, TypedValue* fr,
                               TypedValue* to) {
   if (fr->m_type == KindOfInt64) {
     switch ((IncDecOp)op) {
@@ -1035,7 +1035,7 @@ static inline void IncDecBody(unsigned char op, TypedValue* fr,
 }
 
 template <bool setResult>
-static inline void IncDecElemEmptyish(unsigned char op, TypedValue* base,
+inline void IncDecElemEmptyish(unsigned char op, TypedValue* base,
                                       TypedValue* key, TypedValue& dest) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt(tvAsCVarRef(key));
@@ -1047,14 +1047,14 @@ static inline void IncDecElemEmptyish(unsigned char op, TypedValue* base,
   IncDecBody<setResult>(op, result, &dest);
 }
 template <bool setResult>
-static inline void IncDecElemNumberish(TypedValue& dest) {
+inline void IncDecElemNumberish(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   if (setResult) {
     tvWriteNull(&dest);
   }
 }
 template <bool setResult, KeyType keyType = AnyKey>
-static inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
+inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
                               unsigned char op, TypedValue* base,
                               TypedValue* key, TypedValue& dest) {
   TypedValue scratch;
@@ -1111,7 +1111,7 @@ static inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template <bool setResult>
-static inline void IncDecNewElemEmptyish(unsigned char op, TypedValue* base,
+inline void IncDecNewElemEmptyish(unsigned char op, TypedValue* base,
                                          TypedValue& dest) {
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt();
@@ -1119,14 +1119,14 @@ static inline void IncDecNewElemEmptyish(unsigned char op, TypedValue* base,
   IncDecBody<setResult>(op, result, &dest);
 }
 template <bool setResult>
-static inline void IncDecNewElemNumberish(TypedValue& dest) {
+inline void IncDecNewElemNumberish(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   if (setResult) {
     tvWriteNull(&dest);
   }
 }
 template <bool setResult>
-static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
+inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
                                  unsigned char op, TypedValue* base,
                                  TypedValue& dest) {
   DataType type;
@@ -1178,12 +1178,12 @@ static inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
 }
 
-static inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, int64_t key,
+inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, int64_t key,
                                               bool copy) {
   return a->remove(key, copy);
 }
 
-static inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, StringData* key,
+inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, StringData* key,
                                               bool copy) {
   int64_t n;
   if (!key->isStrictlyInteger(n)) {
@@ -1194,7 +1194,7 @@ static inline ArrayData* UnsetElemArrayRawKey(ArrayData* a, StringData* key,
 }
 
 template <KeyType keyType>
-static inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
+inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
   ArrayData* a = base->m_data.parr;
   bool copy = a->getCount() > 1;
   if (keyType == AnyKey) {
@@ -1220,7 +1220,7 @@ static inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
 }
 
 template <KeyType keyType = AnyKey>
-static inline void UnsetElem(TypedValue* base, TypedValue* member) {
+inline void UnsetElem(TypedValue* base, TypedValue* member) {
   TypedValue scratch;
   DataType type;
   opPre(base, type);
@@ -1247,7 +1247,7 @@ static inline void UnsetElem(TypedValue* base, TypedValue* member) {
 }
 
 template <bool warn>
-static inline DataType propPreNull(TypedValue& tvScratch, TypedValue*& result) {
+inline DataType propPreNull(TypedValue& tvScratch, TypedValue*& result) {
   tvWriteNull(&tvScratch);
   result = &tvScratch;
   if (warn) {
@@ -1255,13 +1255,13 @@ static inline DataType propPreNull(TypedValue& tvScratch, TypedValue*& result) {
   }
   return KindOfNull;
 }
-static inline Instance* createDefaultObject() {
+inline Instance* createDefaultObject() {
   raise_warning(Strings::CREATING_DEFAULT_OBJECT);
   Instance* obj = newInstance(SystemLib::s_stdclassClass);
   return obj;
 }
 template <bool warn, bool define>
-static inline DataType propPreStdclass(TypedValue& tvScratch,
+inline DataType propPreStdclass(TypedValue& tvScratch,
                                        TypedValue*& result, TypedValue* base) {
   if (!define) {
     return propPreNull<warn>(tvScratch, result);
@@ -1277,7 +1277,7 @@ static inline DataType propPreStdclass(TypedValue& tvScratch,
 }
 
 template <bool warn, bool define, bool issetEmpty>
-static inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
+inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
                                TypedValue*& base) {
   DataType type;
   opPre(base, type);
@@ -1323,7 +1323,7 @@ static inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
 //     $result
 template <bool warn, bool define, bool unset, bool baseIsObj = false,
           KeyType keyType = AnyKey>
-static inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
                                Class* ctx, TypedValue* base, TypedValue* key) {
   static_assert(keyType != IntKey, "Integer property keys are not supported");
   assert(!warn || !unset);
@@ -1355,7 +1355,7 @@ static inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template<bool useEmpty>
-static inline bool IssetEmptyElemObj(TypedValue& tvRef, Instance* instance,
+inline bool IssetEmptyElemObj(TypedValue& tvRef, Instance* instance,
                                      bool baseStrOff, TypedValue* key) {
   if (useEmpty) {
     if (LIKELY(instance->isCollection())) {
@@ -1373,7 +1373,7 @@ static inline bool IssetEmptyElemObj(TypedValue& tvRef, Instance* instance,
 }
 
 template <bool useEmpty, bool isObj = false, KeyType keyType = AnyKey>
-static inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
+inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
                                   TypedValue* base, bool baseStrOff,
                                   TypedValue* key) {
   TypedValue scratch;
@@ -1432,7 +1432,7 @@ static inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template <bool useEmpty, KeyType keyType>
-static inline bool IssetEmptyPropObj(Class* ctx, Instance* instance,
+inline bool IssetEmptyPropObj(Class* ctx, Instance* instance,
                                      TypedValue* key) {
   StringData* keySD;
   bool issetEmptyResult;
@@ -1445,7 +1445,7 @@ static inline bool IssetEmptyPropObj(Class* ctx, Instance* instance,
 }
 
 template <bool useEmpty, bool isObj = false, KeyType keyType = AnyKey>
-static inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
+inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
                                   TypedValue* key) {
   if (isObj) {
     return IssetEmptyPropObj<useEmpty, keyType>(
@@ -1467,14 +1467,14 @@ static inline bool IssetEmptyProp(Class* ctx, TypedValue* base,
 }
 
 template <bool setResult>
-static inline void SetPropNull(Cell* val) {
+inline void SetPropNull(Cell* val) {
   if (setResult) {
     tvRefcountedDecRefCell(val);
     tvWriteNull(val);
   }
   raise_warning("Cannot access property on non-object");
 }
-static inline void SetPropStdclass(TypedValue* base, TypedValue* key,
+inline void SetPropStdclass(TypedValue* base, TypedValue* key,
                                    Cell* val) {
   Instance* obj = createDefaultObject();
   obj->incRefCount();
@@ -1487,7 +1487,7 @@ static inline void SetPropStdclass(TypedValue* base, TypedValue* key,
 }
 
 template <KeyType keyType>
-static inline void SetPropObj(Class* ctx, Instance* instance,
+inline void SetPropObj(Class* ctx, Instance* instance,
                               TypedValue* key, Cell* val) {
   StringData* keySD = prepareKey<keyType>(key);
   // Set property.
@@ -1497,7 +1497,7 @@ static inline void SetPropObj(Class* ctx, Instance* instance,
 
 // $base->$key = $val
 template <bool setResult, bool isObj = false, KeyType keyType = AnyKey>
-static inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
+inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
                            Cell* val) {
   if (isObj) {
     SetPropObj<keyType>(ctx, reinterpret_cast<Instance*>(base),
@@ -1546,12 +1546,12 @@ static inline void SetProp(Class* ctx, TypedValue* base, TypedValue* key,
   }
 }
 
-static inline TypedValue* SetOpPropNull(TypedValue& tvScratch) {
+inline TypedValue* SetOpPropNull(TypedValue& tvScratch) {
   raise_warning("Attempt to assign property of non-object");
   tvWriteNull(&tvScratch);
   return &tvScratch;
 }
-static inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
+inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
                                             TypedValue* base, TypedValue* key,
                                             Cell* rhs) {
   Instance* obj = createDefaultObject();
@@ -1569,7 +1569,7 @@ static inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, unsigned char op,
 }
 
 template <KeyType keyType>
-static inline TypedValue* SetOpPropObj(TypedValue& tvRef, Class* ctx,
+inline TypedValue* SetOpPropObj(TypedValue& tvRef, Class* ctx,
                                        unsigned char op, Instance* instance,
                                        TypedValue* key, Cell* rhs) {
   StringData* keySD = prepareKey<keyType>(key);
@@ -1580,7 +1580,7 @@ static inline TypedValue* SetOpPropObj(TypedValue& tvRef, Class* ctx,
 
 // $base->$key <op>= $rhs
 template<bool isObj = false, KeyType keyType = AnyKey>
-static inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
+inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
                                     Class* ctx, unsigned char op,
                                     TypedValue* base, TypedValue* key,
                                     Cell* rhs) {
@@ -1633,14 +1633,14 @@ static inline TypedValue* SetOpProp(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template <bool setResult>
-static inline void IncDecPropNull(TypedValue& dest) {
+inline void IncDecPropNull(TypedValue& dest) {
   raise_warning("Attempt to increment/decrement property of non-object");
   if (setResult) {
     tvWriteNull(&dest);
   }
 }
 template <bool setResult>
-static inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
+inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
                                       TypedValue* key, TypedValue& dest) {
   Instance* obj = createDefaultObject();
   obj->incRefCount();
@@ -1668,7 +1668,7 @@ static inline void IncDecPropStdclass(unsigned char op, TypedValue* base,
 }
 
 template <bool setResult, KeyType keyType>
-static inline void IncDecPropObj(TypedValue& tvRef, Class* ctx,
+inline void IncDecPropObj(TypedValue& tvRef, Class* ctx,
                                  unsigned char op, Instance* base,
                                  TypedValue* key, TypedValue& dest) {
   StringData* keySD = prepareKey<keyType>(key);
@@ -1677,7 +1677,7 @@ static inline void IncDecPropObj(TypedValue& tvRef, Class* ctx,
 }
 
 template <bool setResult, bool isObj = false, KeyType keyType = AnyKey>
-static inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
+inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
                               Class* ctx, unsigned char op,
                               TypedValue* base, TypedValue* key,
                               TypedValue& dest) {
@@ -1730,7 +1730,7 @@ static inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template<bool isObj = false, KeyType keyType = AnyKey>
-static inline void UnsetProp(Class* ctx, TypedValue* base,
+inline void UnsetProp(Class* ctx, TypedValue* base,
                              TypedValue* key) {
   Instance* instance;
   if (!isObj) {

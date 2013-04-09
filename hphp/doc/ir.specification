@@ -1163,14 +1163,20 @@ D:Int LdSwitchObjIndex S0:Obj S1:Int S2:Int
   in the range [S1:S1 + S2), and if so return the value S1 - (Int)S0.
   Else, they return the target of the default target, S2 + 1.
 
-D:StkPtr InterpOne S0:StkPtr S1:StkPtr S2:ConstInt S3:ConstInt
-                     S4:ConstInt [ -> L ]
+D:StkPtr InterpOne<T> S0:StkPtr S1:StkPtr S2:ConstInt S3:ConstInt
 
   Call the interpreter implementation function for one opcode.  S0 and
-  S1 are the VM frame and stack pointers, respectively.  S2 is the bytecode
-  offset.  S3 is the number of cells to adjust the stack pointer before
-  running the interpreter function.  S4 is the VM DataType of the return
-  type for the opcode.  Returns the updated VM stack pointer.
+  S1 are, respectively, the VM frame and stack pointers before this
+  instruction.  S2 is the bytecode offset.  S3 is the stack adjustment
+  performed by this instruction: number of cells popped minus number
+  of cells pushed.  This instruction returns the updated VM stack
+  pointer.
+
+InterpOneCF S0:StkPtr S1:StkPtr S2:ConstInt S3:ConstInt
+
+  Call the interpreter implementation function for one control-flow
+  opcode.  S0 and S1 are, respectively, the VM frame and stack
+  pointers before this instruction.  S2 is the bytecode offset.
 
 
 15. Register allocation

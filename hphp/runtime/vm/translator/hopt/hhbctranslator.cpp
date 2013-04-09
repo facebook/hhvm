@@ -111,7 +111,7 @@ SSATmp* HhbcTranslator::pop(Type type) {
 
 void HhbcTranslator::discard(unsigned n) {
   for (unsigned i = 0; i < n; ++i) {
-    pop(Type::Gen);
+    pop(Type::Gen | Type::Cls);
   }
 }
 
@@ -324,7 +324,7 @@ void HhbcTranslator::emitAddNewElemC() {
 }
 
 void HhbcTranslator::emitNewCol(int type, int numElems) {
-  emitInterpOneOrPunt(Type::Obj);
+  emitInterpOneOrPunt(Type::Obj, 0);
 }
 
 void HhbcTranslator::emitColAddElemC() {
@@ -336,7 +336,7 @@ void HhbcTranslator::emitColAddNewElemC() {
 }
 
 void HhbcTranslator::emitCns(uint32_t id) {
-  emitInterpOneOrPunt(Type::Cell);
+  emitInterpOneOrPunt(Type::Cell, 0);
 }
 
 void HhbcTranslator::emitDefCns(uint32_t id) {
@@ -355,19 +355,19 @@ void HhbcTranslator::emitConcat() {
 
 void HhbcTranslator::emitDefCls(int cid, Offset after) {
 //  m_tb->genDefCls(lookupPreClassId(cid), getCurUnit()->at(after));
-  emitInterpOneOrPunt(Type::None);
+  emitInterpOneOrPunt(Type::None, 0);
 }
 
 void HhbcTranslator::emitDefFunc(int fid) {
 //  m_tb->genDefFunc(lookupFuncId(fid));
-  emitInterpOneOrPunt(Type::None);
+  emitInterpOneOrPunt(Type::None, 0);
 }
 
 void HhbcTranslator::emitLateBoundCls() {
   Class* clss = getCurClass();
   if (!clss) {
     // no static context class, so this will raise an error
-    emitInterpOne(Type::Cls);
+    emitInterpOne(Type::Cls, 0);
     return;
   }
   push(m_tb->gen(LdClsCtx, m_tb->genLdCtx(getCurFunc())));
@@ -376,7 +376,7 @@ void HhbcTranslator::emitLateBoundCls() {
 void HhbcTranslator::emitSelf() {
   Class* clss = getCurClass();
   if (clss == NULL) {
-    emitInterpOne(Type::Cls);
+    emitInterpOne(Type::Cls, 0);
   } else {
     push(m_tb->genDefConst(clss));
   }
@@ -385,7 +385,7 @@ void HhbcTranslator::emitSelf() {
 void HhbcTranslator::emitParent() {
   const Class* clss = getCurClass()->parent();
   if (clss == NULL || clss->parent() == NULL) {
-    emitInterpOne(Type::Cls);
+    emitInterpOne(Type::Cls, 0);
   } else {
     push(m_tb->genDefConst(clss->parent()));
   }
@@ -853,8 +853,7 @@ void HhbcTranslator::emitContStopped() {
 }
 
 void HhbcTranslator::emitContHandle() {
-  // No reason to punt, translator-x64 does emitInterpOne as well
-  emitInterpOne(Type::None, 1);
+  emitInterpOneCF(1);
 }
 
 void HhbcTranslator::emitStrlen() {
@@ -1826,7 +1825,16 @@ void HhbcTranslator::checkTypeLocal(uint32_t locId, Type type) {
 }
 
 void HhbcTranslator::assertTypeLocal(uint32_t localIndex, Type type) {
-  m_tb->genAssertLoc(localIndex, type);
+  m_tb->genAssertLoc(localIndex, type, false);
+}
+
+void HhbcTranslator::overrideTypeLocal(uint32_t localIndex, Type type) {
+  // if changing the inner type of a boxed local, also drop the
+  // information about inner types for any other boxed local
+  if (type.isBoxed()) {
+    m_tb->dropLocalRefsInnerTypes();
+  }
+  m_tb->genAssertLoc(localIndex, type, true);
 }
 
 Trace* HhbcTranslator::guardTypeStack(uint32_t stackIndex,
@@ -1967,7 +1975,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
    * For now we just interp that case.
    */
   if (!locType.isObj()) {
-    emitInterpOneOrPunt(Type::None);
+    emitInterpOneOrPunt(Type::None, 0);
     return;
   }
 
@@ -2544,26 +2552,45 @@ void HhbcTranslator::emitXor() {
   m_tb->genDecRef(btr);
 }
 
-void HhbcTranslator::emitInterpOne(Type type,
-                                   int numDiscard, /* = 0 */
-                                   Trace* target /* = NULL */) {
+/**
+ * Emit InterpOne instruction.
+ *   - 'type' is the return type of the value the instruction pushes on
+ *            the stack if any (or Type:None if none)
+ *   - 'numPopped' is the number of cells that this instruction pops
+ *   - 'numExtraPushed' is the number of cells this instruction pushes on
+ *            the stack, in addition to the cell corresponding to 'type'
+ */
+void HhbcTranslator::emitInterpOne(Type type, int numPopped,
+                                   int numExtraPushed) {
   spillStack();
-  // discard the top elements of the stack
-  discard(numDiscard);
-  m_tb->genInterpOne(m_bcOff, m_stackDeficit, type, target);
+  // discard the top elements of the stack, which are consumed by this instr
+  discard(numPopped);
+  assert(numPopped == m_stackDeficit);
+  int numPushed = (type == Type::None ? 0 : 1) + numExtraPushed;
+  m_tb->genInterpOne(m_bcOff, numPopped - numPushed, type);
   m_stackDeficit = 0;
 }
 
-void HhbcTranslator::emitInterpOneOrPunt(Type type,
-                                         int numDiscard, /* = 0 */
-                                         Trace* target /* = NULL */) {
+void HhbcTranslator::emitInterpOneCF(int numPopped) {
+  spillStack();
+  // discard the top elements of the stack, which are consumed by this instr
+  discard(numPopped);
+  assert(numPopped == m_stackDeficit);
+  m_tb->gen(InterpOneCF, m_tb->getFp(), m_tb->getSp(),
+            m_tb->genDefConst(m_bcOff));
+  m_stackDeficit = 0;
+  m_hasExit = true;
+}
+
+void HhbcTranslator::emitInterpOneOrPunt(Type type, int numPopped,
+                                         int numExtraPushed) {
   if (RuntimeOption::EvalIRPuntDontInterp) {
     Op op = *(Op*)(getCurUnit()->entry() + m_bcOff);
     const char* name = StringData::GetStaticString(
       std::string("PuntDontInterp-") + opcodeToName(op))->data();
     SPUNT(name);
   } else {
-    emitInterpOne(type, numDiscard, target);
+    emitInterpOne(type, numPopped, numExtraPushed);
   }
 }
 

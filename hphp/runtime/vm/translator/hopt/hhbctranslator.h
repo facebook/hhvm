@@ -352,8 +352,11 @@ struct HhbcTranslator {
   void assertTypeStack(uint32_t stackIndex, Type type);
   void checkTypeLocal(uint32_t localIndex, Type type);
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
+  void overrideTypeLocal(uint32_t localIndex, Type type);
   void setThisAvailable();
   void emitLoadDeps();
+  void emitInterpOne(Type type, int numPopped, int numExtraPushed = 0);
+  void emitInterpOneCF(int numPopped);
 
 private:
   /*
@@ -534,10 +537,7 @@ private:
   Trace* getExitSlowTrace();
   Trace* getGuardExit();
   SSATmp* emitLdLocWarn(uint32_t id, Trace* target);
-  void emitInterpOne(Type type, int numDiscard = 0, Trace* target = nullptr);
-  void emitInterpOneOrPunt(Type type,
-                           int numDiscard = 0,
-                           Trace* target = nullptr);
+  void emitInterpOneOrPunt(Type type, int numPopped, int numExtraPushed = 0);
   void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);

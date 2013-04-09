@@ -361,6 +361,12 @@ class NormalizedInstruction {
   bool noOp:1;
 
   /*
+   * Used with HHIR. Instruction shoud be interpreted, because previous attempt
+   * to translate it has failed.
+   */
+  bool interp:1;
+
+  /*
    * This is an FPush* that will be directly bound to a Func*
    */
   bool directCall:1;
@@ -407,6 +413,7 @@ class NormalizedInstruction {
     noSurprise(false),
     noCtor(false),
     noOp(false),
+    interp(false),
     directCall(false),
     inlineReturn(false),
     m_txFlags(Interp) {

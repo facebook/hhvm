@@ -716,6 +716,7 @@ static inline bool isTypePred(const Opcode op) {
 int instrLen(const Opcode* opcode);
 InstrFlags instrFlags(Opcode opcode);
 int numSuccs(const Opcode* opcode);
+bool pushesActRec(Opcode opcode);
 
 // The returned struct has normalized variable-sized immediates
 ArgUnion getImm(const Opcode* opcode, int idx);

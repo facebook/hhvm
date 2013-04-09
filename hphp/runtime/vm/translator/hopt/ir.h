@@ -389,7 +389,10 @@ O(ArrayAdd,                     D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 O(DefCls,                           ND, SUnk,                          C|E|N) \
 O(DefFunc,                          ND, SUnk,                       C|E|N|Er) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                 C|N) \
-O(InterpOne,                 D(StkPtr), SUnk,                E|N|Mem|Refs|Er) \
+O(InterpOne,                 D(StkPtr), S(StkPtr) S(StkPtr)                   \
+                                          C(Int) C(Int),     E|N|Mem|Refs|Er) \
+O(InterpOneCF,                      ND, S(StkPtr) S(StkPtr)                   \
+                                          C(Int),          T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
 O(AllocSpill,                       ND, C(Int),                        E|Mem) \
@@ -405,7 +408,7 @@ O(FillContLocals,                   ND, S(StkPtr)                             \
                                           S(Obj),                    E|N|Mem) \
 O(FillContThis,                     ND, S(Obj)                                \
                                           S(PtrToCell) C(Int),         E|Mem) \
-O(ContEnter,                        ND, S(StkPtr)                              \
+O(ContEnter,                        ND, S(StkPtr)                             \
                                           S(TCA) C(Int) S(StkPtr),     E|Mem) \
 O(UnlinkContVarEnv,                 ND, S(StkPtr),                   E|N|Mem) \
 O(LinkContVarEnv,                   ND, S(StkPtr),                   E|N|Mem) \
@@ -1390,6 +1393,17 @@ public:
 
   static Type fromRuntimeType(const Transl::RuntimeType& rtt) {
     return fromDataType(rtt.outerType(), rtt.innerType());
+  }
+
+  static Type fromDynLocation(const Transl::DynLocation* dynLoc) {
+    if (!dynLoc) {
+      return JIT::Type::None;
+    }
+    DataType dt = dynLoc->rtt.outerType();
+    if (dt == KindOfUnknown) {
+      return JIT::Type::Gen;
+    }
+    return JIT::Type::fromDataType(dt, dynLoc->rtt.innerType());
   }
 }; // class Type
 

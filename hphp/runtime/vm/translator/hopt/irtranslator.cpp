@@ -1389,9 +1389,49 @@ TranslatorX64::irPassPredictedAndInferredTypes(const NormalizedInstruction& i) {
   }
 }
 
-void
-TranslatorX64::irTranslateInstr(const Tracelet& t,
-                                const NormalizedInstruction& i) {
+/**
+ * Returns the number of cells that instruction i pops from the stack.
+ */
+static int getNumPopped(const NormalizedInstruction& i) {
+  return -getStackDelta(i)
+    // getStackDelta includes the output left on the stack, so discount it
+    + (i.outStack ? 1 : 0)
+    // getStackDelta includes ActRec cells pushed on the stack, so discount them
+    + (pushesActRec(i.op()) ? kNumActRecCells : 0);
+}
+
+/**
+ * Returns the number of Act-Rec cells that instruction i pushes onto the stack.
+ */
+static int getNumARCellsPushed(const NormalizedInstruction& i) {
+  return pushesActRec(i.op()) ? kNumActRecCells : 0;
+}
+
+void TranslatorX64::irInterpretInstr(const NormalizedInstruction& i) {
+  JIT::Type outStkType = JIT::Type::fromDynLocation(i.outStack);
+  int poppedCells      = getNumPopped(i);
+  int arPushedCells    = getNumARCellsPushed(i);
+
+  FTRACE(5, "HHIR: BC Instr {}  Popped = {}  ARCellsPushed = {}\n",
+         i.toString(), poppedCells, arPushedCells);
+
+  if (i.changesPC) {
+    m_hhbcTrans->emitInterpOneCF(poppedCells);
+  } else {
+    m_hhbcTrans->emitInterpOne(outStkType, poppedCells, arPushedCells);
+    if (i.outLocal) {
+      // HHIR tracks local values and types, so we should inform it about
+      // the new local type.  This is done via an overriding type assertion.
+      assert(i.outLocal->isLocal());
+      int32_t locId = i.outLocal->location.offset;
+      JIT::Type newType = JIT::Type::fromRuntimeType(i.outLocal->rtt);
+      m_hhbcTrans->overrideTypeLocal(locId, newType);
+    }
+  }
+}
+
+void TranslatorX64::irTranslateInstr(const Tracelet& t,
+                                     const NormalizedInstruction& i) {
   assert(m_useHHIR);
   assert(!i.outStack || i.outStack->isStack());
   assert(!i.outLocal || i.outLocal->isLocal());
@@ -1423,7 +1463,12 @@ TranslatorX64::irTranslateInstr(const Tracelet& t,
     m_hhbcTrans->emitIncStat(Stats::opcodeToIRPostStatCounter(i.op()),
                              1, true);
   }
-  irTranslateInstrWork(t, i);
+
+  if (i.interp) {
+    irInterpretInstr(i);
+  } else {
+    irTranslateInstrWork(t, i);
+  }
 
   irPassPredictedAndInferredTypes(i);
 }
@@ -1474,6 +1519,19 @@ void TranslatorX64::irEmitResolvedDeps(const ChangeMap& resolvedDeps) {
   }
 }
 
+static bool supportedInterpOne(const NormalizedInstruction* i) {
+  switch (i->op()) {
+    // Instructions that do function return are not supported yet
+    case OpRetC:
+    case OpRetV:
+    case OpContRetC:
+    case OpNativeImpl:
+      return false;
+    default:
+      return true;
+  }
+}
+
 TranslatorX64::TranslateTraceletResult
 TranslatorX64::irTranslateTracelet(Tracelet&               t,
                                    const TCA               start,
@@ -1508,6 +1566,14 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
         m_curNI = ni;
         irTranslateInstr(t, *ni);
       } catch (JIT::FailedIRGen& fcg) {
+        // If we haven't tried interpreting ni yet, flag it to be interpreted
+        // and retry
+        if (RuntimeOption::EvalHHIRDisableTx64 && !ni->interp &&
+            supportedInterpOne(ni)) {
+          ni->interp = true;
+          transResult = Retry;
+          break;
+        }
         if (!RuntimeOption::EvalHHIRDisableTx64 || !ni->prev) {
           // Let tx64 handle the entire tracelet.
           throw;

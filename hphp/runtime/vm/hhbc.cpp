@@ -486,6 +486,26 @@ StackTransInfo instrStackTransInfo(const Opcode* opcode) {
   }
 }
 
+bool pushesActRec(Opcode opcode) {
+  switch (opcode) {
+    case OpFPushFunc:
+    case OpFPushFuncD:
+    case OpFPushObjMethod:
+    case OpFPushObjMethodD:
+    case OpFPushClsMethod:
+    case OpFPushClsMethodF:
+    case OpFPushClsMethodD:
+    case OpFPushCtor:
+    case OpFPushCtorD:
+    case OpFPushCuf:
+    case OpFPushCufF:
+    case OpFPushCufSafe:
+      return true;
+    default:
+      return false;
+  }
+}
+
 static void staticArrayStreamer(ArrayData* ad, std::stringstream& out) {
   out << "array(";
   if (!ad->empty()) {

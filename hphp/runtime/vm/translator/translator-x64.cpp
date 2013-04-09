@@ -3561,10 +3561,12 @@ class ConditionalCodeCursor {
 TCA
 TranslatorX64::emitServiceReqVA(SRFlags flags, ServiceRequest req, int numArgs,
                                 va_list args) {
-  bool align = bool(flags & SRFlags::SRAlign);
-  bool inLine = bool(flags & SRFlags::SRInline);
-  TCA start = getFreeStub(inLine);
-  ConditionalCodeCursor cg(astubs, start);
+  bool emitInA = bool(flags & SRFlags::SREmitInA);
+  bool align   = bool(flags & SRFlags::SRAlign) && !emitInA;
+  bool inLine  = bool(flags & SRFlags::SRInline);
+  Asm&   as = emitInA ? a : astubs;
+  TCA start = emitInA ? a.code.frontier : getFreeStub(inLine);
+  ConditionalCodeCursor cg(as, start);
   /* max space for moving to align, saving VM regs plus emitting args */
   static const int kVMRegSpace = 0x14;
   static const int kMovSize = 0xa;
@@ -3573,10 +3575,10 @@ TranslatorX64::emitServiceReqVA(SRFlags flags, ServiceRequest req, int numArgs,
                               + kVMRegSpace
                               + kNumServiceRegs * kMovSize;
   if (align) {
-    moveToAlign(astubs);
+    moveToAlign(as);
   }
-  TCA retval = astubs.code.frontier;
-  emitEagerVMRegSave(astubs, SaveFP);
+  TCA retval = as.code.frontier;
+  emitEagerVMRegSave(as, SaveFP);
   /*
    * Move args into appropriate regs.
    */
@@ -3584,20 +3586,20 @@ TranslatorX64::emitServiceReqVA(SRFlags flags, ServiceRequest req, int numArgs,
   for (int i = 0; i < numArgs; i++) {
     uint64_t argVal = va_arg(args, uint64_t);
     TRACE(3, "%p,", (void*)argVal);
-    emitImmReg(astubs, argVal, serviceReqArgRegs[i]);
+    emitImmReg(as, argVal, serviceReqArgRegs[i]);
   }
   if (!inLine) {
     /* make sure that the stub has enough space that it can be
      * reused for other service requests, with different number of
      * arguments, alignment, etc.
      */
-    astubs.   emitNop(start + kMaxStubSpace - astubs.code.frontier);
-    emitImmReg(astubs, (uint64_t)start, rScratch);
+    as.emitNop(start + kMaxStubSpace - as.code.frontier);
+    emitImmReg(as, (uint64_t)start, rScratch);
   } else {
-    emitImmReg(astubs, 0, rScratch);
+    emitImmReg(as, 0, rScratch);
   }
   TRACE(3, ")\n");
-  emitImmReg(astubs, req, rdi);
+  emitImmReg(as, req, rdi);
   /*
    * Weird hand-shaking with enterTC: reverse-call a service routine.
    *
@@ -3607,13 +3609,13 @@ TranslatorX64::emitServiceReqVA(SRFlags flags, ServiceRequest req, int numArgs,
    * SRJmpInsteadOfRet indicates to fake the return.
    */
   if (flags & SRFlags::SRJmpInsteadOfRet) {
-    astubs.    pop (rax);
-    astubs.    jmp (rax);
+    as.pop(rax);
+    as.jmp(rax);
   } else {
-    astubs.    ret();
+    as.ret();
   }
-  recordBCInstr(OpServiceRequest, astubs, retval);
-  translator_not_reached(astubs);
+  recordBCInstr(OpServiceRequest, as, retval);
+  translator_not_reached(as);
   return retval;
 }
 

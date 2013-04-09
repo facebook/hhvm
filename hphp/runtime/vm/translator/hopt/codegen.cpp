@@ -4749,45 +4749,44 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   SSATmp* pcOffTmp  = inst->getSrc(2);
   SSATmp* spAdjustmentTmp = inst->getSrc(3);
   Type resultType = inst->getTypeParam();
-  Block* label = inst->getTaken();
-
-  assert(pcOffTmp->isConst());
-  assert(spAdjustmentTmp->isConst());
-  assert(fp->getType() == Type::StkPtr);
-  assert(sp->getType() == Type::StkPtr);
-
   int64_t pcOff = pcOffTmp->getValInt();
 
-  void* interpOneHelper =
-    interpOneEntryPoints[*(getCurFunc()->unit()->at(pcOff))];
+  auto opc = *(getCurFunc()->unit()->at(pcOff));
+  void* interpOneHelper = interpOneEntryPoints[opc];
 
   auto dstReg = InvalidReg;
-  if (label) {
-    dstReg = rScratch;
-  }
   cgCallHelper(m_as, (TCA)interpOneHelper, dstReg, kSyncPoint,
                ArgGroup().ssa(fp).ssa(sp).imm(pcOff));
-  if (label) {
-    // compare the pc in the returned execution context with the
-    // bytecode offset of the label
-    Trace* targetTrace = label->getTrace();
-    assert(targetTrace);
-    uint32_t targetBcOff = targetTrace->getBcOff();
-    // compare the pc with the target bc offset
-    m_as.cmp_imm64_disp_reg64(targetBcOff,
-                              offsetof(VMExecutionContext, m_pc),
-                              dstReg);
-//    emitFwdJcc(CC_E, label);
-  }
+
   auto newSpReg = inst->getDst()->getReg();
-  DEBUG_ONLY auto spReg = sp->getReg();
-  int64_t spAdjustment = spAdjustmentTmp->getValInt();
-  int64_t adjustment =
-    (spAdjustment - (resultType == Type::None ? 0 : 1)) * sizeof(Cell);
-  assert(newSpReg == spReg);
-  if (adjustment != 0) {
-    m_as.add_imm32_reg64(adjustment, newSpReg);
+  assert(newSpReg == sp->getReg());
+
+  int64_t spAdjustBytes = cellsToBytes(spAdjustmentTmp->getValInt());
+  if (spAdjustBytes != 0) {
+    m_as.addq(spAdjustBytes, newSpReg);
   }
+}
+
+void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
+  SSATmp* fp = inst->getSrc(0);
+  SSATmp* sp = inst->getSrc(1);
+  int64_t pcOff = inst->getSrc(2)->getValInt();
+
+  auto opc = *(getCurFunc()->unit()->at(pcOff));
+  void* interpOneHelper = interpOneEntryPoints[opc];
+
+  auto dstReg = InvalidReg;
+  cgCallHelper(m_as, (TCA)interpOneHelper, dstReg, kSyncPoint,
+               ArgGroup().ssa(fp).ssa(sp).imm(pcOff));
+
+  // The interpOne method returns a pointer to the current ExecutionContext
+  // in rax.  Use it read the 'm_fp' and 'm_stack.m_top' fields into the
+  // rVmFp and rVmSp registers.
+  m_as.loadq(rax[offsetof(VMExecutionContext, m_fp)], rVmFp);
+  m_as.loadq(rax[offsetof(VMExecutionContext, m_stack) +
+                 Stack::topOfStackOffset()], rVmSp);
+
+  m_tx64->emitServiceReq(TranslatorX64::SRFlags::SREmitInA, REQ_RESUME, 0ull);
 }
 
 void CodeGenerator::cgDefFunc(IRInstruction* inst) {

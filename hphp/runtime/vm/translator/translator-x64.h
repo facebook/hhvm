@@ -813,6 +813,7 @@ private:
   TCA getInterceptHelper();
   void translateInstr(const Tracelet& t, const NormalizedInstruction& i);
   void translateInstrWork(const Tracelet& t, const NormalizedInstruction& i);
+  void irInterpretInstr(const NormalizedInstruction& i);
   void irTranslateInstr(const Tracelet& t, const NormalizedInstruction& i);
   void irTranslateInstrWork(const Tracelet& t, const NormalizedInstruction& i);
   void irTranslateInstrDefault(const Tracelet& t,
@@ -926,10 +927,11 @@ private:
                               SrcRec&       fail);
 
   enum SRFlags {
-    SRNone = 0,
-    SRAlign = 1,
-    SRInline = 2,
-    SRJmpInsteadOfRet = 4
+    SRNone            = 0,
+    SRAlign           = 1,
+    SRInline          = 2,
+    SRJmpInsteadOfRet = 4,
+    SREmitInA         = 8,
   };
   TCA emitServiceReq(ServiceRequest, int numArgs, ...);
   TCA emitServiceReq(SRFlags flags, ServiceRequest, int numArgs, ...);

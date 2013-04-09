@@ -461,8 +461,14 @@ void TraceBuilder::genGuardLoc(uint32_t id, Type type, Trace* exitTrace) {
   }
 }
 
-void TraceBuilder::genAssertLoc(uint32_t id, Type type) {
-  Type prevType = getLocalType(id);
+/**
+ * Generates an AssertLoc instruction for the given local 'id' and 'type'.
+ * If the 'override' flag is not set, then 'type' must be a subtype of the
+ * previous tracked type for this local.
+ */
+void TraceBuilder::genAssertLoc(uint32_t id, Type type,
+                                bool overrideType /* =false */) {
+  Type prevType = overrideType ? Type::None : getLocalType(id);
   if (prevType == Type::None || type.strictSubtypeOf(prevType)) {
     LocalId local(id);
     gen(AssertLoc, type, &local, m_fpValue);
@@ -871,15 +877,13 @@ static SSATmp* getStackValue(SSATmp* sp,
   case InterpOne: {
     // sp = InterpOne(fp, sp, bcOff, stackAdjustment, resultType)
     SSATmp* prevSp = inst->getSrc(1);
-    int64_t numPopped = inst->getSrc(3)->getValInt();
+    int64_t spAdjustment = inst->getSrc(3)->getValInt(); // # popped - # pushed
     Type resultType = inst->getTypeParam();
-    int64_t numPushed = resultType == Type::None ? 0 : 1;
-    if (index == 0 && numPushed == 1) {
+    if (index == 0 && resultType != Type::None) {
       type = resultType;
       return nullptr;
     }
-    return getStackValue(prevSp, index - (numPushed - numPopped),
-                         spansCall, type);
+    return getStackValue(prevSp, index + spAdjustment, spansCall, type);
   }
 
   case NewObj:
@@ -973,11 +977,9 @@ void TraceBuilder::genNativeImpl() {
 
 SSATmp* TraceBuilder::genInterpOne(uint32_t pcOff,
                                    uint32_t stackAdjustment,
-                                   Type resultType,
-                                   Trace* target) {
+                                   Type resultType) {
   return gen(InterpOne,
              resultType,
-             getFirstBlock(target),
              m_fpValue,
              m_spValue,
              genDefConst<int64_t>(pcOff),
@@ -1697,6 +1699,17 @@ void TraceBuilder::updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef) {
     if (m_localValues[id] == oldRef) {
       m_localValues[id] = newRef;
       m_localTypes[id]  = newRefType;
+    }
+  }
+}
+
+/**
+ * This method changes any boxed local into a BoxedCell type.
+ */
+void TraceBuilder::dropLocalRefsInnerTypes() {
+  for (size_t id = 0; id < m_localTypes.size(); id++) {
+    if (m_localTypes[id].isBoxed()) {
+      m_localTypes[id] = Type::BoxedCell;
     }
   }
 }

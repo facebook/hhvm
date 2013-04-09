@@ -52,6 +52,7 @@ public:
   void setThisAvailable() {
     m_thisIsAvailable = true;
   }
+  void dropLocalRefsInnerTypes();
 
   // Run one more pass of simplification on this builder's trace.
   void optimizeTrace();
@@ -153,7 +154,9 @@ public:
                        SSATmp* mask64,
                        SSATmp* vals64,
                        Trace*  exitTrace);
-  void    genAssertLoc(uint32_t id, Type type);
+  void    genAssertLoc(uint32_t id,
+                       Type type,
+                       bool override = false); // ignores conflict w/ prev type
 
   SSATmp* genUnboxPtr(SSATmp* ptr);
   SSATmp* genLdRef(SSATmp* ref, Type type, Trace* exit);
@@ -242,7 +245,7 @@ public:
   SSATmp* genIterFree(uint32_t iterId);
 
   SSATmp* genInterpOne(uint32_t pcOff, uint32_t stackAdjustment,
-                       Type resultType, Trace* target);
+                       Type resultType);
   Trace* getExitSlowTrace(uint32_t bcOff,
                           int32_t stackDeficit,
                           uint32_t numOpnds,

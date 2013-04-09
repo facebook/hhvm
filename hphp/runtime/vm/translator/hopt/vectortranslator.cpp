@@ -31,6 +31,11 @@ TRACE_SET_MOD(hhir);
 using Transl::MInstrState;
 using Transl::mInstrHasUnknownOffsets;
 
+static bool wantPropSpecializedWarnings() {
+  return !RuntimeOption::RepoAuthoritative ||
+    !RuntimeOption::EvalDisableSomeRepoAuthNotices;
+}
+
 bool VectorEffects::supported(Opcode op) {
   return opcodeHasFlags(op, VectorProp | VectorElem);
 }
@@ -353,14 +358,18 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   }
 
   /*
-   * In pretty much any case the vector translator will do operations
-   * that can throw. Currently this means we have to have a spillStack
-   * so the unwinder can handle it (eventually we'll hook this into an
-   * unwind codepath).  TODO(#2162354)
+   * If we're planning on RaiseUndefProp generation
+   * (wantPropSpecializedWarnings) then pretty much in any case the
+   * vector translator will do operations that can throw.
    *
-   * We handle one special case where we know a spillStack won't be
-   * needed: in a simple CGetM of a single property where hphpc has
-   * told us it can't be KindOfUninit.
+   * Currently this means we have to have a spillStack so the unwinder
+   * can handle it (TODO(#2162354): eventually we'll hook this into an
+   * unwind codepath).
+   *
+   * We also handle one special case where we know a spillStack won't
+   * be needed: in a simple CGetM of a single property where hphpc has
+   * told us it can't be KindOfUninit, even if
+   * wantPropSpecializedWarnings we can't throw.
    */
   if (isCGetM && isSingle && simpleProp) {
     auto info = getFinalPropertyOffset(m_ni, m_mii);
@@ -368,7 +377,7 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
     if (info.hphpcType == KindOfInvalid) {
       m_ht.spillStack();
     }
-  } else {
+  } else if (wantPropSpecializedWarnings()) {
     m_ht.spillStack();
   }
 }
@@ -837,7 +846,7 @@ SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
           // a pointer to InitNull, either in the object or
           // init_null_variant.
       m_tb.hint(Block::Unlikely);
-      if (doWarn) {
+      if (doWarn && wantPropSpecializedWarnings()) {
         // We did the spillStack for this back in emitMPre.
         m_tb.gen(RaiseUndefProp, baseAsObj, key);
       }

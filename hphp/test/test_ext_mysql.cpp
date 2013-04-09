@@ -23,6 +23,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtMysql::RunTests(const std::string &which) {
+  // XXX: Disabled until flakiness is resolved: t1135133
+  return true;
+
   bool ret = true;
   RuntimeOption::MySQLReadOnly = false;
 

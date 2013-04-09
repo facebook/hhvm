@@ -1,6 +1,6 @@
 <?php
 
-include_once 'base.php';
+include_once __DIR__ . '/base.php';
 
 /**
  * Possible values for 'format':
@@ -102,19 +102,19 @@ EOT
 
 /*****************************************************************************/
 function idl_format_cpp_impl($impl) {
-  global $funcs, $name, $mode;
+  global $funcs, $name, $mode, $constants, $classes;
   ($f = fopen($impl, 'w')) || die("cannot open $impl");
 
-  if ($mode == 'sep' || $mode == 'remote') {
-    $inc_file = "\"ext_${name}.h\"";
+  if ($mode) {
+    $header_file = "\"ext_${name}.h\"";
   } else {
-    $inc_file = "<runtime/ext/ext_${name}.h>";
+    $header_file = "<runtime/ext/ext_${name}.h>";
   }
 
   fprintf($f,
           <<<EOT
 
-#include $inc_file
+#include $header_file
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -122,8 +122,15 @@ namespace HPHP {
 
 EOT
           );
+
+  foreach ($constants as $const) {
+    generateConstCPPImplementation($const, $f);
+  }
   foreach ($funcs as $func) {
     generateFuncCPPImplementation($func, $f);
+  }
+  foreach ($classes as $class) {
+    generateClassCPPImplementation($class, $f);
   }
   fprintf($f,
           <<<EOT

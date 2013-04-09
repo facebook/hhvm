@@ -629,6 +629,25 @@ function generateConstCPPHeader($const, $f) {
   fprintf($f, "extern const %s k_%s;\n", $name, $const['name']);
 }
 
+function generateConstCPPImplementation($const, $f, $prefix = 'k_') {
+  $name = typename($const['type']);
+  if ($name == 'String') {
+    $name = 'StaticString';
+  }
+  $def = '';
+  if (isset($const['value'])) {
+    if ($name == 'StaticString') {
+      $def = '"' . addslashes($const['value']) . '"';
+    } else if ($name == 'bool') {
+      $def = $const['value'] ? 'true' : 'false';
+    } else {
+      $def = $const['value'];
+    }
+    $def = " = $def";
+  }
+  fprintf($f, "const %s %s%s%s;\n", $name, $prefix, $const['name'], $def);
+}
+
 function generateClassCPPHeader($class, $f) {
   global $MAGIC_METHODS;
   $clsname = $class['name'];
@@ -725,12 +744,33 @@ EOT
   fprintf($f, "\n};\n");
 }
 
+function generateClassCPPImplementation($class, $f) {
+  foreach ($class['consts'] as $k) {
+    generateConstCPPImplementation($k, $f, "q_{$class['name']}$$");
+  }
+
+  foreach ($class['methods'] as $m) {
+    generateMethodCPPImplementation($m, $class, $f);
+  }
+}
+
 function generateMethodCPPHeader($method, $class, $f) {
   global $MAGIC_METHODS;
   fprintf($f, "  public: ");
   generateFuncCPPHeader($method, $f, true,
                         isset($MAGIC_METHODS[$method['name']]),
                         $method['flags'] & IsStatic, $class);
+}
+
+function generateMethodCPPImplementation($method, $class, $f) {
+  if ($method['flags'] & IsStatic) {
+    $prefix = "c_{$class['name']}::ti_";
+    $sprop = 'const char *cls';
+  } else {
+    $prefix = "c_{$class['name']}::t_";
+    $sprop = '';
+  }
+  generateFuncCPPImplementation($method, $f, $prefix, $sprop);
 }
 
 function generatePropertyCPPHeader($property, $f) {
@@ -754,7 +794,7 @@ function generatePreImplemented($method, $class, $f) {
   }
 }
 
-function generateFuncCPPImplementation($func, $f) {
+function generateFuncCPPImplementation($func, $f, $prefix = 'f_', $sprop = '') {
   $schema = "";
   $schema_no = 0;
   if ($func['return'] == Object || $func['return'] == Resource) {
@@ -763,15 +803,19 @@ function generateFuncCPPImplementation($func, $f) {
   $output = '';
   $need_ret = false;
 
-  fprintf($f, '%s f_%s(', typename($func['return']), $func['name']);
+  fprintf($f, '%s %s%s(', typename($func['return']), $prefix, $func['name']);
   $var_arg = ($func['flags'] & VarArgsMask);
   if ($var_arg) fprintf($f, 'int _argc');
   if ($var_arg && count($func['args']) > 0) fprintf($f, ', ');
   $params = "";
   $params_no = 0;
+  if ($sprop) {
+    // For static class methods to inject class name
+    fprintf($f, $sprop);
+  }
   for ($i = 0; $i < count($func['args']); $i++) {
     $arg = $func['args'][$i];
-    if ($i > 0) fprintf($f, ', ');
+    if ($sprop || ($i > 0)) fprintf($f, ', ');
     fprintf($f, '%s %s', param_typename($arg),
             $arg['name']);
     if (isset($arg['default'])) {

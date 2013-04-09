@@ -2007,23 +2007,16 @@ Variant c_SoapServer::t_getfunctions() {
 
 static bool valid_function(c_SoapServer *server, Object &soap_obj,
                            CStrRef fn_name) {
-  String class_name;
+  HPHP::VM::Class* cls;
   if (server->m_type == SOAP_OBJECT || server->m_type == SOAP_CLASS) {
-    class_name = server->m_soap_object->o_getClassName();
+    cls = server->m_soap_object->getVMClass();
   } else if (server->m_soap_functions.functions_all) {
     return f_function_exists(fn_name);
   } else if (!server->m_soap_functions.ft.empty()) {
     return server->m_soap_functions.ft.exists(StringUtil::ToLower(fn_name));
   }
-
-  const ClassInfo *clsInfo = ClassInfo::FindClass(class_name);
-  if (clsInfo) {
-    ClassInfo::MethodInfo *info = clsInfo->getMethodInfo(fn_name.data());
-    if (info && (info->attribute & ClassInfo::IsPublic)) {
-      return true;
-    }
-  }
-  return false;
+  HPHP::VM::Func* f = cls->lookupMethod(fn_name.get());
+  return (f && f->isPublic());
 }
 
 void c_SoapServer::t_handle(CStrRef request /* = null_string */) {

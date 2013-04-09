@@ -605,13 +605,10 @@ static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,
     PDO_HANDLE_DBH_ERR(dbh);
     return false;
   }
-  const ClassInfo *cls = ClassInfo::FindClass(clsname);
+  HPHP::VM::Class* cls = HPHP::VM::Unit::loadClass(clsname.get()); 
   if (cls) {
-    ClassInfo::MethodInfo *method = cls->getMethodInfo("__construct");
-    if (!method) {
-      method = cls->getMethodInfo(clsname.data());
-    }
-    if (method && (method->attribute & ClassInfo::IsPublic)) {
+    const HPHP::VM::Func* method = cls->getDeclaredCtor();
+    if (method && method->isPublic()) {
       pdo_raise_impl_error
         (dbh, NULL, "HY000",
          "user-supplied statement class cannot have a public constructor");
@@ -728,12 +725,12 @@ static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
   if (clsname.empty()) {
     stmt->fetch.clsname = "stdclass";
   }
-  stmt->fetch.constructor = NULL;
-  const ClassInfo *cls = ClassInfo::FindClass(clsname);
+  stmt->fetch.constructor = empty_string; //NULL;
+  HPHP::VM::Class* cls = HPHP::VM::Unit::loadClass(clsname.get());
   if (cls) {
-    const char *constructor = cls->getConstructor();
-    if (constructor) {
-      stmt->fetch.constructor = constructor;
+    const HPHP::VM::Func* method = cls->getDeclaredCtor();
+    if (method) {
+      stmt->fetch.constructor = method->nameRef();
       return true;
     }
   }
@@ -1828,7 +1825,8 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
       if (!do_fetch_class_prepare(stmt)) {
         return false;
       }
-      if (stmt->fetch.constructor && (flags & PDO_FETCH_PROPS_LATE)) {
+      if (!stmt->fetch.constructor.empty() &&
+          (flags & PDO_FETCH_PROPS_LATE)) {
         ret.asCObjRef().get()->o_invoke(stmt->fetch.constructor,
                                         stmt->fetch.ctor_args, -1);
         ret.asCObjRef().get()->clearNoDestruct();
@@ -1964,7 +1962,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
 
   switch (how) {
   case PDO_FETCH_CLASS:
-    if (stmt->fetch.constructor &&
+    if (!stmt->fetch.constructor.empty() &&
         !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
       ret.toObject()->o_invoke(stmt->fetch.constructor, stmt->fetch.ctor_args,
                                -1);

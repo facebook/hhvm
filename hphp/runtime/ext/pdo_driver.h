@@ -590,7 +590,7 @@ public:
   struct {
     int column;
     String clsname;
-    const char *constructor;
+    String constructor;
     Variant ctor_args;
     String func;
     Variant fetch_args;

@@ -598,6 +598,11 @@ bool Class::verifyPersistent() const {
   return true;
 }
 
+const Func* Class::getDeclaredCtor() const {
+  const Func* f = getCtor();
+  return f->name() != sd86ctor ? f : nullptr;
+}
+
 void Class::initInstanceBits() {
   assert(Transl::Translator::WriteLease().amOwner());
   if (s_instanceBitsInit.load(std::memory_order_acquire)) return;

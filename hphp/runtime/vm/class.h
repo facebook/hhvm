@@ -722,6 +722,7 @@ public:
   }
   bool verifyPersistent() const;
   const Func* getCtor() const { return m_ctor; }
+  const Func* getDeclaredCtor() const;
   const Func* getDtor() const { return m_dtor; }
   const Func* getToString() const { return m_toString; }
   const PreClass* preClass() const { return m_preClass.get(); }

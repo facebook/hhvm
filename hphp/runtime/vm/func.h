@@ -208,6 +208,7 @@ struct Func {
   bool isNonClosureMethod() const {
     return isMethod() && !isClosureBody();
   }
+  bool isPublic() const { return bool(m_attrs & AttrPublic); }
   bool isStatic() const { return bool(m_attrs & AttrStatic); }
   bool isAbstract() const { return bool(m_attrs & AttrAbstract); }
   bool isUnique() const { return bool(m_attrs & AttrUnique); }

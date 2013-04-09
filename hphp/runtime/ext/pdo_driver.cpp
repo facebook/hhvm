@@ -196,7 +196,6 @@ PDOStatement::PDOStatement()
       named_rewrite_template(NULL) {
   memset(error_code, 0, sizeof(error_code));
   fetch.column = 0;
-  fetch.constructor = NULL;
 }
 
 PDOStatement::~PDOStatement() {

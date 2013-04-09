@@ -1503,11 +1503,12 @@ class_constant_declaration:
   | T_CONST hh_name_with_type '=' static_scalar { _p->onClassConstant($$,0,$2,$4);}
 ;
 
-new_expr:
-  T_NEW class_name_reference
+expr_with_parens:
+    '(' expr_with_parens ')'           { $$ = $2;}
+  | T_NEW class_name_reference
     ctor_arguments                     { _p->onNewObject($$, $2, $3);}
-  | '(' new_expr ')'                   { $$ = $2;}
-;
+  | T_CLONE expr                       { UEXP($$,$2,T_CLONE,1);}
+  | xhp_tag                            { $$ = $1;}
 
 parenthesis_expr:
   '(' expr ')'                         { $$ = $2;}
@@ -1539,7 +1540,7 @@ yield_list_assign_expr:
 expr:
     expr_no_variable                   { $$ = $1;}
   | variable                           { $$ = $1;}
-  | new_expr                           { $$ = $1;}
+  | expr_with_parens                   { $$ = $1;}
 
 expr_no_variable:
     T_LIST '(' assignment_list ')'
@@ -1549,7 +1550,6 @@ expr_no_variable:
   | variable '=' '&' T_NEW
     class_name_reference
     ctor_arguments                     { _p->onAssignNew($$,$1,$5,$6);}
-  | T_CLONE expr                       { UEXP($$,$2,T_CLONE,1);}
   | variable T_PLUS_EQUAL expr         { BEXP($$,$1,$3,T_PLUS_EQUAL);}
   | variable T_MINUS_EQUAL expr        { BEXP($$,$1,$3,T_MINUS_EQUAL);}
   | variable T_MUL_EQUAL expr          { BEXP($$,$1,$3,T_MUL_EQUAL);}
@@ -1631,7 +1631,6 @@ expr_no_variable:
     '{' inner_statement_list '}'       { Token u; u.reset();
                                          _p->onClosure($$,u,$3,$6,$9,$11,1);
                                          _p->popLabelInfo();}
-  | xhp_tag                            { $$ = $1;}
   | dim_expr                           { $$ = $1;}
   | collection_literal                 { $$ = $1;}
 ;
@@ -2098,13 +2097,15 @@ array_access:
 
 dimmable_variable_access:
     dimmable_variable array_access     { _p->onRefDim($$, $1, $2);}
-  | '(' new_expr ')' array_access      { _p->onRefDim($$, $2, $4);}
+  | '(' expr_with_parens ')' 
+    array_access                       { _p->onRefDim($$, $2, $4);}
 ;
 
 dimmable_variable_no_calls_access:
     dimmable_variable_no_calls
     array_access                       { _p->onRefDim($$, $1, $2);}
-  | '(' new_expr ')' array_access      { _p->onRefDim($$, $2, $4);}
+  | '(' expr_with_parens ')' 
+    array_access                       { _p->onRefDim($$, $2, $4);}
 ;
 
 variable:
@@ -2114,7 +2115,8 @@ variable:
   | class_method_call                  { $$ = $1;}
   | dimmable_variable_access           { $$ = $1;}
   | variable property_access           { _p->onObjectProperty($$,$1,$2);}
-  | '(' new_expr ')' property_access   { _p->onObjectProperty($$,$2,$4);}
+  | '(' expr_with_parens ')' 
+    property_access                    { _p->onObjectProperty($$,$2,$4);}
   | static_class_name
     T_PAAMAYIM_NEKUDOTAYIM
     variable_without_objects           { _p->onStaticMember($$,$1,$3);}
@@ -2130,7 +2132,7 @@ dimmable_variable:
   | dimmable_variable_access           { $$ = $1;}
   | variable
     property_access_without_variables  { _p->onObjectProperty($$,$1,$2);}
-  | '(' new_expr ')'
+  | '(' expr_with_parens ')'
     property_access_without_variables  { _p->onObjectProperty($$,$2,$4);}
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
@@ -2153,13 +2155,16 @@ object_method_call:
   | variable T_OBJECT_OPERATOR
     '{' expr '}' '('
     function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$4,$7);}
-  | '(' new_expr ')' T_OBJECT_OPERATOR
+  | '(' expr_with_parens ')' 
+    T_OBJECT_OPERATOR
     ident hh_typeargs_opt '('
     function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$5,$8);}
-  | '(' new_expr ')'  T_OBJECT_OPERATOR
+  | '(' expr_with_parens ')' 
+    T_OBJECT_OPERATOR
     variable_without_objects '('
     function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$5,$7);}
-  | '(' new_expr ')'  T_OBJECT_OPERATOR
+  | '(' expr_with_parens ')' 
+    T_OBJECT_OPERATOR
     '{' expr '}' '('
     function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$6,$9);}
 ;
@@ -2205,7 +2210,8 @@ variable_no_calls:
     variable_without_objects           { $$ = $1;}
   | dimmable_variable_no_calls_access  { $$ = $1;}
   | variable_no_calls property_access  { _p->onObjectProperty($$,$1,$2);}
-  | '(' new_expr ')' property_access   { _p->onObjectProperty($$,$2,$4);}
+  | '(' expr_with_parens ')' 
+    property_access                    { _p->onObjectProperty($$,$2,$4);}
   | static_class_name
     T_PAAMAYIM_NEKUDOTAYIM
     variable_without_objects           { _p->onStaticMember($$,$1,$3);}
@@ -2216,7 +2222,7 @@ dimmable_variable_no_calls:
   | dimmable_variable_no_calls_access  { $$ = $1;}
   | variable_no_calls
     property_access_without_variables  { _p->onObjectProperty($$,$1,$2);}
-  | '(' new_expr ')'
+  | '(' expr_with_parens ')'
     property_access_without_variables  { _p->onObjectProperty($$,$2,$4);}
   | '(' variable ')'                   { $$ = $2;}
 ;

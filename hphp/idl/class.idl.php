@@ -7,6 +7,8 @@
  * any changes that are not part of schema. Use "note" field to comment on
  * schema itself, and "note" fields are not used in any code generation but
  * only staying within this file.
+ *
+ * @nolint
  */
 ///////////////////////////////////////////////////////////////////////////////
 // Preamble: C++ code inserted at beginning of ext_{name}.h
@@ -47,6 +49,11 @@ CPP
 //        'value' => default value of the argument
 //        'desc'  => description of the argument
 //      )
+//   'taint_observer' => taint propagation information
+//     array (
+//       'set_mask' => which bits to set automatically
+//       'clear_mask' => which bits to clear automatically
+//     )
 // )
 
 DefineFunction(
@@ -203,7 +210,7 @@ DefineFunction(
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => VariantMap,
-      'desc'   => "Returns an associative array of constants with their values."
+      'desc'   => "Returns an associative array of constants with their values.",
     ),
     'args'   => array(
       array(
@@ -276,7 +283,7 @@ DefineFunction(
         'desc'   => "The class name",
       ),
       array(
-        'name'   => 'allow_string',
+        'name'   => "allow_string",
         'type'   => Boolean,
         'value'  => "false",
         'desc'   => "If this parameter set to false (default), string class name as object is not allowed. This also prevents from calling autoloader if the class doesn't exist.",
@@ -427,6 +434,35 @@ DefineFunction(
         'name'   => "obj",
         'type'   => Variant | Reference,
         'desc'   => "The object that method_name is being called on.",
+      ),
+    ),
+    'taint_observer' => false,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "class_alias",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "original",
+        'type'   => String,
+        'desc'   => "The original class.",
+      ),
+      array(
+        'name'   => "alias",
+        'type'   => String,
+        'desc'   => "The alias name for the class.",
+      ),
+      array(
+        'name'   => "autoload",
+        'type'   => Boolean,
+        'value'  => "true",
+        'desc'   => "Whether do autoload if the original class is not found.",
       ),
     ),
     'taint_observer' => false,

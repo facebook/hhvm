@@ -66,6 +66,37 @@ Array f_get_declared_traits() {
   return ClassInfo::GetTraits();
 }
 
+bool f_class_alias(CStrRef original, CStrRef alias, bool autoload /* = true */) {
+  // Return false if orignal class doesn't exist or alias class already exsits.
+  if (!VM::Unit::classExists(original.get(), autoload, VM::AttrNone)) {
+    return false;
+  }
+  if (VM::Unit::classExists(alias.get(), autoload, VM::AttrNone)) {
+    return false;
+  }
+
+  // For now, I use const_cast to copy orignal properties to the 
+  // "alias NamedEntity".
+  // I can refine this routine to use VM::s_namedDataMap.insert(),
+  // instead of using VM::Unit::GetNamedEntity(alias.get()).
+  // But above refine creates a side-effect that s_namedDataMap change to be
+  // visible not only unit.cpp, but also ext_class.cpp 
+  // In this case, I think it's better to use const_cast than to get the
+  // side-effect, because above side-effect increases the interdependency
+  // between unit.cpp and ext_class.cpp.
+  // (We know const_cast also has the side-effect that can be change the value
+  //  of const variable. So I use it only alias variable, therefore this
+  //  doesn't damage the original variable.)
+  VM::NamedEntity* alias_entity =
+    const_cast<VM::NamedEntity*>(VM::Unit::GetNamedEntity(alias.get()));
+  const VM::NamedEntity* orig_entity = VM::Unit::GetNamedEntity(original.get());
+  alias_entity->m_class = orig_entity->m_class;
+  alias_entity->m_cachedClassOffset = orig_entity->m_cachedClassOffset;
+  alias_entity->m_cachedFuncOffset = orig_entity->m_cachedFuncOffset;
+
+  return true;
+}
+
 bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
   return VM::Unit::classExists(class_name.get(), autoload, VM::AttrNone);
 }

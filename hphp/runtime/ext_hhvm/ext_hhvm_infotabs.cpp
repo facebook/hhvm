@@ -190,6 +190,7 @@ TypedValue* fg_property_exists(VM::ActRec *ar);
 TypedValue* fg_get_object_vars(VM::ActRec *ar);
 TypedValue* fg_call_user_method_array(VM::ActRec *ar);
 TypedValue* fg_call_user_method(VM::ActRec *ar);
+TypedValue* fg_class_alias(VM::ActRec *ar);
 TypedValue* fg_hphp_create_continuation(VM::ActRec *ar);
 TypedValue* fg_ctype_alnum(VM::ActRec *ar);
 TypedValue* fg_ctype_alpha(VM::ActRec *ar);
@@ -3210,6 +3211,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "get_object_vars", fg_get_object_vars, (void *)&fh_get_object_vars },
   { "call_user_method_array", fg_call_user_method_array, (void *)&fh_call_user_method_array },
   { "call_user_method", fg_call_user_method, (void *)&fh_call_user_method },
+  { "class_alias", fg_class_alias, (void *)&fh_class_alias },
   { "hphp_create_continuation", fg_hphp_create_continuation, (void *)&fh_hphp_create_continuation },
   { "ctype_alnum", fg_ctype_alnum, (void *)&fh_ctype_alnum },
   { "ctype_alpha", fg_ctype_alpha, (void *)&fh_ctype_alpha },

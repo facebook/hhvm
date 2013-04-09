@@ -50,6 +50,10 @@ Variant f_call_user_method_array(CStrRef method_name, VRefParam obj,
 Variant f_call_user_method(int _argc, CStrRef method_name, VRefParam obj, CArrRef _argv = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool f_class_alias(CStrRef original, CStrRef alias, bool autoload = true);
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // __EXT_CLASS_H__

@@ -1,1 +1,0 @@
-Catchable\ fatal\ error\:\ Argument\ 1\ passed\ to\ FooBar\:\:a\(\)\ must\ implement\ interface\ Foo\,\ instance\ of\ Blort\ given\,\ called\ in\ hphp\/test\/zend\/bad\/tests\-classes\/type\_hinting\_001\.php\ on\ line\ 27\ and\ defined\ in\ hphp\/test\/zend\/bad\/tests\-classes\/type\_hinting\_001\.php\ on\ line\ 12

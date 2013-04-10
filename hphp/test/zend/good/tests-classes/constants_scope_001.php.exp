@@ -1,5 +1,0 @@
-HipHop Notice: Use of undefined constant FATAL - assumed 'FATAL' in hphp/test/zend/good/tests-classes/constants_scope_001.php on line 9
-FATAL = FATAL
-self::FATAL = Fatal error
-self::FATAL = Worst error
-parent::FATAL = Fatal error

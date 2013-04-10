@@ -1,0 +1,2 @@
+HipHop Notice: Use of undefined constant D00Dz - assumed 'D00Dz' in %s on line 3
+D00Dzw00tHipHop Fatal error: Argument 1 passed to woot() must be an instance of string, int given in %s on line 5

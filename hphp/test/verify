@@ -361,11 +361,10 @@ sub run_test
         }
     }
     ($utime, $stime, $cutime, $cstime) = times;
-    my $default_filter = "$opt_srcdir/test/vm/default.filter";
     if (-e "$opt_srcdir/$test.filter") {
-        `$command 2>&1 | $default_filter | $opt_srcdir/$test.filter > $opt_objdir/$test.out`;
+        `$command 2>&1 | $opt_srcdir/$test.filter > $opt_objdir/$test.out`;
     } else {
-        `$command 2>&1 | $default_filter > $opt_objdir/$test.out`;
+        `$command > $opt_objdir/$test.out 2>&1`;
     }
     ($utime, $stime, $tutime, $tstime) = times;
 
@@ -416,6 +415,7 @@ sub run_test
     }
     elsif (!$opt_no_exp && -e "$opt_srcdir/$test.expect")
     {
+        $diff_args = "--text -u";
         `diff $diff_args $opt_srcdir/$test.expect $opt_objdir/$test.out > $opt_objdir/$test.diff 2>&1`;
         if ($?)
         {

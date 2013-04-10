@@ -1,3 +1,0 @@
-Error handler
-We hit our handler.
-HipHop Fatal error: Uncaught exception 'Exception' with message 'Sup' in hphp/test/vm/nested_vm_exceptions2.php:26\nStack trace:\n#0 {main}

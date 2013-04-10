@@ -1,0 +1,14 @@
+About to construct new B: 
+In A::A
+Is B::B() callable?
+bool(false)
+Is B::A() callable?
+bool(true)
+About to construct new C: 
+In A::A
+Is C::A() callable?
+bool(true)
+Is C::B() callable?
+bool(false)
+Is C::C() callable?
+bool(false)

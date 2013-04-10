@@ -1,1 +1,0 @@
-HipHop Fatal error: syntax error, unexpected ',', expecting '&' or T_VARIABLE in hphp/test/vm/trailing_comma_bad3.php on line 2

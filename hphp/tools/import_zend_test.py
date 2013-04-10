@@ -52,6 +52,8 @@ bad_tests = (
     # works in interp but not others
     'bug25922.php',
     'bug34064.php',
+    'objects_029.php',
+    'objects_030.php',
 
     # line number is inconsistent on stack overflow
     'bug41633_3.php',
@@ -309,6 +311,8 @@ stdout = subprocess.Popen(
     stderr=subprocess.STDOUT
 ).communicate()[0]
 
+# segfaults also print on stderr
+stdout = re.sub('\nsh: line 1:.*', '', stdout)
 # fbmake, you are crazy
 results = json.loads('['+stdout.strip().replace("\n", ",\n")+']')[-1]['results']
 
@@ -322,7 +326,12 @@ for test in results:
     mkdir_p(os.path.dirname(good_file))
     mkdir_p(os.path.dirname(bad_file))
 
-    if test['status'] == 'passed':
+    good = (test['status'] == 'passed')
+    for test in bad_tests:
+        if test in filename:
+            good = False
+
+    if good:
         dest_file = good_file
         delete_file = bad_file
         subpath = 'good'

@@ -1,2 +1,0 @@
-Call fail()
-HipHop Fatal error: Call to protected method pass::fail from anonymous context in hphp/test/zend/good/tests-classes/protected_001b.php on line 15

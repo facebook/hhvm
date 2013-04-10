@@ -1,0 +1,3 @@
+__callStatic: Test
+__callStatic: Test
+HipHop Warning: Invalid argument: function: method 'Test' not found in %s on line 18

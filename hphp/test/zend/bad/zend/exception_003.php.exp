@@ -1,4 +1,0 @@
-HipHop Fatal error: .+
-Stack\ trace\:\
-\#0\ \{main\}\
-\ \ thrown\ in\ hphp\/test\/zend\/bad\/zend\/exception\_003\.php\ on\ line\ \d+

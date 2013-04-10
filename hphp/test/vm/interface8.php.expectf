@@ -1,0 +1,2 @@
+Test begin
+HipHop Fatal error: Declaration of B::a() must be compatible with that of A::a() in %s on line 8

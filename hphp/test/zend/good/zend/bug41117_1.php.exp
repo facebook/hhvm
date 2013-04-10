@@ -1,1 +1,0 @@
-HipHop Fatal error: Bad type conversion: foo::__toString() was not defined. in hphp/test/zend/good/zend/bug41117_1.php on line 4

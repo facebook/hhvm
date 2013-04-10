@@ -1,1 +1,0 @@
-HipHop Fatal error: unknown trait method 'nonExistent' in hphp/test/zend/good/zend-traits/bug60165b.php on line 7

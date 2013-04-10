@@ -1,2 +1,0 @@
-PRE-CLASS-GUARD
-HipHop Fatal error: trait declaration of property 'hello' is incompatible with previous declaration in hphp/test/zend/good/zend-traits/property003.php on line 14

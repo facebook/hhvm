@@ -1,8 +1,0 @@
-From\ foo\:\:\_\_callStatic\:\
-string\(3\)\ \"abc\"\
-HipHop Notice: .+
-NULL\
-From\ foo\:\:\_\_call\:\
-string\(3\)\ \"abc\"\
-object\(foo\)\#\d+\ \(0\)\ \{\
-\}

@@ -1,6 +1,0 @@
-\-\-\-\>\ 1\.\ Return\ a\ variable\ by\ reference\ \-\>\ No\ warning\:\
-int\(1\)\
-\
-\-\-\-\>\ 2\.\ Return\ a\ value\ by\ reference\ \-\>\ HipHop Warning: .+
-HipHop Notice: .+
-int\(1\)

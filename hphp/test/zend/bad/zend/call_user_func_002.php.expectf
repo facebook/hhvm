@@ -1,0 +1,7 @@
+%unicode|string%(3) "foo"
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Notice: %a
+HipHop Warning: %a
+HipHop Notice: %a
+HipHop Warning: %a

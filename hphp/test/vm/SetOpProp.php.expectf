@@ -1,0 +1,62 @@
+Test begin
+C Object
+(
+    [p] => 1
+    [a] => <a>
+    [b] => <b><b>
+    [q] => 1
+    [r] => hello
+)
+In D::__get(a)
+In D::__get(b)
+In D::__get(q)
+In D::__get(r)
+D Object
+(
+    [container:D:private] => Array
+        (
+            [a] => D::a
+            [b] => 42
+        )
+
+    [p] => 1
+    [a] => D::a<a>
+    [b] => 42<b><b>
+    [q] => 1
+    [r] => hello
+)
+In E::__get(a)
+In E::__set(a, E::a<a>)
+In E::__get(b)
+In E::__set(b, 42<b>)
+In E::__get(b)
+In E::__set(b, 42<b><b>)
+In E::__get(q)
+In E::__set(q, 1)
+In E::__get(r)
+In E::__set(r, hello)
+E Object
+(
+    [container:E:private] => Array
+        (
+            [a] => E::a<a>
+            [b] => 42<b><b>
+            [q] => 1
+            [r] => hello
+        )
+
+    [p] => 1
+)
+HipHop Warning: Creating default object from empty value in %s on line 59
+stdClass Object
+(
+    [a] => <a>
+    [b] => <b><b>
+    [p] => 1
+    [q] => 1
+    [r] => hello
+)
+HipHop Warning: Attempt to assign property of non-object in %s on line 68
+HipHop Warning: Attempt to assign property of non-object in %s on line 69
+42
+Test end

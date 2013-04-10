@@ -1,0 +1,34 @@
+object(A)#1 (1) {
+  ["c":"A":private]=>
+  int(1)
+}
+HipHop Notice: Undefined variable: this in %s on line 13
+NULL
+HipHop Notice: Undefined variable: this in %s on line 8
+NULL
+HipHop Notice: Undefined variable: this in %s on line 13
+NULL
+HipHop Notice: Undefined variable: this in %s on line 20
+NULL
+HipHop Notice: Undefined variable: this in %s on line 25
+NULL
+HipHop Notice: Undefined variable: this in %s on line 20
+NULL
+HipHop Notice: Undefined variable: this in %s on line 25
+NULL
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}

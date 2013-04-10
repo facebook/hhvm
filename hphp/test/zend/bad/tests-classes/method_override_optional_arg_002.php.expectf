@@ -1,0 +1,2 @@
+Strict Standards: Declaration of B::foo() should be compatible with A::foo($arg = 1) in hphp/test/zend/bad/tests-classes/method_override_optional_arg_002.php on line %d
+foo

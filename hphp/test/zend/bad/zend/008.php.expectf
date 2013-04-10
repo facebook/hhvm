@@ -1,0 +1,22 @@
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+bool(true)
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+bool(true)
+bool(true)
+bool(true)
+HipHop Notice: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+int(1)
+int(2)
+int(3)
+Done

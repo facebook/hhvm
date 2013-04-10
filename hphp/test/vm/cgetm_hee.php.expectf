@@ -1,0 +1,13 @@
+Constructing
+NULL
+string(8) "ticktick"
+string(4) "woof"
+HipHop Notice: Undefined index: 3 in %s on line 27
+NULL
+Destructing
+NULL
+string(8) "tocktock"
+string(4) "meow"
+HipHop Notice: Undefined index: 3 in %s on line 35
+NULL
+Destructing

@@ -1,6 +1,0 @@
-*** Testing ob_get_level() : error conditions ***
-
--- Testing ob_get_level() function with one argument --
-HipHop Warning: Too many arguments for ob_get_level(), expected 0 in hphp/test/zend/good/tests-output/ob_get_level_error_001.php on line 13
-NULL
-Done

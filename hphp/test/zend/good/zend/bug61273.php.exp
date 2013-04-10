@@ -1,2 +1,0 @@
-HipHop Warning: Parameter 1 to __invoke() expected to be a reference, value given in hphp/test/zend/good/zend/bug61273.php on line 8
-okey

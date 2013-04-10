@@ -1,0 +1,8 @@
+object(stdClass)#%d (0) {
+}
+NULL
+HipHop Notice: %a
+HipHop Warning: %a
+NULL
+
+Catchable fatal error: Argument 1 passed to test() must be an instance of Closure, instance of stdClass given, called in hphp/test/zend/bad/zend/closure_027.php on line %d and defined in hphp/test/zend/bad/zend/closure_027.php on line %d

@@ -1,1 +1,0 @@
-HipHop Fatal error: Object does not implement ArrayAccess in hphp/test/zend/good/zend/offset_object.php on line 4

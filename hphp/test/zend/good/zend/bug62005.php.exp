@@ -1,5 +1,0 @@
-HipHop Warning: Creating default object from empty value in hphp/test/zend/good/zend/bug62005.php on line 3
-stdClass Object
-(
-    [energy] => 2
-)

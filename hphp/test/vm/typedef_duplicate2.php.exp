@@ -1,1 +1,0 @@
-HipHop Fatal error: The type Coord is already defined to an incompatible type in hphp/test/vm/typedef_duplicate2.php on line 5

@@ -1,1 +1,0 @@
-HipHop Fatal error: Class foo may not inherit from trait (abc) in hphp/test/zend/good/zend-traits/error_009.php on line 5

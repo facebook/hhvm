@@ -1,0 +1,4 @@
+Creating C
+string(1) "C"
+Creating D
+HipHop Fatal error: Invalid static property access: D::cls in %s on line 5

@@ -1,0 +1,8 @@
+object(foo)#%d (0) {
+}
+object(bar)#%d (0) {
+}
+object(baz)#%d (0) {
+}
+
+Catchable fatal error: Argument 1 passed to foo::testFoo() must be an instance of foo, instance of stdClass given, called in hphp/test/zend/bad/zend/objects_022.php on line %d and defined in hphp/test/zend/bad/zend/objects_022.php on line %d

@@ -1,1 +1,0 @@
-HipHop Fatal error: Cannot inherit previously-inherited constant FOO in hphp/test/zend/good/zend/errmsg_025.php on line 11

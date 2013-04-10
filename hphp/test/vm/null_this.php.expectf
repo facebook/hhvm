@@ -1,0 +1,9 @@
+Calling main()
+Calling a->pub
+Entering a::pub
+string(11) "public in a"
+Leaving a::pub
+Calling x->pub
+Entering x::pub
+Entering a::pub
+HipHop Fatal error: $this is null in %s on line 7

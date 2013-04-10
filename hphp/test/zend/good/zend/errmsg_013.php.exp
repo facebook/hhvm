@@ -1,1 +1,0 @@
-HipHop Fatal error: Default value for parameter a with array type hint can only be an array or NULL in hphp/test/zend/good/zend/errmsg_013.php on line 4

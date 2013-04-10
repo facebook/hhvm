@@ -1,2 +1,0 @@
-bool(true)
-HipHop Fatal error: Argument 1 passed to a() must be an instance of callable, string given in hphp/test/vm/typehint_callable.php on line 3

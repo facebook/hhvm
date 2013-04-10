@@ -13951,7 +13951,7 @@ bool TestCodeRun::TestReflectionClasses() {
       "var_dump($rf->isClosure()); "
       "var_dump($rf->isGenerator()); "
       ,
-      "test/vm/reflection_isclosure.php.exp"
+      "test/vm/reflection_isclosure.php.expect"
     );
   }
 

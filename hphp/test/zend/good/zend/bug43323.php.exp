@@ -1,1 +1,0 @@
-HipHop Fatal error: Class foo contains abstract method (bar) and must therefore be declared abstract or implement the remaining methods in hphp/test/zend/good/zend/bug43323.php on line 6

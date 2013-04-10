@@ -1,0 +1,5 @@
+object(foo\test)#%d (0) {
+}
+NULL
+
+Catchable fatal error: Argument 1 passed to foo\bar::__construct() must implement interface foo\foo, instance of stdClass given, called in hphp/test/zend/bad/zend/ns_072.php on line %d and defined in hphp/test/zend/bad/zend/ns_072.php on line %d

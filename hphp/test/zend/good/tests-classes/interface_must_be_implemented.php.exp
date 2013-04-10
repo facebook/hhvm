@@ -1,1 +1,0 @@
-HipHop Fatal error: Class derived_a contains abstract method (f_a) and must therefore be declared abstract or implement the remaining methods in hphp/test/zend/good/tests-classes/interface_must_be_implemented.php on line 7

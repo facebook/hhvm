@@ -1,1 +1,0 @@
-HipHop Fatal error: Cannot call abstract method Foo::who() in hphp/test/vm/abstract_static_1.php on line 8

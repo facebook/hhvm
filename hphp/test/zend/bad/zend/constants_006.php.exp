@@ -1,9 +1,0 @@
-string\(\d+\)\ \"[^
-]+\"\
-string\(\d+\)\ \"[^
-]+\"\
-int\(\d+\)\
-string\(21\)\ \"test\\foo\:\:\_\_construct\"\
-string\(8\)\ \"test\\foo\"\
-string\(11\)\ \"\_\_construct\"\
-string\(4\)\ \"test\"

@@ -1,8 +1,0 @@
-HipHop Fatal error: .+
-Stack\ trace\:\
-\#0\ [^
-]+\(\d+\)\:\ impl\-\>\_\_get\(\'counter\'\)\
-\#1\ [^
-]+\(\d+\)\:\ impl\-\>\_\_construct\(\)\
-\#2\ \{main\}\
-\ \ thrown\ in\ hphp\/test\/zend\/bad\/zend\/bug38624\.php\ on\ line\ \d+

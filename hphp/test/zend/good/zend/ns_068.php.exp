@@ -1,1 +1,0 @@
-HipHop Fatal error: Namespace declaration statement has to be the very first statement in the script: (Line: 3, Char: 14) in hphp/test/zend/good/zend/ns_068.php on line 3

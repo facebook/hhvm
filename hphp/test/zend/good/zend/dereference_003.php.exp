@@ -1,8 +1,0 @@
-int(2)
-object(foo)#2 (1) {
-  ["x"]=>
-  int(2)
-}
-int(2)
-bool(true)
-float(1.2)

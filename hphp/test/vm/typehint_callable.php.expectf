@@ -1,0 +1,2 @@
+bool(true)
+HipHop Fatal error: Argument 1 passed to a() must be an instance of callable, string given in %s on line 3

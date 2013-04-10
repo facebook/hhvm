@@ -1,1 +1,0 @@
-HipHop Fatal error: Invalid operand type was used: merging an array with NULL or non-array. in hphp/test/zend/good/zend/add_007.php on line 7

@@ -1,3 +1,0 @@
-HipHop Notice: Use of undefined constant ZEND_THREAD_safe - assumed 'ZEND_THREAD_safe' in hphp/test/zend/good/zend/constants_005.php on line 2
-string(16) "ZEND_THREAD_safe"
-int(123)

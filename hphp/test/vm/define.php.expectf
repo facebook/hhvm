@@ -1,0 +1,13 @@
+HipHop Warning: Constant FOO already defined in %s on line 14
+HipHop Warning: Constants may only evaluate to scalar values in %s on line 15
+int(42)
+string(5) "hello"
+=== Enter define_b.php ===
+int(42)
+string(5) "baz_b"
+=== Leave define_b.php ===
+string(5) "baz_b"
+HipHop Warning: Constant BAZ already defined in %s on line 23
+string(5) "baz_b"
+HELLOHELLO
+HipHop Fatal error: Cannot access static:: when no class scope is active in %s on line 34

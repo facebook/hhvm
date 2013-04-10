@@ -1,8 +1,0 @@
-\*\*\*\ Testing\ ob\_clean\(\)\ \:\ basic\ functionality\ \*\*\*\
-\
-\-\-\ Testing\ ob\_clean\(\)\ function\ with\ Zero\ arguments\ \-\-\
-HipHop Notice: .+
-bool\(false\)\
-string\(61\)\ \"bool\(true\)\
-Ensure\ the\ buffer\ is\ still\ active\ after\ the\ clean\.\"\
-Done

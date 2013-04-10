@@ -1,1 +1,0 @@
-HipHop Fatal error: Call to undefined method A::foo from context B in hphp/test/vm/call12.php on line 10

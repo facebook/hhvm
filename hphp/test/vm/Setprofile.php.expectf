@@ -200,7 +200,7 @@ array(3) {
         [0]=>
         array(6) {
           ["file"]=>
-           "%s"
+          string(%d) "%s"
           ["line"]=>
           int(42)
           ["function"]=>
@@ -216,7 +216,7 @@ array(3) {
         [1]=>
         array(6) {
           ["file"]=>
-           "%s"
+          string(%d) "%s"
           ["line"]=>
           int(16)
           ["function"]=>
@@ -232,7 +232,7 @@ array(3) {
         [2]=>
         array(4) {
           ["file"]=>
-           "%s"
+          string(%d) "%s"
           ["line"]=>
           int(37)
           ["function"]=>
@@ -244,7 +244,7 @@ array(3) {
         [3]=>
         array(4) {
           ["file"]=>
-           "%s"
+          string(%d) "%s"
           ["line"]=>
           int(45)
           ["function"]=>
@@ -327,7 +327,7 @@ array(3) {
         [0]=>
         array(6) {
           ["file"]=>
-           "%s"
+          string(%d) "%s"
           ["line"]=>
           int(16)
           ["function"]=>
@@ -343,7 +343,7 @@ array(3) {
         [1]=>
         array(4) {
           ["file"]=>
-           "%s"
+          string(%d) "%s"
           ["line"]=>
           int(37)
           ["function"]=>
@@ -355,7 +355,7 @@ array(3) {
         [2]=>
         array(4) {
           ["file"]=>
-           "%s"
+          string(%d) "%s"
           ["line"]=>
           int(45)
           ["function"]=>
@@ -487,7 +487,7 @@ array(3) {
       ["previous":protected]=>
       NULL
       ["file":protected]=>
-       "%s"
+      string(%d) "%s"
       ["line":protected]=>
       int(16)
       ["trace":protected]=>
@@ -495,7 +495,7 @@ array(3) {
         [0]=>
         array(4) {
           ["file"]=>
-           "%s"
+          string(%d) "%s"
           ["line"]=>
           int(37)
           ["function"]=>
@@ -507,7 +507,7 @@ array(3) {
         [1]=>
         array(4) {
           ["file"]=>
-           "%s"
+          string(%d) "%s"
           ["line"]=>
           int(45)
           ["function"]=>

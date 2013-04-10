@@ -1,0 +1,26 @@
+Test begin
+int(5)
+int(5)
+int(6)
+int(5)
+string(6) "A::BAR"
+string(6) "B::FOO"
+string(6) "A::BAR"
+string(6) "B::FOO"
+string(6) "A::BAR"
+string(6) "B::FOO"
+string(6) "A::BAR"
+HipHop Notice: Use of undefined constant WIZ - assumed 'WIZ' in %s on line 22
+string(3) "WIZ"
+string(11) "--- WIZ ---"
+string(3) "WIZ"
+string(3) "DCD"
+int(123)
+int(123)
+int(123)
+int(123)
+int(123)
+int(123)
+int(711)
+Test end
+HipHop Fatal error: Couldn't find constant D::FakeConstant in %s on line 98

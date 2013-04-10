@@ -1,2 +1,0 @@
-HipHop Fatal error: Uncaught exception 'Exception' with message 'Whiii' in hphp/test/zend/good/zend/bug40815.php:11\nStack trace:\n#0 {main}
-foo

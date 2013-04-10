@@ -1,8 +1,0 @@
-string\(9\)\ \"\_\_call\:\:a\"\
-int\(2\)\
-string\(9\)\ \"\_\_call\:\:c\"\
-string\(15\)\ \"\_\_callStatic\:\:a\"\
-\
-Strict\ Standards\:\ Non\-static\ method\ foo\:\:b\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/zend\/bug48533\.php\ on\ line\ \d+\
-int\(2\)\
-string\(15\)\ \"\_\_callStatic\:\:c\"

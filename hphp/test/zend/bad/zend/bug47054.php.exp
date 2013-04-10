@@ -1,7 +1,0 @@
-Called\ class\:\ D\
-Called\ class\:\ C\
-Called\ class\:\ C\
-HipHop Warning: .+
-\
-Strict\ Standards\:\ Non\-static\ method\ D\:\:m\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/zend\/bug47054\.php\ on\ line\ \d+\
-HipHop Fatal error: .+

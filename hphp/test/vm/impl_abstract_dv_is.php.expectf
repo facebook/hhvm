@@ -1,0 +1,1 @@
+HipHop Fatal error: Declaration of B::s() must be compatible with that of A::s() in %s on line 3

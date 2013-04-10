@@ -1,2 +1,0 @@
-Strict\ Standards\:\ Non\-static\ method\ Foo\:\:get\(\)\ should\ not\ be\ called\ statically\ in\ hphp\/test\/zend\/bad\/zend\/bug40621\.php\ on\ line\ \d+\
-HipHop Fatal error: .+

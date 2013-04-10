@@ -1,4 +1,0 @@
-fopen\(\/tmp\/blah\)\:\ failed\ to\ open\ stream\:\ No\ such\ file\ or\ directory\ \(2\)\ in\ [^
-]+\:\d+\
-HipHop Warning: .+
-\=\=\=DONE\=\=\=

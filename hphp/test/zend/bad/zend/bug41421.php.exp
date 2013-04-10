@@ -1,8 +1,0 @@
-HipHop Warning: .+
-HipHop Fatal error: .+
-Stack\ trace\:\
-\#0\ \[internal\ function\]\:\ wrapper\-\>stream\_eof\(\)\
-\#1\ [^
-]+\(\d+\)\:\ feof\(Resource\ id\ \#6\)\
-\#2\ \{main\}\
-\ \ thrown\ in\ hphp\/test\/zend\/bad\/zend\/bug41421\.php\ on\ line\ \d+

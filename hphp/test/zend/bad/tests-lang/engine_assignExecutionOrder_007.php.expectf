@@ -1,0 +1,32 @@
+Deprecated: Assigning the return value of new by reference is deprecated in %s.php on line 3
+
+Deprecated: Assigning the return value of new by reference is deprecated in %s.php on line 7
+
+Deprecated: Assigning the return value of new by reference is deprecated in %s.php on line 8
+Array
+(
+    [2] => Array
+        (
+            [3] => stdClass
+        )
+
+    [0] => Array
+        (
+            [1] => stdClass Object
+                (
+                )
+
+        )
+
+)
+stdClass Object
+(
+    [a] => stdClass Object
+        (
+            [b] => stdClass Object
+                (
+                )
+
+        )
+
+)

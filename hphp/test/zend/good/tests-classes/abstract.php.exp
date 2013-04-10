@@ -1,2 +1,0 @@
-Call to function show()
-HipHop Fatal error: Cannot call abstract method fail::show() in hphp/test/zend/good/tests-classes/abstract.php on line 12

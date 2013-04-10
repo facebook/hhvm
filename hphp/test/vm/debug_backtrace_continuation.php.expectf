@@ -1,0 +1,46 @@
+array(3) {
+  [0]=>
+  array(2) {
+    ["function"]=>
+    string(12) "my_generator"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      object(Continuation)#1 (0) {
+      }
+    }
+  }
+  [1]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(10)
+    ["function"]=>
+    string(4) "send"
+    ["class"]=>
+    string(12) "Continuation"
+    ["object"]=>
+    object(Continuation)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      NULL
+    }
+  }
+  [2]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(13)
+    ["function"]=>
+    string(10) "my_wrapper"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}

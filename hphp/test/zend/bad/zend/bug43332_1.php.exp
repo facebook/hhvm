@@ -1,3 +1,0 @@
-Catchable\ fatal\ error\:\ Argument\ 1\ passed\ to\ foobar\\foo\:\:bar\(\)\ must\ be\ an\ instance\ of\ foobar\\foo\,\ instance\ of\ stdClass\ given\,\ called\ in\ [^
-]+bug43332\_1\.php\ on\ line\ 10\ and\ defined\ in\ [^
-]+bug43332\_1\.php\ on\ line\ 5

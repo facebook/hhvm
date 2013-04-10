@@ -1,1 +1,0 @@
-HipHop Fatal error: Call to undefined method b::b from context c in hphp/test/zend/good/zend/bug48215_2.php on line 9

@@ -1,7 +1,0 @@
-int(2)
-array(1) {
-  [0]=>
-  int(1)
-}
-HipHop Notice: Undefined index: 2 in hphp/test/zend/good/zend/dereference_013.php on line 24
-NULL

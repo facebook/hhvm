@@ -1,1 +1,0 @@
-HipHop Fatal error: Argument 1 passed to Foo::test5() must be an instance of d, string given in hphp/test/vm/strict_type_args3.php on line 15

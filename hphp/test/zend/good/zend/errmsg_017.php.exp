@@ -1,1 +1,0 @@
-HipHop Fatal error: Method test::__unset() must take exactly 1 argument in hphp/test/zend/good/zend/errmsg_017.php on line 4

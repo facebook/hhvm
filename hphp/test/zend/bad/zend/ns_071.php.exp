@@ -1,3 +1,0 @@
-NULL\
-\
-Catchable\ fatal\ error\:\ Argument\ 1\ passed\ to\ foo\\bar\:\:\_\_construct\(\)\ must\ be\ of\ the\ type\ array\,\ object\ given\,\ called\ in\ hphp\/test\/zend\/bad\/zend\/ns\_071\.php\ on\ line\ \d+\ and\ defined\ in\ hphp\/test\/zend\/bad\/zend\/ns\_071\.php\ on\ line\ \d+

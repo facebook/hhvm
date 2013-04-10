@@ -1,0 +1,23 @@
+object(foo)#%d (0) {
+}
+object(foo)#%d (0) {
+}
+object(foo)#%d (0) {
+}
+object(foo)#%d (0) {
+}
+===no_typehint===
+object(foo)#%d (0) {
+}
+int(1)
+int(2)
+===no_typehint_ref===
+object(foo)#%d (0) {
+}
+int(1)
+int(2)
+===typehint===
+object(foo)#%d (0) {
+}
+
+Catchable fatal error: Argument 1 passed to typehint() must be an instance of foo, integer given in hphp/test/zend/bad/tests-lang/bug24658.php on line %d

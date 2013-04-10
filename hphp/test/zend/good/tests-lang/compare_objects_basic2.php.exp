@@ -1,4 +1,0 @@
-
-Simple test comparing two objects with different compare callback handler
-bool(false)
-===DONE===

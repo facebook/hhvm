@@ -1,1 +1,0 @@
-HipHop Fatal error: Constructor test::__construct() cannot be static in hphp/test/zend/good/zend/errmsg_032.php on line 5

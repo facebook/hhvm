@@ -1,2 +1,0 @@
-HipHop Warning: Destructor threw an object exception: exception 'Exception' with message '' in hphp/test/vm/exceptions4.php:11\nStack trace:\n#0 hphp/test/vm/exceptions4.php(21): B->__destruct()\n#1 {main} in hphp/test/vm/exceptions4.php on line 21
-HipHop Fatal error: Uncaught exception 'Exception' with message '' in hphp/test/vm/exceptions4.php:5\nStack trace:\n#0 hphp/test/vm/exceptions4.php(21): A->__construct()\n#1 {main}

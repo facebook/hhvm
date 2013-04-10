@@ -1,0 +1,4 @@
+HipHop Fatal error: %a
+Stack trace:
+#0 {main}
+  thrown in hphp/test/zend/bad/zend/exception_003.php on line %d

@@ -1,0 +1,9 @@
+%unicode|string%(3) "OK!"
+object(Closure)#%d (1) {
+  [%u|b%"static"]=>
+  array(1) {
+    [%u|b%"instance"]=>
+    object(Closure)#%d (0) {
+    }
+  }
+}

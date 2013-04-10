@@ -1,0 +1,15 @@
+Error handler called (Undefined variable: undefined)
+HipHop Warning: %a
+Stack trace:
+#0 %sbug61767.php(13): {closure}(8, 'Undefined varia...', '%s', 13, Array)
+#1 {main}
+  thrown in %sbug61767.php on line 13
+HipHop Fatal error: %a
+Shutting down
+Array
+(
+    [type] => 1
+    [message] => Call to a member function foo() on a non-object
+    [file] => %sbug61767.php
+    [line] => 13
+)

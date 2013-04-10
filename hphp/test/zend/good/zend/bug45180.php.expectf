@@ -1,0 +1,20 @@
+__call:
+string(3) "ABC"
+__call:
+string(3) "ABC"
+__call:
+string(3) "XYZ"
+__call:
+string(3) "WWW"
+__call:
+string(3) "ABC"
+__callstatic:
+string(1) "A"
+__callstatic:
+string(1) "B"
+__callstatic:
+string(1) "C"
+__callstatic:
+string(3) "FOO"
+__callstatic:
+string(3) "FOO"

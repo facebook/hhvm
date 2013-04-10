@@ -1,1 +1,0 @@
-HipHop Fatal error: Class TraitsTest contains abstract method (hello) and must therefore be declared abstract or implement the remaining methods in hphp/test/zend/good/zend-traits-bugs/abstract-methods01.php on line 8

@@ -1,0 +1,16 @@
+__get nonExisting
+HipHop Notice: %a
+__get publicProperty
+HipHop Notice: %a
+__get protectedProperty
+HipHop Notice: %a
+__get privateProperty
+HipHop Notice: %a
+__isset nonExisting
+__isset publicProperty
+__isset protectedProperty
+__isset privateProperty
+__set nonExisting
+__set publicProperty
+__set protectedProperty
+__set privateProperty

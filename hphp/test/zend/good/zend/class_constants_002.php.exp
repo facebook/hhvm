@@ -1,4 +1,0 @@
-int(1)
-int(5)
-int(10)
-HipHop Fatal error: Class undefined: NoSuchClass in hphp/test/zend/good/zend/class_constants_002.php on line 11

@@ -1,7 +1,0 @@
-Change\ from\ array\ to\ non\ iterable\:\
-int\(1\)\
-HipHop Warning: .+
-\
-Change\ from\ object\ to\ non\ iterable\:\
-int\(1\)\
-HipHop Warning: .+

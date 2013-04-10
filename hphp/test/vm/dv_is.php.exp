@@ -1,1 +1,0 @@
-HipHop Fatal error: Default value for parameter a0 with type String needs to have the same type as the type hint int in hphp/test/vm/dv_is.php on line 3

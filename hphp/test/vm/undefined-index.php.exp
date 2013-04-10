@@ -1,2 +1,0 @@
-HipHop Notice: Undefined index: 123 in hphp/test/vm/undefined-index.php on line 4
-HipHop Notice: Undefined property: stdClass::$flubb in hphp/test/vm/undefined-index.php on line 8

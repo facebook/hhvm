@@ -1,1 +1,0 @@
-HipHop Fatal error: Access type for interface method if_a::err() must be omitted in hphp/test/zend/good/tests-classes/interface_method_private.php on line 4

@@ -1,1 +1,0 @@
-HipHop Fatal error: Invalid static property access: A::priv in hphp/test/vm/hopt_sprop_accessibility.php on line 4

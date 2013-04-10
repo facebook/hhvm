@@ -1,0 +1,2 @@
+Strict Standards: Only variables should be passed by reference in hphp/test/zend/bad/tests-lang/passByReference_004.php on line 13
+int(5)

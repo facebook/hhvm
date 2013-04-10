@@ -1,0 +1,2 @@
+HipHop Warning: Destructor threw an object exception: exception 'Exception' with message '' in %s on line 21
+HipHop Fatal error: Uncaught exception 'Exception' with message '' in %s:5\nStack trace:\n#0 %s(21): A->__construct()\n#1 {main}

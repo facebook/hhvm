@@ -1,0 +1,13 @@
+Simple test for standard compare object handler
+
+-- The following compare should return TRUE --
+bool(true)
+
+-- All the following compares should return FALSE --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+===DONE===

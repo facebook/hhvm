@@ -1,0 +1,3 @@
+Called function foo:bar(1)
+HipHop Warning: %a
+HipHop Fatal error: %a

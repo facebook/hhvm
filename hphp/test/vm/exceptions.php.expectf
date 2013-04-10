@@ -6,23 +6,23 @@ caught 2
 before
 caught
 caught exception
-string(%d) "#0 hphp/test/vm/exceptions.php(91): c()
-#1 hphp/test/vm/exceptions.php(88): b()
-#2 hphp/test/vm/exceptions.php(99): a()
-#3 hphp/test/vm/exceptions.php(111): main3()
+string(%d) "#0 %s(91): c()
+#1 %s(88): b()
+#2 %s(99): a()
+#3 %s(111): main3()
 #4 {main}"
 string(16) "hello, exception"
-string(%d) "#0 hphp/test/vm/exceptions.php(91): c()
-#1 hphp/test/vm/exceptions.php(88): b()
-#2 hphp/test/vm/exceptions.php(99): a()
-#3 hphp/test/vm/exceptions.php(111): main3()
+string(%d) "#0 %s(91): c()
+#1 %s(88): b()
+#2 %s(99): a()
+#3 %s(111): main3()
 #4 {main}"
-Exception from hphp/test/vm/exceptions.php:96
-string(%d) "#0 hphp/test/vm/exceptions.php(91): c()
-#1 hphp/test/vm/exceptions.php(88): b()
-#2 hphp/test/vm/exceptions.php(99): a()
-#3 hphp/test/vm/exceptions.php(111): main3()
+Exception from %s:96
+string(%d) "#0 %s(91): c()
+#1 %s(88): b()
+#2 %s(99): a()
+#3 %s(111): main3()
 #4 {main}"
 bar 3
 caught 3
-HipHop Fatal error: Uncaught exception 'Ex3' with message '' in hphp/test/vm/exceptions.php:21\nStack trace:\n#0 hphp/test/vm/exceptions.php(28): bar()\n#1 hphp/test/vm/exceptions.php(35): foo2()\n#2 hphp/test/vm/exceptions.php(39): foo1()\n#3 (): foo()\n#4 hphp/test/vm/exceptions.php(105): array_map()\n#5 hphp/test/vm/exceptions.php(111): main3()\n#6 {main}
+HipHop Fatal error: Uncaught exception 'Ex3' with message '' in %s:21\nStack trace:\n#0 %s(28): bar()\n#1 %s(35): foo2()\n#2 %s(39): foo1()\n#3 (): foo()\n#4 %s(105): array_map()\n#5 %s(111): main3()\n#6 {main}

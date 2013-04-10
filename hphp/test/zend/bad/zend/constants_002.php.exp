@@ -1,4 +1,0 @@
-HipHop Warning: .+
-HipHop Notice: .+
-string\(\d+\)\ \"foo\"\
-resource\(\d+\)\ of\ type\ \(stream\)

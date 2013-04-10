@@ -1,0 +1,1 @@
+HipHop Fatal error: Default value for parameter a1 with type Int64 needs to have the same type as the type hint array in %s on line 3

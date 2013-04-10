@@ -1,7 +1,0 @@
-call
-string(6) "sdfdsa"
-callstatic
-clone
-string(3) "foo"
-unset
-string(1) "a"

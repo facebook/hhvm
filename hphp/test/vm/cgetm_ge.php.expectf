@@ -1,0 +1,12 @@
+string(3) "bob"
+int(24)
+HipHop Warning: Cannot use a scalar value as an array in %s on line 30
+NULL
+string(1) "3"
+string(3) "bob"
+int(24)
+HipHop Warning: Cannot use a scalar value as an array in %s on line 35
+NULL
+string(1) "3"
+HipHop Notice: Undefined variable: doesnt_exist in %s on line 42
+NULL

@@ -1,0 +1,20 @@
+Passing undefined by value
+HipHop Notice: %a
+
+Inside passbyVal call:
+NULL
+
+After call
+HipHop Notice: %a
+NULL
+
+Passing undefined by reference
+
+Inside passbyRef call:
+NULL
+
+After call
+array(1) {
+  [0]=>
+  NULL
+}

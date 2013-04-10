@@ -1,8 +1,0 @@
-HipHop Fatal error: .+
-Stack\ trace\:\
-\#0\ [^
-]+\(\d+\)\:\ env\:\:errorHandler\(8\,\ \'[^
-]+\'\,\ \'[^
-]+\'\,\ 34\,\ Array\)\
-\#1\ \{main\}\
-\ \ thrown\ in\ hphp\/test\/zend\/bad\/zend\/bug41209\.php\ on\ line\ \d+

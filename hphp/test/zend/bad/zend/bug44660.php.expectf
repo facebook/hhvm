@@ -1,0 +1,20 @@
+--> read access: 
+HipHop Notice: %a
+
+--> direct assignment: 
+HipHop Warning: %a
+
+--> increment: 
+HipHop Warning: %a
+
+--> reference assignment:
+HipHop Warning: %a
+
+--> reference assignment:
+HipHop Warning: %a
+
+--> indexed assignment:
+HipHop Warning: %a
+
+--> Confirm assignments have had no impact:
+bool(true)

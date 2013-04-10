@@ -1,0 +1,33 @@
+Test begin
+object(F)#1 (2) {
+  ["foo"]=>
+  int(12)
+  ["bart"]=>
+  string(5) "snoot"
+}
+int(12)
+HipHop Notice: Undefined property: F::$foo in %s on line 10
+NULL
+string(5) "snoot"
+HipHop Notice: Undefined property: F::$bart in %s on line 10
+NULL
+object(F)#1 (0) {
+}
+object(C)#2 (2) {
+  ["p"]=>
+  string(4) "C::p"
+  ["q"]=>
+  NULL
+}
+In C::__unset("r")
+object(C)#2 (0) {
+}
+------------------------
+foo
+------------------------
+foo
+Test end
+string(4) "set1"
+HipHop Notice: Undefined property: c2::$declprop in %s on line 68
+NULL
+string(4) "set2"

@@ -1,0 +1,4 @@
+HipHop Fatal error: %a
+Stack trace:
+#0 {main}
+  thrown in Unknown on line %d

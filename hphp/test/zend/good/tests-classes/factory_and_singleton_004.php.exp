@@ -1,1 +1,0 @@
-HipHop Fatal error: Call to private method test::__construct from anonymous context in hphp/test/zend/good/tests-classes/factory_and_singleton_004.php on line 8

@@ -1,0 +1,7 @@
+string(%d) "%s"
+string(%d) "%s"
+int(%d)
+string(21) "test\foo::__construct"
+string(8) "test\foo"
+string(11) "__construct"
+string(4) "test"

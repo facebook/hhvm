@@ -1,0 +1,8 @@
+one
+HipHop Warning: two() expects exactly 2 parameters, 1 given in %s on line 4
+two
+HipHop Warning: three() expects exactly 3 parameters, 1 given in %s on line 5
+HipHop Warning: three() expects exactly 3 parameters, 2 given in %s on line 5
+three
+one
+HipHop Fatal error: Uncaught exception 'Exception' with message '2, two() expects exactly 2 parameters, 1 given' in %s:8\nStack trace:\n#0 %s(4): error_handler()\n#1 %s(17): two()\n#2 %s(20): main()\n#3 {main}

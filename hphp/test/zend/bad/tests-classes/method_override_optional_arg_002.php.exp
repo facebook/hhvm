@@ -1,2 +1,0 @@
-Strict\ Standards\:\ Declaration\ of\ B\:\:foo\(\)\ should\ be\ compatible\ with\ A\:\:foo\(\$arg\ \=\ 1\)\ in\ hphp\/test\/zend\/bad\/tests\-classes\/method\_override\_optional\_arg\_002\.php\ on\ line\ \d+\
-foo

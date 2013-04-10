@@ -1,1 +1,0 @@
-HipHop Fatal error: Cannot declare abstract method if_a::err() final in hphp/test/zend/good/tests-classes/interface_method_final.php on line 4

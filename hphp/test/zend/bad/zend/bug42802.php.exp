@@ -1,8 +1,0 @@
-ok\
-ok\
-ok\
-ok\
-\
-Catchable\ fatal\ error\:\ Argument\ 1\ passed\ to\ foo\\test5\(\)\ must\ be\ an\ instance\ of\ bar\,\ instance\ of\ foo\\bar\ given\,\ called\ in\ [^
-]+bug42802\.php\ on\ line\ \d+\ and\ defined\ in\ [^
-]+bug42802\.php\ on\ line\ \d+

@@ -1,2 +1,0 @@
-test::func()
-HipHop Fatal error: Cannot call abstract method test_base::func() in hphp/test/zend/good/tests-classes/abstract_user_call.php on line 20

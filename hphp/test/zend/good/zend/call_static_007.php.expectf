@@ -1,0 +1,4 @@
+__callstatic: Test
+__call: Test
+__call: Bar
+__callstatic: Foo

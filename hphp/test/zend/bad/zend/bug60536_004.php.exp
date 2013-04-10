@@ -1,6 +1,0 @@
-PRE\-CLASS\-GUARD\
-POST\-CLASS\-GUARD\
-\
-Strict\ Standards\:\ Notice\ and\ THello1\ define\ the\ same\ property\ \(\$hello\)\ in\ the\ composition\ of\ Notice\.\ This\ might\ be\ incompatible\,\ to\ improve\ maintainability\ consider\ using\ accessor\ methods\ in\ traits\ instead\.\ Class\ was\ composed\ in\ [^
-]+bug60536\_004\.php\ on\ line\ \d+\
-POST\-CLASS\-GUARD2

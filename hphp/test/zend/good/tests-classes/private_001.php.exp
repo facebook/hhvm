@@ -1,2 +1,0 @@
-Call show()
-HipHop Fatal error: Call to private method pass::show from anonymous context in hphp/test/zend/good/tests-classes/private_001.php on line 14

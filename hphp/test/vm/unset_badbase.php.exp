@@ -1,2 +1,0 @@
-NULL
-HipHop Fatal error: Cannot unset string offsets in hphp/test/vm/unset_badbase.php on line 13

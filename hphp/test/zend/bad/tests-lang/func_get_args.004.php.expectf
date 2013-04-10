@@ -1,0 +1,34 @@
+-- Val, Ref --
+string(10) "original.a"
+string(10) "original.a"
+array(2) {
+  [0]=>
+  string(10) "original.a"
+  [1]=>
+  string(10) "original.a"
+}
+array(2) {
+  [0]=>
+  string(10) "original.a"
+  [1]=>
+  string(9) "changed.y"
+}
+string(9) "changed.y"
+
+
+-- Ref, Val --
+string(10) "original.b"
+string(10) "original.b"
+array(2) {
+  [0]=>
+  string(10) "original.b"
+  [1]=>
+  string(10) "original.b"
+}
+array(2) {
+  [0]=>
+  string(9) "changed.x"
+  [1]=>
+  string(10) "original.b"
+}
+string(9) "changed.x"

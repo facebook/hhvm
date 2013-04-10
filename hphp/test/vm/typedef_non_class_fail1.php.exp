@@ -1,1 +1,0 @@
-HipHop Fatal error: Argument 1 passed to foo() must be an instance of MyString, int given in hphp/test/vm/typedef_non_class_fail1.php on line 6

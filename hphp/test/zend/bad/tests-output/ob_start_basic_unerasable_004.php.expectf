@@ -1,0 +1,4 @@
+[callback:1]This call will obtain the content, but will not flush the buffer.
+HipHop Notice: %a
+HipHop Notice: %a
+string(65) "This call will obtain the content, but will not flush the buffer."

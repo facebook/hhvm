@@ -1,2 +1,0 @@
-HipHop Notice: Undefined variable: b in hphp/test/zend/good/zend/clone_003.php on line 3
-HipHop Fatal error: clone called on non-object in hphp/test/zend/good/zend/clone_003.php on line 3

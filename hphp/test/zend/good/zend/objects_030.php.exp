@@ -1,1 +1,0 @@
-HipHop Fatal error: Invalid static property access: bar::f in hphp/test/zend/good/zend/objects_030.php on line 11

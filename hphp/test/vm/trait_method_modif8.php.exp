@@ -1,1 +1,0 @@
-HipHop Fatal error: Cannot change non-static method Foo::f() to static in Bar in hphp/test/vm/trait_method_modif8.php on line 12

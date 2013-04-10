@@ -361,11 +361,7 @@ sub run_test
         }
     }
     ($utime, $stime, $cutime, $cstime) = times;
-    if (-e "$opt_srcdir/$test.filter") {
-        `$command 2>&1 | $opt_srcdir/$test.filter > $opt_objdir/$test.out`;
-    } else {
-        `$command > $opt_objdir/$test.out 2>&1`;
-    }
+    `$command > $opt_objdir/$test.out 2>&1`;
     ($utime, $stime, $tutime, $tstime) = times;
 
     # Subtract the before time from the after time.
@@ -394,24 +390,10 @@ sub run_test
                 "Nonexistent output file \"$opt_objdir/$test.out\"\n";
         }
     }
-    elsif (!$opt_no_exp && -e "$opt_srcdir/$test.exp")
+    elsif (-e "$opt_srcdir/$test.exp")
     {
-        # Diff mode.
-        $diff_args = "--text -u";
-        if ($opt_server)
-        {
-          `diff $diff_args -I HipHop $opt_srcdir/$test.exp $opt_objdir/$test.out \\
-             > $opt_objdir/$test.diff 2>&1`;
-        }
-        else
-        {
-          `diff $diff_args $opt_srcdir/$test.exp $opt_objdir/$test.out > $opt_objdir/$test.diff 2>&1`;
-        }
-        if ($?)
-        {
-            # diff returns non-zero if there is a difference.
-            $okay = 0;
-        }
+        $okay = 0;
+        print STDERR "Rename your .exp file to .expect. See test/README.md";
     }
     elsif (!$opt_no_exp && -e "$opt_srcdir/$test.expect")
     {

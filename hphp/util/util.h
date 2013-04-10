@@ -36,6 +36,27 @@
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////
+// Non-gcc compat
+#ifndef __GNUC__
+#define __attribute__(x)
+#endif
+
+#define ATTRIBUTE_UNUSED __attribute__((unused))
+#define ATTRIBUTE_NORETURN __attribute__((noreturn))
+#ifndef ATTRIBUTE_PRINTF
+#if __GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 6
+#define ATTRIBUTE_PRINTF(a1,a2) __attribute__((__format__ (__printf__, a1, a2)))
+#else
+#define ATTRIBUTE_PRINTF(a1,a2)
+#endif
+#endif
+#if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __ICC >= 1200 || __GNUC__ > 4
+#define ATTRIBUTE_COLD __attribute__((cold))
+#else
+#define ATTRIBUTE_COLD
+#endif
+
 #define ALWAYS_INLINE  __attribute__((always_inline))
 #define NEVER_INLINE  __attribute__((noinline))
 #define INLINE_SINGLE_CALLER ALWAYS_INLINE
@@ -231,7 +252,8 @@ const void *buffer_append(const void *buf1, int size1,
 /**
  * printf into a std::string.
  */
-void string_printf(std::string &msg, const char *fmt, ...);
+void string_printf(std::string &msg,
+                   const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 void string_vsnprintf(std::string &msg, const char *fmt, va_list ap);
 
 /**

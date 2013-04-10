@@ -40,6 +40,8 @@ void flush();
  */
 extern __thread void* tl_targetCaches;
 extern size_t s_frontier;
+extern size_t s_persistent_frontier;
+extern size_t s_persistent_start;
 
 static const int kConditionFlagsOff = 0;
 

@@ -99,8 +99,8 @@ __thread void* tl_targetCaches = nullptr;
 static_assert(kConditionFlagsOff + sizeof(ssize_t) <= 64,
               "kConditionFlagsOff too large");
 size_t s_frontier = kConditionFlagsOff + 64;
-static size_t s_persistent_frontier = 0;
-static size_t s_persistent_start = 0;
+size_t s_persistent_frontier = 0;
+size_t s_persistent_start = 0;
 static size_t s_next_bit;
 static size_t s_bits_to_go;
 static int s_tc_fd;

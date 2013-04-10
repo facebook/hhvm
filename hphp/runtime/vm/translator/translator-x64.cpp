@@ -12207,6 +12207,8 @@ std::string TranslatorX64::getUsage() {
   size_t stubsUsage = astubs.code.frontier - astubs.code.base;
   size_t dataUsage = m_globalData.frontier - m_globalData.base;
   size_t tcUsage = TargetCache::s_frontier;
+  size_t persistentUsage =
+    TargetCache::s_persistent_frontier - TargetCache::s_persistent_start;
   Util::string_printf(
     usage,
     "tx64: %9zd bytes (%" PRId64 "%%) in ahot.code\n"
@@ -12215,7 +12217,8 @@ std::string TranslatorX64::getUsage() {
     "tx64: %9zd bytes (%" PRId64 "%%) in a.code from ir\n"
     "tx64: %9zd bytes (%" PRId64 "%%) in astubs.code from ir\n"
     "tx64: %9zd bytes (%" PRId64 "%%) in m_globalData\n"
-    "tx64: %9zd bytes (%" PRId64 "%%) in targetCache\n",
+    "tx64: %9zd bytes (%" PRId64 "%%) in targetCache\n"
+    "tx64: %9zd bytes (%" PRId64 "%%) in persistentCache\n",
     aHotUsage,  100 * aHotUsage / ahot.code.size,
     aUsage,     100 * aUsage / a.code.size,
     stubsUsage, 100 * stubsUsage / astubs.code.size,
@@ -12223,7 +12226,9 @@ std::string TranslatorX64::getUsage() {
     m_irAstubsUsage, 100 * m_irAstubsUsage / astubs.code.size,
     dataUsage, 100 * dataUsage / m_globalData.size,
     tcUsage,
-    100 * tcUsage / RuntimeOption::EvalJitTargetCacheSize);
+    400 * tcUsage / RuntimeOption::EvalJitTargetCacheSize / 3,
+    persistentUsage,
+    400 * persistentUsage / RuntimeOption::EvalJitTargetCacheSize);
   return usage;
 }
 

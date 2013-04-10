@@ -819,9 +819,13 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
   FunctionStatementPtr func;
 
   if (funcContext.isGenerator) {
-    AnonFuncKind fKind = name->text().empty() ?
-      ContinuationFromClosure : Continuation;
-    const string &closureName = getAnonFuncName(fKind);
+    string closureName = "0_";
+    if (m_inTrait) {
+      // need to de-dupe
+      closureName += m_clsName + "_";
+    }
+    closureName += getContinuationName(name->text());
+
     Token new_params;
     prepare_generator(this, stmt, new_params);
 
@@ -865,11 +869,9 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
   } else {
     string funcName = name->text();
     if (funcName.empty()) {
-      funcName = getAnonFuncName(Closure);
+      funcName = "{closure}";
     } else if (m_lambdaMode) {
-      string f;
-      f += GetAnonPrefix(CreateFunction);
-      funcName = f + "_" + funcName;
+      funcName += "{lambda}";
     }
 
     ExpressionListPtr attrList;
@@ -1118,8 +1120,15 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   fixStaticVars();
 
   MethodStatementPtr mth;
+
   if (funcContext.isGenerator) {
-    const string &closureName = getAnonFuncName(ParserBase::Continuation);
+    string closureName = "0_";
+    if (m_inTrait) {
+      // need to de-dupe
+      closureName += m_clsName + "_";
+    }
+    closureName += getContinuationName(name->text());
+
     Token new_params;
     prepare_generator(this, stmt, new_params);
     ModifierExpressionPtr exp2 = Construct::Clone(exp);

@@ -754,8 +754,8 @@ const string& ClassScope::getNewGeneratorName(
   if (mapIt != genRenameMap.end()) {
     return mapIt->second;
   }
-  string newName = oldName + "_" +
-    lexical_cast<string>(genFuncScope->getNewID());
+  string newName = lexical_cast<string>(genFuncScope->getNewID()) +
+    "_" + oldName;
   genRenameMap[oldName] = newName;
   return genRenameMap[oldName];
 }
@@ -778,7 +778,7 @@ ClassScope::renameCreateContinuationCalls(AnalysisResultPtr ar,
     const string &oldGenName =
       dynamic_pointer_cast<ScalarExpression>((*params)[1])->getString();
 
-    MethodStatementPtr origGenStmt = importedMethods[oldGenName];
+    MethodStatementPtr origGenStmt = importedMethods[Util::toLower(oldGenName)];
     assert(origGenStmt);
 
     const string &newGenName = origGenStmt->getOriginalName();

@@ -1,3 +1,0 @@
-#!/bin/bash
-
-sed -e 's,to int in string on line [0-9]*,to int,g'

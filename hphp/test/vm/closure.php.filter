@@ -1,3 +1,0 @@
-#!/bin/bash
-
-./test/vm/closure.filter

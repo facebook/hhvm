@@ -6,14 +6,14 @@ array(3) {
     ["line"]=>
     int(8)
     ["function"]=>
-
+    string(10) "__destruct"
     ["class"]=>
-
+    string(6) "Tracer"
     ["object"]=>
     object(Tracer)#2 (0) {
     }
     ["type"]=>
-
+    string(2) "->"
     ["args"]=>
     array(0) {
     }
@@ -25,11 +25,11 @@ array(3) {
     ["line"]=>
     int(18)
     ["function"]=>
-
+    string(2) "hi"
     ["class"]=>
-
+    string(3) "Foo"
     ["type"]=>
-
+    string(2) "::"
     ["args"]=>
     array(0) {
     }
@@ -41,7 +41,7 @@ array(3) {
     ["line"]=>
     int(20)
     ["function"]=>
-
+    string(4) "main"
     ["args"]=>
     array(0) {
     }

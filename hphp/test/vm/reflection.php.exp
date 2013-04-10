@@ -25,7 +25,7 @@ int(2)
 --- getParameters("f") ---
 array(4) {
   [0]=>
-  object(ReflectionParameter) (1) {
+  object(ReflectionParameter)#5 (1) {
     ["info"]=>
     array(6) {
       ["index"]=>
@@ -44,7 +44,7 @@ array(4) {
     }
   }
   [1]=>
-  object(ReflectionParameter) (1) {
+  object(ReflectionParameter)#6 (1) {
     ["info"]=>
     array(7) {
       ["index"]=>
@@ -65,7 +65,7 @@ array(4) {
     }
   }
   [2]=>
-  object(ReflectionParameter) (1) {
+  object(ReflectionParameter)#7 (1) {
     ["info"]=>
     array(8) {
       ["index"]=>
@@ -88,7 +88,7 @@ array(4) {
     }
   }
   [3]=>
-  object(ReflectionParameter) (1) {
+  object(ReflectionParameter)#8 (1) {
     ["info"]=>
     array(8) {
       ["index"]=>
@@ -211,7 +211,7 @@ int(0)
 string(1) "B"
 
 --- getParentClass() ---
-object(ReflectionClass) (2) {
+object(ReflectionClass)#23 (2) {
   ["name"]=>
   string(1) "A"
   ["info":"ReflectionClass":private]=>
@@ -277,7 +277,7 @@ bool(false)
 bool(true)
 
 --- newInstance() ---
-object(B) (4) {
+object(B)#34 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>
@@ -289,7 +289,7 @@ object(B) (4) {
 }
 
 --- newInstanceArgs() ---
-object(B) (4) {
+object(B)#34 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>

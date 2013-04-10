@@ -3,7 +3,7 @@ Test begin
 C::C
 3
 0
-object(C) (7) {
+object(C)#1 (7) {
   ["np":"C":private]=>
   string(4) "C::C"
   ["nq":protected]=>
@@ -27,7 +27,7 @@ Properties:
   "\0*\0q" => 2
   "r" => 3
   "s" => 0
-object(C) (7) {
+object(C)#1 (7) {
   ["np":"C":private]=>
   string(4) "C::E"
   ["nq":protected]=>
@@ -55,7 +55,7 @@ Properties:
 D::D
 33
 0
-object(D) (9) {
+object(D)#2 (9) {
   ["np":"D":private]=>
   string(4) "D::F"
   ["nq":protected]=>
@@ -89,7 +89,7 @@ Properties:
 E::E
 33
 0
-object(E) (9) {
+object(E)#3 (9) {
   ["np":protected]=>
   string(4) "E::G"
   ["nq":protected]=>
@@ -127,7 +127,7 @@ F::F
 22
 33
 0
-object(F) (9) {
+object(F)#4 (9) {
   ["np"]=>
   string(4) "F::H"
   ["nq"]=>
@@ -165,7 +165,7 @@ G::G
 22
 33
 0
-object(G) (11) {
+object(G)#5 (11) {
   ["np"]=>
   string(4) "G::I"
   ["nq"]=>
@@ -208,7 +208,7 @@ H::H
 111
 222
 333
-object(D) (9) {
+object(D)#7 (9) {
   ["np":"D":private]=>
   string(4) "D::E"
   ["nq":protected]=>
@@ -238,7 +238,7 @@ Properties:
   "\0C\0np" => C::D
   "\0C\0p" => 2
   "s" => 1
-object(H) (6) {
+object(H)#6 (6) {
   ["np"]=>
   string(4) "H::I"
   ["nq"]=>
@@ -260,7 +260,7 @@ Properties:
   "q" => 223
   "r" => 334
 === J ===
-object(J) (1) {
+object(J)#7 (1) {
   ["p"]=>
   NULL
 }
@@ -275,7 +275,7 @@ it worked
   "p" => 112
   "q" => 223
   "r" => 334
-object(H) (6) {
+object(H)#6 (6) {
   ["np"]=>
   string(4) "H::I"
   ["nq"]=>
@@ -303,7 +303,7 @@ Properties:
   "p" => 112
   "q" => q
   "r" => 340
-object(H) (6) {
+object(H)#6 (6) {
   ["np"]=>
   string(4) "H::I"
   ["nq"]=>
@@ -324,7 +324,7 @@ Properties:
   "p" => 112
   "q" => q
   "r" => r
-object(dumper) (1) {
+object(dumper)#9 (1) {
   ["prop"]=>
   int(10)
 }

@@ -15,9 +15,9 @@ C Object
     [postInc] => 1
     [postDec] => -1
     [p] => 1
-    [q] => <-- trailing whitespace
+    [q] => 
     [r] => 1
-    [s] => <-- trailing whitespace
+    [s] => 
 )
 --- D ---
 In D::__get(a)
@@ -67,9 +67,9 @@ D Object
     [n] => 1
     [o] => -1
     [p] => 1
-    [q] => <-- trailing whitespace
+    [q] => 
     [r] => 1
-    [s] => <-- trailing whitespace
+    [s] => 
 )
 --- E ---
 int(1)
@@ -111,9 +111,9 @@ E Object
             [n] => 1
             [o] => -1
             [p] => 1
-            [q] => <-- trailing whitespace
+            [q] => 
             [r] => 1
-            [s] => <-- trailing whitespace
+            [s] => 
         )
 
     [preInc] => 1
@@ -130,9 +130,9 @@ NULL
 stdClass Object
 (
     [preInc] => 1
-    [preDec] => <-- trailing whitespace
+    [preDec] => 
     [postInc] => 1
-    [postDec] => <-- trailing whitespace
+    [postDec] => 
 )
 --- 42 ---
 HipHop Warning: Attempt to increment/decrement property of non-object in hphp/test/vm/IncDecProp.php on line 106

@@ -1,5 +1,5 @@
 Test begin
-object(F) (2) {
+object(F)#1 (2) {
   ["foo"]=>
   int(12)
   ["bart"]=>
@@ -11,16 +11,16 @@ NULL
 string(5) "snoot"
 HipHop Notice: Undefined property: F::$bart in hphp/test/vm/UnsetProp.php on line 10
 NULL
-object(F) (0) {
+object(F)#1 (0) {
 }
-object(C) (2) {
+object(C)#2 (2) {
   ["p"]=>
   string(4) "C::p"
   ["q"]=>
   NULL
 }
 In C::__unset("r")
-object(C) (0) {
+object(C)#2 (0) {
 }
 ------------------------
 foo

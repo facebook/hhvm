@@ -1,1 +1,1 @@
-HipHop Fatal error: Argument 1 passed to woot() must be an instance of Point, null given 
+HipHop Fatal error: Argument 1 passed to woot() must be an instance of Point, null given in hphp/test/vm/typedef_non_class_fail2.php on line 10

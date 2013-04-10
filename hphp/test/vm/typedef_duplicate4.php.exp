@@ -1,1 +1,1 @@
-HipHop Fatal error: The type Something is already defined to a different class (Something) 
+HipHop Fatal error: The type Something is already defined to a different class (Something) in hphp/test/vm/typedef_duplicate4.php on line 4

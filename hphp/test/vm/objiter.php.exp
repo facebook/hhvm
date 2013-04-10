@@ -32,7 +32,7 @@ basePub => 10
 childDynamic => child dynamic
 
 Anonymous context, Child object, strong foreach
-object(Child) (8) {
+object(Child)#3 (8) {
   ["childPub"]=>
   string(5) "BLARK"
   ["childProt":protected]=>

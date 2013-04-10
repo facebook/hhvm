@@ -1,2 +1,0 @@
-#!/bin/bash
-sed -e '/SlowTimer/d'

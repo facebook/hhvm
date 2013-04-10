@@ -1,1 +1,1 @@
-HipHop Fatal error: The type Existing is already defined to a different class (Existing) 
+HipHop Fatal error: The type Existing is already defined to a different class (Existing) in hphp/test/vm/typedef_duplicate3.php on line 6

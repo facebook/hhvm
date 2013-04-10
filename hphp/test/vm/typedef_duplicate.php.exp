@@ -1,1 +1,1 @@
-HipHop Fatal error: The type MyType is already defined to a different class (MyClass) 
+HipHop Fatal error: The type MyType is already defined to a different class (MyClass) in hphp/test/vm/typedef_duplicate.php on line 10

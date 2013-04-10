@@ -200,7 +200,7 @@ array(3) {
         [0]=>
         array(6) {
           ["file"]=>
-
+           "%s"
           ["line"]=>
           int(42)
           ["function"]=>
@@ -216,7 +216,7 @@ array(3) {
         [1]=>
         array(6) {
           ["file"]=>
-hphp/test/vm/Setprofile.php"
+           "%s"
           ["line"]=>
           int(16)
           ["function"]=>
@@ -232,7 +232,7 @@ hphp/test/vm/Setprofile.php"
         [2]=>
         array(4) {
           ["file"]=>
-hphp/test/vm/Setprofile.php"
+           "%s"
           ["line"]=>
           int(37)
           ["function"]=>
@@ -244,7 +244,7 @@ hphp/test/vm/Setprofile.php"
         [3]=>
         array(4) {
           ["file"]=>
-hphp/test/vm/Setprofile.php"
+           "%s"
           ["line"]=>
           int(45)
           ["function"]=>
@@ -327,7 +327,7 @@ array(3) {
         [0]=>
         array(6) {
           ["file"]=>
-hphp/test/vm/Setprofile.php"
+           "%s"
           ["line"]=>
           int(16)
           ["function"]=>
@@ -343,7 +343,7 @@ hphp/test/vm/Setprofile.php"
         [1]=>
         array(4) {
           ["file"]=>
-hphp/test/vm/Setprofile.php"
+           "%s"
           ["line"]=>
           int(37)
           ["function"]=>
@@ -355,7 +355,7 @@ hphp/test/vm/Setprofile.php"
         [2]=>
         array(4) {
           ["file"]=>
-hphp/test/vm/Setprofile.php"
+           "%s"
           ["line"]=>
           int(45)
           ["function"]=>
@@ -487,7 +487,7 @@ array(3) {
       ["previous":protected]=>
       NULL
       ["file":protected]=>
-hphp/test/vm/Setprofile.php"
+       "%s"
       ["line":protected]=>
       int(16)
       ["trace":protected]=>
@@ -495,7 +495,7 @@ hphp/test/vm/Setprofile.php"
         [0]=>
         array(4) {
           ["file"]=>
-hphp/test/vm/Setprofile.php"
+           "%s"
           ["line"]=>
           int(37)
           ["function"]=>
@@ -507,7 +507,7 @@ hphp/test/vm/Setprofile.php"
         [1]=>
         array(4) {
           ["file"]=>
-hphp/test/vm/Setprofile.php"
+           "%s"
           ["line"]=>
           int(45)
           ["function"]=>
@@ -574,7 +574,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string() "XX_X"
+  string(%d) "%s"
   [2]=>
   array(1) {
     ["args"]=>
@@ -589,7 +589,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string() "XX_X"
+  string(%d) "%s"
   [2]=>
   NULL
 }
@@ -674,7 +674,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string() "XX_X"
+  string(%d) "%s"
   [2]=>
   array(1) {
     ["args"]=>
@@ -689,7 +689,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string() "XX_X"
+  string(%d) "%s"
   [2]=>
   NULL
 }
@@ -766,7 +766,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string() "XX_X"
+  string(%d) "%s"
   [2]=>
   array(1) {
     ["args"]=>
@@ -781,7 +781,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string() "XX_X"
+  string(%d) "%s"
   [2]=>
   NULL
 }
@@ -823,7 +823,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string() "XX_X"
+  string(%d) "%s"
   [2]=>
   NULL
 }

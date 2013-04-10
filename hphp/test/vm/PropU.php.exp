@@ -1,5 +1,5 @@
 Test begin
-object(stdClass) (1) {
+object(stdClass)#1 (1) {
   ["doh"]=>
   NULL
 }

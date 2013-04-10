@@ -8,10 +8,10 @@ Args: 888 500
 #0  funk() called at hphp/test/vm/closure.php:17]
 #1  {closure}() called at hphp/test/vm/closure.php:28]
 #2  main() called at hphp/test/vm/closure.php:33]
-object(Closure$)#1 (2) {
-  ["use_by_val":"Closure$":private]=>
+object(Closure$$main$c63402ab0b95d70460a1f123666a3382$0)#1 (2) {
+  ["use_by_val":"Closure$$main$c63402ab0b95d70460a1f123666a3382$0":private]=>
   int(123)
-  ["use_by_ref":"Closure$":private]=>
+  ["use_by_ref":"Closure$$main$c63402ab0b95d70460a1f123666a3382$0":private]=>
   &int(4000)
 }
 int(123)

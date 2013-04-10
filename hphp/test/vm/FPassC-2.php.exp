@@ -1,11 +1,11 @@
 HipHop Warning: File not found: doesnotexist.php in hphp/test/vm/FPassC-2.php on line 14
 bool(false)
 NULL
-object(stdClass) (0) {
+object(stdClass)#1 (0) {
 }
-object(stdClass) (0) {
+object(stdClass)#2 (0) {
 }
-object(stdClass) (0) {
+object(stdClass)#1 (0) {
 }
 ==============================
 HipHop Strict Warning: Only variables should be passed by reference in hphp/test/vm/FPassC-2.php on line 28

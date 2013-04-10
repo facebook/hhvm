@@ -1,2 +1,0 @@
-#!/bin/sh
-sed -e 's/^\([ ]*object([^)]\+)\)#[0-9]\+/\1/g' | sed -e 's/^string.*"\/.*hphp/"hphp/g'

@@ -1,1 +1,1 @@
-HipHop Fatal error: syntax error, unexpected T_VARIABLE, expecting ')' 
+HipHop Fatal error: syntax error, unexpected T_VARIABLE, expecting ')' in hphp/test/vm/parse_fail_shapes.php on line 5

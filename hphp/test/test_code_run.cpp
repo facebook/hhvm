@@ -33,8 +33,6 @@ using std::ostringstream;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const char *TestCodeRun::Filter = 0;
-
 // By default, use shared linking for faster testing.
 bool TestCodeRun::FastMode = true;
 
@@ -251,15 +249,6 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
 bool TestCodeRun::RecordMulti(const char *input, const char *output,
                               const char *file, int line, bool nowarnings,
                               bool fileoutput) {
-  if (Filter) {
-    const char *errptr;
-    int erroffset;
-    pcre *re = pcre_compile(Filter, PCRE_CASELESS, &errptr, &erroffset, 0);
-    if (re && pcre_exec(re, 0, input, strlen(input), 0, 0, 0, 0) >= 0) {
-      return true;
-    }
-  }
-
   string fullPath = "runtime/tmp/" + Test::s_suite + "/" + test_name + "/tcr-" +
     boost::lexical_cast<string>(m_test++);
 

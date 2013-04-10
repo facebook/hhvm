@@ -44,13 +44,11 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
     RUN_TESTSUITE(TestDebugger);
     return;
   }
-  const char *vmFilter = 0;
 
   if (suite == "TestCodeRunVM" || suite == "TestCodeRunRepo") {
     suite = "TestCodeRun";
     Option::EnableEval = Option::FullEval;
     RuntimeOption::EvalJit = false;
-    TestCodeRun::Filter = vmFilter;
     RUN_TESTSUITE(TestCodeRun);
     return;
   }
@@ -62,7 +60,6 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
     if (suite == "TestCodeRunJitIR" || suite == "TestCodeRunRepoJitIR") {
       RuntimeOption::EvalJitUseIR = true;
     }
-    TestCodeRun::Filter = vmFilter;
     RUN_TESTSUITE(TestCodeRun);
     return;
   }

@@ -9,7 +9,7 @@
 #
 : ${FBMAKE_BIN_ROOT=$HPHP_HOME/_bin}
 
-VERIFY_SCRIPT=./test/verify.sh
+VERIFY_SCRIPT=./test/verify
 PARSE_TEST=$FBMAKE_BIN_ROOT/hphp/util/parser/test/parse_tester
 
 # some tests are expected not to parse

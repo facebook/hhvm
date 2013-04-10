@@ -39,7 +39,7 @@ QTESTS_SKIP='autoload5.php condinfinite.php condinfinite2.php define_b.php
   include_backtrace2.php backup_cycle_collector.php
   redeclared_class1.php redeclared_class2.php'
 
-VERIFY_SCRIPT=./test/verify.sh
+VERIFY_SCRIPT=./test/verify
 
 ######################################################################
 

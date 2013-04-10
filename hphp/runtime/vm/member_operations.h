@@ -138,7 +138,7 @@ inline void releaseKey(StringData* keySD) {
   }
 }
 
-inline void opPre(TypedValue*& base, DataType& type) {
+inline ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
   // Get inner variant if necessary.
   type = base->m_type;
   if (type == KindOfRef) {

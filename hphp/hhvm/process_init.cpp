@@ -126,18 +126,15 @@ void ProcessInit() {
   // Search for systemlib.php in the following places:
   // 1) ${HHVM_LIB_PATH}/systemlib.php
   // 2) <dirname(realpath(hhvm))>/systemlib.php (requires proc filesystem)
-  // 3) ${HPHP_LIB}/systemlib.php
-  // 4) <HHVM_LIB_PATH_DEFAULT>/systemlib.php
+  // 3) <HHVM_LIB_PATH_DEFAULT>/systemlib.php
   //
   // HHVM_LIB_PATH allows a manual override at runtime. If systemlib.php
   // exists next to the hhvm binary, that is likely to be the next best
   // version to use. The realpath()-based lookup will succeed as long as the
   // proc filesystem exists (e.g. on Linux and some FreeBSD configurations)
-  // and no hard links are in use for the executable. Under certain build
-  // situations, systemlib.php will not be generated next to hhvm binary, so
-  // ${HPHP_LIB} is checked next. Failing all of those options, the
-  // HHVM_LIB_PATH_DEFAULT-based lookup will always succeed, assuming that the
-  // application was built and installed correctly.
+  // and no hard links are in use for the executable. Failing all of those
+  // options, the HHVM_LIB_PATH_DEFAULT-based lookup will always succeed,
+  // assuming that the application was built and installed correctly.
   String currentDir = g_vmContext->getCwd();
   HPHP::Eval::PhpFile* file = nullptr;
 

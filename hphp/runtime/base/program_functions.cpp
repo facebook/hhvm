@@ -1128,8 +1128,7 @@ string systemlib_path() {
   char buf[PATH_MAX + 1];
   if (!check_path(file = getenv("HHVM_LIB_PATH")) &&
       !(realpath("/proc/self/exe", buf) &&
-        check_path(file = dirname(buf))) &&
-      !(check_path(file = getenv("HPHP_LIB")))
+        check_path(file = dirname(buf)))
 #ifdef HHVM_LIB_PATH_DEFAULT
       && !(check_path(file = HHVM_LIB_PATH_DEFAULT))
 #endif

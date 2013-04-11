@@ -119,8 +119,8 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
           close(fdout);
           fdout = 0;
         } else {
-          if (color && Util::s_stdout_color) {
-            out.append(Util::s_stdout_color);
+          if (color && s_stdout_color) {
+            out.append(s_stdout_color);
             out.append(buffer, e);
             out.append(ANSI_COLOR_END);
           } else {
@@ -137,8 +137,8 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
           close(fderr);
           fderr = 0;
         } else if (err) {
-          if (color && Util::s_stdout_color) {
-            err->append(Util::s_stderr_color);
+          if (color && s_stdout_color) {
+            err->append(s_stderr_color);
             err->append(buffer, e);
             err->append(ANSI_COLOR_END);
           } else {

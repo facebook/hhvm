@@ -369,8 +369,8 @@ static void color_line_no(StringBuffer &sb, int line, int lineFocus0,
   if (((line == lineFocus0 && lineFocus1 == 0) ||
        (line >= lineFocus0 && line <= lineFocus1)) &&
       DebuggerClient::HighlightBgColor) {
-    sb.append(Util::add_bgcolor(DebuggerClient::HighlightForeColor,
-                                DebuggerClient::HighlightBgColor));
+    sb.append(add_bgcolor(DebuggerClient::HighlightForeColor,
+                          DebuggerClient::HighlightBgColor));
   } else {
     sb.append(color);
   }
@@ -450,8 +450,8 @@ string check_char_highlight(int lineFocus0, int charFocus0,
       lineFocus0 && charFocus0 && lineFocus1 && charFocus1 &&
       loc.line0 * 1000 + loc.char0 >= lineFocus0 * 1000 + charFocus0 &&
       loc.line1 * 1000 + loc.char1 <= lineFocus1 * 1000 + charFocus1) {
-    return Util::add_bgcolor(DebuggerClient::HighlightForeColor,
-                             DebuggerClient::HighlightBgColor);
+    return add_bgcolor(DebuggerClient::HighlightForeColor,
+                       DebuggerClient::HighlightBgColor);
   }
   return "";
 }

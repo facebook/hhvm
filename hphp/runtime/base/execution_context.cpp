@@ -235,8 +235,8 @@ static void safe_stdout(const  void  *ptr,  size_t  size) {
 
 void BaseExecutionContext::writeStdout(const char *s, int len) {
   if (m_stdout == nullptr) {
-    if (Util::s_stdout_color) {
-      safe_stdout(Util::s_stdout_color, strlen(Util::s_stdout_color));
+    if (s_stdout_color) {
+      safe_stdout(s_stdout_color, strlen(s_stdout_color));
       safe_stdout(s, len);
       safe_stdout(ANSI_COLOR_END, strlen(ANSI_COLOR_END));
     } else {

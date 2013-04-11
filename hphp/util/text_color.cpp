@@ -17,14 +17,14 @@
 #include "text_color.h"
 #include "util.h"
 
-namespace HPHP { namespace Util {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 const char *s_stdout_color = nullptr;
 const char *s_stderr_color = nullptr;
 
 const char *get_color_by_name(const char *name) {
-  string upper = toUpper(name);
+  string upper = Util::toUpper(name);
   if (upper == "BLACK"         ) return  ANSI_COLOR_BLACK;
   if (upper == "RED"           ) return  ANSI_COLOR_RED;
   if (upper == "GREEN"         ) return  ANSI_COLOR_GREEN;
@@ -45,7 +45,7 @@ const char *get_color_by_name(const char *name) {
 }
 
 const char *get_bgcolor_by_name(const char *name) {
-  string upper = toUpper(name);
+  string upper = Util::toUpper(name);
   if (upper == "BLACK"         ) return  ANSI_BGCOLOR_BLACK;
   if (upper == "RED"           ) return  ANSI_BGCOLOR_RED;
   if (upper == "GREEN"         ) return  ANSI_BGCOLOR_GREEN;
@@ -58,22 +58,22 @@ const char *get_bgcolor_by_name(const char *name) {
 }
 
 void get_supported_colors(std::vector<std::string> &names) {
-  names.push_back(toLower("BLACK"         ));
-  names.push_back(toLower("RED"           ));
-  names.push_back(toLower("GREEN"         ));
-  names.push_back(toLower("BROWN"         ));
-  names.push_back(toLower("BLUE"          ));
-  names.push_back(toLower("MAGENTA"       ));
-  names.push_back(toLower("CYAN"          ));
-  names.push_back(toLower("GRAY"          ));
-  names.push_back(toLower("DARK_GRAY"     ));
-  names.push_back(toLower("LIGHT_RED"     ));
-  names.push_back(toLower("LIGHT_GREEN"   ));
-  names.push_back(toLower("YELLOW"        ));
-  names.push_back(toLower("LIGHT_BLUE"    ));
-  names.push_back(toLower("LIGHT_MAGENTA" ));
-  names.push_back(toLower("LIGHT_CYAN"    ));
-  names.push_back(toLower("WHITE"         ));
+  names.push_back(Util::toLower("BLACK"         ));
+  names.push_back(Util::toLower("RED"           ));
+  names.push_back(Util::toLower("GREEN"         ));
+  names.push_back(Util::toLower("BROWN"         ));
+  names.push_back(Util::toLower("BLUE"          ));
+  names.push_back(Util::toLower("MAGENTA"       ));
+  names.push_back(Util::toLower("CYAN"          ));
+  names.push_back(Util::toLower("GRAY"          ));
+  names.push_back(Util::toLower("DARK_GRAY"     ));
+  names.push_back(Util::toLower("LIGHT_RED"     ));
+  names.push_back(Util::toLower("LIGHT_GREEN"   ));
+  names.push_back(Util::toLower("YELLOW"        ));
+  names.push_back(Util::toLower("LIGHT_BLUE"    ));
+  names.push_back(Util::toLower("LIGHT_MAGENTA" ));
+  names.push_back(Util::toLower("LIGHT_CYAN"    ));
+  names.push_back(Util::toLower("WHITE"         ));
 }
 
 std::string add_bgcolor(const char *color, const char *bgcolor) {
@@ -85,4 +85,4 @@ std::string add_bgcolor(const char *color, const char *bgcolor) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

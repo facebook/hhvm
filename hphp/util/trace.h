@@ -22,6 +22,7 @@
 #include <stdarg.h>
 
 #include "folly/Format.h"
+#include "util/text_color.h"
 
 /*
  * Runtime-selectable trace facility. A trace statement has both a module and a
@@ -44,8 +45,13 @@
  *
  * Normally trace information is printed to /tmp/hphp.log. You can
  * override the environment variable HPHP_TRACE_FILE to change
- * this. (Note you can set it to something like /dev/stderr if you
- * want the logs printed to your terminal).
+ * this. (Note you can set it to something like /dev/stderr or
+ * /dev/stdout if you want the logs printed to your terminal).
+ *
+ * When printing to the terminal, some traces will know how to use
+ * colorization.  You can set HPHP_TRACE_TTY to tell the tracing
+ * facility to assume it should colorize even if the output file isn't
+ * obviously a tty.
  */
 
 namespace HPHP {
@@ -227,6 +233,32 @@ static inline bool moduleEnabled(Module t, int level = 1) { return false; }
 static inline int moduleLevel(Module tm) { return 0; }
 #endif /* } (defined(DEBUG) || defined(USE_TRACE)) */
 
-} } // HPHP::Trace
+//////////////////////////////////////////////////////////////////////
+
+} // Trace
+
+// Optional color utility for trace dumps; when output is a tty or
+// when we've been told to assume it is.
+inline const char* color(const char* color) {
+  static auto const shouldColorize = []() -> bool {
+    auto const traceEnv  = getenv("HPHP_TRACE_FILE");
+    auto const assumeTTY = getenv("HPHP_TRACE_TTY");
+    if (assumeTTY) return true;
+    return
+      !strcmp(traceEnv, "/dev/stdout") ? isatty(1) :
+      !strcmp(traceEnv, "/dev/stderr") ? isatty(2) :
+      false;
+  }();
+  return shouldColorize ? color : "";
+}
+
+inline std::string color(const char* fg, const char* bg) {
+  auto const s = add_bgcolor(fg, bg);
+  return color(s.c_str());
+}
+
+//////////////////////////////////////////////////////////////////////
+
+} // HPHP
 #endif /* incl_TRACE_H_ */
 

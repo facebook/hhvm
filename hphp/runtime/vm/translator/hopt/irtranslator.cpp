@@ -1661,7 +1661,10 @@ void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
   if (curFunc()->isGenerator()) {
     fp = (Cell*)Stack::generatorStackBase((ActRec*)fp);
   }
-  FTRACE(1, "{:-^40}\n", " HHIR during translation ");
+  FTRACE(1, "{}{:-^40}{}\n",
+         color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
+         " HHIR during translation ",
+         color(ANSI_COLOR_END));
 
   m_useHHIR      = true;
   m_irFactory.reset(new JIT::IRFactory());
@@ -1672,7 +1675,10 @@ void TranslatorX64::hhirTraceStart(Offset bcStartOffset) {
 void TranslatorX64::hhirTraceEnd(Offset bcSuccOffset) {
   assert(m_useHHIR);
   m_hhbcTrans->end(bcSuccOffset);
-  FTRACE(1, "{:-^40}\n", "");
+  FTRACE(1, "{}{:-^40}{}\n",
+         color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
+         "",
+         color(ANSI_COLOR_END));
 }
 
 void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {

@@ -20,10 +20,11 @@
 #include <cxxabi.h>
 
 #include "folly/Format.h"
+#include "folly/ScopeGuard.h"
 
 #include "util/disasm.h"
-
 #include "util/base.h"
+#include "util/text_color.h"
 
 namespace HPHP {
 
@@ -148,6 +149,8 @@ static const xed_syntax_enum_t s_xed_syntax =
 
 void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
                     uint8_t* codeEndAddr) {
+  auto const endClr = m_opts.m_color.empty() ? "" : ANSI_COLOR_END;
+
 #ifdef HAVE_LIBXED
   char codeStr[MAX_INSTR_ASM_LEN];
   xed_uint8_t *frontier;
@@ -189,6 +192,7 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     for (int i = 0; i < m_opts.m_indentLevel; ++i) {
       out << ' ';
     }
+    out << m_opts.m_color;
     const char* fmt = m_opts.m_relativeOffset ? "{:3x}: " : "{:#10x}: ";
     out << folly::format(fmt, ip - (m_opts.m_relativeOffset ? codeBase : 0));
     if (m_opts.m_printEncoding) {
@@ -201,7 +205,7 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
         out << "   ";
       }
     }
-    out << codeStr << jmpComment << std::endl;
+    out << codeStr << jmpComment << endClr << '\n';
     frontier += instrLen;
     ip       += instrLen;
   }

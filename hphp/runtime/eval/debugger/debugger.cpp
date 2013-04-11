@@ -227,20 +227,20 @@ void Debugger::InterruptVMHook(int type /* = BreakPointReached */,
 ///////////////////////////////////////////////////////////////////////////////
 
 void Debugger::SetTextColors() {
-  Util::s_stdout_color = ANSI_COLOR_CYAN;
-  Util::s_stderr_color = ANSI_COLOR_RED;
+  s_stdout_color = ANSI_COLOR_CYAN;
+  s_stderr_color = ANSI_COLOR_RED;
 }
 
 String Debugger::ColorStdout(CStrRef s) {
-  if (Util::s_stdout_color) {
-    return String(Util::s_stdout_color) + s + String(ANSI_COLOR_END);
+  if (s_stdout_color) {
+    return String(s_stdout_color) + s + String(ANSI_COLOR_END);
   }
   return s;
 }
 
 String Debugger::ColorStderr(CStrRef s) {
-  if (Util::s_stderr_color) {
-    return String(Util::s_stderr_color) + s + String(ANSI_COLOR_END);
+  if (s_stderr_color) {
+    return String(s_stderr_color) + s + String(ANSI_COLOR_END);
   }
   return s;
 }

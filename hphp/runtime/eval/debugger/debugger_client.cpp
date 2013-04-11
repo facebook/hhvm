@@ -242,10 +242,10 @@ void DebuggerClient::LoadColors(Hdf hdf) {
 const char *DebuggerClient::LoadColor(Hdf hdf, const char *defaultName) {
   const char *name = hdf.get(defaultName);
   hdf = name;  // for starter
-  const char *color = Util::get_color_by_name(name);
+  const char *color = get_color_by_name(name);
   if (color == nullptr) {
     Logger::Error("Bad color name %s", name);
-    color = Util::get_color_by_name(defaultName);
+    color = get_color_by_name(defaultName);
   }
   return color;
 }
@@ -253,10 +253,10 @@ const char *DebuggerClient::LoadColor(Hdf hdf, const char *defaultName) {
 const char *DebuggerClient::LoadBgColor(Hdf hdf, const char *defaultName) {
   const char *name = hdf.get(defaultName);
   hdf = name;  // for starter
-  const char *color = Util::get_bgcolor_by_name(name);
+  const char *color = get_bgcolor_by_name(name);
   if (color == nullptr) {
     Logger::Error("Bad color name %s", name);
-    color = Util::get_bgcolor_by_name(defaultName);
+    color = get_bgcolor_by_name(defaultName);
   }
   return color;
 }
@@ -2269,7 +2269,7 @@ void DebuggerClient::saveConfig() {
 
 void DebuggerClient::defineColors() {
   vector<string> names;
-  Util::get_supported_colors(names);
+  get_supported_colors(names);
   Hdf support = m_config["Color"]["SupportedNames"];
   for (unsigned int i = 0; i < names.size(); i++) {
     support[i+1] = names[i];

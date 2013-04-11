@@ -28,6 +28,7 @@
 
 #include "util/disasm.h"
 #include "util/trace.h"
+#include "util/text_color.h"
 #include "runtime/base/string_data.h"
 #include "runtime/vm/runtime.h"
 #include "runtime/vm/stats.h"
@@ -149,6 +150,8 @@ struct {
 #undef DStk
 #undef DPtrToParam
 #undef DBuiltin
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * dispatchExtra translates from runtime values for the Opcode enum
@@ -276,6 +279,16 @@ MAKE_DISPATCHER(ShowDispatcher, std::string, showExtraImpl);
 std::string showExtra(Opcode opc, IRExtraData* data) {
   return dispatchExtra<std::string,ShowDispatcher>(opc, data);
 }
+
+//////////////////////////////////////////////////////////////////////
+
+// Helper for pretty-printing punctuation.
+std::string punc(const char* str) {
+  return folly::format("{}{}{}",
+    color(ANSI_COLOR_DARK_GRAY), str, color(ANSI_COLOR_END)).str();
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }
 
@@ -692,32 +705,44 @@ size_t IRInstruction::hash() const {
 }
 
 void IRInstruction::printOpcode(std::ostream& os) const {
-  os << opcodeName(m_op);
+  os << color(ANSI_COLOR_CYAN)
+     << opcodeName(m_op)
+     << color(ANSI_COLOR_END)
+     ;
 
   if (m_typeParam == Type::None && !hasExtra()) {
     return;
   }
-  os << '<';
+  os << color(ANSI_COLOR_LIGHT_BLUE) << '<' << color(ANSI_COLOR_END);
   if (m_typeParam != Type::None) {
-    os << m_typeParam.toString();
-    if (hasExtra()) os << ',';
+    os << color(ANSI_COLOR_GREEN)
+       << m_typeParam.toString()
+       << color(ANSI_COLOR_END)
+       ;
+    if (hasExtra()) {
+      os << punc(",");
+    }
   }
   if (hasExtra()) {
-    os << showExtra(getOpcode(), m_extra);
+    os << color(ANSI_COLOR_GREEN)
+       << showExtra(getOpcode(), m_extra)
+       << color(ANSI_COLOR_END);
   }
-  os << '>';
+  os << color(ANSI_COLOR_LIGHT_BLUE)
+     << '>'
+     << color(ANSI_COLOR_END);
 }
 
-void IRInstruction::printDst(std::ostream& ostream) const {
+void IRInstruction::printDst(std::ostream& os) const {
   if (getNumDsts() == 0) return;
 
   const char* sep = "";
   for (const SSATmp& dst : getDsts()) {
-    ostream << sep;
-    dst.print(ostream, true);
+    os << punc(sep);
+    dst.print(os, true);
     sep = ", ";
   }
-  ostream << " = ";
+  os << punc(" = ");
 }
 
 void IRInstruction::printSrc(std::ostream& ostream, uint32_t i) const {
@@ -728,78 +753,60 @@ void IRInstruction::printSrc(std::ostream& ostream, uint32_t i) const {
     }
     src->print(ostream);
   } else {
-    ostream << "!!!NULL @ " << i;
+    ostream << color(ANSI_COLOR_RED)
+            << "!!!NULL @ " << i
+            << color(ANSI_COLOR_END)
+            ;
   }
 }
 
-void IRInstruction::printSrcs(std::ostream& ostream) const {
+void IRInstruction::printSrcs(std::ostream& os) const {
   bool first = true;
   if (getOpcode() == IncStat) {
-    ostream << " " << Stats::g_counterNames[getSrc(0)->getValInt()] <<
-               ", " << getSrc(1)->getValInt();
+    os << " " << Stats::g_counterNames[getSrc(0)->getValInt()]
+       << ", " << getSrc(1)->getValInt();
     return;
   }
   for (uint32_t i = 0; i < m_numSrcs; i++) {
     if (!first) {
-      ostream << ", ";
+      os << punc(", ");
     } else {
-      ostream << " ";
+      os << " ";
       first = false;
     }
-    printSrc(ostream, i);
+    printSrc(os, i);
   }
 }
 
 void IRInstruction::print(std::ostream& ostream) const {
   if (getOpcode() == Marker) {
     auto* marker = getExtra<Marker>();
-    ostream << "--- bc" << marker->bcOff
-            << ", spOff: " << marker->stackOff;
+    ostream << color(ANSI_COLOR_BLUE)
+            << folly::format("--- bc {}, spOff {} ({})",
+                             marker->bcOff,
+                             marker->stackOff,
+                             marker->func->fullName()->data())
+            << color(ANSI_COLOR_END);
     return;
   }
 
   if (!isTransient()) {
+    ostream << color(ANSI_COLOR_YELLOW);
     if (!m_id) ostream << folly::format("({:02d}) ", getIId());
     else ostream << folly::format("({:02d}@{:02d}) ", getIId(), m_id);
+    ostream << color(ANSI_COLOR_END);
   }
   printDst(ostream);
-
-  bool isStMem = m_op == StMem || m_op == StMemNT || m_op == StRaw;
-  bool isLdMem = m_op == LdRaw;
-  if (isStMem || isLdMem) {
-    ostream << opcodeName(m_op) << " [";
-    printSrc(ostream, 0);
-    SSATmp* offset = getSrc(1);
-    if (m_op == StRaw) {
-      RawMemSlot& s = RawMemSlot::Get(RawMemSlot::Kind(offset->getValInt()));
-      int64_t offset = s.getOffset();
-      if (offset) {
-        ostream << " + " << offset;
-      }
-    } else if ((isStMem || isLdMem) &&
-        (!offset->isConst() || offset->getValInt() != 0)) {
-      ostream << " + ";
-      printSrc(ostream, 1);
-    }
-    Type type = isStMem ? getSrc(2)->getType() : m_typeParam;
-    ostream << "]:" << type.toString();
-    if (!isLdMem) {
-      assert(getNumSrcs() > 1);
-      ostream << ", ";
-      printSrc(ostream, isStMem ? 2 : 1);
-    }
-  } else {
-    printOpcode(ostream);
-    printSrcs(ostream);
-  }
+  printOpcode(ostream);
+  printSrcs(ostream);
 
   if (m_taken) {
-    ostream << " -> ";
+    ostream << punc(" -> ");
     m_taken->printLabel(ostream);
   }
 
   if (m_tca) {
-    ostream << ", ";
+    ostream << punc(", ");
     if (m_tca == kIRDirectJccJmpActive) {
       ostream << "JccJmp_Exit ";
     }
@@ -829,6 +836,9 @@ std::string IRInstruction::toString() const {
 }
 
 static void printConst(std::ostream& os, IRInstruction* inst) {
+  os << color(ANSI_COLOR_LIGHT_BLUE);
+  SCOPE_EXIT { os << color(ANSI_COLOR_END); };
+
   auto t = inst->getTypeParam();
   auto c = inst->getExtra<DefConst>();
   if (t == Type::Int) {
@@ -878,11 +888,13 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
   }
 }
 
-void Block::printLabel(std::ostream& ostream) const {
-  ostream << "L" << m_id;
+void Block::printLabel(std::ostream& os) const {
+  os << color(ANSI_COLOR_MAGENTA);
+  os << "L" << m_id;
   if (getHint() == Unlikely) {
-    ostream << "<Unlikely>";
+    os << "<Unlikely>";
   }
+  os << color(ANSI_COLOR_END);
 }
 
 int SSATmp::numNeededRegs() const {
@@ -1044,12 +1056,16 @@ void SSATmp::print(std::ostream& os, bool printLastUse) const {
     printConst(os, m_inst);
     return;
   }
+  os << color(ANSI_COLOR_WHITE);
   os << "t" << m_id;
+  os << color(ANSI_COLOR_END);
   if (printLastUse && m_lastUseId != 0) {
-    os << "@" << m_lastUseId << "#" << m_useCount;
+    os << color(ANSI_COLOR_GRAY)
+       << "@" << m_lastUseId << "#" << m_useCount
+       << color(ANSI_COLOR_END);
   }
   if (m_isSpilled || numAllocatedRegs() > 0) {
-    os << '(';
+    os << color(ANSI_COLOR_BROWN) << '(';
     if (!m_isSpilled) {
       for (int i = 0, sz = numAllocatedRegs(); i < sz; ++i) {
         if (i != 0) os << ",";
@@ -1061,9 +1077,13 @@ void SSATmp::print(std::ostream& os, bool printLastUse) const {
         os << m_spillInfo[i];
       }
     }
-    os << ')';
+    os << ')' << color(ANSI_COLOR_END);
   }
-  os << ":" << getType().toString();
+  os << punc(":")
+     << color(ANSI_COLOR_GREEN)
+     << getType().toString()
+     << color(ANSI_COLOR_END)
+     ;
 }
 
 void SSATmp::print() const {
@@ -1084,7 +1104,8 @@ void Trace::print() const {
 void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
   static const int kIndent = 4;
   Disasm disasm(Disasm::Options().indent(kIndent + 4)
-                                 .printEncoding(dumpIREnabled(6)));
+                                 .printEncoding(dumpIREnabled(6))
+                                 .color(color(ANSI_COLOR_BROWN)));
 
   // Print unlikely blocks at the end
   BlockList blocks, unlikely;
@@ -1113,31 +1134,38 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
         }
         uint32_t bcOffset = marker->bcOff;
         if (const auto* func = marker->func) {
+          std::ostringstream uStr;
           func->unit()->prettyPrint(
-            os, Unit::PrintOpts()
+            uStr, Unit::PrintOpts()
                   .range(bcOffset, bcOffset+1)
                   .noLineNumbers()
                   .indent(0));
+          std::vector<std::string> vec;
+          folly::split('\n', uStr.str(), vec);
+          for (auto& s : vec) {
+            os << color(ANSI_COLOR_BLUE) << s << color(ANSI_COLOR_END) << '\n';
+          }
           continue;
         }
       }
       if (inst.getOpcode() == DefLabel) {
         os << std::string(kIndent - 2, ' ');
         inst.getBlock()->printLabel(os);
-        os << ":\n";
+        os << punc(":") << "\n";
         // print phi pseudo-instructions
         for (unsigned i = 0, n = inst.getNumDsts(); i < n; ++i) {
           os << std::string(kIndent +
                             folly::format("({}) ", inst.getIId()).str().size(),
                             ' ');
           inst.getDst(i)->print(os, false);
-          os << " = phi ";
+          os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
+             << color(ANSI_COLOR_END);
           bool first = true;
           inst.getBlock()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
-            if (!first) os << ", ";
+            if (!first) os << punc(", ");
             first = false;
             jmp->printSrc(os, i);
-            os << "@";
+            os << punc("@");
             jmp->getBlock()->printLabel(os);
           });
           os << '\n';
@@ -1162,12 +1190,12 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
       // instruction.  This includes code after the last isntruction (e.g.
       // jmp to next block), and AStubs code.
       if (!blockRange.empty()) {
-        os << std::string(kIndent, ' ') << "A:\n";
+        os << std::string(kIndent, ' ') << punc("A:") << "\n";
         disasm.disasm(os, blockRange.start(), blockRange.end());
       }
       auto astubRange = asmInfo->astubRanges[block];
       if (!astubRange.empty()) {
-        os << std::string(kIndent, ' ') << "AStubs:\n";
+        os << std::string(kIndent, ' ') << punc("AStubs:") << "\n";
         disasm.disasm(os, astubRange.start(), astubRange.end());
       }
       if (!blockRange.empty() || !astubRange.empty()) {
@@ -1177,7 +1205,9 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
   }
 
   for (auto* exitTrace : m_exitTraces) {
-    os << "\n      -------  Exit Trace  -------\n";
+    os << "\n" << color(ANSI_COLOR_GREEN)
+       << "    -------  Exit Trace  -------"
+       << color(ANSI_COLOR_END) << '\n';
     exitTrace->print(os, asmInfo);
   }
 }
@@ -1403,10 +1433,16 @@ void dumpTrace(int level, const Trace* trace, const char* caption,
   if (dumpIREnabled(level)) {
     std::ostringstream str;
     auto bannerFmt = "{:-^40}\n";
-    str << folly::format(bannerFmt, caption);
+    str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
+        << folly::format(bannerFmt, caption)
+        << color(ANSI_COLOR_END)
+        ;
     dumpTraceImpl(trace, str, ai);
     trace->print(str);
-    str << folly::format(bannerFmt, "");
+    str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
+        << folly::format(bannerFmt, "")
+        << color(ANSI_COLOR_END)
+        ;
     HPHP::Trace::traceRelease("%s", str.str().c_str());
   }
 }

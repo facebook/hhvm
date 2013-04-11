@@ -175,10 +175,10 @@ void Logger::log(LogLevelType level, const std::string &msg,
     const char *escaped = escape ? EscapeString(msg) : msg.c_str();
     const char *ending = escapeMore ? "\\n" : "\n";
     int bytes;
-    if (f == stdf && Util::s_stderr_color) {
+    if (f == stdf && s_stderr_color) {
       bytes =
         fprintf(f, "%s%s%s%s%s",
-                Util::s_stderr_color, sheader.c_str(), msg.c_str(), ending,
+                s_stderr_color, sheader.c_str(), msg.c_str(), ending,
                 ANSI_COLOR_END);
     } else {
       bytes = fprintf(f, "%s%s%s", sheader.c_str(), escaped, ending);

@@ -14,42 +14,42 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __UTIL_TEXT_COLOR_H__
-#define __UTIL_TEXT_COLOR_H__
+#ifndef incl_UTIL_TEXT_COLOR_H_
+#define incl_UTIL_TEXT_COLOR_H_
 
 #include "base.h"
 
-namespace HPHP { namespace Util {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#define ANSI_COLOR_BLACK          "\033[22;30m"
-#define ANSI_COLOR_RED            "\033[22;31m"
-#define ANSI_COLOR_GREEN          "\033[22;32m"
-#define ANSI_COLOR_BROWN          "\033[22;33m"
-#define ANSI_COLOR_BLUE           "\033[22;34m"
-#define ANSI_COLOR_MAGENTA        "\033[22;35m"
-#define ANSI_COLOR_CYAN           "\033[22;36m"
-#define ANSI_COLOR_GRAY           "\033[22;37m"
+const char ANSI_COLOR_BLACK[]          = "\033[22;30m";
+const char ANSI_COLOR_RED[]            = "\033[22;31m";
+const char ANSI_COLOR_GREEN[]          = "\033[22;32m";
+const char ANSI_COLOR_BROWN[]          = "\033[22;33m";
+const char ANSI_COLOR_BLUE[]           = "\033[22;34m";
+const char ANSI_COLOR_MAGENTA[]        = "\033[22;35m";
+const char ANSI_COLOR_CYAN[]           = "\033[22;36m";
+const char ANSI_COLOR_GRAY[]           = "\033[22;37m";
 
-#define ANSI_COLOR_DARK_GRAY      "\033[01;30m"
-#define ANSI_COLOR_LIGHT_RED      "\033[01;31m"
-#define ANSI_COLOR_LIGHT_GREEN    "\033[01;32m"
-#define ANSI_COLOR_YELLOW         "\033[01;33m"
-#define ANSI_COLOR_LIGHT_BLUE     "\033[01;34m"
-#define ANSI_COLOR_LIGHT_MAGENTA  "\033[01;35m"
-#define ANSI_COLOR_LIGHT_CYAN     "\033[01;36m"
-#define ANSI_COLOR_WHITE          "\033[01;37m"
+const char ANSI_COLOR_DARK_GRAY[]      = "\033[01;30m";
+const char ANSI_COLOR_LIGHT_RED[]      = "\033[01;31m";
+const char ANSI_COLOR_LIGHT_GREEN[]    = "\033[01;32m";
+const char ANSI_COLOR_YELLOW[]         = "\033[01;33m";
+const char ANSI_COLOR_LIGHT_BLUE[]     = "\033[01;34m";
+const char ANSI_COLOR_LIGHT_MAGENTA[]  = "\033[01;35m";
+const char ANSI_COLOR_LIGHT_CYAN[]     = "\033[01;36m";
+const char ANSI_COLOR_WHITE[]          = "\033[01;37m";
 
-#define ANSI_BGCOLOR_BLACK        ";40m"
-#define ANSI_BGCOLOR_RED          ";41m"
-#define ANSI_BGCOLOR_GREEN        ";42m"
-#define ANSI_BGCOLOR_BROWN        ";43m"
-#define ANSI_BGCOLOR_BLUE         ";44m"
-#define ANSI_BGCOLOR_MAGENTA      ";45m"
-#define ANSI_BGCOLOR_CYAN         ";46m"
-#define ANSI_BGCOLOR_GRAY         ";47m"
+const char ANSI_BGCOLOR_BLACK[]        = ";40m";
+const char ANSI_BGCOLOR_RED[]          = ";41m";
+const char ANSI_BGCOLOR_GREEN[]        = ";42m";
+const char ANSI_BGCOLOR_BROWN[]        = ";43m";
+const char ANSI_BGCOLOR_BLUE[]         = ";44m";
+const char ANSI_BGCOLOR_MAGENTA[]      = ";45m";
+const char ANSI_BGCOLOR_CYAN[]         = ";46m";
+const char ANSI_BGCOLOR_GRAY[]         = ";47m";
 
-#define ANSI_COLOR_END            "\033[0m"
+const char ANSI_COLOR_END[]            = "\033[0m";
 
 extern const char *s_stdout_color;
 extern const char *s_stderr_color;
@@ -61,6 +61,6 @@ const char *get_bgcolor_by_name(const char *name);
 std::string add_bgcolor(const char *color, const char *bgcolor);
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
-#endif // __UTIL_TEXT_COLOR_H__
+#endif

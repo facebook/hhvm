@@ -32,10 +32,10 @@ class Disasm : private boost::noncopyable {
  public:
   struct Options {
     Options()
-        : m_indentLevel(0)
-        , m_printEncoding(false)
-        , m_relativeOffset(false)
-      {}
+      : m_indentLevel(0)
+      , m_printEncoding(false)
+      , m_relativeOffset(false)
+    {}
 
     Options& indent(int i) {
       m_indentLevel = i;
@@ -49,10 +49,15 @@ class Disasm : private boost::noncopyable {
       m_relativeOffset = re;
       return *this;
     }
+    Options& color(std::string c) {
+      m_color = std::move(c);
+      return *this;
+    }
 
     int m_indentLevel;
     bool m_printEncoding;
     bool m_relativeOffset;
+    std::string m_color;
   };
 
   /* Create a Disasm object. indentLevel spaces will be put at the beginning of

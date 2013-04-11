@@ -316,11 +316,11 @@ std::string DebuggerProxy::MakePHPReturn(const std::string &php) {
 
 static void append_stdout(const char *s, int len, void *data) {
   StringBuffer *sb = (StringBuffer*)data;
-  if (Util::s_stdout_color) {
-    sb->append(Util::s_stdout_color);
+  if (s_stdout_color) {
+    sb->append(s_stdout_color);
   }
   sb->append(s, len);
-  if (Util::s_stdout_color) {
+  if (s_stdout_color) {
     sb->append(ANSI_COLOR_END);
   }
 }
@@ -328,12 +328,12 @@ static void append_stdout(const char *s, int len, void *data) {
 static void append_stderr(const char *header, const char *msg,
                           const char *ending, void *data) {
   StringBuffer *sb = (StringBuffer*)data;
-  if (Util::s_stderr_color) {
-    sb->append(Util::s_stderr_color);
+  if (s_stderr_color) {
+    sb->append(s_stderr_color);
   }
   sb->append(msg);
   sb->append(ending);
-  if (Util::s_stderr_color) {
+  if (s_stderr_color) {
     sb->append(ANSI_COLOR_END);
   }
 }

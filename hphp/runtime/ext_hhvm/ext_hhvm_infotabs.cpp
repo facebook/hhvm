@@ -2455,6 +2455,7 @@ TypedValue* tg_12Continuation_valid(VM::ActRec *ar);
 TypedValue* tg_12Continuation_send(VM::ActRec *ar);
 TypedValue* tg_12Continuation_raise(VM::ActRec *ar);
 TypedValue* tg_12Continuation_getOrigFuncName(VM::ActRec *ar);
+TypedValue* tg_12Continuation_getCalledClass(VM::ActRec *ar);
 TypedValue* tg_12Continuation___clone(VM::ActRec *ar);
 VM::Instance* new_DummyContinuation_Instance(VM::Class*);
 TypedValue* tg_17DummyContinuation___construct(VM::ActRec *ar);
@@ -5545,7 +5546,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_PairIterator[] = {
   { "rewind", tg_12PairIterator_rewind }
 };
 
-static const long long hhbc_ext_method_count_Continuation = 16;
+static const long long hhbc_ext_method_count_Continuation = 17;
 static const HhbcExtMethodInfo hhbc_ext_methods_Continuation[] = {
   { "__construct", tg_12Continuation___construct },
   { "update", tg_12Continuation_update },
@@ -5562,6 +5563,7 @@ static const HhbcExtMethodInfo hhbc_ext_methods_Continuation[] = {
   { "send", tg_12Continuation_send },
   { "raise", tg_12Continuation_raise },
   { "getOrigFuncName", tg_12Continuation_getOrigFuncName },
+  { "getCalledClass", tg_12Continuation_getCalledClass },
   { "__clone", tg_12Continuation___clone }
 };
 

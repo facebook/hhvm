@@ -4180,6 +4180,13 @@ class ReflectionFunctionAbstract {
     }
     return $count;
   }
+
+  public function getReturnTypehintText() {
+    if (isset($this->info['return_type'])) {
+      return $this->info['return_type'];
+    }
+    return '';
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5414,6 +5421,13 @@ class ReflectionProperty implements Reflector {
  */
   public function getDocComment() {
     return $this->info['doc'];
+  }
+
+  public function getTypehintText() {
+    if (isset($this->info['type'])) {
+      return $this->info['type'];
+    }
+    return '';
   }
 }
 

@@ -6699,7 +6699,7 @@ VMExecutionContext::createContinuation(ActRec* fp,
   }
   static const StringData* closure = StringData::GetStaticString("{closure}");
   const StringData* origName =
-    origFunc->isClosureBody() ? closure : origFunc->fullName();
+    origFunc->isClosureBody() ? closure : origFunc->name();
   int nLocals = genFunc->numLocals();
   int nIters = genFunc->numIterators();
   Class* genClass = SystemLib::s_ContinuationClass;

@@ -475,6 +475,9 @@ sub run_test
         unless ($content =~ /^$wanted_re$/)
         {
             $okay = 0;
+            # a poor mans aide for debugging
+            $diff_args = "--text -u";
+            `diff $diff_args $opt_srcdir/$test.expectf $opt_objdir/$test.out > $opt_objdir/$test.diff 2>&1`;
         }
     }
     elsif (!$opt_no_exp && -e "$opt_srcdir/$test.expectregex")

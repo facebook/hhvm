@@ -264,6 +264,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
     if (cmd == "stop") {
       transport->sendString("OK\n");
+      Logger::Info("Got admin port stop request from %s",
+                   transport->getRemoteHost());
       HttpServer::Server->stop();
       break;
     }

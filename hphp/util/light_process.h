@@ -37,6 +37,9 @@ public:
                          const std::vector<int> &inherited_fds);
   static void ChangeUser(const std::string &username);
 
+  typedef std::function<void(pid_t)> LostChildHandler;
+  static void SetLostChildHandler(const LostChildHandler& handler);
+
   static FILE *popen(const char *cmd, const char *type,
                      const char *cwd = nullptr);
   static int pclose(FILE *f);
@@ -66,6 +69,7 @@ public:
 
 private:
   static int GetId();
+  static void SigChldHandler(int sig, siginfo_t* info, void* ctx);
 
   bool initShadow(const std::string &prefix, int id,
                   const std::vector<int> &inherited_fds);

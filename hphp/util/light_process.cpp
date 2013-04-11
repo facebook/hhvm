@@ -280,12 +280,32 @@ static void do_change_user(FILE *fin, FILE *fout) {
 
 static boost::scoped_array<LightProcess> g_procs;
 static int g_procsCount = 0;
+static bool s_handlerInited = false;
+static LightProcess::LostChildHandler s_lostChildHandler;
 
 LightProcess::LightProcess()
 : m_shadowProcess(0), m_fin(nullptr), m_fout(nullptr), m_afdt_fd(-1),
   m_afdt_lfd(-1) { }
 
 LightProcess::~LightProcess() {
+}
+
+void LightProcess::SigChldHandler(int sig, siginfo_t* info, void* ctx) {
+  if (info->si_code != CLD_EXITED &&
+      info->si_code != CLD_KILLED &&
+      info->si_code != CLD_DUMPED) {
+    return;
+  }
+  pid_t pid = info->si_pid;
+  for (int i = 0; i < g_procsCount; ++i) {
+    if (g_procs[i].m_shadowProcess == pid) {
+      // The exited process was a light process. Notify the callback, if any.
+      if (s_lostChildHandler) {
+        s_lostChildHandler(pid);
+      }
+      break;
+    }
+  }
 }
 
 void LightProcess::Initialize(const std::string &prefix, int count,
@@ -297,6 +317,18 @@ void LightProcess::Initialize(const std::string &prefix, int count,
   if (Available()) {
     // already initialized
     return;
+  }
+
+  if (!s_handlerInited) {
+    struct sigaction sa;
+    struct sigaction old_sa;
+    sa.sa_sigaction = &LightProcess::SigChldHandler;
+    sa.sa_flags = SA_SIGINFO | SA_NOCLDSTOP;
+    if (sigaction(SIGCHLD, &sa, &old_sa) != 0) {
+      Logger::Error("Couldn't install SIGCHLD handler");
+      abort();
+    }
+    s_handlerInited = true;
   }
 
   g_procs.reset(new LightProcess[count]);
@@ -680,6 +712,10 @@ void LightProcess::ChangeUser(const string &username) {
     fprintf(g_procs[i].m_fout, "change_user\n%s\n", username.c_str());
     fflush(g_procs[i].m_fout);
   }
+}
+
+void LightProcess::SetLostChildHandler(const LostChildHandler& handler) {
+  s_lostChildHandler = handler;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

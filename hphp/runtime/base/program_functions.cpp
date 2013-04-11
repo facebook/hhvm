@@ -925,8 +925,17 @@ static int execute_program_impl(int argc, char **argv) {
 
   open_server_log_file();
 
-  // Defer the initialization of light processes until the log file handle
-  // is created, so that light processes can log to the right place.
+  // Defer the initialization of light processes until the log file handle is
+  // created, so that light processes can log to the right place. If we ever
+  // lose a light process, stop the server instead of proceeding in an
+  // uncertain state.
+  LightProcess::SetLostChildHandler([](pid_t child) {
+    if (!HttpServer::Server) return;
+    if (!HttpServer::Server->isStopped()) {
+      Logger::Warning("Lost light process child %ld. Stopping server.", child);
+      HttpServer::Server->stop();
+    }
+  });
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
                            RuntimeOption::LightProcessCount,
                            inherited_fds);

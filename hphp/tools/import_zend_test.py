@@ -303,8 +303,9 @@ stdout = subprocess.Popen(
     [
         'tools/verify_to_json.php',
         'run_verify.sh',
-        'interp',
         'test/zend/all',
+        'interp',
+        '0',
         '_bin',
     ],
     stdout=subprocess.PIPE,

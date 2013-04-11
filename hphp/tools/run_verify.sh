@@ -51,7 +51,7 @@ fi
 : ${HHVM:=$DEFAULT_HHVM}
 : ${VERIFY_HHBC:=$DEFAULT_VERIFY_HHBC}
 : ${VQ:=jit}
-: ${TEST_PATH:=vm}
+: ${TEST_PATH:=test/vm}
 
 cd $HPHP_HOME/hphp
 
@@ -59,11 +59,11 @@ cd $HPHP_HOME/hphp
 
 skip_list=
 for x in $QTESTS_SKIP ; do
-    skip_list="$skip_list test/$TEST_PATH/$x"
+    skip_list="$skip_list $TEST_PATH/$x"
 done
 
 qtests=$(comm -23 \
-    <(find test/$TEST_PATH -name \*.php -o -name \*.hhas | sort) \
+    <(find $TEST_PATH -name \*.php -o -name \*.hhas | sort) \
     <(echo $skip_list|sed -e 's/ /\n/g'|sort))
 
 repo_args="-v Repo.Local.Mode=-- -v Repo.Central.Path=$VERIFY_HHBC"

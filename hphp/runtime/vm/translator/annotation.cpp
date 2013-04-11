@@ -56,7 +56,7 @@ encodeCallAndArgs(const StringData* name, int numArgs) {
   return StringData::GetStaticString(s.get());
 }
 
-void
+static void
 decodeNameAndArgs(const StringData* enc, string& outName, int& outNumArgs) {
   const char* numArgs = strchr(enc->data(), '@');
   assert(numArgs && *numArgs =='@');
@@ -68,7 +68,9 @@ decodeNameAndArgs(const StringData* enc, string& outName, int& outNumArgs) {
   outName = name;
 }
 
-void recordNameAndArgs(const SrcKey& sk, const StringData* name, int numArgs) {
+static void recordNameAndArgs(const SrcKey& sk,
+                              const StringData* name,
+                              int numArgs) {
   CallRecord cr;
   cr.m_type = EncodedNameAndArgs;
   cr.m_encodedName = encodeCallAndArgs(name, numArgs);
@@ -76,7 +78,13 @@ void recordNameAndArgs(const SrcKey& sk, const StringData* name, int numArgs) {
 }
 
 static void recordFunc(NormalizedInstruction& i,
-                       const SrcKey& sk, const Func* func) {
+                       const SrcKey& sk,
+                       const Func* func) {
+  FTRACE(2, "annotation: recordFunc: {}@{} {}\n",
+         i.m_unit->filepath()->data(),
+         sk.offset(),
+         func->fullName()->data());
+
   CallRecord cr;
   cr.m_type = Function;
   cr.m_func = func;
@@ -90,6 +98,14 @@ static void recordActRecPush(NormalizedInstruction& i,
                              const StringData* clsName,
                              bool staticCall) {
   const SrcKey& sk = i.source;
+  FTRACE(2, "annotation: recordActRecPush: {}@{} {}{}{} ({}static)\n",
+         unit->filepath()->data(),
+         sk.offset(),
+         clsName ? clsName->data() : "",
+         clsName ? "::" : "",
+         name,
+         !staticCall ? "non" : "");
+
   SrcKey next(sk);
   next.advance(unit);
   const FPIEnt *fpi = curFunc()->findFPI(next.offset());

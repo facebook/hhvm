@@ -14034,7 +14034,7 @@ bool TestCodeRun::TestExtMisc() {
   MVCR("<?php var_dump(pack('nvc*', 0x1234, 0x5678, 65, 66));");
   MVCR("<?php var_dump(unpack('nfrist/vsecond/c2chars', "
       "pack('nvc*', 0x1234, 0x5678, 65, 66)));");
-  MVCR("<?php $d=fopen('test/test_code_run.cpp', 'r');\n"
+  MVCR("<?php $d=fopen('test/sample_dir/file', 'r');\n"
        "var_dump(is_object($d));\n"
        "var_dump(is_resource($d));\n"
        "var_dump(gettype((string)$d));");
@@ -14159,7 +14159,7 @@ bool TestCodeRun::TestInvalidArgument() {
 
       "var_dump(stream_get_contents('', -1));"
 
-      "$fp = fopen('test/test_ext_file.txt', 'r');"
+      "$fp = fopen('test/sample_dir/file', 'r');"
       "var_dump(fgets($fp, -1));"
 /*
   Not handled correctly. Invalid arg /types/ should result in
@@ -20978,7 +20978,7 @@ bool TestCodeRun::TestFile() {
        "$result = pclose($h);"
        "echo trim($content).\"/\".$result.\"/\".gettype($result).\"\\n\";");
   MVCR("<?php "
-       "$fp = fopen('test/test_ext_file.txt', 'r');"
+       "$fp = fopen('test/sample_dir/file', 'r');"
        "var_dump(pclose($fp));");
   MVCR("<?php "
        "$fp = fopen('test/nonexist.txt', 'r');"
@@ -21183,7 +21183,7 @@ bool TestCodeRun::TestUserWrappers() {
 
 bool TestCodeRun::TestDirectory() {
   MVCR("<?php "
-      "$d = dir(\"test/\");"
+      "$d = dir(\"test/sample_dir/\");"
       "echo \"Path: \" . $d->path . \"\\n\";"
       "while (false !== ($entry = $d->read())) {"
       "   echo $entry.\"\\n\";"
@@ -22705,11 +22705,11 @@ bool TestCodeRun::TestExtImage() {
 
 bool TestCodeRun::TestExtSplFile() {
   MVCR("<?php "
-      "$info = new SplFileInfo('test');"
+      "$info = new SplFileInfo('test/sample_dir');"
       "if (!$info->isFile()) {"
       "    echo $info->getRealPath();"
       "}"
-      "$info = new SplFileInfo('test/test_code_run.cpp');"
+      "$info = new SplFileInfo('test/sample_dir/file');"
       "var_dump($info->getbaseName());"
       "var_dump($info->getbaseName('.cpp'));"
       "echo 'Last changed at ' . date('g:i a', $info->getCTime());"
@@ -22726,20 +22726,20 @@ bool TestCodeRun::TestExtSplFile() {
       "var_dump($info->isReadable());"
       "var_dump($info->isWritable());");
   MVCR("<?php "
-      "$info = new SplFileInfo('test');"
+      "$info = new SplFileInfo('test/sample_dir');"
       "var_dump($info->getRealPath());"
       "var_dump($info->getPath());"
       "var_dump($info->getPathName());"
-      "$info = new SplFileInfo('test/');"
+      "$info = new SplFileInfo('test/sample_dir/');"
       "var_dump($info->getRealPath());"
       "var_dump($info->getPath());"
       "var_dump($info->getPathName());"
-      "$info = new SplFileInfo('test//../test');"
+      "$info = new SplFileInfo('test/sample_dir//../sample_dir');"
       "var_dump($info->getRealPath());"
       "var_dump($info->getPath());"
       "var_dump($info->getPathName());"
-      "$p=realpath('test/..');"
-      "$info = new SplFileInfo($p.'/test_link');"
+      "$p=realpath('test');"
+      "$info = new SplFileInfo($p.'/sample_dir/symlink');"
       "var_dump($info->getLinkTarget());"
       "var_dump($info->getRealPath());"
       "var_dump($info->getPath());"
@@ -22763,17 +22763,17 @@ bool TestCodeRun::TestExtSplFile() {
 bool TestCodeRun::TestExtIterator() {
   MVCR("<?php "
       "$files = array();"
-      "foreach (new DirectoryIterator('test/') as $file) {"
+      "foreach (new DirectoryIterator('test/sample_dir/') as $file) {"
       "  $files[] = $file;"
       "}"
       "var_dump(count($files));"
-      "$dir = new DirectoryIterator(dirname('test/'));"
+      "$dir = new DirectoryIterator('test/sample_dir/');"
       "foreach ($dir as $fileinfo) {"
       "  if (!$fileinfo->isDot()) {"
       "    var_dump($fileinfo->getFilename());"
       "  }"
       "}"
-      "$iterator = new DirectoryIterator(\"test\");"
+      "$iterator = new DirectoryIterator(\"test/sample_dir\");"
       "foreach ($iterator as $fileinfo) {"
       "  if ($fileinfo->isFile()) {"
       "    echo \"BEGIN: \" . $fileinfo->getFilename() . \"\\n\";"
@@ -22796,7 +22796,7 @@ bool TestCodeRun::TestExtIterator() {
       "    echo \"END\" . \"\\n\";"
       "  }"
       "}"
-      "$iterator = new RecursiveDirectoryIterator(\"test\");"
+      "$iterator = new RecursiveDirectoryIterator(\"test/sample_dir\");"
       "foreach ($iterator as $fileinfo) {"
       "  if ($fileinfo->isFile()) {"
       "    echo $fileinfo->getFilename() . \"\\n\";"
@@ -22819,7 +22819,7 @@ bool TestCodeRun::TestExtIterator() {
       "  }"
       "}");
   MVCR("<?php "
-      "$dir = new DirectoryIterator('test');"
+      "$dir = new DirectoryIterator('test/sample_dir');"
       "while($dir->valid()) {"
       "  if(!$dir->isDot()) {"
       "    print $dir->current().\"\\n\";"
@@ -22827,10 +22827,11 @@ bool TestCodeRun::TestExtIterator() {
       "  $dir->next();"
       "}");
   MVCR("<?php "
-      "$ite=new RecursiveDirectoryIterator('test/');"
+      "$ite=new RecursiveDirectoryIterator('test/sample_dir/');"
       "$bytestotal=0;"
       "$nbfiles=0;"
       "foreach ($ite as $filename=>$cur) {"
+      "  if (substr($filename,-1)=='.') continue;"
       "  $filesize=$cur->getSize();"
       "  $bytestotal+=$filesize;"
       "  $nbfiles++;"
@@ -22839,7 +22840,7 @@ bool TestCodeRun::TestExtIterator() {
       "$bytestotal=number_format($bytestotal);"
       "echo \"Total: $nbfiles files, $bytestotal bytes\\n\";");
   MVCR("<?php "
-       "$ite=new RecursiveDirectoryIterator('test/');"
+       "$ite=new RecursiveDirectoryIterator('test/sample_dir/');"
        "$bytestotal=0;"
        "$nbfiles=0;"
        "foreach (new RecursiveIteratorIterator($ite) as $filename=>$cur) {"
@@ -22852,7 +22853,7 @@ bool TestCodeRun::TestExtIterator() {
        "$bytestotal=number_format($bytestotal);"
        "echo \"Total: $nbfiles files, $bytestotal bytes\\n\";");
   MVCR("<?php "
-      "$path = \"test/\";"
+      "$path = \"test/sample_dir/\";"
       "foreach (new RecursiveIteratorIterator("
       "  new RecursiveDirectoryIterator($path,"
       "  RecursiveDirectoryIterator::KEY_AS_PATHNAME),"
@@ -22862,7 +22863,7 @@ bool TestCodeRun::TestExtIterator() {
       "  }"
       "}");
   MVCR("<?php "
-       "$directory = \"test\";"
+       "$directory = \"test/sample_dir\";"
        "$fileSPLObjects =  new RecursiveIteratorIterator("
        "  new RecursiveDirectoryIterator($directory),"
        "  RecursiveIteratorIterator::SELF_FIRST);"
@@ -22903,7 +22904,7 @@ bool TestCodeRun::TestExtIterator() {
       "    }"
       "  }"
       "}"
-      "getFiles(new RecursiveDirectoryIterator('test'));");
+      "getFiles(new RecursiveDirectoryIterator('test/sample_dir'));");
 
   MVCR("<?php "
       "try {"

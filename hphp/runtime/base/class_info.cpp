@@ -788,7 +788,9 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
         parameter->argType = (DataType)(int64_t)(*p++);
       }
       parameter->value = *p++;
+      parameter->valueLen = (int64_t)*p++;
       parameter->valueText = *p++;
+      parameter->valueTextLen = (int64_t)*p++;
 
       ClassInfo::ReadUserAttributes(p, parameter->userAttrs);
       p++;
@@ -885,6 +887,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     PropertyInfo *property = new PropertyInfo();
     property->attribute = (Attribute)(int64_t)(*p++);
     property->name = makeStaticString(*p++);
+    property->type = DataType((int)uintptr_t(*p++));
     property->owner = this;
     assert(m_properties.find(property->name) == m_properties.end());
     m_properties[property->name] = property;

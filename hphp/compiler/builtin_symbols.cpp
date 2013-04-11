@@ -21,6 +21,7 @@
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/expression/modifier_expression.h>
+#include <compiler/expression/simple_function_call.h>
 #include <compiler/option.h>
 #include <compiler/parser/parser.h>
 #include <compiler/analysis/file_scope.h>
@@ -30,6 +31,8 @@
 #include <runtime/base/class_info.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/execution_context.h>
+#include <runtime/base/thread_init_fini.h>
 #include <util/logger.h>
 #include <util/util.h>
 #include <dlfcn.h>
@@ -48,35 +51,6 @@ using namespace HPHP;
 bool BuiltinSymbols::Loaded = false;
 bool BuiltinSymbols::NoSuperGlobals = false;
 StringBag BuiltinSymbols::s_strings;
-
-namespace HPHP {
-#define EXT_TYPE 4
-#include <system/ext.inc>
-#undef EXT_TYPE
-}
-
-const char *BuiltinSymbols::ExtensionFunctions[] = {
-#define S(n) (const char *)n
-#define T(t) (const char *)Type::KindOf ## t
-#define EXT_TYPE 0
-#include <system/ext.inc>
-  nullptr,
-};
-#undef EXT_TYPE
-
-const char *BuiltinSymbols::ExtensionConsts[] = {
-#define EXT_TYPE 1
-#include <system/ext.inc>
-  nullptr,
-};
-#undef EXT_TYPE
-
-const char *BuiltinSymbols::ExtensionClasses[] = {
-#define EXT_TYPE 2
-#include <system/ext.inc>
-  nullptr,
-};
-#undef EXT_TYPE
 
 StringToFunctionScopePtrMap BuiltinSymbols::s_functions;
 
@@ -126,206 +100,109 @@ int BuiltinSymbols::NumGlobalNames() {
     sizeof(BuiltinSymbols::GlobalNames[0]);
 }
 
-void BuiltinSymbols::ParseExtFunctions(AnalysisResultPtr ar, const char **p,
-                                       bool sep) {
-  while (*p) {
-    FunctionScopePtr f = ParseExtFunction(ar, p);
-    if (sep) {
-      f->setSepExtension();
-    }
-    assert(!s_functions[f->getName()]);
-    s_functions[f->getName()] = f;
+static TypePtr typePtrFromDataType(DataType dt) {
+  switch (dt) {
+    case KindOfNull:    return Type::Null;
+    case KindOfBoolean: return Type::Boolean;
+    case KindOfInt64:   return Type::Int64;
+    case KindOfDouble:  return Type::Double;
+    case KindOfString:  return Type::String;
+    case KindOfArray:   return Type::Array;
+    case KindOfObject:  return Type::Object;
+    case KindOfUnknown:
+    default:
+      return Type::Any;
   }
 }
 
-void BuiltinSymbols::ParseExtConsts(AnalysisResultPtr ar, const char **p,
-                                    bool sep) {
-  while (*p) {
-    const char *name = *p++;
-    TypePtr type = ParseType(p);
-    s_constants->add(name, type, ExpressionPtr(), ar, ConstructPtr());
-    if (sep) {
-      s_constants->setSepExtension(name);
+FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
+                 ClassInfo *cls, ClassInfo::MethodInfo *method) {
+  int attrs = method->attribute;
+  bool isMethod = cls != ClassInfo::GetSystem();
+  FunctionScopePtr f(new FunctionScope(isMethod,
+                                       method->name.data(),
+                                       attrs & ClassInfo::IsReference));
+
+  int reqCount = 0, totalCount = 0;
+  for(auto it = method->parameters.begin();
+      it != method->parameters.end(); ++it) {
+    const ClassInfo::ParameterInfo *pinfo = *it;
+    if (!pinfo->value || !pinfo->value[0]) {
+      ++reqCount;
+    }
+    ++totalCount;
+  }
+  f->setParamCounts(ar, reqCount, totalCount);
+
+  int idx = 0;
+  for(auto it = method->parameters.begin();
+      it != method->parameters.end(); ++it, ++idx) {
+    const ClassInfo::ParameterInfo *pinfo = *it;
+    f->setParamName(idx, pinfo->name);
+    if (pinfo->attribute & ClassInfo::IsReference) {
+      f->setRefParam(idx);
+    }
+    f->setParamType(ar, idx, typePtrFromDataType(pinfo->argType));
+    if (pinfo->valueLen) {
+      f->setParamDefault(idx, pinfo->value, pinfo->valueLen,
+                         std::string(pinfo->valueText, pinfo->valueTextLen));
     }
   }
-}
 
-TypePtr BuiltinSymbols::ParseType(const char **&p) {
-  const char *clsname = nullptr;
-  Type::KindOf ktype = (Type::KindOf)(long)(*p++);
-  if (ktype == CLASS_TYPE) {
-    clsname = *p++;
-  }
-  TypePtr type;
-  if (clsname) {
-    type = Type::CreateObjectType(clsname);
-  } else if (ktype != Type::KindOfVoid) {
-    type = Type::GetType(ktype);
-  }
-  return type;
-}
-
-void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
-                                     bool sep) {
-  while (*p) {
-    // Parse name
-    const char *cname = *p++;
-    // Parse parent
-    const char *cparent = *p++;
-    if (!cparent) cparent = "";
-    // Parse list of interfaces
-    vector<string> ifaces;
-    while (*p) ifaces.push_back(*p++);
-    p++;
-    // Parse methods
-    FunctionScopePtrVec methods;
-    while (*p) {
-      FunctionScopePtr fs = ParseExtFunction(ar, p, true);
-      if (sep) {
-        fs->setSepExtension();
-      }
-      int flags = (int)(int64_t)(*p++);
-      if (flags & ClassInfo::IsAbstract) {
-        fs->addModifier(T_ABSTRACT);
-      }
-      int vismod = 0;
-      if (flags & ClassInfo::IsProtected) {
-        vismod = T_PROTECTED;
-      } else if (flags & ClassInfo::IsPrivate) {
-        vismod = T_PRIVATE;
-      }
-      fs->addModifier(vismod);
-      if (flags & ClassInfo::IsStatic) {
-        fs->addModifier(T_STATIC);
-      }
-      methods.push_back(fs);
-    }
-    if (cparent && *cparent && (ifaces.empty() || ifaces[0] != cparent)) {
-      ifaces.insert(ifaces.begin(), cparent);
-    }
-    ClassScopePtr cl(new ClassScope(ar, cname, cparent, ifaces, methods));
-    for (uint i = 0; i < methods.size(); ++i) {
-      methods[i]->setOuterScope(cl);
-    }
-    p++;
-    // Parse properties
-    while (*p) {
-      int flags = (int)(int64_t)(*p++);
-      ModifierExpressionPtr modifiers(
-        new ModifierExpression(BlockScopePtr(), LocationPtr()));
-      if (flags & ClassInfo::IsProtected) {
-        modifiers->add(T_PROTECTED);
-      } else if (flags & ClassInfo::IsPrivate) {
-        modifiers->add(T_PRIVATE);
-      }
-      if (flags & ClassInfo::IsStatic) {
-        modifiers->add(T_STATIC);
-      }
-      const char *name = *p++;
-      TypePtr type = ParseType(p);
-      cl->getVariables()->add(name, type, false, ar, ExpressionPtr(), modifiers);
-    }
-    p++;
-    // Parse consts
-    while (*p) {
-      const char *name = *p++;
-      TypePtr type = ParseType(p);
-      cl->getConstants()->add(name, type, ExpressionPtr(), ar, ConstructPtr());
-    }
-    p++;
-
-    int flags = (int)(int64_t)(*p++);
-    cl->setClassInfoAttribute(flags);
-    if (flags & ClassInfo::HasDocComment) {
-      cl->setDocComment(*p++);
-    }
-
-    cl->setSystem();
-    if (sep) {
-      cl->setSepExtension();
-    }
-    s_classes[cl->getName()] = cl;
-  }
-}
-
-FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
-    const char** &p, bool method /* = false */) {
-  const char *name = *p++;
-  TypePtr retType = ParseType(p);
-  bool reference = *p++;
-
-  int minParam = -1;
-  int maxParam = 0;
-  const char **arg = p;
-  while (*arg) {
-    /* name */ arg++;
-    ParseType(arg);
-    const char *argDefault = *arg++;
-    /* const char *argDefaultLen = */ arg++;
-    /* const char *argDefaultText = */ arg++;
-    /* bool argReference = */ arg++;
-    if (argDefault && minParam < 0) {
-      minParam = maxParam;
-    }
-    maxParam++;
-  }
-  if (minParam < 0) minParam = maxParam;
-
-  FunctionScopePtr f(new FunctionScope(method, name, reference));
-  f->setParamCounts(ar, minParam, maxParam);
-  if (retType) {
-    f->setReturnType(ar, retType);
+  if (method->returnType != KindOfNull) {
+    f->setReturnType(ar, typePtrFromDataType(method->returnType));
   }
 
-  int index = 0;
-  const char *paramName = nullptr;
-  while ((paramName = *p++ /* argName */)) {
-    TypePtr argType = ParseType(p);
-    const char *argDefault = *p++;
-    const char *argDefaultLen = *p++;
-    const char *argDefaultText = *p++;
-    bool argReference = *p++;
-
-    f->setParamName(index, paramName);
-    if (argReference) f->setRefParam(index);
-    f->setParamType(ar, index, argType);
-    if (argDefault) f->setParamDefault(index, argDefault,
-                                       (int64_t)argDefaultLen,
-                                       argDefaultText);
-
-    index++;
+  f->setClassInfoAttribute(attrs);
+  if (attrs & ClassInfo::HasDocComment) {
+    f->setDocComment(method->docComment);
   }
 
-  int flags = (int)(int64_t)(*p++);
-  f->setClassInfoAttribute(flags);
-  if (flags & ClassInfo::HasDocComment) {
-    f->setDocComment(*p++);
+  if (!isMethod && (attrs & ClassInfo::HasOptFunction)) {
+    // Legacy optimization functions
+    if (method->name.same("fb_call_user_func_safe") ||
+        method->name.same("fb_call_user_func_safe_return") ||
+        method->name.same("fb_call_user_func_array_safe")) {
+      f->setOptFunction(hphp_opt_fb_call_user_func);
+    } else if (method->name.same("is_callable")) {
+      f->setOptFunction(hphp_opt_is_callable);
+    } else if (method->name.same("call_user_func_array")) {
+      f->setOptFunction(hphp_opt_call_user_func);
+    }
   }
-  if (flags & ClassInfo::HasOptFunction) {
-    f->setOptFunction((FunctionOptPtr)(*p++));
+
+  if (isMethod) {
+    if (attrs & ClassInfo::IsProtected) {
+      f->addModifier(T_PROTECTED);
+    } else if (attrs & ClassInfo::IsPrivate) {
+      f->addModifier(T_PRIVATE);
+    }
+    if (attrs & ClassInfo::IsStatic) {
+      f->addModifier(T_STATIC);
+    }
   }
 
   // This block of code is not needed, if BlockScope directly takes flags.
-  if (flags & ClassInfo::MixedVariableArguments) {
+  if (attrs & ClassInfo::MixedVariableArguments) {
     f->setVariableArgument(-1);
-  } else if (flags & ClassInfo::RefVariableArguments) {
+  } else if (attrs & ClassInfo::RefVariableArguments) {
     f->setVariableArgument(1);
-  } else if (flags & ClassInfo::VariableArguments) {
+  } else if (attrs & ClassInfo::VariableArguments) {
     f->setVariableArgument(0);
   }
-  if (flags & ClassInfo::NoEffect) {
+  if (attrs & ClassInfo::NoEffect) {
     f->setNoEffect();
   }
-  if (flags & ClassInfo::FunctionIsFoldable) {
+  if (attrs & ClassInfo::FunctionIsFoldable) {
     f->setIsFoldable();
   }
-  if (flags & ClassInfo::ContextSensitive) {
+  if (attrs & ClassInfo::ContextSensitive) {
     f->setContextSensitive(true);
   }
-  if (flags & ClassInfo::NeedsActRec) {
+  if (attrs & ClassInfo::NeedsActRec) {
     f->setNeedsActRec();
   }
-  if ((flags & ClassInfo::IgnoreRedefinition) && !method) {
+  if ((attrs & ClassInfo::IgnoreRedefinition) && !method) {
     f->setIgnoreRedefinition();
   }
 
@@ -333,66 +210,105 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   return f;
 }
 
-FunctionScopePtr BuiltinSymbols::ParseHelperFunction(AnalysisResultPtr ar,
-                                                     const char** &p) {
-  FunctionScopePtr f = ParseExtFunction(ar, p);
-  f->setHelperFunction();
-  return f;
+void BuiltinSymbols::ImportExtFunctions(AnalysisResultPtr ar,
+                                        StringToFunctionScopePtrMap &map,
+                                        ClassInfo *cls) {
+  const ClassInfo::MethodVec &methods = cls->getMethodsVec();
+  for (auto it = methods.begin(); it != methods.end(); ++it) {
+    FunctionScopePtr f = ImportFunctionScopePtr(ar, cls, *it);
+    assert(!map[f->getName()]);
+    map[f->getName()] = f;
+  }
 }
 
-bool BuiltinSymbols::LoadSepExtensionSymbols(AnalysisResultPtr ar,
-                                             const std::string &name,
-                                             const std::string &soname) {
-  string mapname = name + "_map";
+void BuiltinSymbols::ImportExtFunctions(AnalysisResultPtr ar,
+                                        FunctionScopePtrVec &vec,
+                                        ClassInfo *cls) {
+  const ClassInfo::MethodVec &methods = cls->getMethodsVec();
+  for (auto it = methods.begin(); it != methods.end(); ++it) {
+    FunctionScopePtr f = ImportFunctionScopePtr(ar, cls, *it);
+    vec.push_back(f);
+  }
+}
 
-  const char ***symbols = nullptr;
-
-  // If we linked with .a, the symbol is already in main program.
-  if (s_handle_main == nullptr) {
-    s_handle_main = dlopen(nullptr, RTLD_NOW | RTLD_GLOBAL);
-    if (!s_handle_main) {
-      const char *error = dlerror();
-      Logger::Error("Unable to load main program's symbols: %s",
-                    error ? error : "(unknown)");
+void BuiltinSymbols::ImportExtProperties(AnalysisResultPtr ar,
+                                         VariableTablePtr dest,
+                                         ClassInfo *cls) {
+  ClassInfo::PropertyVec src = cls->getPropertiesVec();
+  for (auto it = src.begin(); it != src.end(); ++it) {
+    ClassInfo::PropertyInfo *pinfo = *it;
+    int attrs = pinfo->attribute;
+    ModifierExpressionPtr modifiers(
+      new ModifierExpression(BlockScopePtr(), LocationPtr()));
+    if (attrs & ClassInfo::IsPrivate) {
+      modifiers->add(T_PRIVATE);
+    } else if (attrs & ClassInfo::IsProtected) {
+      modifiers->add(T_PROTECTED);
     }
-  }
-  if (s_handle_main) {
-    symbols = (const char ***)dlsym(s_handle_main, mapname.c_str());
-  }
-
-  // Otherwise, look for .so to load it.
-  void *handle = nullptr;
-  if (!symbols) {
-    handle = dlopen(soname.c_str(), RTLD_NOW | RTLD_GLOBAL);
-    if (!handle) {
-      const char *error = dlerror();
-      Logger::Error("Unable to load %s: %s", soname.c_str(),
-                    error ? error : "(unknown)");
-      return false;
+    if (attrs & ClassInfo::IsStatic) {
+      modifiers->add(T_STATIC);
     }
-    symbols = (const char ***)dlsym(handle, mapname.c_str());
-    if (!symbols) {
-      Logger::Error("Unable to find %s in %s", mapname.c_str(),
-                    soname.c_str());
-      dlclose(handle);
-      return false;
-    }
+
+    dest->add(pinfo->name.data(), typePtrFromDataType(pinfo->type),
+              false, ar, ExpressionPtr(), modifiers);
+  }
+}
+
+void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
+                                        ConstantTablePtr dest,
+                                        ClassInfo *cls) {
+  ClassInfo::ConstantVec src = cls->getConstantsVec();
+  for (auto it = src.begin(); it != src.end(); ++it) {
+    // We make an assumption that if the constant is a callback type
+    // (e.g. STDIN, STDOUT, STDERR) then it will return an Object.
+    // And that if it's deferred (SID) it'll be a String.
+    ClassInfo::ConstantInfo *cinfo = *it;
+    dest->add(cinfo->name.data(),
+              cinfo->isDeferred()
+                ? (cinfo->isCallback() ? Type::Object : Type::String)
+                : typePtrFromDataType(cinfo->getValue().getType()),
+              ExpressionPtr(), ar, ConstructPtr());
+  }
+}
+
+ClassScopePtr BuiltinSymbols::ImportClassScopePtr(AnalysisResultPtr ar,
+                                                  ClassInfo *cls) {
+  FunctionScopePtrVec methods;
+  ImportExtFunctions(ar, methods, cls);
+
+  ClassInfo::InterfaceVec ifaces = cls->getInterfacesVec();
+  String parent = cls->getParentClass();
+  std::vector<std::string> stdIfaces;
+  if (!parent.empty() && (ifaces.empty() || ifaces[0] != parent)) {
+    stdIfaces.push_back(parent.data());
+  }
+  for (auto it = ifaces.begin(); it != ifaces.end(); ++it) {
+    stdIfaces.push_back(it->data());
   }
 
-  ParseExtFunctions(ar, symbols[0], true);
-  ParseExtConsts   (ar, symbols[1], true);
-  ParseExtClasses  (ar, symbols[2], true);
-
-  if (handle) {
-    /*
-      Not closing for now, because it may have set an object allocator,
-      which would then fail next time its used.
-      I think the object allocators should be fixed instead - one per size,
-      rather than one per class, then this issue wouldnt occur
-    */
-    // dlclose(handle);
+  ClassScopePtr cl(new ClassScope(ar, cls->getName().data(), parent.data(), stdIfaces, methods));
+  for (uint i = 0; i < methods.size(); ++i) {
+    methods[i]->setOuterScope(cl);
   }
-  return true;
+
+  ImportExtProperties(ar, cl->getVariables(), cls);
+  ImportExtConstants(ar, cl->getConstants(), cls);
+  int attrs = cls->getAttribute();
+  cl->setClassInfoAttribute(attrs);
+  if (attrs & ClassInfo::HasDocComment) {
+    cl->setDocComment(cls->getDocComment());
+  }
+  cl->setSystem();
+  return cl;
+}
+
+void BuiltinSymbols::ImportExtClasses(AnalysisResultPtr ar) {
+  const ClassInfo::ClassMap &classes = ClassInfo::GetClassesMap();
+  for (auto it = classes.begin(); it != classes.end(); ++it) {
+    ClassScopePtr cl = ImportClassScopePtr(ar, it->second);
+    assert(!s_classes[cl->getName()]);
+    s_classes[cl->getName()] = cl;
+  }
 }
 
 void BuiltinSymbols::Parse(AnalysisResultPtr ar,
@@ -417,8 +333,11 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
   if (Loaded) return true;
   Loaded = true;
 
+  if (g_context.isNull()) init_thread_locals();
+  ClassInfo::Load();
+
   // load extension functions first, so system/classes may call them
-  ParseExtFunctions(ar, ExtensionFunctions, false);
+  ImportExtFunctions(ar, s_functions, ClassInfo::GetSystem());
   AnalysisResultPtr ar2 = AnalysisResultPtr(new AnalysisResult());
   s_variables = VariableTablePtr(new VariableTable(*ar2.get()));
   s_constants = ConstantTablePtr(new ConstantTable(*ar2.get()));
@@ -458,21 +377,8 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
   }
 
   // load extension constants, classes and dynamics
-  ParseExtConsts(ar, ExtensionConsts, false);
-  ParseExtClasses(ar, ExtensionClasses, false);
-  for (unsigned int i = 0; i < Option::SepExtensions.size(); i++) {
-    Option::SepExtensionOptions &options = Option::SepExtensions[i];
-    string soname = options.soname;
-    if (soname.empty()) {
-      soname = string("lib") + options.name + ".so";
-    }
-    if (!options.lib_path.empty()) {
-      soname = options.lib_path + "/" + soname;
-    }
-    if (!LoadSepExtensionSymbols(ar, options.name, soname)) {
-      return false;
-    }
-  }
+  ImportExtConstants(ar, s_constants, ClassInfo::GetSystem());
+  ImportExtClasses(ar);
 
   if (!extOnly) {
     Array constants = ClassInfo::GetSystemConstants();

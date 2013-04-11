@@ -101,6 +101,8 @@ public:
     const void* callback;
 
     Variant getValue() const;
+    bool isDeferred() const { return deferred; }
+    bool isCallback() const { return callback != nullptr; }
     void setValue(CVarRef value);
     void setStaticValue(CVarRef value);
 
@@ -130,7 +132,9 @@ public:
     const char *name;
     const char *type;      // hinted type string
     const char *value;     // serialized default value
+    int64_t valueLen;
     const char *valueText; // original PHP code
+    int64_t valueTextLen;
     std::vector<const UserAttributeInfo *> userAttrs;
   };
 
@@ -159,6 +163,7 @@ public:
     PropertyInfo() : docComment(nullptr) {}
     Attribute attribute;
     String name;
+    DataType type;
     const char *docComment;
     const ClassInfo *owner;
     bool isVisible(const ClassInfo *context) const;
@@ -410,6 +415,9 @@ public:
   bool hasConstant(CStrRef name) const;
 
   virtual const UserAttributeVec &getUserAttributeVec() const = 0;
+
+  static ClassInfo *GetSystem() { return s_systemFuncs; }
+  static const ClassMap GetClassesMap() { return s_class_like; }
 
 protected:
   static bool s_loaded;            // whether class map is loaded

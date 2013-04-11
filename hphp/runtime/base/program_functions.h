@@ -65,7 +65,6 @@ class ExecutionContext;
 
 void hphp_process_init() ATTRIBUTE_COLD;
 void hphp_session_init();
-void hphp_thread_init();
 
 ExecutionContext* hphp_context_init();
 bool hphp_invoke_simple(const std::string &filename, bool warmupOnly = false);

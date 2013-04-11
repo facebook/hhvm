@@ -19,6 +19,7 @@
 
 #include <compiler/hphp.h>
 #include <util/string_bag.h>
+#include <runtime/base/class_info.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,10 +70,6 @@ public:
   static int NumGlobalNames();
 private:
   static StringBag s_strings;
-  static const char *ExtensionFunctions[];
-  static const char *ExtensionClasses[];
-  static const char *ExtensionConsts[];
-  static const char *ExtensionDeclaredDynamic[];
   static const char *SystemClasses[];
 
   static AnalysisResultPtr LoadGlobalSymbols(const char *fileName);
@@ -85,21 +82,25 @@ private:
   static std::set<std::string> s_declaredDynamic;
 
   static void *s_handle_main;
-  static bool LoadSepExtensionSymbols(AnalysisResultPtr ar,
-                                      const std::string &name,
-                                      const std::string &soname);
 
-  static TypePtr ParseType(const char **&p);
-  static void ParseExtFunctions(AnalysisResultPtr ar, const char **p,
-                                bool sep);
-  static void ParseExtConsts(AnalysisResultPtr ar, const char **p, bool sep);
-  static void ParseExtClasses(AnalysisResultPtr ar, const char **p, bool sep);
-  static void ParseExtDynamics(AnalysisResultPtr ar, const char **p, bool sep);
-
-  static FunctionScopePtr ParseExtFunction(AnalysisResultPtr ar,
-      const char** &p, bool method = false);
-  static FunctionScopePtr ParseHelperFunction(AnalysisResultPtr ar,
-                                              const char** &p);
+  static FunctionScopePtr ImportFunctionScopePtr(AnalysisResultPtr ar,
+                                                 ClassInfo *cls,
+                                                 ClassInfo::MethodInfo *method);
+  static void ImportExtFunctions(AnalysisResultPtr ar,
+                                 StringToFunctionScopePtrMap &map,
+                                 ClassInfo *cls);
+  static void ImportExtFunctions(AnalysisResultPtr ar,
+                                 FunctionScopePtrVec &vec,
+                                 ClassInfo *cls);
+  static void ImportExtProperties(AnalysisResultPtr ar,
+                                  VariableTablePtr dest,
+                                  ClassInfo *cls);
+  static void ImportExtConstants(AnalysisResultPtr ar,
+                                 ConstantTablePtr dest,
+                                 ClassInfo *cls);
+  static ClassScopePtr ImportClassScopePtr(AnalysisResultPtr ar,
+                                           ClassInfo *cls);
+  static void ImportExtClasses(AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

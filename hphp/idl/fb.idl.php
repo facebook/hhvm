@@ -149,7 +149,6 @@ DefineConstant(
 //   'name'   => name of the function
 //   'desc'   => description of the function's purpose
 //   'flags'  => attributes of the function, see base.php for possible values
-//   'opt'    => optimization callback function's name for compiler
 //   'note'   => additional note about this function's schema
 //   'return' =>
 //      array (
@@ -632,7 +631,6 @@ DefineFunction(
     'name'   => "fb_call_user_func_safe",
     'desc'   => "This function invokes \$function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.",
     'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments | HasOptFunction | NoProfile | ContextSensitive,
-    'opt'    => "hphp_opt_fb_call_user_func",
     'return' => array(
       'type'   => VariantVec,
       'desc'   => "Two elements, 0 is a bool whether function was invoked, 1 is the return value if invoked.",
@@ -653,7 +651,6 @@ DefineFunction(
     'name'   => "fb_call_user_func_safe_return",
     'desc'   => "This function invokes \$function with the arguments specified in its parameter\nlist. If the function is not defined, \$default_rval is returned. Note that\nthe default return value comes BEFORE the arguments to the function.",
     'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments | HasOptFunction | NoProfile | ContextSensitive,
-    'opt'    => "hphp_opt_fb_call_user_func",
     'return' => array(
       'type'   => Variant,
       'desc'   => "The result of the function call if defined, otherwise default.",
@@ -679,7 +676,6 @@ DefineFunction(
     'name'   => "fb_call_user_func_array_safe",
     'desc'   => "This function invokes \$function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.",
     'flags'  =>  HasDocComment | HipHopSpecific | HasOptFunction | NoProfile | ContextSensitive,
-    'opt'    => "hphp_opt_fb_call_user_func",
     'return' => array(
       'type'   => VariantVec,
       'desc'   => "Two elements, 0 is a bool whether function was invoked, 1 is the return value if invoked.",

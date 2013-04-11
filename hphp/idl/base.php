@@ -324,13 +324,6 @@ function DefineFunction($func) {
     $func['doc'] = null;
   }
 
-  if (!empty($func['opt'])) {
-    $func['flags'] |= HasOptFunction;
-  } else {
-    $func['flags'] &= ~HasOptFunction;
-    $func['opt'] = null;
-  }
-
   global $funcs, $classes, $current_class;
   if (empty($current_class)) {
     $funcs[] = $func;

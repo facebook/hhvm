@@ -1256,10 +1256,6 @@ void hphp_session_init() {
   g_vmContext->requestInit();
 }
 
-void hphp_thread_init() {
-  init_thread_locals();
-}
-
 bool hphp_is_warmup_enabled() {
   MemoryManager *mm = MemoryManager::TheMemoryManager();
   return mm->isEnabled();

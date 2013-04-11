@@ -35,7 +35,6 @@ CPP
 //   'name'   => name of the function
 //   'desc'   => description of the function's purpose
 //   'flags'  => attributes of the function, see base.php for possible values
-//   'opt'    => optimization callback function's name for compiler
 //   'note'   => additional note about this function's schema
 //   'return' =>
 //      array (
@@ -93,7 +92,6 @@ DefineFunction(
     'name'   => "is_callable",
     'desc'   => "Verify that the contents of a variable can be called as a function. This can check that a simple variable contains the name of a valid function, or that an array contains a properly encoded object and function name.",
     'flags'  =>  HasDocComment | HasOptFunction | ContextSensitive,
-    'opt'    => "hphp_opt_is_callable",
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if name is callable, FALSE otherwise.",
@@ -125,7 +123,6 @@ DefineFunction(
     'name'   => "call_user_func_array",
     'desc'   => "Call a user defined function with the parameters in params.",
     'flags'  =>  HasDocComment | HasOptFunction | NoProfile | ContextSensitive,
-    'opt'    => "hphp_opt_call_user_func",
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the function result, or FALSE on error.",
@@ -150,7 +147,6 @@ DefineFunction(
     'name'   => "call_user_func",
     'desc'   => "Call a user defined function given by the function parameter.",
     'flags'  =>  HasDocComment | VariableArguments | HasOptFunction | NoProfile | ContextSensitive,
-    'opt'    => "hphp_opt_call_user_func",
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the function result, or FALSE on error.",

@@ -105,11 +105,13 @@ function functionClassMap($func, $cls = null) {
            $attr, $arg['name']);
     printDataType($arg['type']);
     if (array_key_exists('value', $arg)) {
-      printf('"%s", "%s", ',
+      printf('"%s", (const char *)%d, "%s", (const char *)%d, ',
              escape_cpp($arg['defaultSerialized']),
-             escape_cpp($arg['defaultText']));
+             strlen($arg['defaultSerialized']),
+             escape_cpp($arg['defaultText']),
+             strlen($arg['defaultText']));
     } else {
-      printf('"", "", ');
+      printf('"", (const char *)0, "", (const char *)0, ');
     }
     print("NULL,\n  ");
   }
@@ -149,6 +151,7 @@ function classClassMap($cls) {
     $att |= IsNothing;
     if (!($att & (IsProtected|IsPrivate|IsPublic))) $att |= IsPublic;
     printf("  (const char *)0x%04X, \"%s\",\n", $att, $p['name']);
+    printDataType($p['type']);
   }
   printf("  NULL,\n");
 
@@ -190,11 +193,9 @@ function constantClassMap($constant, $cls = null) {
 }
 
 function printDataType($t, $off = 0) {
-  if ($t === null) {
-    printf('(const char *)-1, ');
-    return;
-  }
   switch (typename($t)) {
+    case 'null':
+    case 'void':   $s = 'KindOfNull'; $n = 8; break;
     case 'bool':   $s = 'KindOfBoolean'; $n = 9; break;
     case 'int':
     case 'int64_t':$s = 'KindOfInt64'; $n = 10; break;
@@ -207,10 +208,10 @@ function printDataType($t, $off = 0) {
         $s = 'KindOfObject'; $n = 64;
         break;
       }
-      $s = 'KindOfUnknown'; $n = -1;
+      $s = 'KindOfUnknown: $t: ' . typename($t); $n = -1;
       break;
   }
-  printf('(const char *)0x%x, ', ($n + $off) & 0xffffffff);
+  printf('(const char *)0x%x /* %s */, ', ($n + $off) & 0xffffffff, $s);
 }
 
 function write_constants($extern) {

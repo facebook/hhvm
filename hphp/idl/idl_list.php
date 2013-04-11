@@ -16,10 +16,6 @@ foreach ($files as $file) {
   $ucname = $prefix ? camelCase($name) : ucfirst($name);
 
   switch ($format) {
-  case 'inc':
-    $path = $prefix ? "$prefix/" : "";
-    fwrite($f, "#include \"$path$name.inc\"\n");
-    break;
   case 'test_ext':
     $path = $prefix ?: "test";
     fwrite($f, "#include <$path/test_ext_$name.h>\n");

@@ -106,13 +106,10 @@ inline unsigned buildBitmask(T c, Args... args) {
 // both, respectively.
 static KeyType getKeyType(const SSATmp* key, bool nonLitStr,
                           bool nonLitInt) {
-  assert(key->getType().isKnownDataType());
+  auto keyType = key->getType();
+  assert(keyType.notBoxed());
+  assert(keyType.isKnownDataType() || keyType.equals(Type::Cell));
 
-  if (key->isBoxed()) {
-    // Variants can change types at arbitrary times, so don't try to
-    // pass them in registers.
-    return AnyKey;
-  }
   if ((key->isConst() || nonLitStr) && key->isString()) {
     return StrKey;
   } else if ((key->isConst() || nonLitInt) && key->isA(Type::Int)) {
@@ -143,24 +140,6 @@ static inline TypedValue* keyPtr(TypedValue& key) {
   } else {
     return reinterpret_cast<TypedValue*>(key.m_data.num);
   }
-}
-
-template<KeyType kt, bool isRef>
-static inline TypedValue* unbox(TypedValue* k) {
-  if (isRef) {
-    if (kt == AnyKey) {
-      assert(k->m_type == KindOfRef);
-      k = k->m_data.pref->tv();
-      assert(k->m_type != KindOfRef);
-    } else {
-      assert(k->m_type == keyDataType(kt) ||
-             (IS_STRING_TYPE(k->m_type) && IS_STRING_TYPE(keyDataType(kt))));
-      return reinterpret_cast<TypedValue*>(k->m_data.num);
-    }
-  } else if (kt == AnyKey) {
-    assert(k->m_type != KindOfRef);
-  }
-  return k;
 }
 
 } } }

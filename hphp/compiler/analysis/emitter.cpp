@@ -2226,11 +2226,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
                       false, 0, 0);
         }
 
-        for (auto& l : r->nonRefcountedLocals()) {
+        // XXX: disabled until static analysis is more reliable: t2225399
+        /*for (auto& l : r->nonRefcountedLocals()) {
           auto v = m_curFunc->lookupVarId(StringData::GetStaticString(l));
           m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NonRefCounted,
                          false, 0, v);
-        }
+        }*/
         if (retV) {
           e.RetV();
         } else {

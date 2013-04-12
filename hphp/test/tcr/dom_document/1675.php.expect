@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<books>
+ <book>
+  <title>The Grapes of Wrath</title>
+  <author>John Steinbeck</author>
+ </book> <book>
+  <title>The Pearl</title>  <author>John Steinbeck</author>
+ </book><book><title>PHP de Luxe</title><author>Richard Samar, Christian Stocker</author></book></books>

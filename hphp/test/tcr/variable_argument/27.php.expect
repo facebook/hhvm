@@ -1,0 +1,30 @@
+bool(false)
+int(10)
+bool(false)
+bool(false)
+bool(false)
+int(0)
+int(1)
+int(2)
+bool(false)
+bool(false)
+int(0)
+int(1)
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+int(3)
+bool(false)
+array(1) {
+  [0]=>
+  int(30)
+}
+int(30)
+int(30)
+array(0) {
+}
+bool(false)
+bool(false)

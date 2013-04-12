@@ -1,0 +1,5 @@
+int(1)
+array(1) {
+  ["foo"]=>
+  string(5) "hello"
+}

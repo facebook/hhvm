@@ -1,0 +1,6 @@
+int(1000)
+string(4) "str1"
+string(4) "str2"
+int(2000)
+bool(false)
+bool(true)

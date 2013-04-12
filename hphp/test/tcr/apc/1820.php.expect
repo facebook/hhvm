@@ -1,0 +1,80 @@
+object(A)#3 (6) {
+  ["a"]=>
+  int(12321)
+  ["b":protected]=>
+  int(49284)
+  ["c":"A":private]=>
+  int(110889)
+  ["aa"]=>
+  string(2) "aa"
+  ["bb":protected]=>
+  bool(false)
+  ["cc":"A":private]=>
+  float(1.22)
+}
+object(B)#6 (8) {
+  ["a"]=>
+  int(222)
+  ["b":protected]=>
+  int(444)
+  ["c":"B":private]=>
+  int(666)
+  ["aa"]=>
+  string(3) "aaa"
+  ["bb":protected]=>
+  int(4)
+  ["cc":"B":private]=>
+  float(1.222)
+  ["c":"A":private]=>
+  NULL
+  ["cc":"A":private]=>
+  float(1.22)
+}
+object(C)#9 (10) {
+  ["a"]=>
+  int(333)
+  ["b":protected]=>
+  int(666)
+  ["c":"C":private]=>
+  int(999)
+  ["aa"]=>
+  string(4) "aaaa"
+  ["bb":protected]=>
+  int(40)
+  ["cc":"C":private]=>
+  float(1.333)
+  ["c":"B":private]=>
+  NULL
+  ["cc":"B":private]=>
+  float(1.222)
+  ["c":"A":private]=>
+  NULL
+  ["cc":"A":private]=>
+  float(1.22)
+}
+object(D)#12 (12) {
+  ["a"]=>
+  int(333)
+  ["b"]=>
+  int(666)
+  ["c":"D":private]=>
+  int(999)
+  ["aa"]=>
+  string(5) "aaaaa"
+  ["bb"]=>
+  int(400)
+  ["cc":"D":private]=>
+  float(1.3333)
+  ["c":"C":private]=>
+  NULL
+  ["cc":"C":private]=>
+  float(1.333)
+  ["c":"B":private]=>
+  NULL
+  ["cc":"B":private]=>
+  float(1.222)
+  ["c":"A":private]=>
+  NULL
+  ["cc":"A":private]=>
+  float(1.22)
+}

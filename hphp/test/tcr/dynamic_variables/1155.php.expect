@@ -1,0 +1,20 @@
+array(5) {
+  ["a"]=>
+  &int(123)
+  ["b"]=>
+  &int(456)
+  ["c"]=>
+  &int(789)
+  ["d"]=>
+  &int(789)
+  ["e"]=>
+  int(111)
+}
+int(123)
+int(456)
+int(789)
+int(789)
+int(111)
+string(3) "ccc"
+string(3) "aaa"
+string(3) "bbb"

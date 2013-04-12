@@ -1,0 +1,11 @@
+array(1) {
+  [0]=>
+  string(3) "buz"
+}
+string(3) "buz"
+int(1)
+int(42)
+array(0) {
+}
+bool(false)
+int(0)

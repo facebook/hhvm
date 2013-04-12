@@ -1,0 +1,44 @@
+array(0) {
+}
+NULL
+NULL
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+int(0)
+NULL
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+int(0)
+NULL
+array(1) {
+  [0]=>
+  array(1) {
+    [1]=>
+    int(1)
+  }
+}
+array(1) {
+  [1]=>
+  int(1)
+}
+int(1)
+array(1) {
+  [0]=>
+  array(1) {
+    [1]=>
+    int(1)
+  }
+}
+array(1) {
+  [1]=>
+  int(1)
+}
+int(1)

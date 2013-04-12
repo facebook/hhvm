@@ -1,0 +1,27 @@
+array(3) {
+  [0]=>
+  float(1.5)
+  [1]=>
+  float(2.5)
+  [2]=>
+  float(3.5)
+}
+array(4) {
+  [0]=>
+  float(1.5)
+  [1]=>
+  float(2.5)
+  [2]=>
+  float(3.5)
+  [4]=>
+  float(4.5)
+}
+array(3) {
+  [0]=>
+  float(1.5)
+  [1]=>
+  float(2.5)
+  [2]=>
+  float(3.5)
+}
+float(3.5)

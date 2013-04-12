@@ -1,0 +1,50 @@
+array(2) {
+  ["a_ids"]=>
+  array(3) {
+    ["aaa"]=>
+    bool(true)
+    ["ccc"]=>
+    array(2) {
+      [0]=>
+      array(2) {
+        [0]=>
+        string(4) "tcks"
+        [1]=>
+        string(4) "none"
+      }
+      [1]=>
+      array(2) {
+        [0]=>
+        string(4) "tcks"
+        [1]=>
+        string(3) "ids"
+      }
+    }
+    ["bbb"]=>
+    string(4) "aaaa"
+  }
+  ["user_id"]=>
+  array(3) {
+    ["aaa"]=>
+    bool(true)
+    ["ccc"]=>
+    array(2) {
+      [0]=>
+      array(2) {
+        [0]=>
+        string(4) "tcks"
+        [1]=>
+        string(4) "none"
+      }
+      [1]=>
+      array(2) {
+        [0]=>
+        string(4) "tcks"
+        [1]=>
+        string(2) "id"
+      }
+    }
+    ["bbb"]=>
+    string(4) "bbbb"
+  }
+}

@@ -1,0 +1,12 @@
+string(3) "sub"
+Array
+(
+    [1] => main
+    [2] => sub
+)
+string(4) "main"
+Array
+(
+    [1] => main
+    [2] => sub
+)

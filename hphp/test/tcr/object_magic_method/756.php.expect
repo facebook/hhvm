@@ -1,0 +1,5 @@
+__wakeup called
+object(foo)#1 (1) {
+  ["public"]=>
+  string(6) "public"
+}

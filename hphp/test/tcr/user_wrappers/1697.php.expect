@@ -1,0 +1,17 @@
+Method: stream_open
+array(4) {
+  [0]=>
+  string(23) "magic://stream-via-call"
+  [1]=>
+  string(1) "r"
+  [2]=>
+  int(0)
+  [3]=>
+  &NULL
+}
+Method: stream_flush
+array(0) {
+}
+Method: stream_close
+array(0) {
+}

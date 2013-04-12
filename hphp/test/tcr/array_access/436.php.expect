@@ -1,0 +1,177 @@
+GET0: foo
+SET: string
+SET: number
+GET: array
+SET: another_string
+GET: array
+SET: some_object
+GET: array
+GET: another_array
+GET: x
+SET: y
+SET: blank_array
+EXISTS: array
+1GET: array
+GET: non_existent
+ArrayAccessImpl Object
+(
+    [data] => Array
+        (
+        )
+
+)
+GET: array
+EXISTS: non_existent
+GET: blank_array
+ArrayAccessImpl Object
+(
+    [data] => Array
+        (
+        )
+
+)
+EXISTS: blank_array
+UNSET: blank_array
+ArrayAccessImpl Object
+(
+    [data] => Array
+        (
+            [string] => Just a simple string
+            [number] => 33
+            [array] => ArrayAccessImpl Object
+                (
+                    [data] => Array
+                        (
+                            [another_string] => Alpha
+                            [some_object] => stdClass Object
+                                (
+                                )
+
+                            [another_array] => ArrayAccessImpl Object
+                                (
+                                    [data] => Array
+                                        (
+                                            [x] => ArrayAccessImpl Object
+                                                (
+                                                    [data] => Array
+                                                        (
+                                                            [y] => Beta
+                                                        )
+
+                                                )
+
+                                        )
+
+                                )
+
+                            [non_existent] => ArrayAccessImpl Object
+                                (
+                                    [data] => Array
+                                        (
+                                        )
+
+                                )
+
+                        )
+
+                )
+
+            [blank_array] => ArrayAccessImpl Object
+                (
+                    [data] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+)
+SET2: string
+SET2: number
+GET2: array
+SET: another_string
+GET2: array
+SET: some_object
+GET2: array
+GET: another_array
+GET: x
+SET: y
+SET2: blank_array
+EXISTS2: array
+1GET2: array
+GET: non_existent
+ArrayAccessImpl Object
+(
+    [data] => Array
+        (
+        )
+
+)
+GET2: array
+EXISTS: non_existent
+GET2: blank_array
+ArrayAccessImpl Object
+(
+    [data] => Array
+        (
+        )
+
+)
+EXISTS2: blank_array
+UNSET2: blank_array
+ArrayAccessImpl2 Object
+(
+    [data] => Array
+        (
+            [string] => Just a simple string
+            [number] => 33
+            [array] => ArrayAccessImpl Object
+                (
+                    [data] => Array
+                        (
+                            [another_string] => Alpha
+                            [some_object] => stdClass Object
+                                (
+                                )
+
+                            [another_array] => ArrayAccessImpl Object
+                                (
+                                    [data] => Array
+                                        (
+                                            [x] => ArrayAccessImpl Object
+                                                (
+                                                    [data] => Array
+                                                        (
+                                                            [y] => Beta
+                                                        )
+
+                                                )
+
+                                        )
+
+                                )
+
+                            [non_existent] => ArrayAccessImpl Object
+                                (
+                                    [data] => Array
+                                        (
+                                        )
+
+                                )
+
+                        )
+
+                )
+
+            [blank_array] => ArrayAccessImpl Object
+                (
+                    [data] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+)

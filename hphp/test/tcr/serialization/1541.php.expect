@@ -1,0 +1,469 @@
+object(Big)#1 (6) {
+  ["groupAll"]=>
+  array(10) {
+    [0]=>
+    object(Small)#2 (2) {
+      ["name"]=>
+      string(4) "foo0"
+      ["num"]=>
+      int(0)
+    }
+    [1]=>
+    object(Small)#3 (2) {
+      ["name"]=>
+      string(4) "foo1"
+      ["num"]=>
+      int(3)
+    }
+    [2]=>
+    object(Small)#4 (2) {
+      ["name"]=>
+      string(4) "foo2"
+      ["num"]=>
+      int(6)
+    }
+    [3]=>
+    object(Small)#5 (2) {
+      ["name"]=>
+      string(4) "foo3"
+      ["num"]=>
+      int(9)
+    }
+    [4]=>
+    object(Small)#6 (2) {
+      ["name"]=>
+      string(4) "foo4"
+      ["num"]=>
+      int(12)
+    }
+    [5]=>
+    object(Small)#7 (2) {
+      ["name"]=>
+      string(4) "foo5"
+      ["num"]=>
+      int(15)
+    }
+    [6]=>
+    object(Small)#8 (2) {
+      ["name"]=>
+      string(4) "foo6"
+      ["num"]=>
+      int(18)
+    }
+    [7]=>
+    object(Small)#9 (2) {
+      ["name"]=>
+      string(4) "foo7"
+      ["num"]=>
+      int(21)
+    }
+    [8]=>
+    object(Small)#10 (2) {
+      ["name"]=>
+      string(4) "foo8"
+      ["num"]=>
+      int(24)
+    }
+    [9]=>
+    object(Small)#11 (2) {
+      ["name"]=>
+      string(4) "foo9"
+      ["num"]=>
+      int(27)
+    }
+  }
+  ["group1"]=>
+  array(5) {
+    [0]=>
+    array(2) {
+      [0]=>
+      string(4) "foo0"
+      [1]=>
+      object(Small)#2 (2) {
+        ["name"]=>
+        string(4) "foo0"
+        ["num"]=>
+        int(0)
+      }
+    }
+    [1]=>
+    array(2) {
+      [0]=>
+      string(4) "foo2"
+      [1]=>
+      object(Small)#4 (2) {
+        ["name"]=>
+        string(4) "foo2"
+        ["num"]=>
+        int(6)
+      }
+    }
+    [2]=>
+    array(2) {
+      [0]=>
+      string(4) "foo4"
+      [1]=>
+      object(Small)#6 (2) {
+        ["name"]=>
+        string(4) "foo4"
+        ["num"]=>
+        int(12)
+      }
+    }
+    [3]=>
+    array(2) {
+      [0]=>
+      string(4) "foo6"
+      [1]=>
+      object(Small)#8 (2) {
+        ["name"]=>
+        string(4) "foo6"
+        ["num"]=>
+        int(18)
+      }
+    }
+    [4]=>
+    array(2) {
+      [0]=>
+      string(4) "foo8"
+      [1]=>
+      object(Small)#10 (2) {
+        ["name"]=>
+        string(4) "foo8"
+        ["num"]=>
+        int(24)
+      }
+    }
+  }
+  ["group2"]=>
+  array(5) {
+    [0]=>
+    array(2) {
+      [0]=>
+      string(4) "foo1"
+      [1]=>
+      object(Small)#3 (2) {
+        ["name"]=>
+        string(4) "foo1"
+        ["num"]=>
+        int(3)
+      }
+    }
+    [1]=>
+    array(2) {
+      [0]=>
+      string(4) "foo3"
+      [1]=>
+      object(Small)#5 (2) {
+        ["name"]=>
+        string(4) "foo3"
+        ["num"]=>
+        int(9)
+      }
+    }
+    [2]=>
+    array(2) {
+      [0]=>
+      string(4) "foo5"
+      [1]=>
+      object(Small)#7 (2) {
+        ["name"]=>
+        string(4) "foo5"
+        ["num"]=>
+        int(15)
+      }
+    }
+    [3]=>
+    array(2) {
+      [0]=>
+      string(4) "foo7"
+      [1]=>
+      object(Small)#9 (2) {
+        ["name"]=>
+        string(4) "foo7"
+        ["num"]=>
+        int(21)
+      }
+    }
+    [4]=>
+    array(2) {
+      [0]=>
+      string(4) "foo9"
+      [1]=>
+      object(Small)#11 (2) {
+        ["name"]=>
+        string(4) "foo9"
+        ["num"]=>
+        int(27)
+      }
+    }
+  }
+  ["wacky"]=>
+  array(2) {
+    [0]=>
+    &int(10)
+    [1]=>
+    &int(10)
+  }
+  ["nothing"]=>
+  NULL
+  ["unrelated"]=>
+  array(3) {
+    [0]=>
+    object(Small)#12 (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+    [1]=>
+    object(Small)#12 (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+    [2]=>
+    object(Small)#12 (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+  }
+}
+string(1127) "O:3:"Big":6:{s:8:"groupAll";a:10:{i:0;O:5:"Small":2:{s:4:"name";s:4:"foo0";s:3:"num";i:0;}i:1;O:5:"Small":2:{s:4:"name";s:4:"foo1";s:3:"num";i:3;}i:2;O:5:"Small":2:{s:4:"name";s:4:"foo2";s:3:"num";i:6;}i:3;O:5:"Small":2:{s:4:"name";s:4:"foo3";s:3:"num";i:9;}i:4;O:5:"Small":2:{s:4:"name";s:4:"foo4";s:3:"num";i:12;}i:5;O:5:"Small":2:{s:4:"name";s:4:"foo5";s:3:"num";i:15;}i:6;O:5:"Small":2:{s:4:"name";s:4:"foo6";s:3:"num";i:18;}i:7;O:5:"Small":2:{s:4:"name";s:4:"foo7";s:3:"num";i:21;}i:8;O:5:"Small":2:{s:4:"name";s:4:"foo8";s:3:"num";i:24;}i:9;O:5:"Small":2:{s:4:"name";s:4:"foo9";s:3:"num";i:27;}}s:6:"group1";a:5:{i:0;a:2:{i:0;s:4:"foo0";i:1;r:3;}i:1;a:2:{i:0;s:4:"foo2";i:1;r:9;}i:2;a:2:{i:0;s:4:"foo4";i:1;r:15;}i:3;a:2:{i:0;s:4:"foo6";i:1;r:21;}i:4;a:2:{i:0;s:4:"foo8";i:1;r:27;}}s:6:"group2";a:5:{i:0;a:2:{i:0;s:4:"foo1";i:1;r:6;}i:1;a:2:{i:0;s:4:"foo3";i:1;r:12;}i:2;a:2:{i:0;s:4:"foo5";i:1;r:18;}i:3;a:2:{i:0;s:4:"foo7";i:1;r:24;}i:4;a:2:{i:0;s:4:"foo9";i:1;r:30;}}s:5:"wacky";a:2:{i:0;i:10;i:1;R:66;}s:7:"nothing";N;s:9:"unrelated";a:3:{i:0;O:5:"Small":2:{s:4:"name";s:5:"foo10";s:3:"num";i:30;}i:1;r:69;i:2;r:69;}}"
+object(Big)#13 (6) {
+  ["groupAll"]=>
+  array(10) {
+    [0]=>
+    object(Small)#14 (2) {
+      ["name"]=>
+      string(4) "foo0"
+      ["num"]=>
+      int(0)
+    }
+    [1]=>
+    object(Small)#15 (2) {
+      ["name"]=>
+      string(4) "foo1"
+      ["num"]=>
+      int(3)
+    }
+    [2]=>
+    object(Small)#16 (2) {
+      ["name"]=>
+      string(4) "foo2"
+      ["num"]=>
+      int(6)
+    }
+    [3]=>
+    object(Small)#17 (2) {
+      ["name"]=>
+      string(4) "foo3"
+      ["num"]=>
+      int(9)
+    }
+    [4]=>
+    object(Small)#18 (2) {
+      ["name"]=>
+      string(4) "foo4"
+      ["num"]=>
+      int(12)
+    }
+    [5]=>
+    object(Small)#19 (2) {
+      ["name"]=>
+      string(4) "foo5"
+      ["num"]=>
+      int(15)
+    }
+    [6]=>
+    object(Small)#20 (2) {
+      ["name"]=>
+      string(4) "foo6"
+      ["num"]=>
+      int(18)
+    }
+    [7]=>
+    object(Small)#21 (2) {
+      ["name"]=>
+      string(4) "foo7"
+      ["num"]=>
+      int(21)
+    }
+    [8]=>
+    object(Small)#22 (2) {
+      ["name"]=>
+      string(4) "foo8"
+      ["num"]=>
+      int(24)
+    }
+    [9]=>
+    object(Small)#23 (2) {
+      ["name"]=>
+      string(4) "foo9"
+      ["num"]=>
+      int(27)
+    }
+  }
+  ["group1"]=>
+  array(5) {
+    [0]=>
+    array(2) {
+      [0]=>
+      string(4) "foo0"
+      [1]=>
+      object(Small)#14 (2) {
+        ["name"]=>
+        string(4) "foo0"
+        ["num"]=>
+        int(0)
+      }
+    }
+    [1]=>
+    array(2) {
+      [0]=>
+      string(4) "foo2"
+      [1]=>
+      object(Small)#16 (2) {
+        ["name"]=>
+        string(4) "foo2"
+        ["num"]=>
+        int(6)
+      }
+    }
+    [2]=>
+    array(2) {
+      [0]=>
+      string(4) "foo4"
+      [1]=>
+      object(Small)#18 (2) {
+        ["name"]=>
+        string(4) "foo4"
+        ["num"]=>
+        int(12)
+      }
+    }
+    [3]=>
+    array(2) {
+      [0]=>
+      string(4) "foo6"
+      [1]=>
+      object(Small)#20 (2) {
+        ["name"]=>
+        string(4) "foo6"
+        ["num"]=>
+        int(18)
+      }
+    }
+    [4]=>
+    array(2) {
+      [0]=>
+      string(4) "foo8"
+      [1]=>
+      object(Small)#22 (2) {
+        ["name"]=>
+        string(4) "foo8"
+        ["num"]=>
+        int(24)
+      }
+    }
+  }
+  ["group2"]=>
+  array(5) {
+    [0]=>
+    array(2) {
+      [0]=>
+      string(4) "foo1"
+      [1]=>
+      object(Small)#15 (2) {
+        ["name"]=>
+        string(4) "foo1"
+        ["num"]=>
+        int(3)
+      }
+    }
+    [1]=>
+    array(2) {
+      [0]=>
+      string(4) "foo3"
+      [1]=>
+      object(Small)#17 (2) {
+        ["name"]=>
+        string(4) "foo3"
+        ["num"]=>
+        int(9)
+      }
+    }
+    [2]=>
+    array(2) {
+      [0]=>
+      string(4) "foo5"
+      [1]=>
+      object(Small)#19 (2) {
+        ["name"]=>
+        string(4) "foo5"
+        ["num"]=>
+        int(15)
+      }
+    }
+    [3]=>
+    array(2) {
+      [0]=>
+      string(4) "foo7"
+      [1]=>
+      object(Small)#21 (2) {
+        ["name"]=>
+        string(4) "foo7"
+        ["num"]=>
+        int(21)
+      }
+    }
+    [4]=>
+    array(2) {
+      [0]=>
+      string(4) "foo9"
+      [1]=>
+      object(Small)#23 (2) {
+        ["name"]=>
+        string(4) "foo9"
+        ["num"]=>
+        int(27)
+      }
+    }
+  }
+  ["wacky"]=>
+  array(2) {
+    [0]=>
+    &int(10)
+    [1]=>
+    &int(10)
+  }
+  ["nothing"]=>
+  NULL
+  ["unrelated"]=>
+  array(3) {
+    [0]=>
+    object(Small)#24 (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+    [1]=>
+    object(Small)#24 (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+    [2]=>
+    object(Small)#24 (2) {
+      ["name"]=>
+      string(5) "foo10"
+      ["num"]=>
+      int(30)
+    }
+  }
+}

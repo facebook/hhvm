@@ -1,0 +1,13 @@
+Path: test/sample_dir/
+file
+..
+symlink
+dir
+.
+empty
+file
+..
+symlink
+dir
+.
+empty

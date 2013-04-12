@@ -1,0 +1,12 @@
+array(5) {
+  [-1]=>
+  string(3) "abc"
+  [-2]=>
+  string(3) "def"
+  [-3]=>
+  string(3) "ghi"
+  [-4]=>
+  string(3) "jkl"
+  [-5]=>
+  string(3) "mno"
+}

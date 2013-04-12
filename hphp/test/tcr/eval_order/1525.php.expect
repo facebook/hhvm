@@ -1,0 +1,125 @@
+int(0)
+object(X)#1 (0) {
+}
+int(1)
+object(X)#1 (0) {
+}
+int(2)
+object(X)#1 (0) {
+}
+int(3)
+object(X)#1 (0) {
+}
+int(4)
+object(X)#1 (0) {
+}
+int(5)
+object(X)#1 (0) {
+}
+get:int(3)
+get:int(4)
+get:int(5)
+get:string(3) "foo"
+get:int(0)
+get:string(1) "1"
+set:string(1) "2"
+string(3) "foo"
+set:int(2)
+string(3) "foo"
+int(6)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+get:int(6)
+get:string(3) "fuz"
+int(7)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+string(4) "fuz7"
+int(10)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+int(11)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+int(12)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+get:int(10)
+get:int(11)
+get:int(12)
+int(20)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+int(21)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+int(22)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+get:int(20)
+get:int(21)
+get:int(22)
+int(30)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+int(31)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+int(32)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+get:int(30)
+get:int(31)
+get:int(32)
+int(0)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+int(1)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+int(2)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+int(3)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+int(4)
+object(X)#1 (1) {
+  ["2"]=>
+  string(3) "foo"
+}
+get:string(1) "3"
+get:string(1) "4"
+get:string(3) "bar"
+get:string(1) "0"
+get:int(1)

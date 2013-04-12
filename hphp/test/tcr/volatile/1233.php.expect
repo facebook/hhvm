@@ -1,0 +1,15 @@
+bool(true)
+string(8) "function"
+string(3) "foo"
+bool(false)
+bool(false)
+string(8) "constant"
+string(3) "foo"
+bool(false)
+bool(false)
+string(8) "constant"
+string(3) "foo"
+NULL
+string(8) "constant"
+string(3) "bar"
+string(3) "baz"

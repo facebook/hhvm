@@ -1,0 +1,13 @@
+bool(true)
+Open
+string(14) "fifo://testing"
+string(2) "w+"
+int(0)
+int(0)
+int(0)
+int(0)
+string(12) "Data two...
+"
+string(14) "Data three...
+"
+Close

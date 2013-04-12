@@ -1,0 +1,28 @@
+string(3) "bar"
+string(3) "foo"
+string(3) "foo"
+object(X)#1 (4) {
+  ["a"]=>
+  array(1) {
+    ["x"]=>
+    object(Y)#2 (1) {
+      ["y"]=>
+      NULL
+    }
+  }
+  ["qq"]=>
+  object(Y)#4 (1) {
+    ["y"]=>
+    int(1)
+  }
+  ["q"]=>
+  NULL
+  ["y"]=>
+  NULL
+}
+array(0) {
+}
+object(stdClass)#3 (1) {
+  ["t"]=>
+  &NULL
+}

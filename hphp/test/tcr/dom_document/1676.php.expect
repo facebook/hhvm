@@ -1,0 +1,19 @@
+int(1)
+Length: 1
+Key GIF: GIF (image/gif) (-)
+
+Index 0: GIF (image/gif) (-)
+
+NULL
+
+Length: 3
+Key: test Name: test
+Key: rdf Name: rdf
+Key: myimage Name: myimage
+
+Index 0: test
+Index 1: rdf
+Index 2: myimage
+
+NULL
+NULL

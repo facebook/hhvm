@@ -1,0 +1,13 @@
+string(5) "Child"
+array(5) {
+  ["ddd"]=>
+  int(4)
+  ["eee"]=>
+  int(5)
+  ["aaa"]=>
+  int(1)
+  ["bbb"]=>
+  int(2)
+  ["ccc"]=>
+  int(3)
+}

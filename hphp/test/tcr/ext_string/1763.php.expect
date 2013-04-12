@@ -1,0 +1,41 @@
+string(17) "ABCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+string(19) "bobBCDEFGH:/MNRPQR/"
+string(19) "bobBCDEFGH:/MNRPQR/"
+string(19) "bobBCDEFGH:/MNRPQR/"
+string(19) "bobBCDEFGH:/MNRPQR/"
+string(19) "bobBCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+string(17) "ABCDEFGH:/MNRPQR/"
+array(1) {
+  [0]=>
+  string(14) "DEFGH:/MNRPQR/"
+}
+array(1) {
+  [0]=>
+  string(17) "bobDEFGH:/MNRPQR/"
+}
+array(1) {
+  [0]=>
+  string(3) "bob"
+}
+array(1) {
+  [0]=>
+  string(3) "bob"
+}
+string(6) "abcxyz"
+array(1) {
+  [0]=>
+  int(2350001)
+}
+int(1)
+int(2350001)
+int(0)
+int(2350001)
+int(1)
+int(30)
+int(-1)
+int(30)

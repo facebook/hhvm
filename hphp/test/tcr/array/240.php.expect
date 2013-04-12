@@ -1,0 +1,17 @@
+int(1)
+int(2)
+int(3)
+int(3)
+int(2)
+NULL
+NULL
+array(4) {
+  [0]=>
+  int(5)
+  [2]=>
+  int(0)
+  [3]=>
+  bool(true)
+  [4]=>
+  bool(true)
+}

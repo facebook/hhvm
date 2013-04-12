@@ -1,0 +1,8 @@
+string(3) "one"
+array(1) {
+  [0]=>
+  object(X)#1 (0) {
+  }
+}
+string(3) "two"
+string(5) "three"

@@ -1,0 +1,10 @@
+int(1)
+object(p)#1 (1) {
+  ["data1"]=>
+  NULL
+}
+object(c)#2 (1) {
+  ["data1"]=>
+  NULL
+}
+r1

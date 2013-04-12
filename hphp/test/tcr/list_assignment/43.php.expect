@@ -1,0 +1,55 @@
+object(obj)#1 (1) {
+  ["container":"obj":private]=>
+  array(3) {
+    ["one"]=>
+    string(4) "eins"
+    ["two"]=>
+    string(4) "zwei"
+    ["three"]=>
+    string(4) "drei"
+  }
+}
+array(3) {
+  [0]=>
+  string(4) "eins"
+  [1]=>
+  string(4) "zwei"
+  [2]=>
+  array(1) {
+    [0]=>
+    string(4) "drei"
+  }
+}
+object(SetTest)#2 (1) {
+  ["_vals":"SetTest":private]=>
+  array(3) {
+    ["one"]=>
+    NULL
+    ["two"]=>
+    NULL
+    ["three"]=>
+    NULL
+  }
+}
+object(SetTest)#2 (1) {
+  ["_vals":"SetTest":private]=>
+  array(3) {
+    ["one"]=>
+    string(4) "eins"
+    ["two"]=>
+    string(4) "zwei"
+    ["three"]=>
+    string(4) "drei"
+  }
+}
+array(3) {
+  [0]=>
+  string(4) "eins"
+  [1]=>
+  string(4) "zwei"
+  [2]=>
+  array(1) {
+    [0]=>
+    string(4) "drei"
+  }
+}

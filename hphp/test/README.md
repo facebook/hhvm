@@ -22,11 +22,16 @@ These are the allowed extensions:
 * .expectf - The exact string expected output with formating characters.
 * .expectregex - A regex that matches the output.
 * .out - When you run the test, the output will be stored here.
+* .opts - Runtime options to pass to hhvm.
 * .diff - The diff for .expect tests.
 * .hhas - HipHop Assembly.
 
 You must have one `.php`; one and only one of `.expect`, `.expectf`, and
 `.expectregex`; and the rest are optional.
+
+Any suite can have a `config.hdf` file in it that will be used. If one isn't
+present, then the parent suite it checked recusrivly until we use
+test/config.hdf.
 
 Name your test in a descriptive manner and when in doubt break your test into
 many files. You can use comments too so future engineers know if it is a real

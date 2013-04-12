@@ -1,0 +1,36 @@
+t2
+string(1) "a"
+string(1) "b"
+string(1) "c"
+string(1) "d"
+string(1) "f"
+int(1)
+string(1) "a"
+string(1) "b"
+string(1) "c"
+string(1) "d"
+string(1) "f"
+int(2)
+string(1) "a"
+string(1) "b"
+string(1) "c"
+string(1) "d"
+string(1) "f"
+int(2)
+t1
+string(1) "a"
+string(1) "c"
+string(1) "d"
+string(1) "e"
+string(1) "f"
+int(2)
+t12
+string(1) "a"
+string(1) "c"
+string(1) "d"
+string(1) "e"
+string(1) "f"
+int(1)
+string(1) "a"
+string(1) "d"
+int(1)

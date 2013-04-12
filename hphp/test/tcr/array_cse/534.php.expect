@@ -1,0 +1,60 @@
+array(1) {
+  ["e"]=>
+  array(2) {
+    ["foo"]=>
+    int(30)
+    ["bar"]=>
+    int(50)
+  }
+}
+NULL
+array(1) {
+  ["e"]=>
+  array(2) {
+    ["foo"]=>
+    int(30)
+    ["bar"]=>
+    int(50)
+  }
+}
+NULL
+array(1) {
+  ["e"]=>
+  array(3) {
+    ["baz"]=>
+    int(40)
+    ["foo"]=>
+    int(30)
+    ["bar"]=>
+    int(50)
+  }
+}
+int(40)
+array(1) {
+  ["y"]=>
+  array(2) {
+    ["foo"]=>
+    int(30)
+    ["bar"]=>
+    int(50)
+  }
+}
+NULL
+NULL
+array(1) {
+  ["y"]=>
+  array(2) {
+    ["foo"]=>
+    int(30)
+    ["bar"]=>
+    int(50)
+  }
+}
+NULL
+NULL
+array(0) {
+}
+NULL
+NULL
+NULL
+int(30)

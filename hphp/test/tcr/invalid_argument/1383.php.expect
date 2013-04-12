@@ -1,0 +1,4 @@
+int(4096)
+string(74) "Argument 1 passed to x::__construct() must be an instance of y, null given"
+object(x)#1 (0) {
+}

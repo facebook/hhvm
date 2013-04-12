@@ -1,0 +1,9 @@
+object(C)#1 (1) {
+  ["p"]=>
+  string(5) "C::$p"
+}
+In C::__destruct(): 0
+object(C)#1 (1) {
+  ["p"]=>
+  string(7) "changed"
+}

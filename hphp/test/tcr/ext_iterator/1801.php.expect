@@ -1,0 +1,5 @@
+test/sample_dir/file => 3
+test/sample_dir/symlink => 3
+test/sample_dir/dir/empty => 0
+test/sample_dir/empty => 0
+Total: 4 files, 6 bytes

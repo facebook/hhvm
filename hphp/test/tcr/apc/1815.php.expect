@@ -1,0 +1,6 @@
+object(B)#1 (2) {
+  ["b":"B":private]=>
+  int(100)
+  ["b":"A":private]=>
+  int(10)
+}

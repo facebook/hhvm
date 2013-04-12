@@ -1,0 +1,11 @@
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(4) "test"
+  [2]=>
+  int(3)
+}
+int(1)
+int(3)
+string(1) "t"

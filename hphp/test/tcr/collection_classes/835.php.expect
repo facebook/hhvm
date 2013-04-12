@@ -1,0 +1,58 @@
+string(1) "a"
+object(Pair)#4 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+string(1) "b"
+object(Pair)#5 (2) {
+  [0]=>
+  int(3)
+  [1]=>
+  int(4)
+}
+string(1) "c"
+object(Pair)#6 (2) {
+  [0]=>
+  int(6)
+  [1]=>
+  int(7)
+}
+------------------------
+int(0)
+object(Pair)#10 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+int(1)
+object(Pair)#11 (2) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(3)
+}
+int(2)
+object(Pair)#12 (2) {
+  [0]=>
+  int(7)
+  [1]=>
+  int(6)
+}
+------------------------
+int(0)
+object(Pair)#16 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(0)
+}
+int(1)
+object(Pair)#17 (2) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(3)
+}

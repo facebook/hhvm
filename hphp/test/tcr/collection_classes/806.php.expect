@@ -1,0 +1,34 @@
+string(31) "V:6:"Vector":2:{i:7;s:3:"foo";}"
+------------------------
+object(Vector)#1 (2) {
+  [0]=>
+  int(7)
+  [1]=>
+  string(3) "foo"
+}
+Vector Object
+(
+    [0] => 7
+    [1] => foo
+)
+[7,"foo"]
+Vector::__set_state(array(
+  0 => 7,
+  1 => 'foo',
+))
+object(Vector)#2 (2) {
+  [0]=>
+  int(7)
+  [1]=>
+  string(3) "foo"
+}
+Vector Object
+(
+    [0] => 7
+    [1] => foo
+)
+[7,"foo"]
+Vector::__set_state(array(
+  0 => 7,
+  1 => 'foo',
+))

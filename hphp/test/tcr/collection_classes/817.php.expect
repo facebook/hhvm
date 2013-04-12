@@ -1,0 +1,30 @@
+=== Vector ===
+string(30) "Integer key 0 is out of bounds"
+string(48) "Integer key 9223372036854775807 is out of bounds"
+string(49) "Integer key -9223372036854775808 is out of bounds"
+=== Map ===
+string(28) "Integer key 0 is not defined"
+string(46) "Integer key 9223372036854775807 is not defined"
+string(47) "Integer key -9223372036854775808 is not defined"
+string(31) "String key "abc" is not defined"
+string(48) "String key "abcdefghijklmnopqrst" is not defined"
+string(48) "String key "abcdefghijklmnopq..." is not defined"
+83 116 114 105 110 103 32 107
+101 121 32 34 97 98 99 100
+101 102 103 104 105 106 0 107
+108 109 110 111 112 46 46 46
+34 32 105 115 32 110 111 116
+32 100 101 102 105 110 101 100
+=== StableMap ===
+string(28) "Integer key 0 is not defined"
+string(46) "Integer key 9223372036854775807 is not defined"
+string(47) "Integer key -9223372036854775808 is not defined"
+string(31) "String key "abc" is not defined"
+string(48) "String key "abcdefghijklmnopqrst" is not defined"
+string(48) "String key "abcdefghijklmnopq..." is not defined"
+83 116 114 105 110 103 32 107
+101 121 32 34 97 98 99 100
+101 102 103 104 105 106 0 107
+108 109 110 111 112 46 46 46
+34 32 105 115 32 110 111 116
+32 100 101 102 105 110 101 100

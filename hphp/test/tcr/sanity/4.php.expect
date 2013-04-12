@@ -1,0 +1,4 @@
+#!/usr/bin/env php
+a /* show or not */ b
+Hello, World! # comments
+hello

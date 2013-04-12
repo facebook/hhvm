@@ -1,0 +1,8 @@
+array(3) {
+  [2]=>
+  string(8) "caffeine"
+  [1]=>
+  string(5) "brown"
+  [0]=>
+  string(6) "coffee"
+}

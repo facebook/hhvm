@@ -1,0 +1,7 @@
+int(100)
+int(100)
+array(1) {
+  ["hello"]=>
+  &int(1)
+}
+int(10)

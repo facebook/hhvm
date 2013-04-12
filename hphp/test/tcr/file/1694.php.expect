@@ -1,0 +1,4 @@
+array(1) {
+  ["foo"]=>
+  string(10) "Some Value"
+}

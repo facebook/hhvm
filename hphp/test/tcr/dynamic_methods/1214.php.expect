@@ -1,0 +1,13 @@
+bool(true)
+string(17) "Child::overridden"
+string(17) "Child::calledHere"
+bool(true)
+string(19) "Parent_::overridden"
+bool(true)
+string(17) "Child::overridden"
+bool(false)
+string(17) "Child::overridden"
+bool(false)
+string(17) "Child::overridden"
+bool(false)
+string(19) "Parent_::overridden"

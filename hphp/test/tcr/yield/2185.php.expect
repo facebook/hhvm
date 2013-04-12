@@ -1,0 +1,14 @@
+Testing mode 0:
+int(0)
+int(47)
+bool(false)
+NULL
+Testing mode 1:
+int(1)
+bool(false)
+NULL
+Testing mode 2:
+int(2)
+EXCEPTION
+bool(false)
+NULL

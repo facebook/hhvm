@@ -1,0 +1,2 @@
+-vEnableHipHopSyntax=1
+-vArrayAccessIdempotent=1

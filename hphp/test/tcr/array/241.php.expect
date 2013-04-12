@@ -1,0 +1,20 @@
+int(1)
+int(1)
+int(2)
+int(2)
+int(3)
+int(3)
+bool(false)
+int(4)
+int(3)
+array(4) {
+  [1]=>
+  int(4)
+  ["value"]=>
+  int(4)
+  [0]=>
+  int(0)
+  ["key"]=>
+  int(0)
+}
+int(4)

@@ -1,0 +1,52 @@
+NULL
+NULL
+array(1) {
+  [0]=>
+  int(5)
+}
+array(1) {
+  [0]=>
+  int(6)
+}
+array(2) {
+  ["Y"]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+  ["Z"]=>
+  array(1) {
+    [0]=>
+    int(6)
+  }
+}
+NULL
+array(1) {
+  [0]=>
+  int(3)
+}
+array(1) {
+  [0]=>
+  int(5)
+}
+array(1) {
+  [0]=>
+  int(6)
+}
+array(3) {
+  ["X"]=>
+  array(1) {
+    [0]=>
+    int(3)
+  }
+  ["Y"]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+  ["Z"]=>
+  array(1) {
+    [0]=>
+    int(6)
+  }
+}

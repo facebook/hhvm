@@ -1,0 +1,8 @@
+object(stdClass)#1 (1) {
+  ["error"]=>
+  object(stdClass)#2 (1) {
+    ["line"]=>
+    int(1)
+  }
+}
+string(0) ""

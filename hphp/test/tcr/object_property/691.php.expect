@@ -1,0 +1,8 @@
+array(3) {
+  ["foo"]=>
+  int(-1)
+  ["bar"]=>
+  string(3) "foo"
+  ["baz"]=>
+  int(1)
+}

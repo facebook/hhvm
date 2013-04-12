@@ -1,0 +1,30 @@
+array(2) {
+  [0]=>
+  resource(4) of type (xml)
+  [1]=>
+  string(5) "CHILD"
+}
+array(2) {
+  [0]=>
+  resource(4) of type (xml)
+  [1]=>
+  string(3) "TAG"
+}
+array(3) {
+  [0]=>
+  resource(5) of type (xml)
+  [1]=>
+  string(3) "TAG"
+  [2]=>
+  array(0) {
+  }
+}
+array(3) {
+  [0]=>
+  resource(5) of type (xml)
+  [1]=>
+  string(5) "CHILD"
+  [2]=>
+  array(0) {
+  }
+}

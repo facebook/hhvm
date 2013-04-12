@@ -1,0 +1,8 @@
+array(3) {
+  [2]=>
+  string(1) "z"
+  [1]=>
+  string(1) "y"
+  [0]=>
+  string(1) "x"
+}

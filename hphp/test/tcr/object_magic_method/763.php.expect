@@ -1,0 +1,7 @@
+string(6) "test:X"
+string(13) "X::__destruct"
+string(6) "test:Y"
+string(13) "Y::__destruct"
+string(13) "X::__destruct"
+string(6) "test:Z"
+string(13) "X::__destruct"

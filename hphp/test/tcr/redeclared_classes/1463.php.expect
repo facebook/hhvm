@@ -1,0 +1,51 @@
+Base object member passed
+Base static member passed
+Base static method passed
+Base static method obj syntax passed
+dRedec inherited property passed
+dRedec property passed
+dRedec parent->virtual method passed
+dRedec parent->child prop method passed
+dRedec static method passed
+dRedec parent static method passed
+dRedec static method obj syntax passed
+dRedec parent static method obj syntax passed
+dRedec parent static prop passed
+dRedec static prop passed
+dRedec parent method passed
+ddRedec grandparent property passed
+ddRedec parent property passed
+ddRedec property passed
+ddRedec grandparent->virtual method passed
+ddRedec parent->virtual method passed
+ddRedec grandparent->child prop method passed
+ddRedec grandparent static method passed
+ddRedec parent static method passed
+ddRedec static method passed
+ddRedec grandparent static method obj syntax passed
+ddRedec parent static method obj syntax passed
+ddRedec static method obj syntax passed
+ddRedec grandparent static prop passed
+ddRedec parent static prop passed
+ddRedec static prop passed
+ddRedec parent method passed
+RddRedec greatgrandparent property passed
+RddRedec grandparent property passed
+RddRedec parent property passed
+RddRedec property passed
+RddRedec greatgrandparent->virtual method passed
+RddRedec grandparent->virtual method passed
+RddRedec greatgrandparent->child prop method passed
+RddRedec greatgrandparent static method passed
+RddRedec grandparent static method passed
+RddRedec parent static method passed
+RddRedec static method passed
+RddRedec greatgrandparent static method obj syntax passed
+RddRedec grandparent static method obj syntax passed
+RddRedec parent static method obj syntax passed
+RddRedec static method obj syntax passed
+RddRedec greatgrandparent static prop passed
+RddRedec grandparent static prop passed
+RddRedec parent static prop passed
+RddRedec static prop passed
+RddRedec parent method passed

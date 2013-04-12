@@ -1,0 +1,40 @@
+array(1) {
+  [0]=>
+  object(stdClass)#1 (1) {
+    ["foo"]=>
+    int(1)
+  }
+}
+array(1) {
+  [0]=>
+  bool(false)
+}
+array(1) {
+  [0]=>
+  array(1) {
+    [1]=>
+    int(1)
+  }
+}
+array(1) {
+  [0]=>
+  bool(false)
+}
+array(1) {
+  [0]=>
+  &array(1) {
+    [1]=>
+    int(1)
+  }
+}
+array(1) {
+  [0]=>
+  &array(1) {
+    [1]=>
+    int(1)
+  }
+}
+array(1) {
+  [0]=>
+  bool(false)
+}

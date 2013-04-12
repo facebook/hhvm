@@ -73,7 +73,20 @@ hhir_args="$jit_args -v Eval.JitUseIR=true -v Eval.HHIRDisableTx64=true"
 
 ######################################################################
 
-cmd="$HHVM --config test/cli.hdf "
+# Find a config.hdf in the test dir or a parents
+# inspired by http://unix.stackexchange.com/questions/13464/
+cur_dir=$TEST_PATH;
+slashes=${TEST_PATH//[^\/]/}
+config="test/config.hdf"
+for (( n=${#slashes}; n>0; --n )); do
+  if [ -f "$cur_dir/config.hdf" ]; then
+    config="$cur_dir/config.hdf"
+    break
+  fi
+  cur_dir="$cur_dir/.."
+done
+cmd="$HHVM --config $config"
+
 if [ x"$MODE" = x"server" ] ; then
     : ${PORT:=8080}
     : ${TEST_HOME:=.}
@@ -85,12 +98,6 @@ fi
 verify_args="$verify_args --hhvm $HHVM"
 
 cmd="$cmd -v Eval.EnableObjDestructCall=true"
-
-echo $TEST_PATH | grep -q zend
-if [ $? -ne 0 ] ; then
-    cmd="$cmd -v Eval.AllowHhas=true \
-              -v Eval.EnableHipHopSyntax=true"
-fi
 
 case $VQ in
     jit)

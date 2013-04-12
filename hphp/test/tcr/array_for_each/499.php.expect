@@ -1,0 +1,45 @@
+string(5) "hel1o"
+string(5) "hel2o"
+string(5) "hel3o"
+string(5) "hel4o"
+string(5) "hel5o"
+string(3) "bar"
+string(3) "foo"
+int(1)
+int(0)
+string(3) "bar"
+string(3) "foo"
+int(1)
+int(1)
+string(3) "bar"
+string(3) "foo"
+int(2)
+int(2)
+string(3) "bar"
+string(3) "foo"
+int(4)
+int(3)
+string(3) "bar"
+string(3) "foo"
+int(5)
+int(4)
+string(3) "bar"
+string(3) "foo"
+int(1)
+int(0)
+string(3) "bar"
+string(3) "foo"
+int(1)
+int(1)
+string(3) "bar"
+string(3) "foo"
+int(4)
+int(2)
+string(3) "bar"
+string(3) "foo"
+int(4)
+int(3)
+string(3) "bar"
+string(3) "foo"
+int(4)
+int(4)

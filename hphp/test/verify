@@ -345,6 +345,7 @@ sub run_test
     my ($tutime, $tstime);
     my ($extra_dbg) = "";
     my ($utime, $stime, $cutime, $cstime);
+    my ($opts) = "";
 
     if ($opt_server)
     {
@@ -360,8 +361,17 @@ sub run_test
                        . $command . ")";
         }
     }
+
+    if (-e "$opt_objdir/$test.opts") {
+        open (FILE, "<$opt_objdir/$test.opts");
+        @lines = <FILE>;
+        close(FILE);
+        chomp(@lines);
+        $opts = join('', @lines);
+    }
+
     ($utime, $stime, $cutime, $cstime) = times;
-    `$command > $opt_objdir/$test.out 2>&1`;
+    `$command $opts > $opt_objdir/$test.out 2>&1`;
     ($utime, $stime, $tutime, $tstime) = times;
 
     # Subtract the before time from the after time.

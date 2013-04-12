@@ -1,0 +1,18 @@
+object(B)#1 (8) {
+  ["a"]=>
+  int(2)
+  ["b":protected]=>
+  int(4)
+  ["c":"B":private]=>
+  int(6)
+  ["aa"]=>
+  string(3) "aaa"
+  ["bb":protected]=>
+  int(4)
+  ["cc":"B":private]=>
+  float(1.222)
+  ["c":"A":private]=>
+  NULL
+  ["cc":"A":private]=>
+  float(1.22)
+}

@@ -1,0 +1,22 @@
+1	YYYY	nullptr >= true	
+2	YYYY	nullptr >= false	
+3	NNNN	nullptr >= 1	
+4	YYYY	nullptr >= 0	
+5	YYYY	nullptr >= -1	
+6	YYYY	nullptr >= '1'	
+7	YYYY	nullptr >= '0'	
+8	YYYY	nullptr >= '-1'	
+9	YYYY	nullptr >= nullptr	
+10	NNNN	nullptr >= array()	
+11	NNNN	nullptr >= array(1)	
+12	NNNN	nullptr >= array(2)	
+13	NNNN	nullptr >= array('1')	
+14	NNNN	nullptr >= array('0' => '1')	
+15	NNNN	nullptr >= array('a')	
+16	NNNN	nullptr >= array('a' => 1)	
+17	NNNN	nullptr >= array('b' => 1)	
+18	NNNN	nullptr >= array('a' => 1, 'b' => 2)	
+19	NNNN	nullptr >= array(array('a' => 1))	
+20	NNNN	nullptr >= array(array('b' => 1))	
+21	NNNN	nullptr >= 'php'	
+22	YYYY	nullptr >= ''	

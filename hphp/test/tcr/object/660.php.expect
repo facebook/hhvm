@@ -1,0 +1,12 @@
+object(A)#2 (2) {
+  ["a"]=>
+  string(2) "ok"
+  ["b"]=>
+  &string(2) "ok"
+}
+object(A)#2 (2) {
+  ["a"]=>
+  string(2) "ok"
+  ["b"]=>
+  &string(2) "ok"
+}

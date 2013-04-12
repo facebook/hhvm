@@ -1,0 +1,11 @@
+object(X)#2 (3) {
+  ["priv":"X":private]=>
+  int(1)
+  ["prot":protected]=>
+  int(2)
+  ["pub"]=>
+  int(3)
+}
+int(1)
+int(2)
+int(3)

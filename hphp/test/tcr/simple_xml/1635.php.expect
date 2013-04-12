@@ -1,0 +1,9 @@
+array(2) {
+  ["@attributes"]=>
+  array(1) {
+    ["name"]=>
+    string(5) "value"
+  }
+  [0]=>
+  string(6) "whoops"
+}

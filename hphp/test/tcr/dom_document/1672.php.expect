@@ -1,0 +1,171 @@
+Test 1: accessing single nodes from php
+--------- root
+Node Name: chapter
+Node Type: 1
+Num Children: 4
+
+--------- children of root
+Node Name: title
+Node Type: 1
+Num Children: 1
+Node Content: Title
+
+Node Name: #text
+Node Type: 3
+Num Children: 0
+Node Content: 
+
+
+Node Name: para
+Node Type: 1
+Num Children: 7
+
+Node Name: #text
+Node Type: 3
+Num Children: 0
+Node Content: 
+
+
+--------- last
+Node Name: #text
+Node Type: 3
+Num Children: 0
+Node Content: 
+
+
+--------- parent
+Node Name: chapter
+Node Type: 1
+Num Children: 4
+
+--------- children of parent
+Node Name: title
+Node Type: 1
+Num Children: 1
+Node Content: Title
+
+Node Name: #text
+Node Type: 3
+Num Children: 0
+Node Content: 
+
+
+Node Name: para
+Node Type: 1
+Num Children: 7
+
+Node Name: #text
+Node Type: 3
+Num Children: 0
+Node Content: 
+
+
+--------- creating a new attribute
+picture.gif
+--------- Get Attribute Node
+Node Name: src
+Node Type: 2
+Num Children: 1
+Node Content: picture.gif
+
+--------- Remove Attribute Node
+Removed 1 attributes.
+--------- attributes of rootnode
+Node Name: language
+Node Type: 2
+Num Children: 1
+Node Content: en
+
+--------- children of an attribute
+Node Name: #text
+Node Type: 3
+Num Children: 0
+Node Content: en
+
+--------- Add child to root
+Node Name: Silly
+Node Type: 1
+Num Children: 1
+Node Content: Symphony
+
+<?xml version="1.0" standalone="yes"?>
+<!DOCTYPE chapter SYSTEM "/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd" [
+<!ENTITY sp "spanish">
+]>
+<!-- lsfj  -->
+<chapter language="en"><title language="en">Title</title>
+<para language="ge">
+&sp;
+<!-- comment -->
+<informaltable language="&sp;kkk">
+<tgroup cols="3">
+<tbody>
+<row><entry>a1</entry><entry morerows="1">b1</entry><entry>c1</entry></row>
+<row><entry>a2</entry><entry>c2</entry></row>
+<row><entry>a3</entry><entry>b3</entry><entry>c3</entry></row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+<Silly>Symphony</Silly></chapter>
+
+--------- Find element by tagname
+    Using dom
+Node Name: Silly
+Node Type: 1
+Num Children: 1
+Node Content: Symphony
+
+    Using elem
+Node Name: Silly
+Node Type: 1
+Num Children: 1
+Node Content: Symphony
+
+--------- Unlink Node
+Node Name: Silly
+Node Type: 1
+Num Children: 1
+Node Content: Symphony
+
+Node Name: title
+Node Type: 1
+Num Children: 1
+Node Content: Title
+
+Node Name: #text
+Node Type: 3
+Num Children: 0
+Node Content: 
+
+
+Node Name: para
+Node Type: 1
+Num Children: 7
+
+Node Name: #text
+Node Type: 3
+Num Children: 0
+Node Content: 
+
+
+<?xml version="1.0" standalone="yes"?>
+<!DOCTYPE chapter SYSTEM "/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd" [
+<!ENTITY sp "spanish">
+]>
+<!-- lsfj  -->
+<chapter language="en"><title language="en">Title</title>
+<para language="ge">
+&sp;
+<!-- comment -->
+<informaltable language="&sp;kkk">
+<tgroup cols="3">
+<tbody>
+<row><entry>a1</entry><entry morerows="1">b1</entry><entry>c1</entry></row>
+<row><entry>a2</entry><entry>c2</entry></row>
+<row><entry>a3</entry><entry>b3</entry><entry>c3</entry></row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</chapter>

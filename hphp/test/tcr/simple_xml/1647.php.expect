@@ -1,0 +1,22 @@
+string(236) "<?xml version="1.0" encoding="UTF-8"?>
+<wurfl-config>
+  <persistence>
+    <provider>memcache</provider>
+    <params></params>
+  </persistence>
+
+  <cache>
+    <provider>memcache</provider>
+    <params></params>
+  </cache>
+</wurfl-config>"
+string(11) "persistence"
+string(8) "provider"
+string(8) "memcache"
+string(6) "params"
+string(0) ""
+string(5) "cache"
+string(8) "provider"
+string(8) "memcache"
+string(6) "params"
+string(0) ""

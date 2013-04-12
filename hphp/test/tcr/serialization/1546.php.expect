@@ -1,0 +1,10 @@
+object(__PHP_Incomplete_Class)#2 (3) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(1) "Y"
+  ["priv":"Y":private]=>
+  string(4) "priv"
+  ["prot":protected]=>
+  string(4) "prot"
+}
+NULL
+NULL

@@ -1,0 +1,44 @@
+int(0)
+int(0)
+int(0)
+int(10)
+int(10)
+int(10)
+int(10)
+int(10)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+int(0)
+int(1)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+int(1)
+int(2)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+int(2)
+int(3)
+bool(false)
+bool(true)
+array(1) {
+  [0]=>
+  bool(true)
+}

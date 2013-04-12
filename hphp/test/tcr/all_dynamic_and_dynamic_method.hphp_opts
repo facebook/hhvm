@@ -1,0 +1,2 @@
+-vAllDynamic=1
+-v DynamicMethodPrefix.*=_

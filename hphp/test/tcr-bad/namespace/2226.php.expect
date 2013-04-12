@@ -1,0 +1,11 @@
+foo\bar
+foo\bar
+foo\bar
+foo\bar
+bool(true)
+bool(false)
+NULL
+float(INF)
+int(25)
+int(2)
+int(1)

@@ -1,0 +1,3 @@
+<?php
+
+ // File and new size$filename = 'test/images/simpletext.jpg';$percent = 0.5;// Content typeheader('Content-type: image/jpeg');// Get new sizeslist($width, $height) = getimagesize($filename, $nfo);var_dump($nfo);$newwidth = $width * $percent;$newheight = $height * $percent;// Load$thumb = imagecreatetruecolor($newwidth, $newheight);$source = imagecreatefromjpeg($filename);// Resizeimagecopyresized($thumb, $source, 0, 0, 0, 0,                 $newwidth, $newheight, $width, $height);// Outputimagejpeg($thumb);

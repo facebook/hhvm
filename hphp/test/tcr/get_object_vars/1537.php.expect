@@ -1,0 +1,7 @@
+string(4) "Base"
+array(2) {
+  ["aaa"]=>
+  int(1)
+  ["bbb"]=>
+  int(2)
+}

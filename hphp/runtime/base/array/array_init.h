@@ -109,10 +109,11 @@ public:
   }
 
   ArrayInit &set(litstr name, CVarRef v, bool keyConverted = false) {
+    String key(name);
     if (keyConverted) {
-      m_data->set(name, v, false);
+      m_data->set(key, v, false);
     } else {
-      m_data->set(String(name).toKey(), v, false);
+      m_data->set(key.toKey(), v, false);
     }
     return *this;
   }
@@ -152,10 +153,11 @@ public:
   }
 
   ArrayInit &set(litstr name, RefResult v, bool keyConverted = false) {
+    String key(name);
     if (keyConverted) {
-      m_data->setRef(name, variant(v), false);
+      m_data->setRef(key, variant(v), false);
     } else {
-      m_data->setRef(String(name).toKey(), variant(v), false);
+      m_data->setRef(key.toKey(), variant(v), false);
     }
     return *this;
   }
@@ -199,10 +201,6 @@ public:
     return *this;
   }
 
-  ArrayInit &add(litstr name, CVarRef v, bool keyConverted = false) {
-    return add(String(name), v, keyConverted);
-  }
-
   ArrayInit &add(CStrRef name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
       m_data->add(name, v, false);
@@ -239,15 +237,6 @@ public:
 
   ArrayInit &setRef(int64_t name, CVarRef v, bool keyConverted = false) {
     m_data->setRef(name, v, false);
-    return *this;
-  }
-
-  ArrayInit &setRef(litstr name, CVarRef v, bool keyConverted = false) {
-    if (keyConverted) {
-      m_data->setRef(name, v, false);
-    } else {
-      m_data->setRef(String(name).toKey(), v, false);
-    }
     return *this;
   }
 

@@ -1919,45 +1919,8 @@ Variant Variant::rvalAtHelper(int64_t offset, ACCESSPARAMS_IMPL) const {
 }
 
 Variant Variant::rvalAt(litstr offset, ACCESSPARAMS_IMPL) const {
-  if (m_type == KindOfArray) {
-    bool error = flags & AccessFlags::Error;
-    if (flags & AccessFlags::Key) {
-      return m_data.parr->get(offset, error);
-    }
-    int64_t n;
-    int len = strlen(offset);
-    if (!is_strictly_integer(offset, len, n)) {
-      return m_data.parr->get(offset, error);
-    } else {
-      return m_data.parr->get(n, error);
-    }
-  }
-  switch (m_type) {
-  case KindOfStaticString:
-  case KindOfString:
-    return m_data.pstr->getChar(StringData(offset).toInt32());
-  case KindOfObject: {
-    ObjectData* obj = m_data.pobj;
-    if (LIKELY(obj->isCollection())) {
-      String s = offset;
-      return collectionOffsetGet(obj, s);
-    } else {
-      return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
-    }
-    break;
-  }
-  case KindOfRef:
-    return m_data.pref->var()->rvalAt(offset, flags);
-  case KindOfUninit:
-  case KindOfNull:
-    break;
-  default:
-    if ((flags & AccessFlags::Error) && !(flags & AccessFlags::NoHipHop)) {
-      raise_bad_offset_notice();
-    }
-    break;
-  }
-  return null_variant;
+  String key(offset);
+  return rvalAt(key, flags);
 }
 
 Variant Variant::rvalAt(CStrRef offset, ACCESSPARAMS_IMPL) const {
@@ -2117,18 +2080,8 @@ CVarRef Variant::rvalRef(double offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
 }
 
 CVarRef Variant::rvalRef(litstr offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
-  if (m_type == KindOfArray) {
-    bool error = flags & AccessFlags::Error;
-    if (flags & AccessFlags::Key) return m_data.parr->get(offset, error);
-    int64_t n;
-    int len = strlen(offset);
-    if (!is_strictly_integer(offset, len, n)) {
-      return m_data.parr->get(offset, error);
-    } else {
-      return m_data.parr->get(n, error);
-    }
-  }
-  return rvalRefHelper(offset, tmp, flags);
+  String key(offset);
+  return rvalRef(key, tmp, flags);
 }
 
 CVarRef Variant::rvalRef(CStrRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {

@@ -280,7 +280,7 @@ bool ArrayData::validFullPos(const FullPos& fp) const {
 bool ArrayData::advanceFullPos(FullPos& fp) {
   return false;
 }
-    
+
 void ArrayData::freeStrongIterators() {
   for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
     r.front()->setContainer(nullptr);
@@ -516,11 +516,6 @@ TypedValue* ArrayData::nvGetCell(const StringData* key) const {
 
 CVarRef ArrayData::getNotFound(int64_t k) {
   raise_notice("Undefined index: %" PRId64, k);
-  return null_variant;
-}
-
-CVarRef ArrayData::getNotFound(litstr k) {
-  raise_notice("Undefined index: %s", k);
   return null_variant;
 }
 

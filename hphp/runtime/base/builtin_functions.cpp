@@ -886,14 +886,6 @@ bool empty(CVarRef v, CArrRef offset) {
 bool empty(CVarRef v, CObjRef offset) {
   return empty(v, VarNR(offset));
 }
-bool empty(CVarRef v, litstr offset, bool isString /* = false */) {
-  Variant::TypedValueAccessor tva = v.getTypedAccessor();
-  if (LIKELY(Variant::GetAccessorType(tva) == KindOfArray)) {
-    return empty(Variant::GetAsArray(tva).
-                 rvalAtRef(offset, AccessFlags::IsKey(isString)));
-  }
-  return empty(v, Variant(offset));
-}
 
 bool empty(CVarRef v, CStrRef offset, bool isString /* = false */) {
   Variant::TypedValueAccessor tva = v.getTypedAccessor();

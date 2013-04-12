@@ -86,7 +86,6 @@ bool empty(CVarRef v, double  offset);
 bool empty(CVarRef v, CArrRef offset);
 bool empty(CVarRef v, CObjRef offset);
 bool empty(CVarRef v, CVarRef offset);
-bool empty(CVarRef v, litstr  offset, bool isString = false);
 bool empty(CVarRef v, CStrRef offset, bool isString = false);
 
 ///////////////////////////////////////////////////////////////////////////////

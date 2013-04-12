@@ -279,30 +279,23 @@ class ArrayData : public Countable {
    * Inline accessors that convert keys to StringData* before delegating to
    * the virtual method.
    */
-  bool exists(litstr k) const;
   bool exists(CStrRef k) const;
   bool exists(CVarRef k) const;
-  CVarRef get(litstr k, bool error = false) const;
   CVarRef get(CStrRef k, bool error = false) const;
   CVarRef get(CVarRef k, bool error = false) const;
-  ssize_t getIndex(litstr k) const;
   ssize_t getIndex(CStrRef k) const;
   ssize_t getIndex(CVarRef k) const;
-  ArrayData *lval(litstr k, Variant *&ret, bool copy, bool checkExist=false);
   ArrayData *lval(CStrRef k, Variant *&ret, bool copy, bool checkExist=false);
   ArrayData *lval(CVarRef k, Variant *&ret, bool copy, bool checkExist=false);
   ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy, bool create);
-  ArrayData *set(litstr k, CVarRef v, bool copy);
   ArrayData *set(CStrRef k, CVarRef v, bool copy);
   ArrayData *set(CVarRef k, CVarRef v, bool copy);
-  ArrayData *setRef(litstr k, CVarRef v, bool copy);
   ArrayData *setRef(CStrRef k, CVarRef v, bool copy);
   ArrayData *setRef(CVarRef k, CVarRef v, bool copy);
   ArrayData *add(CStrRef k, CVarRef v, bool copy);
   ArrayData *add(CVarRef k, CVarRef v, bool copy);
   ArrayData *addLval(CStrRef k, Variant *&ret, bool copy);
   ArrayData *addLval(CVarRef k, Variant *&ret, bool copy);
-  ArrayData *remove(litstr k, bool copy);
   ArrayData *remove(CStrRef k, bool copy);
   ArrayData *remove(CVarRef k, bool copy);
 
@@ -359,8 +352,8 @@ class ArrayData : public Countable {
    * false if the iterator has moved past the last element, otherwise returns
    * true.
    */
-  virtual bool advanceFullPos(FullPos& fp); 
- 
+  virtual bool advanceFullPos(FullPos& fp);
+
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 
@@ -471,14 +464,12 @@ class ArrayData : public Countable {
   }
   // error-handling helpers
   static CVarRef getNotFound(int64_t k);
-  static CVarRef getNotFound(litstr k);
   static CVarRef getNotFound(const StringData* k);
   static CVarRef getNotFound(CStrRef k);
   static CVarRef getNotFound(CVarRef k);
   static TypedValue* nvGetNotFound(int64_t k);
   static TypedValue* nvGetNotFound(const StringData* k);
 
-  static bool IsValidKey(litstr k) { return k; }
   static bool IsValidKey(CStrRef k);
   static bool IsValidKey(CVarRef k);
   static bool IsValidKey(const StringData* k) { return k; }

@@ -454,18 +454,8 @@ CVarRef Array::rvalAtRef(double key, ACCESSPARAMS_IMPL) const {
 }
 
 CVarRef Array::rvalAtRef(litstr key, ACCESSPARAMS_IMPL) const {
-  if (m_px) {
-    bool error = flags & AccessFlags::Error;
-    if (flags & AccessFlags::Key) return m_px->get(key, error);
-    int64_t n;
-    int len = strlen(key);
-    if (!is_strictly_integer(key, len, n)) {
-      return m_px->get(key, error);
-    } else {
-      return m_px->get(n, error);
-    }
-  }
-  return null_variant;
+  String strkey(key);
+  return rvalAtRef(strkey, flags);
 }
 
 Variant Array::rvalAt(litstr key, ACCESSPARAMS_IMPL) const {
@@ -765,8 +755,8 @@ Array Array::values() const {
 }
 
 bool Array::exists(litstr key, bool isKey /* = false */) const {
-  if (isKey) return existsImpl(key);
-  return existsImpl(String(key).toKey());
+  String str(key);
+  return exists(str, isKey);
 }
 
 bool Array::exists(CStrRef key, bool isKey /* = false */) const {
@@ -791,10 +781,11 @@ bool Array::exists(CVarRef key, bool isKey /* = false */) const {
 }
 
 void Array::remove(litstr  key, bool isString /* = false */) {
+  String k(key);
   if (isString) {
-    removeImpl(key);
+    removeImpl(k);
   } else {
-    removeImpl(String(key).toKey());
+    removeImpl(k.toKey());
   }
 }
 void Array::remove(CStrRef key, bool isString /* = false */) {

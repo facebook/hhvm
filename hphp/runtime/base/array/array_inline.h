@@ -39,12 +39,6 @@ inline static StringData *getStringKey(TypedValueAccessor tva) {
 }
 }
 
-inline bool ArrayData::exists(litstr k) const {
-  assert(IsValidKey(k));
-  String s(k);
-  return exists(s.get());
-}
-
 inline bool ArrayData::exists(CStrRef k) const {
   assert(IsValidKey(k));
   return exists(k.get());
@@ -55,12 +49,6 @@ inline bool ArrayData::exists(CVarRef k) const {
   TypedValueAccessor tvk = k.getTypedAccessor();
   return isIntKey(tvk) ? exists(getIntKey(tvk)) :
          exists(getStringKey(tvk));
-}
-
-inline CVarRef ArrayData::get(litstr k, bool error) const {
-  assert(IsValidKey(k));
-  String s(k);
-  return get(s.get(), error);
 }
 
 inline CVarRef ArrayData::get(CStrRef k, bool error) const {
@@ -75,12 +63,6 @@ inline CVarRef ArrayData::get(CVarRef k, bool error) const {
          get(getStringKey(tvk), error);
 }
 
-inline ssize_t ArrayData::getIndex(litstr k) const {
-  assert(IsValidKey(k));
-  String s(k);
-  return getIndex(s);
-}
-
 inline ssize_t ArrayData::getIndex(CStrRef k) const {
   assert(IsValidKey(k));
   return getIndex(k.get());
@@ -91,13 +73,6 @@ inline ssize_t ArrayData::getIndex(CVarRef k) const {
   TypedValueAccessor tvk = k.getTypedAccessor();
   return isIntKey(tvk) ? getIndex(getIntKey(tvk)) :
          getIndex(getStringKey(tvk));
-}
-
-inline ArrayData* ArrayData::lval(litstr k, Variant *&ret, bool copy,
-                           bool checkExist) {
-  assert(IsValidKey(k));
-  String s(k);
-  return lval(s.get(), ret, copy, checkExist);
 }
 
 inline ArrayData* ArrayData::lval(CStrRef k, Variant *&ret, bool copy,
@@ -120,12 +95,6 @@ inline ArrayData *ArrayData::lvalPtr(CStrRef k, Variant *&ret, bool copy,
   return lvalPtr(k.get(), ret, copy, create);
 }
 
-inline ArrayData* ArrayData::set(litstr k, CVarRef v, bool copy) {
-  assert(IsValidKey(k));
-  String s(k);
-  return set(s.get(), v, copy);
-}
-
 inline ArrayData* ArrayData::set(CStrRef k, CVarRef v, bool copy) {
   assert(IsValidKey(k));
   return set(k.get(), v, copy);
@@ -145,12 +114,6 @@ inline ArrayData* ArrayData::nvSet(int64_t ki, const TypedValue* v, bool copy) {
 inline ArrayData* ArrayData::nvSet(StringData* k, const TypedValue* v,
                                    bool copy) {
   return set(k, tvAsCVarRef(v), copy);
-}
-
-inline ArrayData* ArrayData::setRef(litstr k, CVarRef v, bool copy) {
-  assert(IsValidKey(k));
-  String s(k);
-  return setRef(s.get(), v, copy);
 }
 
 inline ArrayData* ArrayData::setRef(CStrRef k, CVarRef v, bool copy) {
@@ -187,12 +150,6 @@ inline ArrayData* ArrayData::addLval(CVarRef k, Variant *&ret, bool copy) {
   TypedValueAccessor tvk = k.getTypedAccessor();
   return isIntKey(tvk) ? addLval(getIntKey(tvk), ret, copy) :
          addLval(getStringKey(tvk), ret, copy);
-}
-
-inline ArrayData* ArrayData::remove(litstr k, bool copy) {
-  assert(IsValidKey(k));
-  String s(k);
-  return remove(s.get(), copy);
 }
 
 inline ArrayData* ArrayData::remove(CStrRef k, bool copy) {

@@ -60,6 +60,9 @@ void print_string(StringData* s);
 void print_int(int64_t i);
 void print_boolean(bool val);
 
+void raiseWarning(const StringData* sd);
+int64_t modHelper(int64_t left, int64_t right);
+
 inline Iter*
 frame_iter(const ActRec* fp, int i) {
   return (Iter*)(uintptr_t(fp)

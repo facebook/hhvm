@@ -2416,18 +2416,55 @@ void HhbcTranslator::emitNot() {
   m_tb->genDecRef(src);
 }
 
-void HhbcTranslator::emitAdd() {
-  TRACE(3, "%u: Add\n", m_bcOff);
-  emitBinaryArith(OpAdd);
+#define BINOP(Opp) \
+void HhbcTranslator::emit ## Opp() {     \
+    TRACE(3, "%u: " #Opp "\n", m_bcOff); \
+    emitBinaryArith(Op ## Opp);          \
 }
-void HhbcTranslator::emitSub() {
-  TRACE(3, "%u: Sub\n", m_bcOff);
-  emitBinaryArith(OpSub);
+BINOP(Add)
+BINOP(Sub)
+BINOP(Mul)
+BINOP(BitAnd)
+BINOP(BitOr)
+BINOP(BitXor)
+#undef BINOP
+
+void HhbcTranslator::emitDiv() {
+  emitInterpOne(Type::Cell, 2);
 }
-void HhbcTranslator::emitMul() {
-  TRACE(3, "%u: Mul\n", m_bcOff);
-  emitBinaryArith(OpMul);
+
+void HhbcTranslator::emitMod() {
+  auto tl = topC(1)->getType();
+  auto tr = topC(0)->getType();
+  auto isInty = [&](Type t) {
+    return t.subtypeOf(Type::Null | Type::Bool | Type::Int);
+  };
+  if (!(isInty(tl) && isInty(tr))) {
+    emitInterpOne(Type::Cell, 2);
+    return;
+  }
+  SSATmp* r = popC();
+  SSATmp* l = popC();
+  // Exit path spills an additional false
+  auto exitSpillValues = getSpillValues();
+  exitSpillValues.push_back(m_tb->genDefConst(false));
+  // Generate an exit for the rare case that r is zero
+  auto exit =
+    m_tb->ifThenExit(getCurFunc(),
+		     m_stackDeficit,
+		     exitSpillValues,
+    [&](IRFactory* irf, Trace* t) {
+      // Dividing by zero. Interpreting will raise a notice and 
+      // produce the boolean false. Punch out here and resume after
+      // the Mod instruction; this should be rare.
+    m_tb->genFor(t, RaiseWarning,
+                 cns(StringData::GetStaticString(Strings::DIVISION_BY_ZERO)));
+    },
+    getNextSrcKey().offset() /* exitBcOff */, m_bcOff);
+  m_tb->gen(JmpZero, exit, r);
+  push(m_tb->gen(OpMod, Type::Int, l, r));
 }
+
 void HhbcTranslator::emitBitNot() {
   TRACE(3, "%u: BitNot\n", m_bcOff);
   Type srcType = topC()->getType();
@@ -2448,18 +2485,7 @@ void HhbcTranslator::emitBitNot() {
     emitInterpOne(resultType, 1);
   }
 }
-void HhbcTranslator::emitBitAnd() {
-  TRACE(3, "%u: BitAnd\n", m_bcOff);
-  emitBinaryArith(OpAnd);
-}
-void HhbcTranslator::emitBitOr() {
-  TRACE(3, "%u: BitOr\n", m_bcOff);
-  emitBinaryArith(OpOr);
-}
-void HhbcTranslator::emitBitXor() {
-  TRACE(3, "%u: BitXor\n", m_bcOff);
-  emitBinaryArith(OpXor);
-}
+
 void HhbcTranslator::emitXor() {
   TRACE(3, "%u: Xor\n", m_bcOff);
   SSATmp* btr = popC();
@@ -2533,13 +2559,12 @@ std::vector<SSATmp*> HhbcTranslator::getSpillValues() const {
 }
 
 /*
- * Generates an exit trace which will continue the VM execution at the given
- * nextByteCode (defaults to the current m_bcOff) without using HHIR.
- * This should be used in situations that HHIR cannot handle -- ideally only in
- * slow paths.
+ * Generates an exit trace which will continue execution without HHIR.
+ * This should be used in situations that HHIR cannot handle -- ideally
+ * only in slow paths.
  */
 Trace* HhbcTranslator::getExitSlowTrace() {
-  std::vector<SSATmp*> stackValues = getSpillValues();
+  auto stackValues = getSpillValues();
   return m_tb->getExitSlowTrace(m_bcOff,
                                 m_stackDeficit,
                                 stackValues.size(),
@@ -2564,10 +2589,10 @@ Trace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
 
   std::vector<SSATmp*> stackValues = getSpillValues();
   return m_tb->genExitTrace(targetBcOff,
-                           m_stackDeficit,
-                           stackValues.size(),
-                           stackValues.size() ? &stackValues[0] : nullptr,
-                           TraceExitType::Normal);
+			    m_stackDeficit,
+			    stackValues.size(),
+			    stackValues.size() ? &stackValues[0] : nullptr,
+			    TraceExitType::Normal);
 }
 
 /*

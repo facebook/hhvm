@@ -333,9 +333,11 @@ CALL_OPCODE(WarnNonObjProp)
 CALL_OPCODE(ThrowNonObjProp)
 CALL_OPCODE(RaiseUndefProp)
 CALL_OPCODE(RaiseError)
+CALL_OPCODE(RaiseWarning)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(StaticLocInit)
 CALL_OPCODE(StaticLocInitCached)
+CALL_OPCODE(OpMod)
 
 // Vector instruction helpers
 CALL_OPCODE(BaseG)
@@ -1066,6 +1068,10 @@ void CodeGenerator::cgOpOr(IRInstruction* inst) {
                 &Asm::orq,
                 [] (int64_t a, int64_t b) { return a | b; },
                 Commutative);
+}
+
+void CodeGenerator::cgOpDiv(IRInstruction* inst) {
+  not_implemented();
 }
 
 void CodeGenerator::cgOpXor(IRInstruction* inst) {
@@ -4940,13 +4946,9 @@ void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
 }
 
 void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
-#if 0
-  const Func* func = fp->m_func;
-  std::cout << func->fullName()->data()
-            << " " << pcOff
-            << " " << rip
-            << std::endl;
-#endif
+  if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhirTracelets)) {
+    FTRACE(0, "{} {} {}\n", fp->m_func->fullName()->data(), pcOff, rip);
+  }
   checkFrame(fp, sp, /*checkLocals*/true);
 }
 

@@ -167,6 +167,8 @@ O(OpAnd,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpOr,                         D(Int), SNum SNum,                         C) \
 O(OpXor,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpMul,                        DParam, SNum SNum,                         C) \
+O(OpDiv,                        DParam, SNum SNum,                         C) \
+O(OpMod,                        D(Int), SNumInt SNumInt,                 C|N) \
                                                                               \
 O(ConvBoolToArr,                D(Arr), S(Bool),                         C|N) \
 O(ConvDblToArr,                 D(Arr), S(Dbl),                          C|N) \
@@ -240,6 +242,7 @@ O(ExitWhenSurprised,                ND, NA,                                E) \
 O(ExitOnVarEnv,                     ND, S(StkPtr),                         E) \
 O(ReleaseVVOrExit,                  ND, S(StkPtr),                       N|E) \
 O(RaiseError,                       ND, S(Str),               E|N|Mem|Refs|T) \
+O(RaiseWarning,                     ND, S(Str),               E|N|Mem|Refs|Er) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
@@ -558,6 +561,12 @@ enum Opcode : uint16_t {
 #define O(name, dsts, srcs, flags) name,
   IR_OPCODES
 #undef O
+
+  // Agree with hhbc on the names of these, to ease macro implementations.
+  OpBitAnd = OpAnd,
+  OpBitOr = OpOr,
+  OpBitXor = OpXor,
+
   IR_NUM_OPCODES
 };
 

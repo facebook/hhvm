@@ -29,6 +29,7 @@
 #include <runtime/base/taint/taint_observer.h>
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/util/request_local.h>
+#include <runtime/base/strings.h>
 #include <util/case_insensitive.h>
 
 #if defined(__APPLE__) || defined(__USE_BSD)
@@ -108,7 +109,7 @@ inline Numeric minus(CVarRef v1, CVarRef v2)       { return v1 - v2;}
 inline Numeric divide(CVarRef v1, CVarRef v2)      { return v1 / v2; }
 inline Numeric modulo(int64_t v1, int64_t v2) {
   if (UNLIKELY(v2 == 0)) {
-    raise_warning("Division by zero");
+    raise_warning(Strings::DIVISION_BY_ZERO);
     return false;
   }
   if (UNLIKELY(uint64_t(v2+1) <= 2u)) {

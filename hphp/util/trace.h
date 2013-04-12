@@ -80,6 +80,7 @@ namespace Trace {
       TM(txdeps)      \
       TM(typeProfile) \
       TM(hhir)        \
+      TM(hhirTracelets) \
       TM(gc)          \
       TM(unlikely)    \
       TM(jcc)         \

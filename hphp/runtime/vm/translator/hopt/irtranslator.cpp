@@ -146,18 +146,24 @@ TranslatorX64::irEmitLoadDeps() {
 
 
 void
+TranslatorX64::irTranslateMod(const Tracelet& t,
+                              const NormalizedInstruction& i) {
+  HHIR_EMIT(Mod);
+}
+
+void
 TranslatorX64::irTranslateBinaryArithOp(const Tracelet& t,
                                         const NormalizedInstruction& i) {
   const Opcode op = i.op();
   switch (op) {
-#define CASE(OpBc, x64op)                                          \
+#define CASE(OpBc)                                          \
     case Op ## OpBc:   HHIR_EMIT(OpBc);
-    CASE(Add,    add)
-    CASE(Sub,    sub)
-    CASE(BitAnd, and)
-    CASE(BitOr,  or)
-    CASE(BitXor, xor)
-    CASE(Mul,    imul)
+    CASE(Add)
+    CASE(Sub)
+    CASE(BitAnd)
+    CASE(BitOr)
+    CASE(BitXor)
+    CASE(Mul)
 #undef CASE
     default: {
       not_reached();

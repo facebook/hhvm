@@ -73,6 +73,13 @@ public:
     );
   }
 
+  template<class... Args>
+  IRInstruction* genFor(Trace* t, Args... args) {
+    auto instr = m_irFactory.gen(args...);
+    t->back()->push_back(instr);
+    return instr;
+  }
+
   SSATmp* genDefCns(const StringData* cnsName, SSATmp* val);
   SSATmp* genConcat(SSATmp* tl, SSATmp* tr);
   void    genDefCls(PreClass*, const HPHP::VM::Opcode* after);
@@ -248,12 +255,14 @@ public:
    * Lifetime of the returned pointer is managed by the trace this
    * TraceBuilder is generating.
    */
+  typedef std::function<void(IRFactory*, Trace*)> ExitTraceCallback;
   Trace* genExitTrace(uint32_t bcOff,
                       int32_t  stackDeficit,
                       uint32_t numOpnds,
-                      SSATmp** opnds,
+                      SSATmp* const* opnds,
                       TraceExitType::ExitType,
-                      uint32_t notTakenBcOff = 0);
+                      uint32_t notTakenBcOff = 0,
+                      ExitTraceCallback beforeExit = ExitTraceCallback());
 
   /*
    * Generates a target exit trace for GuardFailure exits.
@@ -358,6 +367,22 @@ public:
     taken();
     taken_block->setNext(done_block);
     appendBlock(done_block);
+  }
+
+  /*
+   * ifThenExit produces a conditional exit with user-supplied logic
+   * if the exit is taken.
+   */
+  Trace* ifThenExit(const Func* func,
+                    int stackDeficit,
+                    const std::vector<SSATmp*> &stackValues,
+                    ExitTraceCallback exit,
+                    Offset exitBcOff,
+                    Offset bcOff) {
+    return genExitTrace(exitBcOff, stackDeficit,
+                        stackValues.size(),
+                        stackValues.size() ? &stackValues[0] : nullptr,
+                        TraceExitType::NormalCc, bcOff /* notTakenOff */, exit);
   }
 
   /*

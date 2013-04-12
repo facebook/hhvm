@@ -543,6 +543,7 @@ MINSTRS
   CASE(Add) \
   CASE(Xor) \
   CASE(Not) \
+  CASE(Mod) \
   CASE(BitNot) \
   CASE(CastInt) \
   CASE(CastString) \

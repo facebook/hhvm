@@ -6076,6 +6076,15 @@ TranslatorX64::translateXor(const Tracelet& t,
 }
 
 void
+TranslatorX64::analyzeMod(Tracelet& t, NormalizedInstruction& i) {
+  i.m_txFlags = nativePlan(false);
+}
+
+void TranslatorX64::translateMod(const Tracelet& t, const NormalizedInstruction& i) {
+  not_reached();
+}
+
+void
 TranslatorX64::analyzeNot(Tracelet& t, NormalizedInstruction& i) {
   assert(i.inputs.size() == 1);
   i.m_txFlags = nativePlan(i.inputs[0]->isInt() ||

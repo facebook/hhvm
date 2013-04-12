@@ -374,15 +374,21 @@ GuardRefs
 
 2. Arithmetic
 
-D:Int = OpAdd S0:{Int|Bool} S1:{Int|Bool}
-D:Int = OpSub S0:{Int|Bool} S1:{Int|Bool}
-D:Int = OpAnd S0:{Int|Bool} S1:{Int|Bool}
-D:Int = OpOr  S0:{Int|Bool} S1:{Int|Bool}
-D:Int = OpXor S0:{Int|Bool} S1:{Int|Bool}
-D:Int = OpMul S0:{Int|Bool} S1:{Int|Bool}
+D:Int            = OpAdd S0:{Int|Bool} S1:{Int|Bool}
+D:Int            = OpSub S0:{Int|Bool} S1:{Int|Bool}
+D:Int            = OpAnd S0:{Int|Bool} S1:{Int|Bool}
+D:Int            = OpOr  S0:{Int|Bool} S1:{Int|Bool}
+D:Int            = OpXor S0:{Int|Bool} S1:{Int|Bool}
+D:Int            = OpMul S0:{Int|Bool} S1:{Int|Bool}
+D:{Int|Bool}     = OpMod S0:{Int|Bool} S1:{Int|Bool}
+D:{Int|Bool|Dbl} = OpDiv S0:{Int|Bool} S1:{Int|Bool}
 
   Integer/boolean arithmetic.  Performs the operation described by the
   opcode name on S0 and S1, and puts the result in D.
+
+  Note that OpMod and OpDiv produce boolean false when the divisor is
+  zero-like. Ints are not closed under OpDiv, as OpDiv produces doubles
+  when there is a non-zero remainder.
 
 
 3. Type conversions
@@ -904,6 +910,10 @@ ReleaseVVOrExit S0:StkPtr -> L
 RaiseError S0:Str
 
   Raises a fatal error with the text in S0 as its message.
+
+RaiseWarning S0:Str
+
+  Raises a warning with the text in S0 as its message.
 
 D:StkPtr = GenericRetDecRefs S0:StkPtr S1:Gen S2:ConstInt
 

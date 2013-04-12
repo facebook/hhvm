@@ -519,5 +519,15 @@ int init_closure(ActRec* ar, TypedValue* sp) {
   return n + 1;
 }
 
+void raiseWarning(const StringData* sd) {
+  raise_warning("%s", sd->data());
+}
+
+HOT_FUNC int64_t modHelper(int64_t left, int64_t right) {
+  // We already dealt with divide-by-zero up in hhbctranslator.
+  assert(right != 0);
+  return left % right;
+}
+
 } } // HPHP::VM
 

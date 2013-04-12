@@ -251,7 +251,8 @@ Trace* TraceBuilder::genExitGuardFailure(uint32_t bcOff) {
 }
 
 /*
- * genExitSlow generates a target exit trace for TraceExitType::Slow branches.
+ * getExitSlowTrace generates a target exit trace for
+ * TraceExitType::Slow branches.
  */
 Trace* TraceBuilder::getExitSlowTrace(uint32_t bcOff,
                                       int32_t stackDeficit,
@@ -291,9 +292,11 @@ void TraceBuilder::genTraceEnd(uint32_t nextPc,
 Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
                                   int32_t    stackDeficit,
                                   uint32_t   numOpnds,
-                                  SSATmp** opnds,
+                                  SSATmp* const* opnds,
                                   TraceExitType::ExitType exitType,
-                                  uint32_t   notTakenBcOff) {
+                                  uint32_t   notTakenBcOff,
+                                  std::function<void(IRFactory*, Trace*)>
+                                    beforeExit) {
   Trace* exitTrace = makeExitTrace(bcOff);
 
   MarkerData marker;
@@ -302,6 +305,9 @@ Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
   marker.func     = m_curFunc->getValFunc();
   exitTrace->back()->push_back(m_irFactory.gen(Marker, &marker));
 
+  if (beforeExit) {
+    beforeExit(&m_irFactory, exitTrace);
+  }
   SSATmp* sp = m_spValue;
   if (numOpnds != 0 || stackDeficit != 0) {
     SSATmp* srcs[numOpnds + 2];
@@ -314,25 +320,19 @@ Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
     exitTrace->back()->push_back(spillInst);
   }
   SSATmp* pc = genDefConst<int64_t>(bcOff);
-  IRInstruction* instr = nullptr;
   if (exitType == TraceExitType::NormalCc) {
     assert(notTakenBcOff != 0);
     SSATmp* notTakenPC = genDefConst(notTakenBcOff);
-    instr = m_irFactory.gen(getExitOpcode(exitType),
-                            m_curFunc,
-                            pc,
-                            sp,
-                            m_fpValue,
-                            notTakenPC);
+    genFor(exitTrace, getExitOpcode(exitType),
+           m_curFunc,
+           pc, sp, m_fpValue,
+           notTakenPC);
   } else {
     assert(notTakenBcOff == 0);
-    instr = m_irFactory.gen(getExitOpcode(exitType),
-                            m_curFunc,
-                            pc,
-                            sp,
-                            m_fpValue);
+    genFor(exitTrace, getExitOpcode(exitType),
+           m_curFunc,
+           pc, sp, m_fpValue);
   }
-  exitTrace->back()->push_back(instr);
   return exitTrace;
 }
 

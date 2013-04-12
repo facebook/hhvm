@@ -1037,7 +1037,7 @@ Variant Variant::operator/(CVarRef var) const {
   }
 
   if ((int2 && lval2 == 0) || (!int2 && dval2 == 0)) {
-    raise_warning("Division by zero");
+    raise_warning(Strings::DIVISION_BY_ZERO);
     return false;
   }
 
@@ -1095,7 +1095,7 @@ Variant &Variant::operator/=(CVarRef var) {
   }
 
   if ((int2 && lval2 == 0) || (!int2 && dval2 == 0)) {
-    raise_warning("Division by zero");
+    raise_warning(Strings::DIVISION_BY_ZERO);
     set(false);
     return *this;
   }
@@ -1121,7 +1121,7 @@ Variant &Variant::operator/=(int64_t n) {
     throw BadArrayOperandException();
   }
   if (n == 0) {
-    raise_warning("Division by zero");
+    raise_warning(Strings::DIVISION_BY_ZERO);
     set(false);
     return *this;
   }
@@ -1149,7 +1149,7 @@ Variant &Variant::operator/=(double n) {
     throw BadArrayOperandException();
   }
   if (n == 0.0) {
-    raise_warning("Division by zero");
+    raise_warning(Strings::DIVISION_BY_ZERO);
     set(false);
     return *this;
   }
@@ -1164,7 +1164,7 @@ int64_t Variant::operator%(CVarRef var) const {
   int64_t lval = toInt64();
   int64_t lval2 = var.toInt64();
   if (lval2 == 0) {
-    raise_warning("Division by zero");
+    raise_warning(Strings::DIVISION_BY_ZERO);
     return false;
   }
   return lval % lval2;
@@ -1174,7 +1174,7 @@ Variant &Variant::operator%=(CVarRef var) {
   int64_t lval = toInt64();
   int64_t lval2 = var.toInt64();
   if (lval2 == 0) {
-    raise_warning("Division by zero");
+    raise_warning(Strings::DIVISION_BY_ZERO);
     set(false);
     return *this;
   }
@@ -1184,7 +1184,7 @@ Variant &Variant::operator%=(CVarRef var) {
 
 Variant &Variant::operator%=(int64_t n) {
   if (n == 0) {
-    raise_warning("Division by zero");
+    raise_warning(Strings::DIVISION_BY_ZERO);
     set(false);
     return *this;
   }
@@ -1194,7 +1194,7 @@ Variant &Variant::operator%=(int64_t n) {
 
 Variant &Variant::operator%=(double n) {
   if ((int64_t)n == 0) {
-    raise_warning("Division by zero");
+    raise_warning(Strings::DIVISION_BY_ZERO);
     set(false);
     return *this;
   }

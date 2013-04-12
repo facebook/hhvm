@@ -85,6 +85,8 @@ static CallMap s_callMap({
                            {{TV, 0}, {SSA, 1}}},
     {VerifyParamFail,    (TCA)VerifyParamTypeFail, DNone, SSync, {{SSA, 0}}},
     {RaiseUninitLoc,     (TCA)raiseUndefVariable, DNone, SSync, {{SSA, 0}}},
+    {RaiseWarning,       (TCA)raiseWarning, DNone, SSync, {{SSA, 0}}},
+    {OpMod,              (TCA)modHelper, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
     {WarnNonObjProp,     (TCA)raisePropertyOnNonObject, DNone, SSync, {}},
     {ThrowNonObjProp,    (TCA)throw_null_object_prop, DNone, SSync, {}},
     {RaiseUndefProp,     (TCA)raiseUndefProp, DNone, SSync,

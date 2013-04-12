@@ -3952,7 +3952,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopMul(PC& pc) {
 
 #define MATHOP_DIVCHECK(x)                                                    \
     if (b == x) {                                                             \
-      raise_warning("Division by zero");                                      \
+      raise_warning(Strings::DIVISION_BY_ZERO);                               \
       c2->m_data.num = 0;                                                     \
       c2->m_type = KindOfBoolean;                                             \
     } else

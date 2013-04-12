@@ -131,23 +131,6 @@ inline static KeyType getKeyTypeIS(const SSATmp* key) {
   return getKeyType(key, true, true);
 }
 
-
-// The next few functions are helpers to assert commonly desired
-// conditions about values. Most often used inline while passing
-// arguments to a helper.
-inline static SSATmp* ptr(SSATmp* t) {
-  assert(t->getType().isPtr());
-  return t;
-}
-inline static SSATmp* objOrPtr(SSATmp* t) {
-  assert(t->isA(Type::Obj) || t->getType().isPtr());
-  return t;
-}
-inline static SSATmp* noLitInt(SSATmp* t) {
-  assert(!(t->isConst() && t->isA(Type::Int)));
-  return t;
-}
-
 // keyPtr is used by helper function implementations to convert a
 // TypedValue passed by value into a TypedValue* suitable for passing
 // to helpers from member_operations.h, which are prepared to handle

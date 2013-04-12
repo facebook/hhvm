@@ -667,7 +667,7 @@ void HhbcTranslator::VectorTranslator::emitBaseG() {
   m_ht.spillStack();
   m_base = m_tb.gen(BaseG,
                     m_tb.genDefConst((TCA)opFunc),
-                    noLitInt(gblName),
+                    gblName,
                     genMisPtr());
 }
 
@@ -725,57 +725,36 @@ void HhbcTranslator::VectorTranslator::emitProp() {
   }
 }
 
-template <KeyType keyType, bool unboxKey, MInstrAttr attrs, bool isObj>
+template <bool unboxKey, MInstrAttr attrs, bool isObj>
 static inline TypedValue* propImpl(Class* ctx, TypedValue* base,
                                    TypedValue keyVal, MInstrState* mis) {
-  TypedValue* key = keyPtr<keyType>(keyVal);
-  key = unbox<keyType, unboxKey>(key);
-  return Prop<WDU(attrs), isObj, keyType>(
+  TypedValue* key = unbox<AnyKey, unboxKey>(&keyVal);
+  return Prop<WDU(attrs), isObj>(
     mis->tvScratch, mis->tvRef, ctx, base, key);
 }
 
-#define HELPER_TABLE(m)                                              \
-  /* name        key  unboxKey attrs        isObj */                 \
-  m(propC,     AnyKey,  false, None,        false)                   \
-  m(propCD,    AnyKey,  false, Define,      false)                   \
-  m(propCDO,   AnyKey,  false, Define,       true)                   \
-  m(propCO,    AnyKey,  false, None,         true)                   \
-  m(propCU,    AnyKey,  false, Unset,       false)                   \
-  m(propCUO,   AnyKey,  false, Unset,        true)                   \
-  m(propCW,    AnyKey,  false, Warn,        false)                   \
-  m(propCWD,   AnyKey,  false, WarnDefine,  false)                   \
-  m(propCWDO,  AnyKey,  false, WarnDefine,   true)                   \
-  m(propCWO,   AnyKey,  false, Warn,         true)                   \
-  m(propL,     AnyKey,   true, None,        false)                   \
-  m(propLD,    AnyKey,   true, Define,      false)                   \
-  m(propLDO,   AnyKey,   true, Define,       true)                   \
-  m(propLO,    AnyKey,   true, None,         true)                   \
-  m(propLU,    AnyKey,   true, Unset,       false)                   \
-  m(propLUO,   AnyKey,   true, Unset,        true)                   \
-  m(propLW,    AnyKey,   true, Warn,        false)                   \
-  m(propLWD,   AnyKey,   true, WarnDefine,  false)                   \
-  m(propLWDO,  AnyKey,   true, WarnDefine,   true)                   \
-  m(propLWO,   AnyKey,   true, Warn,         true)                   \
-  m(propLS,    StrKey,   true, None,        false)                   \
-  m(propLSD,   StrKey,   true, Define,      false)                   \
-  m(propLSDO,  StrKey,   true, Define,       true)                   \
-  m(propLSO,   StrKey,   true, None,         true)                   \
-  m(propLSU,   StrKey,   true, Unset,       false)                   \
-  m(propLSUO,  StrKey,   true, Unset,        true)                   \
-  m(propLSW,   StrKey,   true, Warn,        false)                   \
-  m(propLSWD,  StrKey,   true, WarnDefine,  false)                   \
-  m(propLSWDO, StrKey,   true, WarnDefine,   true)                   \
-  m(propLSWO,  StrKey,   true, Warn,         true)                   \
-  m(propS,     StrKey,  false, None,        false)                   \
-  m(propSD,    StrKey,  false, Define,      false)                   \
-  m(propSDO,   StrKey,  false, Define,       true)                   \
-  m(propSO,    StrKey,  false, None,         true)                   \
-  m(propSU,    StrKey,  false, Unset,       false)                   \
-  m(propSUO,   StrKey,  false, Unset,        true)                   \
-  m(propSW,    StrKey,  false, Warn,        false)                   \
-  m(propSWD,   StrKey,  false, WarnDefine,  false)                   \
-  m(propSWDO,  StrKey,  false, WarnDefine,   true)                   \
-  m(propSWO,   StrKey,  false, Warn,         true)
+#define HELPER_TABLE(m)                                      \
+  /* name     unboxKey attrs        isObj */                 \
+  m(propC,      false, None,        false)                   \
+  m(propCD,     false, Define,      false)                   \
+  m(propCDO,    false, Define,       true)                   \
+  m(propCO,     false, None,         true)                   \
+  m(propCU,     false, Unset,       false)                   \
+  m(propCUO,    false, Unset,        true)                   \
+  m(propCW,     false, Warn,        false)                   \
+  m(propCWD,    false, WarnDefine,  false)                   \
+  m(propCWDO,   false, WarnDefine,   true)                   \
+  m(propCWO,    false, Warn,         true)                   \
+  m(propL,       true, None,        false)                   \
+  m(propLD,      true, Define,      false)                   \
+  m(propLDO,     true, Define,       true)                   \
+  m(propLO,      true, None,         true)                   \
+  m(propLU,      true, Unset,       false)                   \
+  m(propLUO,     true, Unset,        true)                   \
+  m(propLW,      true, Warn,        false)                   \
+  m(propLWD,     true, WarnDefine,  false)                   \
+  m(propLWDO,    true, WarnDefine,   true)                   \
+  m(propLWO,     true, Warn,         true)
 
 #define PROP(nm, ...)                                                   \
 TypedValue* nm(Class* ctx, TypedValue* base, TypedValue key,            \
@@ -798,7 +777,7 @@ void HhbcTranslator::VectorTranslator::emitPropGeneric() {
 
   typedef TypedValue* (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
   SSATmp* key = getInput(m_iInd);
-  BUILD_OPTAB(getKeyTypeS(key), key->isBoxed(), mia, m_base->isA(Type::Obj));
+  BUILD_OPTAB(key->isBoxed(), mia, m_base->isA(Type::Obj));
   m_ht.spillStack();
   if (mia & Define) {
     m_base = genStk(PropDX, cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
@@ -1044,10 +1023,10 @@ void HhbcTranslator::VectorTranslator::emitElem() {
   BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed(), mia);
   m_ht.spillStack();
   if (define || unset) {
-    m_base = genStk(define ? ElemDX : ElemUX, cns((TCA)opFunc), ptr(m_base),
+    m_base = genStk(define ? ElemDX : ElemUX, cns((TCA)opFunc), m_base,
                     key, genMisPtr());
   } else {
-    m_base = m_tb.gen(ElemX, cns((TCA)opFunc), ptr(m_base), key, genMisPtr());
+    m_base = m_tb.gen(ElemX, cns((TCA)opFunc), m_base, key, genMisPtr());
   }
 }
 #undef HELPER_TABLE
@@ -1184,7 +1163,7 @@ void HhbcTranslator::VectorTranslator::emitCGetProp() {
   BUILD_OPTAB_HOT(getKeyTypeS(key), key->isBoxed(), m_base->isA(Type::Obj));
   m_ht.spillStack();
   m_result = m_tb.gen(CGetProp, cns((TCA)opFunc), CTX(),
-                      objOrPtr(m_base), noLitInt(key), genMisPtr());
+                      m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -1241,35 +1220,25 @@ void HhbcTranslator::VectorTranslator::emitVGetProp() {
 }
 #undef HELPER_TABLE
 
-template <KeyType keyType, bool unboxKey, bool useEmpty, bool isObj>
+template <bool unboxKey, bool useEmpty, bool isObj>
 static inline bool issetEmptyPropImpl(Class* ctx, TypedValue* base,
                                       TypedValue keyVal) {
-  TypedValue* key = keyPtr<keyType>(keyVal);
-  key = unbox<keyType, unboxKey>(key);
-  return VM::IssetEmptyProp<useEmpty, isObj, keyType>(ctx, base, key);
+  TypedValue* key = unbox<AnyKey, unboxKey>(&keyVal);
+  return VM::IssetEmptyProp<useEmpty, isObj>(ctx, base, key);
 }
 
 #define HELPER_TABLE(m)                                                 \
-  /* name            hot        key  unboxKey useEmpty isObj */         \
-  m(issetPropC,    ,            AnyKey, false, false,   false)          \
-  m(issetPropCE,   ,            AnyKey, false,  true,   false)          \
-  m(issetPropCEO,  ,            AnyKey, false,  true,    true)          \
-  m(issetPropCO,   ,            AnyKey, false, false,    true)          \
-  m(issetPropL,    ,            AnyKey,  true, false,   false)          \
-  m(issetPropLE,   ,            AnyKey,  true,  true,   false)          \
-  m(issetPropLEO,  ,            AnyKey,  true,  true,    true)          \
-  m(issetPropLO,   ,            AnyKey,  true, false,    true)          \
-  m(issetPropLS,   ,            StrKey,  true, false,   false)          \
-  m(issetPropLSE,  ,            StrKey,  true,  true,   false)          \
-  m(issetPropLSEO, ,            StrKey,  true,  true,    true)          \
-  m(issetPropLSO,  ,            StrKey,  true, false,    true)          \
-  m(issetPropS,    ,            StrKey, false, false,   false)          \
-  m(issetPropSE,   ,            StrKey, false,  true,   false)          \
-  m(issetPropSEO,  ,            StrKey, false,  true,    true)          \
-  m(issetPropSO,   HOT_FUNC_VM, StrKey, false, false,    true)
+  /* name        unboxKey useEmpty isObj */                             \
+  m(issetPropC,    false, false,   false)                               \
+  m(issetPropCE,   false,  true,   false)                               \
+  m(issetPropCEO,  false,  true,    true)                               \
+  m(issetPropCO,   false, false,    true)                               \
+  m(issetPropL,     true, false,   false)                               \
+  m(issetPropLE,    true,  true,   false)                               \
+  m(issetPropLEO,   true,  true,    true)                               \
+  m(issetPropLO,    true, false,    true)
 
-#define ISSET(nm, hot, ...)                                             \
-hot                                                                     \
+#define ISSET(nm, ...)                                                  \
 /* This returns int64_t to ensure all 64 bits of rax are valid */       \
 uint64_t nm(Class* ctx, TypedValue* base, TypedValue key) {             \
   return issetEmptyPropImpl<__VA_ARGS__>(ctx, base, key);               \
@@ -1282,8 +1251,7 @@ HELPER_TABLE(ISSET)
 void HhbcTranslator::VectorTranslator::emitIssetEmptyProp(bool isEmpty) {
   SSATmp* key = getInput(m_iInd);
   typedef uint64_t (*OpFunc)(Class*, TypedValue*, TypedValue);
-  BUILD_OPTAB_HOT(getKeyTypeS(key), key->isBoxed(), isEmpty,
-                  m_base->isA(Type::Obj));
+  BUILD_OPTAB(key->isBoxed(), isEmpty, m_base->isA(Type::Obj));
   m_ht.spillStack();
   m_result = m_tb.gen(isEmpty ? EmptyProp : IssetProp, cns((TCA)opFunc),
                       CTX(), m_base, key);
@@ -1298,25 +1266,20 @@ void HhbcTranslator::VectorTranslator::emitEmptyProp() {
   emitIssetEmptyProp(true);
 }
 
-template <KeyType keyType, bool unboxKey, bool isObj>
+template <bool unboxKey, bool isObj>
 static inline TypedValue setPropImpl(Class* ctx, TypedValue* base,
                                      TypedValue keyVal, Cell val) {
-  TypedValue* key = keyPtr<keyType>(keyVal);
-  key = unbox<keyType, unboxKey>(key);
-  VM::SetProp<true, isObj, keyType>(ctx, base, key, &val);
+  TypedValue* key = unbox<AnyKey, unboxKey>(&keyVal);
+  VM::SetProp<true, isObj>(ctx, base, key, &val);
   return val;
 }
 
-#define HELPER_TABLE(m)                                       \
-  /* name         key   unboxKey isObj */           \
-  m(setPropC,    AnyKey,  false, false)             \
-  m(setPropCO,   AnyKey,  false,  true)             \
-  m(setPropL,    AnyKey,   true, false)             \
-  m(setPropLO,   AnyKey,   true,  true)             \
-  m(setPropLS,   StrKey,   true, false)             \
-  m(setPropLSO,  StrKey,   true,  true)             \
-  m(setPropS,    StrKey,  false, false)             \
-  m(setPropSO,   StrKey,  false,  true)
+#define HELPER_TABLE(m)                             \
+  /* name       unboxKey isObj */                   \
+  m(setPropC,     false, false)                     \
+  m(setPropCO,    false,  true)                     \
+  m(setPropL,      true, false)                     \
+  m(setPropLO,     true,  true)
 
 #define PROP(nm, ...)                                                   \
 TypedValue nm(Class* ctx, TypedValue* base, TypedValue key, Cell val) { \
@@ -1349,21 +1312,20 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
   // Emit the appropriate helper call.
   typedef TypedValue (*OpFunc)(Class*, TypedValue*, TypedValue, Cell);
   SSATmp* key = getInput(m_iInd);
-  BUILD_OPTAB(getKeyTypeS(key), key->isBoxed(), m_base->isA(Type::Obj));
+  BUILD_OPTAB(key->isBoxed(), m_base->isA(Type::Obj));
   m_ht.spillStack();
   SSATmp* result = genStk(SetProp, cns((TCA)opFunc), CTX(),
-                          objOrPtr(m_base), noLitInt(key), value);
+                          m_base, key, value);
   VectorEffects ve(result->getInstruction());
   m_result = ve.valTypeChanged ? result : value;
 }
 #undef HELPER_TABLE
 
-template <KeyType keyType, bool unboxKey, SetOpOp op, bool isObj>
+template <bool unboxKey, SetOpOp op, bool isObj>
 static inline TypedValue setOpPropImpl(TypedValue* base, TypedValue keyVal,
                                        Cell val, MInstrState* mis) {
-  TypedValue* key = keyPtr<keyType>(keyVal);
-  key = unbox<keyType, unboxKey>(key);
-  TypedValue* result = VM::SetOpProp<isObj, keyType>(
+  TypedValue* key = unbox<AnyKey, unboxKey>(&keyVal);
+  TypedValue* result = VM::SetOpProp<isObj>(
     mis->tvScratch, mis->tvRef, mis->ctx, op, base, key, &val);
 
   TypedValue ret;
@@ -1372,15 +1334,11 @@ static inline TypedValue setOpPropImpl(TypedValue* base, TypedValue keyVal,
 }
 
 #define OPPROP_TABLE(m, nm, op)                                         \
-  /* name             keyType unboxKey op  isObj */                     \
-  m(nm##op##PropC,    AnyKey,  false,  op,  false)                      \
-  m(nm##op##PropCO,   AnyKey,  false,  op,   true)                      \
-  m(nm##op##PropL,    AnyKey,   true,  op,  false)                      \
-  m(nm##op##PropLO,   AnyKey,   true,  op,   true)                      \
-  m(nm##op##PropLS,   StrKey,   true,  op,  false)                      \
-  m(nm##op##PropLSO,  StrKey,   true,  op,   true)                      \
-  m(nm##op##PropS,    StrKey,  false,  op,  false)                      \
-  m(nm##op##PropSO,   StrKey,  false,  op,   true)
+  /* name             unboxKey op  isObj */                             \
+  m(nm##op##PropC,     false,  op,  false)                              \
+  m(nm##op##PropCO,    false,  op,   true)                              \
+  m(nm##op##PropL,      true,  op,  false)                              \
+  m(nm##op##PropLO,     true,  op,   true)
 
 #define HELPER_TABLE(m, op) OPPROP_TABLE(m, setOp, SetOp##op)
 #define SETOP(nm, ...)                                                 \
@@ -1402,9 +1360,7 @@ void HhbcTranslator::VectorTranslator::emitSetOpProp() {
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue,
                                Cell, MInstrState*);
 # define SETOP_OP(op, bcOp) HELPER_TABLE(FILL_ROW, op)
-  BUILD_OPTAB_ARG(SETOP_OPS,
-                  getKeyTypeS(key), key->isBoxed(), op,
-                  m_base->isA(Type::Obj));
+  BUILD_OPTAB_ARG(SETOP_OPS, key->isBoxed(), op, m_base->isA(Type::Obj));
 # undef SETOP_OP
   m_tb.genStRaw(m_misBase, RawMemSlot::MisCtx, CTX());
   m_ht.spillStack();
@@ -1413,14 +1369,13 @@ void HhbcTranslator::VectorTranslator::emitSetOpProp() {
 }
 #undef HELPER_TABLE
 
-template <KeyType keyType, bool unboxKey, IncDecOp op, bool isObj>
+template <bool unboxKey, IncDecOp op, bool isObj>
 static inline TypedValue incDecPropImpl(Class* ctx, TypedValue* base,
                                         TypedValue keyVal, MInstrState* mis) {
-  TypedValue* key = keyPtr<keyType>(keyVal);
-  key = unbox<keyType, unboxKey>(key);
+  TypedValue* key = unbox<AnyKey, unboxKey>(&keyVal);
   TypedValue result;
   result.m_type = KindOfUninit;
-  VM::IncDecProp<true, isObj, keyType>(
+  VM::IncDecProp<true, isObj>(
     mis->tvScratch, mis->tvRef, ctx, op, base, key, result);
   assert(result.m_type != KindOfRef);
   return result;
@@ -1445,9 +1400,7 @@ void HhbcTranslator::VectorTranslator::emitIncDecProp() {
   SSATmp* key = getInput(m_iInd);
   typedef TypedValue (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
 # define INCDEC_OP(op) HELPER_TABLE(FILL_ROW, op)
-  BUILD_OPTAB_ARG(INCDEC_OPS,
-                  getKeyTypeS(key), key->isBoxed(), op,
-                  m_base->isA(Type::Obj));
+  BUILD_OPTAB_ARG(INCDEC_OPS, key->isBoxed(), op, m_base->isA(Type::Obj));
 # undef INCDEC_OP
   m_ht.spillStack();
   m_result =
@@ -1455,12 +1408,11 @@ void HhbcTranslator::VectorTranslator::emitIncDecProp() {
 }
 #undef HELPER_TABLE
 
-template <KeyType keyType, bool unboxKey, bool isObj>
+template <bool unboxKey, bool isObj>
 static inline void bindPropImpl(Class* ctx, TypedValue* base, TypedValue keyVal,
                                 RefData* val, MInstrState* mis) {
-  TypedValue* key = keyPtr<keyType>(keyVal);
-  key = unbox<keyType, unboxKey>(key);
-  TypedValue* prop = VM::Prop<false, true, false, isObj, keyType>(
+  TypedValue* key = unbox<AnyKey, unboxKey>(&keyVal);
+  TypedValue* prop = VM::Prop<false, true, false, isObj>(
     mis->tvScratch, mis->tvRef, ctx, base, key);
   if (!(prop == &mis->tvScratch && prop->m_type == KindOfUninit)) {
     tvBindRef(val, prop);
@@ -1468,15 +1420,11 @@ static inline void bindPropImpl(Class* ctx, TypedValue* base, TypedValue keyVal,
 }
 
 #define HELPER_TABLE(m)                    \
-  /* name           key unboxKey isObj */  \
-  m(bindPropC,    AnyKey, false, false)    \
-  m(bindPropCO,   AnyKey, false,  true)    \
-  m(bindPropL,    AnyKey,  true, false)    \
-  m(bindPropLO,   AnyKey,  true,  true)    \
-  m(bindPropLS,   StrKey,  true, false)    \
-  m(bindPropLSO,  StrKey,  true,  true)    \
-  m(bindPropS,    StrKey, false, false)    \
-  m(bindPropSO,   StrKey, false,  true)
+  /* name       unboxKey isObj */          \
+  m(bindPropC,    false, false)            \
+  m(bindPropCO,   false,  true)            \
+  m(bindPropL,     true, false)            \
+  m(bindPropLO,    true,  true)
 
 #define PROP(nm, ...)                                                   \
 void nm(Class* ctx, TypedValue* base, TypedValue key,                   \
@@ -1493,31 +1441,26 @@ void HhbcTranslator::VectorTranslator::emitBindProp() {
   SSATmp* box = getValue();
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue*, RefData*,
                          MInstrState*);
-  BUILD_OPTAB(getKeyTypeS(key), key->isBoxed(), m_base->isA(Type::Obj));
+  BUILD_OPTAB(key->isBoxed(), m_base->isA(Type::Obj));
   m_ht.spillStack();
   genStk(BindProp, cns((TCA)opFunc), CTX(), m_base, key, box, genMisPtr());
   m_result = box;
 }
 #undef HELPER_TABLE
 
-template <KeyType keyType, bool unboxKey, bool isObj>
+template <bool unboxKey, bool isObj>
 static inline void unsetPropImpl(Class* ctx, TypedValue* base,
                                  TypedValue keyVal) {
-  TypedValue* key = keyPtr<keyType>(keyVal);
-  key = unbox<keyType, unboxKey>(key);
-  VM::UnsetProp<isObj, keyType>(ctx, base, key);
+  TypedValue* key = unbox<AnyKey, unboxKey>(&keyVal);
+  VM::UnsetProp<isObj>(ctx, base, key);
 }
 
 #define HELPER_TABLE(m)                    \
-  /* name           key unboxKey isObj */  \
-  m(unsetPropC,   AnyKey, false, false)    \
-  m(unsetPropCO,  AnyKey, false,  true)    \
-  m(unsetPropL,   AnyKey,  true, false)    \
-  m(unsetPropLO,  AnyKey,  true,  true)    \
-  m(unsetPropLS,  StrKey,  true, false)    \
-  m(unsetPropLSO, StrKey,  true,  true)    \
-  m(unsetPropS,   StrKey, false, false)    \
-  m(unsetPropSO,  StrKey, false,  true)
+  /* name       unboxKey isObj */          \
+  m(unsetPropC,   false, false)            \
+  m(unsetPropCO,  false,  true)            \
+  m(unsetPropL,    true, false)            \
+  m(unsetPropLO,   true,  true)
 
 #define PROP(nm, ...)                                                   \
   static void nm(Class* ctx, TypedValue* base, TypedValue key) {        \
@@ -1537,7 +1480,7 @@ void HhbcTranslator::VectorTranslator::emitUnsetProp() {
   }
 
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue);
-  BUILD_OPTAB(getKeyTypeS(key), key->isBoxed(), m_base->isA(Type::Obj));
+  BUILD_OPTAB(key->isBoxed(), m_base->isA(Type::Obj));
   m_tb.gen(UnsetProp, cns((TCA)opFunc), CTX(), m_base, key);
 }
 #undef HELPER_TABLE
@@ -1657,7 +1600,7 @@ void HhbcTranslator::VectorTranslator::emitCGetElem() {
   BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed());
   m_ht.spillStack();
   m_result = m_tb.gen(CGetElem, cns((TCA)opFunc),
-                      ptr(m_base), key, genMisPtr());
+                      m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -1682,17 +1625,16 @@ static inline TypedValue vGetElemImpl(TypedValue* base, TypedValue keyVal,
   return result;
 }
 
-#define HELPER_TABLE(m)                                           \
-  /* name          hot        keyType unboxKey */                 \
-  m(vGetElemC,   ,            AnyKey,   false)                    \
-  m(vGetElemI,   HOT_FUNC_VM, IntKey,   false)                    \
-  m(vGetElemL,   ,            AnyKey,    true)                    \
-  m(vGetElemLI,  ,            IntKey,    true)                    \
-  m(vGetElemLS,  ,            StrKey,    true)                    \
-  m(vGetElemS,   ,            StrKey,   false)
+#define HELPER_TABLE(m)                               \
+  /* name         keyType unboxKey */                 \
+  m(vGetElemC,    AnyKey,   false)                    \
+  m(vGetElemI,    IntKey,   false)                    \
+  m(vGetElemL,    AnyKey,    true)                    \
+  m(vGetElemLI,   IntKey,    true)                    \
+  m(vGetElemLS,   StrKey,    true)                    \
+  m(vGetElemS,    StrKey,   false)
 
-#define ELEM(nm, hot, ...)                                              \
-hot                                                                     \
+#define ELEM(nm, ...)                                                   \
 TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) {     \
   return vGetElemImpl<__VA_ARGS__>(base, key,  mis);                    \
 }
@@ -1704,7 +1646,7 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::VectorTranslator::emitVGetElem() {
   SSATmp* key = getInput(m_iInd);
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
-  BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed());
+  BUILD_OPTAB(getKeyTypeIS(key), key->isBoxed());
   m_ht.spillStack();
   m_result = genStk(VGetElem, cns((TCA)opFunc), m_base, key, genMisPtr());
 }
@@ -1736,7 +1678,7 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue keyVal,
   m(issetElemLS,  ,            StrKey,  true,  false)        \
   m(issetElemLSE, ,            StrKey,  true,   true)        \
   m(issetElemS,   HOT_FUNC_VM, StrKey, false,  false)        \
-  m(issetElemSE,  HOT_FUNC_VM, StrKey, false,   true)
+  m(issetElemSE,  ,            StrKey, false,   true)
 
 #define ISSET(nm, hot, ...)                                             \
 hot                                                                     \
@@ -1755,7 +1697,7 @@ void HhbcTranslator::VectorTranslator::emitIssetEmptyElem(bool isEmpty) {
   BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed(), isEmpty);
   m_ht.spillStack();
   m_result = m_tb.gen(isEmpty ? EmptyElem : IssetElem,
-                      cns((TCA)opFunc), ptr(m_base), key, genMisPtr());
+                      cns((TCA)opFunc), m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
 
@@ -1951,33 +1893,28 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, Cell);
   BUILD_OPTAB_HOT(getKeyTypeIS(key), key->isBoxed());
   m_ht.spillStack();
-  SSATmp* result = genStk(SetElem, cns((TCA)opFunc), ptr(m_base), key, value);
+  SSATmp* result = genStk(SetElem, cns((TCA)opFunc), m_base, key, value);
   VectorEffects ve(result->getInstruction());
   m_result = ve.valTypeChanged ? result : value;
 }
 #undef HELPER_TABLE
 
-template <KeyType keyType, bool unboxKey, SetOpOp op>
+template <bool unboxKey, SetOpOp op>
 static inline TypedValue setOpElemImpl(TypedValue* base, TypedValue keyVal,
                                        Cell val, MInstrState* mis) {
-  TypedValue* key = keyPtr<keyType>(keyVal);
-  key = unbox<keyType, unboxKey>(key);
+  TypedValue* key = unbox<AnyKey, unboxKey>(&keyVal);
   TypedValue* result =
-    VM::SetOpElem<keyType>(mis->tvScratch, mis->tvRef, op, base, key, &val);
+    VM::SetOpElem(mis->tvScratch, mis->tvRef, op, base, key, &val);
 
   TypedValue ret;
   tvReadCell(result, &ret);
   return ret;
 }
 
-#define OPELEM_TABLE(m, nm, op)                \
-  /* name           keyType unboxKey op */     \
-  m(nm##op##ElemC,   AnyKey, false,  op)       \
-  m(nm##op##ElemI,   IntKey, false,  op)       \
-  m(nm##op##ElemL,   AnyKey,  true,  op)       \
-  m(nm##op##ElemLI,  IntKey,  true,  op)       \
-  m(nm##op##ElemLS,  StrKey,  true,  op)       \
-  m(nm##op##ElemS,   StrKey, false,  op)
+#define OPELEM_TABLE(m, nm, op)       \
+  /* name          unboxKey op */     \
+  m(nm##op##ElemC,  false,  op)       \
+  m(nm##op##ElemL,   true,  op)
 
 #define HELPER_TABLE(m, op) OPELEM_TABLE(m, setOp, SetOp##op)
 #define SETOP(nm, ...)                                                  \
@@ -1997,7 +1934,7 @@ void HhbcTranslator::VectorTranslator::emitSetOpElem() {
   SSATmp* key = getInput(m_iInd);
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, Cell, MInstrState*);
 # define SETOP_OP(op, bcOp) HELPER_TABLE(FILL_ROW, op)
-  BUILD_OPTAB_ARG(SETOP_OPS, getKeyTypeIS(key), key->isBoxed(), op);
+  BUILD_OPTAB_ARG(SETOP_OPS, key->isBoxed(), op);
 # undef SETOP_OP
   m_ht.spillStack();
   m_result =
@@ -2005,13 +1942,12 @@ void HhbcTranslator::VectorTranslator::emitSetOpElem() {
 }
 #undef HELPER_TABLE
 
-template <KeyType keyType, bool unboxKey, IncDecOp op>
+template <bool unboxKey, IncDecOp op>
 static inline TypedValue incDecElemImpl(TypedValue* base, TypedValue keyVal,
                                         MInstrState* mis) {
-  TypedValue* key = keyPtr<keyType>(keyVal);
-  key = unbox<keyType, unboxKey>(key);
+  TypedValue* key = unbox<AnyKey, unboxKey>(&keyVal);
   TypedValue result;
-  VM::IncDecElem<true, keyType>(
+  VM::IncDecElem<true>(
     mis->tvScratch, mis->tvRef, op, base, key, result);
   assert(result.m_type != KindOfRef);
   return result;
@@ -2034,32 +1970,27 @@ void HhbcTranslator::VectorTranslator::emitIncDecElem() {
   SSATmp* key = getInput(m_iInd);
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
 # define INCDEC_OP(op) HELPER_TABLE(FILL_ROW, op)
-  BUILD_OPTAB_ARG(INCDEC_OPS, getKeyTypeIS(key), key->isBoxed(), op);
+  BUILD_OPTAB_ARG(INCDEC_OPS, key->isBoxed(), op);
 # undef INCDEC_OP
   m_ht.spillStack();
   m_result = genStk(IncDecElem, cns((TCA)opFunc), m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
 
-template <KeyType keyType, bool unboxKey>
+template <bool unboxKey>
 static inline void bindElemImpl(TypedValue* base, TypedValue keyVal,
                                 RefData* val, MInstrState* mis) {
-  TypedValue* key = keyPtr<keyType>(keyVal);
-  key = unbox<keyType, unboxKey>(key);
-  base = VM::ElemD<false, true, keyType>(mis->tvScratch, mis->tvRef, base, key);
+  TypedValue* key = unbox<AnyKey, unboxKey>(&keyVal);
+  base = VM::ElemD<false, true>(mis->tvScratch, mis->tvRef, base, key);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
     tvBindRef(val, base);
   }
 }
 
-#define HELPER_TABLE(m)                         \
-  /* name       keyType  unboxKey */            \
-  m(bindElemC,   AnyKey,  false)                \
-  m(bindElemI,   IntKey,  false)                \
-  m(bindElemL,   AnyKey,   true)                \
-  m(bindElemLI,  IntKey,   true)                \
-  m(bindElemLS,  StrKey,   true)                \
-  m(bindElemS,   StrKey,  false)
+#define HELPER_TABLE(m)                \
+  /* name       unboxKey */            \
+  m(bindElemC,   false)                \
+  m(bindElemL,    true)
 
 #define ELEM(nm, ...)                                                   \
 void nm(TypedValue* base, TypedValue key, RefData* val,                 \
@@ -2075,7 +2006,7 @@ void HhbcTranslator::VectorTranslator::emitBindElem() {
   SSATmp* key = getInput(m_iInd);
   SSATmp* box = getValue();
   typedef void (*OpFunc)(TypedValue*, TypedValue, RefData*, MInstrState*);
-  BUILD_OPTAB(getKeyTypeIS(key), key->isBoxed());
+  BUILD_OPTAB(key->isBoxed());
   m_ht.spillStack();
   genStk(BindElem, cns((TCA)opFunc), m_base, key, box, genMisPtr());
   m_result = box;
@@ -2092,7 +2023,7 @@ static inline void unsetElemImpl(TypedValue* base, TypedValue keyVal) {
 #define HELPER_TABLE(m)                                       \
   /* name           hot       keyType unboxKey */             \
   m(unsetElemC,   ,            AnyKey,  false)                \
-  m(unsetElemI,   HOT_FUNC_VM, IntKey,  false)                \
+  m(unsetElemI,   ,            IntKey,  false)                \
   m(unsetElemL,   ,            AnyKey,   true)                \
   m(unsetElemLI,  ,            IntKey,   true)                \
   m(unsetElemLS,  ,            StrKey,   true)                \
@@ -2141,7 +2072,7 @@ void HhbcTranslator::VectorTranslator::emitVGetNewElem() {
 void HhbcTranslator::VectorTranslator::emitSetNewElem() {
   SSATmp* value = getValue();
   m_ht.spillStack();
-  SSATmp* result = m_tb.gen(SetNewElem, ptr(m_base), value);
+  SSATmp* result = m_tb.gen(SetNewElem, m_base, value);
   VectorEffects ve(result->getInstruction());
   m_result = ve.valTypeChanged ? result : value;
 }

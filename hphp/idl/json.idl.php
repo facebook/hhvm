@@ -136,10 +136,6 @@ DefineFunction(
         'desc'   => "Bitmask consisting of JSON_HEX_QUOT, JSON_HEX_TAG, JSON_HEX_AMP, JSON_HEX_APOS, JSON_FORCE_OBJECT.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -169,10 +165,6 @@ DefineFunction(
         'value'  => "0",
         'desc'   => "User specified recursion depth.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

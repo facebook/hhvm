@@ -25,8 +25,6 @@
 #include <runtime/base/intercept.h>
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/base/taint/taint_data.h>
-#include <runtime/base/taint/taint_observer.h>
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/strings.h>
@@ -128,15 +126,12 @@ inline double  negate(double v)  { return -v; }
 inline Variant negate(CVarRef v) { return -(Variant)v; }
 
 inline String concat(CStrRef s1, CStrRef s2)         {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return s1 + s2;
 }
 inline String &concat_assign(String &s1, litstr s2)  {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return s1 += s2;
 }
 inline String &concat_assign(String &s1, CStrRef s2) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return s1 += s2;
 }
 
@@ -148,8 +143,6 @@ String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
                CStrRef s6);
 
 inline Variant &concat_assign(Variant &v1, litstr s2) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-
   if (v1.getType() == KindOfString) {
     StringData *data = v1.getStringData();
     if (data->getCount() == 1) {
@@ -164,8 +157,6 @@ inline Variant &concat_assign(Variant &v1, litstr s2) {
 }
 
 inline Variant &concat_assign(Variant &v1, CStrRef s2) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-
   if (v1.getType() == KindOfString) {
     StringData *data = v1.getStringData();
     if (data->getCount() == 1) {
@@ -223,8 +214,6 @@ inline int print(const char *s) {
 }
 inline int print(CStrRef s) {
   // print is not a real function. x_print exists, but this function gets called
-  // directly. We therefore need to setup the TaintObserver.
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   g_context->write(s);
   return 1;
 }
@@ -233,8 +222,6 @@ inline void echo(const char *s) {
 }
 inline void echo(CStrRef s) {
   // echo is not a real function. x_echo exists, but this function gets called
-  // directly. We therefore need to setup the TaintObserver.
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   g_context->write(s);
 }
 

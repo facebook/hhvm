@@ -156,8 +156,6 @@ public:
     HphpArray,
     ObjectData,
     GlobalVariables,
-    TaintTraceNode,
-    TaintTraceData,
     TestGlobals
   };
 

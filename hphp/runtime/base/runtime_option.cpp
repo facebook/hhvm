@@ -362,11 +362,6 @@ int RuntimeOption::ScannerType = 0;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableFinallyStatement = false;
 
-#ifdef TAINTED
-bool RuntimeOption::EnableTaintWarnings = false;
-int RuntimeOption::TaintTraceMaxStrlen = 127;
-#endif
-
 // Initializers for Eval flags.
 static inline bool evalJitDefault() {
   // --mode server or --mode daemon
@@ -1109,11 +1104,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EnableAlternative = eval["EnableAlternative"].getInt32(0);
 
     EnableFinallyStatement = eval["EnableFinallyStatement"].getBool();
-
-#ifdef TAINTED
-    EnableTaintWarnings = eval["EnableTaintWarnings"].getBool();
-    TaintTraceMaxStrlen = eval["TaintTraceMaxStrlen"].getInt32(127);
-#endif
 
 #define get_double getDouble
 #define get_bool getBool

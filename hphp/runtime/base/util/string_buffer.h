@@ -19,7 +19,6 @@
 
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
-#include <runtime/base/taint/taint_data.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,12 +58,6 @@ public:
   int size() const { return m_len;}
   int length() const { return m_len;}
   const char *data() const;
-private:
-  // This method is only used internally for particular operations which do
-  // not lead to mutation or creation of strings and do not require support
-  // for taint propagation. There is probably no reason to use this method
-  // where it isn't already used.
-  const char *dataIgnoreTaint() const;
 public:
   char charAt(int pos) const;
 
@@ -73,13 +66,8 @@ public:
    * object any more.
    */
   String detach() { return detachImpl(); }
-  String detachWithTaint() {
-    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-    return detachImpl();
-  }
   String detachImpl();
   String copy();
-  String copyWithTaint();
   void reset();
   void clear() { reset();}
   void resize(int size);
@@ -107,14 +95,9 @@ public:
   void append(unsigned char c) { append((char)c);}
   void append(litstr  s) { assert(s); append(s, strlen(s));}
   void append(CStrRef s);
-  void appendWithTaint(CStrRef s) {
-    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-    append(s);
-  }
   void append(CVarRef s);
   void append(const StringData *s) { append(s->data(), s->size()); }
   void append(const char *s, int len) {
-    TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
     assert(len >= 0);
     if (m_buffer && len <= m_cap - m_len) {
       memcpy(m_buffer + m_len, s, len);
@@ -123,7 +106,6 @@ public:
     }
     appendHelper(s, len);
   }
-  void appendWithTaint(const char *s, int len) { append(s, len); }
   void appendHelper(const char *s, int len);
   void append(const std::string &s) { append(s.data(), s.size());}
   /**
@@ -137,22 +119,13 @@ public:
   StringBuffer &operator+=(CStrRef s) { append(s); return *this;}
 
   StringBuffer &add(CStrRef s) { append(s); return *this; }
-  StringBuffer &addWithTaint(CStrRef s) { appendWithTaint(s); return *this; }
   StringBuffer &add(const char *s, int len) { append(s, len); return *this; }
-  StringBuffer &addWithTaint(const char *s, int len) {
-    appendWithTaint(s, len);
-    return *this;
-  }
 
   /**
    * Append what buf has, and reset buf. Internally, if this StringBuffer
    * is empty, it will swap with buf, so to avoid one string copying.
    */
   void absorb(StringBuffer &buf);
-  void absorbWithTaint(StringBuffer &buf) {
-    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-    absorb(buf);
-  }
 
   /**
    * Write data.
@@ -165,11 +138,6 @@ public:
    */
   void read(FILE *in, int page_size = 1024);
   void read(File *in, int page_size = 1024);
-
-#ifdef TAINTED
-  TaintData& getTaintDataRef() { return m_taint_data; }
-  const TaintData& getTaintDataRefConst() const { return m_taint_data; }
-#endif
 
 private:
   // disabling copy constructor and assignment
@@ -185,9 +153,6 @@ private:
   int m_maxBytes;
   int m_cap;
   int m_len;
-#ifdef TAINTED
-  TaintData m_taint_data;
-#endif
 
   void growBy(int spaceRequired);
 };
@@ -210,20 +175,13 @@ class CstrBuffer {
   String detach();
 
  private:
-  char* dataIgnoreTaint() const { return m_buffer; }
-
- private:
   char* m_buffer;
   unsigned m_len;
   unsigned m_cap;
-#ifdef TAINTED
-  TaintData m_taint_data;
-#endif
 };
 
 inline const char* CstrBuffer::data() const {
   assert(m_len <= m_cap);
-  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
   m_buffer[m_len] = 0;
   return m_buffer;
 }

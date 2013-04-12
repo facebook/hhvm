@@ -65,7 +65,6 @@ DefineFunction(
         'desc'   => "The scale factor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -95,10 +94,6 @@ DefineFunction(
         'desc'   => "This optional parameter is used to set the number of digits after the decimal place in the result. You can also set the global default scale for all functions by using bcscale().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -127,10 +122,6 @@ DefineFunction(
         'value'  => "-1",
         'desc'   => "This optional parameter is used to set the number of digits after the decimal place in the result. You can also set the global default scale for all functions by using bcscale().",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -190,10 +181,6 @@ DefineFunction(
         'desc'   => "This optional parameter is used to set the number of digits after the decimal place in the result. You can also set the global default scale for all functions by using bcscale().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -223,10 +210,6 @@ DefineFunction(
         'desc'   => "This optional parameter is used to set the number of digits after the decimal place in the result. You can also set the global default scale for all functions by using bcscale().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -249,10 +232,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The modulus, as a string.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -282,10 +261,6 @@ DefineFunction(
         'value'  => "-1",
         'desc'   => "This optional parameter is used to set the number of digits after the decimal place in the result. You can also set the global default scale for all functions by using bcscale().",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -321,10 +296,6 @@ DefineFunction(
         'desc'   => "This optional parameter is used to set the number of digits after the decimal place in the result. You can also set the global default scale for all functions by using bcscale().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -348,10 +319,6 @@ DefineFunction(
         'value'  => "-1",
         'desc'   => "This optional parameter is used to set the number of digits after the decimal place in the result. You can also set the global default scale for all functions by using bcscale().",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

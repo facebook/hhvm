@@ -24,7 +24,6 @@
 #include <runtime/base/file/file.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/utf8_decode.h>
-#include <runtime/base/taint/taint_observer.h>
 #include <runtime/ext/ext_json.h>
 
 namespace HPHP {
@@ -38,7 +37,6 @@ StringBuffer::StringBuffer(int initialSize /* = 63 */)
   MutableSlice s = m_str->mutableSlice();
   m_buffer = s.ptr;
   m_cap = s.len;
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 }
 
 StringBuffer::~StringBuffer() {
@@ -49,15 +47,6 @@ StringBuffer::~StringBuffer() {
 }
 
 const char *StringBuffer::data() const {
-  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
-  if (m_buffer && m_len) {
-    m_buffer[m_len] = '\0'; // fixup
-    return m_buffer;
-  }
-  return nullptr;
-}
-
-const char *StringBuffer::dataIgnoreTaint() const {
   if (m_buffer && m_len) {
     m_buffer[m_len] = '\0'; // fixup
     return m_buffer;
@@ -74,11 +63,6 @@ char StringBuffer::charAt(int pos) const {
 }
 
 String StringBuffer::detachImpl() {
-  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
-#ifdef TAINTED
-  m_taint_data.unsetTaint(TAINT_BIT_ALL);
-#endif
-
   if (m_buffer && m_len) {
     assert(m_str && m_str->getCount() == 0);
     m_buffer[m_len] = '\0'; // fixup
@@ -98,16 +82,8 @@ String StringBuffer::copy() {
   return String(data(), size(), CopyString);
 }
 
-String StringBuffer::copyWithTaint() {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  return String(data(), size(), CopyString);
-}
-
 void StringBuffer::absorb(StringBuffer &buf) {
   if (empty()) {
-    TAINT_OBSERVER_REGISTER_ACCESSED(buf.getTaintDataRefConst());
-    TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
-
     StringData* str = m_str;
 
     m_str = buf.m_str;
@@ -134,9 +110,6 @@ void StringBuffer::absorb(StringBuffer &buf) {
 
 void StringBuffer::reset() {
   m_len = 0;
-#ifdef TAINTED
-  m_taint_data.unsetTaint(TAINT_BIT_ALL);
-#endif
 }
 
 void StringBuffer::release() {
@@ -438,7 +411,6 @@ void StringBuffer::growBy(int spaceRequired) {
 CstrBuffer::CstrBuffer(int cap)
   : m_buffer((char*)Util::safe_malloc(cap + 1)), m_len(0), m_cap(cap) {
   assert(unsigned(cap) <= kMaxCap);
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 }
 
 CstrBuffer::CstrBuffer(const char *filename)
@@ -466,7 +438,6 @@ CstrBuffer::CstrBuffer(const char *filename)
       ::close(fd);
     }
   }
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, dataIgnoreTaint());
 }
 
 CstrBuffer::CstrBuffer(char* data, int len)
@@ -496,7 +467,6 @@ void CstrBuffer::append(const char* data, int len) {
 
 String CstrBuffer::detach() {
   assert(m_len <= m_cap);
-  TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
   m_buffer[m_len] = 0;
   String s(m_buffer, m_len, AttachString);
   m_buffer = 0;

@@ -93,54 +93,6 @@ DefineConstant(
     'type'   => Int64,
   ));
 
-DefineConstant(
-  array(
-    'name'   => "TAINT_NONE",
-    'type'   => Int64,
-  ));
-
-DefineConstant(
-  array(
-    'name'   => "TAINT_HTML",
-    'type'   => Int64,
-  ));
-
-DefineConstant(
-  array(
-    'name'   => "TAINT_MUTATED",
-    'type'   => Int64,
-  ));
-
-DefineConstant(
-  array(
-    'name'   => "TAINT_SQL",
-    'type'   => Int64,
-  ));
-
-DefineConstant(
-  array(
-    'name'   => "TAINT_SHELL",
-    'type'   => Int64,
-  ));
-
-DefineConstant(
-  array(
-    'name'   => "TAINT_TRACE_HTML",
-    'type'   => Int64,
-  ));
-
-DefineConstant(
-  array(
-    'name'   => "TAINT_ALL",
-    'type'   => Int64,
-  ));
-
-DefineConstant(
-  array(
-    'name'   => "TAINT_TRACE_SELF",
-    'type'   => Int64,
-  ));
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Functions
@@ -162,7 +114,6 @@ DefineConstant(
 //        'value' => default value of the argument
 //        'desc'  => description of the argument
 //      )
-//   'taint_observer' => taint propagation information
 //     array (
 //       'set_mask' => which bits to set automatically
 //       'clear_mask' => which bits to clear automatically
@@ -184,10 +135,6 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "What to serialize. Note that objects are not supported.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask' => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -218,10 +165,6 @@ DefineFunction(
         'desc'   => "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask' => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -239,10 +182,6 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "What to serialize. Note that objects are not supported.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask' => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -273,10 +212,6 @@ DefineFunction(
         'desc'   => "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask' => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -294,10 +229,6 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "What to serialize. Note that objects are not supported.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask' => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -328,10 +259,6 @@ DefineFunction(
         'desc'   => "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask' => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -349,8 +276,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The file to test"
       )
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -380,8 +305,6 @@ DefineFunction(
         'value'  => "null_variant",
         'desc'   => "Extra data to pass to the handler when intercepting",
       ),
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -421,8 +344,6 @@ DefineFunction(
         'desc'   => "Will always set to TRUE.",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -461,8 +382,6 @@ DefineFunction(
         'desc'   => "Will always set to TRUE.",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -479,8 +398,6 @@ DefineFunction(
         'type'   => StringVec,
         'desc'   => "The functions that can be renamed.",
       ),
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -505,8 +422,6 @@ DefineFunction(
         'desc'   => "What is the new name.",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -530,7 +445,6 @@ DefineFunction(
         'desc'   => "Root to be prepended to all paths in the map.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -548,10 +462,6 @@ DefineFunction(
         'type'   => Variant | Reference,
         'desc'   => "What string to sanitize.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask' => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -571,7 +481,6 @@ DefineFunction(
         'desc'   => "The string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -590,7 +499,6 @@ DefineFunction(
         'desc'   => "The string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -620,10 +528,6 @@ DefineFunction(
         'desc'   => "If length is given and is positive, the return value will contain at most length characters of the portion that begins at start (depending on the length of string).\n\nIf negative length is passed, fb_utf8_substr() cuts the portion out of str from the start'th character up to the character that is length characters away from the end of the string. In case start is also negative, the start position is calculated beforehand according to the rule explained above.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -641,8 +545,6 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "The callback to invoke.",
       ),
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -667,8 +569,6 @@ DefineFunction(
         'desc'   => "Value returned when function does not exist.",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -692,8 +592,6 @@ DefineFunction(
         'desc'   => "The function parameters to invoke with.",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -711,8 +609,6 @@ DefineFunction(
         'desc'   => "Whether to clear data after this function call.",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -723,8 +619,6 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -734,8 +628,6 @@ DefineFunction(
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -761,8 +653,6 @@ DefineFunction(
         'desc'   => "Extra argument to reserve for future use.",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -774,8 +664,6 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Profile result.",
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -785,8 +673,6 @@ DefineFunction(
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -798,8 +684,6 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
       'desc'   => "Profile result.",
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -818,8 +702,6 @@ DefineFunction(
         'desc'   => "The \"virtual\" function's name.",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -829,8 +711,6 @@ DefineFunction(
     'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
     'return' => array(
       'type'   => null,
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -855,8 +735,6 @@ DefineFunction(
         'desc'   => "One of those XHPROF_FLAGS_ constant to specify what to profile.",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -867,8 +745,6 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -878,8 +754,6 @@ DefineFunction(
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -897,8 +771,6 @@ DefineFunction(
         'type'   => VariantMap,
         'desc'   => "The map to load. The format is array(\$id1 => array('ip' => {ip address}, 'db' => {database name}, 'port' => {port number}, 'username' => {user name for login}, 'password' => {password for login}), \$id2 => ...), where \$id1 and \$ids2 are arbitrary 32-bit integers that fb_crossall_query() can use to refer to the physical databases.",
       ),
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -954,8 +826,6 @@ DefineFunction(
         'desc'   => "Whether connect_timeout or read_timeout are in seconds or milli-seconds.",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -1004,106 +874,6 @@ DefineFunction(
         'desc'   => "Whether connect_timeout or read_timeout are in seconds or milli-seconds.",
       ),
     ),
-    'taint_observer' => array(
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "fb_set_taint",
-    'desc'   => "Taints a string with a flag or a bit. This bit is contagious in string operations, being carried over to new strings that are copied or composed from this string. This may be used for checking dirty or clean status of end user's input for different purposes.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
-    'return' => array(
-      'type'   => null,
-    ),
-    'args'   => array(
-      array(
-        'name'   => "str",
-        'type'   => Variant | Reference,
-        'desc'   => "The string to taint.",
-      ),
-      array(
-        'name'   => "taint",
-        'type'   => Int32,
-        'desc'   => "The bit to flag.",
-      ),
-    ),
-    'taint_observer' => array(
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "fb_unset_taint",
-    'desc'   => "Untaints a string by clearing off the bit that was set or carried over.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
-    'return' => array(
-      'type'   => null,
-    ),
-    'args'   => array(
-      array(
-        'name'   => "str",
-        'type'   => Variant | Reference,
-        'desc'   => "The string to untaint.",
-      ),
-      array(
-        'name'   => "taint",
-        'type'   => Int32,
-        'desc'   => "The bit to clear.",
-      ),
-    ),
-    'taint_observer' => array(
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "fb_get_taint",
-    'desc'   => "Checks to see if a bit is set.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
-    'return' => array(
-      'type'   => Boolean,
-      'desc'   => "Whether the taint was set.",
-    ),
-    'args'   => array(
-      array(
-        'name'   => "str",
-        'type'   => String,
-        'desc'   => "The string to check.",
-      ),
-      array(
-        'name'   => "taint",
-        'type'   => Int32,
-        'desc'   => "The bit to check against.",
-      ),
-    ),
-    'taint_observer' => array(
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "fb_get_taint_warning_counts",
-    'desc'   => "Get counts of various suppressed taint warnings.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
-    'return' => array(
-      'type'   => Int64Vec,
-      'desc'   => "The array of warning counts.",
-    ),
-    'taint_observer' => array(
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "fb_enable_html_taint_trace",
-    'desc'   => "Enable an optional tracing feature.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
-    'return' => array(
-      'type'   => null,
-    ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -1121,8 +891,6 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "The key for locating the value.",
       ),
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -1142,8 +910,6 @@ DefineFunction(
         'desc'   => "The new value for the compression state.",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -1161,8 +927,6 @@ DefineFunction(
         'desc'   => "The callback to invoke. An exception object will be passed to the function",
       ),
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -1174,8 +938,6 @@ DefineFunction(
       'type'   => VariantMap,
       'desc'   => "Query result in a format of array('total' => {number of total bytes to flush}, 'sent' => {number of bytes sent out}, 'time' => {time for flushing in us}).",
     ),
-    'taint_observer' => array(
-    ),
   ));
 
 DefineFunction(
@@ -1186,8 +948,6 @@ DefineFunction(
     'return' => array(
       'type'   => Int64,
       'desc'   => "Total number of bytes flushed since last flush",
-    ),
-    'taint_observer' => array(
     ),
   ));
 
@@ -1261,7 +1021,6 @@ DefineFunction(
         'desc'   => "Profiler function to call or null to disable",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(

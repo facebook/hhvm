@@ -31,8 +31,6 @@
 #include <runtime/base/memory/sweepable.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/eval/debugger/debugger.h>
-#include <runtime/base/taint/taint_data.h>
-#include <runtime/base/taint/taint_warning.h>
 #include <runtime/vm/event_hook.h>
 #include <runtime/ext/ext_string.h>
 #include <util/logger.h>
@@ -223,15 +221,6 @@ void BaseExecutionContext::setRequestMemoryMaxBytes(int64_t max) {
 // write()
 
 void BaseExecutionContext::write(CStrRef s) {
-#ifdef TAINTED
-  if (!getTransport() && !m_out) {
-    // We are running a PHP script and we are about to echo to stdout
-    TaintWarning::WarnIfTainted(s, TAINT_BIT_HTML);
-  } else if (getTransport() && m_buffers.size() == 2) {
-    // We are responding to a request and we are about to echo to stdout
-    TaintWarning::WarnIfTainted(s, TAINT_BIT_HTML);
-  }
-#endif
   write(s.data(), s.size());
 }
 

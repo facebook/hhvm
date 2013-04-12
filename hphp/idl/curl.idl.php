@@ -68,7 +68,6 @@ DefineFunction(
         'desc'   => "If provided, the CURLOPT_URL option will be set to its value. You can manually set this using the curl_setopt() function.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -87,7 +86,6 @@ DefineFunction(
         'desc'   => "A cURL handle returned by curl_init().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -106,7 +104,6 @@ DefineFunction(
         'value'  => "k_CURLVERSION_NOW",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -132,7 +129,6 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -156,7 +152,6 @@ DefineFunction(
         'desc'   => "An array specifying which options to set and their values. The keys should be valid curl_setopt() constants or their integer equivalents.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 // FB-specific extension
@@ -182,7 +177,6 @@ DefineFunction(
         'desc'   => "This should be one of the CURLOPT_* values.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -200,10 +194,6 @@ DefineFunction(
         'type'   => Resource,
         'desc'   => "A cURL handle returned by curl_init().",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -229,10 +219,6 @@ DefineFunction(
         'desc'   => "This may be one of the following constants: CURLINFO_EFFECTIVE_URL - Last effective URL CURLINFO_HTTP_CODE - Last received HTTP code CURLINFO_FILETIME - Remote time of the retrieved document, if -1 is returned the time of the document is unknown CURLINFO_TOTAL_TIME - Total transaction time in seconds for last transfer CURLINFO_NAMELOOKUP_TIME - Time in seconds until name resolving was complete CURLINFO_CONNECT_TIME - Time in seconds it took to establish the connection CURLINFO_PRETRANSFER_TIME - Time in seconds from start until just before file transfer begins CURLINFO_STARTTRANSFER_TIME - Time in seconds until the first byte is about to be transferred CURLINFO_REDIRECT_TIME - Time in seconds of all redirection steps before final transaction was started CURLINFO_SIZE_UPLOAD - Total number of bytes uploaded CURLINFO_SIZE_DOWNLOAD - Total number of bytes downloaded CURLINFO_SPEED_DOWNLOAD - Average download speed CURLINFO_SPEED_UPLOAD - Average upload speed CURLINFO_HEADER_SIZE - Total size of all headers received CURLINFO_HEADER_OUT - The request string sent CURLINFO_REQUEST_SIZE - Total size of issued requests, currently only for HTTP requests CURLINFO_SSL_VERIFYRESULT - Result of SSL certification verification requested by setting CURLOPT_SSL_VERIFYPEER CURLINFO_CONTENT_LENGTH_DOWNLOAD - content-length of download, read from Content-Length: field CURLINFO_CONTENT_LENGTH_UPLOAD - Specified size of upload CURLINFO_CONTENT_TYPE - Content-Type: of downloaded object, NULL indicates server did not send valid Content-Type: header",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -251,7 +237,6 @@ DefineFunction(
         'desc'   => "A cURL handle returned by curl_init().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -270,7 +255,6 @@ DefineFunction(
         'desc'   => "A cURL handle returned by curl_init().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -289,7 +273,6 @@ DefineFunction(
         'desc'   => "A cURL handle returned by curl_init().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -301,7 +284,6 @@ DefineFunction(
       'type'   => Resource,
       'desc'   => "Returns a cURL multi handle resource on success, FALSE on failure.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -325,7 +307,6 @@ DefineFunction(
         'desc'   => "A cURL handle returned by curl_init().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -349,7 +330,6 @@ DefineFunction(
         'desc'   => "A cURL handle returned by curl_init().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -372,10 +352,6 @@ DefineFunction(
         'type'   => Variant | Reference,
         'desc'   => "A reference to a flag to tell whether the operations are still running.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -401,7 +377,6 @@ DefineFunction(
         'desc'   => "Time, in seconds, to wait for a response.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -441,7 +416,6 @@ DefineFunction(
         'desc' => "If no file descriptors are set, max_fd will contain -1. Otherwise it will contain the higher descriptor number.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -459,10 +433,6 @@ DefineFunction(
         'type'   => Resource,
         'desc'   => "A cURL handle returned by curl_init().",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -488,7 +458,6 @@ DefineFunction(
         'desc'   => "Number of messages that are still in the queue",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -507,7 +476,6 @@ DefineFunction(
         'desc'   => "A cURL multi handle returned by curl_multi_init().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -536,7 +504,6 @@ DefineFunction(
         'desc'   => "Port number of the HTTP server.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -566,10 +533,6 @@ DefineFunction(
         'value'  => "5",
         'desc'   => "How many seconds to wait for response.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -606,10 +569,6 @@ DefineFunction(
         'desc'   => "How many seconds to wait for response.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -639,10 +598,6 @@ DefineFunction(
         'value'  => "5",
         'desc'   => "How many seconds to wait for response.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -679,10 +634,6 @@ DefineFunction(
         'desc'   => "How many seconds to wait for response.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -700,10 +651,6 @@ DefineFunction(
         'type'   => Object,
         'desc'   => "The object created by calling evhttp_async_get() or evhttp_async_post().",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

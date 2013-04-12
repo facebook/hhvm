@@ -60,11 +60,6 @@ Variant f_xhprof_sample_disable();
 void f_fb_load_local_databases(CArrRef servers);
 Array f_fb_parallel_query(CArrRef sql_map, int max_thread = 50, bool combine_result = true, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
 Array f_fb_crossall_query(CStrRef sql, int max_thread = 50, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
-void f_fb_set_taint(VRefParam str, int taint);
-void f_fb_unset_taint(VRefParam str, int taint);
-bool f_fb_get_taint(CStrRef str, int taint);
-Array f_fb_get_taint_warning_counts();
-void f_fb_enable_html_taint_trace();
 Variant f_fb_const_fetch(CVarRef key);
 bool f_fb_output_compression(bool new_value);
 void f_fb_set_exit_callback(CVarRef function);
@@ -87,14 +82,6 @@ extern const int64_t k_XHPROF_FLAGS_VTSC;
 extern const int64_t k_XHPROF_FLAGS_TRACE;
 extern const int64_t k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE;
 extern const int64_t k_XHPROF_FLAGS_MALLOC;
-extern const int64_t k_TAINT_NONE;
-extern const int64_t k_TAINT_HTML;
-extern const int64_t k_TAINT_MUTATED;
-extern const int64_t k_TAINT_SQL;
-extern const int64_t k_TAINT_SHELL;
-extern const int64_t k_TAINT_TRACE_HTML;
-extern const int64_t k_TAINT_ALL;
-extern const int64_t k_TAINT_TRACE_SELF;
 
 ///////////////////////////////////////////////////////////////////////////////
 

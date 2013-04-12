@@ -72,10 +72,9 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation)
   }
 
   if (UNLIKELY(cont->m_index != -1)) {
+    assert(cont->m_running);
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        cont->m_running
-        ? "Encountered an attempt to start currently running continuation"
-        : "Encountered an attempt to start tainted continuation"));
+        "Encountered an attempt to start currently running continuation"));
     throw e;
   }
 

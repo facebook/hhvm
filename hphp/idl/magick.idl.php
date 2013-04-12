@@ -56,7 +56,6 @@ DefineFunction(
     'return' => array(
       'type'   => String,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -66,7 +65,6 @@ DefineFunction(
     'return' => array(
       'type'   => String,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -76,7 +74,6 @@ DefineFunction(
     'return' => array(
       'type'   => String,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -86,7 +83,6 @@ DefineFunction(
     'return' => array(
       'type'   => Double,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -96,7 +92,6 @@ DefineFunction(
     'return' => array(
       'type'   => String,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -112,7 +107,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -122,7 +116,6 @@ DefineFunction(
     'return' => array(
       'type'   => VariantVec,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -132,7 +125,6 @@ DefineFunction(
     'return' => array(
       'type'   => Int64,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -142,7 +134,6 @@ DefineFunction(
     'return' => array(
       'type'   => String,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -158,7 +149,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -174,7 +164,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -190,7 +179,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -206,7 +194,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -226,7 +213,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -236,7 +222,6 @@ DefineFunction(
     'return' => array(
       'type'   => Resource,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -246,7 +231,6 @@ DefineFunction(
     'return' => array(
       'type'   => Resource,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -262,7 +246,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -294,7 +277,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -311,7 +293,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -327,7 +308,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -343,7 +323,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -359,7 +338,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -375,7 +353,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -391,7 +368,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -407,7 +383,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -423,7 +398,6 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -439,7 +413,6 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -455,7 +428,6 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -471,7 +443,6 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -487,7 +458,6 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -503,7 +473,6 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -519,7 +488,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -535,7 +503,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -551,7 +518,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -567,7 +533,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -583,7 +548,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -599,7 +563,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -615,7 +578,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -631,7 +593,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -647,7 +608,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -663,7 +623,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -703,7 +662,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -731,7 +689,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -771,7 +728,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -791,7 +747,6 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -823,7 +778,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -851,7 +805,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -871,7 +824,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -911,7 +863,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -951,7 +902,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -967,7 +917,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -983,7 +932,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -999,7 +947,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1015,7 +962,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1031,7 +977,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1047,7 +992,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1063,7 +1007,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1079,7 +1022,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1095,7 +1037,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1111,7 +1052,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1127,7 +1067,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1143,7 +1082,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1159,7 +1097,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1175,7 +1112,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1191,7 +1127,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1207,7 +1142,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1223,7 +1157,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1239,7 +1172,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1255,7 +1187,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1271,7 +1202,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1287,7 +1217,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1303,7 +1232,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1319,7 +1247,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1335,7 +1262,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1351,7 +1277,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1367,7 +1292,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1383,7 +1307,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1399,7 +1322,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1415,7 +1337,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1431,7 +1352,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1447,7 +1367,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1463,7 +1382,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1479,7 +1397,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1511,7 +1428,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1539,7 +1455,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1555,7 +1470,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1595,7 +1509,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1627,7 +1540,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1659,7 +1571,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1683,7 +1594,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1707,7 +1617,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1747,7 +1656,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1779,7 +1687,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1811,7 +1718,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1855,7 +1761,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1899,7 +1804,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1915,7 +1819,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1939,7 +1842,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1959,7 +1861,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1979,7 +1880,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2003,7 +1903,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2023,7 +1922,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2043,7 +1941,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2067,7 +1964,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2091,7 +1987,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2107,7 +2002,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2131,7 +2025,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2151,7 +2044,6 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2171,7 +2063,6 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2203,7 +2094,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2219,7 +2109,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2239,7 +2128,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2279,7 +2167,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2303,7 +2190,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2323,7 +2209,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2343,7 +2228,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2363,7 +2247,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2383,7 +2266,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2403,7 +2285,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2423,7 +2304,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2443,7 +2323,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2463,7 +2342,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2483,7 +2361,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2503,7 +2380,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2523,7 +2399,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2543,7 +2418,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2563,7 +2437,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2583,7 +2456,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2603,7 +2475,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2623,7 +2494,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2644,7 +2514,6 @@ DefineFunction(
         'value'  => "true",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2664,7 +2533,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2685,7 +2553,6 @@ DefineFunction(
         'value'  => "null_array",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2705,7 +2572,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2725,7 +2591,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2745,7 +2610,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2765,7 +2629,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2785,7 +2648,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2805,7 +2667,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2825,7 +2686,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2845,7 +2705,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2866,7 +2725,6 @@ DefineFunction(
         'value'  => "true",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2886,7 +2744,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2906,7 +2763,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2926,7 +2782,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2946,7 +2801,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2978,7 +2832,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2998,7 +2851,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3018,7 +2870,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3042,7 +2893,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3058,7 +2908,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3078,7 +2927,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3094,7 +2942,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3130,7 +2977,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3146,7 +2992,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3162,7 +3007,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3178,7 +3022,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3194,7 +3037,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3222,7 +3064,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3242,7 +3083,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3262,7 +3102,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3282,7 +3121,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3318,7 +3156,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3339,7 +3176,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3355,7 +3191,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3375,7 +3210,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3404,7 +3238,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3432,7 +3265,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3456,7 +3288,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3488,7 +3319,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3504,7 +3334,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3528,7 +3357,6 @@ DefineFunction(
         'type'   => Boolean,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3544,7 +3372,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3580,7 +3407,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3604,7 +3430,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3624,7 +3449,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3644,7 +3468,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3673,7 +3496,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3705,7 +3527,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3741,7 +3562,6 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3761,7 +3581,6 @@ DefineFunction(
         'type'   => Boolean,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3786,7 +3605,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3818,7 +3636,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3838,7 +3655,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3854,7 +3670,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3870,7 +3685,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3886,7 +3700,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3906,7 +3719,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3922,7 +3734,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3938,7 +3749,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3958,7 +3768,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3982,7 +3791,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3998,7 +3806,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4014,7 +3821,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4043,7 +3849,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4059,7 +3864,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4075,7 +3879,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4091,7 +3894,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4127,7 +3929,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4152,7 +3953,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4177,7 +3977,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4206,7 +4005,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4235,7 +4033,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4264,7 +4061,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4280,7 +4076,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4296,7 +4091,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4312,7 +4106,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4328,7 +4121,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4344,7 +4136,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4360,7 +4151,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4376,7 +4166,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4392,7 +4181,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4408,7 +4196,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4424,7 +4211,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4444,7 +4230,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4464,7 +4249,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4480,7 +4264,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4496,7 +4279,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4512,7 +4294,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4528,7 +4309,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4544,7 +4324,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4560,7 +4339,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4581,7 +4359,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4597,7 +4374,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4618,7 +4394,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4634,7 +4409,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4650,7 +4424,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4666,7 +4439,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4682,7 +4454,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4698,7 +4469,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4714,7 +4484,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4730,7 +4499,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4746,7 +4514,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4762,7 +4529,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4778,7 +4544,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4794,7 +4559,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4834,7 +4598,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4854,7 +4617,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4870,7 +4632,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4886,7 +4647,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4902,7 +4662,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4918,7 +4677,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4934,7 +4692,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4950,7 +4707,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4966,7 +4722,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4982,7 +4737,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -4998,7 +4752,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5014,7 +4767,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5030,7 +4782,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5046,7 +4797,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5062,7 +4812,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5091,7 +4840,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5107,7 +4855,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5123,7 +4870,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5139,7 +4885,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5155,7 +4900,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5184,7 +4928,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5213,7 +4956,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5242,7 +4984,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5271,7 +5012,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5287,7 +5027,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5303,7 +5042,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5319,7 +5057,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5339,7 +5076,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5359,7 +5095,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5392,7 +5127,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5408,7 +5142,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5432,7 +5165,6 @@ DefineFunction(
         'type'   => Boolean,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5468,7 +5200,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5488,7 +5219,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5504,7 +5234,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5532,7 +5261,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5568,7 +5296,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5588,7 +5315,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5604,7 +5330,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5632,7 +5357,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5658,7 +5382,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5687,7 +5410,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5703,7 +5425,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5719,7 +5440,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5739,7 +5459,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5768,7 +5487,6 @@ DefineFunction(
         'value'  => "0.0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5798,7 +5516,6 @@ DefineFunction(
         'value'  => "0.0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5818,7 +5535,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5842,7 +5558,6 @@ DefineFunction(
         'type'   => Boolean,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5862,7 +5577,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5878,7 +5592,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5903,7 +5616,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5939,7 +5651,6 @@ DefineFunction(
         'type'   => Boolean,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -5975,7 +5686,6 @@ DefineFunction(
         'type'   => Boolean,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6004,7 +5714,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6024,7 +5733,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6060,7 +5768,6 @@ DefineFunction(
         'type'   => Boolean,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6080,7 +5787,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6100,7 +5806,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6120,7 +5825,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6140,7 +5844,6 @@ DefineFunction(
         'type'   => StringVec,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6160,7 +5863,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6176,7 +5878,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6196,7 +5897,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6212,7 +5912,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6244,7 +5943,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6260,7 +5958,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6292,7 +5989,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6316,7 +6012,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6340,7 +6035,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6364,7 +6058,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6388,7 +6081,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6408,7 +6100,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6428,7 +6119,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6449,7 +6139,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6465,7 +6154,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6485,7 +6173,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6505,7 +6192,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6525,7 +6211,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6545,7 +6230,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6569,7 +6253,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6589,7 +6272,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6613,7 +6295,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6633,7 +6314,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6653,7 +6333,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6673,7 +6352,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6693,7 +6371,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6713,7 +6390,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6738,7 +6414,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6758,7 +6433,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6779,7 +6453,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6799,7 +6472,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6819,7 +6491,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6843,7 +6514,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6863,7 +6533,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6883,7 +6552,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6903,7 +6571,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6923,7 +6590,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6951,7 +6617,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -6995,7 +6660,6 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7019,7 +6683,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7043,7 +6706,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7063,7 +6725,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7087,7 +6748,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7107,7 +6767,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7127,7 +6786,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7147,7 +6805,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7167,7 +6824,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7191,7 +6847,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7211,7 +6866,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7227,7 +6881,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7247,7 +6900,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7271,7 +6923,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7295,7 +6946,6 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7319,7 +6969,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7343,7 +6992,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7372,7 +7020,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7396,7 +7043,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7424,7 +7070,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7444,7 +7089,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7476,7 +7120,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7496,7 +7139,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7520,7 +7162,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7540,7 +7181,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7556,7 +7196,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7576,7 +7215,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7596,7 +7234,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7621,7 +7258,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7645,7 +7281,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7669,7 +7304,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7689,7 +7323,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7726,7 +7359,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7750,7 +7382,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7770,7 +7401,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7790,7 +7420,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7810,7 +7439,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7836,7 +7464,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7856,7 +7483,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7872,7 +7498,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7888,7 +7513,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7904,7 +7528,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7920,7 +7543,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7936,7 +7558,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7952,7 +7573,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7968,7 +7588,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -7984,7 +7603,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8000,7 +7618,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8016,7 +7633,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8032,7 +7648,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8048,7 +7663,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8064,7 +7678,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8080,7 +7693,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8096,7 +7708,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8112,7 +7723,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8128,7 +7738,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8144,7 +7753,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8160,7 +7768,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8176,7 +7783,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8192,7 +7798,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8208,7 +7813,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8224,7 +7828,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8240,7 +7843,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8256,7 +7858,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8276,7 +7877,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8296,7 +7896,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8316,7 +7915,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8336,7 +7934,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8356,7 +7953,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8376,7 +7972,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8396,7 +7991,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8416,7 +8010,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8436,7 +8029,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8456,7 +8048,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8476,7 +8067,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8496,7 +8086,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8516,7 +8105,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8536,7 +8124,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8556,7 +8143,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8576,7 +8162,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8596,7 +8181,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8629,7 +8213,6 @@ DefineFunction(
         'value'  => "0.0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8649,7 +8232,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8669,7 +8251,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8689,7 +8270,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8709,7 +8289,6 @@ DefineFunction(
         'type'   => Double,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8725,7 +8304,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8741,7 +8319,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8757,7 +8334,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8773,7 +8349,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8789,7 +8364,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8809,7 +8383,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -8825,7 +8398,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 

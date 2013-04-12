@@ -70,7 +70,6 @@ DefineFunction(
       'type'   => Int64,
       'desc'   => "Returns 1 if client disconnected, 0 otherwise.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -82,7 +81,6 @@ DefineFunction(
       'type'   => Int64,
       'desc'   => "Returns the connection status bitfield, which can be used against the CONNECTION_XXX constants to determine the connection status.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -94,7 +92,6 @@ DefineFunction(
       'type'   => Int64,
       'desc'   => "Returns 1 if the script timed out, 0 otherwise.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -112,7 +109,6 @@ DefineFunction(
         'desc'   => "The constant name.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -142,7 +138,6 @@ DefineFunction(
         'desc'   => "If set to TRUE, the constant will be defined case-insensitive. The default behavior is case-sensitive; i.e. CONSTANT and Constant represent different values.\n\nCase-insensitive constants are stored as lower-case.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -167,7 +162,6 @@ DefineFunction(
         'desc'   => "Whether to try to autoload.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -184,7 +178,6 @@ DefineFunction(
         'value'  => "null_variant",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -204,7 +197,6 @@ DefineFunction(
         'desc'   => "If status is a string, this function prints the status just before exiting.\n\nIf status is an integer, that value will be used as the exit status and not printed. Exit statuses should be in the range 0 to 254, the exit status 255 is reserved by PHP and shall not be used. The status 0 is used to terminate the program successfully. PHP >= 4.2.0 does NOT print the status if it is an integer.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -223,7 +215,6 @@ DefineFunction(
         'desc'   => "The code string to be evaluated. code_str does not have to contain PHP Opening tags.\n\nA return statement will immediately terminate the evaluation of the string .",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -249,7 +240,6 @@ DefineFunction(
         'desc'   => "If set to TRUE, this function will return an array instead of an object.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -259,7 +249,6 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -284,7 +273,6 @@ DefineFunction(
         'desc'   => "Set this parameter to TRUE to make this function return the highlighted code.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -305,7 +293,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -329,10 +316,6 @@ DefineFunction(
         'desc'   => "Set this parameter to TRUE to make this function return the highlighted code.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -352,7 +335,6 @@ DefineFunction(
         'desc'   => "If set, this function will set the ignore_user_abort ini setting to the given value. If not, this function will only return the previous setting without changing it.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -371,7 +353,6 @@ DefineFunction(
         'desc'   => "The format string consists of format codes followed by an optional repeater argument. The repeater argument can be either an integer value or * for repeating to the end of the input data. For a, A, h, H the repeat count specifies how many characters of one data argument are taken, for @ it is the absolute position where to put the next data, for everything else the repeat count specifies how many data arguments are consumed and packed into the resulting binary string.\n\nCurrently implemented formats are: pack() format characters Code Description a NUL-padded string A SPACE-padded string h Hex string, low nibble first H Hex string, high nibble first csigned char C unsigned char s signed short (always 16 bit, machine byte order) S unsigned short (always 16 bit, machine byte order) n unsigned short (always 16 bit, big endian byte order) v unsigned short (always 16 bit, little endian byte order) i signed integer (machine dependent size and byte order) I unsigned integer (machine dependent size and byte order) l signed long (always 32 bit, machine byte order) L unsigned long (always 32 bit, machine byte order) N unsigned long (always 32 bit, big endian byte order) V unsigned long (always 32 bit, little endian byte order) f float (machine dependent size and representation) d double (machine dependent size and representation) x NUL byte X Back up one byte @ NUL-fill to absolute position",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -396,7 +377,6 @@ DefineFunction(
         'desc'   => "If the error_message parameter is used, it will contain the error message generated by the syntax check. error_message is passed by reference.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -415,10 +395,6 @@ DefineFunction(
         'desc'   => "Path to the PHP file.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -436,7 +412,6 @@ DefineFunction(
         'desc'   => "Halt time in seconds.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -455,7 +430,6 @@ DefineFunction(
         'desc'   => "Halt time in micro seconds. A micro second is one millionth of a second.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -479,7 +453,6 @@ DefineFunction(
         'desc'   => "Must be a positive integer less than 1 billion.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -498,7 +471,6 @@ DefineFunction(
         'desc'   => "The timestamp when the script should wake.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -524,7 +496,6 @@ DefineFunction(
         'desc'   => "If set to TRUE, uniqid() will add additional entropy (using the combined linear congruential generator) at the end of the return value, which should make the results more unique.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -548,7 +519,6 @@ DefineFunction(
         'desc'   => "The packed data.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -560,7 +530,6 @@ DefineFunction(
       'type'   => VariantMap,
       'desc'   => "Returns an array with three samples (last 1, 5 and 15 minutes).",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -579,7 +548,6 @@ DefineFunction(
         'desc'   => "The PHP source to parse.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -598,7 +566,6 @@ DefineFunction(
         'desc'   => "The token value.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -617,7 +584,6 @@ DefineFunction(
         'desc'   => "You shouldn't be calling this function if you don't know the magic value.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -636,7 +602,6 @@ DefineFunction(
         'desc'   => "The value being casted to a string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 ///////////////////////////////////////////////////////////////////////////////

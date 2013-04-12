@@ -403,11 +403,6 @@ TypedValue* fg_xhprof_sample_disable(VM::ActRec *ar);
 TypedValue* fg_fb_load_local_databases(VM::ActRec *ar);
 TypedValue* fg_fb_parallel_query(VM::ActRec *ar);
 TypedValue* fg_fb_crossall_query(VM::ActRec *ar);
-TypedValue* fg_fb_set_taint(VM::ActRec *ar);
-TypedValue* fg_fb_unset_taint(VM::ActRec *ar);
-TypedValue* fg_fb_get_taint(VM::ActRec *ar);
-TypedValue* fg_fb_get_taint_warning_counts(VM::ActRec *ar);
-TypedValue* fg_fb_enable_html_taint_trace(VM::ActRec *ar);
 TypedValue* fg_fb_const_fetch(VM::ActRec *ar);
 TypedValue* fg_fb_output_compression(VM::ActRec *ar);
 TypedValue* fg_fb_set_exit_callback(VM::ActRec *ar);
@@ -3062,7 +3057,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2208;
+const long long hhbc_ext_funcs_count = 2203;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -3444,11 +3439,6 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "fb_load_local_databases", fg_fb_load_local_databases, (void *)&fh_fb_load_local_databases },
   { "fb_parallel_query", fg_fb_parallel_query, (void *)&fh_fb_parallel_query },
   { "fb_crossall_query", fg_fb_crossall_query, (void *)&fh_fb_crossall_query },
-  { "fb_set_taint", fg_fb_set_taint, (void *)&fh_fb_set_taint },
-  { "fb_unset_taint", fg_fb_unset_taint, (void *)&fh_fb_unset_taint },
-  { "fb_get_taint", fg_fb_get_taint, (void *)&fh_fb_get_taint },
-  { "fb_get_taint_warning_counts", fg_fb_get_taint_warning_counts, (void *)&fh_fb_get_taint_warning_counts },
-  { "fb_enable_html_taint_trace", fg_fb_enable_html_taint_trace, (void *)&fh_fb_enable_html_taint_trace },
   { "fb_const_fetch", fg_fb_const_fetch, (void *)&fh_fb_const_fetch },
   { "fb_output_compression", fg_fb_output_compression, (void *)&fh_fb_output_compression },
   { "fb_set_exit_callback", fg_fb_set_exit_callback, (void *)&fh_fb_set_exit_callback },

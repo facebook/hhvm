@@ -208,10 +208,6 @@ class TestCodeRun : public TestBase {
   bool TestYield();
   bool TestHint();
   bool TestUserAttributes();
-#ifdef TAINTED
-  bool TestTaint();
-  bool TestTaintExt();
-#endif
   bool TestStrictMode();
 
   // debugging purpose

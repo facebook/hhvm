@@ -25,8 +25,6 @@
 #include <util/hash.h>
 #include <util/alloc.h>
 #include <runtime/base/util/exceptions.h>
-#include <runtime/base/taint/taint_observer.h>
-#include <runtime/base/taint/taint_data.h>
 
 namespace HPHP {
 
@@ -252,20 +250,13 @@ public:
   const char *data() const {
     // TODO: t1800106: re-enable this assert
     //assert(rawdata()[size()] == 0); // all strings must be null-terminated
-    TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
     return rawdata();
   }
   // This method should only be used internally by the String class.
-  const char *dataIgnoreTaint() const {
-    // TODO: t1800106: re-enable this assert
-    //assert(rawdata()[size()] == 0); // all strings must be null-terminated
-    return rawdata();
-  }
   int size() const { return m_len; }
   static uint sizeOffset() { return offsetof(StringData, m_len); }
   int capacity() const { return isSmall() ? MaxSmallSize : bigCap(); }
   StringSlice slice() const {
-    TAINT_OBSERVER_REGISTER_ACCESSED(m_taint_data);
     return StringSlice(m_data, m_len);
   }
   bool empty() const { return size() == 0;}
@@ -286,11 +277,6 @@ public:
   }
   bool isZero() const { return size() == 1 && rawdata()[0] == '0'; }
   bool isValidVariableName() const;
-
-#ifdef TAINTED
-  TaintData& getTaintDataRef() { return m_taint_data; }
-  const TaintData& getTaintDataRefConst() const { return m_taint_data; }
-#endif
 
   /**
    * Mutations.
@@ -410,9 +396,6 @@ public:
       uint64_t cap;
     } m_big;
   };
-#ifdef TAINTED
-  TaintData m_taint_data;
-#endif
 
  private:
   /**

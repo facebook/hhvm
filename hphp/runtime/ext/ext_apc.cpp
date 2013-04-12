@@ -26,8 +26,6 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/variable_serializer.h>
 #include <util/alloc.h>
-#include <runtime/base/taint/taint_data.h>
-#include <runtime/base/taint/taint_trace.h>
 #include <runtime/base/ini_setting.h>
 
 using HPHP::Util::ScopedMem;
@@ -69,9 +67,6 @@ bool f_apc_store(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
     return false;
   }
 
-#ifdef TAINTED
-  TaintTracerSwitchGuard guard(TAINT_BIT_TRACE_ALL, false);
-#endif
   return s_apc_store[cache_id].store(key, var, ttl);
 }
 
@@ -84,9 +79,6 @@ bool f_apc_add(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
     return false;
   }
 
-#ifdef TAINTED
-  TaintTracerSwitchGuard guard(TAINT_BIT_TRACE_ALL, false);
-#endif
   return s_apc_store[cache_id].store(key, var, ttl, false);
 }
 
@@ -99,9 +91,6 @@ Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
     return false;
   }
 
-#ifdef TAINTED
-  TaintTracerSwitchGuard guard(TAINT_BIT_TRACE_ALL, false);
-#endif
   Variant v;
 
   if (key.is(KindOfArray)) {

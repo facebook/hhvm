@@ -818,7 +818,6 @@ Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type) {
 }
 
 String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   StringSlice r1 = s1.slice();
   StringSlice r2 = s2.slice();
   StringSlice r3 = s3.slice();
@@ -833,7 +832,6 @@ String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {
 }
 
 String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   StringSlice r1 = s1.slice();
   StringSlice r2 = s2.slice();
   StringSlice r3 = s3.slice();
@@ -850,8 +848,6 @@ String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
 }
 
 String concat5(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-
   int len1 = s1.size();
   int len2 = s2.size();
   int len3 = s3.size();
@@ -870,8 +866,6 @@ String concat5(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5) {
 
 String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
                CStrRef s6) {
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-
   int len1 = s1.size();
   int len2 = s2.size();
   int len3 = s3.size();

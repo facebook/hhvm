@@ -27,8 +27,6 @@
 #include <locale.h>
 #include <runtime/base/server/http_request_handler.h>
 #include <runtime/base/server/http_protocol.h>
-#include <runtime/base/taint/taint_data.h>
-#include <runtime/base/taint/taint_observer.h>
 
 namespace HPHP {
 
@@ -205,7 +203,6 @@ static Variant str_replace(CVarRef search, CVarRef replace, CStrRef subject,
       Array replArr = replace.toArray();
       ArrayIter replIter(replArr);
       for (ArrayIter iter(searchArr); iter; ++iter) {
-        TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
         if (replIter) {
           ret = ret.replace(iter.second().toString(),
                             replIter.second().toString(),
@@ -219,7 +216,6 @@ static Variant str_replace(CVarRef search, CVarRef replace, CStrRef subject,
       return ret;
     }
 
-    TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
     String repl = replace.toString();
     for (ArrayIter iter(searchArr); iter; ++iter) {
       ret = ret.replace(iter.second().toString(), repl, count, caseSensitive);
@@ -230,7 +226,6 @@ static Variant str_replace(CVarRef search, CVarRef replace, CStrRef subject,
   if (replace.is(KindOfArray)) {
     raise_notice("Array to string conversion");
   }
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   return subject.replace(search.toString(), replace.toString(), count,
                          caseSensitive);
 }
@@ -276,7 +271,6 @@ Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
     } else {
       repl = replacement.toString();
     }
-    TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
     if (start.is(KindOfArray)) {
       if (!length.is(KindOfArray)) {
         throw_invalid_argument("start and length should be of same type - "
@@ -307,7 +301,6 @@ Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
     ArrayIter replIter(replArr);
     for (ArrayIter iter(strArr); iter;
          ++iter, ++startIter, ++lengthIter) {
-      TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
       int nStart = startIter.second().toInt32();
       int nLength = lengthIter.second().toInt32();
       String repl("");
@@ -321,7 +314,6 @@ Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
     String repl = replacement.toString();
     for (ArrayIter iter(strArr); iter;
          ++iter, ++startIter, ++lengthIter) {
-      TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
       int nStart = startIter.second().toInt32();
       int nLength = lengthIter.second().toInt32();
       ret.append(iter.second().toString().replace(nStart, nLength, repl));
@@ -924,7 +916,6 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
   }
 
   if (!to.isNull()) {
-    TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
     return StringUtil::Translate(str, from.toString(), to.toString());
   }
 
@@ -950,7 +941,6 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
     if (minlen == -1 || minlen > len) minlen = len;
   }
 
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   const char *s = str.data();
   int slen = str.size();
   char *key = (char *)malloc(maxlen+1);

@@ -57,7 +57,6 @@ DefineFunction(
     'return' => array(
       'type'   => VariantMap,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -81,7 +80,6 @@ DefineFunction(
         'desc'   => "This optional parameter allows you to extract some extended information from the image file. Currently, this will return the different JPG APP markers as an associative array. Some programs use these APP markers to embed text information in images. A very common one is to embed » IPTC information in the APP13 marker. You can use the iptcparse() function to parse the binary APP13 marker into something readable.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -106,7 +104,6 @@ DefineFunction(
         'desc'   => "Whether to prepend a dot to the extension or not. Default to TRUE.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -125,7 +122,6 @@ DefineFunction(
         'desc'   => "One of the IMAGETYPE_XXX constants.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -156,7 +152,6 @@ DefineFunction(
         'desc'   => "Threshold value, between 0 and 255 (inclusive).",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -180,7 +175,6 @@ DefineFunction(
         'desc'   => "Whether to enable the blending mode or not. On true color images the default value is TRUE otherwise the default value is FALSE",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -204,7 +198,6 @@ DefineFunction(
         'desc'   => "Whether to enable antialiasing or not.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -258,7 +251,6 @@ DefineFunction(
         'desc'   => "A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -302,7 +294,6 @@ DefineFunction(
         'desc'   => "A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -346,7 +337,6 @@ DefineFunction(
         'desc'   => "A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -380,7 +370,6 @@ DefineFunction(
         'desc'   => "Value of blue component.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -419,7 +408,6 @@ DefineFunction(
         'desc'   => "A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -448,7 +436,6 @@ DefineFunction(
         'desc'   => "y-coordinate of the point.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -482,7 +469,6 @@ DefineFunction(
         'desc'   => "Value of blue component.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -521,7 +507,6 @@ DefineFunction(
         'desc'   => "A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -555,7 +540,6 @@ DefineFunction(
         'desc'   => "Value of blue component.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -579,7 +563,6 @@ DefineFunction(
         'desc'   => "The color identifier.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -613,7 +596,6 @@ DefineFunction(
         'desc'   => "Value of blue component.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -652,7 +634,6 @@ DefineFunction(
         'desc'   => "A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -676,7 +657,6 @@ DefineFunction(
         'desc'   => "A palette image link resource pointing to an image that has the same size as image1.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -710,7 +690,6 @@ DefineFunction(
         'desc'   => "Value of blue component.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -749,7 +728,6 @@ DefineFunction(
         'desc'   => "A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -788,7 +766,6 @@ DefineFunction(
         'desc'   => "Value of blue component.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -812,7 +789,6 @@ DefineFunction(
         'desc'   => "The color index.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -831,7 +807,6 @@ DefineFunction(
         'desc'   => "An image resource, returned by one of the image creation functions, such as imagecreatefromgif().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -856,7 +831,6 @@ DefineFunction(
         'desc'   => "A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -890,7 +864,6 @@ DefineFunction(
         'desc'   => "Color offset.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -944,7 +917,6 @@ DefineFunction(
         'desc'   => "Source height.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1003,7 +975,6 @@ DefineFunction(
         'desc'   => "The two images will be merged according to pct which can range from 0 to 100. When pct = 0, no action is taken, when 100 this function behaves identically to imagecopy() for pallete images, while it implements alpha transparency for true colour images.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1062,7 +1033,6 @@ DefineFunction(
         'desc'   => "The src_im will be changed to grayscale according to pct where 0 is fully grayscale and 100 is unchanged. When pct = 100 this function behaves identically to imagecopy() for pallete images, while it implements alpha transparency for true colour images.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1126,7 +1096,6 @@ DefineFunction(
         'desc'   => "Source height.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1190,7 +1159,6 @@ DefineFunction(
         'desc'   => "Source height.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1214,7 +1182,6 @@ DefineFunction(
         'desc'   => "The image height.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1253,7 +1220,6 @@ DefineFunction(
         'desc'   => "Source height.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1272,7 +1238,6 @@ DefineFunction(
         'desc'   => "Path to the GD file.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1291,7 +1256,6 @@ DefineFunction(
         'desc'   => "Path to the GD2 image.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1310,7 +1274,6 @@ DefineFunction(
         'desc'   => "Path to the GIF image.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1329,7 +1292,6 @@ DefineFunction(
         'desc'   => "Path to the JPEG image.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1348,7 +1310,6 @@ DefineFunction(
         'desc'   => "Path to the PNG image.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1367,7 +1328,6 @@ DefineFunction(
         'desc'   => "A string containing the image data.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1386,7 +1346,6 @@ DefineFunction(
         'desc'   => "Path to the WBMP image.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1405,7 +1364,6 @@ DefineFunction(
         'desc'   => "Path to the XBM image.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1424,7 +1382,6 @@ DefineFunction(
         'desc'   => "Path to the XPM image.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1448,7 +1405,6 @@ DefineFunction(
         'desc'   => "Image height.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1492,7 +1448,6 @@ DefineFunction(
         'desc'   => "The fill color. A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1511,7 +1466,6 @@ DefineFunction(
         'desc'   => "An image resource, returned by one of the image creation functions, such as imagecreatetruecolor().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1555,7 +1509,6 @@ DefineFunction(
         'desc'   => "The color of the ellipse. A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1589,7 +1542,6 @@ DefineFunction(
         'desc'   => "The fill color. A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1648,7 +1600,6 @@ DefineFunction(
         'desc'   => "A bitwise OR of the following possibilities: IMG_ARC_PIE IMG_ARC_CHORD IMG_ARC_NOFILL IMG_ARC_EDGED IMG_ARC_PIE and IMG_ARC_CHORD are mutually exclusive; IMG_ARC_CHORD just connects the starting and ending angles with a straight line, while IMG_ARC_PIE produces a rounded edge. IMG_ARC_NOFILL indicates that the arc or chord should be outlined, not filled. IMG_ARC_EDGED, used together with IMG_ARC_NOFILL, indicates that the beginning and ending angles should be connected to the center - this is a good way to outline (rather than fill) a 'pie slice'.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1692,7 +1643,6 @@ DefineFunction(
         'desc'   => "The fill color. A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1726,7 +1676,6 @@ DefineFunction(
         'desc'   => "A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1770,7 +1719,6 @@ DefineFunction(
         'desc'   => "The fill color. A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1809,7 +1757,6 @@ DefineFunction(
         'desc'   => "The fill color. A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1857,7 +1804,6 @@ DefineFunction(
         'desc'   => "IMG_FILTER_COLORIZE: Alpha channel, A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1876,7 +1822,6 @@ DefineFunction(
         'desc'   => "Can be 1, 2, 3, 4, 5 for built-in fonts in latin2 encoding (where higher numbers corresponding to larger fonts) or any of your own font identifiers registered with imageloadfont().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1895,7 +1840,6 @@ DefineFunction(
         'desc'   => "Can be 1, 2, 3, 4, 5 for built-in fonts in latin2 encoding (where higher numbers corresponding to larger fonts) or any of your own font identifiers registered with imageloadfont().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1935,7 +1879,6 @@ DefineFunction(
         'desc'   => "Possible array indexes for extrainfo Key Type Meaning linespacing float Defines drawing linespacing",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1994,7 +1937,6 @@ DefineFunction(
         'desc'   => "Possible array indexes for extrainfo Key Type Meaning linespacing float Defines drawing linespacing",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2023,7 +1965,6 @@ DefineFunction(
         'desc'   => "The output gamma.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2060,7 +2001,6 @@ DefineFunction(
         'desc'   => "Either IMG_GD2_RAW or IMG_GD2_COMPRESSED. Default is IMG_GD2_RAW.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2085,7 +2025,6 @@ DefineFunction(
         'desc'   => "The path to save the file to. If not set or NULL, the raw image stream will be outputted directly.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2110,7 +2049,6 @@ DefineFunction(
         'desc'   => "The path to save the file to. If not set or NULL, the raw image stream will be outputted directly.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2122,7 +2060,6 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on failure.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2147,7 +2084,6 @@ DefineFunction(
         'desc'   => "Include the client area of the application window.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2172,7 +2108,6 @@ DefineFunction(
         'desc'   => "If non-zero, the image will be interlaced, else the interlace bit is turned off.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2191,7 +2126,6 @@ DefineFunction(
         'desc'   => "An image resource, returned by one of the image creation functions, such as imagecreatetruecolor().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2222,7 +2156,6 @@ DefineFunction(
         'desc'   => "quality is optional, and ranges from 0 (worst quality, smaller file) to 100 (best quality, biggest file). The default is the default IJG quality value (about 75).",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2246,7 +2179,6 @@ DefineFunction(
         'desc'   => "One of the following constants: IMG_EFFECT_REPLACE Use pixel replacement (equivalent of passing TRUE to imagealphablending())",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2290,7 +2222,6 @@ DefineFunction(
         'desc'   => "The line color. A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2309,7 +2240,6 @@ DefineFunction(
         'desc'   => "The font file format is currently binary and architecture dependent. This means you should generate the font files on the same type of CPU as the machine you are running PHP on.\n\nFont file format byte position C data type description byte 0-3 int number of characters in the font byte 4-7 int value of first character in the font (often 32 for space) byte 8-11 int pixel width of each character byte 12-15 int pixel height of each character byte 16- char array with character data, one byte per pixel in each character, for a total of (nchars*width*height) bytes.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2333,7 +2263,6 @@ DefineFunction(
         'desc'   => "The source image resource.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2370,7 +2299,6 @@ DefineFunction(
         'desc'   => "Allows reducing the PNG file size. It is a bitmask field which may be set to any combination of the PNG_FILTER_XXX constants. PNG_NO_FILTER or PNG_ALL_FILTERS may also be used to respectively disable or activate all filters.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2404,7 +2332,6 @@ DefineFunction(
         'desc'   => "A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2451,7 +2378,6 @@ DefineFunction(
         'desc'   => "angle is in degrees.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2475,7 +2401,6 @@ DefineFunction(
         'desc'   => "The exact format of this file is described in T1libs documentation. T1lib comes with two ready-to-use files, IsoLatin1.enc and IsoLatin2.enc.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2499,7 +2424,6 @@ DefineFunction(
         'desc'   => "Extension value, must be greater than 0.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2518,7 +2442,6 @@ DefineFunction(
         'desc'   => "A font resource, returned by imagepsloadfont().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2537,7 +2460,6 @@ DefineFunction(
         'desc'   => "Path to the Postscript font file.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2561,7 +2483,6 @@ DefineFunction(
         'desc'   => "Slant level.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2639,7 +2560,6 @@ DefineFunction(
         'desc'   => "Allows you to control the number of colours used for antialiasing text. Allowed values are 4 and 16. The higher value is recommended for text sizes lower than 20, where the effect in text quality is quite visible. With bigger sizes, use 4. It's less computationally intensive.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2683,7 +2603,6 @@ DefineFunction(
         'desc'   => "A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2718,7 +2637,6 @@ DefineFunction(
         'desc'   => "If set and non-zero, transparent colors are ignored (otherwise kept).",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2742,7 +2660,6 @@ DefineFunction(
         'desc'   => "Whether to save the alpha channel or not. Default to FALSE.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2766,7 +2683,6 @@ DefineFunction(
         'desc'   => "An image resource.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2800,7 +2716,6 @@ DefineFunction(
         'desc'   => "A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2824,7 +2739,6 @@ DefineFunction(
         'desc'   => "An array of pixel colors. You can use the IMG_COLOR_TRANSPARENT constant to add a transparent pixel.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2848,7 +2762,6 @@ DefineFunction(
         'desc'   => "Thickness, in pixels.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2872,7 +2785,6 @@ DefineFunction(
         'desc'   => "The image resource to be used as a tile.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2916,7 +2828,6 @@ DefineFunction(
         'desc'   => "A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2960,7 +2871,6 @@ DefineFunction(
         'desc'   => "A color identifier created with imagecolorallocate().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2979,7 +2889,6 @@ DefineFunction(
         'desc'   => "An image resource, returned by one of the image creation functions, such as imagecreatetruecolor().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2998,7 +2907,6 @@ DefineFunction(
         'desc'   => "An image resource, returned by one of the image creation functions, such as imagecreatetruecolor().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3027,7 +2935,6 @@ DefineFunction(
         'desc'   => "Sets the maximum number of colors that should be retained in the palette.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3061,7 +2968,6 @@ DefineFunction(
         'desc'   => "The string to be measured.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3115,7 +3021,6 @@ DefineFunction(
         'desc'   => "The text string in UTF-8 encoding.\n\nMay include decimal numeric character references (of the form: &#8364;) to access characters in a font beyond position 127. The hexadecimal format (like &#xA9;) is supported. Strings in UTF-8 encoding can be passed directly.\n\nNamed entities, such as &copy;, are not supported. Consider using html_entity_decode() to decode these named entities into UTF-8 strings (html_entity_decode() supports this as of PHP 5.0.0).\n\nIf a character is used in the string which is not supported by the font, a hollow rectangle will replace the character.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3127,7 +3032,6 @@ DefineFunction(
       'type'   => Int64,
       'desc'   => "Returns a bit-field corresponding to the image formats supported by the version of GD linked into PHP. The following bits are returned, IMG_GIF | IMG_JPG | IMG_PNG | IMG_WBMP | IMG_XPM.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3158,7 +3062,6 @@ DefineFunction(
         'desc'   => "You can set the foreground color with this parameter by setting an identifier obtained from imagecolorallocate(). The default foreground color is black.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3189,7 +3092,6 @@ DefineFunction(
         'desc'   => "You can set the foreground color with this parameter by setting an identifier obtained from imagecolorallocate(). The default foreground color is black.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3219,7 +3121,6 @@ DefineFunction(
         'desc'   => "Spool flag. If the spool flag is over 2 then the JPEG will be returned as a string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3238,7 +3139,6 @@ DefineFunction(
         'desc'   => "A binary IPTC block.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3277,7 +3177,6 @@ DefineFunction(
         'desc'   => "Threshold value, between 0 and 8 (inclusive).",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3316,7 +3215,6 @@ DefineFunction(
         'desc'   => "Threshold value, between 0 and 8 (inclusive).",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3335,7 +3233,6 @@ DefineFunction(
         'desc'   => "The image being checked.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3372,7 +3269,6 @@ DefineFunction(
         'desc'   => "When set to TRUE the thumbnail itself is read. Otherwise, only the tagged data is read.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3403,7 +3299,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3421,7 +3316,6 @@ DefineFunction(
         'desc'   => "The image index",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -3458,7 +3352,6 @@ DefineFunction(
         'desc'   => "The returned image type of the returned thumbnail. This is either TIFF or JPEG.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 

@@ -87,10 +87,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -131,7 +127,6 @@ DefineFunction(
         'value'  => "false",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -143,7 +138,6 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Returns an array with LibXMLError objects if there are any errors in the buffer, or an empty array otherwise.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -155,7 +149,6 @@ DefineFunction(
       'type'   => Variant,
       'desc'   => "Returns a LibXMLError object if there is any error in the buffer, FALSE otherwise.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -167,7 +160,6 @@ DefineFunction(
       'type'   => null,
       'desc'   => "No value is returned.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -187,7 +179,6 @@ DefineFunction(
         'desc'   => "Whether to enable user error handling.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -206,7 +197,6 @@ DefineFunction(
         'desc'   => "The stream context resource (created with stream_context_create())",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -226,7 +216,6 @@ DefineFunction(
         'desc'   => "Disable (TRUE) or enable (FALSE) libxml extensions (such as DOM, XMLWriter and XMLReader) to load external entities.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 

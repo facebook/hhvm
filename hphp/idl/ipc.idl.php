@@ -70,7 +70,6 @@ DefineFunction(
         'desc'   => "Project identifier. This must be a one character string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -95,7 +94,6 @@ DefineFunction(
         'desc'   => "Queue permissions. Default to 0666. If the message queue already exists, the perms will be ignored.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -114,7 +112,6 @@ DefineFunction(
         'desc'   => "Queue key.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -156,10 +153,6 @@ DefineFunction(
         'type'   => Variant | Reference,
         'value'  => "null",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -216,10 +209,6 @@ DefineFunction(
         'desc'   => "If the function fails, the optional errorcode will be set to the value of the system errno variable.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -238,7 +227,6 @@ DefineFunction(
         'desc'   => "Message queue resource handle",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -262,7 +250,6 @@ DefineFunction(
         'desc'   => "You specify the values you require by setting the value of the keys that you require in the data array.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -281,7 +268,6 @@ DefineFunction(
         'desc'   => "Message queue resource handle",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -300,7 +286,6 @@ DefineFunction(
         'desc'   => "sem_identifier is a semaphore resource, obtained from sem_get().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -336,7 +321,6 @@ DefineFunction(
         'desc'   => "Specifies if the semaphore should be automatically released on request shutdown.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -355,7 +339,6 @@ DefineFunction(
         'desc'   => "A Semaphore resource handle as returned by sem_get().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -374,7 +357,6 @@ DefineFunction(
         'desc'   => "A semaphore resource identifier as returned by sem_get().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -405,7 +387,6 @@ DefineFunction(
         'desc'   => "The optional permission bits. Default to 0666.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -424,7 +405,6 @@ DefineFunction(
         'desc'   => "A shared memory resource handle as returned by shm_attach()",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -443,7 +423,6 @@ DefineFunction(
         'desc'   => "The shared memory identifier as returned by shm_attach()",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -466,10 +445,6 @@ DefineFunction(
         'type'   => Int64,
         'desc'   => "The variable key.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -494,7 +469,6 @@ DefineFunction(
         'desc'   => "The variable key.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -523,10 +497,6 @@ DefineFunction(
         'desc'   => "The variable. All variable-types are supported.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -550,7 +520,6 @@ DefineFunction(
         'desc'   => "The variable key.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 

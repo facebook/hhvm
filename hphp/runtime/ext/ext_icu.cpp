@@ -307,7 +307,6 @@ Array f_icu_tokenize(CStrRef text) {
 
   Array ret;
   std::vector<Token> tokens;
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
   tokenizeString(tokens, getMaster(), UnicodeString::fromUTF8(text.data()));
 
   int i = 0;

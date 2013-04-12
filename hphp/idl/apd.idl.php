@@ -75,7 +75,6 @@ DefineFunction(
         'desc'   => "The new code for the function.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -99,7 +98,6 @@ DefineFunction(
         'desc'   => "The new name for the original_name function.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -109,7 +107,6 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -134,7 +131,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -168,7 +164,6 @@ DefineFunction(
         'desc'   => "An integer which is formed by adding together the XXX_TRACE constants.\n\nIt is not recommended to use MEMORY_TRACE. It is very slow and does not appear to be accurate. ASSIGNMENT_TRACE is not implemented yet.\n\nTo turn on all functional traces (TIMING, FUNCTIONS, ARGS SUMMARY (like strace -c)) use the value 99",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -178,7 +173,6 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -190,7 +184,6 @@ DefineFunction(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -202,7 +195,6 @@ DefineFunction(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -221,7 +213,6 @@ DefineFunction(
         'desc'   => "The debugged variable.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 

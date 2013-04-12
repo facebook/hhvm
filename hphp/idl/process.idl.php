@@ -65,7 +65,6 @@ DefineFunction(
         'desc'   => "The number of seconds to wait. If seconds is zero, no new alarm is created.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -96,7 +95,6 @@ DefineFunction(
         'desc'   => "envs is an array of strings which are passed as environment to the program. The array is in the format of name => value, the key being the name of the environmental variable and the value being the value of that variable.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -108,7 +106,6 @@ DefineFunction(
       'type'   => Int64,
       'desc'   => "On success, the PID of the child process is returned in the parent's thread of execution, and a 0 is returned in the child's thread of execution. On failure, a -1 will be returned in the parent's context, no child process will be created, and a PHP error is raised.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -134,7 +131,6 @@ DefineFunction(
         'desc'   => "One of PRIO_PGRP, PRIO_USER or PRIO_PROCESS.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -165,7 +161,6 @@ DefineFunction(
         'desc'   => "One of PRIO_PGRP, PRIO_USER or PRIO_PROCESS.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -195,7 +190,6 @@ DefineFunction(
         'desc'   => "Specifies whether system call restarting should be used when this signal arrives.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -220,7 +214,6 @@ DefineFunction(
         'desc'   => "If wait3 is available on your system (mostly BSD-style systems), you can provide the optional options parameter. If this parameter is not provided, wait will be used for the system call. If wait3 is not available, providing a value for options will have no effect. The value of options is the value of zero or more of the following two constants OR'ed together: Possible values for options WNOHANG Return immediately if no child has exited. WUNTRACED Return for children which are stopped, and whose status has not been reported.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -250,7 +243,6 @@ DefineFunction(
         'desc'   => "The value of options is the value of zero or more of the following two global constants OR'ed together: possible values for options WNOHANG return immediately if no child has exited. WUNTRACED return for children which are stopped, and whose status has not been reported.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -269,7 +261,6 @@ DefineFunction(
         'desc'   => "status parameter is the status parameter supplied to a successful call to pcntl_waitpid().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -288,7 +279,6 @@ DefineFunction(
         'desc'   => "status parameter is the status parameter supplied to a successful call to pcntl_waitpid().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -307,7 +297,6 @@ DefineFunction(
         'desc'   => "status parameter is the status parameter supplied to a successful call to pcntl_waitpid().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -326,7 +315,6 @@ DefineFunction(
         'desc'   => "status parameter is the status parameter supplied to a successful call to pcntl_waitpid().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -345,7 +333,6 @@ DefineFunction(
         'desc'   => "status parameter is the status parameter supplied to a successful call to pcntl_waitpid().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -364,7 +351,6 @@ DefineFunction(
         'desc'   => "status parameter is the status parameter supplied to a successful call to pcntl_waitpid().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -376,7 +362,6 @@ DefineFunction(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -395,7 +380,6 @@ DefineFunction(
         'desc'   => "The command that will be executed.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -426,7 +410,6 @@ DefineFunction(
         'desc'   => "If the return_var argument is present along with the output argument, then the return status of the executed command will be written to this variable.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -451,7 +434,6 @@ DefineFunction(
         'desc'   => "If the return_var argument is present, the return status of the Unix command will be placed here.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -476,7 +458,6 @@ DefineFunction(
         'desc'   => "If the return_var argument is present, then the return status of the executed command will be written to this variable.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -523,7 +504,6 @@ DefineFunction(
         'desc'   => "Allows you to specify additional options. Currently supported options include: suppress_errors (windows only): suppresses errors generated by this function when it's set to TRUE bypass_shell (windows only): bypass cmd.exe shell when set to TRUE context: stream context used when opening files (created with stream_context_create()) binary_pipes: open pipes in binary mode, instead of using the usual stream_encoding",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -548,7 +528,6 @@ DefineFunction(
         'desc'   => "This optional parameter is only useful on POSIX operating systems; you may specify a signal to send to the process using the kill(2) system call. The default is SIGTERM.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -567,7 +546,6 @@ DefineFunction(
         'desc'   => "The proc_open() resource that will be closed.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -585,7 +563,6 @@ DefineFunction(
         'desc'   => "The proc_open() resource that will be evaluated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -604,7 +581,6 @@ DefineFunction(
         'desc'   => "The increment value of the priority change.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -623,10 +599,6 @@ DefineFunction(
         'desc'   => "The argument that will be escaped.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_SHELL",
-    ),
   ));
 
 DefineFunction(
@@ -644,10 +616,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The command that will be escaped.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_SHELL",
     ),
   ));
 

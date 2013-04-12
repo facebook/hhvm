@@ -350,7 +350,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "to specify here.")
     ("compiler-id", "display the git hash for the compiler id")
     ("repo-schema", "display the repo schema id used by this app")
-    ("taint-status", "check if the compiler was built with taint enabled")
     ;
 
   positional_options_description p;
@@ -399,13 +398,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   if (vm.count("repo-schema")) {
     cout << kRepoSchemaId << "\n";
-    return 1;
-  }
-
-  if (vm.count("taint-status")) {
-#ifdef TAINTED
-    cout << TAINTED << "\n";
-#endif
     return 1;
   }
 

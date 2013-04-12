@@ -58,7 +58,6 @@ DefineFunction(
       'type'   => StringVec,
       'desc'   => "Returns a numerically indexed array.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -75,7 +74,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -92,7 +90,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -118,7 +115,6 @@ DefineFunction(
         'desc'   => "The expected encoding.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -147,10 +143,6 @@ DefineFunction(
         'value'  => "null_string",
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -181,7 +173,6 @@ DefineFunction(
         'desc'   => "Is specified by character code names before conversion. It is either an array, or a comma separated enumerated list. If from_encoding is not specified, the internal encoding will be used.\n\n\"auto\" may be used, which expands to \"ASCII,JIS,UTF-8,EUC-JP,SJIS\".",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -212,10 +203,6 @@ DefineFunction(
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -244,7 +231,6 @@ DefineFunction(
         'desc'   => "vars is the reference to the variable being converted. String, Array and Object are accepted. mb_convert_variables() assumes all parameters have the same encoding.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -262,10 +248,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The string being decoded.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -296,7 +278,6 @@ DefineFunction(
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -327,7 +308,6 @@ DefineFunction(
         'desc'   => "strict specifies whether to use the strict encoding detection or not. Default is FALSE.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -347,7 +327,6 @@ DefineFunction(
         'desc'   => "encoding_list is an array or comma separated list of character encoding. (\"auto\" is expanded to \"ASCII, JIS, UTF-8, EUC-JP, SJIS\")\n\nIf encoding_list is omitted, it returns the current character encoding detection order as array.\n\nThis setting affects mb_detect_encoding() and mb_send_mail().\n\nmbstring currently implements the following encoding detection filters. If there is an invalid byte sequence for the following encodings, encoding detection will fail. UTF-8, UTF-7, ASCII, EUC-JP,SJIS, eucJP-win, SJIS-win, JIS, ISO-2022-JP\n\nFor ISO-8859-*, mbstring always detects as ISO-8859-*.\n\nFor UTF-16, UTF-32, UCS2 and UCS4, encoding detection will fail always.\n\nExample #1 Useless detect order example",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -390,10 +369,6 @@ DefineFunction(
         'desc'   => "Indentation of the first line (number of characters in the header before str).",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -423,7 +398,6 @@ DefineFunction(
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -452,7 +426,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -485,10 +458,6 @@ DefineFunction(
         'value'  => "null_string",
         'desc'   => "Matching condition can be set by option parameter. If i is specified for this parameter, the case will be ignored. If x is specified, white space will be ignored. If m is specified, match will be executed in multiline mode and line break will be included in '.'. If p is specified, match will be executed in POSIX mode, line break will be considered as normal character. If e is specified, replacement string will be evaluated as PHP expression.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -660,7 +629,6 @@ DefineFunction(
         'desc'   => "Contains a substring of the matched string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -694,10 +662,6 @@ DefineFunction(
         'desc'   => "option has the same meaning as in mb_ereg_replace().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -726,7 +690,6 @@ DefineFunction(
         'desc'   => "Contains a substring of the matched string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -745,7 +708,6 @@ DefineFunction(
         'desc'   => "If type isn't specified or is specified to \"all\", an array having the elements \"internal_encoding\", \"http_output\", \"http_input\", \"func_overload\", \"mail_charset\", \"mail_header_encoding\", \"mail_body_encoding\" will be returned.\n\nIf type is specified as \"http_output\", \"http_input\", \"internal_encoding\", \"func_overload\", the specified setting parameter will be returned.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -764,7 +726,6 @@ DefineFunction(
         'desc'   => "Input string specifies the input type. \"G\" for GET, \"P\" for POST, \"C\" for COOKIE, \"S\" for string, \"L\" for list, and \"I\" for the whole list (will return array). If type is omitted, it returns the last input type processed.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -784,7 +745,6 @@ DefineFunction(
         'desc'   => "If encoding is set, mb_http_output() sets the HTTP output character encoding to encoding.\n\nIf encoding is omitted, mb_http_output() returns the current HTTP output character encoding.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -804,7 +764,6 @@ DefineFunction(
         'desc'   => "encoding is the character encoding name used for the HTTP input character encoding conversion, HTTP output character encoding conversion, and the default character encoding for string functions defined by the mbstring module.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -824,7 +783,6 @@ DefineFunction(
         'desc'   => "Used for encoding e-mail messages. Valid languages are \"Japanese\", \"ja\",\"English\",\"en\" and \"uni\" (UTF-8). mb_send_mail() uses this setting to encode e-mail.\n\nLanguage and its setting is ISO-2022-JP/Base64 for Japanese, UTF-8/Base64 for uni, ISO-8859-1/quoted printable for English.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -848,7 +806,6 @@ DefineFunction(
         'desc'   => "The status of the output buffer.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -873,7 +830,6 @@ DefineFunction(
         'desc'   => "An array containing decoded and character encoded converted values.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -892,7 +848,6 @@ DefineFunction(
         'desc'   => "The encoding being checked.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -912,7 +867,6 @@ DefineFunction(
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -931,7 +885,6 @@ DefineFunction(
         'desc'   => "The options to set. This is a a string where each character is an option. To set a mode, the mode character must be the last one set, however there can only be set one mode but multiple options. Regex options Option Meaning i Ambiguity match on x Enables extended pattern form m '.' matches with newlines s '^' -> '\\A', '\$' -> '\\Z' p Same as both the m and s options l Finds longest matches n Ignores empty matches e eval() resulting code Regex syntax modes Mode Meaning j Java (Sun java.util.regex) u GNU regex g grep c Emacs r Ruby z Perl b POSIX Basic regex d POSIX Extended regex",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -972,7 +925,6 @@ DefineFunction(
         'desc'   => "additional_parameter is a MTA command line parameter. It is useful when setting the correct Return-Path header when using sendmail.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1000,10 +952,6 @@ DefineFunction(
         'value'  => "-1",
         'desc'   => "If optional parameter limit is specified, it will be split in limit elements as maximum.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1039,10 +987,6 @@ DefineFunction(
         'value'  => "null_string",
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1084,10 +1028,6 @@ DefineFunction(
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1123,7 +1063,6 @@ DefineFunction(
         'desc'   => "Character encoding name to use. If it is omitted, internal character encoding is used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1159,10 +1098,6 @@ DefineFunction(
         'desc'   => "Character encoding name to use. If it is omitted, internal character encoding is used.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1187,7 +1122,6 @@ DefineFunction(
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1223,7 +1157,6 @@ DefineFunction(
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1258,10 +1191,6 @@ DefineFunction(
         'value'  => "null_string",
         'desc'   => "Character encoding name to use. If it is omitted, internal character encoding is used.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1298,10 +1227,6 @@ DefineFunction(
         'desc'   => "Character encoding name to use. If it is omitted, internal character encoding is used.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1337,7 +1262,6 @@ DefineFunction(
         'desc'   => "Character encoding name to use. If it is omitted, internal character encoding is used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1373,7 +1297,6 @@ DefineFunction(
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1409,10 +1332,6 @@ DefineFunction(
         'desc'   => "Character encoding name to use. If it is omitted, internal character encoding is used.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1436,10 +1355,6 @@ DefineFunction(
         'value'  => "null_string",
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1465,10 +1380,6 @@ DefineFunction(
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1493,7 +1404,6 @@ DefineFunction(
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1513,7 +1423,6 @@ DefineFunction(
         'desc'   => "Specify the Unicode value as an integer, or as one of the following strings: \"none\" : no output \"long\" : Output character code value (Example: U+3000, JIS+7E7E) \"entity\" : Output character entity (Example: Ȁ)",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1543,7 +1452,6 @@ DefineFunction(
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1578,10 +1486,6 @@ DefineFunction(
         'value'  => "null_string",
         'desc'   => "encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

@@ -79,7 +79,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -98,7 +97,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -118,7 +116,6 @@ DefineFunction(
         'desc'   => "Specifies the directory where all algorithms are located. If not specifies, the value of the mcrypt.algorithms_dir php.ini directive is used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -138,7 +135,6 @@ DefineFunction(
         'desc'   => "Specifies the directory where all modes are located. If not specifies, the value of the mcrypt.modes_dir php.ini directive is used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -163,7 +159,6 @@ DefineFunction(
         'desc'   => "This optional parameter can contain the location where the mode module is on the system.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -188,7 +183,6 @@ DefineFunction(
         'desc'   => "This optional parameter can contain the location where the mode module is on the system.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -213,7 +207,6 @@ DefineFunction(
         'desc'   => "The optional lib_dir parameter can contain the location of where the algorithm module is on the system.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -238,7 +231,6 @@ DefineFunction(
         'desc'   => "The optional lib_dir parameter can contain the location of where the algorithm module is on the system.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -263,7 +255,6 @@ DefineFunction(
         'desc'   => "The optional lib_dir parameter can contain the location of where the algorithm module is on the system.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -288,7 +279,6 @@ DefineFunction(
         'desc'   => "The optional lib_dir parameter can contain the location of where the algorithm module is on the system.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -313,7 +303,6 @@ DefineFunction(
         'desc'   => "The optional lib_dir parameter can contain the location of where the algorithm module is on the system.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -338,7 +327,6 @@ DefineFunction(
         'desc'   => "The source can be MCRYPT_RAND (system random number generator), MCRYPT_DEV_RANDOM (read data from /dev/random) and MCRYPT_DEV_URANDOM (read data from /dev/urandom). Prior to 5.3.0, MCRYPT_RAND was the only one supported on Windows.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -377,10 +365,6 @@ DefineFunction(
         'value'  => "null_string",
         'desc'   => "Used for the initialisation in CBC, CFB, OFB modes, and in some algorithms in STREAM mode. If you do not supply an IV, while it is needed for an algorithm, the function issues a warning and uses an IV with all bytes set to '\\0'.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -421,10 +405,6 @@ DefineFunction(
         'desc'   => "The iv parameter is used for the initialisation in CBC, CFB, OFB modes, and in some algorithms in STREAM mode. If you do not supply an IV, while it is needed for an algorithm, the function issues a warning and uses an IV with all bytes set to '\\0'.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -456,10 +436,6 @@ DefineFunction(
         'type'   => String,
         'value'  => "null_string",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -493,10 +469,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -528,10 +500,6 @@ DefineFunction(
         'type'   => String,
         'value'  => "null_string",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -565,10 +533,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -593,7 +557,6 @@ DefineFunction(
         'desc'   => "The module.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -612,7 +575,6 @@ DefineFunction(
         'desc'   => "One of the MCRYPT_ciphername constants or the name of the algorithm as string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -636,7 +598,6 @@ DefineFunction(
         'desc'   => "mode is one of the MCRYPT_MODE_modename constants or one of \"ecb\", \"cbc\", \"cfb\", \"ofb\", \"nofb\" or \"stream\". The IV is ignored in ECB mode as this mode does not require it. You will need to have the same IV (think: starting point) both at encryption and decryption stages, otherwise your encryption will fail.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -656,7 +617,6 @@ DefineFunction(
         'type'   => String,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -675,7 +635,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -694,7 +653,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -713,7 +671,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -732,7 +689,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -751,7 +707,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -770,7 +725,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -789,7 +743,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -808,7 +761,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -827,7 +779,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -846,7 +797,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -869,10 +819,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The data to encrypt.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -902,7 +848,6 @@ DefineFunction(
         'desc'   => "The IV should normally have the size of the algorithms block size, but you must obtain the size by calling mcrypt_enc_get_iv_size(). IV is ignored in ECB. IV MUST exist in CFB, CBC, STREAM, nOFB and OFB modes. It needs to be random and unique (but not secret). The same IV must be used for encryption/decryption. If you do not want to use it you should set it to zeros, but this is not recommended.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -925,10 +870,6 @@ DefineFunction(
         'desc'   => "Encrypted data.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -947,7 +888,6 @@ DefineFunction(
         'desc'   => "The encryption descriptor.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -963,7 +903,6 @@ DefineFunction(
         'type'   => Resource,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 

@@ -367,11 +367,6 @@ public:
   static int MaxUserFunctionId;
   static bool EnableFinallyStatement;
 
-#ifdef TAINTED
-  static bool EnableTaintWarnings;
-  static int TaintTraceMaxStrlen;
-#endif
-
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
 #define EVALFLAGS()                                                     \

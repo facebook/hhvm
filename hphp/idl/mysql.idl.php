@@ -101,7 +101,6 @@ DefineFunction(
         'desc'   => "(HipHop specific) How many milli-seconds to wait for query.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -139,7 +138,6 @@ DefineFunction(
         'value'  => "null_string",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -158,7 +156,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -182,7 +179,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -201,7 +197,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -220,7 +215,6 @@ DefineFunction(
         'desc'   => "The mysql result object from mysql_async_query_result.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -245,10 +239,6 @@ DefineFunction(
         'desc'   => "The type of array that is to be fetched. It's a constant and can take the following values: MYSQL_ASSOC, MYSQL_NUM, and MYSQL_BOTH.  The default is MYSQL_ASSOC (1)",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -272,7 +262,6 @@ DefineFunction(
         'desc'   => "Time, in seconds, to wait for actionable events.  Subsecond accuracy is supported.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -322,7 +311,6 @@ DefineFunction(
         'desc'   => "(HipHop specific) How many milli-seconds to wait for query.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -374,7 +362,6 @@ DefineFunction(
         'value'  => "-1",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -421,7 +408,6 @@ DefineFunction(
         'value'  => "-1",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -446,7 +432,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -466,7 +451,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -484,10 +468,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The string that is to be escaped.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_SQL",
     ),
   ));
 
@@ -513,10 +493,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_SQL",
-    ),
   ));
 
 DefineFunction(
@@ -536,7 +512,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -556,7 +531,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -576,7 +550,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -596,7 +569,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -616,7 +588,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -628,7 +599,6 @@ DefineFunction(
       'type'   => String,
       'desc'   => "The MySQL client version.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -648,7 +618,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -668,7 +637,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -688,7 +656,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -707,10 +674,6 @@ DefineFunction(
         'value'  => "null",
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -731,7 +694,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -750,10 +712,6 @@ DefineFunction(
         'value'  => "null",
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -774,7 +732,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -799,7 +756,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -824,7 +780,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -849,7 +804,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -869,7 +823,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -894,7 +847,6 @@ DefineFunction(
         'desc'   => "Which connection to set to. If absent, default or current connection will be applied to.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -919,7 +871,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -944,7 +895,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -964,7 +914,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -984,7 +933,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1004,7 +952,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1029,7 +976,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1059,7 +1005,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1079,7 +1024,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1104,7 +1048,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1134,7 +1077,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1154,7 +1096,6 @@ DefineFunction(
         'desc'   => "The MySQL connection. If the link identifier is not specified, the last link opened by mysql_connect() is assumed. If no such link is found, it will try to create one as if mysql_connect() was called with no arguments. If no connection is found or established, an E_WARNING level error is generated.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1184,10 +1125,6 @@ DefineFunction(
         'desc'   => "The field name.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1211,10 +1148,6 @@ DefineFunction(
         'desc'   => "The integer index (row/table number)",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1233,7 +1166,6 @@ DefineFunction(
         'desc'   => "resource that is being evaluated. This result comes from a call to mysql_query().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1252,7 +1184,6 @@ DefineFunction(
         'desc'   => "resource that is being evaluated. This result comes from a call to mysql_query().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1271,7 +1202,6 @@ DefineFunction(
         'desc'   => "resource that is being evaluated. This result comes from a call to mysql_query().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1295,7 +1225,6 @@ DefineFunction(
         'desc'   => "The desired row number of the new result pointer.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1314,10 +1243,6 @@ DefineFunction(
         'desc'   => "resource that is being evaluated. This result comes from a call to mysql_query().",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1335,10 +1260,6 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "resource that is being evaluated. This result comes from a call to mysql_query().",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1364,10 +1285,6 @@ DefineFunction(
         'desc'   => "The type of array that is to be fetched. It's a constant and can take the following values: MYSQL_ASSOC, MYSQL_NUM, and MYSQL_BOTH.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1386,7 +1303,6 @@ DefineFunction(
         'desc'   => "resource that is being evaluated. This result comes from a call to mysql_query().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1417,10 +1333,6 @@ DefineFunction(
         'desc'   => "An optional array of parameters to pass to the constructor for class_name objects.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1450,10 +1362,6 @@ DefineFunction(
         'desc'   => "The name or offset of the field being retrieved.\n\nIt can be the field's offset, the field's name, or the field's table dot field name (tablename.fieldname). If the column name has been aliased ('select foo as bar from...'), use the alias instead of the column name. If undefined, the first field is retrieved.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1477,10 +1385,6 @@ DefineFunction(
         'value'  => "-1",
         'desc'   => "The numerical field offset. If the field offset is not specified, the next field that was not yet retrieved by this function is retrieved. The field_offset starts at 0.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1506,7 +1410,6 @@ DefineFunction(
         'desc'   => "The numerical field offset. The field_offset starts at 0. If field_offset does not exist, an error of level E_WARNING is also issued.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1530,10 +1433,6 @@ DefineFunction(
         'value'  => "0",
         'desc'   => "The numerical field offset. The field_offset starts at 0. If field_offset does not exist, an error of level E_WARNING is also issued.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1559,10 +1458,6 @@ DefineFunction(
         'desc'   => "The numerical field offset. The field_offset starts at 0. If field_offset does not exist, an error of level E_WARNING is also issued.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1587,7 +1482,6 @@ DefineFunction(
         'desc'   => "The numerical field offset. The field_offset starts at 0. If field_offset does not exist, an error of level E_WARNING is also issued.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1612,7 +1506,6 @@ DefineFunction(
         'desc'   => "The numerical field offset. The field_offset starts at 0. If field_offset does not exist, an error of level E_WARNING is also issued.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1637,7 +1530,6 @@ DefineFunction(
         'desc'   => "The numerical field offset. The field_offset starts at 0. If field_offset does not exist, an error of level E_WARNING is also issued.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 

@@ -70,10 +70,6 @@ DefineFunction(
         'desc'   => "A list of characters to be escaped. If charlist contains characters \\n, \\r etc., they are converted in C-like style, while other non-alphanumeric characters with ASCII codes lower than 32 and higher than 126 converted to octal representation.\n\nWhen you define a sequence of characters in the charlist argument make sure that you know what characters come between the characters that you set as the start and end of the range.\n\nAlso, if the first character in a range has a higher ASCII value than the second character in the range, no range will be constructed. Only the start, end and period characters will be escaped. Use the ord() function to find the ASCII value for a character.\n\n\n\nBe careful if you choose to escape characters 0, a, b, f, n, r, t and v. They will be converted to \\0, \\a, \\b, \\f, \\n, \\r, \\t and \\v. In PHP \\0 (NULL), \\r (carriage return), \\n (newline), \\f (form feed), \\v (vertical tab) and \\t (tab) are predefined escape sequences, while in C all of these are predefined escape sequences.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -91,10 +87,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The string to be unescaped.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -114,10 +106,6 @@ DefineFunction(
         'desc'   => "The string to be escaped.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -136,10 +124,6 @@ DefineFunction(
         'desc'   => "The input string.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -157,10 +141,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "A character.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -181,10 +161,6 @@ DefineFunction(
         'desc'   => "A character.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -202,10 +178,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The input string.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -225,10 +197,6 @@ DefineFunction(
         'desc'   => "The input string.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -245,10 +213,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The input string.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -268,10 +232,6 @@ DefineFunction(
         'desc'   => "The string to be reversed.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -289,10 +249,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The input string.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -312,10 +268,6 @@ DefineFunction(
         'desc'   => "The input string.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -333,10 +285,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The input string.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -375,10 +323,6 @@ DefineFunction(
         'desc'   => "The input string.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -402,10 +346,6 @@ DefineFunction(
         'value'  => "\"\"",
         'desc'   => "You can use the optional second parameter to specify tags which should not be stripped.\n\nHTML comments and PHP tags are also stripped. This is hardcoded and can not be changed with allowable_tags.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -431,10 +371,6 @@ DefineFunction(
         'desc'   => "Optionally, the stripped characters can also be specified using the charlist parameter. Simply list all characters that you want to be stripped. With .. you can specify a range of characters.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -458,10 +394,6 @@ DefineFunction(
         'value'  => "k_HPHP_TRIM_CHARLIST",
         'desc'   => "You can also specify the characters you want to strip, by means of the charlist parameter. Simply list all characters that you want to be stripped. With .. you can specify a range of characters.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -487,10 +419,6 @@ DefineFunction(
         'desc'   => "You can also specify the characters you want to strip, by means of the charlist parameter. Simply list all characters that you want to be stripped. With .. you can specify a range of characters.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => 'TAINT_BIT_NONE',
-      'clear_mask' => 'TAINT_BIT_NONE',
-    ),
   ));
 
 DefineFunction(
@@ -510,10 +438,6 @@ DefineFunction(
         'type'   => String,
         'value'  => "k_HPHP_TRIM_CHARLIST",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -544,10 +468,6 @@ DefineFunction(
         'desc'   => "If limit is set and positive, the returned array will contain a maximum of limit elements with the last element containing the rest of string.\n\nIf the limit parameter is negative, all components except the last -limit are returned.\n\nIf the limit parameter is zero, then this is treated as 1.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -572,10 +492,6 @@ DefineFunction(
         'desc'   => "The array of strings to implode.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -595,10 +511,6 @@ DefineFunction(
         'type'   => Variant,
         'value'  => "null_variant",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -623,10 +535,6 @@ DefineFunction(
         'value'  => "1",
         'desc'   => "Maximum length of the chunk.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -658,10 +566,6 @@ DefineFunction(
         'desc'   => "The line ending sequence.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -685,10 +589,6 @@ DefineFunction(
         'value'  => "null_variant",
         'desc'   => "The delimiter used when splitting up str.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -724,8 +624,6 @@ DefineFunction(
         'desc'   => "If passed, this will hold the number of matched and replaced needles.",
       ),
     ),
-    // NB: TaintObserver declared in str_replace
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -759,8 +657,6 @@ DefineFunction(
         'desc'   => "The number of matched and replaced needles will be returned in count which is passed by reference.",
       ),
     ),
-    // NB: TaintObserver declared in str_replace
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -795,8 +691,6 @@ DefineFunction(
         'desc'   => "If given and is positive, it represents the length of the portion of string which is to be replaced. If it is negative, it represents the number of characters from the end of string at which to stop replacing. If it is not given, then it will default to strlen( string ); i.e. end the replacing at the end of string. Of course, if length is zero then this function will have the effect of inserting replacement into string at the given start offset.",
       ),
     ),
-    // NB: TaintObserver declared in str_replace
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -825,10 +719,6 @@ DefineFunction(
         'value'  => "0x7FFFFFFF",
         'desc'   => "If length is given and is positive, the string returned will contain at most length characters beginning from start (depending on the length of string).\n\nIf length is given and is negative, then that many characters will be omitted from the end of string (after the start position has been calculated when a start is negative). If start denotes a position beyond this truncation, an empty string will be returned.\n\nIf length is given and is 0, FALSE or NULL an empty string will be returned.\n\nIf length is omitted, the substring starting from start until the end of the string will be returned. Example #2 Using a negative length",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -865,10 +755,6 @@ DefineFunction(
         'desc'   => "Optional argument pad_type can be STR_PAD_RIGHT, STR_PAD_LEFT, or STR_PAD_BOTH. If pad_type is not specified it is assumed to be STR_PAD_RIGHT.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -891,10 +777,6 @@ DefineFunction(
         'type'   => Int32,
         'desc'   => "Number of time the input string should be repeated.\n\nmultiplier has to be greater than or equal to 0. If the multiplier is set to 0, the function will return an empty string.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -932,10 +814,6 @@ DefineFunction(
         'desc'   => "If the cut is set to TRUE, the string is always wrapped at or before the specified width. So if you have a word that is larger than the given width, it is broken apart. (See second example).",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -965,10 +843,6 @@ DefineFunction(
         'value'  => "\"ISO-8859-1\"",
         'desc'   => "The ISO-8859-1 character set is used as default for the optional third charset. This defines the character set used in conversion.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8  ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS  Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1006,10 +880,6 @@ DefineFunction(
         'desc'   => "When double_encode is turned off PHP will not encode existing html entities. The default is to convert everything.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1033,10 +903,6 @@ DefineFunction(
         'value'  => "k_ENT_COMPAT",
         'desc'   => "The quote style. One of the following constants: quote_style constants Constant Name Description ENT_COMPAT Will convert double-quotes and leave single-quotes alone (default) ENT_QUOTES Will convert both double and single quotes ENT_NOQUOTES Will leave both double and single quotes unconverted",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1074,10 +940,6 @@ DefineFunction(
         'desc'   => "When double_encode is turned off PHP will not encode existing html entities, the default is to convert everything.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1114,10 +976,6 @@ DefineFunction(
         'desc'   => "An array of extra ascii chars to be encoded.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1135,10 +993,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The input string.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1158,10 +1012,6 @@ DefineFunction(
         'desc'   => "The input string.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1179,10 +1029,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The uuencoded data.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1202,10 +1048,6 @@ DefineFunction(
         'desc'   => "The data to be encoded.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1223,10 +1065,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The input string.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1246,7 +1084,6 @@ DefineFunction(
         'desc'   => "The data.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1270,10 +1107,6 @@ DefineFunction(
         'value'  => "\"\"",
         'desc'   => "An optional salt string to base the hashing on. If not provided, the behaviour is defined by the algorithm implementation and can lead to unexpected results.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1299,10 +1132,6 @@ DefineFunction(
         'desc'   => "If the optional raw_output is set to TRUE, then the md5 digest is instead returned in raw binary format with a length of 16.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1325,10 +1154,6 @@ DefineFunction(
         'value'  => "false",
         'desc'   => "If the optional raw_output is set to TRUE, then the sha1 digest is instead returned in raw binary format with a length of 20, otherwise the returned value is a 40-character hexadecimal number.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1359,10 +1184,6 @@ DefineFunction(
         'desc'   => "The string replacing from.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1391,10 +1212,6 @@ DefineFunction(
         'desc'   => "The target Cyrillic character set, as a single character.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1420,7 +1237,6 @@ DefineFunction(
         'desc'   => "Like the htmlspecialchars() and htmlentities() functions you can optionally specify the quote_style you are working with. See the description of these modes in htmlspecialchars().",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1444,10 +1260,6 @@ DefineFunction(
         'value'  => "0",
         'desc'   => "This optional parameter indicates maximum number of characters per line that will be returned.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1473,10 +1285,6 @@ DefineFunction(
         'desc'   => "This optional parameter indicates maximum number of characters per line that will be returned.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1500,7 +1308,6 @@ DefineFunction(
         'desc'   => "If locale is NULL or the empty string \"\", the locale names will be set from the values of environment variables with the same names as the above categories, or from \"LANG\".\n\nIf locale is \"0\", the locale setting is not affected, only the current setting is returned.\n\nIf locale is an array or followed by additional parameters then each array element or parameter is tried to be set as new locale until success. This is useful if a locale is known under different names on different systems or for providing a fallback for a possibly not available locale.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1511,7 +1318,6 @@ DefineFunction(
     'return' => array(
       'type'   => VariantMap,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1529,7 +1335,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1546,10 +1351,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "See sprintf() for a description of format.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1573,10 +1374,6 @@ DefineFunction(
         'type'   => VariantVec,
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1593,10 +1390,6 @@ DefineFunction(
         'name'   => "format",
         'type'   => String,
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1619,10 +1412,6 @@ DefineFunction(
         'name'   => "args",
         'type'   => VariantVec,
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1647,10 +1436,6 @@ DefineFunction(
         'desc'   => "The interpreted format for str, which is described in the documentation for sprintf() with following differences: Function is not locale-aware. F, g, G and b are not supported. D stands for decimal number. i stands for integer with base detection. n stands for number of characters processed so far.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1668,10 +1453,6 @@ DefineFunction(
         'type'   => Int64,
         'desc'   => "The ascii code.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1691,7 +1472,6 @@ DefineFunction(
         'desc'   => "A character.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1714,10 +1494,6 @@ DefineFunction(
         'type'   => Double,
         'desc'   => "Disable the use of grouping characters (as defined by the current locale).",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -1755,10 +1531,6 @@ DefineFunction(
         'desc'   => "Sets the thousands separator.\n\nOnly the first character of thousands_sep is used. For example, if you use bar as thousands_sep on the number 1000, number_format() will return 1b000.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -1781,7 +1553,6 @@ DefineFunction(
         'desc'   => "The second string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1811,7 +1582,6 @@ DefineFunction(
         'desc'   => "Number of characters to use in the comparison.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1835,7 +1605,6 @@ DefineFunction(
         'desc'   => "The second string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1859,7 +1628,6 @@ DefineFunction(
         'desc'   => "The second string",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1889,7 +1657,6 @@ DefineFunction(
         'desc'   => "The length of strings to be used in the comparison.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1913,7 +1680,6 @@ DefineFunction(
         'desc'   => "The second string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1937,7 +1703,6 @@ DefineFunction(
         'desc'   => "The second string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1978,7 +1743,6 @@ DefineFunction(
         'desc'   => "If case_insensitivity is TRUE, comparison is case insensitive.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -1997,10 +1761,6 @@ DefineFunction(
         'name'   => "needle",
         'type'   => Variant,
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -2024,10 +1784,6 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "If needle contains more than one character, only the first is used. This behavior is different from that of strstr().\n\nIf needle is not a string, it is converted to an integer and applied as the ordinal value of a character.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -2058,10 +1814,6 @@ DefineFunction(
         'desc'   => "If TRUE, strstr() returns the part of the haystack before the first occurrence of the needle (excluding the needle).",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -2085,10 +1837,6 @@ DefineFunction(
         'desc'   => "If needle is not a string, it is converted to an integer and applied as the ordinal value of a character.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -2111,10 +1859,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "This parameter is case sensitive.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -2145,7 +1889,6 @@ DefineFunction(
         'desc'   => "The optional offset parameter allows you to specify which character in haystack to start searching. The position returned is still relative to the beginning of haystack.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2175,7 +1918,6 @@ DefineFunction(
         'desc'   => "The optional offset parameter allows you to specify which character in haystack to start searching. The position returned is still relative to the beginning of haystack.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2205,7 +1947,6 @@ DefineFunction(
         'desc'   => "May be specified to begin searching an arbitrary number of characters into the string. Negative values will stop searching at an arbitrary point prior to the end of the string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2235,7 +1976,6 @@ DefineFunction(
         'desc'   => "The offset parameter may be specified to begin searching an arbitrary number of characters into the string.\n\nNegative offset values will start the search at offset characters from the start of the string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2271,7 +2011,6 @@ DefineFunction(
         'desc'   => "The maximum length after the specified offset to search for the substring. It outputs a warning if the offset plus the length is greater than the haystack length.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2307,7 +2046,6 @@ DefineFunction(
         'desc'   => "The length of the segment from subject to examine.\n\nIf length is given and is non-negative, then subject will be examined for length characters after the starting position.\n\nIf lengthis given and is negative, then subject will be examined from the starting position up to length characters from the end of subject.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2343,7 +2081,6 @@ DefineFunction(
         'desc'   => "The length of the string to examine.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2362,7 +2099,6 @@ DefineFunction(
         'desc'   => "The string being measured for length.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2387,7 +2123,6 @@ DefineFunction(
         'desc'   => "See return values.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2418,7 +2153,6 @@ DefineFunction(
         'desc'   => "A list of additional characters which will be considered as 'word'",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2460,7 +2194,6 @@ DefineFunction(
         'desc'   => "Defines the cost of deletion.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2490,7 +2223,6 @@ DefineFunction(
         'desc'   => "By passing a reference as third argument, similar_text() will calculate the similarity in percent for you.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -2508,10 +2240,6 @@ DefineFunction(
         'type'   => String,
         'desc'   => "The input string.",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -2537,10 +2265,6 @@ DefineFunction(
         'desc'   => "This parameter restricts the returned metaphone key to phonemes characters in length. The default value of 0 means no restriction.",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -2565,7 +2289,6 @@ DefineFunction(
         'desc'   => "If the second parameter arr is present, variables are stored in this variable as array elements instead.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 

@@ -100,7 +100,6 @@ void StringData::initLiteral(const char* data, int len) {
   m_cdata = data;
   m_big.cap = len | IsLiteral;
   assert(checkSane());
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
 void StringData::enlist() {
@@ -167,7 +166,6 @@ void StringData::initAttach(const char* data, int len) {
     free((void*)data);
   }
   assert(checkSane());
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
 HOT_FUNC
@@ -197,7 +195,6 @@ void StringData::initCopy(const char* data, int len) {
     m_big.cap = len | IsSmart;
   }
   assert(checkSane());
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
 HOT_FUNC
@@ -222,7 +219,6 @@ void StringData::initMalloc(const char* data, int len) {
     m_big.cap = len | IsMalloc;
   }
   assert(checkSane());
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
 HOT_FUNC
@@ -236,7 +232,6 @@ StringData::StringData(SharedVariant *shared)
   m_big.shared = shared;
   m_big.cap = m_len | IsShared;
   enlist();
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
 }
 
 HOT_FUNC
@@ -327,7 +322,6 @@ void StringData::append(const char *s, int len) {
   // size to avoid O(N^2) copying cost.
   if (isShared() || isLiteral()) {
     // buffer is immutable, don't modify it.
-    // We are mutating, so we don't need to repropagate our own taint
     StringSlice r = slice();
     char* newdata = smart_concat(r.ptr, r.len, s, len);
     if (isShared()) {
@@ -340,7 +334,6 @@ void StringData::append(const char *s, int len) {
     m_hash = 0;
   } else if (rawdata() == s) {
     // appending ourself to ourself, be conservative.
-    // We are mutating, so we don't need to repropagate our own taint
     StringSlice r = slice();
     char *newdata = smart_concat(r.ptr, r.len, s, len);
     releaseData();
@@ -350,7 +343,6 @@ void StringData::append(const char *s, int len) {
     m_hash = 0;
   } else if (isSmall()) {
     // we're currently small but might not be after append.
-    // We are mutating, so we don't need to repropagate our own taint
     uint32_t oldlen = m_len;
     newlen = oldlen + len;
     if (newlen <= MaxSmallSize) {
@@ -405,7 +397,6 @@ void StringData::append(const char *s, int len) {
     m_hash = 0;
   }
   assert(newlen <= MaxSize);
-  TAINT_OBSERVER_REGISTER_MUTATED(m_taint_data, rawdata());
   assert(checkSane());
 }
 
@@ -507,10 +498,6 @@ void StringData::dump() const {
       printf("\\x%02x", ch);
     }
   }
-#ifdef TAINTED
-  printf("\n");
-  this->getTaintDataRefConst().dump();
-#endif
   printf("]\n");
 }
 
@@ -554,7 +541,6 @@ void StringData::setChar(int offset, CStrRef substring) {
     if (uint32_t(offset) < s.len) {
       ((char*)s.ptr)[offset] = c;
     } else if (offset <= RuntimeOption::StringOffsetLimit) {
-      // We are mutating, so we don't need to repropagate our own taint
       uint32_t newlen = offset + 1;
       MutableSlice buf = isImmutable() ? escalate(newlen) : reserve(newlen);
       memset(buf.ptr + s.len, ' ', newlen - s.len);
@@ -696,7 +682,6 @@ void StringData::set(CVarRef key, CStrRef v) {
 
 void StringData::preCompute() const {
   assert(!isShared()); // because we are gonna reuse the space!
-  // We don't want to collect taint for a hash
   StringSlice s = slice();
   m_hash = hash_string(s.ptr, s.len);
   assert(m_hash >= 0);
@@ -720,7 +705,6 @@ DataType StringData::isNumericWithVal(int64_t &lval, double &dval,
   DataType ret = KindOfNull;
   StringSlice s = slice();
   if (s.len) {
-    // Not involved in further string construction/mutation; no taint pickup
     ret = is_numeric_string(s.ptr, s.len, &lval, &dval, allow_errors);
     if (ret == KindOfNull && !isShared() && allow_errors) {
       m_hash |= STRHASH_MSB;
@@ -760,7 +744,6 @@ bool StringData::isInteger() const {
 }
 
 bool StringData::isValidVariableName() const {
-  // Not involved in further string construction/mutation; no taint pickup
   StringSlice s = slice();
   return is_valid_var_name(s.ptr, s.len);
 }
@@ -770,13 +753,11 @@ bool StringData::toBoolean() const {
 }
 
 int64_t StringData::toInt64(int base /* = 10 */) const {
-  // Taint absorbtion unnecessary; taint is recreated later for numerics
   return strtoll(rawdata(), nullptr, base);
 }
 
 double StringData::toDouble() const {
   StringSlice s = slice();
-  // Taint absorbtion unnecessary; taint is recreated later for numerics
   if (s.len) return zend_strtod(s.ptr, nullptr);
   return 0;
 }
@@ -839,7 +820,6 @@ int StringData::compare(const StringData *v2) const {
     int len1 = size();
     int len2 = v2->size();
     int len = len1 < len2 ? len1 : len2;
-    // No taint absorption on self-contained string ops like compare
     ret = memcmp(rawdata(), v2->rawdata(), len);
     if (ret) return ret;
     if (len1 == len2) return 0;
@@ -850,7 +830,6 @@ int StringData::compare(const StringData *v2) const {
 
 HOT_FUNC
 strhash_t StringData::hashHelper() const {
-  // We don't want to collect taint for a hash
   strhash_t h = isShared() ? m_big.shared->stringHash() :
                              hash_string_inline(m_data, m_len);
   assert(h >= 0);

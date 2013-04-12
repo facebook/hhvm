@@ -23,7 +23,6 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/array/array_iterator.h>
-#include <runtime/base/taint/taint_observer.h>
 #include <tbb/concurrent_hash_map.h>
 
 #define PREG_PATTERN_ORDER          1
@@ -76,7 +75,6 @@ typedef tbb::concurrent_hash_map<const StringData*,const pcre_cache_entry*,
 static PCREStringMap s_pcreCacheMap;
 
 static const pcre_cache_entry* lookup_cached_pcre(CStrRef regex) {
-  TAINT_OBSERVER_CAP_STACK();
   PCREStringMap::const_accessor acc;
   if (s_pcreCacheMap.find(acc, regex.get())) {
     return acc->second;
@@ -86,7 +84,6 @@ static const pcre_cache_entry* lookup_cached_pcre(CStrRef regex) {
 
 static const pcre_cache_entry*
 insert_cached_pcre(CStrRef regex, const pcre_cache_entry* ent) {
-  TAINT_OBSERVER_CAP_STACK();
   PCREStringMap::accessor acc;
   if (s_pcreCacheMap.insert(acc, StringData::GetStaticString(regex.get()))) {
     acc->second = ent;

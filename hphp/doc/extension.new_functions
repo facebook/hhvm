@@ -83,10 +83,6 @@ testing and some alternative PHP implementation.
 - fb_enable_code_coverage
 - fb_disable_code_coverage
 
-- fb_get_taint
-- fb_set_taint
-- fb_unset_taint
-
 - xhprof_enable
 - xhprof_disable
 - xhprof_sample_enable

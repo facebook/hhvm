@@ -208,14 +208,12 @@ void c_Memcached::t___construct(CStrRef persistent_id /*= null_string*/) {
 
 Variant c_Memcached::t_get(CStrRef key, CVarRef cache_cb /*= null_variant*/,
                            VRefParam cas_token /*= null_variant*/) {
-  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return t_getbykey(null_string, key, cache_cb, cas_token);
 }
 
 Variant c_Memcached::t_getbykey(CStrRef server_key, CStrRef key,
                                 CVarRef cache_cb /*= null_variant*/,
                                 VRefParam cas_token /*= null_variant*/) {
-  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
     m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
@@ -259,14 +257,12 @@ Variant c_Memcached::t_getbykey(CStrRef server_key, CStrRef key,
 Variant c_Memcached::t_getmulti(CArrRef keys,
                                 VRefParam cas_tokens /*= null_variant*/,
                                 int flags /*= 0*/) {
-  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return t_getmultibykey(null_string, keys, cas_tokens, flags);
 }
 
 Variant c_Memcached::t_getmultibykey(CStrRef server_key, CArrRef keys,
                                      VRefParam cas_tokens /*= null_variant*/,
                                      int flags /*= 0*/) {
-  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   bool preserveOrder = flags & q_Memcached$$GET_PRESERVE_ORDER;
@@ -301,13 +297,11 @@ Variant c_Memcached::t_getmultibykey(CStrRef server_key, CArrRef keys,
 
 bool c_Memcached::t_getdelayed(CArrRef keys, bool with_cas /*= false*/,
                                CVarRef value_cb /*= null_variant*/) {
-  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   return t_getdelayedbykey(null_string, keys, with_cas, value_cb);
 }
 
 bool c_Memcached::t_getdelayedbykey(CStrRef server_key, CArrRef keys,
     bool with_cas /*= false*/, CVarRef value_cb /*= null_variant*/) {
-  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   if (!getMultiImpl(server_key, keys, with_cas, NULL)) return false;
@@ -324,7 +318,6 @@ bool c_Memcached::t_getdelayedbykey(CStrRef server_key, CArrRef keys,
 }
 
 Variant c_Memcached::t_fetch() {
-  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   MemcachedResultWrapper result(&m_impl->memcached); Array item;
@@ -334,7 +327,6 @@ Variant c_Memcached::t_fetch() {
 }
 
 Variant c_Memcached::t_fetchall() {
-  TAINT_OBSERVER(TAINT_BIT_ALL, TAINT_BIT_NONE);
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   Array returnValue;

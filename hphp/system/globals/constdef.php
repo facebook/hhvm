@@ -12019,7 +12019,6 @@ DefineConstant(
 //        'value' => default value of the argument
 //        'desc'  => description of the argument
 //      )
-//   'taint_observer' => taint propagation information
 //     array (
 //       'set_mask' => which bits to set automatically
 //       'clear_mask' => which bits to clear automatically

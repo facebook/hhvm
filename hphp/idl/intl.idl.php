@@ -62,7 +62,6 @@ DefineFunction(
       'type'   => Int64,
       'desc'   => "Error code returned by the last API function call.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -74,7 +73,6 @@ DefineFunction(
       'type'   => String,
       'desc'   => "Description of an error occurred in the last API function call.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -93,7 +91,6 @@ DefineFunction(
         'desc'   => "ICU error code.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -111,7 +108,6 @@ DefineFunction(
         'desc'   => "is a value that returned by functions: intl_get_error_code(), collator_get_error_code() .",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -140,7 +136,6 @@ DefineFunction(
         'desc'   => "Optional sorting type, one of the following:\n\nCollator::SORT_REGULAR - compare items normally (don't change types)\n\nCollator::SORT_NUMERIC - compare items numerically\n\nCollator::SORT_STRING - compare items as strings\n\nDefault \$sort_flag value is Collator::SORT_REGULAR. It is also used if an invalid \$sort_flag value has been specified.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -169,7 +164,6 @@ DefineFunction(
         'desc'   => "The second string to compare.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -188,7 +182,6 @@ DefineFunction(
         'desc'   => "The locale containing the required collation rules. Special values for locales can be passed in - if null is passed for the locale, the default locale collation rules will be used. If empty string (\"\") or \"root\" are passed, UCA rules will be used.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -208,7 +201,6 @@ DefineFunction(
         'type'   => Int64,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -224,7 +216,6 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -240,7 +231,6 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -261,7 +251,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -277,7 +266,6 @@ DefineFunction(
         'type'   => Variant,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -301,7 +289,6 @@ DefineFunction(
         'type'   => Int64,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -321,7 +308,6 @@ DefineFunction(
         'type'   => Int64,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -341,7 +327,6 @@ DefineFunction(
         'type'   => Variant | Reference,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -371,7 +356,6 @@ DefineFunction(
         'desc'   => "Optional sorting type, one of the following:\n\n\n\nCollator::SORT_REGULAR - compare items normally (don't change types)\n\nCollator::SORT_NUMERIC - compare items numerically\n\nCollator::SORT_STRING - compare items as strings Default sorting type is Collator::SORT_REGULAR.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -408,10 +392,6 @@ DefineFunction(
         'desc'   => "This parameter can be used only if INTL_IDNA_VARIANT_UTS46 was used for variant. In that case, it will be filled with an array with the keys 'result', the possibly illegal result of the transformation, 'isTransitionalDifferent', a boolean indicating whether the usage of the transitional mechanisms of UTS #46 either has or would have changed the result and 'errors', which is an int representing a bitset of the error constants IDNA_ERROR_*. ",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -444,10 +424,6 @@ DefineFunction(
         'value'  => "null",
         'desc'   => "This parameter can be used only if INTL_IDNA_VARIANT_UTS46 was used for variant. In that case, it will be filled with an array with the keys 'result', the possibly illegal result of the transformation, 'isTransitionalDifferent', a boolean indicating whether the usage of the transitional mechanisms of UTS #46 either has or would have changed the result and 'errors', which is an int representing a bitset of the error constants IDNA_ERROR_*. ",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -484,10 +460,6 @@ DefineFunction(
         'value'  => "null",
         'desc'   => "This parameter can be used only if INTL_IDNA_VARIANT_UTS46 was used for variant. In that case, it will be filled with an array with the keys 'result', the possibly illegal result of the transformation, 'isTransitionalDifferent', a boolean indicating whether the usage of the transitional mechanisms of UTS #46 either has or would have changed the result and 'errors', which is an int representing a bitset of the error constants IDNA_ERROR_*. ",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_MUTATED",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

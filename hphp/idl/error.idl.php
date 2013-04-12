@@ -66,7 +66,6 @@ DefineFunction(
         'desc'   => "Whether or not to populate the \"object\" index.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -78,7 +77,6 @@ DefineFunction(
       'type'   => null,
       'desc'   => "No value is returned.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -90,7 +88,6 @@ DefineFunction(
       'type'   => StringVec,
       'desc'   => "Returns an associative array describing the last error with keys \"type\", \"message\", \"file\" and \"line\". Returns NULL if there hasn't been an error yet.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -127,7 +124,6 @@ DefineFunction(
         'desc'   => "The extra headers. It's used when the message_type parameter is set to 1. This message type uses the same internal function as mail() does.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -147,7 +143,6 @@ DefineFunction(
         'desc'   => "The new error_reporting level. It takes on either a bitmask, or named constants. Using named constants is strongly encouraged to ensure compatibility for future versions. As error levels are added, the range of integers increases, so older integer-based error levels will not always behave as expected.\n\nThe available error level constants and the actual meanings of these error levels are described in the predefined constants.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -159,7 +154,6 @@ DefineFunction(
       'type'   => Boolean,
       'desc'   => "This function always returns TRUE.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -171,7 +165,6 @@ DefineFunction(
       'type'   => Boolean,
       'desc'   => "This function always returns TRUE.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -196,7 +189,6 @@ DefineFunction(
         'desc'   => "The second parameter, errstr, contains the error message, as a string.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -215,7 +207,6 @@ DefineFunction(
         'desc'   => "Name of the function to be called when an uncaught exception occurs. This function must be defined before calling set_exception_handler(). This handler function needs to accept one parameter, which will be the exception object that was thrown.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -233,7 +224,6 @@ DefineFunction(
         'desc'   => "Relative path of the PHP document.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -251,7 +241,6 @@ DefineFunction(
         'desc'   => "The error message for the fatal.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -262,7 +251,6 @@ DefineFunction(
     'return' => array(
       'type'   => null,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -274,7 +262,6 @@ DefineFunction(
       'type'   => StringVec,
       'desc'   => "Returns an associative array. On success, the array will contain two keys 'file' and 'line' which indicate the filename and line number of the callsite that invoked the current function or method.",
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -299,7 +286,6 @@ DefineFunction(
         'desc'   => "The designated error type for this error. It only works with the E_USER family of constants, and will default to E_USER_NOTICE.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -320,7 +306,6 @@ DefineFunction(
         'value'  => "k_E_USER_NOTICE",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 

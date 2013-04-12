@@ -81,10 +81,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -119,10 +115,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -152,10 +144,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_NONE",
-      'clear_mask' => "TAINT_BIT_NONE",
-    ),
   ));
 
 DefineFunction(
@@ -179,7 +167,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -208,7 +195,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -234,7 +220,6 @@ DefineFunction(
         'desc'   => "If limited is TRUE, the return value will exclude the individual list of cache entries. This is useful when trying to optimize calls for statistics gathering.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -254,7 +239,6 @@ DefineFunction(
         'desc'   => "If cache_type is \"user\", the user cache will be cleared; otherwise, the system cache (cached files) will be cleared.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -289,7 +273,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -319,7 +302,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -339,7 +321,6 @@ DefineFunction(
         'desc'   => "When set to FALSE (default) apc_sma_info() will return a detailed information about each segment.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -349,7 +330,6 @@ DefineFunction(
     'return' => array(
       'type'   => StringVec,
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -373,7 +353,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -409,7 +388,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -445,7 +423,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -476,7 +453,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -500,7 +476,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -526,7 +501,6 @@ DefineFunction(
         'desc'   => "The user vars. Passing in NULL signals a dump of every entry, while passing in array() will dump nothing.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -556,7 +530,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -597,7 +570,6 @@ DefineFunction(
         'desc'   => "The context passed to the filename stream. See the file_put_contents() documentation for details.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -633,7 +605,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 

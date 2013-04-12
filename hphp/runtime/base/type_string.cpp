@@ -23,7 +23,6 @@
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/taint/taint_observer.h>
 
 namespace HPHP {
 
@@ -96,8 +95,6 @@ StringData* buildStringData(int n) {
   int is_negative;
   int len;
 
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
-
   tmpbuf[11] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[11], &len);
   return NEW(StringData)(p, len, CopyString);
@@ -120,8 +117,6 @@ StringData* buildStringData(int64_t n) {
   int is_negative;
   int len;
 
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
-
   tmpbuf[20] = '\0';
   p = conv_10(n, &is_negative, &tmpbuf[20], &len);
   return NEW(StringData)(p, len, CopyString);
@@ -141,8 +136,6 @@ String::String(int64_t n) {
 
 StringData* buildStringData(double n) {
   char *buf;
-
-  TAINT_OBSERVER(TAINT_BIT_MUTATED, TAINT_BIT_NONE);
 
   if (n == 0.0) n = 0.0; // so to avoid "-0" output
   vspprintf(&buf, 0, "%.*G", 14, n);
@@ -182,8 +175,7 @@ String String::lastToken(char delimiter) {
 int String::find(char ch, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;
-  // Ignore taint in comparison functions.
-  return string_find(m_px->dataIgnoreTaint(), m_px->size(), ch, pos,
+  return string_find(m_px->data(), m_px->size(), ch, pos,
                      caseSensitive);
 }
 
@@ -194,8 +186,7 @@ int String::find(const char *s, int pos /* = 0 */,
   if (*s && *(s+1) == 0) {
     return find(*s, pos, caseSensitive);
   }
-  // Ignore taint in comparison functions.
-  return string_find(m_px->dataIgnoreTaint(), m_px->size(), s, strlen(s),
+  return string_find(m_px->data(), m_px->size(), s, strlen(s),
                      pos, caseSensitive);
 }
 
@@ -204,18 +195,16 @@ int String::find(CStrRef s, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
-    return find(*s.dataIgnoreTaint(), pos, caseSensitive);
+    return find(*s.data(), pos, caseSensitive);
   }
-  // Ignore taint in comparison functions.
-  return string_find(m_px->dataIgnoreTaint(), m_px->size(),
-                     s.dataIgnoreTaint(), s.size(), pos, caseSensitive);
+  return string_find(m_px->data(), m_px->size(),
+                     s.data(), s.size(), pos, caseSensitive);
 }
 
 int String::rfind(char ch, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
-  // Ignore taint in comparison functions.
-  return string_rfind(m_px->dataIgnoreTaint(), m_px->size(), ch,
+  return string_rfind(m_px->data(), m_px->size(), ch,
                       pos, caseSensitive);
 }
 
@@ -226,8 +215,7 @@ int String::rfind(const char *s, int pos /* = 0 */,
   if (*s && *(s+1) == 0) {
     return rfind(*s, pos, caseSensitive);
   }
-  // Ignore taint in comparison functions.
-  return string_rfind(m_px->dataIgnoreTaint(), m_px->size(), s, strlen(s),
+  return string_rfind(m_px->data(), m_px->size(), s, strlen(s),
                       pos, caseSensitive);
 }
 
@@ -235,11 +223,10 @@ int String::rfind(CStrRef s, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
-    return rfind(*s.dataIgnoreTaint(), pos, caseSensitive);
+    return rfind(*s.data(), pos, caseSensitive);
   }
-  // Ignore taint in comparison functions.
-  return string_rfind(m_px->dataIgnoreTaint(), m_px->size(),
-                      s.dataIgnoreTaint(), s.size(), pos, caseSensitive);
+  return string_rfind(m_px->data(), m_px->size(),
+                      s.data(), s.size(), pos, caseSensitive);
 }
 
 String String::replace(int start, int length, CStrRef replacement) const {

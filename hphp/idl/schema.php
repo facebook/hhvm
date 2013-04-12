@@ -72,11 +72,6 @@ $output .= <<<CODE
 //        'value' => default value of the argument
 //        'desc'  => description of the argument
 //      )
-//   'taint_observer' => taint propagation information
-//     array (
-//       'set_mask' => which bits to set automatically
-//       'clear_mask' => which bits to clear automatically
-//     )
 // )
 
 
@@ -309,20 +304,6 @@ function define_function($func, $clsname = 'function') {
     $args = '';
   }
 
-  $taint_observer = '';
-  if (isset($func['taint_observer'])) {
-    if (is_array($func['taint_observer'])) {
-      push_globals();
-      begin_array(false);
-      out_str('set_mask', $func['taint_observer']['set_mask']);
-      out_str('clear_mask', $func['taint_observer']['clear_mask']);
-      end_array(false);
-      $taint_observer = pop_globals();
-    } else {
-      $taint_observer = "false";
-    }
-  }
-
   begin_function('DefineFunction');
   begin_array();
   out_str('name',   $func['name'], true);
@@ -331,7 +312,6 @@ function define_function($func, $clsname = 'function') {
   out_str('opt',    idx_string($func, 'opt'));
   out_fmt('return', $return);
   out_fmt('args',   $args);
-  out_fmt('taint_observer', $taint_observer);
   out_str('note',   idx_string($func, 'note'));
   end_array(false);
   end_function();

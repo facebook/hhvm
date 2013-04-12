@@ -214,14 +214,6 @@ public:
   const char *data() const {
     return m_px ? m_px->data() : "";
   }
-private:
-  // This method is only used internally for comparisons; that is, fully
-  // self-contained string ops which do not lead to mutation or creation and
-  // do not need to propagate taint. Only use it if you're sure what you're
-  // doing should ignore taint!
-  const char *dataIgnoreTaint() const {
-    return m_px ? m_px->dataIgnoreTaint() : "";
-  }
 public:
   CStrRef setSize(int len) {
     assert(m_px);

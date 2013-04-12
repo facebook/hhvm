@@ -28,9 +28,6 @@
 #include <runtime/base/code_coverage.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/intercept.h>
-#include <runtime/base/taint/taint_data.h>
-#include <runtime/base/taint/taint_trace.h>
-#include <runtime/base/taint/taint_warning.h>
 #include <runtime/vm/backup_gc.h>
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>
@@ -55,15 +52,6 @@ const int64_t k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE =
   FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
 const int64_t k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE =
   FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
-
-const int64_t k_TAINT_NONE = TAINT_BIT_NONE;
-const int64_t k_TAINT_HTML = TAINT_BIT_HTML;
-const int64_t k_TAINT_MUTATED = TAINT_BIT_MUTATED;
-const int64_t k_TAINT_SQL = TAINT_BIT_SQL;
-const int64_t k_TAINT_SHELL = TAINT_BIT_SHELL;
-const int64_t k_TAINT_TRACE_HTML = TAINT_BIT_TRACE_HTML;
-const int64_t k_TAINT_ALL = TAINT_BIT_ALL;
-const int64_t k_TAINT_TRACE_SELF = TAINT_BIT_TRACE_SELF;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1553,72 +1541,6 @@ Variant f_fb_disable_code_coverage() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void f_fb_set_taint(VRefParam str, int taint) {
-#ifdef TAINTED
-  if (!str.isString()) {
-    return;
-  }
-
-  StringData *sd = str.getStringData();
-  assert(sd);
-  if (sd->getCount() > 1) {
-    // Pass taint to our copy.
-    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-    str = NEW(StringData)(sd->data(), sd->size(), CopyString);
-  }
-
-  str.getStringData()->getTaintDataRef().setTaint(taint);
-#endif
-}
-
-void f_fb_unset_taint(VRefParam str, int taint) {
-#ifdef TAINTED
-  if (!str.isString()) {
-    return;
-  }
-
-  StringData *sd = str.getStringData();
-  assert(sd);
-  if (sd->getCount() > 1) {
-    // Pass taint to our copy.
-    TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-    str = NEW(StringData)(sd->data(), sd->size(), CopyString);
-  }
-
-  str.getStringData()->getTaintDataRef().unsetTaint(taint);
-#endif
-}
-
-bool f_fb_get_taint(CStrRef str, int taint) {
-#ifdef TAINTED
-  StringData *string_data = str.get();
-  assert(string_data);
-  return string_data->getTaintDataRefConst().getTaint() & taint;
-#else
-  return false;
-#endif
-}
-
-Array f_fb_get_taint_warning_counts() {
-#ifdef TAINTED
-  return TaintWarning::GetCounts();
-#else
-  Array counts;
-  counts.set(TAINT_BIT_HTML, 0);
-  counts.set(TAINT_BIT_MUTATED, 0);
-  counts.set(TAINT_BIT_SQL, 0);
-  counts.set(TAINT_BIT_SHELL, 0);
-  counts.set(TAINT_BIT_ALL, 0);
-  return counts;
-#endif
-}
-
-void f_fb_enable_html_taint_trace() {
-#ifdef TAINTED
-  TaintTracer::SwitchTrace(TAINT_BIT_TRACE_HTML, true);
-#endif
-}
 
 bool f_fb_output_compression(bool new_value) {
   Transport *transport = g_context->getTransport();

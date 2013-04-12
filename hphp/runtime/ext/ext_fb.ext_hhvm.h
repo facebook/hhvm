@@ -325,55 +325,6 @@ timeout_in_ms => st0
 Value* fh_fb_crossall_query(Value* _rv, Value* sql, int max_thread, bool retry_query_on_fail, int connect_timeout, int read_timeout, bool timeout_in_ms) asm("_ZN4HPHP19f_fb_crossall_queryERKNS_6StringEibiib");
 
 /*
-void HPHP::f_fb_set_taint(HPHP::VRefParamValue const&, int)
-_ZN4HPHP14f_fb_set_taintERKNS_14VRefParamValueEi
-
-str => rdi
-taint => rsi
-*/
-
-void fh_fb_set_taint(TypedValue* str, int taint) asm("_ZN4HPHP14f_fb_set_taintERKNS_14VRefParamValueEi");
-
-/*
-void HPHP::f_fb_unset_taint(HPHP::VRefParamValue const&, int)
-_ZN4HPHP16f_fb_unset_taintERKNS_14VRefParamValueEi
-
-str => rdi
-taint => rsi
-*/
-
-void fh_fb_unset_taint(TypedValue* str, int taint) asm("_ZN4HPHP16f_fb_unset_taintERKNS_14VRefParamValueEi");
-
-/*
-bool HPHP::f_fb_get_taint(HPHP::String const&, int)
-_ZN4HPHP14f_fb_get_taintERKNS_6StringEi
-
-(return value) => rax
-str => rdi
-taint => rsi
-*/
-
-bool fh_fb_get_taint(Value* str, int taint) asm("_ZN4HPHP14f_fb_get_taintERKNS_6StringEi");
-
-/*
-HPHP::Array HPHP::f_fb_get_taint_warning_counts()
-_ZN4HPHP29f_fb_get_taint_warning_countsEv
-
-(return value) => rax
-_rv => rdi
-*/
-
-Value* fh_fb_get_taint_warning_counts(Value* _rv) asm("_ZN4HPHP29f_fb_get_taint_warning_countsEv");
-
-/*
-void HPHP::f_fb_enable_html_taint_trace()
-_ZN4HPHP28f_fb_enable_html_taint_traceEv
-
-*/
-
-void fh_fb_enable_html_taint_trace() asm("_ZN4HPHP28f_fb_enable_html_taint_traceEv");
-
-/*
 HPHP::Variant HPHP::f_fb_const_fetch(HPHP::Variant const&)
 _ZN4HPHP16f_fb_const_fetchERKNS_7VariantE
 

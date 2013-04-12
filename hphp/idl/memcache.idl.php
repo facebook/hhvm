@@ -82,7 +82,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -118,7 +117,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -158,7 +156,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -198,7 +195,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -238,7 +234,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -266,10 +261,6 @@ DefineFunction(
         'type'   => Variant | Reference,
         'value'  => "null",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 
@@ -299,7 +290,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -328,7 +318,6 @@ DefineFunction(
         'value'  => "1",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -357,7 +346,6 @@ DefineFunction(
         'value'  => "1",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -375,7 +363,6 @@ DefineFunction(
         'type'   => Object,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -394,7 +381,6 @@ DefineFunction(
         'desc'   => "Turns debug output on if equals to TRUE. Turns debug output off if equals to FALSE.",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -410,7 +396,6 @@ DefineFunction(
         'type'   => Object,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -433,7 +418,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -453,7 +437,6 @@ DefineFunction(
         'type'   => Int32,
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -478,7 +461,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -503,7 +485,6 @@ DefineFunction(
         'value'  => "0.2",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -534,7 +515,6 @@ DefineFunction(
         'value'  => "100",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -565,7 +545,6 @@ DefineFunction(
         'value'  => "100",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -610,7 +589,6 @@ DefineFunction(
         'value'  => "null_variant",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 DefineFunction(
@@ -670,7 +648,6 @@ DefineFunction(
         'value'  => "0",
       ),
     ),
-    'taint_observer' => false,
   ));
 
 
@@ -931,10 +908,6 @@ DefineFunction(
         'value'  => "null",
         'desc'   => "If present, flags fetched along with the values will be written to this parameter. These flags are the same as the ones given to for example Memcache::set(). The lowest byte of the int is reserved for pecl/memcache internal usage (e.g. to indicate compression and serialization status).",
       ),
-    ),
-    'taint_observer' => array(
-      'set_mask'   => "TAINT_BIT_ALL",
-      'clear_mask' => "TAINT_BIT_NONE",
     ),
   ));
 

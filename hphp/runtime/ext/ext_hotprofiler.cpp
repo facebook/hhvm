@@ -144,11 +144,18 @@ static void hp_trunc_time(struct timeval *tv, uint64_t intr) {
  * @author cjiang
  */
 inline uint64_t tsc() {
+#ifdef __x86_64__
   uint32_t __a,__d;
   uint64_t val;
   asm volatile("rdtsc" : "=a" (__a), "=d" (__d));
   (val) = ((uint64_t)__a) | (((uint64_t)__d)<<32);
   return val;
+#else
+  // TODO(2200461): rdtsc isn't portable. Ideally we'd use some higher-level
+  // portable API (clock_gettime maybe?), but that may break assumptions that
+  // clients of this API make about how the underlying clock works.
+  return 0;
+#endif
 }
 
 /**

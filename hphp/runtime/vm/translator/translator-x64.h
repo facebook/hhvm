@@ -615,6 +615,7 @@ MINSTRS
   CASE(InterfaceExists) \
   CASE(TraitExists) \
   CASE(Dup) \
+  CASE(CreateCl) \
   CASE(CreateCont) \
   CASE(ContEnter) \
   CASE(ContExit) \

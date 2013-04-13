@@ -301,6 +301,10 @@ O(NewObjCached,              D(StkPtr), C(Int)                                \
                                           S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
 O(NewObjNoCtorCached,        D(StkPtr), S(Str)                                \
                                           S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
+O(CreateCl,                     D(Obj), C(Int)                                \
+                                          S(Str)                              \
+                                          S(StkPtr)                           \
+                                          S(StkPtr),                   Mem|N) \
 O(NewArray,                     D(Arr), C(Int),                  E|Mem|N|PRc) \
 O(NewTuple,                     D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
 O(LdRaw,                        DParam, SUnk,                             NF) \

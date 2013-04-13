@@ -3617,6 +3617,12 @@ AKExists    [C C] -> [C:Bool]
   or object, and raises a warning if $2 is not a string, integer, or
   null.
 
+CreateCl <num args> <class name>  [F..F]  ->  [C]
+
+  Creates an instance of <class name> and pushes it on the stack.
+  <class name> must be a subclass of "Closure".
+
+
 14. Continuation creation and execution
 ---------------------------------------
 

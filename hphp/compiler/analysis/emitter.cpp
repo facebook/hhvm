@@ -1773,7 +1773,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
   emitPostponedPinits();
   emitPostponedSinits();
   emitPostponedCinits();
-  emitPostponedClosureCtors();
   Peephole peephole(m_ue, m_metaInfo);
   m_metaInfo.setForUnit(m_ue);
 }
@@ -3801,16 +3800,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // We're still at the closure definition site. Emit code to instantiate
         // the new anonymous class, with the use variables as arguments.
         ExpressionListPtr valuesList(ce->getClosureValues());
-        Offset fpiStart = m_ue.bcPos();
-        e.FPushCtorD(useCount, className);
-        {
-          FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-          for (int i = 0; i < useCount; ++i) {
-            emitFuncCallArg(e, (*valuesList)[i], i);
-          }
+        for (int i = 0; i < useCount; ++i) {
+          emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
         }
-        e.FCall(useCount);
-        emitPop(e);
+        e.CreateCl(useCount, className);
+
         // From here on out, we're just building metadata for the closure.
 
         // Instance variables.
@@ -3820,15 +3814,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           pce->addProperty(useVar.first, AttrPrivate, nullptr, nullptr,
                            &uninit, KindOfInvalid);
         }
-
-        // The constructor. This is entirely generated; all it does is stash its
-        // arguments in the object's instance variables.
-        static const StringData* ctorName =
-          StringData::GetStaticString("__construct");
-        FuncEmitter* ctor = m_ue.newMethodEmitter(ctorName, pce);
-        pce->addMethod(ctor);
-        m_postponedClosureCtors.push_back(
-          PostponedClosureCtor(useVars, ce, ctor));
 
         // The __invoke method. This is the body of the closure, preceded by
         // code that pulls the object's instance variables into locals.
@@ -5635,74 +5620,6 @@ void EmitterVisitor::emitPostponedCinits() {
 
     p.release(); // Manually trigger memory cleanup.
     m_postponedCinits.pop_front();
-  }
-}
-
-void EmitterVisitor::emitPostponedClosureCtors() {
-  while (!m_postponedClosureCtors.empty()) {
-    PostponedClosureCtor& ctor = m_postponedClosureCtors.front();
-    ClosureUseVarVec& useVars = ctor.m_useVars;
-    FuncEmitter* fe = ctor.m_fe;
-    const Location* sLoc = ctor.m_expr->getLocation().get();
-    fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), AttrPublic, false, nullptr);
-
-    unsigned n = useVars.size();
-    Emitter e(ctor.m_expr, m_ue, *this);
-    FuncFinisher ff(this, e, fe);
-    if (n > 0) {
-      for (unsigned i = 0; i < n; ++i) {
-        // To ensure that we get a new local for every use var, we call
-        // appendParam with an artificial uniquified name. Because there's no
-        // user code here, the fact that the variable has a made-up name in the
-        // metadata doesn't matter.
-        std::ostringstream num;
-        num << i;
-        FuncEmitter::ParamInfo pi;
-        pi.setRef(useVars[i].second);
-        fe->appendParam(StringData::GetStaticString(num.str()), pi);
-        if (i) {
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
-                      false, 0, 0);
-        }
-        e.CheckThis();
-        m_evalStack.push(StackSym::H);
-        m_evalStack.push(StackSym::T);
-        m_evalStack.setString(useVars[i].first);
-        markProp(e);
-        emitVirtualLocal(i);
-        if (useVars[i].second) {
-          emitVGet(e);
-          emitBind(e);
-        } else {
-          emitCGet(e);
-          emitSet(e);
-        }
-        emitPop(e);
-      }
-    }
-
-    // call parent::__construct()
-    static StringData* s___construct = StringData::GetStaticString("__construct");
-    e.String(s___construct);
-    static StringData* s_Closure = StringData::GetStaticString("Closure");
-    e.String(s_Closure);
-    e.AGetC();
-    Offset fpiStart = m_ue.bcPos();
-    e.FPushClsMethodF(0);
-    {
-      FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-    }
-    e.FCall(0);
-    e.PopR();
-
-    e.Null();
-    if (n > 0) {
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::GuardedThis,
-                  false, 0, 0);
-    }
-    e.RetC();
-
-    m_postponedClosureCtors.pop_front();
   }
 }
 

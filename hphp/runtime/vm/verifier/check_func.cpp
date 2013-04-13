@@ -605,7 +605,8 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     return vectorSig(pc, CV);
   case OpFCall:     // ONE(IVA),     FMANY,   ONE(RV)
   case OpFCallArray:// NA,           ONE(FV), ONE(RV)
-  case OpFCallBuiltin: //TWO(IVA, SA) FMANY,   ONE(RV)
+  case OpFCallBuiltin: //TWO(IVA, SA) FMANY,  ONE(RV)
+  case OpCreateCl:  // TWO(IVA,SA),  FMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
     }

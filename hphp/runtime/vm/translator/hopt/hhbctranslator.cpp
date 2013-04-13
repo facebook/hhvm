@@ -16,6 +16,7 @@
 #include "runtime/vm/translator/hopt/hhbctranslator.h"
 
 #include "util/trace.h"
+#include "runtime/ext/ext_closure.h"
 #include "runtime/ext/ext_continuation.h"
 #include "runtime/vm/translator/translator-runtime.h"
 #include "runtime/vm/translator/translator-x64.h"
@@ -1292,6 +1293,21 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
     }
   }
   m_tb->genNewObjCached(numParams, className);
+}
+
+void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
+  const StringData* clsName = lookupStringId(funNameStrId);
+  TRACE(3, "%u: CreateCl %d %s\n", m_bcOff, numParams, clsName->data());
+  spillStack();
+  SSATmp* closure = m_tb->gen(
+    CreateCl,
+    m_tb->genDefConst(numParams),
+    m_tb->genDefConst(clsName),
+    m_tb->getSp(),
+    m_tb->getFp()
+  );
+  discard(numParams);
+  push(closure);
 }
 
 void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {

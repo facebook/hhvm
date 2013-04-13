@@ -1010,6 +1010,11 @@ void TranslatorX64::irTranslateFPushCtorD(const Tracelet& t,
   HHIR_EMIT(FPushCtorD, (i.imm[0].u_IVA), (i.imm[1].u_SA));
 }
 
+void TranslatorX64::irTranslateCreateCl(const Tracelet& t,
+                                        const NormalizedInstruction& i) {
+  HHIR_EMIT(CreateCl, (i.imm[0].u_IVA), (i.imm[1].u_SA));
+}
+
 // static void fatalNullThis() { raise_error(Strings::FATAL_NULL_THIS); }
 
 void

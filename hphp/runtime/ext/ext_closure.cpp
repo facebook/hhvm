@@ -32,16 +32,14 @@ c_Closure::~c_Closure() {
 }
 
 void c_Closure::t___construct() {
-  VM::ActRec* ar;
-  {
-    // like calling CallerFrame twice
-    VM::Transl::VMRegAnchor _;
-    VMExecutionContext* context = g_vmContext;
-    VM::ActRec* me = context->getFP();
-    VM::ActRec* childClosure = context->getPrevVMState(me);
-    ar = context->getPrevVMState(childClosure);
-  }
-  
+  raise_error("Can't create a Closure directly");
+}
+
+/**
+ * sp points to the last use variable on the stack.
+ * returns the closure so that translator-x64 can just return "rax".
+ */
+c_Closure* c_Closure::init(int numArgs, VM::ActRec* ar, TypedValue* sp) {
   static StringData* invokeName = StringData::GetStaticString("__invoke");
   VM::Func* invokeFunc = getVMClass()->lookupMethod(invokeName);
 
@@ -60,6 +58,16 @@ void c_Closure::t___construct() {
   // Change my __invoke's m_cls to be the same as my creator's
   VM::Class* scope = ar->m_func->cls();
   m_func = invokeFunc->cloneAndSetClass(scope);
+
+  // copy the props to instance variables
+  assert(m_cls->numDeclProperties() == numArgs);
+  TypedValue* beforeCurUseVar = sp + numArgs;
+  TypedValue* curProperty = propVec();
+  for (int i = 0; i < numArgs; i++) {
+    // teleport the references in here so we don't incref
+    *curProperty++ = *--beforeCurUseVar;
+  }
+  return this;
 }
 
 ObjectData* c_Closure::clone() {

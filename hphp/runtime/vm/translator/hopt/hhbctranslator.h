@@ -232,6 +232,7 @@ struct HhbcTranslator {
                            const StringData* methName);
   void emitFPushCtorD(int32_t numParams, int32_t classNameStrId);
   void emitFPushCtor(int32_t numParams);
+  void emitCreateCl(int32_t numParams, int32_t classNameStrId);
   void emitFCallArray();
   void emitFCall(uint32_t numParams,
                   Offset returnBcOffset,

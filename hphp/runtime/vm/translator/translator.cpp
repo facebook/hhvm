@@ -1209,6 +1209,7 @@ static const struct {
   { OpParent,      {None,             Stack1,       OutClassRef,       1 }},
   { OpLateBoundCls,{None,             Stack1,       OutClassRef,       1 }},
   { OpNativeImpl,  {None,             None,         OutNone,           0 }},
+  { OpCreateCl,    {BStackN,          Stack1,       OutObject,         1 }},
 
   /*** 14. Continuation instructions ***/
 
@@ -1252,15 +1253,16 @@ int getStackDelta(const NormalizedInstruction& ni) {
   int hiddenStackInputs = 0;
   initInstrInfo();
   Opcode op = ni.op();
-  if (op == OpFCall) {
-    int numArgs = ni.imm[0].u_IVA;
-    return 1 - numArgs - kNumActRecCells;
-  }
-  if (op == OpFCallBuiltin) {
-    return 1 - ni.imm[0].u_IVA;
-  }
-  if (op == OpNewTuple) {
-    return 1 - ni.imm[0].u_IVA;
+  switch (op) {
+    case OpFCall: {
+      int numArgs = ni.imm[0].u_IVA;
+      return 1 - numArgs - kNumActRecCells;
+    }
+
+    case OpFCallBuiltin:
+    case OpNewTuple:
+    case OpCreateCl:
+      return 1 - ni.imm[0].u_IVA;
   }
   const InstrInfo& info = instrInfo[op];
   if (info.in & MVector) {

@@ -552,6 +552,7 @@ enum SetOpOp {
   O(Parent,          NA,               NOV,             ONE(AV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
+  O(CreateCl,        TWO(IVA,SA),      FMANY,           ONE(CV),    NF) \
   O(CreateCont,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
   O(ContEnter,       NA,               NOV,             NOV,        CF) \
   O(ContExit,        NA,               NOV,             NOV,        CF) \

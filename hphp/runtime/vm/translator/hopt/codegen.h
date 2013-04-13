@@ -458,7 +458,7 @@ private:
 };
 
 using namespace HPHP::VM::Transl::TargetCache;
-ActRec* cgNewInstanceHelper(Class* cls,
+ActRec* irNewInstanceHelper(Class* cls,
                             int numArgs,
                             Cell* sp,
                             ActRec* prevAr);

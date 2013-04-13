@@ -9338,6 +9338,33 @@ TranslatorX64::emitFPushCtorDFast(const NormalizedInstruction& i,
   emitVStackStore(a, i, rax, arOff + AROFF(m_this));
 }
 
+void
+TranslatorX64::translateCreateCl(const Tracelet& t,
+                                 const NormalizedInstruction& i) {
+  int getArgs = i.imm[0].u_IVA;
+  const StringData* clsName = curUnit()->lookupLitstrId(i.imm[1].u_SA);
+
+  LazyScratchReg clsCache(m_regMap);
+
+  TargetCache::CacheHandle classCh = TargetCache::allocKnownClass(clsName);
+  clsCache.alloc();
+  a.    lea_reg64_disp_reg64(rVmTl, classCh, r(clsCache));
+  EMIT_RCALL(a, i,
+             newInstanceHelperNoCtorCached,
+             R(clsCache),
+             IMM(uintptr_t(clsName)));
+
+  EMIT_RCALL(a, i,
+             getMethodPtr(&c_Closure::init),
+             R(rax),
+             IMM(getArgs),
+             R(rVmFp),
+             RPLUS(rVmSp, vstackOffset(i, 0)));
+
+  m_regMap.bind(rax, i.outStack->location, KindOfObject, RegInfo::DIRTY);
+}
+
+
 static void fatalNullThis() {
   raise_error(Strings::FATAL_NULL_THIS);
 }
@@ -12379,6 +12406,7 @@ bool TranslatorX64::dumpTCData() {
   SUPPORTED_OP(ContCurrent) \
   SUPPORTED_OP(FPushCtor) \
   SUPPORTED_OP(FPushCtorD) \
+  SUPPORTED_OP(CreateCl) \
   SUPPORTED_OP(StaticLocInit) \
   /*
    * Always-interp instructions,

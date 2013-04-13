@@ -1200,7 +1200,14 @@ FreeSpill S0:ConstInt
   Deallocates S0 slots of spill space on the stack.
 
 
-16. Continuations
+16. Continuations & Closures
+
+CreateCl S0:Int S1:Str S2:StkPtr S3:StkPtr
+
+  Creates an object of class S1 (which must be a subclass of Closure),
+  copies S0 number of parameters from S2 into the properties on the object,
+  saves the $this and Func* from ActRec S3 into the object,
+  and returns the object.
 
 CreateCont
 FillContLocals

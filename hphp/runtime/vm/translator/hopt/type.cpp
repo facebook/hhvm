@@ -215,6 +215,16 @@ void assertOperandTypes(const IRInstruction* inst) {
                        errorMessage).str());
   };
 
+  auto checkSpills = [&] {
+    for (; curSrc < inst->getNumSrcs(); ++curSrc) {
+      // SpillStack slots may be stack types or None, if the
+      // simplifier removed some.
+      auto const valid = inst->getSrc(curSrc)->getType()
+        .subtypeOfAny(Type::Gen, Type::Cls, Type::None);
+      check(valid, "Gen|Cls|None");
+    }
+  };
+
 #define IRT(name, ...) UNUSED static const Type name = Type::name;
   IR_TYPES
 #undef IRT
@@ -233,6 +243,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define SNumInt  S(Int, Bool)
 #define SNum     S(Int, Bool, Dbl)
 #define SUnk     return;
+#define SSpills  checkSpills();
 #define ND
 #define DMulti
 #define DStk(...)
@@ -265,6 +276,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef CStr
 #undef SNum
 #undef SUnk
+#undef SSpills
 
 #undef ND
 #undef D

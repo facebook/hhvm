@@ -121,6 +121,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *     CStr          same as C(StaticStr)
  *     SNumInt       same as S(Int,Bool)
  *     SNum          same as S(Int,Bool,Dbl)
+ *     SSpills       SpillStack's variadic source list
  *
  * flags:
  *
@@ -350,7 +351,7 @@ O(StaticLocInitCached,    D(BoxedCell), CStr                                  \
                                           S(FramePtr)                         \
                                           S(Cell)                             \
                                             C(CacheHandle),      PRc|E|N|Mem) \
-O(SpillStack,                D(StkPtr), SUnk,                            CRc) \
+O(SpillStack,                D(StkPtr), S(StkPtr) C(Int) SSpills,        CRc) \
 O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr)                         \
                                           S(Func,FuncCls,FuncCtx,Null)        \

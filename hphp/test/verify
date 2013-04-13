@@ -38,6 +38,8 @@ if ($opt_threads > 20) {
 $opt_reduce = "";
 $opt_coverage = "";
 $opt_hhvm = "hhvm";
+$opt_hphp = "hphp";
+$opt_repo = 0;
 $opt_cpu_time_limit = 0;
 $opt_real_time_limit = 0;
 $opt_no_exp = 0;
@@ -59,6 +61,8 @@ $opt_retval =
             "coverage=s" => \$opt_coverage,
             "no-exp" => \$opt_no_exp,
             "hhvm=s" => \$opt_hhvm,
+            "hphp=s" => \$opt_hphp,
+            "repo=i" => \$opt_repo,
             "cpu-time-limit=i" => \$opt_cpu_time_limit,
             "real-time-limit=i" => \$opt_real_time_limit,
             );
@@ -367,7 +371,25 @@ sub run_test
         @lines = <FILE>;
         close(FILE);
         chomp(@lines);
-        $opts = join('', @lines);
+        $opts = join(' ', @lines);
+    }
+
+
+    if ($opt_repo) {
+      if ($test =~ m/\.hhas/) {
+        # We don't have a way to skip, I guess run non-repo?
+      } else {
+        my ($hphp_opts) = "";
+        if (-e "$opt_objdir/$test.hphp_opts") {
+            open (FILE, "<$opt_objdir/$test.hphp_opts");
+            @lines = <FILE>;
+            close(FILE);
+            chomp(@lines);
+            $hphp_opts = join(' ', @lines);
+        }
+        `$opt_hphp -thhbc -l0 -k1 -o $opt_objdir/$test.repo $hphp_opts $opt_objdir/$test`;
+        $opts .= " -v Repo.Authoritative=true -v Repo.Central.Path=$opt_objdir/$test.repo/hhvm.hhbc";
+      }
     }
 
     ($utime, $stime, $cutime, $cstime) = times;

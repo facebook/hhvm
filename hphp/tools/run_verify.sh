@@ -32,6 +32,7 @@
 
 DEFAULT_VERIFY_HHBC=$FBMAKE_BIN_ROOT/verify.hhbc
 DEFAULT_HHVM=$FBMAKE_BIN_ROOT/hphp/hhvm/hhvm
+DEFAULT_HPHP=$FBMAKE_BIN_ROOT/hphp/hhvm/hphp
 
 QTESTS_SKIP='autoload5.php condinfinite.php condinfinite2.php define_b.php
   _fbcufa_init.php include_b.php include_c.php include_d.php
@@ -49,8 +50,10 @@ if [ x"$HPHP_HOME" = x"" ] ; then
 fi
 
 : ${HHVM:=$DEFAULT_HHVM}
+: ${HPHP:=$DEFAULT_HPHP}
 : ${VERIFY_HHBC:=$DEFAULT_VERIFY_HHBC}
 : ${VQ:=jit}
+: ${REPO:=0}
 : ${TEST_PATH:=test/vm}
 
 cd $HPHP_HOME/hphp
@@ -75,8 +78,13 @@ hhir_args="$jit_args -v Eval.JitUseIR=true -v Eval.HHIRDisableTx64=true"
 
 # Find a config.hdf in the test dir or a parents
 # inspired by http://unix.stackexchange.com/questions/13464/
-cur_dir=$TEST_PATH;
-slashes=${TEST_PATH//[^\/]/}
+
+if [ -f $TEST_PATH ]; then
+  cur_dir=`dirname $TEST_PATH`;
+else
+  cur_dir="$TEST_PATH/"
+fi
+slashes=${cur_dir//[^\/]/}
 config="test/config.hdf"
 for (( n=${#slashes}; n>0; --n )); do
   if [ -f "$cur_dir/config.hdf" ]; then
@@ -87,6 +95,22 @@ for (( n=${#slashes}; n>0; --n )); do
 done
 cmd="$HHVM --config $config"
 
+if [ -f $TEST_PATH ]; then
+  cur_dir=`dirname $TEST_PATH`;
+else
+  cur_dir="$TEST_PATH/"
+fi
+slashes=${cur_dir//[^\/]/}
+config="test/hphp_config.hdf"
+for (( n=${#slashes}; n>0; --n )); do
+  if [ -f "$cur_dir/hphp_config.hdf" ]; then
+    config="$cur_dir/hphp_config.hdf"
+    break
+  fi
+  cur_dir="$cur_dir/.."
+done
+HPHP_ARGS="--config $config"
+
 if [ x"$MODE" = x"server" ] ; then
     : ${PORT:=8080}
     : ${TEST_HOME:=.}
@@ -95,8 +119,7 @@ if [ x"$MODE" = x"server" ] ; then
 else
     cmd="$cmd --file %3\$s"
 fi
-verify_args="$verify_args --hhvm $HHVM"
-
+verify_args="$verify_args --hhvm $HHVM --repo $REPO"
 cmd="$cmd -v Eval.EnableObjDestructCall=true"
 
 case $VQ in
@@ -115,4 +138,4 @@ case $VQ in
 esac
 
 exec $VERIFY_SCRIPT --command="$cmd $VERIFY_EXTRA_CMD_ARGS" $verify_args \
-    $VERIFY_EXTRA_ARGS $qtests
+    $VERIFY_EXTRA_ARGS --hphp="$HPHP $HPHP_ARGS" $qtests

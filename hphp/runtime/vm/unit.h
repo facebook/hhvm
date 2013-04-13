@@ -445,7 +445,8 @@ struct Unit {
 
   MD5 md5() const { return m_md5; }
 
-  static NamedEntity* GetNamedEntity(const StringData *);
+  static NamedEntity* GetNamedEntity(const StringData *)
+    __attribute__((__flatten__));
   static Array getUserFunctions();
   static Array getClassesInfo();
   static Array getInterfacesInfo();

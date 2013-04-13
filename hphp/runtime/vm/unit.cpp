@@ -86,16 +86,20 @@ Mutex Unit::s_classesMutex;
  */
 static NamedEntityMap *s_namedDataMap;
 
-NamedEntity* Unit::GetNamedEntity(const StringData *str) {
-  if (!s_namedDataMap) s_namedDataMap = new NamedEntityMap();
-  NamedEntityMap::const_iterator it = s_namedDataMap->find(str);
-  if (it != s_namedDataMap->end()) return &it->second;
-
+static NEVER_INLINE
+NamedEntity* getNamedEntityHelper(const StringData* str) {
   if (!str->isStatic()) {
     str = StringData::GetStaticString(str);
   }
 
   return &(*s_namedDataMap)[str];
+}
+
+NamedEntity* Unit::GetNamedEntity(const StringData* str) {
+  if (!s_namedDataMap) s_namedDataMap = new NamedEntityMap();
+  NamedEntityMap::const_iterator it = s_namedDataMap->find(str);
+  if (LIKELY(it != s_namedDataMap->end())) return &it->second;
+  return getNamedEntityHelper(str);
 }
 
 void NamedEntity::setCachedFunc(Func* f) {

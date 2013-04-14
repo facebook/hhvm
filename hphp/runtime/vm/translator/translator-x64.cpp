@@ -1450,14 +1450,6 @@ TranslatorX64::translate(SrcKey sk, bool align, bool allowIR) {
 
   SKTRACE(1, sk, "translate moved head from %p to %p\n",
           getTopTranslation(sk), start);
-  if (Trace::moduleEnabledRelease(tcdump, 1)) {
-    static __thread int n;
-    if (++n % 10000 == 0) {
-      std::ofstream f("cfg.dot", std::ios_base::trunc);
-      drawCFG(f);
-      f.close();
-    }
-  }
   return start;
 }
 
@@ -2538,94 +2530,6 @@ TranslatorX64::emitCondJmp(SrcKey skTaken, SrcKey skNotTaken,
 
   a.jcc(cc, stub); // MUST use 4-byte immediate form
   a.jmp(stub); // MUST use 4-byte immediate form
-}
-
-static void skToName(SrcKey sk, char* name) {
-  sprintf(name, "sk_%08lx_%05d",
-          long(sk.getFuncId()), sk.offset());
-}
-
-static void skToClusterName(SrcKey sk, char* name) {
-  sprintf(name, "skCluster_%08lx_%05d",
-          long(sk.getFuncId()), sk.offset());
-}
-
-static void translToName(const TCA tca, char* name) {
-  sprintf(name, "tc_%p", tca);
-}
-
-void TranslatorX64::drawCFG(std::ofstream& out) const {
-  if (!isTransDBEnabled()) return;
-  const char* indent = "    ";
-  static int genCount;
-  int numSrcKeys = 0;
-  int numTranslations = 0;
-  out << "digraph srcdb" << genCount++ <<" {\n";
-  out << indent << "size = \"8,11\";\n";
-  out << indent << "ratio = fill;\n";
-  for (SrcDB::const_iterator entry = m_srcDB.begin();
-       entry != m_srcDB.end(); ++entry) {
-    const SrcKey sk = SrcKey::fromAtomicInt(entry->first);
-    // 1 subgraph per srcKey.
-    char name[64];
-    skToClusterName(sk, name);
-    numSrcKeys++;
-    out << indent << "subgraph " << name << "{\n";
-    char* indent = "        ";
-    skToName(sk, name);
-    out << indent << name << "[shape=box];\n";
-    const vector<TCA>& transls = entry->second->translations();
-    for (vector<TCA>::const_iterator t = transls.begin(); t != transls.end();
-         ++t) {
-      out << indent << "// Translations: " << transls.size() << "\n";
-      char transname[64];
-      translToName(*t, transname);
-      numTranslations++;
-      out << indent << transname << "[fontsize=11.0];\n";
-      out << indent << name << " -> " << transname << ";\n";
-    }
-    // And, all translations on the same line
-    out << indent << "{ rank = same; ";
-    out << name << " ";
-    for (vector<TCA>::const_iterator t = transls.begin(); t != transls.end();
-         ++t) {
-      char transname[64];
-      translToName(*t, transname);
-      out << transname << " ";
-    }
-    out << indent << "}\n"; // subgraph
-    out << indent << "}\n";
-  }
-
-  // OK! Those were all the nodes. Now edges. While edges are physically
-  // from translation to translation, they're virtually from srcKey to
-  // srcKey, and that is how the db represents them.
-  for (SrcDB::const_iterator entry = m_srcDB.begin(); entry != m_srcDB.end();
-       ++entry) {
-    char destName[64];
-    skToName(SrcKey::fromAtomicInt(entry->first), destName);
-    const vector<IncomingBranch>& ibs = entry->second->incomingBranches();
-    out << indent << "// incoming branches to " << destName << "\n";
-    for (vector<IncomingBranch>::const_iterator ib = ibs.begin();
-         ib != ibs.end(); ++ib) {
-      // Find the start of the translation that contains this branch
-      const char *branchTypeToColorStr[] = {
-        "black", // JMP
-        "green", // JZ
-        "red",   // JNZ
-      };
-      TransDB::const_iterator lowerTCA = m_transDB.lower_bound(ib->m_src);
-      assert(lowerTCA != m_transDB.end());
-      char srcName[64];
-      const TransRec* transRec = this->getTransRec(lowerTCA->second);
-      skToName(transRec->src, srcName);
-      out << indent << srcName << " -> " << destName << "[ color = " <<
-        branchTypeToColorStr[ib->m_type] << "];\n";
-    }
-  }
-  out << indent << "// " << numSrcKeys << " srckeys, " << numTranslations <<
-    " tracelets\n";
-  out << "}\n\n";
 }
 
 /*

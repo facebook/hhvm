@@ -1211,13 +1211,6 @@ struct SpaceRecorder {
       ptrdiff_t diff = m_a.code.frontier - m_start;
       if (diff) Trace::traceRelease("TCSpace %10s %3d\n", m_name, diff);
     }
-    if (Trace::moduleEnabledRelease(Trace::tcdump, 1)) {
-      Trace::traceRelease("TCDump %s", m_name);
-      for (const uint8_t* p = m_start; p < m_a.code.frontier; p++) {
-        Trace::traceRelease(" %x", *p);
-      }
-      Trace::traceRelease("\n");
-    }
   }
 };
 

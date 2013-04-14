@@ -69,7 +69,6 @@ namespace Trace {
       TM(fixup)       \
       TM(tcspace)     \
       TM(targetcache) \
-      TM(tcdump)      \
       TM(treadmill)   \
       TM(regalloc)    \
       TM(bcinterp)    \

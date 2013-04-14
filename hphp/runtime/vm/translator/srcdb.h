@@ -92,10 +92,6 @@ struct SrcRec {
     return m_translations;
   }
 
-  const vector<IncomingBranch>& incomingBranches() const {
-    return m_incomingBranches;
-  }
-
   void setAnchorTranslation(TCA anc) {
     assert(!m_anchorTranslation);
     assert(m_tailFallbackJumps.empty());

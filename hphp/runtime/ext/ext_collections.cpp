@@ -21,7 +21,7 @@
 #include "runtime/ext/ext_array.h"
 #include "runtime/ext/ext_math.h"
 #include "runtime/ext/ext_intl.h"
-#include "runtime/vm/translator/translator-inline.h" 
+#include "runtime/vm/translator/translator-inline.h"
 #include "system/lib/systemlib.h"
 
 namespace HPHP {
@@ -111,7 +111,7 @@ void c_Vector::freeData() {
     m_data = nullptr;
   }
 }
-  
+
 void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
   if (!iterable.isInitialized()) {
     return;
@@ -3912,22 +3912,6 @@ ObjectData* collectionDeepCopyPair(c_Pair* pair) {
   collectionDeepCopyTV(&pair->elm0);
   collectionDeepCopyTV(&pair->elm1);
   return o.detach();
-}
-
-CollectionInit::CollectionInit(int cType, ssize_t nElms) {
-  switch (cType) {
-    case Collection::VectorType: m_data = NEWOBJ(c_Vector)(); break;
-    case Collection::MapType: m_data = NEWOBJ(c_Map)(); break;
-    case Collection::StableMapType: m_data = NEWOBJ(c_StableMap)(); break;
-    case Collection::PairType: m_data = NEWOBJ(c_Pair)(); break;
-    default:
-      assert(false);
-      break;
-  }
-  // Reserve enough room for nElms elements in advance
-  if (nElms) {
-    collectionReserve(m_data, nElms);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

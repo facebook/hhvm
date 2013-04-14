@@ -371,14 +371,16 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
    * told us it can't be KindOfUninit, even if
    * wantPropSpecializedWarnings we can't throw.
    */
-  if (isCGetM && isSingle && simpleProp) {
-    auto info = getFinalPropertyOffset(m_ni, m_mii);
-    assert(info.offset != -1);
-    if (info.hphpcType == KindOfInvalid) {
+  if (wantPropSpecializedWarnings()) {
+    if (isCGetM && isSingle && simpleProp) {
+      auto info = getFinalPropertyOffset(m_ni, m_mii);
+      assert(info.offset != -1);
+      if (info.hphpcType == KindOfInvalid) {
+        m_ht.spillStack();
+      }
+    } else {
       m_ht.spillStack();
     }
-  } else if (wantPropSpecializedWarnings()) {
-    m_ht.spillStack();
   }
 }
 

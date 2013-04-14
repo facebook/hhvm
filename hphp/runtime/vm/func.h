@@ -43,7 +43,7 @@ struct Func {
     // construct a dummy ParamInfo
     ParamInfo()
       : m_builtinType(KindOfInvalid), m_funcletOff(InvalidAbsoluteOffset),
-        m_phpCode(nullptr) {
+        m_phpCode(nullptr), m_userType(nullptr) {
       tvWriteUninit(&m_defVal);
     }
 
@@ -59,6 +59,7 @@ struct Func {
         (tcName)
         (tcNullable)
         (m_userAttributes)
+        (m_userType)
         ;
 
       if (SerDe::deserializing) {
@@ -100,6 +101,12 @@ struct Func {
     const Func::UserAttributeMap& userAttributes() const {
       return m_userAttributes;
     }
+    void setUserType(const StringData* userType) {
+      m_userType = userType;
+    }
+    const StringData* userType() const {
+      return m_userType;
+    }
 
   private:
     DataType m_builtinType;     // typehint for builtins
@@ -110,6 +117,8 @@ struct Func {
     TypeConstraint m_typeConstraint;
 
     Func::UserAttributeMap m_userAttributes;
+    // the type the user typed in source code, contains type parameters and all
+    const StringData* m_userType;
   };
   struct SVInfo { // Static variable info.
     const StringData* name;

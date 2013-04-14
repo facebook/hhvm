@@ -5229,6 +5229,9 @@ void EmitterVisitor::emitPostponedMeths() {
         pi.setTypeConstraint(tc);
         TRACE(1, "Added constraint to %s\n", fe->name()->data());
       }
+      if (par->hasUserType()) {
+        pi.setUserType(StringData::GetStaticString(par->getUserTypeHint()));
+      }
       // Store info about the default value if there is one.
       if (par->isOptional()) {
         const StringData* phpCode;

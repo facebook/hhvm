@@ -15,6 +15,7 @@
 */
 
 #include <compiler/parser/parser.h>
+#include <compiler/type_annotation.h>
 #include <util/parser/hphp.tab.hpp>
 #include <compiler/analysis/file_scope.h>
 
@@ -831,7 +832,7 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
 
     func = NEW_STMT(FunctionStatement, exp, ref->num(), closureName,
                     dynamic_pointer_cast<ExpressionList>(new_params->exp),
-                    ret.text(),
+                    ret.typeAnnotationName(),
                     dynamic_pointer_cast<StatementList>(stmt->stmt),
                     attribute, comment, ExpressionListPtr());
     out->stmt = func;
@@ -879,8 +880,8 @@ void Parser::onFunction(Token &out, Token *modifiers, Token &ret, Token &ref,
       attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
     }
 
-    func = NEW_STMT(FunctionStatement, exp, ref->num(), funcName,
-                    old_params, ret.text(),
+    func = NEW_STMT(FunctionStatement, exp, ref->num(), funcName, old_params,
+                    ret.typeAnnotationName(),
                     dynamic_pointer_cast<StatementList>(stmt->stmt),
                     attribute, comment, attrList);
     out->stmt = func;
@@ -912,7 +913,8 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
   if (attr && attr->exp) {
     attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
-  expList->addElement(NEW_EXP(ParameterExpression, type->text(), var->text(),
+  TypeAnnotationPtr typeAnnotation = type.typeAnnotation;
+  expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation, var->text(),
                               ref, defValue ? defValue->exp : ExpressionPtr(),
                               attrList));
   out->exp = expList;
@@ -1079,12 +1081,14 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
       : NEW_EXP0(ModifierExpression);
 
     out->stmt = NEW_STMT
-      (ClassVariable, exp, (type) ? type->text() : "",
+      (ClassVariable, exp,
+       (type) ? type->typeAnnotationName() : "",
        dynamic_pointer_cast<ExpressionList>(decl->exp));
   } else {
     out->stmt =
-      NEW_STMT(ClassConstant, (type) ? type->text() : "",
-               dynamic_pointer_cast<ExpressionList>(decl->exp));
+      NEW_STMT(ClassConstant,
+        (type) ? type->typeAnnotationName() : "",
+        dynamic_pointer_cast<ExpressionList>(decl->exp));
   }
 }
 
@@ -1134,7 +1138,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     ModifierExpressionPtr exp2 = Construct::Clone(exp);
     mth = NEW_STMT(MethodStatement, exp2, ref->num(), closureName,
                    dynamic_pointer_cast<ExpressionList>(new_params->exp),
-                   ret.text(),
+                   ret.typeAnnotationName(),
                    dynamic_pointer_cast<StatementList>(stmt->stmt),
                    attribute, comment, ExpressionListPtr());
     out->stmt = mth;
@@ -1166,7 +1170,9 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
       attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
     }
     mth = NEW_STMT(MethodStatement, exp, ref->num(), name->text(),
-                   old_params, ret.text(), stmts, attribute, comment,
+                   old_params,
+                   ret.typeAnnotationName(),
+                   stmts, attribute, comment,
                    attrList);
     out->stmt = mth;
     if (reloc) {
@@ -1569,7 +1575,8 @@ void Parser::onClosureParam(Token &out, Token *params, Token &param,
   } else {
     expList = NEW_EXP0(ExpressionList);
   }
-  expList->addElement(NEW_EXP(ParameterExpression, "", param->text(), ref,
+  expList->addElement(NEW_EXP(ParameterExpression, TypeAnnotationPtr(),
+                              param->text(), ref,
                               ExpressionPtr(), ExpressionPtr()));
   out->exp = expList;
 }
@@ -1584,6 +1591,50 @@ void Parser::onGoto(Token &out, Token &label, bool limited) {
 
 void Parser::onTypedef(Token& out, const Token& name, const Token& type) {
   out->stmt = NEW_STMT(TypedefStatement, name.text(), type.text());
+}
+
+void Parser::onTypeAnnotation(Token& out, const Token& name,
+		                      const Token& typeArgs) {
+  out.set(name.num(), name.text());
+  out.typeAnnotation = TypeAnnotationPtr(
+    new TypeAnnotation(name.text(), typeArgs.typeAnnotation));
+  if (isTypeVar(name.text())) {
+    out.typeAnnotation->setTypeVar();
+  }
+}
+
+void Parser::onTypeList(Token& type1, const Token& type2) {
+  if (!type1.typeAnnotation) {
+    PARSE_ERROR("Missing type in type list");
+  }
+  if (type2.num() != 0 && !type1.typeAnnotation) {
+    PARSE_ERROR("Missing type in type list");
+  }
+  if (type2.typeAnnotation) {
+    type1.typeAnnotation->appendToTypeList(type2.typeAnnotation);
+  }
+}
+
+void Parser::onTypeSpecialization(Token& type, char specialization) {
+  if (type.typeAnnotation) {
+    switch (specialization) {
+    case '?':
+      type.typeAnnotation->setNullable();
+      break;
+    case '@':
+      type.typeAnnotation->setSoft();
+      break;
+    case 't':
+      type.typeAnnotation->setTuple();
+      break;
+    case 'f':
+      type.typeAnnotation->setFunction();
+      break;
+    case 'x':
+      type.typeAnnotation->setXHP();
+      break;
+    }
+  }
 }
 
 void Parser::invalidateGoto(TStatementPtr stmt, GotoError error) {

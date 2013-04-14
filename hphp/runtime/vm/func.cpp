@@ -900,6 +900,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     pi.setTypeConstraint(m_params[i].typeConstraint());
     pi.setUserAttributes(m_params[i].userAttributes());
     pi.setBuiltinType(m_params[i].builtinType());
+    pi.setUserType(m_params[i].userType());
     f->appendParam(m_params[i].ref(), pi, pBuilder);
   }
   f->shared()->m_params = pBuilder;

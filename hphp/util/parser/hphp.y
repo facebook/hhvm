@@ -2352,13 +2352,16 @@ sm_typeargs_opt:
 ;
 
 sm_type_list:
-    sm_type
-  | sm_type_list ',' sm_type
+    sm_type                            { Token t; t.reset();
+                                         _p->onTypeList($1, t); 
+                                         $$ = $1; }
+  | sm_type_list ',' sm_type           { _p->onTypeList($1, $3); 
+                                         $$ = $1; }
 ;
 
 sm_func_type_list:
-    sm_type_list ',' T_VARARG          { $$.reset(); }
-  | sm_type_list                       { $$.reset(); }
+    sm_type_list ',' T_VARARG          { $$ = $1; }
+  | sm_type_list                       { $$ = $1; }
   | T_VARARG                           { $$.reset(); }
   |                                    { $$.reset(); }
 ;
@@ -2407,33 +2410,41 @@ sm_shape_type:
 sm_type:
     /* double-optional types will be rejected by the typechecker; we
      * already allow plenty of nonsense types anyway */
-    '?' sm_type                        { only_in_strict_mode(_p); $$.reset(); }
-  | '@' sm_type                        { only_in_strict_mode(_p); $$.reset(); }
-  | ident sm_typeargs_opt              { $$ = $1;
-                                         /* if the type annotation is a bound
-                                            typevar we have to strip it */
-                                         if (_p->scanner().isStrictMode() &&
-                                             (_p->isTypeVar($$.text()) ||
-                                              !$$.text().compare("mixed") ||
-                                              !$$.text().compare("this")
-                                             )) {
-                                           $$.reset();
-                                         }
-                                       }
-  | T_ARRAY                            { $$.setText("array"); }
+    '?' sm_type                        { only_in_strict_mode(_p); 
+                                         _p->onTypeSpecialization($2, '?');
+                                         $$ = $2; }
+  | '@' sm_type                        { only_in_strict_mode(_p);
+                                         _p->onTypeSpecialization($2, '@');
+                                         $$ = $2; }
+  | ident sm_typeargs_opt              { _p->onTypeAnnotation($$, $1, $2); }
+  | T_ARRAY                            { Token t; t.reset();
+                                         $1.setText("array");
+                                         _p->onTypeAnnotation($$, $1, t); }
   | sm_shape_type                      { $$ = $1; }
   | T_ARRAY T_TYPELIST_LT sm_type
     T_TYPELIST_GT                      { only_in_strict_mode(_p);
-                                         $$.setText("array"); }
+                                         $1.setText("array");
+                                         _p->onTypeAnnotation($$, $1, $3); }
   | T_ARRAY T_TYPELIST_LT sm_type ','
     sm_type T_TYPELIST_GT              { only_in_strict_mode(_p);
-                                         $$.setText("array"); }
-  | T_XHP_LABEL                        { $1.xhpLabel(); $$ = $1; }
+                                         _p->onTypeList($3, $5);
+                                         $1.setText("array");
+                                         _p->onTypeAnnotation($$, $1, $3); }
+  | T_XHP_LABEL                        { $1.xhpLabel();
+                                         Token t; t.reset();
+                                         _p->onTypeAnnotation($$, $1, t);
+                                         _p->onTypeSpecialization($$, 'x'); }
   | '(' T_FUNCTION
     '(' sm_func_type_list ')'
-    ':' sm_type ')'                   { only_in_strict_mode(_p); $$.reset(); }
+    ':' sm_type ')'                   { only_in_strict_mode(_p); 
+                                        _p->onTypeList($7, $4);
+                                        _p->onTypeAnnotation($$, $2, $7);
+                                        _p->onTypeSpecialization($$, 'f'); }
   | '(' sm_type_list ',' sm_type ')'  { only_in_strict_mode(_p);
-                                        $$.setText("array"); }
+                                        _p->onTypeList($2, $4);
+                                        Token t; t.reset(); t.setText("array");
+                                        _p->onTypeAnnotation($$, t, $2);
+                                        _p->onTypeSpecialization($$, 't'); }
 ;
 
 sm_type_opt:

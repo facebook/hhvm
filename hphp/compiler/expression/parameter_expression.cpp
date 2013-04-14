@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <compiler/type_annotation.h>
 #include <compiler/expression/parameter_expression.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/file_scope.h>
@@ -31,12 +32,12 @@ using namespace HPHP;
 
 ParameterExpression::ParameterExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- const std::string &type, const std::string &name, bool ref,
+ TypeAnnotationPtr type, const std::string &name, bool ref,
  ExpressionPtr defaultValue, ExpressionPtr attributeList)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ParameterExpression)),
     m_originalType(type), m_name(name), m_ref(ref),
     m_defaultValue(defaultValue), m_attributeList(attributeList) {
-  m_type = Util::toLower(type);
+  m_type = Util::toLower(type ? type->simpleName() : "");
   if (m_defaultValue) {
     m_defaultValue->setContext(InParameterExpression);
   }
@@ -48,6 +49,16 @@ ExpressionPtr ParameterExpression::clone() {
   exp->m_defaultValue = Clone(m_defaultValue);
   exp->m_attributeList = Clone(m_attributeList);
   return exp;
+}
+
+const std::string ParameterExpression::getOriginalTypeHint() const  {
+  assert(hasTypeHint());
+  return m_originalType->simpleName();
+}
+
+const std::string ParameterExpression::getUserTypeHint() const  {
+  assert(hasUserType());
+  return m_originalType->fullName();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -275,7 +286,7 @@ void ParameterExpression::compatibleDefault() {
 // code generation functions
 
 void ParameterExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (!m_type.empty()) cg_printf("%s ", m_originalType.c_str());
+  if (!m_type.empty()) cg_printf("%s ", m_originalType->simpleName().c_str());
   if (m_ref) cg_printf("&");
   cg_printf("$%s", m_name.c_str());
   if (m_defaultValue) {

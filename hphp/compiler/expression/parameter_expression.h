@@ -26,11 +26,12 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(Type);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(ParameterExpression);
+DECLARE_BOOST_TYPES(TypeAnnotation);
 
 class ParameterExpression : public Expression {
 public:
   ParameterExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                      const std::string &type, const std::string &name,
+                      TypeAnnotationPtr type, const std::string &name,
                       bool ref, ExpressionPtr defaultValue,
                       ExpressionPtr attributeList);
 
@@ -49,10 +50,9 @@ public:
     assert(hasTypeHint());
     return m_type;
   }
-  const std::string &getOriginalTypeHint() const {
-    assert(hasTypeHint());
-    return m_originalType;
-  }
+  bool hasUserType() const { return m_originalType != nullptr; }
+  const std::string getOriginalTypeHint() const;
+  const std::string getUserTypeHint() const;
   void parseHandler(ClassScopePtr cls);
   void compatibleDefault();
   void fixupSelfAndParentTypehints(ClassScopePtr cls);
@@ -60,7 +60,7 @@ private:
   TypePtr getTypeSpecForClass(AnalysisResultPtr ar, bool forInference);
 
   std::string m_type;
-  std::string m_originalType;
+  TypeAnnotationPtr m_originalType;
   std::string m_name;
   bool m_ref;
   ExpressionPtr m_defaultValue;

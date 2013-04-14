@@ -499,6 +499,18 @@ struct Parser : ParserBase {
   void onTypedef(Token& out, Token& name, Token& value) {
     X(out, name, value);
   }
+
+  void onTypeAnnotation(Token& out, const Token& name, const Token& typeArgs) {
+    X(out, name, typeArgs);
+  }
+
+  void onTypeList(Token& type1, const Token& type2) {
+    X(type1, type2);
+  }
+
+  void onTypeSpecialization(const Token& type, char specialization) {
+    X(type, specialization);
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

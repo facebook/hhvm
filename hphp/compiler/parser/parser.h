@@ -21,6 +21,7 @@
 #include "util/parser/parser.h"
 #include "compiler/construct.h"
 #include "compiler/option.h"
+#include "compiler/type_annotation.h"
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS
@@ -49,6 +50,7 @@ DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(BlockScope);
+DECLARE_BOOST_TYPES(TypeAnnotation);
 
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,6 +60,7 @@ class Token : public ScannerToken {
 public:
   ExpressionPtr exp;
   StatementPtr stmt;
+  TypeAnnotationPtr typeAnnotation;
 
   Token &operator+(const char *str) {
     m_text += str;
@@ -78,11 +81,16 @@ public:
     ScannerToken::operator=(other);
     exp = other.exp;
     stmt = other.stmt;
+    typeAnnotation = other.typeAnnotation;
   }
   void reset() {
     exp.reset();
     stmt.reset();
+    typeAnnotation.reset();
     ScannerToken::reset();
+  }
+  const std::string typeAnnotationName() {
+    return (typeAnnotation) ? typeAnnotation->fullName() : "";
   }
 };
 
@@ -237,6 +245,10 @@ public:
   void onLabel(Token &out, Token &label);
   void onGoto(Token &out, Token &label, bool limited);
   void onTypedef(Token& out, const Token& name, const Token& type);
+
+  void onTypeAnnotation(Token& out, const Token& name, const Token& typeArgs);
+  void onTypeList(Token& type1, const Token& type2);
+  void onTypeSpecialization(Token& type, char specialization);
 
   virtual void invalidateGoto(TStatementPtr stmt, GotoError error);
   virtual void invalidateLabel(TStatementPtr stmt);

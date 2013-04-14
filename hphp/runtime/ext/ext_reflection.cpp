@@ -348,8 +348,8 @@ static void set_function_info(Array &ret, const VM::Func* func) {
       param.set(s_index, VarNR((int)i));
       VarNR name(func->localNames()[i]);
       param.set(s_name, name);
-      const StringData* type = fpi.typeConstraint().exists() ?
-        fpi.typeConstraint().typeName() : empty_string.get();
+      const StringData* type = fpi.userType() ?
+        fpi.userType() : empty_string.get();
       param.set(s_type, VarNR(type));
       param.set(s_function, VarNR(func->name()));
       if (func->preClass()) {

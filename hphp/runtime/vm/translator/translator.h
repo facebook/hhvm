@@ -203,8 +203,8 @@ struct DynLocation {
   bool isBoolean() const {
     return rtt.isBoolean();
   }
-  bool isVariant() const {
-    return rtt.isVariant();
+  bool isRef() const {
+    return rtt.isRef();
   }
   bool isValue() const {
     return rtt.isValue();

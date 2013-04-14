@@ -91,7 +91,7 @@ static const PhysReg unsafe_rsp = rsp;
 // Takes a location and a condition. If the condition is true the value of the
 // location will be passed in a register
 #define VALML(dl, cond)                                                 \
-  IE((cond) && !dl.isVariant(),                                         \
+  IE((cond) && !dl.isRef(),                                             \
      (Stats::emitInc(a, Stats::Tx64_MRegKey),                           \
       m_regMap.allocInputReg(dl),                                       \
       V(dl.location)),                                                  \
@@ -215,7 +215,7 @@ inline unsigned buildBitmask(T c, Args... args) {
 // both, respectively.
 static KeyType getKeyType(const DynLocation& dl, bool nonLitStr,
                           bool nonLitInt) {
-  if (dl.isVariant()) {
+  if (dl.isRef()) {
     // Variants can change types at arbitrary times, so don't try to
     // pass them in registers.
     return AnyKey;
@@ -409,7 +409,7 @@ void TranslatorX64::emitBaseLCR(const Tracelet& t,
     rBase.alloc();
 
     m_regMap.cleanSmashLoc(base.location);
-    if (base.isVariant()) {
+    if (base.isRef()) {
       // Get inner value.
       a.  loadq(pr[disp + TVOFF(m_data)], r(rBase));
       if (auto offset = RefData::tvOffset()) a.addq (offset, r(rBase));
@@ -768,7 +768,7 @@ void TranslatorX64::emitElem(const Tracelet& t,
 
   typedef TypedValue* (*OpFunc)(TypedValue*, TypedValue*,
                                 MInstrState*);
-  BUILD_OPTABH(getKeyTypeIS(memb), memb.isVariant(), mia);
+  BUILD_OPTABH(getKeyTypeIS(memb), memb.isRef(), mia);
   EMIT_RCALL(a, ni, opFunc, R(rBase), ISML(memb), R(mis_rsp));
   rBase.realloc(rax);
 }
@@ -849,7 +849,7 @@ void TranslatorX64::emitPropGeneric(const Tracelet& t,
   Stats::emitInc(a, Stats::PropAsm_Generic);
   typedef TypedValue* (*OpFunc)(Class*, TypedValue*, TypedValue*,
                                 MInstrState*);
-  BUILD_OPTAB(getKeyTypeS(memb), memb.isVariant(), mia, m_vecState->isObj());
+  BUILD_OPTAB(getKeyTypeS(memb), memb.isRef(), mia, m_vecState->isObj());
   EMIT_RCALL(a, ni, opFunc, CTX(),
                     R(rBase),
                     SML(memb),
@@ -1288,7 +1288,7 @@ void TranslatorX64::emitCGetProp(const Tracelet& t,
   // Emit the appropriate helper call.
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue*, TypedValue*,
                          MInstrState*);
-  BUILD_OPTABH(getKeyTypeS(memb), memb.isVariant(), m_vecState->isObj());
+  BUILD_OPTABH(getKeyTypeS(memb), memb.isRef(), m_vecState->isObj());
   EMIT_RCALL(a, ni, opFunc,
              CTX(), R(rBase), SML(memb), RESULT(useTvR), R(mis_rsp));
   if (!useTvR) invalidateOutStack(ni);
@@ -1342,7 +1342,7 @@ void TranslatorX64::emitVGetElem(const Tracelet& t,
   bool useTvR = useTvResult(t, ni, mii);
   PREP_RESULT(useTvR);
   typedef void (*OpFunc)(TypedValue*, TypedValue*, TypedValue*, MInstrState*);
-  BUILD_OPTABH(getKeyTypeIS(memb), memb.isVariant());
+  BUILD_OPTABH(getKeyTypeIS(memb), memb.isRef());
   cleanOutLocal(ni);
   EMIT_RCALL(a, ni, opFunc, R(rBase), ISML(memb), RESULT(useTvR), R(mis_rsp));
   invalidateOutLocal(ni);
@@ -1405,7 +1405,7 @@ void TranslatorX64::emitVGetProp(const Tracelet& t,
   // Emit the appropriate helper call.
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue*, TypedValue*,
                          MInstrState*);
-  BUILD_OPTABH(getKeyTypeS(memb), memb.isVariant(), m_vecState->isObj());
+  BUILD_OPTABH(getKeyTypeS(memb), memb.isRef(), m_vecState->isObj());
   cleanOutLocal(ni);
   EMIT_RCALL(a, ni, opFunc,
              CTX(), R(rBase), SML(memb), RESULT(useTvR), R(mis_rsp));
@@ -1453,7 +1453,7 @@ void TranslatorX64::emitIssetEmptyElem(const Tracelet& t,
                                        unsigned iInd, PhysReg rBase) {
   const DynLocation& memb = *ni.inputs[iInd];
   typedef bool (*OpFunc)(TypedValue*, TypedValue*, MInstrState*);
-  BUILD_OPTABH(getKeyTypeIS(memb), memb.isVariant(), useEmpty);
+  BUILD_OPTABH(getKeyTypeIS(memb), memb.isRef(), useEmpty);
   EMIT_RCALL(a, ni, opFunc, R(rBase), ISML(memb), R(mis_rsp));
   a.   and_imm32_reg64(1, rax); // Mask garbage bits.
   ScratchReg rIssetEmpty(m_regMap, rax);
@@ -1532,7 +1532,7 @@ void TranslatorX64::emitIssetEmptyProp(const Tracelet& t,
   PREP_CTX(argNumToRegName[0]);
   // Emit the appropriate helper call.
   typedef bool (*OpFunc)(Class* ctx, TypedValue*, TypedValue*, MInstrState*);
-  BUILD_OPTABH(getKeyTypeS(memb), memb.isVariant(), useEmpty,
+  BUILD_OPTABH(getKeyTypeS(memb), memb.isRef(), useEmpty,
               m_vecState->isObj());
   EMIT_RCALL(a, ni, opFunc, CTX(), R(rBase), SML(memb));
   a.   andq(1, rax); // Mask garbage bits.
@@ -1609,11 +1609,11 @@ void TranslatorX64::emitSetElem(const Tracelet& t,
   SKTRACE(2, ni.source, "%s setResult=%s\n",
           __func__, setResult ? "true" : "false");
   m_regMap.cleanSmashLoc(val.location);
-  bool useRVal = (!forceMValIncDec(t, ni, mii) && val.isVariant());
+  bool useRVal = (!forceMValIncDec(t, ni, mii) && val.isRef());
   PREP_VAL(useRVal, argNumToRegName[2]);
   // Emit the appropriate helper call.
   typedef void (*OpFunc)(TypedValue*, TypedValue*, Cell*);
-  BUILD_OPTABH(getKeyTypeIS(key), key.isVariant(), setResult);
+  BUILD_OPTABH(getKeyTypeIS(key), key.isRef(), setResult);
   cleanOutLocal(ni);
   EMIT_RCALL(a, ni, opFunc,
                     R(rBase),
@@ -1682,7 +1682,7 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
     m_regMap.allocInputReg(*m_curNI, kRhsIdx);
     PhysReg rhsReg = getReg(val.location);
     LazyScratchReg tmp(m_regMap);
-    if (val.isVariant() && !IS_NULL_TYPE(val.rtt.valueType())) {
+    if (val.isRef() && !IS_NULL_TYPE(val.rtt.valueType())) {
       tmp.alloc();
       emitDerefRef(a, rhsReg, r(tmp));
       rhsReg = r(tmp);
@@ -1701,12 +1701,12 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
   const DynLocation& key = *ni.inputs[iInd];
   m_regMap.cleanSmashLoc(val.location);
   PREP_CTX(argNumToRegName[0]);
-  bool useRVal = val.isVariant();
+  bool useRVal = val.isRef();
   PREP_VAL(useRVal, argNumToRegName[3]);
   // Emit the appropriate helper call.
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue*, Cell*);
   cleanOutLocal(ni);
-  BUILD_OPTAB(getKeyTypeS(key), key.isVariant(), setResult,
+  BUILD_OPTAB(getKeyTypeS(key), key.isRef(), setResult,
               m_vecState->isObj());
   EMIT_RCALL(a, ni, opFunc, CTX(), R(rBase), SML(key), VAL(useRVal));
   invalidateOutLocal(ni);
@@ -1765,12 +1765,12 @@ void TranslatorX64::emitSetOpElem(const Tracelet& t,
   SKTRACE(2, ni.source, "%s setResult=%s\n",
           __func__, setResult ? "true" : "false");
   m_regMap.cleanSmashLoc(val.location);
-  bool useRVal = (!forceMValIncDec(t, ni, mii) && val.isVariant());
+  bool useRVal = (!forceMValIncDec(t, ni, mii) && val.isRef());
   PREP_VAL(useRVal, argNumToRegName[2]);
   typedef void (*OpFunc)(TypedValue*, TypedValue*, Cell*, MInstrState*,
                          TypedValue*);
 # define SETOP_OP(op, bcOp) HELPER_TABLE(FILL_ROW, op)
-  BUILD_OPTAB_ARG(SETOP_OPS, getKeyTypeIS(key), key.isVariant(), op, setResult);
+  BUILD_OPTAB_ARG(SETOP_OPS, getKeyTypeIS(key), key.isRef(), op, setResult);
 # undef SETOP_OP
   // Emit the appropriate helper call.
   cleanOutLocal(ni);
@@ -1859,14 +1859,14 @@ void TranslatorX64::emitSetOpProp(const Tracelet& t,
           __func__, setResult ? "true" : "false");
   m_regMap.cleanSmashLoc(val.location);
   PREP_CTX(argNumToRegName[0]);
-  bool useRVal = val.isVariant();
+  bool useRVal = val.isRef();
   bool isObj = m_vecState->isObj();
   PREP_VAL(useRVal, argNumToRegName[3]);
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue*, Cell*, MInstrState*,
                          TypedValue*);
 # define SETOP_OP(op, bcOp) HELPER_TABLE(FILL_ROW, op)
   BUILD_OPTAB_ARG(SETOP_OPS,
-                  getKeyTypeS(key), key.isVariant(), op, setResult, isObj);
+                  getKeyTypeS(key), key.isRef(), op, setResult, isObj);
 # undef SETOP_OP
   // Emit the appropriate helper call.
   cleanOutLocal(ni);
@@ -1924,7 +1924,7 @@ void TranslatorX64::emitIncDecElem(const Tracelet& t,
           __func__, setResult ? "true" : "false");
   typedef void (*OpFunc)(TypedValue*, TypedValue*, MInstrState*, TypedValue*);
 # define INCDEC_OP(op) HELPER_TABLE(FILL_ROW, op)
-  BUILD_OPTAB_ARG(INCDEC_OPS, getKeyTypeIS(key), key.isVariant(), op, setResult);
+  BUILD_OPTAB_ARG(INCDEC_OPS, getKeyTypeIS(key), key.isRef(), op, setResult);
 # undef INCDEC_OP
   // Emit the appropriate helper call.
   cleanOutLocal(ni);
@@ -1981,7 +1981,7 @@ void TranslatorX64::emitIncDecProp(const Tracelet& t,
                          TypedValue*);
 # define INCDEC_OP(op) HELPER_TABLE(FILL_ROW, op)
   BUILD_OPTAB_ARG(INCDEC_OPS,
-                  getKeyTypeS(key), key.isVariant(), op, setResult, isObj);
+                  getKeyTypeS(key), key.isRef(), op, setResult, isObj);
 # undef INCDEC_OP
   // Emit the appropriate helper call.
   cleanOutLocal(ni);
@@ -2044,9 +2044,9 @@ void TranslatorX64::emitBindElem(const Tracelet& t,
   m_regMap.cleanSmashLoc(val.location);
   cleanOutLocal(ni);
   assert(!forceMValIncDec(t, ni, mii));
-  assert(val.isVariant());
+  assert(val.isRef());
   typedef void (*OpFunc)(TypedValue*, TypedValue*, TypedValue*, MInstrState*);
-  BUILD_OPTAB(getKeyTypeIS(key), key.isVariant());
+  BUILD_OPTAB(getKeyTypeIS(key), key.isRef());
   EMIT_RCALL(a, ni, opFunc, R(rBase), ISML(key), A(val.location), R(mis_rsp));
   invalidateOutLocal(ni);
 }
@@ -2094,7 +2094,7 @@ void TranslatorX64::emitBindProp(const Tracelet& t,
 
   const DynLocation& val = *ni.inputs[0];
   m_regMap.cleanSmashLoc(val.location);
-  assert(val.isVariant());
+  assert(val.isRef());
   assert(generateMVal(t, ni, mii));
   const DynLocation& key = *ni.inputs[iInd];
   cleanOutLocal(ni);
@@ -2103,7 +2103,7 @@ void TranslatorX64::emitBindProp(const Tracelet& t,
   assert(!forceMValIncDec(t, ni, mii));
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue*, TypedValue*,
                          MInstrState*);
-  BUILD_OPTAB(getKeyTypeS(key), key.isVariant(), m_vecState->isObj());
+  BUILD_OPTAB(getKeyTypeS(key), key.isRef(), m_vecState->isObj());
   EMIT_RCALL(a, ni, opFunc,
              CTX(), R(rBase), SML(key), A(val.location), R(mis_rsp));
   invalidateOutLocal(ni);
@@ -2144,7 +2144,7 @@ void TranslatorX64::emitUnsetElem(const Tracelet& t,
   m_regMap.cleanSmashLoc(key.location);
   m_regMap.cleanSmashLoc(val.location);
   typedef void (*OpFunc)(TypedValue*, TypedValue*);
-  BUILD_OPTABH(getKeyTypeIS(key), key.isVariant());
+  BUILD_OPTABH(getKeyTypeIS(key), key.isRef());
   EMIT_RCALL(a, ni, opFunc, R(rBase), ISML(key));
   assert(!ni.outLocal && !ni.outStack);
 }
@@ -2189,7 +2189,7 @@ void TranslatorX64::emitUnsetProp(const Tracelet& t,
   PREP_CTX(argNumToRegName[0]);
   // Emit the appropriate helper call.
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue*);
-  BUILD_OPTAB(getKeyTypeS(key), key.isVariant(), m_vecState->isObj());
+  BUILD_OPTAB(getKeyTypeS(key), key.isRef(), m_vecState->isObj());
   EMIT_RCALL(a, ni, opFunc, CTX(), R(rBase), SML(key));
   assert(!ni.outLocal && !ni.outStack);
 }
@@ -2249,7 +2249,7 @@ void TranslatorX64::emitSetNewElem(const Tracelet& t,
   // Emit the appropriate helper call.
   void (*setNewElemOp)(TypedValue*, Cell*) =
     setResult ? setNewElemR : setNewElemNR;
-  bool useRVal = val.isVariant();
+  bool useRVal = val.isRef();
   PREP_VAL(useRVal, argNumToRegName[1]);
   EMIT_RCALL(a, ni, setNewElemOp,
                     R(rBase),
@@ -2294,7 +2294,7 @@ void TranslatorX64::emitSetOpNewElem(const Tracelet& t,
   SKTRACE(2, ni.source, "%s setResult=%s\n",
           __func__, setResult ? "true" : "false");
   m_regMap.cleanSmashLoc(val.location);
-  bool useRVal = val.isVariant();
+  bool useRVal = val.isRef();
   PREP_VAL(useRVal, argNumToRegName[3]);
   // Emit the appropriate helper call.
   if (setResult) {
@@ -2409,7 +2409,7 @@ void TranslatorX64::emitBindNewElem(const Tracelet& t,
   assert(generateMVal(t, ni, mii));
   const DynLocation& val = *ni.inputs[0];
   m_regMap.cleanSmashLoc(val.location);
-  assert(val.isVariant());
+  assert(val.isRef());
   EMIT_RCALL(a, ni, bindNewElem, R(rBase), A(val.location), R(mis_rsp));
 }
 
@@ -2548,7 +2548,7 @@ void TranslatorX64::emitMPre(const Tracelet& t,
                    ? m_regMap.getReg(val.location)
                    : m_regMap.allocReg(val.location, val.outerType(),
                                        RegInfo::CLEAN);
-    if (val.isVariant()) {
+    if (val.isRef()) {
       tmp.alloc();
       emitDerefRef(a, rVal, r(tmp));
       rVal = r(tmp);
@@ -2700,7 +2700,7 @@ void TranslatorX64::emitCGetElem(const Tracelet& t,
   bool useTvR = useTvResult(t, ni, mii);
   PREP_RESULT(useTvR);
   typedef void (*OpFunc)(TypedValue*, TypedValue*, TypedValue*, MInstrState*);
-  BUILD_OPTABH(getKeyTypeIS(memb), memb.isVariant());
+  BUILD_OPTABH(getKeyTypeIS(memb), memb.isRef());
   EMIT_RCALL(a, ni, opFunc, R(rBase), ISML(memb), RESULT(useTvR), R(mis_rsp));
   assert(!ni.outLocal);
   invalidateOutStack(ni);
@@ -2792,7 +2792,7 @@ TranslatorX64::emitArrayElem(const NormalizedInstruction& i,
   if (decRefBase) {
     // We'll need to decref the base after the call. Make sure we hold
     // on to the value if it's a variant or from a global.
-    if (baseInput->isVariant()) {
+    if (baseInput->isRef()) {
       decRefReg = getReg(baseInput->location);
     }
     if (decRefReg != noreg && kCallerSaved.contains(decRefReg)) {
@@ -2851,13 +2851,13 @@ TranslatorX64::translateCGetM(const Tracelet& t,
     const DynLocation& base = *i.inputs[0];
     const DynLocation& key  = *i.inputs[1];
     int args[2];
-    args[0] = base.isVariant() ? ArgAnyReg : 0;
+    args[0] = base.isRef() ? ArgAnyReg : 0;
     args[1] = 1;
     allocInputsForCall(i, args);
 
     PhysReg baseReg = getReg(base.location);
     LazyScratchReg baseScratch(m_regMap);
-    if (base.isVariant()) {
+    if (base.isRef()) {
       baseScratch.alloc();
       emitDerefRef(a, baseReg, r(baseScratch));
       baseReg = r(baseScratch);
@@ -2915,7 +2915,7 @@ void TranslatorX64::translateIssetMFast(const Tracelet& t,
   PhysReg arrReg = getReg(base.location);
 
   LazyScratchReg scratch(m_regMap);
-  if (base.isVariant()) {
+  if (base.isRef()) {
     scratch.alloc();
     emitDerefRef(a, arrReg, r(scratch));
     arrReg = r(scratch);
@@ -3017,7 +3017,7 @@ bool TranslatorX64::forceMValIncDec(const NormalizedInstruction& ni,
   assert(base.valueType() == KindOfArray || val.valueType() == KindOfArray);
   if (val.isLocal() &&
       (val.location == base.location ||
-       (val.isVariant() && base.isVariant() &&
+       (val.isRef() && base.isRef() &&
         val.valueType() == base.valueType()))) {
     // We don't allow a local input unless we also folded a following pop.
     assert(!ni.outStack);
@@ -3068,7 +3068,7 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
   const DynLocation& key = *i.inputs[2];
   assert(arr.isLocal());
 
-  assert(val.isLocal() || !val.isVariant());
+  assert(val.isLocal() || !val.isRef());
   assert(!i.outStack || !val.isLocal());
 
   bool forceIncDec = forceMValIncDec(i, arr, val);
@@ -3083,7 +3083,7 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
   // some of the array_setm helpers will decRef the key if it is a
   // string (for cases where the key is not a local), while others do
   // not (for cases where the key is a local).
-  bool useBoxedForm = arr.isVariant();
+  bool useBoxedForm = arr.isRef();
   void* fptr;
   if (false) { // helper type-checks
     RefData* ref = nullptr;
@@ -3103,13 +3103,13 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
   /*
    * The value can be passed as A or V according to:
    *
-   *                       | val.isVariant() | !val.isVariant()
+   *                       | val.isRef()     | !val.isRef()
    * ----------------------+-----------------+-----------------------------
    * value                 | V(valLoc)       | A(valLoc)
    */
-  bool valIsVariant = val.isVariant();
+  bool valIsRef = val.isRef();
   int args[3];
-  args[0] = valIsVariant ? 3 : ArgDontAllocate;
+  args[0] = valIsRef ? 3 : ArgDontAllocate;
   args[1] = useBoxedForm ? 0 : 1;
   args[2] = 2;
   allocInputsForCall(i, args);
@@ -3133,7 +3133,7 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
   if (forceIncDec) {
     LazyScratchReg tmp(m_regMap);
     PhysReg rhsReg = getReg(valLoc);
-    if (valIsVariant) {
+    if (valIsRef) {
       tmp.alloc();
       emitDerefRef(a, rhsReg, r(tmp));
       rhsReg = r(tmp);
@@ -3144,7 +3144,7 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
             useBoxedForm ? V(arrLoc) : IMM(0),
             useBoxedForm ? DEREF(arrLoc) : V(arrLoc),
             V(keyLoc),
-            valIsVariant ? VREF(valLoc) : A(valLoc));
+            valIsRef ? VREF(valLoc) : A(valLoc));
 
   recordReentrantCall(i);
   // If we did not used boxed form, we need to tell the register allocator
@@ -3157,7 +3157,7 @@ TranslatorX64::translateSetMArray(const Tracelet& t,
   }
 
   if (i.outStack) {
-    assert(!val.isVariant());
+    assert(!val.isRef());
     // Bring the output value into its correct location on the stack.
     // Note that this has to happen after all of the above, since it
     // needs to read the key from this location.

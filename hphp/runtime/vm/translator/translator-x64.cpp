@@ -4839,7 +4839,7 @@ TranslatorX64::translateCGetL(const Tracelet& t,
     PhysReg localReg = getReg(inputs[0]->location);
     emitMovRegReg(a, localReg, dest);
   }
-  if (inputs[0]->isVariant()) {
+  if (inputs[0]->isRef()) {
     emitDerefRef(a, dest, dest);
   }
   assert(outType != KindOfStaticString);
@@ -4890,7 +4890,7 @@ TranslatorX64::translateCGetL2(const Tracelet& t,
   m_regMap.swapRegisters(stackIn, stackOut);
   const PhysReg cellOut = getReg(ni.outStack->location);
   assert(cellOut != stackIn);
-  if (ni.inputs[locIdx]->isVariant()) {
+  if (ni.inputs[locIdx]->isRef()) {
     emitDerefRef(a, localIn, cellOut);
   } else if (!undefinedLocal) {
     emitMovRegReg(a, localIn, cellOut);
@@ -4958,7 +4958,7 @@ TranslatorX64::translateVGetG(const Tracelet& t,
                               const NormalizedInstruction& i) {
   assert(i.inputs.size() == 1);
   assert(i.outStack);
-  assert(i.outStack->isVariant());
+  assert(i.outStack->isRef());
   assert(i.inputs[0]->location == i.outStack->location);
 
   using namespace TargetCache;
@@ -5163,7 +5163,7 @@ void
 TranslatorX64::translatePopV(const Tracelet& t,
                              const NormalizedInstruction& i) {
   assert(i.inputs[0]->rtt.isVagueValue() ||
-         i.inputs[0]->isVariant());
+         i.inputs[0]->isRef());
   translatePopC(t, i);
 }
 
@@ -5180,7 +5180,7 @@ TranslatorX64::translateUnboxR(const Tracelet& t,
 
   // If the value on the top of a stack is a var, unbox it and
   // leave it on the top of the stack.
-  if (i.inputs[0]->isVariant()) {
+  if (i.inputs[0]->isRef()) {
     emitUnboxTopOfStack(i);
   }
 }
@@ -5411,9 +5411,9 @@ TranslatorX64::translateAddElemC(const Tracelet& t,
   const DynLocation& arr = *i.inputs[2];
   const DynLocation& key = *i.inputs[1];
   const DynLocation& val = *i.inputs[0];
-  assert(!arr.isVariant()); // not handling variants.
-  assert(!key.isVariant());
-  assert(!val.isVariant());
+  assert(!arr.isRef()); // not handling variants.
+  assert(!key.isRef());
+  assert(!val.isRef());
 
   const Location& arrLoc = arr.location;
   const Location& keyLoc = key.location;
@@ -5548,9 +5548,9 @@ TranslatorX64::translateColAddElemC(const Tracelet& t,
   const DynLocation& coll = *i.inputs[2];
   const DynLocation& key = *i.inputs[1];
   const DynLocation& val = *i.inputs[0];
-  assert(!coll.isVariant()); // not handling variants.
-  assert(!key.isVariant());
-  assert(!val.isVariant());
+  assert(!coll.isRef()); // not handling variants.
+  assert(!key.isRef());
+  assert(!val.isRef());
   const Location& collLoc = coll.location;
   const Location& keyLoc = key.location;
   const Location& valLoc = val.location;
@@ -6004,7 +6004,7 @@ TranslatorX64::translateNot(const Tracelet& t,
                             const NormalizedInstruction& i) {
   assert(i.isNative());
   assert(i.outStack && !i.outLocal);
-  assert(!i.inputs[0]->isVariant());
+  assert(!i.inputs[0]->isRef());
   m_regMap.allocOutputRegs(i);
   PhysReg srcdest = m_regMap.getReg(i.outStack->location);
   ScratchReg scr(m_regMap);
@@ -6523,7 +6523,7 @@ TranslatorX64::translateSSwitch(const Tracelet& t,
     bindAddr(*def, strvec[targets-1].dest);
 
     EMIT_RCALL(a, ni, sswitchHelperFast,
-               input.isVariant() ? DEREF(inLoc) : V(inLoc),
+               input.isRef() ? DEREF(inLoc) : V(inLoc),
                IMM(int64_t(table)), IMM(int64_t(def)));
   } else {
     Stats::emitInc(a, Stats::Tx64_StringSwitchSlow);
@@ -7116,7 +7116,7 @@ TranslatorX64::emitStringToClass(const NormalizedInstruction& i) {
       const UNUSED Class* cls = ClassCache::lookup(ch, name);
     }
     TRACE(1, "ClassCache @ %d\n", int(ch));
-    if (i.inputs[kEmitClsLocalIdx]->rtt.isVariant()) {
+    if (i.inputs[kEmitClsLocalIdx]->rtt.isRef()) {
         EMIT_CALL(a, ClassCache::lookup,
                    IMM(ch),
                    DEREF(in));
@@ -7142,7 +7142,7 @@ TranslatorX64::emitObjToClass(const NormalizedInstruction& i) {
   const Location& out = i.outStack->location;
   PhysReg src = getReg(in);
   ScratchReg tmp(m_regMap);
-  if (i.inputs[kEmitClsLocalIdx]->rtt.isVariant()) {
+  if (i.inputs[kEmitClsLocalIdx]->rtt.isRef()) {
     emitDerefRef(a, src, r(tmp));
     src = r(tmp);
   }
@@ -7165,7 +7165,7 @@ TranslatorX64::analyzeAGetC(Tracelet& t, NormalizedInstruction& i) {
   assert(i.outStack && !i.outLocal);
   assert(i.outStack->valueType() == KindOfClass);
   const RuntimeType& rtt = i.inputs[0]->rtt;
-  assert(!rtt.isVariant());
+  assert(!rtt.isRef());
   i.m_txFlags = supportedPlan(rtt.isString() ||
                               rtt.valueType() == KindOfObject);
   if (rtt.isString() && rtt.valueString()) i.manuallyAllocInputs = true;
@@ -7235,7 +7235,7 @@ void TranslatorX64::translateDup(const Tracelet& t,
                                  const NormalizedInstruction& ni) {
   assert(ni.inputs.size() == 1);
   assert(ni.outStack);
-  assert(!ni.inputs[0]->rtt.isVariant());
+  assert(!ni.inputs[0]->rtt.isRef());
   m_regMap.allocOutputRegs(ni);
   PhysReg outR = getReg(ni.outStack->location);
   emitMovRegReg(a, getReg(ni.inputs[0]->location), outR);
@@ -7716,7 +7716,7 @@ void TranslatorX64::translateIncStat(const Tracelet& t,
 static void analyzeClassExistsImpl(NormalizedInstruction& i) {
   const int nameIdx = 1;
   const int autoIdx = 0;
-  assert(!i.inputs[nameIdx]->isVariant() && !i.inputs[autoIdx]->isVariant());
+  assert(!i.inputs[nameIdx]->isRef() && !i.inputs[autoIdx]->isRef());
   i.m_txFlags = supportedPlan(i.inputs[nameIdx]->isString() &&
                               i.inputs[autoIdx]->isBoolean());
   i.fuseBranch = (i.m_txFlags & Supported) &&
@@ -7955,7 +7955,7 @@ void TranslatorX64::translateSetS(const Tracelet& t,
   emitStaticPropInlineLookup(i, kClassIdx, *i.inputs[2], r(sprop));
 
   assert(m_regMap.getInfo(r(sprop))->m_state == RegInfo::SCRATCH);
-  assert(!rhsType.isVariant());
+  assert(!rhsType.isRef());
 
   m_regMap.allocInputReg(i, 0);
   m_regMap.allocOutputRegs(i);
@@ -7970,7 +7970,7 @@ void TranslatorX64::analyzeSetG(Tracelet& t, NormalizedInstruction& i) {
   assert(i.inputs.size() == 2);
   i.m_txFlags = supportedPlan(
     i.inputs[1]->isString() &&
-    !i.inputs[0]->isVariant()
+    !i.inputs[0]->isRef()
   );
   if (i.m_txFlags) i.manuallyAllocInputs = true;
 }
@@ -9868,7 +9868,7 @@ TranslatorX64::translateFPassR(const Tracelet& t,
 
   assert(i.inputs.size() == 1);
   const RuntimeType& inRtt = i.inputs[0]->rtt;
-  if (inRtt.isVariant() && !i.preppedByRef) {
+  if (inRtt.isRef() && !i.preppedByRef) {
     emitUnboxTopOfStack(i);
   }
 }
@@ -10293,7 +10293,7 @@ TranslatorX64::translateVerifyParamType(const Tracelet& t,
   const Location& in = i.inputs[0]->location;
   PhysReg src = getReg(in);
   ScratchReg inCls(m_regMap);
-  if (i.inputs[0]->rtt.isVariant()) {
+  if (i.inputs[0]->rtt.isRef()) {
     emitDerefRef(a, src, r(inCls));
     src = r(inCls);
   }
@@ -10439,7 +10439,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
     Stats::emitInc(a, Stats::Tx64_InstanceOfDBypass);
     // All non-object inputs are not instances
     if (!input0IsLoc) {
-      assert(!input0->isVariant());
+      assert(!input0->isRef());
       emitDecRef(i, srcReg, type);
     }
     if (i.changesPC) {
@@ -10453,7 +10453,7 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
     // Get the input's class from ObjectData->m_cls
     ScratchReg inCls(m_regMap);
     PhysReg baseReg = srcReg;
-    if (input0->rtt.isVariant()) {
+    if (input0->rtt.isRef()) {
       assert(input0IsLoc);
       emitDerefRef(a, srcReg, r(inCls));
       baseReg = r(inCls);
@@ -10978,7 +10978,7 @@ TranslatorX64::emitVariantGuards(const Tracelet& t,
   for (size_t in = 0; in < i.inputs.size(); ++in) {
     DynLocation* input = i.inputs[in];
     if (!input->isValue()) continue;
-    bool isRef = input->isVariant() &&
+    bool isRef = input->isRef() &&
       !i.ignoreInnerType &&
       input->rtt.innerType() != KindOfInvalid;
     bool modifiableLocal = pseudoMain && input->isLocal() &&

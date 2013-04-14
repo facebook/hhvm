@@ -307,9 +307,7 @@ TranslatorX64::irTranslatePopC(const Tracelet& t,
 void
 TranslatorX64::irTranslatePopV(const Tracelet& t,
                                const NormalizedInstruction& i) {
-  assert(i.inputs[0]->rtt.isVagueValue() ||
-         i.inputs[0]->isVariant());
-
+  assert(i.inputs[0]->rtt.isVagueValue() || i.inputs[0]->isRef());
   HHIR_EMIT(PopV);
 }
 

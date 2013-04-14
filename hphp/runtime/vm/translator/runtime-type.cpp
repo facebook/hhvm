@@ -241,7 +241,7 @@ bool RuntimeType::isIter() const {
   return m_kind == ITER;
 }
 
-bool RuntimeType::isVariant() const {
+bool RuntimeType::isRef() const {
   assert(m_kind == VALUE);
   return outerType() == KindOfRef;
 }

@@ -266,7 +266,7 @@ class RuntimeType {
   bool isIter() const;
 
   bool isVagueValue() const;
-  bool isVariant() const;
+  bool isRef() const;
 
   bool isRefCounted() const;
   bool isUninit() const;

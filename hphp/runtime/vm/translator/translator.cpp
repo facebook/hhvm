@@ -835,8 +835,7 @@ getDynLocType(const vector<DynLocation*>& inputs,
         if (!inputs[idx]->rtt.isVagueValue()) {
           if (op == OpBindG || op == OpBindN || op == OpBindS ||
               op == OpBindM || op == OpBindL) {
-            assert(inputs[idx]->rtt.isVariant() &&
-                   !inputs[idx]->isLocal());
+            assert(inputs[idx]->rtt.isRef() && !inputs[idx]->isLocal());
           } else {
             assert(inputs[idx]->rtt.valueType() ==
                    inputs[idx]->rtt.outerType());
@@ -1751,7 +1750,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
           SKTRACE(1, ni->source, "replacing input %d with a MetaInfo-supplied "
                   "class of %s; old type = %s\n",
                   arg, metaName->data(), dl->pretty().c_str());
-          if (dl->rtt.isVariant()) {
+          if (dl->rtt.isRef()) {
             dl->rtt = RuntimeType(KindOfRef, KindOfObject, metaCls);
           } else {
             dl->rtt = RuntimeType(KindOfObject, KindOfInvalid, metaCls);
@@ -2295,7 +2294,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           DynLocation* dl = t.newDynLocation();
           dl->location = inLoc->location;
           dl->rtt = setOpOutputType(ni, ni->inputs);
-          if (inLoc->isVariant()) {
+          if (inLoc->isRef()) {
             dl->rtt = dl->rtt.box();
           }
           SKTRACE(2, ni->source, "(%s, %d) <- type %d\n",
@@ -2486,8 +2485,7 @@ Translator::requestResetHighLevelTranslator() {
 
 bool DynLocation::canBeAliased() const {
   return isValue() &&
-    ((Translator::liveFrameIsPseudoMain() && isLocal()) ||
-     isVariant());
+    ((Translator::liveFrameIsPseudoMain() && isLocal()) || isRef());
 }
 
 // Test the type of a location without recording it as a read yet.
@@ -2529,7 +2527,7 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
         if (m_varEnvTaint && dl->isValue() && dl->isLocal()) {
           dl->rtt = RuntimeType(KindOfInvalid);
         } else if ((m_aliasTaint && dl->canBeAliased()) ||
-                   (rtt.isValue() && rtt.isVariant() && ii.dontGuardInner)) {
+                   (rtt.isValue() && rtt.isRef() && ii.dontGuardInner)) {
           dl->rtt = rtt.setValueType(KindOfInvalid);
         }
         // Record that we depend on the live type of the specified location
@@ -3072,7 +3070,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk) {
             throwUnknownInput();
           }
           if (!ni->ignoreInnerType && !ii.dontGuardInner) {
-            if (rtt.isValue() && rtt.isVariant() &&
+            if (rtt.isValue() && rtt.isRef() &&
                 rtt.innerType() == KindOfInvalid) {
               throwUnknownInput();
             }

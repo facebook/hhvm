@@ -10,6 +10,13 @@ class CGetM {
   function getX() {
     return $this->x;
   }
+
+  public function genVarious() {
+    $local = $this->getX();
+    yield "a";
+    yield $local;
+    yield "c";
+  }
 }
 
 function foo() {
@@ -19,6 +26,16 @@ function foo() {
   yield "\n";
 }
 
-foreach (foo() as $x) {
-  echo $x;
+function main() {
+  foreach (foo() as $x) {
+    echo $x;
+  }
+
+  $blah = new CGetM;
+  foreach ($blah->genVarious() as $x) {
+    echo $x;
+  }
 }
+
+main();
+echo "\n";

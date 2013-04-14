@@ -41,7 +41,7 @@
                 "Iterator",
                 "Awaitable"
             ],
-            "footer": "  public: void setCalledClass(CStrRef cls) {\n    const_assert(!hhvm);\n    m_called_class = cls;\n  }\nprotected: virtual bool php_sleep(Variant &ret);\npublic:\n  inline void preNext() {\n    if (m_done) {\n      throw_exception(Object(SystemLib::AllocExceptionObject(\n                               \"Continuation is already finished\")));\n    }\n    if (m_running) {\n      throw_exception(Object(SystemLib::AllocExceptionObject(\n                               \"Continuation is already running\")));\n    }\n    m_running = true;\n    ++m_index;\n  }\n\n  inline void startedCheck() {\n    if (m_index < 0LL) {\n      throw_exception(\n        Object(SystemLib::AllocExceptionObject(\"Need to call next() first\")));\n    }\n  }\n\npublic:\n  Object m_obj;\n  Array m_args;\n  int64_t m_index;\n  Variant m_value;\n  Variant m_received;\n  String m_origFuncName;\n  bool m_done;\n  bool m_running;\n  bool m_should_throw;\n\n  int m_localsOffset;\n  VM::Func *m_vmFunc;\n  int64_t m_label\n  VM::ActRec* m_arPtr;\n\n  p_ContinuationWaitHandle m_waitHandle;\n\n  SmartPtr<HphpArray> m_VMStatics;\n\n  String& getCalledClass() { not_reached(); }\n\n  HphpArray* getStaticLocals();\n  static size_t sizeForLocalsAndIters(int nLocals, int nIters) {\n    return (sizeof(c_Continuation) + sizeof(TypedValue) * nLocals +\n            sizeof(VM::Iter) * nIters + sizeof(VM::ActRec));\n  }\n  VM::ActRec* actRec() {\n    return m_arPtr;\n  }\n  TypedValue* locals() {\n    return (TypedValue*)(uintptr_t(this) + m_localsOffset);\n  }",
+            "footer": "",
             "funcs": [
                 {
                     "name": "__construct",
@@ -49,24 +49,6 @@
                         "type": null
                     },
                     "args": [
-                        {
-                            "name": "func",
-                            "type": "Int64"
-                        },
-                        {
-                            "name": "origFuncName",
-                            "type": "String"
-                        },
-                        {
-                            "name": "obj",
-                            "type": "Variant",
-                            "value": "null"
-                        },
-                        {
-                            "name": "args",
-                            "type": "VariantMap",
-                            "value": "null_array"
-                        }
                     ],
                     "flags": [
                     ]

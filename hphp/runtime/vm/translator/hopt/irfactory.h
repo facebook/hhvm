@@ -178,10 +178,28 @@ public:
     );
   }
 
-  template<class T>
-  T* cloneInstruction(const T* inst) {
-    T* newInst = new (m_arena) T(m_arena, inst,
-                                 IRInstruction::IId(m_nextInstId++));
+  /*
+   * Replace an existing IRInstruction with a new one.
+   *
+   * This may involve making more allocations in the arena, but the
+   * actual IRInstruction* itself, its IId, etc, will stay unchanged.
+   *
+   * This function takes arguments in the same format as gen().
+   */
+  template<class... Args>
+  void replace(IRInstruction* old, Args... args) {
+    makeInstruction(
+      [&] (IRInstruction* replacement) { old->become(this, replacement); },
+      args...
+    );
+  }
+
+  /*
+   * Clone an instruction and its sources.
+   */
+  IRInstruction* cloneInstruction(const IRInstruction* inst) {
+    auto newInst = new (m_arena) IRInstruction(
+      m_arena, inst, IRInstruction::IId(m_nextInstId++));
     if (newInst->modifiesStack()) {
       assert(newInst->naryDst());
       // The instruction is an opcode that modifies the stack, returning a new
@@ -198,6 +216,9 @@ public:
     return newInst;
   }
 
+  /*
+   * Some helpers for creating specific instruction patterns.
+   */
   IRInstruction* defLabel();
   IRInstruction* defLabel(unsigned numDst);
   template<typename T> SSATmp* defConst(T val) {

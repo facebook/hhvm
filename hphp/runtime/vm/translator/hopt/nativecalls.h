@@ -51,6 +51,7 @@ enum ArgType : unsigned {
   TV,
   VecKeyS,
   VecKeyIS,
+  Immed,
 };
 struct Arg {
   ArgType type;

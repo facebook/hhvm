@@ -166,6 +166,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case SpillStack:   return simplifySpillStack(inst);
   case Call:         return simplifyCall(inst);
 
+  case ExitOnVarEnv: return simplifyExitOnVarEnv(inst);
+
   default:
     return nullptr;
   }
@@ -272,6 +274,16 @@ SSATmp* Simplifier::simplifyCall(IRInstruction* inst) {
 
   // Note: although the instruction might have been modified above, we still
   // need to return nullptr so that it gets cloned later if it's stack-allocated
+  return nullptr;
+}
+
+// We never inline functions that could have a VarEnv, so an
+// ExitOnVarEnv that has a frame based on DefInlineFP can be removed.
+SSATmp* Simplifier::simplifyExitOnVarEnv(IRInstruction* inst) {
+  auto const frameInst = inst->getSrc(0)->inst();
+  if (frameInst->op() == DefInlineFP) {
+    inst->convertToNop();
+  }
   return nullptr;
 }
 

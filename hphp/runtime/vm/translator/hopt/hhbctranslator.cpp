@@ -837,29 +837,37 @@ void HhbcTranslator::emitIterFree(uint32_t iterId) {
 
 void HhbcTranslator::emitCreateCont(bool getArgs,
                                     Id funNameStrId) {
-  /* Runtime-determined slow path punts to TranslatorX64 for now */
-  m_tb->genExitOnVarEnv(getExitSlowTrace());
+  m_tb->gen(ExitOnVarEnv, getExitSlowTrace()->front(), m_tb->getFp());
 
-  const StringData* genName = lookupStringId(funNameStrId);
-  const Func* origFunc = getCurFunc();
-  const Func* genFunc = origFunc->getGeneratorBody(genName);
-  int origLocals = origFunc->numLocals();
-  int genLocals = genFunc->numLocals();
+  auto const genName = lookupStringId(funNameStrId);
+  auto const origFunc = getCurFunc();
+  auto const genFunc = origFunc->getGeneratorBody(genName);
+  auto const origLocals = origFunc->numLocals();
+  auto const genLocals = genFunc->numLocals();
 
-  TCA helper = origFunc->isMethod() ?
-    (TCA)&VMExecutionContext::createContinuation<true> :
-    (TCA)&VMExecutionContext::createContinuation<false>;
-  SSATmp* cont = m_tb->gen(CreateCont, cns(helper), m_tb->getFp(),
-                           cns(getArgs), cns(origFunc), cns(genFunc));
+  auto const cont = m_tb->gen(
+    CreateCont,
+    cns(
+      origFunc->isMethod() ?
+        (TCA)&VMExecutionContext::createContinuation<true> :
+        (TCA)&VMExecutionContext::createContinuation<false>
+    ),
+    m_tb->getFp(),
+    cns(getArgs),
+    cns(origFunc),
+    cns(genFunc)
+  );
 
   TranslatorX64::ContParamMap params;
   if (origLocals <= TranslatorX64::kMaxInlineContLocals &&
       TranslatorX64::mapContParams(params, origFunc, genFunc)) {
-    static const StringData* thisStr = StringData::GetStaticString("this");
+    static auto const thisStr = StringData::GetStaticString("this");
     Id thisId = kInvalidId;
-    bool fillThis = origFunc->isNonClosureMethod() && !origFunc->isStatic() &&
+    const bool fillThis = origFunc->isNonClosureMethod() &&
+      !origFunc->isStatic() &&
       ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
       (origFunc->lookupVarId(thisStr) == kInvalidId);
+
     SSATmp* locals = m_tb->gen(LdContLocalsPtr, cont);
     for (int i = 0; i < origLocals; ++i) {
       SSATmp* loc = m_tb->genIncRef(m_tb->genLdAssertedLoc(i, Type::Gen));

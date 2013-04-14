@@ -6667,53 +6667,40 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCreateCl(PC& pc) {
 
 template<bool isMethod>
 c_Continuation*
-VMExecutionContext::createContinuation(ActRec* fp,
-                                       bool getArgs,
-                                       const Func* origFunc,
-                                       const Func* genFunc) {
-  Object obj;
-  Array args;
-  if (fp->hasThis()) {
-    obj = fp->getThis();
-  }
-  if (getArgs) {
-    args = hhvm_get_frame_args(fp);
-  }
-  static const StringData* closure = StringData::GetStaticString("{closure}");
-  const StringData* origName =
-    origFunc->isClosureBody() ? closure : origFunc->fullName();
-  int nLocals = genFunc->numLocals();
-  int nIters = genFunc->numIterators();
-  Class* genClass = SystemLib::s_ContinuationClass;
-  c_Continuation* cont = c_Continuation::alloc(genClass, nLocals, nIters);
+VMExecutionContext::createContinuationHelper(const Func* origFunc,
+                                             const Func* genFunc,
+                                             ObjectData* thisPtr,
+                                             ArrayData* args,
+                                             Class* frameStaticCls) {
+  auto const cont = c_Continuation::alloc(
+    SystemLib::s_ContinuationClass,
+    genFunc->numLocals(),
+    genFunc->numIterators()
+  );
   cont->incRefCount();
   cont->setNoDestruct();
-  try {
-    cont->t___construct(uintptr_t(genFunc),
-                        StrNR(const_cast<StringData*>(origName)),
-                        obj, args);
-  } catch (...) {
-    decRefObj(cont);
-    throw;
-  }
+
+  static auto const closureName = StringData::GetStaticString("{closure}");
+  auto const origName = origFunc->isClosureBody() ? closureName
+                                                  : origFunc->fullName();
+
+  cont->init(genFunc, origName, thisPtr, args);
+
   // The ActRec corresponding to the generator body lives as long as the object
   // does. We set it up once, here, and then just change FP to point to it when
   // we enter the generator body.
   ActRec* ar = cont->actRec();
 
   if (isMethod) {
-    Class* cls = frameStaticClass(fp);
-
     if (origFunc->isClosureBody()) {
-      genFunc = genFunc->cloneAndSetClass(fp->m_func->cls());
+      genFunc = genFunc->cloneAndSetClass(origFunc->cls());
     }
 
-    if (obj.get()) {
-      ObjectData* objData = obj.get();
-      ar->setThis(objData);
-      objData->incRefCount();
+    if (thisPtr) {
+      ar->setThis(thisPtr);
+      thisPtr->incRefCount();
     } else {
-      ar->setClass(cls);
+      ar->setClass(frameStaticCls);
     }
   } else {
     ar->setThis(nullptr);
@@ -6732,6 +6719,28 @@ VMExecutionContext::createContinuation(ActRec* fp,
   // non-decref is in ~c_Continuation.
 
   return cont;
+}
+
+template<bool isMethod>
+c_Continuation*
+VMExecutionContext::createContinuation(ActRec* fp,
+                                       bool getArgs,
+                                       const Func* origFunc,
+                                       const Func* genFunc) {
+  ObjectData* const thisPtr = fp->hasThis() ? fp->getThis() : nullptr;
+
+  Array args;
+  if (getArgs) {
+    args = hhvm_get_frame_args(fp);
+  }
+
+  return createContinuationHelper<isMethod>(
+    origFunc,
+    genFunc,
+    thisPtr,
+    args.get(),
+    frameStaticClass(fp)
+  );
 }
 
 static inline void setContVar(const Func* genFunc,
@@ -6796,6 +6805,12 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   }
   return cont;
 }
+
+// Explicitly instantiate for hhbctranslator.o
+template c_Continuation* VMExecutionContext::createContinuation<true>(
+  ActRec*, bool, const Func*, const Func*);
+template c_Continuation* VMExecutionContext::createContinuation<false>(
+  ActRec*, bool, const Func*, const Func*);
 
 inline void OPTBLD_INLINE VMExecutionContext::iopCreateCont(PC& pc) {
   NEXT();

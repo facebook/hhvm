@@ -26,9 +26,16 @@
 #include <forward_list>
 #include <cassert>
 #include <type_traits>
+
 #include <boost/noncopyable.hpp>
 #include <boost/checked_delete.hpp>
 #include <boost/type_traits/has_trivial_destructor.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/intrusive/list.hpp>
+
+#include "folly/Range.h"
+#include "folly/Conv.h"
+
 #include "util/asm-x64.h"
 #include "util/trace.h"
 #include "runtime/ext/ext_continuation.h"
@@ -40,9 +47,6 @@
 #include "runtime/base/types.h"
 #include "runtime/vm/func.h"
 #include "runtime/vm/class.h"
-#include "folly/Range.h"
-#include "folly/Conv.h"
-#include <boost/intrusive/list.hpp>
 
 namespace HPHP {
 // forward declaration
@@ -430,6 +434,7 @@ O(CreateCont,                   D(Obj), C(TCA)                                \
                                           C(Bool)                             \
                                           C(Func)                             \
                                           C(Func),               E|N|Mem|PRc) \
+O(InlineCreateCont,             D(Obj), S(Obj,Null),                 E|N|PRc) \
 O(FillContLocals,                   ND, S(FramePtr)                           \
                                           C(Func)                             \
                                           C(Func)                             \
@@ -735,6 +740,11 @@ private:
   uintptr_t m_dataBits;
 };
 
+struct CreateContData : IRExtraData {
+  const Func* origFunc;
+  const Func* genFunc;
+};
+
 /*
  * EdgeData is linked list node that tracks the set of Jmp_'s that pass values
  * to a particular block.  Each such Jmp_ has one node, and the block points
@@ -778,7 +788,6 @@ struct StackOffset : IRExtraData {
 
   int32_t offset;
 };
-
 struct BCOffset : IRExtraData {
   explicit BCOffset(Offset offset) : offset(offset) {}
 
@@ -817,6 +826,7 @@ X(ReDefSP,            StackOffset);
 X(ReDefGeneratorSP,   StackOffset);
 X(DefSP,              StackOffset);
 X(DefInlineFP,        BCOffset);
+X(InlineCreateCont,   CreateContData);
 
 #undef X
 
@@ -1733,8 +1743,28 @@ struct IRInstruction {
   /*
    * Replace an instruction in place with a Mov. Used when we have
    * proven that the instruction's side effects are not needed.
+   *
+   * TODO: replace with become
    */
   void convertToMov();
+
+  /*
+   * Turns this instruction into the target instruction, without
+   * changing stable fields (IId, current block, list fields).  The
+   * existing destination SSATmp(s) will continue to think they came
+   * from this instruction.
+   *
+   * The target instruction may be transient---we'll clone anything we
+   * need to keep, using factory for any needed memory.
+   *
+   * Note: if you want to use this to replace a CSE-able instruction
+   * you're probably going to have a bad time.  For now it's a
+   * precondition that the current instruction can't CSE.
+   *
+   * Pre: other->isTransient() || numDsts() == other->numDsts()
+   * Pre: !canCSE()
+   */
+  void become(IRFactory*, IRInstruction* other);
 
   /*
    * Deep-copy an IRInstruction, using factory to allocate memory for
@@ -1767,6 +1797,7 @@ struct IRInstruction {
     m_dst = newDst;
     m_numDsts = newDst ? 1 : 0;
   }
+
   /*
    * Returns the ith dest of this instruction. i == 0 is treated specially: if
    * the instruction has no dests, getDst(0) will return nullptr, and if the

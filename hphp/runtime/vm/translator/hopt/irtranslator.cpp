@@ -1108,7 +1108,9 @@ TranslatorX64::irTranslateFCallBuiltin(const Tracelet& t,
   HHIR_EMIT(FCallBuiltin, numArgs, numNonDefault, funcId);
 }
 
-static bool shouldIRInline(const Func* func, const Tracelet& callee) {
+static bool shouldIRInline(const Func* curFunc,
+                           const Func* func,
+                           const Tracelet& callee) {
   if (!RuntimeOption::EvalHHIREnableGenTimeInlining) {
     return false;
   }
@@ -1244,6 +1246,15 @@ static bool shouldIRInline(const Func* func, const Tracelet& callee) {
   }
 
   /*
+   * Continuation allocation functions that take no arguments.
+   */
+  resetCursor();
+  if (current == OpCreateCont && cursor->imm[0].u_IVA == 0) {
+    next();
+    if (atRet()) return accept("zero-arg continuation creator");
+  }
+
+  /*
    * Anything that just puts a value on the stack with no inputs, and
    * then returns it, after possibly doing some comparison with
    * another such thing.
@@ -1281,7 +1292,7 @@ TranslatorX64::irTranslateFCall(const Tracelet& t,
    */
   if (i.calleeTrace) {
     if (!m_hhbcTrans->isInlining() &&
-        shouldIRInline(i.funcd, *i.calleeTrace)) {
+        shouldIRInline(curFunc(), i.funcd, *i.calleeTrace)) {
       m_hhbcTrans->beginInlining(numArgs, i.funcd, returnBcOffset);
       static const bool shapeStats = Stats::enabledAny() &&
                                      getenv("HHVM_STATS_INLINESHAPE");

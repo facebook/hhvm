@@ -749,6 +749,9 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
       case VecKeyIS:
         argGroup.vectorKeyIS(src);
         break;
+      case Immed:
+        always_assert(0 && "We can't generate a native call for this");
+        break;
     }
   }
 
@@ -3214,6 +3217,32 @@ void CodeGenerator::cgNewObjNoCtorCached(IRInstruction* inst) {
                dst,
                kSyncPoint,
                args);
+}
+
+void CodeGenerator::cgInlineCreateCont(IRInstruction* inst) {
+  auto const& data = *inst->getExtra<InlineCreateCont>();
+  auto const helper = data.origFunc->isMethod()
+    ? &VMExecutionContext::createContinuationHelper<true>
+    : &VMExecutionContext::createContinuationHelper<false>;
+
+  cgCallHelper(
+    m_as,
+    reinterpret_cast<TCA>(helper),
+    inst->getDst(),
+    kSyncPoint,
+    ArgGroup()
+      .immPtr(data.origFunc)
+      .immPtr(data.genFunc)
+      .ssa(inst->getSrc(0))
+      .immPtr(nullptr) // getArgs array
+      // Deliberately ignoring frameStaticClass parameter, because
+      // it's unused if we have a $this pointer, and we don't inline
+      // functions with a null $this.
+  );
+  if (data.origFunc->isMethod()) {
+    // We can't support a null $this.
+    assert(inst->getSrc(0)->isA(Type::Obj));
+  }
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {

@@ -427,6 +427,13 @@ public:
 
   static void getElem(TypedValue* base, TypedValue* key, TypedValue* dest);
   template<bool isMethod>
+  static c_Continuation* createContinuationHelper(
+    const VM::Func* origFunc,
+    const VM::Func* genFunc,
+    ObjectData* thisPtr,
+    ArrayData* args,
+    VM::Class* frameStaticCls);
+  template<bool isMethod>
   static c_Continuation* createContinuation(ActRec* fp, bool getArgs,
                                             const VM::Func* origFunc,
                                             const VM::Func* genFunc);
@@ -797,7 +804,6 @@ private:
 
 class Silencer {
 public:
-  Silencer() : m_active(false) {}
   explicit Silencer(bool);
 
   ~Silencer() { if (m_active) disableHelper(); }

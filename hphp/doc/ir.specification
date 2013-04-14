@@ -1275,7 +1275,24 @@ D:Obj = CreateCl S0:ConstCls S1:ConstInt S2:FramePtr S3:StkPtr
   object.  Saves the $this and Func* from ActRec S2 into the object,
   and returns the object.
 
-CreateCont
+D:Obj = CreateCont S0:TCA S1:FramePtr S2:ConstBool S3:ConstFunc S4:ConstFunc
+
+  Create a continuation object.  Arguments:
+
+     S0 - function pointer to C++ helper
+     S1 - current frame pointer
+     S2 - whether the CreateCont hhbc op had getArgs set to true (which means
+          the function body may call func_get_args, etc).
+     S3 - the "original" function
+     S4 - the generator function
+
+D:Obj = InlineCreateCont<origFunc,genFunc> S0:{Obj,Null}
+
+  Create a zero-argument continuation object.  S0 is the this pointer
+  for the continuation if it was a method, otherwise null.  Used to
+  weaken the use of the frame in CreateCont when inlining an 'outer'
+  generator function.
+
 FillContLocals
 FillContThis
 

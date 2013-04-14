@@ -93,14 +93,13 @@ private:
   SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
   SSATmp* simplifySpillStack(IRInstruction* inst);
   SSATmp* simplifyCall(IRInstruction* inst);
-
-private:
   SSATmp* genDefInt(int64_t val);
   SSATmp* genDefDbl(double val);
   SSATmp* genDefBool(bool val);
   SSATmp* simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(IRInstruction*);
   SSATmp* simplifyQueryJmp(IRInstruction*);
+  SSATmp* simplifyExitOnVarEnv(IRInstruction*);
 
 private:
   TraceBuilder* const m_tb;

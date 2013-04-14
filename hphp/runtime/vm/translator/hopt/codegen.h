@@ -399,6 +399,8 @@ struct ArgGroup {
     return imm(uintptr_t(ptr));
   }
 
+  ArgGroup& immPtr(std::nullptr_t) { return imm(0); }
+
   ArgGroup& reg(PhysReg reg) {
     m_args.push_back(ArgDesc(ArgDesc::Reg, PhysReg(reg), -1));
     return *this;

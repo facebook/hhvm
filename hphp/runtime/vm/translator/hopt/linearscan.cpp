@@ -668,6 +668,8 @@ void LinearScan::computePreColoringHint() {
           m_preColoringHint.add(inst->getSrc(arg.srcIdx), 0, reg++);
           m_preColoringHint.add(inst->getSrc(arg.srcIdx), 1, reg++);
           break;
+        case Immed:
+          break;
       }
     }
     return;

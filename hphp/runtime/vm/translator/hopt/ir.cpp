@@ -633,6 +633,25 @@ void IRInstruction::convertToMov() {
   assert(m_numDsts == 1);
 }
 
+void IRInstruction::become(IRFactory* factory, IRInstruction* other) {
+  assert(other->isTransient() || m_numDsts == other->m_numDsts);
+  assert(!canCSE());
+  auto& arena = factory->arena();
+
+  // Copy all but m_iid, m_block, m_listNode, and don't clone
+  // dests---the whole point of become() is things still point to us.
+  m_op = other->m_op;
+  m_typeParam = other->m_typeParam;
+  m_id = other->m_id;
+  m_liveRegs = other->m_liveRegs;
+  m_taken = other->m_taken;
+  m_tca = other->m_tca;
+  m_numSrcs = other->m_numSrcs;
+  m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
+  m_srcs = new (arena) SSATmp*[m_numSrcs];
+  std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
+}
+
 IRInstruction* IRInstruction::clone(IRFactory* factory) const {
   return factory->cloneInstruction(this);
 }
@@ -889,11 +908,10 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
     os << "NamedEntity(" << ne << ")";
   } else if (t.subtypeOf(Type::TCA)) {
     TCA tca = c->as<TCA>();
-    char* nameRaw = Util::getNativeFunctionName(tca);
-    SCOPE_EXIT { free(nameRaw); };
-    std::string name(nameRaw);
-    boost::algorithm::trim(name);
-    os << folly::format("TCA: {}({})", tca, name);
+    auto name = Util::getNativeFunctionName(tca);
+    SCOPE_EXIT { free(name); };
+    os << folly::format("TCA: {}({})", tca,
+      boost::trim_copy(std::string(name)));
   } else if (t.subtypeOf(Type::None)) {
     os << "None:" << c->as<int64_t>();
   } else if (t.isPtr()) {

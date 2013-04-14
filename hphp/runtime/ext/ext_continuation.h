@@ -42,11 +42,29 @@ class c_Continuation : public ExtObjectData {
                                       this_->m_vmFunc->numIterators()))(this_);
   }
 
-  // need to implement
-  public:
   explicit c_Continuation(VM::Class* cls = c_Continuation::s_cls);
   ~c_Continuation();
-  void t___construct(int64_t func, CStrRef origFuncName, CVarRef obj = uninit_null(), CArrRef args = null_array);
+
+public:
+  void init(const VM::Func* vmFunc,
+            const StringData* origFuncName,
+            ObjectData* thisPtr,
+            ArrayData* args) noexcept {
+    m_vmFunc = const_cast<VM::Func*>(vmFunc);
+    assert(m_vmFunc);
+    m_origFuncName = origFuncName;
+    assert(m_origFuncName->isStatic());
+
+    if (thisPtr != nullptr) {
+      m_obj = thisPtr;
+    } else {
+      assert(m_obj.isNull());
+    }
+
+    m_args = args;
+  }
+
+  void t___construct();
   void t_update(int64_t label, CVarRef value);
   Object t_getwaithandle();
   int64_t t_getlabel();
@@ -108,7 +126,7 @@ public:
   int64_t m_index;
   Variant m_value;
   Variant m_received;
-  String m_origFuncName;
+  const StringData* m_origFuncName;
   bool m_done;
   bool m_running;
   bool m_should_throw;

@@ -69,20 +69,7 @@ c_Continuation::~c_Continuation() {
   }
 }
 
-void c_Continuation::t___construct(
-  int64_t func, CStrRef origFuncName, CVarRef obj, CArrRef args) {
-  m_vmFunc       = (VM::Func*)func;
-  assert(m_vmFunc);
-  m_origFuncName = origFuncName;
-
-  if (!obj.isNull()) {
-    m_obj = obj.toObject();
-    assert(!m_obj.isNull());
-  } else {
-    assert(m_obj.isNull());
-  }
-  m_args = args;
-}
+void c_Continuation::t___construct() {}
 
 void c_Continuation::t_update(int64_t label, CVarRef value) {
   m_label = label;
@@ -156,24 +143,26 @@ void c_Continuation::t_raised() {
 
 String c_Continuation::t_getorigfuncname() {
   String called_class;
+  String origFunc(const_cast<StringData*>(m_origFuncName));
+
   if (actRec()->hasThis()) {
     called_class = actRec()->getThis()->getVMClass()->name()->data();
   } else if (actRec()->hasClass()) {
     called_class = actRec()->getClass()->name()->data();
   }
   if (called_class.size() == 0) {
-    return m_origFuncName;
+    return origFunc;
   }
 
   /*
     Replace the class name in m_origFuncName with the LSB class.  This
     produces more useful traces.
    */
-  size_t method_pos = m_origFuncName.find("::");
+  size_t method_pos = origFunc.find("::");
   if (method_pos != std::string::npos) {
-    return concat3(called_class, "::", m_origFuncName.substr(method_pos+2));
+    return concat3(called_class, "::", origFunc.substr(method_pos+2));
   } else {
-    return m_origFuncName;
+    return origFunc;
   }
 }
 

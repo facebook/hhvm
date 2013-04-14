@@ -61,7 +61,7 @@ struct DceFlags {
    */
   void incWeakUse() {
     if (m_weakUseCount + 1 > kMaxWeakUseCount) {
-      always_assert(!"currently there's only one instruction "
+      always_assert(!"currently there's only two instructions "
                     "using this machinery, so this shouldn't "
                     "happen ... ");
       return;
@@ -368,7 +368,7 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
  * of a DefInlineFP.  In this case we can kill both, which may allow
  * removing a SpillFrame as well.
  */
-void optimizeActRecs(Trace* trace, DceState& state) {
+void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory) {
   FTRACE(5, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -385,6 +385,22 @@ void optimizeActRecs(Trace* trace, DceState& state) {
                  inst->getIId(),
                  frameInst->getIId());
           state[frameInst].incWeakUse();
+        }
+      }
+      break;
+
+    case CreateCont:
+      {
+        auto const frameInst = inst->getSrc(1)->inst();
+        if (frameInst->op() == DefInlineFP) {
+          auto const spInst = frameInst->getSrc(0)->inst();
+          if (spInst->op() == SpillFrame &&
+              spInst->getSrc(3)->type().subtypeOfAny(Type::Obj, Type::Null)) {
+            FTRACE(5, "CreateCont ({}): weak use of frame {}\n",
+                   inst->getIId(),
+                   frameInst->getIId());
+            state[frameInst].incWeakUse();
+          }
         }
       }
       break;
@@ -423,7 +439,7 @@ void optimizeActRecs(Trace* trace, DceState& state) {
     switch (inst->op()) {
     case DecRefKillThis:
       {
-        auto fp = inst->getSrc(1);
+        auto const fp = inst->getSrc(1);
         if (state[fp->inst()].isDead()) {
           FTRACE(5, "DecRefKillThis ({}) -> DecRef\n", inst->getIId());
           inst->setOpcode(DecRef);
@@ -433,9 +449,31 @@ void optimizeActRecs(Trace* trace, DceState& state) {
       }
       break;
 
+    case CreateCont:
+      {
+        auto const fp = inst->getSrc(1);
+        if (state[fp->inst()].isDead()) {
+          FTRACE(5, "CreateCont ({}) -> InlineCreateCont\n", inst->getIId());
+
+          CreateContData data;
+          data.origFunc = inst->getSrc(3)->getValFunc();
+          data.genFunc  = inst->getSrc(4)->getValFunc();
+
+          assert(fp->inst()->getSrc(0)->inst()->op() == SpillFrame);
+          auto const thisPtr = fp->inst()->getSrc(0)->inst()->getSrc(3);
+          factory->replace(
+            inst,
+            InlineCreateCont,
+            data,
+            thisPtr
+          );
+        }
+      }
+      break;
+
     case InlineReturn:
       {
-        auto fp = inst->getSrc(0);
+        auto const fp = inst->getSrc(0);
         if (state[fp->inst()].isDead()) {
           FTRACE(5, "InlineReturn ({}) setDead\n", inst->getIId());
           state[inst].setDead();
@@ -591,7 +629,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
 
   // Optimize unused inlined activation records.  It's not necessary
   // to look at non-main traces for this.
-  optimizeActRecs(trace, state);
+  optimizeActRecs(trace, state, irFactory);
 
   // now remove instructions whose id == DEAD
   removeDeadInstructions(trace, state);

@@ -2425,9 +2425,9 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
   emitMovRegReg(a, fp->getReg(), rVmFp);
 
   // Get the SrcKey for the dest
-  SrcKey  destSK(func->getValFunc(), pc->getValInt());
+  SrcKey destSK(func->getValFunc(), pc->getValInt());
 
-  switch(exitType) {
+  switch (exitType) {
     case TraceExitType::NormalCc:
       if (toSmash) {
         TCA smashAddr = toSmash->getTCA();
@@ -2510,10 +2510,12 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
         }
       }
       break;
-    case TraceExitType::GuardFailure:
+
+    case TraceExitType::GuardFailure: {
       SrcRec* destSR = m_tx64->getSrcRec(destSK);
       m_tx64->emitFallbackUncondJmp(a, *destSR);
       break;
+    }
   }
 }
 

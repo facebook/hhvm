@@ -1223,10 +1223,7 @@ asm_label(a, release);
         size_t(a.code.frontier - m_dtorGenericStub));
 }
 
-/*
- * Translation call targets. It is a lot easier, and a bit more
- * portable, to use C linkage from assembly.
- */
+
 TCA TranslatorX64::retranslate(SrcKey sk, bool align, bool allowIR) {
   if (isDebuggerAttachedProcess() && isSrcKeyInBL(curUnit(), sk)) {
     // We are about to translate something known to be blacklisted by
@@ -2560,12 +2557,11 @@ TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
   smashed = true;
   SrcRec* sr = getSrcRec(destSk);
   if (req == REQ_BIND_ADDR) {
-    sr->chainFrom(a, IncomingBranch((TCA*)toSmash));
+    sr->chainFrom(IncomingBranch::addr(reinterpret_cast<TCA*>(toSmash)));
   } else if (req == REQ_BIND_JCC) {
-    sr->chainFrom(getAsmFor(toSmash),
-                  IncomingBranch(IncomingBranch::JCC, toSmash));
+    sr->chainFrom(IncomingBranch::jccFrom(toSmash));
   } else {
-    sr->chainFrom(getAsmFor(toSmash), IncomingBranch(toSmash));
+    sr->chainFrom(IncomingBranch::jmpFrom(toSmash));
   }
   return tDest;
 }
@@ -2616,7 +2612,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
     emitServiceReq(SRFlags::SRNone, REQ_BIND_JMPCC_SECOND, 3,
                    toSmash, uint64_t(offWillDefer), uint64_t(cc));
 
-  Asm &as = getAsmFor(toSmash);
+  Asm& as = getAsmFor(toSmash);
   // Its not clear where chainFrom should go to if as is astubs
   assert(&as != &astubs);
 
@@ -2647,7 +2643,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
    */
   CodeCursor cg(as, toSmash);
   as.jcc(cc, stub);
-  getSrcRec(dest)->chainFrom(as, IncomingBranch(as.code.frontier));
+  getSrcRec(dest)->chainFrom(IncomingBranch::jmpFrom(as.code.frontier));
   TRACE(5, "bindJmpccFirst: overwrote with cc%02x taken %d\n", cc, taken);
   return tDest;
 }
@@ -2663,8 +2659,7 @@ TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
   if (branch && writer.acquire()) {
     smashed = true;
     SrcRec* destRec = getSrcRec(dest);
-    destRec->chainFrom(getAsmFor(toSmash),
-                       IncomingBranch(IncomingBranch::JCC, toSmash));
+    destRec->chainFrom(IncomingBranch::jccFrom(toSmash));
   }
   return branch;
 }
@@ -2824,19 +2819,19 @@ void
 TranslatorX64::emitFallbackJmp(Asm& as, SrcRec& dest,
                                ConditionCode cc /* = CC_NZ */) {
   prepareForSmash(as, kJmpccLen);
-  dest.emitFallbackJump(as, as.code.frontier, cc);
+  dest.emitFallbackJump(as.code.frontier, cc);
 }
 
 void
 TranslatorX64::emitFallbackUncondJmp(Asm& as, SrcRec& dest) {
   prepareForSmash(as, kJmpLen);
-  dest.emitFallbackJump(as, as.code.frontier);
+  dest.emitFallbackJump(as.code.frontier);
 }
 
 void
 TranslatorX64::emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc) {
   prepareForSmash(as, kJmpccLen);
-  dest.emitFallbackJump(as, as.code.frontier, cc);
+  dest.emitFallbackJump(as.code.frontier, cc);
 }
 
 void TranslatorX64::emitReqRetransNoIR(Asm& as, SrcKey& sk) {
@@ -3257,7 +3252,8 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
   case REQ_BIND_JMP:
   case REQ_BIND_JCC:
   case REQ_BIND_JMP_NO_IR:
-  case REQ_BIND_ADDR: {
+  case REQ_BIND_ADDR:
+  {
     TCA toSmash = (TCA)args[0];
     Offset off = args[1];
     sk = SrcKey(curFunc(), off);
@@ -3296,7 +3292,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
       if (writer) {
         smashed = true;
         SrcRec* sr = getSrcRec(sk);
-        sr->chainFrom(a, IncomingBranch(&rlsa->m_pseudoMain));
+        sr->chainFrom(IncomingBranch::addr(&rlsa->m_pseudoMain));
       }
     }
   } break;
@@ -11406,7 +11402,7 @@ TranslatorX64::translateTracelet(SrcKey sk, bool considerHHIR/*=true*/,
   // metadata is not yet visible.
   TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n",
       start, sk.getFuncId(), sk.m_offset);
-  srcRec.newTranslation(a, astubs, start);
+  srcRec.newTranslation(start);
   TRACE(1, "tx64: %zd-byte tracelet\n", a.code.frontier - start);
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
     Trace::traceRelease(getUsage().c_str());
@@ -12177,7 +12173,7 @@ void TranslatorX64::addDbgGuardImpl(SrcKey sk, SrcRec& srcRec) {
   TCA dbgBranchGuardSrc = a.code.frontier;
   a.   jmp(realCode);
   // Add it to srcRec
-  srcRec.addDebuggerGuard(a, astubs, dbgGuard, dbgBranchGuardSrc);
+  srcRec.addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);
 }
 
 bool TranslatorX64::dumpTCCode(const char* filename) {
@@ -12367,7 +12363,7 @@ void TranslatorX64::invalidateSrcKey(SrcKey sk) {
    * just created some garbage in the TC. We currently have no mechanism
    * to reclaim this.
    */
-  sr->replaceOldTranslations(a, astubs);
+  sr->replaceOldTranslations();
 }
 
 void TranslatorX64::invalidateFileWork(Eval::PhpFile* f) {

@@ -975,12 +975,13 @@ enum ExitType {
   NormalCc,
   Slow,
   SlowNoProgress,
-  GuardFailure
+  GuardFailure,
 };
 }
 
-extern TraceExitType::ExitType getExitType(Opcode opc);
-extern Opcode getExitOpcode(TraceExitType::ExitType);
+TraceExitType::ExitType getExitType(Opcode opc);
+Opcode getExitOpcode(TraceExitType::ExitType);
+
 inline bool isExitSlow(TraceExitType::ExitType t) {
   return t == TraceExitType::Slow || t == TraceExitType::SlowNoProgress;
 }

@@ -578,7 +578,7 @@ bool cmpOpTypesMayReenter(Opcode op, Type t0, Type t1) {
 
 TraceExitType::ExitType getExitType(Opcode opc) {
   assert(opc >= ExitTrace && opc <= ExitGuardFailure);
-  return (TraceExitType::ExitType)(opc - ExitTrace);
+  return TraceExitType::ExitType(opc - ExitTrace);
 }
 
 Opcode getExitOpcode(TraceExitType::ExitType type) {

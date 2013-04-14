@@ -8,6 +8,18 @@ all sub-suites.
 * zend/good - Passing tests from Zend's suite.
 * zend/bad - Failing tests from Zend. Fix these and move them to zend/good.
 * vm-perf - Some performance tests that aren't commonly run.
+* tcr - The HPHPc TestCodeRun tests.
+
+# Examples how to run them
+
+* VM suite with the JIT on -
+`test/run test/vm`
+
+* Zend tests just with the interpreter in RepoAuthoritative mode -
+`test/run test/zend/good interp 1`
+
+* TCR tests with the JIT in IR mode -
+`test/run test/tcr hhir`
 
 # File Layout
 

@@ -12,8 +12,8 @@ if (count($argv) != 6) {
   exit(1);
 }
 
-$cmd = "TEST_PATH=$argv[2] VQ=$argv[3] REPO=$argv[4] FBMAKE_BIN_ROOT=$HPHP_HOME/$argv[5] " .
-       "$HPHP_HOME/hphp/tools/$argv[1]";
+$cmd = "FBMAKE_BIN_ROOT=$HPHP_HOME/$argv[5] " .
+       "$HPHP_HOME/hphp/tools/$argv[1] $argv[2] $argv[3] $argv[4]";
 
 loop_tests($cmd, function ($line) {
   if (preg_match('/^(test[^\s]*).*/', $line, &$m)) {

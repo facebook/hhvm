@@ -302,7 +302,7 @@ print "Running all tests from zend/all"
 stdout = subprocess.Popen(
     [
         'tools/verify_to_json.php',
-        'run_verify.sh',
+        '../test/run',
         'test/zend/all',
         'interp',
         '0',

@@ -24,7 +24,7 @@ suites = {
 modes = {
     'JitIR' : 'hhir',
     'Jit' : 'jit',
-    'VM' : 'inperp',
+    'VM' : 'interp',
 }
 
 home = os.getenv('HPHP_HOME')
@@ -56,14 +56,10 @@ def main():
                         else:
                             raise Exception('Extra? "%s"' % arg)
 
-                    env = {
-                        'REPO' : repo,
-                        'VQ' : vq,
-                        'TEST_PATH' : 'test/' + dir + subpath
-                    }
-                    print ' '.join([key + '=' + value for key, value in env.items()]) + 'tools/run_verify.sh'
-                    env.update(os.environ)
-                    subprocess.call('tools/run_verify.sh', env=env)
+                    path = 'test/' + dir + subpath
+                    cmd = ['test/run', path, vq, repo]
+                    print ' '.join(cmd)
+                    subprocess.call(cmd)
                     return
 
             raise Exception('Unknown mode "%s"' % arg)

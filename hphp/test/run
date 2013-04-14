@@ -58,6 +58,16 @@ fi
 
 cd $HPHP_HOME/hphp
 
+if [ $# -ge 1 ]; then
+  TEST_PATH=$1;
+fi
+if [ $# -ge 2 ]; then
+  VQ=$2;
+fi
+if [ $# -ge 3 ]; then
+  REPO=$3;
+fi
+
 ######################################################################
 
 skip_list=
@@ -119,7 +129,12 @@ if [ x"$MODE" = x"server" ] ; then
 else
     cmd="$cmd --file %3\$s"
 fi
-verify_args="$verify_args --hhvm $HHVM --repo $REPO"
+verify_args="$verify_args --hhvm $HHVM"
+if [ "$REPO" -a "$REPO" != "0" ]; then
+  verify_args="$verify_args --repo 1"
+else
+  verify_args="$verify_args --repo 0"
+fi
 cmd="$cmd -v Eval.EnableObjDestructCall=true"
 
 case $VQ in
@@ -133,7 +148,8 @@ case $VQ in
         cmd="$cmd $interp_args"
         ;;
     *)
-        cmd="$cmd $jit_args"
+        echo "Unknown VQ '$VQ'. Choose either jit, hhir or interp"
+        exit 1
         ;;
 esac
 

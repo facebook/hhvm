@@ -1,0 +1,50 @@
+{
+    "preamble": "#include <runtime\/vm\/func.h>\n",
+    "consts": [
+    ],
+    "funcs": [
+    ],
+    "classes": [
+        {
+            "name": "Closure",
+            "desc": "Used as the base class for all closures",
+            "footer": "public:\n  public: ObjectData* clone();\n  ObjectData* getThisOrClass() { return m_thisOrClass; }\n  const VM::Func* getInvokeFunc() { return m_func; }\n  HphpArray* getStaticLocals();\n  TypedValue* getUseVars() { return propVec(); }\n  int getNumUseVars() { return m_cls->numDeclProperties(); }\n\n  static size_t funcOffset() { return offsetof(c_Closure, m_func); }\n  static size_t thisOffset() { return offsetof(c_Closure, m_thisOrClass); }\n\nprotected:\n  virtual bool php_sleep(Variant &ret);\nprivate:\n  SmartPtr<HphpArray> m_VMStatics;\n  ObjectData* m_thisOrClass;\n  const VM::Func* m_func;",
+            "flags": [
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DummyClosure",
+            "desc": "Represents an invalid closure which will fatal when used.",
+            "flags": [
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "args": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

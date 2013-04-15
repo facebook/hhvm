@@ -1,0 +1,706 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "asio_enter_context",
+            "desc": "DEPRECATED: does nothing",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "asio_exit_context",
+            "desc": "DEPRECATED: does nothing",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "asio_get_current_context_idx",
+            "desc": "Get index of the current scheduler context, or 0 if there is none",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Int32",
+                "desc": "An index of the current scheduler context"
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "asio_get_running_in_context",
+            "desc": "Get currently running wait handle in a context specified by its index",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Object",
+                "desc": "A ContinuationWaitHandle that is running in a specified context"
+            },
+            "args": [
+                {
+                    "name": "ctx_idx",
+                    "type": "Int32",
+                    "desc": "An index of a specified context"
+                }
+            ]
+        },
+        {
+            "name": "asio_get_running",
+            "desc": "Get currently running wait handle, or null if there is none",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Object",
+                "desc": "A ContinuationWaitHandle that is running in the current context"
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "asio_get_current",
+            "desc": "DEPRECATED: use asio_get_running",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Object",
+                "desc": "A ContinuationWaitHandle that is running in the current context"
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "asio_set_on_failed_callback",
+            "desc": "Set callback to be called when wait handle fails",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "on_failed_cb",
+                    "type": "Variant",
+                    "desc": "A Closure to be called when wait handle fails"
+                }
+            ]
+        },
+        {
+            "name": "asio_set_on_started_callback",
+            "desc": "Set callback to be called when a continuation is started",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "on_started_cb",
+                    "type": "Variant",
+                    "desc": "A Closure to be called when wait handle is started"
+                }
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "WaitHandle",
+            "desc": "A wait handle representing asynchronous operation",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "HasDocComment"
+            ],
+            "ifaces": [
+                "Awaitable"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getWaitHandle",
+                    "desc": "Return this wait handle (for Awaitable interface)",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "import",
+                    "desc": "Import this wait handle to the current scheduler context",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "join",
+                    "desc": "Wait until this wait handle is finished and return its result (operates in a new scheduler context)",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A result of the operation represented by given wait handle"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isFinished",
+                    "desc": "Check if this wait handle finished (succeeded or failed)",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "A boolean indicating whether this wait handle finished"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isSucceeded",
+                    "desc": "Check if this wait handle succeeded",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "A boolean indicating whether this wait handle succeeded"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isFailed",
+                    "desc": "Check if this wait handle failed",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "A boolean indicating whether this wait handle failed"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getID",
+                    "desc": "Get unique ID of this wait handle (amongst existing ones)",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "An integer representing unique ID of this wait handle"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getName",
+                    "desc": "Get name of the operation behind this wait handle",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "A name of the operation behind this wait handle"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getExceptionIfFailed",
+                    "desc": "Get exception if this wait handle has failed, or null",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "An exception if this wait handle has failed, or null"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "StaticWaitHandle",
+            "parent": "WaitHandle",
+            "desc": "A wait handle that is always finished",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "StaticResultWaitHandle",
+            "parent": "StaticWaitHandle",
+            "desc": "A wait handle representing static result",
+            "flags": [
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that always succeeds with a given result",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A StaticResultWaitHandle representing given result"
+                    },
+                    "args": [
+                        {
+                            "name": "result",
+                            "type": "Variant",
+                            "desc": "A result wait handle will succeed with"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "StaticExceptionWaitHandle",
+            "parent": "StaticWaitHandle",
+            "desc": "A wait handle representing statically failed operation",
+            "flags": [
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that always fails with a given exception",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A StaticExceptionWaitHandle representing given exception"
+                    },
+                    "args": [
+                        {
+                            "name": "exception",
+                            "type": "Object",
+                            "desc": "An exception wait handle will fail with"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "WaitableWaitHandle",
+            "parent": "WaitHandle",
+            "desc": "A wait handle that can be waited upon",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getContextIdx",
+                    "desc": "Get index of the scheduler context this wait handle operates in",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Int32",
+                        "desc": "An index of scheduler context this wait handle operates in"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getCreator",
+                    "desc": "Get wait handle that created this wait handle",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A ContinuationWaitHandle that was being executed when this wait handle was constructed"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getParents",
+                    "desc": "Get wait handles blocked on this wait handle",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "VariantVec",
+                        "desc": "An array of BlockableWaitHandles blocked on this wait handle"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getStackTrace",
+                    "desc": "Get stack trace of this wait handle",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "VariantVec",
+                        "desc": "An array of WaitableWaitHandles representing full stack trace, starting with this wait handle"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "BlockableWaitHandle",
+            "parent": "WaitableWaitHandle",
+            "desc": "A wait handle that can be blocked on a dependency",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "ContinuationWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle representing asynchronous execution powered by Continuation",
+            "flags": [
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "start",
+                    "desc": "Start asynchronous execution of a given Continuation",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle representing started Continuation"
+                    },
+                    "args": [
+                        {
+                            "name": "continuation",
+                            "type": "Object",
+                            "desc": "A Continuation to be started"
+                        }
+                    ]
+                },
+                {
+                    "name": "getPrivData",
+                    "desc": "Get user's private data",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "An Object with user's private data"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "setPrivData",
+                    "desc": "Set user's private data",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "data",
+                            "type": "Object",
+                            "desc": "An Object with user's private data"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "GenArrayWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle representing an array of asynchronous operations",
+            "flags": [
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that waits for a given array of dependencies",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will wait for a given array of dependencies and return their results"
+                    },
+                    "args": [
+                        {
+                            "name": "dependencies",
+                            "type": "VariantMap",
+                            "desc": "An Array of dependencies to wait for"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SetResultToRefWaitHandle",
+            "parent": "BlockableWaitHandle",
+            "desc": "A wait handle proxy that sets result to a given reference",
+            "flags": [
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that stores result of a dependency to a given reference",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will store the result of a dependency to a given reference"
+                    },
+                    "args": [
+                        {
+                            "name": "wait_handle",
+                            "type": "Object",
+                            "desc": "A wait handle to wait for"
+                        },
+                        {
+                            "name": "ref",
+                            "type": "Variant",
+                            "desc": "A reference to set the result to",
+                            "ref": true
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "RescheduleWaitHandle",
+            "parent": "WaitableWaitHandle",
+            "desc": "A wait handle that succeeds with null once desired scheduling priority is eligible for execution",
+            "flags": [
+                "HasDocComment"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that succeeds once desired scheduling priority is eligible for execution",
+                    "flags": [
+                        "IsStatic",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A RescheduleWaitHandle that succeeds once desired scheduling priority is eligible for execution"
+                    },
+                    "args": [
+                        {
+                            "name": "queue",
+                            "type": "Int32",
+                            "desc": "A scheduling queue to use (defined by QUEUE_* constants)"
+                        },
+                        {
+                            "name": "priority",
+                            "type": "Int32",
+                            "desc": "A non-negative number indicating scheduling priority (0 runs first)"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+                {
+                    "name": "QUEUE_DEFAULT",
+                    "type": "Int32",
+                    "desc": "A queue that is run whenever there is nothing else to do"
+                },
+                {
+                    "name": "QUEUE_NO_PENDING_IO",
+                    "type": "Int32",
+                    "desc": "A queue that is run only once there is no pending I\/O operation"
+                }
+            ]
+        }
+    ]
+}

@@ -139,7 +139,7 @@ function findIDLFiles($idlDir) {
   $files = array_filter(
     scandir($idlDir),
     function ($f) {
-      return preg_match('/\.idl\.php$/', $f);
+      return preg_match('/\.idl\.json$/', $f);
     });
 
   $files = array_map(function($e) use($idlDir) {
@@ -155,7 +155,7 @@ function parseIDLForFunctions(&$ext_func_info, $mangleMap, $idlDir) {
   global $scriptPath;
   $files = findIDLFiles($idlDir);
   foreach ($files as $file) {
-    require($file);
+    ReadIDLFile($file);
     global $funcs;
     foreach ($funcs as $func) {
       $ext_func_info[] = parseIDLFunc($func, $mangleMap);
@@ -169,7 +169,7 @@ function parseIDLForMethods(&$ext_class_info, $mangleMap, $idlDir) {
   global $scriptPath;
   $files = findIDLFiles($idlDir);
   foreach ($files as $file) {
-    require($file);
+    ReadIDLFile($file);
     global $classes;
     foreach ($classes as $cls) {
       $cname = $cls['name'];

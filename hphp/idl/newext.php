@@ -14,34 +14,33 @@ $name = $argv[1];
 require 'base.php';
 $funcs = phpnet_get_extension_functions($name);
 
-$ret = '<?php ';
+$ret = array();
 foreach ($funcs as $func) {
   $info = phpnet_get_function_info($func);
 
-  $ret .=
-    'DefineFunction(array("name" => "' . $func . '", '.
-    '  "desc" => "'. escape_php(idx($info, 'desc')) .'", '.
-    '  "flags"  =>  HasDocComment,'.
-    '  "return" => array('.
-    '    "type"   => Variant,'.
-    '    "desc"   => "'. escape_php(idx($info, 'ret')) .'",'.
-    '  ),'.
-    '  "args"   => array(';
+  $arr = array(
+    'name' => $func,
+    'desc' => idx($info, 'desc'),
+    'flags' => 'HasDocComment',
+    'return' => array(
+      'type' => 'Variant',
+      'desc' => idx($info, 'ret'),
+    )
+  );
 
   if (isset($info['params'])) {
+    $args = array();
     for ($i = 0; $i < count($info['params']); $i++) {
-      $ret .=
-        '    array('.
-        '      "name"   => "' . $info['param_names'][$i] . '",'.
-        '      "type"   => Variant,'.
-        '      "desc"   => "'. escape_php($info['params'][$i]) .'",'.
-        '    ),';
+      $args[] = array(
+        'name' => $info['param_names'][$i],
+        'type' => 'Variant',
+        'desc' => $info['params'][$i],
+      );
     }
+    $arr['args'] = $args;
   }
 
-  $ret .=
-    '  ),'.
-    '));';
+  $ret[] = $arr;
 }
 
-file_put_contents("$name.idl.php", $ret);
+file_put_contents("$name.idl.json", json_encode($ret, JSON_PRETTY_PRINT));

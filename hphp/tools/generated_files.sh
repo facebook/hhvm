@@ -76,14 +76,14 @@ fi
 if [ "$1" = "constants" -o "$1" = "all" ]; then
   cd $HPHP_HOME
   [ $VERBOSE -eq 1 ] && echo "Generating hphp/system/constants.h"
-  $HHVM hphp/idl/class_map.php hphp/system/constants.h hphp/system/globals/constdef.php
+  $HHVM hphp/idl/class_map.php hphp/system/constants.h hphp/system/globals/constdef.json
 fi
 
 if [ "$1" = "class_map" -o "$1" = "all" ]; then
   cd $HPHP_HOME
   [ $VERBOSE -eq 1 ] && echo "Generating hphp/system/class_map.h"
-  $HHVM hphp/idl/class_map.php hphp/system/class_map.cpp hphp/system/globals/constdef.php \
-	`find hphp/idl -name '*.idl.php'`
+  $HHVM hphp/idl/class_map.php hphp/system/class_map.cpp hphp/system/globals/constdef.json \
+	`find hphp/idl -name '*.idl.json'`
 fi
 
 if [ "$1" = "license" -o "$1" = "all" ]; then

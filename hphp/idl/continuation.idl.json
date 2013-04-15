@@ -1,0 +1,324 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "hphp_create_continuation",
+            "return": {
+                "type": "Object:Continuation"
+            },
+            "args": [
+                {
+                    "name": "clsname",
+                    "type": "String"
+                },
+                {
+                    "name": "funcname",
+                    "type": "String"
+                },
+                {
+                    "name": "origFuncName",
+                    "type": "String"
+                },
+                {
+                    "name": "args",
+                    "type": "VariantMap",
+                    "value": "null_array"
+                }
+            ],
+            "flags": [
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "Continuation",
+            "flags": [
+                "IsFinal"
+            ],
+            "ifaces": [
+                "Iterator",
+                "Awaitable"
+            ],
+            "footer": "  public: void setCalledClass(CStrRef cls) {\n    const_assert(!hhvm);\n    m_called_class = cls;\n  }\nprotected: virtual bool php_sleep(Variant &ret);\npublic:\n  inline void preNext() {\n    if (m_done) {\n      throw_exception(Object(SystemLib::AllocExceptionObject(\n                               \"Continuation is already finished\")));\n    }\n    if (m_running) {\n      throw_exception(Object(SystemLib::AllocExceptionObject(\n                               \"Continuation is already running\")));\n    }\n    m_running = true;\n    ++m_index;\n  }\n\n  inline void startedCheck() {\n    if (m_index < 0LL) {\n      throw_exception(\n        Object(SystemLib::AllocExceptionObject(\"Need to call next() first\")));\n    }\n  }\n\npublic:\n  Object m_obj;\n  Array m_args;\n  int64_t m_index;\n  Variant m_value;\n  Variant m_received;\n  String m_origFuncName;\n  bool m_done;\n  bool m_running;\n  bool m_should_throw;\n\n  int m_localsOffset;\n  VM::Func *m_vmFunc;\n  int64_t m_label\n  VM::ActRec* m_arPtr;\n\n  p_ContinuationWaitHandle m_waitHandle;\n\n  SmartPtr<HphpArray> m_VMStatics;\n\n  String& getCalledClass() { not_reached(); }\n\n  HphpArray* getStaticLocals();\n  static size_t sizeForLocalsAndIters(int nLocals, int nIters) {\n    return (sizeof(c_Continuation) + sizeof(TypedValue) * nLocals +\n            sizeof(VM::Iter) * nIters + sizeof(VM::ActRec));\n  }\n  VM::ActRec* actRec() {\n    return m_arPtr;\n  }\n  TypedValue* locals() {\n    return (TypedValue*)(uintptr_t(this) + m_localsOffset);\n  }",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "func",
+                            "type": "Int64"
+                        },
+                        {
+                            "name": "origFuncName",
+                            "type": "String"
+                        },
+                        {
+                            "name": "obj",
+                            "type": "Variant",
+                            "value": "null"
+                        },
+                        {
+                            "name": "args",
+                            "type": "VariantMap",
+                            "value": "null_array"
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "update",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "label",
+                            "type": "Int64"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "getWaitHandle",
+                    "desc": "Start asynchronous execution of this Continuation and return the wait handle",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getLabel",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "num_args",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "get_args",
+                    "return": {
+                        "type": "VariantVec"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "get_arg",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "id",
+                            "type": "Int64"
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "send",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "v",
+                            "type": "Variant"
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "raise",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "v",
+                            "type": "Variant"
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "getOrigFuncName",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__clone",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DummyContinuation",
+            "ifaces": [
+                "Iterator"
+            ],
+            "desc": "Represents an invalid continuation which will fatal when used.",
+            "flags": [
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "args": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

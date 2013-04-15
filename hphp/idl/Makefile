@@ -1,7 +1,7 @@
 
 V ?= @
 
-IDL_PHPS = $(wildcard  *.idl.php)
+IDL_FILES = $(wildcard  *.idl.json)
 ifndef REPO_ADD
 REPO_ADD = git add
 endif
@@ -16,20 +16,20 @@ all:
 
 lists: ../test/test_ext.h ../test/test_ext.inc ../runtime/ext/ext.h
 
-../test/test_ext.h: idl_list.php $(IDL_PHPS)
+../test/test_ext.h: idl_list.php $(IDL_FILES)
 	@echo 'Generating $@'
 	$(V)$(PHP) idl_list.php test_ext $@
 
-../test/test_ext.inc: idl_list.php $(IDL_PHPS)
+../test/test_ext.inc: idl_list.php $(IDL_FILES)
 	@echo 'Generating $@'
 	$(V)$(PHP) idl_list.php test_suites $@
 	$(V)touch ../test/test.cpp
 
-../runtime/ext/ext.h: idl_list.php $(IDL_PHPS)
+../runtime/ext/ext.h: idl_list.php $(IDL_FILES)
 	@echo 'Generating $@'
 	$(V)$(PHP) idl_list.php ext $@
 
-$(EXT): $(EXT).idl.php idl.php base.php
+$(EXT): $(EXT).idl.json idl.php base.php
 	@echo 'Generating files from $<...'
 	@echo ' --> ext_$@.h ext_$@.cpp'
 	$(V)$(PHP) idl.php cpp  $< ext_$@.h ext_$@.cpp
@@ -70,22 +70,22 @@ remove:
 	$(REPO_DEL) ../runtime/ext/ext_$(EXT).h
 	$(REPO_DEL) ../runtime/ext/ext_$(EXT).cpp
 	@echo 'Removing IDL file...'
-	$(REPO_DEL) $(EXT).idl.php
+	$(REPO_DEL) $(EXT).idl.json
 	make -C ../ clobber && make -C ../
 
 clean clobber:
-	$(V)rm -f *~ $(patsubst %.idl.php, %, $(IDL_PHPS)) $(patsubst %.idl.php, ext_%.h, $(IDL_PHPS)) $(patsubst %.idl.php, ext_%.cpp, $(IDL_PHPS)) $(patsubst %.idl.php, %.inc, $(IDL_PHPS)) $(patsubst %.idl.php, test_ext_%.h, $(IDL_PHPS)) $(patsubst %.idl.php, test_ext_%.cpp, $(IDL_PHPS))
+	$(V)rm -f *~ $(patsubst %.idl.json, %, $(IDL_FILES)) $(patsubst %.idl.json, ext_%.h, $(IDL_FILES)) $(patsubst %.idl.json, ext_%.cpp, $(IDL_FILES)) $(patsubst %.idl.json, %.inc, $(IDL_FILES)) $(patsubst %.idl.json, test_ext_%.h, $(IDL_FILES)) $(patsubst %.idl.json, test_ext_%.cpp, $(IDL_FILES))
 
 update-all:
-	@for c in $(patsubst %.idl.php, %, $(IDL_PHPS)); do $(MAKE) update EXT=$$c; done;
+	@for c in $(patsubst %.idl.json, %, $(IDL_FILES)); do $(MAKE) update EXT=$$c; done;
 
 # re-generating .idl files
 
 %.gendoc:
-	@php schema.php $(patsubst %.gendoc, %.idl.php, $@) -1 > $@.php
-	@mv -f $@.php $(patsubst %.gendoc, %.idl.php, $@)
+	@php schema.php $(patsubst %.gendoc, %.idl.json, $@) -1 > $@.php
+	@mv -f $@.php $(patsubst %.gendoc, %.idl.json, $@)
 
-gendoc-all: $(patsubst %.idl.php, %.gendoc, $(IDL_PHPS))
+gendoc-all: $(patsubst %.idl.json, %.gendoc, $(IDL_FILES))
 
 # re-generating doc comments for system classes
 

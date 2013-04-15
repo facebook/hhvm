@@ -1,0 +1,694 @@
+{
+    "preamble": "#include <sqlite3.h>",
+    "consts": [
+        {
+            "name": "SQLITE3_ASSOC",
+            "type": "Int64"
+        },
+        {
+            "name": "SQLITE3_NUM",
+            "type": "Int64"
+        },
+        {
+            "name": "SQLITE3_BOTH",
+            "type": "Int64"
+        },
+        {
+            "name": "SQLITE3_INTEGER",
+            "type": "Int64"
+        },
+        {
+            "name": "SQLITE3_FLOAT",
+            "type": "Int64"
+        },
+        {
+            "name": "SQLITE3_TEXT",
+            "type": "Int64"
+        },
+        {
+            "name": "SQLITE3_BLOB",
+            "type": "Int64"
+        },
+        {
+            "name": "SQLITE3_NULL",
+            "type": "Int64"
+        },
+        {
+            "name": "SQLITE3_OPEN_READONLY",
+            "type": "Int64"
+        },
+        {
+            "name": "SQLITE3_OPEN_READWRITE",
+            "type": "Int64"
+        },
+        {
+            "name": "SQLITE3_OPEN_CREATE",
+            "type": "Int64"
+        }
+    ],
+    "funcs": [
+    ],
+    "classes": [
+        {
+            "name": "SQLite3",
+            "desc": "A class that interfaces SQLite 3 databases.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "footer": "\n  public: void validate() const;\n  public: sqlite3 *m_raw_db;\n    DECLARE_BOOST_TYPES(UserDefinedFunc);\n    struct UserDefinedFunc {\n      int argc;\n      Variant func;\n      Variant step;\n      Variant fini;\n    };\n  public: UserDefinedFuncPtrVec m_udfs;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "desc": "Path to the SQLite database."
+                        },
+                        {
+                            "name": "flags",
+                            "type": "Int64",
+                            "value": "k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE",
+                            "desc": "Optional flags used to determine how to open the SQLite database. By default, open uses SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE.\n\nSQLITE3_OPEN_READONLY: Open the database for reading only.\n\nSQLITE3_OPEN_READWRITE: Open the database for reading and writing.\n\nSQLITE3_OPEN_CREATE: Create the database if it does not exist."
+                        },
+                        {
+                            "name": "encryption_key",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "An optional encryption key used when encrypting and decrypting an SQLite database."
+                        }
+                    ]
+                },
+                {
+                    "name": "open",
+                    "desc": "Opens an SQLite 3 Database. If the build includes encryption, then it will attempt to use the key.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null,
+                        "desc": "Returns TRUE on success, FALSE on failure to open the database."
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "desc": "Path to the SQLite database."
+                        },
+                        {
+                            "name": "flags",
+                            "type": "Int64",
+                            "value": "k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE",
+                            "desc": "Optional flags used to determine how to open the SQLite database. By default, open uses SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE.\n\nSQLITE3_OPEN_READONLY: Open the database for reading only.\n\nSQLITE3_OPEN_READWRITE: Open the database for reading and writing.\n\nSQLITE3_OPEN_CREATE: Create the database if it does not exist."
+                        },
+                        {
+                            "name": "encryption_key",
+                            "type": "String",
+                            "value": "null_string",
+                            "desc": "An optional encryption key used when encrypting and decrypting an SQLite database."
+                        }
+                    ]
+                },
+                {
+                    "name": "busytimeout",
+                    "desc": "Sets a busy handler that will sleep until the database is not locked or the timeout is reached.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success, FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "msecs",
+                            "type": "Int64",
+                            "desc": "The milliseconds to sleep. Setting this value to a value less than or equal to zero, will turn off an already set timeout handler."
+                        }
+                    ]
+                },
+                {
+                    "name": "close",
+                    "desc": "Closes the database connection.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success, FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "exec",
+                    "desc": "Executes a result-less query against a given database.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE if the query succeeded, FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "sql",
+                            "type": "String",
+                            "desc": "The SQL query to execute (typically an INSERT, UPDATE, or DELETE query)."
+                        }
+                    ]
+                },
+                {
+                    "name": "version",
+                    "desc": "Returns the SQLite3 library version as a string constant and as a number.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "VariantMap",
+                        "desc": "Returns an associative array with the keys \"versionString\" and \"versionNumber\"."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastinsertrowid",
+                    "desc": "Returns the row ID of the most recent INSERT into the database.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns the row ID of the most recent INSERT into the database"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lasterrorcode",
+                    "desc": "Returns the numeric result code of the most recent failed SQLite request.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns an integer value representing the numeric result code of the most recent failed SQLite request."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lasterrormsg",
+                    "desc": "Returns English text describing the most recent failed SQLite request.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Returns an English string describing the most recent failed SQLite request."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "loadextension",
+                    "desc": "Attempts to load an SQLite extension library.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE if the extension is successfully loaded, FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "extension",
+                            "type": "String",
+                            "desc": "The name of the library to load. The library must be located in the directory specified in the configure option sqlite3.extension_dir."
+                        }
+                    ]
+                },
+                {
+                    "name": "changes",
+                    "desc": "Returns the number of database rows that were changed (or inserted or deleted) by the most recent SQL statement.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns an integer value corresponding to the number of database rows changed (or inserted or deleted) by the most recent SQL statement."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "escapestring",
+                    "desc": "Returns a string that has been properly escaped for safe inclusion in an SQL statement.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Returns a properly escaped string that may be used safely in an SQL statement."
+                    },
+                    "args": [
+                        {
+                            "name": "sql",
+                            "type": "String",
+                            "desc": "The string to be escaped."
+                        }
+                    ]
+                },
+                {
+                    "name": "prepare",
+                    "desc": "Prepares an SQL statement for execution and returns an SQLite3Stmt object.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns an SQLite3Stmt object on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "sql",
+                            "type": "String",
+                            "desc": "The SQL query to prepare."
+                        }
+                    ]
+                },
+                {
+                    "name": "query",
+                    "desc": "Executes an SQL query, returning an SQLite3Result object if the query returns results.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns an SQLite3Result object if the query returns results. Otherwise, returns TRUE if the query succeeded, FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "sql",
+                            "type": "String",
+                            "desc": "The SQL query to execute."
+                        }
+                    ]
+                },
+                {
+                    "name": "querysingle",
+                    "desc": "Executes a query and returns a single result.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the value of the first column of results or an array of the entire first row (if entire_row is TRUE), otherwise FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "sql",
+                            "type": "String",
+                            "desc": "The SQL query to execute."
+                        },
+                        {
+                            "name": "entire_row",
+                            "type": "Boolean",
+                            "value": "false",
+                            "desc": "By default, querySingle returns the value of the first column returned by the query. If entire_row is TRUE, then it returns an array of the entire first row."
+                        }
+                    ]
+                },
+                {
+                    "name": "createfunction",
+                    "desc": "Registers a PHP function or user-defined function for use as an SQL scalar function for use within SQL statements.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE upon successful creation of the function, FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "Name of the SQL function to be created or redefined."
+                        },
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "The name of a PHP function or user-defined function to apply as a callback, defining the behavior of the SQL function."
+                        },
+                        {
+                            "name": "argcount",
+                            "type": "Int64",
+                            "value": "-1",
+                            "desc": "The number of arguments that the SQL function takes. If this parameter is negative, then the SQL function may take any number of arguments."
+                        }
+                    ]
+                },
+                {
+                    "name": "createaggregate",
+                    "desc": "Registers a PHP function or user-defined function for use as an SQL aggregate function for use within SQL statements.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE upon successful creation of the aggregate, FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "Name of the SQL aggregate to be created or redefined."
+                        },
+                        {
+                            "name": "step",
+                            "type": "Variant",
+                            "desc": "The name of a PHP function or user-defined function to apply as a callback for every item in the aggregate."
+                        },
+                        {
+                            "name": "final",
+                            "type": "Variant",
+                            "desc": "The name of a PHP function or user-defined function to apply as a callback at the end of the aggregate data."
+                        },
+                        {
+                            "name": "argcount",
+                            "type": "Int64",
+                            "value": "-1",
+                            "desc": "The number of arguments that the SQL aggregate takes. If this parameter is negative, then the SQL aggregate may take any number of arguments."
+                        }
+                    ]
+                },
+                {
+                    "name": "openblob",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "table",
+                            "type": "String"
+                        },
+                        {
+                            "name": "column",
+                            "type": "String"
+                        },
+                        {
+                            "name": "rowid",
+                            "type": "Int64"
+                        },
+                        {
+                            "name": "dbname",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SQLite3Stmt",
+            "desc": "A class that handles prepared statements for the SQLite 3 extension.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "footer": "\n  public: void validate() const;\n  public: p_SQLite3 m_db;\n  public: sqlite3_stmt *m_raw_stmt;\n    DECLARE_BOOST_TYPES(BoundParam);\n    struct BoundParam {\n      int type;\n      int index;\n      Variant value;\n    };\n  public: BoundParamPtrVec m_bound_params;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "dbobject",
+                            "type": "Object"
+                        },
+                        {
+                            "name": "statement",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "paramcount",
+                    "desc": "Returns the number of parameters within the prepared statement.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns the number of parameters within the prepared statement."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "close",
+                    "desc": "Closes the prepared statement.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "reset",
+                    "desc": "Resets the prepared statement to its state prior to execution. All bindings remain intact after reset.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE if the statement is successfully reset, FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "clear",
+                    "desc": "Clears all current bound parameters.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on successful clearing of bound parameters, FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "bindparam",
+                    "desc": "Binds a parameter to a statement variable.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE if the parameter is bound to the statement variable, FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant",
+                            "desc": "An string identifying the statement variable to which the parameter should be bound."
+                        },
+                        {
+                            "name": "parameter",
+                            "type": "Variant",
+                            "desc": "The parameter to bind to a statement variable.",
+                            "ref": true
+                        },
+                        {
+                            "name": "type",
+                            "type": "Int64",
+                            "value": "k_SQLITE3_TEXT",
+                            "desc": "The data type of the parameter to bind.\n\nSQLITE3_INTEGER: The value is a signed integer, stored in 1, 2, 3, 4, 6, or 8 bytes depending on the magnitude of the value.\n\nSQLITE3_FLOAT: The value is a floating point value, stored as an 8-byte IEEE floating point number.\n\nSQLITE3_TEXT: The value is a text string, stored using the database encoding (UTF-8, UTF-16BE or UTF-16-LE).\n\nSQLITE3_BLOB: The value is a blob of data, stored exactly as it was input.\n\nSQLITE3_NULL: The value is a NULL value."
+                        }
+                    ]
+                },
+                {
+                    "name": "bindvalue",
+                    "desc": "Binds the value of a parameter to a statement variable.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE if the value is bound to the statement variable, FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant",
+                            "desc": "An string identifying the statement variable to which the value should be bound."
+                        },
+                        {
+                            "name": "parameter",
+                            "type": "Variant",
+                            "desc": "The value to bind to a statement variable."
+                        },
+                        {
+                            "name": "type",
+                            "type": "Int64",
+                            "value": "k_SQLITE3_TEXT",
+                            "desc": "The data type of the value to bind.\n\nSQLITE3_INTEGER: The value is a signed integer, stored in 1, 2, 3, 4, 6, or 8 bytes depending on the magnitude of the value.\n\nSQLITE3_FLOAT: The value is a floating point value, stored as an 8-byte IEEE floating point number.\n\nSQLITE3_TEXT: The value is a text string, stored using the database encoding (UTF-8, UTF-16BE or UTF-16-LE).\n\nSQLITE3_BLOB: The value is a blob of data, stored exactly as it was input.\n\nSQLITE3_NULL: The value is a NULL value."
+                        }
+                    ]
+                },
+                {
+                    "name": "execute",
+                    "desc": "Executes a prepared statement and returns a result set object.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns an SQLite3Result object on successful execution of the prepared statement, FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SQLite3Result",
+            "desc": "A class that handles result sets for the SQLite 3 extension.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "footer": "\n  public: void validate() const;\n  public: p_SQLite3Stmt m_stmt;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "numcolumns",
+                    "desc": "Returns the number of columns in the result set.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns the number of columns in the result set."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "columnname",
+                    "desc": "Returns the name of the column specified by the column_number.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Returns the string name of the column identified by column_number."
+                    },
+                    "args": [
+                        {
+                            "name": "column",
+                            "type": "Int64",
+                            "desc": "The numeric zero-based index of the column."
+                        }
+                    ]
+                },
+                {
+                    "name": "columntype",
+                    "desc": "Returns the type of the column identified by column_number.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns the data type index of the column identified by column_number (one of SQLITE3_INTEGER, SQLITE3_FLOAT, SQLITE3_TEXT, SQLITE3_BLOB, or SQLITE3_NULL)."
+                    },
+                    "args": [
+                        {
+                            "name": "column",
+                            "type": "Int64",
+                            "desc": "The numeric zero-based index of the column."
+                        }
+                    ]
+                },
+                {
+                    "name": "fetcharray",
+                    "desc": "Fetches a result row as an associative or numerically indexed array or both. By default, fetches as both.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns a result row as an associatively or numerically indexed array or both."
+                    },
+                    "args": [
+                        {
+                            "name": "mode",
+                            "type": "Int64",
+                            "value": "k_SQLITE3_BOTH",
+                            "desc": "Controls how the next row will be returned to the caller. This value must be one of either SQLITE3_ASSOC, SQLITE3_NUM, or SQLITE3_BOTH.\n\nSQLITE3_ASSOC: returns an array indexed by column name as returned in the corresponding result set\n\nSQLITE3_NUM: returns an array indexed by column number as returned in the corresponding result set, starting at column 0\n\nSQLITE3_BOTH: returns an array indexed by both column name and number as returned in the corresponding result set, starting at column 0"
+                        }
+                    ]
+                },
+                {
+                    "name": "reset",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "finalize",
+                    "desc": "Closes the result set.",
+                    "flags": [
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE."
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

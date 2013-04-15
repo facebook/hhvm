@@ -8,7 +8,7 @@ array_shift($args);
 $target = array_shift($args);
 
 foreach ($args as $arg) {
-  require_once $arg;
+  ReadIDLFile(realpath($arg));
 }
 
 if (substr($target, -4) == '.cpp') {

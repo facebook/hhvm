@@ -20,14 +20,14 @@ if (strpos($format, '-') > 0) {
   list($format, $mode) = explode('-', $format);
 }
 
-if (preg_match('/\.idl\.php/', $input)) {
-  $full_name = preg_replace('/\.idl\.php/', '', $input);
+if (preg_match('/\.idl\.json/', $input)) {
+  $full_name = preg_replace('/\.idl\.json/', '', $input);
   $name = preg_replace('%^.*/%', '', $full_name);
   if ($full_name != $name) $mode = 'remote';
 } else {
   throw new Exception("wrong IDL or schema file $input");
 }
-require $input;
+ReadIDLFile($input);
 
 $name = preg_replace('|[/\.]|', '_', $name);
 $NAME = strtoupper($name);

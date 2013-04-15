@@ -1,0 +1,571 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "hphp_recursiveiteratoriterator___construct",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Resource"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "iterator",
+                    "type": "Resource"
+                },
+                {
+                    "name": "mode",
+                    "type": "Int64"
+                },
+                {
+                    "name": "flags",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursiveiteratoriterator_getinneriterator",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Resource"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursiveiteratoriterator_current",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursiveiteratoriterator_key",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursiveiteratoriterator_next",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursiveiteratoriterator_rewind",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursiveiteratoriterator_valid",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_directoryiterator___construct",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "path",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "hphp_directoryiterator_key",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_directoryiterator_next",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_directoryiterator_rewind",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_directoryiterator_seek",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "position",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "hphp_directoryiterator_current",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_directoryiterator___tostring",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_directoryiterator_valid",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_directoryiterator_isdot",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator___construct",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "path",
+                    "type": "String"
+                },
+                {
+                    "name": "flags",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator_key",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator_next",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator_rewind",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator_seek",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "position",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator_current",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator___tostring",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator_valid",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator_haschildren",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator_getchildren",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Resource"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator_getsubpath",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_recursivedirectoryiterator_getsubpathname",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "MutableArrayIterator",
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "Data structure used by the runtime to deal with mutable iteration inside yield generators.",
+            "flags": [
+                "HasDocComment",
+                "NoDefaultSweep"
+            ],
+            "footer": "\n  public: union {\n    char m_u[sizeof(MArrayIter)];\n    TypedValue m_align;\n  };\n  public: bool m_valid;\n\n  private: MArrayIter& marr() {\n    return *(MArrayIter*)(m_u);\n  }",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "array",
+                            "type": "Variant",
+                            "ref": true
+                        }
+                    ],
+                    "flags": [
+                    ]
+                },
+                {
+                    "name": "currentRef",
+                    "return": {
+                        "type": "Variant",
+                        "ref": true
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "return": {
+                        "type": null
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        }
+    ]
+}

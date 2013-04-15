@@ -1,0 +1,1018 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "hphp_splfileinfo___construct",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Resource"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "file_name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getatime",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getbasename",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "suffix",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getctime",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getfileinfo",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Resource"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "class_name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getfilename",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getgroup",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getinode",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getlinktarget",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getmtime",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getowner",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getpath",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getpathinfo",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Resource"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "class_name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getpathname",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getperms",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getrealpath",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_getsize",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_gettype",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_isdir",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_isexecutable",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_isfile",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_islink",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_isreadable",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_iswritable",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_openfile",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Resource"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "open_mode",
+                    "type": "String"
+                },
+                {
+                    "name": "use_include_path",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "context",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_setfileclass",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "class_name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo_setinfoclass",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "class_name",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileinfo___tostring",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject___construct",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Resource"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "filename",
+                    "type": "String"
+                },
+                {
+                    "name": "open_mode",
+                    "type": "String"
+                },
+                {
+                    "name": "use_include_path",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "context",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_current",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_eof",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_fflush",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_fgetc",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_fgetcsv",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "delimiter",
+                    "type": "String"
+                },
+                {
+                    "name": "enclosure",
+                    "type": "String"
+                },
+                {
+                    "name": "escape",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_fgets",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_fgetss",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "String"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "allowable_tags",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_flock",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "wouldblock",
+                    "type": "Variant",
+                    "ref": true
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_fpassthru",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_fscanf",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "_argc",
+                    "type": "Int64"
+                },
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "format",
+                    "type": "String"
+                },
+                {
+                    "name": "_argv",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_fseek",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "offset",
+                    "type": "Int64"
+                },
+                {
+                    "name": "whence",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_fstat",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_ftell",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_ftruncate",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "size",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_fwrite",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "str",
+                    "type": "String"
+                },
+                {
+                    "name": "length",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_getcvscontrol",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_getflags",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_getmaxlinelen",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_key",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Int64"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_next",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_rewind",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_valid",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_seek",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "line_pos",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_setcsvcontrol",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "delimiter",
+                    "type": "String"
+                },
+                {
+                    "name": "enclosure",
+                    "type": "String"
+                },
+                {
+                    "name": "escape",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_setflags",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "flags",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "hphp_splfileobject_setmaxlinelen",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Resource"
+                },
+                {
+                    "name": "max_len",
+                    "type": "Int64"
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

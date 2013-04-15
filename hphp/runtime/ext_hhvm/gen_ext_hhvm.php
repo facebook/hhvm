@@ -26,7 +26,7 @@ $current_object_file = $argv[6];
 $extensions = array();
 $extra_idl = array();
 foreach (array_slice($argv, 7) as $a) {
-  if (preg_match('/\.idl.php$/', $a)) {
+  if (preg_match('/\.idl.json$/', $a)) {
     $extra_idl[] = $a;
   } else {
     $extensions[] = $a;

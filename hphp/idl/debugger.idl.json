@@ -1,0 +1,851 @@
+{
+    "preamble": "#include <runtime\/eval\/debugger\/debugger_client.h>\n#include <runtime\/eval\/debugger\/debugger_proxy.h>",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "hphpd_install_user_command",
+            "desc": "Expands HipHop debugger with a user extended command.",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "TRUE if the command name was not used before, FALSE otherwise."
+            },
+            "args": [
+                {
+                    "name": "cmd",
+                    "type": "String",
+                    "desc": "The command name to register."
+                },
+                {
+                    "name": "clsname",
+                    "type": "String",
+                    "desc": "The debugger command class that has its implementation."
+                }
+            ]
+        },
+        {
+            "name": "hphpd_get_user_commands",
+            "desc": "Gets a list of user extended commands.",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "StringMap",
+                "desc": "A map of commands and their PHP classes."
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "hphpd_break",
+            "desc": "Sets a hard breakpoint. When a debugger is running, this line of code will break into debugger, if condition is met. If there is no debugger that's attached, it will not do anything.",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": [
+                {
+                    "name": "condition",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "If true, break, otherwise, continue."
+                }
+            ]
+        },
+        {
+            "name": "hphpd_get_client",
+            "desc": "Gets an hphpd client with a string key (creating on-demand). With the same key, it guarantees to get the same debugger client across multiple requests. One hphpd client can only be gotten by a single request at any given time. Will return null if the client is already gotten.",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "name",
+                    "type": "String",
+                    "value": "null",
+                    "desc": "the name to identify the debugger client"
+                }
+            ]
+        },
+        {
+            "name": "hphpd_client_ctrl",
+            "desc": "Make special operations on a client, such as interrupt a waiting client.",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "name",
+                    "type": "String",
+                    "desc": "the name to identify the debugger client"
+                },
+                {
+                    "name": "op",
+                    "type": "String",
+                    "desc": "the string to represent the operation"
+                }
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "DebuggerProxyCmdUser",
+            "desc": "DebuggerProxy wrapper for CmdUser",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "footer": "\n public:\n  Eval::DebuggerProxy *m_proxy;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "desc": "Constructor of DebuggerProxyCmdUser.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "isLocal",
+                    "desc": "Whether this proxy is running locally for debugging a local script, or running remotely on a server.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "TRUE if locally, FALSE if remote."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "send",
+                    "desc": "Sends a command back to DebuggerClientCmdUser.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TRUE if successful, FALSE otherwise."
+                    },
+                    "args": [
+                        {
+                            "name": "cmd",
+                            "type": "Object",
+                            "desc": "The command to send to client."
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DebuggerClientCmdUser",
+            "desc": "DebuggerClient wrapper for CmdUser",
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific"
+            ],
+            "footer": "\n public:\n  Eval::DebuggerClient *m_client;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "desc": "Constructor of DebuggerClientCmdUser.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "quit",
+                    "desc": "Quits the client.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "print",
+                    "desc": "Prints some text without any color.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific",
+                        "VariableArguments"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "format",
+                            "type": "String",
+                            "desc": "Format string in printf() style."
+                        }
+                    ]
+                },
+                {
+                    "name": "help",
+                    "desc": "Prints some text in help color.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific",
+                        "VariableArguments"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "format",
+                            "type": "String",
+                            "desc": "Format string in printf() style."
+                        }
+                    ]
+                },
+                {
+                    "name": "info",
+                    "desc": "Prints some text in information color.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific",
+                        "VariableArguments"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "format",
+                            "type": "String",
+                            "desc": "Format string in printf() style."
+                        }
+                    ]
+                },
+                {
+                    "name": "output",
+                    "desc": "Prints some text in script output color.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific",
+                        "VariableArguments"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "format",
+                            "type": "String",
+                            "desc": "Format string in printf() style."
+                        }
+                    ]
+                },
+                {
+                    "name": "error",
+                    "desc": "Prints some text in error color.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific",
+                        "VariableArguments"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "format",
+                            "type": "String",
+                            "desc": "Format string in printf() style."
+                        }
+                    ]
+                },
+                {
+                    "name": "code",
+                    "desc": "Pretty print PHP source code.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "source",
+                            "type": "String",
+                            "desc": "PHP source code to print."
+                        },
+                        {
+                            "name": "highlight_line",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Which line to focus or highlight."
+                        },
+                        {
+                            "name": "start_line_no",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "Starting line number. 0 for no line no."
+                        },
+                        {
+                            "name": "end_line_no",
+                            "type": "Int32",
+                            "value": "0",
+                            "desc": "End line number. 0 for no end line no."
+                        }
+                    ]
+                },
+                {
+                    "name": "ask",
+                    "desc": "Ask end user a question.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific",
+                        "VariableArguments"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Single letter response from end user."
+                    },
+                    "args": [
+                        {
+                            "name": "format",
+                            "type": "String",
+                            "desc": "Format string in printf() style."
+                        }
+                    ]
+                },
+                {
+                    "name": "wrap",
+                    "desc": "Wraps some text to fit screen width.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "Formatted string."
+                    },
+                    "args": [
+                        {
+                            "name": "str",
+                            "type": "String",
+                            "desc": "String to wrap."
+                        }
+                    ]
+                },
+                {
+                    "name": "helpTitle",
+                    "desc": "Displays a title for a help topic.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "str",
+                            "type": "String",
+                            "desc": "Title text."
+                        }
+                    ]
+                },
+                {
+                    "name": "helpCmds",
+                    "desc": "Displays a list of commands in help format. Each command has a name and a short description, and specify more commands in pairs. For example, $client->helpCmds('cmd1', 'desc1', 'cmd2', 'desc2').",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific",
+                        "VariableArguments"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "cmd",
+                            "type": "String",
+                            "desc": "Command name."
+                        },
+                        {
+                            "name": "desc",
+                            "type": "String",
+                            "desc": "Command description."
+                        }
+                    ]
+                },
+                {
+                    "name": "helpBody",
+                    "desc": "Displays help contents. A help body is a help section with one empty line before and one empty line after.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "str",
+                            "type": "String",
+                            "desc": "The help text."
+                        }
+                    ]
+                },
+                {
+                    "name": "helpSection",
+                    "desc": "Displays a section of help text.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "str",
+                            "type": "String",
+                            "desc": "One section of help text."
+                        }
+                    ]
+                },
+                {
+                    "name": "tutorial",
+                    "desc": "Tutorials are help texts displayed according to user's preference. In auto mode (vs. always on or always off modes), one tutorial text is only displayed just once to end user.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "str",
+                            "type": "String",
+                            "desc": "Help texts guiding end user for learning how to use debugger."
+                        }
+                    ]
+                },
+                {
+                    "name": "getCode",
+                    "desc": "PHP code snippet user just typed in manually.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "The PHP source code."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getCommand",
+                    "desc": "Debugger command end user typed.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "The command text."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "arg",
+                    "desc": "Tests if an argument matches a pre-defined keyword. As long as it matches the keyword partially and case-insensitively, it is considered as a match. For example, $client->arg(2, 'foo') will return TRUE if user inputs 'f' or 'fo' or 'Fo' for the 2nd argument.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "TRUE if matched. FALSE otherwise."
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Int32",
+                            "desc": "Argument index."
+                        },
+                        {
+                            "name": "str",
+                            "type": "String",
+                            "desc": "The string to compare with."
+                        }
+                    ]
+                },
+                {
+                    "name": "argCount",
+                    "desc": "Count of total arguments.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "The count, not including user command itself."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "argValue",
+                    "desc": "Gets value of an argument.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "String value of an argument."
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Int32",
+                            "desc": "Argument index."
+                        }
+                    ]
+                },
+                {
+                    "name": "lineRest",
+                    "desc": "Gets rest of line all together as a single string.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "String",
+                        "desc": "The string that has all argument at and after certain index."
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Int32",
+                            "desc": "The starting index to include arguments."
+                        }
+                    ]
+                },
+                {
+                    "name": "args",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "StringVec"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "send",
+                    "desc": "Sends a debugger command to debugger proxy.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TRUE if successful, FALSE otherwise."
+                    },
+                    "args": [
+                        {
+                            "name": "cmd",
+                            "type": "Object",
+                            "desc": "The command to send."
+                        }
+                    ]
+                },
+                {
+                    "name": "xend",
+                    "desc": "Exchanges command with proxy: sends a command to debugger and expects and receives a command from debugger.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "The received command, and it is always the same type as what it sends, so the same command class can handle processing at both sending and receiving sides."
+                    },
+                    "args": [
+                        {
+                            "name": "cmd",
+                            "type": "Object",
+                            "desc": "The command to send."
+                        }
+                    ]
+                },
+                {
+                    "name": "getCurrentLocation",
+                    "desc": "Gets current source location.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "An array in a format of array('file' => {source file name}, 'line' => {line number}, 'namespace' => {namespace code is in}, 'class' => {class code is in}, 'function' => {function code is in}, 'text' => {human readable description of current source location})."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getStackTrace",
+                    "desc": "Gets current stacktrace.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "An array of stacktrace frames."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getFrame",
+                    "desc": "Returns current frame index.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "An index indicating which frame end user has moved to for inspection."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "printFrame",
+                    "desc": "Prints a stacktrace frame.",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Int32",
+                            "desc": "Which frame to print."
+                        }
+                    ]
+                },
+                {
+                    "name": "addCompletion",
+                    "desc": "Adds string(s) to auto-completion. This function is only effective inside DebuggerClientCmdUser::onAutoComplete().",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "list",
+                            "type": "Variant",
+                            "desc": "A single string, an AUTO_COMPLETE_ constant or an array of strings."
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+                {
+                    "name": "AUTO_COMPLETE_FILENAMES",
+                    "type": "Int64"
+                },
+                {
+                    "name": "AUTO_COMPLETE_VARIABLES",
+                    "type": "Int64"
+                },
+                {
+                    "name": "AUTO_COMPLETE_CONSTANTS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "AUTO_COMPLETE_CLASSES",
+                    "type": "Int64"
+                },
+                {
+                    "name": "AUTO_COMPLETE_FUNCTIONS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "AUTO_COMPLETE_CLASS_METHODS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "AUTO_COMPLETE_CLASS_PROPERTIES",
+                    "type": "Int64"
+                },
+                {
+                    "name": "AUTO_COMPLETE_CLASS_CONSTANTS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "AUTO_COMPLETE_KEYWORDS",
+                    "type": "Int64"
+                },
+                {
+                    "name": "AUTO_COMPLETE_CODE",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "DebuggerClient",
+            "desc": "",
+            "bases": [
+                "Sweepable"
+            ],
+            "flags": [
+                "HasDocComment",
+                "HipHopSpecific",
+                "NoDefaultSweep"
+            ],
+            "footer": "\n public:\n  Eval::DebuggerClient *m_client;",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "desc": "Constructor",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getState",
+                    "desc": "get current state of the debugger client",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "One of the constants"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "init",
+                    "desc": "initialize the debugger client",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TBD"
+                    },
+                    "args": [
+                        {
+                            "name": "options",
+                            "type": "Variant",
+                            "desc": "array for passing options"
+                        }
+                    ]
+                },
+                {
+                    "name": "processCmd",
+                    "desc": "issue a command to debugger client",
+                    "flags": [
+                        "HasDocComment",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "TBD"
+                    },
+                    "args": [
+                        {
+                            "name": "cmdName",
+                            "type": "Variant",
+                            "desc": "name of the command to be executed"
+                        },
+                        {
+                            "name": "args",
+                            "type": "Variant",
+                            "desc": "A vector array of strings to be used as arguments"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+                {
+                    "name": "STATE_INVALID",
+                    "type": "Int64"
+                },
+                {
+                    "name": "STATE_UNINIT",
+                    "type": "Int64"
+                },
+                {
+                    "name": "STATE_INITIALIZING",
+                    "type": "Int64"
+                },
+                {
+                    "name": "STATE_READY_FOR_COMMAND",
+                    "type": "Int64"
+                },
+                {
+                    "name": "STATE_BUSY",
+                    "type": "Int64"
+                }
+            ]
+        }
+    ]
+}

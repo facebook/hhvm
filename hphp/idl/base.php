@@ -1,9 +1,5 @@
 <?php
 
-if (file_exists('../system/globals/constants.php')) {
-  @require_once '../system/globals/constants.php';
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // types
 
@@ -193,6 +189,17 @@ function get_flag_names($arr, $name, $global_func) {
   return substr($ret, 2);
 }
 
+function read_array_of_constant_names($flag_arr) {
+  if (!is_array($flag_arr)) {
+    return 0;
+  }
+  $flag = 0;
+  foreach ($flag_arr as $constname) {
+    $flag |= constant($constname);
+  }
+  return $flag;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // schema functions that will be used (and only used) by schemas
 
@@ -206,11 +213,6 @@ function ResetSchema() {
 }
 ResetSchema();
 
-function DefinePreamble($p) {
-  global $preamble;
-  $preamble .= $p;
-}
-
 function BeginClass($class) {
   global $classes, $current_class;
   $current_class = $class['name'];
@@ -223,9 +225,7 @@ function BeginClass($class) {
   $class['properties'] = array();
   $class['consts'] = array();
 
-  if (empty($class['flags'])) {
-    $class['flags'] = 0;
-  }
+  $class['flags'] = read_array_of_constant_names($class['flags']);
   $doc = get_class_doc_comments($class);
   if (!empty($doc)) {
     $class['flags'] |= HasDocComment;
@@ -255,13 +255,42 @@ function EndClass() {
   $current_class = '';
 }
 
-function DefineProperty($property) {
-  global $classes, $current_class;
-  $classes[$current_class]['properties'][] = $property;
+function idl_parse_type($t) {
+  // Named object types
+  if (!strncmp($t, 'Object:', 7)) {
+    return substr($t, 7);
+  }
+
+  if (defined($t) && ($v = constant($t)) &&
+      is_integer($v) && ($v > 0) && ($v < TypeMask)) {
+    return $v;
+  }
+
+  error_log("Undefined type: $t", E_USER_WARNING);
+  return $t;
+}
+
+function idl_infer_type($v) {
+  switch(gettype($v)) {
+    case 'boolean':  return Boolean;
+    case 'integer':  return Int64;
+    case 'double':   return Double;
+    case 'string':   return String;
+    case 'array':    return VariantMap;
+    case 'object':   return Object;
+    case 'resource': return Resource;
+    default: return Any;
+  }
 }
 
 function DefineConstant($const) {
   global $constants, $classes, $current_class;
+  if (!isset($const['type']) && array_key_exists('value', $const)) {
+    $const['type'] = idl_infer_type($const['value']);
+  }
+
+  $const['type'] = idl_parse_type($const['type']);
+
   if (empty($current_class)) {
     $constants[] = $const;
   } else {
@@ -272,19 +301,21 @@ function DefineConstant($const) {
 function DefineFunction($func) {
   global $classes, $current_class;
 
-  if (empty($func['flags'])) {
-    $func['flags'] = 0;
-  }
+  $func['flags'] = read_array_of_constant_names($func['flags']);
   if ($current_class && $classes[$current_class]['flags'] & HipHopSpecific) {
     $func['flags'] |= HipHopSpecific;
   }
   if (!isset($func['return'])) $func['return'] = array();
   $func['ret_desc'] = idx($func['return'], 'desc');
   $func['ret_hint'] = idx($func['return'], 'hint');
-  $func['return'] = idx($func['return'], 'type');
-  if ($func['return'] & Reference) {
-    $func['ref'] = true;
-    $func['return'] = Variant | ($func['return'] & (~TypeMask));
+  if (isset($func['return']['type'])) {
+    if (idx($func['return'], 'ref')) {
+      $func['return'] = Variant;
+    } else {
+      $func['return'] = idl_parse_type($func['return']['type']);
+    }
+  } else {
+    $func['return'] = null;
   }
   $args = array();
   if (!empty($func['args'])) {
@@ -304,9 +335,10 @@ function DefineFunction($func) {
         $arg['defaultSerialized'] = get_serialized_default($arg['value']);
         $arg['defaultText'] = get_default_text($arg['value']);
       }
-      if (idx($arg, 'type') & Reference) {
-        $arg['ref'] = true;
-        $arg['type'] = Variant | ($arg['type'] & (~TypeMask));
+      if (idx($arg, 'ref')) {
+        $arg['type'] = Variant;
+      } else {
+        $arg['type'] = idl_parse_type($arg['type']);
       }
       $args[] = $arg;
     }
@@ -331,6 +363,38 @@ function DefineFunction($func) {
     $classes[$current_class]['methods'][] = $func;
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Read an IDL file into the 'funcs', 'classes' and 'consts' globals
+
+function ReadIDLFile($path) {
+  $entries = json_decode(file_get_contents($path), /* use arrays */ true);
+
+  foreach ($entries['funcs'] as $func) {
+    DefineFunction($func);
+  }
+
+  foreach ($entries['consts'] as $const) {
+    DefineConstant($const);
+  }
+
+  foreach ($entries['classes'] as $class) {
+    $methods = $class['funcs'];
+    $consts = $class['consts'];
+    unset($class['funcs']);
+    unset($class['consts']);
+
+    BeginClass($class);
+    foreach ($methods as $method) {
+      DefineFunction($method);
+    }
+    foreach ($consts as $const) {
+      DefineConstant($const);
+    }
+    EndClass();
+  }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation

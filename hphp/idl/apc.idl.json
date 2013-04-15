@@ -1,0 +1,580 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "apc_add",
+            "desc": "Caches a variable in the data store, only if it's not already stored. Unlike many other mechanisms in PHP, variables stored using apc_add() will persist between requests (until the value is removed from the cache).",
+            "flags": [
+                "HasDocComment",
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "Store the variable using this name. keys are cache-unique, so attempting to use apc_add() to store data with a key that already exists will not overwrite the existing data, and will instead return FALSE. (This is the only difference between apc_add() and apc_store().)"
+                },
+                {
+                    "name": "var",
+                    "type": "Variant",
+                    "desc": "The variable to store"
+                },
+                {
+                    "name": "ttl",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Time To Live; store var in the cache for ttl seconds. After the ttl has passed, the stored variable will be expunged from the cache (on the next request). If no ttl is supplied (or if the ttl is 0), the value will persist until it is removed from the cache manually, or otherwise fails to exist in the cache (clear, restart, etc.)."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_store",
+            "desc": "Cache a variable in the data store. Unlike many other mechanisms in PHP, variables stored using apc_store() will persist between requests (until the value is removed from the cache).",
+            "flags": [
+                "HasDocComment",
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "Store the variable using this name. keys are cache-unique, so storing a second value with the same key will overwrite the original value."
+                },
+                {
+                    "name": "var",
+                    "type": "Variant",
+                    "desc": "The variable to store"
+                },
+                {
+                    "name": "ttl",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Time To Live; store var in the cache for ttl seconds. After the ttl has passed, the stored variable will be expunged from the cache (on the next request). If no ttl is supplied (or if the ttl is 0), the value will persist until it is removed from the cache manually, or otherwise fails to exist in the cache (clear, restart, etc.)."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_fetch",
+            "desc": "Fetchs a stored variable from the cache.",
+            "flags": [
+                "HasDocComment",
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The stored variable or array of variables on success; FALSE on failure"
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "Variant",
+                    "desc": "The key used to store the value (with apc_store()). If an array is passed then each element is fetched and returned."
+                },
+                {
+                    "name": "success",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Set to TRUE in success and FALSE in failure.",
+                    "ref": true
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_delete",
+            "desc": "Removes a stored variable from the cache.",
+            "flags": [
+                "HasDocComment",
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "Variant",
+                    "desc": "The key used to store the value (with apc_store())."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_compile_file",
+            "desc": "Stores a file in the bytecode cache, bypassing all filters.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "Full or relative path to a PHP file that will be compiled and stored in the bytecode cache."
+                },
+                {
+                    "name": "atomic",
+                    "type": "Boolean",
+                    "value": "true"
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_cache_info",
+            "desc": "Retrieves cached information and meta-data from APC's data store.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Array of cached data (and meta-data) or FALSE on failure apc_cache_info() will raise a warning if it is unable to retrieve APC cache data. This typically occurs when APC is not enabled."
+            },
+            "args": [
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "If cache_type is \"user\", information about the user cache will be returned.\n\nIf cache_type is \"filehits\", information about which files have been served from the bytecode cache for the current request will be returned. This feature must be enabled at compile time using --enable-filehits .\n\nIf an invalid or no cache_type is specified, information about the system cache (cached files) will be returned."
+                },
+                {
+                    "name": "limited",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "If limited is TRUE, the return value will exclude the individual list of cache entries. This is useful when trying to optimize calls for statistics gathering."
+                }
+            ]
+        },
+        {
+            "name": "apc_clear_cache",
+            "desc": "Clears the user\/system cache.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "If cache_type is \"user\", the user cache will be cleared; otherwise, the system cache (cached files) will be cleared."
+                }
+            ]
+        },
+        {
+            "name": "apc_define_constants",
+            "desc": null,
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "The key serves as the name of the constant set being stored. This key is used to retrieve the stored constants in apc_load_constants()."
+                },
+                {
+                    "name": "constants",
+                    "type": "String",
+                    "desc": "An associative array of constant_name => value pairs. The constant_name must follow the normal constant naming rules. value must evaluate to a scalar value."
+                },
+                {
+                    "name": "case_sensitive",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "The default behaviour for constants is to be declared case-sensitive; i.e. CONSTANT and Constant represent different values. If this parameter evaluates to FALSE the constants will be declared as case-insensitive symbols."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_load_constants",
+            "desc": "Loads a set of constants from the cache.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "The name of the constant set (that was stored with apc_define_constants()) to be retrieved."
+                },
+                {
+                    "name": "case_sensitive",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "The default behaviour for constants is to be declared case-sensitive; i.e. CONSTANT and Constant represent different values. If this parameter evaluates to FALSE the constants will be declared as case-insensitive symbols."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_sma_info",
+            "desc": "Retrieves APC's Shared Memory Allocation information.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "VariantMap",
+                "desc": "Array of Shared Memory Allocation data; FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "limited",
+                    "type": "Boolean",
+                    "value": "false",
+                    "desc": "When set to FALSE (default) apc_sma_info() will return a detailed information about each segment."
+                }
+            ]
+        },
+        {
+            "name": "apc_filehits",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "StringVec"
+            },
+            "args": [
+            ]
+        },
+        {
+            "name": "apc_delete_file",
+            "desc": "Deletes the given files from the opcode cache.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure. Or if keys is an array, then an empty array is returned on success, or an array of failed files is returned."
+            },
+            "args": [
+                {
+                    "name": "keys",
+                    "type": "Variant",
+                    "desc": "The files to be deleted. Accepts a string, array of strings, or an APCIterator object."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_inc",
+            "desc": "Increases a stored number.",
+            "flags": [
+                "HasDocComment",
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the current value of key's value on success, or FALSE on failure"
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "The key of the value being increased."
+                },
+                {
+                    "name": "step",
+                    "type": "Int64",
+                    "value": "1",
+                    "desc": "The step, or value to increase."
+                },
+                {
+                    "name": "success",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Optionally pass the success or fail boolean value to this referenced variable.",
+                    "ref": true
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_dec",
+            "desc": "Decreases a stored integer value.",
+            "flags": [
+                "HasDocComment",
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns the current value of key's value on success, or FALSE on failure"
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "The key of the value being decreased."
+                },
+                {
+                    "name": "step",
+                    "type": "Int64",
+                    "value": "1",
+                    "desc": "The step, or value to decrease."
+                },
+                {
+                    "name": "success",
+                    "type": "Variant",
+                    "value": "null",
+                    "desc": "Optionally pass the success or fail boolean value to this referenced variable.",
+                    "ref": true
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_cas",
+            "desc": "apc_cas WarningThis function is currently not documented; only its argument list is available.",
+            "flags": [
+                "HasDocComment",
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String"
+                },
+                {
+                    "name": "old_cas",
+                    "type": "Int64"
+                },
+                {
+                    "name": "new_cas",
+                    "type": "Int64"
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_exists",
+            "desc": "Checks if one ore more APC keys exist.",
+            "flags": [
+                "HasDocComment",
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "TRUE if the key exists, otherwise FALSE. If array is passed in, then an array is returned that contains all existing keys, or an empty array if none exist."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "Variant",
+                    "desc": "The key to check existence. If an array is passed then each element is checked."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_bin_dump",
+            "desc": "Returns a binary dump of the given files and user variables from the APC cache. A NULL for files or user_vars signals a dump of every entry, whereas array() will dump nothing.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a binary dump of the given files and user variables from the APC cache, FALSE if APC is not enabled, or NULL if an unknown error is encountered."
+            },
+            "args": [
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "The files. Passing in NULL signals a dump of every entry, while passing in array() will dump nothing."
+                },
+                {
+                    "name": "filter",
+                    "type": "Variant",
+                    "value": "null_variant",
+                    "desc": "The user vars. Passing in NULL signals a dump of every entry, while passing in array() will dump nothing."
+                }
+            ]
+        },
+        {
+            "name": "apc_bin_load",
+            "desc": "Loads the given binary dump into the APC file\/user cache.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE if the binary dump data was loaded with success, otherwise FALSE is returned. FALSE is returned if APC is not enabled, or if the data is not a valid APC binary dump (e.g., unexpected size)."
+            },
+            "args": [
+                {
+                    "name": "data",
+                    "type": "String",
+                    "desc": "The binary dump being loaded, likely from apc_bin_dump()."
+                },
+                {
+                    "name": "flags",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Either APC_BIN_VERIFY_CRC32, APC_BIN_VERIFY_MD5, or both."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "name": "apc_bin_dumpfile",
+            "desc": "Outputs a binary dump of the given files and user variables from the APC cache to the named file.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The number of bytes written to the file, otherwise FALSE if APC is not enabled, filename is an invalid file name, filename can't be opened, the file dump can't be completed (e.g., the hard drive is out of disk space), or an unknown error was encountered."
+            },
+            "args": [
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "desc": "The file names being dumped."
+                },
+                {
+                    "name": "filter",
+                    "type": "Variant",
+                    "desc": "The user variables being dumped."
+                },
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "The filename where the dump is being saved."
+                },
+                {
+                    "name": "flags",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Flags passed to the filename stream. See the file_put_contents() documentation for details."
+                },
+                {
+                    "name": "context",
+                    "type": "Resource",
+                    "value": "null",
+                    "desc": "The context passed to the filename stream. See the file_put_contents() documentation for details."
+                }
+            ]
+        },
+        {
+            "name": "apc_bin_loadfile",
+            "desc": "Loads a binary dump from a file into the APC file\/user cache.",
+            "flags": [
+                "HasDocComment"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success, otherwise FALSE Reasons it may return FALSE include APC is not enabled, filename is an invalid file name or empty, filename can't be opened, the file dump can't be completed, or if the data is not a valid APC binary dump (e.g., unexpected size)."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "The file name containing the dump, likely from apc_bin_dumpfile()."
+                },
+                {
+                    "name": "context",
+                    "type": "Resource",
+                    "value": "null",
+                    "desc": "The files context."
+                },
+                {
+                    "name": "flags",
+                    "type": "Int64",
+                    "value": "0",
+                    "desc": "Either APC_BIN_VERIFY_CRC32, APC_BIN_VERIFY_MD5, or both."
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

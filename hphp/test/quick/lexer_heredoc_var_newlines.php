@@ -6,7 +6,7 @@ $info
 throw new Exception(<<<TXT
 $info
 
-Fix the above
+Fix the above and then run `arc build`
 TXT
 );
 SCRIPT;

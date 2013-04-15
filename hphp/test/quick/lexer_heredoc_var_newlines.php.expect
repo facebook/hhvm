@@ -3,6 +3,6 @@ hello
 throw new Exception(<<<TXT
 hello
 
-Fix the above
+Fix the above and then run `arc build`
 TXT
 );

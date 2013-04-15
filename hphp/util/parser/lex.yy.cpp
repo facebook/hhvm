@@ -79224,7 +79224,8 @@ doc_scan_done:
     // Newline before label will be subtracted from returned text, but
     // raw text will include it, for zend_highlight/strip, tokenizer, etc.
     int newline = 0;
-    if (entireDoc.length() > 0) {
+    bool endLabelFound = (YYSTATE == ST_END_HEREDOC);
+    if (endLabelFound && (entireDoc.length() > 0)) {
       auto it = entireDoc.end();
       if (*--it == '\n') {
         ++newline;
@@ -79253,7 +79254,7 @@ doc_scan_done:
 	YY_BREAK
 case 188:
 YY_RULE_SETUP
-#line 1151 "hphp.x"
+#line 1152 "hphp.x"
 {
         BEGIN(ST_IN_SCRIPTING);
         STEPPOS;
@@ -79262,7 +79263,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 189:
 YY_RULE_SETUP
-#line 1157 "hphp.x"
+#line 1158 "hphp.x"
 {
         _scanner->setToken(yytext, 1, yytext, 1);
         yy_push_state(ST_IN_SCRIPTING, yyscanner);
@@ -79273,7 +79274,7 @@ YY_RULE_SETUP
 case 190:
 /* rule 190 can match eol */
 YY_RULE_SETUP
-#line 1164 "hphp.x"
+#line 1165 "hphp.x"
 {
         std::string strval = _scanner->escape(yytext, yyleng, '"');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
@@ -79283,7 +79284,7 @@ YY_RULE_SETUP
 case 191:
 /* rule 191 can match eol */
 YY_RULE_SETUP
-#line 1170 "hphp.x"
+#line 1171 "hphp.x"
 {
         yyless(yyleng - 1);
         std::string strval = _scanner->escape(yytext, yyleng, '"');
@@ -79294,7 +79295,7 @@ YY_RULE_SETUP
 case 192:
 /* rule 192 can match eol */
 YY_RULE_SETUP
-#line 1177 "hphp.x"
+#line 1178 "hphp.x"
 {
         std::string strval = _scanner->escape(yytext, yyleng, '`');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
@@ -79304,7 +79305,7 @@ YY_RULE_SETUP
 case 193:
 /* rule 193 can match eol */
 YY_RULE_SETUP
-#line 1183 "hphp.x"
+#line 1184 "hphp.x"
 {
         yyless(yyleng - 1);
         std::string strval = _scanner->escape(yytext, yyleng, '`');
@@ -79314,7 +79315,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 194:
 YY_RULE_SETUP
-#line 1190 "hphp.x"
+#line 1191 "hphp.x"
 {
         BEGIN(ST_IN_SCRIPTING);
         return '"';
@@ -79322,7 +79323,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 195:
 YY_RULE_SETUP
-#line 1195 "hphp.x"
+#line 1196 "hphp.x"
 {
         BEGIN(ST_IN_SCRIPTING);
         return '`';
@@ -79330,7 +79331,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case YY_STATE_EOF(ST_COMMENT):
 case YY_STATE_EOF(ST_DOC_COMMENT):
-#line 1200 "hphp.x"
+#line 1201 "hphp.x"
 {
         _scanner->error("Unterminated comment at end of file");
         return 0;
@@ -79339,7 +79340,7 @@ case YY_STATE_EOF(ST_DOC_COMMENT):
 case 196:
 /* rule 196 can match eol */
 YY_RULE_SETUP
-#line 1205 "hphp.x"
+#line 1206 "hphp.x"
 {
         _scanner->error("Unexpected character in input: '%c' (ASCII=%d)",
                         yytext[0], yytext[0]);
@@ -79347,10 +79348,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 197:
 YY_RULE_SETUP
-#line 1210 "hphp.x"
+#line 1211 "hphp.x"
 ECHO;
 	YY_BREAK
-#line 79338 "lex.yy.cpp"
+#line 79339 "lex.yy.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(ST_IN_HTML):
 case YY_STATE_EOF(ST_IN_SCRIPTING):
@@ -80580,7 +80581,7 @@ void hphpfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 1210 "hphp.x"
+#line 1211 "hphp.x"
 
 
 

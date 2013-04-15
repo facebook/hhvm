@@ -68,11 +68,12 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
     RUN_TESTSUITE(TestServer);
     return;
   }
-  // QuickTests
-  if (set != "TestExt") {
-#include <test/test_base_fast.inc>
-  }
-  if (set == "QuickTests") {
+  if (set == "TestUnit") {
+    RUN_TESTSUITE(TestParserExpr);
+    RUN_TESTSUITE(TestParserStmt);
+    RUN_TESTSUITE(TestCodeError);
+    RUN_TESTSUITE(TestUtil);
+    RUN_TESTSUITE(TestCppBase);
     return;
   }
 

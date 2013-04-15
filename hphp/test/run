@@ -1,13 +1,10 @@
 #!/bin/bash
 #
-# Run the verify_quick test suite in various configurations.
+# Run the test suites in various configurations.
 #
-# Main interface is controlled by the VQ env var:
-#
-#    VQ=jit    ./run_verify.sh
-#    VQ=hhir   ./run_verify.sh
-#    VQ=interp ./run_verify.sh
-#    ./run_verify.sh  # default runs the jit
+# The first param is the directory or file to run.
+# The second param is jit, hhir, or interp.
+# The third param is a boolean if we should use repo mode or not.
 #
 # Server mode flags:  (semi-functional--tests with warnings fail)
 #
@@ -54,7 +51,7 @@ fi
 : ${VERIFY_HHBC:=$DEFAULT_VERIFY_HHBC}
 : ${VQ:=jit}
 : ${REPO:=0}
-: ${TEST_PATH:=test/vm}
+: ${TEST_PATH:=test/quick}
 
 cd $HPHP_HOME/hphp
 

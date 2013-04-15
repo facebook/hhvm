@@ -1,0 +1,14 @@
+%s/hphp/test/sample_dirstring(4) "file"
+string(4) "file"
+Last changed at 11:33 pmint(100)
+int(453935113)
+int(1365834782)
+int(2618)
+int(33188)
+int(3)
+string(4) "file"
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(true)

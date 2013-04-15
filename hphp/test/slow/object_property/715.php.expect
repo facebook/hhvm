@@ -1,5 +1,0 @@
-bool(false)
-bool(false)
-bool(true)
-bool(true)
-HipHop Fatal error: Cannot access empty property in /data/users/ptarjan/hphp/hphp/test/tcr/object_property/715.php on line 3

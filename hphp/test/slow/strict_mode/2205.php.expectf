@@ -1,0 +1,1 @@
+HipHop Fatal error: Argument 1 passed to t() must be an instance of X, int given in %s/hphp/test/slow/strict_mode/2205.php on line 2

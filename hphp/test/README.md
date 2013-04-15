@@ -4,22 +4,25 @@ Tests are grouped into "suites". They are just directories. Suites can have
 subdirectories if you want to group them even more. Running a suite will run
 all sub-suites.
 
-* vm - The most common. Put your test here by default.
+* quick - The most common. Put your test here by default.
+* slow - Slower full featured tests. Grouped into sub-suites.
 * zend/good - Passing tests from Zend's suite.
 * zend/bad - Failing tests from Zend. Fix these and move them to zend/good.
 * vm-perf - Some performance tests that aren't commonly run.
-* tcr - The HPHPc TestCodeRun tests.
 
 # Examples how to run them
 
-* VM suite with the JIT on -
-`test/run test/vm`
+* Quick suite with the JIT on -
+`test/run test/quick`
 
 * Zend tests just with the interpreter in RepoAuthoritative mode -
 `test/run test/zend/good interp 1`
 
-* TCR tests with the JIT in IR mode -
-`test/run test/tcr hhir`
+* Slow tests with the JIT in IR mode -
+`test/run test/slow hhir`
+
+* Run evertyhing that is supposed to pass -
+`fbmake runtests`
 
 # File Layout
 

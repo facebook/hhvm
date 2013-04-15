@@ -1,1 +1,0 @@
-HipHop Fatal error: Argument 1 passed to X::bar() must be an instance of X, null given in /data/users/ptarjan/hphp/hphp/test/tcr/compilation/1321.php on line 3

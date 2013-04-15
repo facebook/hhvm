@@ -146,11 +146,11 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
     if (Option::EnableEval < Option::FullEval) {
       if (fastMode) {
         string path = dir + "libtest.so";
-        const char *argv[] = {"", "--file=string", "--config=test/tcr/config.hdf",
+        const char *argv[] = {"", "--file=string", "--config=test/slow/config.hdf",
                               repoarg.c_str(), path.c_str(), nullptr};
         Process::Exec("runtime/tmp/run.sh", argv, nullptr, actual, &err);
       } else {
-        const char *argv[] = {"", "--file=string", "--config=test/tcr/config.hdf",
+        const char *argv[] = {"", "--file=string", "--config=test/slow/config.hdf",
                               repoarg.c_str(), nullptr};
         string path = dir + "test";
         Process::Exec(path.c_str(), argv, nullptr, actual, &err);
@@ -165,7 +165,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
       string jit_rename = string("-vEval.JitEnableRenameFunction=") +
         (RuntimeOption::EvalJit ? "true" : "false");
       const char *argv[] = {"", filearg.c_str(),
-                            "--config=test/tcr/config.hdf",
+                            "--config=test/slow/config.hdf",
                             repoarg.c_str(),
                             jitarg.c_str(),
                             jit_use_ir.c_str(),
@@ -13936,7 +13936,7 @@ bool TestCodeRun::TestReflectionClasses() {
       "var_dump($rf->isClosure()); "
       "var_dump($rf->isGenerator()); "
       ,
-      "test/vm/reflection_isclosure.php.expect"
+      "test/quick/reflection_isclosure.php.expect"
     );
   }
 
@@ -31469,7 +31469,7 @@ bool TestCodeRun::TestTraits() {
          "$x = new D(); $x->useB(); echo serialize($x), \"\\n\";"
          "$x = new D(); $x->useC(); echo serialize($x), \"\\n\";"
          "$x = new D(); $x->useD(); echo serialize($x), \"\\n\";",
-         "test/tcr/traits/2061.php.expect");
+         "test/slow/traits/2061.php.expect");
 
   MVCRO("<?php\n"
          "trait T1 { public $xT1 = 'xT1'; }\n"

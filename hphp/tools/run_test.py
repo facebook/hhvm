@@ -1,8 +1,8 @@
 #!/bin/env python
 #
-# Helper for running hphp/test in fbconfig builds.
+# Helper for running hphp/test in fbconfig builds. Examples:
 #
-# ./run_test.py TestCodeRunVM
+# ./run_test.py SlowVM
 # ./run_test.py QuickRepoJit
 # ./run_test.py ZendJitIR
 #
@@ -17,8 +17,8 @@ import subprocess
 import sys
 
 suites = {
-    'TestCodeRun' : 'tcr',
-    'Quick' : 'vm',
+    'Slow' : 'slow', 
+    'Quick' : 'quick',
     'Zend' : 'zend/good',
 }
 modes = {
@@ -32,7 +32,7 @@ root = os.getenv('FBMAKE_BIN_ROOT', home + '/_bin')
 
 def main():
     if len(sys.argv) < 2:
-        print "%s [TestCodeRun|Quick|Zend][<blank>|Repo][VM|Jit|JitIR][-SubSuiteName]" % sys.argv[0]
+        print "%s [Quick|Slow|Zend][<blank>|Repo][VM|Jit|JitIR][-SubSuiteName]" % sys.argv[0]
         return
 
     arg = sys.argv[1]

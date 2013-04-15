@@ -1,0 +1,3 @@
+NULL
+NULL
+HipHop Fatal error: Cannot access empty property in %s/hphp/test/slow/object_property/707.php on line 3

@@ -1,8 +1,8 @@
 array(3) {
   [0]=>
-  string(24) "test/vm/fb_dbt.php@11@h@"
+  string(27) "test/quick/fb_dbt.php@11@h@"
   [1]=>
-  string(27) "test/vm/fb_dbt.php@82@C::f@"
+  string(30) "test/quick/fb_dbt.php@82@C::f@"
   [2]=>
-  string(24) "test/vm/fb_dbt.php@84@g@"
+  string(27) "test/quick/fb_dbt.php@84@g@"
 }

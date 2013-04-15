@@ -1138,7 +1138,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         setAttribute(VariableTable::NeedGlobalPointer);
     }
     if (m_params) {
-      if (func && func->isRedeclaring()) {
+      if (Option::WholeProgram && func && func->isRedeclaring()) {
         FunctionScope::FunctionInfoPtr info =
           FunctionScope::GetFunctionInfo(m_name);
         always_assert(info);

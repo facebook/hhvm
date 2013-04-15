@@ -436,6 +436,39 @@ TypedValue* fg_mysql_async_wait_actionable(HPHP::VM::ActRec *ar) {
 
 
 /*
+long HPHP::f_mysql_async_status(HPHP::Variant const&)
+_ZN4HPHP20f_mysql_async_statusERKNS_7VariantE
+
+(return value) => rax
+link_identifier => rdi
+*/
+
+long fh_mysql_async_status(TypedValue* link_identifier) asm("_ZN4HPHP20f_mysql_async_statusERKNS_7VariantE");
+
+TypedValue* fg_mysql_async_status(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count == 1LL) {
+      rv.m_type = KindOfInt64;
+      rv.m_data.num = (int64_t)fh_mysql_async_status((args-0));
+      frame_free_locals_no_this_inl(ar, 1);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("mysql_async_status", count, 1, 1, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 1);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::f_mysql_pconnect(HPHP::String const&, HPHP::String const&, HPHP::String const&, int, int, int)
 _ZN4HPHP16f_mysql_pconnectERKNS_6StringES2_S2_iii
 

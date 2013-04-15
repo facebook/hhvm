@@ -1250,6 +1250,13 @@ static Variant php_mysql_fetch_hash(CVarRef result, int result_type) {
    libmysqlclient; for now, protect with an ifdef.  Once open sourced,
    the client will be detectable via its own ifdef. */
 #ifdef FACEBOOK
+
+const int64_t k_ASYNC_OP_INVALID = 0;
+const int64_t k_ASYNC_OP_UNSET = ASYNC_OP_UNSET;
+const int64_t k_ASYNC_OP_CONNECT = ASYNC_OP_CONNECT;
+const int64_t k_ASYNC_OP_QUERY = ASYNC_OP_QUERY;
+const int64_t k_ASYNC_OP_FETCH_ROW = ASYNC_OP_FETCH_ROW;
+
 bool MySQL::async_connect(CStrRef host, int port, CStrRef socket,
                           CStrRef username, CStrRef password,
                           CStrRef database) {
@@ -1505,7 +1512,24 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
   return ret;
 }
 
-#else
+int64_t f_mysql_async_status(CVarRef link_identifier) {
+  MySQL *mySQL = MySQL::Get(link_identifier);
+  if (!mySQL || !mySQL->get()) {
+    raise_warning("supplied argument is not a valid MySQL-Link resource");
+    return -1;
+  }
+
+  return mySQL->get()->async_op_status;
+}
+
+#else  // FACEBOOK
+
+// Bogus values for non-facebook libmysqlclients.
+const int64_t k_ASYNC_OP_INVALID = 0;
+const int64_t k_ASYNC_OP_UNSET = -1;
+const int64_t k_ASYNC_OP_CONNECT = -2;
+const int64_t k_ASYNC_OP_QUERY = -3;
+const int64_t k_ASYNC_OP_FETCH_ROW = -4;
 
 Variant f_mysql_async_connect_start(CStrRef server,
                                     CStrRef username,
@@ -1535,6 +1559,10 @@ Variant f_mysql_async_fetch_array(CVarRef result, int result_type /* = 1 */) {
 }
 
 Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
+  throw NotImplementedException(__func__);
+}
+
+int64_t f_mysql_async_status(CVarRef link_identifier) {
   throw NotImplementedException(__func__);
 }
 

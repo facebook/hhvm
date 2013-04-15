@@ -262,6 +262,7 @@ Variant f_mysql_async_query_result(CVarRef link_identifier);
 bool f_mysql_async_query_completed(CVarRef result);
 Variant f_mysql_async_fetch_array(CVarRef result, int result_type = 1);
 Variant f_mysql_async_wait_actionable(CVarRef items, double timeout);
+int64_t f_mysql_async_status(CVarRef link_identifier);
 
 String f_mysql_escape_string(CStrRef unescaped_string);
 
@@ -366,6 +367,12 @@ Variant f_mysql_field_type(CVarRef result, int field = 0);
 Variant f_mysql_field_flags(CVarRef result, int field = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
+extern const int64_t k_ASYNC_OP_INVALID;
+extern const int64_t k_ASYNC_OP_UNSET;
+extern const int64_t k_ASYNC_OP_CONNECT;
+extern const int64_t k_ASYNC_OP_QUERY;
+extern const int64_t k_ASYNC_OP_FETCH_ROW;
+
 }
 
 #endif // __EXT_MYSQL_H__

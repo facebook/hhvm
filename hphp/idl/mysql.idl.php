@@ -25,6 +25,37 @@ CPP
 //   'note' => additional note about this constant's schema
 // )
 
+DefineConstant(
+  array(
+    'name'   => "ASYNC_OP_INVALID",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "ASYNC_OP_UNSET",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "ASYNC_OP_CONNECT",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "ASYNC_OP_QUERY",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "ASYNC_OP_FETCH_ROW",
+    'type'   => Int64,
+  ));
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Functions
 //
@@ -260,6 +291,24 @@ DefineFunction(
         'name'   => "timeout",
         'type'   => Double,
         'desc'   => "Time, in seconds, to wait for actionable events.  Subsecond accuracy is supported.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "mysql_async_status",
+    'desc'   => "Returns the async operation status for a given mysql connection.  For non-async connections, this returns ASYNC_OP_INVALID.  For an async connection, this can be either ASYNC_OP_UNSET (no pending async operation), ASYNC_OP_QUERY (async query pending), ASYNC_OP_FETCH_ROW (async row fetching pending), or ASYNC_OP_CONNECT (async connection pending).  Returns -1 if the supplied connection itself is invalid.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Int64,
+      'desc'   => "Returns the async operation number for this mysql connection.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "link_identifier",
+        'type'   => Variant,
+        'desc'   => "The MySQL connection.",
       ),
     ),
   ));

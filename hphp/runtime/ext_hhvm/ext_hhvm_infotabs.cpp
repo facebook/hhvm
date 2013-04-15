@@ -1483,6 +1483,7 @@ TypedValue* fg_mysql_async_query_result(VM::ActRec *ar);
 TypedValue* fg_mysql_async_query_completed(VM::ActRec *ar);
 TypedValue* fg_mysql_async_fetch_array(VM::ActRec *ar);
 TypedValue* fg_mysql_async_wait_actionable(VM::ActRec *ar);
+TypedValue* fg_mysql_async_status(VM::ActRec *ar);
 TypedValue* fg_mysql_pconnect(VM::ActRec *ar);
 TypedValue* fg_mysql_connect_with_db(VM::ActRec *ar);
 TypedValue* fg_mysql_pconnect_with_db(VM::ActRec *ar);
@@ -3057,7 +3058,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2203;
+const long long hhbc_ext_funcs_count = 2204;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -4519,6 +4520,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "mysql_async_query_completed", fg_mysql_async_query_completed, (void *)&fh_mysql_async_query_completed },
   { "mysql_async_fetch_array", fg_mysql_async_fetch_array, (void *)&fh_mysql_async_fetch_array },
   { "mysql_async_wait_actionable", fg_mysql_async_wait_actionable, (void *)&fh_mysql_async_wait_actionable },
+  { "mysql_async_status", fg_mysql_async_status, (void *)&fh_mysql_async_status },
   { "mysql_pconnect", fg_mysql_pconnect, (void *)&fh_mysql_pconnect },
   { "mysql_connect_with_db", fg_mysql_connect_with_db, (void *)&fh_mysql_connect_with_db },
   { "mysql_pconnect_with_db", fg_mysql_pconnect_with_db, (void *)&fh_mysql_pconnect_with_db },

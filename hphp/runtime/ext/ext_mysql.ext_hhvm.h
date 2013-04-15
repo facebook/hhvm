@@ -114,6 +114,16 @@ timeout => xmm0
 TypedValue* fh_mysql_async_wait_actionable(TypedValue* _rv, TypedValue* items, double timeout) asm("_ZN4HPHP29f_mysql_async_wait_actionableERKNS_7VariantEd");
 
 /*
+long HPHP::f_mysql_async_status(HPHP::Variant const&)
+_ZN4HPHP20f_mysql_async_statusERKNS_7VariantE
+
+(return value) => rax
+link_identifier => rdi
+*/
+
+long fh_mysql_async_status(TypedValue* link_identifier) asm("_ZN4HPHP20f_mysql_async_statusERKNS_7VariantE");
+
+/*
 HPHP::Variant HPHP::f_mysql_pconnect(HPHP::String const&, HPHP::String const&, HPHP::String const&, int, int, int)
 _ZN4HPHP16f_mysql_pconnectERKNS_6StringES2_S2_iii
 

@@ -1112,7 +1112,8 @@ doc_scan_done:
     // Newline before label will be subtracted from returned text, but
     // raw text will include it, for zend_highlight/strip, tokenizer, etc.
     int newline = 0;
-    if (entireDoc.length() > 0) {
+    bool endLabelFound = (YYSTATE == ST_END_HEREDOC);
+    if (endLabelFound && (entireDoc.length() > 0)) {
       auto it = entireDoc.end();
       if (*--it == '\n') {
         ++newline;

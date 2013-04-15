@@ -1,0 +1,30 @@
+string(3) "foo"
+string(3) "foo"
+string(9) "C::__call"
+string(5) "snoot"
+array(0) {
+}
+string(3) "foo"
+string(3) "foo"
+string(9) "C::__call"
+string(5) "snoot"
+array(0) {
+}
+string(3) "bar"
+string(3) "bar"
+string(9) "C::__call"
+object(C)#1 (0) {
+}
+array(2) {
+  [0]=>
+  string(5) "snoot"
+  [1]=>
+  array(0) {
+  }
+}
+NULL
+bool(true)
+string(9) "C::__call"
+string(5) "snoot"
+array(0) {
+}

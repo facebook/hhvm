@@ -850,9 +850,27 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e,
 
     case Expression::KindOfAssignmentExpression:
     case Expression::KindOfBinaryOpExpression:
-    case Expression::KindOfUnaryOpExpression:
+    case Expression::KindOfUnaryOpExpression: {
       isLoad = false;
-      return testAccesses(e->getStoreVariable(), rv, forLval);
+      ExpressionPtr var = e->getStoreVariable();
+      int access = testAccesses(var, rv, forLval);
+      if (access == SameAccess) {
+        // An assignment to something that might be visible from
+        // another scope, and that might contain an object, could
+        // end up with some other value (due to a destructor running)
+        // than the rhs.
+        if (var->getKindOf() != Expression::KindOfSimpleVariable) {
+          return InterfAccess;
+        }
+        SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(var);
+        if (sv->couldBeAliased() &&
+            (sv->isNeededValid() ? sv->isNeeded() :
+             !sv->getSymbol() || sv->getSymbol()->isNeeded())) {
+          return InterfAccess;
+        }
+      }
+      return access;
+    }
 
     default:
       not_reached();

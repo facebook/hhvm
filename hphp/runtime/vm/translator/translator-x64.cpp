@@ -9348,7 +9348,7 @@ TranslatorX64::translateCreateCl(const Tracelet& t,
 
   TargetCache::CacheHandle classCh = TargetCache::allocKnownClass(clsName);
   clsCache.alloc();
-  a.    lea_reg64_disp_reg64(rVmTl, classCh, r(clsCache));
+  a.    lea   (rVmTl[classCh], r(clsCache));
   EMIT_RCALL(a, i,
              newInstanceHelperNoCtorCached,
              R(clsCache),

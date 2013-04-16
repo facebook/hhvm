@@ -242,7 +242,7 @@ O(ExitWhenSurprised,                ND, NA,                                E) \
 O(ExitOnVarEnv,                     ND, S(StkPtr),                         E) \
 O(ReleaseVVOrExit,                  ND, S(StkPtr),                       N|E) \
 O(RaiseError,                       ND, S(Str),               E|N|Mem|Refs|T) \
-O(RaiseWarning,                     ND, S(Str),               E|N|Mem|Refs|Er) \
+O(RaiseWarning,                     ND, S(Str),              E|N|Mem|Refs|Er) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
@@ -301,8 +301,8 @@ O(NewObjCached,              D(StkPtr), C(Int)                                \
                                           S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
 O(NewObjNoCtorCached,        D(StkPtr), S(Str)                                \
                                           S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
-O(CreateCl,                     D(Obj), C(Int)                                \
-                                          S(Str)                              \
+O(CreateCl,                     D(Obj), C(Cls)                                \
+                                          C(Int)                              \
                                           S(StkPtr)                           \
                                           S(StkPtr),                   Mem|N) \
 O(NewArray,                     D(Arr), C(Int),                  E|Mem|N|PRc) \

@@ -463,6 +463,8 @@ ActRec* irNewInstanceHelper(Class* cls,
                             Cell* sp,
                             ActRec* prevAr);
 
+Instance* createClHelper(Class*, int, ActRec*, TypedValue*);
+
 void genCodeForTrace(Trace*                  trace,
                      CodeGenerator::Asm&     a,
                      CodeGenerator::Asm&     astubs,

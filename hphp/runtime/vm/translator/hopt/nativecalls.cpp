@@ -101,6 +101,8 @@ static CallMap s_callMap({
                            {{SSA, 0}, {SSA, 1}, {TV, 2}, {SSA, 3}}},
     {LdFuncCached,       (TCA)FixedFuncCache::lookupUnknownFunc, DSSA, SSync,
                            {{SSA, 0}}},
+    {CreateCl,           (TCA)createClHelper, DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 
     /* Switch helpers */
     {LdSwitchDblIndex,   (TCA)switchDoubleHelper, DSSA, SSync,

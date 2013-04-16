@@ -3619,8 +3619,10 @@ AKExists    [C C] -> [C:Bool]
 
 CreateCl <num args> <class name>  [F..F]  ->  [C]
 
-  Creates an instance of <class name> and pushes it on the stack.
-  <class name> must be a subclass of "Closure".
+  Creates an instance of <class name> and pushes it on the stack.  The
+  class named by %2 must be a subclass of "Closure", and must be
+  defined at the point of the CreateCl opcode, or the behavior is
+  undefined.
 
 
 14. Continuation creation and execution

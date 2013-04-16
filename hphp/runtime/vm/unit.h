@@ -490,6 +490,23 @@ struct Unit {
                          bool failIsFatal = true);
   void defTypedef(Id id);
 
+  /*
+   * Find the Class* for a defined class corresponding to the name
+   * `clsName'.
+   *
+   * Returns: nullptr if the class of the given name is not yet
+   * defined in this request.
+   */
+  static Class *lookupClass(const StringData *clsName) {
+    return lookupClass(GetNamedEntity(clsName));
+  }
+
+  /*
+   * Find the Class* for a defined class with name mapped to the
+   * supplied NamedEntity.
+   *
+   * Returns: nullptr if the class is not yet defined in this request.
+   */
   static Class *lookupClass(const NamedEntity *ne) {
     Class* cls;
     if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
@@ -498,13 +515,14 @@ struct Unit {
     return nullptr;
   }
 
-  static Class *lookupClass(const StringData *clsName) {
-    return lookupClass(GetNamedEntity(clsName));
-  }
-
   /*
-   * Look up a unique class even if it hasn't been loaded in this
-   * request yet.
+   * Same as lookupClass, except if it's not defined *and* is unique,
+   * return the Class* anyway.
+   *
+   * The point of this is that when jitting code before a unique class
+   * is defined, we can often still burn the Class* into the TC, since
+   * it will be defined by the time the code that needs the Class*
+   * runs (via autoload or whatnot).
    */
   static Class *lookupUniqueClass(const NamedEntity *ne) {
     Class* cls = ne->clsList();
@@ -539,10 +557,6 @@ struct Unit {
                          bool tryAutoload);
   static bool classExists(const StringData* name, bool autoload,
                           Attr typeAttrs);
-
-  Class *lookupClass(Id id) const {
-    return lookupClass(lookupNamedEntityId(id));
-  }
 
   const PreConst* lookupPreConstId(Id id) const {
     assert(id < Id(m_preConsts.size()));

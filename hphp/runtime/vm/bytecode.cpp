@@ -955,7 +955,9 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
             for (auto& idOff : eh->m_catches) {
               auto handler = func->unit()->at(idOff.second);
               FTRACE(1, "unwindFrag: catch candidate {}\n", handler);
-              Class* cls = func->unit()->lookupClass(idOff.first);
+              Class* cls = Unit::lookupClass(
+                func->unit()->lookupNamedEntityId(idOff.first)
+              );
               if (cls && obj->instanceof(cls)) {
                 pc = handler;
                 FTRACE(1, "unwindFrag: entering catch at {}\n", pc);

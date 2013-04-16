@@ -1295,17 +1295,27 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   m_tb->genNewObjCached(numParams, className);
 }
 
+/*
+ * The CreateCl opcode is specified as not being allowed before the
+ * class it creates exists, and closure classes are always unique.
+ *
+ * This means even if we're not in RepoAuthoritative mode, as long as
+ * this code is reachable it will always use the same closure Class*,
+ * so we can just burn it into the TC without using TargetCache.
+ */
 void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
-  const StringData* clsName = lookupStringId(funNameStrId);
-  TRACE(3, "%u: CreateCl %d %s\n", m_bcOff, numParams, clsName->data());
-  spillStack();
-  SSATmp* closure = m_tb->gen(
+  auto const sp = spillStack();
+  auto const cls = Unit::lookupUniqueClass(lookupStringId(funNameStrId));
+  assert(cls && (cls->attrs() & AttrUnique));
+
+  auto const closure = m_tb->gen(
     CreateCl,
-    m_tb->genDefConst(numParams),
-    m_tb->genDefConst(clsName),
-    m_tb->getSp(),
-    m_tb->getFp()
+    cns(cls),
+    cns(numParams),
+    m_tb->getFp(),
+    sp
   );
+
   discard(numParams);
   push(closure);
 }

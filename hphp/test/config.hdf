@@ -1,21 +1,8 @@
-Server {
-  InjectedStacktrace = true
-}
-
 Eval {
   EnableXHP = true
-  IncludePaths {
-    * = .
-    * = /usr/local/lib/php
-    * = /usr/local/php/lib/php
-  }
   AllowHhas = true
   EnableHipHopSyntax = true
   EnableObjDestructCall = true
-}
-
-Sandbox {
-  MySQLReadTimeout = 5000
 }
 
 MySQL {
@@ -38,10 +25,4 @@ ErrorHandling {
 
 ResourceLimit {
   SerializationSizeLimit=134217728
-}
-
-LintExcludePatterns {
-  * = Server.InjectedStacktrace
-  * = Eval.IncludePaths*
-  * = Sandbox.MySQLReadTimeout
 }

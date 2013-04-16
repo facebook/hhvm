@@ -366,6 +366,7 @@ public:
   static int ScannerType;
   static int MaxUserFunctionId;
   static bool EnableFinallyStatement;
+  static bool EnableArgsInBacktraces;
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 

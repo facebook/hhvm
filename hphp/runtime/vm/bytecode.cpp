@@ -2452,7 +2452,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
                              fp->m_func->unit()->filepath())));
         frame.set(String(s_args), args, true);
       }
-    } else if (RuntimeOption::RepoAuthoritative) {
+    } else if (!RuntimeOption::EnableArgsInBacktraces) {
       // Provide an empty 'args' array to be consistent with hphpc
       frame.set(String(s_args), args, true);
     } else {

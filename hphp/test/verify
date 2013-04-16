@@ -389,7 +389,7 @@ sub run_test
         }
         unlink "$opt_objdir/$test.repo/hhvm.hhbc";
         `$opt_hphp -thhbc -l0 -k1 -o $opt_objdir/$test.repo $hphp_opts $opt_objdir/$test`;
-        $opts .= " -v Repo.Authoritative=true -v Repo.Central.Path=$opt_objdir/$test.repo/hhvm.hhbc";
+        $opts .= " -v Repo.Authoritative=true -v Repo.Central.Path=$opt_objdir/$test.repo/hhvm.hhbc -v Eval.EnableArgsInBacktraces=true";
       }
     }
 

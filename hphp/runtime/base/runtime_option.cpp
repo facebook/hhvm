@@ -361,6 +361,7 @@ bool RuntimeOption::CheckSymLink = false;
 int RuntimeOption::ScannerType = 0;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableFinallyStatement = false;
+bool RuntimeOption::EnableArgsInBacktraces = true;
 
 // Initializers for Eval flags.
 static inline bool evalJitDefault() {
@@ -1162,61 +1163,65 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       DebuggerRpcHostDomain = debugger["RPC.HostDomain"].getString();
       DebuggerDefaultRpcTimeout = debugger["RPC.DefaultTimeout"].getInt32(30);
     }
-  }
-  {
-    Hdf repo = config["Repo"];
     {
-      Hdf repoLocal = repo["Local"];
-      // Repo.Local.Mode.
-      RepoLocalMode = repoLocal["Mode"].getString();
-      if (!empty && RepoLocalMode.empty()) {
-        const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
-        if (HHVM_REPO_LOCAL_MODE != nullptr) {
-          RepoLocalMode = HHVM_REPO_LOCAL_MODE;
+      Hdf repo = config["Repo"];
+      {
+        Hdf repoLocal = repo["Local"];
+        // Repo.Local.Mode.
+        RepoLocalMode = repoLocal["Mode"].getString();
+        if (!empty && RepoLocalMode.empty()) {
+          const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
+          if (HHVM_REPO_LOCAL_MODE != nullptr) {
+            RepoLocalMode = HHVM_REPO_LOCAL_MODE;
+          }
+        }
+        if (RepoLocalMode.empty()) {
+          RepoLocalMode = "r-";
+        }
+        if (RepoLocalMode.compare("rw")
+            && RepoLocalMode.compare("r-")
+            && RepoLocalMode.compare("--")) {
+          Logger::Error("Bad config setting: Repo.Local.Mode=%s",
+                        RepoLocalMode.c_str());
+          RepoLocalMode = "rw";
+        }
+        // Repo.Local.Path.
+        RepoLocalPath = repoLocal["Path"].getString();
+        if (!empty && RepoLocalPath.empty()) {
+          const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
+          if (HHVM_REPO_LOCAL_PATH != nullptr) {
+            RepoLocalPath = HHVM_REPO_LOCAL_PATH;
+          }
         }
       }
-      if (RepoLocalMode.empty()) {
-        RepoLocalMode = "r-";
+      {
+        Hdf repoCentral = repo["Central"];
+        // Repo.Central.Path.
+        RepoCentralPath = repoCentral["Path"].getString();
       }
-      if (RepoLocalMode.compare("rw")
-          && RepoLocalMode.compare("r-")
-          && RepoLocalMode.compare("--")) {
-        Logger::Error("Bad config setting: Repo.Local.Mode=%s",
-                      RepoLocalMode.c_str());
-        RepoLocalMode = "rw";
-      }
-      // Repo.Local.Path.
-      RepoLocalPath = repoLocal["Path"].getString();
-      if (!empty && RepoLocalPath.empty()) {
-        const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
-        if (HHVM_REPO_LOCAL_PATH != nullptr) {
-          RepoLocalPath = HHVM_REPO_LOCAL_PATH;
+      {
+        Hdf repoEval = repo["Eval"];
+        // Repo.Eval.Mode.
+        RepoEvalMode = repoEval["Mode"].getString();
+        if (RepoEvalMode.empty()) {
+          RepoEvalMode = "readonly";
+        } else if (RepoEvalMode.compare("local")
+                   && RepoEvalMode.compare("central")
+                   && RepoEvalMode.compare("readonly")) {
+          Logger::Error("Bad config setting: Repo.Eval.Mode=%s",
+                        RepoEvalMode.c_str());
+          RepoEvalMode = "readonly";
         }
       }
+      RepoJournal = repo["Journal"].getString("delete");
+      RepoCommit = repo["Commit"].getBool(true);
+      RepoDebugInfo = repo["DebugInfo"].getBool(true);
+      RepoAuthoritative = repo["Authoritative"].getBool(false);
     }
-    {
-      Hdf repoCentral = repo["Central"];
-      // Repo.Central.Path.
-      RepoCentralPath = repoCentral["Path"].getString();
-    }
-    {
-      Hdf repoEval = repo["Eval"];
-      // Repo.Eval.Mode.
-      RepoEvalMode = repoEval["Mode"].getString();
-      if (RepoEvalMode.empty()) {
-        RepoEvalMode = "readonly";
-      } else if (RepoEvalMode.compare("local")
-                 && RepoEvalMode.compare("central")
-                 && RepoEvalMode.compare("readonly")) {
-        Logger::Error("Bad config setting: Repo.Eval.Mode=%s",
-                      RepoEvalMode.c_str());
-        RepoEvalMode = "readonly";
-      }
-    }
-    RepoJournal = repo["Journal"].getString("delete");
-    RepoCommit = repo["Commit"].getBool(true);
-    RepoDebugInfo = repo["DebugInfo"].getBool(true);
-    RepoAuthoritative = repo["Authoritative"].getBool(false);
+
+    // NB: after we know the value of RepoAuthoritative.
+    EnableArgsInBacktraces =
+      eval["EnableArgsInBacktraces"].getBool(!RepoAuthoritative);
   }
   {
     Hdf sandbox = config["Sandbox"];

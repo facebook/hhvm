@@ -24,6 +24,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+static const StaticString s_GET("GET");
+static const StaticString s_method("method");
+static const StaticString s_http("http");
+static const StaticString s_header("header");
+static const StaticString s_max_redirects("max_redirects");
+static const StaticString s_timeout("timeout");
+static const StaticString s_content("content");
+
 File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
                               int options, CVarRef context) {
   if (RuntimeOption::ServerHttpSafeMode) {
@@ -36,33 +44,35 @@ File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
   }
 
   std::unique_ptr<UrlFile> file;
-  StreamContext *ctx = !context.isObject() ? nullptr : 
+  StreamContext *ctx = !context.isObject() ? nullptr :
                         context.toObject().getTyped<StreamContext>();
-  if (!ctx || ctx->m_options.isNull() || ctx->m_options["http"].isNull()) {
+  if (!ctx || ctx->m_options.isNull() || ctx->m_options[s_http].isNull()) {
     file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)());
   } else {
-    Array opts = ctx->m_options["http"];
-    String method = "GET";
-    if (opts.exists("method")) {
-      method = opts["method"].toString();
+    Array opts = ctx->m_options[s_http];
+    String method = s_GET;
+    if (opts.exists(s_method)) {
+      method = opts[s_method].toString();
     }
     Array headers;
-    if (opts.exists("header")) {
-      Array lines = StringUtil::Explode(opts["header"].toString(), "\r\n");
+    if (opts.exists(s_header)) {
+      Array lines = StringUtil::Explode(opts[s_header].toString(), "\r\n");
       for (ArrayIter it(lines); it; ++it) {
         Array parts = StringUtil::Explode(it.second().toString(), ": ");
         headers.set(parts.rvalAt(0), parts.rvalAt(1));
       }
     }
-    if (opts.exists("user_agent") && !headers.exists("User-Agent")) {
-      headers.set("User-Agent", opts["user_agent"]);
+    static const StaticString s_user_agent("user_agent");
+    static const StaticString s_User_Agent("User-Agent");
+    if (opts.exists(s_user_agent) && !headers.exists(s_User_Agent)) {
+      headers.set(s_User_Agent, opts[s_user_agent]);
     }
     int max_redirs = 20;
-    if (opts.exists("max_redirects")) max_redirs = opts["max_redirects"];
+    if (opts.exists(s_max_redirects)) max_redirs = opts[s_max_redirects];
     int timeout = -1;
-    if (opts.exists("timeout")) timeout = opts["timeout"];
+    if (opts.exists(s_timeout)) timeout = opts[s_timeout];
     file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)(method.data(), headers,
-                                                    opts["content"].toString(),
+                                                    opts[s_content].toString(),
                                                     max_redirs, timeout));
   }
   bool ret = file->open(filename, mode);

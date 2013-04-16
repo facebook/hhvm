@@ -933,9 +933,6 @@ bool isset(CArrRef v, CObjRef offset) {
 bool isset(CArrRef v, CStrRef offset, bool isString /* = false */) {
   return isset(v.rvalAtRef(offset, AccessFlags::IsKey(isString)));
 }
-bool isset(CArrRef v, litstr offset, bool isString /* = false */) {
-  return isset(v.rvalAtRef(offset, AccessFlags::IsKey(isString)));
-}
 bool isset(CArrRef v, CVarRef offset) {
   return isset(v.rvalAtRef(offset));
 }
@@ -988,18 +985,6 @@ bool isset(CVarRef v, CVarRef offset) {
   if (Variant::IsString(tva)) {
     uint64_t pos = offset.toInt64();
     return pos < (uint64_t)Variant::GetStringData(tva)->size();
-  }
-  return false;
-}
-bool isset(CVarRef v, litstr offset, bool isString /* = false */) {
-  Variant::TypedValueAccessor tva = v.getTypedAccessor();
-  if (LIKELY(Variant::GetAccessorType(tva) == KindOfArray)) {
-    return isset(Variant::GetAsArray(tva).rvalAtRef(
-                   offset, AccessFlags::IsKey(isString)));
-  }
-  if (Variant::GetAccessorType(tva) == KindOfObject ||
-      Variant::IsString(tva)) {
-    return isset(v, Variant(offset));
   }
   return false;
 }

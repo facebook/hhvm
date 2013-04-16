@@ -448,7 +448,7 @@ bool TestExtArray::test_array_map() {
 bool TestExtArray::test_array_merge_recursive() {
   {
     Variant a1 = Array::Create();
-    Variant a2 = CREATE_MAP1("key1", ref(a1));
+    Variant a2 = CREATE_MAP1(String("key1"), ref(a1));
     a1 = f_array_merge_recursive(a1, a2);
   }
   {
@@ -540,8 +540,8 @@ bool TestExtArray::test_array_merge() {
   }
   {
     Variant v = 1;
-    Array a = CREATE_MAP1("one", 1);
-    Array b = CREATE_MAP1("two", ref(v));
+    Array a = CREATE_MAP1(String("one"), 1);
+    Array b = CREATE_MAP1(String("two"), ref(v));
     Array r = f_array_merge(2, a, CREATE_VECTOR1(b));
     v = 2;
     VS(f_print_r(r, true),
@@ -640,8 +640,8 @@ bool TestExtArray::test_array_replace() {
   }
   {
     Variant v = 1;
-    Array a = CREATE_MAP1("one", 1);
-    Array b = CREATE_MAP1("two", ref(v));
+    Array a = CREATE_MAP1(String("one"), 1);
+    Array b = CREATE_MAP1(String("two"), ref(v));
     Array r = f_array_replace(2, a, CREATE_VECTOR1(b));
     v = 2;
     VS(f_print_r(r, true),

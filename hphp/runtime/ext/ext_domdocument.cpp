@@ -305,6 +305,9 @@ static void dom_normalize(xmlNodePtr nodep) {
   }
 }
 
+static StaticString s_query("query");
+static StaticString s_namespaces("namespaces");
+
 static Variant dom_canonicalization(xmlNodePtr nodep, CStrRef file,
                                     bool exclusive, bool with_comments,
                                     CVarRef xpath_array, CVarRef ns_prefixes,
@@ -342,11 +345,11 @@ static Variant dom_canonicalization(xmlNodePtr nodep, CStrRef file,
     // xpath query from xpath_array
     Array arr = xpath_array.toArray();
     String xquery;
-    if (!arr.exists("query")) {
+    if (!arr.exists(s_query)) {
       raise_warning("'query' missing from xpath array");
       return false;
     }
-    Variant tmp = arr.rvalAt("query");
+    Variant tmp = arr.rvalAt(s_query);
     if (!tmp.isString()) {
       raise_warning("'query' is not a string");
       return false;
@@ -354,8 +357,8 @@ static Variant dom_canonicalization(xmlNodePtr nodep, CStrRef file,
     xquery = tmp.toString();
     ctxp = xmlXPathNewContext(docp);
     ctxp->node = nodep;
-    if (arr.exists("namespaces")) {
-      Variant tmp = arr.rvalAt("namespaces");
+    if (arr.exists(s_namespaces)) {
+      Variant tmp = arr.rvalAt(s_namespaces);
       if (tmp.isArray()) {
         for (ArrayIter it = tmp.toArray().begin(); !it; ++it) {
           Variant prefix = it.first();

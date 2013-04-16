@@ -259,7 +259,6 @@ bool isset(CVarRef v, double  offset);
 bool isset(CVarRef v, CArrRef offset);
 bool isset(CVarRef v, CObjRef offset);
 bool isset(CVarRef v, CVarRef offset);
-bool isset(CVarRef v, litstr  offset, bool isString = false);
 bool isset(CVarRef v, CStrRef offset, bool isString = false);
 
 bool isset(CArrRef v, int64_t   offset);
@@ -269,7 +268,6 @@ inline bool isset(CArrRef v, double offset) { return isset(v, (int64_t)offset); 
 bool isset(CArrRef v, CArrRef offset);
 bool isset(CArrRef v, CObjRef offset);
 bool isset(CArrRef v, CVarRef offset);
-bool isset(CArrRef v, litstr  offset, bool isString = false);
 bool isset(CArrRef v, CStrRef offset, bool isString = false);
 
 inline Variant unset(Variant &v)               { v.unset();   return uninit_null();}
@@ -292,6 +290,9 @@ inline bool is_string(CVarRef v) { return v.isString();}
 inline bool is_array(CVarRef v)  { return v.is(KindOfArray);}
 inline bool is_object(CVarRef var) {
   return var.is(KindOfObject) && !var.isResource();
+}
+inline bool is_empty_string(CVarRef v) {
+  return v.isString() && v.getStringData()->empty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

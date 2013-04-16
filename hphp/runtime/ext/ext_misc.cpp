@@ -226,6 +226,9 @@ void f_usleep(int micro_seconds) {
   usleep(micro_seconds);
 }
 
+static const StaticString s_seconds("seconds");
+static const StaticString s_nanoseconds("nanoseconds");
+
 Variant f_time_nanosleep(int seconds, int nanoseconds) {
   if (seconds < 0) {
     throw_invalid_argument("seconds: cannot be negative");
@@ -245,8 +248,8 @@ Variant f_time_nanosleep(int seconds, int nanoseconds) {
     return true;
   }
   if (errno == EINTR) {
-    return CREATE_MAP2("seconds", (int64_t)rem.tv_sec,
-                       "nanoseconds", (int64_t)rem.tv_nsec);
+    return CREATE_MAP2(s_seconds, (int64_t)rem.tv_sec,
+                       s_nanoseconds, (int64_t)rem.tv_nsec);
   }
   return false;
 }
@@ -351,8 +354,10 @@ String f_token_name(int64_t token) {
   return "UNKNOWN";
 }
 
+static const StaticString s_marauder("I solemnly swear that I am up to no good.");
+
 Variant f_hphp_process_abort(CVarRef magic) {
-  if (magic.equal("I solemnly swear that I am up to no good.")) {
+  if (magic.equal(s_marauder)) {
     *((int*)0) = 0xdead;
   }
   return null_variant;

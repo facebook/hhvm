@@ -128,6 +128,12 @@ void ExtendedLogger::Log(LogLevelType level, CArrRef stackTrace,
   }
 }
 
+static const StaticString s_class("class");
+static const StaticString s_function("function");
+static const StaticString s_file("file");
+static const StaticString s_type("type");
+static const StaticString s_line("line");
+
 void ExtendedLogger::PrintStackTrace(FILE *f, CArrRef stackTrace,
                                      bool escape /* = false */,
                                      bool escapeMore /* = false */) {
@@ -138,17 +144,17 @@ void ExtendedLogger::PrintStackTrace(FILE *f, CArrRef stackTrace,
     }
     Array frame = it.second().toArray();
     fprintf(f, "    #%d ", i);
-    if (frame.exists("function")) {
-      if (frame.exists("class")) {
-        fprintf(f, "%s%s%s(), called ", frame["class"].toString().c_str(),
-                frame["type"].toString().c_str(),
-                frame["function"].toString().c_str());
+    if (frame.exists(s_function)) {
+      if (frame.exists(s_class)) {
+        fprintf(f, "%s%s%s(), called ", frame[s_class].toString().c_str(),
+                frame[s_type].toString().c_str(),
+                frame[s_function].toString().c_str());
       } else {
-        fprintf(f, "%s(), called ", frame["function"].toString().c_str());
+        fprintf(f, "%s(), called ", frame[s_function].toString().c_str());
       }
     }
-    fprintf(f, "at [%s:%" PRId64 "]", frame["file"].toString().c_str(),
-            frame["line"].toInt64());
+    fprintf(f, "at [%s:%" PRId64 "]", frame[s_file].toString().c_str(),
+            frame[s_line].toInt64());
   }
   fprintf(f, escapeMore ? "\\n" : "\n");
   fflush(f);
@@ -161,19 +167,19 @@ std::string ExtendedLogger::StringOfFrame(CArrRef frame, int i, bool escape) {
     ss << (escape ? "\\n" : "\n");
   }
   ss << "    #" << i << " ";
-  if (frame.exists("function")) {
-    if (frame.exists("class")) {
-      ss << frame["class"].toString().c_str()
-         << frame["type"].toString().c_str()
-         << frame["function"].toString().c_str()
+  if (frame.exists(s_function)) {
+    if (frame.exists(s_class)) {
+      ss << frame[s_class].toString().c_str()
+         << frame[s_type].toString().c_str()
+         << frame[s_function].toString().c_str()
          << "(), called ";
     } else {
-      ss << frame["function"].toString().c_str()
+      ss << frame[s_function].toString().c_str()
          << "(), called ";
     }
   }
-  ss << "at [" << frame["file"].toString().c_str()
-     << ":" << frame["line"].toInt64() << "]";
+  ss << "at [" << frame[s_file].toString().c_str()
+     << ":" << frame[s_line].toInt64() << "]";
 
   return ss.str();
 }

@@ -756,7 +756,7 @@ static int php_read_APP(CObjRef stream, unsigned int marker, Variant &info) {
   length -= 2;                /* length includes itself */
 
   buffer = f_fread(stream, (long)length);
-  if (same(buffer, "")) {
+  if (is_empty_string(buffer)) {
     return 0;
   }
 

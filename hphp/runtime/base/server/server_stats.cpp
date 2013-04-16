@@ -953,6 +953,9 @@ void ServerStats::StartNetworkProfile() {
   }
 }
 
+static const StaticString s_ct("ct");
+static const StaticString s_wt("wt");
+
 Array ServerStats::EndNetworkProfile() {
   s_profile_network = false;
   Lock lock(s_lock, false);
@@ -966,8 +969,8 @@ Array ServerStats::EndNetworkProfile() {
     for (IOStatusMap::const_iterator iter = status.begin();
          iter != status.end(); ++iter) {
       ret.set(String(iter->first),
-              CREATE_MAP2("ct", iter->second.count,
-                          "wt", iter->second.wall_time));
+              CREATE_MAP2(s_ct, iter->second.count,
+                          s_wt, iter->second.wall_time));
     }
     status.clear();
   }
@@ -1217,8 +1220,8 @@ Array ServerStats::getThreadIOStatuses() {
   for (IOStatusMap::const_iterator iter = status.begin();
        iter != status.end(); ++iter) {
     ret.set(String(iter->first),
-            CREATE_MAP2("ct", iter->second.count,
-                        "wt", iter->second.wall_time));
+            CREATE_MAP2(s_ct, iter->second.count,
+                        s_wt, iter->second.wall_time));
   }
   status.clear();
   return ret;

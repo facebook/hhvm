@@ -55,6 +55,7 @@ static const StaticString s_type("type");
 static const StaticString s_function("function");
 static const StaticString s_file("file");
 static const StaticString s_line("line");
+static const StaticString s_message("message");
 
 String debug_string_backtrace(bool skip) {
   if (RuntimeOption::InjectedStackTrace) {
@@ -95,8 +96,8 @@ Array f_error_get_last() {
   if (lastError.isNull()) {
     return (ArrayData *)NULL;
   }
-  return CREATE_MAP2("message", g_context->getLastError(),
-                     "type", g_context->getLastErrorNumber());
+  return CREATE_MAP2(s_message, g_context->getLastError(),
+                     s_type, g_context->getLastErrorNumber());
 }
 
 bool f_error_log(CStrRef message, int message_type /* = 0 */,

@@ -565,7 +565,25 @@ Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define PHP_RUSAGE_PARA(a) #a, (int64_t)usg.a
+static const StaticString s_ru_oublock("ru_oublock");
+static const StaticString s_ru_inblock("ru_inblock");
+static const StaticString s_ru_msgsnd("ru_msgsnd");
+static const StaticString s_ru_msgrcv("ru_msgrcv");
+static const StaticString s_ru_maxrss("ru_maxrss");
+static const StaticString s_ru_ixrss("ru_ixrss");
+static const StaticString s_ru_idrss("ru_idrss");
+static const StaticString s_ru_minflt("ru_minflt");
+static const StaticString s_ru_majflt("ru_majflt");
+static const StaticString s_ru_nsignals("ru_nsignals");
+static const StaticString s_ru_nvcsw("ru_nvcsw");
+static const StaticString s_ru_nivcsw("ru_nivcsw");
+static const StaticString s_ru_nswap("ru_nswap");
+static const StaticString s_ru_utime_tv_usec("ru_utime.tv_usec");
+static const StaticString s_ru_utime_tv_sec("ru_utime.tv_sec");
+static const StaticString s_ru_stime_tv_usec("ru_stime.tv_usec");
+static const StaticString s_ru_stime_tv_sec("ru_stime.tv_sec");
+
+#define PHP_RUSAGE_PARA(a) s_ ## a, (int64_t)usg.a
 Array f_getrusage(int who /* = 0 */) {
   struct rusage usg;
   memset(&usg, 0, sizeof(struct rusage));
@@ -588,10 +606,10 @@ Array f_getrusage(int who /* = 0 */) {
                set(PHP_RUSAGE_PARA(ru_nvcsw)).
                set(PHP_RUSAGE_PARA(ru_nivcsw)).
                set(PHP_RUSAGE_PARA(ru_nswap)).
-               set(PHP_RUSAGE_PARA(ru_utime.tv_usec)).
-               set(PHP_RUSAGE_PARA(ru_utime.tv_sec)).
-               set(PHP_RUSAGE_PARA(ru_stime.tv_usec)).
-               set(PHP_RUSAGE_PARA(ru_stime.tv_sec)).
+               set(s_ru_utime_tv_usec, (int64_t)usg.ru_utime.tv_usec).
+               set(s_ru_utime_tv_sec,  (int64_t)usg.ru_utime.tv_sec).
+               set(s_ru_stime_tv_usec, (int64_t)usg.ru_stime.tv_usec).
+               set(s_ru_stime_tv_sec,  (int64_t)usg.ru_stime.tv_sec).
                create());
 }
 

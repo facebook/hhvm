@@ -368,6 +368,10 @@ bool c_Memcached::getMultiImpl(CStrRef server_key, CArrRef keys,
       keysCopy.size()));
 }
 
+static const StaticString s_key("key");
+static const StaticString s_value("value");
+static const StaticString s_cas("cas");
+
 bool c_Memcached::fetchImpl(memcached_result_st &result, Array &item) {
   memcached_return status;
   if (!memcached_fetch_result(&m_impl->memcached, &result, &status)) {
@@ -386,7 +390,7 @@ bool c_Memcached::fetchImpl(memcached_result_st &result, Array &item) {
   String sKey(key, keyLength, CopyString);
   double cas = (double) memcached_result_cas(&result);
 
-  item = CREATE_MAP3("key", sKey, "value", value, "cas", cas);
+  item = CREATE_MAP3(s_key, sKey, s_value, value, s_cas, cas);
   return true;
 }
 
@@ -595,12 +599,17 @@ bool c_Memcached::t_addservers(CArrRef servers) {
 }
 
 namespace {
+
+static const StaticString s_host("host");
+static const StaticString s_port("port");
+static const StaticString s_weight("weight");
+
 memcached_return_t doServerListCallback(const memcached_st *ptr,
     memcached_server_instance_st server, void *context) {
   Array *returnValue = (Array*) context;
-  returnValue->append(CREATE_MAP3("host", String(server->hostname, CopyString),
-                                  "port", (int32_t)server->port,
-                                  "weight", (int32_t)server->weight));
+  returnValue->append(CREATE_MAP3(s_host, String(server->hostname, CopyString),
+                                  s_port, (int32_t)server->port,
+                                  s_weight, (int32_t)server->weight));
   return MEMCACHED_SUCCESS;
 }
 }
@@ -627,9 +636,9 @@ Variant c_Memcached::t_getserverbykey(CStrRef server_key) {
     return false;
   }
 
-  Array returnValue = CREATE_MAP3("host", String(server->hostname, CopyString),
-                                  "port", (int32_t)server->port,
-                                  "weight", (int32_t)server->weight);
+  Array returnValue = CREATE_MAP3(s_host, String(server->hostname, CopyString),
+                                  s_port, (int32_t)server->port,
+                                  s_weight, (int32_t)server->weight);
   return returnValue;
 }
 
@@ -638,6 +647,32 @@ struct StatsContext {
   memcached_stat_st *stats;
   Array returnValue;
 };
+
+static const StaticString s_pid("pid");
+static const StaticString s_uptime("uptime");
+static const StaticString s_threads("threads");
+static const StaticString s_time("time");
+static const StaticString s_pointer_size("pointer_size");
+static const StaticString s_rusage_user_seconds("rusage_user_seconds");
+static const StaticString s_rusage_user_microseconds("rusage_user_microseconds");
+static const StaticString s_rusage_system_seconds("rusage_system_seconds");
+static const StaticString
+             s_rusage_system_microseconds("rusage_system_microseconds");
+static const StaticString s_curr_items("curr_items");
+static const StaticString s_total_items("total_items");
+static const StaticString s_limit_maxbytes("limit_maxbytes");
+static const StaticString s_curr_connections("curr_connections");
+static const StaticString s_total_connections("total_connections");
+static const StaticString s_connection_structures("connection_structures");
+static const StaticString s_bytes("bytes");
+static const StaticString s_cmd_get("cmd_get");
+static const StaticString s_cmd_set("cmd_set");
+static const StaticString s_get_hits("get_hits");
+static const StaticString s_get_misses("get_misses");
+static const StaticString s_evictions("evictions");
+static const StaticString s_bytes_read("bytes_read");
+static const StaticString s_bytes_written("bytes_written");
+static const StaticString s_version("version");
 
 memcached_return_t doStatsCallback(const memcached_st *ptr,
     memcached_server_instance_st server, void *inContext) {
@@ -648,32 +683,32 @@ memcached_return_t doStatsCallback(const memcached_st *ptr,
   ssize_t i = context->returnValue.size();
 
   context->returnValue.set(String(key, CopyString), Array(ArrayInit(24)
-      .set("pid",                        (int64_t)stats[i].pid)
-      .set("uptime",                     (int64_t)stats[i].uptime)
-      .set("threads",                    (int64_t)stats[i].threads)
-      .set("time",                       (int64_t)stats[i].time)
-      .set("pointer_size",               (int64_t)stats[i].pointer_size)
-      .set("rusage_user_seconds",        (int64_t)stats[i].rusage_user_seconds)
-      .set("rusage_user_microseconds",   (int64_t)stats[i]
+      .set(s_pid,                        (int64_t)stats[i].pid)
+      .set(s_uptime,                     (int64_t)stats[i].uptime)
+      .set(s_threads,                    (int64_t)stats[i].threads)
+      .set(s_time,                       (int64_t)stats[i].time)
+      .set(s_pointer_size,               (int64_t)stats[i].pointer_size)
+      .set(s_rusage_user_seconds,        (int64_t)stats[i].rusage_user_seconds)
+      .set(s_rusage_user_microseconds,   (int64_t)stats[i]
                                                 .rusage_user_microseconds)
-      .set("rusage_system_seconds",      (int64_t)stats[i].rusage_system_seconds)
-      .set("rusage_system_microseconds", (int64_t)stats[i]
+      .set(s_rusage_system_seconds,      (int64_t)stats[i].rusage_system_seconds)
+      .set(s_rusage_system_microseconds, (int64_t)stats[i]
                                                 .rusage_system_microseconds)
-      .set("curr_items",                 (int64_t)stats[i].curr_items)
-      .set("total_items",                (int64_t)stats[i].total_items)
-      .set("limit_maxbytes",             (int64_t)stats[i].limit_maxbytes)
-      .set("curr_connections",           (int64_t)stats[i].curr_connections)
-      .set("total_connections",          (int64_t)stats[i].total_connections)
-      .set("connection_structures",      (int64_t)stats[i].connection_structures)
-      .set("bytes",                      (int64_t)stats[i].bytes)
-      .set("cmd_get",                    (int64_t)stats[i].cmd_get)
-      .set("cmd_set",                    (int64_t)stats[i].cmd_set)
-      .set("get_hits",                   (int64_t)stats[i].get_hits)
-      .set("get_misses",                 (int64_t)stats[i].get_misses)
-      .set("evictions",                  (int64_t)stats[i].evictions)
-      .set("bytes_read",                 (int64_t)stats[i].bytes_read)
-      .set("bytes_written",              (int64_t)stats[i].bytes_written)
-      .set("version",                    String(stats[i].version, CopyString))
+      .set(s_curr_items,                 (int64_t)stats[i].curr_items)
+      .set(s_total_items,                (int64_t)stats[i].total_items)
+      .set(s_limit_maxbytes,             (int64_t)stats[i].limit_maxbytes)
+      .set(s_curr_connections,           (int64_t)stats[i].curr_connections)
+      .set(s_total_connections,          (int64_t)stats[i].total_connections)
+      .set(s_connection_structures,      (int64_t)stats[i].connection_structures)
+      .set(s_bytes,                      (int64_t)stats[i].bytes)
+      .set(s_cmd_get,                    (int64_t)stats[i].cmd_get)
+      .set(s_cmd_set,                    (int64_t)stats[i].cmd_set)
+      .set(s_get_hits,                   (int64_t)stats[i].get_hits)
+      .set(s_get_misses,                 (int64_t)stats[i].get_misses)
+      .set(s_evictions,                  (int64_t)stats[i].evictions)
+      .set(s_bytes_read,                 (int64_t)stats[i].bytes_read)
+      .set(s_bytes_written,              (int64_t)stats[i].bytes_written)
+      .set(s_version,                    String(stats[i].version, CopyString))
       .create()));
 
   return MEMCACHED_SUCCESS;

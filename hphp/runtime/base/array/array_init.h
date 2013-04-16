@@ -152,16 +152,6 @@ public:
     return *this;
   }
 
-  ArrayInit &set(litstr name, RefResult v, bool keyConverted = false) {
-    String key(name);
-    if (keyConverted) {
-      m_data->setRef(key, variant(v), false);
-    } else {
-      m_data->setRef(key.toKey(), variant(v), false);
-    }
-    return *this;
-  }
-
   ArrayInit &set(CStrRef name, RefResult v, bool keyConverted = false) {
     if (keyConverted) {
       m_data->setRef(name, variant(v), false);

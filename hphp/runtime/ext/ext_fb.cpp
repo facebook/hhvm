@@ -1560,6 +1560,12 @@ void f_fb_set_exit_callback(CVarRef function) {
   g_context->setExitCallback(function);
 }
 
+static const StaticString s_flush_stats("flush_stats");
+static const StaticString s_chunk_stats("chunk_stats");
+static const StaticString s_total("total");
+static const StaticString s_sent("sent");
+static const StaticString s_time("time");
+
 Array f_fb_get_flush_stat() {
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -1570,8 +1576,8 @@ Array f_fb_get_flush_stat() {
     int sent = transport->getResponseSentSize();
     int64_t time = transport->getFlushTime();
     return CREATE_MAP2(
-        "flush_stats", CREATE_MAP3("total", total, "sent", sent, "time", time),
-        "chunk_stats", chunkStats);
+        s_flush_stats, CREATE_MAP3(s_total, total, s_sent, sent, s_time, time),
+        s_chunk_stats, chunkStats);
   }
   return NULL;
 }

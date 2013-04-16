@@ -101,6 +101,13 @@ int HttpClient::post(const char *url, const char *data, int size,
   return impl(url, data, size, response, requestHeaders, responseHeaders);
 }
 
+static const StaticString s_ssl("ssl");
+static const StaticString s_verify_peer("verify_peer");
+static const StaticString s_capath("capath");
+static const StaticString s_cafile("cafile");
+static const StaticString s_local_cert("local_cert");
+static const StaticString s_passphrase("passphrase");
+
 int HttpClient::impl(const char *url, const char *data, int size,
                      StringBuffer &response, const HeaderMap *requestHeaders,
                      std::vector<String> *responseHeaders) {
@@ -184,27 +191,27 @@ int HttpClient::impl(const char *url, const char *data, int size,
     curl_easy_setopt(cp, CURLOPT_WRITEHEADER, (void*)this);
   }
 
-  if (m_stream_context_options["ssl"].isArray()) {
-    const Array ssl = m_stream_context_options["ssl"].toArray();
-    if (ssl["verify_peer"].toBoolean()) {
+  if (m_stream_context_options[s_ssl].isArray()) {
+    const Array ssl = m_stream_context_options[s_ssl].toArray();
+    if (ssl[s_verify_peer].toBoolean()) {
       curl_easy_setopt(cp, CURLOPT_SSL_VERIFYPEER, 1);
     }
-    if (ssl.exists("capath")) {
+    if (ssl.exists(s_capath)) {
       curl_easy_setopt(cp, CURLOPT_CAPATH,
-                       ssl["capath"].toString().data());
+                       ssl[s_capath].toString().data());
     }
-    if (ssl.exists("cafile")) {
+    if (ssl.exists(s_cafile)) {
       curl_easy_setopt(cp, CURLOPT_CAINFO,
-                       ssl["cafile"].toString().data());
+                       ssl[s_cafile].toString().data());
     }
-    if (ssl.exists("local_cert")) {
+    if (ssl.exists(s_local_cert)) {
       curl_easy_setopt(cp, CURLOPT_SSLKEY,
-                       ssl["local_cert"].toString().data());
+                       ssl[s_local_cert].toString().data());
       curl_easy_setopt(cp, CURLOPT_SSLKEYTYPE, "PEM");
     }
-    if (ssl.exists("passphrase")) {
+    if (ssl.exists(s_passphrase)) {
       curl_easy_setopt(cp, CURLOPT_KEYPASSWD,
-                       ssl["passphrase"].toString().data());
+                       ssl[s_passphrase].toString().data());
     }
   }
 

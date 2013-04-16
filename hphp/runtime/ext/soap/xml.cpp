@@ -69,6 +69,9 @@ static void soap_ignorableWhitespace(void *ctx, const xmlChar *ch, int len) {
 static void soap_Comment(void *ctx, const xmlChar *value) {
 }
 
+static StaticString s_http("http");
+static StaticString s_timeout("timeout");
+
 xmlDocPtr soap_xmlParseFile(const char *filename) {
   String cache_key("HPHP.SOAP.WSDL.");
   cache_key += filename;
@@ -76,7 +79,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
   Variant content = f_apc_fetch(cache_key);
   if (same(content, false)) {
     Variant stream = File::Open(filename, "rb", 0, f_stream_context_create(
-                CREATE_MAP1("http", CREATE_MAP1("timeout", 1000))));
+                CREATE_MAP1(s_http, CREATE_MAP1(s_timeout, 1000))));
     if (!same(stream, false)) {
       content = f_stream_get_contents(stream);
       if (!same(content, false)) {

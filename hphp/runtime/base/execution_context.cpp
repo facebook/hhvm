@@ -441,10 +441,13 @@ void BaseExecutionContext::resetCurrentBuffer() {
 ///////////////////////////////////////////////////////////////////////////////
 // program executions
 
+static const StaticString s_name("name");
+static const StaticString s_args("args");
+
 void BaseExecutionContext::registerShutdownFunction(CVarRef function,
                                                     Array arguments,
                                                     ShutdownType type) {
-  Array callback = CREATE_MAP2("name", function, "args", arguments);
+  Array callback = CREATE_MAP2(s_name, function, s_args, arguments);
   Variant &funcs = m_shutdowns.lvalAt(type);
   funcs.append(callback);
 }
@@ -517,7 +520,7 @@ void BaseExecutionContext::onRequestShutdown() {
 void BaseExecutionContext::executeFunctions(CArrRef funcs) {
   for (ArrayIter iter(funcs); iter; ++iter) {
     Array callback = iter.second();
-    vm_call_user_func(callback["name"], callback["args"]);
+    vm_call_user_func(callback[s_name], callback[s_args]);
   }
 }
 
@@ -592,6 +595,9 @@ private:
   int m_originalState;
 };
 
+static StaticString s_file("file");
+static StaticString s_line("line");
+
 void BaseExecutionContext::handleError(const std::string &msg,
                                        int errnum,
                                        bool callUserHandler,
@@ -640,8 +646,8 @@ void BaseExecutionContext::handleError(const std::string &msg,
     if (RuntimeOption::InjectedStackTrace) {
       if (!bt.empty()) {
         Array top = bt.rvalAt(0).toArray();
-        if (top.exists("file")) file = top.rvalAt("file").toString();
-        if (top.exists("line")) line = top.rvalAt("line");
+        if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
+        if (top.exists(s_line)) line = top.rvalAt(s_line);
       }
     }
 
@@ -670,8 +676,8 @@ bool BaseExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
         backtrace = arr;
         Array top = backtrace.rvalAt(0);
         if (!top.isNull()) {
-          errfile = top.rvalAt("file");
-          errline = top.rvalAt("line").toInt64();
+          errfile = top.rvalAt(s_file);
+          errline = top.rvalAt(s_line).toInt64();
         }
       }
     }
@@ -707,8 +713,8 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
       Array bt = ee->getBackTrace();
       if (!bt.empty()) {
         Array top = bt.rvalAt(0).toArray();
-        if (top.exists("file")) file = top.rvalAt("file").toString();
-        if (top.exists("line")) line = top.rvalAt("line");
+        if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
+        if (top.exists(s_line)) line = top.rvalAt(s_line);
       }
     }
   }

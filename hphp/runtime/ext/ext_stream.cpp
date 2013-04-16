@@ -225,12 +225,15 @@ bool f_stream_set_blocking(CObjRef stream, int mode) {
   return fcntl(file->fd(), F_SETFL, flags) != -1;
 }
 
+static const StaticString s_sec("sec");
+static const StaticString s_usec("usec");
+
 bool f_stream_set_timeout(CObjRef stream, int seconds,
                           int microseconds /* = 0 */) {
   if (stream.getTyped<Socket>(false, true)) {
     return f_socket_set_option
       (stream, SOL_SOCKET, SO_RCVTIMEO,
-       CREATE_MAP2("sec", seconds, "usec", microseconds));
+       CREATE_MAP2(s_sec, seconds, s_usec, microseconds));
   }
   return false;
 }

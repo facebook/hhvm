@@ -174,15 +174,20 @@ bool CmdMachine::AttachSandbox(DebuggerClient *client,
   return cmdMachine->m_succeed;
 }
 
+static const StaticString s_host("host");
+static const StaticString s_port("port");
+static const StaticString s_auth("auth");
+static const StaticString s_timeout("timeout");
+
 void CmdMachine::UpdateIntercept(DebuggerClient *client,
                                  const std::string &host, int port) {
   CmdMachine cmd;
   cmd.m_body = "rpc";
   cmd.m_rpcConfig = CREATE_MAP4
-    ("host", String(host),
-     "port", port ? port : RuntimeOption::DebuggerDefaultRpcPort,
-     "auth", String(RuntimeOption::DebuggerDefaultRpcAuth),
-     "timeout", RuntimeOption::DebuggerDefaultRpcTimeout);
+    (s_host, String(host),
+     s_port, port ? port : RuntimeOption::DebuggerDefaultRpcPort,
+     s_auth, String(RuntimeOption::DebuggerDefaultRpcAuth),
+     s_timeout, RuntimeOption::DebuggerDefaultRpcTimeout);
   client->xend<CmdMachine>(&cmd);
 }
 

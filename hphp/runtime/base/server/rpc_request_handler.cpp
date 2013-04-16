@@ -152,6 +152,9 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   HttpProtocol::ClearRecord(ret, tmpfile);
 }
 
+static const StaticString s_output("output");
+static const StaticString s_return("return");
+
 bool RPCRequestHandler::executePHPFunction(Transport *transport,
                                            SourceRootInfo &sourceRootInfo) {
   // reset timeout counter
@@ -276,8 +279,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         case 1: response = m_context->obDetachContents(); break;
         case 2:
           response =
-            f_json_encode(CREATE_MAP2("output", m_context->obDetachContents(),
-                                      "return", f_json_encode(funcRet)));
+            f_json_encode(CREATE_MAP2(s_output, m_context->obDetachContents(),
+                                      s_return, f_json_encode(funcRet)));
           break;
         case 3: response = f_serialize(funcRet); break;
       }

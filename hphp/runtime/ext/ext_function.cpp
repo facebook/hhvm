@@ -34,11 +34,12 @@ namespace HPHP {
 using HPHP::VM::ActRec;
 using HPHP::VM::Transl::CallerFrame;
 
+static const StaticString s_internal("internal");
+static const StaticString s_user("user");
+
 Array f_get_defined_functions() {
-  Array ret;
-  ret.set("internal", ClassInfo::GetSystemFunctions());
-  ret.set("user", ClassInfo::GetUserFunctions());
-  return ret;
+  return CREATE_MAP2(s_internal, ClassInfo::GetSystemFunctions(),
+                     s_user, ClassInfo::GetUserFunctions());
 }
 
 bool f_function_exists(CStrRef function_name, bool autoload /* = true */) {
@@ -172,6 +173,9 @@ Variant f_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth,
   return f_call_user_func_rpc(0, host, port, auth, timeout, function, params);
 }
 
+static const StaticString s_func("func");
+static const StaticString s_args("args");
+
 Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
                              int timeout, CVarRef function,
                              CArrRef _argv /* = null_array */) {
@@ -190,7 +194,7 @@ Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
   url += "/call_user_func_serialized?auth=";
   url += auth.data();
 
-  Array blob = CREATE_MAP2("func", function, "args", _argv);
+  Array blob = CREATE_MAP2(s_func, function, s_args, _argv);
   String message = f_serialize(blob);
 
   vector<string> headers;

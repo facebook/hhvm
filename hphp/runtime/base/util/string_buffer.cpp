@@ -74,7 +74,7 @@ String StringBuffer::detachImpl() {
     m_cap = 0;
     return String(str); // causes incref
   }
-  return String("");
+  return empty_string;
 }
 
 String StringBuffer::copy() {

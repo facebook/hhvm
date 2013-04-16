@@ -42,6 +42,9 @@ int SSLSocket::GetSSLExDataIndex() {
   return s_ex_data_index;
 }
 
+static const StaticString s_allow_self_signed("allow_self_signed");
+static const StaticString s_verify_depth("verify_depth");
+
 static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
   int ret = preverify_ok;
 
@@ -58,12 +61,12 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
 
   /* if allow_self_signed is set, make sure that verification succeeds */
   if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT &&
-      stream->getContext()["allow_self_signed"].toBoolean()) {
+      stream->getContext()[s_allow_self_signed].toBoolean()) {
     ret = 1;
   }
 
   /* check the depth */
-  Variant vdepth = stream->getContext()["verify_depth"];
+  Variant vdepth = stream->getContext()[s_verify_depth];
   if (vdepth.toBoolean() && depth > vdepth.toInt64()) {
     ret = 0;
     X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_CHAIN_TOO_LONG);
@@ -72,10 +75,12 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
   return ret;
 }
 
+static const StaticString s_passphrase("passphrase");
+
 static int passwd_callback(char *buf, int num, int verify, void *data) {
   /* TODO: could expand this to make a callback into PHP user-space */
   SSLSocket *stream = (SSLSocket *)data;
-  String passphrase = stream->getContext()["passphrase"];
+  String passphrase = stream->getContext()[s_passphrase];
   if (!passphrase.empty() && passphrase.size() < num - 1) {
     memcpy(buf, passphrase.data(), passphrase.size() + 1);
     return passphrase.size();
@@ -83,17 +88,23 @@ static int passwd_callback(char *buf, int num, int verify, void *data) {
   return 0;
 }
 
+static const StaticString s_verify_peer("verify_peer");
+static const StaticString s_cafile("cafile");
+static const StaticString s_capath("capath");
+static const StaticString s_ciphers("ciphers");
+static const StaticString s_local_cert("local_cert");
+
 SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
   ERR_clear_error();
 
   /* look at options in the stream and set appropriate verification flags */
-  if (m_context["verify_peer"].toBoolean()) {
+  if (m_context[s_verify_peer].toBoolean()) {
     /* turn on verification callback */
     SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
 
     /* CA stuff */
-    String cafile = m_context["cafile"];
-    String capath = m_context["capath"];
+    String cafile = m_context[s_cafile];
+    String capath = m_context[s_capath];
 
     if (!cafile.empty() || !capath.empty()) {
       if (!SSL_CTX_load_verify_locations(ctx, cafile.data(), capath.data())) {
@@ -103,7 +114,7 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
       }
     }
 
-    int64_t depth = m_context["verify_depth"].toInt64();
+    int64_t depth = m_context[s_verify_depth].toInt64();
     if (depth) {
       SSL_CTX_set_verify_depth(ctx, depth);
     }
@@ -112,18 +123,18 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
   }
 
   /* callback for the passphrase (for localcert) */
-  if (!m_context["passphrase"].toString().empty()) {
+  if (!m_context[s_passphrase].toString().empty()) {
     SSL_CTX_set_default_passwd_cb_userdata(ctx, this);
     SSL_CTX_set_default_passwd_cb(ctx, passwd_callback);
   }
 
-  String cipherlist = m_context["ciphers"].toString();
+  String cipherlist = m_context[s_ciphers].toString();
   if (cipherlist.empty()) {
     cipherlist = "DEFAULT";
   }
   SSL_CTX_set_cipher_list(ctx, cipherlist.data());
 
-  String certfile = m_context["local_cert"].toString();
+  String certfile = m_context[s_local_cert].toString();
   if (!certfile.empty()) {
     String resolved_path_buff = File::TranslatePath(certfile);
     if (!resolved_path_buff.empty()) {
@@ -428,9 +439,11 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
   return true;
 }
 
+static const StaticString s_CN_match("CN_match");
+
 bool SSLSocket::applyVerificationPolicy(X509 *peer) {
   /* verification is turned off */
-  if (!m_context["verify_peer"].toBoolean()) {
+  if (!m_context[s_verify_peer].toBoolean()) {
     return true;
   }
 
@@ -445,7 +458,7 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
     /* fine */
     break;
   case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-    if (m_context["allow_self_signed"].toBoolean()) {
+    if (m_context[s_allow_self_signed].toBoolean()) {
       /* allowed */
       break;
     }
@@ -459,11 +472,12 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
   /* if the cert passed the usual checks, apply our own local policies now */
 
   /* Does the common name match ? (used primarily for https://) */
-  String cnmatch = m_context["CN_match"].toString();
+  String cnmatch = m_context[s_CN_match].toString();
   if (!cnmatch.empty()) {
     X509_NAME *name = X509_get_subject_name(peer);
     char buf[1024];
-    int name_len = X509_NAME_get_text_by_NID(name, NID_commonName, buf, sizeof(buf));
+    int name_len = X509_NAME_get_text_by_NID(name, NID_commonName, buf,
+                                             sizeof(buf));
 
     if (name_len < 0) {
       raise_warning("Unable to locate peer certificate CN");
@@ -492,6 +506,11 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
 
   return true;
 }
+
+static const StaticString s_capture_peer_cert("capture_peer_cert");
+static const StaticString s_peer_certificate("peer_certificate");
+static const StaticString s_capture_peer_cert_chain("capture_peer_cert_chain");
+static const StaticString s_peer_certificate_chain("peer_certificate_chain");
 
 bool SSLSocket::enableCrypto(bool activate /* = true */) {
   if (activate && !m_ssl_active) {
@@ -551,13 +570,13 @@ bool SSLSocket::enableCrypto(bool activate /* = true */) {
 
         /* allow the script to capture the peer cert
          * and/or the certificate chain */
-        if (m_context["capture_peer_cert"].toBoolean()) {
+        if (m_context[s_capture_peer_cert].toBoolean()) {
           Object cert(new Certificate(peer_cert));
-          m_context.set("peer_certificate", cert);
+          m_context.set(s_peer_certificate, cert);
           peer_cert = nullptr;
         }
 
-        if (m_context["capture_peer_cert_chain"].toBoolean()) {
+        if (m_context[s_capture_peer_cert_chain].toBoolean()) {
           Array arr;
           STACK_OF(X509) *chain = SSL_get_peer_cert_chain(m_handle);
           if (chain) {
@@ -566,7 +585,7 @@ bool SSLSocket::enableCrypto(bool activate /* = true */) {
               arr.append(Object(new Certificate(mycert)));
             }
           }
-          m_context.set("peer_certificate_chain", arr);
+          m_context.set(s_peer_certificate_chain, arr);
         }
       }
 

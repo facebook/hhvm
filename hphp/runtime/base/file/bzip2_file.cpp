@@ -59,12 +59,15 @@ String BZ2File::errstr() {
   return BZ2_bzerror(m_bzFile, &errnum);
 }
 
+static const StaticString s_errno("errno");
+static const StaticString s_errstr("errstr");
+
 Variant BZ2File::error() {
   assert(m_bzFile);
   int errnum;
   const char * errstr;
   errstr = BZ2_bzerror(m_bzFile, &errnum);
-  return CREATE_MAP2("errno", errnum, "errstr", String(errstr));
+  return CREATE_MAP2(s_errno, errnum, s_errstr, String(errstr));
 }
 
 bool BZ2File::flush() {

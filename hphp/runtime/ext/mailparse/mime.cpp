@@ -496,10 +496,12 @@ MimePart *MimePart::getParent() {
   return m_parent.getTyped<MimePart>();
 }
 
+static const StaticString s_headers("headers");
+
 Variant MimePart::getPartData() {
   Array ret = Array::Create();
 
-  ret.set("headers", m_headers);
+  ret.set(s_headers, m_headers);
 
   ret.set("starting-pos", m_startpos);
   ret.set("starting-pos-body", m_bodystart);

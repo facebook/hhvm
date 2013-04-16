@@ -5039,6 +5039,8 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
     auto* addr = cgInst(inst);
     if (m_state.asmInfo && addr) {
       m_state.asmInfo->instRanges[inst] = TcaRange(addr, m_as.code.frontier);
+      m_state.asmInfo->asmRanges[block] =
+        TcaRange(m_state.asmInfo->asmRanges[block].start(), m_as.code.frontier);
     }
   }
 }
@@ -5077,6 +5079,9 @@ void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
       last->getOpcode() == Jmp_ && last->getTaken() == nextThisAs;
 
     CodeGenerator cg(trace, *as, astubs, tx64, state);
+    if (state.asmInfo) {
+      state.asmInfo->asmRanges[block] = TcaRange(asmStart, as->code.frontier);
+    }
     cg.cgBlock(block, bcMap);
     Block* next = block->getNext();
     if (next && next != nextThisAs) {
@@ -5092,6 +5097,10 @@ void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
       }
     }
   }
+}
+
+void CodeGenerator::print() const {
+  m_curTrace->print(std::cout, m_state.asmInfo);
 }
 
 // select instructions for the trace and its exits

@@ -319,6 +319,9 @@ private:
     asm_label(m_as, done);
   }
 
+  // This is for printing partially-generated traces when debugging
+  void print() const;
+
 private:
   Asm& m_as;                // current "main" assembler
   Asm& m_astubs;            // assembler for stubs and other cold code.

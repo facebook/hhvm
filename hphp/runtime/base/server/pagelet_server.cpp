@@ -233,7 +233,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 struct PageletWorker
-  : JobQueueWorker<PageletTransport*,false,false,JobQueueDropVMStack>
+  : JobQueueWorker<PageletTransport*,true,false,JobQueueDropVMStack>
 {
   virtual void doJob(PageletTransport *job) {
     try {

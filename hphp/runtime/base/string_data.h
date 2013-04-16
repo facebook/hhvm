@@ -344,7 +344,7 @@ public:
   bool isame(const StringData *s) const {
     assert(s);
     if (m_len != s->m_len) return false;
-    return !bstrcasecmp(rawdata(), m_len, s->rawdata(), m_len);
+    return bstrcaseeq(rawdata(), s->rawdata(), m_len);
   }
 
   int compare(const StringData *v2) const;

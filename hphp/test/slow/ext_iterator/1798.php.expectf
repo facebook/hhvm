@@ -1,15 +1,16 @@
-int(6)
+int(7)
 string(4) "file"
 string(7) "symlink"
+string(14) "fix_mtimes.inc"
 string(3) "dir"
 string(5) "empty"
 BEGIN: file
-1365834782
+%d
 file
 file
 100
-453935113
-1365834782
+%d
+1234567894
 2618
 33188
 3
@@ -22,12 +23,12 @@ file
 1
 END
 BEGIN: symlink
-1365834782
+%d
 symlink
 symlink
 100
-453935113
-1365834782
+%d
+1234567894
 2618
 33188
 3
@@ -39,13 +40,31 @@ link
 1
 1
 END
+BEGIN: fix_mtimes.inc
+%d
+fix_mtimes.inc
+fix_mtimes.inc
+100
+%d
+1234567895
+2618
+33188
+383
+file
+
+
+
+
+1
+1
+END
 BEGIN: empty
-1365834782
+%d
 empty
 empty
 100
-453935110
-1365834782
+%d
+1234567892
 2618
 33188
 0
@@ -58,13 +77,13 @@ file
 1
 END
 file
-1365834782
+%d
 file
 file
 file
 100
-453935113
-1365834782
+%d
+1234567894
 2618
 33188
 3
@@ -75,13 +94,13 @@ file
 1
 1
 symlink
-1365834782
+%d
 symlink
 symlink
 symlink
 100
-453935113
-1365834782
+%d
+1234567894
 2618
 33188
 3
@@ -91,14 +110,31 @@ link
 1
 1
 1
+fix_mtimes.inc
+%d
+fix_mtimes.inc
+fix_mtimes.inc
+fix_mtimes.inc
+100
+%d
+1234567895
+2618
+33188
+383
+file
+
+
+
+1
+1
 empty
-1365834782
+%d
 empty
 empty
 empty
 100
-453935110
-1365834782
+%d
+1234567892
 2618
 33188
 0

@@ -1,5 +1,6 @@
  test/sample_dir/file
  test/sample_dir/symlink
+ test/sample_dir/fix_mtimes.inc
  test/sample_dir/dir
   test/sample_dir/dir/empty
  test/sample_dir/empty

@@ -2,12 +2,14 @@ Path: test/sample_dir/
 file
 ..
 symlink
+fix_mtimes.inc
 dir
 .
 empty
 file
 ..
 symlink
+fix_mtimes.inc
 dir
 .
 empty

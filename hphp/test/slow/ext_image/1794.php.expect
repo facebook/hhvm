@@ -1,7 +1,7 @@
 Array
 (
     [FileName] => simpletext.jpg
-    [FileDateTime] => 1365574959
+    [FileDateTime] => 1234567890
     [FileSize] => 1298
     [FileType] => 2
     [MimeType] => image/jpeg
@@ -24,7 +24,7 @@ Array
 Array
 (
     [FileName] => test1pix.jpg
-    [FileDateTime] => 1365574959
+    [FileDateTime] => 1234567890
     [FileSize] => 523
     [FileType] => 2
     [MimeType] => image/jpeg
@@ -41,7 +41,7 @@ Array
 Array
 (
     [FileName] => test2.jpg
-    [FileDateTime] => 1365574959
+    [FileDateTime] => 1234567890
     [FileSize] => 122298
     [FileType] => 2
     [MimeType] => image/jpeg

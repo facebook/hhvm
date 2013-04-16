@@ -2003,6 +2003,9 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
     break;
   }
 
+  case Statement::KindOfTypedefStatement:
+    break;
+
   case Statement::KindOfCatchStatement:
     clear();
     ret = Converge;

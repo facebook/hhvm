@@ -498,6 +498,7 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           }
 
           case Statement::KindOfEchoStatement:
+          case Statement::KindOfTypedefStatement:
             break;
 
           default:

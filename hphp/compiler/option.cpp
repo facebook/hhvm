@@ -278,6 +278,11 @@ void Option::Load(Hdf &config) {
   EnableShortTags = config["EnableShortTags"].getBool(true);
   if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
   else ScannerType &= ~Scanner::AllowShortTags;
+  if (EnableHipHopExperimentalSyntax) {
+    ScannerType |= Scanner::EnableHipHopKeywords;
+  } else {
+    ScannerType &= ~Scanner::EnableHipHopKeywords;
+  }
 
   EnableAspTags = config["EnableAspTags"].getBool();
   if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;

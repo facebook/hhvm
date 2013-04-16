@@ -244,6 +244,7 @@ inline const char* color(const char* color) {
     auto const traceEnv  = getenv("HPHP_TRACE_FILE");
     auto const assumeTTY = getenv("HPHP_TRACE_TTY");
     if (assumeTTY) return true;
+    if (!traceEnv) return false;
     return
       !strcmp(traceEnv, "/dev/stdout") ? isatty(1) :
       !strcmp(traceEnv, "/dev/stderr") ? isatty(2) :

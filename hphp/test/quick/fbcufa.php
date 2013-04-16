@@ -1,5 +1,5 @@
 <?php
-$doc = dirname(__FILE__) . '/_fbcufa_init.php';
+$doc = dirname(__FILE__) . '/fbcufa.inc';
 require_once $doc;
 function main() {
   global $doc;

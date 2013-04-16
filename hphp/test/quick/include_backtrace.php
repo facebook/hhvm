@@ -1,1 +1,1 @@
-<?php include "include_backtrace2.php";
+<?php include "include_backtrace.inc";

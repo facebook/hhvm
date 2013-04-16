@@ -1,6 +1,6 @@
 <?php
 function foo() {
-  require 'define_b.php';
+  require 'define.inc';
 }
 
 function main() {

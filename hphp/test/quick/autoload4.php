@@ -6,6 +6,6 @@ function __autoload($cls) {
   echo "__autoload $cls\n";
 }
 
-require "autoload5.php";
+require "autoload4.inc";
 
 print "Test end\n";

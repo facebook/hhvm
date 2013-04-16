@@ -5,7 +5,7 @@ class A {
   private $d;
   public function f() {
     eval('$this->a = 20; $this->c = 200;');
-    include 'include3_a.php';
+    include 'include3.inc';
     echo $this->a."\n";
     echo $this->b."\n";
     echo $this->c."\n";

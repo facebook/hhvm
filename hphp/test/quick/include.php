@@ -3,19 +3,19 @@
 $a = 1;#"a\n";
 print $a."\n";
 
-require 'include_b.php';
+require 'include.1.inc';
 
 print $a."\n";
 print $b."\n";
 
 function foo() {
-  require 'include_c.php';
+  require 'include.2.inc';
 }
 foo();
 
-$path = dirname(__FILE__) . '/include_d.php';
+$path = dirname(__FILE__) . '/include.3.inc';
 require $path;
 
-$path = __DIR__ . '/include_d.php';
+$path = __DIR__ . '/include.3.inc';
 require $path;
 

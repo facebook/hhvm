@@ -16,10 +16,10 @@ all sub-suites.
 `test/run test/quick`
 
 * Zend tests just with the interpreter in RepoAuthoritative mode -
-`test/run test/zend/good interp 1`
+`test/run test/zend/good -m interp -r`
 
 * Slow tests with the JIT in IR mode -
-`test/run test/slow hhir`
+`test/run test/slow -m hhir`
 
 * Run evertyhing that is supposed to pass -
 `fbmake runtests`

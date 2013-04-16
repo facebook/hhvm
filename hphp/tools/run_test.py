@@ -43,7 +43,7 @@ def main():
             repo = ''
             if arg.startswith('Repo'):
                 arg = arg.replace('Repo', '')
-                repo = '1'
+                repo = '-r'
 
             for mode, vq in modes.items():
                 if arg.startswith(mode):
@@ -57,19 +57,19 @@ def main():
                             raise Exception('Extra? "%s"' % arg)
 
                     path = 'test/' + dir + subpath
-                    cmd = ['test/run', path, vq, repo]
+                    cmd = ['test/run', path, '-m', vq, repo]
                     print ' '.join(cmd)
-                    subprocess.call(cmd)
-                    return
+                    return subprocess.call(cmd)
 
             raise Exception('Unknown mode "%s"' % arg)
 
     os.chdir(home + '/hphp')
     cmd = sys.argv
     cmd[0] = root + '/hphp/test/test'
-    subprocess.call(cmd)
+    return subprocess.call(cmd)
 
 def camel_to_slash(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1/\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1/\2', s1).lower()
-main()
+
+sys.exit(main())

@@ -12,9 +12,13 @@ if (count($argv) != 6) {
   exit(1);
 }
 
-$cmd = "FBMAKE_BIN_ROOT=$HPHP_HOME/$argv[5] " .
-       "$HPHP_HOME/hphp/tools/$argv[1] $argv[2] $argv[3] $argv[4]";
+$repo = '';
+if ($argv[4]) {
+  $repo = '-r';
+}
 
+$cmd = "FBMAKE_BIN_ROOT=$HPHP_HOME/$argv[5] " .
+       "$argv[1] $argv[2] -m $argv[3] $repo";
 loop_tests($cmd, function ($line) {
   if (preg_match('/^(test[^\s]*).*/', $line, &$m)) {
     start($m[1]);

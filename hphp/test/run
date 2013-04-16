@@ -1,154 +1,225 @@
-#!/bin/bash
-#
-# Run the test suites in various configurations.
-#
-# The first param is the directory or file to run.
-# The second param is jit, hhir, or interp.
-# The third param is a boolean if we should use repo mode or not.
-#
-# Server mode flags:  (semi-functional--tests with warnings fail)
-#
-#    MODE="server" -- run in server mode
-#    PORT          -- port to use in server mode (default 8080)
-#    TEST_HOME     -- the --home arg for server mode
-#
-# Other flags:
-#
-#    VERIFY_EXTRA_ARGS      -- extra args to pass to verify
-#    VERIFY_EXTRA_CMD_ARGS  -- extra args to pass to hhvm
-#
-# For use in the Makefile
-#
-#    HHVM          -- path to the hhvm binary to use
-#    VERIFY_HHBC   -- path to use for the an hhbc repo
-#
+#!/bin/env php
+<?php
+/**
+* Run the test suites in various configurations.
+*/
 
-######################################################################
+function usage() {
+  global $argv;
+  return "  $argv[0] [-m jit|hhir|interp] [-r] <tests/directories>";
+}
 
-: ${FBMAKE_BIN_ROOT=$HPHP_HOME/_bin}
+function help() {
+  global $argv;
+  $help = <<<EOT
 
-DEFAULT_VERIFY_HHBC=$FBMAKE_BIN_ROOT/verify.hhbc
-DEFAULT_HHVM=$FBMAKE_BIN_ROOT/hphp/hhvm/hhvm
-DEFAULT_HPHP=$FBMAKE_BIN_ROOT/hphp/hhvm/hphp
+  # Examples
 
-QTESTS_SKIP='autoload5.php condinfinite.php condinfinite2.php define_b.php
-  _fbcufa_init.php include_b.php include_c.php include_d.php
-  include2_a.php include2_b.php infinite.php ReqOnce_b.php include3_a.php
-  include_backtrace2.php backup_cycle_collector.php
-  redeclared_class1.php redeclared_class2.php'
+  Quick tests in JIT mode:
+    $argv[0]
 
-VERIFY_SCRIPT=./test/verify
+  Quick tests in HHIR mode:
+    $argv[0] -m hhir
 
-######################################################################
+  Slow tests in interp mode:
+    $argv[0] -m interp test/slow
 
-if [ x"$HPHP_HOME" = x"" ] ; then
-    echo "HPHP_HOME must be set in your environment"
-    exit 1
-fi
+  Slow closure tests in JIT mode:
+    $argv[0] test/slow/closure
 
-: ${HHVM:=$DEFAULT_HHVM}
-: ${HPHP:=$DEFAULT_HPHP}
-: ${VERIFY_HHBC:=$DEFAULT_VERIFY_HHBC}
-: ${VQ:=jit}
-: ${REPO:=0}
-: ${TEST_PATH:=test/quick}
+  Slow closure tests in JIT mode with RepoAuthoritative:
+    $argv[0] -r test/slow/closure
 
-cd $HPHP_HOME/hphp
+  Zend tests with a "z" in their name:
+    $argv[0] test/zend/good/*/*z*.php
+EOT;
+  return usage().$help;
+}
 
-if [ $# -ge 1 ]; then
-  TEST_PATH=$1;
-fi
-if [ $# -ge 2 ]; then
-  VQ=$2;
-fi
-if [ $# -ge 3 ]; then
-  REPO=$3;
-fi
+function error($message) {
+  echo "$message\n";
+  exit(1);
+}
 
-######################################################################
+if (!isset($_ENV['HPHP_HOME'])) {
+  error("HPHP_HOME must be set in your environment");
+}
 
-skip_list=
-for x in $QTESTS_SKIP ; do
-    skip_list="$skip_list $TEST_PATH/$x"
-done
+function idx($array, $key, $default = null) {
+  return isset($array[$key]) ? $array[$key] : $default;
+}
 
-qtests=$(comm -23 \
-    <(find $TEST_PATH -name \*.php -o -name \*.hhas | sort) \
-    <(echo $skip_list|sed -e 's/ /\n/g'|sort))
+function idx_file($array, $key, $default = null) {
+  return is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
+}
 
-repo_args="-v Repo.Local.Mode=-- -v Repo.Central.Path=$VERIFY_HHBC"
-interp_args="$repo_args -v Eval.Jit=false"
-jit_args="$repo_args -v Eval.Jit=true -v Eval.JitEnableRenameFunction=true"
-hhir_args="$jit_args -v Eval.JitUseIR=true -v Eval.HHIRDisableTx64=true"
+function bin_root() {
+  return idx($_ENV, 'FBMAKE_BIN_ROOT', $_ENV['HPHP_HOME'].'/_bin');
+}
 
-######################################################################
+function get_options($argv) {
+  $parameters = array(
+    'r' => 'repo',
+    'm:' => 'mode:',
+    '' => 'server',
+    'h' => 'help',
+  );
+  $options = array();
+  $files = array();
+  for ($i = 1; $i < count($argv); $i++) {
+    $arg = $argv[$i];
+    $found = false;
+    if ($arg && $arg[0] == '-') {
+      foreach ($parameters as $short => $long) {
+        if ($arg == '-'.str_replace(':', '', $short) ||
+            $arg == '--'.str_replace(':', '', $long)) {
+          if (substr($long, -1, 1) == ':') {
+            $value = $argv[++$i];
+          } else {
+            $value = true;
+          }
+          $options[str_replace(':', '', $long)] = $value;
+          $found = true;
+          break;
+        }
+      }
+    }
+    if (!$found && $arg) {
+      $files[] = $arg;
+    }
+  }
+  return array($options, $files);
+}
 
-# Find a config.hdf in the test dir or a parents
-# inspired by http://unix.stackexchange.com/questions/13464/
+function find_tests($files) {
+  if (!$files) {
+    $files = array($_ENV['HPHP_HOME'].'/hphp/test/quick');
+  }
+  foreach ($files as &$file) {
+    if (!stat($file)) {
+      if ($file == 'jit' || $file == 'hhir' || $file == 'interp') {
+        error(
+          "I'm really sorry to change this, but now the mode is ".
+          "passed with '-m $file', and repo mode is turned on with '-r'"
+        );
+      }
+      error("Not valid file or directory: '$file'");
+    }
+    $file = preg_replace(',//+,', '/', realpath($file));
+    $file = preg_replace(',^'.getcwd().'/,', '', $file);
+  }
+  $files = implode(' ', $files);
+  $tests = explode("\n", shell_exec("find $files -name *.php -o -name *.hhas"));
+  if (!$tests) {
+    error(usage());
+  }
+  asort($tests);
+  return array_filter($tests);
+}
 
-if [ -f $TEST_PATH ]; then
-  cur_dir=`dirname $TEST_PATH`;
-else
-  cur_dir="$TEST_PATH/"
-fi
-slashes=${cur_dir//[^\/]/}
-config="test/config.hdf"
-for (( n=${#slashes}; n>0; --n )); do
-  if [ -f "$cur_dir/config.hdf" ]; then
-    config="$cur_dir/config.hdf"
-    break
-  fi
-  cur_dir="$cur_dir/.."
-done
-cmd="$HHVM --config $config"
+function find_config($tests, $name) {
+  $dirs = array_map('dirname', $tests);
+  $configs = array_map(function($test) use ($name) {
+    return find_config_for_dir($test, $name);
+  }, $tests);
+  $configs = array_unique($configs);
+  if (!count($configs) == 1) {
+    error(
+      "These tests would use many different configs and we only support ".
+      "using one for all the tests. Need these configs: ".
+      implode(' ', $configs).""
+    );
+  }
+  return array_values($configs)[0];
+}
 
-if [ -f $TEST_PATH ]; then
-  cur_dir=`dirname $TEST_PATH`;
-else
-  cur_dir="$TEST_PATH/"
-fi
-slashes=${cur_dir//[^\/]/}
-config="test/hphp_config.hdf"
-for (( n=${#slashes}; n>0; --n )); do
-  if [ -f "$cur_dir/hphp_config.hdf" ]; then
-    config="$cur_dir/hphp_config.hdf"
-    break
-  fi
-  cur_dir="$cur_dir/.."
-done
-HPHP_ARGS="--config $config"
+function find_config_for_dir($dir, $name) {
+  while ($dir && stat($dir)) {
+    $config = "$dir/$name";
+    if (is_file($config)) {
+      return $config;
+    }
+    $dir = substr($dir, 0, strrpos($dir, '/'));
+  }
+  return $name;
+}
 
-if [ x"$MODE" = x"server" ] ; then
-    : ${PORT:=8080}
-    : ${TEST_HOME:=.}
-    cmd="$cmd -m server -v Server.SourceRoot=%s -p %s"
-    verify_args="--server --port $PORT --home $TEST_HOME"
-else
-    cmd="$cmd --file %3\$s"
-fi
-verify_args="$verify_args --hhvm $HHVM"
-if [ "$REPO" -a "$REPO" != "0" ]; then
-  verify_args="$verify_args --repo 1"
-else
-  verify_args="$verify_args --repo 0"
-fi
-cmd="$cmd -v Eval.EnableObjDestructCall=true"
+function is_server($options) {
+  return idx($options, 'server');
+}
 
-case $VQ in
-    jit)
-        cmd="$cmd $jit_args"
-        ;;
-    hhir)
-        cmd="$cmd $hhir_args"
-        ;;
-    interp)
-        cmd="$cmd $interp_args"
-        ;;
-    *)
-        echo "Unknown VQ '$VQ'. Choose either jit, hhir or interp"
-        exit 1
-        ;;
-esac
+function file_arg($options) {
+  if (is_server($options)) {
+    return '-m server -v Server.SourceRoot=%s -p %s';
+  } else {
+    return '--file %3\$s';
+  }
+}
 
-exec $VERIFY_SCRIPT --command="$cmd $VERIFY_EXTRA_CMD_ARGS" $verify_args \
-    $VERIFY_EXTRA_ARGS --hphp="$HPHP $HPHP_ARGS" $qtests
+function mode_arg($options) {
+  $verify_hhbc = idx_file($_ENV, 'VERIFY_HHBC', bin_root().'/verify.hhbc');
+  $repo_args = "-v Repo.Local.Mode=-- -v Repo.Central.Path=$verify_hhbc";
+  $jit_args = "$repo_args -v Eval.Jit=true -v Eval.JitEnableRenameFunction=true";
+  $mode = idx($options, 'mode');
+  switch ($mode) {
+    case '':
+    case 'jit':
+      return $jit_args;
+    case 'hhir':
+      return "$jit_args -v Eval.JitUseIR=true -v Eval.HHIRDisableTx64=true";
+    case 'interp':
+      return "$repo_args -v Eval.Jit=false";
+    default:
+      error("-m must be one of hhir | jit | interp. Got: '$mode'");
+  }
+}
+
+function command_arg($options, $tests) {
+  return array(
+    idx_file($_ENV, 'HHVM', bin_root().'/hphp/hhvm/hhvm'),
+    '--config',
+    find_config($tests, 'config.hdf'),
+    file_arg($options),
+    mode_arg($options),
+  );
+}
+
+function hphp_arg($options, $tests) {
+  return array(
+    idx_file($_ENV, 'HPHP', bin_root().'/hphp/hhvm/hphp'),
+    '--config',
+    find_config($tests, 'hphp_config.hdf'),
+  );
+}
+
+function verify_args($options) {
+  $args = array();
+  if (is_server($options)) {
+    $args[] = '--server --port 8080 --home .';
+  }
+  $args[] = "--hhvm";
+  $args[] = idx_file($_ENV, 'HHVM',bin_root().'/hphp/hhvm/hhvm');
+  if (isset($options['repo'])) {
+    $args[] = '--repo 1';
+  } else {
+    $args[] = '--repo 0';
+  }
+  return $args;
+}
+
+list($options, $files) = get_options($argv);
+if (isset($options['help'])) {
+  error(help());
+}
+$tests = find_tests($files);
+
+$verify = array(
+  $_ENV['HPHP_HOME'].'/hphp/test/verify',
+  '--command="'.implode(' ', command_arg($options, $tests)).'"',
+  implode(' ', verify_args($options)),
+  '--hphp="'.implode(' ', hphp_arg($options, $tests)).'"',
+  implode(' ', $tests),
+);
+
+passthru(implode(' ', $verify), $return_status);
+exit($return_status);

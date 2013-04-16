@@ -11,6 +11,7 @@ Eval {
   }
   AllowHhas = true
   EnableHipHopSyntax = true
+  EnableObjDestructCall = true
 }
 
 Sandbox {

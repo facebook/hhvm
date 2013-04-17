@@ -2,9 +2,9 @@
 #
 # Helper for running hphp/test in fbconfig builds. Examples:
 #
-# ./run_test.py SlowVM
-# ./run_test.py QuickRepoJit
-# ./run_test.py ZendJitIR
+# ./convert_make_target_to_command.py SlowVM
+# ./convert_make_target_to_command.py QuickRepoJit
+# ./convert_make_target_to_command.py ZendJitIR
 #
 # Components are:
 #
@@ -13,11 +13,10 @@
 
 import re
 import os
-import subprocess
 import sys
 
 suites = {
-    'Slow' : 'slow', 
+    'Slow' : 'slow',
     'Quick' : 'quick',
     'Zend' : 'zend/good',
 }
@@ -56,20 +55,20 @@ def main():
                         else:
                             raise Exception('Extra? "%s"' % arg)
 
-                    path = 'test/' + dir + subpath
-                    cmd = ['test/run', path, '-m', vq, repo]
-                    print ' '.join(cmd)
-                    return subprocess.call(cmd)
+                    path = relative_path('../test/' + dir + subpath)
+                    return [relative_path('../test/run'), path, '-m', vq, repo]
 
             raise Exception('Unknown mode "%s"' % arg)
 
-    os.chdir(home + '/hphp')
-    cmd = sys.argv
-    cmd[0] = root + '/hphp/test/test'
-    return subprocess.call(cmd)
+    raise Exception('Unknown Suite "%s"' % arg)
 
 def camel_to_slash(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1/\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1/\2', s1).lower()
 
-sys.exit(main())
+def relative_path(path):
+    """Given a path relative to this file, returns a path relative to cwd"""
+    to_file = os.path.join(os.path.realpath(os.path.dirname(__file__)), path)
+    return os.path.relpath(to_file)
+
+print ' '.join(main())

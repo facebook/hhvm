@@ -63,6 +63,12 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
       g_vmContext->m_setprofileCallback.isNull()) {
     return;
   }
+  // Don't profile 86ctor, since its an implementation detail,
+  // and we dont guarantee to call it
+  if (ar->m_func->cls() && ar->m_func == ar->m_func->cls()->getCtor() &&
+      Func::isSpecial(ar->m_func->name())) {
+    return;
+  }
   Transl::VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 

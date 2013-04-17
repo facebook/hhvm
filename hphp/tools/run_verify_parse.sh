@@ -9,13 +9,15 @@
 #
 : ${FBMAKE_BIN_ROOT=$HPHP_HOME/_bin}
 
+cd $HPHP_HOME/hphp
+
 VERIFY_SCRIPT=./test/verify
 PARSE_TEST=$FBMAKE_BIN_ROOT/hphp/util/parser/test/parse_tester
 
 # some tests are expected not to parse
-PARSE_SKIP='dv_i0.php strict_bad_end.php strict_bad_start.php \
-  strict_numbers.php syntax-error.php xhp-malformed.php Xhp.php \
-  trailing_comma_bad1.php trailing_comma_bad2.php trailing_comma_bad3.php \
+PARSE_SKIP='dv_i0.php strict_bad_end.php strict_bad_start.php
+  strict_numbers.php syntax-error.php xhp-malformed.php Xhp.php
+  trailing_comma_bad1.php trailing_comma_bad2.php trailing_comma_bad3.php
   trailing_comma_bad4.php trailing_comma_bad5.php trailing_comma_bad6.php'
 PARSE_SKIP="$PARSE_SKIP $(cd test/quick && ls parse_fail_*.php)"
 

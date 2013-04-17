@@ -136,6 +136,7 @@ inline static KeyType getKeyTypeIS(const SSATmp* key) {
 template<KeyType kt>
 static inline TypedValue* keyPtr(TypedValue& key) {
   if (kt == AnyKey) {
+    assert(tvIsPlausible(&key));
     return &key;
   } else {
     return reinterpret_cast<TypedValue*>(key.m_data.num);

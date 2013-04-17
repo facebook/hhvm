@@ -27,8 +27,9 @@ foreach ($iterator as $fileinfo) {
   }
 }
 ksort($files);
-foreach ($files as $fileinfo) {
-  echo "BEGIN: " . $fileinfo->getFilename() . "\n";
+foreach ($files as $name => $fileinfo) {
+  echo "BEGIN: " . $name . "\n";
+  echo $fileinfo->getFilename() . "\n";
   echo $fileinfo->getCTime() . "\n";
   echo $fileinfo->getBasename() . "\n";
   echo $fileinfo->getBasename('.cpp') . "\n";
@@ -56,7 +57,7 @@ foreach ($iterator as $fileinfo) {
   }
 }
 ksort($files);
-foreach ($files as $fileinfo) {
+foreach ($files as $name => $fileinfo) {
   echo $fileinfo->getFilename() . "\n";
   echo $fileinfo->getCTime() . "\n";
   echo $fileinfo->getBasename() . "\n";

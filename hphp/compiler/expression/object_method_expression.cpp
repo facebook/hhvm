@@ -185,7 +185,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   m_bindClass = true;
 
   if (m_name.empty()) {
-    m_nameExp->inferAndCheck(ar, Type::String, false);
+    m_nameExp->inferAndCheck(ar, Type::Some, false);
     setInvokeParams(ar);
     // we have to use a variant to hold dynamic value
     return checkTypesImpl(ar, type, Type::Variant, coerce);

@@ -103,11 +103,7 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
     }
   }
 
-  if (!m_class && m_className.empty()) {
-    m_nameExp->inferAndCheck(ar, Type::Variant, false);
-  } else {
-    m_nameExp->inferAndCheck(ar, Type::String, false);
-  }
+  m_nameExp->inferAndCheck(ar, Type::Some, false);
 
   if (m_params) {
     for (int i = 0; i < m_params->getCount(); i++) {

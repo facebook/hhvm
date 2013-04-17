@@ -943,7 +943,7 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
 
   const char *s = str.data();
   int slen = str.size();
-  char *key = (char *)malloc(maxlen+1);
+  String key(maxlen, ReserveString);
 
   StringBuffer result(slen);
   for (int pos = 0; pos < slen; ) {
@@ -951,9 +951,9 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
       maxlen = slen - pos;
     }
     bool found = false;
-    memcpy(key, s + pos, maxlen);
+    memcpy(key.mutableSlice().ptr, s + pos, maxlen);
     for (int len = maxlen; len >= minlen; len--) {
-      key[len] = 0;
+      key.setSize(len);
       if (arr.exists(key)) {
         String replace = arr[key].toString();
         if (!replace.empty()) {
@@ -968,8 +968,6 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
       result += s[pos++];
     }
   }
-  free(key);
-
   return result.detach();
 }
 

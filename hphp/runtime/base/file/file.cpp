@@ -306,19 +306,30 @@ bool File::lock(int operation, bool &wouldblock /* = false */) {
   return true;
 }
 
+static const StaticString s_wrapper_type("wrapper_type");
+static const StaticString s_stream_type("stream_type");
+static const StaticString s_mode("mode");
+static const StaticString s_unread_bytes("unread_bytes");
+static const StaticString s_seekable("seekable");
+static const StaticString s_uri("uri");
+static const StaticString s_timed_out("timed_out");
+static const StaticString s_blocked("blocked");
+static const StaticString s_eof("eof");
+static const StaticString s_wrapper_data("wrapper_data");
+
 Array File::getMetaData() {
-  Array ret = Array::Create();
-  ret.set("wrapper_type", o_getClassName());
-  ret.set("stream_type",  getStreamType());
-  ret.set("mode",         String(m_mode));
-  ret.set("unread_bytes", 0);
-  ret.set("seekable",     seekable());
-  ret.set("uri",          String(m_name));
-  ret.set("timed_out",    false);
-  ret.set("blocked",      true);
-  ret.set("eof",          eof());
-  ret.set("wrapper_data", getWrapperMetaData());
-  return ret;
+  ArrayInit ret(10);
+  ret.set(s_wrapper_type, o_getClassName());
+  ret.set(s_stream_type,  getStreamType());
+  ret.set(s_mode,         String(m_mode));
+  ret.set(s_unread_bytes, 0);
+  ret.set(s_seekable,     seekable());
+  ret.set(s_uri,          String(m_name));
+  ret.set(s_timed_out,    false);
+  ret.set(s_blocked,      true);
+  ret.set(s_eof,          eof());
+  ret.set(s_wrapper_data, getWrapperMetaData());
+  return ret.create();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

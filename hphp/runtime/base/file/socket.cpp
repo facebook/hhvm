@@ -200,10 +200,13 @@ bool Socket::eof() {
   return m_eof;
 }
 
+static const StaticString s_timed_out("timed_out");
+static const StaticString s_blocked("blocked");
+
 Array Socket::getMetaData() {
   Array ret = File::getMetaData();
-  ret.set("timed_out", m_timedOut);
-  ret.set("blocked", (bool)(fcntl(m_fd, F_GETFL, 0) & O_NONBLOCK));
+  ret.set(s_timed_out, m_timedOut);
+  ret.set(s_blocked, (bool)(fcntl(m_fd, F_GETFL, 0) & O_NONBLOCK));
   return ret;
 }
 

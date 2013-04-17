@@ -227,6 +227,7 @@ public:
     assert(len >= 0 && len <= capacity() && !isImmutable());
     m_data[len] = 0;
     m_len = len;
+    m_hash = 0; // invalidate old hash
     return this;
   }
 

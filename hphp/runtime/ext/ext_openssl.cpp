@@ -464,7 +464,7 @@ static void add_assoc_name_entry(Array &ret, const char *key,
   }
 }
 
-static const char *read_string(CArrRef args, const char *key, const char *def,
+static const char *read_string(CArrRef args, CStrRef key, const char *def,
                                vector<String> &strings) {
   if (args.exists(key)) {
     String value = args[key].toString();
@@ -474,7 +474,7 @@ static const char *read_string(CArrRef args, const char *key, const char *def,
   return def;
 }
 
-static int64_t read_integer(CArrRef args, const char *key, int64_t def) {
+static int64_t read_integer(CArrRef args, CStrRef key, int64_t def) {
   if (args.exists(key)) {
     return args[key].toInt64();
   }
@@ -524,12 +524,21 @@ static inline bool php_openssl_config_check_syntax
   return true;
 }
 
+static const StaticString s_config("config");
+static const StaticString s_config_section_name("config_section_name");
+static const StaticString s_digest_alg("digest_alg");
+static const StaticString s_x509_extensions("x509_extensions");
+static const StaticString s_req_extensions("req_extensions");
+static const StaticString s_private_key_bits("private_key_bits");
+static const StaticString s_private_key_type("private_key_type");
+static const StaticString s_encrypt_key("encrypt_key");
+
 static bool php_openssl_parse_config(struct php_x509_request *req,
                                      CArrRef args, vector<String> &strings) {
   req->config_filename =
-    read_string(args, "config", default_ssl_conf_filename, strings);
+    read_string(args, s_config, default_ssl_conf_filename, strings);
   req->section_name =
-    read_string(args, "config_section_name", "req", strings);
+    read_string(args, s_config_section_name, "req", strings);
   req->global_config = CONF_load(NULL, default_ssl_conf_filename, NULL);
   req->req_config = CONF_load(NULL, req->config_filename, NULL);
   if (req->req_config == NULL) {
@@ -550,33 +559,33 @@ static bool php_openssl_parse_config(struct php_x509_request *req,
   }
 
   req->digest_name =
-    read_string(args, "digest_alg",
+    read_string(args, s_digest_alg,
                 CONF_get_string(req->req_config, req->section_name,
                                 "default_md"),
                 strings);
 
   req->extensions_section =
-    read_string(args, "x509_extensions",
+    read_string(args, s_x509_extensions,
                 CONF_get_string(req->req_config, req->section_name,
                                 "x509_extensions"),
                 strings);
 
   req->request_extensions_section =
-    read_string(args, "req_extensions",
+    read_string(args, s_req_extensions,
                 CONF_get_string(req->req_config, req->section_name,
                                 "req_extensions"),
                 strings);
 
   req->priv_key_bits =
-    read_integer(args, "private_key_bits",
+    read_integer(args, s_private_key_bits,
                  CONF_get_number(req->req_config, req->section_name,
                                  "default_bits"));
 
   req->priv_key_type =
-    read_integer(args, "private_key_type", OPENSSL_KEYTYPE_DEFAULT);
+    read_integer(args, s_private_key_type, OPENSSL_KEYTYPE_DEFAULT);
 
-  if (args.exists("encrypt_key")) {
-    bool value = args["encrypt_key"].toBoolean();
+  if (args.exists(s_encrypt_key)) {
+    bool value = args[s_encrypt_key].toBoolean();
     req->priv_key_encrypt = value ? 1 : 0;
   } else {
     str = CONF_get_string(req->req_config, req->section_name,

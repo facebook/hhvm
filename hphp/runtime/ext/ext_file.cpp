@@ -1285,14 +1285,17 @@ public:
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(DirectoryRequestData, s_directory_data);
 
+static const StaticString s_handle("handle");
+static const StaticString s_path("path");
+
 static DIR *get_dir(CObjRef dir_handle) {
   Object obj;
   if (dir_handle.isNull()) {
     obj = s_directory_data->defaultDirectory;
   } else {
     Array arr = dir_handle.toArray();
-    if (arr.exists("handle")) {
-      obj = arr["handle"].toObject();
+    if (arr.exists(s_handle)) {
+      obj = arr[s_handle].toObject();
     } else {
       obj = dir_handle;
     }
@@ -1314,8 +1317,8 @@ Variant f_dir(CStrRef directory) {
     return false;
   }
   ObjectData* d = SystemLib::AllocDirectoryObject();
-  *(d->o_realProp("path", 0)) = directory;
-  *(d->o_realProp("handle", 0)) = dir;
+  *(d->o_realProp(s_path, 0)) = directory;
+  *(d->o_realProp(s_handle, 0)) = dir;
   return d;
 }
 
@@ -1394,8 +1397,8 @@ void f_closedir(CObjRef dir_handle) {
   if (!dir_handle.isNull()) {
     Object obj;
     Array arr = dir_handle.toArray();
-    if (arr.exists("handle")) {
-      obj = arr["handle"].toObject();
+    if (arr.exists(s_handle)) {
+      obj = arr[s_handle].toObject();
     } else {
       obj = dir_handle;
     }

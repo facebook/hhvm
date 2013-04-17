@@ -3939,7 +3939,8 @@ bool f_mb_send_mail(CStrRef to, CStrRef subject, CStrRef message,
     int cnt_trans_enc:1;
   } suppressed_hdrs = { 0, 0 };
 
-  String s = ht_headers["CONTENT-TYPE"];
+  static const StaticString s_CONTENT_TYPE("CONTENT-TYPE");
+  String s = ht_headers[s_CONTENT_TYPE];
   if (!s.isNull()) {
     char *tmp;
     char *param_name;
@@ -3975,7 +3976,9 @@ bool f_mb_send_mail(CStrRef to, CStrRef subject, CStrRef message,
     suppressed_hdrs.cnt_type = 1;
   }
 
-  s = ht_headers["CONTENT-TRANSFER-ENCODING"];
+  static const StaticString
+         s_CONTENT_TRANSFER_ENCODING("CONTENT-TRANSFER-ENCODING");
+  s = ht_headers[s_CONTENT_TRANSFER_ENCODING];
   if (!s.isNull()) {
     mbfl_no_encoding _body_enc = mbfl_name2no_encoding(s.data());
     switch (_body_enc) {

@@ -467,6 +467,9 @@ String c_UConverter::doConvert(CStrRef str,
   return destStr.setSize(dest_len);
 }
 
+static const StaticString s_from_subst("from_subst");
+static const StaticString s_to_subst("to_subst");
+
 Variant c_UConverter::ti_transcode(const char* cls , CStrRef str,
                                    CStrRef toEncoding, CStrRef fromEncoding,
                                    CArrRef options) {
@@ -477,14 +480,14 @@ Variant c_UConverter::ti_transcode(const char* cls , CStrRef str,
   if (!setEncoding(toEncoding, &toCnv, s_intl_error->m_error)) {
     return uninit_null();
   }
-  if (options.exists("from_subst") &&
-     !setSubstChars(options["from_subst"].toString(), fromCnv,
-                                          s_intl_error->m_error)) {
+  if (options.exists(s_from_subst) &&
+     !setSubstChars(options[s_from_subst].toString(), fromCnv,
+                    s_intl_error->m_error)) {
     return uninit_null();
   }
-  if (options.exists("to_subst") &&
-     !setSubstChars(options["to_subst"].toString(), toCnv,
-                                        s_intl_error->m_error)) {
+  if (options.exists(s_to_subst) &&
+     !setSubstChars(options[s_to_subst].toString(), toCnv,
+                    s_intl_error->m_error)) {
     return uninit_null();
   }
   Variant ret = doConvert(str, toCnv, fromCnv, s_intl_error->m_error);

@@ -30,6 +30,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+static const StaticString s_padding_top("padding_top");
+static const StaticString s_padding_right("padding_right");
+static const StaticString s_padding_bottom("padding_bottom");
+static const StaticString s_padding_left("padding_left");
+static const StaticString s_width("width");
+static const StaticString s_height("height");
+static const StaticString s_flush_left("flush_left");
+static const StaticString s_flush_right("flush_right");
+
 namespace ImageSprite {
 
 // PHP extension gd.c
@@ -243,8 +252,8 @@ void Image::load_data_to_gd(int size, const void* data) {
 }
 
 void Image::setOptions(Array options) {
-  if (options.exists("padding_top")) {
-    int32_t v = options["padding_top"].toInt32();
+  if (options.exists(s_padding_top)) {
+    int32_t v = options[s_padding_top].toInt32();
     if (v < 0) {
       m_padding[IMAGESPRITE_PAD_TOP] = 0;
     } else {
@@ -252,8 +261,8 @@ void Image::setOptions(Array options) {
     }
   }
 
-  if (options.exists("padding_right")) {
-    int32_t v = options["padding_right"].toInt32();
+  if (options.exists(s_padding_right)) {
+    int32_t v = options[s_padding_right].toInt32();
     if (v < 0) {
       m_padding[IMAGESPRITE_PAD_RIGHT] = 0;
     } else {
@@ -261,8 +270,8 @@ void Image::setOptions(Array options) {
     }
   }
 
-  if (options.exists("padding_bottom")) {
-    int32_t v = options["padding_bottom"].toInt32();
+  if (options.exists(s_padding_bottom)) {
+    int32_t v = options[s_padding_bottom].toInt32();
     if (v < 0) {
       m_padding[IMAGESPRITE_PAD_BOTTOM] = 0;
     } else {
@@ -270,8 +279,8 @@ void Image::setOptions(Array options) {
     }
   }
 
-  if (options.exists("padding_left")) {
-    int32_t v = options["padding_left"].toInt32();
+  if (options.exists(s_padding_left)) {
+    int32_t v = options[s_padding_left].toInt32();
     if (v < 0) {
       m_padding[IMAGESPRITE_PAD_LEFT] = 0;
     } else {
@@ -279,19 +288,19 @@ void Image::setOptions(Array options) {
     }
   }
 
-  if (options.exists("width") && options.exists("height")) {
-    m_width = options["width"].toInt32();
-    m_height = options["height"].toInt32();
+  if (options.exists(s_width) && options.exists(s_height)) {
+    m_width = options[s_width].toInt32();
+    m_height = options[s_height].toInt32();
     m_area = m_width * m_height;
   }
 
-  if (options.exists("flush_left")) {
-    bool v = options["flush_left"].toBoolean();
+  if (options.exists(s_flush_left)) {
+    bool v = options[s_flush_left].toBoolean();
     m_flush[IMAGESPRITE_FLUSH_LEFT] = v;
   }
 
-  if (options.exists("flush_right")) {
-    bool v = options["flush_right"].toBoolean();
+  if (options.exists(s_flush_right)) {
+    bool v = options[s_flush_right].toBoolean();
     m_flush[IMAGESPRITE_FLUSH_RIGHT] = v;
   }
 }
@@ -1058,6 +1067,9 @@ String c_ImageSprite::t_output(CStrRef output_file /* = null_string*/,
   }
 }
 
+static const StaticString s_x("x");
+static const StaticString s_y("y");
+
 String c_ImageSprite::t_css(CStrRef css_namespace,
                             CStrRef sprite_file /* = null_string */,
                             CStrRef output_file /* = null_string */,
@@ -1096,13 +1108,13 @@ String c_ImageSprite::t_css(CStrRef css_namespace,
     if (verbose) output += "\n  ";
 
     output += "background-position:";
-    if (more(attr["x"], 0)) {
-      output += String("-") + attr["x"] + "px";
+    if (more(attr[s_x], 0)) {
+      output += String("-") + attr[s_x] + "px";
     } else {
       output += "0";
     }
-    if (more(attr["y"], 0)) {
-      output += String(" -") + attr["y"] + "px";
+    if (more(attr[s_y], 0)) {
+      output += String(" -") + attr[s_y] + "px";
     } else {
       output += " 0";
     }
@@ -1113,9 +1125,9 @@ String c_ImageSprite::t_css(CStrRef css_namespace,
     }
 
     if (verbose) output += "\n  ";
-    output += String("width:") + attr["width"] + "px;";
+    output += String("width:") + attr[s_width] + "px;";
     if (verbose) output += "\n  ";
-    output += String("height:") + attr["height"] + "px";
+    output += String("height:") + attr[s_height] + "px";
     if (verbose) output += "\n";
     output += "}";
     if (verbose) output += "\n";
@@ -1129,10 +1141,13 @@ String c_ImageSprite::t_css(CStrRef css_namespace,
   }
 }
 
+static const StaticString s_images("images");
+static const StaticString s_sprite("sprite");
+
 Array c_ImageSprite::t_geterrors() {
   Array ret = Array::Create();
-  ret.set("images", m_img_errors);
-  ret.set("sprite", m_sprite_errors);
+  ret.set(s_images, m_img_errors);
+  ret.set(s_sprite, m_sprite_errors);
   return ret;
 }
 

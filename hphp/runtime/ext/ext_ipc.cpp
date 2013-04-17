@@ -111,6 +111,17 @@ bool f_msg_remove_queue(CObjRef queue) {
   return msgctl(q->id, IPC_RMID, NULL) == 0;
 }
 
+static const StaticString s_msg_perm_uid("msg_perm.uid");
+static const StaticString s_msg_perm_gid("msg_perm.gid");
+static const StaticString s_msg_perm_mode("msg_perm.mode");
+static const StaticString s_msg_stime("msg_stime");
+static const StaticString s_msg_rtime("msg_rtime");
+static const StaticString s_msg_ctime("msg_ctime");
+static const StaticString s_msg_qnum("msg_qnum");
+static const StaticString s_msg_qbytes("msg_qbytes");
+static const StaticString s_msg_lspid("msg_lspid");
+static const StaticString s_msg_lrpid("msg_lrpid");
+
 bool f_msg_set_queue(CObjRef queue, CArrRef data) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
@@ -121,13 +132,13 @@ bool f_msg_set_queue(CObjRef queue, CArrRef data) {
   struct msqid_ds stat;
   if (msgctl(q->id, IPC_STAT, &stat) == 0) {
     Variant value;
-    value = data["msg_perm.uid"];
+    value = data[s_msg_perm_uid];
     if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
-    value = data["msg_perm.gid"];
+    value = data[s_msg_perm_gid];
     if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
-    value = data["msg_perm.mode"];
+    value = data[s_msg_perm_mode];
     if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
-    value = data["msg_qbytes"];
+    value = data[s_msg_qbytes];
     if (!value.isNull()) stat.msg_perm.uid = (int64_t)value;
 
     return msgctl(q->id, IPC_SET, &stat) == 0;
@@ -146,16 +157,16 @@ Array f_msg_stat_queue(CObjRef queue) {
   struct msqid_ds stat;
   if (msgctl(q->id, IPC_STAT, &stat) == 0) {
     Array data;
-    data.set("msg_perm.uid",  (int64_t)stat.msg_perm.uid);
-    data.set("msg_perm.gid",  (int64_t)stat.msg_perm.gid);
-    data.set("msg_perm.mode", stat.msg_perm.mode);
-    data.set("msg_stime",     (int64_t)stat.msg_stime);
-    data.set("msg_rtime",     (int64_t)stat.msg_rtime);
-    data.set("msg_ctime",     (int64_t)stat.msg_ctime);
-    data.set("msg_qnum",      (int64_t)stat.msg_qnum);
-    data.set("msg_qbytes",    (int64_t)stat.msg_qbytes);
-    data.set("msg_lspid",     stat.msg_lspid);
-    data.set("msg_lrpid",     stat.msg_lrpid);
+    data.set(s_msg_perm_uid,  (int64_t)stat.msg_perm.uid);
+    data.set(s_msg_perm_gid,  (int64_t)stat.msg_perm.gid);
+    data.set(s_msg_perm_mode, stat.msg_perm.mode);
+    data.set(s_msg_stime,     (int64_t)stat.msg_stime);
+    data.set(s_msg_rtime,     (int64_t)stat.msg_rtime);
+    data.set(s_msg_ctime,     (int64_t)stat.msg_ctime);
+    data.set(s_msg_qnum,      (int64_t)stat.msg_qnum);
+    data.set(s_msg_qbytes,    (int64_t)stat.msg_qbytes);
+    data.set(s_msg_lspid,     stat.msg_lspid);
+    data.set(s_msg_lrpid,     stat.msg_lrpid);
     return data;
   }
 

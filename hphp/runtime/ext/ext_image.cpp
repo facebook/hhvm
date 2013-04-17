@@ -4355,6 +4355,8 @@ static int php_iptc_next_marker(File *file, int spool,
   return (unsigned int) c;
 }
 
+static const StaticString s_size("size");
+
 Variant f_iptcembed(CStrRef iptcdata, CStrRef jpeg_file_name,
                     int spool /* = 0 */) {
   char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
@@ -4371,7 +4373,7 @@ Variant f_iptcembed(CStrRef iptcdata, CStrRef jpeg_file_name,
   }
   if (spool < 2) {
     Array stat = f_fstat(stream);
-    int st_size = stat["size"];
+    int st_size = stat[s_size];
     size_t malloc_size = iptcdata_len + sizeof(psheader) + st_size + 1024 + 1;
     poi = spoolbuf = (unsigned char *)IM_MALLOC(malloc_size);
     CHECK_ALLOC_R(poi, malloc_size, false);

@@ -295,13 +295,15 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
   return ret;
 }
 
+static const StaticString s_default("(default)");
+
 Variant ArrayUtil::FromHdf(const Hdf &hdf) {
   if (hdf.firstChild().exists()) {
     Array ret = Array::Create();
 
     const char *value = hdf.get();
     if (value) {
-      ret.set("(default)", String(value, CopyString));
+      ret.set(s_default, String(value, CopyString));
     }
 
     for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {

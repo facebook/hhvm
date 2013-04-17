@@ -767,6 +767,10 @@ bool f_ldap_get_option(CObjRef link, int option, VRefParam retval) {
   return true;
 }
 
+static const StaticString s_oid("oid");
+static const StaticString s_value("value");
+static const StaticString s_iscritical("iscritical");
+
 bool f_ldap_set_option(CVarRef link, int option, CVarRef newval) {
   LDAP *ldap = NULL;
   if (!link.isNull()) {
@@ -866,17 +870,17 @@ bool f_ldap_set_option(CVarRef link, int option, CVarRef newval) {
           break;
         }
         Array ctrlval = vctrlval.toArray();
-        if (!ctrlval.exists("oid")) {
+        if (!ctrlval.exists(s_oid)) {
           raise_warning("Control must have an oid key");
           error = 1;
           break;
         }
-        String val = ctrlval["oid"].toString();
+        String val = ctrlval[s_oid].toString();
         stringHolder.append(val);
         ctrl = *ctrlp = (LDAPControl*)malloc(sizeof(**ctrlp));
         ctrl->ldctl_oid = (char*)val.data();
-        if (ctrlval.exists("value")) {
-          val = ctrlval["value"].toString();
+        if (ctrlval.exists(s_value)) {
+          val = ctrlval[s_value].toString();
           stringHolder.append(val);
           ctrl->ldctl_value.bv_val = (char*)val.data();
           ctrl->ldctl_value.bv_len = val.size();
@@ -884,7 +888,7 @@ bool f_ldap_set_option(CVarRef link, int option, CVarRef newval) {
           ctrl->ldctl_value.bv_val = NULL;
           ctrl->ldctl_value.bv_len = 0;
         }
-        if (ctrlval.exists("iscritical")) {
+        if (ctrlval.exists(s_iscritical)) {
           ctrl->ldctl_iscritical = val.toBoolean() ? 1 : 0;
         } else {
           ctrl->ldctl_iscritical = 0;

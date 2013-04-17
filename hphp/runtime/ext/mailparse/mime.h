@@ -71,7 +71,7 @@ private:
     void clear();
 
     Variant get(const char *attrname);
-    void getAll(Array &ret, litstr valuelabel, litstr attrprefix);
+    void getAll(Array &ret, CStrRef valuelabel, CStrRef attrprefix);
 
     bool m_empty;
     String m_value;

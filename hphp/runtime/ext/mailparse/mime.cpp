@@ -223,10 +223,10 @@ Variant MimePart::MimeHeader::get(const char *attrname) {
   return m_attributes[attrname];
 }
 
-void MimePart::MimeHeader::getAll(Array &ret, litstr valuelabel,
-                                  litstr attrprefix) {
+void MimePart::MimeHeader::getAll(Array &ret, CStrRef valuelabel,
+                                  CStrRef attrprefix) {
   for (ArrayIter iter(m_attributes); iter; ++iter) {
-    ret.set(String(attrprefix) + iter.first().toString(), iter.second());
+    ret.set(attrprefix + iter.first().toString(), iter.second());
   }
 
   /* do this last so that a bogus set of headers like this:
@@ -497,61 +497,81 @@ MimePart *MimePart::getParent() {
 }
 
 static const StaticString s_headers("headers");
+static const StaticString s_starting_pos("starting-pos");
+static const StaticString s_starting_pos_body("starting-pos-body");
+static const StaticString s_ending_pos("ending-pos");
+static const StaticString s_ending_pos_body("ending-pos-body");
+static const StaticString s_line_count("line-count");
+static const StaticString s_body_line_count("body-line-count");
+static const StaticString s_charset("charset");
+static const StaticString s_transfer_encoding("transfer-encoding");
+static const StaticString s_content_type("content-type");
+static const StaticString s_content_("content-");
+static const StaticString s_text_plain_error("text/plain; (error)");
+static const StaticString s_content_disposition("content-disposition");
+static const StaticString s_disposition_("disposition-");
+static const StaticString s_content_location("content-location");
+static const StaticString s_content_base("content-base");
+static const StaticString s_content_boundary("content-boundary");
+static const StaticString s_content_id("content-id");
+static const StaticString s_content_description("content-description");
+static const StaticString s_content_language("content-language");
+static const StaticString s_content_md5("content-md5");
 
 Variant MimePart::getPartData() {
   Array ret = Array::Create();
 
   ret.set(s_headers, m_headers);
 
-  ret.set("starting-pos", m_startpos);
-  ret.set("starting-pos-body", m_bodystart);
+  ret.set(s_starting_pos, m_startpos);
+  ret.set(s_starting_pos_body, m_bodystart);
   if (m_parent.isNull()) {
-    ret.set("ending-pos", m_endpos);
-    ret.set("ending-pos-body", m_bodyend);
-    ret.set("line-count", m_nlines);
-    ret.set("body-line-count", m_nbodylines);
+    ret.set(s_ending_pos, m_endpos);
+    ret.set(s_ending_pos_body, m_bodyend);
+    ret.set(s_line_count, m_nlines);
+    ret.set(s_body_line_count, m_nbodylines);
   } else {
-    ret.set("ending-pos", m_bodyend);
-    ret.set("ending-pos-body", m_bodyend);
-    ret.set("line-count", m_nlines ? m_nlines - 1 : m_nlines);
-    ret.set("body-line-count", m_nbodylines ? m_nbodylines - 1 : m_nbodylines);
+    ret.set(s_ending_pos, m_bodyend);
+    ret.set(s_ending_pos_body, m_bodyend);
+    ret.set(s_line_count, m_nlines ? m_nlines - 1 : m_nlines);
+    ret.set(s_body_line_count, m_nbodylines ? m_nbodylines - 1 : m_nbodylines);
   }
 
   if (!m_charset.empty()) {
-    ret.set("charset", m_charset);
+    ret.set(s_charset, m_charset);
   } else {
-    ret.set("charset", "us-ascii");
+    ret.set(s_charset, "us-ascii");
   }
   if (!m_content_transfer_encoding.empty()) {
-    ret.set("transfer-encoding", m_content_transfer_encoding);
+    ret.set(s_transfer_encoding, m_content_transfer_encoding);
   } else {
-    ret.set("transfer-encoding", "8bit");
+    ret.set(s_transfer_encoding, "8bit");
   }
   if (!m_content_type.empty()) {
-    m_content_type.getAll(ret, "content-type", "content-");
+    m_content_type.getAll(ret, s_content_type, s_content_);
   } else {
-    ret.set("content-type", "text/plain; (error)");
+    ret.set(s_content_type, s_text_plain_error);
   }
 
   if (!m_content_disposition.empty()) {
-    m_content_disposition.getAll(ret, "content-disposition", "disposition-");
+    m_content_disposition.getAll(ret, s_content_disposition, s_disposition_);
   }
 
   if (!m_content_location.empty()) {
-    ret.set("content-location", m_content_location);
+    ret.set(s_content_location, m_content_location);
   }
   if (!m_content_base.empty()) {
-    ret.set("content-base", m_content_base);
+    ret.set(s_content_base, m_content_base);
   } else {
-    ret.set("content-base", "/");
+    ret.set(s_content_base, "/");
   }
 
   if (!m_boundary.empty()) {
-    ret.set("content-boundary", m_boundary);
+    ret.set(s_content_boundary, m_boundary);
   }
 
   /* extract the address part of the content-id only */
-  Variant contentId = m_headers["content-id"];
+  Variant contentId = m_headers[s_content_id];
   if (!contentId.isNull()) {
     php_rfc822_tokenized_t *toks =
       php_mailparse_rfc822_tokenize((const char*)contentId.toString().data(),
@@ -559,19 +579,18 @@ Variant MimePart::getPartData() {
     php_rfc822_addresses_t *addrs =
       php_rfc822_parse_address_tokens(toks);
     if (addrs->naddrs > 0) {
-      ret.set("content-id", String(addrs->addrs[0].address, CopyString));
+      ret.set(s_content_id, String(addrs->addrs[0].address, CopyString));
     }
     php_rfc822_free_addresses(addrs);
     php_rfc822_tokenize_free(toks);
   }
 
-  const char *key = "content-description";
-  if (m_headers.exists(key)) ret.set(key, m_headers[key]);
-  key = "content-language";
-  if (m_headers.exists(key)) ret.set(key, m_headers[key]);
-  key = "content-md5";
-  if (m_headers.exists(key)) ret.set(key, m_headers[key]);
-
+  auto copyHeader = [&](CVarRef key) {
+    if (m_headers.exists(key)) ret.set(key, m_headers[key]);
+  };
+  copyHeader(s_content_description);
+  copyHeader(s_content_language);
+  copyHeader(s_content_md5);
   return ret;
 }
 

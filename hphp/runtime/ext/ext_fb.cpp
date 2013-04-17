@@ -1040,6 +1040,14 @@ static void output_dataset(Array &ret, int affected, DBDataSet &ds,
   }
 }
 
+static const StaticString s_session_variable("session_variable");
+static const StaticString s_ip("ip");
+static const StaticString s_db("db");
+static const StaticString s_port("port");
+static const StaticString s_username("username");
+static const StaticString s_password("password");
+static const StaticString s_sql("sql");
+
 void f_fb_load_local_databases(CArrRef servers) {
   DBConn::ClearLocalDatabases();
   for (ArrayIter iter(servers); iter; ++iter) {
@@ -1047,19 +1055,19 @@ void f_fb_load_local_databases(CArrRef servers) {
     Array data = iter.second().toArray();
     if (!data.empty()) {
       std::vector< std::pair<string, string> > sessionVariables;
-      if (data.exists("session_variable")) {
-        Array sv = data["session_variable"].toArray();
+      if (data.exists(s_session_variable)) {
+        Array sv = data[s_session_variable].toArray();
         for (ArrayIter svIter(sv); svIter; ++svIter) {
           sessionVariables.push_back(std::pair<string, string>(
             svIter.first().toString().data(),
             svIter.second().toString().data()));
         }
       }
-      DBConn::AddLocalDB(dbId, data["ip"].toString().data(),
-                         data["db"].toString().data(),
-                         data["port"].toInt32(),
-                         data["username"].toString().data(),
-                         data["password"].toString().data(),
+      DBConn::AddLocalDB(dbId, data[s_ip].toString().data(),
+                         data[s_db].toString().data(),
+                         data[s_port].toInt32(),
+                         data[s_username].toString().data(),
+                         data[s_password].toString().data(),
                          sessionVariables);
     }
   }
@@ -1081,8 +1089,8 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
     Array data = iter.second().toArray();
     if (!data.empty()) {
       std::vector< std::pair<string, string> > sessionVariables;
-      if (data.exists("session_variable")) {
-        Array sv = data["session_variable"].toArray();
+      if (data.exists(s_session_variable)) {
+        Array sv = data[s_session_variable].toArray();
         for (ArrayIter svIter(sv); svIter; ++svIter) {
           sessionVariables.push_back(std::pair<string, string>(
             svIter.first().toString().data(),
@@ -1090,13 +1098,13 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
         }
       }
       ServerDataPtr server
-        (new ServerData(data["ip"].toString().data(),
-                        data["db"].toString().data(),
-                        data["port"].toInt32(),
-                        data["username"].toString().data(),
-                        data["password"].toString().data(),
+        (new ServerData(data[s_ip].toString().data(),
+                        data[s_db].toString().data(),
+                        data[s_port].toInt32(),
+                        data[s_username].toString().data(),
+                        data[s_password].toString().data(),
                         sessionVariables));
-      queries.push_back(ServerQuery(server, data["sql"].toString().data()));
+      queries.push_back(ServerQuery(server, data[s_sql].toString().data()));
     } else {
       // so we can report errors according to array index
       queries.push_back(ServerQuery(ServerDataPtr(), ""));
@@ -1134,6 +1142,8 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
   return ret;
 }
 
+static const StaticString s_error("error");
+
 Array f_fb_crossall_query(CStrRef sql, int max_thread /* = 50 */,
                           bool retry_query_on_fail /* = true */,
                           int connect_timeout /* = -1 */,
@@ -1147,18 +1157,21 @@ Array f_fb_crossall_query(CStrRef sql, int max_thread /* = 50 */,
   Array ret;
   // parameter checking
   if (!sql || !*sql) {
-    ret.set("error", "empty SQL");
+    static const StaticString s_errstr("empty SQL");
+    ret.set(s_error, s_errstr);
     return ret;
   }
 
   // security checking
   String ssql = StringUtil::ToLower(sql);
   if (ssql.find("where") < 0) {
-    ret.set("error", "missing where clause");
+    static const StaticString s_errstr("missing where clause");
+    ret.set(s_error, s_errstr);
     return ret;
   }
   if (ssql.find("select") < 0) {
-    ret.set("error", "non-SELECT not supported");
+    static const StaticString s_errstr("non-SELECT not supported");
+    ret.set(s_error, s_errstr);
     return ret;
   }
 

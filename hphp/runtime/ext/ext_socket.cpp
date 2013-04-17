@@ -457,6 +457,11 @@ bool f_socket_set_nonblock(CObjRef socket) {
   return sock->setBlocking(false);
 }
 
+static const StaticString s_l_onoff("l_onoff");
+static const StaticString s_l_linger("l_linger");
+static const StaticString s_sec("sec");
+static const StaticString s_usec("usec");
+
 bool f_socket_set_option(CObjRef socket, int level, int optname,
                          CVarRef optval) {
   Socket *sock = socket.getTyped<Socket>();
@@ -471,17 +476,17 @@ bool f_socket_set_option(CObjRef socket, int level, int optname,
   case SO_LINGER:
     {
       Array value = optval.toArray();
-      if (!value.exists("l_onoff")) {
+      if (!value.exists(s_l_onoff)) {
         raise_warning("no key \"l_onoff\" passed in optval");
         return false;
       }
-      if (!value.exists("l_linger")) {
+      if (!value.exists(s_l_linger)) {
         raise_warning("no key \"l_linger\" passed in optval");
         return false;
       }
 
-      lv.l_onoff = (unsigned short)value["l_onoff"].toInt32();
-      lv.l_linger = (unsigned short)value["l_linger"].toInt32();
+      lv.l_onoff = (unsigned short)value[s_l_onoff].toInt32();
+      lv.l_linger = (unsigned short)value[s_l_linger].toInt32();
       optlen = sizeof(lv);
       opt_ptr = &lv;
     }
@@ -491,17 +496,17 @@ bool f_socket_set_option(CObjRef socket, int level, int optname,
   case SO_SNDTIMEO:
     {
       Array value = optval.toArray();
-      if (!value.exists("sec")) {
+      if (!value.exists(s_sec)) {
         raise_warning("no key \"sec\" passed in optval");
         return false;
       }
-      if (!value.exists("usec")) {
+      if (!value.exists(s_usec)) {
         raise_warning("no key \"usec\" passed in optval");
         return false;
       }
 
-      tv.tv_sec = value["sec"].toInt32();
-      tv.tv_usec = value["usec"].toInt32();
+      tv.tv_sec = value[s_sec].toInt32();
+      tv.tv_usec = value[s_usec].toInt32();
       if (tv.tv_usec >= 1000000) {
         tv.tv_sec += tv.tv_usec / 1000000;
         tv.tv_usec %= 1000000;

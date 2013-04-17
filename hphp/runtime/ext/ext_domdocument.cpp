@@ -1153,33 +1153,52 @@ static void removeOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
   }
 }
 
-static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
-                                     bool owner = false) {
-  const char *clsname = NULL;
+static const StaticString s_domdocument("domdocument");
+static const StaticString s_domdocumenttype("domdocumenttype");
+static const StaticString s_domelement("domelement");
+static const StaticString s_domattr("domattr");
+static const StaticString s_domtext("domtext");
+static const StaticString s_domcomment("domcomment");
+static const StaticString
+       s_domprocessinginstruction("domprocessinginstruction");
+static const StaticString s_domentityreference("domentityreference");
+static const StaticString s_domentity("domentity");
+static const StaticString s_domcdatasection("domcdatasection");
+static const StaticString s_domdocumentfragment("domdocumentfragment");
+static const StaticString s_domnotation("domnotation");
+
+static String domClassname(xmlNodePtr obj) {
   switch (obj->type) {
   case XML_DOCUMENT_NODE:
-  case XML_HTML_DOCUMENT_NODE: clsname = "domdocument";              break;
+  case XML_HTML_DOCUMENT_NODE: return s_domdocument;
   case XML_DTD_NODE:
-  case XML_DOCUMENT_TYPE_NODE: clsname = "domdocumenttype";          break;
-  case XML_ELEMENT_NODE:       clsname = "domelement";               break;
-  case XML_ATTRIBUTE_NODE:     clsname = "domattr";                  break;
-  case XML_TEXT_NODE:          clsname = "domtext";                  break;
-  case XML_COMMENT_NODE:       clsname = "domcomment";               break;
-  case XML_PI_NODE:            clsname = "domprocessinginstruction"; break;
-  case XML_ENTITY_REF_NODE:    clsname = "domentityreference";       break;
+  case XML_DOCUMENT_TYPE_NODE: return s_domdocumenttype;
+  case XML_ELEMENT_NODE:       return s_domelement;
+  case XML_ATTRIBUTE_NODE:     return s_domattr;
+  case XML_TEXT_NODE:          return s_domtext;
+  case XML_COMMENT_NODE:       return s_domcomment;
+  case XML_PI_NODE:            return s_domprocessinginstruction;
+  case XML_ENTITY_REF_NODE:    return s_domentityreference;
   case XML_ENTITY_DECL:
-  case XML_ELEMENT_DECL:       clsname = "domentity";                break;
-  case XML_CDATA_SECTION_NODE: clsname = "domcdatasection";          break;
-  case XML_DOCUMENT_FRAG_NODE: clsname = "domdocumentfragment";      break;
-  case XML_NOTATION_NODE:      clsname = "domnotation";              break;
+  case XML_ELEMENT_DECL:       return s_domentity;
+  case XML_CDATA_SECTION_NODE: return s_domcdatasection;
+  case XML_DOCUMENT_FRAG_NODE: return s_domdocumentfragment;
+  case XML_NOTATION_NODE:      return s_domnotation;
   default:
+    return String((StringData*)nullptr);
+  }
+}
+
+static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
+                                     bool owner = false) {
+  String clsname = domClassname(obj);
+  if (!clsname.get()) {
     raise_warning("Unsupported node type: %d", obj->type);
     return uninit_null();
   }
-
   if (doc.get() && doc->m_classmap.exists(clsname)) {
     assert(doc->m_classmap[clsname].isString()); // or const char * is not safe
-    clsname = doc->m_classmap[clsname].toString().data();
+    clsname = doc->m_classmap[clsname].toString();
   }
   Object wrapper = create_object_only(clsname);
   c_DOMNode *nodeobj = wrapper.getTyped<c_DOMNode>();

@@ -1829,6 +1829,33 @@ c_SoapServer::c_SoapServer(VM::Class* cb) :
 c_SoapServer::~c_SoapServer() {
 }
 
+static const StaticString s_soap_version("soap_version");
+static const StaticString s_uri("uri");
+static const StaticString s_actor("actor");
+static const StaticString s_encoding("encoding");
+static const StaticString s_classmap("classmap");
+static const StaticString s_typemap("typemap");
+static const StaticString s_features("features");
+static const StaticString s_cache_wsdl("cache_wsdl");
+static const StaticString s_send_errors("send_errors");
+static const StaticString s_location("location");
+static const StaticString s_style("style");
+static const StaticString s_use("use");
+static const StaticString s_stream_context("stream_context");
+static const StaticString s_login("login");
+static const StaticString s_password("password");
+static const StaticString s_authentication("authentication");
+static const StaticString s_proxy_host("proxy_host");
+static const StaticString s_proxy_port("proxy_port");
+static const StaticString s_proxy_login("proxy_login");
+static const StaticString s_proxy_password("proxy_password");
+static const StaticString s_trace("trace");
+static const StaticString s_exceptions("exceptions");
+static const StaticString s_compression("compression");
+static const StaticString s_connection_timeout("connection_timeout");
+static const StaticString s_user_agent("user_agent");
+static const StaticString s_soapaction("soapaction");
+
 void c_SoapServer::t___construct(CVarRef wsdl,
                                  CArrRef options /* = null_array */) {
   USE_SOAP_GLOBAL;
@@ -1847,25 +1874,25 @@ void c_SoapServer::t___construct(CVarRef wsdl,
   int version = SOAP_1_1;
   Array typemap_ht;
   if (!options.empty()) {
-    if (options["soap_version"].isInteger()) {
-      int64_t tmp = options["soap_version"].toInt64();
+    if (options[s_soap_version].isInteger()) {
+      int64_t tmp = options[s_soap_version].toInt64();
       if (tmp == SOAP_1_1 || tmp == SOAP_1_2) {
         version = tmp;
       }
     }
 
-    if (options["uri"].isString()) {
-      m_uri = options["uri"].toString();
+    if (options[s_uri].isString()) {
+      m_uri = options[s_uri].toString();
     } else if (wsdl.isNull()) {
       throw SoapException("'uri' option is required in nonWSDL mode");
     }
 
-    if (options["actor"].isString()) {
-      m_actor = options["actor"].toString();
+    if (options[s_actor].isString()) {
+      m_actor = options[s_actor].toString();
     }
 
-    if (options["encoding"].isString()) {
-      String tmp = options["encoding"].toString();
+    if (options[s_encoding].isString()) {
+      String tmp = options[s_encoding].toString();
       m_encoding = xmlFindCharEncodingHandler(tmp.data());
       if (m_encoding == NULL) {
         throw SoapException("Invalid 'encoding' option - '%s'", tmp.data());
@@ -1873,25 +1900,25 @@ void c_SoapServer::t___construct(CVarRef wsdl,
       s_soap_data->register_encoding(m_encoding);
     }
 
-    if (options["classmap"].isArray()) {
-      m_classmap = options["classmap"].toArray();
+    if (options[s_classmap].isArray()) {
+      m_classmap = options[s_classmap].toArray();
     }
 
-    if (options["typemap"].isArray()) {
-      typemap_ht = options["typemap"].toArray();
+    if (options[s_typemap].isArray()) {
+      typemap_ht = options[s_typemap].toArray();
     }
 
-    if (options["features"].isInteger()) {
-      m_features = options["features"].toInt64();
+    if (options[s_features].isInteger()) {
+      m_features = options[s_features].toInt64();
     }
 
-    if (options["cache_wsdl"].isInteger()) {
-      cache_wsdl = options["cache_wsdl"].toInt64();
+    if (options[s_cache_wsdl].isInteger()) {
+      cache_wsdl = options[s_cache_wsdl].toInt64();
     }
 
-    if (options["send_errors"].isInteger() ||
-        options["send_errors"].is(KindOfBoolean)) {
-      m_send_errors = options["send_errors"].toInt64();
+    if (options[s_send_errors].isInteger() ||
+        options[s_send_errors].is(KindOfBoolean)) {
+      m_send_errors = options[s_send_errors].toInt64();
     }
 
   } else if (wsdl.isNull()) {
@@ -2301,13 +2328,13 @@ void c_SoapClient::t___construct(CVarRef wsdl,
 
   int64_t cache_wsdl = SOAP_GLOBAL(cache);
   if (!options.empty()) {
-    m_location = options["location"];
+    m_location = options[s_location];
 
     if (wsdl.isNull()) {
       /* Fetching non-WSDL mode options */
-      m_uri   = options["uri"];
-      m_style = options["style"].toInt32(); // SOAP_RPC || SOAP_DOCUMENT
-      m_use   = options["use"  ].toInt32(); // SOAP_LITERAL || SOAP_ENCODED
+      m_uri   = options[s_uri];
+      m_style = options[s_style].toInt32(); // SOAP_RPC || SOAP_DOCUMENT
+      m_use   = options[s_use].toInt32(); // SOAP_LITERAL || SOAP_ENCODED
 
       if (m_uri.empty()) {
         throw SoapException("'uri' option is required in nonWSDL mode");
@@ -2317,10 +2344,10 @@ void c_SoapClient::t___construct(CVarRef wsdl,
       }
     }
 
-    if (options.exists("stream_context")) {
+    if (options.exists(s_stream_context)) {
       StreamContext *sc = NULL;
-      if (options["stream_context"].isObject()) {
-        sc = options["stream_context"].toObject()
+      if (options[s_stream_context].isObject()) {
+        sc = options[s_stream_context].toObject()
                                       .getTyped<StreamContext>();
       }
       if (!sc) {
@@ -2329,28 +2356,28 @@ void c_SoapClient::t___construct(CVarRef wsdl,
       m_stream_context_options = sc->m_options;
     }
 
-    if (options.exists("soap_version")) {
-      m_soap_version = options["soap_version"].toInt32();
+    if (options.exists(s_soap_version)) {
+      m_soap_version = options[s_soap_version].toInt32();
     }
 
-    m_login = options["login"].toString();
-    m_password = options["password"].toString();
-    m_authentication = options["authentication"].toInt32();
+    m_login = options[s_login].toString();
+    m_password = options[s_password].toString();
+    m_authentication = options[s_authentication].toInt32();
 
-    m_proxy_host = options["proxy_host"].toString();
-    m_proxy_port = options["proxy_port"].toInt32();
-    m_proxy_login = options["proxy_login"].toString();
-    m_proxy_password = options["proxy_password"].toString();
+    m_proxy_host = options[s_proxy_host].toString();
+    m_proxy_port = options[s_proxy_port].toInt32();
+    m_proxy_login = options[s_proxy_login].toString();
+    m_proxy_password = options[s_proxy_password].toString();
 
-    m_trace = options["trace"].toBoolean();
-    if (options.exists("exceptions")) {
-      m_exceptions = options["exceptions"].toBoolean();
+    m_trace = options[s_trace].toBoolean();
+    if (options.exists(s_exceptions)) {
+      m_exceptions = options[s_exceptions].toBoolean();
     }
-    if (options.exists("compression")) {
-      m_compression = options["compression"].toBoolean();
+    if (options.exists(s_compression)) {
+      m_compression = options[s_compression].toBoolean();
     }
 
-    String encoding = options["encoding"].toString();
+    String encoding = options[s_encoding].toString();
     if (!encoding.empty()) {
       m_encoding = xmlFindCharEncodingHandler(encoding.data());
       if (m_encoding == NULL) {
@@ -2359,13 +2386,13 @@ void c_SoapClient::t___construct(CVarRef wsdl,
       }
       s_soap_data->register_encoding(m_encoding);
     }
-    m_classmap = options["classmap"].toArray();
-    m_features = options["features"].toInt32();
-    m_connection_timeout = options["connection_timeout"].toInt64();
-    m_user_agent = options["user_agent"].toString();
+    m_classmap = options[s_classmap].toArray();
+    m_features = options[s_features].toInt32();
+    m_connection_timeout = options[s_connection_timeout].toInt64();
+    m_user_agent = options[s_user_agent].toString();
 
-    if (options.exists("cache_wsdl")) {
-      cache_wsdl = options["cache_wsdl"].toInt64();
+    if (options.exists(s_cache_wsdl)) {
+      cache_wsdl = options[s_cache_wsdl].toInt64();
     }
 
   } else if (wsdl.isNull()) {
@@ -2394,7 +2421,7 @@ void c_SoapClient::t___construct(CVarRef wsdl,
     SOAP_GLOBAL(soap_version) = old_soap_version;
   }
 
-  Variant v = options["typemap"];
+  Variant v = options[s_typemap];
   if (v.isArray()) {
     Array arr = v.toArray();
     if (!arr.empty()) {
@@ -2419,17 +2446,17 @@ Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
 
   String location, soap_action, uri;
   if (!options.isNull()) {
-    if (options["location"].isString()) {
-      location = options["location"].toString();
+    if (options[s_location].isString()) {
+      location = options[s_location].toString();
       if (location.isNull()) {
         location = m_location;
       }
     }
-    if (options["soapaction"].isString()) {
-      soap_action = options["soapaction"].toString();
+    if (options[s_soapaction].isString()) {
+      soap_action = options[s_soapaction].toString();
     }
-    if (options["uri"].isString()) {
-      uri = options["uri"].toString();
+    if (options[s_uri].isString()) {
+      uri = options[s_uri].toString();
     }
   }
 

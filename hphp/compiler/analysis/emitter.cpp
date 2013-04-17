@@ -4317,23 +4317,29 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
                                      int paramId) {
   visit(exp);
   if (checkIfStackEmpty("FPass*")) return;
+  PassByRefKind passByRefKind = getPassByRefKind(exp);
   if (Option::WholeProgram && !exp->hasAnyContext(Expression::InvokeArgument |
                                                   Expression::RefParameter)) {
     if (exp->hasContext(Expression::RefValue)) {
-      emitVGet(e);
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
-      e.FPassV(paramId);
+      if (passByRefKind == PassByRefKind::AllowCell ||
+          m_evalStack.get(m_evalStack.size() - 1) != StackSym::C) {
+        emitVGet(e);
+        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
+        e.FPassV(paramId);
+        return;
+      }
     } else {
       emitCGet(e);
       m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::NopOut, false, 0, 0);
       e.FPassC(paramId);
+      return;
     }
-    return;
   }
   emitFPass(e, paramId, getPassByRefKind(exp));
 }
 
-void EmitterVisitor::emitFPass(Emitter& e, int paramId, PassByRefKind passByRefKind) {
+void EmitterVisitor::emitFPass(Emitter& e, int paramId,
+                               PassByRefKind passByRefKind) {
   if (checkIfStackEmpty("FPass*")) return;
   LocationGuard locGuard(e, m_tempLoc);
   m_tempLoc.reset();

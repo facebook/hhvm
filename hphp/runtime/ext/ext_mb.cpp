@@ -1618,6 +1618,24 @@ Variant f_mb_encode_numericentity(CStrRef str, CVarRef convmap,
   return php_mb_numericentity_exec(str, convmap, encoding, 0);
 }
 
+static const StaticString s_internal_encoding("internal_encoding");
+static const StaticString s_http_input("http_input");
+static const StaticString s_http_output("http_output");
+static const StaticString s_mail_charset("mail_charset");
+static const StaticString s_mail_header_encoding("mail_header_encoding");
+static const StaticString s_mail_body_encoding("mail_body_encoding");
+static const StaticString s_illegal_chars("illegal_chars");
+static const StaticString s_encoding_translation("encoding_translation");
+static const StaticString s_On("On");
+static const StaticString s_Off("Off");
+static const StaticString s_language("language");
+static const StaticString s_detect_order("detect_order");
+static const StaticString s_substitute_character("substitute_character");
+static const StaticString s_strict_detection("strict_detection");
+static const StaticString s_none("none");
+static const StaticString s_long("long");
+static const StaticString s_entity("entity");
+
 Variant f_mb_get_info(CStrRef type /* = null_string */) {
   const mbfl_language *lang = mbfl_no2language(MBSTRG(current_language));
   mbfl_no_encoding *entry;
@@ -1628,36 +1646,36 @@ Variant f_mb_get_info(CStrRef type /* = null_string */) {
     Array ret;
     if ((name = (char *)mbfl_no_encoding2name
          (MBSTRG(current_internal_encoding))) != NULL) {
-      ret.set("internal_encoding", String(name, CopyString));
+      ret.set(s_internal_encoding, String(name, CopyString));
     }
     if ((name = (char *)mbfl_no_encoding2name
          (MBSTRG(http_input_identify))) != NULL) {
-      ret.set("http_input", String(name, CopyString));
+      ret.set(s_http_input, String(name, CopyString));
     }
     if ((name = (char *)mbfl_no_encoding2name
          (MBSTRG(current_http_output_encoding))) != NULL) {
-      ret.set("http_output", String(name, CopyString));
+      ret.set(s_http_output, String(name, CopyString));
     }
     if (lang != NULL) {
       if ((name = (char *)mbfl_no_encoding2name
            (lang->mail_charset)) != NULL) {
-        ret.set("mail_charset", String(name, CopyString));
+        ret.set(s_mail_charset, String(name, CopyString));
       }
       if ((name = (char *)mbfl_no_encoding2name
            (lang->mail_header_encoding)) != NULL) {
-        ret.set("mail_header_encoding", String(name, CopyString));
+        ret.set(s_mail_header_encoding, String(name, CopyString));
       }
       if ((name = (char *)mbfl_no_encoding2name
            (lang->mail_body_encoding)) != NULL) {
-        ret.set("mail_body_encoding", String(name, CopyString));
+        ret.set(s_mail_body_encoding, String(name, CopyString));
       }
     }
-    ret.set("illegal_chars", MBSTRG(illegalchars));
-    ret.set("encoding_translation",
-            MBSTRG(encoding_translation) ? "On" : "Off");
+    ret.set(s_illegal_chars, MBSTRG(illegalchars));
+    ret.set(s_encoding_translation,
+            MBSTRG(encoding_translation) ? s_On : s_Off);
     if ((name = (char *)mbfl_no_language2name
          (MBSTRG(current_language))) != NULL) {
-      ret.set("language", String(name, CopyString));
+      ret.set(s_language, String(name, CopyString));
     }
     n = MBSTRG(current_detect_order_list_size);
     entry = MBSTRG(current_detect_order_list);
@@ -1670,23 +1688,23 @@ Variant f_mb_get_info(CStrRef type /* = null_string */) {
         entry++;
         n--;
       }
-      ret.set("detect_order", row);
+      ret.set(s_detect_order, row);
     }
     switch (MBSTRG(current_filter_illegal_mode)) {
     case MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE:
-      ret.set("substitute_character", "none");
+      ret.set(s_substitute_character, s_none);
       break;
     case MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG:
-      ret.set("substitute_character", "long");
+      ret.set(s_substitute_character, s_long);
       break;
     case MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY:
-      ret.set("substitute_character", "entity");
+      ret.set(s_substitute_character, s_entity);
       break;
     default:
-      ret.set("substitute_character",
+      ret.set(s_substitute_character,
               MBSTRG(current_filter_illegal_substchar));
     }
-    ret.set("strict_detection", MBSTRG(strict_detection) ? "On" : "Off");
+    ret.set(s_strict_detection, MBSTRG(strict_detection) ? s_On : s_Off);
     return ret;
   } else if (strcasecmp(type.data(), "internal_encoding") == 0) {
     if ((name = (char *)mbfl_no_encoding2name
@@ -1747,18 +1765,18 @@ Variant f_mb_get_info(CStrRef type /* = null_string */) {
   } else if (strcasecmp(type.data(), "substitute_character") == 0) {
     if (MBSTRG(current_filter_illegal_mode) ==
         MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-      return "none";
+      return s_none;
     } else if (MBSTRG(current_filter_illegal_mode) ==
                MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
-      return "long";
+      return s_long;
     } else if (MBSTRG(current_filter_illegal_mode) ==
                MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
-      return "entity";
+      return s_entity;
     } else {
       return MBSTRG(current_filter_illegal_substchar);
     }
   } else if (strcasecmp(type.data(), "strict_detection") == 0) {
-    return MBSTRG(strict_detection) ? "On" : "Off";
+    return MBSTRG(strict_detection) ? s_On : s_Off;
   }
   return false;
 }

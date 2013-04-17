@@ -735,6 +735,11 @@ enum {
 };
 
 #ifdef HAVE_46_API
+
+static const StaticString s_result("result");
+static const StaticString s_isTransitionalDifferent("isTransitionalDifferent");
+static const StaticString s_errors("errors");
+
 static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
   int32_t     converted_capacity;
   char        *converted = NULL;
@@ -768,17 +773,16 @@ static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant id
   }
 
   // Set up the array returned in idna_info.
-  Array arr;
-  arr.set("result", result);
-  arr.set("isTransitionalDifferent", info.isTransitionalDifferent);
-  arr.set("errors", (long)info.errors);
-  idna_info = arr; // As in Zend, the previous value of idn_variant is overwritten, not modified.
-
+  ArrayInit arr(3);
+  arr.set(s_result, result);
+  arr.set(s_isTransitionalDifferent, info.isTransitionalDifferent);
+  arr.set(s_errors, (long)info.errors);
+  // As in Zend, the previous value of idn_variant is overwritten, not modified.
+  idna_info = arr.create();
   if (info.errors == 0) {
     return result;
-  } else {
-    return false;
   }
+  return false;
 }
 
 #endif

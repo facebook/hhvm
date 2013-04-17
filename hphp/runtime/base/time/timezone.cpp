@@ -156,20 +156,23 @@ Array TimeZone::GetNames() {
   return ret;
 }
 
+static const StaticString s_dst("dst");
+static const StaticString s_offset("offset");
+static const StaticString s_timezone_id("timezone_id");
+
 Array TimeZone::GetAbbreviations() {
   Array ret;
   for (const timelib_tz_lookup_table *entry =
          timelib_timezone_abbreviations_list(); entry->name; entry++) {
-    Array element;
-    element.set("dst", (bool)entry->type);
-    element.set("offset", entry->gmtoffset);
+    ArrayInit element(3);
+    element.set(s_dst, (bool)entry->type);
+    element.set(s_offset, entry->gmtoffset);
     if (entry->full_tz_name) {
-      element.set("timezone_id", String(entry->full_tz_name, AttachLiteral));
+      element.set(s_timezone_id, String(entry->full_tz_name, AttachLiteral));
     } else {
-      element.set("timezone_id", uninit_null());
+      element.set(s_timezone_id, uninit_null());
     }
-
-    ret.lvalAt(entry->name).append(element);
+    ret.lvalAt(entry->name).append(element.create());
   }
   return ret;
 }

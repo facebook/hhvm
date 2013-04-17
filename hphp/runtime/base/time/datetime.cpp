@@ -104,11 +104,40 @@ SmartObject<DateTime> DateTime::Current(bool utc /* = false */) {
   return NEWOBJ(DateTime)(time(0), utc);
 }
 
+static const StaticString s_year("year");
+static const StaticString s_month("month");
+static const StaticString s_day("day");
+static const StaticString s_hour("hour");
+static const StaticString s_minute("minute");
+static const StaticString s_second("second");
+static const StaticString s_zone("zone");
+static const StaticString s_zone_type("zone_type");
+static const StaticString s_fraction("fraction");
+static const StaticString s_warning_count("warning_count");
+static const StaticString s_warnings("warnings");
+static const StaticString s_error_count("error_count");
+static const StaticString s_errors("errors");
+static const StaticString s_is_localtime("is_localtime");
+static const StaticString s_is_dst("is_dst");
+static const StaticString s_tz_abbr("tz_abbr");
+static const StaticString s_tz_id("tz_id");
+static const StaticString s_weekday("weekday");
+static const StaticString s_relative("relative");
+static const StaticString s_tm_sec("tm_sec");
+static const StaticString s_tm_min("tm_min");
+static const StaticString s_tm_hour("tm_hour");
+static const StaticString s_tm_mday("tm_mday");
+static const StaticString s_tm_mon("tm_mon");
+static const StaticString s_tm_year("tm_year");
+static const StaticString s_tm_wday("tm_wday");
+static const StaticString s_tm_yday("tm_yday");
+static const StaticString s_unparsed("unparsed");
+
 #define PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(name, elem) \
   if ((int)parsed_time->elem == -99999) {                \
-    ret.set(#name, false);                               \
+    ret.set(name, false);                               \
   } else {                                               \
-    ret.set(#name, (int)parsed_time->elem);              \
+    ret.set(name, (int)parsed_time->elem);              \
   }
 
 Array DateTime::Parse(CStrRef datetime) {
@@ -118,51 +147,51 @@ Array DateTime::Parse(CStrRef datetime) {
                       TimeZone::GetDatabase());
 
   Array ret;
-  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(year,      y);
-  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(month,     m);
-  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(day,       d);
-  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(hour,      h);
-  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(minute,    i);
-  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(second,    s);
+  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_year,      y);
+  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_month,     m);
+  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_day,       d);
+  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_hour,      h);
+  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_minute,    i);
+  PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_second,    s);
 
   if (parsed_time->f == -99999) {
-    ret.set("fraction", false);
+    ret.set(s_fraction, false);
   } else {
-    ret.set("fraction", parsed_time->f);
+    ret.set(s_fraction, parsed_time->f);
   }
 
   setLastErrors(error);
   {
     Array warnings = DateTime::getLastWarnings();
-    ret.set("warning_count", warnings.size());
-    ret.set("warnings", warnings);
+    ret.set(s_warning_count, warnings.size());
+    ret.set(s_warnings, warnings);
   }
   {
     Array errors = DateTime::getLastErrors();
-    ret.set("error_count", errors.size());
-    ret.set("errors", errors);
+    ret.set(s_error_count, errors.size());
+    ret.set(s_errors, errors);
   }
 
-  ret.set("is_localtime", (bool)parsed_time->is_localtime);
+  ret.set(s_is_localtime, (bool)parsed_time->is_localtime);
   if (parsed_time->is_localtime) {
-    PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(zone_type, zone_type);
+    PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_zone_type, zone_type);
     switch (parsed_time->zone_type) {
     case TIMELIB_ZONETYPE_OFFSET:
-      PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(zone, z);
-      ret.set("is_dst", (bool)parsed_time->dst);
+      PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_zone, z);
+      ret.set(s_is_dst, (bool)parsed_time->dst);
       break;
     case TIMELIB_ZONETYPE_ID:
       if (parsed_time->tz_abbr) {
-        ret.set("tz_abbr", String(parsed_time->tz_abbr, CopyString));
+        ret.set(s_tz_abbr, String(parsed_time->tz_abbr, CopyString));
       }
       if (parsed_time->tz_info) {
-        ret.set("tz_id", String(parsed_time->tz_info->name, CopyString));
+        ret.set(s_tz_id, String(parsed_time->tz_info->name, CopyString));
       }
       break;
     case TIMELIB_ZONETYPE_ABBR:
-      PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(zone, z);
-      ret.set("is_dst", (bool)parsed_time->dst);
-      ret.set("tz_abbr", String(parsed_time->tz_abbr, CopyString));
+      PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_zone, z);
+      ret.set(s_is_dst, (bool)parsed_time->dst);
+      ret.set(s_tz_abbr, String(parsed_time->tz_abbr, CopyString));
       break;
     }
   }
@@ -170,20 +199,20 @@ Array DateTime::Parse(CStrRef datetime) {
   {
     Array element;
     if (parsed_time->have_relative) {
-      element.set("year",   parsed_time->relative.y);
-      element.set("month",  parsed_time->relative.m);
-      element.set("day",    parsed_time->relative.d);
-      element.set("hour",   parsed_time->relative.h);
-      element.set("minute", parsed_time->relative.i);
-      element.set("second", parsed_time->relative.s);
+      element.set(s_year,   parsed_time->relative.y);
+      element.set(s_month,  parsed_time->relative.m);
+      element.set(s_day,    parsed_time->relative.d);
+      element.set(s_hour,   parsed_time->relative.h);
+      element.set(s_minute, parsed_time->relative.i);
+      element.set(s_second, parsed_time->relative.s);
 #if defined(TIMELIB_VERSION)
       if (parsed_time->relative.have_weekday_relative) {
 #else
       if (parsed_time->have_weekday_relative) {
 #endif
-        element.set("weekday", parsed_time->relative.weekday);
+        element.set(s_weekday, parsed_time->relative.weekday);
       }
-      ret.set("relative", element);
+      ret.set(s_relative, element);
     }
   }
 
@@ -199,17 +228,17 @@ Array DateTime::Parse(CStrRef ts, CStrRef format) {
     return Array();
   }
 
-  Array ret;
-  ret.set("tm_sec",  parsed_time.tm_sec);
-  ret.set("tm_min",  parsed_time.tm_min);
-  ret.set("tm_hour", parsed_time.tm_hour);
-  ret.set("tm_mday", parsed_time.tm_mday);
-  ret.set("tm_mon",  parsed_time.tm_mon);
-  ret.set("tm_year", parsed_time.tm_year);
-  ret.set("tm_wday", parsed_time.tm_wday);
-  ret.set("tm_yday", parsed_time.tm_yday);
-  ret.set("unparsed", String(unparsed_part, CopyString));
-  return ret;
+  ArrayInit ret(9);
+  ret.set(s_tm_sec,  parsed_time.tm_sec);
+  ret.set(s_tm_min,  parsed_time.tm_min);
+  ret.set(s_tm_hour, parsed_time.tm_hour);
+  ret.set(s_tm_mday, parsed_time.tm_mday);
+  ret.set(s_tm_mon,  parsed_time.tm_mon);
+  ret.set(s_tm_year, parsed_time.tm_year);
+  ret.set(s_tm_wday, parsed_time.tm_wday);
+  ret.set(s_tm_yday, parsed_time.tm_yday);
+  ret.set(s_unparsed, String(unparsed_part, CopyString));
+  return ret.create();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -764,6 +793,18 @@ SmartObject<DateInterval> DateTime::diff(SmartObject<DateTime> datetime2, bool a
 ///////////////////////////////////////////////////////////////////////////////
 // sun
 
+static const StaticString s_sunrise("sunrise");
+static const StaticString s_sunset("sunset");
+static const StaticString s_transit("transit");
+static const StaticString s_civil_twilight_begin("civil_twilight_begin");
+static const StaticString s_civil_twilight_end("civil_twilight_end");
+static const StaticString s_nautical_twilight_begin("nautical_twilight_begin");
+static const StaticString s_nautical_twilight_end("nautical_twilight_end");
+static const StaticString
+       s_astronomical_twilight_begin("astronomical_twilight_begin");
+static const StaticString
+       s_astronomical_twilight_end("astronomical_twilight_end");
+
 Array DateTime::getSunInfo(double latitude, double longitude) const {
   Array ret;
   timelib_sll sunrise, sunset, transit;
@@ -775,18 +816,18 @@ Array DateTime::getSunInfo(double latitude, double longitude) const {
                                            &sunrise, &sunset, &transit);
   switch (rs) {
   case -1: /* always below */
-    ret.set("sunrise", false);
-    ret.set("sunset", false);
+    ret.set(s_sunrise, false);
+    ret.set(s_sunset, false);
     break;
   case 1: /* always above */
-    ret.set("sunrise", true);
-    ret.set("sunset", true);
+    ret.set(s_sunrise, true);
+    ret.set(s_sunset, true);
     break;
   default:
-    ret.set("sunrise", sunrise);
-    ret.set("sunset", sunset);
+    ret.set(s_sunrise, sunrise);
+    ret.set(s_sunset, sunset);
   }
-  ret.set("transit", transit);
+  ret.set(s_transit, transit);
 
   /* Get civil twilight */
   rs = timelib_astro_rise_set_altitude(m_time.get(), longitude, latitude,
@@ -795,16 +836,16 @@ Array DateTime::getSunInfo(double latitude, double longitude) const {
                                        &transit);
   switch (rs) {
   case -1: /* always below */
-    ret.set("civil_twilight_begin", false);
-    ret.set("civil_twilight_end", false);
+    ret.set(s_civil_twilight_begin, false);
+    ret.set(s_civil_twilight_end, false);
     break;
   case 1: /* always above */
-    ret.set("civil_twilight_begin", true);
-    ret.set("civil_twilight_end", true);
+    ret.set(s_civil_twilight_begin, true);
+    ret.set(s_civil_twilight_end, true);
     break;
   default:
-    ret.set("civil_twilight_begin", sunrise);
-    ret.set("civil_twilight_end", sunset);
+    ret.set(s_civil_twilight_begin, sunrise);
+    ret.set(s_civil_twilight_end, sunset);
   }
 
   /* Get nautical twilight */
@@ -814,16 +855,16 @@ Array DateTime::getSunInfo(double latitude, double longitude) const {
                                        &transit);
   switch (rs) {
   case -1: /* always below */
-    ret.set("nautical_twilight_begin", false);
-    ret.set("nautical_twilight_end", false);
+    ret.set(s_nautical_twilight_begin, false);
+    ret.set(s_nautical_twilight_end, false);
     break;
   case 1: /* always above */
-    ret.set("nautical_twilight_begin", true);
-    ret.set("nautical_twilight_end", true);
+    ret.set(s_nautical_twilight_begin, true);
+    ret.set(s_nautical_twilight_end, true);
     break;
   default:
-    ret.set("nautical_twilight_begin", sunrise);
-    ret.set("nautical_twilight_end", sunset);
+    ret.set(s_nautical_twilight_begin, sunrise);
+    ret.set(s_nautical_twilight_end, sunset);
   }
 
   /* Get astronomical twilight */
@@ -833,16 +874,16 @@ Array DateTime::getSunInfo(double latitude, double longitude) const {
                                        &transit);
   switch (rs) {
   case -1: /* always below */
-    ret.set("astronomical_twilight_begin", false);
-    ret.set("astronomical_twilight_end", false);
+    ret.set(s_astronomical_twilight_begin, false);
+    ret.set(s_astronomical_twilight_end, false);
     break;
   case 1: /* always above */
-    ret.set("astronomical_twilight_begin", true);
-    ret.set("astronomical_twilight_end", true);
+    ret.set(s_astronomical_twilight_begin, true);
+    ret.set(s_astronomical_twilight_end, true);
     break;
   default:
-    ret.set("astronomical_twilight_begin", sunrise);
-    ret.set("astronomical_twilight_end", sunset);
+    ret.set(s_astronomical_twilight_begin, sunrise);
+    ret.set(s_astronomical_twilight_end, sunset);
   }
   return ret;
 }

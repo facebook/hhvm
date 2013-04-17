@@ -539,6 +539,8 @@ String c_SimpleXMLElement::t_getname() {
   return String();
 }
 
+static const StaticString s_attributes("@attributes");
+
 Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
                                         bool is_prefix /* = false */) {
   if (m_is_attribute) {
@@ -557,7 +559,7 @@ Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
     } else {
       elem->m_attributes.assignRef(m_attributes);
     }
-    elem->m_children.set("@attributes", elem->m_attributes);
+    elem->m_children.set(s_attributes, elem->m_attributes);
   }
   return obj;
 }
@@ -828,7 +830,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
     Object child = create_element(m_doc, newnode, ns, false);
     if (m_is_attribute) {
       m_attributes.set(name, child);
-      m_children.set("@attributes", m_attributes);
+      m_children.set(s_attributes, m_attributes);
     } else {
       m_children.set(name, child);
     }
@@ -864,7 +866,7 @@ Array c_SimpleXMLElement::o_toArray() const {
     return m_children;
   }
   Array ret;
-  ret.set("@attributes", m_attributes);
+  ret.set(s_attributes, m_attributes);
   ret += m_children;
   return ret;
 }
@@ -1187,14 +1189,21 @@ static void libxml_error_handler(void *userData, xmlErrorPtr error) {
   }
 }
 
+static const StaticString s_level("level");
+static const StaticString s_code("code");
+static const StaticString s_column("column");
+static const StaticString s_message("message");
+static const StaticString s_file("file");
+static const StaticString s_line("line");
+
 static Object create_libxmlerror(xmlError &error) {
   Object ret(NEWOBJ(c_LibXMLError)());
-  ret->o_set("level",   error.level);
-  ret->o_set("code",    error.code);
-  ret->o_set("column",  error.int2);
-  ret->o_set("message", String(error.message, CopyString));
-  ret->o_set("file",    String(error.file, CopyString));
-  ret->o_set("line",    error.line);
+  ret->o_set(s_level,   error.level);
+  ret->o_set(s_code,    error.code);
+  ret->o_set(s_column,  error.int2);
+  ret->o_set(s_message, String(error.message, CopyString));
+  ret->o_set(s_file,    String(error.file, CopyString));
+  ret->o_set(s_line,    error.line);
   return ret;
 }
 

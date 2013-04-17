@@ -453,19 +453,24 @@ public:
 };
 static PDOErrorHash s_err_hash;
 
+static const StaticString s_code("code");
+static const StaticString s_message("message");
+static const StaticString s_errorInfo("errorInfo");
+static const StaticString s_PDOException("PDOException");
+
 void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
   ObjectData *obj = SystemLib::AllocPDOExceptionObject();
-  obj->o_set("code", code, "PDOException");
+  obj->o_set(s_code, code, s_PDOException);
 
   va_list ap;
   va_start(ap, fmt);
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
-  obj->o_set("message", String(msg), "PDOException");
+  obj->o_set(s_message, String(msg), s_PDOException);
   va_end(ap);
 
   if (!info.isNull()) {
-    obj->o_set("errorInfo", info, "PDOException");
+    obj->o_set(s_errorInfo, info, s_PDOException);
   }
   throw Object(obj);
 }
@@ -605,7 +610,7 @@ static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,
     PDO_HANDLE_DBH_ERR(dbh);
     return false;
   }
-  HPHP::VM::Class* cls = HPHP::VM::Unit::loadClass(clsname.get()); 
+  HPHP::VM::Class* cls = HPHP::VM::Unit::loadClass(clsname.get());
   if (cls) {
     const HPHP::VM::Func* method = cls->getDeclaredCtor();
     if (method && method->isPublic()) {

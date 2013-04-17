@@ -1574,6 +1574,10 @@ String f_image_type_to_extension(int imagetype,
   }
 }
 
+static const StaticString s_bits("bits");
+static const StaticString s_channels("channels");
+static const StaticString s_mime("mime");
+
 Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
   int itype = 0;
   struct gfxinfo *result = NULL;
@@ -1581,7 +1585,6 @@ Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
     imageinfo = uninit_null();
   }
 
-  Array ret;
   Variant stream = f_fopen(filename, "rb");
   if (same(stream, false)) {
     raise_warning("failed to open stream: %s", filename.c_str());
@@ -1644,6 +1647,7 @@ Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
   f_fclose(stream);
 
   if (result) {
+    ArrayInit ret(7);
     ret.set(0, (int64_t)result->width);
     ret.set(1, (int64_t)result->height);
     ret.set(2, itype);
@@ -1653,14 +1657,14 @@ Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
     ret.set(3, String(temp, CopyString));
     if (temp) IM_FREE(temp);
     if (result->bits != 0) {
-      ret.set("bits", (int64_t)result->bits);
+      ret.set(s_bits, (int64_t)result->bits);
     }
     if (result->channels != 0) {
-      ret.set("channels", (int64_t)result->channels);
+      ret.set(s_channels, (int64_t)result->channels);
     }
-    ret.set("mime", (char*)php_image_type_to_mime_type(itype));
+    ret.set(s_mime, (char*)php_image_type_to_mime_type(itype));
     IM_FREE(result);
-    return ret;
+    return ret.create();
   } else {
     return false;
   }
@@ -2924,68 +2928,85 @@ static Variant php_imagettftext_common(int mode, int extended,
 }
 #endif  /* ENABLE_GD_TTF */
 
+static const StaticString s_GD_Version("GD Version");
+static const StaticString s_FreeType_Support("FreeType Support");
+static const StaticString s_FreeType_Linkage("FreeType Linkage");
+static const StaticString s_with_freetype("with freetype");
+static const StaticString s_with_TTF_library("with TTF library");
+static const StaticString s_with_unknown_library("with unknown library");
+static const StaticString s_T1Lib_Support("T1Lib_Support");
+static const StaticString s_GIF_Read_Support("GIF Read Support");
+static const StaticString s_GIF_Create_Support("GIF Create Support");
+static const StaticString s_JPG_Support("JPG Support");
+static const StaticString s_PNG_Support("PNG Support");
+static const StaticString s_WBMP_Support("WBMP Support");
+static const StaticString s_XPM_Support("XPM Support");
+static const StaticString s_XBM_Support("XBM Support");
+static const StaticString
+  s_JIS_mapped_Japanese_Font_Support("JIS-mapped Japanese Font Support");
+
 Array f_gd_info() {
   Array ret;
 
-  ret.set("GD Version", PHP_GD_VERSION_STRING);
+  ret.set(s_GD_Version, PHP_GD_VERSION_STRING);
 
 #ifdef ENABLE_GD_TTF
-  ret.set("FreeType Support", true);
+  ret.set(s_FreeType_Support, true);
 #if HAVE_LIBFREETYPE
-  ret.set("FreeType Linkage", "with freetype");
+  ret.set(s_FreeType_Linkage, s_with_freetype);
 #elif HAVE_LIBTTF
-  ret.set("FreeType Linkage", "with TTF library");
+  ret.set(s_FreeType_Linkage, s_with_TTF_library);
 #else
-  ret.set("FreeType Linkage", "with unknown library");
+  ret.set(s_FreeType_Linkage, s_with_unknown_library);
 #endif
 #else
-  ret.set("FreeType Support", false);
+  ret.set(s_FreeType_Support, false);
 #endif
 
 #ifdef HAVE_LIBT1
-  ret.set("T1Lib Support", true);
+  ret.set(s_T1Lib_Support, true);
 #else
-  ret.set("T1Lib Support", false);
+  ret.set(s_T1Lib_Support, false);
 #endif
 #ifdef HAVE_GD_GIF_READ
-  ret.set("GIF Read Support", true);
+  ret.set(s_GIF_Read_Support, true);
 #else
-  ret.set("GIF Read Support", false);
+  ret.set(s_GIF_Read_Support, false);
 #endif
 #ifdef HAVE_GD_GIF_CREATE
-  ret.set("GIF Create Support", true);
+  ret.set(s_GIF_Create_Support, true);
 #else
-  ret.set("GIF Create Support", false);
+  ret.set(s_GIF_Create_Support, false);
 #endif
 #ifdef HAVE_GD_JPG
-  ret.set("JPG Support", true);
+  ret.set(s_JPG_Support, true);
 #else
-  ret.set("JPG Support", false);
+  ret.set(s_JPG_Support, false);
 #endif
 #ifdef HAVE_GD_PNG
-  ret.set("PNG Support", true);
+  ret.set(s_PNG_Support, true);
 #else
-  ret.set("PNG Support", false);
+  ret.set(s_PNG_Support, false);
 #endif
 #ifdef HAVE_GD_WBMP
-  ret.set("WBMP Support", true);
+  ret.set(s_WBMP_Support, true);
 #else
-  ret.set("WBMP Support", false);
+  ret.set(s_WBMP_Support, false);
 #endif
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-  ret.set("XPM Support", true);
+  ret.set(s_XPM_Support, true);
 #else
-  ret.set("XPM Support", false);
+  ret.set(s_XPM_Support, false);
 #endif
 #ifdef HAVE_GD_XBM
-  ret.set("XBM Support", true);
+  ret.set(s_XBM_Support, true);
 #else
-  ret.set("XBM Support", false);
+  ret.set(s_XBM_Support, false);
 #endif
 #if defined(USE_GD_JISX0208) && defined(HAVE_GD_BUNDLED)
-  ret.set("JIS-mapped Japanese Font Support", true);
+  ret.set(s_JIS_mapped_Japanese_Font_Support, true);
 #else
-  ret.set("JIS-mapped Japanese Font Support", false);
+  ret.set(s_JIS_mapped_Japanese_Font_Support, false);
 #endif
   return ret;
 }
@@ -3729,31 +3750,36 @@ Variant f_imagecolorset(CObjRef image, int index,
   }
 }
 
+static const StaticString s_red("red");
+static const StaticString s_green("green");
+static const StaticString s_blue("blue");
+static const StaticString s_alpha("alpha");
+
 Variant f_imagecolorsforindex(CObjRef image, int index) {
-  Array ret;
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
 #if HAVE_LIBGD20
   if ((index >= 0 && gdImageTrueColor(im)) ||
       (!gdImageTrueColor(im) && index >= 0 &&
        index < gdImageColorsTotal(im))) {
-    ret.set("red",  gdImageRed(im,index));
-    ret.set("green", gdImageGreen(im,index));
-    ret.set("blue", gdImageBlue(im,index));
-    ret.set("alpha", gdImageAlpha(im,index));
+    ArrayInit ret(4);
+    ret.set(s_red,  gdImageRed(im,index));
+    ret.set(s_green, gdImageGreen(im,index));
+    ret.set(s_blue, gdImageBlue(im,index));
+    ret.set(s_alpha, gdImageAlpha(im,index));
+    return ret.create();
   }
 #else
   if (col >= 0 && col < gdImageColorsTotal(im)) {
-    ret.set("red", im->red[col]);
-    ret.set("green", im->green[col]);
-    ret.set("blue", im->blue[col]);
+    ArrayInit ret(3);
+    ret.set(s_red, im->red[col]);
+    ret.set(s_green, im->green[col]);
+    ret.set(s_blue, im->blue[col]);
+    return ret.create();
   }
 #endif
-  else {
-    raise_warning("Color index %d out of range", index);
-    return false;
-  }
-  return ret;
+  raise_warning("Color index %d out of range", index);
+  return false;
 }
 
 bool f_imagegammacorrect(CObjRef image, double inputgamma,

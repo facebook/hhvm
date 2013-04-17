@@ -68,6 +68,15 @@ int64_t f_posix_getgid() {
   return getgid();
 }
 
+static const StaticString s_name("name");
+static const StaticString s_passwd("passwd");
+static const StaticString s_members("members");
+static const StaticString s_uid("uid");
+static const StaticString s_gid("gid");
+static const StaticString s_gecos("gecos");
+static const StaticString s_dir("dir");
+static const StaticString s_shell("shell");
+
 static Variant php_posix_group_to_array(int gid,
                    CStrRef gname = null_variant) {
   // Don't pass a gid *and* a gname to this.
@@ -103,12 +112,12 @@ static Variant php_posix_group_to_array(int gid,
     members.append(String(gr.gr_mem[count], CopyString));
   }
 
-  Array ret;
-  ret.set("name", String(gr.gr_name, CopyString));
-  ret.set("passwd", String(gr.gr_passwd, CopyString));
-  ret.set("members", members);
-  ret.set("gid", (int)gr.gr_gid);
-  return ret;
+  ArrayInit ret(4);
+  ret.set(s_name, String(gr.gr_name, CopyString));
+  ret.set(s_passwd, String(gr.gr_passwd, CopyString));
+  ret.set(s_members, members);
+  ret.set(s_gid, (int)gr.gr_gid);
+  return ret.create();
 }
 
 Variant f_posix_getgrgid(int gid) {
@@ -189,15 +198,15 @@ static Variant php_posix_passwd_to_array(int uid,
     return false;
   }
 
-  Array ret;
-  ret.set("name",   String(pw.pw_name,   CopyString));
-  ret.set("passwd", String(pw.pw_passwd, CopyString));
-  ret.set("uid",    (int)pw.pw_uid);
-  ret.set("gid",    (int)pw.pw_gid);
-  ret.set("gecos",  String(pw.pw_gecos,  CopyString));
-  ret.set("dir",    String(pw.pw_dir,    CopyString));
-  ret.set("shell",  String(pw.pw_shell,  CopyString));
-  return ret;
+  ArrayInit ret(7);
+  ret.set(s_name,   String(pw.pw_name,   CopyString));
+  ret.set(s_passwd, String(pw.pw_passwd, CopyString));
+  ret.set(s_uid,    (int)pw.pw_uid);
+  ret.set(s_gid,    (int)pw.pw_gid);
+  ret.set(s_gecos,  String(pw.pw_gecos,  CopyString));
+  ret.set(s_dir,    String(pw.pw_dir,    CopyString));
+  ret.set(s_shell,  String(pw.pw_shell,  CopyString));
+  return ret.create();
 }
 
 Variant f_posix_getpwnam(CStrRef username) {
@@ -353,6 +362,12 @@ String f_posix_strerror(int errnum) {
   return String(Util::safe_strerror(errnum));
 }
 
+static const StaticString s_ticks("ticks");
+static const StaticString s_utime("utime");
+static const StaticString s_stime("stime");
+static const StaticString s_cutime("cutime");
+static const StaticString s_cstime("cstime");
+
 Variant f_posix_times() {
   struct tms t;
   clock_t ticks = times(&t);
@@ -360,13 +375,13 @@ Variant f_posix_times() {
     return false;
   }
 
-  Array ret;
-  ret.set("ticks",  (int)ticks);        /* clock ticks */
-  ret.set("utime",  (int)t.tms_utime);  /* user time */
-  ret.set("stime",  (int)t.tms_stime);  /* system time */
-  ret.set("cutime", (int)t.tms_cutime); /* user time of children */
-  ret.set("cstime", (int)t.tms_cstime); /* system time of children */
-  return ret;
+  ArrayInit ret(5);
+  ret.set(s_ticks,  (int)ticks);        /* clock ticks */
+  ret.set(s_utime,  (int)t.tms_utime);  /* user time */
+  ret.set(s_stime,  (int)t.tms_stime);  /* system time */
+  ret.set(s_cutime, (int)t.tms_cutime); /* user time of children */
+  ret.set(s_cstime, (int)t.tms_cstime); /* system time of children */
+  return ret.create();
 }
 
 Variant f_posix_ttyname(CVarRef fd) {
@@ -383,6 +398,13 @@ Variant f_posix_ttyname(CVarRef fd) {
   return ttyname.setSize(strlen(p));
 }
 
+static const StaticString s_sysname("sysname");
+static const StaticString s_nodename("nodename");
+static const StaticString s_release("release");
+static const StaticString s_version("version");
+static const StaticString s_machine("machine");
+static const StaticString s_domainname("domainname");
+
 Variant f_posix_uname() {
   struct utsname u;
   if (uname(&u) < 0) {
@@ -390,13 +412,13 @@ Variant f_posix_uname() {
   }
 
   Array ret;
-  ret.set("sysname",    String(u.sysname,    CopyString));
-  ret.set("nodename",   String(u.nodename,   CopyString));
-  ret.set("release",    String(u.release,    CopyString));
-  ret.set("version",    String(u.version,    CopyString));
-  ret.set("machine",    String(u.machine,    CopyString));
+  ret.set(s_sysname,    String(u.sysname,    CopyString));
+  ret.set(s_nodename,   String(u.nodename,   CopyString));
+  ret.set(s_release,    String(u.release,    CopyString));
+  ret.set(s_version,    String(u.version,    CopyString));
+  ret.set(s_machine,    String(u.machine,    CopyString));
 #if defined(_GNU_SOURCE) && !defined(__APPLE__) && !defined(__FreeBSD__)
-  ret.set("domainname", String(u.domainname, CopyString));
+  ret.set(s_domainname, String(u.domainname, CopyString));
 #endif
   return ret;
 }

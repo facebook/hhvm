@@ -955,6 +955,15 @@ static double my_time() {
   return t;
 }
 
+static const StaticString s_total("total");
+static const StaticString s_current("current");
+static const StaticString s_filename("filename");
+static const StaticString s_name("name");
+static const StaticString s_done("done");
+static const StaticString s_temp_filename("temp_filename");
+static const StaticString s_cancel_upload("cancel_upload");
+static const StaticString s_rate("rate");
+
 #define RFC1867_TRACKING_KEY_MAXLEN 63
 #define RFC1867_NAME_MAXLEN 63
 #define RFC1867_FILENAME_MAXLEN 127
@@ -1028,14 +1037,14 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       len = strlen(data->name);
       if (len > RFC1867_NAME_MAXLEN) len = RFC1867_NAME_MAXLEN;
       rfc1867ApcData->name = string(data->name, len);
-      Array track;
-      track.set("total", rfc1867ApcData->content_length);
-      track.set("current", rfc1867ApcData->bytes_processed);
-      track.set("filename", rfc1867ApcData->filename);
-      track.set("name", rfc1867ApcData->name);
-      track.set("done", 0);
-      track.set("start_time", rfc1867ApcData->start_time);
-      f_apc_store(rfc1867ApcData->tracking_key, track, 3600);
+      ArrayInit track(6);
+      track.set(s_total, rfc1867ApcData->content_length);
+      track.set(s_current, rfc1867ApcData->bytes_processed);
+      track.set(s_filename, rfc1867ApcData->filename);
+      track.set(s_name, rfc1867ApcData->name);
+      track.set(s_done, 0);
+      track.set(s_start_time, rfc1867ApcData->start_time);
+      f_apc_store(rfc1867ApcData->tracking_key, track.create(), 3600);
     }
     break;
 
@@ -1050,14 +1059,14 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
         Variant v;
         if (s_apc_store[0].get(rfc1867ApcData->tracking_key, v)) {
           if (v.is(KindOfArray)) {
-            Array track;
-            track.set("total", rfc1867ApcData->content_length);
-            track.set("current", rfc1867ApcData->bytes_processed);
-            track.set("filename", rfc1867ApcData->filename);
-            track.set("name", rfc1867ApcData->name);
-            track.set("done", 0);
-            track.set("start_time", rfc1867ApcData->start_time);
-            f_apc_store(rfc1867ApcData->tracking_key, track, 3600);
+            ArrayInit track(6);
+            track.set(s_total, rfc1867ApcData->content_length);
+            track.set(s_current, rfc1867ApcData->bytes_processed);
+            track.set(s_filename, rfc1867ApcData->filename);
+            track.set(s_name, rfc1867ApcData->name);
+            track.set(s_done, 0);
+            track.set(s_start_time, rfc1867ApcData->start_time);
+            f_apc_store(rfc1867ApcData->tracking_key, track.create(), 3600);
           }
           rfc1867ApcData->prev_bytes_processed =
             rfc1867ApcData->bytes_processed;
@@ -1073,16 +1082,16 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       rfc1867ApcData->bytes_processed = data->post_bytes_processed;
       rfc1867ApcData->cancel_upload = data->cancel_upload;
       rfc1867ApcData->temp_filename = data->temp_filename;
-      Array track;
-      track.set("total", rfc1867ApcData->content_length);
-      track.set("current", rfc1867ApcData->bytes_processed);
-      track.set("filename", rfc1867ApcData->filename);
-      track.set("name", rfc1867ApcData->name);
-      track.set("temp_filename", rfc1867ApcData->temp_filename, CopyString);
-      track.set("cancel_upload", rfc1867ApcData->cancel_upload);
-      track.set("done", 0);
-      track.set("start_time", rfc1867ApcData->start_time);
-      f_apc_store(rfc1867ApcData->tracking_key, track, 3600);
+      ArrayInit track(8);
+      track.set(s_total, rfc1867ApcData->content_length);
+      track.set(s_current, rfc1867ApcData->bytes_processed);
+      track.set(s_filename, rfc1867ApcData->filename);
+      track.set(s_name, rfc1867ApcData->name);
+      track.set(s_temp_filename, rfc1867ApcData->temp_filename, CopyString);
+      track.set(s_cancel_upload, rfc1867ApcData->cancel_upload);
+      track.set(s_done, 0);
+      track.set(s_start_time, rfc1867ApcData->start_time);
+      f_apc_store(rfc1867ApcData->tracking_key, track.create(), 3600);
     }
     break;
 
@@ -1097,16 +1106,16 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       } else {
         rfc1867ApcData->rate =
           8.0*rfc1867ApcData->bytes_processed;  /* Too quick */
-        Array track;
-        track.set("total", rfc1867ApcData->content_length);
-        track.set("current", rfc1867ApcData->bytes_processed);
-        track.set("rate", rfc1867ApcData->rate);
-        track.set("filename", rfc1867ApcData->filename);
-        track.set("name", rfc1867ApcData->name);
-        track.set("cancel_upload", rfc1867ApcData->cancel_upload);
-        track.set("done", 1);
-        track.set("start_time", rfc1867ApcData->start_time);
-        f_apc_store(rfc1867ApcData->tracking_key, track, 3600);
+        ArrayInit track(8);
+        track.set(s_total, rfc1867ApcData->content_length);
+        track.set(s_current, rfc1867ApcData->bytes_processed);
+        track.set(s_rate, rfc1867ApcData->rate);
+        track.set(s_filename, rfc1867ApcData->filename);
+        track.set(s_name, rfc1867ApcData->name);
+        track.set(s_cancel_upload, rfc1867ApcData->cancel_upload);
+        track.set(s_done, 1);
+        track.set(s_start_time, rfc1867ApcData->start_time);
+        f_apc_store(rfc1867ApcData->tracking_key, track.create(), 3600);
       }
     }
     break;

@@ -370,6 +370,11 @@ bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
   return true;
 }
 
+static const StaticString s_l_onoff("l_onoff");
+static const StaticString s_l_linger("l_linger");
+static const StaticString s_sec("sec");
+static const StaticString s_usec("usec");
+
 Variant f_socket_get_option(CObjRef socket, int level, int optname) {
   Socket *sock = socket.getTyped<Socket>();
   Array ret;
@@ -386,8 +391,8 @@ Variant f_socket_get_option(CObjRef socket, int level, int optname) {
         return false;
       }
 
-      ret.set("l_onoff", linger_val.l_onoff);
-      ret.set("l_linger", linger_val.l_linger);
+      ret.set(s_l_onoff, linger_val.l_onoff);
+      ret.set(s_l_linger, linger_val.l_linger);
     }
     break;
 
@@ -400,8 +405,8 @@ Variant f_socket_get_option(CObjRef socket, int level, int optname) {
         SOCKET_ERROR(sock, "unable to retrieve socket option", errno);
         return false;
       }
-      ret.set("sec",  (int)tv.tv_sec);
-      ret.set("usec", (int)tv.tv_usec);
+      ret.set(s_sec,  (int)tv.tv_sec);
+      ret.set(s_usec, (int)tv.tv_usec);
     }
     break;
 
@@ -456,11 +461,6 @@ bool f_socket_set_nonblock(CObjRef socket) {
   Socket *sock = socket.getTyped<Socket>();
   return sock->setBlocking(false);
 }
-
-static const StaticString s_l_onoff("l_onoff");
-static const StaticString s_l_linger("l_linger");
-static const StaticString s_sec("sec");
-static const StaticString s_usec("usec");
 
 bool f_socket_set_option(CObjRef socket, int level, int optname,
                          CVarRef optval) {
@@ -1110,6 +1110,15 @@ String ipaddr_convert(struct sockaddr *addr, int addrlen) {
   return String(buffer, CopyString);
 }
 
+static const StaticString s_family("family");
+static const StaticString s_socktype("socktype");
+static const StaticString s_protocol("protocol");
+static const StaticString s_address("address");
+static const StaticString s_port("port");
+static const StaticString s_flow_info("flow_info");
+static const StaticString s_scope_id("scope_id");
+static const StaticString s_sockaddr("sockaddr");
+
 Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
                       int socktype /* = 0 */, int protocol /* = 0 */,
                       int flags /* = 0 */) {
@@ -1147,9 +1156,9 @@ Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
     Array data = Array::Create();
     Array sockinfo = Array::Create();
 
-    data.set("family", res->ai_family);
-    data.set("socktype", res->ai_socktype);
-    data.set("protocol", res->ai_protocol);
+    data.set(s_family, res->ai_family);
+    data.set(s_socktype, res->ai_socktype);
+    data.set(s_protocol, res->ai_protocol);
 
     switch (res->ai_addr->sa_family) {
       case AF_INET:
@@ -1158,8 +1167,8 @@ Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
         String buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
         if (!buffer.empty()) {
           a = (struct sockaddr_in *)res->ai_addr;
-          sockinfo.set("address", buffer);
-          sockinfo.set("port", ntohs(a->sin_port));
+          sockinfo.set(s_address, buffer);
+          sockinfo.set(s_port, ntohs(a->sin_port));
         }
         break;
       }
@@ -1169,16 +1178,16 @@ Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
         String buffer = ipaddr_convert(res->ai_addr, sizeof(*a));
         if (!buffer.empty()) {
           a = (struct sockaddr_in6 *)res->ai_addr;
-          sockinfo.set("address", buffer);
-          sockinfo.set("port", ntohs(a->sin6_port));
-          sockinfo.set("flow_info", (int32_t)a->sin6_flowinfo);
-          sockinfo.set("scope_id", (int32_t)a->sin6_scope_id);
+          sockinfo.set(s_address, buffer);
+          sockinfo.set(s_port, ntohs(a->sin6_port));
+          sockinfo.set(s_flow_info, (int32_t)a->sin6_flowinfo);
+          sockinfo.set(s_scope_id, (int32_t)a->sin6_scope_id);
         }
         break;
       }
     }
 
-    data.set("sockaddr", (sockinfo.empty() ? NULL : sockinfo));
+    data.set(s_sockaddr, (sockinfo.empty() ? nullptr : sockinfo));
 
     ret.append(data);
   }

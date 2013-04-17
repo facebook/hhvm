@@ -757,7 +757,7 @@ static UserSessionModule s_user_session_module;
 
 class SessionSerializer {
 public:
-  SessionSerializer(const char *name) : m_name(name) {
+  explicit SessionSerializer(const char *name) : m_name(name) {
     RegisteredSerializers.push_back(this);
   }
   virtual ~SessionSerializer() {}
@@ -1303,14 +1303,20 @@ void f_session_set_cookie_params(int64_t lifetime,
   }
 }
 
+static const StaticString s_lifetime("lifetime");
+static const StaticString s_path("path");
+static const StaticString s_domain("domain");
+static const StaticString s_secure("secure");
+static const StaticString s_httponly("httponly");
+
 Array f_session_get_cookie_params() {
-  Array ret = Array::Create();
-  ret.set("lifetime", PS(cookie_lifetime));
-  ret.set("path",     String(PS(cookie_path)));
-  ret.set("domain",   String(PS(cookie_domain)));
-  ret.set("secure",   PS(cookie_secure));
-  ret.set("httponly", PS(cookie_httponly));
-  return ret;
+  ArrayInit ret(5);
+  ret.set(s_lifetime, PS(cookie_lifetime));
+  ret.set(s_path,     String(PS(cookie_path)));
+  ret.set(s_domain,   String(PS(cookie_domain)));
+  ret.set(s_secure,   PS(cookie_secure));
+  ret.set(s_httponly, PS(cookie_httponly));
+  return ret.create();
 }
 
 String f_session_name(CStrRef newname /* = null_string */) {

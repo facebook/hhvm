@@ -1011,6 +1011,25 @@ Variant f_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv /* = 
   return false;
 }
 
+static const StaticString s_decimal_point("decimal_point");
+static const StaticString s_thousands_sep("thousands_sep");
+static const StaticString s_int_curr_symbol("int_curr_symbol");
+static const StaticString s_currency_symbol("currency_symbol");
+static const StaticString s_mon_decimal_point("mon_decimal_point");
+static const StaticString s_mon_thousands_sep("mon_thousands_sep");
+static const StaticString s_positive_sign("positive_sign");
+static const StaticString s_negative_sign("negative_sign");
+static const StaticString s_int_frac_digits("int_frac_digits");
+static const StaticString s_frac_digits("frac_digits");
+static const StaticString s_p_cs_precedes("p_cs_precedes");
+static const StaticString s_p_sep_by_space("p_sep_by_space");
+static const StaticString s_n_cs_precedes("n_cs_precedes");
+static const StaticString s_n_sep_by_space("n_sep_by_space");
+static const StaticString s_p_sign_posn("p_sign_posn");
+static const StaticString s_n_sign_posn("n_sign_posn");
+static const StaticString s_grouping("grouping");
+static const StaticString s_mon_grouping("mon_grouping");
+
 Array f_localeconv() {
   struct lconv currlocdata;
   {
@@ -1020,7 +1039,7 @@ Array f_localeconv() {
   }
 
   Array ret;
-#define SET_LOCALE_STRING(x)  ret.set(#x, String(currlocdata.x, CopyString))
+#define SET_LOCALE_STRING(x) ret.set(s_ ## x, String(currlocdata.x, CopyString))
   SET_LOCALE_STRING(decimal_point);
   SET_LOCALE_STRING(thousands_sep);
   SET_LOCALE_STRING(int_curr_symbol);
@@ -1029,7 +1048,7 @@ Array f_localeconv() {
   SET_LOCALE_STRING(mon_thousands_sep);
   SET_LOCALE_STRING(positive_sign);
   SET_LOCALE_STRING(negative_sign);
-#define SET_LOCALE_INTEGER(x) ret.set(#x, currlocdata.x)
+#define SET_LOCALE_INTEGER(x) ret.set(s_ ## x, currlocdata.x)
   SET_LOCALE_INTEGER(int_frac_digits);
   SET_LOCALE_INTEGER(frac_digits);
   SET_LOCALE_INTEGER(p_cs_precedes);
@@ -1046,14 +1065,14 @@ Array f_localeconv() {
   for (int i = 0; i < len; i++) {
     grouping.set(i, currlocdata.grouping[i]);
   }
-  ret.set("grouping", grouping);
+  ret.set(s_grouping, grouping);
 
   /* Grab the monetary grouping data out of the array */
   len = strlen(currlocdata.mon_grouping);
   for (int i = 0; i < len; i++) {
     mon_grouping.set(i, currlocdata.mon_grouping[i]);
   }
-  ret.set("mon_grouping", mon_grouping);
+  ret.set(s_mon_grouping, mon_grouping);
 
   return ret;
 }
@@ -1086,6 +1105,9 @@ static const HtmlBasicEntity basic_entities[] = {
   { '>',  "&gt;",     4,  0 },
   { 0, NULL, 0, 0 }
 };
+
+static const StaticString s_amp("&");
+static const StaticString s_ampsemi("&amp;");
 
 Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_ENT_COMPAT */) {
   static entity_charset charset = determine_charset(nullptr); // get default one
@@ -1130,7 +1152,7 @@ Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_E
       ind[0] = (unsigned char)basic_entities[j].charcode;
       ret.set(String(ind, 2, CopyString), basic_entities[j].entity);
     }
-    ret.set("&", "&amp;");
+    ret.set(s_amp, s_ampsemi);
     break;
   }
 

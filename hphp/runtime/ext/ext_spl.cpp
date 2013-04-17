@@ -34,65 +34,70 @@ static StaticString s_next("next");
 static StaticString s_current("current");
 static StaticString s_key("key");
 
-#define SPL_ADD_CLASS(cls) ret.set(#cls, #cls)
+static const StaticString spl_classes[] = {
+  StaticString("AppendIterator"),
+  StaticString("ArrayIterator"),
+  StaticString("ArrayObject"),
+  StaticString("BadFunctionCallException"),
+  StaticString("BadMethodCallException"),
+  StaticString("CachingIterator"),
+  StaticString("Countable"),
+  StaticString("DirectoryIterator"),
+  StaticString("DomainException"),
+  StaticString("EmptyIterator"),
+  StaticString("FilesystemIterator"),
+  StaticString("FilterIterator"),
+  StaticString("GlobIterator"),
+  StaticString("InfiniteIterator"),
+  StaticString("InvalidArgumentException"),
+  StaticString("IteratorIterator"),
+  StaticString("LengthException"),
+  StaticString("LimitIterator"),
+  StaticString("LogicException"),
+  StaticString("MultipleIterator"),
+  StaticString("NoRewindIterator"),
+  StaticString("OuterIterator"),
+  StaticString("OutOfBoundsException"),
+  StaticString("OutOfRangeException"),
+  StaticString("OverflowException"),
+  StaticString("ParentIterator"),
+  StaticString("RangeException"),
+  StaticString("RecursiveArrayIterator"),
+  StaticString("RecursiveCachingIterator"),
+  StaticString("RecursiveDirectoryIterator"),
+  StaticString("RecursiveFilterIterator"),
+  StaticString("RecursiveIterator"),
+  StaticString("RecursiveIteratorIterator"),
+  StaticString("RecursiveRegexIterator"),
+  StaticString("RecursiveTreeIterator"),
+  StaticString("RegexIterator"),
+  StaticString("RuntimeException"),
+  StaticString("SeekableIterator"),
+  StaticString("SplDoublyLinkedList"),
+  StaticString("SplFileInfo"),
+  StaticString("SplFileObject"),
+  StaticString("SplFixedArray"),
+  StaticString("SplHeap"),
+  StaticString("SplMinHeap"),
+  StaticString("SplMaxHeap"),
+  StaticString("SplObjectStorage"),
+  StaticString("SplObserver"),
+  StaticString("SplPriorityQueue"),
+  StaticString("SplQueue"),
+  StaticString("SplStack"),
+  StaticString("SplSubject"),
+  StaticString("SplTempFileObject"),
+  StaticString("UnderflowException"),
+  StaticString("UnexpectedValueException"),
+};
 
 Array f_spl_classes() {
-  Array ret;
-  SPL_ADD_CLASS(AppendIterator);
-  SPL_ADD_CLASS(ArrayIterator);
-  SPL_ADD_CLASS(ArrayObject);
-  SPL_ADD_CLASS(BadFunctionCallException);
-  SPL_ADD_CLASS(BadMethodCallException);
-  SPL_ADD_CLASS(CachingIterator);
-  SPL_ADD_CLASS(Countable);
-  SPL_ADD_CLASS(DirectoryIterator);
-  SPL_ADD_CLASS(DomainException);
-  SPL_ADD_CLASS(EmptyIterator);
-  SPL_ADD_CLASS(FilesystemIterator);
-  SPL_ADD_CLASS(FilterIterator);
-  SPL_ADD_CLASS(GlobIterator);
-  SPL_ADD_CLASS(InfiniteIterator);
-  SPL_ADD_CLASS(InvalidArgumentException);
-  SPL_ADD_CLASS(IteratorIterator);
-  SPL_ADD_CLASS(LengthException);
-  SPL_ADD_CLASS(LimitIterator);
-  SPL_ADD_CLASS(LogicException);
-  SPL_ADD_CLASS(MultipleIterator);
-  SPL_ADD_CLASS(NoRewindIterator);
-  SPL_ADD_CLASS(OuterIterator);
-  SPL_ADD_CLASS(OutOfBoundsException);
-  SPL_ADD_CLASS(OutOfRangeException);
-  SPL_ADD_CLASS(OverflowException);
-  SPL_ADD_CLASS(ParentIterator);
-  SPL_ADD_CLASS(RangeException);
-  SPL_ADD_CLASS(RecursiveArrayIterator);
-  SPL_ADD_CLASS(RecursiveCachingIterator);
-  SPL_ADD_CLASS(RecursiveDirectoryIterator);
-  SPL_ADD_CLASS(RecursiveFilterIterator);
-  SPL_ADD_CLASS(RecursiveIterator);
-  SPL_ADD_CLASS(RecursiveIteratorIterator);
-  SPL_ADD_CLASS(RecursiveRegexIterator);
-  SPL_ADD_CLASS(RecursiveTreeIterator);
-  SPL_ADD_CLASS(RegexIterator);
-  SPL_ADD_CLASS(RuntimeException);
-  SPL_ADD_CLASS(SeekableIterator);
-  SPL_ADD_CLASS(SplDoublyLinkedList);
-  SPL_ADD_CLASS(SplFileInfo);
-  SPL_ADD_CLASS(SplFileObject);
-  SPL_ADD_CLASS(SplFixedArray);
-  SPL_ADD_CLASS(SplHeap);
-  SPL_ADD_CLASS(SplMinHeap);
-  SPL_ADD_CLASS(SplMaxHeap);
-  SPL_ADD_CLASS(SplObjectStorage);
-  SPL_ADD_CLASS(SplObserver);
-  SPL_ADD_CLASS(SplPriorityQueue);
-  SPL_ADD_CLASS(SplQueue);
-  SPL_ADD_CLASS(SplStack);
-  SPL_ADD_CLASS(SplSubject);
-  SPL_ADD_CLASS(SplTempFileObject);
-  SPL_ADD_CLASS(UnderflowException);
-  SPL_ADD_CLASS(UnexpectedValueException);
-  return ret;
+  const size_t num_classes = sizeof(spl_classes) / sizeof(spl_classes[0]);
+  ArrayInit ret(num_classes);
+  for (size_t i = 0; i < num_classes; ++i) {
+    ret.set(spl_classes[i], spl_classes[i]);
+  }
+  return ret.create();
 }
 
 void throw_spl_exception(const char *fmt, ...) {

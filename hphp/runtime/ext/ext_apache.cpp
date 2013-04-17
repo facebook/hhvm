@@ -81,31 +81,34 @@ bool f_virtual(CStrRef filename) {
   throw NotSupportedException(__func__, "apache is not in use");
 }
 
-Variant f_apache_get_config() {
-  Array ret;
-  int workers, queued;
+static const StaticString s_restart_time("restart_time");
+static const StaticString s_max_clients("max_clients");
+static const StaticString s_active_clients("active_clients");
+static const StaticString s_queued_requests("queued_requests");
+static const StaticString s_child_status("child_status");
 
-  workers = queued = 0;
+Variant f_apache_get_config() {
+  int workers = 0, queued = 0;
   if (HttpServer::Server) {
     workers = HttpServer::Server->getPageServer()->getActiveWorker();
     queued = HttpServer::Server->getPageServer()->getQueuedJobs();
   }
-
-  ret.set("restart_time", HttpServer::StartTime);
-  ret.set("max_clients", RuntimeOption::ServerThreadCount);
-  ret.set("active_clients", workers);
-  ret.set("queued_requests", queued);
-  return ret;
+  ArrayInit ret(4);
+  ret.set(s_restart_time, HttpServer::StartTime);
+  ret.set(s_max_clients, RuntimeOption::ServerThreadCount);
+  ret.set(s_active_clients, workers);
+  ret.set(s_queued_requests, queued);
+  return ret.create();
 }
 
 Variant f_apache_get_scoreboard() {
-  Array ret;
   Array child_status;
   for (int i = 0; i < RuntimeOption::ServerThreadCount; i++) {
     child_status.set(i, 2);
   }
-  ret.set("child_status", child_status);
-  return ret;
+  ArrayInit ret(1);
+  ret.set(s_child_status, child_status);
+  return ret.create();
 }
 
 Variant f_apache_get_rewrite_rules() {

@@ -1010,9 +1010,14 @@ Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static const StaticString s_affected("affected");
+static const StaticString s_result("result");
+static const StaticString s_error("error");
+static const StaticString s_errno("errno");
+
 static void output_dataset(Array &ret, int affected, DBDataSet &ds,
                            const DBConn::ErrorInfoMap &errors) {
-  ret.set("affected", affected);
+  ret.set(s_affected, affected);
 
   Array rows;
   MYSQL_FIELD *fields = ds.getFields();
@@ -1026,7 +1031,7 @@ static void output_dataset(Array &ret, int affected, DBDataSet &ds,
     }
     rows.append(row);
   }
-  ret.set("result", rows);
+  ret.set(s_result, rows);
 
   if (!errors.empty()) {
     Array error, codes;
@@ -1035,8 +1040,8 @@ static void output_dataset(Array &ret, int affected, DBDataSet &ds,
       error.set(iter->first, String(iter->second.msg));
       codes.set(iter->first, iter->second.code);
     }
-    ret.set("error", error);
-    ret.set("errno", codes);
+    ret.set(s_error, error);
+    ret.set(s_errno, codes);
   }
 }
 
@@ -1141,8 +1146,6 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
   }
   return ret;
 }
-
-static const StaticString s_error("error");
 
 Array f_fb_crossall_query(CStrRef sql, int max_thread /* = 50 */,
                           bool retry_query_on_fail /* = true */,

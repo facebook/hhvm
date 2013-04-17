@@ -550,6 +550,16 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam *param,
   return true;
 }
 
+static const StaticString s_native_type("native_type");
+static const StaticString s_null("null");
+static const StaticString s_double("double");
+static const StaticString s_blob("blob");
+static const StaticString s_string("string");
+static const StaticString s_integer("integer");
+static const StaticString s_sqlite_decl_type("sqlite:decl_type");
+static const StaticString s_table("table");
+static const StaticString s_flags("flags");
+
 bool PDOSqliteStatement::getColumnMeta(int64_t colno, Array &ret) {
   if (!m_stmt) {
     return false;
@@ -563,26 +573,26 @@ bool PDOSqliteStatement::getColumnMeta(int64_t colno, Array &ret) {
   ret = Array::Create();
   Array flags = Array::Create();
   switch (sqlite3_column_type(m_stmt, colno)) {
-  case SQLITE_NULL:    ret.set("native_type", "null");    break;
-  case SQLITE_FLOAT:   ret.set("native_type", "double");  break;
-  case SQLITE_BLOB:    flags.append("blob");
-  case SQLITE_TEXT:    ret.set("native_type", "string");  break;
-  case SQLITE_INTEGER: ret.set("native_type", "integer"); break;
+  case SQLITE_NULL:    ret.set(s_native_type, s_null);    break;
+  case SQLITE_FLOAT:   ret.set(s_native_type, s_double);  break;
+  case SQLITE_BLOB:    flags.append(s_blob);
+  case SQLITE_TEXT:    ret.set(s_native_type, s_string);  break;
+  case SQLITE_INTEGER: ret.set(s_native_type, s_integer); break;
   }
 
   const char *str = sqlite3_column_decltype(m_stmt, colno);
   if (str) {
-    ret.set("sqlite:decl_type", String((char *)str, CopyString));
+    ret.set(s_sqlite_decl_type, String((char *)str, CopyString));
   }
 
 #ifdef SQLITE_ENABLE_COLUMN_METADATA
   str = sqlite3_column_table_name(m_stmt, colno);
   if (str) {
-    ret.set("table", String((char *)str, CopyString));
+    ret.set(s_table, String((char *)str, CopyString));
   }
 #endif
 
-  ret.set("flags", flags);
+  ret.set(s_flags, flags);
   return true;
 }
 

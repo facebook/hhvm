@@ -226,8 +226,7 @@ class esyscall {
 public:
   int num;
 
-  esyscall(const char *syscall_name)
-  {
+  explicit esyscall(const char *syscall_name) {
     num = -1;
     char format[strlen(syscall_name) + sizeof(" %d")];
     sprintf(format, "%s %%d", syscall_name);
@@ -520,6 +519,15 @@ enum Flag {
   TrackMalloc           = 0x80,
 };
 
+static const StaticString s_ct("ct");
+static const StaticString s_wt("wt");
+static const StaticString s_cpu("cpu");
+static const StaticString s_mu("mu");
+static const StaticString s_pmu("pmu");
+static const StaticString s_alloc("alloc");
+static const StaticString s_free("free");
+static const StaticString s_compressed_trace("(compressed_trace)");
+
 /**
  * Maintain profiles of a running stack.
  */
@@ -582,20 +590,20 @@ public:
   static void returnVals(phpret& ret, const Name& name, const Counts& counts,
                   int flags, int64_t MHz)
   {
-    Array arr;
-    arr.set("ct",  counts.count);
-    arr.set("wt",  to_usec(counts.wall_time, MHz));
+    ArrayInit arr(5);
+    arr.set(s_ct,  counts.count);
+    arr.set(s_wt,  to_usec(counts.wall_time, MHz));
     if (flags & TrackCPU) {
-      arr.set("cpu", to_usec(counts.cpu, MHz, true));
+      arr.set(s_cpu, to_usec(counts.cpu, MHz, true));
     }
     if (flags & TrackMemory) {
-      arr.set("mu",  counts.memory);
-      arr.set("pmu", counts.peak_memory);
+      arr.set(s_mu,  counts.memory);
+      arr.set(s_pmu, counts.peak_memory);
     } else if (flags & TrackMalloc) {
-      arr.set("alloc", counts.memory);
-      arr.set("free", counts.peak_memory);
+      arr.set(s_alloc, counts.memory);
+      arr.set(s_free, counts.peak_memory);
     }
-    ret.set(String(name), arr);
+    ret.set(String(name), arr.create());
   }
 
   template<class phpret, class StatsMap>
@@ -799,7 +807,7 @@ private:
 public:
 
 public:
-  HierarchicalProfiler(int flags) : m_flags(flags) {
+  explicit HierarchicalProfiler(int flags) : m_flags(flags) {
   }
 
   virtual void beginFrameEx() {
@@ -1089,8 +1097,8 @@ public:
   typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
 
-  TraceProfiler(int flags) : Profiler(), nTrace(0),
-                             full(false), m_flags(flags) {
+  explicit TraceProfiler(int flags)
+    : Profiler(), nTrace(0), full(false), m_flags(flags) {
     if (pthread_mutex_trylock(&s_in_use)) {
       m_successful = false;
     } else {
@@ -1181,7 +1189,7 @@ public:
     if (m_flags & GetTrace) {
       String traceData;
       packTraceData(fmap, traceData, m_MHz);
-      ret.set("(compressed_trace)", traceData);
+      ret.set(s_compressed_trace, traceData);
       fprintf(stderr, "%d bytes\n", traceData.size());
     }
     CountMap trace_buffer;

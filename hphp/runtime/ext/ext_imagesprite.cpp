@@ -611,6 +611,12 @@ Object c_ImageSprite::t_loadimages(bool block /* = false */) {
           std::vector<ImageSprite::Block*>, \
           ImageSprite::BlockAreaComparator>
 
+static const StaticString s_x("x");
+static const StaticString s_y("y");
+static const StaticString s_id("id");
+static const StaticString s_images("images");
+static const StaticString s_sprite("sprite");
+
 void c_ImageSprite::map() {
   if (same(m_current, true)) {
     return;
@@ -966,27 +972,27 @@ void c_ImageSprite::map() {
 
   for(; iter != end; iter++) {
     ImageSprite::Image *img = *iter;
-    Array map;
-    map.set("x", img->m_x);
-    map.set("y", img->m_y);
-    map.set("width", img->m_width);
-    map.set("height", img->m_height);
-    map.set("id", f_crc32(img->m_path));
-    map.set("padding_top", img->m_padding[IMAGESPRITE_PAD_TOP]);
-    map.set("padding_right", img->m_padding[IMAGESPRITE_PAD_RIGHT]);
-    map.set("padding_bottom", img->m_padding[IMAGESPRITE_PAD_BOTTOM]);
-    map.set("padding_left", img->m_padding[IMAGESPRITE_PAD_LEFT]);
-    map.set("flush_left", img->m_flush[IMAGESPRITE_FLUSH_LEFT]);
-    map.set("flush_right", img->m_flush[IMAGESPRITE_FLUSH_RIGHT]);
-    image_map.set(img->m_path, map);
+    ArrayInit map(11);
+    map.set(s_x, img->m_x);
+    map.set(s_y, img->m_y);
+    map.set(s_width, img->m_width);
+    map.set(s_height, img->m_height);
+    map.set(s_id, f_crc32(img->m_path));
+    map.set(s_padding_top, img->m_padding[IMAGESPRITE_PAD_TOP]);
+    map.set(s_padding_right, img->m_padding[IMAGESPRITE_PAD_RIGHT]);
+    map.set(s_padding_bottom, img->m_padding[IMAGESPRITE_PAD_BOTTOM]);
+    map.set(s_padding_left, img->m_padding[IMAGESPRITE_PAD_LEFT]);
+    map.set(s_flush_left, img->m_flush[IMAGESPRITE_FLUSH_LEFT]);
+    map.set(s_flush_right, img->m_flush[IMAGESPRITE_FLUSH_RIGHT]);
+    image_map.set(img->m_path, map.create());
   }
 
   m_width = width;
   m_height = height;
 
-  m_mapping.set("images", image_map);
-  m_mapping.set("width", width);
-  m_mapping.set("height", height);
+  m_mapping.set(s_images, image_map);
+  m_mapping.set(s_width, width);
+  m_mapping.set(s_height, height);
 
   m_current = true;
 }
@@ -1067,9 +1073,6 @@ String c_ImageSprite::t_output(CStrRef output_file /* = null_string*/,
   }
 }
 
-static const StaticString s_x("x");
-static const StaticString s_y("y");
-
 String c_ImageSprite::t_css(CStrRef css_namespace,
                             CStrRef sprite_file /* = null_string */,
                             CStrRef output_file /* = null_string */,
@@ -1140,9 +1143,6 @@ String c_ImageSprite::t_css(CStrRef css_namespace,
     return null_string;
   }
 }
-
-static const StaticString s_images("images");
-static const StaticString s_sprite("sprite");
 
 Array c_ImageSprite::t_geterrors() {
   Array ret = Array::Create();

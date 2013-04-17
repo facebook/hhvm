@@ -366,6 +366,12 @@ int BaseExecutionContext::obGetLevel() {
   return m_buffers.size() - m_protectedLevel;
 }
 
+static const StaticString s_level("level");
+static const StaticString s_type("type");
+static const StaticString s_name("name");
+static const StaticString s_args("args");
+static const StaticString s_default_output_handler("default output handler");
+
 Array BaseExecutionContext::obGetStatus(bool full) {
   Array ret = Array::Create();
   std::list<OutputBuffer*>::const_iterator iter = m_buffers.begin();
@@ -373,13 +379,13 @@ Array BaseExecutionContext::obGetStatus(bool full) {
   int level = 0;
   for (; iter != m_buffers.end(); ++iter, ++level) {
     Array status;
-    status.set("level", level);
+    status.set(s_level, level);
     if (level < m_protectedLevel) {
-      status.set("type", 1);
-      status.set("name", "default output handler");
+      status.set(s_type, 1);
+      status.set(s_name, s_default_output_handler);
     } else {
-      status.set("type", 0);
-      status.set("name", (*iter)->handler);
+      status.set(s_type, 0);
+      status.set(s_name, (*iter)->handler);
     }
 
     if (full) {
@@ -434,9 +440,6 @@ void BaseExecutionContext::resetCurrentBuffer() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // program executions
-
-static const StaticString s_name("name");
-static const StaticString s_args("args");
 
 void BaseExecutionContext::registerShutdownFunction(CVarRef function,
                                                     Array arguments,

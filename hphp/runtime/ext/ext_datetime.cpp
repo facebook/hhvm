@@ -89,15 +89,20 @@ String c_DateTime::t_format(CStrRef format) {
   return m_dt->toString(format, false);
 }
 
+static const StaticString s_warning_count("warning_count");
+static const StaticString s_warnings("warnings");
+static const StaticString s_error_count("error_count");
+static const StaticString s_errors("errors");
+
 Array c_DateTime::ti_getlasterrors(const char* cls ) {
   Array errors = DateTime::getLastErrors();
   Array warnings = DateTime::getLastWarnings();
   Array ret = Array::Create();
 
-  ret.add("warning_count", warnings.size());
-  ret.add("warnings", warnings);
-  ret.add("error_count", errors.size());
-  ret.add("errors", errors);
+  ret.add(s_warning_count, warnings.size());
+  ret.add(s_warnings, warnings);
+  ret.add(s_error_count, errors.size());
+  ret.add(s_errors, errors);
 
   return ret;
 }
@@ -228,16 +233,25 @@ void c_DateInterval::t___construct(CStrRef interval_spec) {
   }
 }
 
+static const StaticString s_y("y");
+static const StaticString s_m("m");
+static const StaticString s_d("d");
+static const StaticString s_h("h");
+static const StaticString s_i("i");
+static const StaticString s_s("s");
+static const StaticString s_invert("invert");
+static const StaticString s_days("days");
+
 Variant c_DateInterval::t___get(Variant member) {
   if (member.isString()) {
-    if (member.same("y"))      return m_di->getYears();
-    if (member.same("m"))      return m_di->getMonths();
-    if (member.same("d"))      return m_di->getDays();
-    if (member.same("h"))      return m_di->getHours();
-    if (member.same("i"))      return m_di->getMinutes();
-    if (member.same("s"))      return m_di->getSeconds();
-    if (member.same("invert")) return m_di->isInverted();
-    if (member.same("days")) {
+    if (member.same(s_y))      return m_di->getYears();
+    if (member.same(s_m))      return m_di->getMonths();
+    if (member.same(s_d))      return m_di->getDays();
+    if (member.same(s_h))      return m_di->getHours();
+    if (member.same(s_i))      return m_di->getMinutes();
+    if (member.same(s_s))      return m_di->getSeconds();
+    if (member.same(s_invert)) return m_di->isInverted();
+    if (member.same(s_days)) {
       if (m_di->haveTotalDays()) {
         return m_di->getTotalDays();
       } else {
@@ -253,17 +267,35 @@ Variant c_DateInterval::t___get(Variant member) {
 
 Variant c_DateInterval::t___set(Variant member, Variant value) {
   if (member.isString()) {
-    if (member.same("y")) { m_di->setYears(value.toInt64());   return uninit_null(); }
-    if (member.same("m")) { m_di->setMonths(value.toInt64());  return uninit_null(); }
-    if (member.same("d")) { m_di->setDays(value.toInt64());    return uninit_null(); }
-    if (member.same("h")) { m_di->setHours(value.toInt64());   return uninit_null(); }
-    if (member.same("i")) { m_di->setMinutes(value.toInt64()); return uninit_null(); }
-    if (member.same("s")) { m_di->setSeconds(value.toInt64()); return uninit_null(); }
-    if (member.same("invert")) {
+    if (member.same(s_y)) {
+      m_di->setYears(value.toInt64());
+      return uninit_null();
+    }
+    if (member.same(s_m)) {
+      m_di->setMonths(value.toInt64());
+      return uninit_null();
+    }
+    if (member.same(s_d)) {
+      m_di->setDays(value.toInt64());
+      return uninit_null();
+    }
+    if (member.same(s_h)) {
+      m_di->setHours(value.toInt64());
+      return uninit_null();
+    }
+    if (member.same(s_i)) {
+      m_di->setMinutes(value.toInt64());
+      return uninit_null();
+    }
+    if (member.same(s_s)) {
+      m_di->setSeconds(value.toInt64());
+      return uninit_null();
+    }
+    if (member.same(s_invert)) {
       m_di->setInverted(value.toBoolean());
       return uninit_null();
     }
-    if (member.same("days")) {
+    if (member.same(s_days)) {
       m_di->setTotalDays(value.toInt64());
       return uninit_null();
     }

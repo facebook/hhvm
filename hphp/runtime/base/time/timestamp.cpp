@@ -33,6 +33,11 @@ double TimeStamp::CurrentSecond() {
   return (double)tp.tv_sec + (double)tp.tv_usec / 1000000;
 }
 
+static const StaticString s_sec("sec");
+static const StaticString s_usec("usec");
+static const StaticString s_minuteswest("minuteswest");
+static const StaticString s_dsttime("dsttime");
+
 Array TimeStamp::CurrentTime() {
   struct timeval tp;
   gettimeofday(&tp, nullptr);
@@ -40,14 +45,14 @@ Array TimeStamp::CurrentTime() {
   timelib_time_offset *offset =
     timelib_get_time_zone_info(tp.tv_sec, TimeZone::Current()->get());
 
-  Array ret;
-  ret.set("sec", (int)tp.tv_sec);
-  ret.set("usec", (int)tp.tv_usec);
-  ret.set("minuteswest", (int)(-offset->offset / 60));
-  ret.set("dsttime", (int)offset->is_dst);
+  ArrayInit ret(4);
+  ret.set(s_sec, (int)tp.tv_sec);
+  ret.set(s_usec, (int)tp.tv_usec);
+  ret.set(s_minuteswest, (int)(-offset->offset / 60));
+  ret.set(s_dsttime, (int)offset->is_dst);
 
   timelib_time_offset_dtor(offset);
-  return ret;
+  return ret.create();
 }
 
 String TimeStamp::CurrentMicroTime() {

@@ -487,6 +487,9 @@ static int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req,
   return ret.toInt64();
 }
 
+static const StaticString s_count("count");
+static const StaticString s_dn("dn");
+
 static void get_attributes(Array &ret, LDAP *ldap,
                            LDAPMessage *ldap_result_entry, bool to_lower) {
   int num_attrib = 0;
@@ -499,7 +502,7 @@ static void get_attributes(Array &ret, LDAP *ldap,
     int num_values = ldap_count_values_len(ldap_value);
 
     Array tmp;
-    tmp.set("count", num_values);
+    tmp.set(s_count, num_values);
     for (int i = 0; i < num_values; i++) {
       tmp.append(String(ldap_value[i]->bv_val, ldap_value[i]->bv_len,
                         CopyString));
@@ -519,7 +522,7 @@ static void get_attributes(Array &ret, LDAP *ldap,
     ber_free(ber, 0);
   }
 
-  ret.set("count", num_attrib);
+  ret.set(s_count, num_attrib);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -568,7 +571,7 @@ Variant f_ldap_explode_dn(CStrRef dn, int with_attrib) {
   int count = i;
 
   Array ret;
-  ret.set("count", count);
+  ret.set(s_count, count);
   for (i = 0; i < count; i++) {
     ret.append(String(ldap_value[i], CopyString));
   }
@@ -1014,7 +1017,7 @@ Variant f_ldap_get_entries(CObjRef link, CObjRef result) {
 
   int num_entries = ldap_count_entries(ldap, res->data);
   Array ret;
-  ret.set("count", num_entries);
+  ret.set(s_count, num_entries);
   if (num_entries == 0) {
     return uninit_null();
   }
@@ -1030,7 +1033,7 @@ Variant f_ldap_get_entries(CObjRef link, CObjRef result) {
     get_attributes(tmp1, ldap, ldap_result_entry, true);
 
     char *dn = ldap_get_dn(ldap, ldap_result_entry);
-    tmp1.set("dn", String(dn, CopyString));
+    tmp1.set(s_dn, String(dn, CopyString));
     ldap_memfree(dn);
 
     ret.set(num_entries, tmp1);
@@ -1039,7 +1042,7 @@ Variant f_ldap_get_entries(CObjRef link, CObjRef result) {
     ldap_result_entry = ldap_next_entry(ldap, ldap_result_entry);
   }
 
-  ret.set("count", num_entries);
+  ret.set(s_count, num_entries);
   return ret;
 }
 
@@ -1235,7 +1238,7 @@ Variant f_ldap_get_values_len(CObjRef link, CObjRef result_entry,
     ret.append(String(ldap_value_len[i]->bv_val, ldap_value_len[i]->bv_len,
                       CopyString));
   }
-  ret.set("count", num_values);
+  ret.set(s_count, num_values);
   ldap_value_free_len(ldap_value_len);
   return ret;
 }

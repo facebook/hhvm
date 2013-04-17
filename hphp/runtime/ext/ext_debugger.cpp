@@ -317,18 +317,24 @@ Variant c_DebuggerClientCmdUser::t_xend(CObjRef cmd) {
   return ret->getUserCommand();
 }
 
+static const StaticString s_file("file");
+static const StaticString s_line("line");
+static const StaticString s_namespace("namespace");
+static const StaticString s_class("class");
+static const StaticString s_function("function");
+static const StaticString s_text("text");
+
 Variant c_DebuggerClientCmdUser::t_getcurrentlocation() {
   BreakPointInfoPtr bpi = m_client->getCurrentLocation();
-  Array ret(Array::Create());
-  if (bpi) {
-    ret.set("file",      String(bpi->m_file));
-    ret.set("line",      (int64_t)bpi->m_line1);
-    ret.set("namespace", String(bpi->getNamespace()));
-    ret.set("class",     String(bpi->getClass()));
-    ret.set("function",  String(bpi->getFunction()));
-    ret.set("text",      String(bpi->site()));
-  }
-  return ret;
+  if (!bpi) return Array::Create();
+  ArrayInit ret(6);
+  ret.set(s_file,      String(bpi->m_file));
+  ret.set(s_line,      (int64_t)bpi->m_line1);
+  ret.set(s_namespace, String(bpi->getNamespace()));
+  ret.set(s_class,     String(bpi->getClass()));
+  ret.set(s_function,  String(bpi->getFunction()));
+  ret.set(s_text,      String(bpi->site()));
+  return ret.create();
 }
 
 Variant c_DebuggerClientCmdUser::t_getstacktrace() {

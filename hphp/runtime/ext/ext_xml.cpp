@@ -362,6 +362,12 @@ static void _xml_add_to_info(XmlParser *parser, char *name) {
   parser->curtag++;
 }
 
+static const StaticString s_type("type");
+static const StaticString s_complete("complete");
+static const StaticString s_tag("tag");
+static const StaticString s_close("close");
+static const StaticString s_level("level");
+
 void _xml_endElementHandler(void *userData, const XML_Char *name) {
   XmlParser *parser = (XmlParser *)userData;
   char *tag_name;
@@ -379,19 +385,16 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
     }
 
     if (!parser->data.isNull()) {
-      Array tag;
-
       if (parser->lastwasopen) {
-        parser->ctag.set("type","complete");
+        parser->ctag.set(s_type, s_complete);
       } else {
-        tag = Array::Create();
+        ArrayInit tag(3);
         _xml_add_to_info(parser,((char*)tag_name) + parser->toffset);
-        tag.set("tag",String(((char*)tag_name) + parser->toffset, CopyString));
-        tag.set("type","close");
-        tag.set("level",parser->level);
-        parser->data.append(tag);
+        tag.set(s_tag, String(((char*)tag_name) + parser->toffset, CopyString));
+        tag.set(s_type, s_close);
+        tag.set(s_level, parser->level);
+        parser->data.append(tag.create());
       }
-
       parser->lastwasopen = 0;
     }
 

@@ -95,9 +95,8 @@ public:
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
-  CurlResource(CStrRef url) : m_exception(NULL),
-                              m_phpException(false),
-                              m_emptyPost(true) {
+  explicit CurlResource(CStrRef url)
+    : m_exception(nullptr), m_phpException(false), m_emptyPost(true) {
     m_cp = curl_easy_init();
     m_url = url;
 
@@ -143,7 +142,8 @@ public:
     }
   }
 
-  CurlResource(CurlResource *src) : m_exception(NULL), m_phpException(false) {
+  explicit CurlResource(CurlResource *src)
+    : m_exception(nullptr), m_phpException(false) {
     assert(src && src != this);
     assert(!src->m_exception);
 
@@ -764,21 +764,31 @@ Variant f_curl_copy_handle(CObjRef ch) {
   return NEWOBJ(CurlResource)(curl);
 }
 
+static const StaticString s_version_number("version_number");
+static const StaticString s_age("age");
+static const StaticString s_features("features");
+static const StaticString s_ssl_version_number("ssl_version_number");
+static const StaticString s_version("version");
+static const StaticString s_host("host");
+static const StaticString s_ssl_version("ssl_version");
+static const StaticString s_libz_version("libz_version");
+static const StaticString s_protocols("protocols");
+
 Variant f_curl_version(int uversion /* = k_CURLVERSION_NOW */) {
   curl_version_info_data *d = curl_version_info((CURLversion)uversion);
   if (d == NULL) {
     return false;
   }
 
-  Array ret;
-  ret.set("version_number",     (int)d->version_num);
-  ret.set("age",                d->age);
-  ret.set("features",           d->features);
-  ret.set("ssl_version_number", d->ssl_version_num);
-  ret.set("version",            d->version);
-  ret.set("host",               d->host);
-  ret.set("ssl_version",        d->ssl_version);
-  ret.set("libz_version",       d->libz_version);
+  ArrayInit ret(9);
+  ret.set(s_version_number,     (int)d->version_num);
+  ret.set(s_age,                d->age);
+  ret.set(s_features,           d->features);
+  ret.set(s_ssl_version_number, d->ssl_version_num);
+  ret.set(s_version,            d->version);
+  ret.set(s_host,               d->host);
+  ret.set(s_ssl_version,        d->ssl_version);
+  ret.set(s_libz_version,       d->libz_version);
 
   // Add an array of protocols
   char **p = (char **) d->protocols;
@@ -786,9 +796,8 @@ Variant f_curl_version(int uversion /* = k_CURLVERSION_NOW */) {
   while (*p != NULL) {
     protocol_list.append(String(*p++, CopyString));
   }
-  ret.set("protocols", protocol_list);
-
-  return ret;
+  ret.set(s_protocols, protocol_list);
+  return ret.create();
 }
 
 bool f_curl_setopt(CObjRef ch, int option, CVarRef value) {
@@ -816,6 +825,29 @@ Variant f_curl_exec(CObjRef ch) {
   return curl->execute();
 }
 
+static const StaticString s_url("url");
+static const StaticString s_content_type("content_type");
+static const StaticString s_http_code("http_code");
+static const StaticString s_header_size("header_size");
+static const StaticString s_request_size("request_size");
+static const StaticString s_filetime("filetime");
+static const StaticString s_ssl_verify_result("ssl_verify_result");
+static const StaticString s_redirect_count("redirect_count");
+static const StaticString s_local_port("local_port");
+static const StaticString s_total_time("total_time");
+static const StaticString s_namelookup_time("namelookup_time");
+static const StaticString s_connect_time("connect_time");
+static const StaticString s_pretransfer_time("pretransfer_time");
+static const StaticString s_size_upload("size_upload");
+static const StaticString s_size_download("size_download");
+static const StaticString s_speed_download("speed_download");
+static const StaticString s_speed_upload("speed_upload");
+static const StaticString s_download_content_length("download_content_length");
+static const StaticString s_upload_content_length("upload_content_length");
+static const StaticString s_starttransfer_time("starttransfer_time");
+static const StaticString s_redirect_time("redirect_time");
+static const StaticString s_request_header("request_header");
+
 Variant f_curl_getinfo(CObjRef ch, int opt /* = 0 */) {
   CHECK_RESOURCE(curl);
   CURL *cp = curl->get();
@@ -827,82 +859,82 @@ Variant f_curl_getinfo(CObjRef ch, int opt /* = 0 */) {
 
     Array ret;
     if (curl_easy_getinfo(cp, CURLINFO_EFFECTIVE_URL, &s_code) == CURLE_OK) {
-      ret.set("url", String(s_code, CopyString));
+      ret.set(s_url, String(s_code, CopyString));
     }
     if (curl_easy_getinfo(cp, CURLINFO_CONTENT_TYPE, &s_code) == CURLE_OK) {
       if (s_code != NULL) {
-        ret.set("content_type", String(s_code, CopyString));
+        ret.set(s_content_type, String(s_code, CopyString));
       } else {
-        ret.set("content_type", uninit_null());
+        ret.set(s_content_type, uninit_null());
       }
     }
     if (curl_easy_getinfo(cp, CURLINFO_HTTP_CODE, &l_code) == CURLE_OK) {
-      ret.set("http_code", l_code);
+      ret.set(s_http_code, l_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_HEADER_SIZE, &l_code) == CURLE_OK) {
-      ret.set("header_size", l_code);
+      ret.set(s_header_size, l_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_REQUEST_SIZE, &l_code) == CURLE_OK) {
-      ret.set("request_size", l_code);
+      ret.set(s_request_size, l_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_FILETIME, &l_code) == CURLE_OK) {
-      ret.set("filetime", l_code);
+      ret.set(s_filetime, l_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_SSL_VERIFYRESULT, &l_code) ==
         CURLE_OK) {
-      ret.set("ssl_verify_result", l_code);
+      ret.set(s_ssl_verify_result, l_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_REDIRECT_COUNT, &l_code) == CURLE_OK) {
-      ret.set("redirect_count", l_code);
+      ret.set(s_redirect_count, l_code);
     }
 #if LIBCURL_VERSION_NUM >= 0x071500
     if (curl_easy_getinfo(cp, CURLINFO_LOCAL_PORT, &l_code) == CURLE_OK) {
-      ret.set("local_port", l_code);
+      ret.set(s_local_port, l_code);
     }
 #endif
     if (curl_easy_getinfo(cp, CURLINFO_TOTAL_TIME, &d_code) == CURLE_OK) {
-      ret.set("total_time", d_code);
+      ret.set(s_total_time, d_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_NAMELOOKUP_TIME, &d_code) == CURLE_OK) {
-      ret.set("namelookup_time", d_code);
+      ret.set(s_namelookup_time, d_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_CONNECT_TIME, &d_code) == CURLE_OK) {
-      ret.set("connect_time", d_code);
+      ret.set(s_connect_time, d_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_PRETRANSFER_TIME, &d_code) ==
         CURLE_OK) {
-      ret.set("pretransfer_time", d_code);
+      ret.set(s_pretransfer_time, d_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_SIZE_UPLOAD, &d_code) == CURLE_OK) {
-      ret.set("size_upload", d_code);
+      ret.set(s_size_upload, d_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_SIZE_DOWNLOAD, &d_code) == CURLE_OK) {
-      ret.set("size_download", d_code);
+      ret.set(s_size_download, d_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_SPEED_DOWNLOAD, &d_code) == CURLE_OK) {
-      ret.set("speed_download", d_code);
+      ret.set(s_speed_download, d_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_SPEED_UPLOAD, &d_code) == CURLE_OK) {
-      ret.set("speed_upload", d_code);
+      ret.set(s_speed_upload, d_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &d_code) ==
         CURLE_OK) {
-      ret.set("download_content_length", d_code);
+      ret.set(s_download_content_length, d_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_CONTENT_LENGTH_UPLOAD, &d_code) ==
         CURLE_OK) {
-      ret.set("upload_content_length", d_code);
+      ret.set(s_upload_content_length, d_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_STARTTRANSFER_TIME, &d_code) ==
         CURLE_OK) {
-      ret.set("starttransfer_time", d_code);
+      ret.set(s_starttransfer_time, d_code);
     }
     if (curl_easy_getinfo(cp, CURLINFO_REDIRECT_TIME, &d_code) == CURLE_OK) {
-      ret.set("redirect_time", d_code);
+      ret.set(s_redirect_time, d_code);
     }
     String header = curl->getHeader();
     if (!header.empty()) {
-      ret.set("request_header", header);
+      ret.set(s_request_header, header);
     }
     return ret;
   }
@@ -1209,6 +1241,12 @@ Variant f_fb_curl_multi_fdset(CObjRef mh,
   return r;
 }
 
+static const StaticString s_msg("msg");
+static const StaticString s_result("result");
+static const StaticString s_handle("handle");
+static const StaticString s_headers("headers");
+static const StaticString s_requests("requests");
+
 Variant f_curl_multi_info_read(CObjRef mh,
                                VRefParam msgs_in_queue /* = null */) {
   CHECK_MULTI_RESOURCE(curlm);
@@ -1222,11 +1260,11 @@ Variant f_curl_multi_info_read(CObjRef mh,
   msgs_in_queue = queued_msgs;
 
   Array ret;
-  ret.set("msg", tmp_msg->msg);
-  ret.set("result", tmp_msg->data.result);
+  ret.set(s_msg, tmp_msg->msg);
+  ret.set(s_result, tmp_msg->data.result);
   Object curle = curlm->find(tmp_msg->easy_handle);
   if (!curle.isNull()) {
-    ret.set("handle", curle);
+    ret.set(s_handle, curle);
   }
   return ret;
 }
@@ -1248,7 +1286,7 @@ public:
   // overriding ResourceData
   virtual CStrRef o_getClassNameHook() const { return s_class_name; }
 
-  LibEventHttpHandle(LibEventHttpClientPtr client) : m_client(client) {
+  explicit LibEventHttpHandle(LibEventHttpClientPtr client) : m_client(client) {
   }
 
   ~LibEventHttpHandle() {
@@ -1314,22 +1352,25 @@ static LibEventHttpClientPtr prepare_client
   return client;
 }
 
+static const StaticString s_code("code");
+static const StaticString s_response("response");
+
 static Array prepare_response(LibEventHttpClientPtr client) {
   int len = 0;
   char *res = client->recv(len); // block on return
 
-  Array ret = Array::Create();
-  ret.set("code", client->getCode());
-  ret.set("response", String(res, len, AttachString));
+  ArrayInit ret(4);
+  ret.set(s_code, client->getCode());
+  ret.set(s_response, String(res, len, AttachString));
 
   Array headers = Array::Create();
   const vector<string> &responseHeaders = client->getResponseHeaders();
   for (unsigned int i = 0; i < responseHeaders.size(); i++) {
     headers.append(String(responseHeaders[i]));
   }
-  ret.set("headers", headers);
-  ret.set("requests", client->getRequests());
-  return ret;
+  ret.set(s_headers, headers);
+  ret.set(s_requests, client->getRequests());
+  return ret.create();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

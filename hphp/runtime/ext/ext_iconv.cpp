@@ -1698,27 +1698,33 @@ Variant f_iconv_mime_decode_headers(CStrRef encoded_headers,
   return ret;
 }
 
+static const StaticString s_input_encoding("input_encoding");
+static const StaticString s_output_encoding("output_encoding");
+static const StaticString s_internal_encoding("internal_encoding");
+static const StaticString s_all("all");
+
+
 Variant f_iconv_get_encoding(CStrRef type /* = "all" */) {
-  if (type == "all") {
+  if (type == s_all) {
     Array ret;
-    ret.set("input_encoding",    ICONVG(input_encoding));
-    ret.set("output_encoding",   ICONVG(output_encoding));
-    ret.set("internal_encoding", ICONVG(internal_encoding));
+    ret.set(s_input_encoding,    ICONVG(input_encoding));
+    ret.set(s_output_encoding,   ICONVG(output_encoding));
+    ret.set(s_internal_encoding, ICONVG(internal_encoding));
     return ret;
   }
-  if (type == "input_encoding")    return ICONVG(input_encoding);
-  if (type == "output_encoding")   return ICONVG(output_encoding);
-  if (type == "internal_encoding") return ICONVG(internal_encoding);
+  if (type == s_input_encoding)    return ICONVG(input_encoding);
+  if (type == s_output_encoding)   return ICONVG(output_encoding);
+  if (type == s_internal_encoding) return ICONVG(internal_encoding);
   return false;
 }
 
 bool f_iconv_set_encoding(CStrRef type, CStrRef charset) {
   if (!validate_charset(charset)) return false;
-  if (type == "input_encoding") {
+  if (type == s_input_encoding) {
     ICONVG(input_encoding) = charset;
-  } else if (type == "output_encoding") {
+  } else if (type == s_output_encoding) {
     ICONVG(output_encoding) = charset;
-  } else if (type == "internal_encoding") {
+  } else if (type == s_internal_encoding) {
     ICONVG(internal_encoding) = charset;
   } else {
     return false;

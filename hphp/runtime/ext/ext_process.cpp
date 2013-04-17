@@ -831,6 +831,15 @@ int64_t f_proc_close(CObjRef process) {
   return process.getTyped<ChildProcess>()->close();
 }
 
+static const StaticString s_command("command");
+static const StaticString s_pid("pid");
+static const StaticString s_running("running");
+static const StaticString s_signaled("signaled");
+static const StaticString s_stopped("stopped");
+static const StaticString s_exitcode("exitcode");
+static const StaticString s_termsig("termsig");
+static const StaticString s_stopsig("stopsig");
+
 Array f_proc_get_status(CObjRef process) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
 
@@ -859,16 +868,16 @@ Array f_proc_get_status(CObjRef process) {
     running = false;
   }
 
-  Array ret;
-  ret.set("command",  proc->command);
-  ret.set("pid",      proc->child);
-  ret.set("running",  running);
-  ret.set("signaled", signaled);
-  ret.set("stopped",  stopped);
-  ret.set("exitcode", exitcode);
-  ret.set("termsig",  termsig);
-  ret.set("stopsig",  stopsig);
-  return ret;
+  ArrayInit ret(8);
+  ret.set(s_command,  proc->command);
+  ret.set(s_pid,      proc->child);
+  ret.set(s_running,  running);
+  ret.set(s_signaled, signaled);
+  ret.set(s_stopped,  stopped);
+  ret.set(s_exitcode, exitcode);
+  ret.set(s_termsig,  termsig);
+  ret.set(s_stopsig,  stopsig);
+  return ret.create();
 }
 
 bool f_proc_nice(int increment) {

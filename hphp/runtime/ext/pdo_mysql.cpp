@@ -1147,6 +1147,16 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
   return true;
 }
 
+static const StaticString s_mysql_def("mysql:def");
+static const StaticString s_not_null("not_null");
+static const StaticString s_primary_key("primary_key");
+static const StaticString s_multiple_key("multiple_key");
+static const StaticString s_unique_key("unique_key");
+static const StaticString s_blob("blob");
+static const StaticString s_native_type("native_type");
+static const StaticString s_flags("flags");
+static const StaticString s_table("table");
+
 bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &return_value) {
   if (!m_result) {
     return false;
@@ -1161,30 +1171,29 @@ bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &return_value) {
 
   const MYSQL_FIELD *F = m_fields + colno;
   if (F->def) {
-    ret.set("mysql:def", String(F->def, CopyString));
+    ret.set(s_mysql_def, String(F->def, CopyString));
   }
   if (IS_NOT_NULL(F->flags)) {
-    flags.append("not_null");
+    flags.append(s_not_null);
   }
   if (IS_PRI_KEY(F->flags)) {
-    flags.append("primary_key");
+    flags.append(s_primary_key);
   }
   if (F->flags & MULTIPLE_KEY_FLAG) {
-    flags.append("multiple_key");
+    flags.append(s_multiple_key);
   }
   if (F->flags & UNIQUE_KEY_FLAG) {
-    flags.append("unique_key");
+    flags.append(s_unique_key);
   }
   if (IS_BLOB(F->flags)) {
-    flags.append("blob");
+    flags.append(s_blob);
   }
   const char *str = type_to_name_native(F->type);
   if (str) {
-    ret.set("native_type", str);
+    ret.set(s_native_type, str);
   }
-
-  ret.set("flags", flags);
-  ret.set("table", String(F->table, CopyString));
+  ret.set(s_flags, flags);
+  ret.set(s_table, String(F->table, CopyString));
   return true;
 }
 

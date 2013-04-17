@@ -389,11 +389,15 @@ void HardwareCounter::ClearPerfEvents() {
   s_counter->clearPerfEvents();
 }
 
+static const StaticString s_instructions("instructions");
+static const StaticString s_loads("loads");
+static const StaticString s_stores("stores");
+
 void HardwareCounter::getPerfEvents(Array& ret) {
-  ret.set("instructions", getInstructionCount());
+  ret.set(s_instructions, getInstructionCount());
   if (!m_countersSet) {
-    ret.set("loads", getLoadCount());
-    ret.set("stores", getStoreCount());
+    ret.set(s_loads, getLoadCount());
+    ret.set(s_stores, getStoreCount());
   }
   for (unsigned i = 0; i < m_counters.size(); i++) {
     ret.set(m_counters[i]->m_desc->data(), m_counters[i]->read());

@@ -249,11 +249,14 @@ bool c_SQLite3::t_exec(CStrRef sql) {
   return true;
 }
 
+static const StaticString s_versionString("versionString");
+static const StaticString s_versionNumber("versionNumber");
+
 Array c_SQLite3::t_version() {
-  Array ret;
-  ret.set("versionString", String((char*)sqlite3_libversion(), CopyString));
-  ret.set("versionNumber", (int64_t)sqlite3_libversion_number());
-  return ret;
+  ArrayInit ret(2);
+  ret.set(s_versionString, String((char*)sqlite3_libversion(), CopyString));
+  ret.set(s_versionNumber, (int64_t)sqlite3_libversion_number());
+  return ret.create();
 }
 
 int64_t c_SQLite3::t_lastinsertrowid() {

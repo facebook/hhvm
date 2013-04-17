@@ -94,38 +94,49 @@ static bool check_error(const char *function, int line, bool ret) {
   return ret;
 }
 
+static const StaticString s_dev("dev");
+static const StaticString s_ino("ino");
+static const StaticString s_mode("mode");
+static const StaticString s_nlink("nlink");
+static const StaticString s_uid("uid");
+static const StaticString s_gid("gid");
+static const StaticString s_rdev("rdev");
+static const StaticString s_size("size");
+static const StaticString s_atime("atime");
+static const StaticString s_mtime("mtime");
+static const StaticString s_ctime("ctime");
+static const StaticString s_blksize("blksize");
+static const StaticString s_blocks("blocks");
+
 Array stat_impl(struct stat *stat_sb) {
-  Array ret;
-
-  ret.append((int64_t)stat_sb->st_dev);
-  ret.append((int64_t)stat_sb->st_ino);
-  ret.append((int64_t)stat_sb->st_mode);
-  ret.append((int64_t)stat_sb->st_nlink);
-  ret.append((int64_t)stat_sb->st_uid);
-  ret.append((int64_t)stat_sb->st_gid);
-  ret.append((int64_t)stat_sb->st_rdev);
-  ret.append((int64_t)stat_sb->st_size);
-  ret.append((int64_t)stat_sb->st_atime);
-  ret.append((int64_t)stat_sb->st_mtime);
-  ret.append((int64_t)stat_sb->st_ctime);
-  ret.append((int64_t)stat_sb->st_blksize);
-  ret.append((int64_t)stat_sb->st_blocks);
-
-  ret.set("dev",     (int64_t)stat_sb->st_dev);
-  ret.set("ino",     (int64_t)stat_sb->st_ino);
-  ret.set("mode",    (int64_t)stat_sb->st_mode);
-  ret.set("nlink",   (int64_t)stat_sb->st_nlink);
-  ret.set("uid",     (int64_t)stat_sb->st_uid);
-  ret.set("gid",     (int64_t)stat_sb->st_gid);
-  ret.set("rdev",    (int64_t)stat_sb->st_rdev);
-  ret.set("size",    (int64_t)stat_sb->st_size);
-  ret.set("atime",   (int64_t)stat_sb->st_atime);
-  ret.set("mtime",   (int64_t)stat_sb->st_mtime);
-  ret.set("ctime",   (int64_t)stat_sb->st_ctime);
-  ret.set("blksize", (int64_t)stat_sb->st_blksize);
-  ret.set("blocks",  (int64_t)stat_sb->st_blocks);
-
-  return ret;
+  ArrayInit ret(26);
+  ret.set((int64_t)stat_sb->st_dev);
+  ret.set((int64_t)stat_sb->st_ino);
+  ret.set((int64_t)stat_sb->st_mode);
+  ret.set((int64_t)stat_sb->st_nlink);
+  ret.set((int64_t)stat_sb->st_uid);
+  ret.set((int64_t)stat_sb->st_gid);
+  ret.set((int64_t)stat_sb->st_rdev);
+  ret.set((int64_t)stat_sb->st_size);
+  ret.set((int64_t)stat_sb->st_atime);
+  ret.set((int64_t)stat_sb->st_mtime);
+  ret.set((int64_t)stat_sb->st_ctime);
+  ret.set((int64_t)stat_sb->st_blksize);
+  ret.set((int64_t)stat_sb->st_blocks);
+  ret.set(s_dev,     (int64_t)stat_sb->st_dev);
+  ret.set(s_ino,     (int64_t)stat_sb->st_ino);
+  ret.set(s_mode,    (int64_t)stat_sb->st_mode);
+  ret.set(s_nlink,   (int64_t)stat_sb->st_nlink);
+  ret.set(s_uid,     (int64_t)stat_sb->st_uid);
+  ret.set(s_gid,     (int64_t)stat_sb->st_gid);
+  ret.set(s_rdev,    (int64_t)stat_sb->st_rdev);
+  ret.set(s_size,    (int64_t)stat_sb->st_size);
+  ret.set(s_atime,   (int64_t)stat_sb->st_atime);
+  ret.set(s_mtime,   (int64_t)stat_sb->st_mtime);
+  ret.set(s_ctime,   (int64_t)stat_sb->st_ctime);
+  ret.set(s_blksize, (int64_t)stat_sb->st_blksize);
+  ret.set(s_blocks,  (int64_t)stat_sb->st_blocks);
+  return ret.create();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -825,15 +836,20 @@ Variant f_realpath(CStrRef path) {
 #define PHP_PATHINFO_EXTENSION  4
 #define PHP_PATHINFO_FILENAME   8
 
+static const StaticString s_dirname("dirname");
+static const StaticString s_basename("basename");
+static const StaticString s_extension("extension");
+static const StaticString s_filename("filename");
+
 Variant f_pathinfo(CStrRef path, int opt /* = 15 */) {
-  Array ret;
+  ArrayInit ret(4);
 
   if ((opt & PHP_PATHINFO_DIRNAME) == PHP_PATHINFO_DIRNAME) {
     String dirname = f_dirname(path);
     if (opt == PHP_PATHINFO_DIRNAME) {
       return dirname;
     }
-    ret.set("dirname", dirname);
+    ret.set(s_dirname, dirname);
   }
 
   String basename = f_basename(path);
@@ -841,7 +857,7 @@ Variant f_pathinfo(CStrRef path, int opt /* = 15 */) {
     if (opt == PHP_PATHINFO_BASENAME) {
       return basename;
     }
-    ret.set("basename", basename);
+    ret.set(s_basename, basename);
   }
 
   if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
@@ -853,7 +869,7 @@ Variant f_pathinfo(CStrRef path, int opt /* = 15 */) {
     if (opt == PHP_PATHINFO_EXTENSION) {
       return extension;
     }
-    ret.set("extension", extension);
+    ret.set(s_extension, extension);
   }
 
   if ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME) {
@@ -867,10 +883,10 @@ Variant f_pathinfo(CStrRef path, int opt /* = 15 */) {
     if (opt == PHP_PATHINFO_FILENAME) {
       return filename;
     }
-    ret.set("filename", filename);
+    ret.set(s_filename, filename);
   }
 
-  return ret;
+  return ret.create();
 }
 
 Variant f_disk_free_space(CStrRef directory) {
@@ -1247,7 +1263,7 @@ bool f_chroot(CStrRef directory) {
 
 class Directory : public SweepableResourceData {
 public:
-  Directory(DIR *handle) : dir(handle) {
+  explicit Directory(DIR *handle) : dir(handle) {
     assert(handle);
   }
 

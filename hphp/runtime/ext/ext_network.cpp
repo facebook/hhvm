@@ -366,6 +366,48 @@ typedef union {
   u_char qb2[65536];
 } querybuf;
 
+static const StaticString s_host("host");
+static const StaticString s_type("type");
+static const StaticString s_ip("ip");
+static const StaticString s_pri("pri");
+static const StaticString s_weight("weight");
+static const StaticString s_port("port");
+static const StaticString s_order("order");
+static const StaticString s_pref("pref");
+static const StaticString s_target("target");
+static const StaticString s_cpu("cpu");
+static const StaticString s_os("os");
+static const StaticString s_txt("txt");
+static const StaticString s_mname("mname");
+static const StaticString s_rname("rname");
+static const StaticString s_serial("serial");
+static const StaticString s_refresh("refresh");
+static const StaticString s_retry("retry");
+static const StaticString s_expire("expire");
+static const StaticString s_minimum_ttl("minimum-ttl");
+static const StaticString s_ipv6("ipv6");
+static const StaticString s_masklen("masklen");
+static const StaticString s_chain("chain");
+static const StaticString s_flags("flags");
+static const StaticString s_services("services");
+static const StaticString s_regex("regex");
+static const StaticString s_replacement("replacement");
+static const StaticString s_class("class");
+static const StaticString s_ttl("ttl");
+
+static const StaticString s_A("A");
+static const StaticString s_MX("MX");
+static const StaticString s_CNAME("CNAME");
+static const StaticString s_NS("NS");
+static const StaticString s_PTR("PTR");
+static const StaticString s_HINFO("HINFO");
+static const StaticString s_TXT("TXT");
+static const StaticString s_SOA("SOA");
+static const StaticString s_AAAA("AAAA");
+static const StaticString s_A6("A6");
+static const StaticString s_SRV("SRV");
+static const StaticString s_NAPTR("NAPTR");
+static const StaticString s_IN("IN");
 
 static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
                                   int type_to_fetch, bool store,
@@ -398,56 +440,56 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
     return cp;
   }
 
-  subarray.set("host", String(name, CopyString));
+  subarray.set(s_host, String(name, CopyString));
   switch (type) {
   case DNS_T_A:
-    subarray.set("type", "A");
+    subarray.set(s_type, s_A);
     snprintf(name, sizeof(name), "%d.%d.%d.%d", cp[0], cp[1], cp[2], cp[3]);
-    subarray.set("ip", String(name, CopyString));
+    subarray.set(s_ip, String(name, CopyString));
     cp += dlen;
     break;
   case DNS_T_MX:
-    subarray.set("type", "MX");
+    subarray.set(s_type, s_MX);
     GETSHORT(n, cp);
-    subarray.set("pri", n);
+    subarray.set(s_pri, n);
     /* no break; */
   case DNS_T_CNAME:
     if (type == DNS_T_CNAME) {
-      subarray.set("type", "CNAME");
+      subarray.set(s_type, s_CNAME);
     }
     /* no break; */
   case DNS_T_NS:
     if (type == DNS_T_NS) {
-      subarray.set("type", "NS");
+      subarray.set(s_type, s_NS);
     }
     /* no break; */
   case DNS_T_PTR:
     if (type == DNS_T_PTR) {
-      subarray.set("type", "PTR");
+      subarray.set(s_type, s_PTR);
     }
     n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
     if (n < 0) {
       return NULL;
     }
     cp += n;
-    subarray.set("target", String(name, CopyString));
+    subarray.set(s_target, String(name, CopyString));
     break;
   case DNS_T_HINFO:
     /* See RFC 1010 for values */
-    subarray.set("type", "HINFO");
+    subarray.set(s_type, s_HINFO);
     n = *cp & 0xFF;
     cp++;
-    subarray.set("cpu", String((const char *)cp, n, CopyString));
+    subarray.set(s_cpu, String((const char *)cp, n, CopyString));
     cp += n;
     n = *cp & 0xFF;
     cp++;
-    subarray.set("os", String((const char *)cp, n, CopyString));
+    subarray.set(s_os, String((const char *)cp, n, CopyString));
     cp += n;
     break;
   case DNS_T_TXT: {
     int ll = 0;
 
-    subarray.set("type", "TXT");
+    subarray.set(s_type, s_TXT);
     String s = String(dlen, ReserveString);
     tp = (unsigned char *)s.mutableSlice().ptr;
 
@@ -459,33 +501,33 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
     s.setSize(dlen);
     cp += dlen;
 
-    subarray.set("txt", s);
+    subarray.set(s_txt, s);
     break;
   }
   case DNS_T_SOA:
-    subarray.set("type", "SOA");
+    subarray.set(s_type, s_SOA);
     n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) -2);
     if (n < 0) {
       return NULL;
     }
     cp += n;
-    subarray.set("mname", String(name, CopyString));
+    subarray.set(s_mname, String(name, CopyString));
     n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) -2);
     if (n < 0) {
       return NULL;
     }
     cp += n;
-    subarray.set("rname", String(name, CopyString));
+    subarray.set(s_rname, String(name, CopyString));
     GETLONG(n, cp);
-    subarray.set("serial", n);
+    subarray.set(s_serial, n);
     GETLONG(n, cp);
-    subarray.set("refresh", n);
+    subarray.set(s_refresh, n);
     GETLONG(n, cp);
-    subarray.set("retry", n);
+    subarray.set(s_retry, n);
     GETLONG(n, cp);
-    subarray.set("expire", n);
+    subarray.set(s_expire, n);
     GETLONG(n, cp);
-    subarray.set("minimum-ttl", n);
+    subarray.set(s_minimum_ttl, n);
     break;
   case DNS_T_AAAA:
     tp = (unsigned char *)name;
@@ -517,15 +559,15 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
       tp++;
     }
     tp[0] = '\0';
-    subarray.set("type", "AAAA");
-    subarray.set("ipv6", String(name, CopyString));
+    subarray.set(s_type, s_AAAA);
+    subarray.set(s_ipv6, String(name, CopyString));
     break;
   case DNS_T_A6:
     p = cp;
-    subarray.set("type", "A6");
+    subarray.set(s_type, s_A6);
     n = ((int)cp[0]) & 0xFF;
     cp++;
-    subarray.set("masklen", n);
+    subarray.set(s_masklen, n);
     tp = (unsigned char *)name;
     if (n > 15) {
       have_v6_break = 1;
@@ -585,7 +627,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
       tp++;
     }
     tp[0] = '\0';
-    subarray.set("ipv6", String(name, CopyString));
+    subarray.set(s_ipv6, String(name, CopyString));
     if (cp < p + dlen) {
       n = dn_expand(answer->qb2, answer->qb2+65536, cp, name,
                     (sizeof name) - 2);
@@ -593,52 +635,52 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
         return NULL;
       }
       cp += n;
-      subarray.set("chain", String(name, CopyString));
+      subarray.set(s_chain, String(name, CopyString));
     }
     break;
   case DNS_T_SRV:
-    subarray.set("type", "SRV");
+    subarray.set(s_type, s_SRV);
     GETSHORT(n, cp);
-    subarray.set("pri", n);
+    subarray.set(s_pri, n);
     GETSHORT(n, cp);
-    subarray.set("weight", n);
+    subarray.set(s_weight, n);
     GETSHORT(n, cp);
-    subarray.set("port", n);
+    subarray.set(s_port, n);
     n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
     if (n < 0) {
       return NULL;
     }
     cp += n;
-    subarray.set("target", String(name, CopyString));
+    subarray.set(s_target, String(name, CopyString));
     break;
   case DNS_T_NAPTR:
-    subarray.set("type", "NAPTR");
+    subarray.set(s_type, s_NAPTR);
     GETSHORT(n, cp);
-    subarray.set("order", n);
+    subarray.set(s_order, n);
     GETSHORT(n, cp);
-    subarray.set("pref", n);
+    subarray.set(s_pref, n);
     n = (cp[0] & 0xFF);
-    subarray.set("flags", String((const char *)(++cp), n, CopyString));
+    subarray.set(s_flags, String((const char *)(++cp), n, CopyString));
     cp += n;
     n = (cp[0] & 0xFF);
-    subarray.set("services", String((const char *)(++cp), n, CopyString));
+    subarray.set(s_services, String((const char *)(++cp), n, CopyString));
     cp += n;
     n = (cp[0] & 0xFF);
-    subarray.set("regex", String((const char *)(++cp), n, CopyString));
+    subarray.set(s_regex, String((const char *)(++cp), n, CopyString));
     cp += n;
     n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
     if (n < 0) {
       return NULL;
     }
     cp += n;
-    subarray.set("replacement", String(name, CopyString));
+    subarray.set(s_replacement, String(name, CopyString));
     break;
   default:
     cp += dlen;
   }
 
-  subarray.set("class", "IN");
-  subarray.set("ttl", (int)ttl);
+  subarray.set(s_class, s_IN);
+  subarray.set(s_ttl, (int)ttl);
   return cp;
 }
 

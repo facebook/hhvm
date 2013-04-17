@@ -1,1 +1,5 @@
-test/sample_dir/dir
+array(1) {
+  [0]=>
+  string(20) "test/sample_dir/dir
+"
+}

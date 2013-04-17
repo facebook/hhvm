@@ -504,13 +504,13 @@ array(9) {
   int(64)
 }
 Locale: 'EN-US-ODESSA'
-  ULOC_VALID_LOCALE     = 'en_US'
+  ULOC_VALID_LOCALE     = 'en_US%S'
 Locale: 'UK_UA_ODESSA'
   ULOC_VALID_LOCALE     = 'uk_UA'
 Locale: 'uk-ua_CALIFORNIA@currency=;currency=GRN'
   ULOC_VALID_LOCALE     = 'uk_UA'
 Locale: ''
-  ULOC_VALID_LOCALE     = 'en_US'
+  ULOC_VALID_LOCALE     = 'en_US%S'
 Locale: 'root'
   ULOC_VALID_LOCALE     = 'root'
 Locale: 'uk@currency=EURO'

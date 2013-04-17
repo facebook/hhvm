@@ -1,10 +1,10 @@
 %s/hphp/test/sample_dirstring(4) "file"
 string(4) "file"
 int(%d)
-int(100)
+int(%d)
 int(%d)
 int(1234567894)
-int(2618)
+int(%d)
 int(33188)
 int(3)
 string(4) "file"

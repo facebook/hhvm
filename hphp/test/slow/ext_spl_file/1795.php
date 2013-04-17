@@ -1,5 +1,6 @@
 <?php
 
+chdir(__DIR__.'/../../..');
 require 'test/sample_dir/fix_mtimes.inc';
 
 $info = new SplFileInfo('test/sample_dir');

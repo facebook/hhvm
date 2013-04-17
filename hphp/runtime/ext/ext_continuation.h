@@ -61,7 +61,6 @@ class c_Continuation : public ExtObjectData {
   public: void t_raise(CVarRef v);
   public: void t_raised();
   public: String t_getorigfuncname();
-  public: String t_getcalledclass();
   public: Variant t___clone();
 
   static c_Continuation* alloc(VM::Class* cls, int nLocals, int nIters) {

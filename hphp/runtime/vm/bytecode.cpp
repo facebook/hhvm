@@ -2341,9 +2341,8 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     if (fp->m_func->isNoInjection()) {
       continue;
     }
-    // Builtins don't have a file and line number and Zend 5.5 does not
-    // include this information for generators
-    if (prevFp && !prevFp->m_func->isBuiltin() && !fp->m_func->isGenerator()) {
+    // Builtins don't have a file and line number
+    if (prevFp && !prevFp->m_func->isBuiltin()) {
       Unit* unit = prevFp->m_func->unit();
       assert(unit);
       const char *filename = unit->filepath()->data();
@@ -6645,7 +6644,7 @@ VMExecutionContext::createContinuation(ActRec* fp,
   }
   static const StringData* closure = StringData::GetStaticString("{closure}");
   const StringData* origName =
-    origFunc->isClosureBody() ? closure : origFunc->name();
+    origFunc->isClosureBody() ? closure : origFunc->fullName();
   int nLocals = genFunc->numLocals();
   int nIters = genFunc->numIterators();
   Class* genClass = SystemLib::s_ContinuationClass;

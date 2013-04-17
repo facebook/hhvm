@@ -729,44 +729,6 @@ TypedValue* tg_12Continuation_getOrigFuncName(HPHP::VM::ActRec *ar) {
 }
 
 /*
-HPHP::String HPHP::c_Continuation::t_getcalledclass()
-_ZN4HPHP14c_Continuation16t_getcalledclassEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
-
-Value* th_12Continuation_getCalledClass(Value* _rv, ObjectData* this_) asm("_ZN4HPHP14c_Continuation16t_getcalledclassEv");
-
-TypedValue* tg_12Continuation_getCalledClass(HPHP::VM::ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_type = KindOfString;
-        th_12Continuation_getCalledClass((&rv.m_data), (this_));
-        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("Continuation::getCalledClass", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("Continuation::getCalledClass");
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
 HPHP::Variant HPHP::c_Continuation::t___clone()
 _ZN4HPHP14c_Continuation9t___cloneEv
 

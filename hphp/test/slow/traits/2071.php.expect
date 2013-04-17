@@ -1,6 +1,3 @@
 string(1) "f"
-string(0) ""
-string(1) "f"
-string(1) "X"
+string(4) "X::f"
 string(9) "{closure}"
-string(0) ""

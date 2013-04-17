@@ -367,6 +367,7 @@ static const StaticString s_complete("complete");
 static const StaticString s_tag("tag");
 static const StaticString s_close("close");
 static const StaticString s_level("level");
+static const StaticString s_value("value");
 
 void _xml_endElementHandler(void *userData, const XML_Char *name) {
   XmlParser *parser = (XmlParser *)userData;
@@ -447,13 +448,13 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
         if (parser->lastwasopen) {
           String myval;
           // check if value exists, if yes append to that
-          if (parser->ctag.toArray().exists("value"))
+          if (parser->ctag.toArray().exists(s_value))
           {
-            myval = parser->ctag.rvalAt("value").toString();
+            myval = parser->ctag.rvalAt(s_value).toString();
             myval += String(decoded_value, decoded_len, AttachString);
-            parser->ctag.set("value", myval);
+            parser->ctag.set(s_value, myval);
           } else {
-            parser->ctag.set("value",
+            parser->ctag.set(s_value,
                              String(decoded_value,decoded_len,AttachString));
           }
         } else {
@@ -462,15 +463,14 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           String myval;
           String mytype;
           curtag.assignRef(parser->data.getArrayData()->endRef());
-          if (curtag.toArray().exists("type")) {
-            mytype = curtag.rvalAt("type").toString();
-            if (!strcmp(mytype.data(), "cdata")) {
-              if (curtag.toArray().exists("value")) {
-                myval = curtag.rvalAt("value").toString();
-                myval += String(decoded_value, decoded_len, AttachString);
-                curtag.set("value", myval);
-                return;
-              }
+          if (curtag.toArray().exists(s_type)) {
+            mytype = curtag.rvalAt(s_type).toString();
+            if (!strcmp(mytype.data(), "cdata") &&
+                curtag.toArray().exists(s_value)) {
+              myval = curtag.rvalAt(s_value).toString();
+              myval += String(decoded_value, decoded_len, AttachString);
+              curtag.set(s_value, myval);
+              return;
             }
           }
           tag = Array::Create();

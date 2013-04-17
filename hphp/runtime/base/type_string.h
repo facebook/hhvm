@@ -291,7 +291,7 @@ public:
    */
   String &operator =  (StringData *data);
   String &operator =  (litstr  v);
-  String &operator =  (CStrRef v);
+  String &operator =  (const String& v);
   String &operator =  (CVarRef v);
   String &operator =  (const std::string &s);
   // These should be members, but g++ doesn't yet support the rvalue

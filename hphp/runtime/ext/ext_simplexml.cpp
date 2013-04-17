@@ -190,9 +190,10 @@ static Array create_children(CObjRef doc, xmlNodePtr root,
 }
 
 static inline void add_namespace_name(Array &out, xmlNsPtr ns) {
-  const char *prefix = ns->prefix ? (const char *)ns->prefix : "";
+  String prefix = ns->prefix ? String((const char*)ns->prefix) :
+                               String(empty_string);
   if (!out.exists(prefix)) {
-    out.set(String(prefix, CopyString), String((char*)ns->href, CopyString));
+    out.set(prefix, String((char*)ns->href, CopyString));
   }
 }
 

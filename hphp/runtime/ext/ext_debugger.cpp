@@ -323,6 +323,11 @@ static const StaticString s_namespace("namespace");
 static const StaticString s_class("class");
 static const StaticString s_function("function");
 static const StaticString s_text("text");
+static const StaticString s_user("user");
+static const StaticString s_configFName("configFName");
+static const StaticString s_host("host");
+static const StaticString s_port("port");
+static const StaticString s_sandbox("sandbox");
 
 Variant c_DebuggerClientCmdUser::t_getcurrentlocation() {
   BreakPointInfoPtr bpi = m_client->getCurrentLocation();
@@ -410,15 +415,15 @@ Variant c_DebuggerClient::t_init(CVarRef options) {
   ops.apiMode = true;
 
   Array opsArr = options.toArray();
-  if (opsArr.exists("user")) {
-    ops.user = opsArr.rvalAtRef("user").toString().data();
+  if (opsArr.exists(s_user)) {
+    ops.user = opsArr.rvalAtRef(s_user).toString().data();
   } else {
     raise_warning("must specify user in options");
     return false;
   }
 
-  if (opsArr.exists("configFName")) {
-    ops.configFName = opsArr.rvalAtRef("configFName").toString().data();
+  if (opsArr.exists(s_configFName)) {
+    ops.configFName = opsArr.rvalAtRef(s_configFName).toString().data();
     FILE *f = fopen(ops.configFName.c_str(), "r");
     if (!f) {
       raise_warning("cannot access config file %s", ops.configFName.c_str());
@@ -427,14 +432,14 @@ Variant c_DebuggerClient::t_init(CVarRef options) {
     fclose(f);
   }
 
-  if (opsArr.exists("host")) {
-    ops.host = opsArr.rvalAtRef("host").toString().data();
+  if (opsArr.exists(s_host)) {
+    ops.host = opsArr.rvalAtRef(s_host).toString().data();
   }
-  if (opsArr.exists("port")) {
-    ops.port = opsArr.rvalAtRef("port").toInt32();
+  if (opsArr.exists(s_port)) {
+    ops.port = opsArr.rvalAtRef(s_port).toInt32();
   }
-  if (opsArr.exists("sandbox")) {
-    ops.sandbox = opsArr.rvalAtRef("sandbox").toString().data();
+  if (opsArr.exists(s_sandbox)) {
+    ops.sandbox = opsArr.rvalAtRef(s_sandbox).toString().data();
   }
 
   m_client->init(ops);

@@ -1160,6 +1160,9 @@ static STACK_OF(X509) *php_array_to_X509_sk(CVarRef certs) {
   return pcerts;
 }
 
+static const StaticString s_friendly_name("friendly_name");
+static const StaticString s_extracerts("extracerts");
+
 static bool openssl_pkcs12_export_impl(CVarRef x509, BIO *bio_out,
                                        CVarRef priv_key, CStrRef pass,
                                        CVarRef args /* = null_variant */) {
@@ -1183,13 +1186,13 @@ static bool openssl_pkcs12_export_impl(CVarRef x509, BIO *bio_out,
   Array arrArgs = args.toArray();
 
   String friendly_name;
-  if (arrArgs.exists("friendly_name")) {
-    friendly_name = arrArgs["friendly_name"].toString();
+  if (arrArgs.exists(s_friendly_name)) {
+    friendly_name = arrArgs[s_friendly_name].toString();
   }
 
   STACK_OF(X509) *ca = NULL;
-  if (arrArgs.exists("extracerts")) {
-    ca = php_array_to_X509_sk(arrArgs["extracerts"]);
+  if (arrArgs.exists(s_extracerts)) {
+    ca = php_array_to_X509_sk(arrArgs[s_extracerts]);
   }
 
   PKCS12 *p12 = PKCS12_create
@@ -1232,7 +1235,6 @@ bool f_openssl_pkcs12_export(CVarRef x509, VRefParam out, CVarRef priv_key,
 
 static const StaticString s_cert("cert");
 static const StaticString s_pkey("pkey");
-static const StaticString s_extracerts("extracerts");
 
 bool f_openssl_pkcs12_read(CStrRef pkcs12, VRefParam certs, CStrRef pass) {
   Variant &vcerts = certs;

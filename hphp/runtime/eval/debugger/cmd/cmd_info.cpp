@@ -23,6 +23,29 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+static const StaticString s_params("params");
+static const StaticString s_ref("ref");
+static const StaticString s_name("name");
+static const StaticString s_varg("varg");
+static const StaticString s_type("type");
+static const StaticString s_default("default");
+static const StaticString s_defaultext("defaultext");
+static const StaticString s_msg("msg");
+static const StaticString s_constants("constants");
+static const StaticString s_methods("methods");
+static const StaticString s_access("access");
+static const StaticString s_static("static");
+static const StaticString s_abstract("abstract");
+static const StaticString s_final("final");
+static const StaticString s_doc("doc");
+static const StaticString s_internal("internal");
+static const StaticString s_file("file");
+static const StaticString s_line1("line1");
+static const StaticString s_line2("line2");
+static const StaticString s_properties("properties");
+static const StaticString s_private_properties("private_properties");
+static const StaticString s_defaultText("defaultText");
+
 void CmdInfo::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_type);
@@ -172,12 +195,12 @@ String CmdInfo::GetProtoType(DebuggerClient *client, const std::string &cls,
   Array info = res->m_info;
   if (!info.empty()) {
     info = info[0];
-    if (info.exists("params")) {
+    if (info.exists(s_params)) {
       StringBuffer sb;
       sb.printf("function %s%s(%s);\n",
-                info["ref"].toBoolean() ? "&" : "",
-                info["name"].toString().data(),
-                GetParams(info["params"], info["varg"]).data());
+                info[s_ref].toBoolean() ? "&" : "",
+                info[s_name].toString().data(),
+                GetParams(info[s_params], info[s_varg]).data());
       return sb.detach();
     }
   }
@@ -252,8 +275,8 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void CmdInfo::PrintDocComments(StringBuffer &sb, CArrRef info) {
-  if (info["doc"].isString()) {
-    String doc = info["doc"].toString();
+  if (info[s_doc].isString()) {
+    String doc = info[s_doc].toString();
     int space1 = 0; // best guess
     int space2 = 3; // best guess
     Variant matches1, matches2;
@@ -271,10 +294,10 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, CArrRef info) {
 
 void CmdInfo::PrintHeader(DebuggerClient *client, StringBuffer &sb,
                           CArrRef info) {
-  if (!info["internal"].toBoolean()) {
-    String file = info["file"].toString();
-    int line1 = info["line1"].toInt32();
-    int line2 = info["line2"].toInt32();
+  if (!info[s_internal].toBoolean()) {
+    String file = info[s_file].toString();
+    int line1 = info[s_line1].toInt32();
+    int line2 = info[s_line2].toInt32();
     if (file.empty() && line1 == 0 && line2 == 0) {
       sb.printf("// (source unknown)\n");
     } else if (line1 == 0 && line2 == 0) {
@@ -301,30 +324,30 @@ String CmdInfo::GetParams(CArrRef params, bool varg,
       args.append(", ");
     }
     Array arg = iter.second().toArray();
-    if (!arg["type"].toString().empty()) {
-      args.append(arg["type"].toString());
+    if (!arg[s_type].toString().empty()) {
+      args.append(arg[s_type].toString());
       args.append(' ');
     }
-    if (arg["ref"].toBoolean()) {
+    if (arg[s_ref].toBoolean()) {
       args.append('&');
     }
     args.append('$');
-    args.append(arg["name"].toString());
-    if (arg.exists("default")) {
+    args.append(arg[s_name].toString());
+    if (arg.exists(s_default)) {
       args.append(" = ");
-      Variant defValue = arg["default"];
-      String defText = arg["defaultText"];
+      Variant defValue = arg[s_default];
+      String defText = arg[s_defaultText];
       if (!defText.empty()) {
         args.append(defText);
       } else if (defValue.isObject()) {
         // ClassInfo was not able to serialize the value, so ext_reflection
         // prepared a stdClass error object. We should fall back to display
         // the original PHP text, if there.
-        args.append(defValue.o_get("msg").toString());
+        args.append(defValue.o_get(s_msg).toString());
       } else if (detailed) {
-        args.append(DebuggerClient::FormatVariable(arg["default"], -1));
+        args.append(DebuggerClient::FormatVariable(arg[s_default], -1));
       } else {
-        args.append(DebuggerClient::FormatVariable(arg["default"]));
+        args.append(DebuggerClient::FormatVariable(arg[s_default]));
       }
     }
   }
@@ -337,11 +360,11 @@ String CmdInfo::GetParams(CArrRef params, bool varg,
   return args.detach();
 }
 
-String CmdInfo::GetModifier(CArrRef info, const char *name) {
+String CmdInfo::GetModifier(CArrRef info, CStrRef name) {
   if (info[name].toBoolean()) {
-    return String(name) + " ";
+    return name + " ";
   }
-  return "";
+  return empty_string;
 }
 
 String CmdInfo::FindSubSymbol(CArrRef symbols, const std::string &symbol) {
@@ -356,11 +379,11 @@ String CmdInfo::FindSubSymbol(CArrRef symbols, const std::string &symbol) {
 
 bool CmdInfo::TryConstant(StringBuffer &sb, CArrRef info,
                           const std::string &subsymbol) {
-  String key = FindSubSymbol(info["constants"], subsymbol);
+  String key = FindSubSymbol(info[s_constants], subsymbol);
   if (!key.isNull()) {
     sb.printf("  const %s = %s;\n", key.data(),
               DebuggerClient::FormatVariable
-              (info["constants"][key], -1).data());
+              (info[s_constants][key], -1).data());
     return true;
   }
   return false;
@@ -368,27 +391,27 @@ bool CmdInfo::TryConstant(StringBuffer &sb, CArrRef info,
 
 bool CmdInfo::TryProperty(StringBuffer &sb, CArrRef info,
                           const std::string &subsymbol) {
-  String key = FindSubSymbol(info["properties"],
+  String key = FindSubSymbol(info[s_properties],
                              subsymbol[0] == '$' ?
                              subsymbol.substr(1) : subsymbol);
   if (!key.isNull()) {
-    Array prop = info["properties"][key];
+    Array prop = info[s_properties][key];
     PrintDocComments(sb, prop);
     sb.printf("  %s %s$%s;\n",
-              prop["access"].toString().data(),
-              GetModifier(prop, "static").data(),
-              prop["name"].toString().data());
+              prop[s_access].toString().data(),
+              GetModifier(prop, s_static).data(),
+              prop[s_name].toString().data());
     return true;
   }
-  key = FindSubSymbol(info["private_properties"],
+  key = FindSubSymbol(info[s_private_properties],
                       subsymbol[0] == '$' ?
                       subsymbol.substr(1) : subsymbol);
   if (!key.isNull()) {
-    Array prop = info["private_properties"][key];
+    Array prop = info[s_private_properties][key];
     PrintDocComments(sb, prop);
     sb.printf("  private %s$%s;\n",
-              GetModifier(prop, "static").data(),
-              prop["name"].toString().data());
+              GetModifier(prop, s_static).data(),
+              prop[s_name].toString().data());
     return true;
   }
   return false;
@@ -405,10 +428,10 @@ bool CmdInfo::TryMethod(DebuggerClient *client, StringBuffer &sb, CArrRef info,
     Array func = info["methods"][key].toArray();
     PrintHeader(client, sb, func);
     sb.printf("%s %s%s%sfunction %s::%s%s(%s);\n",
-              func["access"].toString().data(),
-              GetModifier(func, "static").data(),
-              GetModifier(func, "final").data(),
-              GetModifier(func, "abstract").data(),
+              func[s_access].toString().data(),
+              GetModifier(func, s_static).data(),
+              GetModifier(func, s_final).data(),
+              GetModifier(func, s_abstract).data(),
               info["name"].toString().data(),
               func["ref"].toBoolean() ? "&" : "",
               func["name"].toString().data(),
@@ -420,12 +443,12 @@ bool CmdInfo::TryMethod(DebuggerClient *client, StringBuffer &sb, CArrRef info,
 
 void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
                         const std::string &subsymbol) {
-  if (info.exists("params")) {
+  if (info.exists(s_params)) {
     PrintHeader(client, sb, info);
     sb.printf("function %s%s(%s);\n",
-              info["ref"].toBoolean() ? "&" : "",
-              info["name"].toString().data(),
-              GetParams(info["params"], info["varg"]).data());
+              info[s_ref].toBoolean() ? "&" : "",
+              info[s_name].toString().data(),
+              GetParams(info[s_params], info[s_varg]).data());
     return;
   }
 
@@ -463,8 +486,8 @@ void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
   parent = parents.detach();
 
   sb.printf("%s%s%s %s %s{\n",
-            GetModifier(info, "final").data(),
-            GetModifier(info, "abstract").data(),
+            GetModifier(info, s_final).data(),
+            GetModifier(info, s_abstract).data(),
             info["interface"].toBoolean() ? "interface" : "class",
             info["name"].toString().data(),
             parent.data());
@@ -486,14 +509,14 @@ void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
       sb.printf("  %s%s %s$%s;\n",
                 prop["doc"].toBoolean() ? "[doc] " : "",
                 prop["access"].toString().data(),
-                GetModifier(prop, "static").data(),
+                GetModifier(prop, s_static).data(),
                 prop["name"].toString().data());
     }
     for (ArrayIter iter(info["private_properties"]); iter; ++iter) {
       Array prop = iter.second().toArray();
       sb.printf("  %sprivate %s$%s;\n",
                 prop["doc"].toBoolean() ? "[doc] " : "",
-                GetModifier(prop, "static").data(),
+                GetModifier(prop, s_static).data(),
                 prop["name"].toString().data());
     }
   }
@@ -505,9 +528,9 @@ void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
       sb.printf("  %s%s %s%s%sfunction %s%s(%s);\n",
                 func["doc"].toBoolean() ? "[doc] " : "",
                 func["access"].toString().data(),
-                GetModifier(func, "static").data(),
-                GetModifier(func, "final").data(),
-                GetModifier(func, "abstract").data(),
+                GetModifier(func, s_static).data(),
+                GetModifier(func, s_final).data(),
+                GetModifier(func, s_abstract).data(),
                 func["ref"].toBoolean() ? "&" : "",
                 func["name"].toString().data(),
                 GetParams(func["params"], func["varg"]).data());

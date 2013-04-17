@@ -2079,25 +2079,32 @@ void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   }
 }
 
+static const StaticString s_args("args");
+static const StaticString s_namespace("namespace");
+static const StaticString s_class("class");
+static const StaticString s_function("function");
+static const StaticString s_file("file");
+static const StaticString s_line("line");
+
 void DebuggerClient::printFrame(int index, CArrRef frame) {
   TRACE(2, "DebuggerClient::printFrame\n");
   StringBuffer args;
-  for (ArrayIter iter(frame["args"]); iter; ++iter) {
+  for (ArrayIter iter(frame[s_args]); iter; ++iter) {
     if (!args.empty()) args.append(", ");
     String value = FormatVariable(iter.second());
     args.append(value);
   }
 
   StringBuffer func;
-  if (frame.exists("namespace")) {
-    func.append(frame["namespace"].toString());
+  if (frame.exists(s_namespace)) {
+    func.append(frame[s_namespace].toString());
     func.append("::");
   }
-  if (frame.exists("class")) {
-    func.append(frame["class"].toString());
+  if (frame.exists(s_class)) {
+    func.append(frame[s_class].toString());
     func.append("::");
   }
-  func.append(frame["function"].toString());
+  func.append(frame[s_function].toString());
 
   String sindex(index);
   print("#%s  %s (%s)\n %s  at %s:%d",
@@ -2105,8 +2112,8 @@ void DebuggerClient::printFrame(int index, CArrRef frame) {
         func.data() ? func.data() : "",
         args.data() ? args.data() : "",
         String("           ").substr(0, sindex.size()).data(),
-        frame["file"].toString().data(),
-        (int)frame["line"].toInt32());
+        frame[s_file].toString().data(),
+        (int)frame[s_line].toInt32());
 }
 
 void DebuggerClient::startMacro(std::string name) {

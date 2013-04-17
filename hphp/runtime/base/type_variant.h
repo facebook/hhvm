@@ -1483,10 +1483,6 @@ inline const Variant Array::operator[](double  key) const {
   return rvalAt(key);
 }
 
-inline const Variant Array::operator[](litstr  key) const {
-  return rvalAt(key);
-}
-
 inline const Variant Array::operator[](CStrRef key) const {
   return rvalAt(key);
 }
@@ -1497,6 +1493,29 @@ inline const Variant Array::operator[](CVarRef key) const {
 
 inline Variant uninit_null() {
   return Variant();
+}
+
+//litstr overloads
+inline const Variant Array::operator[](litstr key) const {
+  return (*this)[String(key)];
+}
+inline Variant Array::rvalAt(litstr key, ACCESSPARAMS_IMPL) const {
+  return rvalAt(String(key), flags);
+}
+inline CVarRef Array::rvalAtRef(litstr key, ACCESSPARAMS_IMPL) const {
+  return rvalAtRef(String(key), flags);
+}
+inline Variant& Array::lval(litstr key) {
+  return lval(String(key));
+}
+inline Variant* Array::lvalPtr(litstr key, bool forWrite, bool create) {
+  return lvalPtr(String(key), forWrite, create);
+}
+inline Variant& Array::lvalAt(litstr key, ACCESSPARAMS_IMPL) {
+  return lvalAt(String(key), flags);
+}
+inline CVarRef Array::set(litstr key, CVarRef v, bool isKey) {
+  return set(String(key), v, isKey);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

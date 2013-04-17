@@ -2046,6 +2046,8 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
   return (f && f->isPublic());
 }
 
+static const StaticString s_HTTP_CONTENT_ENCODING("HTTP_CONTENT_ENCODING");
+
 void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
   USE_SOAP_GLOBAL;
   SoapServerScope ss(this);
@@ -2088,8 +2090,8 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
     req = String(data, size, AttachLiteral);
 
     SystemGlobals *g = (SystemGlobals*)get_global_variables();
-    if (g->GV(_SERVER).toArray().exists("HTTP_CONTENT_ENCODING")) {
-      String encoding = g->GV(_SERVER)["HTTP_CONTENT_ENCODING"];
+    if (g->GV(_SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
+      String encoding = g->GV(_SERVER)[s_HTTP_CONTENT_ENCODING];
       Variant ret;
       if (encoding == "gzip" || encoding == "x-gzip") {
         ret = f_gzinflate(String(data, size, AttachLiteral));

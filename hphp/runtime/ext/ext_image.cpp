@@ -763,7 +763,7 @@ static int php_read_APP(CObjRef stream, unsigned int marker, Variant &info) {
   snprintf((char*)markername, sizeof(markername), "APP%d", marker - M_APP0);
 
   if (!(info.is(KindOfArray) &&
-        info.toArray().exists((const char *)markername))) {
+        info.toArray().exists(String((const char *)markername)))) {
     /* XXX we onyl catch the 1st tag of it's kind! */
     info.set(String((char*)markername, CopyString), buffer);
   }

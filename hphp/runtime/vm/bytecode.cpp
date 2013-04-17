@@ -6733,6 +6733,8 @@ static inline void setContVar(const Func* genFunc,
   }
 }
 
+static const StaticString s_this("this");
+
 c_Continuation*
 VMExecutionContext::fillContinuationVars(ActRec* fp,
                                          const Func* origFunc,
@@ -6743,13 +6745,13 @@ VMExecutionContext::fillContinuationVars(ActRec* fp,
   // their references) between the evaluation stack and the local
   // space at the end of the object using memcpy. Any variables in a
   // VarEnv are saved and restored from m_vars as usual.
-  static const StringData* thisStr = StringData::GetStaticString("this");
+  static const StringData* thisStr = s_this.get();
   int nLocals = genFunc->numLocals();
   bool skipThis;
   if (fp->hasVarEnv()) {
     Stats::inc(Stats::Cont_CreateVerySlow);
     Array definedVariables = fp->getVarEnv()->getDefinedVariables();
-    skipThis = definedVariables.exists("this", true);
+    skipThis = definedVariables.exists(s_this, true);
 
     for (ArrayIter iter(definedVariables); !iter.end(); iter.next()) {
       setContVar(genFunc, iter.first().getStringData(),

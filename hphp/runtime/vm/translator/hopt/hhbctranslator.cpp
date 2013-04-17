@@ -2515,6 +2515,9 @@ void HhbcTranslator::emitDiv() {
 }
 
 void HhbcTranslator::emitMod() {
+  // XXX: Disabled until t2299606 is fixed
+  PUNT(emitMod);
+
   auto tl = topC(1)->getType();
   auto tr = topC(0)->getType();
   auto isInty = [&](Type t) {

@@ -119,7 +119,13 @@ void VectorEffects::init(Opcode op, const Type origBase,
 
   // Canonicalize the op to SetProp or SetElem
   op = canonicalOp(op);
-  assert(key.equals(Type::None) || key.isKnownDataType());
+
+  // We're not expecting types other than specific known data types
+  // (or for keys, Cell).  (At least for keys it might work since the
+  // helpers generally operate on cells, but we're asserting anyway
+  // since this shouldn't actually happen.)
+  assert(key.equals(Type::None) || key.isKnownDataType() ||
+         key.equals(Type::Cell));
   assert(origVal.equals(Type::None) || origVal.isKnownDataType());
 
   if ((op == SetElem || op == SetProp) &&

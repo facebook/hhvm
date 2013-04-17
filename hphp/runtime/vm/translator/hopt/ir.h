@@ -2066,7 +2066,7 @@ struct VectorEffects {
   static bool getStackValue(const IRInstruction* inst, uint32_t index,
                             SSATmp*& value, Type& type);
 
-  VectorEffects(const IRInstruction* inst) {
+  explicit VectorEffects(const IRInstruction* inst) {
     int keyIdx = vectorKeyIdx(inst);
     int valIdx = vectorValIdx(inst);
     init(inst->getOpcode(),
@@ -2074,6 +2074,7 @@ struct VectorEffects {
          keyIdx == -1 ? Type::None : inst->getSrc(keyIdx)->getType(),
          valIdx == -1 ? Type::None : inst->getSrc(valIdx)->getType());
   }
+
   template<typename Container>
   VectorEffects(Opcode opc, const Container& srcs) {
     int keyIdx = vectorKeyIdx(opc);
@@ -2083,14 +2084,17 @@ struct VectorEffects {
          keyIdx == -1 ? Type::None : srcs[keyIdx]->getType(),
          valIdx == -1 ? Type::None : srcs[valIdx]->getType());
   }
+
   VectorEffects(Opcode op, Type base, Type key, Type val) {
     init(op, base, key, val);
   }
+
   VectorEffects(Opcode op, SSATmp* base, SSATmp* key, SSATmp* val) {
     auto typeOrNone =
       [](SSATmp* val){ return val ? val->getType() : Type::None; };
     init(op, typeOrNone(base), typeOrNone(key), typeOrNone(val));
   }
+
   Type baseType;
   Type valType;
   bool baseTypeChanged;

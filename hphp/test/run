@@ -44,6 +44,7 @@ function error($message) {
 if (!isset($_ENV['HPHP_HOME'])) {
   error("HPHP_HOME must be set in your environment");
 }
+$_ENV['HPHP_HOME'] = rtrim($_ENV['HPHP_HOME'], '/');
 
 function idx($array, $key, $default = null) {
   return isset($array[$key]) ? $array[$key] : $default;
@@ -55,6 +56,10 @@ function idx_file($array, $key, $default = null) {
 
 function bin_root() {
   return idx($_ENV, 'FBMAKE_BIN_ROOT', $_ENV['HPHP_HOME'].'/_bin');
+}
+
+function verify_hhbc() {
+  return idx_file($_ENV, 'VERIFY_HHBC', bin_root().'/verify.hhbc');
 }
 
 function get_options($argv) {
@@ -157,8 +162,7 @@ function file_arg($options) {
 }
 
 function mode_arg($options) {
-  $verify_hhbc = idx_file($_ENV, 'VERIFY_HHBC', bin_root().'/verify.hhbc');
-  $repo_args = "-v Repo.Local.Mode=-- -v Repo.Central.Path=$verify_hhbc";
+  $repo_args = "-v Repo.Local.Mode=-- -v Repo.Central.Path=".verify_hhbc();
   $jit_args = "$repo_args -v Eval.Jit=true -v Eval.JitEnableRenameFunction=true";
   $mode = idx($options, 'mode');
   switch ($mode) {
@@ -181,6 +185,7 @@ function command_arg($options, $tests) {
     find_config($tests, 'config.hdf'),
     file_arg($options),
     mode_arg($options),
+    '-v Eval.EnableArgsInBacktraces=true',
   );
 }
 
@@ -222,4 +227,23 @@ $verify = array(
 );
 
 passthru(implode(' ', $verify), $return_status);
+
+if ($return_status) {
+  $command = implode(' ', command_arg($options, $tests));
+  $filename = 'FILENAME';
+  $extra_help = ' change FILENAME to the test you want';
+  if (count($tests) == 1) {
+    $filename = current($tests);
+    $extra_help = '';
+  }
+  $command = str_replace('%3\\$s', $filename, $command);
+  
+  if (isset($options['repo'])) {
+    $command .= " -v Repo.Authoritative=true ";
+    $command = str_replace(verify_hhbc(), "$filename.repo/hhvm.hhbc", $command);
+  }
+
+  print "\nTo run these by hand$extra_help:\n".
+        "$command\n";
+}
 exit($return_status);

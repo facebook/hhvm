@@ -163,6 +163,11 @@ string IncludeExpression::CheckInclude(ConstructPtr includeExp,
   parse_string_arg(fileExp, var, lit);
   if (lit.empty()) return lit;
 
+  if (var == "__DIR__") {
+    var = "";
+    lit = Util::safe_dirname(container) + lit;
+  }
+
   string included = get_include_file_path(container, var, lit,
                                           documentRoot, relative);
   if (!included.empty()) {

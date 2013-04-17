@@ -9,10 +9,10 @@ array(5) {
   string(26) "test/sample_dir/file => 3
 "
   [3]=>
-  string(38) "test/sample_dir/fix_mtimes.inc => 375
+  string(38) "test/sample_dir/fix_mtimes.inc => 459
 "
   [4]=>
   string(29) "test/sample_dir/symlink => 3
 "
 }
-Total: 5 files, 4,477 bytes
+Total: 5 files, 4,561 bytes

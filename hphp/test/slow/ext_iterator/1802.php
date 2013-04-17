@@ -1,7 +1,6 @@
 <?php
 
-chdir(__DIR__.'/../../..');
-require 'test/sample_dir/fix_mtimes.inc';
+include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
 
 $path = "test/sample_dir/";
 $files = array(); // order changes per machine

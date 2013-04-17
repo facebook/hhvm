@@ -12,3 +12,6 @@ touch($dir.'empty', $base++);
 touch($dir.'file', $base++);
 touch($dir.'symlink', $base++);
 touch($dir.'fix_mtimes.inc', $base++);
+
+// Tests that include this like to work out of the 'hphp' dir
+chdir($dir.'../..');

@@ -194,7 +194,7 @@ inline TypedValue* ElemArray(ArrayData* base,
 // $result = $base[$key];
 template <bool warn, KeyType keyType = AnyKey>
 inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
-                               TypedValue* base, bool& baseStrOff,
+                               TypedValue* base,
                                TypedValue* key) {
   TypedValue* result;
   DataType type;
@@ -220,17 +220,18 @@ inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   case KindOfStaticString:
   case KindOfString: {
-    if (baseStrOff) {
-      raise_error("Cannot use string offset as an array");
-    }
     int64_t x;
     if (keyType == IntKey) {
       x = reinterpret_cast<int64_t>(key);
     } else if (keyType == StrKey) {
       x = reinterpret_cast<StringData*>(key)->toInt64(10);
+    } else if (LIKELY(IS_INT_TYPE(key->m_type))) {
+      x = key->m_data.num;
+    } else if (LIKELY(IS_STRING_TYPE(key->m_type))) {
+      x = key->m_data.pstr->toInt64(10);
     } else {
-      x = IS_INT_TYPE(key->m_type) ? key->m_data.num
-        : int64_t(tvCellAsCVarRef(key));
+      raise_warning("String offset cast occurred");
+      x = int64_t(tvCellAsCVarRef(key));
     }
     if (x < 0 || x >= base->m_data.pstr->size()) {
       if (warn) {
@@ -245,7 +246,6 @@ inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
       tvScratch.m_type = KindOfStaticString;
     }
     result = &tvScratch;
-    baseStrOff = true;
     break;
   }
   case KindOfArray: {
@@ -1358,7 +1358,7 @@ inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
 
 template<bool useEmpty>
 inline bool IssetEmptyElemObj(TypedValue& tvRef, Instance* instance,
-                                     bool baseStrOff, TypedValue* key) {
+                              TypedValue* key) {
   if (useEmpty) {
     if (LIKELY(instance->isCollection())) {
       return collectionEmpty(instance, key);
@@ -1376,13 +1376,13 @@ inline bool IssetEmptyElemObj(TypedValue& tvRef, Instance* instance,
 
 template <bool useEmpty, bool isObj = false, KeyType keyType = AnyKey>
 inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
-                                  TypedValue* base, bool baseStrOff,
+                                  TypedValue* base,
                                   TypedValue* key) {
   TypedValue scratch;
   if (isObj) {
     initScratchKey<keyType>(scratch, key);
     return IssetEmptyElemObj<useEmpty>(
-      tvRef, reinterpret_cast<Instance*>(base), baseStrOff, key);
+      tvRef, reinterpret_cast<Instance*>(base), key);
   }
 
   TypedValue* result;
@@ -1391,9 +1391,6 @@ inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
   switch (type) {
   case KindOfStaticString:
   case KindOfString: {
-    if (baseStrOff) {
-      return useEmpty;
-    }
     TypedValue tv;
     initScratchKey<keyType>(scratch, key);
     tvDup(key, &tv);
@@ -1418,7 +1415,7 @@ inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfObject: {
     initScratchKey<keyType>(scratch, key);
     return IssetEmptyElemObj<useEmpty>(
-      tvRef, static_cast<Instance*>(base->m_data.pobj), baseStrOff, key);
+      tvRef, static_cast<Instance*>(base->m_data.pobj), key);
     break;
   }
   default: {

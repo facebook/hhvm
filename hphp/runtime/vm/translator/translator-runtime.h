@@ -40,7 +40,6 @@ struct MInstrState {
   TypedValue tvRef2;
   TypedValue tvResult;
   TypedValue tvVal;
-  bool baseStrOff;
   Class* ctx;
 } __attribute__((aligned(16)));
 static_assert(offsetof(MInstrState, tvScratch) % 16 == 0,

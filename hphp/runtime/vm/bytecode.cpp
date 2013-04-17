@@ -3139,7 +3139,6 @@ static inline void ratchetRefs(TypedValue*& result, TypedValue& tvRef,
 #define DECLARE_MEMBERHELPER_ARGS               \
   unsigned ndiscard;                            \
   TypedValue* base;                             \
-  bool baseStrOff = false;                      \
   TypedValue tvScratch;                         \
   TypedValue tvLiteral;                         \
   TypedValue tvRef;                             \
@@ -3152,14 +3151,13 @@ static inline void ratchetRefs(TypedValue*& result, TypedValue& tvRef,
   TypedValue* tvRet;
 
 #define MEMBERHELPERPRE_ARGS                                           \
-  pc, ndiscard, base, baseStrOff, tvScratch, tvLiteral,                \
+  pc, ndiscard, base, tvScratch, tvLiteral,                \
     tvRef, tvRef2, mcode, curMember
 
 // The following arguments are outputs:
 // pc:         bytecode instruction after the vector instruction
 // ndiscard:   number of stack elements to discard
 // base:       ultimate result of the vector-get
-// baseStrOff: StrOff flag associated with base
 // tvScratch:  temporary result storage
 // tvRef:      temporary result storage
 // tvRef2:     temporary result storage
@@ -3178,7 +3176,6 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPre(
     PC& pc,
     unsigned& ndiscard,
     TypedValue*& base,
-    bool& baseStrOff,
     TypedValue& tvScratch,
     TypedValue& tvLiteral,
     TypedValue& tvRef,
@@ -3219,14 +3216,13 @@ inline void OPTBLD_INLINE VMExecutionContext::getHelperPost(
 }
 
 #define GETHELPER_ARGS \
-  pc, ndiscard, tvRet, base, baseStrOff, tvScratch, tvLiteral, \
+  pc, ndiscard, tvRet, base, tvScratch, tvLiteral, \
     tvRef, tvRef2, mcode, curMember
 inline void OPTBLD_INLINE
 VMExecutionContext::getHelper(PC& pc,
                               unsigned& ndiscard,
                               TypedValue*& tvRet,
                               TypedValue*& base,
-                              bool& baseStrOff,
                               TypedValue& tvScratch,
                               TypedValue& tvLiteral,
                               TypedValue& tvRef,
@@ -3241,10 +3237,9 @@ void
 VMExecutionContext::getElem(TypedValue* base, TypedValue* key,
                             TypedValue* dest) {
   assert(base->m_type != KindOfArray);
-  bool baseStrOff = false;
   VMRegAnchor _;
   tvWriteUninit(dest);
-  TypedValue* result = Elem<true>(*dest, *dest, base, baseStrOff, key);
+  TypedValue* result = Elem<true>(*dest, *dest, base, key);
   if (result != dest) {
     tvDup(result, dest);
   }
@@ -3260,7 +3255,7 @@ template <bool setMember,
           bool saveResult>
 inline bool OPTBLD_INLINE VMExecutionContext::memberHelperPre(
     PC& pc, unsigned& ndiscard, TypedValue*& base,
-    bool& baseStrOff, TypedValue& tvScratch, TypedValue& tvLiteral,
+    TypedValue& tvScratch, TypedValue& tvLiteral,
     TypedValue& tvRef, TypedValue& tvRef2,
     MemberCode& mcode, TypedValue*& curMember) {
   // The caller must move pc to the vector immediate before calling
@@ -3438,7 +3433,7 @@ inline bool OPTBLD_INLINE VMExecutionContext::memberHelperPre(
       } else if (define) {
         result = ElemD<warn,reffy>(tvScratch, tvRef, base, curMember);
       } else {
-        result = Elem<warn>(tvScratch, tvRef, base, baseStrOff, curMember);
+        result = Elem<warn>(tvScratch, tvRef, base, curMember);
       }
       break;
     case MPL:
@@ -3500,7 +3495,6 @@ inline bool OPTBLD_INLINE VMExecutionContext::memberHelperPre(
 // pc:         bytecode instruction after the vector instruction
 // ndiscard:   number of stack elements to discard
 // base:       ultimate result of the vector-get
-// baseStrOff: StrOff flag associated with base
 // tvScratch:  temporary result storage
 // tvRef:      temporary result storage
 // tvRef2:     temporary result storage
@@ -3515,7 +3509,7 @@ template <bool warn,
           VMExecutionContext::VectorLeaveCode mleave>
 inline bool OPTBLD_INLINE VMExecutionContext::setHelperPre(
     PC& pc, unsigned& ndiscard, TypedValue*& base,
-    bool& baseStrOff, TypedValue& tvScratch, TypedValue& tvLiteral,
+    TypedValue& tvScratch, TypedValue& tvLiteral,
     TypedValue& tvRef, TypedValue& tvRef2,
     MemberCode& mcode, TypedValue*& curMember) {
   return memberHelperPre<true, warn, define, unset,
@@ -4756,8 +4750,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopIssetM(PC& pc) {
   case MEC:
   case MET:
   case MEI: {
-    issetResult = IssetEmptyElem<false>(tvScratch, tvRef, base, baseStrOff,
-                                        curMember);
+    issetResult = IssetEmptyElem<false>(tvScratch, tvRef, base, curMember);
     break;
   }
   case MPL:
@@ -4885,8 +4878,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopEmptyM(PC& pc) {
   case MEC:
   case MET:
   case MEI: {
-    emptyResult = IssetEmptyElem<true>(tvScratch, tvRef, base, baseStrOff,
-                                       curMember);
+    emptyResult = IssetEmptyElem<true>(tvScratch, tvRef, base, curMember);
     break;
   }
   case MPL:

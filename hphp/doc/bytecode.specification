@@ -1811,16 +1811,13 @@ opcodes associated with them.
 
 Operations can produce and consume intermediate values called "bases". A "base"
 is a structure that contains either a cell or a var or a reference to a memory
-location that is occupied by a cell or a var. A "base" also contains a boolean
-flag "StrOff" which indicates whether the base represents a string offset.
-Bases are never pushed onto the evaluation stack.
+location that is occupied by a cell or a var. Bases are never pushed onto the
+evaluation stack.
 
 For operations that create a base, the operation descriptions specify whether
 the base created "contains" a value or "references" a location. In the former
 case, the base created contains a cell or a var. In the latter case, the base
 created contains a reference to a memory location occupied by a cell or a var.
-Operations that create a base set the StrOff flag to false by default unless
-indicated otherwise by the operation's description.
 
 When a base that contains a cell is destroyed, if the cell references data then
 the execution engine is responsible for honoring the data's refcount logic.
@@ -1982,14 +1979,11 @@ ElemL <local variable id>    [B]  ->  [B]
   If y is an object that does not implement the ArrayAccess interface,
   this operation throws a fatal error.
 
-  If y is a string, this operation checks the status of the StrOff
-  flag of base x. If the StrOff flag is true, this instruction throws
-  a fatal error. Otherwise, this operation continues to compute z =
-  (int)x. If z >= 0 and z < strlen(z), this operation builds a new
-  string consisting of the character at offset z from y and outputs a
-  base that contains the new string with the StrOff flag set to
-  true. Otherwise, this operation outputs a base that contains the
-  empty string with the StrOff flag set to true.
+  If y is a string, this operation computes z = (int)x. If z >= 0 and
+  z < strlen(z), this operation builds a new string consisting of the
+  character at offset z from y and outputs a base that contains the new
+  string. Otherwise, this operation outputs a base that contains the
+  empty string.
 
   If y is not a string, array, or object, this operation will output a
   null base.
@@ -2019,14 +2013,11 @@ ElemLW <local variable id>    [B]  ->  [B]
   If y is an object that does not implement the ArrayAccess interface,
   this operation throws a fatal error.
 
-  If y is a string, this operation checks the status of the StrOff
-  flag of base y. If the StrOff flag is true, this instruction throws
-  a fatal error. Otherwise, this operation continues to compute z =
-  (int)x. If z >= 0 and z < strlen(z), this operation builds a new
+  If y is a string, this operation continues to compute z = (int)x.
+  If z >= 0 and z < strlen(z), this operation builds a new
   string consisting of the character at offset z from y and outputs a
-  base that contains the new string with the StrOff flag set to
-  true. Otherwise, this operation raises a warning and outputs a base
-  that contains the empty string with the StrOff flag set to true.
+  base that contains the new string. Otherwise, this operation raises
+  a warning and outputs a base that contains the empty string.
 
   If y is not a string, array, or object, this operation will output
   a null base.
@@ -2315,10 +2306,8 @@ CGetElemL <local variable id>    [B]  ->  [C]
   If y is an object that does not implement the ArrayAccess interface, this
   operation throws a fatal error.
 
-  If y is a string, this operation checks the status of the StrOff flag of
-  base y. If the StrOff flag is true, this operation throws a fatal error.
-  Otherwise this operation continues to compute z = (int)x. If z >= 0 and
-  z < strlen(z), this operation builds a new string consisting of the character
+  If y is a string, this operation continues to compute z = (int)x. If z >= 0
+  and z < strlen(z), this operation builds a new string consisting of the character
   at offset z from y and pushes it onto the stack. Otherwise, this operation
   raises a warning and pushes the empty string onto the stack.
 
@@ -2379,9 +2368,7 @@ IssetElemL <local variable id>    [B]  ->  [C:Bool]
   If y is an object that does not implement the ArrayAccess interface, this
   operation throws a fatal error.
 
-  If y is a string, this operation first checks the status of the StrOff flag
-  of base y. If the StrOff flag is true, this operation pushes false.
-  Otherwise this operation continues to compute x = (int)x and then it pushes
+  If y is a string, this operation computes x = (int)x and then it pushes
   (x >= 0 && x < strlen(y)) onto the stack.
 
   If y is a not a string, array, or object, this operation pushes false onto
@@ -2409,9 +2396,7 @@ EmptyElemL <local variable id>    [B]  ->  [C]
   If y is an object that does not implement the ArrayAccess interface, this
   operation throws a fatal error.
 
-  If y is a string, this operation first checks the status of the StrOff flag
-  of base y. If the StrOff flag is true, this operation pushes true.
-  Otherwise this operation computes z = (int)x, then pushes true if
+  If y is a string, this operation computes z = (int)x, then pushes true if
   (z < 0 || z >= strlen(y)), !(y[z]) otherwise.
 
   If y is, not an array, object, or string, this operation pushes true onto

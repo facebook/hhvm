@@ -351,8 +351,7 @@ void HhbcTranslator::VectorTranslator::checkMIState() {
   const bool badUnset = isUnsetM && baseType.not(Type::Arr | Type::Obj);
 
   // CGetM on an array with a base that won't use MInstrState. Str
-  // will use tvScratch and baseStrOff and Obj will fatal or use
-  // tvRef.
+  // will use tvScratch and Obj will fatal or use tvRef.
   const bool simpleArrayGet = isCGetM && singleElem &&
     baseType.not(Type::Str | Type::Obj);
 
@@ -405,7 +404,6 @@ void HhbcTranslator::VectorTranslator::emitMPre() {
       m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef), uninit, true);
       m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef2), uninit, true);
     }
-    m_tb.genStRaw(m_misBase, RawMemSlot::MisBaseStrOff, cns(false));
   }
 
   // The base location is input 0 or 1, and the location code is stored
@@ -951,8 +949,7 @@ static inline TypedValue* elemImpl(TypedValue* base, TypedValue keyVal,
   } else if (define) {
     return ElemD<warn, reffy, keyType>(mis->tvScratch, mis->tvRef, base, key);
   } else {
-    return Elem<warn, keyType>(mis->tvScratch, mis->tvRef, base,
-                               mis->baseStrOff, key);
+    return Elem<warn, keyType>(mis->tvScratch, mis->tvRef, base, key);
   }
 }
 
@@ -1526,7 +1523,7 @@ static inline TypedValue cGetElemImpl(TypedValue* base, TypedValue keyVal,
                                       MInstrState* mis) {
   TypedValue result;
   TypedValue* key = keyPtr<keyType>(keyVal);
-  base = Elem<true, keyType>(result, mis->tvRef, base, mis->baseStrOff, key);
+  base = Elem<true, keyType>(result, mis->tvRef, base, key);
   if (base != &result) {
     // Save a copy of the result.
     tvDup(base, &result);
@@ -1619,10 +1616,9 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue keyVal,
   TypedValue* key = keyPtr<keyType>(keyVal);
   // mis == nullptr if we proved that it won't be used. mis->tvScratch and
   // mis->tvRef are ok because those params are passed by
-  // reference. mis->baseStrOff is passed by value so we have to check mis
-  // before accessing it.
+  // reference.
   return VM::IssetEmptyElem<isEmpty, false, keyType>(
-    mis->tvScratch, mis->tvRef, base, mis ? mis->baseStrOff : false, key);
+    mis->tvScratch, mis->tvRef, base, key);
 }
 
 #define HELPER_TABLE(m)                              \

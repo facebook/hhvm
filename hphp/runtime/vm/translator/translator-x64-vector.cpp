@@ -697,8 +697,7 @@ static inline TypedValue* elemImpl(TypedValue* base, TypedValue* key,
   } else if (define) {
     return ElemD<warn, reffy, keyType>(mis->tvScratch, mis->tvRef, base, key);
   } else {
-    return Elem<warn, keyType>(mis->tvScratch, mis->tvRef, base,
-                               mis->baseStrOff, key);
+    return Elem<warn, keyType>(mis->tvScratch, mis->tvRef, base, key);
   }
 }
 
@@ -1419,7 +1418,7 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue* key,
                                       MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
   return IssetEmptyElem<useEmpty, false, keyType>(mis->tvScratch, mis->tvRef,
-                                                  base, mis->baseStrOff, key);
+                                                  base, key);
 }
 
 #define HELPER_TABLE(m)                                      \
@@ -2528,7 +2527,6 @@ void TranslatorX64::emitMPre(const Tracelet& t,
     } else if (debug) {
       emitStoreInvalid(a, MISOFF(tvResult), mis_rsp);
     }
-    a.  store_imm32_disp_reg(false, MISOFF(baseStrOff), mis_rsp);
   }
 
   SKTRACE(2, ni.source, "%s\n", __func__);
@@ -2659,7 +2657,7 @@ static inline void cGetElemImpl(TypedValue* base, TypedValue* key,
                                 TypedValue* result,
                                 MInstrState* mis) {
   key = unbox<keyType, unboxKey>(key);
-  base = Elem<true, keyType>(*result, mis->tvRef, base, mis->baseStrOff, key);
+  base = Elem<true, keyType>(*result, mis->tvRef, base, key);
   if (base != result) {
     // Save a copy of the result.
     tvDup(base, result);

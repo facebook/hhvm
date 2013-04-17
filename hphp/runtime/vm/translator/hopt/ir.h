@@ -1450,8 +1450,7 @@ class RawMemSlot {
 
   enum Kind {
     ContLabel, ContDone, ContShouldThrow, ContRunning, ContARPtr,
-    StrLen, FuncNumParams, FuncRefBitVec, ContEntry, MisBaseStrOff,
-    MisCtx,
+    StrLen, FuncNumParams, FuncRefBitVec, ContEntry, MisCtx,
     MaxKind
   };
 
@@ -1466,7 +1465,6 @@ class RawMemSlot {
       case FuncNumParams:   return GetFuncNumParams();
       case FuncRefBitVec:   return GetFuncRefBitVec();
       case ContEntry:       return GetContEntry();
-      case MisBaseStrOff:   return GetMisBaseStrOff();
       case MisCtx:          return GetMisCtx();
       default: not_reached();
     }
@@ -1517,10 +1515,6 @@ class RawMemSlot {
     static RawMemSlot m(
       Func::prologueTableOff() + sizeof(HPHP::VM::Transl::TCA),
       sz::qword, Type::TCA);
-    return m;
-  }
-  static RawMemSlot& GetMisBaseStrOff() {
-    static RawMemSlot m(HHIR_MISOFF(baseStrOff), sz::byte, Type::Bool);
     return m;
   }
   static RawMemSlot& GetMisCtx() {

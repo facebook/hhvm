@@ -818,7 +818,10 @@ void MemMap::sinkStores(StoreList& stores) {
 }
 
 void optimizeMemoryAccesses(Trace* trace, IRFactory* factory) {
-  MemMap(factory).optimizeMemoryAccesses(trace);
+  if (false) { // TODO(#2302684): memelim can break vector
+               // translations right now
+    MemMap(factory).optimizeMemoryAccesses(trace);
+  }
 }
 
 } } }

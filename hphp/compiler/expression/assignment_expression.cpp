@@ -249,6 +249,14 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
               g_context->setThrowAllErrors(true);
               if (aoff) {
                 if (!aoff->getScalarValue(o)) break;
+                if (v.isString()) {
+                  if (!o.isInteger() ||
+                      o.toInt64Val() < 0 ||
+                      o.toInt64Val() >= v.toCStrRef().size()) {
+                    // warnings should be raised...
+                    break;
+                  }
+                }
                 v.set(o, r);
               } else {
                 v.append(r);

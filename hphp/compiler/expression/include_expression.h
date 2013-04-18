@@ -28,7 +28,7 @@ class IncludeExpression : public UnaryOpExpression, public IParseHandler {
 public:
   static std::string CheckInclude(ConstructPtr includeExp,
                                   ExpressionPtr fileExp,
-                                  bool &documentRoot, bool relative);
+                                  bool &documentRoot);
 
 public:
   IncludeExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,

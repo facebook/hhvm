@@ -55,7 +55,7 @@ ExpressionPtr IncludeExpression::clone() {
 
 static string get_include_file_path(const string &source,
                                     const string &var, const string &lit,
-                                    bool documentRoot, bool relative) {
+                                    bool documentRoot) {
   if (var.empty()) {
     // absolute path
     if (!lit.empty() && lit[0] == '/') {
@@ -69,7 +69,7 @@ static string get_include_file_path(const string &source,
 
     struct stat sb;
     // relative path to containing file's directory
-    if (source.empty() && (relative || stat(lit.c_str(), &sb) == 0)) {
+    if (source.empty() && (stat(lit.c_str(), &sb) == 0)) {
       return lit;
     }
 
@@ -77,12 +77,10 @@ static string get_include_file_path(const string &source,
     string resolved;
     if (pos != string::npos) {
       resolved = source.substr(0, pos + 1) + lit;
-      if (relative || stat(resolved.c_str(), &sb) == 0) {
+      if (stat(resolved.c_str(), &sb) == 0) {
         return resolved;
       }
     }
-
-    if (relative) return "";
 
     // if file cannot be found, resolve it using search paths
     for (unsigned int i = 0; i < Option::IncludeSearchPaths.size(); i++) {
@@ -156,8 +154,7 @@ static void parse_string_arg(ExpressionPtr exp, string &var, string &lit) {
 
 string IncludeExpression::CheckInclude(ConstructPtr includeExp,
                                        ExpressionPtr fileExp,
-                                       bool &documentRoot,
-                                       bool relative) {
+                                       bool &documentRoot) {
   string container = includeExp->getLocation()->file;
   string var, lit;
   parse_string_arg(fileExp, var, lit);
@@ -168,8 +165,7 @@ string IncludeExpression::CheckInclude(ConstructPtr includeExp,
     lit = Util::safe_dirname(container) + lit;
   }
 
-  string included = get_include_file_path(container, var, lit,
-                                          documentRoot, relative);
+  string included = get_include_file_path(container, var, lit, documentRoot);
   if (!included.empty()) {
     if (included == container) {
       Compiler::Error(Compiler::BadPHPIncludeFile, includeExp);
@@ -183,7 +179,7 @@ string IncludeExpression::CheckInclude(ConstructPtr includeExp,
 void IncludeExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   /* m_documentRoot is a bitfield */
   bool dr = m_documentRoot;
-  m_include = CheckInclude(shared_from_this(), m_exp, dr, false);
+  m_include = CheckInclude(shared_from_this(), m_exp, dr);
   m_documentRoot = dr;
   if (!m_include.empty()) ar->parseOnDemand(m_include);
 }
@@ -245,7 +241,7 @@ ExpressionPtr IncludeExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     if (m_include.empty()) {
       bool dr = m_documentRoot;
-      m_include = CheckInclude(shared_from_this(), m_exp, dr, false);
+      m_include = CheckInclude(shared_from_this(), m_exp, dr);
       m_documentRoot = dr;
       m_depsSet = false;
     }

@@ -6766,7 +6766,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
     case Expression::KindOfUnaryOpExpression: {
       UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(val));
       if (u->getOp() == T_ARRAY) {
-        HphpArray* a = NEW(HphpArray)(0);
+        auto a = NEW(HphpArray)(0);
         a->incRefCount();
         m_staticArrays.push_back(a);
 
@@ -6774,10 +6774,9 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
 
         HphpArray* va = m_staticArrays.back();
         m_staticArrays.pop_back();
-        assert(ArrayData::GetScalarArray(va)->isHphpArray());
-        va = static_cast<HphpArray*>(ArrayData::GetScalarArray(va));
 
-        tvVal.m_data.parr = va;
+        auto sa = ArrayData::GetScalarArray(va);
+        tvVal.m_data.parr = sa;
         tvVal.m_type = KindOfArray;
 
         decRefArr(a);

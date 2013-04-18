@@ -99,7 +99,7 @@ class ArrayIter {
 
   ~ArrayIter();
 
-  operator bool() { return !end(); }
+  explicit operator bool() { return !end(); }
   void operator++() { next(); }
 
   bool end() {
@@ -436,7 +436,8 @@ class MArrayIter : public FullPos {
     ArrayData* data = getArray();
     assert(data && data == getContainer());
     assert(data->getCount() <= 1 || data->noCopyOnWrite());
-    assert(!getResetFlag() && data->validFullPos(*this));
+    assert(!getResetFlag());
+    assert(data->validFullPos(*this));
     return data->getValueRef(m_pos);
   }
 

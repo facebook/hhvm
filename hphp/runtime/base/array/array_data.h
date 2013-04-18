@@ -44,6 +44,7 @@ class ArrayData : public Countable {
     kHphpArray,
     kSharedMap,
     kNameValueTableWrapper,
+    kArrayShell,
   };
 
  protected:
@@ -53,7 +54,7 @@ class ArrayData : public Countable {
  public:
   static const ssize_t invalid_index = -1;
 
-  ArrayData(ArrayKind kind, bool nonsmart = false) :
+  explicit ArrayData(ArrayKind kind, bool nonsmart = false) :
     m_size(-1), m_pos(0), m_strongIterators(0), m_kind(kind),
     m_nonsmart(nonsmart) {
   }
@@ -146,6 +147,7 @@ class ArrayData : public Countable {
   /*
    * Specific derived class type querying operators.
    */
+  bool isArrayShell() const { return m_kind == kArrayShell; }
   bool isHphpArray() const { return m_kind == kHphpArray; }
   bool isSharedMap() const { return m_kind == kSharedMap; }
   bool isNameValueTableWrapper() const {

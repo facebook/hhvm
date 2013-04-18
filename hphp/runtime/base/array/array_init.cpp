@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include <runtime/base/array/array_init.h>
+#include <runtime/base/array/policy_array.h>
 #include <runtime/base/array/hphp_array.h>
 #include <runtime/base/runtime_option.h>
 
@@ -23,7 +24,14 @@ namespace HPHP {
 
 HOT_FUNC
 ArrayInit::ArrayInit(ssize_t n) {
-  m_data = n == 0 ? HphpArray::GetStaticEmptyArray() : NEW(HphpArray)(n);
+  if (!n) {
+    m_data = HphpArray::GetStaticEmptyArray();
+  } else if (false) {
+    // Force compilation of ArrayShell
+    m_data = NEW(ArrayShell)(n);
+  } else {
+    m_data = NEW(HphpArray)(n);
+  }
 }
 
 HOT_FUNC

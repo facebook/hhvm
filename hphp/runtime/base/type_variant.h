@@ -91,9 +91,9 @@ class Variant : private TypedValue {
   }
 
   enum NullInit { nullInit };
-  Variant(NullInit) { m_type = KindOfNull; }
+  explicit Variant(NullInit) { m_type = KindOfNull; }
   enum NoInit { noInit };
-  Variant(NoInit) {}
+  explicit Variant(NoInit) {}
 
   void destruct();
   static void destructData(RefData* num, DataType t);
@@ -111,35 +111,35 @@ class Variant : private TypedValue {
    * Variant being able to take many other external types, messing up those
    * operator overloads.
    */
-  Variant(bool    v) { m_type = KindOfBoolean; m_data.num = v; }
-  Variant(int     v) { m_type = KindOfInt64; m_data.num = v; }
+  /* implicit */ Variant(bool    v) { m_type = KindOfBoolean; m_data.num = v; }
+  /* implicit */ Variant(int     v) { m_type = KindOfInt64; m_data.num = v; }
   // The following two overloads will accept int64_t whether it's
   // implemented as long or long long.
-  Variant(long   v) { m_type = KindOfInt64; m_data.num = v; }
-  Variant(long long v) { m_type = KindOfInt64; m_data.num = v; }
-  Variant(uint64_t  v) { m_type = KindOfInt64; m_data.num = v; }
+  /* implicit */ Variant(long   v) { m_type = KindOfInt64; m_data.num = v; }
+  /* implicit */ Variant(long long v) { m_type = KindOfInt64; m_data.num = v; }
+  /* implicit */ Variant(uint64_t  v) { m_type = KindOfInt64; m_data.num = v; }
 
-  Variant(double  v) { m_type = KindOfDouble; m_data.dbl = v; }
+  /* implicit */ Variant(double  v) { m_type = KindOfDouble; m_data.dbl = v; }
 
-  Variant(litstr  v);
-  Variant(const std::string &v);
-  Variant(const StaticString &v) {
+  /* implicit */ Variant(litstr  v);
+  /* implicit */ Variant(const std::string &v);
+  /* implicit */ Variant(const StaticString &v) {
     m_type = KindOfStaticString;
     StringData *s = v.get();
     assert(s);
     m_data.pstr = s;
   }
 
-  Variant(CStrRef v);
-  Variant(CArrRef v);
-  Variant(CObjRef v);
-  Variant(StringData *v);
-  Variant(ArrayData *v);
-  Variant(ObjectData *v);
-  Variant(RefData *r);
+  /* implicit */ Variant(CStrRef v);
+  /* implicit */ Variant(CArrRef v);
+  /* implicit */ Variant(CObjRef v);
+  /* implicit */ Variant(StringData *v);
+  /* implicit */ Variant(ArrayData *v);
+  /* implicit */ Variant(ObjectData *v);
+  /* implicit */ Variant(RefData *r);
 
   // Move ctor for strings
-  Variant(String&& v) {
+  /* implicit */ Variant(String&& v) {
     StringData *s = v.get();
     if (LIKELY(s != nullptr)) {
       m_data.pstr = s;
@@ -153,7 +153,7 @@ class Variant : private TypedValue {
   }
 
   // Move ctor for arrays
-  Variant(Array&& v) {
+  /* implicit */ Variant(Array&& v) {
     m_type = KindOfArray;
     ArrayData *a = v.get();
     if (LIKELY(a != nullptr)) {
@@ -165,7 +165,7 @@ class Variant : private TypedValue {
   }
 
   // Move ctor for objects
-  Variant(Object&& v) {
+  /* implicit */ Variant(Object&& v) {
     m_type = KindOfObject;
     ObjectData *pobj = v.get();
     if (pobj) {
@@ -179,14 +179,14 @@ class Variant : private TypedValue {
   // These are prohibited, but declared just to prevent accidentally
   // calling the bool constructor just because we had a pointer to
   // const.
-  Variant(const StringData *v) = delete;
-  Variant(const ArrayData *v) = delete;
-  Variant(const ObjectData *v) = delete;
-  Variant(const RefData *v) = delete;
-  Variant(const TypedValue *v) = delete;
-  Variant(TypedValue *v) = delete;
-  Variant(const Variant *v) = delete;
-  Variant(Variant *v) = delete;
+  /* implicit */ Variant(const StringData *v) = delete;
+  /* implicit */ Variant(const ArrayData *v) = delete;
+  /* implicit */ Variant(const ObjectData *v) = delete;
+  /* implicit */ Variant(const RefData *v) = delete;
+  /* implicit */ Variant(const TypedValue *v) = delete;
+  /* implicit */ Variant(TypedValue *v) = delete;
+  /* implicit */ Variant(const /* implicit */ Variant *v) = delete;
+  /* implicit */ Variant(/* implicit */ Variant *v) = delete;
 
   /*
    * Creation constructor from ArrayInit that avoids a null check.
@@ -199,17 +199,18 @@ class Variant : private TypedValue {
   }
 
 #ifdef INLINE_VARIANT_HELPER
-  inline ALWAYS_INLINE Variant(CVarRef v) { constructValHelper(v); }
   inline ALWAYS_INLINE
-  Variant(CVarStrongBind v) { constructRefHelper(variant(v)); }
+  /* implicit */ Variant(CVarRef v) { constructValHelper(v); }
   inline ALWAYS_INLINE
-  Variant(CVarWithRefBind v) {
+  /* implicit */ Variant(CVarStrongBind v) { constructRefHelper(variant(v)); }
+  inline ALWAYS_INLINE
+  /* implicit */ Variant(CVarWithRefBind v) {
     constructWithRefHelper(variant(v), 0);
   }
 #else
-  Variant(CVarRef v);
-  Variant(CVarStrongBind v);
-  Variant(CVarWithRefBind v);
+  /* implicit */ Variant(CVarRef v);
+  /* implicit */ Variant(CVarStrongBind v);
+  /* implicit */ Variant(CVarWithRefBind v);
 #endif
 
   /*
@@ -627,7 +628,7 @@ class Variant : private TypedValue {
    * inference coding simpler (Expression::m_expectedType handling).
    */
 
-  operator bool   () const { return toBoolean();}
+  /* implicit */ operator bool   () const { return toBoolean();}
   operator char   () const { return toByte();}
   operator short  () const { return toInt16();}
   operator int    () const { return toInt32();}
@@ -1204,6 +1205,7 @@ public:
     if (IS_REFCOUNTED_TYPE(t)) destructData(d, t);
   }
 
+public:
   inline ALWAYS_INLINE void constructRefHelper(CVarRef v) {
     PromoteToRef(v);
     v.m_data.pref->incRefCount();
@@ -1319,10 +1321,10 @@ private:
 
 class VRefParamValue {
 public:
-  template <class T> VRefParamValue(const T &v) : m_var(v) {}
+  template <class T> /* implicit */ VRefParamValue(const T &v) : m_var(v) {}
 
-  VRefParamValue() : m_var(Variant::nullInit) {}
-  VRefParamValue(RefResult v) : m_var(strongBind(v)) {}
+  /* implicit */ VRefParamValue() : m_var(Variant::nullInit) {}
+  /* implicit */ VRefParamValue(RefResult v) : m_var(strongBind(v)) {}
   template <typename T>
   Variant &operator=(const T &v) const {
     m_var = v;
@@ -1336,7 +1338,7 @@ public:
   Variant *operator&() const { return &m_var; }
   Variant *operator->() const { return &m_var; }
 
-  operator bool   () const { return m_var.toBoolean();}
+  explicit operator bool   () const { return m_var.toBoolean();}
   operator int    () const { return m_var.toInt32();}
   operator int64_t  () const { return m_var.toInt64();}
   operator double () const { return m_var.toDouble();}
@@ -1387,7 +1389,7 @@ private:
 };
 
 inline VRefParamValue vref(CVarRef v) {
-  return strongBind(v);
+  return VRefParamValue(strongBind(v));
 }
 
 inline VRefParam directRef(CVarRef v) {
@@ -1447,8 +1449,8 @@ public:
     return asVariant()->isNull();
   }
 private:
-  VarNR(litstr  v); // not implemented
-  VarNR(const std::string & v); // not implemented
+  /* implicit */ VarNR(litstr  v); // not implemented
+  /* implicit */ VarNR(const std::string & v); // not implemented
 
   void init(DataType dt) {
     m_type = dt;

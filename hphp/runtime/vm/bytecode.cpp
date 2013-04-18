@@ -1671,7 +1671,7 @@ void VMExecutionContext::shuffleMagicArgs(ActRec* ar) {
   assert(!ar->hasVarEnv() && !ar->hasInvName());
   // We need to make an array containing all the arguments passed by the
   // caller and put it where the second argument is
-  HphpArray* argArray = pack_args_into_array(ar, nargs);
+  ArrayData* argArray = pack_args_into_array(ar, nargs);
   argArray->incRefCount();
   // Remove the arguments from the stack
   for (int i = 0; i < nargs; ++i) {

@@ -26,6 +26,7 @@
 #include <runtime/base/shared/shared_map.h>
 #include <util/exception.h>
 #include <tbb/concurrent_hash_map.h>
+#include <runtime/base/array/policy_array.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,6 +113,11 @@ void ArrayData::release() {
   }
   if (isSharedMap()) {
     SharedMap* that = static_cast<SharedMap*>(this);
+    that->release();
+    return;
+  }
+  if (isArrayShell()) {
+    auto that = static_cast<ArrayShell*>(this);
     that->release();
     return;
   }

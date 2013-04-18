@@ -2117,8 +2117,8 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
   }
   // TODO: validate this pointer from actrec
   int numLocals = func->numLocals();
-  DEBUG_ONLY Cell* firstSp = ((Cell*)fp) - func->numSlotsInFrame();
-  assert(sp <= firstSp || func->isGenerator());
+  assert(sp <= (Cell*)fp - func->numSlotsInFrame()
+         || func->isGenerator());
   if (checkLocals) {
     int numParams = func->numParams();
     for (int i=0; i < numLocals; i++) {

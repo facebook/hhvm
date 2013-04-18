@@ -703,6 +703,7 @@ public:
   }
 
   inline void ALWAYS_INLINE pushArray(ArrayData* a) {
+    assert(a);
     pushArrayNoRc(a);
     a->incRefCount();
   }

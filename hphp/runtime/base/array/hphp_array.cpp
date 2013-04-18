@@ -526,38 +526,38 @@ HphpArray::ElmInd* warnUnbalanced(size_t n, HphpArray::ElmInd* ei) {
   return ei;
 }
 
-#define FIND_FOR_INSERT_BODY(h0, hit) \
-  ElmInd* ret = nullptr; \
-  size_t tableMask = m_tableMask; \
-  size_t probeIndex = size_t(h0) & tableMask; \
-  Elm* elms = m_data; \
-  ElmInd* ei = &m_hash[probeIndex]; \
-  ssize_t /*ElmInd*/ pos = *ei; \
-  if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) { \
-    return ei; \
-  } \
-  if (!validElmInd(pos)) ret = ei; \
-  /* Quadratic probe. */ \
-  for (size_t i = 1;; ++i) { \
-    assert(i <= tableMask); \
-    probeIndex = (probeIndex + i) & tableMask; \
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
-    ei = &m_hash[probeIndex]; \
-    pos = ssize_t(*ei); \
-    if (validElmInd(pos)) { \
-      if (hit) { \
-        assert(m_hLoad <= computeMaxElms(tableMask)); \
-        return ei; \
-      } \
-    } else { \
-      if (!ret) ret = ei; \
-      if (pos == ElmIndEmpty) { \
-        assert(m_hLoad <= computeMaxElms(tableMask)); \
-        return LIKELY(i <= 100) || \
-               LIKELY(i <= size_t(RuntimeOption::MaxArrayChain)) ? \
-                 ret : warnUnbalanced(i, ret);\
-      } \
-    } \
+#define FIND_FOR_INSERT_BODY(h0, hit)                                   \
+  ElmInd* ret = nullptr;                                                \
+  size_t tableMask = m_tableMask;                                       \
+  size_t probeIndex = size_t(h0) & tableMask;                           \
+  Elm* elms = m_data;                                                   \
+  ElmInd* ei = &m_hash[probeIndex];                                     \
+  ssize_t /*ElmInd*/ pos = *ei;                                         \
+  if ((validElmInd(pos) && hit) || pos == ssize_t(ElmIndEmpty)) {       \
+    return ei;                                                          \
+  }                                                                     \
+  if (!validElmInd(pos)) ret = ei;                                      \
+  /* Quadratic probe. */                                                \
+  for (size_t i = 1;; ++i) {                                            \
+    assert(i <= tableMask);                                             \
+    probeIndex = (probeIndex + i) & tableMask;                          \
+    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex);  \
+    ei = &m_hash[probeIndex];                                           \
+    pos = ssize_t(*ei);                                                 \
+    if (validElmInd(pos)) {                                             \
+      if (hit) {                                                        \
+        assert(m_hLoad <= computeMaxElms(tableMask));                   \
+        return ei;                                                      \
+      }                                                                 \
+    } else {                                                            \
+      if (!ret) ret = ei;                                               \
+      if (pos == ElmIndEmpty) {                                         \
+        assert(m_hLoad <= computeMaxElms(tableMask));                   \
+        return LIKELY(i <= 100) ||                                      \
+          LIKELY(i <= size_t(RuntimeOption::MaxArrayChain)) ?           \
+          ret : warnUnbalanced(i, ret);                                 \
+      }                                                                 \
+    }                                                                   \
   }
 
 NEVER_INLINE

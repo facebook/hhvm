@@ -114,7 +114,7 @@ function find_tests($files) {
     $file = preg_replace(',^'.getcwd().'/,', '', $file);
   }
   $files = implode(' ', $files);
-  $tests = explode("\n", shell_exec("find $files -name *.php -o -name *.hhas"));
+  $tests = explode("\n", shell_exec("find $files -name '*.php' -o -name '*.hhas'"));
   if (!$tests) {
     error(usage());
   }

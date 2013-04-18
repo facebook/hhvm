@@ -54,4 +54,6 @@ include($filename);
 
 echo "Done\n";
 
+?><?php
+@unlink(dirname(__FILE__).'/010-file.php');
 ?>

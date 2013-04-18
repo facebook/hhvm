@@ -206,6 +206,16 @@ def walk(filename, source):
             '<?php', 
             '<?php\n$_COOKIE = http_parse_cookie("' + sections['COOKIE'] + '");\n'
         )
+    if sections.has_key('ENV'):
+        for line in sections['ENV'].split('\n'):
+            boom = line.split('=')
+            if len(boom) == 2 and boom[0] and boom[1]:
+                test = test.replace(
+                    '<?php',
+                    '<?php\n$_ENV[%s] = %s;\n' % (boom[0], boom[1])
+                )
+    if sections.has_key('CLEAN'):
+        test += sections['CLEAN']
 
     if 'bug60771.php' in full_dest_filename:
         test = test.replace("?>", "unlink('test.php');\n?>")
@@ -300,8 +310,8 @@ if not os.path.isdir('test/zend/all'):
     else:
         print "Running all tests from test/zend/bad"
         shutil.copytree('test/zend/bad', 'test/zend/all')
-
-print "Running all tests from zend/all"
+else:
+    print "Running all tests from zend/all"
 
 stdout = subprocess.Popen(
     [

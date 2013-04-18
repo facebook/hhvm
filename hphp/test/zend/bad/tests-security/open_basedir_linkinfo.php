@@ -26,4 +26,7 @@ var_dump(linkinfo($symlink));
 var_dump(unlink($symlink));
 
 test_open_basedir_after("linkinfo");
+?><?php
+require_once "open_basedir.inc";
+delete_directories();
 ?>

@@ -102,9 +102,19 @@ int64_t convStrToDblHelper(const StringData* s) {
 }
 
 int64_t convCellToDblHelper(TypedValue tv) {
-  tvCastToDoubleInPlace(&tv); // consumes a ref on counted values
-                              // but not if an exception happens. (REVIEW)
-  return tv.m_data.num;
+  try {
+    tvCastToDoubleInPlace(&tv); // consumes a ref on counted values
+                                // but not if an exception happens. (REVIEW)
+    return tv.m_data.num;
+  } catch (...) {
+    // spill tv back to stack. unwinder
+    // will take care of decreffing it.
+    VMRegAnchor _;
+    TypedValue* spillSlot = (TypedValue *)vmsp();
+    spillSlot->m_data.num = tv.m_data.num;
+    spillSlot->m_type = tv.m_type;
+    throw;
+  }
 }
 
 int64_t convArrToIntHelper(ArrayData* a) {
@@ -122,9 +132,19 @@ int64_t convStrToIntHelper(const StringData* s) {
 }
 
 int64_t convCellToIntHelper(TypedValue tv) {
-  tvCastToInt64InPlace(&tv); // consumes a ref on counted values
-                             // but not if an exception happens. (REVIEW)
-  return tv.m_data.num;
+  try {
+    tvCastToInt64InPlace(&tv); // consumes a ref on counted values
+                               // but not if an exception happens. (REVIEW)
+    return tv.m_data.num;
+  } catch (...) {
+    // spill tv back to stack. unwinder
+    // will take care of decreffing it.
+    VMRegAnchor _;
+    TypedValue* spillSlot = (TypedValue *)vmsp();
+    spillSlot->m_data.num = tv.m_data.num;
+    spillSlot->m_type = tv.m_type;
+    throw;
+  }
 }
 
 ObjectData* convCellToObjHelper(TypedValue tv) {
@@ -157,11 +177,16 @@ StringData* convObjToStrHelper(ObjectData* o) {
   try {
     auto s = o->t___tostring();
     auto r = s.get();
-    o->decRefCount();
+    decRefObj(o);
     if (!r->isStatic()) r->incRefCount();
     return r;
   } catch (...) {
-    o->decRefCount();
+    // spill object back to stack. unwinder
+    // will take care of decreffing it.
+    VMRegAnchor _;
+    TypedValue* spillSlot = (TypedValue *)vmsp();
+    spillSlot->m_data.pobj = o;
+    spillSlot->m_type = KindOfObject;
     throw;
   }
 }

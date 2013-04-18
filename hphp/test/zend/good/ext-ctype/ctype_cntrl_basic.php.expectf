@@ -1,0 +1,4 @@
+*** Testing ctype_cntrl() : basic functionality ***
+bool(true)
+bool(false)
+===DONE===

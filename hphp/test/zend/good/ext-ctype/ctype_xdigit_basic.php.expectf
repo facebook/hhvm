@@ -1,0 +1,4 @@
+*** Testing ctype_xdigit() : basic functionality ***
+bool(true)
+bool(false)
+===DONE===

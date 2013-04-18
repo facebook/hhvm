@@ -398,21 +398,34 @@ D:Arr  = ConvDblToArr S0:Dbl
 D:Arr  = ConvIntToArr S0:Int
 D:Arr  = ConvObjToArr S0:Obj
 D:Arr  = ConvStrToArr S0:Str
-D:Arr  = ConvGenToArr S0:Gen
-D:Bool = ConvToBool S0:Gen
+D:Arr  = ConvCellToArr S0:Cell
+
+D:Bool = ConvArrToBool S0:Arr
+D:Bool = ConvDblToBool S0:Dbl
+D:Bool = ConvIntToBool S0:Int
+D:Bool = ConvStrToBool S0:Str
+D:Bool = ConvCellToBool S0:Cell
+
 D:Dbl  = ConvArrToDbl S0:Arr
 D:Dbl  = ConvBoolToDbl S0:Bool
 D:Dbl  = ConvIntToDbl S0:Int
 D:Dbl  = ConvObjToDbl S0:Obj
 D:Dbl  = ConvStrToDbl S0:Str
-D:Dbl  = ConvGenToDbl S0:Gen
+D:Dbl  = ConvCellToDbl S0:Cell
+
 D:Int  = ConvArrToInt S0:Arr
 D:Int  = ConvDblToInt S0:Dbl
 D:Int  = ConvObjToInt S0:Obj
 D:Int  = ConvStrToInt S0:Str
-D:Int  = ConvGenToInt S0:Gen
-D:Obj  = ConvoObj S0:Gen
-D:Str  = ConvToStr S0:Gen
+D:Int  = ConvCellToInt S0:Cell
+
+D:Obj  = ConvCellToObj S0:Cell
+
+D:StaticStr = ConvBoolToStr S0:Bool
+D:Str  = ConvDblToStr S0:Dbl
+D:Str  = ConvIntToStr S0:Int
+D:Str  = ConvObjToStr S0:Obj
+D:Str  = ConvCellToStr S0:Cell
 
   Convert S0 from its current type to the destination type, according to the PHP
   semantics of such a conversion.

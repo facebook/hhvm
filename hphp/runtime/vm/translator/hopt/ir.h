@@ -175,27 +175,35 @@ O(ConvDblToArr,                 D(Arr), S(Dbl),                          C|N) \
 O(ConvIntToArr,                 D(Arr), S(Int),                          C|N) \
 O(ConvObjToArr,                 D(Arr), S(Obj),                      N|CRc|K) \
 O(ConvStrToArr,                 D(Arr), S(Str),                        N|CRc) \
-O(ConvGenToArr,                 D(Arr), S(Gen),                      N|CRc|K) \
+O(ConvCellToArr,                D(Arr), S(Cell),                     N|CRc|K) \
                                                                               \
-O(ConvToBool,                  D(Bool), S(Gen),                          C|N) \
+O(ConvArrToBool,               D(Bool), S(Arr),                          C|N) \
+O(ConvDblToBool,               D(Bool), S(Dbl),                            C) \
+O(ConvIntToBool,               D(Bool), S(Int),                            C) \
+O(ConvStrToBool,               D(Bool), S(Str),                            N) \
+O(ConvCellToBool,              D(Bool), S(Cell),                           N) \
                                                                               \
-O(ConvArrToDbl,                 D(Dbl), S(Arr),                            N) \
+O(ConvArrToDbl,                 D(Dbl), S(Arr),                          C|N) \
 O(ConvBoolToDbl,                D(Dbl), S(Bool),                        C|Rm) \
 O(ConvIntToDbl,                 D(Dbl), S(Int),                         C|Rm) \
 O(ConvObjToDbl,                 D(Dbl), S(Obj),                   N|Er|CRc|K) \
 O(ConvStrToDbl,                 D(Dbl), S(Str),                      N|CRc|K) \
-O(ConvGenToDbl,                 D(Dbl), S(Gen),                   N|Er|CRc|K) \
+O(ConvCellToDbl,                D(Dbl), S(Cell),                  N|Er|CRc|K) \
                                                                               \
-O(ConvArrToInt,                 D(Int), S(Arr),                            N) \
+O(ConvArrToInt,                 D(Int), S(Arr),                          C|N) \
 O(ConvBoolToInt,                D(Int), S(Bool),                        C|Rm) \
 O(ConvDblToInt,                 D(Int), S(Dbl),                       C|N|Rm) \
 O(ConvObjToInt,                 D(Int), S(Obj),                   N|Er|CRc|K) \
 O(ConvStrToInt,                 D(Int), S(Str),                            N) \
-O(ConvGenToInt,                 D(Int), S(Gen),                   N|Er|CRc|K) \
+O(ConvCellToInt,                D(Int), S(Cell),                  N|Er|CRc|K) \
                                                                               \
-O(ConvToObj,                    D(Obj), S(Gen),                          C|N) \
+O(ConvCellToObj,                D(Obj), S(Cell),                     N|CRc|K) \
                                                                               \
-O(ConvToStr,                    D(Str), S(Gen),                          C|N) \
+O(ConvBoolToStr,          D(StaticStr), S(Bool),                        C|Rm) \
+O(ConvDblToStr,                 D(Str), S(Dbl),                            N) \
+O(ConvIntToStr,                 D(Str), S(Int),                            N) \
+O(ConvObjToStr,                 D(Str), S(Obj),                   N|Er|CRc|K) \
+O(ConvCellToStr,                D(Str), S(Cell),                  N|Er|CRc|K) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
@@ -2384,13 +2392,15 @@ int32_t spillValueCells(IRInstruction* spillStack);
 constexpr int kSpillStackActRecExtraArgs = 5;
 
 inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
-  if (instr->getOpcode() != ConvToBool) {
-    return false;
+  switch (instr->getOpcode()) {
+    case ConvIntToBool:
+      return true;
+    case ConvCellToBool:
+      return instr->getSrc(0)->getType().subtypeOfAny(
+        Type::Func, Type::Cls, Type::FuncCls, Type::VarEnv, Type::TCA);
+    default:
+      return false;
   }
-
-  return instr->getSrc(0)->isA(
-    Type::Int | Type::Func | Type::Cls | Type::FuncCls |
-    Type::VarEnv | Type::TCA);
 }
 
 /*

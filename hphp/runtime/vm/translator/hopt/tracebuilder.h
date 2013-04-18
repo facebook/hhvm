@@ -187,10 +187,6 @@ public:
   SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
   SSATmp* genCastStk(uint32_t id, Type type);
   SSATmp* genConvToBool(SSATmp* src);
-  SSATmp* genConvToDbl(SSATmp* src);
-  SSATmp* genConvToStr(SSATmp* src);
-  SSATmp* genConvToArr(SSATmp* src);
-  SSATmp* genConvToObj(SSATmp* src);
   SSATmp* genLdPropAddr(SSATmp* obj, SSATmp* prop);
   SSATmp* genLdClsMethod(SSATmp* cls, uint32_t methodSlot);
   SSATmp* genLdClsMethodCache(SSATmp* className,

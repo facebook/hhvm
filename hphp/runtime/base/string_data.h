@@ -215,6 +215,8 @@ class StringData {
 public:
   void append(StringSlice r) { append(r.ptr, r.len); }
   void append(const char *s, int len);
+  static const StringData* convert_double_helper(double n);
+  static const StringData* convert_integer_helper(int64_t n);
   StringData *copy(bool sharedMemory = false) const;
   MutableSlice reserve(int capacity);
   MutableSlice mutableSlice() {

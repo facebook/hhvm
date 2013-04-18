@@ -40,27 +40,16 @@ StringData const **String::converted_integers;
 
 String::IntegerStringDataMap String::integer_string_data_map;
 
-static const StringData *convert_integer_helper(int64_t n) {
-  char tmpbuf[21];
-  char *p;
-  int is_negative;
-  int len;
-
-  tmpbuf[20] = '\0';
-  p = conv_10(n, &is_negative, &tmpbuf[20], &len);
-  return StringData::GetStaticString(p);
-}
-
 void String::PreConvertInteger(int64_t n) {
   IntegerStringDataMap::const_iterator it =
     integer_string_data_map.find(n);
   if (it != integer_string_data_map.end()) return;
-  integer_string_data_map[n] = convert_integer_helper(n);
+  integer_string_data_map[n] = StringData::convert_integer_helper(n);
 }
 
 const StringData *String::ConvertInteger(int64_t n) {
   StringData const **psd = converted_integers + n;
-  const StringData *sd = convert_integer_helper(n);
+  const StringData *sd = StringData::convert_integer_helper(n);
   *psd = sd;
   return sd;
 }

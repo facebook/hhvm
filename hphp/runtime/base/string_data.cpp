@@ -20,6 +20,7 @@
 #include <runtime/base/util/exceptions.h>
 #include <util/alloc.h>
 #include <math.h>
+#include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_strtod.h>
 #include <runtime/base/complex_types.h>
@@ -41,6 +42,28 @@ typedef tbb::concurrent_unordered_map<const StringData *, uint32_t,
                                       string_data_hash,
                                       string_data_same> StringDataMap;
 static StringDataMap *s_stringDataMap;
+
+const StringData* StringData::convert_double_helper(double n) {
+ char *buf;
+ StringData* result;
+
+ if (n == 0.0) n = 0.0; // so to avoid "-0" output
+ vspprintf(&buf, 0, "%.*G", 14, n);
+ result = StringData::GetStaticString(buf);
+ free(buf);
+ return result;
+}
+
+const StringData* StringData::convert_integer_helper(int64_t n) {
+ char tmpbuf[21];
+ char *p;
+ int is_negative;
+ int len;
+
+ tmpbuf[20] = '\0';
+ p = conv_10(n, &is_negative, &tmpbuf[20], &len);
+ return StringData::GetStaticString(p);
+}
 
 size_t StringData::GetStaticStringCount() {
   if (!s_stringDataMap) return 0;

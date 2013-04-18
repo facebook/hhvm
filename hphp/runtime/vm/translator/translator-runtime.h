@@ -57,6 +57,45 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
 TypedValue setNewElem(TypedValue* base, Cell val);
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis);
 RefData* box_value(TypedValue tv);
+ArrayData* convCellToArrHelper(TypedValue tv);
+
+/* Helper functions for conversion instructions that are too
+complicated to inline */
+
+inline int64_t reinterpretDblAsInt(double d) {
+  union {
+    int64_t intval;
+    double dblval;
+  } u;
+  u.dblval = d;
+  return u.intval;
+}
+
+inline double reinterpretIntAsDbl(int64_t i) {
+  union {
+    int64_t intval;
+    double dblval;
+  } u;
+  u.intval = i;
+  return u.dblval;
+}
+
+int64_t convArrToBoolHelper(const ArrayData* a);
+int64_t convStrToBoolHelper(const StringData* s);
+int64_t convCellToBoolHelper(TypedValue tv);
+int64_t convArrToDblHelper(ArrayData* a);
+int64_t convStrToDblHelper(const StringData* s);
+int64_t convCellToDblHelper(TypedValue tv);
+int64_t convArrToIntHelper(ArrayData* a);
+int64_t convDblToIntHelper(int64_t i);
+int64_t convStrToIntHelper(const StringData* s);
+int64_t convCellToIntHelper(TypedValue tv);
+ObjectData* convCellToObjHelper(TypedValue tv);
+StringData* convDblToStrHelper(int64_t i);
+StringData* convIntToStrHelper(int64_t i);
+StringData* convObjToStrHelper(ObjectData* o);
+StringData* convCellToStrHelper(TypedValue tv);
+
 void raisePropertyOnNonObject();
 void raiseUndefProp(ObjectData* base, const StringData* name);
 void VerifyParamTypeFail(int param);

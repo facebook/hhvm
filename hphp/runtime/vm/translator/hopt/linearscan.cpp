@@ -649,51 +649,6 @@ void LinearScan::computePreColoringHint() {
         m_preColoringHint.add(inst->getSrc(0), 0, 1);
       }
       break;
-    case ConvBoolToArr:
-    case ConvDblToArr:
-    case ConvIntToArr:
-    case ConvObjToArr:
-    case ConvStrToArr:
-    case ConvGenToArr:
-      break;
-    case ConvToBool:
-      {
-        SSATmp* src = inst->getSrc(0);
-        Type fromType = src->getType();
-        if (fromType == Type::Cell) {
-          m_preColoringHint.add(src, 0, 0);
-          m_preColoringHint.add(src, 1, 1);
-        } else if (fromType == Type::Str ||
-                   fromType == Type::StaticStr ||
-                   fromType.isArray() ||
-                   fromType == Type::Obj) {
-          m_preColoringHint.add(src, 0, 0);
-        }
-        break;
-      }
-    case ConvArrToDbl:
-    case ConvBoolToDbl:
-    case ConvIntToDbl:
-    case ConvObjToDbl:
-    case ConvStrToDbl:
-    case ConvGenToDbl:
-      break;
-    case ConvBoolToInt:
-    case ConvDblToInt:
-    case ConvObjToInt:
-      break;
-    case ConvStrToInt:
-      {
-        SSATmp* src = inst->getSrc(0);
-        m_preColoringHint.add(src, 0, 0);
-        break;
-      }
-    case ConvGenToInt:
-      break;
-    case ConvToObj:
-      break;
-    case ConvToStr:
-      break;
     case InstanceOf:
     case NInstanceOf:
     case JmpInstanceOf:

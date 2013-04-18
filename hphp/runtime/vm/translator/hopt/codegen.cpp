@@ -315,6 +315,36 @@ CALL_OPCODE(AddElemIntKey)
 CALL_OPCODE(AddNewElem)
 CALL_OPCODE(ArrayAdd)
 CALL_OPCODE(Box)
+
+CALL_OPCODE(ConvBoolToArr);
+CALL_OPCODE(ConvDblToArr);
+CALL_OPCODE(ConvIntToArr);
+CALL_OPCODE(ConvObjToArr);
+CALL_OPCODE(ConvStrToArr);
+CALL_OPCODE(ConvCellToArr);
+
+CALL_OPCODE(ConvArrToBool);
+CALL_OPCODE(ConvStrToBool);
+CALL_OPCODE(ConvCellToBool);
+
+CALL_OPCODE(ConvArrToDbl);
+CALL_OPCODE(ConvObjToDbl);
+CALL_OPCODE(ConvStrToDbl);
+CALL_OPCODE(ConvCellToDbl);
+
+CALL_OPCODE(ConvArrToInt);
+CALL_OPCODE(ConvDblToInt);
+CALL_OPCODE(ConvObjToInt);
+CALL_OPCODE(ConvStrToInt);
+CALL_OPCODE(ConvCellToInt);
+
+CALL_OPCODE(ConvCellToObj);
+
+CALL_OPCODE(ConvDblToStr);
+CALL_OPCODE(ConvIntToStr);
+CALL_OPCODE(ConvObjToStr);
+CALL_OPCODE(ConvCellToStr);
+
 CALL_OPCODE(CreateCont)
 CALL_OPCODE(FillContLocals)
 CALL_OPCODE(NewArray)
@@ -1101,34 +1131,6 @@ void CodeGenerator::cgOpMul(IRInstruction* inst) {
              Commutative);
 }
 
-// Runtime helpers
-
-HOT_FUNC_VM static int64_t arrToBoolHelper(const ArrayData *a) {
-  return a->size() != 0;
-}
-
-HOT_FUNC_VM static int64_t cellToBoolHelper(TypedValue tv) {
-  if (IS_NULL_TYPE(tv.m_type)) {
-    return 0;
-  }
-
-  if (tv.m_type <= KindOfInt64) {
-    return tv.m_data.num ? 1 : 0;
-  }
-
-  switch (tv.m_type) {
-    case KindOfDouble:  return tv.m_data.dbl != 0;
-    case KindOfStaticString:
-    case KindOfString:  return tv.m_data.pstr->toBoolean();
-    case KindOfArray:   return tv.m_data.parr->size() != 0;
-    case KindOfObject:  return tv.m_data.pobj->o_toBoolean();
-    default:
-      assert(false);
-      break;
-  }
-  return 0;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Comparison Operators
 ///////////////////////////////////////////////////////////////////////////////
@@ -1612,138 +1614,48 @@ asm_label(a, falseLabel);
 asm_label(a, out);
 }
 
-// The assumption here is that the overall cost of allocating
-// the array swamps the cost of putting a simple value in to
-// a typed value, so there is no need for further type specialization.
-
-void CodeGenerator::cgConvBoolToArr(IRInstruction* inst) {
-  cgConvGenToArr(inst);
-}
-
-void CodeGenerator::cgConvDblToArr(IRInstruction* inst) {
-  cgConvGenToArr(inst);
-}
-
-void CodeGenerator::cgConvIntToArr(IRInstruction* inst) {
-  cgConvGenToArr(inst);
-}
-
-void CodeGenerator::cgConvObjToArr(IRInstruction* inst) {
-  cgConvGenToArr(inst);
-}
-
-void CodeGenerator::cgConvStrToArr(IRInstruction* inst) {
-  cgConvGenToArr(inst);
-}
-
-// So why have all of these different IR instructions instead
-// of just ConvGenToArr? Because we need at least two variants
-// and we don't want to overload opcodes and we want consistency.
-
-ArrayData* convGenToArrHelper(TypedValue value) {
-  // Note: the call sites of this function all assume that
-  // no user code will run and no recoverable exceptions will
-  // occur while running this code. This seems trivially true
-  // in all cases but converting objects to arrays. It also
-  // seems true for that case as well, since the resulting array
-  // is essentially metadata for the object. If that is not true,
-  // you might end up looking at this code in a debugger and now
-  // you know why.
-  tvCastToArrayInPlace(&value); // consumes a ref on counted values
-  return value.m_data.parr;
-}
-
-void CodeGenerator::cgConvGenToArr(IRInstruction* inst) {
+void CodeGenerator::cgConvDblToBool(IRInstruction* inst) {
   SSATmp* dst = inst->getDst();
-  SSATmp* src = inst->getSrc(0);
-
-  ArgGroup args;
-  args.typedValue(src);
-  ArrayData*(*fPtr)(TypedValue) = convGenToArrHelper;
-  cgCallHelper(m_as, (TCA)fPtr, dst, kNoSyncPoint, args);
-}
-
-void CodeGenerator::cgConvToBool(IRInstruction* inst) {
-  Type fromType = inst->getSrc(0)->getType();
-  SSATmp* dst = inst->getDst();
-  SSATmp* src = inst->getSrc(0);
-
   auto dstReg = dst->getReg();
+  assert(dstReg != InvalidReg);
+  SSATmp* src = inst->getSrc(0);
   auto srcReg = src->getReg();
-
-  bool srcIsConst = src->isConst();
-
-  if (fromType.isNull()) {
-    // Uninit/Null -> Bool (false)
-    m_as.xor_reg64_reg64(dstReg, dstReg);
-  } else if (fromType == Type::Bool) {
-    // Bool -> Bool (nop!)
-    if (srcIsConst) {
-      int64_t constVal = src->getValRawInt();
-      if (constVal == 0) {
-        m_as.xor_reg64_reg64(dstReg, dstReg);
-      } else {
-        m_as.mov_imm64_reg(1, dstReg);
-      }
+  if (srcReg == InvalidReg) {
+    assert(src->isConst());
+    double constVal = src->getValDbl();
+    if (constVal == 0.0) {
+      m_as.xor_reg64_reg64(dstReg, dstReg);
     } else {
-      emitMovRegReg(m_as, srcReg, dstReg);
-    }
-  } else if (fromType == Type::Int) {
-    // Int -> Bool
-    if (srcIsConst) {
-      int64_t constVal = src->getValInt();
-      if (constVal == 0) {
-        m_as.xor_reg64_reg64(dstReg, dstReg);
-      } else {
-        m_as.mov_imm64_reg(1, dstReg);
-      }
-    } else {
-      m_as.test_reg64_reg64(srcReg, srcReg);
-      m_as.setne(rbyte(dstReg));
+      m_as.mov_imm64_reg(1, dstReg);
     }
   } else {
-    Transl::Call helper(nullptr);
-    ArgGroup args;
-    if (fromType == Type::Cell) {
-      // Cell -> Bool
-      args.typedValue(src);
-      helper = Transl::Call((TCA)cellToBoolHelper);
-    } else if (fromType.isString()) {
-      // Str -> Bool
-      args.ssa(src);
-      helper = Transl::Call(getMethodPtr(&StringData::toBoolean));
-    } else if (fromType.isArray()) {
-      // Arr -> Bool
-      args.ssa(src);
-      helper = Transl::Call((TCA)arrToBoolHelper);
-    } else if (fromType == Type::Obj) {
-      // Obj -> Bool
-      args.ssa(src);
-      helper = Transl::Call(getMethodPtr(&ObjectData::o_toBoolean));
-    } else {
-      // Dbl -> Bool
-      CG_PUNT(Conv_Dbl_Bool);
-    }
-    cgCallHelper(m_as, helper, dstReg, kNoSyncPoint, args);
+    m_as.movq(srcReg, dstReg);
+    m_as.shlq(1, dstReg); // 0.0 stays zero and -0.0 is now 0.0
+    m_as.setne(rbyte(dstReg)); // lower byte becomes 1 if dstReg != 0
+    m_as.movzbl(rbyte(dstReg), r32(dstReg));
   }
 }
 
-static int64_t arrayToDoubleHelper(ArrayData* value) {
-  union {
-    int64_t intval;
-    double dblval;
-  } u;
-  u.dblval = value->empty() ? 0 : 1;
-  return u.intval;
-}
-
-void CodeGenerator::cgConvArrToDbl(IRInstruction* inst) {
+void CodeGenerator::cgConvIntToBool(IRInstruction* inst) {
   SSATmp* dst = inst->getDst();
+  auto dstReg = dst->getReg();
+  assert(dstReg != InvalidReg);
   SSATmp* src = inst->getSrc(0);
-  ArgGroup args;
-  args.ssa(src);
-  int64_t (*fPtr)(ArrayData*) = arrayToDoubleHelper;
-  cgCallHelper(m_as, (TCA)fPtr, dst, kNoSyncPoint, args);
+  auto srcReg = src->getReg();
+
+  if (srcReg == InvalidReg) {
+    assert(src->isConst());
+    int64_t constVal = src->getValInt();
+    if (constVal == 0) {
+      m_as.xor_reg64_reg64(dstReg, dstReg);
+    } else {
+      m_as.mov_imm64_reg(1, dstReg);
+    }
+  } else {
+    m_as.test_reg64_reg64(srcReg, srcReg);
+    m_as.setne(rbyte(dstReg));
+    m_as.movzbl(rbyte(dstReg), r32(dstReg));
+  }
 }
 
 void CodeGenerator::cgConvBoolToDbl(IRInstruction* inst) {
@@ -1796,42 +1708,6 @@ void CodeGenerator::cgConvIntToDbl(IRInstruction* inst) {
   m_as.mov_xmm_reg64(xmm0, dstReg);
 }
 
-void CodeGenerator::cgConvObjToDbl(IRInstruction* inst) {
-  cgConvGenToDbl(inst);
-}
-
-void CodeGenerator::cgConvStrToDbl(IRInstruction* inst) {
-  cgConvGenToDbl(inst);
-}
-
-HOT_FUNC_VM static int64_t genToDblHelper(TypedValue value) {
-  tvCastToDoubleInPlace(&value); // this will decrease the ref count
-  // of the current object in value.
-  return value.m_data.num;
-}
-
-void CodeGenerator::cgConvGenToDbl(IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
-  SSATmp* src = inst->getSrc(0);
-  ArgGroup args;
-  args.typedValue(src);
-  int64_t (*fPtr)(TypedValue) = genToDblHelper;
-  cgCallHelper(m_as, (TCA)fPtr, dst, kSyncPoint, args);
-}
-
-static int64_t arrayToIntHelper(ArrayData* value) {
-  return value->empty() ? 0 : 1;
-}
-
-void CodeGenerator::cgConvArrToInt(IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
-  SSATmp* src = inst->getSrc(0);
-  ArgGroup args;
-  args.ssa(src);
-  int64_t (*fPtr)(ArrayData*) = arrayToIntHelper;
-  cgCallHelper(m_as, (TCA)fPtr, dst, kNoSyncPoint, args);
-}
-
 void CodeGenerator::cgConvBoolToInt(IRInstruction* inst) {
   SSATmp* dst = inst->getDst();
   auto dstReg = dst->getReg();
@@ -1851,92 +1727,25 @@ void CodeGenerator::cgConvBoolToInt(IRInstruction* inst) {
   }
 }
 
-HOT_FUNC_VM static int64_t doubleToIntHelper(int64_t value) {
-  union {
-    int64_t intval;
-    double dblval;
-  } u;
-  u.intval = value;
-  double d = u.dblval;
-  return (d >= 0 ? d > std::numeric_limits<uint64_t>::max() ? 0u :
-          (uint64_t)d : (int64_t)d);
-}
-
-void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
-  SSATmp* src = inst->getSrc(0);
-  ArgGroup args;
-  args.typedValue(src);
-  int64_t (*fPtr)(int64_t) = doubleToIntHelper;
-  cgCallHelper(m_as, (TCA)fPtr, dst, kNoSyncPoint, args);
-}
-
-void CodeGenerator::cgConvObjToInt(IRInstruction* inst) {
-  // Never cheap, so just use the general logic.
-  cgConvGenToInt(inst);
-}
-
-void CodeGenerator::cgConvStrToInt(IRInstruction* inst) {
+void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
   SSATmp* dst = inst->getDst();
   auto dstReg = dst->getReg();
   assert(dstReg != InvalidReg);
   SSATmp* src = inst->getSrc(0);
-  if (src->isConst()) {
-    auto val = src->getValStr()->toInt64();
-    m_as.mov_imm64_reg(val, dstReg);
-  } else {
-    ArgGroup args;
-    args.ssa(src).imm(10);
-    cgCallHelper(m_as,
-                 Transl::Call(getMethodPtr(&StringData::toInt64)),
-                 dstReg, kNoSyncPoint, args);
-  }
-}
-
-static int64_t genToIntHelper(TypedValue value) {
-  tvCastToInt64InPlace(&value); // this will decrease the ref count
-                                // of the current object in value.
-  return value.m_data.num;
-}
-
-void CodeGenerator::cgConvGenToInt(IRInstruction* inst) {
-  SSATmp* dst = inst->getDst();
-  SSATmp* src = inst->getSrc(0);
-  ArgGroup args;
-  args.typedValue(src);
-  int64_t (*fPtr)(TypedValue) = genToIntHelper;
-  cgCallHelper(m_as, (TCA)fPtr, dst, kSyncPoint, args);
-}
-
-void CodeGenerator::cgConvToObj(IRInstruction* inst) {
-  CG_PUNT(ConvToObj);
-}
-
-void CodeGenerator::cgConvToStr(IRInstruction* inst) {
-  Type fromType = inst->getSrc(0)->getType();
-  SSATmp* dst = inst->getDst();
-  SSATmp* src = inst->getSrc(0);
-
-  auto dstReg = dst->getReg();
   auto srcReg = src->getReg();
-
-  if (fromType == Type::Int) {
-    // Int -> Str
-    ArgGroup args;
-    args.ssa(src);
-    StringData*(*fPtr)(int64_t) = buildStringData;
-    cgCallHelper(m_as, (TCA)fPtr,
-                 dst, kNoSyncPoint, args);
-  } else if (fromType == Type::Bool) {
-    // Bool -> Str
-    m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
-    m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString(""),
-                       dstReg);
-    m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString("1"),
-                       rScratch);
-    m_as.cmov_reg64_reg64(CC_NZ, rScratch, dstReg);
+  assert(src->isConst() == (srcReg == InvalidReg));
+  if (srcReg == InvalidReg) {
+    auto constVal = src->getValBool();
+    if (!constVal) {
+      m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString(""), dstReg);
+    } else {
+      m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString("1"), dstReg);
+    }
   } else {
-    CG_PUNT(ConvToString);
+    m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
+    m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString(""), dstReg);
+    m_as.mov_imm64_reg((uint64_t)StringData::GetStaticString("1"), rScratch);
+    m_as.cmov_reg64_reg64(CC_NZ, rScratch, dstReg);
   }
 }
 

@@ -53,6 +53,134 @@ HOT_FUNC_VM RefData* box_value(TypedValue tv) {
   return tvBoxHelper(tv.m_type, tv.m_data.num);
 }
 
+ArrayData* convCellToArrHelper(TypedValue tv) {
+  // Note: the call sites of this function all assume that
+  // no user code will run and no recoverable exceptions will
+  // occur while running this code. This seems trivially true
+  // in all cases but converting objects to arrays. It also
+  // seems true for that case as well, since the resulting array
+  // is essentially metadata for the object. If that is not true,
+  // you might end up looking at this code in a debugger and now
+  // you know why.
+  tvCastToArrayInPlace(&tv); // consumes a ref on counted values
+  return tv.m_data.parr;
+}
+
+int64_t convArrToBoolHelper(const ArrayData* a) {
+  return a->size() != 0;
+}
+
+int64_t convStrToBoolHelper(const StringData* s) {
+  return s->toBoolean();
+}
+
+int64_t convCellToBoolHelper(TypedValue tv) {
+  // Cannot call tvCastToBooleanInPlace here because some of the
+  // call sites will not be increasing the ref count on tv before
+  // calling, the ref count must be left alone.
+
+  switch (tv.m_type) {
+    case KindOfUninit:
+    case KindOfNull:    return false;
+    case KindOfBoolean: return tv.m_data.num;
+    case KindOfInt64:   return tv.m_data.num != 0;
+    case KindOfDouble:  return tv.m_data.dbl != 0;
+    case KindOfStaticString:
+    case KindOfString:  return tv.m_data.pstr->toBoolean();
+    case KindOfArray:   return !tv.m_data.parr->empty();
+    case KindOfObject:  return tv.m_data.pobj != nullptr;
+    default:            not_reached();
+  }
+}
+
+int64_t convArrToDblHelper(ArrayData* a) {
+  return reinterpretDblAsInt(a->empty() ? 0 : 1);
+}
+
+int64_t convStrToDblHelper(const StringData* s) {
+  return reinterpretDblAsInt(s->toDouble());
+}
+
+int64_t convCellToDblHelper(TypedValue tv) {
+  tvCastToDoubleInPlace(&tv); // consumes a ref on counted values
+                              // but not if an exception happens. (REVIEW)
+  return tv.m_data.num;
+}
+
+int64_t convArrToIntHelper(ArrayData* a) {
+  return a->empty() ? 0 : 1;
+}
+
+int64_t convDblToIntHelper(int64_t i) {
+  double d = reinterpretIntAsDbl(i);
+  return (d >= 0 ? d > std::numeric_limits<uint64_t>::max() ? 0u :
+          (uint64_t)d : (int64_t)d);
+}
+
+int64_t convStrToIntHelper(const StringData* s) {
+  return s->toInt64(10);
+}
+
+int64_t convCellToIntHelper(TypedValue tv) {
+  tvCastToInt64InPlace(&tv); // consumes a ref on counted values
+                             // but not if an exception happens. (REVIEW)
+  return tv.m_data.num;
+}
+
+ObjectData* convCellToObjHelper(TypedValue tv) {
+  // Note: the call sites of this function all assume that
+  // no user code will run and no recoverable exceptions will
+  // occur while running this code. This seems trivially true
+  // in all cases but converting arrays to objects. It also
+  // seems true for that case as well, since the source array
+  // is essentially metadata for the object. If that is not true,
+  // you might end up looking at this code in a debugger and now
+  // you know why.
+  tvCastToObjectInPlace(&tv); // consumes a ref on counted values
+  return tv.m_data.pobj;
+}
+
+StringData* convDblToStrHelper(int64_t i) {
+  double d = reinterpretIntAsDbl(i);
+  auto r = buildStringData(d);
+  r->incRefCount();
+  return r;
+}
+
+StringData* convIntToStrHelper(int64_t i) {
+  auto r = buildStringData(i);
+  r->incRefCount();
+  return r;
+}
+
+StringData* convObjToStrHelper(ObjectData* o) {
+  try {
+    auto s = o->t___tostring();
+    auto r = s.get();
+    o->decRefCount();
+    if (!r->isStatic()) r->incRefCount();
+    return r;
+  } catch (...) {
+    o->decRefCount();
+    throw;
+  }
+}
+
+StringData* convCellToStrHelper(TypedValue tv) {
+  switch (tv.m_type) {
+    case KindOfUninit:
+    case KindOfNull:    return buildStringData("");
+    case KindOfBoolean: return buildStringData(tv.m_data.num ? "1" : "");
+    case KindOfInt64:   return convIntToStrHelper(tv.m_data.num);
+    case KindOfDouble:  return convDblToStrHelper(tv.m_data.num);
+    case KindOfStaticString:
+    case KindOfString:  return tv.m_data.pstr;
+    case KindOfArray:   tvDecRefArr(&tv); return buildStringData("Array");
+    case KindOfObject:  return convObjToStrHelper(tv.m_data.pobj);
+    default:            not_reached();
+  }
+}
+
 void raisePropertyOnNonObject() {
   raise_warning("Cannot access property on non-object");
 }

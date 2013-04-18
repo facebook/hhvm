@@ -100,7 +100,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConvDblToArr:  return simplifyConvToArr(inst);
   case ConvIntToArr:  return simplifyConvToArr(inst);
   case ConvStrToArr:  return simplifyConvToArr(inst);
-  case ConvToBool:    return simplifyConvToBool(inst);
+  case ConvArrToBool: return simplifyConvArrToBool(inst);
+  case ConvDblToBool: return simplifyConvDblToBool(inst);
+  case ConvIntToBool: return simplifyConvIntToBool(inst);
+  case ConvStrToBool: return simplifyConvStrToBool(inst);
   case ConvArrToDbl:  return simplifyConvArrToDbl(inst);
   case ConvBoolToDbl: return simplifyConvBoolToDbl(inst);
   case ConvIntToDbl:  return simplifyConvIntToDbl(inst);
@@ -109,8 +112,9 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConvBoolToInt: return simplifyConvBoolToInt(inst);
   case ConvDblToInt:  return simplifyConvDblToInt(inst);
   case ConvStrToInt:  return simplifyConvStrToInt(inst);
-  case ConvToObj:     return simplifyConvToObj(inst);
-  case ConvToStr:     return simplifyConvToStr(inst);
+  case ConvBoolToStr: return simplifyConvBoolToStr(inst);
+  case ConvDblToStr:  return simplifyConvDblToStr(inst);
+  case ConvIntToStr:  return simplifyConvIntToStr(inst);
   case Unbox:         return simplifyUnbox(inst);
   case UnboxPtr:      return simplifyUnboxPtr(inst);
   case IsType:
@@ -396,7 +400,10 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
 
   // TODO: Add more algebraic simplification rules for NOT
   switch (op) {
-    case ConvToBool:
+    case ConvArrToBool:
+    case ConvDblToBool:
+    case ConvIntToBool:
+    case ConvStrToBool:
       return simplifyNot(inst->getSrc(0));
     case OpXor: {
       // !!X --> bool(X)
@@ -1069,34 +1076,40 @@ SSATmp* Simplifier::simplifyConvToArr(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvToBool(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvArrToBool(IRInstruction* inst) {
   SSATmp* src  = inst->getSrc(0);
-  Type srcType = src->getType();
-  if (srcType == Type::Bool) {
-    return src;
-  }
-  if (srcType.isNull()) {
-    return genDefBool(false);
-  }
-  if (srcType == Type::Obj) {
+  if (src->isConst()) {
+    if (src->getValArr()->empty()) {
+      return genDefBool(false);
+    }
     return genDefBool(true);
   }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvDblToBool(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
   if (src->isConst()) {
-    if (srcType == Type::Int) {
-      return genDefBool(bool(src->getValInt()));
-    }
-    if (srcType == Type::StaticStr) {
-      // only the strings "", and "0" convert to false, all other strings
-      // are converted to true
-      const StringData* str = src->getValStr();
-      return genDefBool(!str->empty() && !str->isZero());
-    }
-    if (srcType.isArray()) {
-      if (src->getValArr()->empty()) {
-        return genDefBool(false);
-      }
-      return genDefBool(true);
-    }
+    return genDefBool(bool(src->getValDbl()));
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvIntToBool(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
+  if (src->isConst()) {
+    return genDefBool(bool(src->getValInt()));
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvStrToBool(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
+  if (src->isConst()) {
+    // only the strings "", and "0" convert to false, all other strings
+    // are converted to true
+    const StringData* str = src->getValStr();
+    return genDefBool(!str->empty() && !str->isZero());
   }
   return nullptr;
 }
@@ -1178,43 +1191,31 @@ SSATmp* Simplifier::simplifyConvStrToInt(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvToObj(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvBoolToStr(IRInstruction* inst) {
   SSATmp* src  = inst->getSrc(0);
-  Type srcType = src->getType();
-  if (srcType == Type::Obj) {
-    return src;
+  if (src->isConst()) {
+    if (src->getValBool()) {
+      return m_tb->genDefConst(StringData::GetStaticString("1"));
+    }
+    return m_tb->genDefConst(StringData::GetStaticString(""));
   }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvToStr(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvDblToStr(IRInstruction* inst) {
   SSATmp* src  = inst->getSrc(0);
-  Type srcType = src->getType();
-  if (srcType.isString()) {
-    return src;
-  }
-  // arrays always get converted to the string "Array"
-  if (srcType.isArray()) {
-    return m_tb->genDefConst(StringData::GetStaticString("Array"));
-  }
-  if (srcType.isNull()) {
-    return m_tb->genDefConst(StringData::GetStaticString(""));
-  }
   if (src->isConst()) {
-    if (srcType == Type::Bool) {
-      if (src->getValBool()) {
-        return m_tb->genDefConst(StringData::GetStaticString("1"));
-      }
-      return m_tb->genDefConst(StringData::GetStaticString(""));
-    }
-    if (srcType == Type::Int) {
-      std::stringstream ss;
-      ss << src->getValInt();
-      return m_tb->genDefConst(StringData::GetStaticString(ss.str()));
-    }
-    if (srcType == Type::Dbl) {
-      // TODO constant dbl to string
-    }
+    return m_tb->genDefConst(
+      StringData::convert_double_helper(src->getValDbl()));
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvIntToStr(IRInstruction* inst) {
+  SSATmp* src  = inst->getSrc(0);
+  if (src->isConst()) {
+    return m_tb->genDefConst(
+      StringData::convert_integer_helper(src->getValInt()));
   }
   return nullptr;
 }

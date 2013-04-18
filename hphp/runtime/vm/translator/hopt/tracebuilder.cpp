@@ -396,21 +396,26 @@ SSATmp* TraceBuilder::genDefNone() {
   return gen(DefConst, Type::None, &cdata);
 }
 
-SSATmp* TraceBuilder::genConvToStr(SSATmp* src) {
-  if (src->getType() == Type::Bool) {
-    // Bool to string code sequence loads static strings
-    return gen(ConvToStr, Type::StaticStr, src);
-  } else {
-    return gen(ConvToStr, Type::Str, src);
-  }
-}
-
-SSATmp* TraceBuilder::genConvToObj(SSATmp* src) {
-  return gen(ConvToObj, Type::Obj, src);
-}
-
 SSATmp* TraceBuilder::genConvToBool(SSATmp* src) {
-  return gen(ConvToBool, Type::Bool, src);
+  Type fromType = src->getType();
+  if (fromType.isBool()) {
+    return src;
+  } else if (fromType.isNull()) {
+    return genDefConst(false);
+  } else if (fromType.isArray()) {
+    return gen(ConvArrToBool, src);
+  } else if (fromType.isDbl()) {
+    return gen(ConvDblToBool, src);
+  } else if (fromType.isInt()) {
+    return gen(ConvIntToBool, src);
+  } else if (fromType.isString()) {
+    return gen(ConvStrToBool, src);
+  } else if (fromType.isObj()) {
+    // If a value is known to be an object, it is known to be non null.
+    return genDefConst(true);
+  } else {
+    return gen(ConvCellToBool, src);
+  }
 }
 
 SSATmp* TraceBuilder::genCmp(Opcode opc, SSATmp* src1, SSATmp* src2) {

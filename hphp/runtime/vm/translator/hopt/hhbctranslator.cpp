@@ -1,4 +1,4 @@
-/*
+ /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
@@ -2153,7 +2153,7 @@ void HhbcTranslator::emitCastArray() {
   } else if (fromType.isObj()) {
     push(m_tb->gen(ConvObjToArr, src));
   } else {
-    push(m_tb->gen(ConvGenToArr, src));
+    push(m_tb->gen(ConvCellToArr, src));
   }
 }
 
@@ -2184,7 +2184,7 @@ void HhbcTranslator::emitCastDouble() {
     push(m_tb->gen(ConvObjToDbl, src));
   } else {
     spillStack(); // may throw
-    push(m_tb->gen(ConvGenToDbl, src));
+    push(m_tb->gen(ConvCellToDbl, src));
   }
 }
 
@@ -2210,28 +2210,43 @@ void HhbcTranslator::emitCastInt() {
     push(m_tb->gen(ConvObjToInt, src));
   } else {
     spillStack(); // may throw
-    push(m_tb->gen(ConvGenToInt, src));
+    push(m_tb->gen(ConvCellToInt, src));
+  }
+}
+
+void HhbcTranslator::emitCastObject() {
+  SSATmp* src = popC();
+  Type srcType = src->getType();
+  if (srcType.isObj()) {
+    push(src);
+  } else {
+    push(m_tb->gen(ConvCellToObj, src));
   }
 }
 
 void HhbcTranslator::emitCastString() {
   SSATmp* src = popC();
   Type fromType = src->getType();
-  if (fromType == Type::Cell) {
-    PUNT(CastString_Cell);
-  } else if (fromType == Type::Obj) {
-    // call the toString helper on object
-    PUNT(CastString_Obj);
+  if (fromType.isString()) {
+    push(src);
+  } else if (fromType.isNull()) {
+    push(m_tb->genDefConst(StringData::GetStaticString("")));
+  } else if (fromType.isArray()) {
+    push(m_tb->genDefConst(StringData::GetStaticString("Array")));
+    m_tb->genDecRef(src);
+  } else if (fromType.isBool()) {
+    push(m_tb->gen(ConvBoolToStr, src));
+  } else if (fromType.isDbl()) {
+    push(m_tb->gen(ConvDblToStr, src));
+  } else if (fromType.isInt()) {
+    push(m_tb->gen(ConvIntToStr, src));
+  } else if (fromType.isObj()) {
+    spillStack(); // may throw
+    push(m_tb->gen(ConvObjToStr, src));
   } else {
-    // for int to string conversion, this calls a helper that returns
-    // a string with ref count of 0.
-    pushIncRef(m_tb->genConvToStr(src));
+    spillStack(); // may throw
+    push(m_tb->gen(ConvCellToStr, src));
   }
-  m_tb->genDecRef(src);
-}
-
-void HhbcTranslator::emitCastObject() {
-  emitInterpOneOrPunt(Type::Obj, 1);
 }
 
 static
@@ -2538,7 +2553,7 @@ void HhbcTranslator::emitMod() {
 		     m_stackDeficit,
 		     exitSpillValues,
     [&](IRFactory* irf, Trace* t) {
-      // Dividing by zero. Interpreting will raise a notice and 
+      // Dividing by zero. Interpreting will raise a notice and
       // produce the boolean false. Punch out here and resume after
       // the Mod instruction; this should be rare.
     m_tb->genFor(t, RaiseWarning,

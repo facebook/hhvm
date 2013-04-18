@@ -245,6 +245,14 @@ ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
           return replaceValue(makeConstant(ar, "null"));
         }
         if (m_offset->isScalar() && m_offset->getScalarValue(o)) {
+          if (v.isString()) {
+            if (!o.isInteger() ||
+                o.toInt64Val() < 0 ||
+                o.toInt64Val() >= v.toCStrRef().size()) {
+              // warnings should be raised...
+              return ExpressionPtr();
+            }
+          }
           try {
             g_context->setThrowAllErrors(true);
             Variant res = v.rvalAt(

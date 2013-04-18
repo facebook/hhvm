@@ -45,11 +45,6 @@ void ifThen(Transl::X64Assembler& a, ConditionCode cc, Then thenBlock) {
 
 // RAII aids to machine code.
 
-// In shared stubs, we've already made the stack odd by calling
-// from a to astubs. Calls from a are on an even rsp.
-typedef PhysRegSaverParity<0> PhysRegSaverStub;
-typedef PhysRegSaverParity<1> PhysRegSaver;
-
 // Put FreezeRegs in a scope around any emit calls where the caller needs
 // to be sure the callee will not modify the state of the register
 // map.  (Arises in situations with conditional code often.)

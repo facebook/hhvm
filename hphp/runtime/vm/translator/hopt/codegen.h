@@ -128,6 +128,7 @@ private:
     cgCallNative(m_as, inst);
   }
   void cgCallNative(Asm& a, IRInstruction* inst);
+  void doStackArgs(Asm&, ArgGroup&);
   void cgCallHelper(Asm&,
                     TCA addr,
                     SSATmp* dst,
@@ -356,7 +357,8 @@ class ArgDesc {
 public:
   enum Kind {
     Reg,     // Normal register
-    TypeReg, // Type register. Might need arch-specific mangling before call
+    TypeReg, // TypedValue's m_type field. Might need arch-specific
+             // mangling before call depending on TypedValue's layout.
     Imm,     // Immediate
     Addr,    // Address
     None,    // Nothing: register will contain garbage
@@ -407,15 +409,29 @@ private:
  *   assert(args.size() == 3);
  */
 struct ArgGroup {
-  size_t size() const { return m_args.size(); }
+  typedef std::vector<ArgDesc> ArgVec;
 
+  ArgGroup()
+      : m_override(nullptr)
+    {}
+
+  size_t numRegArgs() const { return m_regArgs.size(); }
+  size_t numStackArgs() const { return m_stkArgs.size(); }
+
+  ArgDesc& reg(size_t i) {
+    assert(i < m_regArgs.size());
+    return m_regArgs[i];
+  }
   ArgDesc& operator[](size_t i) {
-    assert(i < size());
-    return m_args[i];
+    return reg(i);
+  }
+  ArgDesc& stk(size_t i) {
+    assert(i < m_stkArgs.size());
+    return m_stkArgs[i];
   }
 
   ArgGroup& imm(uintptr_t imm) {
-    m_args.push_back(ArgDesc(ArgDesc::Imm, InvalidReg, imm));
+    push_arg(ArgDesc(ArgDesc::Imm, InvalidReg, imm));
     return *this;
   }
 
@@ -426,33 +442,24 @@ struct ArgGroup {
   ArgGroup& immPtr(std::nullptr_t) { return imm(0); }
 
   ArgGroup& reg(PhysReg reg) {
-    m_args.push_back(ArgDesc(ArgDesc::Reg, PhysReg(reg), -1));
+    push_arg(ArgDesc(ArgDesc::Reg, PhysReg(reg), -1));
     return *this;
   }
 
   ArgGroup& addr(PhysReg base, intptr_t off) {
-    m_args.push_back(ArgDesc(ArgDesc::Addr, base, off));
+    push_arg(ArgDesc(ArgDesc::Addr, base, off));
     return *this;
   }
 
   ArgGroup& ssa(SSATmp* tmp) {
-    m_args.push_back(ArgDesc(tmp));
+    push_arg(ArgDesc(tmp));
     return *this;
   }
 
   ArgGroup& ssas(IRInstruction* inst, unsigned begin, unsigned count = 1) {
     for (SSATmp* s : inst->getSrcs().subpiece(begin, count)) {
-      m_args.push_back(ArgDesc(s));
+      push_arg(ArgDesc(s));
     }
-    return *this;
-  }
-
-  /*
-   * Loads the type of tmp into an arg register destined to be the
-   * upper word of a TypedValue parameter passed by value in registers.
-   */
-  ArgGroup& type(SSATmp* tmp) {
-    m_args.push_back(ArgDesc(tmp, false));
     return *this;
   }
 
@@ -460,11 +467,14 @@ struct ArgGroup {
    * Pass tmp as a TypedValue passed by value.
    */
   ArgGroup& typedValue(SSATmp* tmp) {
-    return packed_tv ? type(tmp).ssa(tmp) : ssa(tmp).type(tmp);
-  }
-
-  ArgGroup& none() {
-    m_args.push_back(ArgDesc(ArgDesc::None, InvalidReg, -1));
+    // If there's exactly one register argument slot left, the whole TypedValue
+    // goes on the stack instead of being split between a register and the
+    // stack.
+    if (m_regArgs.size() == kNumRegisterArgs - 1) {
+      m_override = &m_stkArgs;
+    }
+    packed_tv ? type(tmp).ssa(tmp) : ssa(tmp).type(tmp);
+    m_override = nullptr;
     return *this;
   }
 
@@ -477,6 +487,29 @@ struct ArgGroup {
   }
 
 private:
+  void push_arg(const ArgDesc& arg) {
+    // If m_override is set, use it unconditionally. Otherwise, select
+    // m_regArgs or m_stkArgs depending on how many args we've already pushed.
+    ArgVec* args = m_override;
+    if (!args) {
+      args = m_regArgs.size() < kNumRegisterArgs ? &m_regArgs : &m_stkArgs;
+    }
+    args->push_back(arg);
+  }
+
+  /*
+   * For passing the m_type field of a TypedValue.
+   */
+  ArgGroup& type(SSATmp* tmp) {
+    push_arg(ArgDesc(tmp, false));
+    return *this;
+  }
+
+  ArgGroup& none() {
+    push_arg(ArgDesc(ArgDesc::None, InvalidReg, -1));
+    return *this;
+  }
+
   ArgGroup& vectorKeyImpl(SSATmp* key, bool allowInt) {
     if (key->isString() || (allowInt && key->isA(Type::Int))) {
       return packed_tv ? none().ssa(key) : ssa(key).none();
@@ -484,7 +517,9 @@ private:
     return typedValue(key);
   }
 
-  std::vector<ArgDesc> m_args;
+  ArgVec* m_override; // used to force args to go into a specific ArgVec
+  ArgVec m_regArgs;
+  ArgVec m_stkArgs;
 };
 
 const Func* loadClassCtor(Class* cls);

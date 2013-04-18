@@ -501,12 +501,13 @@ O_STK(SetOpProp,               D(Cell), C(TCA)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(Cell)                             \
-                                          S(PtrToCell),VProp|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell)                        \
+                                          C(Int),      VProp|E|N|Mem|Refs|Er) \
 O_STK(IncDecProp,              D(Cell), C(TCA)                                \
-                                          C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
-                                          S(PtrToCell),VProp|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell)                        \
+                                          C(Int),      VProp|E|N|Mem|Refs|Er) \
 O(EmptyProp,                   D(Bool), C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
@@ -1520,6 +1521,8 @@ inline Type typeForConst(const Class*)       { return Type::Cls; }
 inline Type typeForConst(const TypedValue*)  { return Type::PtrToGen; }
 inline Type typeForConst(TCA)                { return Type::TCA; }
 inline Type typeForConst(double)             { return Type::Dbl; }
+inline Type typeForConst(SetOpOp)            { return Type::Int; }
+inline Type typeForConst(IncDecOp)           { return Type::Int; }
 inline Type typeForConst(const ArrayData* ad) {
   assert(ad->isStatic());
   // TODO: Task #2124292, Reintroduce StaticArr

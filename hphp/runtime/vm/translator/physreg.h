@@ -223,40 +223,34 @@ static_assert(std::has_trivial_destructor<RegSet>::value,
 
 //////////////////////////////////////////////////////////////////////
 
-template<int StackParity>
 struct PhysRegSaverParity {
-  PhysRegSaverParity(X64Assembler& a_, RegSet s_) : a(a_), s(s_) {
-    s.forEach([&] (PhysReg pr) {
-      a.    push   (pr);
-    });
-    if ((s.size() & 1) == StackParity) {
-      // Maintain stack evenness for SIMD compatibility.
-      a.    subq   (8, reg::rsp);
-    }
-  }
+  PhysRegSaverParity(int parity, X64Assembler& as, RegSet regs);
+  ~PhysRegSaverParity();
 
   PhysRegSaverParity(const PhysRegSaverParity&) = delete;
   PhysRegSaverParity(PhysRegSaverParity&&) = default;
   PhysRegSaverParity& operator=(const PhysRegSaverParity&) = delete;
   PhysRegSaverParity& operator=(PhysRegSaverParity&&) = default;
 
-  ~PhysRegSaverParity() {
-    if ((s.size() & 1) == StackParity) {
-      // See above; stack parity.
-      a.    addq   (8, reg::rsp);
-    }
-    s.forEachR([&] (PhysReg pr) {
-      a.    pop    (pr);
-    });
-  }
-
-  int rspAdjustment() const {
-    return s.size() + ((s.size() & 1) == StackParity);
-  }
+  int rspAdjustment() const;
+  void bytesPushed(int64_t bytes);
 
 private:
-  X64Assembler& a;
-  RegSet s;
+  X64Assembler& m_as;
+  RegSet m_regs;
+  int64_t m_adjust;
+};
+
+struct PhysRegSaverStub : public PhysRegSaverParity {
+  PhysRegSaverStub(X64Assembler& as, RegSet regs)
+      : PhysRegSaverParity(0, as, regs)
+  {}
+};
+
+struct PhysRegSaver : public PhysRegSaverParity {
+  PhysRegSaver(X64Assembler& as, RegSet regs)
+      : PhysRegSaverParity(1, as, regs)
+  {}
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -1283,9 +1283,9 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
 }
 #undef HELPER_TABLE
 
-template <SetOpOp op, bool isObj>
+template <bool isObj>
 static inline TypedValue setOpPropImpl(TypedValue* base, TypedValue keyVal,
-                                       Cell val, MInstrState* mis) {
+                                       Cell val, MInstrState* mis, SetOpOp op) {
   TypedValue* result = VM::SetOpProp<isObj>(
     mis->tvScratch, mis->tvRef, mis->ctx, op, base, &keyVal, &val);
 
@@ -1294,22 +1294,19 @@ static inline TypedValue setOpPropImpl(TypedValue* base, TypedValue keyVal,
   return ret;
 }
 
-#define OPPROP_TABLE(m, nm, op)                                \
-  /* name             op  isObj */                             \
-  m(nm##op##PropC,    op,  false)                              \
-  m(nm##op##PropCO,   op,   true)
+#define HELPER_TABLE(m)                                  \
+  /* name         isObj */                               \
+  m(setOpPropC,    false)                                \
+  m(setOpPropCO,    true)
 
-#define HELPER_TABLE(m, op) OPPROP_TABLE(m, setOp, SetOp##op)
 #define SETOP(nm, ...)                                                 \
 TypedValue nm(TypedValue* base, TypedValue key,                        \
-                     Cell val, MInstrState* mis) {                     \
-  return setOpPropImpl<__VA_ARGS__>(base, key, val, mis);              \
+              Cell val, MInstrState* mis, SetOpOp op) {                \
+  return setOpPropImpl<__VA_ARGS__>(base, key, val, mis, op);          \
 }
-#define SETOP_OP(op, bcOp) HELPER_TABLE(SETOP, op)
 namespace VectorHelpers {
-SETOP_OPS
+HELPER_TABLE(SETOP)
 }
-#undef SETOP_OP
 #undef SETOP
 
 void HhbcTranslator::VectorTranslator::emitSetOpProp() {
@@ -1317,52 +1314,54 @@ void HhbcTranslator::VectorTranslator::emitSetOpProp() {
   SSATmp* key = getKey();
   SSATmp* value = getValue();
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue,
-                               Cell, MInstrState*);
-# define SETOP_OP(op, bcOp) HELPER_TABLE(FILL_ROW, op)
-  BUILD_OPTAB_ARG(SETOP_OPS, op, m_base->isA(Type::Obj));
-# undef SETOP_OP
-  gen(StRaw, m_misBase, cns(RawMemSlot::MisCtx), CTX());
+                               Cell, MInstrState*, SetOpOp);
+  BUILD_OPTAB(m_base->isA(Type::Obj));
+  m_tb.gen(StRaw, m_misBase, cns(RawMemSlot::MisCtx), CTX());
   m_ht.exceptionBarrier();
   m_result =
-    genStk(SetOpProp, cns((TCA)opFunc), m_base, key, value, genMisPtr());
+    genStk(SetOpProp, cns((TCA)opFunc),
+           m_base, key, value, genMisPtr(), cns(op));
 }
 #undef HELPER_TABLE
 
-template <IncDecOp op, bool isObj>
-static inline TypedValue incDecPropImpl(Class* ctx, TypedValue* base,
-                                        TypedValue keyVal, MInstrState* mis) {
+template <bool isObj>
+static inline TypedValue incDecPropImpl(TypedValue* base, TypedValue keyVal,
+                                        MInstrState* mis, IncDecOp op) {
   TypedValue result;
   result.m_type = KindOfUninit;
   VM::IncDecProp<true, isObj>(
-    mis->tvScratch, mis->tvRef, ctx, op, base, &keyVal, result);
+    mis->tvScratch, mis->tvRef, mis->ctx, op, base, &keyVal, result);
   assert(result.m_type != KindOfRef);
   return result;
 }
 
 
-#define HELPER_TABLE(m, op) OPPROP_TABLE(m, incDec, op)
+#define HELPER_TABLE(m)                         \
+  /* name         isObj */                      \
+  m(incDecPropC,   false)                       \
+  m(incDecPropCO,   true)
+
 #define INCDEC(nm, ...)                                                 \
-TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,             \
-                     MInstrState* mis) {                                \
-  return incDecPropImpl<__VA_ARGS__>(ctx, base, key, mis);              \
+TypedValue nm(TypedValue* base, TypedValue key,                         \
+              MInstrState* mis, IncDecOp op) {                          \
+  return incDecPropImpl<__VA_ARGS__>(base, key, mis, op);               \
 }
-#define INCDEC_OP(op) HELPER_TABLE(INCDEC, op)
 namespace VectorHelpers {
-INCDEC_OPS
+HELPER_TABLE(INCDEC)
 }
-#undef INCDEC_OP
 #undef INCDEC
 
 void HhbcTranslator::VectorTranslator::emitIncDecProp() {
   IncDecOp op = IncDecOp(m_ni.imm[0].u_OA);
   SSATmp* key = getKey();
-  typedef TypedValue (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
-# define INCDEC_OP(op) HELPER_TABLE(FILL_ROW, op)
-  BUILD_OPTAB_ARG(INCDEC_OPS, op, m_base->isA(Type::Obj));
-# undef INCDEC_OP
+  typedef TypedValue (*OpFunc)(TypedValue*, TypedValue,
+                               MInstrState*, IncDecOp);
+  BUILD_OPTAB(m_base->isA(Type::Obj));
+  m_tb.gen(StRaw, m_misBase, cns(RawMemSlot::MisCtx), CTX());
   m_ht.exceptionBarrier();
   m_result =
-    genStk(IncDecProp, cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
+    genStk(IncDecProp, cns((TCA)opFunc),
+           m_base, key, genMisPtr(), cns(op));
 }
 #undef HELPER_TABLE
 

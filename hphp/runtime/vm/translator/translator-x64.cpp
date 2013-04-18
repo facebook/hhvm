@@ -11825,7 +11825,7 @@ TCA TranslatorX64::emitNAryStub(X64Assembler& a, Call c) {
   a.    movq (rsp, rbp);
   {
     RegSet s = kCallerSaved - alreadySaved;
-    PhysRegSaverParity<Parity> rs(a, s);
+    PhysRegSaverParity rs(Parity, a, s);
     emitCall(a, c);
   }
   a.    pop  (rbp);  // }

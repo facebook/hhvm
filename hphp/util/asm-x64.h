@@ -1042,6 +1042,7 @@ struct X64Assembler {
   }
 
   void push(Reg64 r)  { instrR(instr_push, r); }
+  void pushl(Reg32 r) { instrR(instr_push, r); }
   void pop (Reg64 r)  { instrR(instr_pop,  r); }
   void idiv(Reg64 r)  { instrR(instr_idiv, r); }
   void incq(Reg64 r)  { instrR(instr_inc,  r); }

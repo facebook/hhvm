@@ -72,7 +72,8 @@ static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 using Transl::rVmFp;
 using Transl::rVmSp;
 
-const size_t kTypeShiftBits = (offsetof(TypedValue, m_type) % 8) * 8;
+const size_t kTypeWordOffset = (offsetof(TypedValue, m_type) % 8);
+const size_t kTypeShiftBits = kTypeWordOffset * CHAR_BIT;
 
 // left shift an immediate DataType, for type, to the correct position
 // within one of the registers used to pass a TypedValue by value.
@@ -638,28 +639,20 @@ void CodeGenerator::cgJmpSame (IRInstruction* inst) { cgJcc(inst); }
 void CodeGenerator::cgJmpNSame(IRInstruction* inst) { cgJcc(inst); }
 
 /**
- * Once the arg sources and dests are all assigned; emit moves and exchanges
- * to put all the args in desired registers. In addition to moves and
- * exchanges, shuffleArgs also handles adding lea-offsets for dest registers
- * (dest = src + lea-offset) and zero extending bools (dest = zeroExtend(src)).
+ * Once the arg sources and dests are all assigned; emit moves and exchanges to
+ * put all the args in desired registers. Any arguments that don't fit in
+ * registers will be put on the stack. In addition to moves and exchanges,
+ * shuffleArgs also handles adding lea-offsets for dest registers (dest = src +
+ * lea-offset) and zero extending bools (dest = zeroExtend(src)).
  */
 typedef Transl::X64Assembler Asm;
-static void shuffleArgs(Asm& a, ArgGroup& args) {
-  // First schedule arg moves
-  for (size_t i = 0; i < args.size(); ++i) {
-    // We don't support memory-to-register moves currently.
-    assert(args[i].getKind() == ArgDesc::Reg ||
-           args[i].getKind() == ArgDesc::TypeReg ||
-           args[i].getKind() == ArgDesc::Imm ||
-           args[i].getKind() == ArgDesc::Addr ||
-           args[i].getKind() == ArgDesc::None);
-  }
-  // Handle register-to-register moves.
+static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
+  // Compute the move/shuffle plan.
   int moves[kNumX64Regs];
   ArgDesc* argDescs[kNumX64Regs];
   memset(moves, -1, sizeof moves);
   memset(argDescs, 0, sizeof argDescs);
-  for (size_t i = 0; i < args.size(); ++i) {
+  for (size_t i = 0; i < args.numRegArgs(); ++i) {
     auto kind = args[i].getKind();
     if (!(kind == ArgDesc::Reg  ||
           kind == ArgDesc::Addr ||
@@ -675,6 +668,8 @@ static void shuffleArgs(Asm& a, ArgGroup& args) {
   }
   std::vector<MoveInfo> howTo;
   doRegMoves(moves, int(reg::rScratch), howTo);
+
+  // Execute the plan
   for (size_t i = 0; i < howTo.size(); ++i) {
     if (howTo[i].m_kind == MoveInfo::Move) {
       if (howTo[i].m_reg2 == reg::rScratch) {
@@ -705,7 +700,7 @@ static void shuffleArgs(Asm& a, ArgGroup& args) {
   // load-effective address and zero extending for bools.
   // Ignore args that have been handled by the
   // move above.
-  for (size_t i = 0; i < args.size(); ++i) {
+  for (size_t i = 0; i < args.numRegArgs(); ++i) {
     if (!args[i].done()) {
       ArgDesc::Kind kind = args[i].getKind();
       PhysReg dst = args[i].getDstReg();
@@ -723,6 +718,52 @@ static void shuffleArgs(Asm& a, ArgGroup& args) {
       }
     }
   }
+
+  // Store any remaining arguments to the stack
+  for (int i = args.numStackArgs() - 1; i >= 0; --i) {
+    auto& arg = args.stk(i);
+    auto srcReg = arg.getSrcReg();
+    assert(arg.getDstReg() == InvalidReg);
+    switch (arg.getKind()) {
+      case ArgDesc::Reg:
+        if (arg.isZeroExtend()) {
+          a.  movzbl(rbyte(srcReg), r32(rScratch));
+          a.  push(rScratch);
+        } else {
+          a.  push(srcReg);
+        }
+        break;
+
+      case ArgDesc::TypeReg:
+        static_assert(kTypeWordOffset == 4 || kTypeWordOffset == 0,
+                      "kTypeWordOffset value not supported");
+        // x86 stacks grow down, so push higher offset items first
+        if (kTypeWordOffset == 4) {
+          a.  pushl(r32(srcReg));
+          a.  pushl(eax);
+        } else {
+          a.  pushl(eax);
+          a.  pushl(r32(srcReg));
+        }
+        break;
+
+      case ArgDesc::Imm:
+        a.    emitImmReg(arg.getImm(), rScratch);
+        a.    push(rScratch);
+        break;
+
+      case ArgDesc::Addr:
+        not_implemented();
+
+      case ArgDesc::None:
+        a.    push(rax);
+        if (RuntimeOption::EvalHHIRGenerateAsserts) {
+          a.  storeq(0xbadbadbadbadbad, *rsp);
+        }
+        break;
+    }
+  }
+  return args.numStackArgs() * sizeof(int64_t);
 }
 
 void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
@@ -823,26 +864,24 @@ void CodeGenerator::cgCallHelper(Asm& a,
                                  ArgGroup& args,
                                  RegSet toSave,
                                  DestType destType) {
-  assert(int(args.size()) <= kNumRegisterArgs);
   assert(m_curInst->isNative());
 
-  // Save the register that are live at the point after this IR instruction.
-  // However, don't save the destination registers that will be overwritten
-  // by this call.
+  // Save the caller-saved registers that are live across this
+  // instruction. The number of regs to save and the number of args
+  // being passed on the stack affect the parity of the PhysRegSaver,
+  // so we use the generic version here.
   toSave = toSave & kCallerSaved;
   assert((toSave & RegSet().add(dstReg0).add(dstReg1)).empty());
-  PhysRegSaverParity<1> regSaver(a, toSave);
+  PhysRegSaverParity regSaver(1 + args.numStackArgs(), a, toSave);
 
-  // Assign registers to the arguments
-  for (size_t i = 0; i < args.size(); i++) {
+  // Assign registers to the arguments then prepare them for the call.
+  for (size_t i = 0; i < args.numRegArgs(); i++) {
     args[i].setDstReg(argNumToRegName[i]);
   }
-
-  shuffleArgs(a, args);
+  regSaver.bytesPushed(shuffleArgs(a, args));
 
   // do the call; may use a trampoline
   m_tx64->emitCall(a, call);
-
   if (sync != kNoSyncPoint) {
     recordSyncPoint(a, sync);
   }
@@ -3011,12 +3050,12 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
   Address patchTypeCheck = cgCheckRefCountedType(baseReg, offset);
   if (exit == nullptr && RuntimeOption::EvalHHIRGenericDtorHelper) {
     {
-      // This PhysRegSaverParity saves rdi redundantly if
+      // This PhysRegSaverStub saves rdi redundantly if
       // !liveRegs[m_curInst].contains(rdi), but its
       // necessary to maintain stack alignment. We can do better
       // by making the helpers adjust the stack for us in the cold
       // path, which calls the destructor.
-      PhysRegSaverParity<0> regSaver(m_as, RegSet(rdi));
+      PhysRegSaverStub regSaver(m_as, RegSet(rdi));
 
       /*
        * rVmSp is ok here because this is part of the special
@@ -4622,6 +4661,8 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
         args[j++].setDstReg(dst->getReg(1));
       }
     }
+    assert(args.numStackArgs() == 0 &&
+           "Jmp_ doesn't support passing arguments on the stack yet.");
     shuffleArgs(m_as, args);
   }
   if (!m_state.noTerminalJmp_) {

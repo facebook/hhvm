@@ -6,32 +6,37 @@
 
 function usage() {
   global $argv;
-  return "  $argv[0] [-m jit|hhir|interp] [-r] <tests/directories>";
+  return "usage: $argv[0] [-m jit|hhir|interp] [-r] <tests/directories>";
 }
 
 function help() {
   global $argv;
+  $ztestexample = 'test/zend/good/*/*z*.php';
   $help = <<<EOT
 
-  # Examples
 
-  Quick tests in JIT mode:
-    $argv[0]
+This is the hhvm test-suite runner.  For more detailed documentation,
+see hphp/test/README.md.
 
-  Quick tests in HHIR mode:
-    $argv[0] -m hhir
+# Examples:
 
-  Slow tests in interp mode:
-    $argv[0] -m interp test/slow
+  # Quick tests in JIT mode:
+  % $argv[0]
 
-  Slow closure tests in JIT mode:
-    $argv[0] test/slow/closure
+  # Quick tests in HHIR mode:
+  % $argv[0] -m hhir
 
-  Slow closure tests in JIT mode with RepoAuthoritative:
-    $argv[0] -r test/slow/closure
+  # Slow tests in interp mode:
+  % $argv[0] -m interp test/slow
 
-  Zend tests with a "z" in their name:
-    $argv[0] test/zend/good/*/*z*.php
+  # Slow closure tests in JIT mode:
+  % $argv[0] test/slow/closure
+
+  # Slow closure tests in JIT mode with RepoAuthoritative:
+  % $argv[0] -r test/slow/closure
+
+  # Zend tests with a "z" in their name:
+  % $argv[0] $ztestexample
 EOT;
   return usage().$help;
 }
@@ -41,10 +46,22 @@ function error($message) {
   exit(1);
 }
 
-if (!isset($_ENV['HPHP_HOME'])) {
-  error("HPHP_HOME must be set in your environment");
+function hphp_home() {
+  if (isset($GLOBALS['val'])) return $GLOBALS['val'];
+  $get_val = function() {
+    if (isset($_ENV['HPHP_HOME'])) {
+      return $_ENV['HPHP_HOME'];
+    }
+
+    $top_level = system('git rev-parse --show-top-level', $status);
+    if ($status === 0) {
+      return $top_level;
+    }
+    error("Couldn't determine the root of your fbcode repository.\n".
+          "Try setting HPHP_HOME in your environment");
+  };
+  return $GLOBALS['val'] = rtrim($get_val(), '/');
 }
-$_ENV['HPHP_HOME'] = rtrim($_ENV['HPHP_HOME'], '/');
 
 function idx($array, $key, $default = null) {
   return isset($array[$key]) ? $array[$key] : $default;
@@ -55,7 +72,7 @@ function idx_file($array, $key, $default = null) {
 }
 
 function bin_root() {
-  return idx($_ENV, 'FBMAKE_BIN_ROOT', $_ENV['HPHP_HOME'].'/_bin');
+  return idx($_ENV, 'FBMAKE_BIN_ROOT', hphp_home().'/_bin');
 }
 
 function verify_hhbc() {
@@ -98,7 +115,7 @@ function get_options($argv) {
 
 function find_tests($files) {
   if (!$files) {
-    $files = array($_ENV['HPHP_HOME'].'/hphp/test/quick');
+    $files = array(hphp_home().'/hphp/test/quick');
   }
   foreach ($files as &$file) {
     if (!stat($file)) {
@@ -219,7 +236,7 @@ if (isset($options['help'])) {
 $tests = find_tests($files);
 
 $verify = array(
-  $_ENV['HPHP_HOME'].'/hphp/test/verify',
+  hphp_home().'/hphp/test/verify',
   '--command="'.implode(' ', command_arg($options, $tests)).'"',
   implode(' ', verify_args($options)),
   '--hphp="'.implode(' ', hphp_arg($options, $tests)).'"',
@@ -237,7 +254,7 @@ if ($return_status) {
     $extra_help = '';
   }
   $command = str_replace('%3\\$s', $filename, $command);
-  
+
   if (isset($options['repo'])) {
     $command .= " -v Repo.Authoritative=true ";
     $command = str_replace(verify_hhbc(), "$filename.repo/hhvm.hhbc", $command);

@@ -161,12 +161,16 @@ bool BinaryOpExpression::isLogicalOrOperator() const {
 }
 
 ExpressionPtr BinaryOpExpression::unneededHelper() {
-  if (!isShortCircuitOperator() || !m_exp2->getContainedEffects()) {
+  bool shortCircuit = isShortCircuitOperator();
+  if (!m_exp2->getContainedEffects() ||
+      (!shortCircuit && !m_exp1->getContainedEffects())) {
     return Expression::unneededHelper();
   }
 
-  m_exp2 = m_exp2->unneeded();
-  m_exp2->setExpectedType(Type::Boolean);
+  if (shortCircuit) {
+    m_exp2 = m_exp2->unneeded();
+    m_exp2->setExpectedType(Type::Boolean);
+  }
   return static_pointer_cast<Expression>(shared_from_this());
 }
 

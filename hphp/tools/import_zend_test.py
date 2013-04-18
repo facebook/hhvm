@@ -63,16 +63,111 @@ bad_tests = (
     'bug54265.php',
 )
 
+no_import = (
+    # these hang forever
+    '005a.php',
+    'array_012.php',
+    'array_pad_variation2.php',
+    'bug27508.php',
+    'gzgetc_basic.php',
+    'gzgets_basic.php',
+    'observer_003.php',
+    'observer_004.php',
+    'observer_005.php',
+    'observer_006.php',
+    'observer_009.php',
+    'sleep_error.php',
+    'socket_select-wrongparams-1.php',
+    'test010.php',
+    'usleep_error.php',
+
+    # not imported yet, but will be
+    '/ext/curl',
+    '/ext/ctype',
+    '/ext/date',
+    '/ext/exif',
+    '/ext/gd',
+    '/ext/hash',
+    '/ext/iconv',
+    '/ext/imap',
+    '/ext/intl',
+    '/ext/json',
+    '/ext/ldap',
+    '/ext/libxml',
+    '/ext/mbstring',
+    '/ext/standard',
+    '/ext/mcrypt',
+    '/ext/mysql',
+    '/ext/oci8',
+    '/ext/openssl',
+    '/ext/pcntl',
+    '/ext/pcre',
+    '/ext/pdo',
+    '/ext/pdo_mysql',
+    '/ext/pdo_sqlite',
+    '/ext/pgsql',
+    '/ext/posix',
+    '/ext/session',
+    '/ext/simplexml',
+    '/ext/soap',
+    '/ext/sockets',
+    '/ext/spl',
+    '/ext/sqlite3',
+    '/ext/xml',
+    '/ext/xmlreader',
+    '/ext/xmlwriter',
+    '/ext/zlib',
+
+    # not implemented extensions
+    '/sapi',
+    '/ext/calendar',
+    '/ext/com_dotnet',
+    '/ext/dba',
+    '/ext/dom',
+    '/ext/enchant',
+    '/ext/ereg',
+    '/ext/fileinfo',
+    '/ext/filter',
+    '/ext/ftp',
+    '/ext/gettext',
+    '/ext/gmp',
+    '/ext/interbase',
+    '/ext/mssql',
+    '/ext/mysqli',
+    '/ext/mysqlnd',
+    '/ext/opcache',
+    '/ext/odbc',
+    '/ext/pdo_dblib',
+    '/ext/pdo_firebird',
+    '/ext/pdo_odbc',
+    '/ext/pdo_pgsql',
+    '/ext/pdo_oci',
+    '/ext/phar',
+    '/ext/pspell',
+    '/ext/readline',
+    '/ext/recode',
+    '/ext/reflection',
+    '/ext/shmop',
+    '/ext/skeleton',
+    '/ext/snmp',
+    '/ext/sybase_ct',
+    '/ext/sysvmsg',
+    '/ext/sysvsem',
+    '/ext/sysvshm',
+    '/ext/tidy',
+    '/ext/tokenizer',
+    '/ext/wddx',
+    '/ext/xmlrpc',
+    '/ext/xsl',
+    '/ext/zip',
+)
+
 errors = (
     # generic inconsistencies
     ('Variable passed to ([^\s]+)\(\) is not an array or object', 'Invalid operand type was used: expecting an array'),
     ('bcdiv\(\): ', ''),
     ('bcsqrt\(\): ', ''),
     ('bcpowmod\(\): ', ''),
-
-    # I can't do math with backreferences so write them out
-    ('([^\s]+)\(\) expects exactly 1 parameter, 0 given', r'Missing argument 1 for \1()'),
-    ('([^\s]+)\(\) expects exactly (\d+) parameters, \d+ given', r'Missing argument \2 for \1()'),
 )
 
 parser = argparse.ArgumentParser()
@@ -109,6 +204,9 @@ def mkdir_p(path):
         pass
 
 def walk(filename, source):
+    if not '.phpt' in filename:
+        return
+
     print "Importing %s" % filename
 
     dest_filename = os.path.basename(filename).replace('.phpt', '.php')
@@ -118,10 +216,6 @@ def walk(filename, source):
     dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)
     mkdir_p(dest_subdir)
     full_dest_filename = os.path.join(dest_subdir, dest_filename)
-
-    if not '.phpt' in filename:
-        shutil.copyfile(filename, full_dest_filename)
-        return
 
     def split(pattern, str):
         return re.split(r'\n\s*--'+pattern+'--\s*\n', str, 1)
@@ -231,66 +325,6 @@ def walk(filename, source):
 if args.zend_path:
     test_dirs = (('Zend/tests'), ('tests'), ('sapi'), ('ext'))
     def should_import(filename):
-        no_import = (
-            # these hang forever
-            '005a.php',
-            'array_012.php',
-            'array_pad_variation2.php',
-            'bug27508.php',
-            'gzgetc_basic.php',
-            'gzgets_basic.php',
-            'observer_003.php',
-            'observer_004.php',
-            'observer_005.php',
-            'observer_006.php',
-            'observer_009.php',
-            'sleep_error.php',
-            'socket_select-wrongparams-1.php',
-            'test010.php',
-            'usleep_error.php',
-
-            # not implemented extensions
-            '/sapi',
-            '/ext/calendar',
-            '/ext/com_dotnet',
-            '/ext/dba',
-            '/ext/dom',
-            '/ext/enchant',
-            '/ext/ereg',
-            '/ext/fileinfo',
-            '/ext/filter',
-            '/ext/ftp',
-            '/ext/gett/ext',
-            '/ext/gmp',
-            '/ext/interbase',
-            '/ext/mssql',
-            '/ext/mysqli',
-            '/ext/mysqlnd',
-            '/ext/opcache',
-            '/ext/odbc',
-            '/ext/pdo_dblib',
-            '/ext/pdo_firebird',
-            '/ext/pdo_odbc',
-            '/ext/pdo_pgsql',
-            '/ext/pdo_oci',
-            '/ext/phar',
-            '/ext/pspell',
-            '/ext/readline',
-            '/ext/recode',
-            '/ext/reflection',
-            '/ext/shmop',
-            '/ext/snmp',
-            '/ext/sybase_ct',
-            '/ext/sysvmsg',
-            '/ext/sysvsem',
-            '/ext/sysvshm',
-            '/ext/tidy',
-            '/ext/tokenizer',
-            '/ext/wddx',
-            '/ext/xmlrpc',
-            '/ext/xsl',
-            '/ext/zip',
-        )
         for bad in no_import:
             if bad in filename:
                 return False

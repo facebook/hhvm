@@ -57,6 +57,10 @@ bad_tests = (
 
     # line number is inconsistent on stack overflow
     'bug41633_3.php',
+
+    # broken in Jenkins
+    'bug35239.php',
+    'bug54265.php',
 )
 
 errors = (
@@ -302,7 +306,7 @@ print "Running all tests from zend/all"
 stdout = subprocess.Popen(
     [
         'tools/verify_to_json.php',
-        '../test/run',
+        'test/run',
         'test/zend/all',
         'interp',
         '0',

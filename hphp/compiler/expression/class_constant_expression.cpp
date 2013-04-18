@@ -144,6 +144,19 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
     ExpressionPtr value = dynamic_pointer_cast<Expression>(decl);
     BlockScope::s_constMutex.unlock();
 
+    if (!value->isScalar() &&
+        (value->is(KindOfClassConstantExpression) ||
+         value->is(KindOfConstantExpression))) {
+      std::set<ExpressionPtr> seen;
+      do {
+        if (!seen.insert(value).second) return ExpressionPtr();
+        value = value->preOptimize(ar);
+        if (!value) return ExpressionPtr();
+      } while (!value->isScalar() &&
+               (value->is(KindOfClassConstantExpression) ||
+                value->is(KindOfConstantExpression)));
+    }
+
     ExpressionPtr rep = Clone(value, getScope());
     bool annotate = Option::FlAnnotate;
     Option::FlAnnotate = false; // avoid nested comments on getText

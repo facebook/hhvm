@@ -332,7 +332,8 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
     // check for dynamic constant and volatile function/class
     if (!m_class && m_className.empty() &&
-        (m_type == DefinedFunction ||
+        (m_type == DefineFunction ||
+         m_type == DefinedFunction ||
          m_type == FunctionExistsFunction ||
          m_type == FBCallUserFuncSafeFunction ||
          m_type == ClassExistsFunction ||
@@ -345,6 +346,28 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         if (name && name->isLiteralString()) {
           string symbol = name->getLiteralString();
           switch (m_type) {
+            case DefineFunction: {
+              ConstantTableConstPtr constants = ar->getConstants();
+              // system constant
+              if (constants->isPresent(symbol)) {
+                break;
+              }
+              // user constant
+              BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
+              // not found (i.e., undefined)
+              if (!block) break;
+              constants = block->getConstants();
+              const Symbol *sym = constants->getSymbol(symbol);
+              always_assert(sym);
+              if (!sym->isDynamic()) {
+                if (FunctionScopeRawPtr fsc = getFunctionScope()) {
+                  if (!fsc->inPseudoMain()) {
+                    const_cast<Symbol*>(sym)->setDynamic();
+                  }
+                }
+              }
+              break;
+            }
             case DefinedFunction: {
               ConstantTablePtr constants = ar->getConstants();
               if (!constants->isPresent(symbol)) {

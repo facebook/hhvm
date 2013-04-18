@@ -347,6 +347,8 @@ public:
   void setDstReg(PhysReg reg) { m_dstReg = reg; }
   Immed getImm() const { return m_imm; }
   bool isZeroExtend() const {return m_zeroExtend;}
+  bool done() const { return m_done; }
+  void markDone() { m_done = true; }
 
 private: // These should be created using ArgGroup.
   friend struct ArgGroup;
@@ -357,6 +359,7 @@ private: // These should be created using ArgGroup.
     , m_dstReg(reg::noreg)
     , m_imm(immVal)
     , m_zeroExtend(false)
+    , m_done(false)
   {}
 
   explicit ArgDesc(SSATmp* tmp, bool val = true);
@@ -367,6 +370,7 @@ private:
   PhysReg m_dstReg;
   Immed m_imm;
   bool m_zeroExtend;
+  bool m_done;
 };
 
 /*

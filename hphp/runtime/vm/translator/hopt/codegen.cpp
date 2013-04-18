@@ -218,7 +218,8 @@ const char* getContextName(Class* ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1), m_zeroExtend(false) {
+ArgDesc::ArgDesc(SSATmp* tmp, bool val) : m_imm(-1), m_zeroExtend(false),
+  m_done(false) {
   if (tmp->getType() == Type::None) {
     assert(val);
     m_kind = None;
@@ -633,7 +634,9 @@ void CodeGenerator::cgJmpNSame(IRInstruction* inst) { cgJcc(inst); }
 
 /**
  * Once the arg sources and dests are all assigned; emit moves and exchanges
- * to put all the args in desired registers.
+ * to put all the args in desired registers. In addition to moves and
+ * exchanges, shuffleArgs also handles adding lea-offsets for dest registers
+ * (dest = src + lea-offset) and zero extending bools (dest = zeroExtend(src)).
  */
 typedef Transl::X64Assembler Asm;
 static void shuffleArgs(Asm& a, ArgGroup& args) {
@@ -660,22 +663,10 @@ static void shuffleArgs(Asm& a, ArgGroup& args) {
     }
     auto dstReg = args[i].getDstReg();
     auto srcReg = args[i].getSrcReg();
-    if (dstReg == srcReg) {
-      // Ignore register-to-register moves whose src and dst registers
-      // are the same. But emit the code for load-effective-address
-      // operations whose src and dst registers are the same as
-      // doRegMoves won't handle those.
-      if (kind == ArgDesc::Addr) {
-        // an lea whose src and dest regs are the same
-        a.    lea    (srcReg[args[i].getImm().q()], dstReg);
-      } else if (args[i].isZeroExtend()) {
-        // if passing bool as TypedValue.m_data, must zero extend
-        a.    movzbl (rbyte(dstReg), r32(dstReg));
-      }
-      continue;
+    if (dstReg != srcReg) {
+      moves[int(dstReg)] = int(srcReg);
+      argDescs[int(dstReg)] = &args[i];
     }
-    moves[int(dstReg)] = int(srcReg);
-    argDescs[int(dstReg)] = &args[i];
   }
   std::vector<MoveInfo> howTo;
   doRegMoves(moves, int(reg::rScratch), howTo);
@@ -685,44 +676,46 @@ static void shuffleArgs(Asm& a, ArgGroup& args) {
         a.      movq   (howTo[i].m_reg1, howTo[i].m_reg2);
       } else {
         ArgDesc* argDesc = argDescs[int(howTo[i].m_reg2)];
-        if (argDesc->getKind() == ArgDesc::Reg ||
-            argDesc->getKind() == ArgDesc::TypeReg) {
+        ArgDesc::Kind kind = argDesc->getKind();
+        if (kind == ArgDesc::Reg || kind == ArgDesc::TypeReg) {
           if (argDesc->isZeroExtend()) {
             a.    movzbl (rbyte(howTo[i].m_reg1), r32(howTo[i].m_reg2));
           } else {
             a.    movq   (howTo[i].m_reg1, howTo[i].m_reg2);
           }
         } else {
-          assert(argDesc->getKind() == ArgDesc::Addr);
+          assert(kind == ArgDesc::Addr);
           a.    lea    (howTo[i].m_reg1[argDesc->getImm().q()],
                         howTo[i].m_reg2);
+        }
+        if (kind != ArgDesc::TypeReg) {
+          argDesc->markDone();
         }
       }
     } else {
       a.    xchgq  (howTo[i].m_reg1, howTo[i].m_reg2);
-      ArgDesc* argDesc2 = argDescs[int(howTo[i].m_reg2)];
-      if (argDesc2->getKind() == ArgDesc::Addr) {
-        a.  addq   (argDesc2->getImm(), howTo[i].m_reg2);
-      } else if (argDesc2->isZeroExtend()) {
-        a.  movzbl (rbyte(howTo[i].m_reg2), r32(howTo[i].m_reg2));
-      }
-      ArgDesc* argDesc1 = argDescs[int(howTo[i].m_reg1)];
-      if (argDesc1->getKind() == ArgDesc::Addr) {
-        a.  addq   (argDesc1->getImm(), howTo[i].m_reg1);
-      } else if (argDesc1->isZeroExtend()) {
-        a.  movzbl (rbyte(howTo[i].m_reg1), r32(howTo[i].m_reg1));
-      }
     }
   }
-  // Handle const-to-register moves and type shifting
+  // Handle const-to-register moves, type shifting,
+  // load-effective address and zero extending for bools.
+  // Ignore args that have been handled by the
+  // move above.
   for (size_t i = 0; i < args.size(); ++i) {
-    if (args[i].getKind() == ArgDesc::Imm) {
-      emitLoadImm(a, args[i].getImm().q(), args[i].getDstReg());
-    } else if (args[i].getKind() == ArgDesc::TypeReg) {
-      a.    shlq   (kTypeShiftBits, args[i].getDstReg());
-    } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
-               args[i].getKind() == ArgDesc::None) {
-      emitLoadImm(a, 0xbadbadbadbadbad, args[i].getDstReg());
+    if (!args[i].done()) {
+      ArgDesc::Kind kind = args[i].getKind();
+      PhysReg dst = args[i].getDstReg();
+      if (kind == ArgDesc::Imm) {
+        emitLoadImm(a, args[i].getImm().q(), dst);
+      } else if (kind == ArgDesc::TypeReg) {
+        a.    shlq   (kTypeShiftBits, dst);
+      } else if (kind == ArgDesc::Addr) {
+        a.    addq   (args[i].getImm(), dst);
+      } else if (args[i].isZeroExtend()) {
+        a.    movzbl (rbyte(dst), r32(dst));
+      } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
+                 kind == ArgDesc::None) {
+        emitLoadImm(a, 0xbadbadbadbadbad, dst);
+      }
     }
   }
 }

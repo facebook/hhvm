@@ -92,6 +92,10 @@ void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
     // ...as in ClassConstant statement
     // We are handling this one here, not in ClassConstant, purely because
     // we need "value" to store in constant table.
+    if (type->is(Type::KindOfArray)) {
+      parseTimeFatal(Compiler::NoError,
+                     "Arrays are not allowed in class constants");
+    }
     ConstantExpressionPtr exp =
       dynamic_pointer_cast<ConstantExpression>(m_variable);
     scope->getConstants()->add(exp->getName(), type, m_value, ar, m_variable);

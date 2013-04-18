@@ -1,0 +1,14 @@
+*** Testing gmstrftime() : usage variation ***
+
+--Time in a.m/p.m notation--
+bool(false)
+bool(false)
+
+--Time in 24 hour notation--
+bool(false)
+bool(false)
+
+--Current time %H:%M:%S format--
+bool(false)
+bool(false)
+===DONE===

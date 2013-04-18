@@ -1,0 +1,26 @@
+*** Testing idate() : usage variation ***
+
+--Internet Time--
+int(%d)
+
+--12 hour format--
+int(%d)
+
+--24 hour format--
+int(%d)
+
+--Minutes--
+int(%d)
+
+--DST Activated--
+int(%d)
+
+--Seconds--
+int(%d)
+
+--Seconds since Unix Epoch--
+int(%d)
+
+--Time zone offset--
+int(%d)
+===DONE===

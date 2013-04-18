@@ -1,0 +1,14 @@
+*** Testing DateTime::setISODate () : error conditions ***
+
+-- Testing DateTime::setISODate() function with zero arguments --
+HipHop Warning: %a
+bool(false)
+
+-- Testing DateTime::setISODate() function with less than expected no. of arguments --
+HipHop Warning: %a
+bool(false)
+
+-- Testing date_isodate_set() function with more than expected no. of arguments --
+HipHop Warning: %a
+bool(false)
+===DONE===

@@ -1,0 +1,6 @@
+*** Testing date_default_timezone_get() : error conditions ***
+
+-- Testing date_create() function with more than expected no. of arguments --
+string(3) "UTC"
+
+===Done===

@@ -1,0 +1,12 @@
+*** Testing basic DateTime inheritance() ***
+
+-- Create an instance of DateTimeExt --
+
+-- Invoke __toString --
+May 1, 1967, 10:30:41 pm
+
+ -- modify date and time --
+
+-- Invoke __toString again --
+July 2, 1963, 10:45:30 am
+===DONE===

@@ -1,0 +1,8 @@
+*** Testing idate() : usage variation ***
+
+-- Testing idate() function for 2 digit year having no zero as starting number --
+int(70)
+
+-- Testing idate() function for 2 digit year having zero as starting number --
+int(1)
+===DONE===

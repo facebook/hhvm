@@ -83,7 +83,6 @@ no_import = (
 
     # not imported yet, but will be
     '/ext/curl',
-    '/ext/date',
     '/ext/exif',
     '/ext/gd',
     '/ext/hash',

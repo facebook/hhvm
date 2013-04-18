@@ -1,0 +1,7 @@
+*** Testing clone on DateTime objects ***
+object(DateTimeZone)#%d (0) {
+}
+object(DateTimeZone)#%d (0) {
+}
+TEST PASSED : Objects equal but not indetical
+===DONE===

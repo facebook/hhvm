@@ -1,0 +1,11 @@
+*** Testing mktime() : error conditions ***
+
+-- Testing mktime() function with Zero arguments --
+
+Strict Standards: mktime(): You should be using the time() function instead in hphp/test/zend/bad/ext-date/mktime_error.php on line %d
+int(%d)
+
+-- Testing mktime() function with more than expected no. of arguments --
+HipHop Warning: %a
+bool(false)
+===DONE===

@@ -1,0 +1,17 @@
+*** Testing gmmktime() : usage variation ***
+
+-- Testing gmmktime() function with one optional argument --
+int(%d)
+
+-- Testing gmmktime() function with two optional argument --
+int(%d)
+
+-- Testing gmmktime() function with three optional argument --
+int(%d)
+
+-- Testing gmmktime() function with four optional argument --
+int(%d)
+
+-- Testing gmmktime() function with five optional argument --
+int(%d)
+===DONE===

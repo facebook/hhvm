@@ -1,0 +1,34 @@
+*** Testing date_sunrise() : usage variation ***
+
+--12 Aug 2008--
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+--13 Aug 2008--
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+--12 Nov 2008--
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+--13 Nov 2008--
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+===DONE===

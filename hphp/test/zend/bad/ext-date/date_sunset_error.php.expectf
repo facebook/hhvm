@@ -1,0 +1,14 @@
+*** Testing date_sunset() : error conditions ***
+
+-- Testing date_sunset() function with Zero arguments --
+HipHop Warning: %a
+bool(false)
+
+-- Testing date_sunset() function with more than expected no. of arguments --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+===DONE===

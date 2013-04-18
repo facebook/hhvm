@@ -1,0 +1,14 @@
+*** Testing gmdate() : usage variation ***
+
+-- Testing gmdate() function with ISO 8601 date format --
+string(%d) "%s"
+string(25) "2008-08-08T08:08:08+00:00"
+
+-- Testing gmdate() function with RFC 2822 date format --
+string(%d) "%s"
+string(31) "Fri, 08 Aug 2008 08:08:08 +0000"
+
+-- Testing gmdate() function with seconds since Unix Epoch format --
+string(%d) "%d"
+string(10) "1218182888"
+===DONE===

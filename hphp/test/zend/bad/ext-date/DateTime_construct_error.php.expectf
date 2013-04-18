@@ -1,0 +1,8 @@
+*** Testing date_create() : error conditions ***
+
+-- Testing new DateTime() with more than expected no. of arguments --
+HipHop Fatal error: %a
+Stack trace:
+#0 %s(%d): DateTime->__construct('GMT', Object(DateTimeZone), 99)
+#1 {main}
+  thrown in hphp/test/zend/bad/ext-date/DateTime_construct_error.php on line %d

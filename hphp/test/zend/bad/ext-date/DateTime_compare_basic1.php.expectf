@@ -1,0 +1,24 @@
+Simple test for DateTime compare object handler
+
+-- All the following tests should compare equal --
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+-- The following test should still compare equal --
+bool(true)
+
+-- All the following tests should now compare NOT equal --
+bool(false)
+bool(false)
+bool(false)
+
+-- All the following tests should again compare equal --
+bool(true)
+bool(true)
+bool(true)
+===DONE===

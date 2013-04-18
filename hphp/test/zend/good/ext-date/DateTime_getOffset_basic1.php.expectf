@@ -1,0 +1,4 @@
+*** Testing DateTime::getOffset() : basic functionality ***
+Winter offset: 0 hours
+Summer offset: 1 hours
+===DONE===

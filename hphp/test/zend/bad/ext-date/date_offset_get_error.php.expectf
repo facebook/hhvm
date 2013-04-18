@@ -1,0 +1,18 @@
+*** Testing date_offset_get() : error conditions ***
+
+-- Testing date_offset_get() function with zero arguments --
+HipHop Warning: %a
+bool(false)
+
+-- Testing date_offset_get() function with more than expected no. of arguments --
+HipHop Warning: %a
+bool(false)
+
+-- Testing date_offset_get() function with an invalid values for $object argument --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+===DONE===

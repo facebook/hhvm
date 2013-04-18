@@ -1,0 +1,30 @@
+array(12) {
+  ["year"]=>
+  int(2010)
+  ["month"]=>
+  int(1)
+  ["day"]=>
+  int(1)
+  ["hour"]=>
+  int(24)
+  ["minute"]=>
+  int(59)
+  ["second"]=>
+  int(59)
+  ["fraction"]=>
+  float(0)
+  ["warning_count"]=>
+  int(1)
+  ["warnings"]=>
+  array(1) {
+    [18]=>
+    string(27) "The parsed time was invalid"
+  }
+  ["error_count"]=>
+  int(0)
+  ["errors"]=>
+  array(0) {
+  }
+  ["is_localtime"]=>
+  bool(false)
+}

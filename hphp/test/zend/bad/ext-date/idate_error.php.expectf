@@ -1,0 +1,10 @@
+*** Testing idate() : error conditions ***
+
+-- Testing idate() function with Zero arguments --
+HipHop Warning: %a
+bool(false)
+
+-- Testing idate() function with more than expected no. of arguments --
+HipHop Warning: %a
+bool(false)
+===DONE===

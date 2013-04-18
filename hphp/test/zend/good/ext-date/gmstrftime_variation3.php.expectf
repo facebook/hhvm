@@ -1,0 +1,18 @@
+*** Testing gmstrftime() : usage variation ***
+
+--Abbreviated weekday name--
+string(%d) "%s"
+string(3) "Fri"
+
+--Full weekday name--
+string(%d) "%s"
+string(6) "Friday"
+
+--Week number of the year--
+string(%d) "%d"
+string(2) "31"
+
+--Week number of the year in decimal number--
+string(%d) "%d"
+string(2) "31"
+===DONE===

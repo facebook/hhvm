@@ -1,0 +1,11 @@
+*** Testing DateTime::modify() : basic functionality ***
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+
+Deprecated: mktime(): The is_dst parameter is deprecated in hphp/test/zend/bad/ext-date/mktime_basic1.php on line %d
+int(%i)
+===DONE===

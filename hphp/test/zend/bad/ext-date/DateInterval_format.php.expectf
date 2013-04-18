@@ -1,0 +1,20 @@
+Y=01
+M=02
+D=03
+H=04
+I=05
+S=06
+R=+
+y=1
+m=2
+d=3
+h=4
+i=5
+s=6
+r=
+
+inverted R=-
+inverted r=-
+
+%=%
+x=%x

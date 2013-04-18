@@ -1,0 +1,99 @@
+*** Testing date_default_timezone_set() : usage variations ***
+
+-- Iteration 1 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 2 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 3 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 4 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 5 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 6 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 7 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 8 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 9 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 10 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 11 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 12 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 13 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 14 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 15 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 16 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 17 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 18 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 19 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 20 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 21 --
+HipHop Notice: %a
+xyz' is invalid in hphp/test/zend/bad/ext-date/date_default_timezone_set_variation1.php on line %d
+bool(false)
+
+-- Iteration 22 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 23 --
+HipHop Notice: %a
+bool(false)
+
+-- Iteration 24 --
+HipHop Warning: %a
+bool(false)
+===Done===

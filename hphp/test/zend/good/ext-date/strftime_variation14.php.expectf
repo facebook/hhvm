@@ -1,0 +1,18 @@
+*** Testing strftime() : usage variation ***
+
+--Century number--
+string(%d) "%d"
+string(2) "20"
+
+--Month Date Year--
+string(%d) "%d/%d/%d"
+string(8) "08/08/08"
+
+--Year with century--
+string(%d) "%d"
+string(4) "2008"
+
+--Year without century--
+string(%d) "%d"
+string(2) "08"
+===DONE===

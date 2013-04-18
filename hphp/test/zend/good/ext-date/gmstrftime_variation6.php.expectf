@@ -1,0 +1,22 @@
+*** Testing gmstrftime() : usage variation ***
+
+--Hour as decimal by 24-hour format--
+string(2) "%d"
+string(2) "08"
+
+--Hour as decimal by 12-hour format--
+string(2) "%d"
+string(2) "08"
+
+--Minute as decimal number--
+string(%d) "%d"
+string(2) "08"
+
+--AM/PM format for a time--
+string(2) "%s"
+string(2) "AM"
+
+--Second as decimal number--
+string(%d) "%d"
+string(2) "08"
+===DONE===

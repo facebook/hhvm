@@ -1,0 +1,4 @@
+*** Testing gmdate() : basic functionality ***
+string(24) "2008-08-08T08:08:08+0000"
+string(%d) "%s"
+===DONE===

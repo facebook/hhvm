@@ -475,7 +475,7 @@ sub run_test
             $temp = $temp . quotemeta(substr($wanted_re, $startOffset, $start - $startOffset));
             if ($end > $start)
             {
-                $temp = $temp . '(' . substr($wanted_re, $start.2, $end - $start-2) . ')';
+                $temp = $temp . '(' . substr($wanted_re, $start+2, $end - $start-2) . ')';
             }
 
             $startOffset = $end + 2;

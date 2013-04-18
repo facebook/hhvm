@@ -1,0 +1,22 @@
+*** Testing gmdate() : usage variation ***
+
+-- Testing gmdate() function with full textual representation of month format --
+string(%d) "%s"
+string(6) "August"
+
+-- Testing gmdate() function with numeric representation of month format --
+string(%d) "%d"
+string(2) "08"
+
+-- Testing gmdate() function with short textual representation of month format --
+string(%d) "%s"
+string(3) "Aug"
+
+-- Testing gmdate() function with numeric representation of month without leading zeros format --
+string(%d) "%d"
+string(1) "8"
+
+-- Testing gmdate() function with number of days in a month format --
+string(%d) "%d"
+string(2) "31"
+===DONE===

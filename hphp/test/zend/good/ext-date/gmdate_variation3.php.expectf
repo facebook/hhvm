@@ -1,0 +1,22 @@
+*** Testing gmdate() : usage variation ***
+
+--Day with leading zeros--
+string(%d) "%d"
+string(2) "08"
+
+--Day without leading zeros--
+string(%d) "%d"
+string(1) "8"
+
+--ISO representation--
+string(%d) "%d"
+string(1) "5"
+
+--Numeric representation of day--
+string(%d) "%d"
+string(1) "5"
+
+--Day of the year--
+string(%d) "%d"
+string(3) "220"
+===DONE===

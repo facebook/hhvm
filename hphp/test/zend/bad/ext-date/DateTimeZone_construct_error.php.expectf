@@ -1,0 +1,8 @@
+*** Testing DateTimeZone() : error conditions ***
+
+-- Testing new DateTimeZone() with more than expected no. of arguments --
+HipHop Fatal error: %a
+Stack trace:
+#0 %s(%d): DateTimeZone->__construct('GMT', 99)
+#1 {main}
+  thrown in hphp/test/zend/bad/ext-date/DateTimeZone_construct_error.php on line %d

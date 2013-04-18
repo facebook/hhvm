@@ -414,16 +414,6 @@ void Array::escalate() {
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions
 
-Variant Array::rvalAt(bool key, ACCESSPARAMS_IMPL) const {
-  if (m_px) return m_px->get(key ? 1LL : 0LL, flags & AccessFlags::Error);
-  return null_variant;
-}
-
-CVarRef Array::rvalAtRef(bool key, ACCESSPARAMS_IMPL) const {
-  if (m_px) return m_px->get(key ? 1LL : 0LL, flags & AccessFlags::Error);
-  return null_variant;
-}
-
 Variant Array::rvalAt(int key, ACCESSPARAMS_IMPL) const {
   if (m_px) return m_px->get((int64_t)key, flags & AccessFlags::Error);
   return null_variant;

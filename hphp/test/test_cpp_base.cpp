@@ -284,14 +284,6 @@ bool TestCppBase::TestArray() {
     }
     VERIFY(i == 2);
   }
-  {
-    Variant arr = CREATE_MAP1("n1", "v1");
-    Variant k, v;
-    for (MutableArrayIter iter = arr.begin(&k, v); iter.advance();) {
-      arr.weakRemove(k);
-    }
-    VS(arr, Array::Create());
-  }
   /* TODO: fix this
   {
     Variant arr = CREATE_MAP2("n1", "v1", "n2", "v2");

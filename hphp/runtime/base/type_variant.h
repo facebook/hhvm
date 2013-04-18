@@ -794,7 +794,6 @@ class Variant : private VariantBase {
    * Offset functions
    */
   Variant rvalAtHelper(int64_t offset, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(bool offset, ACCESSPARAMS_DECL) const;
   Variant rvalAt(int offset, ACCESSPARAMS_DECL) const {
     return rvalAt((int64_t)offset, flags);
   }
@@ -821,7 +820,6 @@ class Variant : private VariantBase {
     }
     return rvalRefHelper(offset, tmp, flags);
   }
-  CVarRef rvalRef(bool offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
   CVarRef rvalRef(double offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
   CVarRef rvalRef(litstr offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
   CVarRef rvalRef(CStrRef offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
@@ -830,9 +828,6 @@ class Variant : private VariantBase {
   // for when we know its an array or null
   template <typename T>
   CVarRef rvalAtRefHelper(T offset, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(bool offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper((int64_t)offset, flags);
-  }
   CVarRef rvalAtRef(int offset, ACCESSPARAMS_DECL) const {
     return rvalAtRefHelper((int64_t)offset, flags);
   }
@@ -846,7 +841,6 @@ class Variant : private VariantBase {
   CVarRef rvalAtRef(CVarRef offset, ACCESSPARAMS_DECL) const {
     return rvalAtRefHelper<CVarRef>(offset, flags);
   }
-  const Variant operator[](bool    key) const { return rvalAt(key);}
   const Variant operator[](int     key) const { return rvalAt(key);}
   const Variant operator[](int64_t   key) const { return rvalAt(key);}
   const Variant operator[](double  key) const { return rvalAt(key);}
@@ -878,7 +872,6 @@ class Variant : private VariantBase {
   static Variant &lvalInvalid();
   static Variant &lvalBlackHole();
 
-  Variant &lvalAt(bool    key, ACCESSPARAMS_DECL);
   Variant &lvalAt(int     key, ACCESSPARAMS_DECL);
   Variant &lvalAt(int64_t   key, ACCESSPARAMS_DECL);
   Variant &lvalAt(double  key, ACCESSPARAMS_DECL);
@@ -886,7 +879,6 @@ class Variant : private VariantBase {
   Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CVarRef key, ACCESSPARAMS_DECL);
 
-  Variant &lvalRef(bool    key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(int     key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(double  key, Variant& tmp, ACCESSPARAMS_DECL);
@@ -914,7 +906,6 @@ class Variant : private VariantBase {
   inline ALWAYS_INLINE static CVarRef SetRefImpl(
     Variant *self, T key, CVarRef v, bool isKey);
 
-  CVarRef set(bool    key, CVarRef v);
   CVarRef set(int     key, CVarRef v) { return set((int64_t)key, v); }
   CVarRef set(int64_t   key, CVarRef v);
   CVarRef set(double  key, CVarRef v);
@@ -926,7 +917,6 @@ class Variant : private VariantBase {
 
   CVarRef append(CVarRef v);
 
-  CVarRef setRef(bool    key, CVarRef v);
   CVarRef setRef(int     key, CVarRef v) { return setRef((int64_t)key, v); }
   CVarRef setRef(int64_t   key, CVarRef v);
   CVarRef setRef(double  key, CVarRef v);
@@ -936,7 +926,6 @@ class Variant : private VariantBase {
   CVarRef setRef(CStrRef key, CVarRef v, bool isString = false);
   CVarRef setRef(CVarRef key, CVarRef v);
 
-  CVarRef set(bool    key, RefResult v) { return setRef(key, variant(v)); }
   CVarRef set(int     key, RefResult v) { return setRef(key, variant(v)); }
   CVarRef set(int64_t   key, RefResult v) { return setRef(key, variant(v)); }
   CVarRef set(double  key, RefResult v) { return setRef(key, variant(v)); }
@@ -951,7 +940,6 @@ class Variant : private VariantBase {
   CVarRef appendRef(CVarRef v);
   CVarRef append(RefResult v) { return appendRef(variant(v)); }
 
-  void remove(bool    key) { removeImpl(key);}
   void remove(int     key) { removeImpl((int64_t)key);}
   void remove(int64_t   key) { removeImpl(key);}
   void remove(double  key) { removeImpl(key);}
@@ -962,43 +950,6 @@ class Variant : private VariantBase {
     removeImpl(key, isString);
   }
   void remove(CVarRef key);
-
-  void weakRemove(litstr key, bool isStr = false) {
-    if (is(KindOfArray) ||
-        (is(KindOfObject) && getObjectData()->supportsUnsetElem())) {
-      remove(key, isStr);
-      return;
-    }
-    if (isString()) {
-      raise_error("Cannot unset string offsets");
-      return;
-    }
-  }
-
-  void weakRemove(CStrRef key, bool isStr = false) {
-    if (is(KindOfArray) ||
-        (is(KindOfObject) && getObjectData()->supportsUnsetElem())) {
-      remove(key, isStr);
-      return;
-    }
-    if (isString()) {
-      raise_error("Cannot unset string offsets");
-      return;
-    }
-  }
-
-  template<typename T>
-  void weakRemove(const T &key) {
-    if (is(KindOfArray) ||
-        (is(KindOfObject) && getObjectData()->supportsUnsetElem())) {
-      remove(key);
-      return;
-    }
-    if (isString()) {
-      raise_error("Cannot unset string offsets");
-      return;
-    }
-  }
 
   /**
    * More array operations.
@@ -1173,7 +1124,6 @@ class Variant : private VariantBase {
 
   void removeImpl(double key);
   void removeImpl(int64_t key);
-  void removeImpl(bool key);
   void removeImpl(CVarRef key, bool isString = false);
   void removeImpl(CStrRef key, bool isString = false);
 
@@ -1533,10 +1483,6 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 // breaking circular dependencies
-
-inline const Variant Array::operator[](bool    key) const {
-  return rvalAt(key);
-}
 
 inline const Variant Array::operator[](int     key) const {
   return rvalAt(key);

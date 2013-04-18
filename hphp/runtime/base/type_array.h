@@ -260,7 +260,6 @@ class Array : protected ArrayBase {
   /**
    * Offset
    */
-  Variant rvalAt(bool    key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(int     key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(int64_t   key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(double  key, ACCESSPARAMS_DECL) const;
@@ -271,7 +270,6 @@ class Array : protected ArrayBase {
   /**
    * To get offset for temporary usage
    */
-  CVarRef rvalAtRef(bool    key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(int     key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(int64_t   key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(double  key, ACCESSPARAMS_DECL) const;
@@ -279,7 +277,6 @@ class Array : protected ArrayBase {
   CVarRef rvalAtRef(CVarRef key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(CStrRef key, ACCESSPARAMS_DECL) const;
 
-  const Variant operator[](bool    key) const;
   const Variant operator[](int     key) const;
   const Variant operator[](int64_t   key) const;
   const Variant operator[](double  key) const;
@@ -309,9 +306,6 @@ class Array : protected ArrayBase {
 
   Variant &lvalAt();
 
-  Variant &lvalAt(bool    key, ACCESSPARAMS_DECL) {
-    return lvalAtImpl(key, flags);
-  }
   Variant &lvalAt(int     key, ACCESSPARAMS_DECL) {
     return lvalAtImpl(key, flags);
   }
@@ -331,9 +325,6 @@ class Array : protected ArrayBase {
   template<typename T>
   CVarRef setRefImpl(const T &key, CVarRef v);
 
-  CVarRef set(bool    key, CVarRef v) {
-    return set(int64_t(key ? 1 : 0), v);
-  }
   CVarRef set(int     key, CVarRef v) {
     return set((int64_t)key, v);
   }
@@ -346,7 +337,6 @@ class Array : protected ArrayBase {
   CVarRef set(CStrRef key, CVarRef v, bool isKey = false);
   CVarRef set(CVarRef key, CVarRef v, bool isKey = false);
 
-  CVarRef set(bool    key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(char    key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(short   key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(int     key, RefResult v) { return setRef(key,variant(v)); }
@@ -363,9 +353,6 @@ class Array : protected ArrayBase {
     return setRef(key,variant(v), isKey);
   }
 
-  CVarRef setRef(bool    key, CVarRef v) {
-    return setRef((int64_t)key, v);
-  }
   CVarRef setRef(int     key, CVarRef v) {
     return setRef((int64_t)key, v);
   }
@@ -382,9 +369,6 @@ class Array : protected ArrayBase {
   template<typename T>
   CVarRef addImpl(const T &key, CVarRef v);
 
-  CVarRef add(bool    key, CVarRef v) {
-    return add((int64_t)key, v);
-  }
   CVarRef add(int     key, CVarRef v) {
     return add((int64_t)key, v);
   }
@@ -408,9 +392,6 @@ class Array : protected ArrayBase {
     return *ret;
   }
 
-  Variant &addLval(bool    key) {
-    return addLvalImpl(key ? 1LL : 0LL);
-  }
   Variant &addLval(int     key) {
     return addLvalImpl((int64_t)key);
   }
@@ -432,9 +413,6 @@ class Array : protected ArrayBase {
   bool existsImpl(const T &key) const {
     if (m_px) return m_px->exists(key);
     return false;
-  }
-  bool exists(bool    key) const {
-    return existsImpl(key ? 1LL : 0LL);
   }
   bool exists(char    key) const {
     return existsImpl((int64_t)key);
@@ -462,9 +440,6 @@ class Array : protected ArrayBase {
       if (escalated != m_px) ArrayBase::operator=(escalated);
     }
   }
-  void remove(bool    key) {
-    removeImpl(key ? 1LL : 0LL);
-  }
   void remove(char    key) {
     removeImpl((int64_t)key);
   }
@@ -483,18 +458,6 @@ class Array : protected ArrayBase {
   void remove(litstr  key, bool isString = false);
   void remove(CStrRef key, bool isString = false);
   void remove(CVarRef key);
-
-  void weakRemove(litstr  key, bool isString = false) {
-    remove(key, isString);
-  }
-  void weakRemove(CStrRef key, bool isString = false) {
-    remove(key, isString);
-  }
-
-  template<typename T>
-  void weakRemove(const T &key) {
-    remove(key);
-  }
 
   void removeAll();
   void clear() { removeAll();}

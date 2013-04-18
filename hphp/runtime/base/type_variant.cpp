@@ -68,7 +68,6 @@ static StaticString s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
 ///////////////////////////////////////////////////////////////////////////////
 // local helpers
 
-static int64_t ToKey(bool i) { return (int64_t)i; }
 static int64_t ToKey(int64_t i) { return i; }
 static VarNR ToKey(CStrRef s) { return s.toKey(); }
 static VarNR ToKey(CVarRef v) { return v.toKey(); }
@@ -1883,9 +1882,6 @@ static void raise_bad_offset_notice() {
   }                                                                     \
   return null_variant;
 
-Variant Variant::rvalAt(bool offset, ACCESSPARAMS_IMPL) const {
-  IMPLEMENT_RVAL_INTEGRAL
-}
 Variant Variant::rvalAt(double offset, ACCESSPARAMS_IMPL) const {
   IMPLEMENT_RVAL_INTEGRAL
 }
@@ -2064,13 +2060,6 @@ CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
 
 template CVarRef
 Variant::rvalRefHelper(int64_t offset, CVarRef tmp, ACCESSPARAMS_IMPL) const;
-
-CVarRef Variant::rvalRef(bool offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
-  if (m_type == KindOfArray) {
-    return m_data.parr->get(ToKey(offset), flags & AccessFlags::Error);
-  }
-  return rvalRefHelper(offset, tmp, flags);
-}
 
 CVarRef Variant::rvalRef(double offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
@@ -2254,9 +2243,6 @@ Variant& Variant::lvalAtImpl(T key, ACCESSPARAMS_IMPL) {
   return Variant::LvalAtImpl0<T>(this, key, nullptr, true, flags);
 }
 
-Variant &Variant::lvalAt(bool    key, ACCESSPARAMS_IMPL) {
-  return lvalAtImpl(key, flags);
-}
 Variant &Variant::lvalAt(int     key, ACCESSPARAMS_IMPL) {
   return lvalAt((int64_t)key, flags);
 }
@@ -2277,9 +2263,6 @@ Variant &Variant::lvalAt(CVarRef k, ACCESSPARAMS_IMPL) {
   return lvalAtImpl<CVarRef>(k, flags);
 }
 
-Variant &Variant::lvalRef(bool    key, Variant& tmp, ACCESSPARAMS_IMPL) {
-  return LvalAtImpl0(this, key, &tmp, false, flags);
-}
 Variant &Variant::lvalRef(int     key, Variant& tmp, ACCESSPARAMS_IMPL) {
   return lvalRef((int64_t)key, tmp, flags);
 }
@@ -2504,10 +2487,6 @@ inline ALWAYS_INLINE CVarRef Variant::SetImpl(Variant *self, T key,
   return v;
 }
 
-CVarRef Variant::set(bool key, CVarRef v) {
-  return SetImpl(this, key, v, false);
-}
-
 CVarRef Variant::set(int64_t key, CVarRef v) {
   return SetImpl(this, key, v, false);
 }
@@ -2633,10 +2612,6 @@ inline ALWAYS_INLINE CVarRef Variant::SetRefImpl(Variant *self, T key,
   return v;
 }
 
-CVarRef Variant::setRef(bool key, CVarRef v) {
-  return SetRefImpl(this, key, v, false);
-}
-
 CVarRef Variant::setRef(int64_t key, CVarRef v) {
   return SetRefImpl(this, key, v, false);
 }
@@ -2734,31 +2709,6 @@ void Variant::removeImpl(int64_t key) {
       ArrayData *arr = getArrayData();
       if (arr) {
         ArrayData *escalated = arr->remove(key, (arr->getCount() > 1));
-        if (escalated != arr) {
-          set(escalated);
-        }
-      }
-    }
-    break;
-  case KindOfObject:
-    callOffsetUnset(key);
-    break;
-  default:
-    lvalInvalid();
-    break;
-  }
-}
-
-void Variant::removeImpl(bool key) {
-  switch (getType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    break;
-  case KindOfArray:
-    {
-      ArrayData *arr = getArrayData();
-      if (arr) {
-        ArrayData *escalated = arr->remove(ToKey(key), (arr->getCount() > 1));
         if (escalated != arr) {
           set(escalated);
         }

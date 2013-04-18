@@ -6,19 +6,26 @@
 
 function usage() {
   global $argv;
-  return "usage: $argv[0] [-m jit|hhir|interp] [-r] <tests/directories>";
+  return "usage: $argv[0] [-m jit|hhir|interp] [-r] <test/directories>";
 }
 
 function help() {
   global $argv;
-  $ztestexample = 'test/zend/good/*/*z*.php';
+  $ztestexample = 'test/zend/good/*/*z*.php'; // sep. for syntax highlighting
   $help = <<<EOT
 
 
 This is the hhvm test-suite runner.  For more detailed documentation,
 see hphp/test/README.md.
 
-# Examples:
+The test argument may be a path to a php test file, a directory name, or
+one of a few pre-defined suite names that this script knows about.
+
+If you work with hhvm a lot, you might consider a bash alias:
+
+   ht() { path/to/fbcode/hphp/test/run "$@" }
+
+Examples:
 
   # Quick tests in JIT mode:
   % $argv[0]
@@ -35,6 +42,9 @@ see hphp/test/README.md.
   # Slow closure tests in JIT mode with RepoAuthoritative:
   % $argv[0] -r test/slow/closure
 
+  # Slow array tests, in RepoAuthoritative:
+  % $argv[0] -r test/slow/array
+
   # Zend tests with a "z" in their name:
   % $argv[0] $ztestexample
 EOT;
@@ -47,7 +57,7 @@ function error($message) {
 }
 
 function hphp_home() {
-  if (isset($GLOBALS['val'])) return $GLOBALS['val'];
+  if (isset($GLOBALS['_hphp_home'])) return $GLOBALS['_hphp_home'];
   $get_val = function() {
     if (isset($_ENV['HPHP_HOME'])) {
       return $_ENV['HPHP_HOME'];
@@ -60,7 +70,7 @@ function hphp_home() {
     error("Couldn't determine the root of your fbcode repository.\n".
           "Try setting HPHP_HOME in your environment");
   };
-  return $GLOBALS['val'] = rtrim($get_val(), '/');
+  return $GLOBALS['_hphp_home'] = rtrim($get_val(), '/');
 }
 
 function idx($array, $key, $default = null) {
@@ -113,19 +123,39 @@ function get_options($argv) {
   return array($options, $files);
 }
 
+/*
+ * We support some 'special' file names, that just know where the test
+ * suites are, to avoid typing 'hphp/test/foo'.
+ */
+function map_convenience_filename(string $file) {
+  if ($file == 'jit' || $file == 'hhir' || $file == 'interp') {
+    error(
+      "I'm really sorry to change this, but now the mode is ".
+      "passed with '-m $file', and repo mode is turned on with '-r'"
+    );
+  }
+
+  $mappage = Map {
+    'quick' => 'hphp/test/quick',
+    'slow'  => 'hphp/test/slow',
+  };
+
+  $m = null;
+  if (!preg_match('/([^\/]*)(.*)/', $file, $m) ||
+      !$mappage->containsKey($m[1])) {
+    error("Not valid file or directory: '$file'");
+  }
+  if (!isset($m[2])) $m[2] = '';
+  return hphp_home().'/'.$mappage->get($m[1]).$m[2];
+}
+
 function find_tests($files) {
   if (!$files) {
     $files = array(hphp_home().'/hphp/test/quick');
   }
   foreach ($files as &$file) {
     if (!stat($file)) {
-      if ($file == 'jit' || $file == 'hhir' || $file == 'interp') {
-        error(
-          "I'm really sorry to change this, but now the mode is ".
-          "passed with '-m $file', and repo mode is turned on with '-r'"
-        );
-      }
-      error("Not valid file or directory: '$file'");
+      $file = map_convenience_filename($file);
     }
     $file = preg_replace(',//+,', '/', realpath($file));
     $file = preg_replace(',^'.getcwd().'/,', '', $file);

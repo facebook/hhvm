@@ -4,7 +4,7 @@ function b($s) {
   if (strlen($s) == 4) {
     return 12;
   }
-  $z = 234;
+  $GLOBALS['z'] = 234;
   return 8;
 }
 
@@ -20,8 +20,8 @@ function a($b) {
 function f() {
   for ($i = 0; $i < 4; ++$i) {
     a($i < 3);
-    $tmp = $i;
-    $i = $tmp;
+    $GLOBALS['tmp'] = $i;
+    $i = $GLOBALS['tmp'];
   }
 }
 
@@ -29,11 +29,11 @@ function enable() {
   echo "Going to enable\n";
   fb_enable_code_coverage();
   echo "Enabled\n";
-  $z = 3;
+  $GLOBALS['z'] = 3;
 }
 
 function doenable() {
-  $y = 2;
+  global $y;
   enable();
   $y += 43;
 }

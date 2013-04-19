@@ -23,7 +23,7 @@ one of a few pre-defined suite names that this script knows about.
 
 If you work with hhvm a lot, you might consider a bash alias:
 
-   ht() { path/to/fbcode/hphp/test/run "$@" }
+   alias ht="path/to/fbcode/hphp/test/run"
 
 Examples:
 
@@ -57,20 +57,15 @@ function error($message) {
 }
 
 function hphp_home() {
-  if (isset($GLOBALS['_hphp_home'])) return $GLOBALS['_hphp_home'];
-  $get_val = function() {
-    if (isset($_ENV['HPHP_HOME'])) {
-      return $_ENV['HPHP_HOME'];
-    }
-
-    $top_level = system('git rev-parse --show-top-level', $status);
+  static $ret;
+  if (!$ret) {
+    $top_level = system('git rev-parse --show-toplevel', $status);
     if ($status === 0) {
-      return $top_level;
+      return $ret = rtrim($top_level, '/');
     }
-    error("Couldn't determine the root of your fbcode repository.\n".
-          "Try setting HPHP_HOME in your environment");
-  };
-  return $GLOBALS['_hphp_home'] = rtrim($get_val(), '/');
+    error("Couldn't determine the root of your fbcode repository.\n");
+  }
+  return $ret;
 }
 
 function idx($array, $key, $default = null) {

@@ -2,7 +2,7 @@
 
 include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
 
-$d = dir("test/sample_dir/");
+$d = dir(__DIR__."/../../sample_dir/");
 echo "Path: " . $d->path . "\n";
 $files = array(); // order changes per machine
 while (false !== ($entry = $d->read())) {

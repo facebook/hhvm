@@ -2,11 +2,11 @@
 
 include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
 
-$info = new SplFileInfo('test/sample_dir');
+$info = new SplFileInfo(__DIR__.'/../../sample_dir');
 if (!$info->isFile()) {
   echo $info->getRealPath();
 }
-$info = new SplFileInfo('test/sample_dir/file');
+$info = new SplFileInfo(__DIR__.'/../../sample_dir/file');
 var_dump($info->getbaseName());
 var_dump($info->getbaseName('.cpp'));
 var_dump($info->getCTime());

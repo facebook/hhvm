@@ -1,4 +1,4 @@
-Path: test/sample_dir/
+Path: %s
 array(7) {
   [0]=>
   string(2) ".

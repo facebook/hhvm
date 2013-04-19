@@ -2,7 +2,7 @@
 
 include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
 
-$directory = "test/sample_dir";
+$directory = __DIR__."/../../sample_dir";
 $fileSPLObjects = new RecursiveIteratorIterator(
   new RecursiveDirectoryIterator($directory),
   RecursiveIteratorIterator::SELF_FIRST);

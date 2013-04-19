@@ -2,7 +2,7 @@
 
 include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
 
-$path = "test/sample_dir/";
+$path = __DIR__."/../../sample_dir/";
 $files = array(); // order changes per machine
 foreach (new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($path,

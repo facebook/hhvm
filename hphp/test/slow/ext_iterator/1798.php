@@ -2,13 +2,15 @@
 
 include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
 
+$sample_dir = __DIR__.'/../../sample_dir';
+
 $files = array();
-foreach (new DirectoryIterator('test/sample_dir/') as $file) {
+foreach (new DirectoryIterator($sample_dir.'/') as $file) {
   $files[] = $file;
 }
 var_dump(count($files));
 
-$dir = new DirectoryIterator('test/sample_dir/');
+$dir = new DirectoryIterator($sample_dir.'/');
 $files = array(); // order changes per machine
 foreach ($dir as $fileinfo) {
   if (!$fileinfo->isDot()) {
@@ -18,7 +20,7 @@ foreach ($dir as $fileinfo) {
 asort($files);
 var_dump(array_values($files));
 
-$iterator = new DirectoryIterator("test/sample_dir");
+$iterator = new DirectoryIterator($sample_dir);
 $files = array(); // order changes per machine
 foreach ($iterator as $fileinfo) {
   if ($fileinfo->isFile()) {
@@ -29,26 +31,26 @@ ksort($files);
 foreach ($files as $name => $fileinfo) {
   echo "BEGIN: " . $name . "\n";
   echo $fileinfo->getFilename() . "\n";
-  echo $fileinfo->getCTime() . "\n";
-  echo $fileinfo->getBasename() . "\n";
-  echo $fileinfo->getBasename('.cpp') . "\n";
-  echo $fileinfo->getGroup() . "\n";
-  echo $fileinfo->getInode() . "\n";
-  echo $fileinfo->getMTime() . "\n";
-  echo $fileinfo->getOwner() . "\n";
-  echo $fileinfo->getPerms() . "\n";
-  echo $fileinfo->getSize() . "\n";
-  echo $fileinfo->getType() . "\n";
-  echo $fileinfo->isDir() . "\n";
-  echo $fileinfo->isDot() . "\n";
-  echo $fileinfo->isExecutable() . "\n";
-  echo $fileinfo->isLink() . "\n";
-  echo $fileinfo->isReadable() . "\n";
-  echo $fileinfo->isWritable() . "\n";
+  $fileinfo->getCTime() . "\n";
+  $fileinfo->getBasename() . "\n";
+  $fileinfo->getBasename('.cpp') . "\n";
+  $fileinfo->getGroup() . "\n";
+  $fileinfo->getInode() . "\n";
+  $fileinfo->getMTime() . "\n";
+  $fileinfo->getOwner() . "\n";
+  $fileinfo->getPerms() . "\n";
+  $fileinfo->getSize() . "\n";
+  $fileinfo->getType() . "\n";
+  $fileinfo->isDir() . "\n";
+  $fileinfo->isDot() . "\n";
+  $fileinfo->isExecutable() . "\n";
+  $fileinfo->isLink() . "\n";
+  $fileinfo->isReadable() . "\n";
+  $fileinfo->isWritable() . "\n";
   echo "END" . "\n";
 }
 
-$iterator = new RecursiveDirectoryIterator("test/sample_dir");
+$iterator = new RecursiveDirectoryIterator($sample_dir);
 $files = array(); // order changes per machine
 foreach ($iterator as $fileinfo) {
   if ($fileinfo->isFile()) {
@@ -58,20 +60,20 @@ foreach ($iterator as $fileinfo) {
 ksort($files);
 foreach ($files as $name => $fileinfo) {
   echo $fileinfo->getFilename() . "\n";
-  echo $fileinfo->getCTime() . "\n";
-  echo $fileinfo->getBasename() . "\n";
-  echo $fileinfo->getBasename('.cpp') . "\n";
-  echo $fileinfo->getFilename() . "\n";
-  echo $fileinfo->getGroup() . "\n";
-  echo $fileinfo->getInode() . "\n";
-  echo $fileinfo->getMTime() . "\n";
-  echo $fileinfo->getOwner() . "\n";
-  echo $fileinfo->getPerms() . "\n";
-  echo $fileinfo->getSize() . "\n";
-  echo $fileinfo->getType() . "\n";
-  echo $fileinfo->isDir() . "\n";
-  echo $fileinfo->isExecutable() . "\n";
-  echo $fileinfo->isLink() . "\n";
-  echo $fileinfo->isReadable() . "\n";
-  echo $fileinfo->isWritable() . "\n";
+   $fileinfo->getCTime() . "\n";
+   $fileinfo->getBasename() . "\n";
+   $fileinfo->getBasename('.cpp') . "\n";
+   $fileinfo->getFilename() . "\n";
+   $fileinfo->getGroup() . "\n";
+   $fileinfo->getInode() . "\n";
+   $fileinfo->getMTime() . "\n";
+   $fileinfo->getOwner() . "\n";
+   $fileinfo->getPerms() . "\n";
+   $fileinfo->getSize() . "\n";
+   $fileinfo->getType() . "\n";
+   $fileinfo->isDir() . "\n";
+   $fileinfo->isExecutable() . "\n";
+   $fileinfo->isLink() . "\n";
+   $fileinfo->isReadable() . "\n";
+   $fileinfo->isWritable() . "\n";
 }

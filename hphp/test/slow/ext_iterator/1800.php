@@ -2,7 +2,7 @@
 
 include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
 
-$ite=new RecursiveDirectoryIterator('test/sample_dir/');
+$ite=new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir/');
 $bytestotal=0;
 $nbfiles=0;
 $files = array(); // order changes per machine

@@ -352,7 +352,7 @@ stdout = subprocess.Popen(
         'test/run',
         'test/zend/all',
         'interp',
-        '0',
+        '',
         '_bin',
     ],
     stdout=subprocess.PIPE,

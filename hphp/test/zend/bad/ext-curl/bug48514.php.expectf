@@ -1,0 +1,4 @@
+resource(%d) of type (curl)
+%string|unicode%(4) "curl"
+resource(%d) of type (curl_multi)
+%string|unicode%(10) "curl_multi"

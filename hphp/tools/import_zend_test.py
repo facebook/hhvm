@@ -82,7 +82,6 @@ no_import = (
     'usleep_error.php',
 
     # not imported yet, but will be
-    '/ext/curl',
     '/ext/exif',
     '/ext/gd',
     '/ext/hash',

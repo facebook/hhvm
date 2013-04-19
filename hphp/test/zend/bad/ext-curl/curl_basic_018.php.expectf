@@ -1,0 +1,6 @@
+*** Testing curl_exec() : basic functionality ***
+%unicode|string%(75) "Hello World!
+Hello World!Hello World!
+Hello World!Hello World!
+Hello World!"
+===DONE===

@@ -1,0 +1,15 @@
+*** Test curl_copy_handle() after exec() with POST ***
+string(163) "array(1) {
+  ["test"]=>
+  string(7) "getpost"
+}
+array(3) {
+  ["Hello"]=>
+  string(5) "World"
+  ["Foo"]=>
+  string(3) "Bar"
+  ["Person"]=>
+  string(8) "John Doe"
+}
+"
+===DONE===

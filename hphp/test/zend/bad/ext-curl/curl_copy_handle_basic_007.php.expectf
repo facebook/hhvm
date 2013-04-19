@@ -1,0 +1,15 @@
+*** Testing curl copy handle with simple POST using array as arguments ***
+string(163) "array(1) {
+  ["test"]=>
+  string(7) "getpost"
+}
+array(3) {
+  ["Hello"]=>
+  string(5) "World"
+  ["Foo"]=>
+  string(3) "Bar"
+  ["Person"]=>
+  string(8) "John Doe"
+}
+"
+===DONE===

@@ -1,0 +1,11 @@
+HipHop Warning: %a
+* About to connect() %a
+* Closing connection #%d
+Ok for CURLOPT_STDERR
+HipHop Warning: %a
+Ok for CURLOPT_WRITEHEADER
+HipHop Warning: %a
+%a
+Ok for CURLOPT_FILE
+HipHop Warning: %a
+Ok for CURLOPT_INFILE

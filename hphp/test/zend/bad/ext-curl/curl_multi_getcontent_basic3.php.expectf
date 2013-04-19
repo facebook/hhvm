@@ -1,0 +1,9 @@
+array(2) {
+  ["test"]=>
+  string(7) "getpost"
+  ["get_param"]=>
+  string(11) "Hello World"
+}
+array(0) {
+}
+CURL2

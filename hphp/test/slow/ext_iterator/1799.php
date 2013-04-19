@@ -1,7 +1,5 @@
 <?php
 
-include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
-
 $dir = new DirectoryIterator(__DIR__.'/../../sample_dir');
 $files = array(); // order changes per machine
 while($dir->valid()) {

@@ -23147,7 +23147,7 @@ bool TestCodeRun::TestExtSoap() {
        "  }"
        "}"
        "function test($options) {"
-       "  return new MySoap('test/test.wsdl', $options);"
+       "  return new MySoap('test/slow/ext_soap/1809.wsdl', $options);"
        "}"
        "var_dump(test(array('foo' => 'bar'))->pub);");
 

@@ -1,7 +1,5 @@
 <?php
 
-include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
-
 $d = dir(__DIR__."/../../sample_dir/");
 echo "Path: " . $d->path . "\n";
 $files = array(); // order changes per machine

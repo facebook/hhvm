@@ -1,6 +1,6 @@
 array(5) {
   [0]=>
-  string(%d) "%s../../sample_dir/dir => 18
+  string(%d) "%s../../sample_dir/dir => %d
 "
   [1]=>
   string(%d) "%s../../sample_dir/empty => 0
@@ -15,4 +15,4 @@ array(5) {
   string(%d) "%s../../sample_dir/symlink => 3
 "
 }
-Total: 5 files, 483 bytes
+Total: 5 files, %d bytes

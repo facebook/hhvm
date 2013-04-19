@@ -1,7 +1,5 @@
 <?php
 
-include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
-
 $ite=new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir/');
 $bytestotal=0;
 $nbfiles=0;

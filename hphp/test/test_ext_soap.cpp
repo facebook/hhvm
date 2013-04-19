@@ -129,7 +129,7 @@ bool TestExtSoap::test_SoapServerArrayParam() {
 
 bool TestExtSoap::test_SoapServerWSDL() {
   m_server = p_SoapServer(NEWOBJ(c_SoapServer)());
-  m_server->t___construct("test/test.wsdl",
+  m_server->t___construct("test/slow/ext_soap/1809.wsdl",
                           CREATE_MAP1("uri", "http://testuri.org"));
   m_server->t_addfunction("Add");
 

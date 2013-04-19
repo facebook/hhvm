@@ -9,7 +9,7 @@
  }
 
  function test($options) {
-   return new MySoap(__DIR__.'/../../test.wsdl', $options);
+   return new MySoap(__DIR__.'/1809.wsdl', $options);
  }
 
  var_dump(test(array('foo' => 'bar'))->pub);

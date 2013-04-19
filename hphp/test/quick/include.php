@@ -19,3 +19,8 @@ require $path;
 $path = __DIR__ . '/include.3.inc';
 require $path;
 
+if (0) {
+  // to ensure we include the file in
+  // RepoAuthoritative mode
+  require 'include.3.inc';
+}

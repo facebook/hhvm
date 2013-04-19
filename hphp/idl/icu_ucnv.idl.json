@@ -19,6 +19,9 @@
                     "flags": [
                         "HasDocComment"
                     ],
+                    "return": {
+                        "type": null
+                    },
                     "args": [
                         {
                             "name": "toEncoding",
@@ -64,6 +67,9 @@
                     "flags": [
                         "HasDocComment"
                     ],
+                    "return": {
+                        "type": null
+                    },
                     "args": [
                         {
                             "name": "encoding",
@@ -91,6 +97,9 @@
                     "flags": [
                         "HasDocComment"
                     ],
+                    "return": {
+                        "type": null
+                    },
                     "args": [
                         {
                             "name": "encoding",

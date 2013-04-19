@@ -256,11 +256,6 @@ function EndClass() {
 }
 
 function idl_parse_type($t) {
-  // Named object types
-  if (!strncmp($t, 'Object:', 7)) {
-    return substr($t, 7);
-  }
-
   if (defined($t) && ($v = constant($t)) &&
       is_integer($v) && ($v > 0) && ($v < TypeMask)) {
     return $v;

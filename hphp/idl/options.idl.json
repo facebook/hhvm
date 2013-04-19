@@ -893,7 +893,9 @@
             "flags": [
                 "HasDocComment"
             ],
-            "return": null,
+            "return": {
+                "type": null
+            },
             "args": [
             ]
         },
@@ -903,7 +905,9 @@
             "flags": [
                 "HasDocComment"
             ],
-            "return": null,
+            "return": {
+                "type": null
+            },
             "args": [
             ]
         },

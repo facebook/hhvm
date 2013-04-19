@@ -6,7 +6,7 @@
         {
             "name": "hphp_create_continuation",
             "return": {
-                "type": "Object:Continuation"
+                "type": "Object"
             },
             "args": [
                 {

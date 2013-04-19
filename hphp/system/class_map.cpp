@@ -13623,7 +13623,7 @@ const char *g_class_map[] = {
   NULL,
   NULL,
   (const char *)0x10006040, "hphp_create_continuation", "", (const char*)0, (const char*)0,
-  "/**\n * ( excerpt from\n * http://php.net/manual/en/function.hphp-create-continuation.php )\n *\n *\n * @clsname    string\n * @funcname   string\n * @origFuncName\n *             string\n * @args       map\n *\n * @return     Continuation\n *\n */",
+  "/**\n * ( excerpt from\n * http://php.net/manual/en/function.hphp-create-continuation.php )\n *\n *\n * @clsname    string\n * @funcname   string\n * @origFuncName\n *             string\n * @args       map\n *\n * @return     object\n */",
   (const char *)0x40 /* KindOfObject */, (const char *)0x2000, "clsname", "", (const char *)0x14 /* KindOfString */, "", (const char *)0, "", (const char *)0, NULL,
   (const char *)0x2000, "funcname", "", (const char *)0x14 /* KindOfString */, "", (const char *)0, "", (const char *)0, NULL,
   (const char *)0x2000, "origFuncName", "", (const char *)0x14 /* KindOfString */, "", (const char *)0, "", (const char *)0, NULL,

@@ -473,6 +473,9 @@
                 "HipHopSpecific",
                 "NoInjection"
             ],
+            "return": {
+                "type": null
+            },
             "args": [
             ]
         }

@@ -1054,6 +1054,9 @@
                 "HasDocComment",
                 "HipHopSpecific"
             ],
+            "return": {
+                "type": null
+            },
             "args": [
                 {
                     "name": "filename",

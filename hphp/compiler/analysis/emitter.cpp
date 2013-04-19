@@ -1432,7 +1432,7 @@ private:
  */
 class RestoreErrorReportingThunklet : public Thunklet {
 public:
-  RestoreErrorReportingThunklet(Id loc) : m_oldLevelLoc(loc) {}
+  explicit RestoreErrorReportingThunklet(Id loc) : m_oldLevelLoc(loc) {}
   virtual void emit(Emitter& e) {
     e.getEmitterVisitor().emitRestoreErrorReporting(e, m_oldLevelLoc);
     e.Unwind();
@@ -1443,7 +1443,7 @@ private:
 
 class UnsetUnnamedLocalThunklet : public Thunklet {
 public:
-  UnsetUnnamedLocalThunklet(Id loc) : m_loc(loc) {}
+  explicit UnsetUnnamedLocalThunklet(Id loc) : m_loc(loc) {}
   virtual void emit(Emitter& e) {
     e.getEmitterVisitor().emitVirtualLocal(m_loc);
     e.getEmitterVisitor().emitUnset(e);

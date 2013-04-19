@@ -287,7 +287,7 @@ public:
 class Label {
 public:
   Label() : m_off(InvalidAbsoluteOffset) {}
-  Label(Emitter& e) : m_off(InvalidAbsoluteOffset) {
+  explicit Label(Emitter& e) : m_off(InvalidAbsoluteOffset) {
     set(e);
   }
   Offset getAbsoluteOffset() const { return m_off; }
@@ -326,7 +326,7 @@ public:
 class EmitterVisitor {
   friend class UnsetUnnamedLocalThunklet;
 public:
-  EmitterVisitor(UnitEmitter& ue);
+  explicit EmitterVisitor(UnitEmitter& ue);
   ~EmitterVisitor();
 
   bool visit(ConstructPtr c);

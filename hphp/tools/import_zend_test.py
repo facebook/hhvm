@@ -178,6 +178,7 @@ parser.add_argument(
     "-o",
     "--only",
     type=str,
+    action='append',
     help="only import tests whose path matches this regex."
 )
 parser.add_argument(
@@ -331,9 +332,16 @@ if args.zend_path:
         for root, dirs, files in os.walk(os.path.join(args.zend_path, source)):
             for filename in files:
                 full_file = os.path.join(root, filename)
-                if args.only and not re.search(args.only, full_file):
-                    continue
-                if should_import(full_file):
+
+                def matches(regexes):
+                    if not regexes:
+                        return True
+                    for regex in regexes:
+                        if re.search(regex, full_file):
+                            return True
+                    return False
+
+                if matches(args.only) and should_import(full_file):
                     walk(full_file, root.replace(args.zend_path, ''))
 
 if not os.path.isdir('test/zend/all'):

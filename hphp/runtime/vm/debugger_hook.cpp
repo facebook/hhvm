@@ -36,22 +36,31 @@ static inline Transl::Translator* transl() {
   return Transl::Translator::Get();
 }
 
-void phpDebuggerHook(const uchar* pc) {
+// Hook called from the bytecode interpreter before every opcode executed while
+// a debugger is attached. The debugger may choose to hold the thread below
+// here and execute any number of commands from the client. Return from here
+// lets the opcode execute.
+void phpDebuggerOpcodeHook(const uchar* pc) {
   TRACE(5, "in phpDebuggerHook()\n");
+  // Short-circuit when we're doing things like evaling PHP for print command,
+  // or conditional breakpoints.
   if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
+  // Short-circuit for cases where we're executing a line of code that we know
+  // we don't need an interrupt for, e.g., stepping over a line of code.
   if (UNLIKELY(g_vmContext->m_lastLocFilter != nullptr) &&
       g_vmContext->m_lastLocFilter->checkPC(pc)) {
     TRACE(5, "same location as last interrupt\n");
     return;
   }
+  // Are we hitting a breakpoint?
   if (LIKELY(g_vmContext->m_breakPointFilter == nullptr ||
       !g_vmContext->m_breakPointFilter->checkPC(pc))) {
     TRACE(5, "not in the PC range for any breakpoints\n");
     if (LIKELY(!DEBUGGER_FORCE_INTR)) {
-      // implies we left the location for last break;
+      // Implies we left the location for last break.
       delete g_vmContext->m_lastLocFilter;
       g_vmContext->m_lastLocFilter = nullptr;
       return;
@@ -62,7 +71,9 @@ void phpDebuggerHook(const uchar* pc) {
   TRACE(5, "out phpDebuggerHook()\n");
 }
 
-void phpExceptionHook(ObjectData* e) {
+// Hook called from iopThrow to signal that we are about to throw an exception.
+// NB: this does not hook any portion of exception unwind.
+void phpDebuggerExceptionHook(ObjectData* e) {
   TRACE(5, "in phpExceptionHook()\n");
   if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
@@ -76,6 +87,9 @@ bool isDebuggerAttachedProcess() {
   return Eval::Debugger::CountConnectedProxy() > 0;
 }
 
+// Ensure we interpret all code at the given offsets. This sets up a guard for
+// each piece of tranlated code to ensure we punt ot the interpreter when the
+// debugger is attached.
 static void blacklistRangesInJit(const Unit* unit,
                                  const OffsetRangeVec& offsets) {
   for (OffsetRangeVec::const_iterator it = offsets.begin();
@@ -90,6 +104,7 @@ static void blacklistRangesInJit(const Unit* unit,
   }
 }
 
+// Ensure we interpret an entire function when the debugger is attached.
 static void blacklistFuncInJit(const Func* f) {
   Unit* unit = f->unit();
   OffsetRangeVec ranges;
@@ -162,14 +177,16 @@ static void addBreakPointsClass(Eval::DebuggerProxy* proxy,
     }
   }
 }
-    
+
 void phpDebuggerEvalHook(const Func* f) {
   if (RuntimeOption::EvalJit) {
     blacklistFuncInJit(f);
   }
 }
 
-void phpFileLoadHook(Eval::PhpFile* efile) {
+// Hook called by the VM when a file is loaded. Gives the debugger a chance
+// to apply any pending breakpoints that might be in the file.
+void phpDebuggerFileLoadHook(Eval::PhpFile* efile) {
   Eval::DebuggerProxyPtr proxy = Eval::Debugger::GetProxy();
   if (!proxy) {
     return;
@@ -177,7 +194,7 @@ void phpFileLoadHook(Eval::PhpFile* efile) {
   addBreakPointsInFile(proxy.get(), efile);
 }
 
-void phpDefClassHook(const Class* cls) {
+void phpDebuggerDefClassHook(const Class* cls) {
   Eval::DebuggerProxyPtr proxy = Eval::Debugger::GetProxy();
   if (!proxy) {
     return;
@@ -185,15 +202,16 @@ void phpDefClassHook(const Class* cls) {
   addBreakPointsClass(proxy.get(), cls);
 }
 
-void phpDefFuncHook(const Func* func) {
+void phpDebuggerDefFuncHook(const Func* func) {
   Eval::DebuggerProxyPtr proxy = Eval::Debugger::GetProxy();
   if (proxy && proxy->couldBreakEnterFunc(func->fullName())) {
     addBreakPointFuncEntry(func);
   }
 }
 
-void phpBreakPointHook(Eval::DebuggerProxyVM* proxy) {
-  // Set file:line breakpoints to each loaded file
+// Helper which will look at every loaded file and attempt to see if any
+// existing file:line breakpoints should be set.
+void phpSetBreakPointsInAllFiles(Eval::DebuggerProxyVM* proxy) {
   for (EvaledFilesMap::const_iterator it =
        g_vmContext->m_evaledFiles.begin();
        it != g_vmContext->m_evaledFiles.end(); ++it) {
@@ -222,12 +240,12 @@ void phpBreakPointHook(Eval::DebuggerProxyVM* proxy) {
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PtrMapNode {
+struct PCFilter::PtrMapNode {
   void **m_entries;
   void clearImpl(unsigned short bits);
 };
 
-void PtrMapNode::clearImpl(unsigned short bits) {
+void PCFilter::PtrMapNode::clearImpl(unsigned short bits) {
   // clear all the sub levels and mark all slots NULL
   if (bits <= PTRMAP_LEVEL_BITS) {
     assert(bits == PTRMAP_LEVEL_BITS);
@@ -237,28 +255,29 @@ void PtrMapNode::clearImpl(unsigned short bits) {
   }
   for (int i = 0; i < PTRMAP_LEVEL_ENTRIES; i++) {
     if (m_entries[i]) {
-      ((PtrMapNode*)m_entries[i])->clearImpl(bits - PTRMAP_LEVEL_BITS);
-      free(((PtrMapNode*)m_entries[i])->m_entries);
+      ((PCFilter::PtrMapNode*)m_entries[i])->clearImpl(bits -
+                                                       PTRMAP_LEVEL_BITS);
+      free(((PCFilter::PtrMapNode*)m_entries[i])->m_entries);
       free(m_entries[i]);
       m_entries[i] = nullptr;
     }
   }
 }
 
-PtrMapNode* PtrMap::MakeNode() {
+PCFilter::PtrMapNode* PCFilter::PtrMap::MakeNode() {
   PtrMapNode* node = (PtrMapNode*)malloc(sizeof(PtrMapNode));
   node->m_entries =
     (void**)calloc(1, PTRMAP_LEVEL_ENTRIES * sizeof(void*));
   return node;
 }
 
-PtrMap::~PtrMap() {
+PCFilter::PtrMap::~PtrMap() {
   clear();
   free(m_root->m_entries);
   free(m_root);
 }
 
-void* PtrMap::getPointer(void* ptr) {
+void* PCFilter::PtrMap::getPointer(void* ptr) {
   PtrMapNode* current = m_root;
   unsigned short cursor = PTRMAP_PTR_SIZE;
   while (current && cursor) {
@@ -271,7 +290,7 @@ void* PtrMap::getPointer(void* ptr) {
   return (void*)current;
 }
 
-void PtrMap::setPointer(void* ptr, void* val) {
+void PCFilter::PtrMap::setPointer(void* ptr, void* val) {
   PtrMapNode* current = m_root;
   unsigned short cursor = PTRMAP_PTR_SIZE;
   while (true) {
@@ -290,15 +309,14 @@ void PtrMap::setPointer(void* ptr, void* val) {
   }
 }
 
-void PtrMap::clear() {
+void PCFilter::PtrMap::clear() {
   m_root->clearImpl(PTRMAP_PTR_SIZE);
 }
 
 int PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets) {
   int counter = 0;
-  for (OffsetRangeVec::const_iterator it = offsets.begin();
-       it != offsets.end(); ++it) {
-    for (PC pc = unit->at(it->m_base); pc < unit->at(it->m_past);
+  for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
+    for (PC pc = unit->at(range->m_base); pc < unit->at(range->m_past);
          pc += instrLen((Opcode*)pc)) {
       addPC(pc);
       counter++;

@@ -392,7 +392,7 @@ public:
 
   RequestInjectionData()
     : cflagsPtr(nullptr), surprisePage(nullptr), started(0), timeoutSeconds(-1),
-      debugger(false), debuggerIdle(0), dummySandbox(false),
+      debugger(false), dummySandbox(false),
       debuggerIntr(false), coverage(false) {
   }
 
@@ -411,7 +411,6 @@ public:
   int timeoutSeconds;  // how many seconds to timeout
 
   bool debugger;       // whether there is a DebuggerProxy attached to me
-  int  debuggerIdle;   // skipping this many interrupts while proxy is idle
   bool dummySandbox;   // indicating it is from a dummy sandbox thread
   bool debuggerIntr;   // indicating we should force interrupt for debugger
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
@@ -552,7 +551,7 @@ public:
     m_info->m_executing =
       builtin ? ThreadInfo::ExtensionFunctions : ThreadInfo::UserFunctions;
   }
-  ExecutionProfiler(ThreadInfo::Executing executing) {
+  explicit ExecutionProfiler(ThreadInfo::Executing executing) {
     m_info = ThreadInfo::s_threadInfo.getNoCheck();
     m_executing = m_info->m_executing;
     m_info->m_executing = executing;

@@ -35,7 +35,7 @@ inline ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
     }
   }
   *funcAddr = func;
-  if (UNLIKELY(debugger)) phpDefFuncHook(func);
+  if (UNLIKELY(debugger)) phpDebuggerDefFuncHook(func);
 }
 
 } } // HPHP::VM

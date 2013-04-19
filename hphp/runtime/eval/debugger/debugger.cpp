@@ -109,7 +109,6 @@ void Debugger::CleanupDummySandboxThreads() {
   s_debugger.cleanupDummySandboxThreads();
 }
 
-
 void Debugger::DebuggerSession(const DebuggerClientOptions& options,
                                const std::string& file, bool restart) {
   if (options.extension.empty()) {
@@ -163,14 +162,9 @@ void Debugger::InterruptPSPEnded(const char *url) {
   }
 }
 
-void Debugger::InterruptFileLine(InterruptSite &site) {
-  Interrupt(BreakPointReached, nullptr, &site);
-}
-
-void Debugger::InterruptHard(InterruptSite &site) {
-  Interrupt(HardBreakPoint, nullptr, &site);
-}
-
+// Called directly from exception handling to indicate a user error handler
+// failed to handle an exeption. NB: this is quite distinct from the hook called
+// from iopThrow named phpDebuggerExceptionHook().
 bool Debugger::InterruptException(CVarRef e) {
   if (RuntimeOption::EnableDebugger) {
     ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
@@ -182,19 +176,23 @@ bool Debugger::InterruptException(CVarRef e) {
   return true;
 }
 
+// Primary entrypoint for the debugger from the VM. Called in response to a host
+// of VM events that the debugger is interested in. The debugger will execute
+// any logic needed to handle the event, and will block below this to wait for
+// and process more commands from the debugger client. This function will only
+// return when the debugger is letting the thread continue execution, e.g., for
+// flow control command like continue, next, etc.
 void Debugger::Interrupt(int type, const char *program,
                          InterruptSite *site /* = NULL */,
                          const char *error /* = NULL */) {
   assert(RuntimeOption::EnableDebugger);
 
-  RequestInjectionData &rjdata = ThreadInfo::s_threadInfo->m_reqInjectionData;
-  if (rjdata.debuggerIdle > 0 && type == BreakPointReached) {
-    --rjdata.debuggerIdle;
-    return;
-  }
-
   DebuggerProxyPtr proxy = GetProxy();
   if (proxy) {
+    RequestInjectionData &rjdata = ThreadInfo::s_threadInfo->m_reqInjectionData;
+    // The proxy will only service an interrupt if we've previously setup some
+    // form of flow control command (steps, breakpoints, etc.) or if it's
+    // an interrupt related to something like the session or request.
     if (proxy->needInterrupt() || type != BreakPointReached) {
       // Interrupts may execute some PHP code, causing another interruption.
       std::stack<void *> &interrupts = rjdata.interrupts;
@@ -204,9 +202,13 @@ void Debugger::Interrupt(int type, const char *program,
       proxy->interrupt(cmd);
       interrupts.pop();
     }
+    // Some cmds requires us to interpret all instructions until the cmd
+    // completes. Setting this will ensure we stay out of JIT code and in the
+    // interpreter so phpDebuggerOpcodeHook has a chance to work.
     rjdata.debuggerIntr = proxy->needInterruptForNonBreak();
   } else {
-    // debugger clients are disconnected abnormally
+    // Debugger clients are disconnected abnormally, or this sandbox is not
+    // being debugged.
     if (type == SessionStarted || type == SessionEnded) {
       // for command line programs, we need this exception to exit from
       // the infinite execution loop
@@ -215,10 +217,24 @@ void Debugger::Interrupt(int type, const char *program,
   }
 }
 
+// Primary entrypoint from the set of "debugger hooks", which the VM calls in
+// response to various events. While this function is quite general wrt. the
+// type of interrupt, practically the type will be one of the following:
+//   - ExceptionThrown
+//   - BreakPointReached
+//   - HardBreakPoint
+//
+// Note: it is indeed a bit odd that interrupts due to single stepping come in
+// as "BreakPointReached". Currently this results in spurious work in the
+// debugger.
 void Debugger::InterruptVMHook(int type /* = BreakPointReached */,
                                CVarRef e /* = null_variant */) {
+  // Computing the interrupt site here pulls in more data from the Unit to
+  // describe the current execution point.
   InterruptSiteVM site(type == HardBreakPoint, e);
   if (!site.valid()) {
+    // An invalid site is missing something like an ActRec, a func, or a
+    // Unit. Currently the debugger has no action to take at such sites.
     return;
   }
   Interrupt(type, nullptr, &site);
@@ -331,11 +347,16 @@ void Debugger::unregisterSandbox(const StringData* sandboxId) {
 
 #define FOREACH_SANDBOX_THREAD_END()    } } }                          \
 
+// Ask every thread in this proxy's sandbox and the dummy sandbox to "stop".
+// Gaining control of these threads is the intention... the mechanism is to
+// force them all to start interpreting all of their code in an effort to gain
+// control in phpDebuggerOpcodeHook().
 void Debugger::requestInterrupt(DebuggerProxyPtr proxy) {
   const StringData* sid = StringData::GetStaticString(proxy->getSandboxId());
   FOREACH_SANDBOX_THREAD_BEGIN(sid, ti)
   ti->m_reqInjectionData.debuggerIntr = true;
   FOREACH_SANDBOX_THREAD_END()
+
   sid = StringData::GetStaticString(proxy->getDummyInfo().id());
   FOREACH_SANDBOX_THREAD_BEGIN(sid, ti)
   ti->m_reqInjectionData.debuggerIntr = true;

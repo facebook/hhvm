@@ -23,10 +23,15 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+// DebuggerCommand is the base of all commands executed by the debugger. It
+// also represents the base binary communication format between DebuggerProxy
+// and DebuggerClient.
+//
+// Each command has serialization logic, plus client- and server-side logic.
+// Client-side logic is implemented in the onClient* methods, while server-side
+// is in the onServer* methods.
+//
 
-/**
- * Binary communication format between DebuggerProxy and DebuggerClient.
- */
 DECLARE_BOOST_TYPES(DebuggerCommand);
 class DebuggerCommand {
 public:
@@ -80,7 +85,7 @@ public:
                       const char *caller);
 
 public:
-  DebuggerCommand(Type type)
+  explicit DebuggerCommand(Type type)
     : m_type(type), m_version(0), m_exitInterrupt(false),
       m_incomplete(false) {}
 

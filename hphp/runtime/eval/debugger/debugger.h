@@ -25,6 +25,10 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+// The Debugger generally manages proxies, sandboxes, and is the inital handler
+// of interrupts from the VM. It associates VM threads with sandboxes, and
+// sandboxes with proxies. Interrupts get minimal handling before being handed
+// off to the proper proxy.
 
 class Debugger {
 public:
@@ -76,10 +80,8 @@ public:
   static void InterruptPSPEnded(const char *url);
 
   /**
-   * A new line of PHP code is reached from execution thread.
+   * Called when a user handler fails to handle an exception.
    */
-  static void InterruptFileLine(InterruptSite &site);
-  static void InterruptHard(InterruptSite &site);
   static bool InterruptException(CVarRef e);
 
   /**
@@ -157,9 +159,12 @@ public:
   ~DebuggerDummyEnv();
 };
 
+// Suppress the debugger's ability to get interrupted while executing PHP.
+// Primarily used to suppress debugger events while evaling PHP in response
+// to commands like print, or for expressions in conditional breakpoints.
 class EvalBreakControl {
 public:
-  EvalBreakControl(bool noBreak);
+  explicit EvalBreakControl(bool noBreak);
   ~EvalBreakControl();
 private:
   bool m_noBreakSave;

@@ -450,7 +450,7 @@ bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
 
 class FrameRestore {
  public:
-  FrameRestore(const PreClass* preClass) {
+  explicit FrameRestore(const PreClass* preClass) {
     VMExecutionContext* ec = g_vmContext;
     ActRec* fp = ec->getFP();
     PC pc = ec->getPC();
@@ -550,7 +550,7 @@ Class* Unit::defClass(const PreClass* preClass,
       Class::Avail avail = class_->avail(parent, failIsFatal /*tryAutoload*/);
       if (LIKELY(avail == Class::AvailTrue)) {
         class_->setCached();
-        DEBUGGER_ATTACHED_ONLY(phpDefClassHook(class_));
+        DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(class_));
         return class_;
       }
       if (avail == Class::AvailFail) {
@@ -614,7 +614,7 @@ Class* Unit::defClass(const PreClass* preClass,
     }
     newClass.get()->incAtomicCount();
     newClass.get()->setCached();
-    DEBUGGER_ATTACHED_ONLY(phpDefClassHook(newClass.get()));
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass.get()));
     return newClass.get();
   }
 }
@@ -1123,7 +1123,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
         Func* func = *it;
         assert(func->top());
         getDataRef<Func*>(tcbase, func->getCachedOffset()) = func;
-        if (debugger) phpDefFuncHook(func);
+        if (debugger) phpDebuggerDefFuncHook(func);
       } while (++it != fend);
     } else {
       do {
@@ -1169,7 +1169,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           }
         }
         getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
-        if (debugger) phpDefClassHook(cls);
+        if (debugger) phpDebuggerDefClassHook(cls);
       } else {
         if (UNLIKELY(!defClass(pre, false))) {
           redoHoistable = true;
@@ -1247,7 +1247,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           }
           assert(avail == Class::AvailTrue);
           getDataRef<Class*>(tcbase, cls->m_cachedOffset) = cls;
-          if (debugger) phpDefClassHook(cls);
+          if (debugger) phpDebuggerDefClassHook(cls);
           obj = mi->mergeableObj(++ix);
           k = UnitMergeKind(uintptr_t(obj) & 7);
         } while (k == UnitMergeKindUniqueDefinedClass);

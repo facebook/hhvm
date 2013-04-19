@@ -135,6 +135,8 @@ void DebuggerProxy::notifyDummySandbox() {
   m_dummySandbox->notifySignal(CmdSignal::SignalBreak);
 }
 
+// Hold the entire set of breakpoints, and sift breakpoints by function and
+// class name into separate containers for later.
 void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
   WriteLock lock(m_breakMutex);
   m_breakpoints = breakpoints;
@@ -181,7 +183,7 @@ bool DebuggerProxy::couldBreakEnterFunc(const StringData* funcFullName) {
 void DebuggerProxy::getBreakClsMethods(
   std::vector<const StringData*>& classNames) {
   classNames.clear();
-  WriteLock lock(m_breakMutex);
+  WriteLock lock(m_breakMutex); // Write lock in case iteration causes a re-hash
   for (StringDataMap::const_iterator iter = m_breaksEnterClsMethod.begin();
        iter != m_breaksEnterClsMethod.end(); ++iter) {
     classNames.push_back(iter->first);
@@ -191,7 +193,7 @@ void DebuggerProxy::getBreakClsMethods(
 void DebuggerProxy::getBreakFuncs(
   std::vector<const StringData*>& funcFullNames) {
   funcFullNames.clear();
-  WriteLock lock(m_breakMutex);
+  WriteLock lock(m_breakMutex); // Write lock in case iteration causes a re-hash
   for (StringDataMap::const_iterator iter = m_breaksEnterFunc.begin();
        iter != m_breaksEnterFunc.end(); ++iter) {
     funcFullNames.push_back(iter->first);
@@ -207,7 +209,12 @@ bool DebuggerProxy::needInterruptForNonBreak() {
   return m_flow || m_signum != CmdSignal::SignalNone;
 }
 
+// Handle an interrupt from the VM. Note: some work for breakpoints has already
+// occured in DebuggerProxyVM::interrupt().
 void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
+  // Wait until this thread is the thread this proxy wants to debug.
+  // NB: breakpoints and control flow checks happen here, too, and return false
+  // if we're not done with the flow, or not at a breakpoint, etc.
   if (!blockUntilOwn(cmd, true)) {
     return;
   }
@@ -255,6 +262,13 @@ void DebuggerProxy::startSignalThread() {
   m_signalThread.start();
 }
 
+// This gets it's own thread, and polls the client once per second to see if
+// there is a signal, i.e., if the user has pressed Ctrl-C, etc. If there is a
+// signal, it is passed as an interrupt to the proxy in an attempt to get other
+// threads in the sandbox to stop.
+//
+// If another thread in the sandbox fails to stop and consume the signal then
+// it will be passed to the dummy sandbox instead.
 void DebuggerProxy::pollSignal() {
   while (!m_stopped) {
     sleep(1);
@@ -271,13 +285,14 @@ void DebuggerProxy::pollSignal() {
 
     Lock lock(m_signalMutex);
 
+    // Send CmdSignal over to the client and wait for a response.
     CmdSignal cmd;
     if (!cmd.onServerD(this)) break; // on socket error
 
     DebuggerCommandPtr res;
     while (!DebuggerCommand::Receive(m_thrift, res,
                                      "DebuggerProxy::pollSignal()")) {
-      // we will wait forever until DebuggerClient sends us something
+      // We will wait forever until DebuggerClient sends us something.
     }
     if (!res) break;
 
@@ -371,6 +386,11 @@ DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
   return info;
 }
 
+// Waits until this thread is the one that the proxy considers the current
+// thread. This also check to see if the given cmd has any breakpoints or
+// flow control that we should stop for. Note: while stepping, pretty much all
+// of the stepping logic is handled below here and this will return false if
+// the stepping operation has not completed.
 bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
   int64_t self = cmd.getThreadId();
 
@@ -410,12 +430,17 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
   return true;
 }
 
+// Checks whether the cmd has any breakpoints that match the current Site.
+// Also returns true for cmds that have should always break.
 bool DebuggerProxy::checkBreakPoints(CmdInterrupt &cmd) {
   ReadLock lock(m_breakMutex);
   return cmd.shouldBreak(m_breakpoints);
 }
 
+// Check if we should stop due to flow control, breakpoints, and signals.
 bool DebuggerProxy::checkJumpFlowBreak(CmdInterrupt &cmd) {
+  // If there is an outstanding Ctrl-C from the client, go ahead and break now.
+  // Note: this stops any flow control command we might have in-flight.
   if (m_signum == CmdSignal::SignalBreak) {
     Lock lock(m_signumMutex);
     if (m_signum == CmdSignal::SignalBreak) {
@@ -493,15 +518,14 @@ void DebuggerProxy::checkStop() {
 }
 
 void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
+  // Do the server-side work for this cmd.
   if (!cmd.onServerD(this)) {
     Debugger::RemoveProxy(shared_from_this()); // on socket error
     return;
   }
 
-  // Once we sent an CmdInterrupt to client side, we should be considered idle
-  RequestInjectionData &rjdata = ThreadInfo::s_threadInfo->m_reqInjectionData;
-  rjdata.debuggerIdle = 0;
-
+  // Wait for commands from the debugger client and process them. We'll stay
+  // here until we get a command that should cause the thread to continue.
   while (true) {
     DebuggerCommandPtr res;
     while (!DebuggerCommand::Receive(m_thrift, res,
@@ -511,6 +535,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     }
     checkStop();
     if (res) {
+      // Any control flow command gets installed here and we continue execution.
       m_flow = dynamic_pointer_cast<CmdFlowControl>(res);
       if (m_flow) {
         m_flow->onServerD(this);
@@ -537,6 +562,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       }
     }
     try {
+      // Perform the server-size work for this command.
       if (!res || !res->onServerD(this)) {
         Debugger::RemoveProxy(shared_from_this());
         return;
@@ -617,18 +643,18 @@ BreakPointInfoPtr DebuggerProxyVM::getBreakPointAtCmd(CmdInterrupt& cmd) {
   return BreakPointInfoPtr();
 }
 
-
+// Handle an interrupt from the VM.
 void DebuggerProxyVM::interrupt(CmdInterrupt &cmd) {
   changeBreakPointDepth(cmd);
-  if (cmd.getInterruptType() != BreakPointReached &&
-      cmd.getInterruptType() != HardBreakPoint) {
-    DebuggerProxy::interrupt(cmd);
-    return;
-  }
 
-  if (cmd.getInterruptType() != HardBreakPoint) {
+  if (cmd.getInterruptType() == BreakPointReached) {
     if (!needInterrupt()) return;
-    // Modify m_lastLocFilter to save current location
+
+    // NB: stepping is represented as a BreakPointReached interrupt.
+
+    // Modify m_lastLocFilter to save current location. This will short-circuit
+    // the work done up in phpDebuggerOpcodeHook() and ensure we don't break on
+    // this line until we're completely off of it.
     InterruptSiteVM *site = (InterruptSiteVM*)cmd.getSite();
     if (g_vmContext->m_lastLocFilter) {
       g_vmContext->m_lastLocFilter->clear();
@@ -647,7 +673,7 @@ void DebuggerProxyVM::interrupt(CmdInterrupt &cmd) {
     }
     g_vmContext->m_lastLocFilter->addRanges(site->getUnit(),
                                             site->getCurOffsetRange());
-    // if the breakpoint is not to be processed, we should continue execution
+    // If the breakpoint is not to be processed, we should continue execution.
     BreakPointInfoPtr bp = getBreakPointAtCmd(cmd);
     if (bp) {
       if (!bp->breakable(getRealStackDepth())) {
@@ -662,8 +688,8 @@ void DebuggerProxyVM::interrupt(CmdInterrupt &cmd) {
 }
 
 void DebuggerProxyVM::setBreakPoints(BreakPointInfoPtrVec& breakpoints) {
-  DebuggerProxy::setBreakPoints(breakpoints);
-  VM::phpBreakPointHook(this);
+  DebuggerProxy::setBreakPoints(breakpoints); // Hold bp's in the proxy.
+  VM::phpSetBreakPointsInAllFiles(this); // Apply breakpoints to the code.
 }
 
 void DebuggerProxyVM::readInjTablesFromThread() {
@@ -719,6 +745,7 @@ int DebuggerProxyVM::getStackDepth() {
   return depth;
 }
 
+// Handle a continue cmd, or setup stepping.
 void DebuggerProxyVM::processFlowControl(CmdInterrupt &cmd) {
   switch (m_flow->getType()) {
     case DebuggerCommand::KindOfContinue:
@@ -765,6 +792,8 @@ void DebuggerProxyVM::changeBreakPointDepth(CmdInterrupt& cmd) {
   }
 }
 
+// Determine if an outstanding flow control cmd has run it's course and we
+// should stop execution.
 bool DebuggerProxyVM::breakByFlowControl(CmdInterrupt &cmd) {
   switch (m_flow->getType()) {
     case DebuggerCommand::KindOfStep: {

@@ -2618,7 +2618,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
       rpath.get()->incRefCount();
       efile->incRef();
     }
-    DEBUGGER_ATTACHED_ONLY(phpFileLoadHook(efile));
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(efile));
   }
   return efile;
 }
@@ -4452,7 +4452,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopThrow(PC& pc) {
 
   Object obj(c1->m_data.pobj);
   m_stack.popC();
-  DEBUGGER_ATTACHED_ONLY(phpExceptionHook(obj.get()));
+  DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHook(obj.get()));
   throw obj;
 }
 
@@ -7173,7 +7173,7 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
 
 #define O(name, imm, pusph, pop, flags)                       \
   LabelDbg##name:                                             \
-    phpDebuggerHook(pc);                                      \
+    phpDebuggerOpcodeHook(pc);                                \
   LabelInst##name:                                            \
     INST_HOOK_PC(injTable, pc);                               \
   LabelCover##name:                                           \

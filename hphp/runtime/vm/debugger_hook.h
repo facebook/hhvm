@@ -25,21 +25,31 @@ class DebuggerProxyVM;
 class PhpFile;
 }}
 
+///////////////////////////////////////////////////////////////////////////////
+// This is a set of functions which are primarily called from the VM to notify
+// the debugger about various events. Some of the implemenatitons also interact
+// with the VM to setup further notifications, though this is not the only place
+// the debugger interacts directly with the VM.
+
 namespace HPHP {
 namespace VM {
 
-void phpDebuggerHook(const uchar* pc);
-void phpExceptionHook(ObjectData* e);
-
+// "Hooks" called by the VM at various points during program execution while
+// debugging to give the debugger a chance to act. The debugger may block
+// execution indefinetly within one of these hooks.
+void phpDebuggerOpcodeHook(const uchar* pc);
+void phpDebuggerExceptionHook(ObjectData* e);
 void phpDebuggerEvalHook(const Func* f);
-void phpBreakPointHook(Eval::DebuggerProxyVM* proxy);
-void phpFileLoadHook(Eval::PhpFile* efile);
-
+void phpDebuggerFileLoadHook(Eval::PhpFile* efile);
 class Class;
 class Func;
-void phpDefClassHook(const Class* cls);
-void phpDefFuncHook(const Func* func);
+void phpDebuggerDefClassHook(const Class* cls);
+void phpDebuggerDefFuncHook(const Func* func);
 
+// Helper to apply pending breakpoints to all files.
+void phpSetBreakPointsInAllFiles(Eval::DebuggerProxyVM* proxy);
+
+// Is this thread being debugged?
 static inline bool isDebuggerAttached() {
   return ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.debugger;
 }
@@ -50,37 +60,44 @@ static inline bool isDebuggerAttached() {
   }                                                                   \
 } while(0)                                                            \
 
+// Is this process being debugged?
+bool isDebuggerAttachedProcess();
+
+// This flag ensures two things: first, that we stay in the interpreter and
+// out of JIT code. Second, that the phpDebuggerHook will continue to allow
+// debugger interrupts for every opcode executed (modulo filters.)
 #define DEBUGGER_FORCE_INTR  \
   (ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.debuggerIntr)
 
+// Map which holds a set of PCs and supports reasonably fast addition and
+// lookup. Used by the debugger to decide if a given PC falls within an
+// interesting area, e.g., for breakpoints and stepping.
+class PCFilter {
+private:
+  // Radix-tree implementation of pointer map
+  struct PtrMapNode;
+  class PtrMap {
 #define PTRMAP_PTR_SIZE       (sizeof(void*) * 8)
 #define PTRMAP_LEVEL_BITS     8LL
 #define PTRMAP_LEVEL_ENTRIES  (1LL << PTRMAP_LEVEL_BITS)
 #define PTRMAP_LEVEL_MASK     (PTRMAP_LEVEL_ENTRIES - 1LL)
 
-bool isDebuggerAttachedProcess();
+  public:
+    PtrMap() {
+      static_assert(PTRMAP_PTR_SIZE % PTRMAP_LEVEL_BITS == 0,
+                    "PTRMAP_PTR_SIZE must be a multiple of PTRMAP_LEVEL_BITS");
+      m_root = MakeNode();
+    }
+    ~PtrMap();
+    void setPointer(void* ptr, void* val);
+    void* getPointer(void* ptr);
+    void clear();
 
-class PtrMapNode;
-class PtrMap {
-  // Radix-tree implementation of pointer map
-public:
-  PtrMap() {
-    static_assert(PTRMAP_PTR_SIZE % PTRMAP_LEVEL_BITS == 0,
-                  "PTRMAP_PTR_SIZE must be a multiple of PTRMAP_LEVEL_BITS");
-    m_root = MakeNode();
-  }
-  ~PtrMap();
-  void setPointer(void* ptr, void* val);
-  void* getPointer(void* ptr);
-  void clear();
+  private:
+    PtrMapNode* m_root;
+    static PtrMapNode* MakeNode();
+  };
 
-private:
-  PtrMapNode* m_root;
-  static PtrMapNode* MakeNode();
-};
-
-class PCFilter {
-private:
   PtrMap m_map;
 
 public:

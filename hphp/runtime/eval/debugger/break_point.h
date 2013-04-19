@@ -28,20 +28,16 @@ enum InterruptType {
   RequestStarted,
   RequestEnded,
   PSPEnded,
-  HardBreakPoint,
+  HardBreakPoint, // From f_hphpd_break().
   BreakPointReached,
   ExceptionThrown,
 };
 
+// Represents a site in the code, at the source level.
+// Note: this class currently has just one subclass, InterruptSiteVM, which will
+// be combined with this shortly.
 class InterruptSite {
 public:
-  InterruptSite(CVarRef e = null_variant, const char *cls = nullptr,
-                const char *function = nullptr, StringData *file = nullptr,
-                int line0 = 0, int char0 = 0, int line1 = 0, int char1 = 0)
-    : m_exception(e), m_class(cls), m_function(function), m_file(file),
-      m_line0(line0), m_char0(char0), m_line1(line1), m_char1(char1),
-      m_jumping(false) { }
-
   virtual const char *getFile() const = 0;
   virtual const char *getClass() const = 0;
   virtual const char *getFunction() const = 0;
@@ -61,6 +57,14 @@ public:
   void setJumping() { m_jumping = true;}
 
 protected:
+  explicit InterruptSite(CVarRef e = null_variant, const char *cls = nullptr,
+                         const char *function = nullptr,
+                         StringData *file = nullptr, int line0 = 0,
+                         int char0 = 0, int line1 = 0, int char1 = 0)
+    : m_exception(e), m_class(cls), m_function(function), m_file(file),
+      m_line0(line0), m_char0(char0), m_line1(line1), m_char1(char1),
+      m_jumping(false) { }
+
   Variant m_exception;
 
   // cached
@@ -78,9 +82,12 @@ protected:
   bool m_jumping;
 };
 
+// Forms an InterruptSite by looking at the current thread's current PC and
+// grabbing source data out of the corresponding Unit.
 class InterruptSiteVM : public InterruptSite {
 public:
-  InterruptSiteVM(bool hardBreakPoint = false, CVarRef e = null_variant);
+  explicit InterruptSiteVM(bool hardBreakPoint = false,
+                           CVarRef e = null_variant);
   virtual const char *getFile() const;
   virtual const char *getClass() const;
   virtual const char *getFunction() const;

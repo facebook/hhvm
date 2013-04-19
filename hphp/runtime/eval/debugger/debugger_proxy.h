@@ -26,6 +26,24 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+// A DebuggerProxy provides a conection thru which a client may talk to a VM
+// which is being debugged. The VM can also send messages to the client via the
+// proxy, either in reponse to messages from the client, or to poll the client
+// for information.
+//
+// In an basic scenario where a client is debugging a remote VM, the VM will
+// create a proxy when the client connects (via DebuggerServer) and listen for
+// commands via this proxy. It will use this proxy when completing control flow
+// commands to interrupt the client. The client sends and receives messages over
+// a socket directly to this proxy. Thus we have:
+//
+//   Client <---> Proxy <---> VM
+//
+// The client always creates its own "local proxy", which allows debugging any
+// code running on the VM within the client. The two are easily confused.
+//
+// Note: currently DebuggerProxy has a single subclass, DebuggerProxyVM.
+// There used to be other subclasses, but they're gong now. These can be merged.
 
 class CmdInterrupt;
 DECLARE_BOOST_TYPES(DebuggerProxy);
@@ -48,9 +66,6 @@ public:
                             int frame);
 
 public:
-  DebuggerProxy(SmartPtr<Socket> socket, bool local);
-  virtual ~DebuggerProxy();
-
   bool isLocal() const { return m_local;}
 
   const char *getThreadType() const;
@@ -86,6 +101,9 @@ public:
   void forceQuit();
 
 protected:
+  DebuggerProxy(SmartPtr<Socket> socket, bool local);
+  virtual ~DebuggerProxy();
+
   bool m_stopped;
 
   bool m_local;
@@ -150,10 +168,11 @@ public:
   void setInjTables(HPHP::VM::InjectionTables* tables) { m_injTables = tables;}
   void readInjTablesFromThread();
   void writeInjTablesToThread();
+
+private:
   void changeBreakPointDepth(CmdInterrupt& cmd);
   BreakPointInfoPtr getBreakPointAtCmd(CmdInterrupt& cmd);
 
-private:
   int getStackDepth();
   int getRealStackDepth();
 

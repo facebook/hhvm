@@ -450,11 +450,6 @@ void CmdBreak::setClientOutput(DebuggerClient *client) {
 
 bool CmdBreak::onServer(DebuggerProxy *proxy) {
   if (m_body == "update") {
-    if (!m_bps.empty()) {
-      RequestInjectionData &rjdata =
-        ThreadInfo::s_threadInfo->m_reqInjectionData;
-      rjdata.debuggerIdle = 0;
-    }
     proxy->setBreakPoints(m_bps);
     m_breakpoints = &m_bps;
     return proxy->send(this);

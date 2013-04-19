@@ -1,6 +1,6 @@
 <?php
-$doc = dirname(__FILE__) . '/fbcufa.inc';
-require_once $doc;
+$doc = __DIR__ . '/fbcufa.inc';
+require_once 'fbcufa.inc';
 function main() {
   global $doc;
   echo "--------------------\n";

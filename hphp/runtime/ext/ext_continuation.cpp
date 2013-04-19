@@ -63,7 +63,7 @@ c_Continuation::~c_Continuation() {
   contLocal->m_type = KindOfNull;
 
   if (ar->hasVarEnv()) {
-    VM::VarEnv::destroy(ar->getVarEnv());
+    ar->getVarEnv()->detach(ar);
   } else {
     frame_free_locals_inl(ar, m_vmFunc->numLocals());
   }

@@ -601,6 +601,10 @@ void AliasManager::cleanRefs(ExpressionPtr e,
                              ExpressionPtrList::reverse_iterator it,
                              ExpressionPtrList::reverse_iterator &end,
                              int depth) {
+  if (e->is(Expression::KindOfUnaryOpExpression) &&
+      e->getLocalEffects() == Expression::UnknownEffect) {
+    return;
+  }
   if (e->is(Expression::KindOfAssignmentExpression) ||
       e->is(Expression::KindOfBinaryOpExpression) ||
       e->is(Expression::KindOfUnaryOpExpression)) {
@@ -752,6 +756,7 @@ void AliasManager::killLocals() {
         continue;
 
       case Expression::KindOfUnaryOpExpression:
+        if (e->getLocalEffects() == Expression::UnknownEffect) goto kill_it;
         cleanInterf(spc(UnaryOpExpression, e)->getExpression(),
                     ++it, end, depth);
         continue;
@@ -848,9 +853,14 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e,
       return testAccesses(e, rv, forLval);
     }
 
+    case Expression::KindOfUnaryOpExpression:
+      if (e->getLocalEffects() == Expression::UnknownEffect) {
+        isLoad = false;
+        return InterfAccess;
+      }
+      // fall through
     case Expression::KindOfAssignmentExpression:
-    case Expression::KindOfBinaryOpExpression:
-    case Expression::KindOfUnaryOpExpression: {
+    case Expression::KindOfBinaryOpExpression: {
       isLoad = false;
       ExpressionPtr var = e->getStoreVariable();
       int access = testAccesses(var, rv, forLval);
@@ -899,6 +909,10 @@ int AliasManager::checkAnyInterf(ExpressionPtr e1, ExpressionPtr e2,
     case Expression::KindOfAssignmentExpression:
     case Expression::KindOfBinaryOpExpression:
     case Expression::KindOfUnaryOpExpression:
+      if (e1->getLocalEffects() == Expression::UnknownEffect) {
+        isLoad = false;
+        return InterfAccess;
+      }
       e1 = e1->getStoreVariable();
       if (!e1 || !e1->hasContext(Expression::OprLValue)) return DisjointAccess;
       break;
@@ -1274,6 +1288,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
           }
           case Expression::KindOfUnaryOpExpression: {
             UnaryOpExpressionPtr u = spc(UnaryOpExpression, rep);
+            assert(u->getOp() == T_INC || u->getOp() == T_DEC);
             if (Option::EliminateDeadCode) {
               if (u->getActualType() && u->getActualType()->isInteger()) {
                 ExpressionPtr val = u->getExpression()->clone();
@@ -1720,7 +1735,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
                 default:
                   break;
               }
-              always_assert(alt->getKindOf() == uop->getExpression()->getKindOf());
+              always_assert(alt->getKindOf() ==
+                            uop->getExpression()->getKindOf());
               uop->getExpression()->setCanonID(alt->getCanonID());
             } else {
               uop->getExpression()->setCanonID(m_nextID++);
@@ -1729,7 +1745,11 @@ ExpressionPtr AliasManager::canonicalizeNode(
           add(m_accessList, e);
           break;
         default:
-          getCanonical(e);
+          if (uop->getLocalEffects() == Expression::UnknownEffect) {
+            add(m_accessList, e);
+          } else {
+            getCanonical(e);
+          }
           break;
       }
       break;

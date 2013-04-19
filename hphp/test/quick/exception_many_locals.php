@@ -24,6 +24,7 @@ function main() {
     $o7 = $o; // use callee saved
     $p = 5;
     $x = CONSTANT;
+    echo $x;
   } catch (Exception $e) {
     echo "Caught: " . $e->getMessage() . "\n";
   }

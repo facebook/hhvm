@@ -5,10 +5,10 @@ $nonstaticUnscoped = function () {
 };
 
 class A {
-	private static $priv = 7;
-	function readVar() {
-		A::$priv;
-	}
+  private static $priv = 7;
+  function readVar() {
+    return A::$priv;
+  }
 }
 
 (new A())->readVar();

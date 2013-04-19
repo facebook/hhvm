@@ -156,25 +156,35 @@ ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultConstPtr ar) {
 ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultConstPtr ar) {
   Symbol *sym = nullptr;
   if (m_class) updateClassName();
-  if (!m_class && m_resolvedClass && m_valid &&
-      m_exp->is(Expression::KindOfScalarExpression)) {
-    ClassScopePtr cls = ar->findExactClass(shared_from_this(), m_className);
-    if (cls && (!cls->isVolatile() || isPresent())) {
-      ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
-      const std::string &name = var->getString();
+  if (m_class || !m_resolvedClass || !m_valid ||
+      !m_exp->is(Expression::KindOfScalarExpression)) {
+    return ExpressionPtr();
+  }
 
-      sym = cls->findProperty(cls, name, ar);
-      if (sym && !sym->isIndirectAltered() && sym->isStatic()) {
-        ConstructPtr init = sym->getClassInitVal();
-        if (init) {
-          ExpressionPtr rep = dynamic_pointer_cast<Expression>(init);
-          if (rep->isScalar()) {
-            ExpressionPtr repClone = Clone(rep, getScope());
-            if (!repClone->getActualType()) {
-              repClone->setActualType(getActualType());
-            }
-            return replaceValue(repClone);
+  ClassScopePtr cls = ar->findExactClass(shared_from_this(), m_className);
+  if (!cls || (cls->isVolatile() && !isPresent())) {
+    return ExpressionPtr();
+  }
+
+  ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
+  const std::string &name = var->getString();
+
+  sym = cls->findProperty(cls, name, ar);
+  if (sym && !sym->isIndirectAltered() && sym->isStatic()) {
+    if (sym->isPrivate() ? cls == getClassScope() :
+        sym->isProtected() ?
+        getClassScope() && getClassScope()->derivesFrom(ar, cls->getName(),
+                                                        true, false) :
+        true) {
+      ConstructPtr init = sym->getClassInitVal();
+      if (init) {
+        ExpressionPtr rep = dynamic_pointer_cast<Expression>(init);
+        if (rep->isScalar()) {
+          ExpressionPtr repClone = Clone(rep, getScope());
+          if (!repClone->getActualType()) {
+            repClone->setActualType(getActualType());
           }
+          return replaceValue(repClone);
         }
       }
     }

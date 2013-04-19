@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : string gmstrftime(string format [, int timestamp])
- * Description: Format a GMT/UCT time/date according to locale settings
+ * Description: Format a GMT/UCT time/date according to locale settings 
  * Source code: ext/date/php_date.c
- * Alias to functions:
+ * Alias to functions: 
  */
 
 echo "*** Testing gmstrftime() : usage variation ***\n";
@@ -17,7 +17,7 @@ date_default_timezone_set("Asia/Calcutta");
 $inputs = array(
 	  'Year as decimal number without a century' => "%y",
 	  'Year as decimal number including the century' => "%Y",
-	  'Time zone offset' => "%Z",
+	  'Time zone offset' => "%Z",	 	
 	  'Time zone offset' => "%z",
 );
 

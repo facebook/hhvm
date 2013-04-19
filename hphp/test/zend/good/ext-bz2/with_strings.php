@@ -16,4 +16,4 @@ $tests = <<<TESTS
  \$blaat === \$blaat2
 TESTS;
 
-include(dirname(__FILE__) . '/../../../tests/quicktester.inc');
+include(dirname(__FILE__) . '//../tests/quicktester.inc');

@@ -17,7 +17,7 @@
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-
+  
   $curl_content = curl_exec($ch);
   curl_close($ch);
 

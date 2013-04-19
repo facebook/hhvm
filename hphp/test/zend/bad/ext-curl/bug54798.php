@@ -15,7 +15,7 @@ function checkForClosedFilePointer($host, $curl_option, $description) {
     }
 
 	curl_setopt($ch, $curl_option, $fp);
-
+	
 	curl_setopt($ch, CURLOPT_URL, $host);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 

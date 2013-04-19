@@ -1,13 +1,13 @@
 <?php
 /* Prototype  : array timezone_identifiers_list  ( void )
- * Description: Returns numerically index array with all timezone identifiers
+ * Description: Returns numerically index array with all timezone identifiers  
  * Source code: ext/date/php_date.c
- * Alias to functions:
+ * Alias to functions: 
  */
 
 echo "*** Testing timezone_identifiers_list() : basic functionality ***\n";
 
-//Set the default time zone
+//Set the default time zone 
 date_default_timezone_set("GMT");
 
 $zones = timezone_identifiers_list();

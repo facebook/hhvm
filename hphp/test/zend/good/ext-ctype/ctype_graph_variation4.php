@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : bool ctype_graph(mixed $c)
- * Description: Checks for any printable character(s) except space
- * Source code: ext/ctype/ctype.c
+ * Description: Checks for any printable character(s) except space 
+ * Source code: ext/ctype/ctype.c 
  */
 
 /*

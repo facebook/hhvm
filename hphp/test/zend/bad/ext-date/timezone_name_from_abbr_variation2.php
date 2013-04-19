@@ -2,12 +2,12 @@
 /* Prototype  : string timezone_name_from_abbr  ( string $abbr  [, int $gmtOffset= -1  [, int $isdst= -1  ]] )
  * Description: Returns the timezone name from abbrevation
  * Source code: ext/date/php_date.c
- * Alias to functions:
+ * Alias to functions: 
  */
 
 echo "*** Testing timezone_name_from_abbr() : usage variation -  unexpected values to second argument \$gmtOffset***\n";
 
-//Set the default time zone
+//Set the default time zone 
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -86,8 +86,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-
-      // resource
+      
+      // resource 
       'resource' => $file_handle
 );
 

@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool ctype_alpha(mixed $c)
- * Description: Checks for alphabetic character(s)
+ * Description: Checks for alphabetic character(s) 
  * Source code: ext/ctype/ctype.c
  */
 
@@ -35,7 +35,7 @@ $values = array(
        'abc123\n',
 /*20*/ 'abc 123',
        '',
-       ' ',
+       ' ', 
 /*23*/ base64_decode("w4DDoMOHw6fDiMOo") // non-ascii characters
 );
 

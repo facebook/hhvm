@@ -4,10 +4,10 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTimeZone::getOffset()
  */
-
+ 
 echo "*** Testing timezone_offset_get() : usage variation -  unexpected values to first argument \$object***\n";
 
-//Set the default time zone
+//Set the default time zone 
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -87,8 +87,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-
-      // resource
+      
+      // resource 
       'resource' => $file_handle
 );
 
@@ -96,7 +96,7 @@ $datetime = new DateTime("2009-01-31 15:14:10");
 
 foreach($inputs as $variation =>$object) {
     echo "\n-- $variation --\n";
-	var_dump( timezone_offset_get($object, $datetime) );
+   	var_dump( timezone_offset_get($object, $datetime) );
 };
 
 // closing the resource

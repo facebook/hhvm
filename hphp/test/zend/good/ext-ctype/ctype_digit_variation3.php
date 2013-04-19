@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool ctype_digit(mixed $c)
- * Description: Checks for numeric character(s)
+ * Description: Checks for numeric character(s) 
  * Source code: ext/ctype/ctype.c
  */
 
@@ -29,7 +29,7 @@ $values = array(
        '@!$*',
        "0",
 /*15*/ "3",
-       "9",
+       "9", 
        "1234",
        "7890",
        "0677",

@@ -7,7 +7,7 @@
 
 echo "*** Testing date_timezone_set() : usage variation -  unexpected values to first argument \$object***\n";
 
-//Set the default time zone
+//Set the default time zone 
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -87,8 +87,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-
-      // resource
+      
+      // resource 
       'resource' => $file_handle
 );
 

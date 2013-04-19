@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : string strftime(string format [, int timestamp])
- * Description: Format a local time/date according to locale settings
+ * Description: Format a local time/date according to locale settings 
  * Source code: ext/date/php_date.c
- * Alias to functions:
+ * Alias to functions: 
  */
 
 echo "*** Testing strftime() : usage variation ***\n";
@@ -16,7 +16,7 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 $inputs = array(
 	  'Year as decimal number without a century' => "%y",
 	  'Year as decimal number including the century' => "%Y",
-	  'Time zone offset' => "%Z",
+	  'Time zone offset' => "%Z",	 	
 	  'Time zone offset' => "%z",
 );
 

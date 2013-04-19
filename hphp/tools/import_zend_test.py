@@ -65,21 +65,40 @@ bad_tests = (
 
 no_import = (
     # these hang forever
-    '005a.php',
-    'array_012.php',
-    'array_pad_variation2.php',
-    'bug27508.php',
-    'gzgetc_basic.php',
-    'gzgets_basic.php',
-    'observer_003.php',
-    'observer_004.php',
-    'observer_005.php',
-    'observer_006.php',
-    'observer_009.php',
-    'sleep_error.php',
-    'socket_select-wrongparams-1.php',
-    'test010.php',
-    'usleep_error.php',
+    '005a.phpt',
+    'array_012.phpt',
+    'array_pad_variation2.phpt',
+    'bug27508.phpt',
+    'gzgetc_basic.phpt',
+    'gzgets_basic.phpt',
+    'observer_003.phpt',
+    'observer_004.phpt',
+    'observer_005.phpt',
+    'observer_006.phpt',
+    'observer_009.phpt',
+    'sleep_error.phpt',
+    'socket_select-wrongparams-1.phpt',
+    'test010.phpt',
+    'usleep_error.phpt',
+
+    # segfaults
+    'bz2/tests/004.phpt',
+    'date/tests/bug50055.phpt',
+    'operators/divide_basiclong_64bit.phpt',
+    'operators/modulus_basiclong_64bit.phpt',
+    'lang/bug21820.phpt',
+    'lang/func_get_arg.003.phpt',
+    'lang/func_num_args.003.phpt',
+    'lang/func_get_args.003.phpt',
+    'func/010.phpt',
+    'Zend/tests/020.phpt',
+    'Zend/tests/bug35239.phpt',
+    'Zend/tests/bug54265.phpt',
+    'Zend/tests/bug55705.phpt',
+    'Zend/tests/callable_type_hint_001.phpt',
+    'Zend/tests/callable_type_hint_003.phpt',
+    'Zend/tests/jump13.phpt',
+    'Zend/tests/heredoc_005.phpt',
 
     # not imported yet, but will be
     '/ext/exif',
@@ -159,6 +178,33 @@ no_import = (
     '/ext/zip',
 )
 
+# Random other files that zend wants
+other_files = (
+    'curl_testdata1.txt',
+    'curl_testdata2.txt',
+    'autoload_root.p5c',
+    'autoload_derived.p5c',
+    'autoload_implements.p5c',
+    'autoload_interface.p5c',
+    'constants_basic_003.inc',
+    'interface_optional_arg_003.inc',
+    '015.inc',
+    '016.inc',
+    '023-2.inc',
+    'inc.inc',
+    'inc_throw.inc',
+    'bug54804.inc',
+    'nowdoc.inc',
+    'ns_022.inc',
+    'ns_027.inc',
+    'ns_028.inc',
+    'ns_065.inc',
+    'ns_066.inc',
+    'ns_067.inc',
+    'unset.inc',
+    'quicktester.inc',
+)
+
 errors = (
     # generic inconsistencies
     ('Variable passed to ([^\s]+)\(\) is not an array or object', 'Invalid operand type was used: expecting an array'),
@@ -202,11 +248,6 @@ def mkdir_p(path):
         pass
 
 def walk(filename, source):
-    if not '.phpt' in filename:
-        return
-
-    print "Importing %s" % filename
-
     dest_filename = os.path.basename(filename).replace('.phpt', '.php')
     source_dir = source.lower().replace('/tests', '').replace('/', '-')
 
@@ -214,6 +255,12 @@ def walk(filename, source):
     dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)
     mkdir_p(dest_subdir)
     full_dest_filename = os.path.join(dest_subdir, dest_filename)
+
+    if not '.phpt' in filename:
+        shutil.copyfile(filename, full_dest_filename)
+        return
+
+    print "Importing %s" % filename
 
     def split(pattern, str):
         return re.split(r'\n\s*--'+pattern+'--\s*\n', str, 1)
@@ -317,6 +364,10 @@ def walk(filename, source):
         test = test.replace("?>", "unlink('test.php');\n?>")
     if 'bug44805.php' in full_dest_filename:
         test = test.replace("1)) {\n\tunlink($file2", "2)) {\n\tunlink($file2")
+    if 'bug24054.php' in full_dest_filename:
+        test = test.replace("quicktester.inc", "tests/quicktester.inc")
+    if 'with_strings.php' in full_dest_filename:
+        test = test.replace("../..", "")
 
     file(full_dest_filename, 'w').write(test)
 
@@ -361,7 +412,7 @@ stdout = subprocess.Popen(
         'test/zend/all',
         'interp',
         '',
-        '_bin',
+        '../_bin',
     ],
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT
@@ -370,6 +421,7 @@ stdout = subprocess.Popen(
 # segfaults also print on stderr
 stdout = re.sub('\nsh: line 1:.*', '', stdout)
 # fbmake, you are crazy
+print stdout
 results = json.loads('['+stdout.strip().replace("\n", ",\n")+']')[-1]['results']
 
 if args.verbose:
@@ -407,8 +459,21 @@ for test in results:
     file(dest_file+dest_ext, 'w').write(
         file(source_file_exp).read().replace('/all', '/' + subpath)
     )
+    os.unlink(source_file_exp)
     for f in glob.glob(delete_file+"*"):
         os.unlink(f)
+
+# extra random files needed for tests...
+for root, dirs, files in os.walk('test/zend/all'):
+    for filename in files:
+        filename = os.path.join(root, filename)
+
+        for name in other_files:
+            if name in filename:
+                dest = filename.replace('all', 'good', 1)
+                dir = os.path.dirname(dest)
+                mkdir_p(dir)
+                shutil.copyfile(filename, dest)
 
 if not args.dirty:
     shutil.rmtree('test/zend/all')

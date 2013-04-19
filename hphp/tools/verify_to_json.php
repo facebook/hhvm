@@ -17,7 +17,7 @@ if (count($argv) != 6) {
 
 $cmd = "FBMAKE_BIN_ROOT=$argv[5] $argv[1] $argv[2] -m $argv[3] $argv[4]";
 loop_tests($cmd, function ($line) {
-  if (preg_match('/^hphp\/(test[^\s]*).*/', $line, &$m)) {
+  if (preg_match('/^(?:hphp\/)?(test[^\s]*).*/', $line, &$m)) {
     start($m[1]);
     return;
   }

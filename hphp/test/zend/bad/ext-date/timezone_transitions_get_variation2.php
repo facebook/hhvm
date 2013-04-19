@@ -4,10 +4,10 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTimeZone::getTransitions()
  */
-
+ 
 echo "*** Testing timezone_transitions_get() : usage variation -  unexpected values to first argument \$timestamp_begin ***\n";
 
-//Set the default time zone
+//Set the default time zone 
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -87,8 +87,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-
-      // resource
+      
+      // resource 
       'resource' => $file_handle
 );
 
@@ -97,8 +97,8 @@ $timestamp_end = mktime(0, 0, 0, 1, 1, 1975);
 
 foreach($inputs as $variation =>$timestamp_begin) {
     echo "\n-- $variation --\n";
-	$tran =  timezone_transitions_get($tz, $timestamp_begin, $timestamp_end);
-	var_dump( gettype($tran) );
+   	$tran =  timezone_transitions_get($tz, $timestamp_begin, $timestamp_end);
+   	var_dump( gettype($tran) );
 	var_dump( count($tran) );
 };
 

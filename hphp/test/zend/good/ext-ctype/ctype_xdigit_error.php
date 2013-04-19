@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool ctype_xdigit(mixed $c)
- * Description: Checks for character(s) representing a hexadecimal digit
+ * Description: Checks for character(s) representing a hexadecimal digit 
  * Source code: ext/ctype/ctype.c
  */
 

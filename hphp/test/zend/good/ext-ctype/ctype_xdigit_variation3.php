@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool ctype_xdigit(mixed $c)
- * Description: Checks for character(s) representing a hexadecimal digit
+ * Description: Checks for character(s) representing a hexadecimal digit 
  * Source code: ext/ctype/ctype.c
  */
 
@@ -11,7 +11,7 @@
 
 echo "*** Testing ctype_xdigit() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C");
+$orig = setlocale(LC_CTYPE, "C"); 
 
 $values = array(
 /*1*/  "This string contains just letters and spaces", // Simple string
@@ -49,6 +49,6 @@ foreach($values as $value) {
       $iterator++;
 };
 
-setlocale(LC_CTYPE, $orig);
+setlocale(LC_CTYPE, $orig); 
 ?>
 ===DONE===

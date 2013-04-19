@@ -14,4 +14,4 @@ $tests = <<<TESTS
 $i === $j
 TESTS;
 
-include(dirname(__FILE__) . '/../quicktester.inc');
+include(dirname(__FILE__) . '/../tests/quicktester.inc');

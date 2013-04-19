@@ -1,10 +1,10 @@
 <?php
 /* Prototype  : DateTime date_date_set  ( DateTime $object  , int $year  , int $month  , int $day  )
- * Description: Resets the current date of the DateTime object to a different date.
+ * Description: Resets the current date of the DateTime object to a different date. 
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::setDate
  */
-
+ 
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_date_set() : error conditions ***\n";

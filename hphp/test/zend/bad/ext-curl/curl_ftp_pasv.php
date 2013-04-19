@@ -3,7 +3,7 @@
   $username = getenv('PHP_CURL_FTP_REMOTE_USER');
   $password = getenv('PHP_CURL_FTP_REMOTE_PASSWD');
 
-  // FTP this script to a server
+  // FTP this script to a server 
   $fp  =  fopen ( __FILE__ ,  "r" );
   $url  =  "ftp://$username:$password@$host/test.phpt" ;
 

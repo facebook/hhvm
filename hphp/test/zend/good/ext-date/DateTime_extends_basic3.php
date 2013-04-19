@@ -1,5 +1,5 @@
 <?php
-//Set the default time zone
+//Set the default time zone 
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing new DateTime() : with user format() method ***\n";

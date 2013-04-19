@@ -15,7 +15,7 @@
 // --------------
 
     date_default_timezone_set('Australia/Sydney');
-
+  
     $date= date_create('2007-11-04 12:00:00+0200');
     var_dump(date_format($date, 'O e'));
 ?>

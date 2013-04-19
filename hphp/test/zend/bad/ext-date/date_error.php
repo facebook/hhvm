@@ -6,7 +6,7 @@
 
 echo "*** Testing date() : error conditions ***\n";
 
-//Set the default time zone
+//Set the default time zone 
 date_default_timezone_set("America/Chicago");
 
 $format = "m.d.y";
@@ -20,4 +20,4 @@ $extra_arg = true;
 var_dump (checkdate($format, $timestamp, $extra_arg));
 
 ?>
-===DONE===
+===DONE=== 

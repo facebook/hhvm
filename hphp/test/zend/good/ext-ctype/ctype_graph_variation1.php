@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : bool ctype_graph(mixed $c)
- * Description: Checks for any printable character(s) except space
- * Source code: ext/ctype/ctype.c
+ * Description: Checks for any printable character(s) except space 
+ * Source code: ext/ctype/ctype.c 
  */
 
 /*
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-
+       
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-
+       
        // object data
 /*22*/ new classA(),
 

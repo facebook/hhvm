@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool ctype_lower(mixed $c)
- * Description: Checks for lowercase character(s)
+ * Description: Checks for lowercase character(s)  
  * Source code: ext/ctype/ctype.c
  */
 
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-
+       
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-
+       
        // object data
 /*22*/ new classA(),
 
@@ -90,7 +90,7 @@ foreach($inputs as $input) {
 };
 
 fclose($fp);
-
+ 
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===

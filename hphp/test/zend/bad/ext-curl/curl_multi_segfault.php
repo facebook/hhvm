@@ -3,7 +3,7 @@
   $username = getenv('PHP_CURL_FTP_REMOTE_USER');
   $password = getenv('PHP_CURL_FTP_REMOTE_PASSWD');
 
-  // FTP this script to a server
+  // FTP this script to a server 
   $fp  =  fopen ( __FILE__ ,  "r" );
   $url  =  "ftp://$username:$password@$host/" ;
 
@@ -32,8 +32,8 @@
 			  $mrc = curl_multi_exec($cmh, $active);
 		  } while ($mrc == CURLM_CALL_MULTI_PERFORM);
 	  }
-  }
-
+  }   
+    
   var_dump(is_string(curl_multi_getcontent($ch)));
   curl_multi_remove_handle($cmh, $ch);
   curl_close($ch);

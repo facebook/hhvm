@@ -14,85 +14,59 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/ext_hhvm/ext_hhvm.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/ext/ext.h>
-#include <runtime/vm/class.h>
-#include <runtime/vm/runtime.h>
+
+#include "runtime/ext_hhvm/ext_hhvm.h"
+#include "runtime/base/builtin_functions.h"
+#include "runtime/base/array/array_init.h"
+#include "runtime/ext/ext.h"
+#include "runtime/vm/class.h"
+#include "runtime/vm/runtime.h"
 #include <exception>
 
 namespace HPHP {
 
-/*
-long HPHP::f_ftok(HPHP::String const&, HPHP::String const&)
-_ZN4HPHP6f_ftokERKNS_6StringES2_
-
-(return value) => rax
-pathname => rdi
-proj => rsi
-*/
-
 long fh_ftok(Value* pathname, Value* proj) asm("_ZN4HPHP6f_ftokERKNS_6StringES2_");
 
-TypedValue * fg1_ftok(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_ftok(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_ftok(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_ftok(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfInt64;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
   }
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
+  rv->m_type = KindOfInt64;
   rv->m_data.num = (int64_t)fh_ftok(&args[-0].m_data, &args[-1].m_data);
-  return rv;
 }
 
-TypedValue* fg_ftok(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 2LL) {
-      if (IS_STRING_TYPE((args-1)->m_type) && IS_STRING_TYPE((args-0)->m_type)) {
-        rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)fh_ftok(&args[-0].m_data, &args[-1].m_data);
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_ftok(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_ftok(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 2) {
+    if (IS_STRING_TYPE((args - 1)->m_type) &&
+        IS_STRING_TYPE((args - 0)->m_type)) {
+      rv->m_type = KindOfInt64;
+      rv->m_data.num = (int64_t)fh_ftok(&args[-0].m_data, &args[-1].m_data);
     } else {
-      throw_wrong_arguments_nr("ftok", count, 2, 2, 1);
+      fg1_ftok(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("ftok", count, 2, 2, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-
-
-/*
-HPHP::Variant HPHP::f_msg_get_queue(long, long)
-_ZN4HPHP15f_msg_get_queueEll
-
-(return value) => rax
-_rv => rdi
-key => rsi
-perms => rdx
-*/
-
 TypedValue* fh_msg_get_queue(TypedValue* _rv, long key, long perms) asm("_ZN4HPHP15f_msg_get_queueEll");
 
-TypedValue * fg1_msg_get_queue(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_msg_get_queue(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_msg_get_queue(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_msg_get_queue(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -105,109 +79,174 @@ TypedValue * fg1_msg_get_queue(TypedValue* rv, ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  fh_msg_get_queue((rv), (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0666));
+  fh_msg_get_queue(rv, (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0666));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* fg_msg_get_queue(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count >= 1LL && count <= 2LL) {
-      if ((count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfInt64) {
-        fh_msg_get_queue((&(rv)), (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0666));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_msg_get_queue(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_msg_get_queue(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count >= 1 && count <= 2) {
+    if ((count <= 1 || (args - 1)->m_type == KindOfInt64) &&
+        (args - 0)->m_type == KindOfInt64) {
+      fh_msg_get_queue(rv, (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0666));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_wrong_arguments_nr("msg_get_queue", count, 1, 2, 1);
+      fg1_msg_get_queue(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("msg_get_queue", count, 1, 2, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-
-
-/*
-bool HPHP::f_msg_queue_exists(long)
-_ZN4HPHP18f_msg_queue_existsEl
-
-(return value) => rax
-key => rdi
-*/
 
 bool fh_msg_queue_exists(long key) asm("_ZN4HPHP18f_msg_queue_existsEl");
 
-TypedValue * fg1_msg_queue_exists(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_msg_queue_exists(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_msg_queue_exists(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_msg_queue_exists(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
+  rv->m_type = KindOfBoolean;
   rv->m_data.num = (fh_msg_queue_exists((long)(args[-0].m_data.num))) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* fg_msg_queue_exists(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if ((args-0)->m_type == KindOfInt64) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_msg_queue_exists((long)(args[-0].m_data.num))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_msg_queue_exists(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_msg_queue_exists(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 1) {
+    if ((args - 0)->m_type == KindOfInt64) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (fh_msg_queue_exists((long)(args[-0].m_data.num))) ? 1LL : 0LL;
     } else {
-      throw_wrong_arguments_nr("msg_queue_exists", count, 1, 1, 1);
+      fg1_msg_queue_exists(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("msg_queue_exists", count, 1, 1, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
+bool fh_msg_remove_queue(Value* queue) asm("_ZN4HPHP18f_msg_remove_queueERKNS_6ObjectE");
 
+void fg1_msg_remove_queue(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_msg_remove_queue(TypedValue* rv, ActRec* ar, int32_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToObjectInPlace(args-0);
+  rv->m_type = KindOfBoolean;
+  rv->m_data.num = (fh_msg_remove_queue(&args[-0].m_data)) ? 1LL : 0LL;
+}
 
-/*
-bool HPHP::f_msg_send(HPHP::Object const&, long, HPHP::Variant const&, bool, bool, HPHP::VRefParamValue const&)
-_ZN4HPHP10f_msg_sendERKNS_6ObjectElRKNS_7VariantEbbRKNS_14VRefParamValueE
+TypedValue* fg_msg_remove_queue(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 1) {
+    if ((args - 0)->m_type == KindOfObject) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (fh_msg_remove_queue(&args[-0].m_data)) ? 1LL : 0LL;
+    } else {
+      fg1_msg_remove_queue(rv, ar, count);
+    }
+  } else {
+    throw_wrong_arguments_nr("msg_remove_queue", count, 1, 1, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
+  return &ar->m_r;
+}
 
-(return value) => rax
-queue => rdi
-msgtype => rsi
-message => rdx
-serialize => rcx
-blocking => r8
-errorcode => r9
-*/
+bool fh_msg_set_queue(Value* queue, Value* data) asm("_ZN4HPHP15f_msg_set_queueERKNS_6ObjectERKNS_5ArrayE");
+
+void fg1_msg_set_queue(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_msg_set_queue(TypedValue* rv, ActRec* ar, int32_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if ((args-1)->m_type != KindOfArray) {
+    tvCastToArrayInPlace(args-1);
+  }
+  if ((args-0)->m_type != KindOfObject) {
+    tvCastToObjectInPlace(args-0);
+  }
+  rv->m_type = KindOfBoolean;
+  rv->m_data.num = (fh_msg_set_queue(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
+}
+
+TypedValue* fg_msg_set_queue(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 2) {
+    if ((args - 1)->m_type == KindOfArray &&
+        (args - 0)->m_type == KindOfObject) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (fh_msg_set_queue(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
+    } else {
+      fg1_msg_set_queue(rv, ar, count);
+    }
+  } else {
+    throw_wrong_arguments_nr("msg_set_queue", count, 2, 2, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
+  return &ar->m_r;
+}
+
+Value* fh_msg_stat_queue(Value* _rv, Value* queue) asm("_ZN4HPHP16f_msg_stat_queueERKNS_6ObjectE");
+
+void fg1_msg_stat_queue(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_msg_stat_queue(TypedValue* rv, ActRec* ar, int32_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToObjectInPlace(args-0);
+  rv->m_type = KindOfArray;
+  fh_msg_stat_queue(&(rv->m_data), &args[-0].m_data);
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+}
+
+TypedValue* fg_msg_stat_queue(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 1) {
+    if ((args - 0)->m_type == KindOfObject) {
+      rv->m_type = KindOfArray;
+      fh_msg_stat_queue(&(rv->m_data), &args[-0].m_data);
+      if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+    } else {
+      fg1_msg_stat_queue(rv, ar, count);
+    }
+  } else {
+    throw_wrong_arguments_nr("msg_stat_queue", count, 1, 1, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
+  return &ar->m_r;
+}
 
 bool fh_msg_send(Value* queue, long msgtype, TypedValue* message, bool serialize, bool blocking, TypedValue* errorcode) asm("_ZN4HPHP10f_msg_sendERKNS_6ObjectElRKNS_7VariantEbbRKNS_14VRefParamValueE");
 
-TypedValue * fg1_msg_send(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_msg_send(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_msg_send(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_msg_send(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 6
   case 5:
@@ -227,63 +266,42 @@ TypedValue * fg1_msg_send(TypedValue* rv, ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
+  rv->m_type = KindOfBoolean;
   VRefParamValue defVal5 = uninit_null();
   rv->m_data.num = (fh_msg_send(&args[-0].m_data, (long)(args[-1].m_data.num), (args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(true), (count > 5) ? (args-5) : (TypedValue*)(&defVal5))) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* fg_msg_send(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count >= 3LL && count <= 6LL) {
-      if ((count <= 4 || (args-4)->m_type == KindOfBoolean) && (count <= 3 || (args-3)->m_type == KindOfBoolean) && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv.m_type = KindOfBoolean;
-        VRefParamValue defVal5 = uninit_null();
-        rv.m_data.num = (fh_msg_send(&args[-0].m_data, (long)(args[-1].m_data.num), (args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(true), (count > 5) ? (args-5) : (TypedValue*)(&defVal5))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 6);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_msg_send(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 6);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_msg_send(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count >= 3 && count <= 6) {
+    if ((count <= 4 || (args - 4)->m_type == KindOfBoolean) &&
+        (count <= 3 || (args - 3)->m_type == KindOfBoolean) &&
+        (args - 1)->m_type == KindOfInt64 &&
+        (args - 0)->m_type == KindOfObject) {
+      rv->m_type = KindOfBoolean;
+      VRefParamValue defVal5 = uninit_null();
+      rv->m_data.num = (fh_msg_send(&args[-0].m_data, (long)(args[-1].m_data.num), (args-2), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true), (count > 4) ? (bool)(args[-4].m_data.num) : (bool)(true), (count > 5) ? (args-5) : (TypedValue*)(&defVal5))) ? 1LL : 0LL;
     } else {
-      throw_wrong_arguments_nr("msg_send", count, 3, 6, 1);
+      fg1_msg_send(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 6);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("msg_send", count, 3, 6, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 6);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-
-
-/*
-bool HPHP::f_msg_receive(HPHP::Object const&, long, HPHP::VRefParamValue const&, long, HPHP::VRefParamValue const&, bool, long, HPHP::VRefParamValue const&)
-_ZN4HPHP13f_msg_receiveERKNS_6ObjectElRKNS_14VRefParamValueElS5_blS5_
-
-(return value) => rax
-queue => rdi
-desiredmsgtype => rsi
-msgtype => rdx
-maxsize => rcx
-message => r8
-unserialize => r9
-flags => st0
-errorcode => st8
-*/
-
 bool fh_msg_receive(Value* queue, long desiredmsgtype, TypedValue* msgtype, long maxsize, TypedValue* message, bool unserialize, long flags, TypedValue* errorcode) asm("_ZN4HPHP13f_msg_receiveERKNS_6ObjectElRKNS_14VRefParamValueElS5_blS5_");
 
-TypedValue * fg1_msg_receive(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_msg_receive(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_msg_receive(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_msg_receive(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 8
   case 7:
@@ -306,263 +324,106 @@ TypedValue * fg1_msg_receive(TypedValue* rv, ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-0);
   }
+  rv->m_type = KindOfBoolean;
   VRefParamValue defVal7 = uninit_null();
   rv->m_data.num = (fh_msg_receive(&args[-0].m_data, (long)(args[-1].m_data.num), (args-2), (long)(args[-3].m_data.num), (args-4), (count > 5) ? (bool)(args[-5].m_data.num) : (bool)(true), (count > 6) ? (long)(args[-6].m_data.num) : (long)(0), (count > 7) ? (args-7) : (TypedValue*)(&defVal7))) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* fg_msg_receive(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count >= 5LL && count <= 8LL) {
-      if ((count <= 6 || (args-6)->m_type == KindOfInt64) && (count <= 5 || (args-5)->m_type == KindOfBoolean) && (args-3)->m_type == KindOfInt64 && (args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfObject) {
-        rv.m_type = KindOfBoolean;
-        VRefParamValue defVal7 = uninit_null();
-        rv.m_data.num = (fh_msg_receive(&args[-0].m_data, (long)(args[-1].m_data.num), (args-2), (long)(args[-3].m_data.num), (args-4), (count > 5) ? (bool)(args[-5].m_data.num) : (bool)(true), (count > 6) ? (long)(args[-6].m_data.num) : (long)(0), (count > 7) ? (args-7) : (TypedValue*)(&defVal7))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 8);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_msg_receive(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 8);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
-    } else {
-      throw_wrong_arguments_nr("msg_receive", count, 5, 8, 1);
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 8);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-
-
-/*
-bool HPHP::f_msg_remove_queue(HPHP::Object const&)
-_ZN4HPHP18f_msg_remove_queueERKNS_6ObjectE
-
-(return value) => rax
-queue => rdi
-*/
-
-bool fh_msg_remove_queue(Value* queue) asm("_ZN4HPHP18f_msg_remove_queueERKNS_6ObjectE");
-
-TypedValue * fg1_msg_remove_queue(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_msg_remove_queue(TypedValue* rv, ActRec* ar, int64_t count) {
+TypedValue* fg_msg_receive(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
-  tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_msg_remove_queue(&args[-0].m_data)) ? 1LL : 0LL;
-  return rv;
-}
-
-TypedValue* fg_msg_remove_queue(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if ((args-0)->m_type == KindOfObject) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_msg_remove_queue(&args[-0].m_data)) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_msg_remove_queue(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+  if (count >= 5 && count <= 8) {
+    if ((count <= 6 || (args - 6)->m_type == KindOfInt64) &&
+        (count <= 5 || (args - 5)->m_type == KindOfBoolean) &&
+        (args - 3)->m_type == KindOfInt64 &&
+        (args - 1)->m_type == KindOfInt64 &&
+        (args - 0)->m_type == KindOfObject) {
+      rv->m_type = KindOfBoolean;
+      VRefParamValue defVal7 = uninit_null();
+      rv->m_data.num = (fh_msg_receive(&args[-0].m_data, (long)(args[-1].m_data.num), (args-2), (long)(args[-3].m_data.num), (args-4), (count > 5) ? (bool)(args[-5].m_data.num) : (bool)(true), (count > 6) ? (long)(args[-6].m_data.num) : (long)(0), (count > 7) ? (args-7) : (TypedValue*)(&defVal7))) ? 1LL : 0LL;
     } else {
-      throw_wrong_arguments_nr("msg_remove_queue", count, 1, 1, 1);
+      fg1_msg_receive(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-
-
-/*
-bool HPHP::f_msg_set_queue(HPHP::Object const&, HPHP::Array const&)
-_ZN4HPHP15f_msg_set_queueERKNS_6ObjectERKNS_5ArrayE
-
-(return value) => rax
-queue => rdi
-data => rsi
-*/
-
-bool fh_msg_set_queue(Value* queue, Value* data) asm("_ZN4HPHP15f_msg_set_queueERKNS_6ObjectERKNS_5ArrayE");
-
-TypedValue * fg1_msg_set_queue(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_msg_set_queue(TypedValue* rv, ActRec* ar, int64_t count) {
-  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
-  if ((args-1)->m_type != KindOfArray) {
-    tvCastToArrayInPlace(args-1);
+  } else {
+    throw_wrong_arguments_nr("msg_receive", count, 5, 8, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
   }
-  if ((args-0)->m_type != KindOfObject) {
-    tvCastToObjectInPlace(args-0);
-  }
-  rv->m_data.num = (fh_msg_set_queue(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
-  return rv;
-}
-
-TypedValue* fg_msg_set_queue(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 2LL) {
-      if ((args-1)->m_type == KindOfArray && (args-0)->m_type == KindOfObject) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_msg_set_queue(&args[-0].m_data, &args[-1].m_data)) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_msg_set_queue(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
-    } else {
-      throw_wrong_arguments_nr("msg_set_queue", count, 2, 2, 1);
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  frame_free_locals_no_this_inl(ar, 8);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-
-
-/*
-HPHP::Array HPHP::f_msg_stat_queue(HPHP::Object const&)
-_ZN4HPHP16f_msg_stat_queueERKNS_6ObjectE
-
-(return value) => rax
-_rv => rdi
-queue => rsi
-*/
-
-Value* fh_msg_stat_queue(Value* _rv, Value* queue) asm("_ZN4HPHP16f_msg_stat_queueERKNS_6ObjectE");
-
-TypedValue * fg1_msg_stat_queue(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_msg_stat_queue(TypedValue* rv, ActRec* ar, int64_t count) {
-  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfArray;
-  tvCastToObjectInPlace(args-0);
-  fh_msg_stat_queue((&rv->m_data), &args[-0].m_data);
-  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
-  return rv;
-}
-
-TypedValue* fg_msg_stat_queue(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if ((args-0)->m_type == KindOfObject) {
-        rv.m_type = KindOfArray;
-        fh_msg_stat_queue((&rv.m_data), &args[-0].m_data);
-        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_msg_stat_queue(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
-    } else {
-      throw_wrong_arguments_nr("msg_stat_queue", count, 1, 1, 1);
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-
-
-/*
-bool HPHP::f_sem_acquire(HPHP::Object const&)
-_ZN4HPHP13f_sem_acquireERKNS_6ObjectE
-
-(return value) => rax
-sem_identifier => rdi
-*/
 
 bool fh_sem_acquire(Value* sem_identifier) asm("_ZN4HPHP13f_sem_acquireERKNS_6ObjectE");
 
-TypedValue * fg1_sem_acquire(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_sem_acquire(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_sem_acquire(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_sem_acquire(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
+  rv->m_type = KindOfBoolean;
   rv->m_data.num = (fh_sem_acquire(&args[-0].m_data)) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* fg_sem_acquire(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if ((args-0)->m_type == KindOfObject) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_sem_acquire(&args[-0].m_data)) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_sem_acquire(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_sem_acquire(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 1) {
+    if ((args - 0)->m_type == KindOfObject) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (fh_sem_acquire(&args[-0].m_data)) ? 1LL : 0LL;
     } else {
-      throw_wrong_arguments_nr("sem_acquire", count, 1, 1, 1);
+      fg1_sem_acquire(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("sem_acquire", count, 1, 1, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
+bool fh_sem_release(Value* sem_identifier) asm("_ZN4HPHP13f_sem_releaseERKNS_6ObjectE");
 
+void fg1_sem_release(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_sem_release(TypedValue* rv, ActRec* ar, int32_t count) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToObjectInPlace(args-0);
+  rv->m_type = KindOfBoolean;
+  rv->m_data.num = (fh_sem_release(&args[-0].m_data)) ? 1LL : 0LL;
+}
 
-/*
-HPHP::Variant HPHP::f_sem_get(long, long, long, bool)
-_ZN4HPHP9f_sem_getElllb
-
-(return value) => rax
-_rv => rdi
-key => rsi
-max_acquire => rdx
-perm => rcx
-auto_release => r8
-*/
+TypedValue* fg_sem_release(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 1) {
+    if ((args - 0)->m_type == KindOfObject) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (fh_sem_release(&args[-0].m_data)) ? 1LL : 0LL;
+    } else {
+      fg1_sem_release(rv, ar, count);
+    }
+  } else {
+    throw_wrong_arguments_nr("sem_release", count, 1, 1, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
+  return &ar->m_r;
+}
 
 TypedValue* fh_sem_get(TypedValue* _rv, long key, long max_acquire, long perm, bool auto_release) asm("_ZN4HPHP9f_sem_getElllb");
 
-TypedValue * fg1_sem_get(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_sem_get(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_sem_get(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_sem_get(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -583,154 +444,71 @@ TypedValue * fg1_sem_get(TypedValue* rv, ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  fh_sem_get((rv), (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0666), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
+  fh_sem_get(rv, (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0666), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* fg_sem_get(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count >= 1LL && count <= 4LL) {
-      if ((count <= 3 || (args-3)->m_type == KindOfBoolean) && (count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfInt64) {
-        fh_sem_get((&(rv)), (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0666), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 4);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_sem_get(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 4);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
-    } else {
-      throw_wrong_arguments_nr("sem_get", count, 1, 4, 1);
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 4);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-
-
-/*
-bool HPHP::f_sem_release(HPHP::Object const&)
-_ZN4HPHP13f_sem_releaseERKNS_6ObjectE
-
-(return value) => rax
-sem_identifier => rdi
-*/
-
-bool fh_sem_release(Value* sem_identifier) asm("_ZN4HPHP13f_sem_releaseERKNS_6ObjectE");
-
-TypedValue * fg1_sem_release(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_sem_release(TypedValue* rv, ActRec* ar, int64_t count) {
+TypedValue* fg_sem_get(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
-  tvCastToObjectInPlace(args-0);
-  rv->m_data.num = (fh_sem_release(&args[-0].m_data)) ? 1LL : 0LL;
-  return rv;
-}
-
-TypedValue* fg_sem_release(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if ((args-0)->m_type == KindOfObject) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_sem_release(&args[-0].m_data)) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_sem_release(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+  if (count >= 1 && count <= 4) {
+    if ((count <= 3 || (args - 3)->m_type == KindOfBoolean) &&
+        (count <= 2 || (args - 2)->m_type == KindOfInt64) &&
+        (count <= 1 || (args - 1)->m_type == KindOfInt64) &&
+        (args - 0)->m_type == KindOfInt64) {
+      fh_sem_get(rv, (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0666), (count > 3) ? (bool)(args[-3].m_data.num) : (bool)(true));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_wrong_arguments_nr("sem_release", count, 1, 1, 1);
+      fg1_sem_get(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("sem_get", count, 1, 4, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 4);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-
-
-/*
-bool HPHP::f_sem_remove(HPHP::Object const&)
-_ZN4HPHP12f_sem_removeERKNS_6ObjectE
-
-(return value) => rax
-sem_identifier => rdi
-*/
 
 bool fh_sem_remove(Value* sem_identifier) asm("_ZN4HPHP12f_sem_removeERKNS_6ObjectE");
 
-TypedValue * fg1_sem_remove(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_sem_remove(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_sem_remove(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_sem_remove(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
+  rv->m_type = KindOfBoolean;
   rv->m_data.num = (fh_sem_remove(&args[-0].m_data)) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* fg_sem_remove(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if ((args-0)->m_type == KindOfObject) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_sem_remove(&args[-0].m_data)) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_sem_remove(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_sem_remove(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 1) {
+    if ((args - 0)->m_type == KindOfObject) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (fh_sem_remove(&args[-0].m_data)) ? 1LL : 0LL;
     } else {
-      throw_wrong_arguments_nr("sem_remove", count, 1, 1, 1);
+      fg1_sem_remove(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("sem_remove", count, 1, 1, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-
-
-/*
-HPHP::Variant HPHP::f_shm_attach(long, long, long)
-_ZN4HPHP12f_shm_attachElll
-
-(return value) => rax
-_rv => rdi
-shm_key => rsi
-shm_size => rdx
-shm_flag => rcx
-*/
-
 TypedValue* fh_shm_attach(TypedValue* _rv, long shm_key, long shm_size, long shm_flag) asm("_ZN4HPHP12f_shm_attachElll");
 
-TypedValue * fg1_shm_attach(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_shm_attach(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_shm_attach(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_shm_attach(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -747,153 +525,102 @@ TypedValue * fg1_shm_attach(TypedValue* rv, ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  fh_shm_attach((rv), (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(10000), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0666));
+  fh_shm_attach(rv, (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(10000), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0666));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* fg_shm_attach(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count >= 1LL && count <= 3LL) {
-      if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && (args-0)->m_type == KindOfInt64) {
-        fh_shm_attach((&(rv)), (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(10000), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0666));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 3);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_shm_attach(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 3);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_shm_attach(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count >= 1 && count <= 3) {
+    if ((count <= 2 || (args - 2)->m_type == KindOfInt64) &&
+        (count <= 1 || (args - 1)->m_type == KindOfInt64) &&
+        (args - 0)->m_type == KindOfInt64) {
+      fh_shm_attach(rv, (long)(args[-0].m_data.num), (count > 1) ? (long)(args[-1].m_data.num) : (long)(10000), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0666));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_wrong_arguments_nr("shm_attach", count, 1, 3, 1);
+      fg1_shm_attach(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 3);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("shm_attach", count, 1, 3, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 3);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-
-
-/*
-bool HPHP::f_shm_detach(long)
-_ZN4HPHP12f_shm_detachEl
-
-(return value) => rax
-shm_identifier => rdi
-*/
 
 bool fh_shm_detach(long shm_identifier) asm("_ZN4HPHP12f_shm_detachEl");
 
-TypedValue * fg1_shm_detach(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_shm_detach(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_shm_detach(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_shm_detach(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
+  rv->m_type = KindOfBoolean;
   rv->m_data.num = (fh_shm_detach((long)(args[-0].m_data.num))) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* fg_shm_detach(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if ((args-0)->m_type == KindOfInt64) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_shm_detach((long)(args[-0].m_data.num))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_shm_detach(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_shm_detach(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 1) {
+    if ((args - 0)->m_type == KindOfInt64) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (fh_shm_detach((long)(args[-0].m_data.num))) ? 1LL : 0LL;
     } else {
-      throw_wrong_arguments_nr("shm_detach", count, 1, 1, 1);
+      fg1_shm_detach(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("shm_detach", count, 1, 1, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-
-
-/*
-bool HPHP::f_shm_remove(long)
-_ZN4HPHP12f_shm_removeEl
-
-(return value) => rax
-shm_identifier => rdi
-*/
 
 bool fh_shm_remove(long shm_identifier) asm("_ZN4HPHP12f_shm_removeEl");
 
-TypedValue * fg1_shm_remove(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_shm_remove(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_shm_remove(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_shm_remove(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
+  rv->m_type = KindOfBoolean;
   rv->m_data.num = (fh_shm_remove((long)(args[-0].m_data.num))) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* fg_shm_remove(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if ((args-0)->m_type == KindOfInt64) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_shm_remove((long)(args[-0].m_data.num))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_shm_remove(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_shm_remove(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 1) {
+    if ((args - 0)->m_type == KindOfInt64) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (fh_shm_remove((long)(args[-0].m_data.num))) ? 1LL : 0LL;
     } else {
-      throw_wrong_arguments_nr("shm_remove", count, 1, 1, 1);
+      fg1_shm_remove(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("shm_remove", count, 1, 1, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-
-
-/*
-HPHP::Variant HPHP::f_shm_get_var(long, long)
-_ZN4HPHP13f_shm_get_varEll
-
-(return value) => rax
-_rv => rdi
-shm_identifier => rsi
-variable_key => rdx
-*/
 
 TypedValue* fh_shm_get_var(TypedValue* _rv, long shm_identifier, long variable_key) asm("_ZN4HPHP13f_shm_get_varEll");
 
-TypedValue * fg1_shm_get_var(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_shm_get_var(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_shm_get_var(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_shm_get_var(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -901,207 +628,145 @@ TypedValue * fg1_shm_get_var(TypedValue* rv, ActRec* ar, int64_t count) {
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  fh_shm_get_var((rv), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num));
+  fh_shm_get_var(rv, (long)(args[-0].m_data.num), (long)(args[-1].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* fg_shm_get_var(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 2LL) {
-      if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-        fh_shm_get_var((&(rv)), (long)(args[-0].m_data.num), (long)(args[-1].m_data.num));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_shm_get_var(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_shm_get_var(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 2) {
+    if ((args - 1)->m_type == KindOfInt64 &&
+        (args - 0)->m_type == KindOfInt64) {
+      fh_shm_get_var(rv, (long)(args[-0].m_data.num), (long)(args[-1].m_data.num));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_wrong_arguments_nr("shm_get_var", count, 2, 2, 1);
+      fg1_shm_get_var(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("shm_get_var", count, 2, 2, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-
-
-/*
-bool HPHP::f_shm_has_var(long, long)
-_ZN4HPHP13f_shm_has_varEll
-
-(return value) => rax
-shm_identifier => rdi
-variable_key => rsi
-*/
 
 bool fh_shm_has_var(long shm_identifier, long variable_key) asm("_ZN4HPHP13f_shm_has_varEll");
 
-TypedValue * fg1_shm_has_var(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_shm_has_var(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_shm_has_var(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_shm_has_var(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
   }
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
+  rv->m_type = KindOfBoolean;
   rv->m_data.num = (fh_shm_has_var((long)(args[-0].m_data.num), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* fg_shm_has_var(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 2LL) {
-      if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_shm_has_var((long)(args[-0].m_data.num), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_shm_has_var(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_shm_has_var(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 2) {
+    if ((args - 1)->m_type == KindOfInt64 &&
+        (args - 0)->m_type == KindOfInt64) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (fh_shm_has_var((long)(args[-0].m_data.num), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
     } else {
-      throw_wrong_arguments_nr("shm_has_var", count, 2, 2, 1);
+      fg1_shm_has_var(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("shm_has_var", count, 2, 2, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-
-
-/*
-bool HPHP::f_shm_put_var(long, long, HPHP::Variant const&)
-_ZN4HPHP13f_shm_put_varEllRKNS_7VariantE
-
-(return value) => rax
-shm_identifier => rdi
-variable_key => rsi
-variable => rdx
-*/
 
 bool fh_shm_put_var(long shm_identifier, long variable_key, TypedValue* variable) asm("_ZN4HPHP13f_shm_put_varEllRKNS_7VariantE");
 
-TypedValue * fg1_shm_put_var(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_shm_put_var(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_shm_put_var(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_shm_put_var(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
   }
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
+  rv->m_type = KindOfBoolean;
   rv->m_data.num = (fh_shm_put_var((long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* fg_shm_put_var(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 3LL) {
-      if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_shm_put_var((long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 3);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_shm_put_var(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 3);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_shm_put_var(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 3) {
+    if ((args - 1)->m_type == KindOfInt64 &&
+        (args - 0)->m_type == KindOfInt64) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (fh_shm_put_var((long)(args[-0].m_data.num), (long)(args[-1].m_data.num), (args-2))) ? 1LL : 0LL;
     } else {
-      throw_wrong_arguments_nr("shm_put_var", count, 3, 3, 1);
+      fg1_shm_put_var(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 3);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("shm_put_var", count, 3, 3, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 3);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-
-
-/*
-bool HPHP::f_shm_remove_var(long, long)
-_ZN4HPHP16f_shm_remove_varEll
-
-(return value) => rax
-shm_identifier => rdi
-variable_key => rsi
-*/
 
 bool fh_shm_remove_var(long shm_identifier, long variable_key) asm("_ZN4HPHP16f_shm_remove_varEll");
 
-TypedValue * fg1_shm_remove_var(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_shm_remove_var(TypedValue* rv, ActRec* ar, int64_t count) {
+void fg1_shm_remove_var(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void fg1_shm_remove_var(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
   }
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
+  rv->m_type = KindOfBoolean;
   rv->m_data.num = (fh_shm_remove_var((long)(args[-0].m_data.num), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* fg_shm_remove_var(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 2LL) {
-      if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (fh_shm_remove_var((long)(args[-0].m_data.num), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        fg1_shm_remove_var(&rv, ar, count);
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* fg_shm_remove_var(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 2) {
+    if ((args - 1)->m_type == KindOfInt64 &&
+        (args - 0)->m_type == KindOfInt64) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (fh_shm_remove_var((long)(args[-0].m_data.num), (long)(args[-1].m_data.num))) ? 1LL : 0LL;
     } else {
-      throw_wrong_arguments_nr("shm_remove_var", count, 2, 2, 1);
+      fg1_shm_remove_var(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("shm_remove_var", count, 2, 2, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-
-
-
-} // !HPHP
-
+} // namespace HPHP

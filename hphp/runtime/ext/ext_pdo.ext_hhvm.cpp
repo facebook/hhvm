@@ -14,48 +14,37 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/ext_hhvm/ext_hhvm.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/ext/ext.h>
-#include <runtime/vm/class.h>
-#include <runtime/vm/runtime.h>
+
+#include "runtime/ext_hhvm/ext_hhvm.h"
+#include "runtime/base/builtin_functions.h"
+#include "runtime/base/array/array_init.h"
+#include "runtime/ext/ext.h"
+#include "runtime/vm/class.h"
+#include "runtime/vm/runtime.h"
 #include <exception>
 
 namespace HPHP {
 
-/*
-HPHP::Array HPHP::f_pdo_drivers()
-_ZN4HPHP13f_pdo_driversEv
-
-(return value) => rax
-_rv => rdi
-*/
-
 Value* fh_pdo_drivers(Value* _rv) asm("_ZN4HPHP13f_pdo_driversEv");
 
-TypedValue* fg_pdo_drivers(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 0LL) {
-      rv.m_type = KindOfArray;
-      fh_pdo_drivers((&rv.m_data));
-      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
-      frame_free_locals_no_this_inl(ar, 0);
-      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-      return &ar->m_r;
-    } else {
-      throw_toomany_arguments_nr("pdo_drivers", 0, 1);
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+TypedValue* fg_pdo_drivers(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  if (count == 0) {
+    rv->m_type = KindOfArray;
+    fh_pdo_drivers(&(rv->m_data));
+    if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  } else {
+    throw_toomany_arguments_nr("pdo_drivers", 0, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
 
 
 HPHP::VM::Instance* new_PDO_Instance(HPHP::VM::Class* cls) {
@@ -68,24 +57,11 @@ HPHP::VM::Instance* new_PDO_Instance(HPHP::VM::Class* cls) {
 }
 
 IMPLEMENT_CLASS(PDO);
-/*
-void HPHP::c_PDO::t___construct(HPHP::String const&, HPHP::String const&, HPHP::String const&, HPHP::Array const&)
-_ZN4HPHP5c_PDO13t___constructERKNS_6StringES3_S3_RKNS_5ArrayE
-
-this_ => rdi
-dsn => rsi
-username => rdx
-password => rcx
-options => r8
-*/
-
 void th_3PDO___construct(ObjectData* this_, Value* dsn, Value* username, Value* password, Value* options) asm("_ZN4HPHP5c_PDO13t___constructERKNS_6StringES3_S3_RKNS_5ArrayE");
 
-TypedValue* tg1_3PDO___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_3PDO___construct(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_3PDO___construct(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_data.num = 0LL;
-  rv->m_type = KindOfNull;
   switch (count) {
   default: // count >= 4
     if ((args-3)->m_type != KindOfArray) {
@@ -105,59 +81,81 @@ TypedValue* tg1_3PDO___construct(TypedValue* rv, ActRec* ar, int64_t count, Obje
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
+  rv->m_type = KindOfNull;
   th_3PDO___construct((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_array));
-  return rv;
 }
 
-TypedValue* tg_3PDO___construct(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count >= 1LL && count <= 4LL) {
-        if ((count <= 3 || (args-3)->m_type == KindOfArray) && (count <= 2 || IS_STRING_TYPE((args-2)->m_type)) && (count <= 1 || IS_STRING_TYPE((args-1)->m_type)) && IS_STRING_TYPE((args-0)->m_type)) {
-          rv.m_data.num = 0LL;
-          rv.m_type = KindOfNull;
-          th_3PDO___construct((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_array));
-          frame_free_locals_inl(ar, 4);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_3PDO___construct(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 4);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_3PDO___construct(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count >= 1 && count <= 4) {
+      if ((count <= 3 || (args - 3)->m_type == KindOfArray) &&
+          (count <= 2 || IS_STRING_TYPE((args - 2)->m_type)) &&
+          (count <= 1 || IS_STRING_TYPE((args - 1)->m_type)) &&
+          IS_STRING_TYPE((args - 0)->m_type)) {
+        rv->m_type = KindOfNull;
+        th_3PDO___construct((this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_string), (count > 2) ? &args[-2].m_data : (Value*)(&null_string), (count > 3) ? &args[-3].m_data : (Value*)(&null_array));
       } else {
-        throw_wrong_arguments_nr("PDO::__construct", count, 1, 4, 1);
+        tg1_3PDO___construct(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDO::__construct");
+      throw_wrong_arguments_nr("PDO::__construct", count, 1, 4, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 4);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::__construct");
+  }
+  frame_free_locals_inl(ar, 4);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_PDO::t_prepare(HPHP::String const&, HPHP::Array const&)
-_ZN4HPHP5c_PDO9t_prepareERKNS_6StringERKNS_5ArrayE
+bool th_3PDO_setattribute(ObjectData* this_, long attribute, TypedValue* value) asm("_ZN4HPHP5c_PDO14t_setattributeElRKNS_7VariantE");
 
-(return value) => rax
-_rv => rdi
-this_ => rsi
-statement => rdx
-options => rcx
-*/
+void tg1_3PDO_setattribute(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_3PDO_setattribute(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  tvCastToInt64InPlace(args-0);
+  rv->m_type = KindOfBoolean;
+  rv->m_data.num = (th_3PDO_setattribute((this_), (long)(args[-0].m_data.num), (args-1))) ? 1LL : 0LL;
+}
+
+TypedValue* tg_3PDO_setattribute(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 2) {
+      if ((args - 0)->m_type == KindOfInt64) {
+        rv->m_type = KindOfBoolean;
+        rv->m_data.num = (th_3PDO_setattribute((this_), (long)(args[-0].m_data.num), (args-1))) ? 1LL : 0LL;
+      } else {
+        tg1_3PDO_setattribute(rv, ar, count, this_);
+      }
+    } else {
+      throw_wrong_arguments_nr("PDO::setattribute", count, 2, 2, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
+    }
+  } else {
+    throw_instance_method_fatal("PDO::setattribute");
+  }
+  frame_free_locals_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
+  return &ar->m_r;
+}
 
 TypedValue* th_3PDO_prepare(TypedValue* _rv, ObjectData* this_, Value* statement, Value* options) asm("_ZN4HPHP5c_PDO9t_prepareERKNS_6StringERKNS_5ArrayE");
 
-TypedValue* tg1_3PDO_prepare(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_prepare(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_3PDO_prepare(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_3PDO_prepare(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -170,512 +168,316 @@ TypedValue* tg1_3PDO_prepare(TypedValue* rv, ActRec* ar, int64_t count, ObjectDa
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_3PDO_prepare((rv), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
+  th_3PDO_prepare(rv, (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_3PDO_prepare(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count >= 1LL && count <= 2LL) {
-        if ((count <= 1 || (args-1)->m_type == KindOfArray) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_3PDO_prepare((&(rv)), (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 2);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_3PDO_prepare(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 2);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_3PDO_prepare(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count >= 1 && count <= 2) {
+      if ((count <= 1 || (args - 1)->m_type == KindOfArray) &&
+          IS_STRING_TYPE((args - 0)->m_type)) {
+        th_3PDO_prepare(rv, (this_), &args[-0].m_data, (count > 1) ? &args[-1].m_data : (Value*)(&null_array));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_wrong_arguments_nr("PDO::prepare", count, 1, 2, 1);
+        tg1_3PDO_prepare(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDO::prepare");
+      throw_wrong_arguments_nr("PDO::prepare", count, 1, 2, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::prepare");
+  }
+  frame_free_locals_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-bool HPHP::c_PDO::t_begintransaction()
-_ZN4HPHP5c_PDO18t_begintransactionEv
-
-(return value) => rax
-this_ => rdi
-*/
 
 bool th_3PDO_begintransaction(ObjectData* this_) asm("_ZN4HPHP5c_PDO18t_begintransactionEv");
 
-TypedValue* tg_3PDO_begintransaction(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (th_3PDO_begintransaction((this_))) ? 1LL : 0LL;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDO::begintransaction", 0, 1);
-      }
+TypedValue* tg_3PDO_begintransaction(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (th_3PDO_begintransaction((this_))) ? 1LL : 0LL;
     } else {
-      throw_instance_method_fatal("PDO::begintransaction");
+      throw_toomany_arguments_nr("PDO::begintransaction", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::begintransaction");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-bool HPHP::c_PDO::t_commit()
-_ZN4HPHP5c_PDO8t_commitEv
-
-(return value) => rax
-this_ => rdi
-*/
 
 bool th_3PDO_commit(ObjectData* this_) asm("_ZN4HPHP5c_PDO8t_commitEv");
 
-TypedValue* tg_3PDO_commit(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (th_3PDO_commit((this_))) ? 1LL : 0LL;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDO::commit", 0, 1);
-      }
+TypedValue* tg_3PDO_commit(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (th_3PDO_commit((this_))) ? 1LL : 0LL;
     } else {
-      throw_instance_method_fatal("PDO::commit");
+      throw_toomany_arguments_nr("PDO::commit", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::commit");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-bool HPHP::c_PDO::t_rollback()
-_ZN4HPHP5c_PDO10t_rollbackEv
-
-(return value) => rax
-this_ => rdi
-*/
 
 bool th_3PDO_rollback(ObjectData* this_) asm("_ZN4HPHP5c_PDO10t_rollbackEv");
 
-TypedValue* tg_3PDO_rollback(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (th_3PDO_rollback((this_))) ? 1LL : 0LL;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDO::rollback", 0, 1);
-      }
-    } else {
-      throw_instance_method_fatal("PDO::rollback");
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
-  return &ar->m_r;
-}
-
-/*
-bool HPHP::c_PDO::t_setattribute(long, HPHP::Variant const&)
-_ZN4HPHP5c_PDO14t_setattributeElRKNS_7VariantE
-
-(return value) => rax
-this_ => rdi
-attribute => rsi
-value => rdx
-*/
-
-bool th_3PDO_setattribute(ObjectData* this_, long attribute, TypedValue* value) asm("_ZN4HPHP5c_PDO14t_setattributeElRKNS_7VariantE");
-
-TypedValue* tg1_3PDO_setattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_setattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg_3PDO_rollback(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
-  tvCastToInt64InPlace(args-0);
-  rv->m_data.num = (th_3PDO_setattribute((this_), (long)(args[-0].m_data.num), (args-1))) ? 1LL : 0LL;
-  return rv;
-}
-
-TypedValue* tg_3PDO_setattribute(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 2LL) {
-        if ((args-0)->m_type == KindOfInt64) {
-          rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_3PDO_setattribute((this_), (long)(args[-0].m_data.num), (args-1))) ? 1LL : 0LL;
-          frame_free_locals_inl(ar, 2);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_3PDO_setattribute(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 2);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
-      } else {
-        throw_wrong_arguments_nr("PDO::setattribute", count, 2, 2, 1);
-      }
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (th_3PDO_rollback((this_))) ? 1LL : 0LL;
     } else {
-      throw_instance_method_fatal("PDO::setattribute");
+      throw_toomany_arguments_nr("PDO::rollback", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::rollback");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDO::t_getattribute(long)
-_ZN4HPHP5c_PDO14t_getattributeEl
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-attribute => rdx
-*/
 
 TypedValue* th_3PDO_getattribute(TypedValue* _rv, ObjectData* this_, long attribute) asm("_ZN4HPHP5c_PDO14t_getattributeEl");
 
-TypedValue* tg1_3PDO_getattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_getattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_3PDO_getattribute(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_3PDO_getattribute(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
-  th_3PDO_getattribute((rv), (this_), (long)(args[-0].m_data.num));
+  th_3PDO_getattribute(rv, (this_), (long)(args[-0].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_3PDO_getattribute(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 1LL) {
-        if ((args-0)->m_type == KindOfInt64) {
-          th_3PDO_getattribute((&(rv)), (this_), (long)(args[-0].m_data.num));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_3PDO_getattribute(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_3PDO_getattribute(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 1) {
+      if ((args - 0)->m_type == KindOfInt64) {
+        th_3PDO_getattribute(rv, (this_), (long)(args[-0].m_data.num));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_wrong_arguments_nr("PDO::getattribute", count, 1, 1, 1);
+        tg1_3PDO_getattribute(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDO::getattribute");
+      throw_wrong_arguments_nr("PDO::getattribute", count, 1, 1, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::getattribute");
+  }
+  frame_free_locals_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDO::t_exec(HPHP::String const&)
-_ZN4HPHP5c_PDO6t_execERKNS_6StringE
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-query => rdx
-*/
 
 TypedValue* th_3PDO_exec(TypedValue* _rv, ObjectData* this_, Value* query) asm("_ZN4HPHP5c_PDO6t_execERKNS_6StringE");
 
-TypedValue* tg1_3PDO_exec(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_exec(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_3PDO_exec(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_3PDO_exec(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_3PDO_exec((rv), (this_), &args[-0].m_data);
+  th_3PDO_exec(rv, (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_3PDO_exec(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 1LL) {
-        if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_3PDO_exec((&(rv)), (this_), &args[-0].m_data);
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_3PDO_exec(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_3PDO_exec(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 1) {
+      if (IS_STRING_TYPE((args - 0)->m_type)) {
+        th_3PDO_exec(rv, (this_), &args[-0].m_data);
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_wrong_arguments_nr("PDO::exec", count, 1, 1, 1);
+        tg1_3PDO_exec(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDO::exec");
+      throw_wrong_arguments_nr("PDO::exec", count, 1, 1, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::exec");
+  }
+  frame_free_locals_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDO::t_lastinsertid(HPHP::String const&)
-_ZN4HPHP5c_PDO14t_lastinsertidERKNS_6StringE
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-seqname => rdx
-*/
 
 TypedValue* th_3PDO_lastinsertid(TypedValue* _rv, ObjectData* this_, Value* seqname) asm("_ZN4HPHP5c_PDO14t_lastinsertidERKNS_6StringE");
 
-TypedValue* tg1_3PDO_lastinsertid(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_lastinsertid(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_3PDO_lastinsertid(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_3PDO_lastinsertid(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_3PDO_lastinsertid((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
+  th_3PDO_lastinsertid(rv, (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_3PDO_lastinsertid(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count <= 1LL) {
-        if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-          th_3PDO_lastinsertid((&(rv)), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_3PDO_lastinsertid(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_3PDO_lastinsertid(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count <= 1) {
+      if ((count <= 0 || IS_STRING_TYPE((args - 0)->m_type))) {
+        th_3PDO_lastinsertid(rv, (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_toomany_arguments_nr("PDO::lastinsertid", 1, 1);
+        tg1_3PDO_lastinsertid(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDO::lastinsertid");
+      throw_toomany_arguments_nr("PDO::lastinsertid", 1, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::lastinsertid");
+  }
+  frame_free_locals_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDO::t_errorcode()
-_ZN4HPHP5c_PDO11t_errorcodeEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_3PDO_errorcode(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO11t_errorcodeEv");
 
-TypedValue* tg_3PDO_errorcode(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_3PDO_errorcode((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDO::errorcode", 0, 1);
-      }
+TypedValue* tg_3PDO_errorcode(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_3PDO_errorcode(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDO::errorcode");
+      throw_toomany_arguments_nr("PDO::errorcode", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::errorcode");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Array HPHP::c_PDO::t_errorinfo()
-_ZN4HPHP5c_PDO11t_errorinfoEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 Value* th_3PDO_errorinfo(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO11t_errorinfoEv");
 
-TypedValue* tg_3PDO_errorinfo(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_type = KindOfArray;
-        th_3PDO_errorinfo((&rv.m_data), (this_));
-        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDO::errorinfo", 0, 1);
-      }
+TypedValue* tg_3PDO_errorinfo(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfArray;
+      th_3PDO_errorinfo(&(rv->m_data), (this_));
+      if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDO::errorinfo");
+      throw_toomany_arguments_nr("PDO::errorinfo", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::errorinfo");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDO::t_query(HPHP::String const&)
-_ZN4HPHP5c_PDO7t_queryERKNS_6StringE
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-sql => rdx
-*/
 
 TypedValue* th_3PDO_query(TypedValue* _rv, ObjectData* this_, Value* sql) asm("_ZN4HPHP5c_PDO7t_queryERKNS_6StringE");
 
-TypedValue* tg1_3PDO_query(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_query(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_3PDO_query(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_3PDO_query(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
-  th_3PDO_query((rv), (this_), &args[-0].m_data);
+  th_3PDO_query(rv, (this_), &args[-0].m_data);
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_3PDO_query(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 1LL) {
-        if (IS_STRING_TYPE((args-0)->m_type)) {
-          th_3PDO_query((&(rv)), (this_), &args[-0].m_data);
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_3PDO_query(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_3PDO_query(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 1) {
+      if (IS_STRING_TYPE((args - 0)->m_type)) {
+        th_3PDO_query(rv, (this_), &args[-0].m_data);
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_wrong_arguments_nr("PDO::query", count, 1, 1, 1);
+        tg1_3PDO_query(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDO::query");
+      throw_wrong_arguments_nr("PDO::query", count, 1, 1, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::query");
+  }
+  frame_free_locals_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_PDO::t_quote(HPHP::String const&, long)
-_ZN4HPHP5c_PDO7t_quoteERKNS_6StringEl
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-str => rdx
-paramtype => rcx
-*/
-
 TypedValue* th_3PDO_quote(TypedValue* _rv, ObjectData* this_, Value* str, long paramtype) asm("_ZN4HPHP5c_PDO7t_quoteERKNS_6StringEl");
 
-TypedValue* tg1_3PDO_quote(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_quote(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_3PDO_quote(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_3PDO_quote(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -688,150 +490,110 @@ TypedValue* tg1_3PDO_quote(TypedValue* rv, ActRec* ar, int64_t count, ObjectData
   if (!IS_STRING_TYPE((args-0)->m_type)) {
     tvCastToStringInPlace(args-0);
   }
-  th_3PDO_quote((rv), (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$PARAM_STR));
+  th_3PDO_quote(rv, (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$PARAM_STR));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_3PDO_quote(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count >= 1LL && count <= 2LL) {
-        if ((count <= 1 || (args-1)->m_type == KindOfInt64) && IS_STRING_TYPE((args-0)->m_type)) {
-          th_3PDO_quote((&(rv)), (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$PARAM_STR));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 2);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_3PDO_quote(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 2);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_3PDO_quote(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count >= 1 && count <= 2) {
+      if ((count <= 1 || (args - 1)->m_type == KindOfInt64) &&
+          IS_STRING_TYPE((args - 0)->m_type)) {
+        th_3PDO_quote(rv, (this_), &args[-0].m_data, (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$PARAM_STR));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_wrong_arguments_nr("PDO::quote", count, 1, 2, 1);
+        tg1_3PDO_quote(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDO::quote");
+      throw_wrong_arguments_nr("PDO::quote", count, 1, 2, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::quote");
+  }
+  frame_free_locals_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDO::t___wakeup()
-_ZN4HPHP5c_PDO10t___wakeupEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_3PDO___wakeup(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO10t___wakeupEv");
 
-TypedValue* tg_3PDO___wakeup(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_3PDO___wakeup((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDO::__wakeup", 0, 1);
-      }
+TypedValue* tg_3PDO___wakeup(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_3PDO___wakeup(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDO::__wakeup");
+      throw_toomany_arguments_nr("PDO::__wakeup", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::__wakeup");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDO::t___sleep()
-_ZN4HPHP5c_PDO9t___sleepEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_3PDO___sleep(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO9t___sleepEv");
 
-TypedValue* tg_3PDO___sleep(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_3PDO___sleep((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDO::__sleep", 0, 1);
-      }
+TypedValue* tg_3PDO___sleep(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_3PDO___sleep(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDO::__sleep");
+      throw_toomany_arguments_nr("PDO::__sleep", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDO::__sleep");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Array HPHP::c_PDO::ti_getavailabledrivers(char const*)
-_ZN4HPHP5c_PDO22ti_getavailabledriversEPKc
-
-(return value) => rax
-_rv => rdi
-cls_ => rsi
-*/
 
 Value* th_3PDO_getavailabledrivers(Value* _rv, char const* cls_) asm("_ZN4HPHP5c_PDO22ti_getavailabledriversEPKc");
 
-TypedValue* tg_3PDO_getavailabledrivers(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 0LL) {
-      rv.m_type = KindOfArray;
-      th_3PDO_getavailabledrivers((&rv.m_data), ("PDO"));
-      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
-      frame_free_locals_no_this_inl(ar, 0);
-      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-      return &ar->m_r;
-    } else {
-      throw_toomany_arguments_nr("PDO::getavailabledrivers", 0, 1);
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+TypedValue* tg_3PDO_getavailabledrivers(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (count == 0) {
+    rv->m_type = KindOfArray;
+    th_3PDO_getavailabledrivers(&(rv->m_data), "PDO");
+    if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  } else {
+    throw_toomany_arguments_nr("PDO::getavailabledrivers", 0, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
+
 
 HPHP::VM::Instance* new_PDOStatement_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
@@ -843,112 +605,72 @@ HPHP::VM::Instance* new_PDOStatement_Instance(HPHP::VM::Class* cls) {
 }
 
 IMPLEMENT_CLASS(PDOStatement);
-/*
-void HPHP::c_PDOStatement::t___construct()
-_ZN4HPHP14c_PDOStatement13t___constructEv
-
-this_ => rdi
-*/
-
 void th_12PDOStatement___construct(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement13t___constructEv");
 
-TypedValue* tg_12PDOStatement___construct(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_data.num = 0LL;
-        rv.m_type = KindOfNull;
-        th_12PDOStatement___construct((this_));
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::__construct", 0, 1);
-      }
+TypedValue* tg_12PDOStatement___construct(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfNull;
+      th_12PDOStatement___construct((this_));
     } else {
-      throw_instance_method_fatal("PDOStatement::__construct");
+      throw_toomany_arguments_nr("PDOStatement::__construct", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::__construct");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_execute(HPHP::Array const&)
-_ZN4HPHP14c_PDOStatement9t_executeERKNS_5ArrayE
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-params => rdx
-*/
 
 TypedValue* th_12PDOStatement_execute(TypedValue* _rv, ObjectData* this_, Value* params) asm("_ZN4HPHP14c_PDOStatement9t_executeERKNS_5ArrayE");
 
-TypedValue* tg1_12PDOStatement_execute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_execute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_execute(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_execute(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToArrayInPlace(args-0);
-  th_12PDOStatement_execute((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_array));
+  th_12PDOStatement_execute(rv, (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_array));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_12PDOStatement_execute(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count <= 1LL) {
-        if ((count <= 0 || (args-0)->m_type == KindOfArray)) {
-          th_12PDOStatement_execute((&(rv)), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_array));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_execute(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_12PDOStatement_execute(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count <= 1) {
+      if ((count <= 0 || (args - 0)->m_type == KindOfArray)) {
+        th_12PDOStatement_execute(rv, (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_array));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_toomany_arguments_nr("PDOStatement::execute", 1, 1);
+        tg1_12PDOStatement_execute(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::execute");
+      throw_toomany_arguments_nr("PDOStatement::execute", 1, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::execute");
+  }
+  frame_free_locals_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_fetch(long, long, long)
-_ZN4HPHP14c_PDOStatement7t_fetchElll
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-how => rdx
-orientation => rcx
-offset => r8
-*/
-
 TypedValue* th_12PDOStatement_fetch(TypedValue* _rv, ObjectData* this_, long how, long orientation, long offset) asm("_ZN4HPHP14c_PDOStatement7t_fetchElll");
 
-TypedValue* tg1_12PDOStatement_fetch(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_fetch(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_fetch(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_fetch(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -966,289 +688,198 @@ TypedValue* tg1_12PDOStatement_fetch(TypedValue* rv, ActRec* ar, int64_t count, 
   case 0:
     break;
   }
-  th_12PDOStatement_fetch((rv), (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$FETCH_ORI_NEXT), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
+  th_12PDOStatement_fetch(rv, (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$FETCH_ORI_NEXT), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_12PDOStatement_fetch(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count <= 3LL) {
-        if ((count <= 2 || (args-2)->m_type == KindOfInt64) && (count <= 1 || (args-1)->m_type == KindOfInt64) && (count <= 0 || (args-0)->m_type == KindOfInt64)) {
-          th_12PDOStatement_fetch((&(rv)), (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$FETCH_ORI_NEXT), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 3);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_fetch(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 3);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_12PDOStatement_fetch(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count <= 3) {
+      if ((count <= 2 || (args - 2)->m_type == KindOfInt64) &&
+          (count <= 1 || (args - 1)->m_type == KindOfInt64) &&
+          (count <= 0 || (args - 0)->m_type == KindOfInt64)) {
+        th_12PDOStatement_fetch(rv, (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(q_PDO$$FETCH_ORI_NEXT), (count > 2) ? (long)(args[-2].m_data.num) : (long)(0));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_toomany_arguments_nr("PDOStatement::fetch", 3, 1);
+        tg1_12PDOStatement_fetch(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::fetch");
+      throw_toomany_arguments_nr("PDOStatement::fetch", 3, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 3);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::fetch");
+  }
+  frame_free_locals_inl(ar, 3);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_fetchobject(HPHP::String const&, HPHP::Variant const&)
-_ZN4HPHP14c_PDOStatement13t_fetchobjectERKNS_6StringERKNS_7VariantE
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-class_name => rdx
-ctor_args => rcx
-*/
 
 TypedValue* th_12PDOStatement_fetchobject(TypedValue* _rv, ObjectData* this_, Value* class_name, TypedValue* ctor_args) asm("_ZN4HPHP14c_PDOStatement13t_fetchobjectERKNS_6StringERKNS_7VariantE");
 
-TypedValue* tg1_12PDOStatement_fetchobject(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_fetchobject(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_fetchobject(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_fetchobject(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
-  th_12PDOStatement_fetchobject((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+  th_12PDOStatement_fetchobject(rv, (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_12PDOStatement_fetchobject(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count <= 2LL) {
-        if ((count <= 0 || IS_STRING_TYPE((args-0)->m_type))) {
-          Variant defVal1;
-          th_12PDOStatement_fetchobject((&(rv)), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 2);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_fetchobject(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 2);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_12PDOStatement_fetchobject(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count <= 2) {
+      if ((count <= 0 || IS_STRING_TYPE((args - 0)->m_type))) {
+        Variant defVal1;
+        th_12PDOStatement_fetchobject(rv, (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string), (count > 1) ? (args-1) : (TypedValue*)(&defVal1));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_toomany_arguments_nr("PDOStatement::fetchobject", 2, 1);
+        tg1_12PDOStatement_fetchobject(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::fetchobject");
+      throw_toomany_arguments_nr("PDOStatement::fetchobject", 2, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::fetchobject");
+  }
+  frame_free_locals_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_fetchcolumn(long)
-_ZN4HPHP14c_PDOStatement13t_fetchcolumnEl
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-column_numner => rdx
-*/
 
 TypedValue* th_12PDOStatement_fetchcolumn(TypedValue* _rv, ObjectData* this_, long column_numner) asm("_ZN4HPHP14c_PDOStatement13t_fetchcolumnEl");
 
-TypedValue* tg1_12PDOStatement_fetchcolumn(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_fetchcolumn(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_fetchcolumn(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_fetchcolumn(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
-  th_12PDOStatement_fetchcolumn((rv), (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0));
+  th_12PDOStatement_fetchcolumn(rv, (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_12PDOStatement_fetchcolumn(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count <= 1LL) {
-        if ((count <= 0 || (args-0)->m_type == KindOfInt64)) {
-          th_12PDOStatement_fetchcolumn((&(rv)), (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_fetchcolumn(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_12PDOStatement_fetchcolumn(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count <= 1) {
+      if ((count <= 0 || (args - 0)->m_type == KindOfInt64)) {
+        th_12PDOStatement_fetchcolumn(rv, (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_toomany_arguments_nr("PDOStatement::fetchcolumn", 1, 1);
+        tg1_12PDOStatement_fetchcolumn(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::fetchcolumn");
+      throw_toomany_arguments_nr("PDOStatement::fetchcolumn", 1, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::fetchcolumn");
+  }
+  frame_free_locals_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_fetchall(long, HPHP::Variant const&, HPHP::Variant const&)
-_ZN4HPHP14c_PDOStatement10t_fetchallElRKNS_7VariantES3_
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-how => rdx
-class_name => rcx
-ctor_args => r8
-*/
-
 TypedValue* th_12PDOStatement_fetchall(TypedValue* _rv, ObjectData* this_, long how, TypedValue* class_name, TypedValue* ctor_args) asm("_ZN4HPHP14c_PDOStatement10t_fetchallElRKNS_7VariantES3_");
 
-TypedValue* tg1_12PDOStatement_fetchall(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_fetchall(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_fetchall(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_fetchall(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   Variant defVal1;
   Variant defVal2;
-  th_12PDOStatement_fetchall((rv), (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+  th_12PDOStatement_fetchall(rv, (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_12PDOStatement_fetchall(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count <= 3LL) {
-        if ((count <= 0 || (args-0)->m_type == KindOfInt64)) {
-          Variant defVal1;
-          Variant defVal2;
-          th_12PDOStatement_fetchall((&(rv)), (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 3);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_fetchall(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 3);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_12PDOStatement_fetchall(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count <= 3) {
+      if ((count <= 0 || (args - 0)->m_type == KindOfInt64)) {
+        Variant defVal1;
+        Variant defVal2;
+        th_12PDOStatement_fetchall(rv, (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (args-1) : (TypedValue*)(&defVal1), (count > 2) ? (args-2) : (TypedValue*)(&defVal2));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_toomany_arguments_nr("PDOStatement::fetchall", 3, 1);
+        tg1_12PDOStatement_fetchall(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::fetchall");
+      throw_toomany_arguments_nr("PDOStatement::fetchall", 3, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 3);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::fetchall");
+  }
+  frame_free_locals_inl(ar, 3);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-bool HPHP::c_PDOStatement::t_bindvalue(HPHP::Variant const&, HPHP::Variant const&, long)
-_ZN4HPHP14c_PDOStatement11t_bindvalueERKNS_7VariantES3_l
-
-(return value) => rax
-this_ => rdi
-paramno => rsi
-param => rdx
-type => rcx
-*/
 
 bool th_12PDOStatement_bindvalue(ObjectData* this_, TypedValue* paramno, TypedValue* param, long type) asm("_ZN4HPHP14c_PDOStatement11t_bindvalueERKNS_7VariantES3_l");
 
-TypedValue* tg1_12PDOStatement_bindvalue(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_bindvalue(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_bindvalue(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_bindvalue(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-2);
+  rv->m_type = KindOfBoolean;
   rv->m_data.num = (th_12PDOStatement_bindvalue((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR))) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* tg_12PDOStatement_bindvalue(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count >= 2LL && count <= 3LL) {
-        if ((count <= 2 || (args-2)->m_type == KindOfInt64)) {
-          rv.m_type = KindOfBoolean;
-          rv.m_data.num = (th_12PDOStatement_bindvalue((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR))) ? 1LL : 0LL;
-          frame_free_locals_inl(ar, 3);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_bindvalue(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 3);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_12PDOStatement_bindvalue(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count >= 2 && count <= 3) {
+      if ((count <= 2 || (args - 2)->m_type == KindOfInt64)) {
+        rv->m_type = KindOfBoolean;
+        rv->m_data.num = (th_12PDOStatement_bindvalue((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR))) ? 1LL : 0LL;
       } else {
-        throw_wrong_arguments_nr("PDOStatement::bindvalue", count, 2, 3, 1);
+        tg1_12PDOStatement_bindvalue(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::bindvalue");
+      throw_wrong_arguments_nr("PDOStatement::bindvalue", count, 2, 3, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 3);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::bindvalue");
+  }
+  frame_free_locals_inl(ar, 3);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-bool HPHP::c_PDOStatement::t_bindparam(HPHP::Variant const&, HPHP::VRefParamValue const&, long, long, HPHP::Variant const&)
-_ZN4HPHP14c_PDOStatement11t_bindparamERKNS_7VariantERKNS_14VRefParamValueEllS3_
-
-(return value) => rax
-this_ => rdi
-paramno => rsi
-param => rdx
-type => rcx
-max_value_len => r8
-driver_params => r9
-*/
 
 bool th_12PDOStatement_bindparam(ObjectData* this_, TypedValue* paramno, TypedValue* param, long type, long max_value_len, TypedValue* driver_params) asm("_ZN4HPHP14c_PDOStatement11t_bindparamERKNS_7VariantERKNS_14VRefParamValueEllS3_");
 
-TypedValue* tg1_12PDOStatement_bindparam(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_bindparam(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_bindparam(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_bindparam(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 5
   case 4:
@@ -1262,64 +893,45 @@ TypedValue* tg1_12PDOStatement_bindparam(TypedValue* rv, ActRec* ar, int64_t cou
   case 2:
     break;
   }
+  rv->m_type = KindOfBoolean;
   Variant defVal4;
   rv->m_data.num = (th_12PDOStatement_bindparam((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (args-4) : (TypedValue*)(&defVal4))) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* tg_12PDOStatement_bindparam(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count >= 2LL && count <= 5LL) {
-        if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64)) {
-          rv.m_type = KindOfBoolean;
-          Variant defVal4;
-          rv.m_data.num = (th_12PDOStatement_bindparam((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (args-4) : (TypedValue*)(&defVal4))) ? 1LL : 0LL;
-          frame_free_locals_inl(ar, 5);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_bindparam(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 5);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_12PDOStatement_bindparam(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count >= 2 && count <= 5) {
+      if ((count <= 3 || (args - 3)->m_type == KindOfInt64) &&
+          (count <= 2 || (args - 2)->m_type == KindOfInt64)) {
+        rv->m_type = KindOfBoolean;
+        Variant defVal4;
+        rv->m_data.num = (th_12PDOStatement_bindparam((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (args-4) : (TypedValue*)(&defVal4))) ? 1LL : 0LL;
       } else {
-        throw_wrong_arguments_nr("PDOStatement::bindparam", count, 2, 5, 1);
+        tg1_12PDOStatement_bindparam(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::bindparam");
+      throw_wrong_arguments_nr("PDOStatement::bindparam", count, 2, 5, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 5);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::bindparam");
+  }
+  frame_free_locals_inl(ar, 5);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-bool HPHP::c_PDOStatement::t_bindcolumn(HPHP::Variant const&, HPHP::VRefParamValue const&, long, long, HPHP::Variant const&)
-_ZN4HPHP14c_PDOStatement12t_bindcolumnERKNS_7VariantERKNS_14VRefParamValueEllS3_
-
-(return value) => rax
-this_ => rdi
-paramno => rsi
-param => rdx
-type => rcx
-max_value_len => r8
-driver_params => r9
-*/
 
 bool th_12PDOStatement_bindcolumn(ObjectData* this_, TypedValue* paramno, TypedValue* param, long type, long max_value_len, TypedValue* driver_params) asm("_ZN4HPHP14c_PDOStatement12t_bindcolumnERKNS_7VariantERKNS_14VRefParamValueEllS3_");
 
-TypedValue* tg1_12PDOStatement_bindcolumn(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_bindcolumn(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_bindcolumn(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_bindcolumn(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   switch (count) {
   default: // count >= 5
   case 4:
@@ -1333,377 +945,264 @@ TypedValue* tg1_12PDOStatement_bindcolumn(TypedValue* rv, ActRec* ar, int64_t co
   case 2:
     break;
   }
+  rv->m_type = KindOfBoolean;
   Variant defVal4;
   rv->m_data.num = (th_12PDOStatement_bindcolumn((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (args-4) : (TypedValue*)(&defVal4))) ? 1LL : 0LL;
-  return rv;
 }
 
-TypedValue* tg_12PDOStatement_bindcolumn(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count >= 2LL && count <= 5LL) {
-        if ((count <= 3 || (args-3)->m_type == KindOfInt64) && (count <= 2 || (args-2)->m_type == KindOfInt64)) {
-          rv.m_type = KindOfBoolean;
-          Variant defVal4;
-          rv.m_data.num = (th_12PDOStatement_bindcolumn((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (args-4) : (TypedValue*)(&defVal4))) ? 1LL : 0LL;
-          frame_free_locals_inl(ar, 5);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_bindcolumn(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 5);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_12PDOStatement_bindcolumn(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count >= 2 && count <= 5) {
+      if ((count <= 3 || (args - 3)->m_type == KindOfInt64) &&
+          (count <= 2 || (args - 2)->m_type == KindOfInt64)) {
+        rv->m_type = KindOfBoolean;
+        Variant defVal4;
+        rv->m_data.num = (th_12PDOStatement_bindcolumn((this_), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_PDO$$PARAM_STR), (count > 3) ? (long)(args[-3].m_data.num) : (long)(0), (count > 4) ? (args-4) : (TypedValue*)(&defVal4))) ? 1LL : 0LL;
       } else {
-        throw_wrong_arguments_nr("PDOStatement::bindcolumn", count, 2, 5, 1);
+        tg1_12PDOStatement_bindcolumn(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::bindcolumn");
+      throw_wrong_arguments_nr("PDOStatement::bindcolumn", count, 2, 5, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 5);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::bindcolumn");
+  }
+  frame_free_locals_inl(ar, 5);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-long HPHP::c_PDOStatement::t_rowcount()
-_ZN4HPHP14c_PDOStatement10t_rowcountEv
-
-(return value) => rax
-this_ => rdi
-*/
 
 long th_12PDOStatement_rowcount(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement10t_rowcountEv");
 
-TypedValue* tg_12PDOStatement_rowcount(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)th_12PDOStatement_rowcount((this_));
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::rowcount", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_rowcount(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfInt64;
+      rv->m_data.num = (int64_t)th_12PDOStatement_rowcount((this_));
     } else {
-      throw_instance_method_fatal("PDOStatement::rowcount");
+      throw_toomany_arguments_nr("PDOStatement::rowcount", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::rowcount");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_errorcode()
-_ZN4HPHP14c_PDOStatement11t_errorcodeEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_12PDOStatement_errorcode(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement11t_errorcodeEv");
 
-TypedValue* tg_12PDOStatement_errorcode(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_12PDOStatement_errorcode((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::errorcode", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_errorcode(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_12PDOStatement_errorcode(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDOStatement::errorcode");
+      throw_toomany_arguments_nr("PDOStatement::errorcode", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::errorcode");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Array HPHP::c_PDOStatement::t_errorinfo()
-_ZN4HPHP14c_PDOStatement11t_errorinfoEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 Value* th_12PDOStatement_errorinfo(Value* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement11t_errorinfoEv");
 
-TypedValue* tg_12PDOStatement_errorinfo(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_type = KindOfArray;
-        th_12PDOStatement_errorinfo((&rv.m_data), (this_));
-        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::errorinfo", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_errorinfo(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfArray;
+      th_12PDOStatement_errorinfo(&(rv->m_data), (this_));
+      if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDOStatement::errorinfo");
+      throw_toomany_arguments_nr("PDOStatement::errorinfo", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::errorinfo");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_setattribute(long, HPHP::Variant const&)
-_ZN4HPHP14c_PDOStatement14t_setattributeElRKNS_7VariantE
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-attribute => rdx
-value => rcx
-*/
 
 TypedValue* th_12PDOStatement_setattribute(TypedValue* _rv, ObjectData* this_, long attribute, TypedValue* value) asm("_ZN4HPHP14c_PDOStatement14t_setattributeElRKNS_7VariantE");
 
-TypedValue* tg1_12PDOStatement_setattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_setattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_setattribute(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_setattribute(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
-  th_12PDOStatement_setattribute((rv), (this_), (long)(args[-0].m_data.num), (args-1));
+  th_12PDOStatement_setattribute(rv, (this_), (long)(args[-0].m_data.num), (args-1));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_12PDOStatement_setattribute(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 2LL) {
-        if ((args-0)->m_type == KindOfInt64) {
-          th_12PDOStatement_setattribute((&(rv)), (this_), (long)(args[-0].m_data.num), (args-1));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 2);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_setattribute(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 2);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_12PDOStatement_setattribute(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 2) {
+      if ((args - 0)->m_type == KindOfInt64) {
+        th_12PDOStatement_setattribute(rv, (this_), (long)(args[-0].m_data.num), (args-1));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_wrong_arguments_nr("PDOStatement::setattribute", count, 2, 2, 1);
+        tg1_12PDOStatement_setattribute(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::setattribute");
+      throw_wrong_arguments_nr("PDOStatement::setattribute", count, 2, 2, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::setattribute");
+  }
+  frame_free_locals_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_getattribute(long)
-_ZN4HPHP14c_PDOStatement14t_getattributeEl
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-attribute => rdx
-*/
 
 TypedValue* th_12PDOStatement_getattribute(TypedValue* _rv, ObjectData* this_, long attribute) asm("_ZN4HPHP14c_PDOStatement14t_getattributeEl");
 
-TypedValue* tg1_12PDOStatement_getattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_getattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_getattribute(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_getattribute(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
-  th_12PDOStatement_getattribute((rv), (this_), (long)(args[-0].m_data.num));
+  th_12PDOStatement_getattribute(rv, (this_), (long)(args[-0].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_12PDOStatement_getattribute(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 1LL) {
-        if ((args-0)->m_type == KindOfInt64) {
-          th_12PDOStatement_getattribute((&(rv)), (this_), (long)(args[-0].m_data.num));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_getattribute(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_12PDOStatement_getattribute(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 1) {
+      if ((args - 0)->m_type == KindOfInt64) {
+        th_12PDOStatement_getattribute(rv, (this_), (long)(args[-0].m_data.num));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_wrong_arguments_nr("PDOStatement::getattribute", count, 1, 1, 1);
+        tg1_12PDOStatement_getattribute(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::getattribute");
+      throw_wrong_arguments_nr("PDOStatement::getattribute", count, 1, 1, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::getattribute");
+  }
+  frame_free_locals_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-long HPHP::c_PDOStatement::t_columncount()
-_ZN4HPHP14c_PDOStatement13t_columncountEv
-
-(return value) => rax
-this_ => rdi
-*/
 
 long th_12PDOStatement_columncount(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement13t_columncountEv");
 
-TypedValue* tg_12PDOStatement_columncount(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_type = KindOfInt64;
-        rv.m_data.num = (int64_t)th_12PDOStatement_columncount((this_));
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::columncount", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_columncount(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfInt64;
+      rv->m_data.num = (int64_t)th_12PDOStatement_columncount((this_));
     } else {
-      throw_instance_method_fatal("PDOStatement::columncount");
+      throw_toomany_arguments_nr("PDOStatement::columncount", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::columncount");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_getcolumnmeta(long)
-_ZN4HPHP14c_PDOStatement15t_getcolumnmetaEl
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-column => rdx
-*/
 
 TypedValue* th_12PDOStatement_getcolumnmeta(TypedValue* _rv, ObjectData* this_, long column) asm("_ZN4HPHP14c_PDOStatement15t_getcolumnmetaEl");
 
-TypedValue* tg1_12PDOStatement_getcolumnmeta(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_getcolumnmeta(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_getcolumnmeta(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_getcolumnmeta(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
-  th_12PDOStatement_getcolumnmeta((rv), (this_), (long)(args[-0].m_data.num));
+  th_12PDOStatement_getcolumnmeta(rv, (this_), (long)(args[-0].m_data.num));
   if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
-  return rv;
 }
 
-TypedValue* tg_12PDOStatement_getcolumnmeta(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 1LL) {
-        if ((args-0)->m_type == KindOfInt64) {
-          th_12PDOStatement_getcolumnmeta((&(rv)), (this_), (long)(args[-0].m_data.num));
-          if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_getcolumnmeta(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        }
+TypedValue* tg_12PDOStatement_getcolumnmeta(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 1) {
+      if ((args - 0)->m_type == KindOfInt64) {
+        th_12PDOStatement_getcolumnmeta(rv, (this_), (long)(args[-0].m_data.num));
+        if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
       } else {
-        throw_wrong_arguments_nr("PDOStatement::getcolumnmeta", count, 1, 1, 1);
+        tg1_12PDOStatement_getcolumnmeta(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::getcolumnmeta");
+      throw_wrong_arguments_nr("PDOStatement::getcolumnmeta", count, 1, 1, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::getcolumnmeta");
+  }
+  frame_free_locals_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-/*
-bool HPHP::c_PDOStatement::t_setfetchmode(int, long, HPHP::Array const&)
-_ZN4HPHP14c_PDOStatement14t_setfetchmodeEilRKNS_5ArrayE
-
-(return value) => rax
-this_ => rdi
-_argc => rsi
-mode => rdx
-_argv => rcx
-*/
-
 bool th_12PDOStatement_setfetchmode(ObjectData* this_, int64_t _argc, long mode, Value* _argv) asm("_ZN4HPHP14c_PDOStatement14t_setfetchmodeEilRKNS_5ArrayE");
 
-TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
+void tg1_12PDOStatement_setfetchmode(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) __attribute__((noinline,cold));
+void tg1_12PDOStatement_setfetchmode(TypedValue* rv, ActRec* ar, int32_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
+  rv->m_type = KindOfBoolean;
+
   Array extraArgs;
   {
     ArrayInit ai(count-1);
-    for (int64_t i = 1; i < count; ++i) {
+    for (int32_t i = 1; i < count; ++i) {
       TypedValue* extraArg = ar->getExtraArg(i-1);
       if (tvIsStronglyBound(extraArg)) {
         ai.setRef(i-1, tvAsVariant(extraArg));
@@ -1713,424 +1212,298 @@ TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, ActRec* ar, int64_t 
     }
     extraArgs = ai.create();
   }
-  rv->m_data.num = (th_12PDOStatement_setfetchmode((this_), (count), (long)(args[-0].m_data.num), (Value*)(&extraArgs))) ? 1LL : 0LL;
-  return rv;
+  rv->m_data.num = (th_12PDOStatement_setfetchmode((this_), count, (long)(args[-0].m_data.num), (Value*)(&extraArgs))) ? 1LL : 0LL;
 }
 
-TypedValue* tg_12PDOStatement_setfetchmode(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count >= 1LL) {
-        if ((args-0)->m_type == KindOfInt64) {
-          rv.m_type = KindOfBoolean;
-          Array extraArgs;
-          {
-            ArrayInit ai(count-1);
-            for (int64_t i = 1; i < count; ++i) {
-              TypedValue* extraArg = ar->getExtraArg(i-1);
-              if (tvIsStronglyBound(extraArg)) {
-                ai.setRef(i-1, tvAsVariant(extraArg));
-              } else {
-                ai.set(i-1, tvAsVariant(extraArg));
-              }
+TypedValue* tg_12PDOStatement_setfetchmode(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count >= 1) {
+      if ((args - 0)->m_type == KindOfInt64) {
+        rv->m_type = KindOfBoolean;
+
+        Array extraArgs;
+        {
+          ArrayInit ai(count-1);
+          for (int32_t i = 1; i < count; ++i) {
+            TypedValue* extraArg = ar->getExtraArg(i-1);
+            if (tvIsStronglyBound(extraArg)) {
+              ai.setRef(i-1, tvAsVariant(extraArg));
+            } else {
+              ai.set(i-1, tvAsVariant(extraArg));
             }
-            extraArgs = ai.create();
           }
-          rv.m_data.num = (th_12PDOStatement_setfetchmode((this_), (count), (long)(args[-0].m_data.num), (Value*)(&extraArgs))) ? 1LL : 0LL;
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
-        } else {
-          tg1_12PDOStatement_setfetchmode(&rv, ar, count , this_);
-          frame_free_locals_inl(ar, 1);
-          memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-          return &ar->m_r;
+          extraArgs = ai.create();
         }
+        rv->m_data.num = (th_12PDOStatement_setfetchmode((this_), count, (long)(args[-0].m_data.num), (Value*)(&extraArgs))) ? 1LL : 0LL;
       } else {
-        throw_missing_arguments_nr("PDOStatement::setfetchmode", 1, count, 1);
+        tg1_12PDOStatement_setfetchmode(rv, ar, count, this_);
       }
     } else {
-      throw_instance_method_fatal("PDOStatement::setfetchmode");
+      throw_missing_arguments_nr("PDOStatement::setfetchmode", 1, count, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::setfetchmode");
+  }
+  frame_free_locals_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-bool HPHP::c_PDOStatement::t_nextrowset()
-_ZN4HPHP14c_PDOStatement12t_nextrowsetEv
-
-(return value) => rax
-this_ => rdi
-*/
 
 bool th_12PDOStatement_nextrowset(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement12t_nextrowsetEv");
 
-TypedValue* tg_12PDOStatement_nextrowset(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (th_12PDOStatement_nextrowset((this_))) ? 1LL : 0LL;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::nextrowset", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_nextrowset(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (th_12PDOStatement_nextrowset((this_))) ? 1LL : 0LL;
     } else {
-      throw_instance_method_fatal("PDOStatement::nextrowset");
+      throw_toomany_arguments_nr("PDOStatement::nextrowset", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::nextrowset");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-bool HPHP::c_PDOStatement::t_closecursor()
-_ZN4HPHP14c_PDOStatement13t_closecursorEv
-
-(return value) => rax
-this_ => rdi
-*/
 
 bool th_12PDOStatement_closecursor(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement13t_closecursorEv");
 
-TypedValue* tg_12PDOStatement_closecursor(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_type = KindOfBoolean;
-        rv.m_data.num = (th_12PDOStatement_closecursor((this_))) ? 1LL : 0LL;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::closecursor", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_closecursor(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfBoolean;
+      rv->m_data.num = (th_12PDOStatement_closecursor((this_))) ? 1LL : 0LL;
     } else {
-      throw_instance_method_fatal("PDOStatement::closecursor");
+      throw_toomany_arguments_nr("PDOStatement::closecursor", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::closecursor");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_debugdumpparams()
-_ZN4HPHP14c_PDOStatement17t_debugdumpparamsEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_12PDOStatement_debugdumpparams(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement17t_debugdumpparamsEv");
 
-TypedValue* tg_12PDOStatement_debugdumpparams(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_12PDOStatement_debugdumpparams((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::debugdumpparams", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_debugdumpparams(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_12PDOStatement_debugdumpparams(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDOStatement::debugdumpparams");
+      throw_toomany_arguments_nr("PDOStatement::debugdumpparams", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::debugdumpparams");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_current()
-_ZN4HPHP14c_PDOStatement9t_currentEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_12PDOStatement_current(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement9t_currentEv");
 
-TypedValue* tg_12PDOStatement_current(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_12PDOStatement_current((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::current", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_current(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_12PDOStatement_current(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDOStatement::current");
+      throw_toomany_arguments_nr("PDOStatement::current", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::current");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_key()
-_ZN4HPHP14c_PDOStatement5t_keyEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_12PDOStatement_key(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement5t_keyEv");
 
-TypedValue* tg_12PDOStatement_key(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_12PDOStatement_key((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::key", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_key(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_12PDOStatement_key(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDOStatement::key");
+      throw_toomany_arguments_nr("PDOStatement::key", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::key");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_next()
-_ZN4HPHP14c_PDOStatement6t_nextEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_12PDOStatement_next(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement6t_nextEv");
 
-TypedValue* tg_12PDOStatement_next(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_12PDOStatement_next((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::next", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_next(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_12PDOStatement_next(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDOStatement::next");
+      throw_toomany_arguments_nr("PDOStatement::next", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::next");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_rewind()
-_ZN4HPHP14c_PDOStatement8t_rewindEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_12PDOStatement_rewind(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement8t_rewindEv");
 
-TypedValue* tg_12PDOStatement_rewind(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_12PDOStatement_rewind((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::rewind", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_rewind(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_12PDOStatement_rewind(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDOStatement::rewind");
+      throw_toomany_arguments_nr("PDOStatement::rewind", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::rewind");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t_valid()
-_ZN4HPHP14c_PDOStatement7t_validEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_12PDOStatement_valid(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement7t_validEv");
 
-TypedValue* tg_12PDOStatement_valid(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_12PDOStatement_valid((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::valid", 0, 1);
-      }
+TypedValue* tg_12PDOStatement_valid(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_12PDOStatement_valid(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDOStatement::valid");
+      throw_toomany_arguments_nr("PDOStatement::valid", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::valid");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t___wakeup()
-_ZN4HPHP14c_PDOStatement10t___wakeupEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_12PDOStatement___wakeup(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement10t___wakeupEv");
 
-TypedValue* tg_12PDOStatement___wakeup(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_12PDOStatement___wakeup((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::__wakeup", 0, 1);
-      }
+TypedValue* tg_12PDOStatement___wakeup(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_12PDOStatement___wakeup(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDOStatement::__wakeup");
+      throw_toomany_arguments_nr("PDOStatement::__wakeup", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::__wakeup");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Variant HPHP::c_PDOStatement::t___sleep()
-_ZN4HPHP14c_PDOStatement9t___sleepEv
-
-(return value) => rax
-_rv => rdi
-this_ => rsi
-*/
 
 TypedValue* th_12PDOStatement___sleep(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement9t___sleepEv");
 
-TypedValue* tg_12PDOStatement___sleep(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        th_12PDOStatement___sleep((&(rv)), (this_));
-        if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("PDOStatement::__sleep", 0, 1);
-      }
+TypedValue* tg_12PDOStatement___sleep(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      th_12PDOStatement___sleep(rv, (this_));
+      if (rv->m_type == KindOfUninit) rv->m_type = KindOfNull;
     } else {
-      throw_instance_method_fatal("PDOStatement::__sleep");
+      throw_toomany_arguments_nr("PDOStatement::__sleep", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("PDOStatement::__sleep");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-
-} // !HPHP
-
+} // namespace HPHP

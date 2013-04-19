@@ -16,16 +16,6 @@
 */
 namespace HPHP {
 
-/*
-HPHP::Array HPHP::f_pdo_drivers()
-_ZN4HPHP13f_pdo_driversEv
-
-(return value) => rax
-_rv => rdi
-*/
-
 Value* fh_pdo_drivers(Value* _rv) asm("_ZN4HPHP13f_pdo_driversEv");
 
-
-} // !HPHP
-
+} // namespace HPHP

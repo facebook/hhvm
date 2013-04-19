@@ -16,20 +16,6 @@
 */
 namespace HPHP {
 
-/*
-HPHP::Object HPHP::f_hphp_create_continuation(HPHP::String const&, HPHP::String const&, HPHP::String const&, HPHP::Array const&)
-_ZN4HPHP26f_hphp_create_continuationERKNS_6StringES2_S2_RKNS_5ArrayE
-
-(return value) => rax
-_rv => rdi
-clsname => rsi
-funcname => rdx
-origFuncName => rcx
-args => r8
-*/
-
 Value* fh_hphp_create_continuation(Value* _rv, Value* clsname, Value* funcname, Value* origFuncName, Value* args) asm("_ZN4HPHP26f_hphp_create_continuationERKNS_6StringES2_S2_RKNS_5ArrayE");
 
-
-} // !HPHP
-
+} // namespace HPHP

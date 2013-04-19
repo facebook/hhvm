@@ -16,122 +16,24 @@
 */
 namespace HPHP {
 
-/*
-HPHP::Variant HPHP::f_base64_decode(HPHP::String const&, bool)
-_ZN4HPHP15f_base64_decodeERKNS_6StringEb
-
-(return value) => rax
-_rv => rdi
-data => rsi
-strict => rdx
-*/
-
 TypedValue* fh_base64_decode(TypedValue* _rv, Value* data, bool strict) asm("_ZN4HPHP15f_base64_decodeERKNS_6StringEb");
-
-/*
-HPHP::String HPHP::f_base64_encode(HPHP::String const&)
-_ZN4HPHP15f_base64_encodeERKNS_6StringE
-
-(return value) => rax
-_rv => rdi
-data => rsi
-*/
 
 Value* fh_base64_encode(Value* _rv, Value* data) asm("_ZN4HPHP15f_base64_encodeERKNS_6StringE");
 
-/*
-HPHP::Variant HPHP::f_get_headers(HPHP::String const&, int)
-_ZN4HPHP13f_get_headersERKNS_6StringEi
-
-(return value) => rax
-_rv => rdi
-url => rsi
-format => rdx
-*/
-
 TypedValue* fh_get_headers(TypedValue* _rv, Value* url, int format) asm("_ZN4HPHP13f_get_headersERKNS_6StringEi");
-
-/*
-HPHP::Array HPHP::f_get_meta_tags(HPHP::String const&, bool)
-_ZN4HPHP15f_get_meta_tagsERKNS_6StringEb
-
-(return value) => rax
-_rv => rdi
-filename => rsi
-use_include_path => rdx
-*/
 
 Value* fh_get_meta_tags(Value* _rv, Value* filename, bool use_include_path) asm("_ZN4HPHP15f_get_meta_tagsERKNS_6StringEb");
 
-/*
-HPHP::Variant HPHP::f_http_build_query(HPHP::Variant const&, HPHP::String const&, HPHP::String const&)
-_ZN4HPHP18f_http_build_queryERKNS_7VariantERKNS_6StringES5_
-
-(return value) => rax
-_rv => rdi
-formdata => rsi
-numeric_prefix => rdx
-arg_separator => rcx
-*/
-
 TypedValue* fh_http_build_query(TypedValue* _rv, TypedValue* formdata, Value* numeric_prefix, Value* arg_separator) asm("_ZN4HPHP18f_http_build_queryERKNS_7VariantERKNS_6StringES5_");
-
-/*
-HPHP::Variant HPHP::f_parse_url(HPHP::String const&, int)
-_ZN4HPHP11f_parse_urlERKNS_6StringEi
-
-(return value) => rax
-_rv => rdi
-url => rsi
-component => rdx
-*/
 
 TypedValue* fh_parse_url(TypedValue* _rv, Value* url, int component) asm("_ZN4HPHP11f_parse_urlERKNS_6StringEi");
 
-/*
-HPHP::String HPHP::f_rawurldecode(HPHP::String const&)
-_ZN4HPHP14f_rawurldecodeERKNS_6StringE
-
-(return value) => rax
-_rv => rdi
-str => rsi
-*/
-
 Value* fh_rawurldecode(Value* _rv, Value* str) asm("_ZN4HPHP14f_rawurldecodeERKNS_6StringE");
-
-/*
-HPHP::String HPHP::f_rawurlencode(HPHP::String const&)
-_ZN4HPHP14f_rawurlencodeERKNS_6StringE
-
-(return value) => rax
-_rv => rdi
-str => rsi
-*/
 
 Value* fh_rawurlencode(Value* _rv, Value* str) asm("_ZN4HPHP14f_rawurlencodeERKNS_6StringE");
 
-/*
-HPHP::String HPHP::f_urldecode(HPHP::String const&)
-_ZN4HPHP11f_urldecodeERKNS_6StringE
-
-(return value) => rax
-_rv => rdi
-str => rsi
-*/
-
 Value* fh_urldecode(Value* _rv, Value* str) asm("_ZN4HPHP11f_urldecodeERKNS_6StringE");
-
-/*
-HPHP::String HPHP::f_urlencode(HPHP::String const&)
-_ZN4HPHP11f_urlencodeERKNS_6StringE
-
-(return value) => rax
-_rv => rdi
-str => rsi
-*/
 
 Value* fh_urlencode(Value* _rv, Value* str) asm("_ZN4HPHP11f_urlencodeERKNS_6StringE");
 
-
-} // !HPHP
-
+} // namespace HPHP

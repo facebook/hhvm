@@ -14,15 +14,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/ext_hhvm/ext_hhvm.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/ext/ext.h>
-#include <runtime/vm/class.h>
-#include <runtime/vm/runtime.h>
+
+#include "runtime/ext_hhvm/ext_hhvm.h"
+#include "runtime/base/builtin_functions.h"
+#include "runtime/base/array/array_init.h"
+#include "runtime/ext/ext.h"
+#include "runtime/vm/class.h"
+#include "runtime/vm/runtime.h"
 #include <exception>
 
 namespace HPHP {
+
 
 HPHP::VM::Instance* new_GenArrayWaitHandle_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
@@ -34,93 +36,64 @@ HPHP::VM::Instance* new_GenArrayWaitHandle_Instance(HPHP::VM::Class* cls) {
 }
 
 IMPLEMENT_CLASS(GenArrayWaitHandle);
-/*
-void HPHP::c_GenArrayWaitHandle::t___construct()
-_ZN4HPHP20c_GenArrayWaitHandle13t___constructEv
-
-this_ => rdi
-*/
-
 void th_18GenArrayWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP20c_GenArrayWaitHandle13t___constructEv");
 
-TypedValue* tg_18GenArrayWaitHandle___construct(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_data.num = 0LL;
-        rv.m_type = KindOfNull;
-        th_18GenArrayWaitHandle___construct((this_));
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("GenArrayWaitHandle::__construct", 0, 1);
-      }
+TypedValue* tg_18GenArrayWaitHandle___construct(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfNull;
+      th_18GenArrayWaitHandle___construct((this_));
     } else {
-      throw_instance_method_fatal("GenArrayWaitHandle::__construct");
+      throw_toomany_arguments_nr("GenArrayWaitHandle::__construct", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("GenArrayWaitHandle::__construct");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Object HPHP::c_GenArrayWaitHandle::ti_create(char const*, HPHP::Array const&)
-_ZN4HPHP20c_GenArrayWaitHandle9ti_createEPKcRKNS_5ArrayE
-
-(return value) => rax
-_rv => rdi
-cls_ => rsi
-dependencies => rdx
-*/
 
 Value* th_18GenArrayWaitHandle_create(Value* _rv, char const* cls_, Value* dependencies) asm("_ZN4HPHP20c_GenArrayWaitHandle9ti_createEPKcRKNS_5ArrayE");
 
-TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, ActRec* ar, int64_t count) {
+void tg1_18GenArrayWaitHandle_create(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void tg1_18GenArrayWaitHandle_create(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfObject;
   tvCastToArrayInPlace(args-0);
-  th_18GenArrayWaitHandle_create((&rv->m_data), ("GenArrayWaitHandle"), &args[-0].m_data);
-  if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
-  return rv;
+  rv->m_type = KindOfObject;
+  th_18GenArrayWaitHandle_create(&(rv->m_data), "GenArrayWaitHandle", &args[-0].m_data);
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
 }
 
-TypedValue* tg_18GenArrayWaitHandle_create(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      if ((args-0)->m_type == KindOfArray) {
-        rv.m_type = KindOfObject;
-        th_18GenArrayWaitHandle_create((&rv.m_data), ("GenArrayWaitHandle"), &args[-0].m_data);
-        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        tg1_18GenArrayWaitHandle_create(&rv, ar, count );
-        frame_free_locals_no_this_inl(ar, 1);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* tg_18GenArrayWaitHandle_create(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (count == 1) {
+    if ((args - 0)->m_type == KindOfArray) {
+      rv->m_type = KindOfObject;
+      th_18GenArrayWaitHandle_create(&(rv->m_data), "GenArrayWaitHandle", &args[-0].m_data);
+      if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
     } else {
-      throw_wrong_arguments_nr("GenArrayWaitHandle::create", count, 1, 1, 1);
+      tg1_18GenArrayWaitHandle_create(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("GenArrayWaitHandle::create", count, 1, 1, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-
-} // !HPHP
-
+} // namespace HPHP

@@ -16,31 +16,8 @@
 */
 namespace HPHP {
 
-/*
-HPHP::String HPHP::f_json_encode(HPHP::Variant const&, HPHP::Variant const&)
-_ZN4HPHP13f_json_encodeERKNS_7VariantES2_
-
-(return value) => rax
-_rv => rdi
-value => rsi
-options => rdx
-*/
-
 Value* fh_json_encode(Value* _rv, TypedValue* value, TypedValue* options) asm("_ZN4HPHP13f_json_encodeERKNS_7VariantES2_");
-
-/*
-HPHP::Variant HPHP::f_json_decode(HPHP::String const&, bool, HPHP::Variant const&)
-_ZN4HPHP13f_json_decodeERKNS_6StringEbRKNS_7VariantE
-
-(return value) => rax
-_rv => rdi
-json => rsi
-assoc => rdx
-options => rcx
-*/
 
 TypedValue* fh_json_decode(TypedValue* _rv, Value* json, bool assoc, TypedValue* options) asm("_ZN4HPHP13f_json_decodeERKNS_6StringEbRKNS_7VariantE");
 
-
-} // !HPHP
-
+} // namespace HPHP

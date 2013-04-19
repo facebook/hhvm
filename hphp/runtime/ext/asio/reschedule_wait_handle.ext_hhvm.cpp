@@ -14,15 +14,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/ext_hhvm/ext_hhvm.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/ext/ext.h>
-#include <runtime/vm/class.h>
-#include <runtime/vm/runtime.h>
+
+#include "runtime/ext_hhvm/ext_hhvm.h"
+#include "runtime/base/builtin_functions.h"
+#include "runtime/base/array/array_init.h"
+#include "runtime/ext/ext.h"
+#include "runtime/vm/class.h"
+#include "runtime/vm/runtime.h"
 #include <exception>
 
 namespace HPHP {
+
 
 HPHP::VM::Instance* new_RescheduleWaitHandle_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
@@ -34,99 +36,70 @@ HPHP::VM::Instance* new_RescheduleWaitHandle_Instance(HPHP::VM::Class* cls) {
 }
 
 IMPLEMENT_CLASS(RescheduleWaitHandle);
-/*
-void HPHP::c_RescheduleWaitHandle::t___construct()
-_ZN4HPHP22c_RescheduleWaitHandle13t___constructEv
-
-this_ => rdi
-*/
-
 void th_20RescheduleWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP22c_RescheduleWaitHandle13t___constructEv");
 
-TypedValue* tg_20RescheduleWaitHandle___construct(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_data.num = 0LL;
-        rv.m_type = KindOfNull;
-        th_20RescheduleWaitHandle___construct((this_));
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("RescheduleWaitHandle::__construct", 0, 1);
-      }
+TypedValue* tg_20RescheduleWaitHandle___construct(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfNull;
+      th_20RescheduleWaitHandle___construct((this_));
     } else {
-      throw_instance_method_fatal("RescheduleWaitHandle::__construct");
+      throw_toomany_arguments_nr("RescheduleWaitHandle::__construct", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("RescheduleWaitHandle::__construct");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-/*
-HPHP::Object HPHP::c_RescheduleWaitHandle::ti_create(char const*, int, int)
-_ZN4HPHP22c_RescheduleWaitHandle9ti_createEPKcii
-
-(return value) => rax
-_rv => rdi
-cls_ => rsi
-queue => rdx
-priority => rcx
-*/
-
 Value* th_20RescheduleWaitHandle_create(Value* _rv, char const* cls_, int queue, int priority) asm("_ZN4HPHP22c_RescheduleWaitHandle9ti_createEPKcii");
 
-TypedValue* tg1_20RescheduleWaitHandle_create(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue* tg1_20RescheduleWaitHandle_create(TypedValue* rv, ActRec* ar, int64_t count) {
+void tg1_20RescheduleWaitHandle_create(TypedValue* rv, ActRec* ar, int32_t count) __attribute__((noinline,cold));
+void tg1_20RescheduleWaitHandle_create(TypedValue* rv, ActRec* ar, int32_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-  rv->m_type = KindOfObject;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
   }
   if ((args-0)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-0);
   }
-  th_20RescheduleWaitHandle_create((&rv->m_data), ("RescheduleWaitHandle"), (int)(args[-0].m_data.num), (int)(args[-1].m_data.num));
-  if (rv->m_data.num == 0LL)rv->m_type = KindOfNull;
-  return rv;
+  rv->m_type = KindOfObject;
+  th_20RescheduleWaitHandle_create(&(rv->m_data), "RescheduleWaitHandle", (int)(args[-0].m_data.num), (int)(args[-1].m_data.num));
+  if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
 }
 
-TypedValue* tg_20RescheduleWaitHandle_create(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 2LL) {
-      if ((args-1)->m_type == KindOfInt64 && (args-0)->m_type == KindOfInt64) {
-        rv.m_type = KindOfObject;
-        th_20RescheduleWaitHandle_create((&rv.m_data), ("RescheduleWaitHandle"), (int)(args[-0].m_data.num), (int)(args[-1].m_data.num));
-        if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        tg1_20RescheduleWaitHandle_create(&rv, ar, count );
-        frame_free_locals_no_this_inl(ar, 2);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      }
+TypedValue* tg_20RescheduleWaitHandle_create(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (count == 2) {
+    if ((args - 1)->m_type == KindOfInt64 &&
+        (args - 0)->m_type == KindOfInt64) {
+      rv->m_type = KindOfObject;
+      th_20RescheduleWaitHandle_create(&(rv->m_data), "RescheduleWaitHandle", (int)(args[-0].m_data.num), (int)(args[-1].m_data.num));
+      if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
     } else {
-      throw_wrong_arguments_nr("RescheduleWaitHandle::create", count, 2, 2, 1);
+      tg1_20RescheduleWaitHandle_create(rv, ar, count);
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 2);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_wrong_arguments_nr("RescheduleWaitHandle::create", count, 2, 2, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 2);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-
-} // !HPHP
-
+} // namespace HPHP

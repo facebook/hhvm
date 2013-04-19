@@ -39,11 +39,15 @@ fi
 
 # $1 - Binary to pull symbols from
 # $2 - .ext_hhvm.cpp file to build
+# $3 - .ext_hhvm.h file to build
 make_hhvm()
 {
   [ ! -f "$1" ] && check_err 1 "No object file to generate $2 from, did you build first?"
   [ $VERBOSE -eq 1 ] && echo "Generating $2"
-  $HHVM gen_ext_hhvm.php $2 . /dev/null /dev/null "" $1
+  readelf -s -W $1 | grep 'FUNC.*GLOBAL' | \
+    sed -e 's/^.*DEFAULT[0-9 ]*//' | \
+    $HPHP_HOME/hphp/tools/gen-ext-hhvm/gen-ext-hhvm \
+    $3 $2 $HPHP_HOME/hphp/idl/*.idl.json
   check_err $? "Failed generating $2"
 }
 
@@ -51,25 +55,29 @@ if [ "$1" = "hhvm" -o "$1" = "all" ]; then
   cd $HPHP_HOME/hphp/runtime/ext
   SOURCES=`find . -name '*.cpp' | grep -v ext_hhvm | grep -v sep | cut -c 3- | cut -d . -f 1`
   RUNTIME_BUILD=$HPHP_HOME/hphp/CMakeFiles/hphp_runtime_static.dir
-  cd $HPHP_HOME/hphp/runtime/ext_hhvm
   if [ -z "$SOURCES" -a $VERBOSE -eq 1 ]; then
     echo "No extensions found while generating *.ext_hhvm.cpp"
   fi
   for i in $SOURCES; do
-    make_hhvm $RUNTIME_BUILD/runtime/ext/$i.cpp.o ../ext/$i.ext_hhvm.cpp
+    make_hhvm $RUNTIME_BUILD/runtime/ext/$i.cpp.o ../ext/$i.ext_hhvm.cpp ../ext/$i.ext_hhvm.h
   done
-  make_hhvm $RUNTIME_BUILD/runtime/base/builtin_functions.cpp.o ../base/builtin_functions.ext_hhvm.cpp
+  make_hhvm $RUNTIME_BUILD/runtime/base/builtin_functions.cpp.o ../base/builtin_functions.ext_hhvm.cpp ../base/builtin_functions.ext_hhvm.h
 fi
 
 if [ "$1" = "infotabs" -o "$1" = "all" ]; then
   cd $HPHP_HOME/hphp/runtime/ext_hhvm
-
-  SOURCES=`find ../ext -name '*.ext_hhvm.cpp'`
   [ $VERBOSE -eq 1 ] && echo "Generating hphp/runtime/ext_hhvm/ext_hhvm_infotabs.h"
-  $HHVM gen_infotabs_header.php ext_hhvm_infotabs.h $SOURCES ../base/builtin_functions.ext_hhvm.cpp
+  echo -n "" > ext_hhvm_infotabs.h
+  SOURCES=`find ../ext ../base -name '*.ext_hhvm.h' | sort`
+  for i in $SOURCES; do
+    echo "#include \"$i\"" >> ext_hhvm_infotabs.h
+  done
 
+  cd $HPHP_HOME/hphp
   [ $VERBOSE -eq 1 ] && echo "Generating hphp/runtime/ext_hhvm/ext_hhvm_infotabs.cpp"
-  $HHVM gen_infotabs.php ext_hhvm_infotabs.cpp . "" "" ""
+  tools/gen-ext-hhvm/gen-infotabs \
+    runtime/ext_hhvm/ext_hhvm_infotabs.cpp \
+    idl/*.idl.json
   check_err $? "Failed generating hphp/runtime/ext_hhvm/ext_hhvm_infotabs.cpp"
 fi
 

@@ -14,15 +14,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <runtime/ext_hhvm/ext_hhvm.h>
-#include <runtime/base/builtin_functions.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/ext/ext.h>
-#include <runtime/vm/class.h>
-#include <runtime/vm/runtime.h>
+
+#include "runtime/ext_hhvm/ext_hhvm.h"
+#include "runtime/base/builtin_functions.h"
+#include "runtime/base/array/array_init.h"
+#include "runtime/ext/ext.h"
+#include "runtime/vm/class.h"
+#include "runtime/vm/runtime.h"
 #include <exception>
 
 namespace HPHP {
+
 
 HPHP::VM::Instance* new_StaticResultWaitHandle_Instance(HPHP::VM::Class* cls) {
   size_t nProps = cls->numDeclProperties();
@@ -34,76 +36,51 @@ HPHP::VM::Instance* new_StaticResultWaitHandle_Instance(HPHP::VM::Class* cls) {
 }
 
 IMPLEMENT_CLASS(StaticResultWaitHandle);
-/*
-void HPHP::c_StaticResultWaitHandle::t___construct()
-_ZN4HPHP24c_StaticResultWaitHandle13t___constructEv
-
-this_ => rdi
-*/
-
 void th_22StaticResultWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP24c_StaticResultWaitHandle13t___constructEv");
 
-TypedValue* tg_22StaticResultWaitHandle___construct(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    ObjectData* this_ = (ar->hasThis() ? ar->getThis() : NULL);
-    if (this_) {
-      if (count == 0LL) {
-        rv.m_data.num = 0LL;
-        rv.m_type = KindOfNull;
-        th_22StaticResultWaitHandle___construct((this_));
-        frame_free_locals_inl(ar, 0);
-        memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-        return &ar->m_r;
-      } else {
-        throw_toomany_arguments_nr("StaticResultWaitHandle::__construct", 0, 1);
-      }
+TypedValue* tg_22StaticResultWaitHandle___construct(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (this_) {
+    if (count == 0) {
+      rv->m_type = KindOfNull;
+      th_22StaticResultWaitHandle___construct((this_));
     } else {
-      throw_instance_method_fatal("StaticResultWaitHandle::__construct");
+      throw_toomany_arguments_nr("StaticResultWaitHandle::__construct", 0, 1);
+      rv->m_data.num = 0LL;
+      rv->m_type = KindOfNull;
     }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_inl(ar, 0);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+  } else {
+    throw_instance_method_fatal("StaticResultWaitHandle::__construct");
+  }
+  frame_free_locals_inl(ar, 0);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
-
-/*
-HPHP::Object HPHP::c_StaticResultWaitHandle::ti_create(char const*, HPHP::Variant const&)
-_ZN4HPHP24c_StaticResultWaitHandle9ti_createEPKcRKNS_7VariantE
-
-(return value) => rax
-_rv => rdi
-cls_ => rsi
-result => rdx
-*/
 
 Value* th_22StaticResultWaitHandle_create(Value* _rv, char const* cls_, TypedValue* result) asm("_ZN4HPHP24c_StaticResultWaitHandle9ti_createEPKcRKNS_7VariantE");
 
-TypedValue* tg_22StaticResultWaitHandle_create(ActRec *ar) {
-    TypedValue rv;
-    int64_t count = ar->numArgs();
-    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
-    if (count == 1LL) {
-      rv.m_type = KindOfObject;
-      th_22StaticResultWaitHandle_create((&rv.m_data), ("StaticResultWaitHandle"), (args-0));
-      if (rv.m_data.num == 0LL) rv.m_type = KindOfNull;
-      frame_free_locals_no_this_inl(ar, 1);
-      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-      return &ar->m_r;
-    } else {
-      throw_wrong_arguments_nr("StaticResultWaitHandle::create", count, 1, 1, 1);
-    }
-    rv.m_data.num = 0LL;
-    rv.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, 1);
-    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
-    return &ar->m_r;
+TypedValue* tg_22StaticResultWaitHandle_create(ActRec* ar) {
+  TypedValue rvSpace;
+  TypedValue* rv = &rvSpace;
+  int32_t count = ar->numArgs();
+  TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+  ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);
+  if (count == 1) {
+    rv->m_type = KindOfObject;
+    th_22StaticResultWaitHandle_create(&(rv->m_data), "StaticResultWaitHandle", (args-0));
+    if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;
+  } else {
+    throw_wrong_arguments_nr("StaticResultWaitHandle::create", count, 1, 1, 1);
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  frame_free_locals_no_this_inl(ar, 1);
+  memcpy(&ar->m_r, rv, sizeof(TypedValue));
   return &ar->m_r;
 }
 
-
-} // !HPHP
-
+} // namespace HPHP

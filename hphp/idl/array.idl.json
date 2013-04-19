@@ -145,6 +145,8 @@
         {
             "name": "array_column",
             "desc": "Return the values from a single column in the input array, identified by the value_key and optionally indexed by the index_key",
+            "flags": [
+            ],
             "return": {
               "type": "Variant",
               "desc": "Returns the array column, or FALSE on failure"

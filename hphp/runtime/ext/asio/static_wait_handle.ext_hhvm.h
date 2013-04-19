@@ -16,6 +16,4 @@
 */
 namespace HPHP {
 
-
-} // !HPHP
-
+} // namespace HPHP

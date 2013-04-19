@@ -16,33 +16,8 @@
 */
 namespace HPHP {
 
-/*
-void HPHP::f_thrift_protocol_write_binary(HPHP::Object const&, HPHP::String const&, long, HPHP::Object const&, int, bool)
-_ZN4HPHP30f_thrift_protocol_write_binaryERKNS_6ObjectERKNS_6StringElS2_ib
-
-transportobj => rdi
-method_name => rsi
-msgtype => rdx
-request_struct => rcx
-seqid => r8
-strict_write => r9
-*/
-
 void fh_thrift_protocol_write_binary(Value* transportobj, Value* method_name, long msgtype, Value* request_struct, int seqid, bool strict_write) asm("_ZN4HPHP30f_thrift_protocol_write_binaryERKNS_6ObjectERKNS_6StringElS2_ib");
-
-/*
-HPHP::Variant HPHP::f_thrift_protocol_read_binary(HPHP::Object const&, HPHP::String const&, bool)
-_ZN4HPHP29f_thrift_protocol_read_binaryERKNS_6ObjectERKNS_6StringEb
-
-(return value) => rax
-_rv => rdi
-transportobj => rsi
-obj_typename => rdx
-strict_read => rcx
-*/
 
 TypedValue* fh_thrift_protocol_read_binary(TypedValue* _rv, Value* transportobj, Value* obj_typename, bool strict_read) asm("_ZN4HPHP29f_thrift_protocol_read_binaryERKNS_6ObjectERKNS_6StringEb");
 
-
-} // !HPHP
-
+} // namespace HPHP

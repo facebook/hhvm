@@ -15,17 +15,6 @@
 */
 namespace HPHP {
 
-/*
-HPHP::String HPHP::f_serialize(HPHP::Variant const&)
-_ZN4HPHP11f_serializeERKNS_7VariantE
-
-(return value) => rax
-_rv => rdi
-value => rsi
-*/
-
 Value* fh_serialize(Value* _rv, TypedValue* value) asm("_ZN4HPHP11f_serializeERKNS_7VariantE");
 
-
-} // !HPHP
-
+} // namespace HPHP

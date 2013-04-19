@@ -16,41 +16,10 @@
 */
 namespace HPHP {
 
-/*
-int HPHP::f_thrift_protocol_set_compact_version(int)
-_ZN4HPHP37f_thrift_protocol_set_compact_versionEi
-
-(return value) => rax
-version => rdi
-*/
-
 int fh_thrift_protocol_set_compact_version(int version) asm("_ZN4HPHP37f_thrift_protocol_set_compact_versionEi");
-
-/*
-void HPHP::f_thrift_protocol_write_compact(HPHP::Object const&, HPHP::String const&, long, HPHP::Object const&, int)
-_ZN4HPHP31f_thrift_protocol_write_compactERKNS_6ObjectERKNS_6StringElS2_i
-
-transportobj => rdi
-method_name => rsi
-msgtype => rdx
-request_struct => rcx
-seqid => r8
-*/
 
 void fh_thrift_protocol_write_compact(Value* transportobj, Value* method_name, long msgtype, Value* request_struct, int seqid) asm("_ZN4HPHP31f_thrift_protocol_write_compactERKNS_6ObjectERKNS_6StringElS2_i");
 
-/*
-HPHP::Variant HPHP::f_thrift_protocol_read_compact(HPHP::Object const&, HPHP::String const&)
-_ZN4HPHP30f_thrift_protocol_read_compactERKNS_6ObjectERKNS_6StringE
-
-(return value) => rax
-_rv => rdi
-transportobj => rsi
-obj_typename => rdx
-*/
-
 TypedValue* fh_thrift_protocol_read_compact(TypedValue* _rv, Value* transportobj, Value* obj_typename) asm("_ZN4HPHP30f_thrift_protocol_read_compactERKNS_6ObjectERKNS_6StringE");
 
-
-} // !HPHP
-
+} // namespace HPHP

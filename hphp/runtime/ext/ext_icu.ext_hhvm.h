@@ -16,43 +16,10 @@
 */
 namespace HPHP {
 
-/*
-HPHP::Variant HPHP::f_icu_match(HPHP::String const&, HPHP::String const&, HPHP::VRefParamValue const&, long)
-_ZN4HPHP11f_icu_matchERKNS_6StringES2_RKNS_14VRefParamValueEl
-
-(return value) => rax
-_rv => rdi
-pattern => rsi
-subject => rdx
-matches => rcx
-flags => r8
-*/
-
 TypedValue* fh_icu_match(TypedValue* _rv, Value* pattern, Value* subject, TypedValue* matches, long flags) asm("_ZN4HPHP11f_icu_matchERKNS_6StringES2_RKNS_14VRefParamValueEl");
-
-/*
-HPHP::String HPHP::f_icu_transliterate(HPHP::String const&, bool)
-_ZN4HPHP19f_icu_transliterateERKNS_6StringEb
-
-(return value) => rax
-_rv => rdi
-str => rsi
-remove_accents => rdx
-*/
 
 Value* fh_icu_transliterate(Value* _rv, Value* str, bool remove_accents) asm("_ZN4HPHP19f_icu_transliterateERKNS_6StringEb");
 
-/*
-HPHP::Array HPHP::f_icu_tokenize(HPHP::String const&)
-_ZN4HPHP14f_icu_tokenizeERKNS_6StringE
-
-(return value) => rax
-_rv => rdi
-text => rsi
-*/
-
 Value* fh_icu_tokenize(Value* _rv, Value* text) asm("_ZN4HPHP14f_icu_tokenizeERKNS_6StringE");
 
-
-} // !HPHP
-
+} // namespace HPHP

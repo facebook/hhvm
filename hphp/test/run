@@ -130,8 +130,10 @@ function map_convenience_filename(string $file) {
   }
 
   $mappage = Map {
-    'quick' => 'hphp/test/quick',
-    'slow'  => 'hphp/test/slow',
+    'quick'    => 'hphp/test/quick',
+    'slow'     => 'hphp/test/slow',
+    'zend'     => 'hphp/test/zend/good',
+    'zend_bad' => 'hphp/test/zend/bad',
   };
 
   $m = null;

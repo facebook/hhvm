@@ -29,6 +29,6 @@ function main() {
   foo();
 
   set_error_handler('error_handler');
-  $x = FakeConstant;
+  return FakeConstant;
 }
 main();

@@ -23,7 +23,7 @@ array(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(18)
+    int(19)
     ["function"]=>
     string(2) "hi"
     ["class"]=>
@@ -39,7 +39,7 @@ array(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(20)
+    int(21)
     ["function"]=>
     string(4) "main"
     ["args"]=>

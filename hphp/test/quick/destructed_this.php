@@ -5,6 +5,7 @@ function id($x) { return $x; }
 class Foo {
   public function hi() {
     $bad = new Tracer();
+    return $bad !== null;
   }
 }
 

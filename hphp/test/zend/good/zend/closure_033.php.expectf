@@ -1,2 +1,2 @@
-Test::{closure}()
+Test::%a
 HipHop Fatal error: %a

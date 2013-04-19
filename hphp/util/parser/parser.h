@@ -57,10 +57,39 @@ public:
     StaticName
   };
 
+  /**
+   * These numbers are scattered throughout the code base (often hardcoded).
+   * Do not change unless you change all the occurances.
+   */
+  enum AnonFuncKind {
+    Closure,
+    CreateFunction,
+    ContinuationFromClosure,
+    Continuation
+  };
+
+  enum AnonFuncKindChar {
+    CharClosure = '0',
+    CharCreateFunction,
+    CharContinuationFromClosure,
+    CharContinuation
+  };
+
+  static char GetAnonPrefix(AnonFuncKind kind);
+
   static bool IsClosureName                (const std::string &name);
+  static bool IsCreateFunctionName         (const std::string &name);
   static bool IsContinuationName           (const std::string &name);
+  static bool IsContinuationFromClosureName(const std::string &name);
   static bool IsClosureOrContinuationName  (const std::string &name);
-  std::string getContinuationName(const std::string &name);
+  static bool IsAnonFunctionName           (const std::string &name) {
+    return IsAnonFunctionName(name.c_str());
+  }
+  static bool IsAnonFunctionName           (const char *name);
+  /**
+   * Reset parser static variables. Good for unit tests.
+   */
+  static void Reset();
 
 public:
   ParserBase(Scanner &scanner, const char *fileName);
@@ -120,6 +149,7 @@ public:
   void pushClass(bool isXhpClass);
   bool peekClass();
   void popClass();
+  std::string getAnonFuncName(AnonFuncKind kind);
 
   // for typevar checking
   void pushTypeScope();
@@ -207,6 +237,10 @@ protected:
   NamespaceState m_nsState;
   std::string m_namespace; // current namespace
   hphp_string_imap<std::string> m_aliases;
+
+  // for closure hidden name
+  static Mutex s_mutex;
+  static std::map<int64_t, int> s_closureIds;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

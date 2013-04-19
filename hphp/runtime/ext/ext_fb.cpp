@@ -1447,7 +1447,8 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
   }
 
   if (function_exists(new_func_name)) {
-    if (new_func_name.data()[0] != '1') {
+    if (new_func_name.data()[0] !=
+        ParserBase::CharCreateFunction) { // create_function
       raise_warning("fb_rename_function(%s, %s) failed: %s already exists!",
                     orig_func_name.data(), new_func_name.data(),
                     new_func_name.data());

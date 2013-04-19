@@ -58,13 +58,13 @@ class AsioContext {
     c_ContinuationWaitHandle* m_current;
 
     // queue of ContinuationWaitHandles ready for immediate execution
-    smart::queue<c_ContinuationWaitHandle*> m_queue_ready;
+    smart::queue<c_ContinuationWaitHandle*> m_runnableQueue;
 
     // queue of RescheduleWaitHandles scheduled in default mode
-    reschedule_priority_queue_t m_priority_queue_default;
+    reschedule_priority_queue_t m_priorityQueueDefault;
 
     // queue of RescheduleWaitHandles scheduled to be run once there is no pending I/O
-    reschedule_priority_queue_t m_priority_queue_no_pending_io;
+    reschedule_priority_queue_t m_priorityQueueNoPendingIO;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

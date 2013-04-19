@@ -39,19 +39,19 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
   assert(!m_current);
 
-  exitContextQueue(ctx_idx, m_queue_ready);
+  exitContextQueue(ctx_idx, m_runnableQueue);
 
-  for (auto it : m_priority_queue_default) {
+  for (auto it : m_priorityQueueDefault) {
     exitContextQueue(ctx_idx, it.second);
   }
 
-  for (auto it : m_priority_queue_no_pending_io) {
+  for (auto it : m_priorityQueueNoPendingIO) {
     exitContextQueue(ctx_idx, it.second);
   }
 }
 
 void AsioContext::schedule(c_ContinuationWaitHandle* wait_handle) {
-  m_queue_ready.push(wait_handle);
+  m_runnableQueue.push(wait_handle);
   wait_handle->incRefCount();
 }
 
@@ -60,8 +60,8 @@ void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, 
 
   reschedule_priority_queue_t& dst_queue =
     (queue == QUEUE_DEFAULT)
-      ? m_priority_queue_default
-      : m_priority_queue_no_pending_io;
+      ? m_priorityQueueDefault
+      : m_priorityQueueNoPendingIO;
 
   // creates a new per-prio queue if necessary
   dst_queue[priority].push(wait_handle);
@@ -75,9 +75,9 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
   while (!wait_handle->isFinished()) {
     // run queue of ready continuations
-    while (!m_queue_ready.empty()) {
-      auto current = m_queue_ready.front();
-      m_queue_ready.pop();
+    while (!m_runnableQueue.empty()) {
+      auto current = m_runnableQueue.front();
+      m_runnableQueue.pop();
       m_current = current;
       m_current->run();
       m_current = nullptr;
@@ -89,12 +89,12 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     }
 
     // run default priority queue once
-    if (runSingle(m_priority_queue_default)) {
+    if (runSingle(m_priorityQueueDefault)) {
       continue;
     }
 
     // run no-pending-io priority queue once
-    if (runSingle(m_priority_queue_no_pending_io)) {
+    if (runSingle(m_priorityQueueNoPendingIO)) {
       continue;
     }
 

@@ -86,8 +86,7 @@ public:
   CStrRef o_getClassNameHook() const { return s_TestResource; }
 };
 
-typedef SmartAllocator<SomeClass,
-                       SmartAllocatorImpl::TestAllocator>
+typedef SmartAllocator<SomeClass>
         SomeClassAlloc;
 
 bool TestCppBase::TestSmartAllocator() {

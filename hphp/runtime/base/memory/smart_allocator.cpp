@@ -54,27 +54,16 @@ void InitAllocatorThreadLocal() {
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-SmartAllocatorImpl::SmartAllocatorImpl(Name name, int itemSize)
-  : m_itemSize(itemSizeRoundup(itemSize)) , m_name(name) {
+SmartAllocatorImpl::SmartAllocatorImpl(const std::type_info* typeId,
+                                       uint itemSize)
+  : m_itemSize(itemSizeRoundup(itemSize)) , m_typeId(typeId) {
   assert(itemSize > 0);
   MemoryManager::TheMemoryManager()->add(this);
 }
 
-SmartAllocatorImpl::~SmartAllocatorImpl() {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool UNUSED is_iterable_type(SmartAllocatorImpl::Name type) {
-  return type == SmartAllocatorImpl::Variant ||
-         type == SmartAllocatorImpl::RefData ||
-         type == SmartAllocatorImpl::ObjectData ||
-         type == SmartAllocatorImpl::StringData ||
-         type == SmartAllocatorImpl::HphpArray;
-}
-
 SmartAllocatorImpl::Iterator::Iterator(const SmartAllocatorImpl* sa) {
-  assert(is_iterable_type(sa->getAllocatorType()));
   next();
 }
 
@@ -89,7 +78,7 @@ void SmartAllocatorImpl::Iterator::next() {
 // ObjectAllocator classes
 
 ObjectAllocatorBase::ObjectAllocatorBase(int itemSize)
-  : SmartAllocatorImpl(SmartAllocatorImpl::ObjectData, itemSize) {
+    : SmartAllocatorImpl(&typeid(ObjectData), itemSize) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

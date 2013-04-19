@@ -28,6 +28,7 @@
 #include <runtime/base/util/countable.h>
 #include <runtime/base/memory/memory_usage_stats.h>
 #include <util/trace.h>
+#include <typeinfo>
 
 namespace HPHP {
 
@@ -73,7 +74,7 @@ inline void smart_allocator_check_type() {
 #define NEW(T) new (T::AllocatorType::getNoCheck()) T
 #define NEWOBJ(T) new                                     \
   ((smart_allocator_check_type<T>(), ThreadLocalSingleton \
-    <ObjectAllocator<ObjectSizeClass<sizeof(T)>::value> > \
+    <ObjectAllocator<ObjectSizeClass<sizeof(T)>::value>>  \
     ::getNoCheck())) T
 #define NEWOBJSZ(T,SZ) \
   new ((smart_allocator_check_type<T>(), info->instanceSizeAllocator(SZ))) T
@@ -87,7 +88,7 @@ inline void smart_allocator_check_type() {
 #define DELETEOBJ(NS,T,OBJ) delete OBJ
 #define RELEASEOBJ(NS,T,OBJ)                              \
   (ThreadLocalSingleton                                   \
-    <ObjectAllocator<ObjectSizeClass<sizeof(T)>::value> > \
+    <ObjectAllocator<ObjectSizeClass<sizeof(T)>::value>>  \
     ::getNoCheck())->release(OBJ)
 #define SWEEPOBJ(T) this->~T()
 #endif
@@ -110,65 +111,48 @@ void InitAllocatorThreadLocal() ATTRIBUTE_COLD;
 
 #define DECLARE_SMART_ALLOCATION(T)                                     \
   public:                                                               \
-  typedef                                                               \
-    ThreadLocalSingleton<SmartAllocator<T, SmartAllocatorImpl::T> >     \
-    AllocatorType;                                                      \
+  typedef ThreadLocalSingleton<SmartAllocator<T>> AllocatorType;        \
   static void *SmaAllocatorInitSetup;                                   \
-  void release();                                                       \
+  void release();
 
 #define IMPLEMENT_SMART_ALLOCATION(T)                                   \
   void *T::SmaAllocatorInitSetup =                                      \
-    SmartAllocatorInitSetup<T, SmartAllocatorImpl::T>();                \
+    SmartAllocatorInitSetup<T>();                                       \
   void T::release() {                                                   \
     DELETE(T)(this);                                                    \
-  }                                                                     \
+  }
 
 #define IMPLEMENT_SMART_ALLOCATION_HOT(T)                               \
   void *T::SmaAllocatorInitSetup =                                      \
-    SmartAllocatorInitSetup<T, SmartAllocatorImpl::T>();                \
+    SmartAllocatorInitSetup<T>();                                       \
   HOT_FUNC void T::release() {                                          \
     DELETE(T)(this);                                                    \
-  }                                                                     \
+  }
 
 #define IMPLEMENT_SMART_ALLOCATION_CLS(C, T)                            \
   void *C::T::SmaAllocatorInitSetup =                                   \
-    SmartAllocatorInitSetup<C::T, SmartAllocatorImpl::T>();             \
+    SmartAllocatorInitSetup<C::T>();                                    \
   void C::T::release() {                                                \
     DELETE(T)(this);                                                    \
-  }                                                                     \
+  }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define SLAB_SIZE (2 << 20)
+const uint SLAB_SIZE = 2 << 20;
 
 /**
  * Just a simple free-list based memory allocator.
  */
 class SmartAllocatorImpl : boost::noncopyable {
 public:
-  enum Name {
-    TestAllocator = -1,
-    RefData,
-    StringData,
-    SharedMap,
-    Variant,
-    Bucket,
-    HphpArray,
-    ObjectData,
-    GlobalVariables,
-    TestGlobals
-  };
-
   struct Iterator;
 
   // Ensure we have room for freelist and _count tombstone
   static const size_t MinItemSize = 16;
 
 public:
-  SmartAllocatorImpl(Name name, int itemSize);
-  ~SmartAllocatorImpl();
+  SmartAllocatorImpl(const std::type_info* typeId, uint itemSize);
 
-  Name getAllocatorType() const { return m_name; }
   int getItemSize() const { return m_itemSize;}
   static size_t itemSizeRoundup(size_t n) {
     return n >= MinItemSize ? n : MinItemSize;
@@ -193,12 +177,17 @@ public:
    */
   bool isFromThisAllocator(void*) const { return false; }
 
+  const std::type_info& getAllocatorType() const {
+    assert(m_typeId);
+    return *m_typeId;
+  }
+
   // keep these frequently used fields together.
 private:
   TRACE_SET_MOD(smartalloc);
   GarbageList m_free;
-  const int m_itemSize;
-  const Name m_name;
+  const uint m_itemSize;
+  const std::type_info* m_typeId;
 };
 
 /*
@@ -220,7 +209,7 @@ struct SmartAllocatorImpl::Iterator : private boost::noncopyable {
 // This allocator is for known and fixed sized classes, like StringData or
 // ArrayData.
 
-template<typename T, SmartAllocatorImpl::Name TNameEnum>
+template <typename T>
 class SmartAllocator : public SmartAllocatorImpl {
  public:
   /**
@@ -228,7 +217,7 @@ class SmartAllocator : public SmartAllocatorImpl {
    * times to grow the memory, but the higher chance of increasing memory
    * footprint.
    */
-  SmartAllocator() : SmartAllocatorImpl(TNameEnum, sizeof(T)) {
+  SmartAllocator() : SmartAllocatorImpl(&typeid(T), sizeof(T)) {
     static_assert(sizeof(T) <= SLAB_SIZE, "slab too small");
   }
 
@@ -240,7 +229,7 @@ class SmartAllocator : public SmartAllocatorImpl {
   }
 
   static void Create(void* storage) {
-    new (storage) SmartAllocator<T, TNameEnum>();
+    new (storage) SmartAllocator<T>();
   }
   static void Delete(SmartAllocator *p) {
     p->~SmartAllocator();
@@ -250,9 +239,9 @@ class SmartAllocator : public SmartAllocatorImpl {
   }
 };
 
-template<typename T, SmartAllocatorImpl::Name TNameEnum>
+template<typename T>
 void *SmartAllocatorInitSetup() {
-  ThreadLocalSingleton<SmartAllocator<T, TNameEnum> > tls;
+  ThreadLocalSingleton<SmartAllocator<T>> tls;
   GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
   return (void*)tls.getNoCheck;
 }
@@ -333,9 +322,8 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-template<typename T, HPHP::SmartAllocatorImpl::Name TNameEnum>
-inline void *operator new(size_t sizeT,
-                          HPHP::SmartAllocator<T, TNameEnum> *a) {
+template<typename T>
+inline void *operator new(size_t sizeT, HPHP::SmartAllocator<T> *a) {
   assert(sizeT == sizeof(T));
   return a->alloc(HPHP::SmartAllocatorImpl::itemSizeRoundup(sizeof(T)));
 }
@@ -345,9 +333,8 @@ inline void *operator new(size_t sizeT, HPHP::ObjectAllocatorBase *a) {
   return a->alloc();
 }
 
-template<typename T, HPHP::SmartAllocatorImpl::Name TNameEnum>
-inline void operator delete
-(void *p, HPHP::SmartAllocator<T, TNameEnum> *a) {
+template<typename T>
+inline void operator delete(void *p, HPHP::SmartAllocator<T> *a) {
   assert(p);
   a->dealloc((T*)p);
 }

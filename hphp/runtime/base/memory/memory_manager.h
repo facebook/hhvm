@@ -50,15 +50,17 @@ const uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
  * to store a singly linked list.
  */
 class GarbageList {
+  struct NakedNode { NakedNode* next; };
+  NakedNode* ptr;
 public:
   GarbageList() : ptr(nullptr) {
   }
 
   // Pops an item, or returns NULL
   void* maybePop() {
-    void** ret = ptr;
+    auto ret = ptr;
     if (LIKELY(ret != nullptr)) {
-      ptr = (void**)*ret;
+      ptr = ret->next;
     }
     return ret;
   }
@@ -66,22 +68,22 @@ public:
   // Pushes an item on to the list. The item must be larger than
   // sizeof(void*)
   void push(void* val) {
-    void** convval = (void**)val;
-    *convval = ptr;
+    auto convval = (NakedNode*)val;
+    convval->next = ptr;
     ptr = convval;
   }
 
   // Number of items on the list.  We calculate this iteratively
   // on the assumption we don't query this often, so iterating is
   // faster than keeping a size field up-to-date.
-  int size() const {
-    int sz = 0;
+  uint size() const {
+    uint sz = 0;
     for (Iterator it = begin(), e = end(); it != e; ++it, ++sz) {}
     return sz;
   }
 
   bool empty() const {
-    return ptr == nullptr;
+    return !ptr;
   }
 
   // Remove all items from this list
@@ -91,7 +93,7 @@ public:
 
   class Iterator {
   public:
-    explicit Iterator(const GarbageList& l) : curptr(l.ptr) {}
+    explicit Iterator(const GarbageList& lst) : curptr(lst.ptr) {}
 
     Iterator(const Iterator &other) : curptr(other.curptr) {}
     Iterator() : curptr(nullptr) {}
@@ -105,14 +107,13 @@ public:
     }
 
     Iterator &operator++() {
-      if (curptr) {
-        curptr = (void**)*curptr;
-      }
+      assert(curptr);
+      curptr = curptr->next;
       return *this;
     }
 
     Iterator operator++(int) {
-      Iterator ret(*this);
+      auto ret(*this);
       operator++();
       return ret;
     }
@@ -122,7 +123,7 @@ public:
     }
 
   private:
-    void** curptr;
+    NakedNode* curptr;
   };
 
   Iterator begin() const {
@@ -134,9 +135,6 @@ public:
   }
 
   typedef Iterator iterator;
-
-private:
-  void** ptr;
 };
 
 /**

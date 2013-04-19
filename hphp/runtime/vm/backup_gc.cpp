@@ -95,7 +95,7 @@ bool is_smart_allocated(ObjectData* obj) {
   // size, so currently we have to check them all.
   MemoryManager::AllocIterator aIter(MemoryManager::TheMemoryManager());
   while (SmartAllocatorImpl* sa = aIter.current()) {
-    if (sa->getAllocatorType() == SmartAllocatorImpl::ObjectData) {
+    if (sa->getAllocatorType() == typeid(ObjectData)) {
       if (sa->isFromThisAllocator(obj)) return true;
     }
     aIter.next();
@@ -131,25 +131,18 @@ void walk_allocator(const Visitor& visit, SmartAllocatorImpl* sa) {
 template<class Visitor>
 void walk_smart_heap(const Visitor& visit) {
   MemoryManager::AllocIterator aIter(MemoryManager::TheMemoryManager());
-  while (SmartAllocatorImpl* sa = aIter.current()) {
-    switch (sa->getAllocatorType()) {
-    case SmartAllocatorImpl::HphpArray:
+  for (; SmartAllocatorImpl* sa = aIter.current(); aIter.next()) {
+    auto const& t = sa->getAllocatorType();
+    if (t == typeid(HphpArray)) {
       walk_allocator<ArrayData>(visit, sa);
-      break;
-    case SmartAllocatorImpl::RefData:
+    } else if (t == typeid(RefData)) {
       walk_allocator<RefData>(visit, sa);
-      break;
-    case SmartAllocatorImpl::ObjectData:
+    } else  if (t == typeid(ObjectData)) {
       walk_allocator<ObjectData>(visit, sa);
-      break;
-    case SmartAllocatorImpl::StringData:
+    } else if (t == typeid(StringData)) {
       // Unneccesary for the first level walk, because strings can't
       // have references to other objects.
-      break;
-    default:
-      break;
     }
-    aIter.next();
   }
 }
 

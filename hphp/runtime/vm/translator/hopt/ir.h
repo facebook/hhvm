@@ -50,7 +50,10 @@ class StringData;
 namespace VM {
 namespace JIT {
 
-using namespace HPHP::VM::Transl;
+using HPHP::VM::Transl::TCA;
+using HPHP::VM::Transl::RegSet;
+using HPHP::VM::Transl::PhysReg;
+using HPHP::VM::Transl::ConditionCode;
 
 struct IRInstruction;
 
@@ -582,6 +585,7 @@ O(EmptyElem,                   D(Bool), C(TCA)                                \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
 O(IncStatGrouped,                   ND, CStr CStr C(Int),            E|N|Mem) \
+O(IncTransCounter,                  ND, NA,                                E) \
 O(DbgAssertRefCount,                ND, SUnk,                            N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(Nop,                              ND, NA,                               NF) \
@@ -895,6 +899,8 @@ inline Opcode queryJmpToQueryOp(Opcode opc) {
 
 inline ConditionCode queryJmpToCC(Opcode opc) {
   assert(isQueryJmpOp(opc));
+
+  using namespace HPHP::VM::Transl;
 
   switch (opc) {
     case JmpGt:                 return CC_G;
@@ -1540,45 +1546,46 @@ class RawMemSlot {
     : m_offset(offset), m_size(size), m_type(type), m_allowExtra(allowExtra) { }
 
   static RawMemSlot& GetContLabel() {
-    static RawMemSlot m(CONTOFF(m_label), sz::qword, Type::Int);
+    static RawMemSlot m(CONTOFF(m_label), Transl::sz::qword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContDone() {
-    static RawMemSlot m(CONTOFF(m_done), sz::byte, Type::Bool);
+    static RawMemSlot m(CONTOFF(m_done), Transl::sz::byte, Type::Bool);
     return m;
   }
   static RawMemSlot& GetContShouldThrow() {
-    static RawMemSlot m(CONTOFF(m_should_throw), sz::byte, Type::Bool);
+    static RawMemSlot m(CONTOFF(m_should_throw), Transl::sz::byte, Type::Bool);
     return m;
   }
   static RawMemSlot& GetContRunning() {
-    static RawMemSlot m(CONTOFF(m_running), sz::byte, Type::Bool);
+    static RawMemSlot m(CONTOFF(m_running), Transl::sz::byte, Type::Bool);
     return m;
   }
   static RawMemSlot& GetContARPtr() {
-    static RawMemSlot m(CONTOFF(m_arPtr), sz::qword, Type::StkPtr);
+    static RawMemSlot m(CONTOFF(m_arPtr), Transl::sz::qword, Type::StkPtr);
     return m;
   }
   static RawMemSlot& GetStrLen() {
-    static RawMemSlot m(StringData::sizeOffset(), sz::dword, Type::Int);
+    static RawMemSlot m(StringData::sizeOffset(), Transl::sz::dword, Type::Int);
     return m;
   }
   static RawMemSlot& GetFuncNumParams() {
-    static RawMemSlot m(Func::numParamsOff(), sz::qword, Type::Int);
+    static RawMemSlot m(Func::numParamsOff(), Transl::sz::qword, Type::Int);
     return m;
   }
   static RawMemSlot& GetFuncRefBitVec() {
-    static RawMemSlot m(Func::refBitVecOff(), sz::qword, Type::Int);
+    static RawMemSlot m(Func::refBitVecOff(), Transl::sz::qword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContEntry() {
     static RawMemSlot m(
       Func::prologueTableOff() + sizeof(HPHP::VM::Transl::TCA),
-      sz::qword, Type::TCA);
+      Transl::sz::qword, Type::TCA);
     return m;
   }
   static RawMemSlot& GetMisCtx() {
-    static RawMemSlot m(HHIR_MISOFF(ctx), sz::qword, Type::Cls);
+    using namespace HPHP::VM::Transl;
+    static RawMemSlot m(HHIR_MISOFF(ctx), Transl::sz::qword, Type::Cls);
     return m;
   }
 
@@ -1994,7 +2001,7 @@ public:
    * Reload instructions need to deal with SSATmps that are spilled.
    */
   bool hasReg(uint32_t i = 0) const {
-    return !m_isSpilled && m_regs[i] != InvalidReg;
+    return !m_isSpilled && m_regs[i] != Transl::InvalidReg;
   }
 
   /*
@@ -2062,7 +2069,7 @@ private:
     , m_isSpilled(false)
     , m_spillSlot(-1)
   {
-    m_regs[0] = m_regs[1] = InvalidReg;
+    m_regs[0] = m_regs[1] = Transl::InvalidReg;
   }
   SSATmp(const SSATmp&);
   SSATmp& operator=(const SSATmp&);

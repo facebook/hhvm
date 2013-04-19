@@ -42,6 +42,8 @@
 
 namespace HPHP { namespace VM { namespace JIT {
 
+using namespace HPHP::VM::Transl;
+
 #define IRT(name, ...) const Type Type::name(Type::k##name);
 IR_TYPES
 #undef IRT

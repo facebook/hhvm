@@ -89,11 +89,7 @@ void cgPunt(const char* file, int line, const char* func) {
   throw FailedCodeGen(file, line, func);
 }
 
-#define CG_PUNT(instr) do {                     \
-  if (tx64) {                                   \
-    cgPunt( __FILE__, __LINE__, #instr);        \
-  }                                             \
-} while(0)
+#define CG_PUNT(instr) cgPunt(__FILE__, __LINE__, #instr)
 
 struct CycleInfo {
   int node;
@@ -4855,6 +4851,10 @@ void CodeGenerator::cgIncStat(IRInstruction *inst) {
                  inst->getSrc(2)->getValBool());
 }
 
+void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {
+  m_tx64->emitTransCounterInc(m_as);
+}
+
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   emitAssertRefCount(m_as, inst->getSrc(0)->getReg());
 }
@@ -4913,14 +4913,6 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
   for (IRInstruction& instr : *block) {
     IRInstruction* inst = &instr;
     if (inst->op() == Marker) {
-      if (!m_state.firstMarkerSeen) {
-        m_state.firstMarkerSeen = true;
-        // This will be generated right after the tracelet guards
-        if (RuntimeOption::EvalJitTransCounters && m_tx64 &&
-            block->getTrace()->isMain()) {
-          m_tx64->emitTransCounterInc(m_as);
-        }
-      }
       m_state.lastMarker = inst->getExtra<Marker>();
       if (m_tx64 && m_tx64->isTransDBEnabled() && bcMap) {
         bcMap->push_back((TransBCMapping){Offset(m_state.lastMarker->bcOff),
@@ -4941,7 +4933,6 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
 
 void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
              vector<TransBCMapping>* bcMap, CodegenState& state) {
-  state.firstMarkerSeen = false;
   state.lastMarker = nullptr;
   if (RuntimeOption::EvalHHIRGenerateAsserts && trace->isMain()) {
     CodeGenerator::emitTraceCall(amain, trace->getBcOff(), tx64);

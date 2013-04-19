@@ -34,6 +34,8 @@ namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
+using namespace HPHP::VM::Transl;
+
 ArrayData* HhbcTranslator::lookupArrayId(int arrId) {
   return getCurUnit()->lookupArrayId(arrId);
 }
@@ -1037,6 +1039,10 @@ void HhbcTranslator::emitIncStat(int32_t counter, int32_t value, bool force) {
   if (Stats::enabled() || force) {
     m_tb->genIncStat(counter, value, force);
   }
+}
+
+void HhbcTranslator::emitIncTransCounter() {
+  m_tb->gen(IncTransCounter);
 }
 
 SSATmp* HhbcTranslator::getStrName(const StringData* knownName) {

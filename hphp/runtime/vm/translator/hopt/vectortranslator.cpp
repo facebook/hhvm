@@ -28,8 +28,7 @@ namespace HPHP { namespace VM { namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
-using Transl::MInstrState;
-using Transl::mInstrHasUnknownOffsets;
+using namespace HPHP::VM::Transl;
 
 static bool wantPropSpecializedWarnings() {
   return !RuntimeOption::RepoAuthoritative ||

@@ -21,6 +21,8 @@
 #include "util/trace.h"
 #include "runtime/vm/translator/hopt/ir.h"
 
+using namespace HPHP::VM::Transl;
+
 namespace HPHP { namespace VM { namespace JIT {
 
 TRACE_SET_MOD(hhir);

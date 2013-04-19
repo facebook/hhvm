@@ -27,7 +27,8 @@
 #include "runtime/vm/translator/runtime-type.h"
 #include "runtime/vm/translator/hopt/tracebuilder.h"
 
-using namespace HPHP::VM::Transl;
+using HPHP::VM::Transl::SrcKey;
+using HPHP::VM::Transl::NormalizedInstruction;
 
 namespace HPHP {
 namespace VM {
@@ -343,6 +344,7 @@ struct HhbcTranslator {
 
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force = false);
+  void emitIncTransCounter();
 
   template<typename T>
   SSATmp* cns(T val) {
@@ -377,7 +379,7 @@ private:
    */
   class VectorTranslator {
    public:
-    VectorTranslator(const Transl::NormalizedInstruction& ni,
+    VectorTranslator(const NormalizedInstruction& ni,
                      HhbcTranslator& ht);
     void emit();
 
@@ -400,7 +402,7 @@ private:
     void emitIntermediateOp();
     void emitProp();
     void emitPropGeneric();
-    void emitPropSpecialized(const MInstrAttr mia, PropInfo);
+    void emitPropSpecialized(const MInstrAttr mia, Transl::PropInfo propInfo);
     void emitElem();
     void emitNewElem();
     void emitRatchetRefs();
@@ -435,7 +437,7 @@ private:
     SSATmp* getValue();
     SSATmp* checkInitProp(SSATmp* baseAsObj,
                           SSATmp* propAddr,
-                          PropInfo propOffset,
+                          Transl::PropInfo propOffset,
                           bool warn,
                           bool define);
     Class* contextClass() const;

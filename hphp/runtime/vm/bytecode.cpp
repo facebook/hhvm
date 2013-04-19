@@ -982,8 +982,7 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
   // count starts over for the caller frame.
   fault.m_handledCount = 0;
 
-  if (fp->isFromFPushCtor()) {
-    assert(fp->hasThis());
+  if (fp->isFromFPushCtor() && fp->hasThis()) {
     fp->getThis()->setNoDestruct();
   }
 

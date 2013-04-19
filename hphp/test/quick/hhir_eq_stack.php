@@ -14,6 +14,7 @@ function wat() {
   $l = array($z, $z);
   $y = $k == $z;
   $k = null;
+  return $y;
 }
 
 try { wat(); }

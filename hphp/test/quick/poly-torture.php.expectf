@@ -16,9 +16,9 @@ HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 1 given in %s
 HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 2 given in %s on line 41
 HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 3 given in %s on line 41
 HipHop Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 4 given in %s on line 41
-HipHop Notice: Undefined variable: d in %s on line 41
-HipHop Notice: Undefined variable: e in %s on line 41
-C also has this method with params:  
+C also has this method with params: HipHop Notice: Undefined variable: d in %s on line 41
+ HipHop Notice: Undefined variable: e in %s on line 41
+
 --C also has this method with params: 3 4
     randObj: A
     randObj: C

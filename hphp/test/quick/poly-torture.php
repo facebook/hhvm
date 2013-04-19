@@ -38,7 +38,7 @@ class C {
     echo "C::__call $nm\n";
   }
   function noSuchMethodBoyeee($a, $b, $c, $d, $e) {
-    echo "C also has this method with params: $d $e\n";
+    echo "C also has this method with params: ", $d, " ", $e, "\n";
   }
 }
 
@@ -62,7 +62,7 @@ class MagicBox {
   }
   function __call($nm, $arr) {
     echo "--";
-    call_user_func_array(array($this->inner, $nm), $arr); 
+    call_user_func_array(array($this->inner, $nm), $arr);
   }
 }
 

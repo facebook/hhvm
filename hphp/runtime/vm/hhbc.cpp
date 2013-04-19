@@ -676,7 +676,7 @@ std::string instrToString(const Opcode* it, const Unit* u /* = NULL */) {
 #define READOFF() do {                                              \
   Offset _value = *(Offset*)it;                                     \
   out << " " << _value;                                             \
-  if (u != nullptr) {                                                  \
+  if (u != nullptr && _value >= 0) {                                \
     out << " (" << u->offsetOf(iStart + _value) << ")";             \
   }                                                                 \
   it += sizeof(Offset);                                             \

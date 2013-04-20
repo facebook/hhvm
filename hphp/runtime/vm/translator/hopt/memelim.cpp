@@ -32,7 +32,7 @@ namespace {
 
 class MemMap {
  public:
-  MemMap(IRFactory* factory)
+  explicit MemMap(IRFactory* factory)
     : m_factory(factory)
     , m_liveInsts(factory->numInsts()) {
     assert(factory != nullptr);
@@ -71,7 +71,7 @@ private:
   // it can also track the reference count of the box for better availability
   // analysis. and when the object gets to a ref count of 0 it will be destroyed
   struct RefInfo : public Counted {
-    RefInfo(IRInstruction* inst, bool killValue = false) {
+    explicit RefInfo(IRInstruction* inst, bool killValue = false) {
       update(inst, killValue);
     }
 
@@ -86,7 +86,7 @@ private:
   };
 
   struct LocInfo : public Counted {
-    LocInfo(IRInstruction* inst, bool killValue = false) {
+    explicit LocInfo(IRInstruction* inst, bool killValue = false) {
       update(inst, killValue);
     }
 

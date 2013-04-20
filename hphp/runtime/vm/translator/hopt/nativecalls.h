@@ -36,7 +36,7 @@ enum FuncType : unsigned {
 
 struct FuncPtr {
   FuncPtr() {}
-  FuncPtr(TCA f) : type(FPtr), ptr(f) {}
+  /* implicit */ FuncPtr(TCA f) : type(FPtr), ptr(f) {}
   FuncPtr(FuncType t, uint64_t i) : type(t), srcIdx(i) { assert(t == FSSA); }
 
   FuncType type;

@@ -37,10 +37,12 @@ struct Location {
     This,     // $this in the current frame
   };
 
-  Location(Space spc)
-  : space(spc)
-  , offset(0)
-  { assert(spc == This); }
+  explicit Location(Space spc)
+    : space(spc)
+    , offset(0)
+  {
+    assert(spc == This);
+  }
 
   Location(Space spc, int64_t off)
     : space(spc)
@@ -125,12 +127,12 @@ public:
 };
 
 struct InputInfo {
-  InputInfo(const Location &l)
-    : loc(l),
-      dontBreak(false),
-      dontGuard(l.isLiteral()),
-      dontGuardInner(false)
-    {}
+  explicit InputInfo(const Location &l)
+    : loc(l)
+    , dontBreak(false)
+    , dontGuard(l.isLiteral())
+    , dontGuardInner(false)
+  {}
 
   std::string pretty() const {
     std::string p = loc.pretty();
@@ -228,17 +230,17 @@ class RuntimeType {
   }
 
  public:
-  RuntimeType(DataType outer, DataType inner = KindOfInvalid,
-              const Class* = nullptr);
-  RuntimeType(const StringData*);
-  RuntimeType(const ArrayData*);
-  RuntimeType(const Class*);
+  explicit RuntimeType(DataType outer, DataType inner = KindOfInvalid,
+                       const Class* = nullptr);
+  explicit RuntimeType(const StringData*);
+  explicit RuntimeType(const ArrayData*);
+  explicit RuntimeType(const Class*);
   explicit RuntimeType(bool value);
   explicit RuntimeType(int64_t value);
   RuntimeType(const RuntimeType& copy);
   RuntimeType();
-  RuntimeType(const Iter* iter);
-  RuntimeType(ArrayIter::Type type);
+  explicit RuntimeType(const Iter* iter);
+  explicit RuntimeType(ArrayIter::Type type);
 
   static const int UnknownBool = -1;
 

@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 #define __STDC_FORMAT_MACROS
+
+#include "runtime/vm/translator/translator-x64.h"
+
 #include <cinttypes>
 #include <stdint.h>
 #include <assert.h>
@@ -76,7 +79,6 @@ typedef __sighandler_t *sighandler_t;
 #include "runtime/vm/translator/targetcache.h"
 #include "runtime/vm/translator/translator-deps.h"
 #include "runtime/vm/translator/translator-inline.h"
-#include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/translator/srcdb.h"
 #include "runtime/vm/translator/x64-util.h"
 #include "runtime/vm/translator/unwind-x64.h"
@@ -3017,7 +3019,7 @@ TranslatorX64::emitRetFromInterpretedGeneratorFrame() {
 class FreeRequestStubTrigger : public Treadmill::WorkItem {
   TCA m_stub;
  public:
-  FreeRequestStubTrigger(TCA stub) : m_stub(stub) {
+  explicit FreeRequestStubTrigger(TCA stub) : m_stub(stub) {
     TRACE(3, "FreeStubTrigger @ %p, stub %p\n", this, m_stub);
   }
   virtual void operator()() {
@@ -11863,7 +11865,7 @@ namespace {
 
 struct DeferredFileInvalidate : public DeferredWorkItem {
   Eval::PhpFile* m_f;
-  DeferredFileInvalidate(Eval::PhpFile* f) : m_f(f) {
+  explicit DeferredFileInvalidate(Eval::PhpFile* f) : m_f(f) {
     TRACE(2, "DeferredFileInvalidate @ %p, m_f %p\n", this, m_f); }
   void operator()() {
     TRACE(2, "DeferredFileInvalidate: Firing @ %p , m_f %p\n", this, m_f);
@@ -11873,7 +11875,7 @@ struct DeferredFileInvalidate : public DeferredWorkItem {
 
 struct DeferredPathInvalidate : public DeferredWorkItem {
   const std::string m_path;
-  DeferredPathInvalidate(const std::string& path) : m_path(path) {
+  explicit DeferredPathInvalidate(const std::string& path) : m_path(path) {
     assert(m_path.size() >= 1 && m_path[0] == '/');
   }
   void operator()() {

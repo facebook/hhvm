@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_ASM_X64_TEST_H_
+#define incl_HPHP_ASM_X64_TEST_H_
 
 namespace HPHP {
 namespace x64 {
@@ -23,4 +25,6 @@ void testEmitMethods();
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
+
+#endif
 

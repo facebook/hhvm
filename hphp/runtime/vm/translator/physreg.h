@@ -37,13 +37,13 @@ namespace HPHP { namespace VM { namespace Transl {
  */
 struct PhysReg {
   explicit constexpr PhysReg(int n = -1) : n(n) {}
-  /* implicit */ constexpr PhysReg(Reg64 r) : n(int(r)) {}
+  constexpr /* implicit */ PhysReg(Reg64 r) : n(int(r)) {}
   explicit constexpr PhysReg(Reg32 r) : n(int(RegNumber(r))) {}
 
   explicit constexpr PhysReg(RegNumber r) : n(int(r)) {}
 
-  constexpr operator Reg64() const { return Reg64(n); }
-  constexpr operator RegNumber() const { return RegNumber(n); }
+  constexpr /* implicit */ operator Reg64() const { return Reg64(n); }
+  constexpr /* implicit */ operator RegNumber() const { return RegNumber(n); }
 
   explicit constexpr operator int() const { return n; }
   constexpr bool operator==(PhysReg r) const { return n == r.n; }

@@ -491,9 +491,10 @@ class UnknownInputExc : public std::exception {
 
 class GuardType {
  public:
-  GuardType(DataType outer = KindOfInvalid, DataType inner = KindOfInvalid);
-  GuardType(const RuntimeType& rtt);
-  GuardType(const GuardType& other);
+  explicit GuardType(DataType outer = KindOfInvalid,
+                     DataType inner = KindOfInvalid);
+  explicit GuardType(const RuntimeType& rtt);
+           GuardType(const GuardType& other);
   const DataType   getOuterType() const;
   const DataType   getInnerType() const;
   bool             isSpecific() const;

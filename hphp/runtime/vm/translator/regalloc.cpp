@@ -13,13 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#define __STDC_FORMAT_MACROS
+
+#include "runtime/vm/translator/regalloc.h"
 
 #include <set>
+#include <cinttypes>
 
 #include <boost/format.hpp>
 #include "runtime/base/types.h"
 #include "util/trace.h"
-#include "regalloc.h"
 
 namespace HPHP { namespace VM { namespace Transl {
 

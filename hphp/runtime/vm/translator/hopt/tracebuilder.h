@@ -311,9 +311,9 @@ public:
   }
 
   struct DisableCseGuard {
-    DisableCseGuard(TraceBuilder& tb)
-        : m_tb(tb)
-        , m_oldEnable(tb.m_enableCse)
+    explicit DisableCseGuard(TraceBuilder& tb)
+      : m_tb(tb)
+      , m_oldEnable(tb.m_enableCse)
     {
         m_tb.m_enableCse = false;
     }

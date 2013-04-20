@@ -13,11 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#define __STDC_FORMAT_MACROS
+
+#include "runtime/vm/translator/translator.h"
 
 // Translator front-end: parse instruction stream into basic blocks, decode
 // and normalize instructions. Propagate run-time type info to instructions
 // to annotate their inputs and outputs with types.
-#define __STDC_FORMAT_MACROS
 #include <cinttypes>
 #include <assert.h>
 #include <stdint.h>
@@ -35,7 +37,6 @@
 #include "runtime/vm/hhbc.h"
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/translator/targetcache.h"
-#include "runtime/vm/translator/translator.h"
 #include "runtime/vm/translator/translator-deps.h"
 #include "runtime/vm/translator/translator-inline.h"
 #include "runtime/vm/translator/translator-x64.h"
@@ -499,7 +500,7 @@ static RuntimeType bitOpType(DynLocation* a, DynLocation* b) {
   vector<DynLocation*> ins;
   ins.push_back(a);
   if (b) ins.push_back(b);
-  return inferType(BitOpRules, ins);
+  return RuntimeType(inferType(BitOpRules, ins));
 }
 
 static uint32_t m_w = 1;    /* must not be zero */
@@ -1798,11 +1799,11 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 
   auto push_stack = [&] {
     ++stackCount;
-    inputs.push_back(Location(Location::Stack, localStackOffset++));
+    inputs.emplace_back(Location(Location::Stack, localStackOffset++));
   };
   auto push_local = [&] (int imm) {
     ++localCount;
-    inputs.push_back(Location(Location::Local, imm));
+    inputs.emplace_back(Location(Location::Local, imm));
   };
 
   /*
@@ -1827,7 +1828,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
   switch (numLocationCodeStackVals(lcode)) {
   case 0: {
     if (lcode == LH) {
-      inputs.push_back(Location(Location::This));
+      inputs.emplace_back(Location(Location::This));
     } else {
       assert(lcode == LL || lcode == LGL || lcode == LNL);
       int numImms = numLocationCodeImms(lcode);
@@ -1867,10 +1868,10 @@ static void addMVectorInputs(NormalizedInstruction& ni,
       if (memberCodeImmIsLoc(mcode)) {
         push_local(imm);
       } else if (memberCodeImmIsString(mcode)) {
-        inputs.push_back(Location(Location::Litstr, imm));
+        inputs.emplace_back(Location(Location::Litstr, imm));
       } else {
         assert(memberCodeImmIsInt(mcode));
-        inputs.push_back(Location(Location::Litint, imm));
+        inputs.emplace_back(Location(Location::Litint, imm));
       }
     } else {
       push_stack();
@@ -1925,7 +1926,7 @@ void Translator::getInputs(Tracelet& t,
     inputs.needsRefCheck = true;
   }
   if (input & Iter) {
-    inputs.push_back(Location(Location::Iter, ni->imm[0].u_IVA));
+    inputs.emplace_back(Location(Location::Iter, ni->imm[0].u_IVA));
   }
   if (input & FStack) {
     currentStackOffset -= ni->imm[0].u_IVA; // arguments consumed
@@ -1934,15 +1935,15 @@ void Translator::getInputs(Tracelet& t,
   if (input & IgnoreInnerType) ni->ignoreInnerType = true;
   if (input & Stack1) {
     SKTRACE(1, sk, "getInputs: stack1 %d\n", currentStackOffset - 1);
-    inputs.push_back(Location(Location::Stack, --currentStackOffset));
+    inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
     if (input & DontGuardStack1) inputs.back().dontGuard = true;
     if (input & DontBreakStack1) inputs.back().dontBreak = true;
     if (input & Stack2) {
       SKTRACE(1, sk, "getInputs: stack2 %d\n", currentStackOffset - 1);
-      inputs.push_back(Location(Location::Stack, --currentStackOffset));
+      inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
       if (input & Stack3) {
         SKTRACE(1, sk, "getInputs: stack3 %d\n", currentStackOffset - 1);
-        inputs.push_back(Location(Location::Stack, --currentStackOffset));
+        inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
       }
     }
   }
@@ -1951,7 +1952,7 @@ void Translator::getInputs(Tracelet& t,
     SKTRACE(1, sk, "getInputs: stackN %d %d\n", currentStackOffset - 1,
             numArgs);
     for (int i = 0; i < numArgs; i++) {
-      inputs.push_back(Location(Location::Stack, --currentStackOffset));
+      inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
       inputs.back().dontGuard = true;
       inputs.back().dontBreak = true;
     }
@@ -1961,7 +1962,7 @@ void Translator::getInputs(Tracelet& t,
     SKTRACE(1, sk, "getInputs: BStackN %d %d\n", currentStackOffset - 1,
             numArgs);
     for (int i = 0; i < numArgs; i++) {
-      inputs.push_back(Location(Location::Stack, --currentStackOffset));
+      inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
     }
   }
   if (input & MVector) {
@@ -1991,7 +1992,7 @@ void Translator::getInputs(Tracelet& t,
         break;
     }
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
-    inputs.push_back(Location(Location::Local, loc));
+    inputs.emplace_back(Location(Location::Local, loc));
     if (input & DontGuardLocal) inputs.back().dontGuard = true;
     if (input & DontBreakLocal) inputs.back().dontBreak = true;
   }
@@ -2024,7 +2025,7 @@ void Translator::getInputs(Tracelet& t,
     int n = curFunc()->numLocals();
     for (int i = 0; i < n; ++i) {
       if (!ni->nonRefCountedLocals[i]) {
-        inputs.push_back(Location(Location::Local, i));
+        inputs.emplace_back(Location(Location::Local, i));
       }
     }
   }
@@ -2039,7 +2040,7 @@ void Translator::getInputs(Tracelet& t,
     }
   }
   if (input & This) {
-    inputs.push_back(Location(Location::This));
+    inputs.emplace_back(Location(Location::This));
   }
 }
 

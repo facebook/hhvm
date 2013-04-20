@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "runtime/vm/translator/srcdb.h"
 
 #include <stdint.h>
 #include <stdarg.h>
@@ -21,7 +22,6 @@
 #include "util/base.h"
 #include "util/trace.h"
 #include "runtime/vm/translator/translator-x64.h"
-#include "srcdb.h"
 
 namespace HPHP {
 namespace VM {

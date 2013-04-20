@@ -13,14 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "runtime/vm/translator/runtime-type.h"
 
 #include <assert.h>
 #include <stdint.h>
 #include <stdarg.h>
 #include "runtime/vm/bytecode.h"
 #include "runtime/base/types.h"
-#include "runtime-type.h"
-#include "translator.h"
+#include "runtime/vm/translator/translator.h"
 
 namespace HPHP {
 namespace VM {

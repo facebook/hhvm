@@ -54,7 +54,7 @@ enum SyncOptions {
 
 // Information about where code was generated, for pretty-printing.
 struct AsmInfo {
-  AsmInfo(const IRFactory* factory)
+  explicit AsmInfo(const IRFactory* factory)
     : instRanges(factory, TcaRange(nullptr, nullptr))
     , asmRanges(factory, TcaRange(nullptr, nullptr))
     , astubRanges(factory, TcaRange(nullptr, nullptr))
@@ -464,7 +464,6 @@ private:
   std::vector<ArgDesc> m_args;
 };
 
-using namespace HPHP::VM::Transl::TargetCache;
 ActRec* irNewInstanceHelper(Class* cls,
                             int numArgs,
                             Cell* sp,

@@ -80,7 +80,7 @@ struct LeaseHolderBase {
 
   public:
     ~LeaseHolderBase();
-    operator bool() const { return m_haveLock; }
+    explicit operator bool() const { return m_haveLock; }
     bool acquire();
 
   private:
@@ -89,11 +89,11 @@ struct LeaseHolderBase {
     bool m_acquired;
 };
 struct LeaseHolder : public LeaseHolderBase {
-  LeaseHolder(Lease& l, LeaseAcquire acquire = ACQUIRE)
+  explicit LeaseHolder(Lease& l, LeaseAcquire acquire = ACQUIRE)
     : LeaseHolderBase(l, acquire, false) {}
 };
 struct BlockingLeaseHolder : public LeaseHolderBase {
-  BlockingLeaseHolder(Lease& l)
+  explicit BlockingLeaseHolder(Lease& l)
     : LeaseHolderBase(l, ACQUIRE, true) {}
 };
 

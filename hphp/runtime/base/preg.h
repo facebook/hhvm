@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PREG_H__
+#ifndef incl_HPHP_PREG_H_
 #define incl_HPHP_PREG_H_
 
 #include <runtime/base/types.h>

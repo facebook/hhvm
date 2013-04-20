@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_REQUEST_LOCAL_H__
-#define __HPHP_REQUEST_LOCAL_H__
+#ifndef incl_HPHP_REQUEST_LOCAL_H_
+#define incl_HPHP_REQUEST_LOCAL_H_
 
 #include <runtime/base/execution_context.h>
 
@@ -163,4 +163,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_REQUEST_LOCAL_H__
+#endif // incl_HPHP_REQUEST_LOCAL_H_

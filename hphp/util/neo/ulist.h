@@ -8,8 +8,8 @@
  * Copyright (C) 2001 by Brandon Long
  */
 
-#ifndef __ULIST_H_
-#define __ULIST_H_ 1
+#ifndef incl_HPHP_ULIST_H_
+#define incl_HPHP_ULIST_H_ 1
 
 #include "neo_err.h"
 
@@ -42,4 +42,4 @@ int uListIndex (ULIST *ul, const void *key, int (*compareFunc)(const void *, con
 NEOERR * uListDestroy (ULIST **ul, int flags);
 NEOERR * uListDestroyFunc (ULIST **ul, void (*destroyFunc)(void *));
 
-#endif /* __ULIST_H_ */
+#endif /* incl_HPHP_ULIST_H_ */

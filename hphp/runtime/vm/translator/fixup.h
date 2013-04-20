@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_FIXUP_H_
-#define incl_FIXUP_H_
+#ifndef incl_HPHP_FIXUP_H_
+#define incl_HPHP_FIXUP_H_
 
 #include <util/util.h>
 #include <runtime/vm/translator/types.h>

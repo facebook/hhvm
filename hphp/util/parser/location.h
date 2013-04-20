@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UTIL_PARSER_LOCATION_H__
-#define __HPHP_UTIL_PARSER_LOCATION_H__
+#ifndef incl_HPHP_UTIL_PARSER_LOCATION_H_
+#define incl_HPHP_UTIL_PARSER_LOCATION_H_
 
 #include <util/base.h>
 
@@ -63,4 +63,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_UTIL_PARSER_LOCATION_H__
+#endif // incl_HPHP_UTIL_PARSER_LOCATION_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_PENDQ_H_
-#define incl_PENDQ_H_
+#ifndef incl_HPHP_PENDQ_H_
+#define incl_HPHP_PENDQ_H_
 
 #include <queue>
 

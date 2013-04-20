@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_SERVER_H__
-#define __HPHP_EVAL_DEBUGGER_SERVER_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_SERVER_H_
+#define incl_HPHP_EVAL_DEBUGGER_SERVER_H_
 
 #include <util/async_func.h>
 #include <runtime/base/file/socket.h>
@@ -55,4 +55,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_SERVER_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_SERVER_H_

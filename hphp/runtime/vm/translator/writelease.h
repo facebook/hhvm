@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _WRITELEASE_H_
-#define _WRITELEASE_H_
+#ifndef incl_HPHP_WRITELEASE_H_
+#define incl_HPHP_WRITELEASE_H_
 
 #include <pthread.h>
 
@@ -99,4 +99,4 @@ struct BlockingLeaseHolder : public LeaseHolderBase {
 
 }}} // HPHP::VM::Transl
 
-#endif /* _WRITELEASE_H_ */
+#endif /* incl_HPHP_WRITELEASE_H_ */

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __ALIAS_MANAGER_H__
-#define __ALIAS_MANAGER_H__
+#ifndef incl_HPHP_ALIAS_MANAGER_H_
+#define incl_HPHP_ALIAS_MANAGER_H_
 
 #include <compiler/expression/expression.h>
 
@@ -276,4 +276,4 @@ class AliasManager {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __ALIAS_MANAGER_H__
+#endif // incl_HPHP_ALIAS_MANAGER_H_

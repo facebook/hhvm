@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_CODE_RUN_H__
-#define __TEST_CODE_RUN_H__
+#ifndef incl_HPHP_TEST_CODE_RUN_H_
+#define incl_HPHP_TEST_CODE_RUN_H_
 
 #include <test/test_base.h>
 
@@ -314,4 +314,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_CODE_RUN_H__
+#endif // incl_HPHP_TEST_CODE_RUN_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_PROGRAM_FUNCTIONS_H__
-#define __HPHP_PROGRAM_FUNCTIONS_H__
+#ifndef incl_HPHP_PROGRAM_FUNCTIONS_H_
+#define incl_HPHP_PROGRAM_FUNCTIONS_H_
 
 #include <util/base.h>
 #include <runtime/base/types.h>
@@ -89,4 +89,4 @@ extern const char* const kCompilerId;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_PROGRAM_FUNCTIONS_H__
+#endif // incl_HPHP_PROGRAM_FUNCTIONS_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_RUNTIME_VM_BLOB_HELPER_H_
-#define incl_RUNTIME_VM_BLOB_HELPER_H_
+#ifndef incl_HPHP_RUNTIME_VM_BLOB_HELPER_H_
+#define incl_HPHP_RUNTIME_VM_BLOB_HELPER_H_
 
 #include <algorithm>
 #include <vector>

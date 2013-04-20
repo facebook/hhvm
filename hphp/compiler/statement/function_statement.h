@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __FUNCTION_STATEMENT_H__
-#define __FUNCTION_STATEMENT_H__
+#ifndef incl_HPHP_FUNCTION_STATEMENT_H_
+#define incl_HPHP_FUNCTION_STATEMENT_H_
 
 #include <compiler/statement/method_statement.h>
 #include <compiler/expression/unary_op_expression.h>
@@ -58,4 +58,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __FUNCTION_STATEMENT_H__
+#endif // incl_HPHP_FUNCTION_STATEMENT_H_

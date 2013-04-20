@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __MEMORY_SHARED_MEMORY_ALLOCATOR_H__
-#define __MEMORY_SHARED_MEMORY_ALLOCATOR_H__
+#ifndef incl_HPHP_MEMORY_SHARED_MEMORY_ALLOCATOR_H_
+#define incl_HPHP_MEMORY_SHARED_MEMORY_ALLOCATOR_H_
 
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
@@ -239,4 +239,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __MEMORY_SHARED_MEMORY_ALLOCATOR_H__
+#endif // incl_HPHP_MEMORY_SHARED_MEMORY_ALLOCATOR_H_

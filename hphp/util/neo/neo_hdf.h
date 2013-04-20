@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef __NEO_HDF_H_
-#define __NEO_HDF_H_ 1
+#ifndef incl_HPHP_NEO_HDF_H_
+#define incl_HPHP_NEO_HDF_H_ 1
 
 __BEGIN_DECLS
 
@@ -597,4 +597,4 @@ void hdf_register_fileload(HDF *hdf, void *ctx, HDFFILELOAD fileload);
 
 __END_DECLS
 
-#endif /* __NEO_HDF_H_ */
+#endif /* incl_HPHP_NEO_HDF_H_ */

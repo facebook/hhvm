@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __THREAD_LOCAL_H__
-#define __THREAD_LOCAL_H__
+#ifndef incl_HPHP_THREAD_LOCAL_H_
+#define incl_HPHP_THREAD_LOCAL_H_
 
 #include <pthread.h>
 #include "exception.h"
@@ -562,4 +562,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __THREAD_LOCAL_H__
+#endif // incl_HPHP_THREAD_LOCAL_H_

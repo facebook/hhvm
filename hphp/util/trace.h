@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_TRACE_H_
-#define incl_TRACE_H_
+#ifndef incl_HPHP_TRACE_H_
+#define incl_HPHP_TRACE_H_
 
 #include <string>
 #include <vector>
@@ -260,5 +260,5 @@ inline std::string color(const char* fg, const char* bg) {
 //////////////////////////////////////////////////////////////////////
 
 } // HPHP
-#endif /* incl_TRACE_H_ */
+#endif /* incl_HPHP_TRACE_H_ */
 

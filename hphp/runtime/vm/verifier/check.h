@@ -18,8 +18,8 @@
  * This is the Verifier's public interface.
  */
 
-#ifndef incl_VM_VERIFIER_CHECK_H_
-#define incl_VM_VERIFIER_CHECK_H_
+#ifndef incl_HPHP_VM_VERIFIER_CHECK_H_
+#define incl_HPHP_VM_VERIFIER_CHECK_H_
 
 namespace HPHP {
 namespace VM {
@@ -101,4 +101,4 @@ bool checkFunc(const Func*, bool verbose = false);
 
 }}} // HPHP::VM::Verifier
 
-#endif // incl_VM_VERIFIER_CHECK_UNIT_H_
+#endif // incl_HPHP_VM_VERIFIER_CHECK_UNIT_H_

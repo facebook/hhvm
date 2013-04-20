@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __LIBEVENT_HTTP_CLIENT_H__
-#define __LIBEVENT_HTTP_CLIENT_H__
+#ifndef incl_HPHP_LIBEVENT_HTTP_CLIENT_H_
+#define incl_HPHP_LIBEVENT_HTTP_CLIENT_H_
 
 #include <util/base.h>
 #include <util/async_func.h>
@@ -117,4 +117,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __LIBEVENT_HTTP_CLIENT_H__
+#endif // incl_HPHP_LIBEVENT_HTTP_CLIENT_H_

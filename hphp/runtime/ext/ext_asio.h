@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_ASIO_H__
-#define __EXT_ASIO_H__
+#ifndef incl_HPHP_EXT_ASIO_H_
+#define incl_HPHP_EXT_ASIO_H_
 
 #include <runtime/base/base_includes.h>
 #include <runtime/ext/asio/asio_session.h>
@@ -441,4 +441,4 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_ASIO_H__
+#endif // incl_HPHP_EXT_ASIO_H_

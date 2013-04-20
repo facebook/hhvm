@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DUMMY_SANDBOX_H__
-#define __HPHP_EVAL_DUMMY_SANDBOX_H__
+#ifndef incl_HPHP_EVAL_DUMMY_SANDBOX_H_
+#define incl_HPHP_EVAL_DUMMY_SANDBOX_H_
 
 #include <util/async_func.h>
 #include <util/synchronizable.h>
@@ -58,4 +58,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DUMMY_SANDBOX_H__
+#endif // incl_HPHP_EVAL_DUMMY_SANDBOX_H_

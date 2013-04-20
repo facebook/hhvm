@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_TIMEZONE_H__
-#define __HPHP_TIMEZONE_H__
+#ifndef incl_HPHP_TIMEZONE_H_
+#define incl_HPHP_TIMEZONE_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
@@ -143,4 +143,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_TIMEZONE_H__
+#endif // incl_HPHP_TIMEZONE_H_

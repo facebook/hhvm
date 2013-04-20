@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __INSIDE_HPHP_COMPLEX_TYPES_H__
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'type_array.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
 
-#ifndef __HPHP_ARRAY_H__
-#define __HPHP_ARRAY_H__
+#ifndef incl_HPHP_ARRAY_H_
+#define incl_HPHP_ARRAY_H_
 
 #include <boost/static_assert.hpp>
 
@@ -609,4 +609,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ARRAY_H__
+#endif // incl_HPHP_ARRAY_H_

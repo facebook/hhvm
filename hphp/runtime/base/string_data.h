@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_STRING_DATA_H__
-#define __HPHP_STRING_DATA_H__
+#ifndef incl_HPHP_STRING_DATA_H_
+#define incl_HPHP_STRING_DATA_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/util/countable.h>
@@ -463,4 +463,4 @@ ALWAYS_INLINE inline void decRefStr(StringData* s) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_STRING_DATA_H__
+#endif // incl_HPHP_STRING_DATA_H_

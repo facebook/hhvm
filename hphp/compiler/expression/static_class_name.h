@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STATIC_CLASS_NAME_H__
-#define __STATIC_CLASS_NAME_H__
+#ifndef incl_HPHP_STATIC_CLASS_NAME_H_
+#define incl_HPHP_STATIC_CLASS_NAME_H_
 
 #include <compiler/expression/expression.h>
 
@@ -69,4 +69,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __STATIC_CLASS_NAME_H__
+#endif // incl_HPHP_STATIC_CLASS_NAME_H_

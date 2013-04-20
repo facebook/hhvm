@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __SYNCHRONIZABLE_MULTI_H__
-#define __SYNCHRONIZABLE_MULTI_H__
+#ifndef incl_HPHP_SYNCHRONIZABLE_MULTI_H_
+#define incl_HPHP_SYNCHRONIZABLE_MULTI_H_
 
 #include "base.h"
 #include "mutex.h"
@@ -67,4 +67,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __SYNCHRONIZABLE_MULTI_H__
+#endif // incl_HPHP_SYNCHRONIZABLE_MULTI_H_

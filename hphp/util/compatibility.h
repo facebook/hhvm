@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __COMPATIBILITY_H__
-#define __COMPATIBILITY_H__
+#ifndef incl_HPHP_COMPATIBILITY_H_
+#define incl_HPHP_COMPATIBILITY_H_
 
 #include "base.h"
 
@@ -35,4 +35,4 @@ int64_t gettime_diff_us(const timespec &start, const timespec &end);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __COMPATIBILITY_H__
+#endif // incl_HPHP_COMPATIBILITY_H_

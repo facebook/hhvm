@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_DEBUGGER_H__
-#define __TEST_DEBUGGER_H__
+#ifndef incl_HPHP_TEST_DEBUGGER_H_
+#define incl_HPHP_TEST_DEBUGGER_H_
 
 #include <test/test_base.h>
 #include <runtime/base/complex_types.h>
@@ -63,4 +63,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_DEBUGGER_H__
+#endif // incl_HPHP_TEST_DEBUGGER_H_

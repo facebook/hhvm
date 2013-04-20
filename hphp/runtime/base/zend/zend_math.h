@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ZEND_MATH_H__
-#define __HPHP_ZEND_MATH_H__
+#ifndef incl_HPHP_ZEND_MATH_H_
+#define incl_HPHP_ZEND_MATH_H_
 
 #include <util/base.h>
 
@@ -177,4 +177,4 @@ void zend_get_rand_data() ATTRIBUTE_COLD;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZEND_MATH_H__
+#endif // incl_HPHP_ZEND_MATH_H_

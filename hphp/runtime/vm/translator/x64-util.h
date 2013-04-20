@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _X64_UTIL_H_
-#define _X64_UTIL_H_
+#ifndef X64_UTIL_H_
+#define X64_UTIL_H_
 
 #include <util/asm-x64.h>
 #include <runtime/vm/translator/translator-inline.h>

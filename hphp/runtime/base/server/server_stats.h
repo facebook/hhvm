@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SERVER_STATS_H__
-#define __HPHP_SERVER_STATS_H__
+#ifndef incl_HPHP_SERVERSTATS_H_
+#define incl_HPHP_SERVERSTATS_H_
 
 #include <util/lock.h>
 #include <util/thread_local.h>
@@ -247,4 +247,4 @@ void server_stats_log_mutex(const std::string &stack, int64_t elapsed_us);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_SERVER_STATS_H__
+#endif // incl_HPHP_SERVERSTATS_H_

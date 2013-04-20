@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __PROCESS_H__
-#define __PROCESS_H__
+#ifndef incl_HPHP_PROCESS_H_
+#define incl_HPHP_PROCESS_H_
 
 #include "base.h"
 #include <sys/syscall.h>
@@ -200,4 +200,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __PROCESS_H__
+#endif // incl_HPHP_PROCESS_H_

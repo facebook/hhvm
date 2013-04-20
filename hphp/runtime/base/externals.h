@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CPP_BASE_EXTERNALS_H__
-#define __CPP_BASE_EXTERNALS_H__
+#ifndef incl_HPHP_CPP_BASE_EXTERNALS_H_
+#define incl_HPHP_CPP_BASE_EXTERNALS_H_
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -76,4 +76,4 @@ extern StaticString literalStrings[];
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __CPP_BASE_HPHP_H__
+#endif // incl_HPHP_CPP_BASE_HPHP_H_

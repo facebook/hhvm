@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __LOGGER_H__
-#define __LOGGER_H__
+#ifndef incl_HPHP_LOGGER_H_
+#define incl_HPHP_LOGGER_H_
 
 #include <atomic>
 #include <string>
@@ -165,4 +165,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __LOGGER_H__
+#endif // incl_HPHP_LOGGER_H_

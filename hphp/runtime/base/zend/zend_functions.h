@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ZEND_FUNCTIONS_H__
-#define __HPHP_ZEND_FUNCTIONS_H__
+#ifndef incl_HPHP_ZEND_FUNCTIONS_H_
+#define incl_HPHP_ZEND_FUNCTIONS_H_
 
 #include <runtime/base/types.h>
 #include <util/hash.h>
@@ -49,4 +49,4 @@ conv_10(register int64_t num, register int *is_negative, char *buf_end,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZEND_FUNCTIONS_H__
+#endif // incl_HPHP_ZEND_FUNCTIONS_H_

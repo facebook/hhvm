@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __UNSET_STATEMENT_H__
-#define __UNSET_STATEMENT_H__
+#ifndef incl_HPHP_UNSET_STATEMENT_H_
+#define incl_HPHP_UNSET_STATEMENT_H_
 
 #include <compiler/statement/statement.h>
 
@@ -40,4 +40,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __UNSET_STATEMENT_H__
+#endif // incl_HPHP_UNSET_STATEMENT_H_

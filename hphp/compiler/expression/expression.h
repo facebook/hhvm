@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXPRESSION_H__
-#define __EXPRESSION_H__
+#ifndef incl_HPHP_EXPRESSION_H_
+#define incl_HPHP_EXPRESSION_H_
 
 #include <compiler/construct.h>
 #include <compiler/analysis/type.h>
@@ -418,4 +418,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXPRESSION_H__
+#endif // incl_HPHP_EXPRESSION_H_

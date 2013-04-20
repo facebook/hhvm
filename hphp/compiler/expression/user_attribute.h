@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __USER_ATTRIBUTE_H__
-#define __USER_ATTRIBUTE_H__
+#ifndef incl_HPHP_USER_ATTRIBUTE_H_
+#define incl_HPHP_USER_ATTRIBUTE_H_
 
 #include <compiler/expression/expression.h>
 
@@ -43,4 +43,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __USER_ATTRIBUTE_H__
+#endif // incl_HPHP_USER_ATTRIBUTE_H_

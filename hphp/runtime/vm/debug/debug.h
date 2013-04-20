@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _TRANSLATOR_DEBUG_H_
-#define _TRANSLATOR_DEBUG_H_
+#ifndef TRANSLATOR_DEBUG_H_
+#define TRANSLATOR_DEBUG_H_
 
 #include <runtime/base/types.h>
 #include <runtime/vm/translator/translator.h>

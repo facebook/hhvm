@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_HASH_FURC_H__
-#define __EXT_HASH_FURC_H__
+#ifndef incl_HPHP_EXT_HASH_FURC_H_
+#define incl_HPHP_EXT_HASH_FURC_H_
 
 #include <stdint.h>
 
@@ -28,6 +28,6 @@ uint32_t furc_hash_internal(const char* const key, const size_t len, const uint3
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_HASH_FURC_H__
+#endif // incl_HPHP_EXT_HASH_FURC_H_
 
 

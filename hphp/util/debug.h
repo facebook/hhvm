@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_DEBUG_H_
-#define incl_DEBUG_H_
+#ifndef incl_HPHP_DEBUG_H_
+#define incl_HPHP_DEBUG_H_
 
 #include <signal.h>
 
@@ -41,4 +41,4 @@
 #define DEBUGGER_IF(...) do { } while(0)
 #endif /* DEBUG */
 
-#endif /* incl_DEBUG_H_ */
+#endif /* incl_HPHP_DEBUG_H_ */

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_THRIFT_BUFFER_H__
-#define __HPHP_THRIFT_BUFFER_H__
+#ifndef incl_HPHP_THRIFT_BUFFER_H_
+#define incl_HPHP_THRIFT_BUFFER_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
@@ -283,4 +283,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_THRIFT_BUFFER_H__
+#endif // incl_HPHP_THRIFT_BUFFER_H_

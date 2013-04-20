@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_PLAIN_FILE_H__
-#define __HPHP_PLAIN_FILE_H__
+#ifndef incl_HPHP_PLAIN_FILE_H_
+#define incl_HPHP_PLAIN_FILE_H_
 
 #include <runtime/base/file/file.h>
 #include <runtime/base/execution_context.h>
@@ -99,4 +99,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_PLAIN_FILE_H__
+#endif // incl_HPHP_PLAIN_FILE_H_

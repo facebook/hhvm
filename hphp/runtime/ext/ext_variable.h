@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_VARIABLE_H__
-#define __HPHP_VARIABLE_H__
+#ifndef incl_HPHP_VARIABLE_H_
+#define incl_HPHP_VARIABLE_H_
 
 #include <runtime/base/base_includes.h>
 
@@ -86,4 +86,4 @@ int64_t f_extract(CArrRef var_array, int extract_type = EXTR_OVERWRITE,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_VARIABLE_H__
+#endif // incl_HPHP_VARIABLE_H_

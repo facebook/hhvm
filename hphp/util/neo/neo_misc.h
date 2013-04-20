@@ -9,15 +9,15 @@
  *
  */
 
-#ifndef __NEO_MISC_H_
-#define __NEO_MISC_H_ 1
+#ifndef incl_HPHP_NEO_MISC_H_
+#define incl_HPHP_NEO_MISC_H_ 1
 
 #include <stdlib.h>
 #include <time.h>
 #include <limits.h>
 
 /* In case they didn't start from ClearSilver.h. */
-#ifndef __CS_CONFIG_H_
+#ifndef incl_HPHP_CS_CONFIG_H_
 #include "cs_config.h"
 #endif
 
@@ -129,4 +129,4 @@ UINT32 ne_crc (UINT8 *data, UINT32 bytes);
 
 __END_DECLS
 
-#endif /* __NEO_MISC_H_ */
+#endif /* incl_HPHP_NEO_MISC_H_ */

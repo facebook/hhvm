@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_BASE_H__
-#define __TEST_BASE_H__
+#ifndef incl_HPHP_TEST_BASE_H_
+#define incl_HPHP_TEST_BASE_H_
 
 #include <string>
 #include <assert.h>
@@ -136,4 +136,4 @@ typedef WithOption<false> WithNoOpt;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_BASE_H__
+#endif // incl_HPHP_TEST_BASE_H_

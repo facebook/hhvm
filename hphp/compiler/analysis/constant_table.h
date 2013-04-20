@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CONSTANT_TABLE_H__
-#define __CONSTANT_TABLE_H__
+#ifndef incl_HPHP_CONSTANT_TABLE_H_
+#define incl_HPHP_CONSTANT_TABLE_H_
 
 #include <compiler/analysis/symbol_table.h>
 #include <compiler/analysis/block_scope.h>
@@ -103,4 +103,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CONSTANT_TABLE_H__
+#endif // incl_HPHP_CONSTANT_TABLE_H_

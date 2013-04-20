@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_TRANSLATOR_RUNTIME_H_
-#define incl_TRANSLATOR_RUNTIME_H_
+#ifndef incl_HPHP_TRANSLATOR_RUNTIME_H_
+#define incl_HPHP_TRANSLATOR_RUNTIME_H_
 
 #include "runtime/base/types.h"
 #include "runtime/vm/translator/abi-x64.h"

@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_RUNTIME_VM_TRANSLATOR_X64_H_
-#define incl_RUNTIME_VM_TRANSLATOR_X64_H_
+#ifndef incl_HPHP_RUNTIME_VM_TRANSLATOR_X64_H_
+#define incl_HPHP_RUNTIME_VM_TRANSLATOR_X64_H_
 
 #include <signal.h>
 #include <memory>

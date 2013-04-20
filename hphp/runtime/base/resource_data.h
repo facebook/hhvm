@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_RESOURCE_DATA_H__
-#define __HPHP_RESOURCE_DATA_H__
+#ifndef incl_HPHP_RESOURCE_DATA_H_
+#define incl_HPHP_RESOURCE_DATA_H_
 
 #include <runtime/base/complex_types.h>
 #include <runtime/base/memory/sweepable.h>
@@ -134,4 +134,4 @@ typedef std::map<std::string, ResourceMap> ResourceMapMap;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_RESOURCE_DATA_H__
+#endif // incl_HPHP_RESOURCE_DATA_H_

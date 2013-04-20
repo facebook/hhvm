@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CPP_BASE_HPHP_SYSTEM_H__
-#define __CPP_BASE_HPHP_SYSTEM_H__
+#ifndef incl_HPHP_CPP_BASE_HPHP_SYSTEM_H_
+#define incl_HPHP_CPP_BASE_HPHP_SYSTEM_H_
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -63,4 +63,4 @@ const char* getHphpCompilerId();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __CPP_BASE_HPHP_SYSTEM_H__
+#endif // incl_HPHP_CPP_BASE_HPHP_SYSTEM_H_

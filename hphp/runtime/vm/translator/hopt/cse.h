@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HHIR_CSE_H_
-#define incl_HHIR_CSE_H_
+#ifndef incl_HPHP_HHIR_CSE_H_
+#define incl_HPHP_HHIR_CSE_H_
 
 #include <unordered_map>
 

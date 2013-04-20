@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EVAL_FILE_REPOSITORY_H__
-#define __EVAL_FILE_REPOSITORY_H__
+#ifndef incl_HPHP_EVAL_FILE_REPOSITORY_H_
+#define incl_HPHP_EVAL_FILE_REPOSITORY_H_
 
 #include <time.h>
 #include <sys/stat.h>
@@ -177,4 +177,4 @@ String resolveVmInclude(StringData* path, const char* currentDir,
 }
 }
 
-#endif /* __EVAL_FILE_REPOSITORY_H__ */
+#endif /* incl_HPHP_EVAL_FILE_REPOSITORY_H_ */

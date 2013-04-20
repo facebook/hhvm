@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __HPHP_INTERCEPT_H__
-#define __HPHP_INTERCEPT_H__
+#ifndef incl_HPHP_INTERCEPT_H_
+#define incl_HPHP_INTERCEPT_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
@@ -83,4 +83,4 @@ extern DECLARE_THREAD_LOCAL_NO_CHECK(bool, s_hasRenamedFunction);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_INTERCEPT_H__
+#endif // incl_HPHP_INTERCEPT_H_

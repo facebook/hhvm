@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef __NEO_STR_H_
-#define __NEO_STR_H_ 1
+#ifndef incl_HPHP_NEO_STR_H_
+#define incl_HPHP_NEO_STR_H_ 1
 
 __BEGIN_DECLS
 
@@ -111,4 +111,4 @@ NEOERR *neos_url_validate (const char *in, char **esc);
 
 __END_DECLS
 
-#endif /* __NEO_STR_H_ */
+#endif /* incl_HPHP_NEO_STR_H_ */

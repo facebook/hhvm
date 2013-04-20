@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_DATETIME_H__
-#define __EXT_DATETIME_H__
+#ifndef incl_HPHP_EXT_DATETIME_H_
+#define incl_HPHP_EXT_DATETIME_H_
 
 #include <runtime/base/base_includes.h>
 #include <runtime/base/time/timestamp.h>
@@ -290,4 +290,4 @@ Variant f_date_sunset(int64_t timestamp, int format = 0,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_DATETIME_H__
+#endif // incl_HPHP_EXT_DATETIME_H_

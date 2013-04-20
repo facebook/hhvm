@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _GDB_JIT_H_
-#define _GDB_JIT_H_
+#ifndef GDB_JIT_H_
+#define GDB_JIT_H_
 
 #include "dwarf.h"
 #include <runtime/base/types.h>

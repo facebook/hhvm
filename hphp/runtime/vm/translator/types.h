@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_TRANSL_TYPES_H_
-#define incl_TRANSL_TYPES_H_
+#ifndef incl_HPHP_TRANSL_TYPES_H_
+#define incl_HPHP_TRANSL_TYPES_H_
 
 #include "util/base.h"
 

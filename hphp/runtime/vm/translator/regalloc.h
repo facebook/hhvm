@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_REG_ALLOC_H_
-#define incl_REG_ALLOC_H_
+#ifndef incl_HPHP_REG_ALLOC_H_
+#define incl_HPHP_REG_ALLOC_H_
 
 #include <boost/noncopyable.hpp>
 
@@ -467,4 +467,4 @@ private:
 
 } } } // HPHP::VM::Transl
 
-#endif /* incl_REG_ALLOC_H_ */
+#endif /* incl_HPHP_REG_ALLOC_H_ */

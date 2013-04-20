@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STATIC_STATEMENT_H__
-#define __STATIC_STATEMENT_H__
+#ifndef incl_HPHP_STATIC_STATEMENT_H_
+#define incl_HPHP_STATIC_STATEMENT_H_
 
 #include <compiler/statement/statement.h>
 #include <compiler/expression/simple_variable.h>
@@ -40,4 +40,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __STATIC_STATEMENT_H__
+#endif // incl_HPHP_STATIC_STATEMENT_H_

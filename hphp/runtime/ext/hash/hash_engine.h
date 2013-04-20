@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_HASH_ENGINE_H__
-#define __EXT_HASH_ENGINE_H__
+#ifndef incl_HPHP_EXT_HASH_ENGINE_H_
+#define incl_HPHP_EXT_HASH_ENGINE_H_
 
 #include <util/base.h>
 
@@ -48,4 +48,4 @@ typedef std::map<std::string, HashEnginePtr> HashEngineMap;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_HASH_ENGINE_H__
+#endif // incl_HPHP_EXT_HASH_ENGINE_H_

@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHVM_PROCESS_INIT_H_
-#define incl_HHVM_PROCESS_INIT_H_
+#ifndef incl_HPHP_HHVM_PROCESS_INIT_H_
+#define incl_HPHP_HHVM_PROCESS_INIT_H_
 
 #include "util/base.h"
 #include "runtime/base/thread_init_fini.h"

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_INSTRUMENTATION_HOOK_H_
-#define incl_INSTRUMENTATION_HOOK_H_
+#ifndef incl_HPHP_INSTRUMENTATION_HOOK_H_
+#define incl_HPHP_INSTRUMENTATION_HOOK_H_
 
 #include <runtime/vm/instrumentation.h>
 #include <runtime/base/execution_context.h>
@@ -61,4 +61,4 @@ static inline void instHookStr(int type, const char* str) {
 
 } }    // HPHP::VM
 
-#endif /* incl_INSTRUMENTATION_HOOK_H_ */
+#endif /* incl_HPHP_INSTRUMENTATION_HOOK_H_ */

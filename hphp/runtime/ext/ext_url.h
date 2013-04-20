@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_URL_H__
-#define __EXT_URL_H__
+#ifndef incl_HPHP_EXT_URL_H_
+#define incl_HPHP_EXT_URL_H_
 
 #include <runtime/base/base_includes.h>
 
@@ -45,4 +45,4 @@ String f_urlencode(CStrRef str);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_URL_H__
+#endif // incl_HPHP_EXT_URL_H_

@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_POSIX_H__
-#define __EXT_POSIX_H__
+#ifndef incl_HPHP_EXT_POSIX_H_
+#define incl_HPHP_EXT_POSIX_H_
 
 #include <runtime/base/base_includes.h>
 #include <sys/types.h>
@@ -99,4 +99,4 @@ Variant f_posix_uname();
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_POSIX_H__
+#endif // incl_HPHP_EXT_POSIX_H_

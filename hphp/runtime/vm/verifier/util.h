@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_VERIFIER_UTIL_H_
-#define incl_VM_VERIFIER_UTIL_H_
+#ifndef incl_HPHP_VM_VERIFIER_UTIL_H_
+#define incl_HPHP_VM_VERIFIER_UTIL_H_
 
 #include <cstddef> // for size_t
 #include <vector>
@@ -61,4 +61,4 @@ inline bool contains(const C &c, T e) {
 
 }}} // namespace HPHP::VM::Verifier
 
-#endif // incl_VM_VERIFIER_UTIL_H
+#endif // incl_HPHP_VM_VERIFIER_UTIL_H

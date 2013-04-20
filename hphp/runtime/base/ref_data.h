@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __INSIDE_HPHP_COMPLEX_TYPES_H__
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'ref_data.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
 
-#ifndef __HPHP_REF_DATA_H
-#define __HPHP_REF_DATA_H
+#ifndef incl_HPHP_REF_DATA_H
+#define incl_HPHP_REF_DATA_H
 
 namespace HPHP {
 
@@ -125,4 +125,4 @@ ALWAYS_INLINE inline void decRefRef(RefData* ref) {
 
 } // namespace HPHP
 
-#endif //__HPHP_REF_DATA_H
+#endif //incl_HPHP_REF_DATA_H

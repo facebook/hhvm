@@ -23,8 +23,8 @@
  * translator.
  */
 
-#ifndef incl_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
-#define incl_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
+#ifndef incl_HPHP_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
+#define incl_HPHP_VM_RUNTIME_TRANSLATOR_ABI_X64_H_
 
 #include "util/asm-x64.h"
 #include "runtime/vm/translator/regalloc.h"

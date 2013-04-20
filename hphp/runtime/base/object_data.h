@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_OBJECT_DATA_H__
-#define __HPHP_OBJECT_DATA_H__
+#ifndef incl_HPHP_OBJECT_DATA_H_
+#define incl_HPHP_OBJECT_DATA_H_
 
 #include <runtime/base/util/countable.h>
 #include <runtime/base/util/smart_ptr.h>
@@ -388,4 +388,4 @@ ALWAYS_INLINE inline void decRefObj(ObjectData* obj) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_OBJECT_DATA_H__
+#endif // incl_HPHP_OBJECT_DATA_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_TYPES_H__
-#define __HPHP_TYPES_H__
+#ifndef incl_HPHP_TYPES_H_
+#define incl_HPHP_TYPES_H_
 
 #include <util/base.h>
 #include <util/thread_local.h>
@@ -589,4 +589,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_TYPES_H__
+#endif // incl_HPHP_TYPES_H_

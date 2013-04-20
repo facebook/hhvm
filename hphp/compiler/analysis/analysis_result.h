@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __ANALYSIS_RESULT_H__
-#define __ANALYSIS_RESULT_H__
+#ifndef incl_HPHP_ANALYSIS_RESULT_H_
+#define incl_HPHP_ANALYSIS_RESULT_H_
 
 #include <compiler/code_generator.h>
 #include <compiler/analysis/code_error.h>
@@ -595,4 +595,4 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __ANALYSIS_RESULT_H__
+#endif // incl_HPHP_ANALYSIS_RESULT_H_

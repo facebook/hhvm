@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_CLASS_INFO_H__
-#define __HPHP_CLASS_INFO_H__
+#ifndef incl_HPHP_CLASS_INFO_H_
+#define incl_HPHP_CLASS_INFO_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
@@ -515,4 +515,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_CLASS_INFO_H__
+#endif // incl_HPHP_CLASS_INFO_H_

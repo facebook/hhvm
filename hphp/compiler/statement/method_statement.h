@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __METHOD_STATEMENT_H__
-#define __METHOD_STATEMENT_H__
+#ifndef incl_HPHP_METHOD_STATEMENT_H_
+#define incl_HPHP_METHOD_STATEMENT_H_
 
 #include <compiler/statement/statement.h>
 
@@ -147,4 +147,4 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __METHOD_STATEMENT_H__
+#endif // incl_HPHP_METHOD_STATEMENT_H_

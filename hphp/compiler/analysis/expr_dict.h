@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXPR_DICT_H__
-#define __EXPR_DICT_H__
+#ifndef incl_HPHP_EXPR_DICT_H_
+#define incl_HPHP_EXPR_DICT_H_
 
 #include <compiler/analysis/dictionary.h>
 
@@ -94,4 +94,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __EXPR_DICT_H__
+#endif // incl_HPHP_EXPR_DICT_H_

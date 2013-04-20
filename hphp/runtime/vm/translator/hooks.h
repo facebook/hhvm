@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HOOKS_H_
-#define incl_HOOKS_H_
+#ifndef incl_HPHP_HOOKS_H_
+#define incl_HPHP_HOOKS_H_
 
 namespace HPHP {
 namespace VM {

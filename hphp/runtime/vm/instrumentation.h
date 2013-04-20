@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_INSTRUMENTATION_H_
-#define incl_INSTRUMENTATION_H_
+#ifndef incl_HPHP_INSTRUMENTATION_H_
+#define incl_HPHP_INSTRUMENTATION_H_
 
 #include <runtime/vm/core_types.h>
 #include <runtime/vm/unit.h>
@@ -165,4 +165,4 @@ public:
 
 } }    // HPHP::VM
 
-#endif /* incl_INSTRUMENTATION_H_ */
+#endif /* incl_HPHP_INSTRUMENTATION_H_ */

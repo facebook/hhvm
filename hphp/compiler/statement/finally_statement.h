@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __FINALLY_STATEMENT_H__
-#define __FINALLY_STATEMENT_H__
+#ifndef incl_HPHP_FINALLY_STATEMENT_H_
+#define incl_HPHP_FINALLY_STATEMENT_H_
 
 #include <compiler/statement/statement.h>
 
@@ -42,4 +42,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __FINALLY_STATEMENT_H__
+#endif // incl_HPHP_FINALLY_STATEMENT_H_

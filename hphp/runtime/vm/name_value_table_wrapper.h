@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_RUNTIME_VM_NAME_VALUE_TABLE_WRAPPER_H
-#define incl_RUNTIME_VM_NAME_VALUE_TABLE_WRAPPER_H
+#ifndef incl_HPHP_RUNTIME_VM_NAME_VALUE_TABLE_WRAPPER_H
+#define incl_HPHP_RUNTIME_VM_NAME_VALUE_TABLE_WRAPPER_H
 
 #include "runtime/vm/name_value_table.h"
 #include "runtime/base/array/array_data.h"

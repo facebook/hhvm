@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DYNAMIC_CONTENT_CACHE_H__
-#define __DYNAMIC_CONTENT_CACHE_H__
+#ifndef incl_HPHP_DYNAMIC_CONTENT_CACHE_H_
+#define incl_HPHP_DYNAMIC_CONTENT_CACHE_H_
 
 #include <runtime/base/util/string_buffer.h>
 #include <util/mutex.h>
@@ -57,4 +57,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __DYNAMIC_CONTENT_CACHE_H__
+#endif // incl_HPHP_DYNAMIC_CONTENT_CACHE_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __IMMSTACK_H__
-#define __IMMSTACK_H__
+#ifndef incl_HPHP_IMMSTACK_H_
+#define incl_HPHP_IMMSTACK_H_
 
 #include <runtime/vm/bytecode.h>
 

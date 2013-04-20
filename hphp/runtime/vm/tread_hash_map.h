@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_VM_TREAD_HASH_MAP_H_
-#define incl_VM_TREAD_HASH_MAP_H_
+#ifndef incl_HPHP_VM_TREAD_HASH_MAP_H_
+#define incl_HPHP_VM_TREAD_HASH_MAP_H_
 
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>

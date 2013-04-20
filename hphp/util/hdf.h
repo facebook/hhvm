@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CONFIG_HDF_H__
-#define __CONFIG_HDF_H__
+#ifndef incl_HPHP_CONFIG_HDF_H_
+#define incl_HPHP_CONFIG_HDF_H_
 
 #include "base.h"
 #include <string>
@@ -417,4 +417,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __CONFIG_HDF_H__
+#endif // incl_HPHP_CONFIG_HDF_H_

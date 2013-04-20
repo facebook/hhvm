@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __ARRAY_INIT_H__
-#define __ARRAY_INIT_H__
+#ifndef incl_HPHP_ARRAY_INIT_H_
+#define incl_HPHP_ARRAY_INIT_H_
 
 #include <runtime/base/array/array_data.h>
 #include <runtime/base/complex_types.h>
@@ -281,4 +281,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* __ARRAY_INIT_H__ */
+#endif /* incl_HPHP_ARRAY_INIT_H_ */

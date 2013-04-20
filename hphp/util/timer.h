@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TIMER_H__
-#define __TIMER_H__
+#ifndef incl_HPHP_TIMER_H_
+#define incl_HPHP_TIMER_H_
 
 #include "base.h"
 
@@ -74,4 +74,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __TIMER_H__
+#endif // incl_HPHP_TIMER_H_

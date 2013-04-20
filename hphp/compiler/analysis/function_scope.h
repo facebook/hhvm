@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __FUNCTION_SCOPE_H__
-#define __FUNCTION_SCOPE_H__
+#ifndef incl_HPHP_FUNCTION_SCOPE_H_
+#define incl_HPHP_FUNCTION_SCOPE_H_
 
 #include <compiler/expression/user_attribute.h>
 #include <compiler/analysis/block_scope.h>
@@ -493,4 +493,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __FUNCTION_SCOPE_H__
+#endif // incl_HPHP_FUNCTION_SCOPE_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_COMMAND_H__
-#define __HPHP_EVAL_DEBUGGER_COMMAND_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_COMMAND_H_
+#define incl_HPHP_EVAL_DEBUGGER_COMMAND_H_
 
 #include <util/base.h>
 #include <runtime/eval/debugger/debugger_thrift_buffer.h>
@@ -127,4 +127,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_COMMAND_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_COMMAND_H_

@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _HPHP_ELFWRITER_H_
-#define _HPHP_ELFWRITER_H_
+#ifndef HPHP_ELFWRITER_H_
+#define HPHP_ELFWRITER_H_
 
 #include <runtime/base/types.h>
 #include "dwarf.h"

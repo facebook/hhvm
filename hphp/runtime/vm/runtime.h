@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_VM_RUNTIME_H_
-#define incl_VM_RUNTIME_H_
+#ifndef incl_HPHP_VM_RUNTIME_H_
+#define incl_HPHP_VM_RUNTIME_H_
 
 #include <runtime/vm/event_hook.h>
 #include <runtime/vm/func.h>

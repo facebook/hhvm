@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __RUNTIME_BASE_EXTENDED_LOGGER_H__
-#define __RUNTIME_BASE_EXTENDED_LOGGER_H__
+#ifndef incl_HPHP_RUNTIME_BASE_EXTENDED_LOGGER_H_
+#define incl_HPHP_RUNTIME_BASE_EXTENDED_LOGGER_H_
 
 #include <util/logger.h>
 #include <util/exception.h>
@@ -68,4 +68,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __RUNTIME_BASE_EXTENDED_LOGGER_H__
+#endif // incl_HPHP_RUNTIME_BASE_EXTENDED_LOGGER_H_

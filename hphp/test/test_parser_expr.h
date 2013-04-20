@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_PARSER_EXPR_H__
-#define __TEST_PARSER_EXPR_H__
+#ifndef incl_HPHP_TEST_PARSER_EXPR_H_
+#define incl_HPHP_TEST_PARSER_EXPR_H_
 
 #include <test/test_parser.h>
 
@@ -56,4 +56,4 @@ class TestParserExpr : public TestParser {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_PARSER_EXPR_H__
+#endif // incl_HPHP_TEST_PARSER_EXPR_H_

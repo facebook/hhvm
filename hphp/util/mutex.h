@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __MUTEX_H__
-#define __MUTEX_H__
+#ifndef incl_HPHP_MUTEX_H_
+#define incl_HPHP_MUTEX_H_
 
 #include <util/assertions.h>
 #include <util/util.h>
@@ -380,4 +380,4 @@ class RankedCHM : public tbb::concurrent_hash_map<K, V, H> {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __MUTEX_H__
+#endif // incl_HPHP_MUTEX_H_

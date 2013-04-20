@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_UNIT_H_
-#define incl_VM_UNIT_H_
+#ifndef incl_HPHP_VM_UNIT_H_
+#define incl_HPHP_VM_UNIT_H_
 
 // Expects that runtime/vm/core_types.h is already included.
 #include "runtime/base/runtime_option.h"

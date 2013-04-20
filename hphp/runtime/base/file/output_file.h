@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_OUTPUT_FILE_H__
-#define __HPHP_OUTPUT_FILE_H__
+#ifndef incl_HPHP_OUTPUT_FILE_H_
+#define incl_HPHP_OUTPUT_FILE_H_
 
 #include <runtime/base/file/file.h>
 
@@ -58,4 +58,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_OUTPUT_FILE_H__
+#endif // incl_HPHP_OUTPUT_FILE_H_

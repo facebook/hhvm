@@ -14,8 +14,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __ICU__TRANSLITERATOR_H__
-#define __ICU__TRANSLITERATOR_H__
+#ifndef incl_HPHP_ICU_TRANSLITERATOR_H_
+#define incl_HPHP_ICU_TRANSLITERATOR_H_
 
 #include <boost/scoped_ptr.hpp>
 #include <unicode/translit.h>
@@ -42,4 +42,4 @@ class ICUTransliterator {
 
 }
 
-#endif // __ICU__TRANSLITERATOR_H__
+#endif // incl_HPHP_ICU_TRANSLITERATOR_H_

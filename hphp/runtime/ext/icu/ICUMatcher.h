@@ -14,8 +14,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __ICU_MATCHER_H__
-#define __ICU_MATCHER_H__
+#ifndef incl_HPHP_ICU_MATCHER_H_
+#define incl_HPHP_ICU_MATCHER_H_
 
 #include <boost/scoped_ptr.hpp>
 #include <unicode/regex.h>
@@ -44,4 +44,4 @@ class ICUMatcher {
 
 }
 
-#endif // __ICU_MATCHER_H__
+#endif // incl_HPHP_ICU_MATCHER_H_

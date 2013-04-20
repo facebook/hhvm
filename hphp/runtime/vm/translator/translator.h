@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _TRANSLATOR_H_
-#define _TRANSLATOR_H_
+#ifndef incl_HPHP_TRANSLATOR_H_
+#define incl_HPHP_TRANSLATOR_H_
 
 #include <limits.h>
 #include <string.h>

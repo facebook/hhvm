@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_VERIFIER_CFG_H_
-#define incl_VM_VERIFIER_CFG_H_
+#ifndef incl_HPHP_VM_VERIFIER_CFG_H_
+#define incl_HPHP_VM_VERIFIER_CFG_H_
 
 #include "runtime/vm/repo.h"
 #include "runtime/vm/verifier/util.h"
@@ -267,4 +267,4 @@ inline Offset fpiPast(const FPIEnt& fpi, PC bc) {
 
 }}} // HPHP::VM::Verifier
 
-#endif // incl_VM_VERIFIER_CFG_H_
+#endif // incl_HPHP_VM_VERIFIER_CFG_H_

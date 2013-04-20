@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_FUNC_H_
-#define incl_VM_FUNC_H_
+#ifndef incl_HPHP_VM_FUNC_H_
+#define incl_HPHP_VM_FUNC_H_
 
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/type_constraint.h"

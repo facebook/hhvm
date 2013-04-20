@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_SIMPLEXML_INCLUDE_H__
-#define __EXT_SIMPLEXML_INCLUDE_H__
+#ifndef incl_HPHP_EXT_SIMPLEXML_INCLUDE_H_
+#define incl_HPHP_EXT_SIMPLEXML_INCLUDE_H_
 
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
@@ -29,4 +29,4 @@
 #include <libxml/xpointer.h>
 #include <libxml/xmlschemas.h>
 
-#endif // __EXT_SIMPLEXML_INCLUDE_H__
+#endif // incl_HPHP_EXT_SIMPLEXML_INCLUDE_H_

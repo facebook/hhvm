@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_REPO_HELPERS_H_
-#define incl_VM_REPO_HELPERS_H_
+#ifndef incl_HPHP_VM_REPO_HELPERS_H_
+#define incl_HPHP_VM_REPO_HELPERS_H_
 
 #include <boost/noncopyable.hpp>
 #include <sqlite3.h>

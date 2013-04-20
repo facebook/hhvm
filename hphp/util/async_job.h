@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __ASYNC_JOB_H__
-#define __ASYNC_JOB_H__
+#ifndef incl_HPHP_ASYNC_JOB_H_
+#define incl_HPHP_ASYNC_JOB_H_
 
 #include "base.h"
 #include "async_func.h"
@@ -188,4 +188,4 @@ class JobDispatcher {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __ASYNC_JOB_H__
+#endif // incl_HPHP_ASYNC_JOB_H_

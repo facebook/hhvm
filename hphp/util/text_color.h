@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_UTIL_TEXT_COLOR_H_
-#define incl_UTIL_TEXT_COLOR_H_
+#ifndef incl_HPHP_UTIL_TEXT_COLOR_H_
+#define incl_HPHP_UTIL_TEXT_COLOR_H_
 
 #include "base.h"
 

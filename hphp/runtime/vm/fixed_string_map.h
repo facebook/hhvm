@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __FIXED_STRING_MAP_H__
-#define __FIXED_STRING_MAP_H__
+#ifndef incl_HPHP_FIXED_STRING_MAP_H_
+#define incl_HPHP_FIXED_STRING_MAP_H_
 
 #include <util/base.h>
 #include <runtime/base/string_data.h>
@@ -51,4 +51,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 } }
 
-#endif // __FIXED_STRING_MAP_H__
+#endif // incl_HPHP_FIXED_STRING_MAP_H_

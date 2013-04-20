@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_JSON_H__
-#define __HPHP_JSON_H__
+#ifndef incl_HPHP_JSON_H_
+#define incl_HPHP_JSON_H_
 
 #include "base.h"
 
@@ -269,4 +269,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_JSON_H__
+#endif // incl_HPHP_JSON_H_

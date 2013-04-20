@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef __NEO_ERR_H_
-#define __NEO_ERR_H_ 1
+#ifndef incl_HPHP_NEO_ERR_H_
+#define incl_HPHP_NEO_ERR_H_ 1
 
 #include "neo_misc.h"
 
@@ -225,4 +225,4 @@ int nerr_handle (NEOERR **err, NERR_TYPE type);
 
 __END_DECLS
 
-#endif /* __NEO_ERR_H_ */
+#endif /* incl_HPHP_NEO_ERR_H_ */

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UTIL_LFU_TABLE_H__
-#define __HPHP_UTIL_LFU_TABLE_H__
+#ifndef incl_HPHP_UTIL_LFU_TABLE_H_
+#define incl_HPHP_UTIL_LFU_TABLE_H_
 
 #include <util/base.h>
 #include <util/lock.h>
@@ -634,4 +634,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_UTIL_LFU_TABLE_H__
+#endif // incl_HPHP_UTIL_LFU_TABLE_H_

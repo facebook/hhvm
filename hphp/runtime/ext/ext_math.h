@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_MATH_H__
-#define __EXT_MATH_H__
+#ifndef incl_HPHP_EXT_MATH_H_
+#define incl_HPHP_EXT_MATH_H_
 
 #include <runtime/base/base_includes.h>
 #include <runtime/base/zend/zend_string.h>
@@ -109,4 +109,4 @@ double f_lcg_value();
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_MATH_H__
+#endif // incl_HPHP_EXT_MATH_H_

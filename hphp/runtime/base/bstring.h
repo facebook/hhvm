@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_BSTRING_H__
-#define __HPHP_BSTRING_H__
+#ifndef incl_HPHP_BSTRING_H_
+#define incl_HPHP_BSTRING_H_
 
 #include <stdlib.h>
 
@@ -86,4 +86,4 @@ char* bstrrstr(const char* haystack, size_t haystackSize,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_BSTRING_H__
+#endif // incl_HPHP_BSTRING_H_

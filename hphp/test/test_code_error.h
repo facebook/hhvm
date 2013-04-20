@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_CODE_ERROR_H__
-#define __TEST_CODE_ERROR_H__
+#ifndef incl_HPHP_TEST_CODE_ERROR_H_
+#define incl_HPHP_TEST_CODE_ERROR_H_
 
 #include <test/test_base.h>
 #include <compiler/analysis/code_error.h>
@@ -50,4 +50,4 @@ class TestCodeError : public TestBase {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_CODE_ERROR_H__
+#endif // incl_HPHP_TEST_CODE_ERROR_H_

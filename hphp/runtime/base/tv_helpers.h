@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __INSIDE_HPHP_COMPLEX_TYPES_H__
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'tv_helpers.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
 
-#ifndef __HPHP_TV_HELPERS_H__
-#define __HPHP_TV_HELPERS_H__
+#ifndef incl_HPHP_TV_HELPERS_H_
+#define incl_HPHP_TV_HELPERS_H_
 
 #include <runtime/base/types.h>
 
@@ -465,4 +465,4 @@ extern const RawDestructor g_destructors[kDestrTableSize];
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_TV_HELPERS_H__
+#endif // incl_HPHP_TV_HELPERS_H_

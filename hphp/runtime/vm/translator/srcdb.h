@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _SRCDB_H_
-#define _SRCDB_H_
+#ifndef incl_HPHP_SRCDB_H_
+#define incl_HPHP_SRCDB_H_
 
 #include <boost/noncopyable.hpp>
 

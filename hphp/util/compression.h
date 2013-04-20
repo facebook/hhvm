@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __COMPRESSION_H__
-#define __COMPRESSION_H__
+#ifndef incl_HPHP_COMPRESSION_H_
+#define incl_HPHP_COMPRESSION_H_
 
 #include "base.h"
 #include <zlib.h>
@@ -57,4 +57,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif  // __COMPRESSION_H__
+#endif  // incl_HPHP_COMPRESSION_H_

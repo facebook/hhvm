@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_PHP_DEBUG_H_
-#define incl_PHP_DEBUG_H_
+#ifndef incl_HPHP_PHP_DEBUG_H_
+#define incl_HPHP_PHP_DEBUG_H_
 
 namespace HPHP {
 
@@ -31,4 +31,4 @@ static inline bool phpBreakpointEnabled(const char* sourceName) {
 
 }      // namespace HPHP
 
-#endif /* incl_PHP_DEBUG_H_ */
+#endif /* incl_HPHP_PHP_DEBUG_H_ */

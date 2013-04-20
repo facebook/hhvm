@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HHVM_AS_H_
-#define incl_HHVM_AS_H_
+#ifndef incl_HPHP_HHVM_AS_H_
+#define incl_HPHP_HHVM_AS_H_
 
 #include <runtime/base/md5.h>
 

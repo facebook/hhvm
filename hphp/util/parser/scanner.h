@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UTIL_PARSER_SCANNER_H__
-#define __HPHP_UTIL_PARSER_SCANNER_H__
+#ifndef incl_HPHP_UTIL_PARSER_SCANNER_H_
+#define incl_HPHP_UTIL_PARSER_SCANNER_H_
 
 #include <sstream>
 #include <util/exception.h>
@@ -342,4 +342,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_UTIL_PARSER_SCANNER_H__
+#endif // incl_HPHP_UTIL_PARSER_SCANNER_H_

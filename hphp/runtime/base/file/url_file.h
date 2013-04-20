@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_URL_FILE_H__
-#define __HPHP_URL_FILE_H__
+#ifndef incl_HPHP_URL_FILE_H_
+#define incl_HPHP_URL_FILE_H_
 
 #include <runtime/base/file/mem_file.h>
 #include <runtime/base/util/string_buffer.h>
@@ -58,4 +58,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_URL_FILE_H__
+#endif // incl_HPHP_URL_FILE_H_

@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_DOMDOCUMENT_INCLUDES_H__
-#define __EXT_DOMDOCUMENT_INCLUDES_H__
+#ifndef incl_HPHP_EXT_DOMDOCUMENT_INCLUDES_H_
+#define incl_HPHP_EXT_DOMDOCUMENT_INCLUDES_H_
 
 #include <runtime/base/base_includes.h>
 
@@ -64,4 +64,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_DOMDOCUMENT_INCLUDES_H__
+#endif // incl_HPHP_EXT_DOMDOCUMENT_INCLUDES_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CLASS_VARIABLE_H__
-#define __CLASS_VARIABLE_H__
+#ifndef incl_HPHP_CLASS_VARIABLE_H_
+#define incl_HPHP_CLASS_VARIABLE_H_
 
 #include <compiler/statement/statement.h>
 
@@ -55,4 +55,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CLASS_VARIABLE_H__
+#endif // incl_HPHP_CLASS_VARIABLE_H_

@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_ASIO_SESSION_H__
-#define __EXT_ASIO_SESSION_H__
+#ifndef incl_HPHP_EXT_ASIO_SESSION_H_
+#define incl_HPHP_EXT_ASIO_SESSION_H_
 
 #include <runtime/base/base_includes.h>
 #include <runtime/ext/asio/asio_context.h>
@@ -86,4 +86,4 @@ class AsioSession {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_ASIO_SESSION_H__
+#endif // incl_HPHP_EXT_ASIO_SESSION_H_

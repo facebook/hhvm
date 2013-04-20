@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UTIL_ALLOC_H__
-#define __HPHP_UTIL_ALLOC_H__
+#ifndef incl_HPHP_UTIL_ALLOC_H_
+#define incl_HPHP_UTIL_ALLOC_H_
 
 #include <stdint.h>
 
@@ -161,4 +161,4 @@ extern const size_t s_pageSize;
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_UTIL_ALLOC_H__
+#endif // incl_HPHP_UTIL_ALLOC_H_

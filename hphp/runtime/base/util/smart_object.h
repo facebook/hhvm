@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SMART_OBJECT_H__
-#define __HPHP_SMART_OBJECT_H__
+#ifndef incl_HPHP_SMART_OBJECT_H_
+#define incl_HPHP_SMART_OBJECT_H_
 
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/complex_types.h>

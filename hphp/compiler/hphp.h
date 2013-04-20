@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_H__
-#define __HPHP_H__
+#ifndef incl_HPHP_H_
+#define incl_HPHP_H_
 
 #include <util/base.h>
 #include <util/case_insensitive.h>
@@ -32,4 +32,4 @@ template<class type> struct hphp_string_hash_map<type, ClassScope> :
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif  // __HPHP_H__
+#endif  // incl_HPHP_H_

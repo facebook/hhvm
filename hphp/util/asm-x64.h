@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_UTIL_ASM_X64_H_
-#define incl_UTIL_ASM_X64_H_
+#ifndef incl_HPHP_UTIL_ASM_X64_H_
+#define incl_HPHP_UTIL_ASM_X64_H_
 
 #include <type_traits>
 

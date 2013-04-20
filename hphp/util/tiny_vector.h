@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_UTIL_TINYVECTOR_H_
-#define incl_UTIL_TINYVECTOR_H_
+#ifndef incl_HPHP_UTIL_TINYVECTOR_H_
+#define incl_HPHP_UTIL_TINYVECTOR_H_
 
 #include <stdlib.h>
 #include <boost/noncopyable.hpp>

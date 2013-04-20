@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STATEMENT_LIST_H__
-#define __STATEMENT_LIST_H__
+#ifndef incl_HPHP_STATEMENT_LIST_H_
+#define incl_HPHP_STATEMENT_LIST_H_
 
 #include <compiler/statement/statement.h>
 
@@ -66,4 +66,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __STATEMENT_LIST_H__
+#endif // incl_HPHP_STATEMENT_LIST_H_

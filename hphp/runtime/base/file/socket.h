@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SOCKET_H__
-#define __HPHP_SOCKET_H__
+#ifndef incl_HPHP_SOCKET_H_
+#define incl_HPHP_SOCKET_H_
 
 #include <runtime/base/file/file.h>
 #include <sys/types.h>
@@ -90,4 +90,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_SOCKET_H__
+#endif // incl_HPHP_SOCKET_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_STRING_OFFSET_H__
-#define __HPHP_STRING_OFFSET_H__
+#ifndef incl_HPHP_STRING_OFFSET_H_
+#define incl_HPHP_STRING_OFFSET_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/string_data.h>
@@ -64,4 +64,4 @@ class StringOffset {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_STRING_OFFSET_H__
+#endif // incl_HPHP_STRING_OFFSET_H_

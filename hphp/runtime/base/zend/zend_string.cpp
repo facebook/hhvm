@@ -2998,8 +2998,8 @@ char *string_convert_cyrillic_string(const char *input, int length,
 ///////////////////////////////////////////////////////////////////////////////
 // Hebrew
 
-#define _HEB_BLOCK_TYPE_ENG 1
-#define _HEB_BLOCK_TYPE_HEB 2
+#define HEB_BLOCK_TYPE_ENG 1
+#define HEB_BLOCK_TYPE_HEB 2
 
 #define isheb(c)                                                        \
   (((((unsigned char) c) >= 224) && (((unsigned char) c) <= 250)) ? 1 : 0)
@@ -3038,13 +3038,13 @@ char *string_convert_hebrew_string(const char *str, int &str_len,
   block_length=0;
 
   if (isheb(*tmp)) {
-    block_type = _HEB_BLOCK_TYPE_HEB;
+    block_type = HEB_BLOCK_TYPE_HEB;
   } else {
-    block_type = _HEB_BLOCK_TYPE_ENG;
+    block_type = HEB_BLOCK_TYPE_ENG;
   }
 
   do {
-    if (block_type == _HEB_BLOCK_TYPE_HEB) {
+    if (block_type == HEB_BLOCK_TYPE_HEB) {
       while ((isheb((int)*(tmp+1)) ||
               _isblank((int)*(tmp+1)) ||
               ispunct((int)*(tmp+1)) ||
@@ -3071,7 +3071,7 @@ char *string_convert_hebrew_string(const char *str, int &str_len,
         }
         target--;
       }
-      block_type = _HEB_BLOCK_TYPE_ENG;
+      block_type = HEB_BLOCK_TYPE_ENG;
     } else {
       while (!isheb(*(tmp+1)) &&
              (int)*(tmp+1)!='\n' && block_end < str_len-1) {
@@ -3089,7 +3089,7 @@ char *string_convert_hebrew_string(const char *str, int &str_len,
         *target = str[i];
         target--;
       }
-      block_type = _HEB_BLOCK_TYPE_HEB;
+      block_type = HEB_BLOCK_TYPE_HEB;
     }
     block_start=block_end+1;
   } while (block_end < str_len-1);

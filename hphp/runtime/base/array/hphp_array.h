@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_HPHP_ARRAY_H__
-#define __HPHP_HPHP_ARRAY_H__
+#ifndef incl_HPHP_HPHP_ARRAY_H_
+#define incl_HPHP_HPHP_ARRAY_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/array/array_data.h>
@@ -551,4 +551,4 @@ ArrayData* array_add(ArrayData* a1, ArrayData* a2);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_HPHP_ARRAY_H__
+#endif // incl_HPHP_HPHP_ARRAY_H_

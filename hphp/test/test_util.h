@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_UTIL_H__
-#define __TEST_UTIL_H__
+#ifndef incl_HPHP_TEST_UTIL_H_
+#define incl_HPHP_TEST_UTIL_H_
 
 #include <test/test_base.h>
 #include <util/base.h>
@@ -36,4 +36,4 @@ class TestUtil : public TestBase {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_CPP_BASE_H__
+#endif // incl_HPHP_TEST_CPP_BASE_H_

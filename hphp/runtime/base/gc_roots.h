@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_BASE_GC_ROOTS_H_
-#define incl_BASE_GC_ROOTS_H_
+#ifndef incl_HPHP_BASE_GC_ROOTS_H_
+#define incl_HPHP_BASE_GC_ROOTS_H_
 
 #include <vector>
 #include <boost/noncopyable.hpp>

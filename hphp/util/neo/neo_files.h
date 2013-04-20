@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef __NEO_FILES_H_
-#define __NEO_FILES_H_ 1
+#ifndef incl_HPHP_NEO_FILES_H_
+#define incl_HPHP_NEO_FILES_H_ 1
 
 __BEGIN_DECLS
 
@@ -34,4 +34,4 @@ NEOERR *ne_listdir_fmatch(const char *path, ULIST **files, MATCH_FUNC fmatch,
 
 __END_DECLS
 
-#endif /* __NEO_FILES_H_ */
+#endif /* incl_HPHP_NEO_FILES_H_ */

@@ -16,8 +16,8 @@
 
 #include <runtime/base/types.h>
 
-#ifndef __SYSTEMLIB_H__
-#define __SYSTEMLIB_H__
+#ifndef incl_HPHP_SYSTEMLIB_H_
+#define incl_HPHP_SYSTEMLIB_H_
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

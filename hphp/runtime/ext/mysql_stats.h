@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_MYSQL_STATS_H__
-#define __HPHP_MYSQL_STATS_H__
+#ifndef incl_HPHP_MYSQLSTATS_H_
+#define incl_HPHP_MYSQLSTATS_H_
 
 #include <util/base.h>
 #include <util/lock.h>
@@ -87,4 +87,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_MYSQL_STATS_H__
+#endif // incl_HPHP_MYSQLSTATS_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DB_MYSQL_H__
-#define __DB_MYSQL_H__
+#ifndef incl_HPHP_DB_MYSQL_H_
+#define incl_HPHP_DB_MYSQL_H_
 
 #include "base.h"
 #include <mysql/mysql.h>
@@ -35,4 +35,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __DB_MYSQL_H__
+#endif // incl_HPHP_DB_MYSQL_H_

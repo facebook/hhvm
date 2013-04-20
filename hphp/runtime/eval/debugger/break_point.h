@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_BREAK_POINT_H__
-#define __HPHP_EVAL_DEBUGGER_BREAK_POINT_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
+#define incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
 
 #include <runtime/eval/debugger/debugger_thrift_buffer.h>
 
@@ -227,4 +227,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_BREAK_POINT_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_

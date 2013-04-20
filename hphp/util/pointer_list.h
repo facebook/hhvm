@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __POINTERLIST_H__
-#define __POINTERLIST_H__
+#ifndef incl_HPHP_POINTERLIST_H_
+#define incl_HPHP_POINTERLIST_H_
 
 #include <stdlib.h>
 #include "util/assertions.h"

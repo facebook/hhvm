@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_DATEINTERVAL_H__
-#define __HPHP_DATEINTERVAL_H__
+#ifndef incl_HPHP_DATEINTERVAL_H_
+#define incl_HPHP_DATEINTERVAL_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
@@ -123,4 +123,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_DATEINTERVAL_H__
+#endif // incl_HPHP_DATEINTERVAL_H_

@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHIR_OPT_H_
-#define incl_HHIR_OPT_H_
+#ifndef incl_HPHP_HHIR_OPT_H_
+#define incl_HPHP_HHIR_OPT_H_
 
 namespace HPHP { namespace VM { namespace JIT {
 

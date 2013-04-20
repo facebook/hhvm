@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __PDO_DRIVER_H__
-#define __PDO_DRIVER_H__
+#ifndef incl_HPHP_PDO_DRIVER_H_
+#define incl_HPHP_PDO_DRIVER_H_
 
 #include <runtime/base/base_includes.h>
 
@@ -612,4 +612,4 @@ void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __PDO_DRIVER_H__
+#endif // incl_HPHP_PDO_DRIVER_H_

@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_ASIO_CONTEXT_H__
-#define __EXT_ASIO_CONTEXT_H__
+#ifndef incl_HPHP_EXT_ASIO_CONTEXT_H_
+#define incl_HPHP_EXT_ASIO_CONTEXT_H_
 
 #include <functional>
 #include <queue>
@@ -70,4 +70,4 @@ class AsioContext {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_ASIO_CONTEXT_H__
+#endif // incl_HPHP_EXT_ASIO_CONTEXT_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_PARSER_H__
-#define __TEST_PARSER_H__
+#ifndef incl_HPHP_TEST_PARSER_H_
+#define incl_HPHP_TEST_PARSER_H_
 
 #include <test/test_base.h>
 
@@ -39,4 +39,4 @@ class TestParser : public TestBase {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_PARSER_H__
+#endif // incl_HPHP_TEST_PARSER_H_

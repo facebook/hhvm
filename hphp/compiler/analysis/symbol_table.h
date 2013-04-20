@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __SYMBOL_TABLE_H__
-#define __SYMBOL_TABLE_H__
+#ifndef incl_HPHP_SYMBOL_TABLE_H_
+#define incl_HPHP_SYMBOL_TABLE_H_
 
 #include <compiler/hphp.h>
 #include <util/json.h>
@@ -392,4 +392,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __SYMBOL_TABLE_H__
+#endif // incl_HPHP_SYMBOL_TABLE_H_

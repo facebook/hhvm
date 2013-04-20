@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CLASS_SCOPE_H__
-#define __CLASS_SCOPE_H__
+#ifndef incl_HPHP_CLASS_SCOPE_H_
+#define incl_HPHP_CLASS_SCOPE_H_
 
 #include <compiler/analysis/block_scope.h>
 #include <compiler/analysis/function_container.h>
@@ -489,4 +489,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CLASS_SCOPE_H__
+#endif // incl_HPHP_CLASS_SCOPE_H_

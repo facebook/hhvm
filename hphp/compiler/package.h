@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __PACKAGE_H__
-#define __PACKAGE_H__
+#ifndef incl_HPHP_PACKAGE_H_
+#define incl_HPHP_PACKAGE_H_
 
 #include <compiler/hphp.h>
 #include <util/string_bag.h>
@@ -89,4 +89,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __PACKAGE_H__
+#endif // incl_HPHP_PACKAGE_H_

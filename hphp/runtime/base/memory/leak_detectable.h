@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_LEAK_DETECTABLE_H__
-#define __HPHP_LEAK_DETECTABLE_H__
+#ifndef incl_HPHP_LEAK_DETECTABLE_H_
+#define incl_HPHP_LEAK_DETECTABLE_H_
 
 #include <util/stack_trace.h>
 #include <util/lock.h>
@@ -87,4 +87,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* __HPHP_LEAK_DETECTABLE_H__ */
+#endif /* incl_HPHP_LEAK_DETECTABLE_H_ */

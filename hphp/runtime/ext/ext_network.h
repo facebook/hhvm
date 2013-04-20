@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_NETWORK_H__
-#define __EXT_NETWORK_H__
+#ifndef incl_HPHP_EXT_NETWORK_H_
+#define incl_HPHP_EXT_NETWORK_H_
 
 #include <runtime/base/base_includes.h>
 #include <runtime/ext/ext_stream.h>
@@ -105,4 +105,4 @@ bool f_syslog(int priority, CStrRef message);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_NETWORK_H__
+#endif // incl_HPHP_EXT_NETWORK_H_

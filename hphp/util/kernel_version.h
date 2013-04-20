@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_KERNEL_VERSION_H_
-#define incl_KERNEL_VERSION_H_
+#ifndef incl_HPHP_KERNEL_VERSION_H_
+#define incl_HPHP_KERNEL_VERSION_H_
 
 namespace HPHP {
 

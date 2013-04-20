@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EXECUTION_CONTEXT_H__
-#define __HPHP_EXECUTION_CONTEXT_H__
+#ifndef incl_HPHP_EXECUTION_CONTEXT_H_
+#define incl_HPHP_EXECUTION_CONTEXT_H_
 
 #include <runtime/base/class_info.h>
 #include <runtime/base/complex_types.h>
@@ -816,4 +816,4 @@ extern DECLARE_THREAD_LOCAL_NO_CHECK(PersistentObjectStore,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_EXECUTION_CONTEXT_H__
+#endif // incl_HPHP_EXECUTION_CONTEXT_H_

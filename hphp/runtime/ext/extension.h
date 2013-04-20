@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXTENSION_H__
-#define __EXTENSION_H__
+#ifndef incl_HPHP_EXTENSION_H_
+#define incl_HPHP_EXTENSION_H_
 
 #include <runtime/base/complex_types.h>
 #include <runtime/base/debuggable.h>
@@ -86,4 +86,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXTENSION_H__
+#endif // incl_HPHP_EXTENSION_H_

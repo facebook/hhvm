@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HTTP_CLIENT_H__
-#define __HTTP_CLIENT_H__
+#ifndef incl_HPHP_HTTP_CLIENT_H_
+#define incl_HPHP_HTTP_CLIENT_H_
 
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/server/transport.h>
@@ -98,4 +98,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HTTP_CLIENT_H__
+#endif // incl_HPHP_HTTP_CLIENT_H_

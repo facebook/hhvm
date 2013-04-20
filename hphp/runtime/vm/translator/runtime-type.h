@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_RUNTIME_TYPE_H_
-#define incl_RUNTIME_TYPE_H_
+#ifndef incl_HPHP_RUNTIME_TYPE_H_
+#define incl_HPHP_RUNTIME_TYPE_H_
 
 #include "runtime/vm/bytecode.h"
 
@@ -286,4 +286,4 @@ class RuntimeType {
 
 } } }
 
-#endif // incl_RUNTIME_TYPE_H_
+#endif // incl_HPHP_RUNTIME_TYPE_H_

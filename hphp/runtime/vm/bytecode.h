@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_BYTECODE_H_
-#define incl_VM_BYTECODE_H_
+#ifndef incl_HPHP_VM_BYTECODE_H_
+#define incl_HPHP_VM_BYTECODE_H_
 
 #include <boost/optional.hpp>
 

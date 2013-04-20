@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CLASS_STATEMENT_H__
-#define __CLASS_STATEMENT_H__
+#ifndef incl_HPHP_CLASS_STATEMENT_H_
+#define incl_HPHP_CLASS_STATEMENT_H_
 
 #include <compiler/statement/interface_statement.h>
 #include <compiler/expression/modifier_expression.h>
@@ -59,4 +59,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CLASS_STATEMENT_H__
+#endif // incl_HPHP_CLASS_STATEMENT_H_

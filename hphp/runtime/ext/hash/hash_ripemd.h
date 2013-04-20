@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_HASH_RIPEMD_H__
-#define __EXT_HASH_RIPEMD_H__
+#ifndef incl_HPHP_EXT_HASH_RIPEMD_H_
+#define incl_HPHP_EXT_HASH_RIPEMD_H_
 
 #include <runtime/ext/hash/hash_engine.h>
 
@@ -66,4 +66,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_HASH_RIPEMD_H__
+#endif // incl_HPHP_EXT_HASH_RIPEMD_H_

@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_ARRAY_H__
-#define __EXT_ARRAY_H__
+#ifndef incl_HPHP_EXT_ARRAY_H_
+#define incl_HPHP_EXT_ARRAY_H_
 
 #include <runtime/base/base_includes.h>
 #include <runtime/base/array/array_util.h>
@@ -178,4 +178,4 @@ Variant f_i18n_loc_get_error_code();
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_ARRAY_H__
+#endif // incl_HPHP_EXT_ARRAY_H_

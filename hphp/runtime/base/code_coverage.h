@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_CODE_COVERAGE_H__
-#define __HPHP_EVAL_CODE_COVERAGE_H__
+#ifndef incl_HPHP_EVAL_CODE_COVERAGE_H_
+#define incl_HPHP_EVAL_CODE_COVERAGE_H_
 
 #include <runtime/base/complex_types.h>
 #include <util/lock.h>
@@ -56,4 +56,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_EVAL_CODE_COVERAGE_H__
+#endif // incl_HPHP_EVAL_CODE_COVERAGE_H_

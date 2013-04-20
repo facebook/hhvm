@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_TREADMILL_H_
-#define incl_TREADMILL_H_
+#ifndef incl_HPHP_TREADMILL_H_
+#define incl_HPHP_TREADMILL_H_
 
 #include "runtime/vm/unit.h"
 

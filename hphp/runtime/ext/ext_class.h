@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_CLASS_H__
-#define __EXT_CLASS_H__
+#ifndef incl_HPHP_EXT_CLASS_H_
+#define incl_HPHP_EXT_CLASS_H_
 
 #include <runtime/base/base_includes.h>
 
@@ -52,4 +52,4 @@ Variant f_call_user_method(int _argc, CStrRef method_name, VRefParam obj, CArrRe
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_CLASS_H__
+#endif // incl_HPHP_EXT_CLASS_H_

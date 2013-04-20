@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __NEW_OBJECT_EXPRESSION_H__
-#define __NEW_OBJECT_EXPRESSION_H__
+#ifndef incl_HPHP_NEW_OBJECT_EXPRESSION_H_
+#define incl_HPHP_NEW_OBJECT_EXPRESSION_H_
 
 #include <compiler/expression/function_call.h>
 
@@ -41,4 +41,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __NEW_OBJECT_EXPRESSION_H__
+#endif // incl_HPHP_NEW_OBJECT_EXPRESSION_H_

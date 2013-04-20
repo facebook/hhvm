@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ARRAY_ITERATOR_H__
-#define __HPHP_ARRAY_ITERATOR_H__
+#ifndef incl_HPHP_ARRAY_ITERATOR_H_
+#define incl_HPHP_ARRAY_ITERATOR_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/util/smart_ptr.h>
@@ -478,4 +478,4 @@ namespace VM {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ARRAY_ITERATOR_H__
+#endif // incl_HPHP_ARRAY_ITERATOR_H_

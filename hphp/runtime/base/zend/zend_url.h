@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ZEND_URL_H__
-#define __HPHP_ZEND_URL_H__
+#ifndef incl_HPHP_ZEND_URL_H_
+#define incl_HPHP_ZEND_URL_H_
 
 #include <util/base.h>
 
@@ -55,4 +55,4 @@ char *url_raw_decode(const char *s, int &len);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZEND_URL_H__
+#endif // incl_HPHP_ZEND_URL_H_

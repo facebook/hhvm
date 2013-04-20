@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _TRANSLATOR_DEPS_H_
-#define _TRANSLATOR_DEPS_H
+#ifndef TRANSLATOR_DEPS_H_
+#define TRANSLATOR_DEPS_H
 
 #include <vector>
 #include <tbb/concurrent_hash_map.h>
@@ -84,4 +84,4 @@ void unmergePreConsts(const PreConstVec& preConsts, void* owner);
 
 } } } // HPHP::VM::Transl
 
-#endif // _TRANSLATOR_DEPS_H_
+#endif // TRANSLATOR_DEPS_H_

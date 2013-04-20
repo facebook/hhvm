@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_H__
-#define __HPHP_EVAL_DEBUGGER_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_H_
+#define incl_HPHP_EVAL_DEBUGGER_H_
 
 #include <util/lock.h>
 #include <runtime/eval/debugger/debugger_proxy.h>
@@ -168,4 +168,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_H_

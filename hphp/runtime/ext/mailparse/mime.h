@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __PHP_MAILPARSE_MIME_H__
-#define __PHP_MAILPARSE_MIME_H__
+#ifndef incl_HPHP_PHP_MAILPARSE_MIME_H_
+#define incl_HPHP_PHP_MAILPARSE_MIME_H_
 
 #include <runtime/base/base_includes.h>
 #include <runtime/ext/mailparse/rfc822.h>
@@ -156,4 +156,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __PHP_MAILPARSE_MIME_H__
+#endif // incl_HPHP_PHP_MAILPARSE_MIME_H_

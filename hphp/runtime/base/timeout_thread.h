@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TIMEOUT_THREAD_H__
-#define __TIMEOUT_THREAD_H__
+#ifndef incl_HPHP_TIMEOUT_THREAD_H_
+#define incl_HPHP_TIMEOUT_THREAD_H_
 
 #include <queue>
 
@@ -71,5 +71,5 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __TIMEOUT_THREAD_H__
+#endif // incl_HPHP_TIMEOUT_THREAD_H_
 

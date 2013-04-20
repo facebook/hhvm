@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STRING_BAG_H__
-#define __STRING_BAG_H__
+#ifndef incl_HPHP_STRING_BAG_H_
+#define incl_HPHP_STRING_BAG_H_
 
 #include "base.h"
 
@@ -42,4 +42,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __STRING_BAG_H__
+#endif // incl_HPHP_STRING_BAG_H_

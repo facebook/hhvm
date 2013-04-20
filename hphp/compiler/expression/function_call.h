@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __FUNCTION_CALL_H__
-#define __FUNCTION_CALL_H__
+#ifndef incl_HPHP_FUNCTION_CALL_H_
+#define incl_HPHP_FUNCTION_CALL_H_
 
 #include <compiler/analysis/function_scope.h>
 #include <compiler/expression/static_class_name.h>
@@ -108,4 +108,4 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __FUNCTION_CALL_H__
+#endif // incl_HPHP_FUNCTION_CALL_H_

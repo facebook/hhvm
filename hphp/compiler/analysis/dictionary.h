@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DICTIONARY_H__
-#define __DICTIONARY_H__
+#ifndef incl_HPHP_DICTIONARY_H_
+#define incl_HPHP_DICTIONARY_H_
 
 #include <compiler/hphp.h>
 #include <compiler/analysis/data_flow.h>
@@ -78,4 +78,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __DICTIONARY_H__
+#endif // incl_HPHP_DICTIONARY_H_

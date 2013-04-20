@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXCEPTION_H__
-#define __EXCEPTION_H__
+#ifndef incl_HPHP_EXCEPTION_H_
+#define incl_HPHP_EXCEPTION_H_
 
 #include "stack_trace.h"
 #include <stdarg.h>
@@ -105,4 +105,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXCEPTION_H__
+#endif // incl_HPHP_EXCEPTION_H_

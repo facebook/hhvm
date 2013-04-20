@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_HASH_H__
-#define __HPHP_HASH_H__
+#ifndef incl_HPHP_HASH_H_
+#define incl_HPHP_HASH_H_
 
 #include <stdint.h>
 
@@ -338,4 +338,4 @@ inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_HASH_H__
+#endif // incl_HPHP_HASH_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_PROXY_H__
-#define __HPHP_EVAL_DEBUGGER_PROXY_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_PROXY_H_
+#define incl_HPHP_EVAL_DEBUGGER_PROXY_H_
 
 #include <util/base.h>
 #include <util/synchronizable.h>
@@ -167,4 +167,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_PROXY_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_PROXY_H_

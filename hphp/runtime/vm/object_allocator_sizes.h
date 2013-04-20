@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_OBJECT_ALLOCATOR_SIZES_H__
-#define __HPHP_OBJECT_ALLOCATOR_SIZES_H__
+#ifndef incl_HPHP_OBJECT_ALLOCATOR_SIZES_H_
+#define incl_HPHP_OBJECT_ALLOCATOR_SIZES_H_
 
 namespace HPHP {
 namespace VM {

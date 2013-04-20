@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HTTP_SERVER_LIB_EVENT_SERVER_WITH_TAKEOVER_H__
-#define __HTTP_SERVER_LIB_EVENT_SERVER_WITH_TAKEOVER_H__
+#ifndef incl_HPHP_HTTP_SERVER_LIB_EVENT_SERVER_WITH_TAKEOVER_H_
+#define incl_HPHP_HTTP_SERVER_LIB_EVENT_SERVER_WITH_TAKEOVER_H_
 
 #include <runtime/base/server/libevent_server.h>
 
@@ -76,4 +76,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HTTP_SERVER_LIB_EVENT_SERVER_H__
+#endif // incl_HPHP_HTTP_SERVER_LIB_EVENT_SERVER_H_

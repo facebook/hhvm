@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __BINARY_OP_EXPRESSION_H__
-#define __BINARY_OP_EXPRESSION_H__
+#ifndef incl_HPHP_BINARY_OP_EXPRESSION_H_
+#define incl_HPHP_BINARY_OP_EXPRESSION_H_
 
 #include <compiler/expression/expression_list.h>
 
@@ -71,4 +71,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __BINARY_OP_EXPRESSION_H__
+#endif // incl_HPHP_BINARY_OP_EXPRESSION_H_

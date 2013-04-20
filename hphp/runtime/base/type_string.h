@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __INSIDE_HPHP_COMPLEX_TYPES_H__
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'type_string.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
 
-#ifndef __HPHP_STRING_H__
-#define __HPHP_STRING_H__
+#ifndef incl_HPHP_STRING_H_
+#define incl_HPHP_STRING_H_
 
 #include <util/assertions.h>
 #include <runtime/base/util/smart_ptr.h>
@@ -624,4 +624,4 @@ extern const StaticString empty_string;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_STRING_H__
+#endif // incl_HPHP_STRING_H_

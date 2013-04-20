@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __RUNTIME_OPTION_H__
-#define __RUNTIME_OPTION_H__
+#ifndef incl_HPHP_RUNTIME_OPTION_H_
+#define incl_HPHP_RUNTIME_OPTION_H_
 
 #include <runtime/base/server/virtual_host.h>
 #include <runtime/base/server/satellite_server.h>
@@ -505,4 +505,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __RUNTIME_OPTION_H__
+#endif // incl_HPHP_RUNTIME_OPTION_H_

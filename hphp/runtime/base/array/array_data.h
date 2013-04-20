@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ARRAY_DATA_H__
-#define __HPHP_ARRAY_DATA_H__
+#ifndef incl_HPHP_ARRAY_DATA_H_
+#define incl_HPHP_ARRAY_DATA_H_
 
 #include <runtime/base/util/countable.h>
 #include <runtime/base/types.h>
@@ -500,4 +500,4 @@ void decRefArr(ArrayData* arr) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ARRAY_DATA_H__
+#endif // incl_HPHP_ARRAY_DATA_H_

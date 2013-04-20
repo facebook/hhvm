@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_FUNC_INLINE_H_
-#define incl_VM_FUNC_INLINE_H_
+#ifndef incl_HPHP_VM_FUNC_INLINE_H_
+#define incl_HPHP_VM_FUNC_INLINE_H_
 
 namespace HPHP {
 namespace VM {

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TYPE_ANNOTATION_H__
-#define __TYPE_ANNOTATION_H__
+#ifndef incl_HPHP_TYPEANNOTATION_H_
+#define incl_HPHP_TYPEANNOTATION_H_
 
 #include <util/base.h>
 

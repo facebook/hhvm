@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SMART_ALLOCATOR_H__
-#define __HPHP_SMART_ALLOCATOR_H__
+#ifndef incl_HPHP_SMART_ALLOCATOR_H_
+#define incl_HPHP_SMART_ALLOCATOR_H_
 
 #include <boost/noncopyable.hpp>
 #include <boost/type_traits/is_base_of.hpp>
@@ -359,4 +359,4 @@ inline void operator delete(void *p , HPHP::ObjectAllocatorBase *a) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __HPHP_SMART_ALLOCATOR_H__
+#endif // incl_HPHP_SMART_ALLOCATOR_H_

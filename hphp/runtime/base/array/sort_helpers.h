@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __SORT_HELPERS_H__
-#define __SORT_HELPERS_H__
+#ifndef incl_HPHP_SORT_HELPERS_H_
+#define incl_HPHP_SORT_HELPERS_H_
 
 #include <runtime/base/complex_types.h>
 #include <runtime/base/builtin_functions.h>
@@ -287,4 +287,4 @@ struct ElmUCompare {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __SORT_HELPERS_H__
+#endif // incl_HPHP_SORT_HELPERS_H_

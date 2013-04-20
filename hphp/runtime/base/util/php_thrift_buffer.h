@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_PHP_THRIFT_BUFFER_H__
-#define __HPHP_PHP_THRIFT_BUFFER_H__
+#ifndef incl_HPHP_PHP_THRIFT_BUFFER_H_
+#define incl_HPHP_PHP_THRIFT_BUFFER_H_
 
 #include <runtime/base/util/thrift_buffer.h>
 
@@ -51,4 +51,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_PHP_THRIFT_BUFFER_H__
+#endif // incl_HPHP_PHP_THRIFT_BUFFER_H_

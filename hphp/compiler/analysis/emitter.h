@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __COMPILER_EMITTER_H__
-#define __COMPILER_EMITTER_H__
+#ifndef incl_HPHP_COMPILER_EMITTER_H_
+#define incl_HPHP_COMPILER_EMITTER_H_
 
 #include <compiler/expression/expression.h>
 #include <compiler/statement/statement.h>
@@ -689,4 +689,4 @@ extern "C" {
 }
 }
 
-#endif // __COMPILER_EMITTER_H__
+#endif // incl_HPHP_COMPILER_EMITTER_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_DATETIME_H__
-#define __HPHP_DATETIME_H__
+#ifndef incl_HPHP_DATETIME_H_
+#define incl_HPHP_DATETIME_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/time/timezone.h>
@@ -356,4 +356,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_DATETIME_H__
+#endif // incl_HPHP_DATETIME_H_

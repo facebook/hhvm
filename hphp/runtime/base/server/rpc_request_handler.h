@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_RPC_REQUEST_HANDLER_H__
-#define __HPHP_RPC_REQUEST_HANDLER_H__
+#ifndef incl_HPHP_RPC_REQUEST_HANDLER_H_
+#define incl_HPHP_RPC_REQUEST_HANDLER_H_
 
 #include <runtime/base/server/server.h>
 #include <runtime/base/execution_context.h>
@@ -76,4 +76,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_RPC_REQUEST_HANDLER_H__
+#endif // incl_HPHP_RPC_REQUEST_HANDLER_H_

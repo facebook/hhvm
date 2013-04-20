@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_RUNTIME_VM_NAMEVALUETABLE_H_
-#define incl_RUNTIME_VM_NAMEVALUETABLE_H_
+#ifndef incl_HPHP_RUNTIME_VM_NAMEVALUETABLE_H_
+#define incl_HPHP_RUNTIME_VM_NAMEVALUETABLE_H_
 
 #include <boost/noncopyable.hpp>
 #include <deque>

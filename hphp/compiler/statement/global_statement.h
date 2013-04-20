@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GLOBAL_STATEMENT_H__
-#define __GLOBAL_STATEMENT_H__
+#ifndef incl_HPHP_GLOBAL_STATEMENT_H_
+#define incl_HPHP_GLOBAL_STATEMENT_H_
 
 #include <compiler/statement/statement.h>
 
@@ -41,4 +41,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __GLOBAL_STATEMENT_H__
+#endif // incl_HPHP_GLOBAL_STATEMENT_H_

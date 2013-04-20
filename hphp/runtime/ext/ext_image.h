@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_IMAGE_H__
-#define __EXT_IMAGE_H__
+#ifndef incl_HPHP_EXT_IMAGE_H_
+#define incl_HPHP_EXT_IMAGE_H_
 
 #include <runtime/base/base_includes.h>
 #include <runtime/base/zend/zend_php_config.h>
@@ -160,4 +160,4 @@ Variant f_exif_thumbnail(CStrRef filename, VRefParam width = uninit_null(), VRef
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_IMAGE_H__
+#endif // incl_HPHP_EXT_IMAGE_H_

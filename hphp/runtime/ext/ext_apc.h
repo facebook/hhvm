@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_APC_H__
-#define __EXT_APC_H__
+#ifndef incl_HPHP_EXT_APC_H_
+#define incl_HPHP_EXT_APC_H_
 
 #include <runtime/base/base_includes.h>
 #include <runtime/base/shared/shared_store_base.h>
@@ -129,4 +129,4 @@ size_t get_const_map_size();
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_APC_H__
+#endif // incl_HPHP_EXT_APC_H_

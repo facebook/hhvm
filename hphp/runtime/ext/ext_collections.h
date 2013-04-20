@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_COLLECTION_H__
-#define __EXT_COLLECTION_H__
+#ifndef incl_HPHP_EXT_COLLECTION_H_
+#define incl_HPHP_EXT_COLLECTION_H_
 
 #include <runtime/base/base_includes.h>
 #include <system/lib/systemlib.h>
@@ -1485,4 +1485,4 @@ private:
 
 }
 
-#endif // __EXT_COLLECTION_H__
+#endif // incl_HPHP_EXT_COLLECTION_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SHARED_VARIANT_H__
-#define __HPHP_SHARED_VARIANT_H__
+#ifndef incl_HPHP_SHARED_VARIANT_H_
+#define incl_HPHP_SHARED_VARIANT_H_
 
 #include <runtime/base/types.h>
 #include <util/lock.h>
@@ -272,4 +272,4 @@ class SharedVariantStats {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* __HPHP_SHARED_VARIANT_H__ */
+#endif /* incl_HPHP_SHARED_VARIANT_H_ */

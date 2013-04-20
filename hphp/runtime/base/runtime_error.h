@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_RUNTIME_ERROR_H__
-#define __HPHP_RUNTIME_ERROR_H__
+#ifndef incl_HPHP_RUNTIME_ERROR_H_
+#define incl_HPHP_RUNTIME_ERROR_H_
 
 #include <cstdarg>
 #include <string>
@@ -96,5 +96,5 @@ warn_or_error(const char* fmt, ...) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_RUNTIME_ERROR_H__
+#endif // incl_HPHP_RUNTIME_ERROR_H_
 

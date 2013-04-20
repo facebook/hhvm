@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __FOREACH_STATEMENT_H__
-#define __FOREACH_STATEMENT_H__
+#ifndef incl_HPHP_FOREACH_STATEMENT_H_
+#define incl_HPHP_FOREACH_STATEMENT_H_
 
 #include <compiler/statement/loop_statement.h>
 
@@ -53,4 +53,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __FOREACH_STATEMENT_H__
+#endif // incl_HPHP_FOREACH_STATEMENT_H_

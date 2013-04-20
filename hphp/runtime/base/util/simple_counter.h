@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __HPHP_SIMPLE_COUNTER_H__
-#define __HPHP_SIMPLE_COUNTER_H__
+#ifndef incl_HPHP_SIMPLE_COUNTER_H_
+#define incl_HPHP_SIMPLE_COUNTER_H_
 
 #include <runtime/base/util/request_local.h>
 #include <util/stack_trace.h>

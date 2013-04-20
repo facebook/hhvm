@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DB_CONN_H__
-#define __DB_CONN_H__
+#ifndef incl_HPHP_DB_CONN_H_
+#define incl_HPHP_DB_CONN_H_
 
 #include "db_dataset.h"
 #include "exception.h"
@@ -203,4 +203,4 @@ class DBConn {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __DB_CONN_H__
+#endif // incl_HPHP_DB_CONN_H_

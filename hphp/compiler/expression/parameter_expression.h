@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __PARAMETER_EXPRESSION_H__
-#define __PARAMETER_EXPRESSION_H__
+#ifndef incl_HPHP_PARAMETER_EXPRESSION_H_
+#define incl_HPHP_PARAMETER_EXPRESSION_H_
 
 #include <compiler/expression/expression.h>
 #include <util/json.h>
@@ -70,4 +70,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __PARAMETER_EXPRESSION_H__
+#endif // incl_HPHP_PARAMETER_EXPRESSION_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_CASE_INSENSITIVE_H__
-#define __HPHP_CASE_INSENSITIVE_H__
+#ifndef incl_HPHP_CASE_INSENSITIVE_H_
+#define incl_HPHP_CASE_INSENSITIVE_H_
 
 #include <util/base.h>
 #include <util/hash.h>
@@ -76,4 +76,4 @@ class hphp_string_iset :
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_CASE_INSENSITIVE_H__
+#endif // incl_HPHP_CASE_INSENSITIVE_H_

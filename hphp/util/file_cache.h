@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __FILE_CACHE_H__
-#define __FILE_CACHE_H__
+#ifndef incl_HPHP_FILE_CACHE_H_
+#define incl_HPHP_FILE_CACHE_H_
 
 #include "base.h"
 
@@ -78,4 +78,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif  // __FILE_CACHE_H__
+#endif  // incl_HPHP_FILE_CACHE_H_

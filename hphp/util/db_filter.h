@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DB_FILTER_H__
-#define __DB_FILTER_H__
+#ifndef incl_HPHP_DB_FILTER_H_
+#define incl_HPHP_DB_FILTER_H_
 
 #include "base.h"
 
@@ -154,4 +154,4 @@ class DBOrStringFilter : public DBQueryFilter {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __DB_FILTER_H__
+#endif // incl_HPHP_DB_FILTER_H_

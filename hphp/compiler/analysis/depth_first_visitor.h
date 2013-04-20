@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DEPTH_FIRST_VISITOR_H__
-#define __DEPTH_FIRST_VISITOR_H__
+#ifndef incl_HPHP_DEPTH_FIRST_VISITOR_H_
+#define incl_HPHP_DEPTH_FIRST_VISITOR_H_
 
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/ast_walker.h>
@@ -230,4 +230,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __DEPTH_FIRST_VISITOR_H__
+#endif // incl_HPHP_DEPTH_FIRST_VISITOR_H_

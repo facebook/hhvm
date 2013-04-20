@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _TYPE_PROFILE_H_
-#define _TYPE_PROFILE_H_
+#ifndef TYPE_PROFILE_H_
+#define TYPE_PROFILE_H_
 
 namespace HPHP {
 namespace VM {
@@ -50,4 +50,4 @@ static inline bool shouldProfile() {
 
 } }
 
-#endif // _TYPE_PROFILE_H_
+#endif // TYPE_PROFILE_H_

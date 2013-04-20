@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CLIENT_H__
-#define __HPHP_EVAL_DEBUGGER_CLIENT_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CLIENT_H_
+#define incl_HPHP_EVAL_DEBUGGER_CLIENT_H_
 
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/eval/debugger/debugger_client_settings.h>
@@ -481,4 +481,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CLIENT_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CLIENT_H_

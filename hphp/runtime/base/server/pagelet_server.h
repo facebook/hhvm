@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_PAGELET_SERVER_H__
-#define __HPHP_PAGELET_SERVER_H__
+#ifndef incl_HPHP_PAGELET_SERVER_H_
+#define incl_HPHP_PAGELET_SERVER_H_
 
 #include <runtime/base/complex_types.h>
 
@@ -66,4 +66,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_PAGELET_SERVER_H__
+#endif // incl_HPHP_PAGELET_SERVER_H_

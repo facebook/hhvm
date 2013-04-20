@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H_
 
 #include <runtime/eval/debugger/cmd/cmd_break.h>
 
@@ -38,4 +38,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H_

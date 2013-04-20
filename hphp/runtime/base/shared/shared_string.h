@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_CPP_BASE_SHARED_SHARED_STRING_H__
-#define __HPHP_CPP_BASE_SHARED_SHARED_STRING_H__
+#ifndef incl_HPHP_CPP_BASE_SHARED_SHARED_STRING_H_
+#define incl_HPHP_CPP_BASE_SHARED_SHARED_STRING_H_
 
 #include <util/base.h>
 #include <runtime/base/util/smart_ptr.h>
@@ -87,4 +87,4 @@ class hphp_shared_string_map :
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_CPP_BASE_SHARED_SHARED_STRING_H__
+#endif // incl_HPHP_CPP_BASE_SHARED_SHARED_STRING_H_

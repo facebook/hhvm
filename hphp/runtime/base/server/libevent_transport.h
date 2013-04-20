@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HTTP_SERVER_LIB_EVENT_TRANSPORT_H__
-#define __HTTP_SERVER_LIB_EVENT_TRANSPORT_H__
+#ifndef incl_HPHP_HTTP_SERVER_LIB_EVENT_TRANSPORT_H_
+#define incl_HPHP_HTTP_SERVER_LIB_EVENT_TRANSPORT_H_
 
 #include <runtime/base/server/transport.h>
 #include <evhttp.h>
@@ -73,4 +73,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HTTP_SERVER_LIB_EVENT_TRANSPORT_H__
+#endif // incl_HPHP_HTTP_SERVER_LIB_EVENT_TRANSPORT_H_

@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __SMALLLOCKS_H__
-#define __SMALLLOCKS_H__
+#ifndef incl_HPHP_SMALLLOCKS_H_
+#define incl_HPHP_SMALLLOCKS_H_
 
 #include <atomic>
 #include <unistd.h>

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXPRESSION_LIST_H__
-#define __EXPRESSION_LIST_H__
+#ifndef incl_HPHP_EXPRESSION_LIST_H_
+#define incl_HPHP_EXPRESSION_LIST_H_
 
 #include <compiler/expression/expression.h>
 
@@ -105,4 +105,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __EXPRESSION_LIST_H__
+#endif // incl_HPHP_EXPRESSION_LIST_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_VARIABLE_SERIALIZER_H__
-#define __HPHP_VARIABLE_SERIALIZER_H__
+#ifndef incl_HPHP_VARIABLE_SERIALIZER_H_
+#define incl_HPHP_VARIABLE_SERIALIZER_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/util/string_buffer.h>
@@ -141,4 +141,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_VARIABLE_SERIALIZER_H__
+#endif // incl_HPHP_VARIABLE_SERIALIZER_H_

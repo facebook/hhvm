@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_MACRO_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_MACRO_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_MACRO_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_MACRO_H_
 
 #include <runtime/eval/debugger/debugger_command.h>
 
@@ -38,4 +38,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_MACRO_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_MACRO_H_

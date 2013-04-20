@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UTIL_PARSER_PARSER_H__
-#define __HPHP_UTIL_PARSER_PARSER_H__
+#ifndef incl_HPHP_UTIL_PARSER_PARSER_H_
+#define incl_HPHP_UTIL_PARSER_PARSER_H_
 
 #include <util/parser/scanner.h>
 #include <util/lock.h>
@@ -212,4 +212,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_UTIL_PARSER_PARSER_H__
+#endif // incl_HPHP_UTIL_PARSER_PARSER_H_

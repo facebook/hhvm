@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_MEMBER_OPERATIONS_H_
-#define incl_VM_MEMBER_OPERATIONS_H_
+#ifndef incl_HPHP_VM_MEMBER_OPERATIONS_H_
+#define incl_HPHP_VM_MEMBER_OPERATIONS_H_
 
 #include "runtime/base/types.h"
 #include "runtime/base/strings.h"
@@ -1754,4 +1754,4 @@ inline void UnsetProp(Class* ctx, TypedValue* base,
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
-#endif // incl_VM_MEMBER_OPERATIONS_H_
+#endif // incl_HPHP_VM_MEMBER_OPERATIONS_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_TEMP_FILE_H__
-#define __HPHP_TEMP_FILE_H__
+#ifndef incl_HPHP_TEMP_FILE_H_
+#define incl_HPHP_TEMP_FILE_H_
 
 #include <runtime/base/file/plain_file.h>
 
@@ -51,4 +51,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_TEMP_FILE_H__
+#endif // incl_HPHP_TEMP_FILE_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __LOCK_H__
-#define __LOCK_H__
+#ifndef incl_HPHP_LOCK_H_
+#define incl_HPHP_LOCK_H_
 
 #include "mutex.h"
 #include "synchronizable.h"
@@ -192,4 +192,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif  // __LOCK_H__
+#endif  // incl_HPHP_LOCK_H_

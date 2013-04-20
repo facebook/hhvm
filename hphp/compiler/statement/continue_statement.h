@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CONTINUE_STATEMENT_H__
-#define __CONTINUE_STATEMENT_H__
+#ifndef incl_HPHP_CONTINUE_STATEMENT_H_
+#define incl_HPHP_CONTINUE_STATEMENT_H_
 
 #include <compiler/statement/break_statement.h>
 
@@ -32,4 +32,4 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CONTINUE_STATEMENT_H__
+#endif // incl_HPHP_CONTINUE_STATEMENT_H_

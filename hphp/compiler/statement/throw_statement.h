@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __THROW_STATEMENT_H__
-#define __THROW_STATEMENT_H__
+#ifndef incl_HPHP_THROW_STATEMENT_H_
+#define incl_HPHP_THROW_STATEMENT_H_
 
 #include <compiler/statement/statement.h>
 
@@ -37,4 +37,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __THROW_STATEMENT_H__
+#endif // incl_HPHP_THROW_STATEMENT_H_

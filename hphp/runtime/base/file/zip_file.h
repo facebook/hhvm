@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ZIP_FILE_H__
-#define __HPHP_ZIP_FILE_H__
+#ifndef incl_HPHP_ZIP_FILE_H_
+#define incl_HPHP_ZIP_FILE_H_
 
 #include <runtime/base/file/plain_file.h>
 #include <zlib.h>
@@ -58,4 +58,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZIP_FILE_H__
+#endif // incl_HPHP_ZIP_FILE_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_MACROS_H__
-#define __HPHP_MACROS_H__
+#ifndef incl_HPHP_MACROS_H_
+#define incl_HPHP_MACROS_H_
 
 #include "util/assertions.h"
 
@@ -153,4 +153,4 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_MACROS_H__
+#endif // incl_HPHP_MACROS_H_

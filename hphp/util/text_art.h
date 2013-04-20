@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __UTIL_TEXT_ART_H__
-#define __UTIL_TEXT_ART_H__
+#ifndef incl_HPHP_UTIL_TEXT_ART_H_
+#define incl_HPHP_UTIL_TEXT_ART_H_
 
 #include "base.h"
 
@@ -49,4 +49,4 @@ extern bool s_use_utf8;
 ///////////////////////////////////////////////////////////////////////////////
 }}}
 
-#endif // __UTIL_TEXT_ART_H__
+#endif // incl_HPHP_UTIL_TEXT_ART_H_

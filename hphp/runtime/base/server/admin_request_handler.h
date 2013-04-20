@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __ADMIN_REQUEST_HANDLER_H__
-#define __ADMIN_REQUEST_HANDLER_H__
+#ifndef incl_HPHP_ADMIN_REQUEST_HANDLER_H_
+#define incl_HPHP_ADMIN_REQUEST_HANDLER_H_
 
 #include <runtime/base/server/libevent_server.h>
 #include <runtime/base/server/access_log.h>
@@ -63,4 +63,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __ADMIN_REQUEST_HANDLER_H__
+#endif // incl_HPHP_ADMIN_REQUEST_HANDLER_H_

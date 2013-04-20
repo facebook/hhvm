@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UPLOAD_H__
-#define __HPHP_UPLOAD_H__
+#ifndef incl_HPHP_UPLOAD_H_
+#define incl_HPHP_UPLOAD_H_
 
 #include <string>
 #include <runtime/base/server/transport.h>
@@ -80,4 +80,4 @@ const std::set<std::string> &get_uploaded_files();
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __HPHP_UPLOAD_H__
+#endif // incl_HPHP_UPLOAD_H_

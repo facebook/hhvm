@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_LIST_ASSIGNMENT_H__
-#define __HPHP_LIST_ASSIGNMENT_H__
+#ifndef incl_HPHP_LIST_ASSIGNMENT_H_
+#define incl_HPHP_LIST_ASSIGNMENT_H_
 
 #include <runtime/base/types.h>
 
@@ -60,4 +60,4 @@ Variant list_assign(CVarRef data, ListAssignmentElement *elem, ...);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_LIST_ASSIGNMENT_H__
+#endif // incl_HPHP_LIST_ASSIGNMENT_H_

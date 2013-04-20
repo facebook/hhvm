@@ -16,8 +16,8 @@
 
 #include <runtime/base/complex_types.h>
 
-#ifndef __HPHP_EXT_HHBC_H__
-#define __HPHP_EXT_HHBC_H__
+#ifndef incl_HPHP_EXT_HHBC_H_
+#define incl_HPHP_EXT_HHBC_H_
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,5 +54,5 @@ extern const HhbcExtClassInfo hhbc_ext_classes[];
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_EXT_HHBC_H__
+#endif // incl_HPHP_EXT_HHBC_H_
 

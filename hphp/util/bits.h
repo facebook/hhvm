@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __BITS_H__
-#define __BITS_H__
+#ifndef incl_HPHP_BITS_H_
+#define incl_HPHP_BITS_H_
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,4 +63,4 @@ struct BitPhase : public BitPhaseImpl<i,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __BITS_H__
+#endif // incl_HPHP_BITS_H_

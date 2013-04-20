@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CURL_TLS_WORKAROUNDS_H__
-#define __CURL_TLS_WORKAROUNDS_H__
+#ifndef incl_HPHP_CURL_TLS_WORKAROUNDS_H_
+#define incl_HPHP_CURL_TLS_WORKAROUNDS_H_
 
 #include <curl/curl.h>
 
@@ -23,6 +23,6 @@ namespace HPHP {
 
 CURLcode curl_tls_workarounds_cb(CURL *curl, void *sslctx, void *parm);
 
-#endif // __CURL_TLS_WORKAROUNDS_H__
+#endif // incl_HPHP_CURL_TLS_WORKAROUNDS_H_
 
 }

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __REF_DICT_H__
-#define __REF_DICT_H__
+#ifndef incl_HPHP_REF_DICT_H_
+#define incl_HPHP_REF_DICT_H_
 
 #include <compiler/analysis/dictionary.h>
 
@@ -63,4 +63,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __REF_DICT_H__
+#endif // incl_HPHP_REF_DICT_H_

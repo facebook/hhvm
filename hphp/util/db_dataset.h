@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DB_DATASET_H__
-#define __DB_DATASET_H__
+#ifndef incl_HPHP_DB_DATASET_H_
+#define incl_HPHP_DB_DATASET_H_
 
 #include "dataset.h"
 
@@ -74,4 +74,4 @@ class DBDataSet : public DataSet {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __DB_DATASET_H__
+#endif // incl_HPHP_DB_DATASET_H_

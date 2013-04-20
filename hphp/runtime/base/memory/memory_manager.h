@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_MEMORY_MANAGER_H__
-#define __HPHP_MEMORY_MANAGER_H__
+#ifndef incl_HPHP_MEMORY_MANAGER_H_
+#define incl_HPHP_MEMORY_MANAGER_H_
 
 #include <boost/noncopyable.hpp>
 #include <util/thread_local.h>
@@ -523,4 +523,4 @@ struct hash_set : std::tr1::unordered_set<
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_MEMORY_MANAGER_H__
+#endif // incl_HPHP_MEMORY_MANAGER_H_

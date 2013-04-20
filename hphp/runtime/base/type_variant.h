@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __INSIDE_HPHP_COMPLEX_TYPES_H__
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'type_variant.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
 
-#ifndef __HPHP_VARIANT_H__
-#define __HPHP_VARIANT_H__
+#ifndef incl_HPHP_VARIANT_H_
+#define incl_HPHP_VARIANT_H_
 
 #include <type_traits>
 
@@ -1543,4 +1543,4 @@ inline Variant uninit_null() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_VARIANT_H__
+#endif // incl_HPHP_VARIANT_H_

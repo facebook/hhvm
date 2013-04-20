@@ -16,8 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_MEMCACHED_H__
-#define __EXT_MEMCACHED_H__
+#ifndef incl_HPHP_EXT_MEMCACHED_H_
+#define incl_HPHP_EXT_MEMCACHED_H_
 
 #include <runtime/base/base_includes.h>
 #include <libmemcached/memcached.h>
@@ -169,4 +169,4 @@ class c_Memcached : public ExtObjectData, public Sweepable {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_MEMCACHED_H__
+#endif // incl_HPHP_EXT_MEMCACHED_H_

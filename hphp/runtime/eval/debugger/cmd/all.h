@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_ALL_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_ALL_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_ALL_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_ALL_H_
 
 #include <runtime/eval/debugger/cmd/cmd_eval.h>
 #include <runtime/eval/debugger/cmd/cmd_abort.h>
@@ -55,4 +55,4 @@
 #include <runtime/eval/debugger/cmd/cmd_complete.h>
 //tag: new_cmd.php inserts new command here, do NOT remove/modify this line
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_ALL_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_ALL_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_BASE_MD5_H_
-#define incl_BASE_MD5_H_
+#ifndef incl_HPHP_BASE_MD5_H_
+#define incl_HPHP_BASE_MD5_H_
 
 #include <runtime/base/zend/zend_string.h>
 #include <util/util.h>

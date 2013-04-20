@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SMART_PTR_H__
-#define __HPHP_SMART_PTR_H__
+#ifndef incl_HPHP_SMART_PTR_H_
+#define incl_HPHP_SMART_PTR_H_
 
 #include <boost/static_assert.hpp>
 #include <util/base.h>
@@ -245,4 +245,4 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_SMART_PTR_H__
+#endif // incl_HPHP_SMART_PTR_H_

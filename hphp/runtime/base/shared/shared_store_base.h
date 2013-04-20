@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_SHARED_STORE_BASE_H__
-#define __HPHP_SHARED_STORE_BASE_H__
+#ifndef incl_HPHP_SHARED_STORE_BASE_H_
+#define incl_HPHP_SHARED_STORE_BASE_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/shared/shared_variant.h>
@@ -192,4 +192,4 @@ extern SharedStoreFileStorage s_apc_file_storage;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* __HPHP_SHARED_STORE_BASE_H__ */
+#endif /* incl_HPHP_SHARED_STORE_BASE_H_ */

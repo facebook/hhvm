@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TRAIT_PREC_STATEMENT_H__
-#define __TRAIT_PREC_STATEMENT_H__
+#ifndef incl_HPHP_TRAIT_PREC_STATEMENT_H_
+#define incl_HPHP_TRAIT_PREC_STATEMENT_H_
 
 #include <compiler/statement/statement.h>
 #include <compiler/expression/scalar_expression.h>
@@ -47,4 +47,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __TRAIT_PREC_STATEMENT_H__
+#endif // incl_HPHP_TRAIT_PREC_STATEMENT_H_

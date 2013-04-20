@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_PARSER_STMT_H__
-#define __TEST_PARSER_STMT_H__
+#ifndef incl_HPHP_TEST_PARSER_STMT_H_
+#define incl_HPHP_TEST_PARSER_STMT_H_
 
 #include <test/test_parser.h>
 
@@ -59,4 +59,4 @@ class TestParserStmt : public TestParser {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_PARSER_STMT_H__
+#endif // incl_HPHP_TEST_PARSER_STMT_H_

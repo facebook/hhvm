@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_HASH_HAVAL_H__
-#define __EXT_HASH_HAVAL_H__
+#ifndef incl_HPHP_EXT_HASH_HAVAL_H_
+#define incl_HPHP_EXT_HASH_HAVAL_H_
 
 #include <runtime/ext/hash/hash_engine.h>
 
@@ -40,4 +40,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_HASH_HAVAL_H__
+#endif // incl_HPHP_EXT_HASH_HAVAL_H_

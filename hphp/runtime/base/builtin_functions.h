@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_BUILTIN_FUNCTIONS_H__
-#define __HPHP_BUILTIN_FUNCTIONS_H__
+#ifndef incl_HPHP_BUILTIN_FUNCTIONS_H_
+#define incl_HPHP_BUILTIN_FUNCTIONS_H_
 
 #include <runtime/base/execution_context.h>
 #include <runtime/base/types.h>
@@ -596,4 +596,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_BUILTIN_FUNCTIONS_H__
+#endif // incl_HPHP_BUILTIN_FUNCTIONS_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STAT_CACHE_H__
-#define __STAT_CACHE_H__
+#ifndef incl_HPHP_STAT_CACHE_H_
+#define incl_HPHP_STAT_CACHE_H_
 
 #include <sys/inotify.h>
 
@@ -129,4 +129,4 @@ class StatCache {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __STAT_CACHE_H__
+#endif // incl_HPHP_STAT_CACHE_H_

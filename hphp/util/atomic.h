@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_ATOMIC_H_
-#define incl_ATOMIC_H_
+#ifndef incl_HPHP_ATOMIC_H_
+#define incl_HPHP_ATOMIC_H_
 
 #include <stdint.h>
 #include <boost/type_traits/is_arithmetic.hpp>

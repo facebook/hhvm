@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_THREAD_INIT_FINI_H__
-#define __HPHP_THREAD_INIT_FINI_H__
+#ifndef incl_HPHP_THREAD_INIT_FINI_H_
+#define incl_HPHP_THREAD_INIT_FINI_H_
 
 #include <runtime/base/hphp_system.h>
 
@@ -42,4 +42,4 @@ struct InitFiniNode {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_THREAD_INIT_FINI_H__
+#endif // incl_HPHP_THREAD_INIT_FINI_H_

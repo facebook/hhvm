@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __THRIFT_TRANSPORT_H__
-#define __THRIFT_TRANSPORT_H__
+#ifndef incl_HPHP_THRIFT_TRANSPORT_H_
+#define incl_HPHP_THRIFT_TRANSPORT_H_
 
 #include <runtime/base/base_includes.h>
 #include <util/logger.h>

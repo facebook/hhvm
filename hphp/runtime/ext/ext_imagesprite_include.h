@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_IMAGESPRITE_INCLUDE_H__
-#define __EXT_IMAGESPRITE_INCLUDE_H__
+#ifndef incl_HPHP_EXT_IMAGESPRITE_INCLUDE_H_
+#define incl_HPHP_EXT_IMAGESPRITE_INCLUDE_H_
 
 #include <runtime/base/base_includes.h>
 #include <evhttp.h>
@@ -194,4 +194,4 @@ class Block {
 
 } // ImageSprite
 } // HPHP
-#endif // __EXT_IMAGESPRITE_INCLUDE_H__
+#endif // incl_HPHP_EXT_IMAGESPRITE_INCLUDE_H_

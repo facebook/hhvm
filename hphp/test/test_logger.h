@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_LOGGER_H__
-#define __TEST_LOGGER_H__
+#ifndef incl_HPHP_TEST_LOGGER_H_
+#define incl_HPHP_TEST_LOGGER_H_
 
 #include <runtime/base/base_includes.h>
 #include <runtime/ext/ext_variable.h>
@@ -45,4 +45,4 @@ private:
   std::string getGitRevision();
 };
 
-#endif // __TEST_LOGGER_H__
+#endif // incl_HPHP_TEST_LOGGER_H_

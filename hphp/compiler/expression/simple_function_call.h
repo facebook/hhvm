@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __SIMPLE_FUNCTION_CALL_H__
-#define __SIMPLE_FUNCTION_CALL_H__
+#ifndef incl_HPHP_SIMPLE_FUNCTION_CALL_H_
+#define incl_HPHP_SIMPLE_FUNCTION_CALL_H_
 
 #include <compiler/expression/function_call.h>
 #include <compiler/analysis/variable_table.h>
@@ -148,4 +148,4 @@ ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
 
 ///////////////////////////////////////////////////////////////////////////////
 } // HPHP
-#endif // __SIMPLE_FUNCTION_CALL_H__
+#endif // incl_HPHP_SIMPLE_FUNCTION_CALL_H_

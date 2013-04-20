@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STACKTRACE_H__
-#define __STACKTRACE_H__
+#ifndef incl_HPHP_STACKTRACE_H_
+#define incl_HPHP_STACKTRACE_H_
 
 #include <dlfcn.h>
 #include "base.h"
@@ -188,4 +188,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __STACKTRACE_H__
+#endif // incl_HPHP_STACKTRACE_H_

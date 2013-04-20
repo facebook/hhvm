@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_FILE_H__
-#define __HPHP_FILE_H__
+#ifndef incl_HPHP_FILE_H_
+#define incl_HPHP_FILE_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/resource_data.h>
@@ -183,4 +183,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_FILE_H__
+#endif // incl_HPHP_FILE_H_

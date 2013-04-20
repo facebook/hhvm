@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_INDEXED_STRING_MAP_H_
-#define incl_VM_INDEXED_STRING_MAP_H_
+#ifndef incl_HPHP_VM_INDEXED_STRING_MAP_H_
+#define incl_HPHP_VM_INDEXED_STRING_MAP_H_
 
 #include <boost/mpl/if.hpp>
 #include <boost/utility/enable_if.hpp>

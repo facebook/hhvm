@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TYPE_H__
-#define __TYPE_H__
+#ifndef incl_HPHP_TYPE_H_
+#define incl_HPHP_TYPE_H_
 
 #include <compiler/hphp.h>
 #include <util/json.h>
@@ -274,4 +274,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __TYPE_H__
+#endif // incl_HPHP_TYPE_H_

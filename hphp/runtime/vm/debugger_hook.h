@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_DEBUGGER_HOOK_H_
-#define incl_DEBUGGER_HOOK_H_
+#ifndef incl_HPHP_DEBUGGER_HOOK_H_
+#define incl_HPHP_DEBUGGER_HOOK_H_
 
 #include <util/base.h>
 
@@ -99,4 +99,4 @@ public:
 
 }}      // namespace HPHP::VM
 
-#endif /* incl_DEBUGGER_HOOK_H_ */
+#endif /* incl_HPHP_DEBUGGER_HOOK_H_ */

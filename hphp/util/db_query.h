@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DB_QUERY_H__
-#define __DB_QUERY_H__
+#ifndef incl_HPHP_DB_QUERY_H_
+#define incl_HPHP_DB_QUERY_H_
 
 #include <stdarg.h>
 #include "db_filter.h"
@@ -162,4 +162,4 @@ class DBQuery {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __DB_QUERY_H__
+#endif // incl_HPHP_DB_QUERY_H_

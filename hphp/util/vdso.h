@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_UTIL_VDSO_H
-#define __HPHP_UTIL_VDSO_H
+#ifndef incl_HPHP_UTIL_VDSO_H
+#define incl_HPHP_UTIL_VDSO_H
 
 #include "base.h"
 #include "util/util.h"

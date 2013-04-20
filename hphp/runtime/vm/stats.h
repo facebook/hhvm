@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _STATS_H_
-#define _STATS_H_
+#ifndef STATS_H_
+#define STATS_H_
 
 #include <runtime/vm/hhbc.h>
 #include <util/asm-x64.h>

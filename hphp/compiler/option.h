@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __OPTION_H__
-#define __OPTION_H__
+#ifndef incl_HPHP_OPTION_H_
+#define incl_HPHP_OPTION_H_
 
 #include <util/hdf.h>
 #include <util/string_bag.h>
@@ -300,4 +300,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __OPTION_H__
+#endif // incl_HPHP_OPTION_H_

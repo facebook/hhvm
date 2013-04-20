@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_TRANSLATOR_INLINE_H_
-#define incl_TRANSLATOR_INLINE_H_
+#ifndef incl_HPHP_TRANSLATOR_INLINE_H_
+#define incl_HPHP_TRANSLATOR_INLINE_H_
 
 #include "translator.h"
 #include <boost/noncopyable.hpp>

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CODE_GENERATOR_H__
-#define __CODE_GENERATOR_H__
+#ifndef incl_HPHP_CODE_GENERATOR_H_
+#define incl_HPHP_CODE_GENERATOR_H_
 
 #include <compiler/hphp.h>
 
@@ -332,4 +332,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CODE_GENERATOR_H__
+#endif // incl_HPHP_CODE_GENERATOR_H_

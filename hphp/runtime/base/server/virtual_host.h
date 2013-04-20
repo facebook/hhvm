@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __VIRTUAL_HOST_H__
-#define __VIRTUAL_HOST_H__
+#ifndef incl_HPHP_VIRTUAL_HOST_H_
+#define incl_HPHP_VIRTUAL_HOST_H_
 
 #include <util/hdf.h>
 #include <runtime/base/types.h>
@@ -120,4 +120,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __VIRTUAL_HOST_H__
+#endif // incl_HPHP_VIRTUAL_HOST_H_

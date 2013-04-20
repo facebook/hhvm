@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_DEBUGGER_THRIFT_BUFFER_H__
-#define __HPHP_DEBUGGER_THRIFT_BUFFER_H__
+#ifndef incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
+#define incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
 
 #include <runtime/base/util/thrift_buffer.h>
 #include <runtime/base/file/socket.h>
@@ -80,4 +80,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_DEBUGGER_THRIFT_BUFFER_H__
+#endif // incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_

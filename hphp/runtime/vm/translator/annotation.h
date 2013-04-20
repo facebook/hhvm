@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _ANNOTATION_H_
-#define _ANNOTATION_H_
+#ifndef ANNOTATION_H_
+#define ANNOTATION_H_
 
 #include <runtime/vm/translator/translator.h>
 

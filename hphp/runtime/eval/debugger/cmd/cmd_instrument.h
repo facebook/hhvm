@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H_
 
 #include <runtime/eval/debugger/debugger_command.h>
 #include <runtime/eval/debugger/inst_point.h>
@@ -67,4 +67,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_INSTRUMENT_H_

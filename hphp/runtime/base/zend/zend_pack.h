@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ZEND_PACK_H__
-#define __HPHP_ZEND_PACK_H__
+#ifndef incl_HPHP_ZEND_PACK_H_
+#define incl_HPHP_ZEND_PACK_H_
 
 #include <runtime/base/types.h>
 
@@ -83,4 +83,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZEND_PACK_H__
+#endif // incl_HPHP_ZEND_PACK_H_

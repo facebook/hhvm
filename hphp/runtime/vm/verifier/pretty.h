@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_VERIFIER_PRETTY_H_
-#define incl_VM_VERIFIER_PRETTY_H_
+#ifndef incl_HPHP_VM_VERIFIER_PRETTY_H_
+#define incl_HPHP_VM_VERIFIER_PRETTY_H_
 
 namespace HPHP {
 namespace VM {
@@ -69,4 +69,4 @@ void verify_error(const char* fmt, ...) __attribute__((format(printf,1,2)));
 
 }}} // HPHP::VM::Verifier
 
-#endif // incl_VM_VERIFIER_PRETTY_H
+#endif // incl_HPHP_VM_VERIFIER_PRETTY_H

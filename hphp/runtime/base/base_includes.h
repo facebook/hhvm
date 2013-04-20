@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_BASE_INCLUDES_H__
-#define __HPHP_BASE_INCLUDES_H__
+#ifndef incl_HPHP_BASE_INCLUDES_H_
+#define incl_HPHP_BASE_INCLUDES_H_
 
 ///////////////////////////////////////////////////////////////////////////////
 // headers needed by extensions.
@@ -31,4 +31,4 @@
 #endif
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __HPHP_BASE_INCLUDES_H__
+#endif // incl_HPHP_BASE_INCLUDES_H_

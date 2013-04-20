@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CONSTRUCT_H__
-#define __CONSTRUCT_H__
+#ifndef incl_HPHP_CONSTRUCT_H_
+#define incl_HPHP_CONSTRUCT_H_
 
 #include <util/json.h>
 #include <compiler/code_generator.h>
@@ -333,4 +333,4 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __CONSTRUCT_H__
+#endif // incl_HPHP_CONSTRUCT_H_

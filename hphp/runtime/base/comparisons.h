@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_COMPARISONS_H__
-#define __HPHP_COMPARISONS_H__
+#ifndef incl_HPHP_COMPARISONS_H_
+#define incl_HPHP_COMPARISONS_H_
 
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
@@ -812,4 +812,4 @@ bool more_or_equal(CVarRef v1, CVarRef v2);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_COMPARISONS_H__
+#endif // incl_HPHP_COMPARISONS_H_

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_TRANSLATOR_UNWIND_X64_H_
-#define incl_VM_TRANSLATOR_UNWIND_X64_H_
+#ifndef incl_HPHP_VM_TRANSLATOR_UNWIND_X64_H_
+#define incl_HPHP_VM_TRANSLATOR_UNWIND_X64_H_
 
 #include <cstdlib>
 #include <sstream>

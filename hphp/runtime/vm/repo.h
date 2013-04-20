@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_REPO_H_
-#define incl_VM_REPO_H_
+#ifndef incl_HPHP_VM_REPO_H_
+#define incl_HPHP_VM_REPO_H_
 
 #include "runtime/vm/unit.h"
 #include "runtime/vm/class.h"

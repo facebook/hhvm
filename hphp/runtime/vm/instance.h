@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_VM_INSTANCE_H_
-#define incl_VM_INSTANCE_H_
+#ifndef incl_HPHP_VM_INSTANCE_H_
+#define incl_HPHP_VM_INSTANCE_H_
 
 #include "runtime/base/object_data.h"
 #include "runtime/base/memory/smart_allocator.h"

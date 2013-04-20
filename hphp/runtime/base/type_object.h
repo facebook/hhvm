@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __INSIDE_HPHP_COMPLEX_TYPES_H__
+#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'type_object.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
 
-#ifndef __HPHP_OBJECT_H__
-#define __HPHP_OBJECT_H__
+#ifndef incl_HPHP_OBJECT_H_
+#define incl_HPHP_OBJECT_H_
 
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/object_data.h>
@@ -230,4 +230,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_OBJECT_H__
+#endif // incl_HPHP_OBJECT_H_

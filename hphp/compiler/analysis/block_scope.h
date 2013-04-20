@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __BLOCK_SCOPE_H__
-#define __BLOCK_SCOPE_H__
+#ifndef incl_HPHP_BLOCK_SCOPE_H_
+#define incl_HPHP_BLOCK_SCOPE_H_
 
 #include <compiler/hphp.h>
 
@@ -366,4 +366,4 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __BLOCK_SCOPE_H__
+#endif // incl_HPHP_BLOCK_SCOPE_H_

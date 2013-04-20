@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __LIVE_DICT_H__
-#define __LIVE_DICT_H__
+#ifndef incl_HPHP_LIVE_DICT_H_
+#define incl_HPHP_LIVE_DICT_H_
 
 #include <compiler/analysis/dictionary.h>
 
@@ -53,4 +53,4 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __LIVE_DICT_H__
+#endif // incl_HPHP_LIVE_DICT_H_

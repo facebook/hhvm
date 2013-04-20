@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_H__
-#define __TEST_H__
+#ifndef incl_HPHP_TEST_H_
+#define incl_HPHP_TEST_H_
 
 #include <compiler/hphp.h>
 #include <test/test_logger.h>
@@ -86,4 +86,4 @@ private:
 extern const char *php_path;
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_H__
+#endif // incl_HPHP_TEST_H_

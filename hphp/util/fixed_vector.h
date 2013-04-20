@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_UTIL_FIXED_VECTOR_H_
-#define incl_UTIL_FIXED_VECTOR_H_
+#ifndef incl_HPHP_UTIL_FIXED_VECTOR_H_
+#define incl_HPHP_UTIL_FIXED_VECTOR_H_
 
 #include <algorithm>
 #include <vector>

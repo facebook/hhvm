@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_POOL_H__
-#define __HPHP_POOL_H__
+#ifndef incl_HPHP_POOL_H_
+#define incl_HPHP_POOL_H_
 
 #include <util/base.h>
 
@@ -52,4 +52,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_POOL_H__
+#endif // incl_HPHP_POOL_H_

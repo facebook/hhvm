@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_CONCURRENT_SHARED_STORE_H__
-#define __HPHP_CONCURRENT_SHARED_STORE_H__
+#ifndef incl_HPHP_CONCURRENT_SHARED_STORE_H_
+#define incl_HPHP_CONCURRENT_SHARED_STORE_H_
 
 #define TBB_PREVIEW_CONCURRENT_PRIORITY_QUEUE 1
 
@@ -126,4 +126,4 @@ private:
 }
 
 
-#endif /* __HPHP_CONCURRENT_SHARED_STORE_H__ */
+#endif /* incl_HPHP_CONCURRENT_SHARED_STORE_H_ */

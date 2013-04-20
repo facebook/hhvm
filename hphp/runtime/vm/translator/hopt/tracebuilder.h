@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HHVM_HHIR_TRACEBUILDER_H_
-#define incl_HHVM_HHIR_TRACEBUILDER_H_
+#ifndef incl_HPHP_HHVM_HHIR_TRACEBUILDER_H_
+#define incl_HPHP_HHVM_HHIR_TRACEBUILDER_H_
 
 #include <boost/scoped_ptr.hpp>
 

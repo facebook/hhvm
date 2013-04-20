@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __NETWORK_H__
-#define __NETWORK_H__
+#ifndef incl_HPHP_NETWORK_H_
+#define incl_HPHP_NETWORK_H_
 
 #include "base.h"
 #include <string>
@@ -57,4 +57,4 @@ bool GetNetworkStats(const char *iface, int &in_bps, int &out_bps);
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __NETWORK_H__
+#endif // incl_HPHP_NETWORK_H_

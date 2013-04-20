@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_COUNTABLE_H__
-#define __HPHP_COUNTABLE_H__
+#ifndef incl_HPHP_COUNTABLE_H_
+#define incl_HPHP_COUNTABLE_H_
 
 #include <util/base.h>
 #include <util/util.h>
@@ -156,4 +156,4 @@ class AtomicCountable {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_COUNTABLE_H__
+#endif // incl_HPHP_COUNTABLE_H_

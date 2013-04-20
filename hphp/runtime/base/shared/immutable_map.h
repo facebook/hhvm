@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_IMMUTABLE_MAP_H__
-#define __HPHP_IMMUTABLE_MAP_H__
+#ifndef incl_HPHP_IMMUTABLE_MAP_H_
+#define incl_HPHP_IMMUTABLE_MAP_H_
 
 #include <runtime/base/types.h>
 #include <util/lock.h>
@@ -94,4 +94,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* __HPHP_IMMUTABLE_MAP_H__ */
+#endif /* incl_HPHP_IMMUTABLE_MAP_H_ */

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __TEST_SERVER_H__
-#define __TEST_SERVER_H__
+#ifndef incl_HPHP_TEST_SERVER_H_
+#define incl_HPHP_TEST_SERVER_H_
 
 #include <test/test_code_run.h>
 #include <runtime/base/complex_types.h>
@@ -140,4 +140,4 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // __TEST_SERVER_H__
+#endif // incl_HPHP_TEST_SERVER_H_

@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EXT_CONTINUATION_H__
-#define __EXT_CONTINUATION_H__
+#ifndef incl_HPHP_EXT_CONTINUATION_H_
+#define incl_HPHP_EXT_CONTINUATION_H_
 
 
 #include <runtime/base/base_includes.h>
@@ -159,4 +159,4 @@ class c_DummyContinuation : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __EXT_CONTINUATION_H__
+#endif // incl_HPHP_EXT_CONTINUATION_H_

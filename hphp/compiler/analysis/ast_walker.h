@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __AST_WALKER_H__
-#define __AST_WALKER_H__
+#ifndef incl_HPHP_AST_WALKER_H_
+#define incl_HPHP_AST_WALKER_H_
 
 #include <compiler/hphp.h>
 #include <compiler/construct.h>
@@ -132,4 +132,4 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __AST_WALKER_H__
+#endif // incl_HPHP_AST_WALKER_H_

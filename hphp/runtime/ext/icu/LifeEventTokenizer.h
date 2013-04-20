@@ -14,8 +14,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef __ICU_LIFE_EVENT_TOKENIZER_H__
-#define __ICU_LIFE_EVENT_TOKENIZER_H__
+#ifndef incl_HPHP_ICU_LIFE_EVENT_TOKENIZER_H_
+#define incl_HPHP_ICU_LIFE_EVENT_TOKENIZER_H_
 
 #include <atomic>
 #include <string>
@@ -66,4 +66,4 @@ void tokenizeString(
 
 }
 
-#endif // __ICU_LIFE_EVENT_TOKENIZER_H__
+#endif // incl_HPHP_ICU_LIFE_EVENT_TOKENIZER_H_

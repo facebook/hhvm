@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_SHELL_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_SHELL_H__
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_SHELL_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_SHELL_H_
 
 #include <runtime/eval/debugger/debugger_command.h>
 
@@ -44,4 +44,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_SHELL_H__
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_SHELL_H_

@@ -157,6 +157,7 @@ static Array create_children(CObjRef doc, xmlNodePtr root,
                              CStrRef ns, bool is_prefix) {
   Array properties = Array::Create();
   for (xmlNodePtr node = root->children; node; node = node->next) {
+    if (node->type == XML_COMMENT_NODE) continue;
     if (node->children || node->prev || node->next) {
       if (node->type == XML_TEXT_NODE) {
         // bad node from parser, ignoring it...

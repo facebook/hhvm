@@ -51,6 +51,8 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_localValues(func->numLocals(), nullptr)
   , m_localTypes(func->numLocals(), Type::None)
 {
+  FTRACE(2, "TraceBuilder: initial sp offset {}\n", initialSpOffsetFromFp);
+
   // put a function marker at the start of trace
   m_curFunc = genDefConst<const Func*>(func);
   if (RuntimeOption::EvalHHIRGenOpts) {

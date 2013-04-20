@@ -175,7 +175,9 @@ void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
 
 void HhbcTranslator::emitPrint() {
   Type type = topC()->getType();
-  if (type.subtypeOf(Type::Int | Type::Bool | Type::Null | Type::Str)) {
+  if (type.subtypeOfAny(Type::Int, Type::Bool, Type::Null, Type::Str)) {
+    auto const cell = popC();
+
     Opcode op;
     if (type.isString()) {
       op = PrintStr;
@@ -188,7 +190,9 @@ void HhbcTranslator::emitPrint() {
       op = Nop;
     }
     // the print helpers decref their arg, so don't decref pop'ed value
-    if (op != Nop) m_tb->gen(op, popC());
+    if (op != Nop) {
+      m_tb->gen(op, cell);
+    }
     push(m_tb->genDefConst<int64_t>(1));
   } else {
     emitInterpOne(Type::Int, 1);
@@ -2549,17 +2553,21 @@ void HhbcTranslator::emitMod() {
   exitSpillValues.push_back(m_tb->genDefConst(false));
   // Generate an exit for the rare case that r is zero
   auto exit =
-    m_tb->ifThenExit(getCurFunc(),
-		     m_stackDeficit,
-		     exitSpillValues,
-    [&](IRFactory* irf, Trace* t) {
-      // Dividing by zero. Interpreting will raise a notice and
-      // produce the boolean false. Punch out here and resume after
-      // the Mod instruction; this should be rare.
-    m_tb->genFor(t, RaiseWarning,
-                 cns(StringData::GetStaticString(Strings::DIVISION_BY_ZERO)));
-    },
-    getNextSrcKey().offset() /* exitBcOff */, m_bcOff);
+    m_tb->ifThenExit(
+      getCurFunc(),
+      m_stackDeficit,
+      exitSpillValues,
+      [&](IRFactory* irf, Trace* t) {
+        // Dividing by zero. Interpreting will raise a notice and
+        // produce the boolean false. Punch out here and resume after
+        // the Mod instruction; this should be rare.
+        m_tb->genFor(t, RaiseWarning,
+                     cns(StringData::GetStaticString(
+                         Strings::DIVISION_BY_ZERO)));
+      },
+      getNextSrcKey().offset() /* exitBcOff */,
+      m_bcOff
+    );
   m_tb->gen(JmpZero, exit, r);
   push(m_tb->gen(OpMod, Type::Int, l, r));
 }
@@ -2707,10 +2715,10 @@ Trace* HhbcTranslator::getExitTrace(Offset targetBcOff /* = -1 */) {
 
   std::vector<SSATmp*> stackValues = getSpillValues();
   return m_tb->genExitTrace(targetBcOff,
-			    m_stackDeficit,
-			    stackValues.size(),
-			    stackValues.size() ? &stackValues[0] : nullptr,
-			    TraceExitType::Normal);
+                            m_stackDeficit,
+                            stackValues.size(),
+                            stackValues.size() ? &stackValues[0] : nullptr,
+                            TraceExitType::Normal);
 }
 
 /*

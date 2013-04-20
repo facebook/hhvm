@@ -77,13 +77,6 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
     return;
   }
 
-  if (suite == "TestPerformance") {
-    fprintf(stderr, "%s is not yet supported\n", suite.c_str());
-    exit(-1);
-    RUN_TESTSUITE(TestPerformance);
-    return;
-  }
-
   // complete extension tests
 #include "test_ext.inc"
 

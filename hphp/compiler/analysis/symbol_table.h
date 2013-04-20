@@ -254,7 +254,7 @@ private:
 
 class SymParamWrapper : public JSON::DocTarget::ISerializable {
 public:
-  SymParamWrapper(const Symbol* sym) : m_sym(sym) {
+  explicit SymParamWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
   }
   virtual void serialize(JSON::DocTarget::OutputStream &out) const {
@@ -266,7 +266,7 @@ private:
 
 class SymClassVarWrapper : public JSON::DocTarget::ISerializable {
 public:
-  SymClassVarWrapper(const Symbol* sym) : m_sym(sym) {
+  explicit SymClassVarWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
   }
   virtual void serialize(JSON::DocTarget::OutputStream &out) const {

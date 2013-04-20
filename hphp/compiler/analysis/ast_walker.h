@@ -26,7 +26,7 @@ namespace HPHP {
 class AstWalkerState {
 public:
   AstWalkerState() : index(0) {}
-  AstWalkerState(ConstructRawPtr c) : cp(c), index(0) {}
+  explicit AstWalkerState(ConstructRawPtr c) : cp(c), index(0) {}
 
   friend bool operator==(const AstWalkerState &s1,
                          const AstWalkerState &s2) {
@@ -40,7 +40,7 @@ public:
 class AstWalkerStateVec : public std::vector<AstWalkerState> {
   public:
   AstWalkerStateVec() {}
-  AstWalkerStateVec(ConstructRawPtr cp) {
+  explicit AstWalkerStateVec(ConstructRawPtr cp) {
     push_back(AstWalkerState(cp));
   }
 };

@@ -32,7 +32,7 @@ class Dictionary {
 public:
   typedef std::vector<ExpressionPtr> IdMap;
 
-  Dictionary(AliasManager &am);
+  explicit Dictionary(AliasManager &am);
   void build(MethodStatementPtr s);
   void build(StatementPtr s);
   void build(ExpressionPtr s);

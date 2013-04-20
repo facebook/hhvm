@@ -13,9 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "compiler/analysis/control_flow.h"
+
+#include <boost/graph/depth_first_search.hpp>
 
 #include "compiler/analysis/ast_walker.h"
-#include "compiler/analysis/control_flow.h"
 #include "compiler/analysis/data_flow.h"
 #include "compiler/expression/expression.h"
 #include "compiler/expression/binary_op_expression.h"
@@ -36,8 +38,6 @@
 #include "compiler/statement/label_statement.h"
 #include "compiler/statement/goto_statement.h"
 #include "compiler/statement/case_statement.h"
-
-#include <boost/graph/depth_first_search.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,7 +182,7 @@ public:
 
 class dfs_dump : public boost::default_dfs_visitor {
 public:
-  dfs_dump(AnalysisResultConstPtr ar) : m_ar(ar) {}
+  explicit dfs_dump(AnalysisResultConstPtr ar) : m_ar(ar) {}
 
   void discover_vertex(ControlFlowGraph::vertex_descriptor u,
                        const ControlFlowGraph &g) {

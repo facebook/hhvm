@@ -91,12 +91,12 @@ public:
 
   class Locker {
   public:
-    Locker(const AnalysisResult *ar) :
+    explicit Locker(const AnalysisResult *ar) :
         m_ar(const_cast<AnalysisResult*>(ar)),
         m_mutex(m_ar->getMutex()) {
       m_mutex.lock();
     }
-    Locker(AnalysisResultConstPtr ar) :
+    explicit Locker(AnalysisResultConstPtr ar) :
         m_ar(const_cast<AnalysisResult*>(ar.get())),
         m_mutex(m_ar->getMutex()) {
       m_mutex.lock();
@@ -399,7 +399,7 @@ private:
 
 class RescheduleException : public Exception {
 public:
-  RescheduleException(BlockScopeRawPtr scope) :
+  explicit RescheduleException(BlockScopeRawPtr scope) :
     Exception(), m_scope(scope) {}
   BlockScopeRawPtr &getScope() { return m_scope; }
 #ifdef HPHP_INSTRUMENT_TYPE_INF
@@ -413,7 +413,7 @@ private:
 
 class SetCurrentScope {
 public:
-  SetCurrentScope(BlockScopeRawPtr scope) {
+  explicit SetCurrentScope(BlockScopeRawPtr scope) {
     assert(!((*AnalysisResult::s_currentScopeThreadLocal).get()));
     *AnalysisResult::s_currentScopeThreadLocal = scope;
     scope->setInVisitScopes(true);
@@ -499,9 +499,9 @@ private:
     }
   }
 #else
-  BaseTryLock(BlockScopeRawPtr scopeToLock,
-              bool lockCondition = true,
-              bool profile = true)
+  explicit BaseTryLock(BlockScopeRawPtr scopeToLock,
+                       bool lockCondition = true,
+                       bool profile = true)
     : m_profiler(profile),
       m_mutex(scopeToLock->getInferTypesMutex()),
       m_acquired(false) {
@@ -536,8 +536,8 @@ public:
           bool profile = true) :
     BaseTryLock(scopeToLock, fromFunction, fromLine, true, profile) {}
 #else
-  TryLock(BlockScopeRawPtr scopeToLock,
-          bool profile = true) :
+  explicit TryLock(BlockScopeRawPtr scopeToLock,
+                   bool profile = true) :
     BaseTryLock(scopeToLock, true, profile) {}
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
 };

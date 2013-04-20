@@ -201,7 +201,7 @@ public:
   /**
    * KindOf testing.
    */
-  Type(KindOf kindOf);
+  explicit Type(KindOf kindOf);
   bool is(KindOf kindOf) const { return m_kindOf == kindOf;}
   bool isExactType() const { return IsExactType(m_kindOf); }
   bool mustBe(KindOf kindOf) const { return !(m_kindOf & ~kindOf); }

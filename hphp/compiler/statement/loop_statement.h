@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(LoopStatement);
 
 class LoopStatement : public Statement {
 protected:
-  LoopStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
+  explicit LoopStatement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
 public:
   void clearStringBufs();
   void addStringBuf(const std::string &name);

@@ -33,8 +33,8 @@ public:
     ListKindLeft
   };
 
-  ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                 ListKind kind = ListKindParam);
+  explicit ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
+                          ListKind kind = ListKindParam);
 
   // change case to lower so to make it case insensitive
   void toLower();

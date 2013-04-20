@@ -853,9 +853,11 @@ struct OptVisitor {
   OptVisitor(AnalysisResultPtr ar, unsigned nscope) :
       m_ar(ar), m_nscope(nscope), m_dispatcher(0) {
   }
-  OptVisitor(const Visitor &po) : m_ar(po.m_ar),
-                                  m_nscope(po.m_nscope),
-                                  m_dispatcher(po.m_dispatcher) {
+  /* implicit */ OptVisitor(const Visitor &po)
+    : m_ar(po.m_ar)
+    , m_nscope(po.m_nscope)
+    , m_dispatcher(po.m_dispatcher)
+  {
     const_cast<Visitor&>(po).m_dispatcher = 0;
   }
   ~OptVisitor() {

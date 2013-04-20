@@ -100,7 +100,7 @@ public:
   }
 
 public:
-  VariableTable(BlockScope &blockScope);
+  explicit VariableTable(BlockScope &blockScope);
 
   /**
    * Get/set attributes.

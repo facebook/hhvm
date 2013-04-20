@@ -454,7 +454,8 @@ private:
 
 void Construct::dump(int spc, AnalysisResultConstPtr ar) {
   ConstructDumper cd(spc, ar);
-  cd.walk(ConstructRawPtr(this), ConstructRawPtr(), ConstructRawPtr());
+  cd.walk(AstWalkerStateVec(ConstructRawPtr(this)),
+    ConstructRawPtr(), ConstructRawPtr());
 }
 
 void Construct::dump(int spc, AnalysisResultConstPtr ar, bool functionOnly,

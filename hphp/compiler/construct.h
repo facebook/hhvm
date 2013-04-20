@@ -314,7 +314,7 @@ public:
   int getLocalEffects() const { return m_localEffects; }
   virtual void effectsCallback() = 0;
 protected:
-  LocalEffectsContainer(Construct::Effect localEffect) :
+  explicit LocalEffectsContainer(Construct::Effect localEffect) :
     m_localEffects(localEffect) {}
   LocalEffectsContainer() :
     m_localEffects(0) {}

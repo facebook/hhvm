@@ -398,8 +398,11 @@ public:
 
   class FunctionInfo {
   public:
-    FunctionInfo(int rva = -1) : m_maybeStatic(false), m_maybeRefReturn(false),
-                                 m_refVarArg(rva) { }
+    explicit FunctionInfo(int rva = -1)
+      : m_maybeStatic(false)
+      , m_maybeRefReturn(false)
+      , m_refVarArg(rva)
+    {}
 
     bool isRefParam(int p) const {
       if (m_refVarArg >= 0 && p >= m_refVarArg) return true;

@@ -27,7 +27,7 @@ typedef std::vector<TypePtrIdxPair> TypePtrIdxPairVec;
 
 class ExprDict : public Dictionary {
 public:
-  ExprDict(AliasManager &am);
+  explicit ExprDict(AliasManager &am);
   /* Building the dictionary */
   void build(MethodStatementPtr m);
   void visit(ExpressionPtr e);
@@ -43,8 +43,8 @@ public:
   TypePtr propagateType(ExpressionPtr e);
 
   void getTypes(ExpressionPtr e, TypePtrIdxPairVec &types);
-private:
 
+private:
   /**
    * types is filled with (type assertion, canon id for that type assertion)
    * tuples

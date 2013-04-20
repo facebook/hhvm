@@ -24,7 +24,7 @@ namespace HPHP {
 
 class StaticClassName : public IParseHandler {
 public:
-  StaticClassName(ExpressionPtr classExp);
+  explicit StaticClassName(ExpressionPtr classExp);
 
   void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
 

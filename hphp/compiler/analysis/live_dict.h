@@ -26,7 +26,7 @@ namespace HPHP {
 
 class LiveDict : public Dictionary {
 public:
-  LiveDict(AliasManager &am) : Dictionary(am) {}
+  explicit LiveDict(AliasManager &am) : Dictionary(am) {}
   /* Building the dictionary */
   void build(MethodStatementPtr m);
   void visit(ExpressionPtr e);

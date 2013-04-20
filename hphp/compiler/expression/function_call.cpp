@@ -208,7 +208,10 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 struct InlineCloneInfo {
-  InlineCloneInfo(FunctionScopePtr fs) : func(fs), callWithThis(false) {}
+  explicit InlineCloneInfo(FunctionScopePtr fs)
+    : func(fs)
+    , callWithThis(false)
+  {}
 
   FunctionScopePtr              func;
   StringToExpressionPtrMap      sepm;

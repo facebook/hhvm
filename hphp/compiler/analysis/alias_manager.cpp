@@ -263,7 +263,7 @@ void AliasManager::beginScope() {
   ExpressionPtr e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
                                        T_STRING, string("begin")));
   m_accessList.add(e);
-  m_stack.push_back(m_accessList.size());
+  m_stack.push_back(CondStackElem(m_accessList.size()));
   m_accessList.beginScope();
   if (BucketMapEntry *tail = m_bucketList) {
     BucketMapEntry *bm = tail;
@@ -2504,7 +2504,7 @@ static void markAvailable(ExpressionRawPtr e) {
 
 class TypeAssertionInserter {
 public:
-  TypeAssertionInserter(AnalysisResultConstPtr ar) :
+  explicit TypeAssertionInserter(AnalysisResultConstPtr ar) :
     m_ar(ar), m_changed(false) {
     BuildAssertionMap();
   }

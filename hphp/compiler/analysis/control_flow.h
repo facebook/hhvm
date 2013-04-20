@@ -309,7 +309,10 @@ inline void put(boost::vertex_color_t c,
 
 class ControlFlowGraphWalker : public FunctionWalker {
 public:
-  ControlFlowGraphWalker(ControlFlowGraph *g) : m_block(0), m_graph(*g) {}
+  explicit ControlFlowGraphWalker(ControlFlowGraph *g)
+    : m_block(0)
+    , m_graph(*g)
+  {}
   template <class T>
   void walk(T &t) {
     std::pair<ControlFlowGraph::vertex_iterator,

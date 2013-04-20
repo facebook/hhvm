@@ -326,10 +326,10 @@ void LiveDict::updateAccess(ExpressionPtr e) {
 }
 
 struct Colorizer {
-  Colorizer(int w) : toNode(w) {}
+  explicit Colorizer(int w) : toNode(w) {}
 
   struct NodeInfo {
-    NodeInfo(int index) : originalIndex(index), size(0), color(-1) {}
+    explicit NodeInfo(int index) : originalIndex(index), size(0), color(-1) {}
     int originalIndex;
     int size;
     int color;
@@ -359,7 +359,7 @@ struct Colorizer {
 
   class NodeCmp {
   public:
-    NodeCmp(const Colorizer *c) : m_c(c) {}
+    explicit NodeCmp(const Colorizer *c) : m_c(c) {}
     bool operator()(int a, int b) {
       const NodeInfo &n1 = m_c->nodes[a];
       const NodeInfo &n2 = m_c->nodes[b];

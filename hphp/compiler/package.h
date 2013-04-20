@@ -37,7 +37,9 @@ DECLARE_BOOST_TYPES(AnalysisResult);
  */
 class Package {
 public:
-  Package(const char *root, bool bShortTags = true, bool bAspTags = false);
+  explicit Package(const char *root,
+                   bool bShortTags = true,
+                   bool bAspTags = false);
 
   void addAllFiles(bool force); // add from Option::PackageDirectories/Files
 

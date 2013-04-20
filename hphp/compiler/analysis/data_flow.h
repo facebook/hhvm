@@ -91,7 +91,7 @@ private:
 
 class DataFlowWalker : public ControlFlowGraphWalker {
 public:
-  DataFlowWalker(ControlFlowGraph *g) : ControlFlowGraphWalker(g) {}
+  explicit DataFlowWalker(ControlFlowGraph *g) : ControlFlowGraphWalker(g) {}
 
   template<class T>
   void walk(T &t) { ControlFlowGraphWalker::walk(t); }

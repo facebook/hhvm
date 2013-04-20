@@ -24,7 +24,7 @@ namespace HPHP {
 
 class RefDict : public Dictionary {
 public:
-  RefDict(AliasManager &am) : Dictionary(am), first_pass(true) {}
+  explicit RefDict(AliasManager &am) : Dictionary(am), first_pass(true) {}
 
   /* Building the dictionary */
   void build(MethodStatementPtr m);
@@ -52,7 +52,7 @@ private:
 
 class RefDictWalker : public ControlFlowGraphWalker {
 public:
-  RefDictWalker(ControlFlowGraph *g) :
+  explicit RefDictWalker(ControlFlowGraph *g) :
     ControlFlowGraphWalker(g), first_pass(true) {}
   void walk() { ControlFlowGraphWalker::walk(*this); }
   int after(ConstructRawPtr cp);

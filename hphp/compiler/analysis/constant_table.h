@@ -37,7 +37,7 @@ DECLARE_BOOST_TYPES(ClassScope);
  */
 class ConstantTable : public SymbolTable {
 public:
-  ConstantTable(BlockScope &blockScope);
+  explicit ConstantTable(BlockScope &blockScope);
 
   /**
    * Whether defining something to be non-scalar value or redeclared, or

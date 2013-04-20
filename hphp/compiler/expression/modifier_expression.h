@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(ModifierExpression);
 
 class ModifierExpression : public Expression {
 public:
-  ModifierExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS);
+  explicit ModifierExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
 

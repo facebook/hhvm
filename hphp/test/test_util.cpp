@@ -16,7 +16,6 @@
 
 #include <test/test_util.h>
 #include <util/logger.h>
-#include <util/lfu_table.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/shared/shared_string.h>
 #include <runtime/base/zend/zend_string.h>
@@ -37,7 +36,6 @@ TestUtil::TestUtil() {
 
 bool TestUtil::RunTests(const std::string &which) {
   bool ret = true;
-  //RUN_TEST(TestLFUTable);
   RUN_TEST(TestSharedString);
   RUN_TEST(TestCanonicalize);
   RUN_TEST(TestHDF);
@@ -65,146 +63,6 @@ struct IHash {
 struct IEq {
   bool operator()(int i, int j) const { return i == j; }
 };
-
-typedef LFUTable<int, int, IHash, IEq> TestMap;
-
-bool TestUtil::TestLFUTable() {
-  {
-    TestMap table(1, 5, 2);
-    table.insert(1,1);
-    int r = 0;
-    VERIFY(table.lookup(1, r) && r == 1);
-    VERIFY(table.lookup(1, r) && r == 1);
-    VERIFY(table.lookup(1, r) && r == 1);
-  }
-  {
-    TestMap table(100, 5, 2);
-    for (int i = 0; i < 10; i++) {
-      table.insert(i,i);
-    }
-    VERIFY(table.check());
-    int r = 0;
-    VERIFY(!table.lookup(0, r));
-    VERIFY(!table.lookup(1, r));
-    VERIFY(!table.lookup(2, r));
-    VERIFY(!table.lookup(3, r));
-    VERIFY(!table.lookup(4, r));
-    VERIFY(table.lookup(5, r) && r == 5);
-    VERIFY(table.lookup(6, r) && r == 6);
-    VERIFY(table.lookup(7, r) && r == 7);
-    VERIFY(table.lookup(8, r) && r == 8);
-    VERIFY(table.lookup(9, r) && r == 9);
-    VERIFY(table.check());
-  }
-  {
-    TestMap table(1, 5, 2);
-    for (int i = 0; i < 5; i++) {
-      table.insert(i,i);
-    }
-    sleep(1);
-    for (int i = 5; i < 10; i++) {
-      table.insert(i,i);
-    }
-    VERIFY(table.check());
-    int r = 0;
-    VERIFY(!table.lookup(0, r));
-    VERIFY(!table.lookup(1, r));
-    VERIFY(!table.lookup(2, r));
-    VERIFY(!table.lookup(3, r));
-    VERIFY(!table.lookup(4, r));
-    VERIFY(table.lookup(5, r) && r == 5);
-    VERIFY(table.lookup(6, r) && r == 6);
-    VERIFY(table.lookup(7, r) && r == 7);
-    VERIFY(table.lookup(8, r) && r == 8);
-    VERIFY(table.lookup(9, r) && r == 9);
-    VERIFY(table.check());
-  }
-  {
-    TestMap table(1, 5, 2);
-    for (int i = 0; i < 5; i++) {
-      table.insert(i,i);
-    }
-    int r = 0;
-    VERIFY(table.lookup(0, r) && r == 0);
-    VERIFY(table.lookup(0, r) && r == 0);
-    VERIFY(table.lookup(3, r) && r == 3);
-    sleep(1);
-    for (int i = 5; i < 8; i++) {
-      table.insert(i,i);
-    }
-    VERIFY(table.lookup(0, r) && r == 0);
-    VERIFY(!table.lookup(1, r));
-    VERIFY(!table.lookup(2, r));
-    VERIFY(table.lookup(3, r) && r == 3);
-    VERIFY(!table.lookup(4, r));
-    VERIFY(table.lookup(5, r) && r == 5);
-    VERIFY(table.lookup(6, r) && r == 6);
-    VERIFY(table.lookup(7, r) && r == 7);
-    int ct = 0;
-    for (TestMap::const_iterator it = table.begin();
-         it != table.end(); ++it) {
-      ct++;
-      VERIFY(it.first() == it.second());
-    }
-    VERIFY(ct == 5);
-  }
-  {
-    TestMap table(1, 5, 2);
-    for (int i = 0; i < 5; i++) {
-      table[i] = i;
-    }
-    int r = 0;
-    VERIFY(table[0] == 0);
-    VERIFY(table[0] == 0);
-    VERIFY(table[3] == 3);
-    sleep(1);
-    for (int i = 5; i < 8; i++) {
-      table[i] = i;
-    }
-    VERIFY(table.check());
-    VERIFY(table.lookup(0, r) && r == 0);
-    VERIFY(!table.lookup(1, r));
-    VERIFY(!table.lookup(2, r));
-    VERIFY(table.lookup(3, r) && r == 3);
-    VERIFY(!table.lookup(4, r));
-    VERIFY(table.lookup(5, r) && r == 5);
-    VERIFY(table.lookup(6, r) && r == 6);
-    VERIFY(table.lookup(7, r) && r == 7);
-    VERIFY(table.check());
-    int ct = 0;
-    for (TestMap::const_iterator it = table.begin();
-         it != table.end(); ++it) {
-      ct++;
-      VERIFY(it.first() == it.second());
-    }
-    VERIFY(ct == 5);
-  }
-  {
-    class Reader : public TestMap::AtomicReader {
-    public:
-      void read(int const &k, int const &v) {
-
-      }
-    };
-    class Updater : public TestMap::AtomicUpdater {
-    public:
-      bool update(int const &k, int &v, bool newly) {
-        v = k;
-        return false;
-      }
-    };
-    Reader r;
-    Updater u;
-    TestMap table(1, 5, 2);
-    for (int i = 0; i < 5; i++) {
-      table.atomicUpdate(i, u, true);
-    }
-    for (int i = 0; i < 5; i++) {
-      VERIFY(table.atomicRead(i, r));
-    }
-  }
-  return Count(true);
-}
 
 bool TestUtil::TestSharedString() {
   {

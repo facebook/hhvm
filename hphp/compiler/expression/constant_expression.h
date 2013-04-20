@@ -61,7 +61,7 @@ public:
   void pushConst(const std::string &name);
   void popConst();
   void setComment(const std::string &comment) { m_comment = comment;}
-  const std::string getComment() { return m_comment;}
+  std::string getComment() { return m_comment;}
   bool isValid() const { return m_valid; }
   bool isDynamic() const { return m_dynamic; }
 private:

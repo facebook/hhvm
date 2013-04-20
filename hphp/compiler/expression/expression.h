@@ -171,6 +171,7 @@ public:
   }
   bool hasSubExpr(ExpressionPtr sub) const;
   virtual void setComment(const std::string &) {}
+  virtual std::string getComment() { return ""; }
   /**
    * Set this expression's error flags.
    */

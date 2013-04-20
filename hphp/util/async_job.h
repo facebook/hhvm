@@ -39,9 +39,10 @@ class WorkerInfo {
 template<class TJob, class TWorker>
 class WorkerWrapper {
 public:
-  WorkerWrapper(JobDispatcher<TJob, TWorker> &dispatcher)
-    : m_dispatcher(dispatcher),
-    m_func(this, &WorkerWrapper<TJob, TWorker>::doJob) {
+  explicit WorkerWrapper(JobDispatcher<TJob, TWorker> &dispatcher)
+    : m_dispatcher(dispatcher)
+    , m_func(this, &WorkerWrapper<TJob, TWorker>::doJob)
+  {
     if (!WorkerInfo<TJob>::DoInit) {
       m_func.setNoInit();
     }

@@ -28,7 +28,10 @@ class BiasedCoin {
   unsigned m_state;
 
  public:
-  BiasedCoin(double pct, unsigned seed = -1u) : m_seed(seed), m_pct(pct) {
+  explicit BiasedCoin(double pct, unsigned seed = -1u)
+    : m_seed(seed)
+    , m_pct(pct)
+  {
     assert(pct <= 100.0);
     if (seed == -1u) {
       seed = getpid();

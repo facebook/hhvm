@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "util/embedded_vfs.h"
 
 /*
  * based on test_demovfs.c and test_multiplex.c in sqlite3
@@ -28,7 +29,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "embedded_vfs.h"
 
 #ifndef SQLITE_CORE
   #define SQLITE_CORE 1  /* Disable the API redefinition in sqlite3ext.h */

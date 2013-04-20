@@ -31,7 +31,7 @@ public:
   DECLARE_BOOST_TYPES(Frame);
   class Frame {
   public:
-    Frame(void *_bt) : bt(_bt), lineno(0), offset(0) {}
+    explicit Frame(void *_bt) : bt(_bt), lineno(0), offset(0) {}
 
     void *bt;
     int lineno;
@@ -71,7 +71,7 @@ public:
   DECLARE_BOOST_TYPES(Frame);
   class Frame : public StackTraceBase::Frame {
   public:
-    Frame(void *_bt) : StackTraceBase::Frame(_bt) {}
+    explicit Frame(void *_bt) : StackTraceBase::Frame(_bt) {}
     std::string filename;
     std::string funcname;
     std::string toString() const;
@@ -79,7 +79,7 @@ public:
 
 public:
 
-  StackTrace(bool trace = true) ;
+  explicit StackTrace(bool trace = true) ;
 
   /**
    * Translate a frame pointer to file name and line number pair.
@@ -100,9 +100,8 @@ public:
   /**
    * Constructing from hexEncode() results.
    */
-  StackTrace(const std::string &hexEncoded);
-
-  StackTrace(const char *hexEncoded);
+  explicit StackTrace(const std::string &hexEncoded);
+  explicit StackTrace(const char *hexEncoded);
 
   /**
    * Generate an output of the written stack trace.
@@ -138,7 +137,7 @@ public:
    * Constructor, and this will save current stack trace if trace is true.
    * It can be false for an empty stacktrace.
    */
-  StackTraceNoHeap(bool trace = true) ;
+  explicit StackTraceNoHeap(bool trace = true);
 
   /**
    * Log stacktrace into a file under /tmp. If "out" is not null,

@@ -744,7 +744,7 @@ static bool by_location(const VariableTable::StaticGlobalInfoPtr &p1,
                         const VariableTable::StaticGlobalInfoPtr &p2) {
   ConstructRawPtr d1 = p1->sym->getDeclaration();
   ConstructRawPtr d2 = p2->sym->getDeclaration();
-  if (!d1) return d2;
+  if (!d1) return !!d2;
   if (!d2) return false;
   return d1->getLocation()->compare(d2->getLocation().get()) < 0;
 }

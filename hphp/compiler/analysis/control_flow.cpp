@@ -868,7 +868,7 @@ ControlFlowGraph *ControlFlowGraph::buildControlFlow(MethodStatementPtr m) {
   ControlFlowGraph *graph = new ControlFlowGraph;
 
   graph->m_stmt = m;
-  ControlFlowBuilder cfb(graph, m->getOrigGeneratorFunc());
+  ControlFlowBuilder cfb(graph, !!m->getOrigGeneratorFunc());
   cfb.run(m->getStmts());
   graph->m_nextDfn = 1;
   depth_first_visit(*graph, cfb.head(),

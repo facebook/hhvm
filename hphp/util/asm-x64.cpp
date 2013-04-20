@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "util/asm-x64.h"
+
 #include <stdint.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -24,7 +26,6 @@
 #include <sys/types.h>
 
 #include "util/assertions.h"
-#include "util/asm-x64.h"
 #include "util/maphuge.h"
 #include "runtime/base/runtime_option.h"
 

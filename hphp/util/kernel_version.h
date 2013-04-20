@@ -26,7 +26,7 @@ struct KernelVersion {
   int m_dash;
   int m_fbk;
   KernelVersion();             // Use uname
-  KernelVersion(const char*);  // A known kernel version for cmp.
+  explicit KernelVersion(const char*);  // A known kernel version for cmp.
   static int cmp(const KernelVersion& l, const KernelVersion& r) {
 #define C(field) if (l.field != r.field) return l.field - r.field;
     C(m_major);

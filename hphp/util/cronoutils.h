@@ -71,7 +71,8 @@
  * NEED_GETOPT_DEFS can be defined and declarations are provided here.
  */
 
-#if !defined(_CRONOUTILS_H_)
+#ifndef incl_HPHP_CRONOUTILS_H_
+#define incl_HPHP_CRONOUTILS_H_
 
 /* Header files */
 

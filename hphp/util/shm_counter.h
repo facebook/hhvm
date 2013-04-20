@@ -32,7 +32,7 @@ namespace HPHP {
 class ShmCounter {
 public:
   ShmCounter() {}
-  ShmCounter(const char *n) : count(0) {
+  explicit ShmCounter(const char *n) : count(0) {
     size_t size = sizeof(name);
     strncpy(name, n, size);
     name[size - 1] = '\0';

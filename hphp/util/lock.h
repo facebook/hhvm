@@ -34,7 +34,7 @@ public:
   static bool s_profile;
   static int s_profile_sampling;
 
-  LockProfiler(bool profile);
+  explicit LockProfiler(bool profile);
   ~LockProfiler();
 
 private:
@@ -96,23 +96,23 @@ public:
  */
 class Lock : public ConditionalLock {
 public:
-  Lock(Mutex &mutex, bool profile = true)
+  explicit Lock(Mutex &mutex, bool profile = true)
     : ConditionalLock(mutex, true, profile) {}
-  Lock(Synchronizable *obj, bool profile = true)
+  explicit Lock(Synchronizable *obj, bool profile = true)
     : ConditionalLock(obj, true, profile) {}
-  Lock(SynchronizableMulti *obj, bool profile = true)
+  explicit Lock(SynchronizableMulti *obj, bool profile = true)
     : ConditionalLock(obj, true, profile) {}
 };
 
 class ScopedUnlock {
 public:
-  ScopedUnlock(Mutex &mutex) : m_mutex(mutex) {
+  explicit ScopedUnlock(Mutex &mutex) : m_mutex(mutex) {
     m_mutex.unlock();
   }
-  ScopedUnlock(Synchronizable *obj) : m_mutex(obj->getMutex()) {
+  explicit ScopedUnlock(Synchronizable *obj) : m_mutex(obj->getMutex()) {
     m_mutex.unlock();
   }
-  ScopedUnlock(SynchronizableMulti *obj) : m_mutex(obj->getMutex()) {
+  explicit ScopedUnlock(SynchronizableMulti *obj) : m_mutex(obj->getMutex()) {
     m_mutex.unlock();
   }
 
@@ -138,7 +138,7 @@ public:
 
 class SimpleLock : public SimpleConditionalLock {
 public:
-  SimpleLock(SimpleMutex &mutex, bool profile = true)
+  explicit SimpleLock(SimpleMutex &mutex, bool profile = true)
     : SimpleConditionalLock(mutex, true, profile) {}
 };
 
@@ -169,13 +169,13 @@ private:
 
 class ReadLock : public ConditionalReadLock {
 public:
-  ReadLock(ReadWriteMutex &mutex, bool profile = true)
+  explicit ReadLock(ReadWriteMutex &mutex, bool profile = true)
     : ConditionalReadLock(mutex, true, profile) {}
 };
 
 class WriteLock {
 public:
-  WriteLock(ReadWriteMutex &mutex, bool profile = true)
+  explicit WriteLock(ReadWriteMutex &mutex, bool profile = true)
     : m_profiler(profile), m_mutex(mutex) {
     m_mutex.acquireWrite();
   }

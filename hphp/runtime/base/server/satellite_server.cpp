@@ -45,7 +45,7 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   hdf["Passwords"].get(m_passwords);
   m_alwaysReset = hdf["AlwaysReset"].getBool(false);
 
-  string type = hdf["Type"];
+  string type = hdf["Type"].getString();
   if (type == "InternalPageServer") {
     m_type = SatelliteServer::KindOfInternalPageServer;
     vector<string> urls;
@@ -99,7 +99,7 @@ private:
 
 class InternalPageServer : public SatelliteServer {
 public:
-  InternalPageServer(SatelliteServerInfoPtr info) {
+  explicit InternalPageServer(SatelliteServerInfoPtr info) {
     InternalPageServerImplPtr server
       (new TypedServer<InternalPageServerImpl, HttpRequestHandler>
        (RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
@@ -124,7 +124,7 @@ private:
 
 class DanglingPageServer : public SatelliteServer {
 public:
-  DanglingPageServer(SatelliteServerInfoPtr info) {
+  explicit DanglingPageServer(SatelliteServerInfoPtr info) {
     m_server = ServerPtr
       (new TypedServer<LibEventServer, HttpRequestHandler>
        (RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
@@ -185,7 +185,7 @@ private:
 
 class RPCServer : public SatelliteServer {
 public:
-  RPCServer(SatelliteServerInfoPtr info) {
+  explicit RPCServer(SatelliteServerInfoPtr info) {
     m_server = ServerPtr(new RPCServerImpl(RuntimeOption::ServerIP, info));
   }
 

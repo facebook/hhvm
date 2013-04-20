@@ -13,9 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "runtime/base/program_functions.h"
 
 #include "runtime/base/types.h"
-#include "runtime/base/program_functions.h"
 #include "runtime/base/type_conversions.h"
 #include "runtime/base/builtin_functions.h"
 #include "runtime/base/execution_context.h"
@@ -618,7 +618,7 @@ static int start_server(const std::string &username) {
     Logger::Info("Replaying warmup request %s", file.c_str());
     try {
       rt.onRequestStart(start);
-      rt.replayInput(file);
+      rt.replayInput(Hdf(file));
       handler.handleRequest(&rt);
       Logger::Info("Finished successfully");
     } catch (std::exception& e) {

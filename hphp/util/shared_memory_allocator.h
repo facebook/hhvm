@@ -220,7 +220,7 @@ public:
     return boost::interprocess::named_mutex::remove(name);
   }
 
-  SharedMemoryLock(const char *name) {
+  explicit SharedMemoryLock(const char *name) {
     assert(name && *name);
     m_mutex = new boost::interprocess::named_mutex
       (boost::interprocess::open_or_create, name);

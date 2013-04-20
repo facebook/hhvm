@@ -263,14 +263,18 @@ public:
   hphp_raw_ptr() : px(0) {}
   explicit hphp_raw_ptr(T *p) : px(p) {}
 
-  hphp_raw_ptr(const boost::weak_ptr<T> &p) : px(p.lock().get()) {}
+  /* implicit */ hphp_raw_ptr(const boost::weak_ptr<T> &p)
+    : px(p.lock().get())
+  {}
 
   template <class S>
-  hphp_raw_ptr(const boost::shared_ptr<S> &p) : px(p.get()) {}
+  /* implicit */ hphp_raw_ptr(const boost::shared_ptr<S> &p) : px(p.get()) {}
   template <class S>
-  hphp_raw_ptr(const boost::weak_ptr<S> &p) : px(p.lock().get()) {}
+  /* implicit */ hphp_raw_ptr(const boost::weak_ptr<S> &p)
+    : px(p.lock().get())
+  {}
   template <class S>
-  hphp_raw_ptr(const hphp_raw_ptr<S> &p) : px(p.get()) {}
+  /* implicit */ hphp_raw_ptr(const hphp_raw_ptr<S> &p) : px(p.get()) {}
 
   boost::shared_ptr<T> lock() const {
     return px ? boost::static_pointer_cast<T>(px->shared_from_this()) :
@@ -281,7 +285,7 @@ public:
   }
 
   template <class S>
-  operator boost::shared_ptr<S>() const {
+  /* implicit */ operator boost::shared_ptr<S>() const {
     S *s = px; // just to verify the implicit conversion T->S
     return s ? boost::static_pointer_cast<S>(px->shared_from_this()) :
       boost::shared_ptr<S>();
@@ -289,7 +293,7 @@ public:
 
   T *operator->() const { assert(px); return px; }
   T *get() const { return px; }
-  operator bool() const { return !expired(); }
+  explicit operator bool() const { return !expired(); }
   void reset() { px = 0; }
 private:
   T     *px;
@@ -447,18 +451,6 @@ destroyMapValues(Container& c) {
     delete i->second;
   }
 }
-
-// Arbitrary callback when a scope exits.
-struct ScopeGuard {
-  typedef std::tr1::function<void()> Callback;
-
-  ScopeGuard(void(*cbFptr)()) : m_cb(Callback(cbFptr)) { }
-  ScopeGuard(Callback cb) : m_cb(cb) { }
-  ~ScopeGuard() { m_cb(); }
-private:
-  Callback m_cb;
-};
-
 
 
 ///////////////////////////////////////////////////////////////////////////////

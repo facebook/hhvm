@@ -342,12 +342,12 @@ bool FunctionScope::isGenerator() const {
          (ParserBase::IsContinuationName(name()) &&
           m_paramNames.size() == 1 &&
           m_paramNames[0] == CONTINUATION_OBJECT_NAME));
-  return getOrigGenStmt();
+  return !!getOrigGenStmt();
 }
 
 bool FunctionScope::hasGeneratorAsBody() const {
   MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(getStmt());
-  return stmt ? stmt->getGeneratorFunc() : false;
+  return stmt ? !!stmt->getGeneratorFunc() : false;
 }
 
 bool FunctionScope::isGeneratorFromClosure() const {

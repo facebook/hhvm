@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_SYNCHRONIZABLE_MULTI_H_
 #define incl_HPHP_SYNCHRONIZABLE_MULTI_H_
 
-#include "base.h"
-#include "mutex.h"
-#include "rank.h"
+#include "util/base.h"
+#include "util/mutex.h"
+#include "util/rank.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ namespace HPHP {
  */
 class SynchronizableMulti {
 public:
-  SynchronizableMulti(int size);
+  explicit SynchronizableMulti(int size);
   virtual ~SynchronizableMulti();
 
   /**

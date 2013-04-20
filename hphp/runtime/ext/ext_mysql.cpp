@@ -15,6 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "folly/ScopeGuard.h"
+
 #include <runtime/ext/ext_mysql.h>
 #include <runtime/ext/ext_preg.h>
 #include <runtime/ext/ext_network.h>
@@ -1443,7 +1445,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
   }
 
   struct pollfd* fds = (struct pollfd*)calloc(count, sizeof(struct pollfd));
-  ScopeGuard fds_free([fds]() { free(fds); });
+  SCOPE_EXIT { free(fds); };
 
   // Walk our input, determine what kind of poll() operation is
   // necessary for the descriptor in question, and put an entry into

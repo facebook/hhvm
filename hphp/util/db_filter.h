@@ -91,7 +91,7 @@ class DBInStringFilter : public DBQueryFilter {
   /**
    * We need a connection object to escape strings.
    */
-  DBInStringFilter(DBConn *conn);
+  explicit DBInStringFilter(DBConn *conn);
 
   /**
    * Just keep adding strings to the filter.

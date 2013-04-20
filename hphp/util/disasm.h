@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_DISAASM_H_
+#ifndef incl_HPHP_UTIL_DISASM_H_
 #define incl_HPHP_UTIL_DISASM_H_
 
 #ifdef HAVE_LIBXED

@@ -32,7 +32,11 @@ class Exception;
 class LogFileData {
 public:
   LogFileData() : log(nullptr), bytesWritten(0), prevBytesWritten(0) {}
-  LogFileData(FILE *f) : log(f), bytesWritten(0), prevBytesWritten(0) {}
+  explicit LogFileData(FILE *f)
+    : log(f)
+    , bytesWritten(0)
+    , prevBytesWritten(0)
+  {}
   LogFileData(const LogFileData& rhs) :
       log(rhs.log), prevBytesWritten(rhs.prevBytesWritten) {
     bytesWritten.store(rhs.bytesWritten.load());

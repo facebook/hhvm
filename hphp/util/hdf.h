@@ -46,12 +46,12 @@ public:
   /**
    * Constructors.
    */
-  Hdf();                                 // create an empty HDF tree
-  Hdf(const char *filename);             // open the specified file
-  Hdf(const std::string &filename);      // open the specified file
-  Hdf(const Hdf *hdf, const char *name); // constructing a sub-node  (internal)
-  Hdf(const Hdf &hdf);                   // make a copy by reference (internal)
-  Hdf(HDF *hdf);                         // attaching a raw pointer  (internal)
+  Hdf();                                          // create an empty HDF tree
+  explicit Hdf(const char *filename);             // open the specified file
+  explicit Hdf(const std::string &filename);      // open the specified file
+  explicit Hdf(const Hdf *hdf, const char *name); // constructing a sub-node
+           Hdf(const Hdf &hdf);                   // make a copy by reference
+  explicit Hdf(HDF *hdf);                         // attaching a raw pointer
   ~Hdf();
 
   /**
@@ -134,19 +134,6 @@ public:
   void get(std::set<std::string, stdltistr> &values) const;
   void get(std::map<std::string, std::string> &values) const;
   void get(hphp_string_imap<std::string> &values) const;
-
-  operator const char *() const { return get();}
-  operator std::string() const { return getString();}
-  operator bool   () const { return getBool()  ;}
-  operator char   () const { return getByte()  ;}
-  operator uchar  () const { return getUByte() ;}
-  operator int16_t  () const { return getInt16() ;}
-  operator uint16_t () const { return getUInt16();}
-  operator int32_t  () const { return getInt32() ;}
-  operator uint32_t () const { return getUInt32();}
-  operator int64_t  () const { return getInt64() ;}
-  operator uint64_t () const { return getUInt64();}
-  operator double () const { return getDouble();}
 
   /**
    * Set this node's value.
@@ -396,7 +383,7 @@ public:
  */
 class HdfDataValueException : public HdfException {
 public:
-  HdfDataValueException(const Hdf *hdf, const char *expected = "")
+  explicit HdfDataValueException(const Hdf *hdf, const char *expected = "")
     : HdfException("HDF node [%s]'s value \"%s\" is not expected %s",
                    hdf->getFullPath().c_str(), hdf->get(""), expected) {
   }
@@ -408,7 +395,7 @@ public:
  */
 class HdfInvalidOperation : public HdfException {
 public:
-  HdfInvalidOperation(const char *operation)
+  explicit HdfInvalidOperation(const char *operation)
     : HdfException("Invalid operation: %s", operation) {
   }
   EXCEPTION_COMMON_IMPL(HdfInvalidOperation);

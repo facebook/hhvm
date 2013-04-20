@@ -79,7 +79,7 @@ struct Reg64 {
 
   // Implicit conversion for backward compatability only.  This is
   // needed to keep the store_reg##_disp_reg## style apis working.
-  constexpr operator RegNumber() const { return RegNumber(rn); }
+  constexpr /* implicit */ operator RegNumber() const { return RegNumber(rn); }
 
   // Integer conversion is allowed but only explicitly.  (It's not
   // unusual to want to printf registers, etc.  Just cast it first.)
@@ -101,7 +101,7 @@ private:
 #define SIMPLE_REGTYPE(What)                                        \
   struct What {                                                     \
     explicit constexpr What(int rn) : rn(rn) {}                     \
-    explicit constexpr operator RegNumber() const {                 \
+    explicit constexpr /* implicit */ operator RegNumber() const {  \
       return RegNumber(rn);                                         \
     }                                                               \
     explicit constexpr operator int() const { return rn; }          \
@@ -440,14 +440,6 @@ namespace reg {
 
 //////////////////////////////////////////////////////////////////////
 
-static inline void
-atomic_store64(volatile uint64_t* dest, uint64_t value) {
-  // gcc on x64 will implement this with a 64-bit store, and
-  // normal 64-bit stores don't tear across instruction boundaries
-  // assuming all 8 bytes of dest are on the same cacheline.
-  *dest = value;
-}
-
 /*
  * Note that CodeAddresses are not const; the whole point is that we intend
  * to mutate them. uint8_t is as good a type as any: instructions are
@@ -574,7 +566,12 @@ struct DataBlock {
       for (size_t i = 0; i < n; ++i) {
         u.bytes[i] = bs[i];
       }
-      atomic_store64((uint64_t*)frontier, u.qword);
+
+      // If this address doesn't span cache lines, on x64 this is an
+      // atomic store.  We're not using atomic_release_store() because
+      // this code path occurs even when it may span cache lines, and
+      // that function asserts about this.
+      *reinterpret_cast<uint64_t*>(frontier) = u.qword;
     } else {
       memcpy(frontier, bs, n);
     }

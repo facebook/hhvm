@@ -110,7 +110,7 @@ class DBConn {
   static unsigned int DefaultReadTimeout;
 
  public:
-  DBConn(int maxRetryOpenOnFail = 0, int maxRetryQueryOnFail = 1);
+  explicit DBConn(int maxRetryOpenOnFail = 0, int maxRetryQueryOnFail = 1);
   ~DBConn();
 
   /**

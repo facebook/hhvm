@@ -57,7 +57,8 @@ class DBDataSet : public DataSet {
   virtual int getFieldLength(int field) const;
 
  private:
-  DBDataSet(DBDataSet &ds) { assert(false);} // no copy constructor
+  DBDataSet(const DBDataSet &ds) = delete;
+  DBDataSet& operator=(const DBDataSet&) = delete;
 
   typedef std::list<MYSQL_RES*> ResultList;
   ResultList m_results;

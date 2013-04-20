@@ -14,6 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include "folly/ScopeGuard.h"
+
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <algorithm>
+
 #include <util/logger.h>
 #include <util/util.h>
 #include <util/job_queue.h>
@@ -95,11 +102,6 @@
 #include <compiler/parser/parser.h>
 
 #include <system/lib/systemlib.h>
-
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <algorithm>
 
 namespace HPHP {
 namespace Compiler {
@@ -3826,7 +3828,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         pce->addMethod(invoke);
         MethodStatementPtr body(
           static_pointer_cast<MethodStatement>(ce->getClosureFunction()));
-        invoke->setHasGeneratorAsBody(body->getGeneratorFunc());
+        invoke->setHasGeneratorAsBody(!!body->getGeneratorFunc());
         postponeMeth(body, invoke, false, new ClosureUseVarVec(useVars));
 
         return true;
@@ -5173,7 +5175,7 @@ void EmitterVisitor::emitPostponedMeths() {
       fe = new FuncEmitter(m_ue, -1, -1, methName);
       fe->setIsGenerator(funcScope->isGenerator());
       fe->setIsGeneratorFromClosure(funcScope->isGeneratorFromClosure());
-      fe->setHasGeneratorAsBody(p.m_meth->getGeneratorFunc());
+      fe->setHasGeneratorAsBody(!!p.m_meth->getGeneratorFunc());
       p.m_fe = fe;
       top_fes.push_back(fe);
     }
@@ -7459,7 +7461,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       filename = "";
       unitOrigin = UnitOriginEval;
     }
-    ScopeGuard sg(SymbolTable::Purge);
+    SCOPE_EXIT { SymbolTable::Purge(); };
 
     // Check if this file contains raw hip hop bytecode instead of php.
     // For now this is just dictated by file extension, and doesn't ever

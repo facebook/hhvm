@@ -61,7 +61,7 @@ public:
   struct Deleter {
     Exception* m_e;
     Deleter() : m_e(nullptr) {}
-    Deleter(Exception* e) : m_e(e) {}
+    explicit Deleter(Exception* e) : m_e(e) {}
     ~Deleter() { delete m_e; }
   };
 
@@ -82,7 +82,7 @@ protected:
 
 class FileOpenException : public Exception {
 public:
-  FileOpenException(const char *filename)
+  explicit FileOpenException(const char *filename)
       : Exception("Unable to open file %s", filename) {
   }
 
@@ -95,8 +95,8 @@ class VMSwitchModeException : public Exception {
 private:
   bool m_unwindBuiltin;
 public:
-  VMSwitchModeException(bool m_unwindBuiltin)
-    : m_unwindBuiltin(m_unwindBuiltin) {}
+  explicit VMSwitchModeException(bool unwindBuiltin)
+    : m_unwindBuiltin(unwindBuiltin) {}
   bool unwindBuiltin() const { return m_unwindBuiltin; }
 
   EXCEPTION_COMMON_IMPL(VMSwitchModeException);

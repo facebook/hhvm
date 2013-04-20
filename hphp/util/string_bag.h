@@ -28,7 +28,7 @@ namespace HPHP {
  */
 class StringBag {
 public:
-  StringBag(int reserve_count = 0);
+  explicit StringBag(int reserve_count = 0);
   ~StringBag();
 
   const char *add(const char *s);

@@ -445,6 +445,9 @@ interface MapAccess extends ConstMapAccess,
                             IndexAccess {
 }
 
+interface Indexish extends KeyedTraversable {
+}
+
 interface ConstVector extends ConstCollection,
                               ConstIndexAccess,
                               KeyedIterable {

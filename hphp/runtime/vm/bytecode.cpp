@@ -4288,6 +4288,11 @@ inline bool OPTBLD_INLINE VMExecutionContext::cellInstanceOf(
   if (tv->m_type == KindOfObject) {
     Class* cls = Unit::lookupClass(ne);
     if (cls) return tv->m_data.pobj->instanceof(cls);
+  } else if (tv->m_type == KindOfArray) {
+    Class* cls = Unit::lookupClass(ne);
+    if (cls && interface_supports_array(cls->name())) {
+      return true;
+    }
   }
   return false;
 }

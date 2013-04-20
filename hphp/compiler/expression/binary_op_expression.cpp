@@ -579,8 +579,15 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           result = v1 || v2; break;
         case T_LOGICAL_AND:
           result = v1 && v2; break;
-        case T_INSTANCEOF:
-          result = false; break;
+        case T_INSTANCEOF: {
+          if (v1.isArray() && v2.isString() &&
+              interface_supports_array(v2.getStringData())) {
+            result = true;
+            break;
+          }
+          result = false;
+          break;
+        }
         default:
           return ExpressionPtr();
       }

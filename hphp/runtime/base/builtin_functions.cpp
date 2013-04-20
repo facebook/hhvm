@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/builtin_functions.h"
+
+#include "hphp/runtime/base/type_conversions.h"
 #include "hphp/runtime/base/code_coverage.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/variable_serializer.h"
@@ -48,21 +49,25 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
 
-static StaticString s_offsetExists("offsetExists");
-static StaticString s___autoload("__autoload");
-static StaticString s___call("__call");
-static StaticString s___callStatic("__callStatic");
-static StaticString s_exception("exception");
-static StaticString s_previous("previous");
+const StaticString s_offsetExists("offsetExists");
+const StaticString s___autoload("__autoload");
+const StaticString s___call("__call");
+const StaticString s___callStatic("__callStatic");
+const StaticString s_exception("exception");
+const StaticString s_previous("previous");
 
-StaticString s_self("self");
-StaticString s_parent("parent");
-StaticString s_static("static");
-StaticString s_class("class");
-StaticString s_function("function");
-StaticString s_constant("constant");
-StaticString s_type("type");
-StaticString s_failure("failure");
+const StaticString s_self("self");
+const StaticString s_parent("parent");
+const StaticString s_static("static");
+const StaticString s_class("class");
+const StaticString s_function("function");
+const StaticString s_constant("constant");
+const StaticString s_type("type");
+const StaticString s_failure("failure");
+
+const StaticString s_Traversable("Traversable");
+const StaticString s_KeyedTraversable("KeyedTraversable");
+const StaticString s_Indexish("Indexish");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -977,6 +982,19 @@ bool isset(CVarRef v, CStrRef offset, bool isString /* = false */) {
     return isset(v, Variant(offset));
   }
   return false;
+}
+
+bool interface_supports_array(const StringData* s) {
+  return (s->isame(s_Traversable.get()) ||
+          s->isame(s_KeyedTraversable.get()) ||
+          s->isame(s_Indexish.get()));
+}
+
+bool interface_supports_array(const std::string& n) {
+  const char* s = n.c_str();
+  return ((n.size() == 11 && !strcasecmp(s, "Traversable")) ||
+          (n.size() == 16 && !strcasecmp(s, "KeyedTraversable")) ||
+          (n.size() == 8 && !strcasecmp(s, "Indexish")));
 }
 
 String get_source_filename(litstr path, bool dir_component /* = false */) {

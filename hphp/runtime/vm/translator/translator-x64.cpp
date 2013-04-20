@@ -10257,19 +10257,24 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
     srcReg = getReg(input0->location);
   }
 
+  const StringData* clsName = curUnit()->lookupLitstrId(i.imm[0].u_SA);
+
   if (type != KindOfObject) {
+    // Handle cases where the left hand side is not an object. If the
+    // left hand side is an array and the right hand side is an interface
+    // that supports arrays, we return true, otherwise we return false.
+    bool res = (type == KindOfArray && interface_supports_array(clsName));
     Stats::emitInc(a, Stats::Tx64_InstanceOfDBypass);
-    // All non-object inputs are not instances
     if (!input0IsLoc) {
       assert(!input0->isRef());
       emitDecRef(i, srcReg, type);
     }
     if (i.changesPC) {
-      fuseBranchAfterStaticBool(a, t, i, false);
+      fuseBranchAfterStaticBool(a, t, i, res);
       assert(!patchAddr);
       return;
     } else {
-      emitImmReg(a, false, r(result));
+      emitImmReg(a, res, r(result));
     }
   } else {
     // Get the input's class from ObjectData->m_cls
@@ -10286,7 +10291,6 @@ TranslatorX64::translateInstanceOfD(const Tracelet& t,
       emitDecRef(i, srcReg, type);
     }
 
-    const StringData* clsName = curUnit()->lookupLitstrId(i.imm[0].u_SA);
     Class* maybeCls = Unit::lookupUniqueClass(clsName);
 
     // maybeInterface is just used as a hint: If it's a trait/interface now but

@@ -20,6 +20,7 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/expression/expression.h"
+#include "hphp/runtime/base/builtin_functions.h"
 #include <boost/format.hpp>
 
 using namespace HPHP;
@@ -77,14 +78,25 @@ void Type::ResetTypeHintTypes() {
   s_HHTypeHintTypes.clear();
 }
 
-TypePtr Type::CreateObjectType(const std::string &classname) {
-  return TypePtr(new Type(KindOfObject, classname));
+TypePtr Type::CreateObjectType(const std::string &clsname) {
+  // For interfaces that support arrays we're pessimistic and
+  // we treat it as a Variant
+  if (interface_supports_array(clsname)) {
+    return Type::Variant;
+  }
+  return TypePtr(new Type(KindOfObject, clsname));
 }
 
-TypePtr Type::GetType(KindOf kindOf,
-                      const std::string &clsname /* = "" */) {
+TypePtr Type::GetType(KindOf kindOf, const std::string &clsname /* = "" */) {
   assert(kindOf);
-  if (!clsname.empty()) return TypePtr(new Type(kindOf, clsname));
+  if (!clsname.empty()) {
+    // For interfaces that support arrays we're pessimistic and
+    // we treat it as a Variant
+    if (interface_supports_array(clsname)) {
+      return Type::Variant;
+    }
+    return TypePtr(new Type(kindOf, clsname));
+  }
 
   switch (kindOf) {
   case KindOfBoolean:     return Type::Boolean;

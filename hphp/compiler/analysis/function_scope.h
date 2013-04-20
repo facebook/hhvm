@@ -267,8 +267,6 @@ public:
   void clearRetExprs();
   void fixRetExprs();
 
-  bool needsTypeCheckWrapper() const;
-
   void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
   FunctionOptPtr getOptFunction() const { return m_optFunction; }
 

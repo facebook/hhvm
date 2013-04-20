@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/type_constraint.h"
+
 #include "hphp/util/base.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -23,7 +25,6 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/translator/translator-inline.h"
 #include "hphp/runtime/base/builtin_functions.h"
-#include "hphp/runtime/vm/type_constraint.h"
 
 namespace HPHP {
 
@@ -173,6 +174,12 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
       return true;
     }
     return !selfOrParentOrCallable && checkTypedefObj(tv);
+  }
+
+  if (tv->m_type == KindOfArray &&
+      isObjectOrTypedef() &&
+      interface_supports_array(m_typeName)) {
+    return true;
   }
 
   return isObjectOrTypedef() && !isCallable()

@@ -574,18 +574,6 @@ void FunctionScope::setPerfectVirtual() {
   }
 }
 
-bool FunctionScope::needsTypeCheckWrapper() const {
-  for (int i = 0; i < m_maxParam; i++) {
-    if (isRefParam(i)) continue;
-    if (TypePtr spec = m_paramTypeSpecs[i]) {
-      if (Type::SameType(spec, m_paramTypes[i])) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 bool FunctionScope::needsClassParam() {
   if (!isStatic()) return false;
   ClassScopeRawPtr cls = getContainingClass();

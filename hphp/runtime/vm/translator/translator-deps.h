@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _TRANSLATOR_DEPS_H_
-#define _TRANSLATOR_DEPS_H
+#ifndef incl_HPHP_TRANSLATOR_DEPS_H
+#define incl_HPHP_TRANSLATOR_DEPS_H
 
 #include <vector>
 #include <tbb/concurrent_hash_map.h>

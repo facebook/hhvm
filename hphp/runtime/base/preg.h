@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __PREG_H__
-#define __PREG_H_
+#ifndef incl_HPHP_PREG_H_
+#define incl_HPHP_PREG_H_
 
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>

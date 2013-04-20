@@ -20,8 +20,7 @@
 #include <boost/format.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
 
-#define __STDC_FORMAT_MACROS
-#include <inttypes.h>
+#include <cinttypes>
 
 #include <libgen.h>
 #include <sys/mman.h>

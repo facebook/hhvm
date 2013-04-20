@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#define __STDC_FORMAT_MACROS
 #include <cinttypes>
 
 #include <errno.h>

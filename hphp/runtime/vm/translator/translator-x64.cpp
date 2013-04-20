@@ -13,8 +13,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#define __STDC_FORMAT_MACROS
-
 #include "runtime/vm/translator/translator-x64.h"
 
 #include <cinttypes>

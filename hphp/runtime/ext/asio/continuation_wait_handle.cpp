@@ -157,7 +157,7 @@ void c_ContinuationWaitHandle::run() {
     // we are blocked on m_child so it must be WaitableWaitHandle
     assert(dynamic_cast<c_WaitableWaitHandle*>(m_child.get()));
     blockOn(static_cast<c_WaitableWaitHandle*>(m_child.get()));
-  } catch (Object exception) {
+  } catch (const Object& exception) {
     // process exception thrown by generator or blockOn cycle detection
     markAsFailed(exception);
   }
@@ -200,7 +200,7 @@ String c_ContinuationWaitHandle::getName() {
       return m_continuation->t_getorigfuncname();
 
     default:
-      throw new FatalErrorException(
+      throw FatalErrorException(
           "Invariant violation: encountered unexpected state");
   }
 }

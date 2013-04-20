@@ -276,7 +276,7 @@ bool TestExtPreg::test_preg_replace() {
       f_preg_replace("/(<\\/?)(\\w+)([^>]*>)/e",
                      "'\\\\1'.strtoupper('\\\\2').'\\\\3'",
                      html_body);
-    } catch (NotSupportedException e) {
+    } catch (const NotSupportedException& e) {
       return Count(true);
     }
   }

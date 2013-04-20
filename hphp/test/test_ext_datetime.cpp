@@ -79,7 +79,7 @@ bool TestExtDatetime::RunTests(const std::string &which) {
 
 /* Ignore unimplemented datetime features when timelib is old */
 #define TIMELIB_TEST_UNIMPL(minver, exp) try { exp } \
-  catch (NotImplementedException e) { \
+  catch (const NotImplementedException& e) { \
     return Count(f_timezone_version_get().toDouble() < minver); \
   }
 

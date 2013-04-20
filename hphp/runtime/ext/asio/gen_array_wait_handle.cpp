@@ -114,7 +114,7 @@ void c_GenArrayWaitHandle::initialize(CObjRef exception, CArrRef deps, ssize_t i
   m_iterPos = iter_pos;
   try {
     blockOn(child);
-  } catch (Object cycle_exception) {
+  } catch (const Object& cycle_exception) {
     putException(m_exception, cycle_exception.get());
     m_iterPos = m_deps->iter_advance(m_iterPos);
     onUnblocked();
@@ -148,7 +148,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
       try {
         blockOn(child_wh);
         return;
-      } catch (Object cycle_exception) {
+      } catch (const Object& cycle_exception) {
         putException(m_exception, cycle_exception.get());
       }
     }
@@ -229,7 +229,7 @@ void c_GenArrayWaitHandle::enterContext(context_idx_t ctx_idx) {
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
       child_wh->enterContext(ctx_idx);
     }
-  } catch (Object cycle_exception) {
+  } catch (const Object& cycle_exception) {
     // exception will be eventually processed by onUnblocked()
   }
 }

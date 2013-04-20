@@ -190,7 +190,7 @@ bool TestExtApc::test_apc_delete() {
 bool TestExtApc::test_apc_compile_file() {
   try {
     f_apc_compile_file("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -218,7 +218,7 @@ bool TestExtApc::test_apc_clear_cache() {
 bool TestExtApc::test_apc_define_constants() {
   try {
     f_apc_define_constants("", "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -227,7 +227,7 @@ bool TestExtApc::test_apc_define_constants() {
 bool TestExtApc::test_apc_load_constants() {
   try {
     f_apc_load_constants("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -241,7 +241,7 @@ bool TestExtApc::test_apc_sma_info() {
 bool TestExtApc::test_apc_filehits() {
   try {
     f_apc_filehits();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -250,7 +250,7 @@ bool TestExtApc::test_apc_filehits() {
 bool TestExtApc::test_apc_delete_file() {
   try {
     f_apc_delete_file("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -284,7 +284,7 @@ bool TestExtApc::test_apc_cas() {
 bool TestExtApc::test_apc_bin_dump() {
   try {
     f_apc_bin_dump();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -293,7 +293,7 @@ bool TestExtApc::test_apc_bin_dump() {
 bool TestExtApc::test_apc_bin_load() {
   try {
     f_apc_bin_load("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -302,7 +302,7 @@ bool TestExtApc::test_apc_bin_load() {
 bool TestExtApc::test_apc_bin_dumpfile() {
   try {
     f_apc_bin_dumpfile(0, uninit_null(), "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -311,7 +311,7 @@ bool TestExtApc::test_apc_bin_dumpfile() {
 bool TestExtApc::test_apc_bin_loadfile() {
   try {
     f_apc_bin_loadfile("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);

@@ -242,7 +242,7 @@ bool TestExtMysql::test_mysql_thread_id() {
 bool TestExtMysql::test_mysql_create_db() {
   try {
     f_mysql_create_db("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -256,7 +256,7 @@ bool TestExtMysql::test_mysql_select_db() {
 bool TestExtMysql::test_mysql_drop_db() {
   try {
     f_mysql_drop_db("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -369,7 +369,7 @@ bool TestExtMysql::test_mysql_unbuffered_query() {
 bool TestExtMysql::test_mysql_db_query() {
   try {
     f_mysql_db_query("", "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -398,7 +398,7 @@ bool TestExtMysql::test_mysql_list_fields() {
     Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME,
                                    TEST_PASSWORD);
     f_mysql_list_fields(TEST_DATABASE, "test");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);

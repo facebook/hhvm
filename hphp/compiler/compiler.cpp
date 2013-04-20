@@ -359,7 +359,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     store(command_line_parser(argc, argv).options(desc).positional(p).run(),
           vm);
     notify(vm);
-  } catch (unknown_option e) {
+  } catch (const unknown_option& e) {
     Logger::Error("Error in command line: %s\n\n", e.what());
     cout << desc << "\n";
     return -1;
@@ -677,7 +677,7 @@ int process(const CompilerOptions &po) {
         int runId = package.saveStatsToDB(server, seconds, po.branch,
                                           po.revision);
         package.commitStats(server, runId);
-      } catch (DatabaseException e) {
+      } catch (const DatabaseException& e) {
         Logger::Error("%s", e.what());
       }
     } else {

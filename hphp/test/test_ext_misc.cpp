@@ -101,7 +101,7 @@ bool TestExtMisc::test_exit() {
 bool TestExtMisc::test_eval() {
   try {
     f_eval("sleep(5);");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(false);
   }
   return Count(true);
@@ -110,7 +110,7 @@ bool TestExtMisc::test_eval() {
 bool TestExtMisc::test_get_browser() {
   try {
     f_get_browser();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -124,7 +124,7 @@ bool TestExtMisc::test___halt_compiler() {
 bool TestExtMisc::test_highlight_file() {
   try {
     f_highlight_file("a");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -133,7 +133,7 @@ bool TestExtMisc::test_highlight_file() {
 bool TestExtMisc::test_show_source() {
   try {
     f_show_source("a");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -142,7 +142,7 @@ bool TestExtMisc::test_show_source() {
 bool TestExtMisc::test_highlight_string() {
   try {
     f_highlight_string("a");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -161,7 +161,7 @@ bool TestExtMisc::test_pack() {
 bool TestExtMisc::test_php_check_syntax() {
   try {
     f_php_check_syntax("a");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -170,7 +170,7 @@ bool TestExtMisc::test_php_check_syntax() {
 bool TestExtMisc::test_php_strip_whitespace() {
   try {
     f_php_strip_whitespace("a");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);

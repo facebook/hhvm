@@ -284,7 +284,7 @@ public:
             }
           }
         }
-      } catch (typename QueueType::StopSignal) {
+      } catch (const typename QueueType::StopSignal&) {
         m_stopped = true; // queue is empty and stopped, so we are done
       }
     }

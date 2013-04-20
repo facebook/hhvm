@@ -40,7 +40,7 @@ bool TestExtApd::RunTests(const std::string &which) {
 bool TestExtApd::test_override_function() {
   try {
     f_override_function("", "", "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -49,7 +49,7 @@ bool TestExtApd::test_override_function() {
 bool TestExtApd::test_rename_function() {
   try {
     f_rename_function("", "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -58,7 +58,7 @@ bool TestExtApd::test_rename_function() {
 bool TestExtApd::test_apd_set_browser_trace() {
   try {
     f_apd_set_browser_trace();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -67,7 +67,7 @@ bool TestExtApd::test_apd_set_browser_trace() {
 bool TestExtApd::test_apd_set_pprof_trace() {
   try {
     f_apd_set_pprof_trace("", "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -76,7 +76,7 @@ bool TestExtApd::test_apd_set_pprof_trace() {
 bool TestExtApd::test_apd_set_session_trace_socket() {
   try {
     f_apd_set_session_trace_socket("", 0, 0, 0);
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -85,7 +85,7 @@ bool TestExtApd::test_apd_set_session_trace_socket() {
 bool TestExtApd::test_apd_stop_trace() {
   try {
     f_apd_stop_trace();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -94,7 +94,7 @@ bool TestExtApd::test_apd_stop_trace() {
 bool TestExtApd::test_apd_breakpoint() {
   try {
     f_apd_breakpoint();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -103,7 +103,7 @@ bool TestExtApd::test_apd_breakpoint() {
 bool TestExtApd::test_apd_continue() {
   try {
     f_apd_continue();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -112,7 +112,7 @@ bool TestExtApd::test_apd_continue() {
 bool TestExtApd::test_apd_echo() {
   try {
     f_apd_echo("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);

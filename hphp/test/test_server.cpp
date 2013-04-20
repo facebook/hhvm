@@ -194,7 +194,7 @@ static int find_server_port(int port_min, int port_max) {
       server->stop();
       server->waitForEnd();
       return port;
-    } catch (FailedToListenException e) {
+    } catch (const FailedToListenException& e) {
       if (port >= port_max) throw;
     }
   }
@@ -569,7 +569,7 @@ bool TestServer::TestHttpClient() {
                          ("127.0.0.1", s_server_port, 50, -1));
       server->start();
       break;
-    } catch (FailedToListenException e) {
+    } catch (const FailedToListenException& e) {
       if (s_server_port == PORT_MAX) throw;
     }
   }

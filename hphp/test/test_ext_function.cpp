@@ -92,7 +92,7 @@ bool TestExtFunction::test_forward_static_call() {
 bool TestExtFunction::test_create_function() {
   try {
     f_create_function("$a", "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(false);
   }
   return Count(true);
@@ -131,7 +131,7 @@ bool TestExtFunction::test_register_cleanup_function() {
 bool TestExtFunction::test_register_tick_function() {
   try {
     f_register_tick_function(0, "test", Array::Create());
-  } catch (NotImplementedException e) {
+  } catch (const NotImplementedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -140,7 +140,7 @@ bool TestExtFunction::test_register_tick_function() {
 bool TestExtFunction::test_unregister_tick_function() {
   try {
     f_unregister_tick_function("test");
-  } catch (NotImplementedException e) {
+  } catch (const NotImplementedException& e) {
     return Count(true);
   }
   return Count(false);

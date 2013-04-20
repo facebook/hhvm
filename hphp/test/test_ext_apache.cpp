@@ -67,7 +67,7 @@ bool TestExtApache::test_getallheaders() {
 bool TestExtApache::test_virtual() {
   try {
     f_virtual("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -86,7 +86,7 @@ bool TestExtApache::test_apache_get_scoreboard() {
 bool TestExtApache::test_apache_get_rewrite_rules() {
   try {
     f_apache_get_rewrite_rules();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);

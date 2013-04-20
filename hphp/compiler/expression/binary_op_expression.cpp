@@ -218,7 +218,7 @@ ExpressionPtr BinaryOpExpression::simplifyLogical(AnalysisResultConstPtr ar) {
   try {
     ExpressionPtr rep = foldConst(ar);
     if (rep) return replaceValue(rep);
-  } catch (Exception e) {
+  } catch (const Exception& e) {
   }
   return ExpressionPtr();
 }

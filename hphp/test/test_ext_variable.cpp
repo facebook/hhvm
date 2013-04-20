@@ -396,7 +396,7 @@ bool TestExtVariable::test_get_defined_vars() {
 bool TestExtVariable::test_import_request_variables() {
   try {
     f_import_request_variables("G");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);

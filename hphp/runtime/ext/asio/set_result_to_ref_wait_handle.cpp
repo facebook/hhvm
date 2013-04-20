@@ -89,7 +89,7 @@ void c_SetResultToRefWaitHandle::initialize(c_WaitableWaitHandle* child, RefData
   m_ref->incRefCount();
   try {
     blockOn(child);
-  } catch (Object cycle_exception) {
+  } catch (const Object& cycle_exception) {
     markAsFailed(cycle_exception);
   }
 }

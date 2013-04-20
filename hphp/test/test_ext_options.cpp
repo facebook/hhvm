@@ -91,7 +91,7 @@ bool TestExtOptions::test_assert() {
   f_assert(true);
   try {
     f_assert(false);
-  } catch (Assertion e) {
+  } catch (const Assertion& e) {
     return Count(true);
   }
   return Count(true);
@@ -120,7 +120,7 @@ bool TestExtOptions::test_get_loaded_extensions() {
 bool TestExtOptions::test_get_extension_funcs() {
   try {
     f_get_extension_funcs("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -129,7 +129,7 @@ bool TestExtOptions::test_get_extension_funcs() {
 bool TestExtOptions::test_get_cfg_var() {
   try {
     f_get_cfg_var("");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -144,7 +144,7 @@ bool TestExtOptions::test_get_defined_constants() {
   try {
     f_get_defined_constants(true);
     return Count(false);
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   f_get_defined_constants();
@@ -189,7 +189,7 @@ bool TestExtOptions::test_get_magic_quotes_runtime() {
 bool TestExtOptions::test_get_required_files() {
   try {
     f_get_required_files();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -203,7 +203,7 @@ bool TestExtOptions::test_getenv() {
 bool TestExtOptions::test_getlastmod() {
   try {
     f_getlastmod();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -217,7 +217,7 @@ bool TestExtOptions::test_getmygid() {
 bool TestExtOptions::test_getmyinode() {
   try {
     f_getmyinode();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -275,7 +275,7 @@ bool TestExtOptions::test_cpu_get_model() {
 bool TestExtOptions::test_ini_alter() {
   try {
     f_ini_alter("", "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -284,7 +284,7 @@ bool TestExtOptions::test_ini_alter() {
 bool TestExtOptions::test_ini_get_all() {
   try {
     f_ini_get_all();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -324,7 +324,7 @@ bool TestExtOptions::test_memory_get_usage() {
 bool TestExtOptions::test_php_ini_scanned_files() {
   try {
     f_php_ini_scanned_files();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -333,7 +333,7 @@ bool TestExtOptions::test_php_ini_scanned_files() {
 bool TestExtOptions::test_php_logo_guid() {
   try {
     f_php_logo_guid();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -352,7 +352,7 @@ bool TestExtOptions::test_php_uname() {
 bool TestExtOptions::test_phpcredits() {
   try {
     f_phpcredits();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -397,7 +397,7 @@ bool TestExtOptions::test_version_compare() {
 bool TestExtOptions::test_zend_logo_guid() {
   try {
     f_zend_logo_guid();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -406,7 +406,7 @@ bool TestExtOptions::test_zend_logo_guid() {
 bool TestExtOptions::test_zend_thread_id() {
   try {
     f_zend_thread_id();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -415,7 +415,7 @@ bool TestExtOptions::test_zend_thread_id() {
 bool TestExtOptions::test_zend_version() {
   try {
     f_zend_version();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);

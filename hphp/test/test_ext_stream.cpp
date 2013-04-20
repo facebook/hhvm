@@ -90,7 +90,7 @@ bool TestExtStream::test_stream_context_create() {
 bool TestExtStream::test_stream_context_get_default() {
   try {
     f_stream_context_get_default();
-  } catch (NotImplementedException e) {
+  } catch (const NotImplementedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -99,7 +99,7 @@ bool TestExtStream::test_stream_context_get_default() {
 bool TestExtStream::test_stream_context_get_options() {
   try {
     f_stream_context_get_options(Object());
-  } catch (NotImplementedException e) {
+  } catch (const NotImplementedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -108,7 +108,7 @@ bool TestExtStream::test_stream_context_get_options() {
 bool TestExtStream::test_stream_context_set_option() {
   try {
     f_stream_context_set_option(Object(), "");
-  } catch (NotImplementedException e) {
+  } catch (const NotImplementedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -117,7 +117,7 @@ bool TestExtStream::test_stream_context_set_option() {
 bool TestExtStream::test_stream_context_set_param() {
   try {
     f_stream_context_set_param(Object(), Array());
-  } catch (NotImplementedException e) {
+  } catch (const NotImplementedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -137,7 +137,7 @@ bool TestExtStream::test_stream_copy_to_stream() {
 bool TestExtStream::test_stream_encoding() {
   try {
     f_stream_encoding(Object());
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -146,7 +146,7 @@ bool TestExtStream::test_stream_encoding() {
 bool TestExtStream::test_stream_bucket_append() {
   try {
     f_stream_bucket_append(Object(), Object());
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -155,7 +155,7 @@ bool TestExtStream::test_stream_bucket_append() {
 bool TestExtStream::test_stream_bucket_prepend() {
   try {
     f_stream_bucket_prepend(Object(), Object());
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -164,7 +164,7 @@ bool TestExtStream::test_stream_bucket_prepend() {
 bool TestExtStream::test_stream_bucket_make_writeable() {
   try {
     f_stream_bucket_make_writeable(Object());
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -173,7 +173,7 @@ bool TestExtStream::test_stream_bucket_make_writeable() {
 bool TestExtStream::test_stream_bucket_new() {
   try {
     f_stream_bucket_new(Object(), "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -182,7 +182,7 @@ bool TestExtStream::test_stream_bucket_new() {
 bool TestExtStream::test_stream_filter_register() {
   try {
     f_stream_filter_register("", "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -191,7 +191,7 @@ bool TestExtStream::test_stream_filter_register() {
 bool TestExtStream::test_stream_filter_remove() {
   try {
     f_stream_filter_remove(Object());
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -200,7 +200,7 @@ bool TestExtStream::test_stream_filter_remove() {
 bool TestExtStream::test_stream_filter_append() {
   try {
     f_stream_filter_append(Object(), "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -209,7 +209,7 @@ bool TestExtStream::test_stream_filter_append() {
 bool TestExtStream::test_stream_filter_prepend() {
   try {
     f_stream_filter_prepend(Object(), "");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -242,7 +242,7 @@ bool TestExtStream::test_stream_get_contents() {
 bool TestExtStream::test_stream_get_filters() {
   try {
     f_stream_get_filters();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -383,7 +383,7 @@ bool TestExtStream::test_stream_socket_client() {
 bool TestExtStream::test_stream_socket_enable_crypto() {
   try {
     f_stream_socket_enable_crypto(Object(), true);
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);

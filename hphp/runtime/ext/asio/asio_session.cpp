@@ -84,7 +84,7 @@ void AsioSession::onFailed(CObjRef exception) {
   if (m_onFailedCallback) {
     try {
       vm_call_user_func(m_onFailedCallback, Array::Create(exception));
-    } catch (Object callback_exception) {
+    } catch (const Object& callback_exception) {
       raise_warning("[asio] Ignoring exception thrown by onFailed callback");
     }
   }
@@ -106,7 +106,7 @@ void AsioSession::onStarted(CObjRef wait_handle) {
   assert(m_onStartedCallback);
   try {
     vm_call_user_func(m_onStartedCallback, Array::Create(wait_handle));
-  } catch (Object callback_exception) {
+  } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by onStarted callback");
   }
 }

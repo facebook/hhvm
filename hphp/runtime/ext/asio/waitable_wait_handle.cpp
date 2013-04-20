@@ -209,7 +209,7 @@ void c_WaitableWaitHandle::join() {
 
     // run queues until we are finished
     session->getCurrentContext()->runUntil(this);
-  } catch (Object exception) {
+  } catch (const Object& exception) {
     // recover from PHP exceptions; HPHP internal exceptions are deliberately
     // ignored as there is no easy way to recover from them
     session->exitContext();

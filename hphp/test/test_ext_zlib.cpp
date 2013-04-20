@@ -116,7 +116,7 @@ bool TestExtZlib::test_gzdecode() {
 bool TestExtZlib::test_zlib_get_coding_type() {
   try {
     f_zlib_get_coding_type();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -223,7 +223,7 @@ bool TestExtZlib::test_qlzuncompress() {
        "testing gzcompress");
     VS(f_qlzuncompress(f_qlzcompress("testing gzcompress", 3), 3),
        "testing gzcompress");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     SKIP("no qlzcompress() support");
   }
   return Count(true);
@@ -238,7 +238,7 @@ bool TestExtZlib::test_snuncompress() {
   try {
     VS(f_snuncompress(f_sncompress("testing sncompress")),
        "testing sncompress");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     SKIP("No sncompress() support");
   }
   return Count(true);

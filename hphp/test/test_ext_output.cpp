@@ -166,7 +166,7 @@ bool TestExtOutput::test_ob_get_status() {
 bool TestExtOutput::test_ob_gzhandler() {
   try {
     f_ob_gzhandler("value", 0);
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -191,7 +191,7 @@ bool TestExtOutput::test_ob_list_handlers() {
 bool TestExtOutput::test_output_add_rewrite_var() {
   try {
     f_output_add_rewrite_var("name", "value");
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);
@@ -200,7 +200,7 @@ bool TestExtOutput::test_output_add_rewrite_var() {
 bool TestExtOutput::test_output_reset_rewrite_vars() {
   try {
     f_output_reset_rewrite_vars();
-  } catch (NotSupportedException e) {
+  } catch (const NotSupportedException& e) {
     return Count(true);
   }
   return Count(false);

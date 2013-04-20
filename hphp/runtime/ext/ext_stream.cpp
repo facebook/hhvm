@@ -275,7 +275,7 @@ bool f_stream_wrapper_register(CStrRef protocol, CStrRef classname) {
   try {
     wrapper = std::unique_ptr<Stream::Wrapper>(
                    new UserStreamWrapper(protocol, classname));
-  } catch (InvalidArgumentException e) {
+  } catch (const InvalidArgumentException& e) {
     raise_warning("%s", e.what());
     return false;
   }

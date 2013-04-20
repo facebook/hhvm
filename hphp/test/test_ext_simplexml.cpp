@@ -71,7 +71,7 @@ bool TestExtSimplexml::test_libxml_use_internal_errors() {
 bool TestExtSimplexml::test_libxml_set_streams_context() {
   try {
     f_libxml_set_streams_context(Object());
-  } catch (NotImplementedException e) {
+  } catch (const NotImplementedException& e) {
     return Count(true);
   }
   return Count(false);

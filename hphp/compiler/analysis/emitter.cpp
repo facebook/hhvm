@@ -5241,10 +5241,17 @@ void EmitterVisitor::emitPostponedMeths() {
           initScalar(dv, vNode);
           pi.setDefaultValue(dv);
 
-          // Simple case: it's a scalar value so we just serialize it
-          VariableSerializer vs(VariableSerializer::PHPOutput);
-          String result = vs.serialize(tvAsCVarRef(&dv), true);
-          phpCode = StringData::GetStaticString(result.data());
+          std::string orig = vNode->getComment();
+          if (orig.empty()) {
+            // Simple case: it's a scalar value so we just serialize it
+            VariableSerializer vs(VariableSerializer::PHPOutput);
+            String result = vs.serialize(tvAsCVarRef(&dv), true);
+            phpCode = StringData::GetStaticString(result.get());
+          } else {
+            // This was optimized from a Constant, or ClassConstant
+            // use the original string
+            phpCode = StringData::GetStaticString(orig);
+          }
         } else {
           // Non-scalar, so we have to output PHP from the AST node
           std::ostringstream os;

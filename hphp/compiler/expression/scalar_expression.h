@@ -70,7 +70,7 @@ public:
   int64_t getHash() const;
 
   void setComment(const std::string &comment) { m_comment = comment;}
-  const std::string getComment() { return m_comment;}
+  std::string getComment() { return m_comment;}
 
 
   bool getString(const std::string *&s) const;

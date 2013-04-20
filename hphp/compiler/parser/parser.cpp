@@ -1362,11 +1362,6 @@ static void invalidYield(LocationPtr loc) {
 }
 
 bool Parser::setIsGenerator() {
-  if (!Option::EnableHipHopSyntax) {
-    PARSE_ERROR("Yield is not enabled");
-    return false;
-  }
-
   if (m_funcContexts.empty()) {
     invalidYield(getLocation());
     PARSE_ERROR("Yield can only be used inside a function");
@@ -1594,7 +1589,7 @@ void Parser::onTypedef(Token& out, const Token& name, const Token& type) {
 }
 
 void Parser::onTypeAnnotation(Token& out, const Token& name,
-		                      const Token& typeArgs) {
+                                          const Token& typeArgs) {
   out.set(name.num(), name.text());
   out.typeAnnotation = TypeAnnotationPtr(
     new TypeAnnotation(name.text(), typeArgs.typeAnnotation));

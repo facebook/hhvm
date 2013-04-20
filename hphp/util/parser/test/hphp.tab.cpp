@@ -10372,7 +10372,7 @@ yyreduce:
                                         _p->onTypeList((yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]));
                                         Token t; t.reset(); t.setText("array");
                                         _p->onTypeAnnotation((yyval), t, (yyvsp[(2) - (5)]));
-                                        _p->onTypeSpecialization((yyval), 's'); ;}
+                                        _p->onTypeSpecialization((yyval), 't'); ;}
     break;
 
   case 705:

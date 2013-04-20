@@ -41,35 +41,34 @@ namespace HPHP {
 class ArrayIter;
 class MutableArrayIter;
 
-/**
- * Perhaps the most important class in the entire runtime. When type inference
- * fails to know type of a variable, or when certain coding requires reference
- * or other dynamic-ness, we have to use Variant as a fallback of a specific
- * type. This normally means slower coding. Conceptually, Variant == zval,
- * in terms of tasks it has to perform. Therefore, this class is taking similar
- * switch(type) approach Zend takes, and this class is pretty much the entire
- * Zend re-implementation in a C++ way, whereas other classes in this library
- * represent type-specialized implementation of the language.
+/*
+ * This class predates HHVM.
  *
- * Variant is also the only way to implement references. A reference is a
- * strong binding between two variables, meaning they both point to the same
- * underlying data.
+ * In hphpc, when type inference failed to know type of a variable, we
+ * would use Variant to represent the php variable in generated C++.
  *
- * In this class, strong binding is done through "pref" member variable. All
- * others are for weak bindings. Primitive types can just make copies, but not
- * strings and arrays, which take a copy-on-write approach. This is done by
- * doing reference counting on pstr and parr members.
+ * Now Variant is only used in C++ extensions, and the API is mostly
+ * legacy stuff.  If you're writing a C++ extension, try to avoid
+ * Variant when you can (but you often can't, and we don't really have
+ * a replacement yet, sorry).
  *
- * In summary, we have really different approaches handling different types:
+ * In C++ extensions, this class can be used as a generic handle to
+ * one of our other data types (e.g. StringData, ArrayData), and it
+ * may also be a handle to a RefData.
  *
- *           binding  copy-by-value copy-on-write  ref-counting
- *   num     weak      x (data)
- *   dbl     weak      x (data)
- *   str     weak      x (pointer)
- *   pstr    weak      x (pointer)        x             x
- *   parr    weak      x (pointer)        x             x
- *   pobj    weak      x (pointer)                      x
- *   pref    strong    x (pointer)                      x
+ * Beware:
+ *
+ *    For historical reasons, this class does a lot of things you
+ *    don't really expect in a well-behaved C++ class.
+ *
+ *    For example, the copy constructor is not a copy constructor (it
+ *    unboxes refs and converts KindOfUninit to KindOfNull).  A
+ *    similar story applies to the move constructor.  (And this means
+ *    we may actually rely on whether copy elision (NRVO etc) is
+ *    happening in some places for correctness.)
+ *
+ *    Use carefully.
+ *
  */
 
 #ifdef HHVM_GC
@@ -190,8 +189,8 @@ class Variant : private VariantBase {
     }
   }
 
-  // These are  prohibited, but declared just  to prevent accidentally
-  // calling the  bool constructor  just because we  had a  pointer to
+  // These are prohibited, but declared just to prevent accidentally
+  // calling the bool constructor just because we had a pointer to
   // const.
   Variant(const StringData *v) = delete;
   Variant(const ArrayData *v) = delete;
@@ -216,17 +215,33 @@ class Variant : private VariantBase {
   Variant(CVarWithRefBind v);
 #endif
 
-  // Move ctor
+  /*
+   * Move ctor
+   *
+   * Note: not semantically a move constructor.  Like our "copy
+   * constructor", unboxes refs and turns uninits to null.
+   */
   Variant(Variant&& v) {
-    const Variant *other =
-      UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pref->var() : &v;
-    assert(this != other);
-    m_type = other->m_type != KindOfUninit ? other->m_type : KindOfNull;
-    m_data = other->m_data;
+    if (UNLIKELY(v.m_type == KindOfRef)) {
+      // We can't avoid the refcounting when it's a ref.  Do basically
+      // what a copy would have done.
+      moveRefHelper(std::move(v));
+      return;
+    }
+
+    assert(this != &v);
+    m_type = v.m_type != KindOfUninit ? v.m_type : KindOfNull;
+    m_data = v.m_data;
     v.reset();
   }
 
-  // Move assign
+  /*
+   * Move assign
+   *
+   * Note: not semantically a move assignment operator.  Like our
+   * "copy asignment operator", unboxes refs and turns uninits to
+   * null.
+   */
   Variant& operator=(Variant &&rhs) {
     // a = std::move(a), ILLEGAL per C++11 17.6.4.9
     assert(this != &rhs);
@@ -1258,6 +1273,17 @@ public:
     }
     m_type = other->m_type != KindOfUninit ? other->m_type : KindOfNull;
     m_data = other->m_data;
+  }
+
+  void moveRefHelper(Variant&& v) {
+    assert(v.m_type == KindOfRef);
+    m_type = v.m_data.pref->tv()->m_type; // Can't be KindOfUninit.
+    m_data = v.m_data.pref->tv()->m_data;
+    if (IS_REFCOUNTED_TYPE(m_type)) {
+      m_data.pstr->incRefCount();
+    }
+    decRefRef(v.m_data.pref);
+    v.reset();
   }
 
   inline ALWAYS_INLINE

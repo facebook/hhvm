@@ -24,16 +24,6 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
                         std::string &which, std::string &set) {
   // individual test suites
   s_suite = suite;
-  if (suite == "TestCodeRun") {
-    RUN_TESTSUITE(TestCodeRun);
-    return;
-  }
-  if (suite == "TestCodeRunStatic") {
-    suite = "TestCodeRun";
-    TestCodeRun::FastMode = false;
-    RUN_TESTSUITE(TestCodeRun);
-    return;
-  }
   if (suite == "TestDebugger" || suite == "TestDebuggerJit") {
     if (suite == "TestDebuggerJit") {
       RuntimeOption::EvalJit = true;
@@ -44,30 +34,13 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
     RUN_TESTSUITE(TestDebugger);
     return;
   }
-
-  if (suite == "TestCodeRunVM" || suite == "TestCodeRunRepo") {
-    suite = "TestCodeRun";
-    Option::EnableEval = Option::FullEval;
-    RuntimeOption::EvalJit = false;
-    RUN_TESTSUITE(TestCodeRun);
-    return;
-  }
-  if (suite == "TestCodeRunJit" || suite == "TestCodeRunRepoJit" ||
-      suite == "TestCodeRunJitIR" || suite == "TestCodeRunRepoJitIR") {
-    suite = "TestCodeRun";
-    Option::EnableEval = Option::FullEval;
-    RuntimeOption::EvalJit = true;
-    if (suite == "TestCodeRunJitIR" || suite == "TestCodeRunRepoJitIR") {
-      RuntimeOption::EvalJitUseIR = true;
-    }
-    RUN_TESTSUITE(TestCodeRun);
-    return;
-  }
   if (suite == "TestServer") {
     Option::EnableEval = Option::FullEval;
     RUN_TESTSUITE(TestServer);
     return;
   }
+
+  // set based tests with many suites
   if (set == "TestUnit") {
     RUN_TESTSUITE(TestParserExpr);
     RUN_TESTSUITE(TestParserStmt);
@@ -76,11 +49,11 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
     RUN_TESTSUITE(TestCppBase);
     return;
   }
-
+  if (set == "TestExt") {
   // complete extension tests
 #include "test_ext.inc"
-
-  if (suite == "" && set != "NoCodeRun" && set != "TestExt") {
-    RUN_TESTSUITE(TestCodeRun);
+    return;
   }
+
+  printf("Unknown suite: %s\n", suite.c_str());
 }

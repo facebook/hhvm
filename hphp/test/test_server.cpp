@@ -36,9 +36,7 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TestServer::TestServer() {
-  TestCodeRun::FastMode = false;
-}
+TestServer::TestServer() { }
 
 static int s_server_port = 0;
 static int s_admin_port = 0;

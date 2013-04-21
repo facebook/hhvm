@@ -166,7 +166,7 @@ std::string Option::GetSystemRoot() {
       throw Exception("Environment variable HPHP_HOME is not set.");
     }
     SystemRoot = home;
-    SystemRoot += "/src";
+    SystemRoot += "/hphp";
   }
   return SystemRoot;
 }

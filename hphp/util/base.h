@@ -127,14 +127,6 @@ static const bool debug =
 #endif
   ;
 
-const bool hhvm_gc =
-#ifdef HHVM_GC
-  true
-#else
-  false
-#endif
-  ;
-
 static const bool use_jemalloc =
 #ifdef USE_JEMALLOC
   true

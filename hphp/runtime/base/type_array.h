@@ -29,7 +29,6 @@
 #include <runtime/base/array/array_data.h>
 #include <runtime/base/type_string.h>
 #include <runtime/base/hphp_value.h>
-#include <runtime/base/gc_roots.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,12 +41,6 @@ inline int64_t ToKey(double d) {
 class ArrayIter;
 class StaticArray;
 
-#ifdef HHVM_GC
-typedef GCRootTracker<ArrayData> ArrayBase;
-#else
-typedef SmartPtr<ArrayData> ArrayBase;
-#endif
-
 /**
  * Array type wrapping around ArrayData to implement reference
  * counting, copy-on-write and ArrayData escalation.
@@ -57,7 +50,9 @@ typedef SmartPtr<ArrayData> ArrayBase;
  * type of ArrayData to accomplish the task. This "upgrade" is called
  * escalation.
  */
-class Array : protected ArrayBase {
+class Array : protected SmartPtr<ArrayData> {
+ typedef SmartPtr<ArrayData> ArrayBase;
+
  public:
   /**
    * Create an empty array or an array with one element. Note these are

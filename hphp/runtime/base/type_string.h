@@ -28,7 +28,6 @@
 #include <runtime/base/string_offset.h>
 #include <runtime/base/types.h>
 #include <runtime/base/hphp_value.h>
-#include <runtime/base/gc_roots.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,17 +41,13 @@ StringData* buildStringData(int64_t   n);
 StringData* buildStringData(double  n);
 StringData* buildStringData(litstr  s);
 
-#ifdef HHVM_GC
-typedef GCRootTracker<StringData> StringBase;
-#else
-typedef SmartPtr<StringData> StringBase;
-#endif
-
 /**
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
  */
-class String : protected StringBase {
+class String : protected SmartPtr<StringData> {
+  typedef SmartPtr<StringData> StringBase;
+
 public:
   typedef hphp_hash_map<int64_t, const StringData *, int64_hash>
     IntegerStringDataMap;

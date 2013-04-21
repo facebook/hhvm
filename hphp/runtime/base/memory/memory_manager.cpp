@@ -213,16 +213,6 @@ void MemoryManager::add(SmartAllocatorImpl *allocator) {
 
 void MemoryManager::sweepAll() {
   Sweepable::SweepAll();
-#ifdef HHVM_GC
-  GCRootTracker<StringData>::clear();
-  GCRootTracker<ArrayData>::clear();
-  GCRootTracker<ObjectData>::clear();
-  GCRootTracker<Variant>::clear();
-  GCRoot<StringData>::clear();
-  GCRoot<ArrayData>::clear();
-  GCRoot<ObjectData>::clear();
-  GCRoot<Variant>::clear();
-#endif
 }
 
 struct SmallNode {

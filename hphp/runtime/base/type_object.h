@@ -26,7 +26,6 @@
 #include <runtime/base/object_data.h>
 #include <runtime/base/type_string.h>
 #include <runtime/base/hphp_value.h>
-#include <runtime/base/gc_roots.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,16 +35,12 @@ namespace HPHP {
 class ArrayIter;
 class MutableArrayIter;
 
-#ifdef HHVM_GC
-typedef GCRootTracker<ObjectData> ObjectBase;
-#else
-typedef SmartPtr<ObjectData> ObjectBase;
-#endif
-
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
-class Object : protected ObjectBase {
+class Object : protected SmartPtr<ObjectData> {
+  typedef SmartPtr<ObjectData> ObjectBase;
+
 public:
   Object() {}
 

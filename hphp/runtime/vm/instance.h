@@ -95,20 +95,6 @@ class Instance : public ObjectData {
 
  private:
   void instanceInit(Class* cls) {
-    /*
-     * During the construction of an instance, the instance has a ref
-     * count of zero, and no pointer to it yet exists anywhere the
-     * tracing collector can find it.  (I.e., newInstance() hasn't
-     * returned, so it isn't on the execution stack or in an Object
-     * smart pointer yet.)
-     *
-     * However, instance creation can sometimes lead to execution of
-     * arbitrary code (in the form of an autoload handler).  Moreover
-     * it can also lead to memory allocations (which may be a point at
-     * which we want to do GC), so we need to register the root for
-     * the duration of construction.
-     */
-    DECLARE_STACK_GC_ROOT(ObjectData, this);
     setAttributes(cls->getODAttrs());
     size_t nProps = cls->numDeclProperties();
     if (cls->needInitialization()) {

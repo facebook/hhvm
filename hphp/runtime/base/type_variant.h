@@ -33,7 +33,6 @@
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/array/array_data.h>
 #include <runtime/base/macros.h>
-#include <runtime/base/gc_roots.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,13 +70,7 @@ class MutableArrayIter;
  *
  */
 
-#ifdef HHVM_GC
-typedef GCRootTracker<Variant> VariantBase;
-#else
-typedef TypedValue VariantBase;
-#endif
-
-class Variant : private VariantBase {
+class Variant : private TypedValue {
  public:
   friend class Array;
   friend class VariantVectorBase;

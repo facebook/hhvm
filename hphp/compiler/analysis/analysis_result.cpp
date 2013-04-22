@@ -169,7 +169,7 @@ FunctionScopePtr AnalysisResult::findFunction(
   const std::string &funcName) const {
   StringToFunctionScopePtrMap::const_iterator bit =
     m_functions.find(funcName);
-  if (bit != m_functions.end()) {
+  if (bit != m_functions.end() && !bit->second->ignoreRedefinition()) {
     return bit->second;
   }
   StringToFunctionScopePtrMap::const_iterator iter =
@@ -177,7 +177,7 @@ FunctionScopePtr AnalysisResult::findFunction(
   if (iter != m_functionDecs.end()) {
     return iter->second;
   }
-  return FunctionScopePtr();
+  return bit != m_functions.end() ? bit->second : FunctionScopePtr();
 }
 
 BlockScopePtr AnalysisResult::findConstantDeclarer(
@@ -343,11 +343,14 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
 
   string fname = funcScope->getName();
   // System functions override
-  if (m_functions.find(fname) != m_functions.end()) {
-    // we need someone to hold on to a reference to it
-    // even though we're not going to do anything with it
-    this->lock()->m_ignoredScopes.push_back(funcScope);
-    return false;
+  auto it = m_functions.find(fname);
+  if (it != m_functions.end()) {
+    if (!it->second->ignoreRedefinition()) {
+      // we need someone to hold on to a reference to it
+      // even though we're not going to do anything with it
+      this->lock()->m_ignoredScopes.push_back(funcScope);
+      return false;
+    }
   }
 
   return true;

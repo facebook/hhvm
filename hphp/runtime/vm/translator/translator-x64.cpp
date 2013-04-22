@@ -3161,7 +3161,8 @@ TranslatorX64::enterTC(SrcKey sk, TCA start) {
       start = TCA(0xbee5face);
     }
 
-    TRACE(4, "enterTC: request(%s) args: %" PRIx64 " %" PRIx64 " %" PRIx64 " %" PRIx64 " %" PRIx64 "\n",
+    TRACE(2, "enterTC: request(%s) args: %" PRIx64 " %" PRIx64 " %"
+             PRIx64 " %" PRIx64 " %" PRIx64 "\n",
           reqName(info.requestNum),
           info.args[0], info.args[1], info.args[2], info.args[3],
           info.args[4]);

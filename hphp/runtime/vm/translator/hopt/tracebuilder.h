@@ -240,7 +240,7 @@ public:
   SSATmp* genIterNextK(uint32_t iterId, uint32_t valLocalId, uint32_t keyLocalId);
   SSATmp* genIterFree(uint32_t iterId);
 
-  SSATmp* genInterpOne(uint32_t pcOff, uint32_t stackAdjustment,
+  SSATmp* genInterpOne(uint32_t pcOff, int32_t stackAdjustment,
                        Type resultType);
   Trace* getExitSlowTrace(uint32_t bcOff,
                           int32_t stackDeficit,

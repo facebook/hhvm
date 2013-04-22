@@ -983,7 +983,7 @@ void TraceBuilder::genNativeImpl() {
 }
 
 SSATmp* TraceBuilder::genInterpOne(uint32_t pcOff,
-                                   uint32_t stackAdjustment,
+                                   int32_t stackAdjustment,
                                    Type resultType) {
   return gen(InterpOne,
              resultType,
@@ -1247,7 +1247,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       int64_t stackAdjustment = inst->getSrc(3)->getValInt();
       Type resultType = inst->getTypeParam();
       // push the return value if any and adjust for the popped values
-      m_spOffset += ((resultType == Type::None ? 0 : 1) - stackAdjustment);
+      m_spOffset += -stackAdjustment;
       break;
     }
 

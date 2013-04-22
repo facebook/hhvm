@@ -88,11 +88,16 @@ public:
   bool couldBreakEnterFunc(const StringData* funcFullName);
   void getBreakClsMethods(std::vector<const StringData*>& classNames);
   void getBreakFuncs(std::vector<const StringData*>& funcFullNames);
+  BreakPointInfoPtr getBreakPointAtCmd(CmdInterrupt& cmd);
 
   bool needInterrupt();
-  bool needInterruptForNonBreak();
+  bool needVMInterrupts();
   void interrupt(CmdInterrupt &cmd);
   bool sendToClient(DebuggerCommand *cmd);
+  CmdInterrupt& currentInterruptCmd();
+
+  int getStackDepth();
+  int getRealStackDepth();
 
   void startSignalThread();
   void pollSignal(); // for signal polling thread
@@ -110,18 +115,11 @@ private:
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);
   bool checkBreakPoints(CmdInterrupt &cmd);
   bool checkFlowBreak(CmdInterrupt &cmd);
-  bool processFlowBreak(CmdInterrupt &cmd);
   void processInterrupt(CmdInterrupt &cmd);
-  void processFlowControl(CmdInterrupt &cmd);
-  bool breakByFlowControl(CmdInterrupt &cmd);
 
   DThreadInfoPtr createThreadInfo(const std::string &desc);
 
   void changeBreakPointDepth(CmdInterrupt& cmd);
-  BreakPointInfoPtr getBreakPointAtCmd(CmdInterrupt& cmd);
-
-  int getRealStackDepth();
-  int getStackDepth();
 
   bool m_stopped;
 

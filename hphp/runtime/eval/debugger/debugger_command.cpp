@@ -27,7 +27,7 @@ static const Trace::Module TRACEMOD = Trace::debugger;
 
 // send/recv
 bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
-  TRACE(2, "DebuggerCommand::send\n");
+  TRACE(5, "DebuggerCommand::send\n");
   try {
     thrift.reset(false);
     sendImpl(thrift);
@@ -41,7 +41,7 @@ bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
 }
 
 bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
-  TRACE(2, "DebuggerCommand::recv\n");
+  TRACE(5, "DebuggerCommand::recv\n");
   try {
     recvImpl(thrift);
   } catch (...) {
@@ -53,7 +53,7 @@ bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
 }
 
 void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
-  TRACE(2, "DebuggerCommand::sendImpl\n");
+  TRACE(5, "DebuggerCommand::sendImpl\n");
   thrift.write((int32_t)m_type);
   thrift.write(m_class);
   thrift.write(m_body);
@@ -61,14 +61,14 @@ void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
 }
 
 void DebuggerCommand::recvImpl(DebuggerThriftBuffer &thrift) {
-  TRACE(2, "DebuggerCommand::recvImpl\n");
+  TRACE(5, "DebuggerCommand::recvImpl\n");
   thrift.read(m_body);
   thrift.read(m_version);
 }
 
 bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
                               DebuggerCommandPtr &cmd, const char *caller) {
-  TRACE(2, "DebuggerCommand::Receive\n");
+  TRACE(5, "DebuggerCommand::Receive\n");
   cmd.reset();
 
   struct pollfd fds[1];
@@ -92,6 +92,8 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     Logger::Verbose("%s => DebuggerCommand::Receive(): socket error", caller);
     return true;
   }
+
+  TRACE(1, "DebuggerCommand::Receive: got cmd of type %d\n", type);
 
   // not all commands are here, as not all commands need to be sent over wire
   switch (type) {
@@ -137,6 +139,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
       return true;
   }
   if (!cmd->recv(thrift)) {
+    Logger::Verbose("%s => DebuggerCommand::Receive(): socket error", caller);
     cmd.reset();
   }
   return true;

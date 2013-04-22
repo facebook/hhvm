@@ -1890,6 +1890,7 @@ void VMExecutionContext::enterVM(TypedValue* retval,
                                  ExtraArgs* extraArgs) {
   m_firstAR = ar;
   ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
+  assert(isReturnHelper(ar->m_savedRip));
 
   DEBUG_ONLY int faultDepth = m_faults.size();
   SCOPE_EXIT {
@@ -2755,6 +2756,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, bool local,
   ar->m_soff = uintptr_t(m_fp->m_func->unit()->offsetOf(pc) -
                          m_fp->m_func->base());
   ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
+  assert(isReturnHelper(ar->m_savedRip));
   pushLocalsAndIterators(func);
   if (local) {
     ar->m_varEnv = 0;
@@ -3004,6 +3006,7 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
     ar->m_soff = 0;
     ar->m_savedRbp = 0;
     ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
+    assert(isReturnHelper(ar->m_savedRip));
     m_fp = ar;
     m_pc = s_debuggerDummy->entry();
     m_firstAR = ar;
@@ -3016,6 +3019,34 @@ void VMExecutionContext::exitDebuggerDummyEnv() {
   assert(m_topVarEnv);
   assert(m_globalVarEnv == m_topVarEnv);
   m_globalVarEnv->detach(getFP());
+}
+
+// Identifies the set of return helpers that we may set m_savedRip to in an
+// ActRec.
+bool VMExecutionContext::isReturnHelper(uintptr_t address) {
+  return ((address == (uintptr_t)tx64->getRetFromInterpretedFrame()) ||
+          (address == (uintptr_t)tx64->getRetFromInterpretedGeneratorFrame()) ||
+          (address == (uintptr_t)tx64->getCallToExit()));
+}
+
+// Walk the stack and find any return address to jitted code and bash it to
+// the RetFromInterpretedFrame helper. This ensures that we don't return into
+// jitted code and gives the system the proper chance to interpret blacklisted
+// tracelets.
+void VMExecutionContext::preventReturnsToTC() {
+  assert(isDebuggerAttached());
+  if (RuntimeOption::EvalJit) {
+    ActRec *ar = getFP();
+    while (ar) {
+      if (!isReturnHelper(ar->m_savedRip)) {
+        TRACE(2, "Replace RIP with RetFromInterpretedFrame helper in fp %p"
+              ", savedRip 0x%lx\n", ar, ar->m_savedRip);
+        ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
+        assert(isReturnHelper(ar->m_savedRip));
+      }
+      ar = getPrevVMState(ar);
+    }
+  }
 }
 
 static inline StringData* lookup_name(TypedValue* key) {
@@ -5864,6 +5895,7 @@ template <bool handle_throw>
 void VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   assert(ar->m_savedRbp == (uint64_t)m_fp);
   ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
+  assert(isReturnHelper(ar->m_savedRip));
   TRACE(3, "FCall: pc %p func %p base %d\n", m_pc,
         m_fp->m_func->unit()->entry(),
         int(m_fp->m_func->base()));
@@ -6130,6 +6162,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
     assert(ar->m_savedRbp == (uint64_t)m_fp);
     assert(!ar->m_func->isGenerator());
     ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
+    assert(isReturnHelper(ar->m_savedRip));
     TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,
           m_fp->m_func->unit()->entry(),
           int(m_fp->m_func->base()));
@@ -6848,6 +6881,7 @@ void VMExecutionContext::iopContEnter(PC& pc) {
   contAR->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
   contAR->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedGeneratorFrame();
+  assert(isReturnHelper(contAR->m_savedRip));
 
   m_fp = contAR;
   pc = contAR->m_func->getEntry();

@@ -123,7 +123,7 @@ void Debugger::RetireDummySandboxThread(DummySandbox* toRetire) {
 }
 
 void Debugger::CleanupDummySandboxThreads() {
-  TRACE(2, "Debugger::CleanupDummySandboxThreads\n");
+  TRACE(7, "Debugger::CleanupDummySandboxThreads\n");
   s_debugger.cleanupDummySandboxThreads();
 }
 
@@ -229,10 +229,10 @@ void Debugger::Interrupt(int type, const char *program,
       proxy->interrupt(cmd);
       interrupts.pop();
     }
-    // Some cmds requires us to interpret all instructions until the cmd
+    // Some cmds require us to interpret all instructions until the cmd
     // completes. Setting this will ensure we stay out of JIT code and in the
     // interpreter so phpDebuggerOpcodeHook has a chance to work.
-    rjdata.debuggerIntr = proxy->needInterruptForNonBreak();
+    rjdata.debuggerIntr = proxy->needVMInterrupts();
   } else {
     TRACE(3, "proxy == null\n");
     // Debugger clients are disconnected abnormally, or this sandbox is not
@@ -437,7 +437,7 @@ void Debugger::retireDummySandboxThread(DummySandbox* toRetire) {
 }
 
 void Debugger::cleanupDummySandboxThreads() {
-  TRACE(2, "Debugger::cleanupDummySandboxThreads\n");
+  TRACE(7, "Debugger::cleanupDummySandboxThreads\n");
   DummySandbox* ptr = nullptr;
   while (m_cleanupDummySandboxQ.try_pop(ptr)) {
     ptr->notify();

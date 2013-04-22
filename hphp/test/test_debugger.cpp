@@ -344,6 +344,7 @@ void TestDebugger::runServer() {
                              "/test";
   const char *argv[] = {"hphpd_test", "--mode=server",
                         "--config=test/config-debugger-server.hdf",
+                        "-vEval.JitWarmupRequests=0",
                         portConfig.c_str(),
                         srcRootConfig.c_str(),
                         includePathConfig.c_str(),

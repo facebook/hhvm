@@ -628,6 +628,7 @@ public:
   void evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
+  void preventReturnsToTC();
   void destructObjects();
   int m_lambdaCounter;
   struct ReentryRecord {
@@ -688,6 +689,7 @@ private:
   bool prepareArrayArgs(ActRec* ar, ArrayData* args,
                         ExtraArgs*& extraArgs);
   void recordCodeCoverage(PC pc);
+  bool isReturnHelper(uintptr_t address);
   int m_coverPrevLine;
   HPHP::VM::Unit* m_coverPrevUnit;
   Array m_evaledArgs;

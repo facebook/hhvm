@@ -225,48 +225,37 @@ void DebuggerProxy::getBreakFuncs(
   }
 }
 
+// Proxy needs to be interrupted because it has something setup which may need
+// processing; breakpoints, flow control commands, a signal.
 bool DebuggerProxy::needInterrupt() {
   TRACE(2, "DebuggerProxy::needInterrupt\n");
-  return m_hasBreakPoints || m_flow ||
-         m_signum != CmdSignal::SignalNone;
+  return m_hasBreakPoints || m_flow || m_signum != CmdSignal::SignalNone;
 }
 
-bool DebuggerProxy::needInterruptForNonBreak() {
-  TRACE(2, "DebuggerProxy::needInterruptForNonBreak\n");
-  return m_flow || m_signum != CmdSignal::SignalNone;
+// We need VM interrupts if we're in a state that requires the debugger to be
+// interrupted for every opcode.
+bool DebuggerProxy::needVMInterrupts() {
+  TRACE(2, "DebuggerProxy::needVMInterrupts\n");
+  bool flowNeedsInterrupt = (m_flow && m_flow->needsVMInterrupt());
+  return flowNeedsInterrupt || m_signum != CmdSignal::SignalNone;
 }
 
 // Handle an interrupt from the VM.
 void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   TRACE(2, "DebuggerProxy::interrupt\n");
+  // Make any breakpoints that have passed breakable again.
   changeBreakPointDepth(cmd);
 
+  // At this point we have an interrupt, but we don't know if we're on the
+  // thread the proxy considers "current".
+  // NB: BreakPointReached really means we've got control of a VM thread from
+  // the opcode hook. This could be for a breakpoint, stepping, etc.
   if (cmd.getInterruptType() == BreakPointReached) {
-    if (!needInterrupt()) return;
+    // If we have this type of interrupt then the proxy must have outstanding
+    // work to do. If it doesn't, then we've come too far processing this
+    // interrupt.
+    assert(needInterrupt());
 
-    // NB: stepping is represented as a BreakPointReached interrupt.
-
-    // Modify m_lastLocFilter to save current location. This will short-circuit
-    // the work done up in phpDebuggerOpcodeHook() and ensure we don't break on
-    // this line until we're completely off of it.
-    InterruptSite *site = cmd.getSite();
-    if (g_vmContext->m_lastLocFilter) {
-      g_vmContext->m_lastLocFilter->clear();
-    } else {
-      g_vmContext->m_lastLocFilter = new VM::PCFilter();
-    }
-    if (debug && Trace::moduleEnabled(Trace::bcinterp, 5)) {
-      Trace::trace("prepare source loc filter\n");
-      const VM::OffsetRangeVec& offsets = site->getCurOffsetRange();
-      for (VM::OffsetRangeVec::const_iterator it = offsets.begin();
-           it != offsets.end(); ++it) {
-        Trace::trace("block source loc in %s:%d: unit %p offset [%d, %d)\n",
-                     site->getFile(), site->getLine0(),
-                     site->getUnit(), it->m_base, it->m_past);
-      }
-    }
-    g_vmContext->m_lastLocFilter->addRanges(site->getUnit(),
-                                            site->getCurOffsetRange());
     // If the breakpoint is not to be processed, we should continue execution.
     BreakPointInfoPtr bp = getBreakPointAtCmd(cmd);
     if (bp) {
@@ -278,13 +267,14 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
     }
   }
 
-  // Wait until this thread is the thread this proxy wants to debug.
-  // NB: breakpoints and control flow checks happen here, too, and return false
-  // if we're not done with the flow, or not at a breakpoint, etc.
+  // Wait until this thread is the one this proxy wants to debug.
   if (!blockUntilOwn(cmd, true)) {
     return;
   }
-  if (processFlowBreak(cmd)) {
+
+  // We know we're on the "current" thread, so we can process any active flow
+  // command, stop if we're at a breakpoint, handle other interrupts, etc.
+  if (checkFlowBreak(cmd)) {
     while (true) {
       try {
         Lock lock(m_signalMutex);
@@ -443,10 +433,10 @@ DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
 }
 
 // Waits until this thread is the one that the proxy considers the current
-// thread. This also check to see if the given cmd has any breakpoints or
-// flow control that we should stop for. Note: while stepping, pretty much all
-// of the stepping logic is handled below here and this will return false if
-// the stepping operation has not completed.
+// thread.
+// NB: if the thread is not the current thread, and we're asked to check
+// breakpoints, then if there are no breakpoints which could effect this
+// thread we simply return false and stop processing the current interrupt.
 bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
   TRACE(2, "DebuggerProxy::blockUntilOwn\n");
   int64_t self = cmd.getThreadId();
@@ -476,10 +466,9 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
       // The breakpoint might have been removed while I'm waiting
       return false;
     }
-  } else if (check && !checkFlowBreak(cmd)) {
-    return false;
   }
 
+  // This thread is now the one the proxy considers the current thread.
   if (m_thread == 0) {
     m_thread = self;
   }
@@ -510,38 +499,45 @@ bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
 
   // Note that even if fcShouldBreak, we still need to test bpShouldBreak
   // so to correctly report breakpoint reached + evaluating watchpoints;
-  // vice versa, so to decCount() on m_flow.
+  // vice versa, so to give a flow cmd a chance to react.
+  // Note: a Continue cmd is a bit special. We need to process it _only_ if
+  // we decide to break.
   bool fcShouldBreak = false; // should I break according to flow control?
   bool bpShouldBreak = false; // should I break according to breakpoints?
 
   if ((cmd.getInterruptType() == BreakPointReached ||
-       cmd.getInterruptType() == HardBreakPoint) && m_flow) {
-    fcShouldBreak = breakByFlowControl(cmd);
+       cmd.getInterruptType() == HardBreakPoint ||
+       cmd.getInterruptType() == ExceptionThrown) && m_flow) {
+    if (!m_flow->is(DebuggerCommand::KindOfContinue)) {
+      m_flow->onBeginInterrupt(this, cmd);
+      if (m_flow->complete()) {
+        fcShouldBreak = true;
+        m_flow.reset();
+      }
+    }
   }
 
   bpShouldBreak = checkBreakPoints(cmd);
+
+  // This is done before KindOfContinue testing.
   if (!fcShouldBreak && !bpShouldBreak) {
-    return false; // this is done before KindOfContinue testing
+    return false;
   }
 
-
-  return true;
-}
-
-bool DebuggerProxy::processFlowBreak(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxy::processFlowBreak\n");
   if ((cmd.getInterruptType() == BreakPointReached ||
        cmd.getInterruptType() == HardBreakPoint) && m_flow) {
     if (m_flow->is(DebuggerCommand::KindOfContinue)) {
-      if (!m_flow->decCount()) m_flow.reset();
+      m_flow->onBeginInterrupt(this, cmd);
+      if (m_flow->complete()) m_flow.reset();
       return false;
     }
   }
+
   return true;
 }
 
 void DebuggerProxy::checkStop() {
-  TRACE(2, "DebuggerProxy::checkStop\n");
+  TRACE(5, "DebuggerProxy::checkStop\n");
   if (m_stopped) {
     Debugger::RemoveProxy(shared_from_this());
     m_thrift.close();
@@ -551,7 +547,7 @@ void DebuggerProxy::checkStop() {
 
 void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
   TRACE(2, "DebuggerProxy::processInterrupt\n");
-  // Do the server-side work for this cmd, which just notifies the client.
+  // Do the server-side work for this interrupt, which just notifies the client.
   if (!cmd.onServer(this)) {
     Debugger::RemoveProxy(shared_from_this()); // on socket error
     return;
@@ -571,10 +567,15 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       // Any control flow command gets installed here and we continue execution.
       m_flow = dynamic_pointer_cast<CmdFlowControl>(res);
       if (m_flow) {
-        m_flow->onServer(this);
-        processFlowControl(cmd);
-        if (m_flow && m_threadMode == Normal) {
-          switchThreadMode(Sticky);
+        m_flow->onSetup(this, cmd);
+        if (!m_flow->complete()) {
+          if (m_threadMode == Normal) {
+            switchThreadMode(Sticky);
+          }
+        } else {
+          // The flow cmd has determined that it is done with its work and
+          // doesn't need to remain for later processing.
+          m_flow.reset();
         }
         return;
       }
@@ -715,37 +716,6 @@ int DebuggerProxy::getStackDepth() {
   return depth;
 }
 
-// Handle a continue cmd, or setup stepping.
-void DebuggerProxy::processFlowControl(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxy::processFlowControl\n");
-  switch (m_flow->getType()) {
-    case DebuggerCommand::KindOfContinue:
-      if (!m_flow->decCount()) {
-        m_flow.reset();
-      }
-      break;
-    case DebuggerCommand::KindOfStep:
-      {
-        // allows the breakpoint to be hit again when returns
-        // from function call
-        BreakPointInfoPtr bp = getBreakPointAtCmd(cmd);
-        if (bp) {
-          bp->setBreakable(getRealStackDepth());
-        }
-        break;
-      }
-    case DebuggerCommand::KindOfOut:
-    case DebuggerCommand::KindOfNext:
-      m_flow->setStackDepth(getStackDepth());
-      m_flow->setVMDepth(g_vmContext->m_nesting);
-      m_flow->setFileLine(cmd.getFileLine());
-      break;
-    default:
-      assert(false);
-      break;
-  }
-}
-
 /**
  * If a breakpoint is set at that depth,
  * this function clears the current depth information
@@ -762,56 +732,6 @@ void DebuggerProxy::changeBreakPointDepth(CmdInterrupt& cmd) {
       m_breakpoints[i]->changeBreakPointDepth(getRealStackDepth());
     }
   }
-}
-
-// Determine if an outstanding flow control cmd has run it's course and we
-// should stop execution.
-bool DebuggerProxy::breakByFlowControl(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxy::breakByFlowControl\n");
-  switch (m_flow->getType()) {
-    case DebuggerCommand::KindOfStep: {
-      if (!m_flow->decCount()) {
-        // if the line changes and the stack depth is the same
-        // pop the breakpoint depth stack
-        m_flow.reset();
-        return true;
-      }
-      break;
-    }
-    case DebuggerCommand::KindOfNext: {
-      int currentVMDepth = g_vmContext->m_nesting;
-      int currentStackDepth = getStackDepth();
-
-      if (currentVMDepth <= m_flow->getVMDepth() &&
-          currentStackDepth <= m_flow->getStackDepth() &&
-          m_flow->getFileLine() != cmd.getFileLine()) {
-            if (!m_flow->decCount()) {
-              m_flow.reset();
-              return true;
-            }
-      }
-
-      break;
-    }
-    case DebuggerCommand::KindOfOut: {
-      int currentVMDepth = g_vmContext->m_nesting;
-      int currentStackDepth = getStackDepth();
-      if (currentVMDepth < m_flow->getVMDepth()) {
-        // Cut corner here, just break when cross VM boundary no matter how
-        // many levels we want to go out of
-        m_flow.reset();
-        return true;
-      } else if (m_flow->getStackDepth() - currentStackDepth >=
-                 m_flow->getCount()) {
-        m_flow.reset();
-        return true;
-      }
-      break;
-    }
-    default:
-      break;
-  }
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

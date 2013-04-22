@@ -49,6 +49,10 @@ void phpDebuggerDefFuncHook(const Func* func);
 // Helper to apply pending breakpoints to all files.
 void phpSetBreakPointsInAllFiles(Eval::DebuggerProxy* proxy);
 
+// Add/remove breakpoints at a specific offset.
+void phpAddBreakPoint(const Unit* unit, Offset offset);
+void phpRemoveBreakPoint(const Unit* unit, Offset offset);
+
 // Is this thread being debugged?
 static inline bool isDebuggerAttached() {
   return ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.debugger;
@@ -64,7 +68,7 @@ static inline bool isDebuggerAttached() {
 bool isDebuggerAttachedProcess();
 
 // This flag ensures two things: first, that we stay in the interpreter and
-// out of JIT code. Second, that the phpDebuggerHook will continue to allow
+// out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
 // debugger interrupts for every opcode executed (modulo filters.)
 #define DEBUGGER_FORCE_INTR  \
   (ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.debuggerIntr)
@@ -102,13 +106,22 @@ private:
 
 public:
   PCFilter() {}
+
+  // Add/remove offsets, either individually or by range.
   int addRanges(const Unit* unit, const OffsetRangeVec& offsets);
+  void removeOffset(const Unit* unit, Offset offset);
+
+  // Add/remove/check explicit PCs.
   void addPC(const uchar* pc) {
     m_map.setPointer((void*)pc, (void*)pc);
+  }
+  void removePC(const uchar* pc) {
+    m_map.setPointer((void*)pc, nullptr);
   }
   bool checkPC(const uchar* pc) {
     return m_map.getPointer((void*)pc) == (void*)pc;
   }
+
   void clear() {
     m_map.clear();
   }

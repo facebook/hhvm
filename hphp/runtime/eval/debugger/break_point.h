@@ -29,7 +29,7 @@ enum InterruptType {
   RequestEnded,
   PSPEnded,
   HardBreakPoint, // From f_hphpd_break().
-  BreakPointReached,
+  BreakPointReached, // Break from the VM interpreter loop
   ExceptionThrown,
 };
 

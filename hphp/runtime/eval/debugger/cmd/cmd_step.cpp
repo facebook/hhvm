@@ -32,5 +32,25 @@ bool CmdStep::help(DebuggerClient *client) {
   return true;
 }
 
+void CmdStep::onSetup(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
+  assert(!m_complete); // Complete cmds should not be asked to do work.
+  CmdFlowControl::onSetup(proxy, interrupt);
+  // Allows a breakpoint on this same line to be hit again when control returns
+  // from function call.
+  BreakPointInfoPtr bp = proxy->getBreakPointAtCmd(interrupt);
+  if (bp) {
+    bp->setBreakable(proxy->getRealStackDepth());
+  }
+  installLocationFilterForLine(interrupt.getSite());
+  m_needsVMInterrupt = true;
+}
+
+void CmdStep::onBeginInterrupt(DebuggerProxy *proxy, CmdInterrupt &interrupt) {
+  m_complete = (decCount() == 0);
+  if (!m_complete) {
+    installLocationFilterForLine(interrupt.getSite());
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}

@@ -293,7 +293,7 @@ static void get_color(int tokid, int prev, int next,
                       const char **palette =
                       DebuggerClient::DefaultCodeColors) {
 
-  TRACE(2, "debugger_base:get_color\n");
+  TRACE(7, "debugger_base:get_color\n");
 #undef YYTOKENTYPE
 #ifdef YYTOKEN_MAP
 #undef YYTOKEN_MAP
@@ -386,7 +386,7 @@ static void get_color(int tokid, int prev, int next,
 
 static void color_line_no(StringBuffer &sb, int line, int lineFocus0,
                           int lineFocus1, const char *color) {
-  TRACE(2, "debugger_base:color_line_no\n");
+  TRACE(7, "debugger_base:color_line_no\n");
   if (((line == lineFocus0 && lineFocus1 == 0) ||
        (line >= lineFocus0 && line <= lineFocus1)) &&
       DebuggerClient::HighlightBgColor) {
@@ -402,7 +402,7 @@ static void append_line_no(StringBuffer &sb, const char *text,
                            int lineFocus0, int charFocus0, int lineFocus1,
                            int charFocus1, const char **palette =
                            DebuggerClient::DefaultCodeColors) {
-  TRACE(2, "debugger_base:append_line_no\n");
+  TRACE(7, "debugger_base:append_line_no\n");
   const char *colorLineNo = palette[CodeColorLineNo * 2];
   const char *endLineNo = palette[CodeColorLineNo * 2 + 1];
 
@@ -457,7 +457,7 @@ static void append_line_no(StringBuffer &sb, const char *text,
 String highlight_code(CStrRef source, int line /* = 0 */,
                       int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                       int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
-  TRACE(2, "debugger_base:highlight_code\n");
+  TRACE(7, "debugger_base:highlight_code\n");
   String prepended = "<?php\n";
   prepended += source;
   String highlighted = highlight_php(prepended, line, lineFocus0, charFocus0,
@@ -469,7 +469,7 @@ String highlight_code(CStrRef source, int line /* = 0 */,
 string check_char_highlight(int lineFocus0, int charFocus0,
                             int lineFocus1, int charFocus1,
                             Location &loc) {
-  TRACE(2, "debugger_base:check_char_highlight\n");
+  TRACE(7, "debugger_base:check_char_highlight\n");
   if (DebuggerClient::HighlightBgColor &&
       lineFocus0 && charFocus0 && lineFocus1 && charFocus1 &&
       loc.line0 * 1000 + loc.char0 >= lineFocus0 * 1000 + charFocus0 &&
@@ -483,7 +483,7 @@ string check_char_highlight(int lineFocus0, int charFocus0,
 String highlight_php(CStrRef source, int line /* = 0 */,
                      int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                      int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
-  TRACE(2, "debugger_base:highlight_php\n");
+  TRACE(7, "debugger_base:highlight_php\n");
   StringBuffer res;
   Scanner scanner(source.data(), source.size(),
                   Scanner::AllowShortTags | Scanner::ReturnAllTokens);

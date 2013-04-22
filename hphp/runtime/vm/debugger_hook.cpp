@@ -41,7 +41,7 @@ static inline Transl::Translator* transl() {
 // here and execute any number of commands from the client. Return from here
 // lets the opcode execute.
 void phpDebuggerOpcodeHook(const uchar* pc) {
-  TRACE(5, "in phpDebuggerHook()\n");
+  TRACE(5, "in phpDebuggerOpcodeHook()\n");
   // Short-circuit when we're doing things like evaling PHP for print command,
   // or conditional breakpoints.
   if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
@@ -60,27 +60,24 @@ void phpDebuggerOpcodeHook(const uchar* pc) {
       !g_vmContext->m_breakPointFilter->checkPC(pc))) {
     TRACE(5, "not in the PC range for any breakpoints\n");
     if (LIKELY(!DEBUGGER_FORCE_INTR)) {
-      // Implies we left the location for last break.
-      delete g_vmContext->m_lastLocFilter;
-      g_vmContext->m_lastLocFilter = nullptr;
       return;
     }
     TRACE(5, "DEBUGGER_FORCE_INTR\n");
   }
   Eval::Debugger::InterruptVMHook();
-  TRACE(5, "out phpDebuggerHook()\n");
+  TRACE(5, "out phpDebuggerOpcodeHook()\n");
 }
 
 // Hook called from iopThrow to signal that we are about to throw an exception.
 // NB: this does not hook any portion of exception unwind.
 void phpDebuggerExceptionHook(ObjectData* e) {
-  TRACE(5, "in phpExceptionHook()\n");
+  TRACE(5, "in phpDebuggerExceptionHook()\n");
   if (UNLIKELY(g_vmContext->m_dbgNoBreak)) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
   Eval::Debugger::InterruptVMHook(Eval::ExceptionThrown, e);
-  TRACE(5, "out phpExceptionHook()\n");
+  TRACE(5, "out phpDebuggerExceptionHook()\n");
 }
 
 bool isDebuggerAttachedProcess() {
@@ -102,6 +99,10 @@ static void blacklistRangesInJit(const Unit* unit,
   if (!transl()->addDbgGuards(unit)) {
     Logger::Warning("Failed to set breakpoints in Jitted code");
   }
+  // In this case, we may be setting a breakpoint in a tracelet which could
+  // already be jitted, and present on the stack. Make sure we don't return
+  // to it so we have a chance to honor breakpoints.
+  g_vmContext->preventReturnsToTC();
 }
 
 // Ensure we interpret an entire function when the debugger is attached.
@@ -110,6 +111,13 @@ static void blacklistFuncInJit(const Func* f) {
   OffsetRangeVec ranges;
   ranges.push_back(OffsetRange(f->base(), f->past()));
   blacklistRangesInJit(unit, ranges);
+}
+
+static PCFilter *getBreakPointFilter() {
+  if (!g_vmContext->m_breakPointFilter) {
+    g_vmContext->m_breakPointFilter = new PCFilter();
+  }
+  return g_vmContext->m_breakPointFilter;
 }
 
 static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
@@ -131,9 +139,6 @@ static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
     if (!unit->getOffsetRanges(bp->m_line1, offsets)) {
       continue;
     }
-    if (!g_vmContext->m_breakPointFilter) {
-      g_vmContext->m_breakPointFilter = new PCFilter();
-    }
     if (debug && Trace::moduleEnabled(Trace::bcinterp, 5)) {
       for (OffsetRangeVec::const_iterator it = offsets.begin();
            it != offsets.end(); ++it) {
@@ -142,7 +147,7 @@ static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
                      it->m_base, it->m_past);
       }
     }
-    g_vmContext->m_breakPointFilter->addRanges(unit, offsets);
+    getBreakPointFilter()->addRanges(unit, offsets);
     if (RuntimeOption::EvalJit) {
       blacklistRangesInJit(unit, offsets);
     }
@@ -151,12 +156,9 @@ static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
 
 static void addBreakPointFuncEntry(const Func* f) {
   PC pc = f->unit()->at(f->base());
-  if (!g_vmContext->m_breakPointFilter) {
-    g_vmContext->m_breakPointFilter = new PCFilter();
-  }
   TRACE(5, "func() break %s : unit %p offset %d)\n",
         f->fullName()->data(), f->unit(), f->base());
-  g_vmContext->m_breakPointFilter->addPC(pc);
+  getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
     if (transl()->addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
@@ -175,6 +177,30 @@ static void addBreakPointsClass(Eval::DebuggerProxy* proxy,
     if (proxy->couldBreakEnterFunc(funcs[i]->fullName())) {
       addBreakPointFuncEntry(funcs[i]);
     }
+  }
+}
+
+void phpAddBreakPoint(const Unit* unit, Offset offset) {
+  PC pc = unit->at(offset);
+  getBreakPointFilter()->addPC(pc);
+  if (RuntimeOption::EvalJit) {
+    if (transl()->addDbgBLPC(pc)) {
+      // if a new entry is added in blacklist
+      if (!transl()->addDbgGuards(unit)) {
+        Logger::Warning("Failed to set breakpoints in Jitted code");
+      }
+      // In this case, we may be setting a breakpoint in a tracelet which could
+      // already be jitted, and present on the stack. Make sure we don't return
+      // to it so we have a chance to honor breakpoints.
+      g_vmContext->preventReturnsToTC();
+    }
+  }
+}
+
+void phpRemoveBreakPoint(const Unit* unit, Offset offset) {
+  if (g_vmContext->m_breakPointFilter) {
+    PC pc = unit->at(offset);
+    g_vmContext->m_breakPointFilter->removePC(pc);
   }
 }
 
@@ -323,6 +349,10 @@ int PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets) {
     }
   }
   return counter;
+}
+
+void PCFilter::removeOffset(const Unit* unit, Offset offset) {
+  removePC(unit->at(offset));
 }
 
 //////////////////////////////////////////////////////////////////////////

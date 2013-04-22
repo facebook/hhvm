@@ -48,6 +48,12 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   for (auto it : m_priorityQueueNoPendingIO) {
     exitContextQueue(ctx_idx, it.second);
   }
+
+  while (!m_externalThreadEvents.empty()) {
+    auto ete_wh = m_externalThreadEvents.back();
+    m_externalThreadEvents.pop_back();
+    ete_wh->exitContext(ctx_idx);
+  }
 }
 
 void AsioContext::schedule(c_ContinuationWaitHandle* wait_handle) {
@@ -68,28 +74,65 @@ void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, 
   wait_handle->incRefCount();
 }
 
+uint32_t AsioContext::registerExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle) {
+  m_externalThreadEvents.push_back(wait_handle);
+  return m_externalThreadEvents.size() - 1;
+}
+
+void AsioContext::unregisterExternalThreadEvent(uint32_t ete_idx) {
+  assert(ete_idx < m_externalThreadEvents.size());
+  if (ete_idx != m_externalThreadEvents.size() - 1) {
+    m_externalThreadEvents[ete_idx] = m_externalThreadEvents.back();
+    m_externalThreadEvents[ete_idx]->setIndex(ete_idx);
+  }
+  m_externalThreadEvents.pop_back();
+}
+
 void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   assert(!m_current);
   assert(wait_handle);
   assert(wait_handle->getContext() == this);
 
+  auto session = AsioSession::Get();
+  uint8_t check_ete_counter = 0;
+
   while (!wait_handle->isFinished()) {
-    // run queue of ready continuations
-    while (!m_runnableQueue.empty()) {
+    // process ready external thread events once per 256 other events
+    // (when 8-bit check_ete_counter overflows)
+    if (!++check_ete_counter) {
+      auto ete_wh = session->getReadyExternalThreadEvents();
+      while (ete_wh) {
+        auto next_wh = ete_wh->getNextToProcess();
+        ete_wh->process();
+        ete_wh = next_wh;
+      }
+    }
+
+    // run queue of ready continuations once
+    if (!m_runnableQueue.empty()) {
       auto current = m_runnableQueue.front();
       m_runnableQueue.pop();
       m_current = current;
       m_current->run();
       m_current = nullptr;
       decRefObj(current);
-
-      if (wait_handle->isFinished()) {
-        return;
-      }
+      continue;
     }
 
     // run default priority queue once
     if (runSingle(m_priorityQueueDefault)) {
+      continue;
+    }
+
+    // pending external thread events? wait for at least one to become ready
+    if (!m_externalThreadEvents.empty()) {
+      // all your wait time are belong to us
+      auto ete_wh = session->waitForExternalThreadEvents();
+      while (ete_wh) {
+        auto next_wh = ete_wh->getNextToProcess();
+        ete_wh->process();
+        ete_wh = next_wh;
+      }
       continue;
     }
 

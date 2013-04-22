@@ -28,6 +28,7 @@ namespace HPHP {
 FORWARD_DECLARE_CLASS_BUILTIN(WaitableWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(RescheduleWaitHandle);
+FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
 
 typedef uint8_t context_idx_t;
 
@@ -44,6 +45,8 @@ class AsioContext {
 
     void schedule(c_ContinuationWaitHandle* wait_handle);
     void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority);
+    uint32_t registerExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle);
+    void unregisterExternalThreadEvent(uint32_t ete_idx);
     void runUntil(c_WaitableWaitHandle* wait_handle);
 
     static const uint32_t QUEUE_DEFAULT       = 0;
@@ -65,6 +68,9 @@ class AsioContext {
 
     // queue of RescheduleWaitHandles scheduled to be run once there is no pending I/O
     reschedule_priority_queue_t m_priorityQueueNoPendingIO;
+
+    // list of all pending ExternalThreadEventWaitHandles
+    smart::vector<c_ExternalThreadEventWaitHandle*> m_externalThreadEvents;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

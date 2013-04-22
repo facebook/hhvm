@@ -651,6 +651,32 @@
                     "desc": "A queue that is run only once there is no pending I\/O operation"
                 }
             ]
+        },
+        {
+            "name": "ExternalThreadEventWaitHandle",
+            "parent": "WaitableWaitHandle",
+            "desc": "A wait handle that synchronizes against C++ operation in external thread",
+            "bases": [
+                "Sweepable"
+            ],
+            "flags": [
+                "HasDocComment",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate",
+                        "HasDocComment"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ]
         }
     ]
 }

@@ -33,7 +33,10 @@ void AsioSession::Init() {
 }
 
 AsioSession::AsioSession()
-    : m_contexts(), m_onFailedCallback(nullptr), m_onStartedCallback(nullptr) {
+    : m_contexts(), m_readyExternalThreadEvents(nullptr),
+      m_readyExternalThreadEventsMutex(),
+      m_readyExternalThreadEventsCondition(),
+      m_onFailedCallback(nullptr), m_onStartedCallback(nullptr) {
 }
 
 void AsioSession::enterContext() {
@@ -66,6 +69,53 @@ void AsioSession::exitContext() {
 uint16_t AsioSession::getCurrentWaitHandleDepth() {
   assert(!isInContext() || getCurrentContext()->isRunning());
   return isInContext() ? getCurrentWaitHandle()->getDepth() : 0;
+}
+
+c_ExternalThreadEventWaitHandle* AsioSession::waitForExternalThreadEvents() {
+  // try check for ready external thread events without grabbing lock
+  auto ready = m_readyExternalThreadEvents.exchange(nullptr);
+  if (ready != nullptr) {
+    assert(ready != k_waitingForExternalThreadEvents);
+    return ready;
+  }
+
+  // no ready external thread events available, synchronization needed
+  std::unique_lock<std::mutex> lock(m_readyExternalThreadEventsMutex);
+
+  // transition from empty to WAITING
+  if (m_readyExternalThreadEvents.compare_exchange_strong(ready, k_waitingForExternalThreadEvents)) {
+    // wait for transition from WAITING to non-empty
+    do {
+      m_readyExternalThreadEventsCondition.wait(lock);
+    } while (m_readyExternalThreadEvents.load() == k_waitingForExternalThreadEvents);
+  } else  {
+    // external thread transitioned from empty to non-empty while grabbing lock
+  }
+
+  ready = m_readyExternalThreadEvents.exchange(nullptr);
+  assert(ready != nullptr);
+  assert(ready != k_waitingForExternalThreadEvents);
+  return ready;
+}
+
+void AsioSession::enqueueExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle) {
+  auto next = m_readyExternalThreadEvents.load();
+  while (true) {
+    while (next != k_waitingForExternalThreadEvents) {
+      wait_handle->setNextToProcess(next);
+      if (m_readyExternalThreadEvents.compare_exchange_weak(next, wait_handle)) {
+        return;
+      }
+    }
+
+    // try to transition from WAITING to non-empty
+    wait_handle->setNextToProcess(nullptr);
+    if (m_readyExternalThreadEvents.compare_exchange_weak(next, wait_handle)) {
+      // succeeded, notify condition
+      m_readyExternalThreadEventsCondition.notify_one();
+      return;
+    }
+  }
 }
 
 void AsioSession::setOnFailedCallback(ObjectData* on_failed_callback) {

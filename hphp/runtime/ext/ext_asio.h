@@ -434,6 +434,48 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// class ExternalThreadEventWaitHandle
+
+/**
+ * A wait handle that synchronizes against C++ operation in external thread.
+ *
+ * See asio_external_thread_event.h for more details.
+ */
+class AsioExternalThreadEvent;
+FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
+class c_ExternalThreadEventWaitHandle : public c_WaitableWaitHandle, public Sweepable {
+ public:
+  DECLARE_CLASS(ExternalThreadEventWaitHandle, ExternalThreadEventWaitHandle, WaitableWaitHandle)
+
+  // need to implement
+  public: c_ExternalThreadEventWaitHandle(VM::Class* cls = c_ExternalThreadEventWaitHandle::s_cls);
+  public: ~c_ExternalThreadEventWaitHandle();
+  public: void t___construct();
+
+ public:
+  static c_ExternalThreadEventWaitHandle* Create(AsioExternalThreadEvent* event);
+
+  c_ExternalThreadEventWaitHandle* getNextToProcess() { assert(getState() == STATE_WAITING); return m_nextToProcess; }
+  void setNextToProcess(c_ExternalThreadEventWaitHandle* next) { assert(getState() == STATE_WAITING); m_nextToProcess = next; }
+  void setIndex(uint32_t ete_idx) { assert(getState() == STATE_WAITING); m_index = ete_idx; }
+
+  void abandon(bool sweeping);
+  void process();
+  String getName();
+  void enterContext(context_idx_t ctx_idx);
+  void exitContext(context_idx_t ctx_idx);
+
+ private:
+  void initialize(AsioExternalThreadEvent* event);
+
+  c_ExternalThreadEventWaitHandle* m_nextToProcess;
+  AsioExternalThreadEvent* m_event;
+  uint32_t m_index;
+
+  static const uint8_t STATE_WAITING  = 3;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_EXT_ASIO_H_

@@ -210,16 +210,6 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
 }
 
 void TypeConstraint::selfToClass(const Func* func, const Class **cls) const {
-  if (hphpiCompat) {
-    // hphpi: a typehint self in a trait's method in the class using a trait
-    // represents the trait rather than the using class.
-    const PreClass* pc = func->preClass();
-    if (pc && !(pc->attrs() & AttrTrait)) {
-      *cls = func->cls();
-    }
-    return;
-  }
-  // PHP 5.4: typehint self in a method in a trait is the class using the trait
   const Class* c = func->cls();
   if (c) {
     *cls = c;
@@ -228,16 +218,6 @@ void TypeConstraint::selfToClass(const Func* func, const Class **cls) const {
 
 void TypeConstraint::selfToTypeName(const Func* func,
                                     const StringData **typeName) const {
-  if (hphpiCompat) {
-    // hphpi: a typehint self in a trait's method in the class using a trait
-    // represents the trait rather than the using class.
-    const PreClass* pc = func->preClass();
-    if (pc) {
-      *typeName = pc->name();
-    }
-    return;
-  }
-  // PHP 5.4: typehint self in a trait's method is the class using the trait
   const Class* c = func->cls();
   if (c) {
     *typeName = c->name();
@@ -245,10 +225,6 @@ void TypeConstraint::selfToTypeName(const Func* func,
 }
 
 void TypeConstraint::parentToClass(const Func* func, const Class **cls) const {
-  if (hphpiCompat) {
-    return;
-  }
-  // Match 5.4 for methods defined in classes and traits
   Class* c1 = func->cls();
   const Class* c2 = c1 ? c1->parent() : nullptr;
   if (c2) {

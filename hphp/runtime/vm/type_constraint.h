@@ -96,17 +96,9 @@ public:
   }
 
   bool compat(const TypeConstraint& other) const {
-    if (!hphpiCompat) {
-      // php 5.4.0RC6 allows 'int' compatible to Int but not integer
-      return (m_typeName == other.m_typeName
-              || (m_typeName != nullptr && other.m_typeName != nullptr
-                  && m_typeName->isame(other.m_typeName)));
-    } else {
-      // For now, be compatible with hphpi: int $x != Int $x
-      return (m_typeName == other.m_typeName
-              || (m_typeName != nullptr && other.m_typeName != nullptr
-                  && m_typeName->same(other.m_typeName)));
-    }
+    return (m_typeName == other.m_typeName
+            || (m_typeName != nullptr && other.m_typeName != nullptr
+                && m_typeName->isame(other.m_typeName)));
   }
 
   inline static bool equivDataTypes(DataType t1, DataType t2) {

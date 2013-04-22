@@ -1,4 +1,5 @@
 A accepts param from subclass C
 B accepts param from subclass C
 A accepts param from subclass C
-HipHop Fatal error: Argument 1 passed to T::bar() must be an instance of T, C given in %s on line 4
+C accepts param from subclass C
+HipHop Fatal error: Argument 1 passed to D::test() must be an instance of D, C given in %s on line 26

@@ -9249,6 +9249,10 @@ TranslatorX64::translateCreateCl(const Tracelet& t,
              R(clsCache),
              IMM(uintptr_t(clsName)));
 
+  for (auto& input : i.inputs) {
+    m_regMap.cleanLoc(input->location);
+  }
+
   EMIT_RCALL(a, i,
              getMethodPtr(&c_Closure::init),
              R(rax),

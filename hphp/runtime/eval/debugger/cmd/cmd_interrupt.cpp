@@ -310,10 +310,6 @@ bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
   return false;
 }
 
-FrameInjection *CmdInterrupt::getFrame() {
-  return nullptr;
-}
-
 std::string CmdInterrupt::getFileLine() const {
   string ret;
   if (m_site) {

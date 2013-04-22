@@ -227,7 +227,6 @@ private:
   bool checkUrl(std::string &url);
   bool checkLines(int line);
   bool checkStack(InterruptSite &site);
-  bool checkFrame(FrameInjection *frame);
   bool checkClause();
 };
 

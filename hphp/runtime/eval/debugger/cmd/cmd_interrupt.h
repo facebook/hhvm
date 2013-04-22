@@ -52,7 +52,6 @@ public:
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
   bool shouldBreak(const BreakPointInfoPtrVec &bps);
-  FrameInjection *getFrame();
   std::string getFileLine() const;
 
   InterruptSite *getSite() { return m_site;}

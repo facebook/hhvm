@@ -25,16 +25,11 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdFlowControl);
 class CmdFlowControl : public DebuggerCommand {
 public:
-  CmdFlowControl(Type type)
-      : DebuggerCommand(type), m_count(1), m_frame(nullptr), m_nframe(nullptr),
-        m_stackDepth(0), m_vmDepth(0) { }
+  explicit CmdFlowControl(Type type)
+      : DebuggerCommand(type), m_count(1), m_stackDepth(0), m_vmDepth(0) { }
 
   int decCount() { assert(m_count > 0); return --m_count;}
   int getCount() const { assert(m_count > 0); return m_count;}
-  void setFrame(FrameInjection *frame) { m_frame = frame;}
-  FrameInjection *getFrame() const { return m_frame;}
-  void setNegativeFrame(FrameInjection *frame) { m_nframe = frame;}
-  FrameInjection *getNegativeFrame() const { return m_nframe;}
   void setFileLine(const std::string &loc) { m_loc = loc;}
   const std::string &getFileLine() const { return m_loc;}
 
@@ -51,8 +46,6 @@ public:
 
 private:
   int16_t m_count;
-  FrameInjection *m_frame;  // which frame to break next time
-  FrameInjection *m_nframe; // definitely not to break with this frame
   std::string m_loc; // last break's source location
   bool m_smallStep;
 

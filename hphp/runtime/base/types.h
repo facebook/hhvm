@@ -433,7 +433,6 @@ public:
 namespace VM {
 class GlobalNameValueTableWrapper;
 }
-class FrameInjection;
 class ObjectAllocatorBase;
 class Profiler;
 class CodeCoverage;
@@ -463,7 +462,6 @@ public:
   static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
   std::vector<ObjectAllocatorBase *> m_allocators;
-  FrameInjection *m_top;
   RequestInjectionData m_reqInjectionData;
 
   // For infinite recursion detection.  m_stacklimit is the lowest

@@ -83,7 +83,6 @@ void ThreadInfo::GetExecutionSamples(std::map<Executing, int> &counts) {
 }
 
 void ThreadInfo::onSessionInit() {
-  m_top = nullptr;
   m_reqInjectionData.onSessionInit();
 
   // Take the address of the cached per-thread stackLimit, and use this to allow

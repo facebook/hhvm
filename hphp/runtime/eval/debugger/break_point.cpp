@@ -807,11 +807,6 @@ bool BreakPointInfo::checkStack(InterruptSite &site) {
   return true;
 }
 
-bool BreakPointInfo::checkFrame(FrameInjection *frame) {
-  const_assert(false);
-  return true;
-}
-
 bool BreakPointInfo::checkClause() {
   if (!m_clause.empty()) {
     if (m_php.empty()) {

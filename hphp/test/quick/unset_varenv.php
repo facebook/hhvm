@@ -3,9 +3,9 @@
 function foo() {
   $x = 'c';
   $$x = "haha";
-  echo "value: " . $$x . "\n";
+  echo "value: ", $$x . "\n";
   unset($$x);
-  echo "value: " . $$x . "\n";
+  echo "value: ", $$x . "\n";
 }
 
 foo();

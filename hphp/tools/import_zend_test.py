@@ -102,6 +102,7 @@ no_import = (
     'pcntl/tests/pcntl_exec.phpt',
     'pcntl/tests/pcntl_exec_2.phpt',
     'pcntl/tests/pcntl_exec_3.phpt',
+    'gd/tests/crafted_gd2.phpt',
 
     # not imported yet, but will be
     '/ext/gd',
@@ -195,9 +196,21 @@ other_files = (
     'ns_066.inc',
     'ns_067.inc',
     'unset.inc',
-    'tests/quicktester.inc',
-
     '/ext-exif/bug48378.jpeg',
+    '/ext-gd/Tuffy.ttf',
+    '/ext-gd/bug37346.gif',
+    '/ext-gd/bug38112.gif',
+    '/ext-gd/bug43121.gif',
+    '/ext-gd/conv_test.gif',
+    '/ext-gd/conv_test.jpeg',
+    '/ext-gd/conv_test.png',
+    '/ext-gd/conv_test.xbm',
+    '/ext-gd/php.gif',
+    '/ext-gd/src.gd2',
+    '/ext-gd/src.wbmp',
+    '/ext-gd/test8859.ttf',
+    '/ext-gd/test_gif.gif',
+    '/tests/quicktester.inc',
 )
 
 errors = (

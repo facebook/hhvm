@@ -1,0 +1,12 @@
+*** Testing imagecolorallocate() : error conditions ***
+
+-- Testing imagecolorallocate() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing imagecolorallocate() function with less than expected no. of arguments --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+===DONE===

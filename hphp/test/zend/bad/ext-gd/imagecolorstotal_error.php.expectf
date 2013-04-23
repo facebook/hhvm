@@ -1,0 +1,14 @@
+*** Testing imagecolorstotal() : error conditions ***
+
+-- Testing imagecolorstotal() function with Zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing imagecolorstotal() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing imagecolorstotal() function with a invalid resource
+HipHop Warning: %a
+bool(false)
+===DONE===

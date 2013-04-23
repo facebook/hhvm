@@ -1,0 +1,26 @@
+*** Testing gd_info() : variation ***
+array(%d) {
+  ["GD Version"]=>
+  string(%d) %a
+  ["FreeType Support"]=>
+  bool%a
+  ["T1Lib Support"]=>
+  bool%a
+  ["GIF Read Support"]=>
+  bool%a
+  ["GIF Create Support"]=>
+  bool%a
+  ["JPEG Support"]=>
+  bool%a
+  ["PNG Support"]=>
+  bool%a
+  ["WBMP Support"]=>
+  bool%a
+  ["XPM Support"]=>
+  bool%a
+  ["XBM Support"]=>
+  bool%a
+  ["JIS-mapped Japanese Font Support"]=>
+  bool%a
+}
+===DONE===

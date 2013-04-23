@@ -1,0 +1,6 @@
+bool(true)
+array(1) {
+  [0]=>
+  string(28) "cn=userA,dc=my-domain,dc=com"
+}
+===DONE===

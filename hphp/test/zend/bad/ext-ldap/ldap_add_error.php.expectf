@@ -1,0 +1,28 @@
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+string(17) "Invalid DN syntax"
+int(34)
+bool(true)
+HipHop Warning: %a
+bool(false)
+string(14) "Already exists"
+int(68)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+string(24) "Undefined attribute type"
+int(17)
+HipHop Warning: %a
+bool(false)
+===DONE===

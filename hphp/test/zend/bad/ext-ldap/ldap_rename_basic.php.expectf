@@ -1,0 +1,31 @@
+bool(true)
+array(2) {
+  ["count"]=>
+  int(1)
+  [0]=>
+  array(6) {
+    ["sn"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(7) "testSN1"
+    }
+    [0]=>
+    string(2) "sn"
+    ["cn"]=>
+    array(2) {
+      ["count"]=>
+      int(1)
+      [0]=>
+      string(5) "userZ"
+    }
+    [1]=>
+    string(2) "cn"
+    ["count"]=>
+    int(2)
+    ["dn"]=>
+    string(28) "cn=userZ,dc=my-domain,dc=com"
+  }
+}
+===DONE===

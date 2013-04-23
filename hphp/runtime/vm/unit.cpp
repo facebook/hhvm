@@ -1039,6 +1039,8 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
       } else if (out) {
         out->mergeableObj(oix++) = (void*)(uintptr_t(cls) | 1);
       }
+    } else if (out) {
+      out->mergeableObj(oix++) = obj;
     }
   }
 
@@ -1063,6 +1065,8 @@ size_t compactUnitMergeInfo(UnitMergeInfo* in, UnitMergeInfo* out) {
             out->mergeableObj(oix++) =
               (void*)(uintptr_t(cls) | UnitMergeKindUniqueDefinedClass);
           }
+        } else if (out) {
+          out->mergeableObj(oix++) = obj;
         }
         break;
       }

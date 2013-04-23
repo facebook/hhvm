@@ -1,0 +1,14 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+bool(true)
+SELECTING results
+string(1) "a"
+array(2) {
+  ["id"]=>
+  string(1) "a"
+  ["time"]=>
+  int(%d)
+}
+Done

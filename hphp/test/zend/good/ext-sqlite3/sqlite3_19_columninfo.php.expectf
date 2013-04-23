@@ -1,0 +1,13 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+bool(true)
+SELECTING results
+Name: time - Type: 1
+Name: id - Type: 3
+Name: time - Type: 1
+Name: id - Type: 3
+Closing database
+bool(true)
+Done

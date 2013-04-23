@@ -1,0 +1,17 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+bool(true)
+SELECTING results
+Param count for query 1:
+int(1)
+Param count for query 2:
+int(0)
+Param count for query 3:
+int(2)
+Param count for query 4:
+int(1)
+Closing database
+bool(true)
+Done

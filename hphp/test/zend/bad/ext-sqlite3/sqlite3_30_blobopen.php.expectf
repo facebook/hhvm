@@ -1,0 +1,16 @@
+Creating Table
+bool(true)
+PREPARING insert
+BINDING Parameter
+bool(true)
+bool(true)
+Closing statement
+bool(true)
+resource(%d) of type (stream)
+Stream Contents
+string(9) "TEST TEST"
+Closing Stream
+bool(true)
+Closing database
+bool(true)
+Done

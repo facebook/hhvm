@@ -1,0 +1,12 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+bool(true)
+UPDATE query
+bool(true)
+Rows Updated
+int(2)
+Closing database
+bool(true)
+Done

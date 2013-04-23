@@ -69,7 +69,6 @@ no_import = (
     '/ext/pdo_mysql',
     '/ext/pdo_sqlite',
     '/ext/spl',
-    '/ext/sqlite3',
     '/ext/standard',
     '/ext/xmlwriter',
 
@@ -208,6 +207,8 @@ other_files = (
     '/ext-soap-schema/test_schema.inc',
     '/ext-soap-soap12/soap12-test.inc',
     '/ext-soap-soap12/soap12-test.wsdl',
+    '/ext-sqlite3/new_db.inc',
+    '/ext-sqlite3/stream_test.inc',
     '/ext-xml/xmltest.xml',
     '/ext-xmlreader/012.dtd',
     '/ext-xmlreader/012.xml',

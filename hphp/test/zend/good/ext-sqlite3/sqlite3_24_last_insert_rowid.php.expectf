@@ -1,0 +1,10 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+int(1)
+bool(true)
+int(2)
+Closing database
+bool(true)
+Done

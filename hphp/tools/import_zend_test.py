@@ -196,7 +196,7 @@ other_files = (
     'ns_066.inc',
     'ns_067.inc',
     'unset.inc',
-    'quicktester.inc',
+    'tests/quicktester.inc',
 )
 
 errors = (
@@ -360,8 +360,12 @@ def walk(filename, source):
         test = test.replace("1)) {\n\tunlink($file2", "2)) {\n\tunlink($file2")
     if 'bug24054.php' in full_dest_filename:
         test = test.replace("quicktester.inc", "tests/quicktester.inc")
-    if 'with_strings.php' in full_dest_filename:
+    if 'ext-bz2/with_strings.php' in full_dest_filename:
         test = test.replace("../..", "")
+    if 'ext-bz2/bug51997.php' in full_dest_filename:
+        test = test.replace("testfile.bz2", "bug51997.bz2")
+    if 'ext-bz2/with_files.php' in full_dest_filename:
+        test = test.replace("testfile.bz2", "with_files.bz2")
 
     file(full_dest_filename, 'w').write(test)
 

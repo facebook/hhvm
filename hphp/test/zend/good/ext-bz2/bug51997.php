@@ -2,7 +2,7 @@
 
 error_reporting(E_ALL);
 
-$filename = "testfile.bz2";
+$filename = "bug51997.bz2";
 $str = "This is a test string.\n";
 $bz = bzopen($filename, "w");
 bzwrite($bz, $str);

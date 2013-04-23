@@ -1,0 +1,20 @@
+<root id="elem1">
+<elem1>
+<elem2>
+<elem3>
+<elem4>
+</elem4>
+</elem3>
+</elem2>
+</elem1>
+</root>
+<ROOT ID="elem1">
+<ELEM1>
+<ELEM2>
+<ELEM3>
+<ELEM4>
+</ELEM4>
+</ELEM3>
+</ELEM2>
+</ELEM1>
+</ROOT>

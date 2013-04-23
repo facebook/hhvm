@@ -1,0 +1,16 @@
+array(1) {
+  [0]=>
+  array(4) {
+    ["tag"]=>
+    string(4) "TEST"
+    ["type"]=>
+    string(8) "complete"
+    ["level"]=>
+    int(1)
+    ["attributes"]=>
+    array(1) {
+      ["ATTR"]=>
+      string(13) "angle<bracket"
+    }
+  }
+}

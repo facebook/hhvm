@@ -117,7 +117,6 @@ no_import = (
     '/ext/soap',
     '/ext/spl',
     '/ext/sqlite3',
-    '/ext/xml',
     '/ext/xmlreader',
     '/ext/xmlwriter',
     '/ext/zlib',
@@ -219,6 +218,7 @@ other_files = (
     '/ext-openssl/public.key',
     '/ext-session/save_handler.inc',
     '/ext-simplexml/bug24392.xml',
+    '/ext-xml/xmltest.xml',
     '/tests/quicktester.inc',
 )
 

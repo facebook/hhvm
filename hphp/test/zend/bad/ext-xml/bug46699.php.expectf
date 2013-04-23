@@ -1,0 +1,4 @@
+<a xmlns="http://example.com/foo" xmlns:bar="http://example.com/bar">
+  <bar:b foo="bar">1</bar:b>
+  <bar:c bar:nix="null" foo="bar">2</bar:c>
+</a>

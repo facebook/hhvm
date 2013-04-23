@@ -1,0 +1,96 @@
+Index array
+Array
+(
+    [LISTOFAWARDS] => Array
+        (
+            [0] => 0
+            [1] => 5
+            [2] => 6
+        )
+
+    [COUNT] => Array
+        (
+            [0] => 1
+            [1] => 3
+            [2] => 4
+        )
+
+    [TOTAL] => Array
+        (
+            [0] => 2
+        )
+
+)
+Vals array
+Array
+(
+    [0] => Array
+        (
+            [tag] => LISTOFAWARDS
+            [type] => open
+            [level] => 1
+            [attributes] => Array
+                (
+                    [XMLNS:NS1] => http://www.fpdsng.com/FPDS
+                )
+
+            [value] => 
+
+        )
+
+    [1] => Array
+        (
+            [tag] => COUNT
+            [type] => open
+            [level] => 2
+            [value] => 
+
+        )
+
+    [2] => Array
+        (
+            [tag] => TOTAL
+            [type] => complete
+            [level] => 3
+            [value] => 867
+        )
+
+    [3] => Array
+        (
+            [tag] => COUNT
+            [value] => 
+
+            [type] => cdata
+            [level] => 2
+        )
+
+    [4] => Array
+        (
+            [tag] => COUNT
+            [type] => close
+            [level] => 2
+        )
+
+    [5] => Array
+        (
+            [tag] => LISTOFAWARDS
+            [value] => 
+
+            [type] => cdata
+            [level] => 1
+        )
+
+    [6] => Array
+        (
+            [tag] => LISTOFAWARDS
+            [type] => close
+            [level] => 1
+        )
+
+)
+LISTOFAWARDS
+COUNT
+TOTAL
+TOTAL
+COUNT
+LISTOFAWARDS

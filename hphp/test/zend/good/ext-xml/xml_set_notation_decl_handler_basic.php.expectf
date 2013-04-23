@@ -1,0 +1,35 @@
+Simple test of xml_set_notation_decl_handler(() function
+notation_decl_handler called
+...Name=USDATE
+...Base=
+...System ID=http://www.schema.net/usdate.not
+...Public ID=
+notation_decl_handler called
+...Name=AUSDATE
+...Base=
+...System ID=http://www.schema.net/ausdate.not
+...Public ID=
+notation_decl_handler called
+...Name=ISODATE
+...Base=
+...System ID=http://www.schema.net/isodate.not
+...Public ID=
+unparsed_entity_decl_handler called
+...Entity name=testUS
+...Base=
+...System ID=test_usdate.xml
+...Public ID=
+...Notation name=USDATE
+unparsed_entity_decl_handler called
+...Entity name=testAUS
+...Base=
+...System ID=test_ausdate.xml
+...Public ID=
+...Notation name=AUSDATE
+unparsed_entity_decl_handler called
+...Entity name=testISO
+...Base=
+...System ID=test_isodate_xml
+...Public ID=
+...Notation name=ISODATE
+Done

@@ -1,0 +1,241 @@
+libxml2 Version => %s
+Encoding: UTF-8
+XML Prologue: present
+Chunk size: all data at once
+BOM: not prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-8
+XML Prologue: not present
+Chunk size: all data at once
+BOM: not prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-8
+XML Prologue: present
+Chunk size: all data at once
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-8
+XML Prologue: not present
+Chunk size: all data at once
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16BE
+XML Prologue: present
+Chunk size: all data at once
+BOM: not prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16BE
+XML Prologue: present
+Chunk size: all data at once
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16BE
+XML Prologue: not present
+Chunk size: all data at once
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16LE
+XML Prologue: present
+Chunk size: all data at once
+BOM: not prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16LE
+XML Prologue: present
+Chunk size: all data at once
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16LE
+XML Prologue: not present
+Chunk size: all data at once
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-8
+XML Prologue: present
+Chunk size: 1 byte(s)
+BOM: not prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-8
+XML Prologue: not present
+Chunk size: 1 byte(s)
+BOM: not prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-8
+XML Prologue: present
+Chunk size: 1 byte(s)
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-8
+XML Prologue: not present
+Chunk size: 1 byte(s)
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16BE
+XML Prologue: present
+Chunk size: 1 byte(s)
+BOM: not prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16BE
+XML Prologue: present
+Chunk size: 1 byte(s)
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16BE
+XML Prologue: not present
+Chunk size: 1 byte(s)
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16LE
+XML Prologue: present
+Chunk size: 1 byte(s)
+BOM: not prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16LE
+XML Prologue: present
+Chunk size: 1 byte(s)
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}
+Encoding: UTF-16LE
+XML Prologue: not present
+Chunk size: 1 byte(s)
+BOM: prepended
+array(3) {
+  [0]=>
+  string(128) "e38386e382b9e383883ae38386e382b9e3838831: 687474703a2f2f7777772e6578616d706c652e636f6d2fe38386e382b9e383882f, e38386e382b9e38388"
+  [1]=>
+  string(60) "e38386e382b9e383883ae38386e382b9e3838832: e38386e382b9e38388"
+  [2]=>
+  string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
+}

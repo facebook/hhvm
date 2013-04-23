@@ -1,0 +1,4 @@
+Deprecated: Function ereg_replace() is deprecated in hphp/test/zend/bad/ext-mbstring/php_gr_jp_dev_884-1.php on line %d
+string(2) "bb"
+string(2) "bb"
+string(2) "bb"

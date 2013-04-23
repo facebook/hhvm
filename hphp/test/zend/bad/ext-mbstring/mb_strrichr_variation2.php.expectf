@@ -1,0 +1,86 @@
+*** Testing mb_strrichr() : usage variation ***
+
+--int 0--
+bool(false)
+
+--int 1--
+bool(false)
+
+--int 12345--
+bool(false)
+
+--int -12345--
+bool(false)
+
+--float 10.5--
+bool(false)
+
+--float -10.5--
+bool(false)
+
+--float 12.3456789000e10--
+bool(false)
+
+--float -12.3456789000e10--
+bool(false)
+
+--float .5--
+bool(false)
+
+--empty array--
+Error: 2 - mb_strrichr() expects parameter 2 to be string, array given, %s(%d)
+bool(false)
+
+--int indexed array--
+Error: 2 - mb_strrichr() expects parameter 2 to be string, array given, %s(%d)
+bool(false)
+
+--associative array--
+Error: 2 - mb_strrichr() expects parameter 2 to be string, array given, %s(%d)
+bool(false)
+
+--nested arrays--
+Error: 2 - mb_strrichr() expects parameter 2 to be string, array given, %s(%d)
+bool(false)
+
+--uppercase NULL--
+bool(false)
+
+--lowercase null--
+bool(false)
+
+--lowercase true--
+bool(false)
+
+--lowercase false--
+bool(false)
+
+--uppercase TRUE--
+bool(false)
+
+--uppercase FALSE--
+bool(false)
+
+--empty string DQ--
+bool(false)
+
+--empty string SQ--
+bool(false)
+
+--instance of classWithToString--
+bool(false)
+
+--instance of classWithoutToString--
+Error: 2 - mb_strrichr() expects parameter 2 to be string, object given, %s(%d)
+bool(false)
+
+--undefined var--
+bool(false)
+
+--unset var--
+bool(false)
+
+--resource--
+Error: 2 - mb_strrichr() expects parameter 2 to be string, resource given, %s(%d)
+bool(false)
+===DONE===

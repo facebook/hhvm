@@ -1,0 +1,80 @@
+*** Testing mb_substr() : usage variations ***
+
+**-- Offset is: -60 --**
+-- ASCII String --
+string(8) "2b497320"
+--Multibyte String --
+string(24) "e697a5e69cace8aa9ee38386"
+
+**-- Offset is: -50 --**
+-- ASCII String --
+string(8) "2b497320"
+--Multibyte String --
+string(24) "e697a5e69cace8aa9ee38386"
+
+**-- Offset is: -40 --**
+-- ASCII String --
+string(8) "2b497320"
+--Multibyte String --
+string(24) "e697a5e69cace8aa9ee38386"
+
+**-- Offset is: -30 --**
+-- ASCII String --
+string(8) "2b497320"
+--Multibyte String --
+string(24) "e697a5e69cace8aa9ee38386"
+
+**-- Offset is: -20 --**
+-- ASCII String --
+string(8) "49732061"
+--Multibyte String --
+string(24) "e69cace8aa9ee38386e382ad"
+
+**-- Offset is: -10 --**
+-- ASCII String --
+string(8) "69736820"
+--Multibyte String --
+string(8) "31323334"
+
+**-- Offset is: 0 --**
+-- ASCII String --
+string(8) "2b497320"
+--Multibyte String --
+string(24) "e697a5e69cace8aa9ee38386"
+
+**-- Offset is: 10 --**
+-- ASCII String --
+string(8) "6c697368"
+--Multibyte String --
+string(8) "30313233"
+
+**-- Offset is: 20 --**
+-- ASCII String --
+string(2) "67"
+--Multibyte String --
+string(6) "e38082"
+
+**-- Offset is: 30 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: 40 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: 50 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+
+**-- Offset is: 60 --**
+-- ASCII String --
+string(0) ""
+--Multibyte String --
+string(0) ""
+Done

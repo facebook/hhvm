@@ -1,0 +1,41 @@
+-- Offset is -25 --
+Multibyte String:
+HipHop Warning: %a
+bool(false)
+ASCII String:
+mb_strrpos:
+HipHop Warning: %a
+bool(false)
+strrpos:
+HipHop Warning: %a
+bool(false)
+
+-- Offset is -24 --
+Multibyte String:
+HipHop Warning: %a
+bool(false)
+ASCII String:
+mb_strrpos:
+HipHop Warning: %a
+bool(false)
+strrpos:
+HipHop Warning: %a
+bool(false)
+
+-- Offset is -13 --
+Multibyte String:
+bool(false)
+ASCII String:
+mb_strrpos:
+bool(false)
+strrpos:
+bool(false)
+
+-- Offset is -12 --
+Multibyte String:
+int(9)
+ASCII String:
+mb_strrpos:
+int(9)
+strrpos:
+int(9)

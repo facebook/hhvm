@@ -1,0 +1,14 @@
+*** Testing mb_ereg_match() : basic functionality ***
+
+-- ASCII string 1 --
+bool(true)
+
+-- ASCII string 2 --
+bool(false)
+
+-- Multibyte string 1 --
+bool(true)
+
+-- Multibyte string 2 --
+bool(false)
+Done

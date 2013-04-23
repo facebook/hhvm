@@ -106,7 +106,6 @@ no_import = (
 
     # not imported yet, but will be
     '/ext/gd',
-    '/ext/mbstring',
     '/ext/standard',
     '/ext/mcrypt',
     '/ext/mysql',
@@ -209,6 +208,7 @@ other_files = (
     '/ext-gd/test_gif.gif',
     '/ext-intl/ut_common.inc',
     '/ext-ldap/connect.inc',
+    '/ext-mbstring/common.inc',
     '/ext-openssl/005_crt.txt',
     '/ext-openssl/bug37820cert.pem',
     '/ext-openssl/bug37820key.pem',

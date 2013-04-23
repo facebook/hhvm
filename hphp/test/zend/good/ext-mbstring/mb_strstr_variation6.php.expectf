@@ -1,0 +1,10 @@
+*** Testing mb_strstr() : variation ***
+-- Ascii data --
+string(10) "6263646566"
+bool(false)
+bool(false)
+-- mb data in utf-8 --
+string(52) "cebccebdcebecebfcf80cf81cf83cf84cf85cf86cf87cf88cf89"
+bool(false)
+bool(false)
+===DONE===

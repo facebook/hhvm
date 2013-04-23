@@ -1,0 +1,4 @@
+*** Testing mb_stripos() : error conditions ***
+HipHop Warning: %a
+bool(false)
+Done

@@ -1,0 +1,4 @@
+*** Testing iconv_strlen() : error ***
+HipHop Notice: %a
+bool(false)
+===DONE===

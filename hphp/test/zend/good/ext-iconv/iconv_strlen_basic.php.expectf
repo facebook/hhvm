@@ -1,0 +1,8 @@
+*** Testing iconv_strlen() : basic functionality***
+
+-- ASCII String --
+int(7)
+
+-- Multibyte String --
+int(21)
+===DONE===

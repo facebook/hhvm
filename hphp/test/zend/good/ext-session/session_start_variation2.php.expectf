@@ -1,0 +1,12 @@
+*** Testing session_start() : variation ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+Done

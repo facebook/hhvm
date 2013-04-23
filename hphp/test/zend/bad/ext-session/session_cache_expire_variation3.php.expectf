@@ -1,0 +1,13 @@
+*** Testing session_cache_expire() : variation ***
+string(3) "180"
+int(180)
+string(3) "180"
+int(180)
+string(10) "1234567890"
+bool(true)
+int(1234567890)
+string(10) "1234567890"
+bool(true)
+int(1234567890)
+string(10) "1234567890"
+Done

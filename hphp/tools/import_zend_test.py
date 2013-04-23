@@ -99,10 +99,12 @@ no_import = (
     'Zend/tests/callable_type_hint_003.phpt',
     'Zend/tests/jump13.phpt',
     'Zend/tests/heredoc_005.phpt',
+    'gd/tests/crafted_gd2.phpt',
     'pcntl/tests/pcntl_exec.phpt',
     'pcntl/tests/pcntl_exec_2.phpt',
     'pcntl/tests/pcntl_exec_3.phpt',
-    'gd/tests/crafted_gd2.phpt',
+    'session/tests/bug61728.phpt',
+    'session/tests/session_module_name_variation2.phpt',
 
     # not imported yet, but will be
     '/ext/gd',
@@ -112,7 +114,6 @@ no_import = (
     '/ext/pdo_sqlite',
     '/ext/pgsql',
     '/ext/posix',
-    '/ext/session',
     '/ext/simplexml',
     '/ext/soap',
     '/ext/spl',
@@ -217,6 +218,7 @@ other_files = (
     '/ext-openssl/openssl.cnf',
     '/ext-openssl/private.key',
     '/ext-openssl/public.key',
+    '/ext-session/save_handler.inc',
     '/tests/quicktester.inc',
 )
 

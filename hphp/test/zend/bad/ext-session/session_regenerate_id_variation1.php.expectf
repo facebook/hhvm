@@ -1,0 +1,11 @@
+*** Testing session_regenerate_id() : variation ***
+string(0) ""
+bool(false)
+string(0) ""
+bool(true)
+bool(true)
+string(%d) "%s"
+bool(true)
+bool(false)
+string(0) ""
+Done

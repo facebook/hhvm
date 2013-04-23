@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="urn:Formation"><SOAP-ENV:Body><ns1:echo><in><mandatoryElement>REV</mandatoryElement></in></ns1:echo></SOAP-ENV:Body></SOAP-ENV:Envelope>

@@ -1,0 +1,4 @@
+float(0.1)
+float(NAN)
+float(INF)
+float(-INF)

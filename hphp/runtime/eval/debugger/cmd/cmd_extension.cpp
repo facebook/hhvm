@@ -122,7 +122,7 @@ bool CmdExtension::processList(DebuggerProxy *proxy) {
   for (int i = 0; i < hrLen; i++) sb.append(BOX_H); sb.append("\n");
 
   m_out = sb.detach();
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 bool CmdExtension::onServer(DebuggerProxy *proxy) {
@@ -165,7 +165,7 @@ bool CmdExtension::onServer(DebuggerProxy *proxy) {
     m_err = "Unable to find the specified extension: ";
     m_err += String(name);
   }
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

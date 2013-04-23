@@ -92,7 +92,7 @@ public:
   bool needInterrupt();
   bool needInterruptForNonBreak();
   virtual void interrupt(CmdInterrupt &cmd);
-  bool send(DebuggerCommand *cmd);
+  bool sendToClient(DebuggerCommand *cmd);
 
   void startSignalThread();
   void pollSignal(); // for signal polling thread

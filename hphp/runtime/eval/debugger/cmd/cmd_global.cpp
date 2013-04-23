@@ -84,7 +84,7 @@ void CmdGlobal::setClientOutput(DebuggerClient *client) {
 
 bool CmdGlobal::onServer(DebuggerProxy *proxy) {
   m_globals = CmdVariable::GetGlobalVariables();
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

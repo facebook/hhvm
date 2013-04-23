@@ -284,7 +284,7 @@ bool CmdList::onServer(DebuggerProxy *proxy) {
       m_code = f_file_get_contents(full_path.c_str());
     }
   }
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 Variant CmdList::GetSourceFile(DebuggerClient *client,

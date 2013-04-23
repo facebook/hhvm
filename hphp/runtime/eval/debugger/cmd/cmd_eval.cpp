@@ -38,8 +38,8 @@ bool CmdEval::onClient(DebuggerClient *client) {
   m_body = client->getCode();
   m_frame = client->getFrame();
   m_bypassAccessCheck = client->getDebuggerBypassCheck();
-  client->send(this);
-  DebuggerCommandPtr res = client->recv(m_type);
+  client->sendToServer(this);
+  DebuggerCommandPtr res = client->recvFromServer(m_type);
   if (!res->is(m_type)) {
     assert(client->isApiMode());
     m_incomplete = true;
@@ -66,7 +66,7 @@ bool CmdEval::onServer(DebuggerProxy *proxy) {
   g_context->setDebuggerBypassCheck(m_bypassAccessCheck);
   DebuggerProxy::ExecutePHP(m_body, m_output, !proxy->isLocal(), m_frame);
   g_context->setDebuggerBypassCheck(false);
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 bool CmdEval::onServerVM(DebuggerProxy *proxy) {
@@ -77,7 +77,7 @@ bool CmdEval::onServerVM(DebuggerProxy *proxy) {
   g_vmContext->setDebuggerBypassCheck(false);
   delete g_vmContext->m_lastLocFilter;
   g_vmContext->m_lastLocFilter = locSave;
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

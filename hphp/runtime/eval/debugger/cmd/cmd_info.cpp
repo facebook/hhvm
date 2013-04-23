@@ -227,7 +227,7 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
       vars.push_back("$" + iter.first().toString()->toCPPString());
     }
 
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
 
   if (m_type == KindOfUnknown || m_type == KindOfClass) {
@@ -246,7 +246,7 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
       }
     } catch (...) {}
   }
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

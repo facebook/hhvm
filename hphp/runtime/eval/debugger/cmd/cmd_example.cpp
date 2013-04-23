@@ -67,7 +67,7 @@ bool CmdExample::onClient(DebuggerClient *client) {
 
 bool CmdExample::onServer(DebuggerProxy *proxy) {
   m_output = m_input.size();
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

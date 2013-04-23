@@ -35,7 +35,7 @@ bool CmdQuit::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
 
   if (client->argCount() == 0) {
-    client->send(this);
+    client->sendToServer(this);
     client->quit();
     return true;
   }

@@ -278,7 +278,7 @@ void CmdInterrupt::setClientOutput(DebuggerClient *client) {
 }
 
 bool CmdInterrupt::onServer(DebuggerProxy *proxy) {
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {

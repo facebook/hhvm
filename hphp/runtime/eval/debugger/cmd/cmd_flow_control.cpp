@@ -54,7 +54,7 @@ bool CmdFlowControl::onClient(DebuggerClient *client) {
     }
   }
   m_smallStep = client->getDebuggerSmallStep();
-  client->send(this);
+  client->sendToServer(this);
   throw DebuggerConsoleExitException();
 }
 

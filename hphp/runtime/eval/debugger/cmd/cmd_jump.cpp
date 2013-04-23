@@ -91,7 +91,7 @@ bool CmdJump::onClient(DebuggerClient *client) {
     }
   }
 
-  client->send(this);
+  client->sendToServer(this);
   throw DebuggerConsoleExitException();
 }
 

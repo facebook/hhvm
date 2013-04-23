@@ -58,7 +58,7 @@ bool CmdRun::onClient(DebuggerClient *client) {
 
   m_args = StringVecPtr(client->args(), null_deleter());
   m_smallStep = client->getDebuggerSmallStep();
-  client->send(this);
+  client->sendToServer(this);
   client->clearCachedLocal();
   client->setFrame(0);
   throw DebuggerConsoleExitException();

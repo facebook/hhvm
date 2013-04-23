@@ -370,7 +370,7 @@ bool CmdPrint::onServer(DebuggerProxy *proxy) {
   m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
                                     m_output, !proxy->isLocal(), m_frame);
   g_context->setDebuggerBypassCheck(false);
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 bool CmdPrint::onServerVM(DebuggerProxy *proxy) {
@@ -385,7 +385,7 @@ bool CmdPrint::onServerVM(DebuggerProxy *proxy) {
   g_vmContext->setDebuggerBypassCheck(false);
   delete g_vmContext->m_lastLocFilter;
   g_vmContext->m_lastLocFilter = locSave;
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

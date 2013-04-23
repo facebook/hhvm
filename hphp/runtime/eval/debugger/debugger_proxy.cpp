@@ -277,8 +277,8 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   }
 }
 
-bool DebuggerProxy::send(DebuggerCommand *cmd) {
-  TRACE(2, "DebuggerProxy::send\n");
+bool DebuggerProxy::sendToClient(DebuggerCommand *cmd) {
+  TRACE(2, "DebuggerProxy::sendToClient\n");
   return cmd->send(m_thrift);
 }
 

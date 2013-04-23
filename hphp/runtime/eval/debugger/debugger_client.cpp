@@ -1787,20 +1787,20 @@ std::string DebuggerClient::lineRest(int index) {
 
 DebuggerCommandPtr DebuggerClient::xend(DebuggerCommand *cmd) {
   TRACE(2, "DebuggerClient::xend\n");
-  send(cmd);
-  return recv(cmd->getType());
+  sendToServer(cmd);
+  return recvFromServer(cmd->getType());
 }
 
-void DebuggerClient::send(DebuggerCommand *cmd) {
-  TRACE(2, "DebuggerClient::send\n");
+void DebuggerClient::sendToServer(DebuggerCommand *cmd) {
+  TRACE(2, "DebuggerClient::sendToServer\n");
   if (!cmd->send(m_machine->m_thrift)) {
     throw DebuggerProtocolException();
   }
 }
 
-DebuggerCommandPtr DebuggerClient::recv(int expected) {
-  TRACE(2, "DebuggerClient::recv\n");
-  const char *func = "DebuggerClient::recv()";
+DebuggerCommandPtr DebuggerClient::recvFromServer(int expected) {
+  TRACE(2, "DebuggerClient::recvFromServer\n");
+  const char *func = "DebuggerClient::recvFromServer ()";
 
   DebuggerCommandPtr res;
   while (true) {

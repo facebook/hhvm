@@ -172,7 +172,7 @@ bool c_DebuggerProxyCmdUser::t_islocal() {
 
 Variant c_DebuggerProxyCmdUser::t_send(CObjRef cmd) {
   CmdUser cmdUser(cmd);
-  return m_proxy->send(&cmdUser);
+  return m_proxy->sendToClient(&cmdUser);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -307,7 +307,7 @@ Array c_DebuggerClientCmdUser::t_args() {
 
 Variant c_DebuggerClientCmdUser::t_send(CObjRef cmd) {
   CmdUser cmdUser(cmd);
-  m_client->send(&cmdUser);
+  m_client->sendToServer(&cmdUser);
   return true;
 }
 

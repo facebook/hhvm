@@ -452,7 +452,7 @@ bool CmdBreak::onServer(DebuggerProxy *proxy) {
   if (m_body == "update") {
     proxy->setBreakPoints(m_bps);
     m_breakpoints = &m_bps;
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
   return false;
 }

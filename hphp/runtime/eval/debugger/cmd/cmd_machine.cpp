@@ -295,11 +295,11 @@ bool CmdMachine::onServer(DebuggerProxy *proxy) {
       LibEventHttpClient::SetCache(host.data(), port, 1);
       register_intercept("", "fb_rpc_intercept_handler", m_rpcConfig);
     }
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
   if (m_body == "list") {
     Debugger::GetRegisteredSandboxes(m_sandboxes);
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
   if (m_body == "attach" && !m_sandboxes.empty()) {
     m_succeed = proxy->switchSandbox(m_sandboxes[0]->id(), m_force);
@@ -307,7 +307,7 @@ bool CmdMachine::onServer(DebuggerProxy *proxy) {
       proxy->notifyDummySandbox();
       m_exitInterrupt = true;
     }
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
   return false;
 }

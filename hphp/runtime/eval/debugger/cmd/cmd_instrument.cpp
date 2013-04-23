@@ -140,7 +140,7 @@ bool CmdInstrument::onServerVM(DebuggerProxy *proxy) {
   } else if (m_type == ActionWrite) {
     validateAndWriteToTable(proxyVM);
   }
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 void CmdInstrument::readFromTable(DebuggerProxyVM *proxy) {

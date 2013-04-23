@@ -69,7 +69,7 @@ bool CmdShell::onServer(DebuggerProxy *proxy) {
   argv[m_args.size()] = nullptr;
   Process::Exec(argv[0], argv, nullptr, m_out, &m_out, true);
   free(argv);
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

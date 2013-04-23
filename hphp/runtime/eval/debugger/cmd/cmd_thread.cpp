@@ -113,18 +113,18 @@ bool CmdThread::onClient(DebuggerClient *client) {
     processList(client);
   } else if (client->arg(1, "normal")) {
     m_body = "normal";
-    client->send(this);
+    client->sendToServer(this);
     client->info("Thread is running in normal mode now. Other threads will "
                  "interleave when they hit breakpoints as well.");
   } else if (client->arg(1, "sticky")) {
     m_body = "sticky";
-    client->send(this);
+    client->sendToServer(this);
     client->info("Thread is running in sticky mode now. All other threads "
                  "will wait until this thread finishes, when they hit "
                  "breakpoints.");
   } else if (client->arg(1, "exclusive")) {
     m_body = "exclusive";
-    client->send(this);
+    client->sendToServer(this);
     client->info("Thread is running in exclusive mode now. All other threads "
                  "will not break, even when they hit breakpoints.");
   } else {
@@ -160,7 +160,7 @@ bool CmdThread::onClient(DebuggerClient *client) {
 
     m_body = "switch";
     m_threads.push_back(thread);
-    client->send(this);
+    client->sendToServer(this);
     throw DebuggerConsoleExitException();
   }
 
@@ -189,12 +189,12 @@ bool CmdThread::onServer(DebuggerProxy *proxy) {
     g_context->debuggerInfo(info);
 
     m_out = DebuggerClient::FormatInfoVec(info);
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
 
   if (m_body == "list") {
     proxy->getThreads(m_threads);
-    return proxy->send(this);
+    return proxy->sendToClient(this);
   }
   if (m_body == "switch") {
     if (!m_threads.empty()) {

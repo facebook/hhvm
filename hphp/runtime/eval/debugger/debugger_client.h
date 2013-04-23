@@ -109,7 +109,7 @@ public:
   static String FormatTitle(const char *title);
 
 public:
-  DebuggerClient(std::string name = ""); // name only for api usage
+  explicit DebuggerClient(std::string name = ""); // name only for api usage
   ~DebuggerClient();
   void reset();
 
@@ -184,13 +184,15 @@ public:
   StringVec *args() { return &m_args;}
 
   /**
-   * Send the commmand to DebuggerProxy and expect same type of command back.
+   * Send the commmand to server's DebuggerProxy
+   * and expect same type of command back.
    */
   template<typename T> boost::shared_ptr<T> xend(DebuggerCommand *cmd) {
     return boost::static_pointer_cast<T>(xend(cmd));
   }
-  void send(DebuggerCommand *cmd);
-  DebuggerCommandPtr recv(int expected);
+
+  void sendToServer(DebuggerCommand *cmd);
+  DebuggerCommandPtr recvFromServer(int expected);
 
   /**
    * Machine functions. True if we're switching to a machine that's not

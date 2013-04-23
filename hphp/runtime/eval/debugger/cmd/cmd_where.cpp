@@ -162,7 +162,7 @@ bool CmdWhere::onServerVM(DebuggerProxy *proxy) {
   if (!m_stackArgs) {
     processStackTrace();
   }
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

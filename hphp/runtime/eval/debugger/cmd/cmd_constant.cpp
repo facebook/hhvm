@@ -114,7 +114,7 @@ bool CmdConstant::onServer(DebuggerProxy *proxy) {
   try {
     m_constants = ClassInfo::GetConstants();
   } catch (...) {}
-  return proxy->send(this);
+  return proxy->sendToClient(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

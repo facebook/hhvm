@@ -1,0 +1,32 @@
+*** Testing preg_grep() : error conditions ***
+
+Arg value is abcdef
+HipHop Warning: %a
+bool(false)
+
+Arg value is /[a-zA-Z]
+HipHop Warning: %a
+bool(false)
+
+Arg value is [a-zA-Z]/
+HipHop Warning: %a
+bool(false)
+
+Arg value is /[a-zA-Z]/F
+HipHop Warning: %a
+bool(false)
+
+Arg value is Array
+HipHop Warning: %a
+NULL
+
+Arg value is /[a-zA-Z]/
+array(2) {
+  [1]=>
+  string(3) "abc"
+  [2]=>
+  string(4) "test"
+}
+HipHop Warning: %a
+NULL
+Done

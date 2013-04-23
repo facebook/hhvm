@@ -1,0 +1,10 @@
+*** Testing preg_replace() : error conditions ***
+
+Arg value is: this is a string
+string(64) "this is a stringthis is a stringthis is a stringthis is a string"
+
+Arg value is: Array
+HipHop Warning: %a
+bool(false)
+
+Catchable fatal error: Object of class stdClass could not be converted to string in %spreg_replace_error2.php on line %d

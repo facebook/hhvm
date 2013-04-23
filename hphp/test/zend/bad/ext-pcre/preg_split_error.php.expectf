@@ -1,0 +1,14 @@
+*** Testing preg_split() : error conditions ***
+
+-- Testing preg_split() function with Zero arguments --
+HipHop Warning: %a
+bool(false)
+
+-- Testing preg_split() function with more than expected no. of arguments --
+HipHop Warning: %a
+bool(false)
+
+-- Testing preg_split() function with less than expected no. of arguments --
+HipHop Warning: %a
+bool(false)
+Done

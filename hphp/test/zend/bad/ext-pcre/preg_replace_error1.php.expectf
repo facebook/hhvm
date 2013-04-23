@@ -1,0 +1,25 @@
+*** Testing preg_replace() : error conditions***
+
+Arg value is abcdef
+HipHop Warning: %a
+NULL
+
+Arg value is /[a-zA-Z]
+HipHop Warning: %a
+NULL
+
+Arg value is [a-zA-Z]/
+HipHop Warning: %a
+NULL
+
+Arg value is /[a-zA-Z]/F
+HipHop Warning: %a
+NULL
+
+Arg value is Array
+string(1) "a"
+
+Arg value is /[a-zA-Z]/
+string(1) "1"
+
+Catchable fatal error: Object of class stdClass could not be converted to string in %spreg_replace_error1.php on line %d

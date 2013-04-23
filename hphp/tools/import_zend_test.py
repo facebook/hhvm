@@ -113,7 +113,6 @@ no_import = (
     '/ext/mcrypt',
     '/ext/mysql',
     '/ext/openssl',
-    '/ext/pcre',
     '/ext/pdo',
     '/ext/pdo_mysql',
     '/ext/pdo_sqlite',

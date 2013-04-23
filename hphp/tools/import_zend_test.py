@@ -116,7 +116,6 @@ no_import = (
     '/ext/posix',
     '/ext/spl',
     '/ext/sqlite3',
-    '/ext/xmlreader',
     '/ext/xmlwriter',
     '/ext/zlib',
 
@@ -224,6 +223,12 @@ other_files = (
     '/ext-soap-soap12/soap12-test.inc',
     '/ext-soap-soap12/soap12-test.wsdl',
     '/ext-xml/xmltest.xml',
+    '/ext-xmlreader/012.dtd',
+    '/ext-xmlreader/012.xml',
+    '/ext-xmlreader/dtdexample.dtd',
+    '/ext-xmlreader/relaxNG.rng',
+    '/ext-xmlreader/relaxNG2.rng',
+    '/ext-xmlreader/relaxNG3.rng',
     '/tests/quicktester.inc',
 )
 
@@ -394,6 +399,10 @@ def walk(filename, source):
         test = test.replace("testfile.bz2", "bug51997.bz2")
     if 'ext-bz2/with_files.php' in full_dest_filename:
         test = test.replace("testfile.bz2", "with_files.bz2")
+    if 'ext-xmlreader/003.php' in full_dest_filename:
+        test = test.replace("_002.xml", "_003.xml")
+    if 'ext-xmlreader/004.php' in full_dest_filename:
+        test = test.replace("_002.xml", "_004.xml")
 
     file(full_dest_filename, 'w').write(test)
 

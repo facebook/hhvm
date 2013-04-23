@@ -104,7 +104,6 @@ no_import = (
     'pcntl/tests/pcntl_exec_3.phpt',
 
     # not imported yet, but will be
-    '/ext/exif',
     '/ext/gd',
     '/ext/intl',
     '/ext/ldap',
@@ -197,6 +196,8 @@ other_files = (
     'ns_067.inc',
     'unset.inc',
     'tests/quicktester.inc',
+
+    '/ext-exif/bug48378.jpeg',
 )
 
 errors = (

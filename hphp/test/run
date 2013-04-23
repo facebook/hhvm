@@ -57,14 +57,7 @@ function error($message) {
 }
 
 function hphp_home() {
-  static $ret;
-  if ($ret) { return $ret; }
-
-  $top_level = system('git rev-parse --show-toplevel', $status);
-  if ($status === 0) {
-    return $ret = rtrim($top_level, '/');
-  }
-  error("Couldn't determine the root of your fbcode repository.\n");
+  return __DIR__.'/../..';
 }
 
 function idx($array, $key, $default = null) {

@@ -1,5 +1,5 @@
 <?php
-
+            
 $pattern =
 "/\s([\w_\.\/]+)(?:=([\'\"]?(?:[\w\d\s\?=\(\)\.,'_#\/\\:;&-]|(?:\\\\\"|\\\')?)+[\'\"]?))?/";
 $context = "<simpletag an_attribute=\"simpleValueInside\">";

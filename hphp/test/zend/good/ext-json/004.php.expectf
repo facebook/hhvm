@@ -1,0 +1,7 @@
+object(stdClass)#%d (1) {
+  ["prop"]=>
+  *RECURSION*
+}
+HipHop Warning: %a
+string(22) "{"prop":{"prop":null}}"
+Done

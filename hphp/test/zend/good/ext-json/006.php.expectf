@@ -1,0 +1,6 @@
+Normal: ["<foo>","'bar'","\"baz\"","&blong&"]
+Tags: ["\u003Cfoo\u003E","'bar'","\"baz\"","&blong&"]
+Apos: ["<foo>","\u0027bar\u0027","\"baz\"","&blong&"]
+Quot: ["<foo>","'bar'","\u0022baz\u0022","&blong&"]
+Amp: ["<foo>","'bar'","\"baz\"","\u0026blong\u0026"]
+All: ["\u003Cfoo\u003E","\u0027bar\u0027","\u0022baz\u0022","\u0026blong\u0026"]

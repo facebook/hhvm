@@ -1,0 +1,17 @@
+array(1) {
+  [""]=>
+  string(5) "value"
+}
+array(2) {
+  [""]=>
+  string(5) "value"
+  ["key"]=>
+  string(5) "value"
+}
+array(2) {
+  ["key"]=>
+  string(5) "value"
+  [""]=>
+  string(5) "value"
+}
+Done

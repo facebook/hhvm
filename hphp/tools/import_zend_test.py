@@ -105,7 +105,6 @@ no_import = (
     '/ext/gd',
     '/ext/imap',
     '/ext/intl',
-    '/ext/json',
     '/ext/ldap',
     '/ext/libxml',
     '/ext/mbstring',

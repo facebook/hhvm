@@ -1,0 +1,16 @@
+==NonSerializingTest==
+{"data":{"str":"foo","int":1,"float":2.3,"bool":false,"nil":null,"arr":[1,2,3],"obj":{}}}
+{"data":["foo",1,2.3,false,null,[1,2,3],{}]}
+{"data":{"str":"foo","int":1,"float":2.3,"bool":false,"nil":null,"arr":[1,2,3],"obj":{}}}
+==SerializingTest==
+{"str":"foo","int":1,"float":2.3,"bool":false,"nil":null,"arr":[1,2,3],"obj":{}}
+["foo",1,2.3,false,null,[1,2,3],{}]
+{"str":"foo","int":1,"float":2.3,"bool":false,"nil":null,"arr":[1,2,3],"obj":{}}
+==ValueSerializingTest==
+["foo",1,2.3,false,null,[1,2,3],{}]
+["foo",1,2.3,false,null,[1,2,3],{}]
+["foo",1,2.3,false,null,[1,2,3],{}]
+==SelfSerializingTest==
+{"data":{"str":"foo","int":1,"float":2.3,"bool":false,"nil":null,"arr":[1,2,3],"obj":{}}}
+{"data":["foo",1,2.3,false,null,[1,2,3],{}]}
+{"data":{"str":"foo","int":1,"float":2.3,"bool":false,"nil":null,"arr":[1,2,3],"obj":{}}}

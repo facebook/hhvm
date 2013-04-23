@@ -254,19 +254,23 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
   return true;
 }
 
+static const StaticString s_format("format");
+static const StaticString s_php("php");
+static const StaticString s_value("value");
+
 void CmdInterrupt::setClientOutput(DebuggerClient *client) {
   client->setOutputType(DebuggerClient::OTCodeLoc);
   client->setOTFileLine(m_bpi->m_file, m_bpi->m_line1);
   Array values;
   DebuggerClient::WatchPtrVec &watches = client->getWatches();
   for (int i = 0; i < (int)watches.size(); i++) {
-    Array watch;
-    watch.set("format", watches[i]->first);
-    watch.set("php", watches[i]->second);
+    ArrayInit watch(3);
+    watch.set(s_format, watches[i]->first);
+    watch.set(s_php, watches[i]->second);
     Variant v = CmdPrint().processWatch(client, watches[i]->first,
                                         watches[i]->second);
-    watch.set("value", CmdPrint::FormatResult(watches[i]->first, v));
-    values.append(watch);
+    watch.set(s_value, CmdPrint::FormatResult(watches[i]->first, v));
+    values.append(watch.create());
   }
   client->setOTValues(values);
 }

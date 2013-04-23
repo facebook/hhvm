@@ -475,12 +475,6 @@ class Array : protected SmartPtr<ArrayData> {
 
   //litstr overloads
   const Variant operator[](litstr key) const;
-  Variant rvalAt(litstr key, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(litstr key, ACCESSPARAMS_DECL) const;
-  Variant &lval(litstr key);
-  Variant *lvalPtr(litstr key, bool forWrite, bool create);
-  Variant &lvalAt(litstr key, ACCESSPARAMS_DECL);
-  CVarRef set(litstr key, CVarRef v, bool isKey = false);
 
  private:
   // helpers

@@ -51,8 +51,9 @@ static inline bool useCounters() {
 
 class HardwareCounterImpl {
 public:
-  HardwareCounterImpl(int type, unsigned long config, StringData* desc = nullptr)
-    : m_desc(desc), m_err(0), m_fd(-1) {
+  HardwareCounterImpl(int type, unsigned long config,
+                      const char* desc = nullptr)
+    : m_desc(desc ? desc : ""), m_err(0), m_fd(-1) {
     memset (&pe, 0, sizeof (struct perf_event_attr));
     pe.type = type;
     pe.size = sizeof (struct perf_event_attr);
@@ -130,7 +131,7 @@ public:
   }
 
 public:
-  StringData* m_desc;
+  StaticString m_desc;
   int m_err;
 private:
   int m_fd;
@@ -326,8 +327,7 @@ bool HardwareCounter::addPerfEvent(char *event) {
     Logger::Warning("failed to find perf event: %s", event);
     return false;
   }
-  hwc = new HardwareCounterImpl(
-            type, config, StringData::GetStaticString(event));
+  hwc = new HardwareCounterImpl(type, config, event);
   if (hwc->m_err) {
     Logger::Warning("failed to set perf event: %s", event);
     delete hwc;
@@ -348,7 +348,7 @@ bool HardwareCounter::addPerfEvent(char *event) {
 bool HardwareCounter::eventExists(char *event) {
   // hopefully m_counters set is small, so a linear scan does not hurt
   for(unsigned i = 0; i < m_counters.size(); i++) {
-    if (!strcmp(event, m_counters[i]->m_desc->data())) {
+    if (!strcmp(event, m_counters[i]->m_desc.c_str())) {
       return true;
     }
   }
@@ -400,7 +400,7 @@ void HardwareCounter::getPerfEvents(Array& ret) {
     ret.set(s_stores, getStoreCount());
   }
   for (unsigned i = 0; i < m_counters.size(); i++) {
-    ret.set(m_counters[i]->m_desc->data(), m_counters[i]->read());
+    ret.set(m_counters[i]->m_desc, m_counters[i]->read());
   }
   if (m_pseudoEvents) {
     TranslatorX64::Get()->getPerfCounters(ret);

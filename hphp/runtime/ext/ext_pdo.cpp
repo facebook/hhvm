@@ -2980,6 +2980,11 @@ int64_t c_PDOStatement::t_columncount() {
   return m_stmt->column_count;
 }
 
+static const StaticString s_name("name");
+static const StaticString s_len("len");
+static const StaticString s_precision("precision");
+static const StaticString s_pdo_type("pdo_type");
+
 Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
   if (column < 0) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "42P10",
@@ -3002,12 +3007,12 @@ Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
 
   /* add stock items */
   PDOColumn *col = m_stmt->columns[column].toObject().getTyped<PDOColumn>();
-  ret.set("name", col->name);
-  ret.set("len", (int64_t)col->maxlen); /* FIXME: unsigned ? */
-  ret.set("precision", (int64_t)col->precision);
+  ret.set(s_name, col->name);
+  ret.set(s_len, (int64_t)col->maxlen); /* FIXME: unsigned ? */
+  ret.set(s_precision, (int64_t)col->precision);
   if (col->param_type != PDO_PARAM_ZVAL) {
     // if param_type is PDO_PARAM_ZVAL the driver has to provide correct data
-    ret.set("pdo_type", (int64_t)col->param_type);
+    ret.set(s_pdo_type, (int64_t)col->param_type);
   }
   return ret;
 }

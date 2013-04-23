@@ -416,6 +416,24 @@ bool CmdBreak::onClient(DebuggerClient *client) {
   return true;
 }
 
+static const StaticString s_id("id");
+static const StaticString s_state("state");
+static const StaticString s_is_exception("is_exception");
+static const StaticString s_exception_class("exception_class");
+static const StaticString s_file("file");
+static const StaticString s_line1("line1");
+static const StaticString s_line2("line2");
+static const StaticString s_namespace("namespace");
+static const StaticString s_func("func");
+static const StaticString s_class("class");
+static const StaticString s_url("url");
+static const StaticString s_use_regex("use_regex");
+static const StaticString s_clause_type("clause_type");
+static const StaticString s_clause("clause");
+static const StaticString s_if("if");
+static const StaticString s_ampamp("ampamp");
+static const StaticString s_desc("desc");
+
 void CmdBreak::setClientOutput(DebuggerClient *client) {
   // Output an array of current breakpoints including exceptions
   client->setOutputType(DebuggerClient::OTValues);
@@ -424,25 +442,25 @@ void CmdBreak::setClientOutput(DebuggerClient *client) {
   for (int i = 0; i < (int)m_breakpoints->size(); i++) {
     BreakPointInfoPtr bpi = m_breakpoints->at(i);
     Array breakpoint;
-    breakpoint.set("id", bpi->index());
-    breakpoint.set("state", bpi->state(false));
+    breakpoint.set(s_id, bpi->index());
+    breakpoint.set(s_state, bpi->state(false));
     if (bpi->m_interrupt == ExceptionThrown) {
-      breakpoint.set("is_exception", true);
-      breakpoint.set("exception_class", bpi->getExceptionClass());
+      breakpoint.set(s_is_exception, true);
+      breakpoint.set(s_exception_class, bpi->getExceptionClass());
     } else {
-      breakpoint.set("is_exception", false);
-      breakpoint.set("file", bpi->m_file);
-      breakpoint.set("line1", bpi->m_line1);
-      breakpoint.set("line2", bpi->m_line2);
-      breakpoint.set("namespace", bpi->getNamespace());
-      breakpoint.set("func", bpi->getFunction());
-      breakpoint.set("class", bpi->getClass());
+      breakpoint.set(s_is_exception, false);
+      breakpoint.set(s_file, bpi->m_file);
+      breakpoint.set(s_line1, bpi->m_line1);
+      breakpoint.set(s_line2, bpi->m_line2);
+      breakpoint.set(s_namespace, bpi->getNamespace());
+      breakpoint.set(s_func, bpi->getFunction());
+      breakpoint.set(s_class, bpi->getClass());
     }
-    breakpoint.set("url", bpi->m_url);
-    breakpoint.set("use_regex", bpi->m_regex);
-    breakpoint.set("clause_type", bpi->m_check ? "if" : "&&");
-    breakpoint.set("clause", bpi->m_clause);
-    breakpoint.set("desc", bpi->desc());
+    breakpoint.set(s_url, bpi->m_url);
+    breakpoint.set(s_use_regex, bpi->m_regex);
+    breakpoint.set(s_clause_type, bpi->m_check ? s_if : s_ampamp);
+    breakpoint.set(s_clause, bpi->m_clause);
+    breakpoint.set(s_desc, bpi->desc());
     values.append(breakpoint);
   }
   client->setOTValues(values);

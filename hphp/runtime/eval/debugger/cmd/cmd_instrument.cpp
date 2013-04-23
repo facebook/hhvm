@@ -108,6 +108,15 @@ bool CmdInstrument::onClient(DebuggerClient *client) {
   return true;
 }
 
+static const StaticString s_valid("valid");
+static const StaticString s_desc("desc");
+static const StaticString s_type("type");
+static const StaticString s_file_line("file_line");
+static const StaticString s_file("file");
+static const StaticString s_line("line");
+static const StaticString s_func_entry("func_entry");
+static const StaticString s_func("func");
+
 void CmdInstrument::setClientOutput(DebuggerClient *client) {
   // Output all instrumentation point info
   client->setOutputType(DebuggerClient::OTValues);
@@ -116,15 +125,15 @@ void CmdInstrument::setClientOutput(DebuggerClient *client) {
   for (unsigned int i = 0; i < ips->size(); i++) {
     InstPointInfoPtr ipi = (*ips)[i];
     Array instpoint;
-    instpoint.set("valid", ipi->m_valid);
-    instpoint.set("desc", ipi->m_desc);
+    instpoint.set(s_valid, ipi->m_valid);
+    instpoint.set(s_desc, ipi->m_desc);
     if (ipi->m_locType == InstPointInfo::LocFileLine) {
-      instpoint.set("type", "file_line");
-      instpoint.set("file", ipi->m_file);
-      instpoint.set("line", ipi->m_line);
+      instpoint.set(s_type, s_file_line);
+      instpoint.set(s_file, ipi->m_file);
+      instpoint.set(s_line, ipi->m_line);
     } else if (ipi->m_locType == InstPointInfo::LocFuncEntry) {
-      instpoint.set("type", "func_entry");
-      instpoint.set("func", ipi->m_func);
+      instpoint.set(s_type, s_func_entry);
+      instpoint.set(s_func, ipi->m_func);
     }
     values.append(instpoint);
   }

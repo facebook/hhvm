@@ -11962,7 +11962,8 @@ TranslatorX64::getPerfCounters(Array& ret) {
     // Until Perflab can automatically scale the values we give it to
     // an appropriate range, we have to fudge these numbers so they
     // look more like reasonable hardware counter values.
-    ret.set(kPerfCounterNames[i], s_perfCounters[i] * 1000);
+    ret.set(String::FromCStr(kPerfCounterNames[i]),
+            s_perfCounters[i] * 1000);
   }
 
   if (RuntimeOption::EnableInstructionCounts) {
@@ -11972,7 +11973,7 @@ TranslatorX64::getPerfCounters(Array& ret) {
            begin += STATS_PER_OPCODE) {
         count += Stats::tl_counters[Stats::StatCounter(begin)];
       }
-      ret.set(name, count);
+      ret.set(String::FromCStr(name), count);
     };
 
     doCounts(Stats::Instr_TranslLowInvalid + STATS_PER_OPCODE,

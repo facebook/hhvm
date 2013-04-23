@@ -511,13 +511,20 @@ bool TestExtFile::test_parse_hdf_file() {
   return Count(true);
 }
 
+static const StaticString s_bool("bool");
+static const StaticString s_string("string");
+static const StaticString s_text("text");
+static const StaticString s_num("num");
+static const StaticString s_arr("arr");
+static const StaticString s_anothertext("anothertext");
+
 bool TestExtFile::test_parse_hdf_string() {
   Array hdf;
-  hdf.set("bool", false);
-  hdf.set("string", "text");
-  hdf.set("num", 12345);
-  Array arr = CREATE_MAP3("bool", false, "string", "anothertext", "num", 6789);
-  hdf.set("arr", arr);
+  hdf.set(s_bool, false);
+  hdf.set(s_string, s_text);
+  hdf.set(s_num, 12345);
+  Array arr = CREATE_MAP3(s_bool, false, s_string, s_anothertext, s_num, 6789);
+  hdf.set(s_arr, arr);
 
   VS(f_parse_hdf_string("bool = false\n"
                         "string = text\n"
@@ -537,11 +544,11 @@ bool TestExtFile::test_write_hdf_file() {
 
 bool TestExtFile::test_write_hdf_string() {
   Array hdf;
-  hdf.set("bool", false);
-  hdf.set("string", "text");
-  hdf.set("num", 12345);
-  Array arr = CREATE_MAP3("bool", false, "string", "anothertext", "num", 6789);
-  hdf.set("arr", arr);
+  hdf.set(s_bool, false);
+  hdf.set(s_string, s_text);
+  hdf.set(s_num, 12345);
+  Array arr = CREATE_MAP3(s_bool, false, s_string, s_anothertext, s_num, 6789);
+  hdf.set(s_arr, arr);
 
   String str = f_write_hdf_string(hdf);
   VS(str,

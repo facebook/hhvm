@@ -69,6 +69,9 @@ public:
   static String FromChar(char ch) {
     return StringData::GetStaticString(ch);
   }
+  static String FromCStr(const char* str) {
+    return StringData::GetStaticString(str);
+  }
 
   static const StringData *ConvertInteger(int64_t n) ATTRIBUTE_COLD;
   static const StringData *GetIntegerStringData(int64_t n) {

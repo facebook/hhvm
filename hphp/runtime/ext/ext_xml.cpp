@@ -368,6 +368,9 @@ static const StaticString s_tag("tag");
 static const StaticString s_close("close");
 static const StaticString s_level("level");
 static const StaticString s_value("value");
+static const StaticString s_cdata("cdata");
+static const StaticString s_open("open");
+static const StaticString s_attributes("attributes");
 
 void _xml_endElementHandler(void *userData, const XML_Char *name) {
   XmlParser *parser = (XmlParser *)userData;
@@ -476,11 +479,11 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           tag = Array::Create();
           _xml_add_to_info(parser, parser->ltags[parser->level-1] +
                            parser->toffset);
-          tag.set("tag", String(parser->ltags[parser->level-1] +
+          tag.set(s_tag, String(parser->ltags[parser->level-1] +
                                 parser->toffset, CopyString));
-          tag.set("value", String(decoded_value, AttachString));
-          tag.set("type", "cdata");
-          tag.set("level", parser->level);
+          tag.set(s_value, String(decoded_value, AttachString));
+          tag.set(s_type, s_cdata);
+          tag.set(s_level, parser->level);
           parser->data.append(tag);
         }
       } else {
@@ -537,9 +540,9 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
       _xml_add_to_info(parser,((char *) tag_name) + parser->toffset);
 
-      tag.set("tag",String(((char *)tag_name)+parser->toffset,CopyString));
-      tag.set("type","open");
-      tag.set("level",parser->level);
+      tag.set(s_tag,String(((char *)tag_name)+parser->toffset,CopyString));
+      tag.set(s_type, s_open);
+      tag.set(s_level, parser->level);
 
       parser->ltags[parser->level-1] = strdup(tag_name);
       parser->lastwasopen = 1;
@@ -558,7 +561,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
       }
 
       if (atcnt) {
-        tag.set("attributes",atr);
+        tag.set(s_attributes,atr);
       }
       parser->data.append(tag);
       parser->ctag.assignRef(parser->data.getArrayData()->endRef());

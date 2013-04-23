@@ -38,7 +38,8 @@ static ExtensionUninitializer s_extension_uninitializer;
 ///////////////////////////////////////////////////////////////////////////////
 
 Extension::Extension(litstr name, const char *version /* = "" */)
-    : m_name(name), m_version(version ? version : "") {
+    : m_name(StringData::GetStaticString(name))
+    , m_version(version ? version : "") {
   if (s_registered_extensions == NULL) {
     s_registered_extensions = new ExtensionMap();
   }
@@ -51,7 +52,7 @@ void Extension::LoadModules(Hdf hdf) {
   assert(s_registered_extensions);
   for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
        iter != s_registered_extensions->end(); ++iter) {
-    iter->second->moduleLoad(hdf["Extensions"][iter->second->m_name]);
+    iter->second->moduleLoad(hdf["Extensions"][iter->second->m_name.c_str()]);
   }
 }
 

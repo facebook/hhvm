@@ -148,16 +148,23 @@ bool CmdConfig::onClient(DebuggerClient *client) {
   return true;
 }
 
+static const StaticString s_BypassAccessCheck("BypassAccessCheck");
+static const StaticString s_LogFile("LogFile");
+static const StaticString s_PrintLevel("PrintLevel");
+static const StaticString s_SmallStep("SmallStep");
+static const StaticString s_StackArgs("StackArgs");
+static const StaticString s_ApiModeSerialize("ApiModeSerialize");
+
 void CmdConfig::setClientOutput(DebuggerClient *client) {
   client->setOutputType(DebuggerClient::OTValues);
-  Array values;
+  ArrayInit values(6);
   values.set("BypassAccessCheck", client->getDebuggerBypassCheck());
   values.set("LogFile", client->getLogFile());
   values.set("PrintLevel", client->getDebuggerPrintLevel());
   values.set("SmallStep", client->getDebuggerSmallStep());
   values.set("StackArgs", client->getDebuggerStackArgs());
   values.set("ApiModeSerialize", client->getDebuggerClientApiModeSerialize());
-  client->setOTValues(values);
+  client->setOTValues(values.create());
 }
 
 void CmdConfig::listVars(DebuggerClient *client) {

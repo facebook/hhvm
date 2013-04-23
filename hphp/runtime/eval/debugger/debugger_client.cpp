@@ -1156,33 +1156,45 @@ String DebuggerClient::getPrintString() {
   return s;
 }
 
+static const StaticString s_output_type("output_type");
+static const StaticString s_file("file");
+static const StaticString s_line_no("line_no");
+static const StaticString s_watch_values("watch_values");
+static const StaticString s_stacktrace("stacktrace");
+static const StaticString s_frame("frame");
+static const StaticString s_values("values");
+static const StaticString s_text("text");
+static const StaticString s_invalid("invalid");
+static const StaticString s_cmd("cmd");
+static const StaticString s_code_loc("code_loc");
+
 Array DebuggerClient::getOutputArray() {
   TRACE(2, "DebuggerClient::getOutputArray\n");
   Array ret;
   switch (m_outputType) {
     case OTCodeLoc:
-      ret.set("output_type", "code_loc");
-      ret.set("file", m_otFile);
-      ret.set("line_no", m_otLineNo);
-      ret.set("watch_values", m_otValues);
+      ret.set(s_output_type, s_code_loc);
+      ret.set(s_file, m_otFile);
+      ret.set(s_line_no, m_otLineNo);
+      ret.set(s_watch_values, m_otValues);
       break;
     case OTStacktrace:
-      ret.set("output_type", "stacktrace");
-      ret.set("stacktrace", m_stacktrace);
-      ret.set("frame", m_frame);
+      ret.set(s_output_type, s_stacktrace);
+      ret.set(s_stacktrace, m_stacktrace);
+      ret.set(s_frame, m_frame);
       break;
     case OTValues:
-      ret.set("output_type", "values");
-      ret.set("values", m_otValues);
+      ret.set(s_output_type, s_values);
+      ret.set(s_values, m_otValues);
       break;
     case OTText:
-      ret.set("output_type", "text");
+      ret.set(s_output_type, s_text);
       break;
     default:
-      ret.set("output_type", "invalid");
+      ret.set(s_output_type, s_invalid);
   }
-  ret.set("cmd", m_command);
-  ret.set("text", getPrintString());
+  ret.set(s_cmd, m_command);
+  ret.set(s_text, getPrintString());
   return ret;
 }
 
@@ -2083,7 +2095,6 @@ static const StaticString s_args("args");
 static const StaticString s_namespace("namespace");
 static const StaticString s_class("class");
 static const StaticString s_function("function");
-static const StaticString s_file("file");
 static const StaticString s_line("line");
 
 void DebuggerClient::printFrame(int index, CArrRef frame) {

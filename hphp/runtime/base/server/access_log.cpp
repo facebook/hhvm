@@ -312,6 +312,9 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
       }
     }
     break;
+  case 'I':
+    out << transport->getRequestSize();
+    break;
   case 'n':
     if (arg.empty()) return false;
     {

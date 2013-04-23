@@ -1,0 +1,2 @@
+resource(%d) of type (OpenSSL key)
+int(1)

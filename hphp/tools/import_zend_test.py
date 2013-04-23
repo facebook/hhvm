@@ -111,7 +111,6 @@ no_import = (
     '/ext/standard',
     '/ext/mcrypt',
     '/ext/mysql',
-    '/ext/openssl',
     '/ext/pdo_mysql',
     '/ext/pdo_sqlite',
     '/ext/pgsql',
@@ -210,6 +209,15 @@ other_files = (
     '/ext-gd/test8859.ttf',
     '/ext-gd/test_gif.gif',
     '/ext-intl/ut_common.inc',
+    '/ext-openssl/005_crt.txt',
+    '/ext-openssl/bug37820cert.pem',
+    '/ext-openssl/bug37820key.pem',
+    '/ext-openssl/bug39217cert1.txt',
+    '/ext-openssl/bug39217cert2.txt',
+    '/ext-openssl/cert.crt',
+    '/ext-openssl/openssl.cnf',
+    '/ext-openssl/private.key',
+    '/ext-openssl/public.key',
     '/tests/quicktester.inc',
 )
 

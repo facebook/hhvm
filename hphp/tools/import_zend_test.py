@@ -151,7 +151,6 @@ no_import = (
     '/ext/mssql',
     '/ext/mysqli',
     '/ext/mysqlnd',
-    '/ext/opcache',
     '/ext/odbc',
     '/ext/pdo_dblib',
     '/ext/pdo_firebird',

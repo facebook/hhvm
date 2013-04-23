@@ -1,0 +1,27 @@
+Input: 1
+ Length: 1
+ Hex: %x
+
+Input: 2
+ Length: 2
+ Hex: %x
+
+Input: 4
+ Length: 4
+ Hex: %x
+
+Input: 8
+ Length: 8
+ Hex: %x
+
+Input: 16
+ Length: 16
+ Hex: %x
+
+Input: 32
+ Length: 32
+ Hex: %x
+
+Input: 64
+ Length: 64
+ Hex: %x

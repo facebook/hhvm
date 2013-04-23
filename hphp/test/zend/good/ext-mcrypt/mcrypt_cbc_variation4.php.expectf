@@ -1,0 +1,82 @@
+*** Testing mcrypt_cbc() : usage variation ***
+
+--float 10.5--
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
+
+--float -10.5--
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
+
+--float 12.3456789000e10--
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
+
+--float -12.3456789000e10--
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
+
+--float .5--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--empty array--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--int indexed array--
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
+
+--associative array--
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
+
+--nested arrays--
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
+
+--uppercase NULL--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--lowercase null--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--lowercase true--
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
+
+--lowercase false--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--uppercase TRUE--
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
+
+--uppercase FALSE--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--empty string DQ--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--empty string SQ--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--string DQ--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--string SQ--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--mixed case string--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--heredoc--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--instance of classWithToString--
+Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
+
+--instance of classWithoutToString--
+Error: 8 - Object of class classWithoutToString could not be converted to int, %s(%d)
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
+
+--undefined var--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--unset var--
+string(32) "5f781523f696d596e4b809d72197a0cc"
+
+--resource--
+string(%d) %s
+===DONE===

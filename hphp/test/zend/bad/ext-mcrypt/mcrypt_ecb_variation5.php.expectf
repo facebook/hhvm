@@ -1,0 +1,86 @@
+*** Testing mcrypt_ecb() : usage variation ***
+
+--int 0--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--int 1--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--int 12345--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--int -12345--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--float 10.5--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--float -10.5--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--float 12.3456789000e10--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--float -12.3456789000e10--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--float .5--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--empty array--
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
+string(0) ""
+
+--int indexed array--
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
+string(0) ""
+
+--associative array--
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
+string(0) ""
+
+--nested arrays--
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
+string(0) ""
+
+--uppercase NULL--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--lowercase null--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--lowercase true--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--lowercase false--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--uppercase TRUE--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--uppercase FALSE--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--empty string DQ--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--empty string SQ--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--instance of classWithToString--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--instance of classWithoutToString--
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, object given, %s(%d)
+string(0) ""
+
+--undefined var--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--unset var--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--resource--
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, resource given, %s(%d)
+string(0) ""
+===DONE===

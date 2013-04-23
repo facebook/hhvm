@@ -107,7 +107,6 @@ no_import = (
     # not imported yet, but will be
     '/ext/gd',
     '/ext/standard',
-    '/ext/mcrypt',
     '/ext/mysql',
     '/ext/pdo_mysql',
     '/ext/pdo_sqlite',
@@ -209,6 +208,7 @@ other_files = (
     '/ext-intl/ut_common.inc',
     '/ext-ldap/connect.inc',
     '/ext-mbstring/common.inc',
+    '/ext-mcrypt/vectors.txt',
     '/ext-openssl/005_crt.txt',
     '/ext-openssl/bug37820cert.pem',
     '/ext-openssl/bug37820key.pem',

@@ -1,0 +1,82 @@
+*** Testing mcrypt_ecb() : usage variation ***
+
+--float 10.5--
+string(32) "a80c6cef6b42c8759143586a57bb7dc6"
+
+--float -10.5--
+string(32) "a80c6cef6b42c8759143586a57bb7dc6"
+
+--float 12.3456789000e10--
+string(32) "a80c6cef6b42c8759143586a57bb7dc6"
+
+--float -12.3456789000e10--
+string(32) "a80c6cef6b42c8759143586a57bb7dc6"
+
+--float .5--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--empty array--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--int indexed array--
+string(32) "a80c6cef6b42c8759143586a57bb7dc6"
+
+--associative array--
+string(32) "a80c6cef6b42c8759143586a57bb7dc6"
+
+--nested arrays--
+string(32) "a80c6cef6b42c8759143586a57bb7dc6"
+
+--uppercase NULL--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--lowercase null--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--lowercase true--
+string(32) "a80c6cef6b42c8759143586a57bb7dc6"
+
+--lowercase false--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--uppercase TRUE--
+string(32) "a80c6cef6b42c8759143586a57bb7dc6"
+
+--uppercase FALSE--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--empty string DQ--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--empty string SQ--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--string DQ--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--string SQ--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--mixed case string--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--heredoc--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--instance of classWithToString--
+Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
+string(32) "a80c6cef6b42c8759143586a57bb7dc6"
+
+--instance of classWithoutToString--
+Error: 8 - Object of class classWithoutToString could not be converted to int, %s(%d)
+string(32) "a80c6cef6b42c8759143586a57bb7dc6"
+
+--undefined var--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--unset var--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--resource--
+string(%d) %s
+===DONE===

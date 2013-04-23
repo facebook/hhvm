@@ -53,3 +53,14 @@ function bar($i) {
 }
 
 bar(1);
+
+function baz($i) {
+  if ($i >= 1) {
+    $s1 = '5.3xxx';
+    $s2 = '7yyy';
+  }
+  var_dump((double)$s1);
+  var_dump((double)$s2);
+}
+
+baz(1);

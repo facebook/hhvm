@@ -792,7 +792,7 @@ DataType StringData::isNumericWithVal(int64_t &lval, double &dval,
 }
 
 bool StringData::isNumeric() const {
-  if (isStatic()) return (m_hash >= 0);
+  if (m_hash < 0) return false;
   int64_t lval; double dval;
   DataType ret = isNumericWithVal(lval, dval, 0);
   switch (ret) {

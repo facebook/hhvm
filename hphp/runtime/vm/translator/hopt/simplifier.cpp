@@ -1144,10 +1144,15 @@ SSATmp* Simplifier::simplifyConvStrToDbl(IRInstruction* inst) {
   SSATmp* src = inst->getSrc(0);
   if (src->isConst()) {
     const StringData *str = src->getValStr();
-    if (str->isNumeric()) {
-      return genDefDbl(str->toDouble());
+    int64_t lval;
+    double dval;
+    DataType ret = str->isNumericWithVal(lval, dval, 1);
+    if (ret == KindOfInt64) {
+      dval = (double)lval;
+    } else if (ret != KindOfDouble) {
+      dval = 0.0;
     }
-    return genDefDbl(0.0);
+    return genDefDbl(dval);
   }
   return nullptr;
 }
@@ -1183,10 +1188,15 @@ SSATmp* Simplifier::simplifyConvStrToInt(IRInstruction* inst) {
   SSATmp* src  = inst->getSrc(0);
   if (src->isConst()) {
     const StringData *str = src->getValStr();
-    if (str->isInteger()) {
-      return genDefInt(str->toInt64());
+    int64_t lval;
+    double dval;
+    DataType ret = str->isNumericWithVal(lval, dval, 1);
+    if (ret == KindOfDouble) {
+      lval = (int64_t)dval;
+    } else if (ret != KindOfInt64) {
+      lval = 0;
     }
-    return genDefInt(0);
+    return genDefInt(lval);
   }
   return nullptr;
 }

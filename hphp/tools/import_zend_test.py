@@ -115,7 +115,6 @@ no_import = (
     '/ext/session',
     '/ext/simplexml',
     '/ext/soap',
-    '/ext/sockets',
     '/ext/spl',
     '/ext/sqlite3',
     '/ext/xml',

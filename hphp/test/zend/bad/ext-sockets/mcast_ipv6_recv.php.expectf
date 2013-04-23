@@ -1,0 +1,44 @@
+creating send socket
+resource(%d) of type (Socket)
+creating receive socket
+resource(%d) of type (Socket)
+bool(true)
+bool(true)
+int(14)
+int(14)
+string(14) "testing packet"
+string(%d) "%s"
+int(14)
+1> initial packet
+leaving group
+bool(true)
+int(20)
+int(14)
+2> unicast packet
+re-joining group
+bool(true)
+int(12)
+3> mcast packet
+blocking source
+bool(true)
+int(31)
+int(14)
+4> unicast packet
+unblocking source
+bool(true)
+int(12)
+5> mcast packet
+leaving group
+bool(true)
+int(20)
+int(14)
+6> unicast packet
+joining source group
+bool(true)
+int(32)
+7> mcast packet from desired source
+leaving source group
+bool(true)
+int(20)
+int(14)
+8> unicast packet

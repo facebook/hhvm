@@ -1,0 +1,6 @@
+HipHop Warning: %a
+ in hphp/test/zend/bad/ext-sockets/socket_sentto_recvfrom_ipv6_udp-win32.php on line %d
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+Received Ping! from remote address ::1 and remote port 1223

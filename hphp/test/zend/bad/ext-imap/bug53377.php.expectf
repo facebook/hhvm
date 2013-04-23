@@ -1,0 +1,23 @@
+array(3) {
+  [0]=>
+  object(stdClass)#1 (2) {
+    ["charset"]=>
+    string(5) "UTF-8"
+    ["text"]=>
+    string(3) "€"
+  }
+  [1]=>
+  object(stdClass)#2 (2) {
+    ["charset"]=>
+    string(5) "UTF-8"
+    ["text"]=>
+    string(3) "€"
+  }
+  [2]=>
+  object(stdClass)#3 (2) {
+    ["charset"]=>
+    string(5) "UTF-8"
+    ["text"]=>
+    string(3) "€"
+  }
+}

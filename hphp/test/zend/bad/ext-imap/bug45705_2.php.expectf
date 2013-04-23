@@ -1,0 +1,28 @@
+array(6) {
+  ["return_path"]=>
+  string(27) "John Doe <john@example.com>"
+  ["from"]=>
+  string(27) "John Doe <john@example.com>"
+  ["reply_to"]=>
+  string(27) "John Doe <john@example.com>"
+  ["to"]=>
+  string(27) "John Doe <john@example.com>"
+  ["cc"]=>
+  string(27) "John Doe <john@example.com>"
+  ["bcc"]=>
+  string(27) "John Doe <john@example.com>"
+}
+array(6) {
+  ["return_path"]=>
+  string(27) "John Doe <john@example.com>"
+  ["from"]=>
+  string(27) "John Doe <john@example.com>"
+  ["reply_to"]=>
+  string(27) "John Doe <john@example.com>"
+  ["to"]=>
+  string(27) "John Doe <john@example.com>"
+  ["cc"]=>
+  string(27) "John Doe <john@example.com>"
+  ["bcc"]=>
+  string(27) "John Doe <john@example.com>"
+}

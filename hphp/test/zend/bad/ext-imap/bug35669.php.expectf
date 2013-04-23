@@ -1,0 +1,23 @@
+Date: Wed, 04 Jan 2006 19:24:43 -0500
+From: Santa <somewhere@northpole.gov>
+To: The bad smurf <bad@smurf.com>
+MIME-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="%s"
+
+--%s
+Content-Type: TEXT/ALTERNATIVE; CHARSET=US-ASCII
+
+
+--%s
+Content-Type: TEXT/PLAIN; CHARSET=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Description: Plaintype part of message
+
+See mom, it will crash
+--%s
+Content-Type: TEXT/HTML; CHARSET=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Description: HTML part of message
+
+See mom, it will <b>crash</b>
+--%s--

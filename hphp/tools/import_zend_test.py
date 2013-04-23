@@ -103,7 +103,6 @@ no_import = (
     # not imported yet, but will be
     '/ext/exif',
     '/ext/gd',
-    '/ext/imap',
     '/ext/intl',
     '/ext/ldap',
     '/ext/mbstring',

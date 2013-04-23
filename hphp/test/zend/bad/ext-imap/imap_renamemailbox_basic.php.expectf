@@ -1,0 +1,12 @@
+Checking with no parameters
+HipHop Warning: %a
+Checking with incorrect parameter type
+HipHop Warning: %a
+HipHop Warning: %a
+Create a temporary mailbox and add 1 msgs
+.. mailbox '{%s}%s' created
+HipHop Warning: %a
+HipHop Warning: %a
+Checking OK
+bool(true)
+bool(true)

@@ -1,0 +1,18 @@
+Checking with no parameters
+HipHop Warning: %a
+Checking with incorrect parameter type
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)
+Checking OK
+bool(true)
+object(stdClass)#%d (%d) {
+  [%sname"]=>
+  string(%d) "{%s}%s"
+  [%sattributes"]=>
+  int(%d)
+  [%sdelimiter"]=>
+  string(%d) "%s"
+}

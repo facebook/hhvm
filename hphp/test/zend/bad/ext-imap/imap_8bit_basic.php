@@ -1,0 +1,17 @@
+<?php
+/* Prototype  : string imap_8bit  ( string $string  )
+ * Description: Convert an 8bit string to a quoted-printable string.
+ * Source code: ext/imap/php_imap.c
+ */
+
+echo "*** Testing imap_8bit() : basic functionality ***\n";
+
+var_dump(imap_8bit("String with CRLF at end \r\n"));
+//NB this appears to be a bug in cclient; a space at end of string should be encoded as =20
+var_dump(imap_8bit("String with space at end "));
+var_dump(imap_8bit("String with tabs \t\t in middle"));
+var_dump(imap_8bit("String with tab at end \t"));
+var_dump(imap_8bit("\x00\x01\x02\x03\x04\xfe\xff\x0a\x0d"));
+
+?>
+===Done===

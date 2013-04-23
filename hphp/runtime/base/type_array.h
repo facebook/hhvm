@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_ARRAY_H_
+#define incl_HPHP_ARRAY_H_
+
 #ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'type_array.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
-
-#ifndef incl_HPHP_ARRAY_H_
-#define incl_HPHP_ARRAY_H_
 
 #include <boost/static_assert.hpp>
 
@@ -39,7 +39,6 @@ inline int64_t ToKey(double d) {
 
 // forward declaration
 class ArrayIter;
-class StaticArray;
 
 /**
  * Array type wrapping around ArrayData to implement reference
@@ -80,8 +79,8 @@ class Array : protected SmartPtr<ArrayData> {
    * array value from the parameter, and they are NOT constructing an array
    * with that single value (then one should use Array::Create() functions).
    */
-  Array(ArrayData *data) : ArrayBase(data) { }
-  Array(CArrRef arr) : ArrayBase(arr.m_px) { }
+  /* implicit */ Array(ArrayData *data) : ArrayBase(data) { }
+  /* implicit */ Array(CArrRef arr) : ArrayBase(arr.m_px) { }
 
   // Move ctor
   Array(Array&& src) : ArrayBase(std::move(src)) {
@@ -125,7 +124,6 @@ class Array : protected SmartPtr<ArrayData> {
   Array &operator =  (ArrayData *data);
   Array &operator =  (CArrRef v);
   Array &operator =  (CVarRef v);
-  Array &operator =  (const StaticArray &v);
   Array  operator +  (ArrayData *data) const;
   Array  operator +  (CArrRef v) const;
   Array  operator +  (CVarRef v) const;
@@ -513,26 +511,6 @@ class Array : protected SmartPtr<ArrayData> {
     BOOST_STATIC_ASSERT((offsetof(Array, m_px) == kExpectedMPxOffset));
   }
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-/**
- * A StaticArray can be co-accessed by multiple threads, therefore they are
- * not thread local, and they have to be allocated BEFORE any thread starts,
- * so that they won't be garbage collected by MemoryManager. This is used by
- * scalar arrays, so they can be pre-allocated before request handling.
- */
-class StaticArray : public Array {
-public:
-  StaticArray() { }
-  StaticArray(ArrayData *data) : Array(data) {
-  }
-  ~StaticArray() {
-    // prevent ~SmartPtr from calling decRefCount after data is released
-    m_px = nullptr;
-  }
-};
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // ArrNR

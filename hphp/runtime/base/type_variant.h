@@ -129,12 +129,6 @@ class Variant : private TypedValue {
     assert(s);
     m_data.pstr = s;
   }
-  Variant(const StaticArray &v) {
-    m_type = KindOfArray;
-    ArrayData *a = v.get();
-    assert(a);
-    m_data.parr = a;
-  }
 
   Variant(CStrRef v);
   Variant(CArrRef v);

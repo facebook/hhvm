@@ -1029,7 +1029,7 @@ Variant SSATmp::getValVariant() const {
     return (litstr)m_inst->getExtra<ConstData>()
         ->as<const StringData*>()->data();
   case KindOfArray:
-    return StaticArray(ArrayData::GetScalarArray(m_inst->getExtra<ConstData>()
+    return Array(ArrayData::GetScalarArray(m_inst->getExtra<ConstData>()
       ->as<ArrayData*>()));
   case KindOfObject:
     return m_inst->getExtra<ConstData>()->as<const Object*>();

@@ -83,15 +83,6 @@ Array &Array::operator =  (Variant&& v) {
   return *this;
 }
 
-HOT_FUNC
-Array &Array::operator=(const StaticArray &arr) {
-  if (m_px != arr.m_px) {
-    if (m_px) decRefArr(m_px);
-    m_px = arr.m_px;
-  }
-  return *this;
-}
-
 Array Array::operator+(ArrayData *data) const {
   return Array(m_px).operator+=(data);
 }

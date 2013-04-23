@@ -1,0 +1,22 @@
+*** Testing gzuncompress() : error conditions ***
+
+-- Testing gzuncompress() function with Zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing gzuncompress() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing with a buffer that is too small --
+HipHop Warning: %a
+bool(false)
+
+-- Testing with incorrect arguments --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+===DONE===

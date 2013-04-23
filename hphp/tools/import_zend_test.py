@@ -119,7 +119,6 @@ no_import = (
     '/ext/spl',
     '/ext/sqlite3',
     '/ext/xmlwriter',
-    '/ext/zlib',
 
     # not implemented extensions
     '/sapi',
@@ -231,6 +230,7 @@ other_files = (
     '/ext-xmlreader/relaxNG.rng',
     '/ext-xmlreader/relaxNG2.rng',
     '/ext-xmlreader/relaxNG3.rng',
+    '/ext-zlib/004.txt.gz',
     '/tests/quicktester.inc',
 )
 
@@ -405,6 +405,8 @@ def walk(filename, source):
         test = test.replace("_002.xml", "_003.xml")
     if 'ext-xmlreader/004.php' in full_dest_filename:
         test = test.replace("_002.xml", "_004.xml")
+    if 'bug61139.php' in full_dest_filename:
+        test += "\nunlink('someFile');\n?>"
 
     file(full_dest_filename, 'w').write(test)
 

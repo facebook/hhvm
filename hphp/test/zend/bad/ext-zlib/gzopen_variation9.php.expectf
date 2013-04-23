@@ -1,0 +1,17 @@
+*** Testing gzopen() : variation ***
+mode=r+
+HipHop Warning: %a
+gzopen=bool(false)
+
+mode=rf
+gzopen=resource(%d) of type (stream)
+
+mode=w+
+HipHop Warning: %a
+gzopen=bool(false)
+
+mode=e
+HipHop Warning: %a
+gzopen=bool(false)
+
+===DONE===

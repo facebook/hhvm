@@ -1,0 +1,5 @@
+*** Testing gzencode() : variation ***
+
+-- Testing multiple compression --
+bool(true)
+===Done===

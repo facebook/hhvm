@@ -1,0 +1,11 @@
+array(3) {
+  [0]=>
+  string(12) "hello world
+"
+  [1]=>
+  string(22) "is a very common test
+"
+  [2]=>
+  string(17) "for all languages"
+}
+===DONE===

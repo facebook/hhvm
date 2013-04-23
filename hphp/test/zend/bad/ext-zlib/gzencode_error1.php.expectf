@@ -1,0 +1,30 @@
+*** Testing gzencode() : error conditions ***
+
+-- Testing gzencode() function with Zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing gzencode() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing with incorrect compression level --
+HipHop Warning: %a
+bool(false)
+
+-- Testing with incorrect encoding_mode --
+HipHop Warning: %a
+bool(false)
+
+-- Testing with incorrect parameters --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+===Done===

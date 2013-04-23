@@ -1,0 +1,15 @@
+move to the 50th byte
+int(0)
+tell=50
+string(10) " high abov"
+
+move forward to the 100th byte
+int(0)
+tell=100
+string(10) "Destiny wh"
+
+move backward to the 20th byte
+int(0)
+tell=20
+string(10) "hrough fee"
+===DONE===

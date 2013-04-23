@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<root><node>node1</node><node>node2</node></root>
+
+<?xml version="1.0"?>
+<root><node>New Value</node><node>node2</node></root>

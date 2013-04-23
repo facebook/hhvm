@@ -114,7 +114,6 @@ no_import = (
     '/ext/pdo_sqlite',
     '/ext/pgsql',
     '/ext/posix',
-    '/ext/simplexml',
     '/ext/soap',
     '/ext/spl',
     '/ext/sqlite3',
@@ -219,6 +218,7 @@ other_files = (
     '/ext-openssl/private.key',
     '/ext-openssl/public.key',
     '/ext-session/save_handler.inc',
+    '/ext-simplexml/bug24392.xml',
     '/tests/quicktester.inc',
 )
 

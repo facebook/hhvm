@@ -1,0 +1,12 @@
+object(SimpleXMLElement)#%d (1) {
+  ["@attributes"]=>
+  array(1) {
+    ["attr"]=>
+    string(%d) "foo%sbar%sbaz"
+  }
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  string(%d) "foo%sbar%sbaz"
+}
+===DONE===

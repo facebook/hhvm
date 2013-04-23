@@ -1,0 +1,65 @@
+getDocNamespaces
+
+Backwards Compatibility:
+recursion:
+array(2) {
+  ["p"]=>
+  string(20) "http://example.org/p"
+  ["t"]=>
+  string(20) "http://example.org/t"
+}
+array(2) {
+  ["p"]=>
+  string(20) "http://example.org/p"
+  ["t"]=>
+  string(20) "http://example.org/t"
+}
+array(2) {
+  ["p"]=>
+  string(20) "http://example.org/p"
+  ["t"]=>
+  string(20) "http://example.org/t"
+}
+
+non recursive:
+array(1) {
+  ["p"]=>
+  string(20) "http://example.org/p"
+}
+array(1) {
+  ["p"]=>
+  string(20) "http://example.org/p"
+}
+array(1) {
+  ["p"]=>
+  string(20) "http://example.org/p"
+}
+
+
+Using new 'from_root' bool set to false:
+recursion:
+array(2) {
+  ["p"]=>
+  string(20) "http://example.org/p"
+  ["t"]=>
+  string(20) "http://example.org/t"
+}
+array(1) {
+  ["t"]=>
+  string(20) "http://example.org/t"
+}
+array(0) {
+}
+
+non recursive:
+array(1) {
+  ["p"]=>
+  string(20) "http://example.org/p"
+}
+array(1) {
+  ["t"]=>
+  string(20) "http://example.org/t"
+}
+array(0) {
+}
+===DONE===

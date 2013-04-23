@@ -25,10 +25,12 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+static const Trace::Module TRACEMOD = Trace::debugger;
 
 DebuggerServer DebuggerServer::s_debugger_server;
 
 bool DebuggerServer::Start() {
+  TRACE(2, "DebuggerServer::Start\n");
   if (RuntimeOption::EnableDebuggerServer) {
     Debugger::SetTextColors();
 
@@ -43,6 +45,7 @@ bool DebuggerServer::Start() {
 }
 
 void DebuggerServer::Stop() {
+  TRACE(2, "DebuggerServer::Stop\n");
   if (RuntimeOption::EnableDebuggerServer) {
     s_debugger_server.stop();
   }
@@ -52,14 +55,17 @@ void DebuggerServer::Stop() {
 
 DebuggerServer::DebuggerServer()
     : m_serverThread(this, &DebuggerServer::accept), m_stopped(false) {
+  TRACE(2, "DebuggerServer::DebuggerServer\n");
 }
 
 DebuggerServer::~DebuggerServer() {
+  TRACE(2, "DebuggerServer::~DebuggerServery\n");
   m_stopped = true;
   m_serverThread.waitForEnd();
 }
 
 bool DebuggerServer::start() {
+  TRACE(2, "DebuggerServer::start\n");
   int port = RuntimeOption::DebuggerServerPort;
   int backlog = 128;
 
@@ -97,11 +103,13 @@ bool DebuggerServer::start() {
 }
 
 void DebuggerServer::stop() {
+  TRACE(2, "DebuggerServer::stop\n");
   m_stopped = true;
   m_serverThread.waitForEnd();
 }
 
 void DebuggerServer::accept() {
+  TRACE(2, "DebuggerServer::accept\n");
   // server loop
   while (!m_stopped) {
     struct pollfd fds[1];

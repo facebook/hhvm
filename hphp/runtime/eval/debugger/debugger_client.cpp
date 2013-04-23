@@ -43,9 +43,12 @@ using namespace HPHP::Util::TextArt;
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+static const Trace::Module TRACEMOD = Trace::debugger;
+
 static boost::scoped_ptr<DebuggerClient> debugger_client;
 
 static DebuggerClient& getStaticDebuggerClient() {
+  TRACE(2, "DebuggerClient::getStaticDebuggerClient\n");
   /*
    * DebuggerClient acquires global mutexes in its constructor, so we
    * allocate s_debugger_client lazily to ensure that all of the
@@ -63,6 +66,7 @@ static DebuggerClient& getStaticDebuggerClient() {
 }
 
 void shutdown_hphpd() {
+  TRACE(2, "DebuggerClient::shutdown_hphpd\n");
   if (debugger_client) {
     debugger_client->resetSmartAllocatedMembers();
     debugger_client.reset();
@@ -73,10 +77,12 @@ void shutdown_hphpd() {
 // readline setups
 
 static char* debugger_generator(const char* text, int state) {
+  TRACE(2, "DebuggerClient::debugger_generator\n");
   return getStaticDebuggerClient().getCompletion(text, state);
 }
 
 static char **debugger_completion(const char *text, int start, int end) {
+  TRACE(2, "DebuggerClient::debugger_completion\n");
   if (getStaticDebuggerClient().setCompletion(text, start, end)) {
     return rl_completion_matches((char*)text, &debugger_generator);
   }
@@ -84,10 +90,12 @@ static char **debugger_completion(const char *text, int start, int end) {
 }
 
 static void debugger_signal_handler(int sig) {
+  TRACE(2, "DebuggerClient::debugger_signal_handler\n");
   getStaticDebuggerClient().onSignal(sig);
 }
 
 void DebuggerClient::onSignal(int sig) {
+  TRACE(2, "DebuggerClient::onSignal\n");
   if (m_inputState == TakingInterrupt) {
     time_t now = time(0);
 
@@ -114,6 +122,7 @@ void DebuggerClient::onSignal(int sig) {
 }
 
 int DebuggerClient::pollSignal() {
+  TRACE(2, "DebuggerClient::pollSignal\n");
   int ret = m_signum;
   m_signum = CmdSignal::SignalNone;
   return ret;
@@ -127,6 +136,7 @@ int DebuggerClient::pollSignal() {
 class ReadlineApp {
 public:
   ReadlineApp() {
+    TRACE(2, "ReadlineApp::ReadlineApp\n");
     DebuggerClient::AdjustScreenMetrics();
 
     rl_attempted_completion_function = debugger_completion;
@@ -135,11 +145,14 @@ public:
     rl_catch_signals = 0;
     signal(SIGINT, debugger_signal_handler);
 
+    TRACE(3, "ReadlineApp::ReadlineApp, about to call read_history\n");
     read_history((Process::GetHomeDirectory() +
                   DebuggerClient::HistoryFileName).c_str());
+    TRACE(3, "ReadlineApp::ReadlineApp, done calling read_history\n");
   }
 
   ~ReadlineApp() {
+    TRACE(2, "ReadlineApp::~ReadlineApp\n");
     write_history((Process::GetHomeDirectory() +
                    DebuggerClient::HistoryFileName).c_str());
   }
@@ -152,15 +165,18 @@ class ReadlineWaitCursor {
 public:
   ReadlineWaitCursor()
       : m_thread(this, &ReadlineWaitCursor::animate), m_waiting(true) {
+    TRACE(2, "ReadlineWaitCursor::ReadlineWaitCursor\n");
     m_thread.start();
   }
 
   ~ReadlineWaitCursor() {
+    TRACE(2, "ReadlineWaitCursor::~ReadlineWaitCursor\n");
     m_waiting = false;
     m_thread.waitForEnd();
   }
 
   void animate() {
+    TRACE(2, "ReadlineWaitCursor::animate\n");
     m_line = rl_line_buffer;
     while (m_waiting) {
       frame('|'); frame('/'); frame('-'); frame('\\');
@@ -175,6 +191,7 @@ private:
   string m_line;
 
   void frame(char ch) {
+  TRACE(2, "ReadlineWaitCursor::getStaticDebuggerClient\n");
     string line = m_line + ch;
     rl_replace_line(line.c_str(), 1);
     rl_redisplay();
@@ -218,6 +235,7 @@ const char *DebuggerClient::DefaultCodeColors[] = {
 };
 
 void DebuggerClient::LoadColors(Hdf hdf) {
+  TRACE(2, "DebuggerClient::LoadColors\n");
   HelpColor     = LoadColor(hdf["Help"],     "BROWN");
   InfoColor     = LoadColor(hdf["Info"],     "GREEN");
   OutputColor   = LoadColor(hdf["Output"],   "CYAN");
@@ -240,6 +258,7 @@ void DebuggerClient::LoadColors(Hdf hdf) {
 }
 
 const char *DebuggerClient::LoadColor(Hdf hdf, const char *defaultName) {
+  TRACE(2, "DebuggerClient::LoadColor\n");
   const char *name = hdf.get(defaultName);
   hdf = name;  // for starter
   const char *color = get_color_by_name(name);
@@ -251,6 +270,7 @@ const char *DebuggerClient::LoadColor(Hdf hdf, const char *defaultName) {
 }
 
 const char *DebuggerClient::LoadBgColor(Hdf hdf, const char *defaultName) {
+  TRACE(2, "DebuggerClient::LoadBgColor\n");
   const char *name = hdf.get(defaultName);
   hdf = name;  // for starter
   const char *color = get_bgcolor_by_name(name);
@@ -263,12 +283,14 @@ const char *DebuggerClient::LoadBgColor(Hdf hdf, const char *defaultName) {
 
 void DebuggerClient::LoadCodeColor(CodeColor index, Hdf hdf,
                                    const char *defaultName) {
+  TRACE(2, "DebuggerClient::LoadCodeColor\n");
   const char *color = LoadColor(hdf, defaultName);
   DefaultCodeColors[index * 2] = color;
   DefaultCodeColors[index * 2 + 1] = color ? ANSI_COLOR_END : nullptr;
 }
 
 SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
+  TRACE(2, "DebuggerClient::Start\n");
   Debugger::SetTextColors();
   SmartPtr<Socket> ret = getStaticDebuggerClient().connectLocal();
   getStaticDebuggerClient().start(options);
@@ -276,19 +298,23 @@ SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
 }
 
 void DebuggerClient::Stop() {
+  TRACE(2, "DebuggerClient::Stop\n");
   getStaticDebuggerClient().stop();
 }
 
 void DebuggerClient::AdjustScreenMetrics() {
+  TRACE(2, "entered: DebuggerClient::AdjustScreenMetrics\n");
   int rows = 0; int cols = 0;
   rl_get_screen_size(&rows, &cols);
   if (rows > 0 && cols > 0) {
     LineWidth = cols - 4;
     ScrollBlockSize = CodeBlockSize = rows - (rows >> 2);
   }
+  TRACE(2, "leaving: DebuggerClient::AdjustScreenMetrics\n");
 }
 
 bool DebuggerClient::IsValidNumber(const std::string &arg) {
+  TRACE(2, "DebuggerClient::IsValidNumber\n");
   if (arg.empty()) return false;
   for (unsigned int i = 0; i < arg.size(); i++) {
     if (!isdigit(arg[i])) {
@@ -300,6 +326,7 @@ bool DebuggerClient::IsValidNumber(const std::string &arg) {
 
 String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */,
                                       bool vardump /* = false */) {
+  TRACE(2, "DebuggerClient::FormatVariable\n");
   String value;
   if (maxlen <= 0) {
     try {
@@ -331,6 +358,7 @@ String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */,
 
 String DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
                                      int *nameLen /* = NULL */) {
+  TRACE(2, "DebuggerClient::FormatInfoVec\n");
   // vertical align names
   int maxlen = 0;
   for (unsigned int i = 0; i < info.size(); i++) {
@@ -356,6 +384,7 @@ String DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
 }
 
 String DebuggerClient::FormatTitle(const char *title) {
+  TRACE(2, "DebuggerClient::FormatTitle\n");
   String dash = StringUtil::Repeat(BOX_H, (LineWidth - strlen(title)) / 2 - 4);
 
   StringBuffer sb;
@@ -381,10 +410,12 @@ DebuggerClient::DebuggerClient(std::string name /* = "" */)
       m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0),
       m_clientState(StateUninit), m_inApiUse(false),
       m_nameForApi(name), m_usageLogFP(nullptr) {
+  TRACE(2, "DebuggerClient::DebuggerClient\n");
   initUsageLogging();
 }
 
 DebuggerClient::~DebuggerClient() {
+  TRACE(2, "DebuggerClient::~DebuggerClient\n");
   m_stopped = true;
   m_mainThread.waitForEnd();
   FILE *f = getLogFileHandler();
@@ -396,6 +427,7 @@ DebuggerClient::~DebuggerClient() {
 }
 
 void DebuggerClient::reset() {
+  TRACE(2, "DebuggerClient::reset\n");
   for (unsigned int i = 0; i < m_machines.size(); i++) {
     m_machines[i]->m_thrift.close();
   }
@@ -408,10 +440,12 @@ void DebuggerClient::reset() {
 }
 
 bool DebuggerClient::isLocal() {
+  TRACE(2, "DebuggerClient::isLocal\n");
   return !isApiMode() && m_machines[0] == m_machine;
 }
 
 bool DebuggerClient::connect(const std::string &host, int port) {
+  TRACE(2, "DebuggerClient::connect\n");
   assert(isApiMode() ||
          (!m_machines.empty() && m_machines[0]->m_name == LocalPrompt));
   for (unsigned int i = 1; i < m_machines.size(); i++) {
@@ -425,6 +459,7 @@ bool DebuggerClient::connect(const std::string &host, int port) {
 }
 
 bool DebuggerClient::connectRPC(const std::string &host, int port) {
+  TRACE(2, "DebuggerClient::connectRPC\n");
   assert(!m_machines.empty());
   DMachineInfoPtr local = m_machines[0];
   assert(local->m_name == LocalPrompt);
@@ -436,6 +471,7 @@ bool DebuggerClient::connectRPC(const std::string &host, int port) {
 }
 
 bool DebuggerClient::disconnect() {
+  TRACE(2, "DebuggerClient::disconnect\n");
   assert(!m_machines.empty());
   DMachineInfoPtr local = m_machines[0];
   assert(local->m_name == LocalPrompt);
@@ -446,6 +482,7 @@ bool DebuggerClient::disconnect() {
 }
 
 void DebuggerClient::switchMachine(DMachineInfoPtr machine) {
+  TRACE(2, "DebuggerClient::switchMachine\n");
   m_rpcHost.clear();
   machine->m_initialized = false; // even if m_machine == machine
 
@@ -465,6 +502,7 @@ void DebuggerClient::switchMachine(DMachineInfoPtr machine) {
 }
 
 SmartPtr<Socket> DebuggerClient::connectLocal() {
+  TRACE(2, "DebuggerClient::connectLocal\n");
   int fds[2];
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0) {
     throw Exception("unable to create socket pair for local debugging");
@@ -485,6 +523,7 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
 }
 
 bool DebuggerClient::connectRemote(const std::string &host, int port) {
+  TRACE(2, "DebuggerClient::connectRemote\n");
   if (port <= 0) {
     port = RuntimeOption::DebuggerServerPort;
   }
@@ -510,6 +549,7 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
 }
 
 bool DebuggerClient::reconnect() {
+  TRACE(2, "DebuggerClient::reconnect\n");
   assert(m_machine);
   string &host = m_machine->m_name;
   int port = m_machine->m_port;
@@ -539,6 +579,7 @@ bool DebuggerClient::reconnect() {
 }
 
 std::string DebuggerClient::getPrompt() {
+  TRACE(2, "DebuggerClient::getPrompt\n");
   if (NoPrompt) {
     return "";
   }
@@ -558,6 +599,7 @@ std::string DebuggerClient::getPrompt() {
 }
 
 void DebuggerClient::init(const DebuggerClientOptions &options) {
+  TRACE(2, "DebuggerClient::init\n");
   m_options = options;
 
   if (isApiMode()) {
@@ -603,20 +645,24 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
 }
 
 void DebuggerClient::start(const DebuggerClientOptions &options) {
+  TRACE(2, "DebuggerClient::start\n");
   init(options);
   m_mainThread.start();
 }
 
 void DebuggerClient::stop() {
+  TRACE(2, "DebuggerClient::stop\n");
   m_stopped = true;
   m_mainThread.waitForEnd();
 }
 
 void DebuggerClient::run() {
+  TRACE(2, "DebuggerClient::run\n");
   // Make sure we don't run the interface thread for API mode
   assert(!isApiMode());
 
   ReadlineApp app;
+  TRACE(3, "DebuggerClient::run, about to call playMacro\n");
   playMacro("startup");
 
   if (!m_options.cmds.empty()) {
@@ -660,12 +706,14 @@ void DebuggerClient::run() {
 // auto-complete
 
 void DebuggerClient::updateLiveLists() {
+  TRACE(2, "DebuggerClient::updateLiveLists\n");
   ReadlineWaitCursor waitCursor;
   CmdInfo::UpdateLiveLists(this);
   m_acLiveListsDirty = false;
 }
 
 void DebuggerClient::promptFunctionPrototype() {
+  TRACE(2, "DebuggerClient::promptFunctionPrototype\n");
   if (m_acProtoTypePrompted) return;
   m_acProtoTypePrompted = true;
 
@@ -698,6 +746,7 @@ void DebuggerClient::promptFunctionPrototype() {
 }
 
 bool DebuggerClient::setCompletion(const char *text, int start, int end) {
+  TRACE(2, "DebuggerClient::setCompletion\n");
   if (m_inputState == TakingCommand) {
     parseCommand(rl_line_buffer);
     if (*text) {
@@ -712,6 +761,7 @@ bool DebuggerClient::setCompletion(const char *text, int start, int end) {
 }
 
 void DebuggerClient::addCompletion(AutoComplete type) {
+  TRACE(2, "DebuggerClient::addCompletion(AutoComplete type)\n");
   if (type < 0 || type >= AutoCompleteCount) {
     Logger::Error("Invalid auto completion enum: %d", type);
     return;
@@ -739,19 +789,23 @@ void DebuggerClient::addCompletion(AutoComplete type) {
 }
 
 void DebuggerClient::addCompletion(const char **list) {
+  TRACE(2, "DebuggerClient::addCompletion(const char **list)\n");
   m_acLists.push_back(list);
 }
 
 void DebuggerClient::addCompletion(const char *name) {
+  TRACE(2, "DebuggerClient::addCompletion(const char *name)\n");
   m_acStrings.push_back(name);
 }
 
 void DebuggerClient::addCompletion(const std::vector<std::string> &items) {
+  TRACE(2, "DebuggerClient::addCompletion(const std::vector<std::string>)\n");
   m_acItems.insert(m_acItems.end(), items.begin(), items.end());
 }
 
 char *DebuggerClient::getCompletion(const std::vector<std::string> &items,
                                     const char *text) {
+  TRACE(2, "DebuggerClient::getCompletion(const std::vector<std::string>\n");
   while (++m_acPos < (int)items.size()) {
     const char *p = items[m_acPos].c_str();
     if (m_acLen == 0 || strncasecmp(p, text, m_acLen) == 0) {
@@ -764,6 +818,7 @@ char *DebuggerClient::getCompletion(const std::vector<std::string> &items,
 
 std::vector<std::string> DebuggerClient::getAllCompletions(
   std::string const &text) {
+  TRACE(2, "DebuggerClient::getAllCompletions\n");
   std::vector<std::string> res;
 
   if (m_acLiveListsDirty) {
@@ -784,6 +839,7 @@ std::vector<std::string> DebuggerClient::getAllCompletions(
 
 char *DebuggerClient::getCompletion(const std::vector<const char *> &items,
                                     const char *text) {
+  TRACE(2, "DebuggerClient::getCompletion(const std::vector<const char *>\n");
   while (++m_acPos < (int)items.size()) {
     const char *p = items[m_acPos];
     if (m_acLen == 0 || strncasecmp(p, text, m_acLen) == 0) {
@@ -795,11 +851,13 @@ char *DebuggerClient::getCompletion(const std::vector<const char *> &items,
 }
 
 static char first_non_whitespace(const char *s) {
+  TRACE(2, "DebuggerClient::first_non_whitespace\n");
   while (*s && isspace(*s)) s++;
   return *s;
 }
 
 char *DebuggerClient::getCompletion(const char *text, int state) {
+  TRACE(2, "DebuggerClient::getCompletion\n");
   if (state == 0) {
     m_acLen = strlen(text);
     m_acIndex = 0;
@@ -881,6 +939,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
 // main
 
 bool DebuggerClient::initializeMachine() {
+  TRACE(2, "DebuggerClient::initializeMachine\n");
   if (!m_machine->m_initialized) {
     // set/clear intercept for RPC thread
     if (!m_machines.empty() && m_machine == m_machines[0]) {
@@ -916,6 +975,7 @@ bool DebuggerClient::initializeMachine() {
 }
 
 DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
+  TRACE(2, "DebuggerClient::waitForNextInterrupt\n");
   const char *func = "DebuggerClient::waitForNextInterrupt()";
   while (!m_stopped) {
     DebuggerCommandPtr cmd;
@@ -955,6 +1015,7 @@ DebuggerCommandPtr DebuggerClient::waitForNextInterrupt() {
 }
 
 void DebuggerClient::runImpl() {
+  TRACE(2, "DebuggerClient::runImpl\n");
   const char *func = "DebuggerClient::runImpl()";
 
   try {
@@ -1007,6 +1068,7 @@ void DebuggerClient::runImpl() {
 }
 
 bool DebuggerClient::console() {
+  TRACE(2, "DebuggerClient::console\n");
   while (true) {
     const char *line = nullptr;
 
@@ -1088,12 +1150,14 @@ bool DebuggerClient::console() {
 // output functions
 
 String DebuggerClient::getPrintString() {
+  TRACE(2, "DebuggerClient::getPrintString\n");
   String s(m_outputBuf); // makes a copy;
   m_outputBuf.clear();
   return s;
 }
 
 Array DebuggerClient::getOutputArray() {
+  TRACE(2, "DebuggerClient::getOutputArray\n");
   Array ret;
   switch (m_outputType) {
     case OTCodeLoc:
@@ -1127,6 +1191,7 @@ Array DebuggerClient::getOutputArray() {
 // spew showing the code around the breakpoint.
 //
 void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
+  TRACE(2, "DebuggerClient::shortCode\n");
   if (bp && !bp->m_file.empty() && bp->m_line1) {
     Variant source = CmdList::GetSourceFile(this, bp->m_file);
     if (source.isString()) {
@@ -1172,6 +1237,7 @@ void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
 bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
                           int line2 /* = 0 */, int charFocus0 /* = 0 */,
                           int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
+  TRACE(2, "DebuggerClient::code\n");
   if (line1 == 0 && line2 == 0) {
     String highlighted;
     if (isApiMode()) {
@@ -1214,6 +1280,7 @@ bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
 }
 
 char DebuggerClient::ask(const char *fmt, ...) {
+  TRACE(2, "DebuggerClient::ask\n");
   assert(!isApiMode());
   string msg;
   va_list ap;
@@ -1230,12 +1297,12 @@ char DebuggerClient::ask(const char *fmt, ...) {
 #define FWRITE(ptr, size, nmemb, stream)                                \
 do {                                                                    \
   if (isApiMode()) {                                                    \
-    m_outputBuf.append(ptr, size * nmemb);                             \
+    m_outputBuf.append(ptr, size * nmemb);                              \
   }                                                                     \
                                                                         \
   /* LogFile debugger setting */                                        \
   FILE *f = getLogFileHandler();                                        \
-  if (f != nullptr) {                                                      \
+  if (f != nullptr) {                                                   \
     fwrite(ptr, size, nmemb, f);                                        \
   }                                                                     \
                                                                         \
@@ -1244,6 +1311,7 @@ do {                                                                    \
 } while (0)                                                             \
 
 void DebuggerClient::print(const char *fmt, ...) {
+  TRACE(2, "DebuggerClient::print(const char *fmt, ...)\n");
   string msg;
   va_list ap;
   va_start(ap, fmt);
@@ -1252,12 +1320,14 @@ void DebuggerClient::print(const char *fmt, ...) {
 }
 
 void DebuggerClient::print(const std::string &s) {
+  TRACE(2, "DebuggerClient::print(const std::string &s)\n");
   FWRITE(s.data(), 1, s.length(), stdout);
   FWRITE("\n", 1, 1, stdout);
   fflush(stdout);
 }
 
 void DebuggerClient::print(CStrRef msg) {
+  TRACE(2, "DebuggerClient::print(CStrRef msg)\n");
   FWRITE(msg.data(), 1, msg.length(), stdout);
   FWRITE("\n", 1, 1, stdout);
   fflush(stdout);
@@ -1295,16 +1365,19 @@ IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor);
 #undef IMPLEMENT_COLOR_OUTPUT
 
 string DebuggerClient::wrap(const std::string &s) {
+  TRACE(2, "DebuggerClient::wrap\n");
   String ret = StringUtil::WordWrap(String(s.c_str(), s.size(), AttachLiteral),
                                     LineWidth - 4, "\n", true);
   return string(ret.data(), ret.size());
 }
 
 void DebuggerClient::helpTitle(const char *title) {
+  TRACE(2, "DebuggerClient::helpTitle\n");
   help(FormatTitle(title));
 }
 
 void DebuggerClient::helpCmds(const char *cmd, const char *desc, ...) {
+  TRACE(2, "DebuggerClient::helpCmds(const char *cmd, const char *desc,...)\n");
   std::vector<const char *> cmds;
   cmds.push_back(cmd);
   cmds.push_back(desc);
@@ -1322,6 +1395,7 @@ void DebuggerClient::helpCmds(const char *cmd, const char *desc, ...) {
 }
 
 void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
+  TRACE(2, "DebuggerClient::helpCmds(const std::vector<const char *> &cmds)\n");
   int left = 0; int right = 0;
   for (unsigned int i = 0; i < cmds.size(); i++) {
     int &width = (i % 2 ? right : left);
@@ -1373,16 +1447,19 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
 }
 
 void DebuggerClient::helpBody(const std::string &s) {
+  TRACE(2, "DebuggerClient::helpBody\n");
   help("");
   help(wrap(s));
   help("");
 }
 
 void DebuggerClient::helpSection(const std::string &s) {
+  TRACE(2, "DebuggerClient::helpSection\n");
   help(wrap(s));
 }
 
 void DebuggerClient::tutorial(const char *text) {
+  TRACE(2, "DebuggerClient::tutorial\n");
   if (m_tutorial < 0) return;
 
   String ret = String(text).replace("\t", "    ");
@@ -1426,6 +1503,7 @@ void DebuggerClient::tutorial(const char *text) {
 }
 
 void DebuggerClient::setTutorial(int mode) {
+  TRACE(2, "DebuggerClient::setTutorial\n");
   if (m_tutorial != mode) {
     m_tutorial = mode;
     m_tutorialVisited.clear();
@@ -1450,6 +1528,7 @@ const char **DebuggerClient::GetCommands() {
 }
 
 void DebuggerClient::shiftCommand() {
+  TRACE(2, "DebuggerClient::shiftCommand\n");
   if (m_command.size() > 1) {
     m_args.insert(m_args.begin(), m_command.substr(1));
     m_argIdx.insert(m_argIdx.begin(), 1);
@@ -1458,13 +1537,14 @@ void DebuggerClient::shiftCommand() {
 }
 
 DebuggerCommand *DebuggerClient::createCommand() {
+  TRACE(2, "DebuggerClient::createCommand\n");
 #define MATCH_CMD(name, cmd)                 \
 do {                                         \
   if (match(name)) {                         \
     m_commandCanonical = name;               \
     return new cmd();                        \
   }                                          \
-  return nullptr;                               \
+  return nullptr;                            \
 } while(0)                                   \
 
 #define NEW_CMD_NAME(name, cmd)              \
@@ -1517,6 +1597,7 @@ do {                                         \
 }
 
 bool DebuggerClient::process() {
+  TRACE(2, "DebuggerClient::process\n");
   clearCachedLocal();
   if (isApiMode()) {
     // construct m_line based on m_command and m_args
@@ -1566,6 +1647,7 @@ bool DebuggerClient::process() {
 // helpers
 
 void DebuggerClient::addToken(std::string &token, int idx) {
+  TRACE(2, "DebuggerClient::addToken\n");
   m_argIdx.push_back(idx);
   if (m_command.empty()) {
     m_command = token;
@@ -1576,6 +1658,7 @@ void DebuggerClient::addToken(std::string &token, int idx) {
 }
 
 void DebuggerClient::parseCommand(const char *line) {
+  TRACE(2, "DebuggerClient::parseCommand\n");
   m_command.clear();
   m_args.clear();
 
@@ -1632,6 +1715,7 @@ void DebuggerClient::parseCommand(const char *line) {
 }
 
 bool DebuggerClient::parse(const char *line) {
+  TRACE(2, "DebuggerClient::parse\n");
   if (m_inputState != TakingCode) {
     while (isspace(*line)) line++;
   }
@@ -1663,15 +1747,18 @@ bool DebuggerClient::parse(const char *line) {
 }
 
 bool DebuggerClient::match(const char *cmd) {
+  TRACE(2, "DebuggerClient::match\n");
   assert(cmd && *cmd);
   return !strncasecmp(m_command.c_str(), cmd, m_command.size());
 }
 
 bool DebuggerClient::Match(const char *input, const char *cmd) {
+  TRACE(2, "DebuggerClient::Match\n");
   return !strncasecmp(input, cmd, strlen(input));
 }
 
 bool DebuggerClient::arg(int index, const char *s) {
+  TRACE(2, "DebuggerClient::arg\n");
   assert(s && *s);
   assert(index > 0);
   --index;
@@ -1680,6 +1767,7 @@ bool DebuggerClient::arg(int index, const char *s) {
 }
 
 std::string DebuggerClient::argValue(int index) {
+  TRACE(2, "DebuggerClient::argValue\n");
   assert(index > 0);
   --index;
   if (index >= 0 && index < (int)m_args.size()) {
@@ -1689,6 +1777,7 @@ std::string DebuggerClient::argValue(int index) {
 }
 
 std::string DebuggerClient::lineRest(int index) {
+  TRACE(2, "DebuggerClient::lineRest\n");
   assert(index > 0);
   return m_line.substr(m_argIdx[index - 1] + 1);
 }
@@ -1697,17 +1786,20 @@ std::string DebuggerClient::lineRest(int index) {
 // comunication with DebuggerProxy
 
 DebuggerCommandPtr DebuggerClient::xend(DebuggerCommand *cmd) {
+  TRACE(2, "DebuggerClient::xend\n");
   send(cmd);
   return recv(cmd->getType());
 }
 
 void DebuggerClient::send(DebuggerCommand *cmd) {
+  TRACE(2, "DebuggerClient::send\n");
   if (!cmd->send(m_machine->m_thrift)) {
     throw DebuggerProtocolException();
   }
 }
 
 DebuggerCommandPtr DebuggerClient::recv(int expected) {
+  TRACE(2, "DebuggerClient::recv\n");
   const char *func = "DebuggerClient::recv()";
 
   DebuggerCommandPtr res;
@@ -1766,6 +1858,7 @@ DebuggerCommandPtr DebuggerClient::recv(int expected) {
 // helpers
 
 int DebuggerClient::checkEvalEnd() {
+  TRACE(2, "DebuggerClient::checkEvalEnd\n");
   size_t pos = m_line.rfind("?>");
   if (pos == string::npos) {
     return -1;
@@ -1781,6 +1874,7 @@ int DebuggerClient::checkEvalEnd() {
 }
 
 bool DebuggerClient::processTakeCode() {
+  TRACE(2, "DebuggerClient::processTakeCode\n");
   assert(m_inputState == TakingCommand);
 
   char first = m_line[0];
@@ -1818,6 +1912,7 @@ bool DebuggerClient::processTakeCode() {
 }
 
 bool DebuggerClient::processEval() {
+  TRACE(2, "DebuggerClient::processEval\n");
   m_runState = Running;
   m_inputState = TakingCommand;
   m_acLiveListsDirty = true;
@@ -1826,12 +1921,14 @@ bool DebuggerClient::processEval() {
 }
 
 void DebuggerClient::swapHelp() {
+  TRACE(2, "DebuggerClient::swapHelp\n");
   assert(m_args.size() > 0);
   m_command = m_args[0];
   m_args[0] = "help";
 }
 
 void DebuggerClient::quit() {
+  TRACE(2, "DebuggerClient::quit\n");
   m_quitting = true;
   for (unsigned int i = 0; i < m_machines.size(); i++) {
     m_machines[i]->m_thrift.close();
@@ -1840,6 +1937,7 @@ void DebuggerClient::quit() {
 }
 
 DSandboxInfoPtr DebuggerClient::getSandbox(int index) const {
+  TRACE(2, "DebuggerClient::getSandbox\n");
   if (index > 0) {
     --index;
     if (index >= 0 && index < (int)m_sandboxes.size()) {
@@ -1850,6 +1948,7 @@ DSandboxInfoPtr DebuggerClient::getSandbox(int index) const {
 }
 
 void DebuggerClient::updateThreads(DThreadInfoPtrVec threads) {
+  TRACE(2, "DebuggerClient::updateThreads\n");
   m_threads = threads;
   for (unsigned int i = 0; i < m_threads.size(); i++) {
     DThreadInfoPtr thread = m_threads[i];
@@ -1866,6 +1965,7 @@ void DebuggerClient::updateThreads(DThreadInfoPtrVec threads) {
 }
 
 DThreadInfoPtr DebuggerClient::getThread(int index) const {
+  TRACE(2, "DebuggerClient::getThread\n");
   for (unsigned int i = 0; i < m_threads.size(); i++) {
     if (m_threads[i]->m_index == index) {
       return m_threads[i];
@@ -1877,6 +1977,7 @@ DThreadInfoPtr DebuggerClient::getThread(int index) const {
 void DebuggerClient::getListLocation(std::string &file, int &line,
                                      int &lineFocus0, int &charFocus0,
                                      int &lineFocus1, int &charFocus1) {
+  TRACE(2, "DebuggerClient::getListLocation\n");
   lineFocus0 = charFocus0 = lineFocus1 = charFocus1 = 0;
   if (m_listFile.empty() && m_breakpoint) {
     setListLocation(m_breakpoint->m_file, m_breakpoint->m_line1, true);
@@ -1893,6 +1994,7 @@ void DebuggerClient::getListLocation(std::string &file, int &line,
 
 void DebuggerClient::setListLocation(const std::string &file, int line,
                                      bool center) {
+  TRACE(2, "DebuggerClient::setListLocation\n");
   m_listFile = file;
   if (!m_listFile.empty() && m_listFile[0] != '/' && !m_sourceRoot.empty()) {
     if (m_sourceRoot[m_sourceRoot.size() - 1] != '/') {
@@ -1912,6 +2014,7 @@ void DebuggerClient::setListLocation(const std::string &file, int line,
 }
 
 void DebuggerClient::setSourceRoot(const std::string &sourceRoot) {
+  TRACE(2, "DebuggerClient::setSourceRoot\n");
   m_config["SourceRoot"] = m_sourceRoot = sourceRoot;
   saveConfig();
 
@@ -1920,11 +2023,13 @@ void DebuggerClient::setSourceRoot(const std::string &sourceRoot) {
 }
 
 void DebuggerClient::setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints) {
+  TRACE(2, "DebuggerClient::setMatchedBreakPoints\n");
   m_matched = breakpoints;
 }
 
 void DebuggerClient::setCurrentLocation(int64_t threadId,
                                         BreakPointInfoPtr breakpoint) {
+  TRACE(2, "DebuggerClient::setCurrentLocation\n");
   m_threadId = threadId;
   m_breakpoint = breakpoint;
   m_stacktrace.reset();
@@ -1935,6 +2040,7 @@ void DebuggerClient::setCurrentLocation(int64_t threadId,
 }
 
 void DebuggerClient::addWatch(const char *fmt, const std::string &php) {
+  TRACE(2, "DebuggerClient::addWatch\n");
   WatchPtr watch(new Watch());
   watch->first = fmt;
   watch->second = php;
@@ -1942,10 +2048,12 @@ void DebuggerClient::addWatch(const char *fmt, const std::string &php) {
 }
 
 void DebuggerClient::setStackTrace(CArrRef stacktrace) {
+  TRACE(2, "DebuggerClient::setStackTrace\n");
   m_stacktrace = stacktrace;
 }
 
 void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
+  TRACE(2, "DebuggerClient::moveToFrame\n");
   m_frame = index;
   if (m_frame >= m_stacktrace.size()) {
     m_frame = m_stacktrace.size() - 1;
@@ -1973,6 +2081,7 @@ void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
 }
 
 void DebuggerClient::printFrame(int index, CArrRef frame) {
+  TRACE(2, "DebuggerClient::printFrame\n");
   StringBuffer args;
   for (ArrayIter iter(frame["args"]); iter; ++iter) {
     if (!args.empty()) args.append(", ");
@@ -2002,6 +2111,7 @@ void DebuggerClient::printFrame(int index, CArrRef frame) {
 }
 
 void DebuggerClient::startMacro(std::string name) {
+  TRACE(2, "DebuggerClient::startMacro\n");
   if (m_macroRecording &&
       ask("We are recording a macro. Do you want to save? [Y/n]") != 'n') {
     endMacro();
@@ -2024,6 +2134,7 @@ void DebuggerClient::startMacro(std::string name) {
 }
 
 void DebuggerClient::endMacro() {
+  TRACE(2, "DebuggerClient::endMacro\n");
   if (!m_macroRecording) {
     error("There is no ongoing recording.");
     tutorial("Use '& [s]tart {name}' or '& [s]tart' command to start "
@@ -2047,6 +2158,7 @@ void DebuggerClient::endMacro() {
 }
 
 bool DebuggerClient::playMacro(std::string name) {
+  TRACE(2, "DebuggerClient::playMacro\n");
   if (name.empty()) {
     name = "default";
   }
@@ -2061,6 +2173,7 @@ bool DebuggerClient::playMacro(std::string name) {
 }
 
 bool DebuggerClient::deleteMacro(int index) {
+  TRACE(2, "DebuggerClient::deleteMacro\n");
   --index;
   if (index >= 0 && index < (int)m_macros.size()) {
     if (ask("Are you sure you want to delete the macro? [y/N]") != 'y') {
@@ -2074,6 +2187,7 @@ bool DebuggerClient::deleteMacro(int index) {
 }
 
 void DebuggerClient::record(const char *line) {
+  TRACE(2, "DebuggerClient::record\n");
   assert(line);
   if (m_macroRecording && line[0] != '&') {
     m_macroRecording->m_cmds.push_back(line);
@@ -2084,6 +2198,7 @@ void DebuggerClient::record(const char *line) {
 // helpers for server API
 
 bool DebuggerClient::apiGrab() {
+  TRACE(2, "DebuggerClient::apiGrab\n");
   Lock l(m_inApiUseLck);
   if (m_inApiUse) {
     return false;
@@ -2093,11 +2208,13 @@ bool DebuggerClient::apiGrab() {
 }
 
 void DebuggerClient::apiFree() {
+  TRACE(2, "DebuggerClient::apiFree\n");
   Lock l(m_inApiUseLck);
   m_inApiUse = false;
 }
 
 void DebuggerClient::resetSmartAllocatedMembers() {
+  TRACE(2, "DebuggerClient::resetSmartAllocatedMembers\n");
   // Essentially sets these to null: so it's safe to run their
   // destructors at sweep time or after the SmartAllocators are torn
   // down.
@@ -2109,6 +2226,7 @@ void DebuggerClient::resetSmartAllocatedMembers() {
 // helpers for usage logging
 
 void DebuggerClient::initUsageLogging() {
+  TRACE(2, "DebuggerClient::initUsageLogging\n");
   // Usage log file is a runtime option instead of debugger config because
   // it is for internal monitoring and we don't want users to modify this.
   if (RuntimeOption::DebuggerUsageLogFile.empty()) {
@@ -2124,6 +2242,7 @@ void DebuggerClient::initUsageLogging() {
 }
 
 void DebuggerClient::finiUsageLogging() {
+  TRACE(2, "DebuggerClient::finiUsageLogging\n");
   if (m_usageLogFP) {
     fclose(m_usageLogFP);
     m_usageLogFP = nullptr;
@@ -2131,6 +2250,7 @@ void DebuggerClient::finiUsageLogging() {
 }
 
 void DebuggerClient::usageLog(const std::string& cmd, const std::string& line) {
+  TRACE(2, "DebuggerClient::usageLog\n");
   if (!m_usageLogFP) {
     return;
   }
@@ -2159,6 +2279,7 @@ void DebuggerClient::usageLog(const std::string& cmd, const std::string& line) {
 }
 
 void DebuggerClient::usageLogInterrupt(DebuggerCommandPtr cmd) {
+  TRACE(2, "DebuggerClient::usageLogInterrupt\n");
   CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
   if (!intr) {
     return;
@@ -2181,6 +2302,7 @@ void DebuggerClient::usageLogInterrupt(DebuggerCommandPtr cmd) {
 // configuration
 
 void DebuggerClient::loadConfig() {
+  TRACE(2, "DebuggerClient::loadConfig\n");
   if (m_configFileName.empty()) {
     m_configFileName = Process::GetHomeDirectory() + ConfigFileName;
   }
@@ -2245,6 +2367,7 @@ void DebuggerClient::loadConfig() {
 }
 
 void DebuggerClient::saveConfig() {
+  TRACE(2, "DebuggerClient::saveConfig\n");
   if (m_configFileName.empty()) {
     // we are not touching a file that was not successfully loaded earlier
     return;
@@ -2268,6 +2391,7 @@ void DebuggerClient::saveConfig() {
 }
 
 void DebuggerClient::defineColors() {
+  TRACE(2, "DebuggerClient::defineColors\n");
   vector<string> names;
   get_supported_colors(names);
   Hdf support = m_config["Color"]["SupportedNames"];

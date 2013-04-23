@@ -28,6 +28,7 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+static const Trace::Module TRACEMOD = Trace::debugger;
 
 DummySandbox::DummySandbox(DebuggerProxy *proxy,
                            const std::string &defaultPath,
@@ -35,10 +36,12 @@ DummySandbox::DummySandbox(DebuggerProxy *proxy,
     : m_proxy(proxy), m_defaultPath(defaultPath), m_startupFile(startupFile),
       m_stopped(false),
       m_signum(CmdSignal::SignalNone) {
+  TRACE(2, "DummySandbox::DummySandbox\n");
   m_thread = new AsyncFunc<DummySandbox>(this, &DummySandbox::run);
 }
 
 bool DummySandbox::waitForEnd(int seconds) {
+  TRACE(2, "DummySandbox::waitForEnd\n");
   bool ret = m_thread->waitForEnd(seconds);
   if (ret) {
     delete m_thread;
@@ -47,10 +50,12 @@ bool DummySandbox::waitForEnd(int seconds) {
 }
 
 void DummySandbox::start() {
+  TRACE(2, "DummySandbox::start\n");
   m_thread->start();
 }
 
 void DummySandbox::stop() {
+  TRACE(2, "DummySandbox::stop\n");
   m_stopped = true;
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   if (ti->m_reqInjectionData.dummySandbox) {
@@ -69,10 +74,12 @@ namespace {
 
 struct CLISession : boost::noncopyable {
   CLISession() {
+    TRACE(2, "CLISession::CLISession\n");
     char *argv[] = {"", nullptr};
     execute_command_line_begin(1, argv, 0);
   }
   ~CLISession() {
+    TRACE(2, "CLISession::~CLISession\n");
     Debugger::UnregisterSandbox(g_context->getSandboxId());
     ThreadInfo::s_threadInfo.getNoCheck()->
       m_reqInjectionData.debugger = false;
@@ -83,6 +90,7 @@ struct CLISession : boost::noncopyable {
 }
 
 void DummySandbox::run() {
+  TRACE(2, "DummySandbox::run\n");
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   Debugger::RegisterThread();
   ti->m_reqInjectionData.dummySandbox = true;
@@ -155,12 +163,14 @@ void DummySandbox::run() {
 }
 
 void DummySandbox::notifySignal(int signum) {
+  TRACE(2, "DummySandbox::notifySignal\n");
   Lock lock(this);
   m_signum = signum;
   notify();
 }
 
 std::string DummySandbox::getStartupDoc(const DSandboxInfo &sandbox) {
+  TRACE(2, "DummySandbox::getStartupDoc\n");
   string path;
   if (!m_startupFile.empty()) {
     // if relative path, prepend directory

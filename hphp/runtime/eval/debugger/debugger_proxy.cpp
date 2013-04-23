@@ -28,16 +28,20 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+static const Trace::Module TRACEMOD = Trace::debugger;
+
 DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
     : m_stopped(false), m_local(local), m_dummySandbox(nullptr),
       m_hasBreakPoints(false), m_threadMode(Normal), m_thread(0),
       m_signalThread(this, &DebuggerProxy::pollSignal),
       m_signum(CmdSignal::SignalNone) {
+  TRACE(2, "DebuggerProxy::DebuggerProxy\n");
   m_thrift.create(socket);
   m_dummyInfo = DSandboxInfo::CreateDummyInfo((int64_t)this);
 }
 
 DebuggerProxy::~DebuggerProxy() {
+  TRACE(2, "DebuggerProxy::~DebuggerProxy\n");
   m_stopped = true;
   m_signalThread.waitForEnd();
 
@@ -47,20 +51,24 @@ DebuggerProxy::~DebuggerProxy() {
 }
 
 const char *DebuggerProxy::getThreadType() const {
+  TRACE(2, "DebuggerProxy::getThreadType\n");
   return isLocal() ? "Command Line Script" : "Dummy Sandbox";
 }
 
 DSandboxInfo DebuggerProxy::getSandbox() const {
+  TRACE(2, "DebuggerProxy::getSandbox\n");
   Lock lock(m_mutex);
   return m_sandbox;
 }
 
 std::string DebuggerProxy::getSandboxId() const {
+  TRACE(2, "DebuggerProxy::getSandboxId\n");
   Lock lock(m_mutex);
   return m_sandbox.id();
 }
 
 void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
+  TRACE(2, "DebuggerProxy::getThreads\n");
   Lock lock(this);
   std::stack<void *> &interrupts =
     ThreadInfo::s_threadInfo->m_reqInjectionData.interrupts;
@@ -81,10 +89,12 @@ void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
 }
 
 bool DebuggerProxy::switchSandbox(const std::string &newId, bool force) {
+  TRACE(2, "DebuggerProxy::switchSandbox\n");
   return Debugger::SwitchSandbox(shared_from_this(), newId, force);
 }
 
 void DebuggerProxy::updateSandbox(DSandboxInfoPtr sandbox) {
+  TRACE(2, "DebuggerProxy::updateSandbox\n");
   Lock lock(m_mutex);
   if (sandbox) {
     if (m_sandbox.id() != sandbox->id()) {
@@ -96,6 +106,7 @@ void DebuggerProxy::updateSandbox(DSandboxInfoPtr sandbox) {
 }
 
 bool DebuggerProxy::switchThread(DThreadInfoPtr thread) {
+  TRACE(2, "DebuggerProxy::switchThread\n");
   Lock lock(this);
   if (m_threads.find(thread->m_id) != m_threads.end()) {
     m_newThread = thread;
@@ -106,6 +117,7 @@ bool DebuggerProxy::switchThread(DThreadInfoPtr thread) {
 
 void DebuggerProxy::switchThreadMode(ThreadMode mode,
                                      int64_t threadId /* = 0 */) {
+  TRACE(2, "DebuggerProxy::switchThreadMode\n");
   Lock lock(this);
   m_threadMode = mode;
   if (threadId) {
@@ -125,6 +137,7 @@ void DebuggerProxy::switchThreadMode(ThreadMode mode,
 }
 
 void DebuggerProxy::startDummySandbox() {
+  TRACE(2, "DebuggerProxy::startDummySandbox\n");
   m_dummySandbox =
     new DummySandbox(this, RuntimeOption::DebuggerDefaultSandboxPath,
                      RuntimeOption::DebuggerStartupDocument);
@@ -132,12 +145,14 @@ void DebuggerProxy::startDummySandbox() {
 }
 
 void DebuggerProxy::notifyDummySandbox() {
+  TRACE(2, "DebuggerProxy::notifyDummySandbox\n");
   m_dummySandbox->notifySignal(CmdSignal::SignalBreak);
 }
 
 // Hold the entire set of breakpoints, and sift breakpoints by function and
 // class name into separate containers for later.
 void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
+  TRACE(2, "DebuggerProxy::setBreakPoints\n");
   WriteLock lock(m_breakMutex);
   m_breakpoints = breakpoints;
   m_hasBreakPoints = !m_breakpoints.empty();
@@ -164,17 +179,20 @@ void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
 }
 
 void DebuggerProxy::getBreakPoints(BreakPointInfoPtrVec &breakpoints) {
+  TRACE(2, "DebuggerProxy::getBreakPoints\n");
   ReadLock lock(m_breakMutex);
   breakpoints = m_breakpoints;
 }
 
 bool DebuggerProxy::couldBreakEnterClsMethod(const StringData* className) {
+  TRACE(2, "DebuggerProxy::couldBreakEnterClsMethod\n");
   ReadLock lock(m_breakMutex);
   StringDataMap::const_accessor acc;
   return m_breaksEnterClsMethod.find(acc, className);
 }
 
 bool DebuggerProxy::couldBreakEnterFunc(const StringData* funcFullName) {
+  TRACE(2, "DebuggerProxy::couldBreakEnterFunc\n");
   ReadLock lock(m_breakMutex);
   StringDataMap::const_accessor acc;
   return m_breaksEnterFunc.find(acc, funcFullName);
@@ -182,6 +200,7 @@ bool DebuggerProxy::couldBreakEnterFunc(const StringData* funcFullName) {
 
 void DebuggerProxy::getBreakClsMethods(
   std::vector<const StringData*>& classNames) {
+  TRACE(2, "DebuggerProxy::getBreakClsMethods\n");
   classNames.clear();
   WriteLock lock(m_breakMutex); // Write lock in case iteration causes a re-hash
   for (StringDataMap::const_iterator iter = m_breaksEnterClsMethod.begin();
@@ -192,6 +211,7 @@ void DebuggerProxy::getBreakClsMethods(
 
 void DebuggerProxy::getBreakFuncs(
   std::vector<const StringData*>& funcFullNames) {
+  TRACE(2, "DebuggerProxy::getBreakFuncs\n");
   funcFullNames.clear();
   WriteLock lock(m_breakMutex); // Write lock in case iteration causes a re-hash
   for (StringDataMap::const_iterator iter = m_breaksEnterFunc.begin();
@@ -201,17 +221,20 @@ void DebuggerProxy::getBreakFuncs(
 }
 
 bool DebuggerProxy::needInterrupt() {
+  TRACE(2, "DebuggerProxy::needInterrupt\n");
   return m_hasBreakPoints || m_flow ||
          m_signum != CmdSignal::SignalNone;
 }
 
 bool DebuggerProxy::needInterruptForNonBreak() {
+  TRACE(2, "DebuggerProxy::needInterruptForNonBreak\n");
   return m_flow || m_signum != CmdSignal::SignalNone;
 }
 
 // Handle an interrupt from the VM. Note: some work for breakpoints has already
 // occured in DebuggerProxyVM::interrupt().
 void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxy::interrupt\n");
   // Wait until this thread is the thread this proxy wants to debug.
   // NB: breakpoints and control flow checks happen here, too, and return false
   // if we're not done with the flow, or not at a breakpoint, etc.
@@ -255,10 +278,12 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
 }
 
 bool DebuggerProxy::send(DebuggerCommand *cmd) {
+  TRACE(2, "DebuggerProxy::send\n");
   return cmd->send(m_thrift);
 }
 
 void DebuggerProxy::startSignalThread() {
+  TRACE(2, "DebuggerProxy::startSignalThread\n");
   m_signalThread.start();
 }
 
@@ -270,6 +295,7 @@ void DebuggerProxy::startSignalThread() {
 // If another thread in the sandbox fails to stop and consume the signal then
 // it will be passed to the dummy sandbox instead.
 void DebuggerProxy::pollSignal() {
+  TRACE(2, "DebuggerProxy::pollSignal\n");
   while (!m_stopped) {
     sleep(1);
 
@@ -311,6 +337,7 @@ void DebuggerProxy::pollSignal() {
 }
 
 void DebuggerProxy::forceQuit() {
+  TRACE(2, "DebuggerProxy::forceQuit\n");
   DSandboxInfo invalid;
   Lock l(this);
   m_sandbox = invalid;
@@ -322,14 +349,17 @@ void DebuggerProxy::forceQuit() {
 // helpers
 
 std::string DebuggerProxy::MakePHP(const std::string &php) {
+  TRACE(2, "DebuggerProxy::MakePHP\n");
   return "<?php " + php + ";";
 }
 
 std::string DebuggerProxy::MakePHPReturn(const std::string &php) {
+  TRACE(2, "DebuggerProxy::MakePHPReturn\n");
   return "<?php return " + php + ";";
 }
 
 static void append_stdout(const char *s, int len, void *data) {
+  TRACE(2, "DebuggerProxy::append_stdout\n");
   StringBuffer *sb = (StringBuffer*)data;
   if (s_stdout_color) {
     sb->append(s_stdout_color);
@@ -342,6 +372,7 @@ static void append_stdout(const char *s, int len, void *data) {
 
 static void append_stderr(const char *header, const char *msg,
                           const char *ending, void *data) {
+  TRACE(2, "DebuggerProxy::append_stderr\n");
   StringBuffer *sb = (StringBuffer*)data;
   if (s_stderr_color) {
     sb->append(s_stderr_color);
@@ -355,6 +386,7 @@ static void append_stderr(const char *header, const char *msg,
 
 Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
                                   bool log, int frame) {
+  TRACE(2, "DebuggerProxy::ExecutePHP\n");
   Variant ret;
   StringBuffer sb;
   StringBuffer *save = g_context->swapOutputBuffer(nullptr);
@@ -373,6 +405,7 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
 }
 
 DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
+  TRACE(2, "DebuggerProxy::createThreadInfo\n");
   DThreadInfoPtr info(new DThreadInfo());
   info->m_id = (int64_t)Process::GetThreadId();
   info->m_desc = desc;
@@ -392,6 +425,7 @@ DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
 // of the stepping logic is handled below here and this will return false if
 // the stepping operation has not completed.
 bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
+  TRACE(2, "DebuggerProxy::blockUntilOwn\n");
   int64_t self = cmd.getThreadId();
 
   Lock lock(this);
@@ -433,12 +467,14 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
 // Checks whether the cmd has any breakpoints that match the current Site.
 // Also returns true for cmds that have should always break.
 bool DebuggerProxy::checkBreakPoints(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxy::checkBreakPoints\n");
   ReadLock lock(m_breakMutex);
   return cmd.shouldBreak(m_breakpoints);
 }
 
 // Check if we should stop due to flow control, breakpoints, and signals.
 bool DebuggerProxy::checkJumpFlowBreak(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxy::checkJumpFlowBreak\n");
   // If there is an outstanding Ctrl-C from the client, go ahead and break now.
   // Note: this stops any flow control command we might have in-flight.
   if (m_signum == CmdSignal::SignalBreak) {
@@ -487,6 +523,7 @@ bool DebuggerProxy::checkJumpFlowBreak(CmdInterrupt &cmd) {
 }
 
 bool DebuggerProxy::processJumpFlowBreak(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxy::processJumpFlowBreak\n");
   if (m_jump) {
     switch (cmd.getInterruptType()) {
       case SessionEnded:
@@ -510,6 +547,7 @@ bool DebuggerProxy::processJumpFlowBreak(CmdInterrupt &cmd) {
 }
 
 void DebuggerProxy::checkStop() {
+  TRACE(2, "DebuggerProxy::checkStop\n");
   if (m_stopped) {
     Debugger::RemoveProxy(shared_from_this());
     m_thrift.close();
@@ -518,6 +556,7 @@ void DebuggerProxy::checkStop() {
 }
 
 void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxy::processInterrupt\n");
   // Do the server-side work for this cmd.
   if (!cmd.onServerD(this)) {
     Debugger::RemoveProxy(shared_from_this()); // on socket error
@@ -582,10 +621,12 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
 }
 
 void DebuggerProxy::processFlowControl(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxy::processFlowControl\n");
   const_assert(false);
 }
 
 bool DebuggerProxy::breakByFlowControl(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxy::breakByFlowControl\n");
   const_assert(false);
 }
 
@@ -594,6 +635,7 @@ bool DebuggerProxy::breakByFlowControl(CmdInterrupt &cmd) {
 
 Variant DebuggerProxyVM::ExecutePHP(const std::string &php, String &output,
                                     bool log, int frame) {
+  TRACE(2, "DebuggerProxyVM::ExecutePHP\n");
   Variant ret;
   StringBuffer sb;
   StringBuffer *save = g_context->swapOutputBuffer(nullptr);
@@ -633,6 +675,7 @@ Variant DebuggerProxyVM::ExecutePHP(const std::string &php, String &output,
 // There could be multiple breakpoints at one place but we can manage this
 // with only one breakpoint.
 BreakPointInfoPtr DebuggerProxyVM::getBreakPointAtCmd(CmdInterrupt& cmd) {
+  TRACE(2, "DebuggerProxyVM::getBreakPointAtCmd\n");
   for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
     BreakPointInfoPtr bp = m_breakpoints[i];
     if (bp->m_state != BreakPointInfo::Disabled &&
@@ -645,6 +688,7 @@ BreakPointInfoPtr DebuggerProxyVM::getBreakPointAtCmd(CmdInterrupt& cmd) {
 
 // Handle an interrupt from the VM.
 void DebuggerProxyVM::interrupt(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxyVM::interrupt\n");
   changeBreakPointDepth(cmd);
 
   if (cmd.getInterruptType() == BreakPointReached) {
@@ -688,11 +732,13 @@ void DebuggerProxyVM::interrupt(CmdInterrupt &cmd) {
 }
 
 void DebuggerProxyVM::setBreakPoints(BreakPointInfoPtrVec& breakpoints) {
+  TRACE(2, "DebuggerProxyVM::setBreakPoints\n");
   DebuggerProxy::setBreakPoints(breakpoints); // Hold bp's in the proxy.
   VM::phpSetBreakPointsInAllFiles(this); // Apply breakpoints to the code.
 }
 
 void DebuggerProxyVM::readInjTablesFromThread() {
+  TRACE(2, "DebuggerProxyVM::readInjTablesFromThread\n");
   ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
   if (ti->m_reqInjectionData.dummySandbox) {
     return;
@@ -708,6 +754,7 @@ void DebuggerProxyVM::readInjTablesFromThread() {
 }
 
 void DebuggerProxyVM::writeInjTablesToThread() {
+  TRACE(2, "DebuggerProxyVM::writeInjTablesToThread\n");
   if (g_vmContext->m_injTables) {
     delete g_vmContext->m_injTables;
     g_vmContext->m_injTables = nullptr;
@@ -719,6 +766,7 @@ void DebuggerProxyVM::writeInjTablesToThread() {
 }
 
 int DebuggerProxyVM::getRealStackDepth() {
+  TRACE(2, "DebuggerProxyVM::getRealStackDepth\n");
   int depth = 0;
   VMExecutionContext* context = g_vmContext;
   HPHP::VM::ActRec *fp = context->getFP();
@@ -732,6 +780,7 @@ int DebuggerProxyVM::getRealStackDepth() {
 }
 
 int DebuggerProxyVM::getStackDepth() {
+  TRACE(2, "DebuggerProxyVM::getStackDepth\n");
   int depth = 0;
   VMExecutionContext* context = g_vmContext;
   HPHP::VM::ActRec *fp = context->getFP();
@@ -747,6 +796,7 @@ int DebuggerProxyVM::getStackDepth() {
 
 // Handle a continue cmd, or setup stepping.
 void DebuggerProxyVM::processFlowControl(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxyVM::processFlowControl\n");
   switch (m_flow->getType()) {
     case DebuggerCommand::KindOfContinue:
       if (!m_flow->decCount()) {
@@ -782,6 +832,7 @@ void DebuggerProxyVM::processFlowControl(CmdInterrupt &cmd) {
  */
 
 void DebuggerProxyVM::changeBreakPointDepth(CmdInterrupt& cmd) {
+  TRACE(2, "DebuggerProxyVM::changeBreakPointDepth\n");
   for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
     // if the site changes, then update the breakpoint depth
     BreakPointInfoPtr bp = m_breakpoints[i];
@@ -795,6 +846,7 @@ void DebuggerProxyVM::changeBreakPointDepth(CmdInterrupt& cmd) {
 // Determine if an outstanding flow control cmd has run it's course and we
 // should stop execution.
 bool DebuggerProxyVM::breakByFlowControl(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxyVM::breakByFlowControl\n");
   switch (m_flow->getType()) {
     case DebuggerCommand::KindOfStep: {
       if (!m_flow->decCount()) {

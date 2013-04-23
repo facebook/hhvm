@@ -23,9 +23,11 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
-// send/recv
+static const Trace::Module TRACEMOD = Trace::debugger;
 
+// send/recv
 bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
+  TRACE(2, "DebuggerCommand::send\n");
   try {
     thrift.reset(false);
     sendImpl(thrift);
@@ -39,6 +41,7 @@ bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
 }
 
 bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
+  TRACE(2, "DebuggerCommand::recv\n");
   try {
     recvImpl(thrift);
   } catch (...) {
@@ -50,6 +53,7 @@ bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
 }
 
 void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
+  TRACE(2, "DebuggerCommand::sendImpl\n");
   thrift.write((int32_t)m_type);
   thrift.write(m_class);
   thrift.write(m_body);
@@ -57,12 +61,14 @@ void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
 }
 
 void DebuggerCommand::recvImpl(DebuggerThriftBuffer &thrift) {
+  TRACE(2, "DebuggerCommand::recvImpl\n");
   thrift.read(m_body);
   thrift.read(m_version);
 }
 
 bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
                               DebuggerCommandPtr &cmd, const char *caller) {
+  TRACE(2, "DebuggerCommand::Receive\n");
   cmd.reset();
 
   struct pollfd fds[1];
@@ -141,14 +147,17 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
 // default handlers
 
 void DebuggerCommand::list(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::list\n");
 }
 
 bool DebuggerCommand::help(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::help\n");
   assert(false);
   return true;
 }
 
 bool DebuggerCommand::onClient(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::onClient\n");
   if (client->arg(1, "help") || client->arg(1, "?")) {
     return help(client);
   }
@@ -156,11 +165,13 @@ bool DebuggerCommand::onClient(DebuggerClient *client) {
 }
 
 void DebuggerCommand::setClientOutput(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::setClientOutput\n");
   // Just default to text
   client->setOutputType(DebuggerClient::OTText);
 }
 
 bool DebuggerCommand::onClientD(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::onClientD\n");
   bool ret = onClientVM(client);
   if (client->isApiMode() && !m_incomplete) {
     setClientOutput(client);
@@ -169,6 +180,7 @@ bool DebuggerCommand::onClientD(DebuggerClient *client) {
 }
 
 bool DebuggerCommand::onServer(DebuggerProxy *proxy) {
+  TRACE(2, "DebuggerCommand::onServer\n");
   assert(false);
   Logger::Error("DebuggerCommand::onServer(): bad cmd type: %d", m_type);
   return false;

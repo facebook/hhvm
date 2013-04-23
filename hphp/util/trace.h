@@ -75,6 +75,7 @@ namespace Trace {
       TM(refcount)    \
       TM(asmx64)      \
       TM(runtime)     \
+      TM(debugger)    \
       TM(debuginfo)   \
       TM(stats)       \
       TM(emitter)     \

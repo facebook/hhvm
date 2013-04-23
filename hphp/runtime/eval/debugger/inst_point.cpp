@@ -21,8 +21,10 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+static const Trace::Module TRACEMOD = Trace::debugger;
 
 const uchar* InstPointInfo::lookupPC() {
+  TRACE(2, "InstPointInfo::lookupPC\n");
   VMExecutionContext* context = g_vmContext;
   if (m_locType == LocHere) {
     // Instrument to current location
@@ -44,21 +46,25 @@ const uchar* InstPointInfo::lookupPC() {
 }
 
 void InstPointInfo::setLocHere() {
+  TRACE(2, "InstPointInfo::setLocHere\n");
   m_locType = LocHere;
 }
 
 void InstPointInfo::setLocFileLine(const std::string& file, int line) {
+  TRACE(2, "InstPointInfo::setLocFileLine\n");
   m_locType = LocFileLine;
   m_file = file;
   m_line = line;
 }
 
 void InstPointInfo::setLocFuncEntry(const std::string& func) {
+  TRACE(2, "InstPointInfo::setLocFuncEntry\n");
   m_locType = LocFuncEntry;
   m_func = func;
 }
 
 void InstPointInfo::sendImpl(DebuggerThriftBuffer &thrift) {
+  TRACE(2, "InstPointInfo::sendImpl\n");
   thrift.write(m_locType);
   thrift.write(m_valid);
   thrift.write(m_file);
@@ -69,6 +75,7 @@ void InstPointInfo::sendImpl(DebuggerThriftBuffer &thrift) {
 }
 
 void InstPointInfo::recvImpl(DebuggerThriftBuffer &thrift) {
+  TRACE(2, "InstPointInfo::recvImpl\n");
   thrift.read(m_locType);
   thrift.read(m_valid);
   thrift.read(m_file);
@@ -80,6 +87,7 @@ void InstPointInfo::recvImpl(DebuggerThriftBuffer &thrift) {
 
 void InstPointInfo::SendImpl(const InstPointInfoPtrVec& ips,
                              DebuggerThriftBuffer &thrift) {
+  TRACE(2, "InstPointInfo::SendImpl\n");
   int16_t size = ips.size();
   thrift.write(size);
   for (int i = 0; i < size; i++) {
@@ -89,6 +97,7 @@ void InstPointInfo::SendImpl(const InstPointInfoPtrVec& ips,
 
 void InstPointInfo::RecvImpl(InstPointInfoPtrVec& ips,
                              DebuggerThriftBuffer &thrift) {
+  TRACE(2, "InstPointInfo::RecvImpl\n");
   int16_t size;
   thrift.read(size);
   ips.resize(size);

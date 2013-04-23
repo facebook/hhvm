@@ -23,7 +23,10 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+static const Trace::Module TRACEMOD = Trace::debugger;
+
 const std::string &DSandboxInfo::id() const {
+  TRACE(2, "DSandboxInfo::id\n");
   if (m_cached_id.empty() && !m_user.empty()) {
     m_cached_id = m_user + "\t" + m_name;
   }
@@ -31,6 +34,7 @@ const std::string &DSandboxInfo::id() const {
 }
 
 const std::string DSandboxInfo::desc() const {
+  TRACE(2, "DSandboxInfo::desc\n");
   string ret = m_user + "'s " + m_name + " sandbox";
   if (!m_path.empty()) {
     ret += " at " + m_path;
@@ -39,12 +43,14 @@ const std::string DSandboxInfo::desc() const {
 }
 
 DSandboxInfo DSandboxInfo::CreateDummyInfo(uint64_t unique) {
+  TRACE(2, "DSandboxInfo::CreateDummyInfo\n");
   char buf[64];
   snprintf(buf, 64, "dummy\t0x%" PRIu64, unique);
   return DSandboxInfo(std::string(buf));
 }
 
 void DSandboxInfo::set(const std::string &id) {
+  TRACE(2, "DSandboxInfo::set\n");
   m_cached_id.clear();
   m_user.clear();
   m_name.clear();
@@ -60,18 +66,21 @@ void DSandboxInfo::set(const std::string &id) {
 }
 
 void DSandboxInfo::update(const DSandboxInfo &src) {
+  TRACE(2, "DSandboxInfo::update\n");
   if (!src.m_path.empty() && m_path.empty()) {
     m_path = src.m_path;
   }
 }
 
 void DSandboxInfo::sendImpl(ThriftBuffer &thrift) {
+  TRACE(2, "DSandboxInfo::sendImpl\n");
   thrift.write(m_user);
   thrift.write(m_name);
   thrift.write(m_path);
 }
 
 void DSandboxInfo::recvImpl(ThriftBuffer &thrift) {
+  TRACE(2, "DSandboxInfo::recvImpl\n");
   thrift.read(m_user);
   thrift.read(m_name);
   thrift.read(m_path);
@@ -80,6 +89,7 @@ void DSandboxInfo::recvImpl(ThriftBuffer &thrift) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void DThreadInfo::sendImpl(ThriftBuffer &thrift) {
+  TRACE(2, "DThreadInfo::sendImpl\n");
   thrift.write(m_id);
   thrift.write(m_desc);
   thrift.write(m_type);
@@ -87,6 +97,7 @@ void DThreadInfo::sendImpl(ThriftBuffer &thrift) {
 }
 
 void DThreadInfo::recvImpl(ThriftBuffer &thrift) {
+  TRACE(2, "DThreadInfo::recvImpl\n");
   thrift.read(m_id);
   thrift.read(m_desc);
   thrift.read(m_type);
@@ -96,18 +107,21 @@ void DThreadInfo::recvImpl(ThriftBuffer &thrift) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void DFunctionInfo::sendImpl(ThriftBuffer &thrift) {
+  TRACE(2, "DFunctionInfo::sendImpl\n");
   thrift.write(m_namespace);
   thrift.write(m_class);
   thrift.write(m_function);
 }
 
 void DFunctionInfo::recvImpl(ThriftBuffer &thrift) {
+  TRACE(2, "DFunctionInfo::recvImpl\n");
   thrift.read(m_namespace);
   thrift.read(m_class);
   thrift.read(m_function);
 }
 
 std::string DFunctionInfo::getName() const {
+  TRACE(2, "DFunctionInfo::getName\n");
   if (m_function.empty() || m_class.empty()) {
     return m_function;
   } else {
@@ -116,6 +130,7 @@ std::string DFunctionInfo::getName() const {
 }
 
 std::string DFunctionInfo::site(std::string &preposition) const {
+  TRACE(2, "DFunctionInfo::site\n");
   string ret;
   preposition = "at ";
   if (!m_class.empty()) {
@@ -144,6 +159,7 @@ std::string DFunctionInfo::site(std::string &preposition) const {
 }
 
 std::string DFunctionInfo::desc(const BreakPointInfo *bpi) const {
+  TRACE(2, "DFunctionInfo::desc\n");
   string ret;
   if (!m_class.empty()) {
     string cls;
@@ -172,6 +188,7 @@ std::string DFunctionInfo::desc(const BreakPointInfo *bpi) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string Macro::desc(const char *indent) {
+  TRACE(2, "Macro::desc\n");
   string ret;
   for (unsigned int i = 0; i < m_cmds.size(); i++) {
     if (indent) ret += indent;
@@ -182,11 +199,13 @@ std::string Macro::desc(const char *indent) {
 }
 
 void Macro::load(Hdf node) {
+  TRACE(2, "Macro::load\n");
   m_name = node["name"].getString();
   node["cmds"].get(m_cmds);
 }
 
 void Macro::save(Hdf node) {
+  TRACE(2, "Macro::save\n");
   node["name"] = m_name;
   for (unsigned int i = 0; i < m_cmds.size(); i++) {
     node["cmds"][i] = m_cmds[i];
@@ -274,6 +293,7 @@ static void get_color(int tokid, int prev, int next,
                       const char **palette =
                       DebuggerClient::DefaultCodeColors) {
 
+  TRACE(2, "debugger_base:get_color\n");
 #undef YYTOKENTYPE
 #ifdef YYTOKEN_MAP
 #undef YYTOKEN_MAP
@@ -366,6 +386,7 @@ static void get_color(int tokid, int prev, int next,
 
 static void color_line_no(StringBuffer &sb, int line, int lineFocus0,
                           int lineFocus1, const char *color) {
+  TRACE(2, "debugger_base:color_line_no\n");
   if (((line == lineFocus0 && lineFocus1 == 0) ||
        (line >= lineFocus0 && line <= lineFocus1)) &&
       DebuggerClient::HighlightBgColor) {
@@ -381,6 +402,7 @@ static void append_line_no(StringBuffer &sb, const char *text,
                            int lineFocus0, int charFocus0, int lineFocus1,
                            int charFocus1, const char **palette =
                            DebuggerClient::DefaultCodeColors) {
+  TRACE(2, "debugger_base:append_line_no\n");
   const char *colorLineNo = palette[CodeColorLineNo * 2];
   const char *endLineNo = palette[CodeColorLineNo * 2 + 1];
 
@@ -435,6 +457,7 @@ static void append_line_no(StringBuffer &sb, const char *text,
 String highlight_code(CStrRef source, int line /* = 0 */,
                       int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                       int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
+  TRACE(2, "debugger_base:highlight_code\n");
   String prepended = "<?php\n";
   prepended += source;
   String highlighted = highlight_php(prepended, line, lineFocus0, charFocus0,
@@ -446,6 +469,7 @@ String highlight_code(CStrRef source, int line /* = 0 */,
 string check_char_highlight(int lineFocus0, int charFocus0,
                             int lineFocus1, int charFocus1,
                             Location &loc) {
+  TRACE(2, "debugger_base:check_char_highlight\n");
   if (DebuggerClient::HighlightBgColor &&
       lineFocus0 && charFocus0 && lineFocus1 && charFocus1 &&
       loc.line0 * 1000 + loc.char0 >= lineFocus0 * 1000 + charFocus0 &&
@@ -459,6 +483,7 @@ string check_char_highlight(int lineFocus0, int charFocus0,
 String highlight_php(CStrRef source, int line /* = 0 */,
                      int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                      int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
+  TRACE(2, "debugger_base:highlight_php\n");
   StringBuffer res;
   Scanner scanner(source.data(), source.size(),
                   Scanner::AllowShortTags | Scanner::ReturnAllTokens);

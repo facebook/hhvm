@@ -78,7 +78,6 @@ no_import = (
     '/ext/xmlwriter/examples/',
 
     # not imported yet, but will be
-    '/ext/mysql',
     '/ext/pdo_mysql',
     '/ext/pdo_sqlite',
     '/ext/spl',
@@ -202,6 +201,7 @@ other_files = (
     '/ext-ldap/connect.inc',
     '/ext-mbstring/common.inc',
     '/ext-mcrypt/vectors.txt',
+    '/ext-mysql/connect.inc',
     '/ext-openssl/005_crt.txt',
     '/ext-openssl/bug37820cert.pem',
     '/ext-openssl/bug37820key.pem',

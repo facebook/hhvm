@@ -1,0 +1,37 @@
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+valid fields
+%unicode|string%(1) "1"
+%unicode|string%(1) "a"
+%unicode|string%(1) "1"
+%unicode|string%(1) "1"
+%unicode|string%(1) "a"
+%unicode|string%(1) "a"
+some invalid fields
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+_id
+%unicode|string%(1) "1"
+_label
+string(2) "aa"
+_foo
+NULL
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+done!

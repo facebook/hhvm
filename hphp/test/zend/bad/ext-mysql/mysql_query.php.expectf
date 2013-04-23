@@ -1,0 +1,11 @@
+array(1) {
+  [%u|b%"valid"]=>
+  %unicode|string%(30) "this is sql but with semicolon"
+}
+array(1) {
+  [%u|b%""]=>
+  %unicode|string%(1) "a"
+}
+%unicode|string%(1) "a"
+HipHop Warning: %a
+done!

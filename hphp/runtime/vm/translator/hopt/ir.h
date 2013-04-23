@@ -277,6 +277,8 @@ O(LdClsCtx,                     D(Cls), S(Ctx),                            C) \
 O(LdClsCctx,                    D(Cls), S(Cctx),                           C) \
 O(LdClsCns,                     DParam, CStr CStr,                         C) \
 O(LookupClsCns,                 DParam, CStr CStr,           E|Refs|Er|N|Mem) \
+O(LdCns,                        DParam, CStr,                              C) \
+O(LookupCns,                    DParam, CStr,                E|Refs|Er|N|Mem) \
 O(LdClsMethodCache,         D(FuncCls), SUnk,              N|C|E|Refs|Er|Mem) \
 O(LdClsMethodFCache,        D(FuncCtx), C(Cls) CStr S(Obj,Cls,Ctx), N|C|E|Er) \
 O(GetCtxFwdCall,                D(Ctx), S(Ctx) S(Func),                    C) \

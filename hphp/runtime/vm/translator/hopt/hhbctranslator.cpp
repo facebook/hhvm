@@ -341,7 +341,51 @@ void HhbcTranslator::emitColAddNewElemC() {
 }
 
 void HhbcTranslator::emitCns(uint32_t id) {
-  emitInterpOneOrPunt(Type::Cell, 0);
+  StringData* name = curUnit()->lookupLitstrId(id);
+  SSATmp* cnsNameTmp = m_tb->genDefConst(name);
+  const TypedValue* tv = Unit::lookupPersistentCns(name);
+  SSATmp* result = nullptr;
+  Type cnsType = Type::Cell;
+  if (tv) {
+    switch (tv->m_type) {
+      case KindOfUninit:
+        // a dynamic system constant. always a slow lookup
+        result = m_tb->gen(LookupCns, cnsType, cnsNameTmp);
+        break;
+      case KindOfBoolean:
+        result = m_tb->genDefConst((bool)tv->m_data.num);
+        break;
+      case KindOfInt64:
+        result = m_tb->genDefConst(tv->m_data.num);
+        break;
+      case KindOfDouble:
+        result = m_tb->genDefConst(tv->m_data.dbl);
+        break;
+      case KindOfString:
+      case KindOfStaticString:
+        result = m_tb->genDefConst(tv->m_data.pstr);
+        break;
+      default:
+        not_reached();
+    }
+  } else {
+    spillStack(); // do this on main trace so we update stack tracking once.
+    SSATmp* c1 = m_tb->gen(LdCns, cnsType, cnsNameTmp);
+    result = m_tb->cond(
+      getCurFunc(),
+      [&] (Block* taken) { // branch
+        m_tb->gen(CheckInit, taken, c1);
+      },
+      [&] { // Next: LdCns hit in TC
+        return c1;
+      },
+      [&] { // Taken: miss in TC, do lookup & init
+        m_tb->hint(Block::Unlikely);
+        return m_tb->gen(LookupCns, cnsType, cnsNameTmp);
+      }
+    );
+  }
+  push(result);
 }
 
 void HhbcTranslator::emitDefCns(uint32_t id) {

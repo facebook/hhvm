@@ -4255,6 +4255,59 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
                inst->getDst(), kSyncPoint, args, DestType::TV);
 }
 
+void CodeGenerator::cgLdCns(IRInstruction* inst) {
+  const StringData* cnsName = inst->getSrc(0)->getValStr();
+
+  TargetCache::CacheHandle ch = StringData::DefCnsHandle(cnsName, false);
+  // Has an unlikely branch to a LookupCns
+  cgLoad(rVmTl, ch, inst);
+}
+
+static TypedValue lookupCnsHelper(const TypedValue* tv, StringData* nm) {
+  assert(tv->m_type == KindOfUninit);
+  TypedValue *cns = nullptr;
+  TypedValue c1;
+  if (UNLIKELY(tv->m_data.pref != nullptr)) {
+    ClassInfo::ConstantInfo* ci =
+      (ClassInfo::ConstantInfo*)(void*)tv->m_data.pref;
+    cns = const_cast<Variant&>(ci->getDeferredValue()).asTypedValue();
+    tvReadCell(cns, &c1);
+  } else {
+    if (UNLIKELY(TargetCache::s_constants != nullptr)) {
+      cns = TargetCache::s_constants->HphpArray::nvGet(nm);
+    }
+    if (!cns) {
+      cns = Unit::loadCns(const_cast<StringData*>(nm));
+    }
+    if (UNLIKELY(!cns)) {
+      raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
+      c1.m_data.pstr = const_cast<StringData*>(nm);
+      c1.m_type = KindOfStaticString;
+    } else {
+      c1.m_type = cns->m_type;
+      c1.m_data = cns->m_data;
+    }
+  }
+  return c1;
+}
+
+void CodeGenerator::cgLookupCns(IRInstruction* inst) {
+  SSATmp* cnsNameTmp = inst->getSrc(0);
+
+  assert(inst->getTypeParam() == Type::Cell);
+  assert(cnsNameTmp->isConst() && cnsNameTmp->getType() == Type::StaticStr);
+
+  const StringData* cnsName = cnsNameTmp->getValStr();
+  TargetCache::CacheHandle ch = StringData::DefCnsHandle(cnsName, false);
+
+  ArgGroup args;
+  args.addr(rVmTl, ch)
+      .immPtr(cnsName);
+
+  cgCallHelper(m_as, TCA(lookupCnsHelper),
+               inst->getDst(), kSyncPoint, args, DestType::TV);
+}
+
 HOT_FUNC_VM
 static inline int64_t ak_exist_string_helper(StringData* key, ArrayData* arr) {
   int64_t n;

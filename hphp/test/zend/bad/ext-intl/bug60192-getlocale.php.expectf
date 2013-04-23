@@ -1,0 +1,1 @@
+Catchable fatal error: Collator::getLocale(): Object not initialized in hphp/test/zend/bad/ext-intl/bug60192-getlocale.php on line %d

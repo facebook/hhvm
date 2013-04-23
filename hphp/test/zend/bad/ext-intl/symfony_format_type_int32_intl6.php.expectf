@@ -1,0 +1,12 @@
+array(4) {
+  [0]=>
+  object(NumberFormatter)#1 (0) {
+  }
+  [1]=>
+  float(2147483648)
+  [2]=>
+  string(21) "(SFD2,147,483,648.00)"
+  [3]=>
+  string(83) "->format() TYPE_INT32 formats inconsistently an integer if out of the 32 bit range."
+}
+== didn't crash ==

@@ -1,0 +1,10 @@
+array(3) {
+  [0]=>
+  object(NumberFormatter)#1 (0) {
+  }
+  [1]=>
+  float(-2147483649)
+  [2]=>
+  string(14) "-2,147,483,649"
+}
+== didn't crash ==

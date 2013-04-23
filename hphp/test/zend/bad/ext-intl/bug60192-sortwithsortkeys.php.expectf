@@ -1,0 +1,1 @@
+Catchable fatal error: Collator::sortWithSortKeys(): Object not initialized in hphp/test/zend/bad/ext-intl/bug60192-sortwithsortkeys.php on line %d

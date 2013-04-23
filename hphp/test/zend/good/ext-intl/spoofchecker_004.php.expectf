@@ -1,0 +1,6 @@
+Check with default settings
+bool(true)
+bool(true)
+Change confusable settings
+bool(false)
+bool(true)

@@ -1,0 +1,5 @@
+paypal with Cyrillic spoof characters
+bool(true)
+certain all-uppercase Latin sequences can be spoof of Greek
+bool(true)
+bool(false)

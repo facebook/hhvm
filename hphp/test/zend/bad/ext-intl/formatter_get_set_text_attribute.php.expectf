@@ -1,0 +1,37 @@
+Attribute POSITIVE_PREFIX
+Default value: []
+Formatting number with default value: 12,345.123
+New value: [_+_]
+Formatting number with new value: _+_12,345.123
+
+Attribute POSITIVE_SUFFIX
+Default value: []
+Formatting number with default value: 12,345.123
+New value: [_+_]
+Formatting number with new value: 12,345.123_+_
+
+Attribute NEGATIVE_PREFIX
+Default value: [-]
+Formatting number with default value: -12,345.123
+New value: [_-_]
+Formatting number with new value: _-_12,345.123
+
+Attribute NEGATIVE_SUFFIX
+Default value: []
+Formatting number with default value: -12,345.123
+New value: [_-_]
+Formatting number with new value: -12,345.123_-_
+
+Attribute PADDING_CHARACTER
+Default value: [*]
+Formatting number with default value: ***********12,345.123
+New value: [^]
+Formatting number with new value: ^^^^^^^^^^^12,345.123
+
+Attribute POSITIVE_PREFIX-2
+Default value: []
+Formatting number with default value: 12,345.123
+New value: [blahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblah]
+Formatting number with new value: blahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblah12,345.123
+
+Currency ISO-code for locale 'uk_UA' is: UAH

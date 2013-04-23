@@ -1,0 +1,14 @@
+Creating IntlDateFormatter with time_type = 0
+After call to get_timetype :  timetype= 0
+
+Creating IntlDateFormatter with time_type = 1
+After call to get_timetype :  timetype= 1
+
+Creating IntlDateFormatter with time_type = 2
+After call to get_timetype :  timetype= 2
+
+Creating IntlDateFormatter with time_type = 3
+After call to get_timetype :  timetype= 3
+
+Creating IntlDateFormatter with time_type = -1
+After call to get_timetype :  timetype= -1

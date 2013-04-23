@@ -1,0 +1,4 @@
+HipHop Warning: %a
+HipHop Warning: %a
+
+Catchable fatal error: Argument 1 passed to transliterator_create_inverse() must be an instance of Transliterator, string given in hphp/test/zend/bad/ext-intl/transliterator_create_inverse_error.php on line %d

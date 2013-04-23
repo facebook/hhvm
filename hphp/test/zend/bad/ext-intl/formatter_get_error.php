@@ -1,0 +1,24 @@
+<?php
+
+/*
+ * Error handling.
+ */
+
+
+function ut_main()
+{
+    $fmt = ut_nfmt_create( "en_US", NumberFormatter::CURRENCY );
+    $currency = '';
+    $pos = 0;
+    $num = ut_nfmt_parse_currency( $fmt, '123.45', $currency, $pos );
+    if( $num === false )
+        return $fmt->getErrorMessage() . " (" . $fmt->getErrorCode() . ")\n";
+    else
+        return "Ooops, an error should have occurred.";
+}
+
+include_once( 'ut_common.inc' );
+
+// Run the test
+ut_run();
+?>

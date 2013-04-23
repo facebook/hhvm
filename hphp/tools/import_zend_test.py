@@ -106,7 +106,6 @@ no_import = (
 
     # not imported yet, but will be
     '/ext/gd',
-    '/ext/intl',
     '/ext/ldap',
     '/ext/mbstring',
     '/ext/standard',
@@ -210,6 +209,7 @@ other_files = (
     '/ext-gd/src.wbmp',
     '/ext-gd/test8859.ttf',
     '/ext-gd/test_gif.gif',
+    '/ext-intl/ut_common.inc',
     '/tests/quicktester.inc',
 )
 

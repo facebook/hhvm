@@ -1,0 +1,14 @@
+Creating IntlDateFormatter with date_type = 0
+After call to get_datetype :  datetype= 0
+
+Creating IntlDateFormatter with date_type = 1
+After call to get_datetype :  datetype= 1
+
+Creating IntlDateFormatter with date_type = 2
+After call to get_datetype :  datetype= 2
+
+Creating IntlDateFormatter with date_type = 3
+After call to get_datetype :  datetype= 3
+
+Creating IntlDateFormatter with date_type = -1
+After call to get_datetype :  datetype= -1

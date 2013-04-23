@@ -1497,7 +1497,9 @@ void TraceBuilder::cseInsert(IRInstruction* inst) {
 }
 
 void TraceBuilder::cseKill(SSATmp* src) {
-  getCSEHashTable(src->getInstruction())->erase(src);
+  if (src->getInstruction()->canCSE()) {
+    getCSEHashTable(src->getInstruction())->erase(src);
+  }
 }
 
 SSATmp* TraceBuilder::cseLookup(IRInstruction* inst) {

@@ -1,0 +1,6 @@
+string(10) "-//FOO/BAR"
+string(%d) "%sfoobar.dtd"
+HipHop Warning: %a
+bool(false)
+bool(true)
+Done.

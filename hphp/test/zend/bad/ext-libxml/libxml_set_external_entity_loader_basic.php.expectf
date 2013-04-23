@@ -1,0 +1,14 @@
+string(10) "-//FOO/BAR"
+string(25) "http://example.com/foobar"
+array(4) {
+  ["directory"]=>
+  NULL
+  ["intSubName"]=>
+  NULL
+  ["extSubURI"]=>
+  NULL
+  ["extSubSystem"]=>
+  NULL
+}
+bool(true)
+Done.

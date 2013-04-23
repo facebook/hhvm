@@ -70,7 +70,6 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -100,6 +99,8 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
+
+#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -174,7 +175,15 @@ typedef void* yyscan_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -77107,8 +77116,8 @@ static yyconst yy_state_type yy_NUL_trans[2411] =
 #define yymore() (yyg->yy_more_flag = 1)
 #define YY_MORE_ADJ yyg->yy_more_len
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "hphp.x"
-#line 2 "hphp.x"
+#line 1 "hphp.ll"
+#line 2 "hphp.ll"
 #include <util/parser/scanner.h>
 
 // macros for flex
@@ -77290,7 +77299,7 @@ static int getNextTokenType(int t) {
  * For heredocs, matching continues across/after newlines if/when it's known
  * that the next line doesn't contain a possible ending label
  */
-#line 77278 "lex.yy.cpp"
+#line 77287 "lex.yy.cpp"
 
 #define INITIAL 0
 #define ST_IN_HTML 1
@@ -77451,7 +77460,12 @@ static int input (yyscan_t yyscanner );
     
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -77539,10 +77553,10 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 209 "hphp.x"
+#line 209 "hphp.ll"
 
 
-#line 77530 "lex.yy.cpp"
+#line 77544 "lex.yy.cpp"
 
     yylval = yylval_param;
 
@@ -77625,232 +77639,232 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 211 "hphp.x"
+#line 211 "hphp.ll"
 { SETTOKEN; return T_EXIT;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 212 "hphp.x"
+#line 212 "hphp.ll"
 { SETTOKEN; return T_EXIT;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 213 "hphp.x"
+#line 213 "hphp.ll"
 { SETTOKEN; return T_FUNCTION;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 214 "hphp.x"
+#line 214 "hphp.ll"
 { SETTOKEN; return T_CONST;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 215 "hphp.x"
+#line 215 "hphp.ll"
 { SETTOKEN; return T_RETURN;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 216 "hphp.x"
+#line 216 "hphp.ll"
 { SETTOKEN; return T_YIELD;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 217 "hphp.x"
+#line 217 "hphp.ll"
 { SETTOKEN; return T_TRY;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 218 "hphp.x"
+#line 218 "hphp.ll"
 { SETTOKEN; return T_CATCH;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 219 "hphp.x"
+#line 219 "hphp.ll"
 { SETTOKEN; return T_FINALLY;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 220 "hphp.x"
+#line 220 "hphp.ll"
 { SETTOKEN; return T_THROW;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 221 "hphp.x"
+#line 221 "hphp.ll"
 { SETTOKEN; return T_IF;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 222 "hphp.x"
+#line 222 "hphp.ll"
 { SETTOKEN; return T_ELSEIF;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 223 "hphp.x"
+#line 223 "hphp.ll"
 { SETTOKEN; return T_ENDIF;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 224 "hphp.x"
+#line 224 "hphp.ll"
 { SETTOKEN; return T_ELSE;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 225 "hphp.x"
+#line 225 "hphp.ll"
 { SETTOKEN; return T_WHILE;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 226 "hphp.x"
+#line 226 "hphp.ll"
 { SETTOKEN; return T_ENDWHILE;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 227 "hphp.x"
+#line 227 "hphp.ll"
 { SETTOKEN; return T_DO;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 228 "hphp.x"
+#line 228 "hphp.ll"
 { SETTOKEN; return T_FOR;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 229 "hphp.x"
+#line 229 "hphp.ll"
 { SETTOKEN; return T_ENDFOR;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 230 "hphp.x"
+#line 230 "hphp.ll"
 { SETTOKEN; return T_FOREACH;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 231 "hphp.x"
+#line 231 "hphp.ll"
 { SETTOKEN; return T_ENDFOREACH;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 232 "hphp.x"
+#line 232 "hphp.ll"
 { SETTOKEN; return T_DECLARE;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 233 "hphp.x"
+#line 233 "hphp.ll"
 { SETTOKEN; return T_ENDDECLARE;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 234 "hphp.x"
+#line 234 "hphp.ll"
 { SETTOKEN; return T_INSTANCEOF;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 235 "hphp.x"
+#line 235 "hphp.ll"
 { SETTOKEN; return T_AS;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 236 "hphp.x"
+#line 236 "hphp.ll"
 { SETTOKEN; return T_SWITCH;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 237 "hphp.x"
+#line 237 "hphp.ll"
 { SETTOKEN; return T_ENDSWITCH;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 238 "hphp.x"
+#line 238 "hphp.ll"
 { SETTOKEN; return T_CASE;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 239 "hphp.x"
+#line 239 "hphp.ll"
 { SETTOKEN; return T_DEFAULT;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 240 "hphp.x"
+#line 240 "hphp.ll"
 { SETTOKEN; return T_BREAK;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 241 "hphp.x"
+#line 241 "hphp.ll"
 { SETTOKEN; return T_CONTINUE;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 242 "hphp.x"
+#line 242 "hphp.ll"
 { SETTOKEN; return T_GOTO;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 243 "hphp.x"
+#line 243 "hphp.ll"
 { SETTOKEN; return T_ECHO;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 244 "hphp.x"
+#line 244 "hphp.ll"
 { SETTOKEN; return T_PRINT;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 245 "hphp.x"
+#line 245 "hphp.ll"
 { SETTOKEN; return T_CLASS;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 246 "hphp.x"
+#line 246 "hphp.ll"
 { SETTOKEN; return T_INTERFACE;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 247 "hphp.x"
+#line 247 "hphp.ll"
 { SETTOKEN; return T_TRAIT;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 248 "hphp.x"
+#line 248 "hphp.ll"
 { SETTOKEN; return T_INSTEADOF;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 249 "hphp.x"
+#line 249 "hphp.ll"
 { SETTOKEN; return T_EXTENDS;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 250 "hphp.x"
+#line 250 "hphp.ll"
 { SETTOKEN; return T_IMPLEMENTS;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 251 "hphp.x"
+#line 251 "hphp.ll"
 { SETTOKEN; return T_XHP_ATTRIBUTE;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 252 "hphp.x"
+#line 252 "hphp.ll"
 { SETTOKEN; return T_XHP_CATEGORY;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 253 "hphp.x"
+#line 253 "hphp.ll"
 { SETTOKEN; return T_XHP_CHILDREN;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 254 "hphp.x"
+#line 254 "hphp.ll"
 { SETTOKEN; return T_XHP_REQUIRED;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 255 "hphp.x"
+#line 255 "hphp.ll"
 { SETTOKEN; return T_XHP_ENUM;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 257 "hphp.x"
+#line 257 "hphp.ll"
 {
         STEPPOS;
         yy_push_state(ST_LOOKING_FOR_PROPERTY, yyscanner);
@@ -77859,7 +77873,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 263 "hphp.x"
+#line 263 "hphp.ll"
 {
         STEPPOS;
         return T_OBJECT_OPERATOR;
@@ -77867,7 +77881,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 268 "hphp.x"
+#line 268 "hphp.ll"
 {
         SETTOKEN;
         yy_pop_state(yyscanner);
@@ -77877,7 +77891,7 @@ YY_RULE_SETUP
 case 49:
 /* rule 49 can match eol */
 YY_RULE_SETUP
-#line 274 "hphp.x"
+#line 274 "hphp.ll"
 {
         yyless(0);
         yy_pop_state(yyscanner);
@@ -77885,32 +77899,32 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 279 "hphp.x"
+#line 279 "hphp.ll"
 { STEPPOS;return T_PAAMAYIM_NEKUDOTAYIM;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 280 "hphp.x"
+#line 280 "hphp.ll"
 { SETTOKEN;return T_NS_SEPARATOR;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 281 "hphp.x"
+#line 281 "hphp.ll"
 { SETTOKEN;return T_NEW;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 282 "hphp.x"
+#line 282 "hphp.ll"
 { SETTOKEN;return T_CLONE;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 283 "hphp.x"
+#line 283 "hphp.ll"
 { SETTOKEN;return T_VAR;}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 285 "hphp.x"
+#line 285 "hphp.ll"
 {
   if (_scanner->lastToken() != T_FUNCTION) {
     STEPPOS;
@@ -77923,7 +77937,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 295 "hphp.x"
+#line 295 "hphp.ll"
 {
   if (_scanner->lastToken() != T_FUNCTION) {
     STEPPOS;
@@ -77936,7 +77950,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 305 "hphp.x"
+#line 305 "hphp.ll"
 {
   if (_scanner->lastToken() != T_FUNCTION) {
     STEPPOS;
@@ -77949,7 +77963,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 315 "hphp.x"
+#line 315 "hphp.ll"
 {
   if (_scanner->lastToken() != T_FUNCTION) {
     STEPPOS;
@@ -77962,7 +77976,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 325 "hphp.x"
+#line 325 "hphp.ll"
 {
   if (_scanner->lastToken() != T_FUNCTION) {
     STEPPOS;
@@ -77975,7 +77989,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 335 "hphp.x"
+#line 335 "hphp.ll"
 {
   if (_scanner->lastToken() != T_FUNCTION) {
     STEPPOS;
@@ -77988,7 +78002,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 345 "hphp.x"
+#line 345 "hphp.ll"
 {
   if (_scanner->lastToken() != T_FUNCTION) {
     STEPPOS;
@@ -78001,257 +78015,257 @@ YY_RULE_SETUP
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 355 "hphp.x"
+#line 355 "hphp.ll"
 { SETTOKEN; return T_EVAL;}
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 356 "hphp.x"
+#line 356 "hphp.ll"
 { SETTOKEN; return T_INCLUDE;}
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 357 "hphp.x"
+#line 357 "hphp.ll"
 { SETTOKEN; return T_INCLUDE_ONCE;}
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 358 "hphp.x"
+#line 358 "hphp.ll"
 { SETTOKEN; return T_REQUIRE;}
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 359 "hphp.x"
+#line 359 "hphp.ll"
 { SETTOKEN; return T_REQUIRE_ONCE;}
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 360 "hphp.x"
+#line 360 "hphp.ll"
 { SETTOKEN; return T_NAMESPACE;}
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 361 "hphp.x"
+#line 361 "hphp.ll"
 { SETTOKEN; return T_USE;}
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 362 "hphp.x"
+#line 362 "hphp.ll"
 { SETTOKEN; return T_GLOBAL;}
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 363 "hphp.x"
+#line 363 "hphp.ll"
 { SETTOKEN; return T_ISSET;}
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 364 "hphp.x"
+#line 364 "hphp.ll"
 { SETTOKEN; return T_EMPTY;}
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 365 "hphp.x"
+#line 365 "hphp.ll"
 { SETTOKEN; return T_HALT_COMPILER;}
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 366 "hphp.x"
+#line 366 "hphp.ll"
 { SETTOKEN; return T_STATIC;}
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 367 "hphp.x"
+#line 367 "hphp.ll"
 { SETTOKEN; return T_ABSTRACT;}
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 368 "hphp.x"
+#line 368 "hphp.ll"
 { SETTOKEN; return T_FINAL;}
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 369 "hphp.x"
+#line 369 "hphp.ll"
 { SETTOKEN; return T_PRIVATE;}
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 370 "hphp.x"
+#line 370 "hphp.ll"
 { SETTOKEN; return T_PROTECTED;}
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 371 "hphp.x"
+#line 371 "hphp.ll"
 { SETTOKEN; return T_PUBLIC;}
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 372 "hphp.x"
+#line 372 "hphp.ll"
 { SETTOKEN; return T_UNSET;}
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 373 "hphp.x"
+#line 373 "hphp.ll"
 { STEPPOS; return T_DOUBLE_ARROW;}
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 374 "hphp.x"
+#line 374 "hphp.ll"
 { SETTOKEN; return T_LIST;}
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 375 "hphp.x"
+#line 375 "hphp.ll"
 { SETTOKEN; return T_ARRAY;}
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 376 "hphp.x"
+#line 376 "hphp.ll"
 { STEPPOS; return T_INC;}
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 377 "hphp.x"
+#line 377 "hphp.ll"
 { STEPPOS; return T_DEC;}
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 378 "hphp.x"
+#line 378 "hphp.ll"
 { STEPPOS; return T_IS_IDENTICAL;}
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 379 "hphp.x"
+#line 379 "hphp.ll"
 { STEPPOS; return T_IS_NOT_IDENTICAL;}
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 380 "hphp.x"
+#line 380 "hphp.ll"
 { STEPPOS; return T_IS_EQUAL;}
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 381 "hphp.x"
+#line 381 "hphp.ll"
 { STEPPOS; return T_IS_NOT_EQUAL;}
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 382 "hphp.x"
+#line 382 "hphp.ll"
 { STEPPOS; return T_IS_SMALLER_OR_EQUAL;}
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 383 "hphp.x"
+#line 383 "hphp.ll"
 { STEPPOS; return T_IS_GREATER_OR_EQUAL;}
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 384 "hphp.x"
+#line 384 "hphp.ll"
 { STEPPOS; return T_PLUS_EQUAL;}
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 385 "hphp.x"
+#line 385 "hphp.ll"
 { STEPPOS; return T_MINUS_EQUAL;}
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
-#line 386 "hphp.x"
+#line 386 "hphp.ll"
 { STEPPOS; return T_MUL_EQUAL;}
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 387 "hphp.x"
+#line 387 "hphp.ll"
 { STEPPOS; return T_DIV_EQUAL;}
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 388 "hphp.x"
+#line 388 "hphp.ll"
 { STEPPOS; return T_CONCAT_EQUAL;}
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
-#line 389 "hphp.x"
+#line 389 "hphp.ll"
 { STEPPOS; return T_MOD_EQUAL;}
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 390 "hphp.x"
+#line 390 "hphp.ll"
 { STEPPOS; return T_SL_EQUAL;}
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
-#line 391 "hphp.x"
+#line 391 "hphp.ll"
 { STEPPOS; return T_SR_EQUAL;}
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 392 "hphp.x"
+#line 392 "hphp.ll"
 { STEPPOS; return T_AND_EQUAL;}
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
-#line 393 "hphp.x"
+#line 393 "hphp.ll"
 { STEPPOS; return T_OR_EQUAL;}
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 394 "hphp.x"
+#line 394 "hphp.ll"
 { STEPPOS; return T_XOR_EQUAL;}
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 395 "hphp.x"
+#line 395 "hphp.ll"
 { STEPPOS; return T_BOOLEAN_OR;}
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
-#line 396 "hphp.x"
+#line 396 "hphp.ll"
 { STEPPOS; return T_BOOLEAN_AND;}
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
-#line 397 "hphp.x"
+#line 397 "hphp.ll"
 { SETTOKEN; return T_LOGICAL_OR;}
 	YY_BREAK
 case 105:
 YY_RULE_SETUP
-#line 398 "hphp.x"
+#line 398 "hphp.ll"
 { SETTOKEN; return T_LOGICAL_AND;}
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
-#line 399 "hphp.x"
+#line 399 "hphp.ll"
 { SETTOKEN; return T_LOGICAL_XOR;}
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
-#line 400 "hphp.x"
+#line 400 "hphp.ll"
 { STEPPOS; return T_SL;}
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
-#line 401 "hphp.x"
+#line 401 "hphp.ll"
 { SETTOKEN; return T_VARARG; }
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 403 "hphp.x"
+#line 403 "hphp.ll"
 { HH_ONLY_KEYWORD(T_SHAPE); }
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
-#line 404 "hphp.x"
+#line 404 "hphp.ll"
 { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 405 "hphp.x"
+#line 405 "hphp.ll"
 { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 407 "hphp.x"
+#line 407 "hphp.ll"
 {
   if (_scanner->getLookaheadLtDepth() < 2) {
     STEPPOS;
@@ -78264,7 +78278,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 417 "hphp.x"
+#line 417 "hphp.ll"
 {
   int ntt = getNextTokenType(_scanner->lastToken());
   if (ntt & NextTokenType::XhpTag) {
@@ -78292,7 +78306,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-#line 442 "hphp.x"
+#line 442 "hphp.ll"
 {
   STEPPOS;
   if (_scanner->isStrictMode()) {
@@ -78309,7 +78323,7 @@ YY_RULE_SETUP
 case 115:
 /* rule 115 can match eol */
 YY_RULE_SETUP
-#line 455 "hphp.x"
+#line 455 "hphp.ll"
 {
   BEGIN(ST_IN_SCRIPTING);
   yyless(1);
@@ -78320,7 +78334,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 463 "hphp.x"
+#line 463 "hphp.ll"
 {
   BEGIN(ST_IN_SCRIPTING);
   STEPPOS;
@@ -78329,7 +78343,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 469 "hphp.x"
+#line 469 "hphp.ll"
 {
   int ntt = getNextTokenType(_scanner->lastToken());
   if (ntt & NextTokenType::XhpClassName) {
@@ -78344,7 +78358,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 481 "hphp.x"
+#line 481 "hphp.ll"
 {
   int ntt = getNextTokenType(_scanner->lastToken());
   if (ntt & NextTokenType::XhpCategoryName) {
@@ -78359,12 +78373,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 493 "hphp.x"
+#line 493 "hphp.ll"
 {STEPPOS; return yytext[0];}
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
-#line 495 "hphp.x"
+#line 495 "hphp.ll"
 {
         STEPPOS;
         yy_push_state(ST_IN_SCRIPTING, yyscanner);
@@ -78373,7 +78387,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 501 "hphp.x"
+#line 501 "hphp.ll"
 {
         STEPPOS;
         yy_push_state(ST_LOOKING_FOR_VARNAME, yyscanner);
@@ -78382,7 +78396,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
-#line 507 "hphp.x"
+#line 507 "hphp.ll"
 {
         STEPPOS;
         // We need to be robust against a '}' in PHP code with
@@ -78394,7 +78408,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 516 "hphp.x"
+#line 516 "hphp.ll"
 {
         SETTOKEN;
         // Change state to IN_SCRIPTING; current state will be popped
@@ -78406,7 +78420,7 @@ YY_RULE_SETUP
 case 124:
 /* rule 124 can match eol */
 YY_RULE_SETUP
-#line 524 "hphp.x"
+#line 524 "hphp.ll"
 {
         yyless(0);
         // Change state to IN_SCRIPTING; current state will be popped
@@ -78416,7 +78430,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
-#line 531 "hphp.x"
+#line 531 "hphp.ll"
 {
         SETTOKEN;
         errno = 0;
@@ -78432,7 +78446,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 544 "hphp.x"
+#line 544 "hphp.ll"
 {
         SETTOKEN;
         errno = 0;
@@ -78448,7 +78462,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
-#line 557 "hphp.x"
+#line 557 "hphp.ll"
 { /* Offset could be treated as a long */
         SETTOKEN;
         errno = 0;
@@ -78464,7 +78478,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
-#line 570 "hphp.x"
+#line 570 "hphp.ll"
 { /* Offset must be treated as a string */
         SETTOKEN;
         return T_NUM_STRING;
@@ -78472,7 +78486,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 129:
 YY_RULE_SETUP
-#line 575 "hphp.x"
+#line 575 "hphp.ll"
 {
         SETTOKEN;
         return T_DNUMBER;
@@ -78480,48 +78494,48 @@ YY_RULE_SETUP
 	YY_BREAK
 case 130:
 YY_RULE_SETUP
-#line 580 "hphp.x"
+#line 580 "hphp.ll"
 { SETTOKEN; return T_CLASS_C; }
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 581 "hphp.x"
+#line 581 "hphp.ll"
 { SETTOKEN; return T_TRAIT_C; }
 	YY_BREAK
 case 132:
 YY_RULE_SETUP
-#line 582 "hphp.x"
+#line 582 "hphp.ll"
 { SETTOKEN; return T_FUNC_C;  }
 	YY_BREAK
 case 133:
 YY_RULE_SETUP
-#line 583 "hphp.x"
+#line 583 "hphp.ll"
 { SETTOKEN; return T_METHOD_C;}
 	YY_BREAK
 case 134:
 YY_RULE_SETUP
-#line 584 "hphp.x"
+#line 584 "hphp.ll"
 { SETTOKEN; return T_LINE;    }
 	YY_BREAK
 case 135:
 YY_RULE_SETUP
-#line 585 "hphp.x"
+#line 585 "hphp.ll"
 { SETTOKEN; return T_FILE;    }
 	YY_BREAK
 case 136:
 YY_RULE_SETUP
-#line 586 "hphp.x"
+#line 586 "hphp.ll"
 { SETTOKEN; return T_DIR;     }
 	YY_BREAK
 case 137:
 YY_RULE_SETUP
-#line 587 "hphp.x"
+#line 587 "hphp.ll"
 { SETTOKEN; return T_NS_C;    }
 	YY_BREAK
 case 138:
 /* rule 138 can match eol */
 YY_RULE_SETUP
-#line 589 "hphp.x"
+#line 589 "hphp.ll"
 {
         _scanner->setHashBang(yytext, yyleng);
         BEGIN(ST_IN_SCRIPTING);
@@ -78532,7 +78546,7 @@ YY_RULE_SETUP
 case 139:
 /* rule 139 can match eol */
 YY_RULE_SETUP
-#line 596 "hphp.x"
+#line 596 "hphp.ll"
 {
         SETTOKEN;
         BEGIN(ST_IN_SCRIPTING);
@@ -78543,7 +78557,7 @@ YY_RULE_SETUP
 case 140:
 /* rule 140 can match eol */
 YY_RULE_SETUP
-#line 603 "hphp.x"
+#line 603 "hphp.ll"
 {
         SETTOKEN;
         return T_INLINE_HTML;
@@ -78552,7 +78566,7 @@ YY_RULE_SETUP
 case 141:
 /* rule 141 can match eol */
 YY_RULE_SETUP
-#line 608 "hphp.x"
+#line 608 "hphp.ll"
 {
         SETTOKEN;
         if (_scanner->shortTags() || yyleng > 2) {
@@ -78573,7 +78587,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 142:
 YY_RULE_SETUP
-#line 626 "hphp.x"
+#line 626 "hphp.ll"
 {
         SETTOKEN;
         if ((yytext[1]=='%' && _scanner->aspTags()) ||
@@ -78595,7 +78609,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 143:
 YY_RULE_SETUP
-#line 645 "hphp.x"
+#line 645 "hphp.ll"
 {
         SETTOKEN;
         if (_scanner->aspTags()) {
@@ -78617,7 +78631,7 @@ YY_RULE_SETUP
 case 144:
 /* rule 144 can match eol */
 YY_RULE_SETUP
-#line 663 "hphp.x"
+#line 663 "hphp.ll"
 {
         if (YY_START != INITIAL) {
                 _scanner->error("Strict mode: content before <?hh");
@@ -78631,7 +78645,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 145:
 YY_RULE_SETUP
-#line 674 "hphp.x"
+#line 674 "hphp.ll"
 {
         _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1);
         return T_VARIABLE;
@@ -78639,7 +78653,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 146:
 YY_RULE_SETUP
-#line 679 "hphp.x"
+#line 679 "hphp.ll"
 {
         yyless(yyleng - 3);
         yy_push_state(ST_LOOKING_FOR_PROPERTY, yyscanner);
@@ -78649,7 +78663,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 147:
 YY_RULE_SETUP
-#line 686 "hphp.x"
+#line 686 "hphp.ll"
 {
         yyless(yyleng - 1);
         yy_push_state(ST_VAR_OFFSET, yyscanner);
@@ -78659,7 +78673,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 148:
 YY_RULE_SETUP
-#line 693 "hphp.x"
+#line 693 "hphp.ll"
 {
         yy_pop_state(yyscanner);
         return ']';
@@ -78667,7 +78681,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 149:
 YY_RULE_SETUP
-#line 698 "hphp.x"
+#line 698 "hphp.ll"
 {
         /* Only '[' can be valid, but returning other tokens will allow
            a more explicit parse error */
@@ -78677,7 +78691,7 @@ YY_RULE_SETUP
 case 150:
 /* rule 150 can match eol */
 YY_RULE_SETUP
-#line 704 "hphp.x"
+#line 704 "hphp.ll"
 {
         /* Invalid rule to return a more explicit parse error with proper
            line number */
@@ -78689,7 +78703,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 151:
 YY_RULE_SETUP
-#line 713 "hphp.x"
+#line 713 "hphp.ll"
 {
         SETTOKEN;
         return T_STRING;
@@ -78698,7 +78712,7 @@ YY_RULE_SETUP
 case 152:
 /* rule 152 can match eol */
 YY_RULE_SETUP
-#line 718 "hphp.x"
+#line 718 "hphp.ll"
 {
         STEPPOS;
         return T_WHITESPACE;
@@ -78706,7 +78720,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 153:
 YY_RULE_SETUP
-#line 723 "hphp.x"
+#line 723 "hphp.ll"
 {
         yy_push_state(ST_ONE_LINE_COMMENT, yyscanner);
         yymore();
@@ -78714,7 +78728,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 154:
 YY_RULE_SETUP
-#line 728 "hphp.x"
+#line 728 "hphp.ll"
 {
         yymore();
 }
@@ -78722,7 +78736,7 @@ YY_RULE_SETUP
 case 155:
 /* rule 155 can match eol */
 YY_RULE_SETUP
-#line 732 "hphp.x"
+#line 732 "hphp.ll"
 {
         switch (yytext[yyleng-1]) {
         case '?':
@@ -78741,7 +78755,7 @@ YY_RULE_SETUP
 case 156:
 /* rule 156 can match eol */
 YY_RULE_SETUP
-#line 747 "hphp.x"
+#line 747 "hphp.ll"
 {
         STEPPOS;
         yy_pop_state(yyscanner);
@@ -78750,7 +78764,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 157:
 YY_RULE_SETUP
-#line 753 "hphp.x"
+#line 753 "hphp.ll"
 {
         if (_scanner->isStrictMode()) {
           _scanner->error("Strict mode: ?> not allowed");
@@ -78769,7 +78783,7 @@ YY_RULE_SETUP
 case 158:
 /* rule 158 can match eol */
 YY_RULE_SETUP
-#line 768 "hphp.x"
+#line 768 "hphp.ll"
 {
         yy_push_state(ST_DOC_COMMENT, yyscanner);
         yymore();
@@ -78777,7 +78791,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 159:
 YY_RULE_SETUP
-#line 773 "hphp.x"
+#line 773 "hphp.ll"
 {
         yy_push_state(ST_COMMENT, yyscanner);
         yymore();
@@ -78786,14 +78800,14 @@ YY_RULE_SETUP
 case 160:
 /* rule 160 can match eol */
 YY_RULE_SETUP
-#line 778 "hphp.x"
+#line 778 "hphp.ll"
 {
         yymore();
 }
 	YY_BREAK
 case 161:
 YY_RULE_SETUP
-#line 782 "hphp.x"
+#line 782 "hphp.ll"
 {
         SETTOKEN;
         yy_pop_state(yyscanner);
@@ -78802,7 +78816,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 162:
 YY_RULE_SETUP
-#line 788 "hphp.x"
+#line 788 "hphp.ll"
 {
         STEPPOS;
         yy_pop_state(yyscanner);
@@ -78811,7 +78825,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 163:
 YY_RULE_SETUP
-#line 794 "hphp.x"
+#line 794 "hphp.ll"
 {
         yymore();
 }
@@ -78819,7 +78833,7 @@ YY_RULE_SETUP
 case 164:
 /* rule 164 can match eol */
 YY_RULE_SETUP
-#line 798 "hphp.x"
+#line 798 "hphp.ll"
 {
         if (_scanner->isStrictMode()) {
           _scanner->error("Strict mode: ?> not allowed");
@@ -78837,7 +78851,7 @@ YY_RULE_SETUP
 case 165:
 /* rule 165 can match eol */
 YY_RULE_SETUP
-#line 812 "hphp.x"
+#line 812 "hphp.ll"
 {
         STEPPOS;
         yy_push_state(ST_IN_HTML, yyscanner);
@@ -78851,7 +78865,7 @@ YY_RULE_SETUP
 case 166:
 /* rule 166 can match eol */
 YY_RULE_SETUP
-#line 822 "hphp.x"
+#line 822 "hphp.ll"
 {
         if (_scanner->aspTags()) {
                 STEPPOS;
@@ -78871,7 +78885,7 @@ YY_RULE_SETUP
 case 167:
 /* rule 167 can match eol */
 YY_RULE_SETUP
-#line 838 "hphp.x"
+#line 838 "hphp.ll"
 {
         int bprefix = (yytext[0] != '"') ? 1 : 0;
         std::string strval =
@@ -78884,7 +78898,7 @@ YY_RULE_SETUP
 case 168:
 /* rule 168 can match eol */
 YY_RULE_SETUP
-#line 847 "hphp.x"
+#line 847 "hphp.ll"
 {
         int bprefix = (yytext[0] != '\'') ? 1 : 0;
         int closed = (yytext[yyleng - 1] == '\'');
@@ -78897,7 +78911,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 169:
 YY_RULE_SETUP
-#line 857 "hphp.x"
+#line 857 "hphp.ll"
 {
         int bprefix = (yytext[0] != '"') ? 1 : 0;
         _scanner->setToken(yytext, yyleng, yytext + bprefix, yyleng - bprefix);
@@ -78908,7 +78922,7 @@ YY_RULE_SETUP
 case 170:
 /* rule 170 can match eol */
 YY_RULE_SETUP
-#line 864 "hphp.x"
+#line 864 "hphp.ll"
 {
         int bprefix = (yytext[0] != '<') ? 1 : 0;
         int label_len = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
@@ -78935,7 +78949,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 171:
 YY_RULE_SETUP
-#line 888 "hphp.x"
+#line 888 "hphp.ll"
 {
         STEPPOS;
         BEGIN(ST_BACKQUOTE);
@@ -78944,7 +78958,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 172:
 YY_RULE_SETUP
-#line 894 "hphp.x"
+#line 894 "hphp.ll"
 {
   SETTOKEN;
   return T_XHP_LABEL;
@@ -78952,7 +78966,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 173:
 YY_RULE_SETUP
-#line 899 "hphp.x"
+#line 899 "hphp.ll"
 {
   STEPPOS;
   return yytext[0];
@@ -78961,7 +78975,7 @@ YY_RULE_SETUP
 case 174:
 /* rule 174 can match eol */
 YY_RULE_SETUP
-#line 904 "hphp.x"
+#line 904 "hphp.ll"
 {
   _scanner->setToken(yytext, yyleng, yytext+1, yyleng-2);
   return T_XHP_TEXT;
@@ -78969,7 +78983,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 175:
 YY_RULE_SETUP
-#line 909 "hphp.x"
+#line 909 "hphp.ll"
 {
   STEPPOS;
   yy_push_state(ST_IN_SCRIPTING, yyscanner);
@@ -78978,7 +78992,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 176:
 YY_RULE_SETUP
-#line 915 "hphp.x"
+#line 915 "hphp.ll"
 {
   STEPPOS;
   BEGIN(ST_XHP_CHILD);
@@ -78987,7 +79001,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 177:
 YY_RULE_SETUP
-#line 921 "hphp.x"
+#line 921 "hphp.ll"
 {
   BEGIN(ST_XHP_END_SINGLETON_TAG);
   yyless(1);
@@ -78997,7 +79011,7 @@ YY_RULE_SETUP
 case 178:
 /* rule 178 can match eol */
 YY_RULE_SETUP
-#line 927 "hphp.x"
+#line 927 "hphp.ll"
 {
   // This rule ensures we get a reasonable syntax error message
   // when unexpected characters occur inside XHP tags
@@ -79009,7 +79023,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 179:
 YY_RULE_SETUP
-#line 936 "hphp.x"
+#line 936 "hphp.ll"
 {
   STEPPOS;
   yy_pop_state(yyscanner);
@@ -79019,7 +79033,7 @@ YY_RULE_SETUP
 case 180:
 /* rule 180 can match eol */
 YY_RULE_SETUP
-#line 942 "hphp.x"
+#line 942 "hphp.ll"
 {
   SETTOKEN;
   return T_XHP_TEXT;
@@ -79027,7 +79041,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 181:
 YY_RULE_SETUP
-#line 947 "hphp.x"
+#line 947 "hphp.ll"
 {
   STEPPOS;
   yy_push_state(ST_IN_SCRIPTING, yyscanner);
@@ -79036,7 +79050,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 182:
 YY_RULE_SETUP
-#line 953 "hphp.x"
+#line 953 "hphp.ll"
 {
   BEGIN(ST_XHP_END_CLOSE_TAG);
   yyless(1);
@@ -79046,7 +79060,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 183:
 YY_RULE_SETUP
-#line 960 "hphp.x"
+#line 960 "hphp.ll"
 {
   STEPPOS;
   return '/';
@@ -79054,7 +79068,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 184:
 YY_RULE_SETUP
-#line 965 "hphp.x"
+#line 965 "hphp.ll"
 {
   SETTOKEN;
   return T_XHP_LABEL;
@@ -79062,7 +79076,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 185:
 YY_RULE_SETUP
-#line 970 "hphp.x"
+#line 970 "hphp.ll"
 {
   STEPPOS;
   yy_pop_state(yyscanner);
@@ -79071,7 +79085,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 186:
 YY_RULE_SETUP
-#line 976 "hphp.x"
+#line 976 "hphp.ll"
 {
   STEPPOS;
   yy_push_state(ST_XHP_IN_TAG, yyscanner);
@@ -79081,7 +79095,7 @@ YY_RULE_SETUP
 case 187:
 /* rule 187 can match eol */
 YY_RULE_SETUP
-#line 982 "hphp.x"
+#line 982 "hphp.ll"
 {
   int refillResult = EOB_ACT_CONTINUE_SCAN;
   std::vector<std::string> docPieces;
@@ -79254,7 +79268,7 @@ doc_scan_done:
 	YY_BREAK
 case 188:
 YY_RULE_SETUP
-#line 1152 "hphp.x"
+#line 1152 "hphp.ll"
 {
         BEGIN(ST_IN_SCRIPTING);
         STEPPOS;
@@ -79263,7 +79277,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 189:
 YY_RULE_SETUP
-#line 1158 "hphp.x"
+#line 1158 "hphp.ll"
 {
         _scanner->setToken(yytext, 1, yytext, 1);
         yy_push_state(ST_IN_SCRIPTING, yyscanner);
@@ -79274,7 +79288,7 @@ YY_RULE_SETUP
 case 190:
 /* rule 190 can match eol */
 YY_RULE_SETUP
-#line 1165 "hphp.x"
+#line 1165 "hphp.ll"
 {
         std::string strval = _scanner->escape(yytext, yyleng, '"');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
@@ -79284,7 +79298,7 @@ YY_RULE_SETUP
 case 191:
 /* rule 191 can match eol */
 YY_RULE_SETUP
-#line 1171 "hphp.x"
+#line 1171 "hphp.ll"
 {
         yyless(yyleng - 1);
         std::string strval = _scanner->escape(yytext, yyleng, '"');
@@ -79295,7 +79309,7 @@ YY_RULE_SETUP
 case 192:
 /* rule 192 can match eol */
 YY_RULE_SETUP
-#line 1178 "hphp.x"
+#line 1178 "hphp.ll"
 {
         std::string strval = _scanner->escape(yytext, yyleng, '`');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
@@ -79305,7 +79319,7 @@ YY_RULE_SETUP
 case 193:
 /* rule 193 can match eol */
 YY_RULE_SETUP
-#line 1184 "hphp.x"
+#line 1184 "hphp.ll"
 {
         yyless(yyleng - 1);
         std::string strval = _scanner->escape(yytext, yyleng, '`');
@@ -79315,7 +79329,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 194:
 YY_RULE_SETUP
-#line 1191 "hphp.x"
+#line 1191 "hphp.ll"
 {
         BEGIN(ST_IN_SCRIPTING);
         return '"';
@@ -79323,7 +79337,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 195:
 YY_RULE_SETUP
-#line 1196 "hphp.x"
+#line 1196 "hphp.ll"
 {
         BEGIN(ST_IN_SCRIPTING);
         return '`';
@@ -79331,7 +79345,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case YY_STATE_EOF(ST_COMMENT):
 case YY_STATE_EOF(ST_DOC_COMMENT):
-#line 1201 "hphp.x"
+#line 1201 "hphp.ll"
 {
         _scanner->error("Unterminated comment at end of file");
         return 0;
@@ -79340,7 +79354,7 @@ case YY_STATE_EOF(ST_DOC_COMMENT):
 case 196:
 /* rule 196 can match eol */
 YY_RULE_SETUP
-#line 1206 "hphp.x"
+#line 1206 "hphp.ll"
 {
         _scanner->error("Unexpected character in input: '%c' (ASCII=%d)",
                         yytext[0], yytext[0]);
@@ -79348,10 +79362,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 197:
 YY_RULE_SETUP
-#line 1211 "hphp.x"
+#line 1211 "hphp.ll"
 ECHO;
 	YY_BREAK
-#line 79339 "lex.yy.cpp"
+#line 79353 "lex.yy.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(ST_IN_HTML):
 case YY_STATE_EOF(ST_IN_SCRIPTING):
@@ -80134,8 +80148,8 @@ YY_BUFFER_STATE hphp_scan_string (yyconst char * yystr , yyscan_t yyscanner)
 
 /** Setup the input buffer state to scan the given bytes. The next call to hphplex() will
  * scan from a @e copy of @a bytes.
- * @param bytes the byte buffer to scan
- * @param len the number of bytes in the buffer pointed to by @a bytes.
+ * @param yybytes the byte buffer to scan
+ * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
@@ -80581,7 +80595,7 @@ void hphpfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 1211 "hphp.x"
+#line 1211 "hphp.ll"
 
 
 

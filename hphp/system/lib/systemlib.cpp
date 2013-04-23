@@ -33,7 +33,6 @@ namespace HPHP {
   }
 
 bool SystemLib::s_inited = false;
-HPHP::Eval::PhpFile* SystemLib::s_phpFile = nullptr;
 HPHP::VM::Unit* SystemLib::s_unit = nullptr;
 HPHP::VM::Unit* SystemLib::s_nativeFuncUnit = nullptr;
 HPHP::VM::Unit* SystemLib::s_nativeClassUnit = nullptr;

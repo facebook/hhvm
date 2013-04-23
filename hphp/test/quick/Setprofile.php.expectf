@@ -200,7 +200,7 @@ array(3) {
         [0]=>
         array(6) {
           ["file"]=>
-          string(%d) "%s"
+          string(%d) "%S"
           ["line"]=>
           int(42)
           ["function"]=>

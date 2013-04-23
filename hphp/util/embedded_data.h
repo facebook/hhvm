@@ -19,10 +19,16 @@
 
 #include <string>
 
-namespace HPHP {
+namespace HPHP { namespace Util {
 
-std::string get_embedded_repo();
+struct embedded_data {
+  std::string   m_filename;
+  uint32_t      m_start;
+  uint32_t      m_len;
+};
 
-}
+bool get_embedded_data(const char *section, embedded_data* desc);
+
+} }
 
 #endif

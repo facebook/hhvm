@@ -51,5 +51,14 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibElf DEFAULT_MSG
     LIBELF_LIBRARIES
     LIBELF_INCLUDE_DIRS)
 
+SET(CMAKE_REQUIRED_LIBRARIES elf)
+INCLUDE(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("#include <libelf.h>
+int main() {
+  Elf *e = (Elf*)0;
+  size_t sz;
+  elf_getshdrstrndx(e, &sz);
+  return 0;
+}" ELF_GETSHDRSTRNDX)
 
-mark_as_advanced(LIBELF_INCLUDE_DIRS LIBELF_LIBRARIES)
+mark_as_advanced(LIBELF_INCLUDE_DIRS LIBELF_LIBRARIES ELF_GETSHDRSTRNDX)

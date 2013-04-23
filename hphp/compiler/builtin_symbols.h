@@ -73,9 +73,6 @@ private:
   static const char *SystemClasses[];
 
   static AnalysisResultPtr LoadGlobalSymbols(const char *fileName);
-  static void Parse(AnalysisResultPtr ar,
-                    const std::string& phpBaseName,
-                    const std::string& phpFileName);
 
   static StringToTypePtrMap s_superGlobals;
 

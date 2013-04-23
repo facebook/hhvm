@@ -16,8 +16,11 @@
 
 #include "runtime/base/program_functions.h"
 #include "hhvm/process_init.h"
-#include "runtime/vm/embedded_repo.h"
 #include "compiler/compiler.h"
+
+#include "util/embedded_data.h"
+#include "util/embedded_vfs.h"
+#include "util/util.h"
 
 int main(int argc, char** argv) {
   if (!argc) return 0;
@@ -26,10 +29,16 @@ int main(int argc, char** argv) {
     return HPHP::compiler_main(argc - 1, argv + 1);
   }
   HPHP::register_process_init();
-  std::string repo = HPHP::get_embedded_repo();
-  if (repo.empty()) {
+  HPHP::Util::embedded_data data;
+  if (!HPHP::Util::get_embedded_data("repo", &data)) {
     return HPHP::execute_program(argc, argv);
   }
+  std::string repo;
+  HPHP::Util::string_printf(repo, "%s:%u:%u",
+                            data.m_filename.c_str(),
+                            (unsigned)data.m_start, (unsigned)data.m_len);
+  HPHP::sqlite3_embedded_initialize(nullptr, true);
+
   std::vector<char*> args;
   args.push_back(argv[0]);
   args.push_back("-vRepo.Authoritative=true");

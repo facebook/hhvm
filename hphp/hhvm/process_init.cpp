@@ -123,37 +123,17 @@ void ProcessInit() {
                                                 hhbc_ext_funcs_count);
   SystemLib::s_nativeFuncUnit = nativeFuncUnit;
 
-  // Search for systemlib.php in the following places:
-  // 1) ${HHVM_LIB_PATH}/systemlib.php
-  // 2) <dirname(realpath(hhvm))>/systemlib.php (requires proc filesystem)
-  // 3) <HHVM_LIB_PATH_DEFAULT>/systemlib.php
-  //
-  // HHVM_LIB_PATH allows a manual override at runtime. If systemlib.php
-  // exists next to the hhvm binary, that is likely to be the next best
-  // version to use. The realpath()-based lookup will succeed as long as the
-  // proc filesystem exists (e.g. on Linux and some FreeBSD configurations)
-  // and no hard links are in use for the executable. Failing all of those
-  // options, the HHVM_LIB_PATH_DEFAULT-based lookup will always succeed,
-  // assuming that the application was built and installed correctly.
   String currentDir = g_vmContext->getCwd();
-  HPHP::Eval::PhpFile* file = nullptr;
 
-  string slib = RuntimeOption::RepoAuthoritative ?
-    string("/:systemlib.php") : systemlib_path();
+  string slib = get_systemlib();
 
-  if (!slib.empty()) {
-    file = g_vmContext->lookupPhpFile(String(slib).get(),
-                                      currentDir.data(), nullptr);
-  }
-  if (!file) {
+  if (slib.empty()) {
     // Die a horrible death.
     Logger::Error("Unable to find/load systemlib.php");
     _exit(1);
   }
 
-  SystemLib::s_phpFile = file;
-  file->incRef();
-  SystemLib::s_unit = file->unit();
+  SystemLib::s_unit = compile_string(slib.c_str(), slib.size());
 
   // Restore most settings before merging anything,
   // because of optimizations that depend on them

@@ -16,7 +16,20 @@
 #include <gtest/gtest.h>
 #include "hhvm/process_init.h"
 
+#include <string>
+
 int main(int argc, char** argv) {
+  char buf[PATH_MAX];
+  if (realpath("/proc/self/exe", buf)) {
+    for (int i = 0; i < 4; i++) {
+      char* p = strrchr(buf, '/');
+      assert(p);
+      *p = 0;
+    }
+    std::string slib = buf;
+    slib += "/ext_hhvm/systemlib.php";
+    setenv("HHVM_SYSTEMLIB", slib.c_str(), true);
+  }
   testing::InitGoogleTest(&argc, argv);
   HPHP::init_for_unit_test();
   return RUN_ALL_TESTS();

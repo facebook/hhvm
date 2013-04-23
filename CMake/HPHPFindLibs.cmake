@@ -266,6 +266,9 @@ include_directories(${LIBDWARF_INCLUDE_DIRS})
 
 find_package(LibElf REQUIRED)
 include_directories(${LIBELF_INCLUDE_DIRS})
+if (ELF_GETSHDRSTRNDX)
+        add_definitions("-DHAVE_ELF_GETSHDRSTRNDX")
+endif()
 
 CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/utf8.h" U8T_DECOMPOSE RECENT_CCLIENT)
 if (NOT RECENT_CCLIENT)

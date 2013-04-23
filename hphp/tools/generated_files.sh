@@ -13,7 +13,13 @@ check_err()
 VERBOSE=1
 
 HHVM=$HPHP_HOME/hphp/hhvm/hhvm
-[ ! -x "$HHVM" ] && HHVM=`which hhvm`
+if [ -x "$HHVM" ]; then
+  export HHVM_SYSTEMLIB=$HPHP_HOME/bin/systemlib.php
+else
+  HHVM=`which hhvm`
+  export HHVM_SYSTEMLIB=`dirname $HHVM`/systemlib.php
+fi
+
 [ ! -x "$HHVM" ] && check_err 1 "$HHVM is not executable"
 
 HPHP_TOOLS=$HPHP_HOME/hphp/tools/

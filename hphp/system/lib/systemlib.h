@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/types.h>
-
 #ifndef incl_HPHP_SYSTEMLIB_H_
 #define incl_HPHP_SYSTEMLIB_H_
+
+#include <runtime/base/types.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,6 @@ namespace Eval {
 class SystemLib {
  public:
   static bool s_inited;
-  static HPHP::Eval::PhpFile* s_phpFile;
   static HPHP::VM::Unit* s_unit;
   static HPHP::VM::Unit* s_nativeFuncUnit;
   static HPHP::VM::Unit* s_nativeClassUnit;

@@ -34,6 +34,7 @@
 #include "runtime/base/memory/memory_manager.h"
 #include "util/process.h"
 #include "util/capability.h"
+#include "util/embedded_data.h"
 #include "util/timer.h"
 #include "util/stack_trace.h"
 #include "util/light_process.h"
@@ -1116,30 +1117,29 @@ String canonicalize_path(CStrRef p, const char* root, int rootLen) {
   return path;
 }
 
-static bool check_path(const char *path) {
-  if (!path) return false;
-
-  string file = string(path) + "/systemlib.php";
-  struct stat result;
-  if (stat(file.c_str(), &result)) {
-    return false;
+// Search for systemlib.php in the following places:
+// 1) ${HHVM_SYSTEMLIB}
+// 2) section "systemlib" in the current executable
+// and return its contents
+string get_systemlib() {
+  if (char *file = getenv("HHVM_SYSTEMLIB")) {
+    std::ifstream ifs(file);
+    if (ifs.good()) {
+      return std::string(std::istreambuf_iterator<char>(ifs),
+                         std::istreambuf_iterator<char>());
+    }
   }
-  return S_ISREG(result.st_mode);
-}
 
-string systemlib_path() {
-  char *file;
-  char buf[PATH_MAX + 1];
-  if (!check_path(file = getenv("HHVM_LIB_PATH")) &&
-      !(realpath("/proc/self/exe", buf) &&
-        check_path(file = dirname(buf)))
-#ifdef HHVM_LIB_PATH_DEFAULT
-      && !(check_path(file = HHVM_LIB_PATH_DEFAULT))
-#endif
-     ) {
-    return "";
-  }
-  return string(file) + "/systemlib.php";
+  Util::embedded_data desc;
+  if (!Util::get_embedded_data("systemlib", &desc)) return "";
+
+  std::ifstream ifs(desc.m_filename);
+  if (!ifs.good()) return "";
+  ifs.seekg(desc.m_start, std::ios::beg);
+  std::unique_ptr<char[]> data(new char[desc.m_len]);
+  ifs.read(data.get(), desc.m_len);
+  string result(data.get(), desc.m_len);
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -7314,53 +7314,6 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
   ues.clear();
 }
 
-static void emitSystemLib() {
-  if (!Option::WholeProgram) return;
-
-  string slib = systemlib_path();
-  if (slib.empty()) return;
-
-  FILE* sl = fopen(slib.c_str(), "r");
-  if (!sl) return;
-  fseek(sl, 0, SEEK_END);
-  long len = ftell(sl);
-  fseek(sl, 0, SEEK_SET);
-
-  char *code = (char*)malloc(len + 1);
-  Option::WholeProgram = false;
-  SystemLib::s_inited = false;
-
-  SCOPE_EXIT {
-    SystemLib::s_inited = true;
-    Option::WholeProgram = true;
-    free(code);
-  };
-
-  if (fread(code, len, 1, sl) != 1) {
-    throw Exception("Failed to read systemlib");
-  }
-
-  code[len] = 0;
-  AnalysisResultPtr ar(new AnalysisResult());
-  Scanner scanner(code, len, RuntimeOption::ScannerType, "/:systemlib.php");
-  Parser parser(scanner, "/:systemlib.php", ar, len);
-  parser.parse();
-  FileScopePtr fsp = parser.getFileScope();
-  fsp->setOuterScope(ar);
-
-  ar->loadBuiltins();
-  ar->setPhase(AnalysisResult::AnalyzeAll);
-  fsp->analyzeProgram(ar);
-
-  int md5len;
-  char* md5str = string_md5(code, len, false, md5len);
-  MD5 md5(md5str);
-  free(md5str);
-
-  UnitEmitter* ue = emitHHBCUnitEmitter(ar, fsp, md5);
-  Repo::get().commitUnit(ue, UnitOriginFile);
-}
-
 /**
  * This is the entry point for offline bytecode generation.
  */
@@ -7415,8 +7368,6 @@ void emitAllHHBC(AnalysisResultPtr ar) {
         break;
       }
     }
-
-    emitSystemLib();
   } else {
     dispatcher.waitEmpty();
   }

@@ -311,24 +311,6 @@ void BuiltinSymbols::ImportExtClasses(AnalysisResultPtr ar) {
   }
 }
 
-void BuiltinSymbols::Parse(AnalysisResultPtr ar,
-                           const std::string& phpBaseName,
-                           const std::string& phpFileName) {
-  const char *baseName = s_strings.add(phpBaseName.c_str());
-  const char *fileName = s_strings.add(phpFileName.c_str());
-  try {
-    Scanner scanner(fileName, Option::ScannerType);
-    Compiler::Parser parser(scanner, baseName, ar);
-    if (!parser.parse()) {
-      Logger::Error("Unable to parse file %s: %s", fileName,
-                    parser.getMessage().c_str());
-      assert(false);
-    }
-  } catch (FileOpenException &e) {
-    Logger::Error("%s", e.getMessage().c_str());
-  }
-}
-
 bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
   if (Loaded) return true;
   Loaded = true;
@@ -346,17 +328,17 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
   if (!extOnly) {
     ar = AnalysisResultPtr(new AnalysisResult());
     ar->loadBuiltinFunctions();
-    string slib = systemlib_path();
-    if (slib.empty()) {
-      for (const char **cls = SystemClasses; *cls; cls++) {
-        string phpBaseName = "/system/classes/";
-        phpBaseName += *cls;
-        phpBaseName += ".php";
-        Parse(ar, phpBaseName, Option::GetSystemRoot() + phpBaseName);
-      }
-    } else {
-      Parse(ar, slib, slib);
+    string slib = get_systemlib();
+
+    Scanner scanner(slib.c_str(), slib.size(),
+                    Option::ScannerType, "systemlib.php");
+    Compiler::Parser parser(scanner, "systemlib.php", ar);
+    if (!parser.parse()) {
+      Logger::Error("Unable to parse systemlib.php: %s",
+                    parser.getMessage().c_str());
+      assert(false);
     }
+
     ar->analyzeProgram(true);
     ar->inferTypes();
     const StringToFileScopePtrMap &files = ar->getAllFiles();

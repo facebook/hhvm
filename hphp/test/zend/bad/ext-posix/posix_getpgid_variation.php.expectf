@@ -1,0 +1,85 @@
+*** Testing posix_getpgid() : usage variations ***
+HipHop Notice: %a
+HipHop Notice: %a
+
+Arg value 10.5 
+valid output
+
+Arg value -10.5 
+valid output
+
+Arg value 101234567000 
+valid output
+
+Arg value 1.07654321E-9 
+valid output
+
+Arg value 0.5 
+valid output
+HipHop Notice: %a
+
+Arg value Array 
+HipHop Warning: %a
+valid output
+HipHop Notice: %a
+
+Arg value Array 
+HipHop Warning: %a
+valid output
+HipHop Notice: %a
+
+Arg value Array 
+HipHop Warning: %a
+valid output
+HipHop Notice: %a
+
+Arg value Array 
+HipHop Warning: %a
+valid output
+HipHop Notice: %a
+
+Arg value Array 
+HipHop Warning: %a
+valid output
+
+Arg value  
+valid output
+
+Arg value  
+valid output
+
+Arg value 1 
+valid output
+
+Arg value  
+valid output
+
+Arg value 1 
+valid output
+
+Arg value  
+valid output
+
+Arg value  
+HipHop Warning: %a
+valid output
+
+Arg value  
+HipHop Warning: %a
+valid output
+
+Arg value string 
+HipHop Warning: %a
+valid output
+
+Arg value string 
+HipHop Warning: %a
+valid output
+
+Arg value  
+valid output
+
+Arg value  
+valid output
+
+Catchable fatal error: Object of class stdClass could not be converted to string in hphp/test/zend/bad/ext-posix/posix_getpgid_variation.php on line %d

@@ -1,0 +1,6 @@
+Basic test of POSIX getpgid(), kill(), get_last_error() and strerror() functions
+Kill pid=%d
+bool(false)
+int(%d)
+string(%d) %sNo such process%s
+===DONE====

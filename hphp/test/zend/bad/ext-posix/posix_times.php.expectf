@@ -1,0 +1,13 @@
+array(5) {
+  ["ticks"]=>
+  int(%i)
+  ["utime"]=>
+  int(%d)
+  ["stime"]=>
+  int(%d)
+  ["cutime"]=>
+  int(%d)
+  ["cstime"]=>
+  int(%d)
+}
+===DONE===

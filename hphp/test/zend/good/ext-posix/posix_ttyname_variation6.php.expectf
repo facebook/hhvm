@@ -1,0 +1,5 @@
+*** Test substituting argument 1 with object values ***
+Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
+bool(false)
+Error: 8 - Object of class classWithoutToString could not be converted to int, %s(%d)
+bool(false)

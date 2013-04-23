@@ -61,6 +61,9 @@ bad_tests = (
     # broken in Jenkins
     'bug35239.php',
     'bug54265.php',
+    
+    # our build machines have no members in group 0...
+    'ext-posix/posix_getgrgid.php',
 )
 
 no_import = (
@@ -113,7 +116,6 @@ no_import = (
     '/ext/pdo_mysql',
     '/ext/pdo_sqlite',
     '/ext/pgsql',
-    '/ext/posix',
     '/ext/spl',
     '/ext/sqlite3',
     '/ext/xmlwriter',

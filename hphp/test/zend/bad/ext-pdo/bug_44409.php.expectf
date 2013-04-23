@@ -1,0 +1,8 @@
+Method called: bug44409::unserialize('Data from DB')
+Array
+(
+    [0] => bug44409 Object
+        (
+        )
+
+)

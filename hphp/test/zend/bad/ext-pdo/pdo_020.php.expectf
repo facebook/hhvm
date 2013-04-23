@@ -1,0 +1,3 @@
+Counted 2 columns after SELECT id, val FROM test.
+Counted 3 columns after SELECT id, val, val2 FROM test.
+Counted 1 columns after SELECT COUNT(*) FROM test.

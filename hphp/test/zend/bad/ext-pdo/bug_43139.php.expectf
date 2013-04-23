@@ -1,0 +1,12 @@
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(2) {
+      ["xyz"]=>
+      string(1) "1"
+      ["def"]=>
+      string(1) "2"
+    }
+  }
+}

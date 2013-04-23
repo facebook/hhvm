@@ -1,0 +1,14 @@
+===QUERY===
+|-Array [0]
+| |-10 [id]
+| |-Abc [val]
+| \-zxy [val2]
+|-Array [1]
+| |-20 [id]
+| |-Def [val]
+| \-wvu [val2]
+\-Array [2]
+  |-30 [id]
+  |-Ghi [val]
+  \-tsr [val2]
+===DONE===

@@ -1,0 +1,34 @@
+array(3) {
+  ["A"]=>
+  array(1) {
+    [0]=>
+    string(1) "A"
+  }
+  ["B"]=>
+  array(1) {
+    [0]=>
+    string(1) "A"
+  }
+  ["C"]=>
+  array(1) {
+    [0]=>
+    string(1) "C"
+  }
+}
+array(3) {
+  ["A"]=>
+  array(1) {
+    ["val"]=>
+    string(1) "A"
+  }
+  ["B"]=>
+  array(1) {
+    ["val"]=>
+    string(1) "A"
+  }
+  ["C"]=>
+  array(1) {
+    ["val"]=>
+    string(1) "C"
+  }
+}

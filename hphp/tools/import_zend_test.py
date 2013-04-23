@@ -99,6 +99,9 @@ no_import = (
     'Zend/tests/callable_type_hint_003.phpt',
     'Zend/tests/jump13.phpt',
     'Zend/tests/heredoc_005.phpt',
+    'pcntl/tests/pcntl_exec.phpt',
+    'pcntl/tests/pcntl_exec_2.phpt',
+    'pcntl/tests/pcntl_exec_3.phpt',
 
     # not imported yet, but will be
     '/ext/exif',
@@ -110,7 +113,6 @@ no_import = (
     '/ext/mcrypt',
     '/ext/mysql',
     '/ext/openssl',
-    '/ext/pcntl',
     '/ext/pcre',
     '/ext/pdo',
     '/ext/pdo_mysql',

@@ -1,0 +1,11 @@
+*** Testing fflush(): writing to a file and reading the contents ***
+int(63)
+bool(true)
+first line of string
+second line of string
+third line of stringint(63)
+
+*** Testing fflush(): for return type ***
+bool(true)
+
+*** Done ***

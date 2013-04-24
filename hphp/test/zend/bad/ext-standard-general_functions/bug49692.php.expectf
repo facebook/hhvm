@@ -1,0 +1,9 @@
+array(1) {
+  ["sitemap"]=>
+  array(2) {
+    ["/home"]=>
+    string(13) "default:index"
+    ["/info"]=>
+    string(12) "default:info"
+  }
+}

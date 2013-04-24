@@ -1,0 +1,6 @@
+*** Testing lstat() for link after being renamed ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+===Done===

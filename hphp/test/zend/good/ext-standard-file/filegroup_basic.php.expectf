@@ -1,0 +1,14 @@
+*** Testing filegroup(): basic functionality ***
+-- Testing with the file or directory created by owner --
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+
+-- Testing with the standard file or directory --
+int(%d)
+int(%d)
+int(%d)
+
+*** Done ***

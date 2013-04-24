@@ -1,0 +1,96 @@
+*** Testing array_chunk() : basic functionality ***
+
+-- Iteration 1 --
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(4)
+  }
+  [2]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+}
+
+-- Iteration 2 --
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(6) "value1"
+    [1]=>
+    string(6) "value2"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(6) "value3"
+  }
+}
+
+-- Iteration 3 --
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    int(3)
+  }
+}
+
+-- Iteration 4 --
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "one"
+    [1]=>
+    string(3) "two"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(5) "three"
+  }
+}
+
+-- Iteration 5 --
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "one"
+    [1]=>
+    string(3) "two"
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    string(5) "three"
+    [1]=>
+    int(4)
+  }
+  [2]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+}
+Done

@@ -1,0 +1,20 @@
+*** Testing array_combine() : binary safe checking ***
+array(2) {
+  ["hello"]=>
+  string(5) "hello"
+  ["world"]=>
+  string(5) "world"
+}
+array(2) {
+  ["hello"]=>
+  string(5) "hello"
+  ["world"]=>
+  string(5) "world"
+}
+array(2) {
+  ["hello"]=>
+  string(5) "hello"
+  ["world"]=>
+  string(5) "world"
+}
+Done

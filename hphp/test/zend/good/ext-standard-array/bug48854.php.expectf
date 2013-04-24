@@ -1,0 +1,18 @@
+array(2) {
+  [%u|b%"friends"]=>
+  int(5)
+  [%u|b%"children"]=>
+  array(1) {
+    [%u|b%"dogs"]=>
+    int(0)
+  }
+}
+array(2) {
+  [%u|b%"friends"]=>
+  int(10)
+  [%u|b%"children"]=>
+  array(1) {
+    [%u|b%"cats"]=>
+    int(5)
+  }
+}

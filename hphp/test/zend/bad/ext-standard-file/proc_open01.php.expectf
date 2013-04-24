@@ -1,0 +1,16 @@
+array(2) {
+  [0]=>
+  resource(%d) of type (stream)
+  [1]=>
+  resource(%d) of type (stream)
+}
+%unicode|string%(5) "yay!
+"
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}

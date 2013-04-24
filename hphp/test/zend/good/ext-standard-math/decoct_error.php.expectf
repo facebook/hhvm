@@ -1,0 +1,5 @@
+*** Testing decoct() :  error conditions ***
+Incorrect number of arguments
+HipHop Warning: %a
+HipHop Warning: %a
+===Done===

@@ -1,0 +1,32 @@
+*** Testing array_diff_uassoc() : usage variation ***
+
+--decimal indexed--
+array(1) {
+  [12]=>
+  int(12)
+}
+array(1) {
+  [-17]=>
+  int(-17)
+}
+
+--octal indexed--
+array(1) {
+  [12]=>
+  int(12)
+}
+array(1) {
+  [-9]=>
+  int(-9)
+}
+
+--hexa  indexed--
+array(1) {
+  [12]=>
+  int(12)
+}
+array(1) {
+  [-7]=>
+  int(-7)
+}
+===DONE===

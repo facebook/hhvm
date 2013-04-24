@@ -1,0 +1,18 @@
+Testing gethostbyaddr : error conditions
+
+-- Testing gethostbyaddr function with Zero arguments --
+HipHop Warning: .+
+NULL
+
+-- Testing gethostbyaddr function with more than expected no. of arguments --
+HipHop Warning: .+
+NULL
+
+-- Testing gethostbyaddr function with invalid addresses --
+HipHop Warning: .+
+bool\(false\)
+HipHop Warning: .+
+bool\(false\)
+HipHop Warning: .+
+bool\(false\)
+Done

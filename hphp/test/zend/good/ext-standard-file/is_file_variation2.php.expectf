@@ -1,0 +1,5 @@
+*** Testing is_file() with links ***
+bool(true)
+bool(true)
+
+*** Done ***

@@ -1,0 +1,18 @@
+*** Testing array_intersect_uassoc() : usage variation ***
+
+-- Testing array_intersect_uassoc() function using class with static method as callback --
+array(1) {
+  ["a"]=>
+  string(5) "green"
+}
+array(1) {
+  ["a"]=>
+  string(5) "green"
+}
+
+-- Testing array_intersect_uassoc() function using class with regular method as callback --
+array(1) {
+  ["a"]=>
+  string(5) "green"
+}
+===DONE===

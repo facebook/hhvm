@@ -1,0 +1,8 @@
+*** Testing vprintf() : basic functionality - using string format ***
+one
+int(3)
+one two
+int(7)
+one two three
+int(13)
+===DONE===

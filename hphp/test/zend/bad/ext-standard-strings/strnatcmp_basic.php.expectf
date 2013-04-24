@@ -1,0 +1,27 @@
+*** Testing strnatcmp() : basic functionality ***
+Less than tests
+int(-1)
+int(-1)
+int(-1)
+int(-1)
+int(-1)
+int(1)
+int(1)
+int(1)
+int(1)
+int(1)
+Equal too tests
+int(0)
+int(1)
+Greater than tests
+int(1)
+int(1)
+int(1)
+int(1)
+int(1)
+int(1)
+int(1)
+int(1)
+int(1)
+int(1)
+===DONE===

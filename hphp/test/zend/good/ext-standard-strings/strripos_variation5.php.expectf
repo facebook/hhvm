@@ -1,0 +1,7 @@
+*** Testing strripos() function: with heredoc strings ***
+-- With heredoc string containing escape characters --
+int(13)
+int(19)
+int(13)
+int(19)
+===DONE===

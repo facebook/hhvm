@@ -1,0 +1,7 @@
+*** Testing stat() for directory after being renamed ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+--- Done ---

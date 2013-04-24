@@ -1,0 +1,16 @@
+array(2) {
+  [0]=>
+  resource(%d) of type (stream)
+  [1]=>
+  resource(%d) of type (stream)
+}
+bool(false)
+bool(false)
+string(22) "line start, line end, "
+bool(false)
+bool(false)
+string(15) "incomplete line"
+bool(false)
+string(15) "incomplete line"
+bool(false)
+string(11) "end of file"

@@ -1,0 +1,73 @@
+*** Testing tempnam() with absolute and relative paths ***
+
+-- Iteration 1 --
+File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 2 --
+File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 3 --
+File name is => %s\tempnam_variation2\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 4 --
+File name is => %s\tempnam_variation2\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 5 --
+File name is => %s\tempnam_variation2\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 6 --
+File name is => %s\tempnam_variation2\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 7 --
+File name is => %s\t%s
+File permissions are => 100666
+File created in => temp dir
+
+-- Iteration 8 --
+File name is => %s\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 9 --
+File name is => %s\t%s
+File permissions are => 100666
+File created in => temp dir
+
+-- Iteration 10 --
+File name is => %s\t%s
+File permissions are => 100666
+File created in => temp dir
+
+-- Iteration 11 --
+File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 12 --
+File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 13 --
+File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 14 --
+File name is => %s\t%s
+File permissions are => 100666
+File created in => temp dir
+
+*** Done ***

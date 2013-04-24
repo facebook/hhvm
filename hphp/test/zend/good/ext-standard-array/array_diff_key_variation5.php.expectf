@@ -1,0 +1,12 @@
+*** Testing array_diff_key() : usage variation ***
+
+-- Testing array_diff_key() function with float indexed array --
+array(2) {
+  [20]=>
+  string(2) "20"
+  [-20]=>
+  string(3) "-20"
+}
+array(0) {
+}
+===DONE===

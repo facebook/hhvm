@@ -1,0 +1,13 @@
+*** Testing strval() : error conditions ***
+
+-- Testing strval() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing strval() function with less than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing strval() function with object which has not toString() method  --
+
+Catchable fatal error: Object of class MyClass could not be converted to string in hphp/test/zend/bad/ext-standard-strings/strval_error.phpt on line %d

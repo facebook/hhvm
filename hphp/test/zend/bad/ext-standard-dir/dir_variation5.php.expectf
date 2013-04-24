@@ -1,0 +1,4 @@
+*** Testing dir() : open a file instead of a directory ***
+HipHop Warning: %a
+bool(false)
+Done

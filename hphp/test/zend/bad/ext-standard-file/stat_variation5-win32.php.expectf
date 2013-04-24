@@ -1,0 +1,6 @@
+*** Testing stat(): on a file with read/write permission ***
+bool(true)
+bool(true)
+bool(true)
+
+*** Done ***

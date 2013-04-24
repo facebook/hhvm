@@ -1,0 +1,20 @@
+*** Testing array_intersect() : binary safe checking ***
+array(2) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+}
+array(2) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+}
+array(2) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+}
+Done

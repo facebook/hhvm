@@ -1,0 +1,95 @@
+*** Testing readfile() : usage variation ***
+
+--int 0--
+testing readfile
+
+--int 1--
+testing readfile
+
+--int 12345--
+testing readfile
+
+--int -12345--
+testing readfile
+
+--float 10.5--
+testing readfile
+
+--float -10.5--
+testing readfile
+
+--float 12.3456789000e10--
+testing readfile
+
+--float -12.3456789000e10--
+testing readfile
+
+--float .5--
+testing readfile
+
+--empty array--
+Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+File not read
+
+--int indexed array--
+Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+File not read
+
+--associative array--
+Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+File not read
+
+--nested arrays--
+Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+File not read
+
+--uppercase NULL--
+testing readfile
+
+--lowercase null--
+testing readfile
+
+--lowercase true--
+testing readfile
+
+--lowercase false--
+testing readfile
+
+--uppercase TRUE--
+testing readfile
+
+--uppercase FALSE--
+testing readfile
+
+--empty string DQ--
+testing readfile
+
+--empty string SQ--
+testing readfile
+
+--string DQ--
+testing readfile
+
+--string SQ--
+testing readfile
+
+--mixed case string--
+testing readfile
+
+--heredoc--
+testing readfile
+
+--instance of classWithToString--
+Error: 2 - readfile() expects parameter 2 to be boolean, object given, %s(%d)
+File not read
+
+--instance of classWithoutToString--
+Error: 2 - readfile() expects parameter 2 to be boolean, object given, %s(%d)
+File not read
+
+--undefined var--
+testing readfile
+
+--unset var--
+testing readfile
+===DONE===

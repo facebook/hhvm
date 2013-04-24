@@ -1,0 +1,14 @@
+*** Testing array_diff_key() : usage variation ***
+
+-- Testing array_diff_key() function with boolean indexed array --
+array(3) {
+  [-10]=>
+  string(3) "-10"
+  ["true"]=>
+  int(1)
+  ["false"]=>
+  int(0)
+}
+array(0) {
+}
+===DONE===

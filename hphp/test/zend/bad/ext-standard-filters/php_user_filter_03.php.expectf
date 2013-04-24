@@ -1,0 +1,1 @@
+Strict Standards: Declaration of foo::onCreate() should be compatible with php_user_filter::onCreate() in hphp/test/zend/bad/ext-standard-filters/php_user_filter_03.phpt on line %d

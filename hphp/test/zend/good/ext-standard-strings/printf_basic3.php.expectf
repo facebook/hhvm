@@ -1,0 +1,24 @@
+*** Testing printf() : basic functionality - using float format ***
+
+-- Calling printf() with no arguments--
+format
+int(6)
+
+-- Calling printf() with one arguments--
+11.110000
+int(9)
+11.110000
+int(9)
+
+-- Calling printf() with two arguments--
+11.110000 22.220000
+int(19)
+11.110000 22.220000
+int(19)
+
+-- Calling printf() with three arguments--
+11.110000 22.220000 33.330000
+int(29)
+11.110000 22.220000 33.330000
+int(29)
+===DONE===

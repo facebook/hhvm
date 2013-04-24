@@ -1,0 +1,26 @@
+*** Testing array_map() : non-permmited built-in functions ***
+-- Iteration 1 --
+HipHop Warning: %a
+NULL
+-- Iteration 2 --
+HipHop Warning: %a
+NULL
+-- Iteration 3 --
+HipHop Warning: %a
+NULL
+-- Iteration 4 --
+HipHop Warning: %a
+NULL
+-- Iteration 5 --
+HipHop Warning: %a
+NULL
+-- Iteration 6 --
+HipHop Warning: %a
+NULL
+-- Iteration 7 --
+HipHop Warning: %a
+NULL
+-- Iteration 8 --
+HipHop Warning: %a
+NULL
+Done

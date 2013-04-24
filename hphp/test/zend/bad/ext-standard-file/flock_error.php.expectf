@@ -1,0 +1,49 @@
+*** Testing error conditions ***
+
+--- Iteration 0 ---
+HipHop Warning: %a
+bool(false)
+
+--- Iteration 1 ---
+HipHop Warning: %a
+bool(false)
+
+--- Iteration 2 ---
+HipHop Warning: %a
+bool(false)
+
+--- Iteration 3 ---
+HipHop Warning: %a
+bool(false)
+
+--- Iteration 4 ---
+HipHop Warning: %a
+NULL
+
+--- Iteration 5 ---
+HipHop Warning: %a
+NULL
+
+--- Iteration 6 ---
+HipHop Warning: %a
+NULL
+
+--- Iteration 7 ---
+HipHop Warning: %a
+NULL
+
+--- Iteration 8 ---
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+*** Done ***

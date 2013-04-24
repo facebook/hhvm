@@ -1,0 +1,14 @@
+test.file does not exist
+test.file exists
+test.file is not a symlink
+test.file exists
+test.file is file
+test.file permissions are 0666
+test.file size is 0
+test.file is writeable
+test.file is readable
+test.file is a regular file
+../file is a directory
+test.file is not a directory
+test.file does not exist
+test.file does not exist

@@ -1,0 +1,22 @@
+*** Testing mkdir(): error conditions ***
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Notice: %a
+HipHop Warning: %a
+bool(false)
+
+*** Testing rmdir(): error conditions ***
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Notice: %a
+HipHop Warning: %a
+bool(false)
+
+*** Testing rmdir() on non-existent directory ***
+HipHop Warning: %a
+bool(false)
+Done

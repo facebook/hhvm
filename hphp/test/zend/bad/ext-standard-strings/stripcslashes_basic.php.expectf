@@ -1,0 +1,7 @@
+*** Testing stripcslashes() : basic functionality ***
+string(11) "Hello World"
+string(13) "Hello World
+"
+string(11) "Hello World"
+string(11) "Hello World"
+===DONE===

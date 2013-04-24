@@ -1,0 +1,32 @@
+Array
+(
+    [0] => Array
+        (
+            [b] => brown
+            [c] => blue
+            [0] => red
+            [1] => 
+        )
+
+    [1] => Array
+        (
+            [a] => green
+            [b] => brown
+            [c] => blue
+        )
+
+    [2] => Array
+        (
+            [a] => green
+            [0] => yellow
+            [1] => red
+            [2] => 1
+        )
+
+    [3] => Array
+        (
+            [b] => brown
+            [c] => blue
+        )
+
+)

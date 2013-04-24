@@ -1,0 +1,22 @@
+array(4) {
+  ["MYCONST"]=>
+  array(1) {
+    ["MYCONST"]=>
+    string(1) "1"
+  }
+  ["M_PI"]=>
+  array(1) {
+    ["FOO"]=>
+    string(%d) "3.%d test"
+  }
+  ["foo::bar"]=>
+  array(2) {
+    ["A"]=>
+    string(1) "1"
+    ["B"]=>
+    string(3) "BAB"
+  }
+  ["MYCONST M_PI"]=>
+  array(0) {
+  }
+}

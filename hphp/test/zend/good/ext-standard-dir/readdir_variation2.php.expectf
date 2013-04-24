@@ -1,0 +1,6 @@
+*** Testing readdir() : usage variations ***
+
+-- Pass an empty directory to readdir() --
+string(1) "."
+string(2) ".."
+===DONE===

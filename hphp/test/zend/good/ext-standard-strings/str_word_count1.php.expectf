@@ -1,0 +1,9 @@
+int(0)
+HipHop Warning: %a
+bool(false)
+HipHop Notice: %a
+HipHop Warning: %a
+bool(false)
+HipHop Notice: %a
+NULL
+Done

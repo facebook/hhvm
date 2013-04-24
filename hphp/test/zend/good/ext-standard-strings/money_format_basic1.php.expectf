@@ -1,0 +1,20 @@
+*** Testing money_format() : basic functionality***
+Format values with 14 positions, 8 digits to left, 2 to right using national format
+string
+string
+Format again but with ( for negative values
+string
+string
+Format with 0 for padding character
+string
+string
+Format again with * for padding character
+string
+string
+Format again but disable grouping character
+string
+string
+Format again suppress currency symbol
+string
+string
+===DONE===

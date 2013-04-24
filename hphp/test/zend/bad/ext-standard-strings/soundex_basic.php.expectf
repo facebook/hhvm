@@ -1,0 +1,17 @@
+*** Testing soundex() : basic functionality ***
+string(4) "E460"
+string(4) "G200"
+string(4) "H416"
+string(4) "K530"
+string(4) "L300"
+string(4) "L222"
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+ 
+===DONE===

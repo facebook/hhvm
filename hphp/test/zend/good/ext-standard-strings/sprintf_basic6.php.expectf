@@ -1,0 +1,6 @@
+*** Testing sprintf() : basic functionality - using exponential format ***
+string(6) "format"
+string(11) "1.000000e+3"
+string(23) "1.000000E+3 2.000000e+3"
+string(35) "1.000000e+3 2.000000E+3 3.000000e+3"
+Done

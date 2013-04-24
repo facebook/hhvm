@@ -1,0 +1,22 @@
+*** Testing var_export() with valid null values ***
+
+*** Output for null values ***
+
+-- Iteration: NULL --
+NULL
+NULL
+string(4) "NULL"
+
+
+-- Iteration: null --
+NULL
+NULL
+string(4) "NULL"
+
+
+-- Iteration: null_var --
+NULL
+NULL
+string(4) "NULL"
+
+===DONE===

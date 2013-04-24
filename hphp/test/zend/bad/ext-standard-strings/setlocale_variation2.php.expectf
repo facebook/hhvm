@@ -1,0 +1,7 @@
+*** Testing setlocale() : usage variations ***
+-- Test setlocale() with all available locale in the system --
+No of locales found on the machine = %d
+No of setlocale() success = %d
+Expected no of failures = 0
+Test PASSED
+Done

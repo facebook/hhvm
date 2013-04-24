@@ -1,0 +1,38 @@
+*** Testing htmlspecialchars() : basic functionality ***
+Basic tests
+Test 1: abc&lt;&gt;&quot;&amp;
+Test 2: &amp;&amp;abc&lt;&gt;&quot;&amp;
+Test 3: a&gt;,\&lt;bc&lt;&gt;&quot;&amp;
+Test 4: a\'\'&amp;bc&lt;&gt;&quot;&amp;
+Test 5: &amp;amp;&amp;lt;
+Test 6: abc&lt;&gt;"&amp;
+Test 7: &amp;&amp;abc&lt;&gt;"&amp;
+Test 8: a&gt;,\&lt;bc&lt;&gt;"&amp;
+Test 9: a\'\'&amp;bc&lt;&gt;"&amp;
+Test 10: &amp;amp;&amp;lt;
+Test 11: abc&lt;&gt;&quot;&amp;
+Test 12: &amp;&amp;abc&lt;&gt;&quot;&amp;
+Test 13: a&gt;,\&lt;bc&lt;&gt;&quot;&amp;
+Test 14: a\'\'&amp;bc&lt;&gt;&quot;&amp;
+Test 15: &amp;amp;&amp;lt;
+Test 16: abc&lt;&gt;&quot;&amp;
+Test 17: &amp;&amp;abc&lt;&gt;&quot;&amp;
+Test 18: a&gt;,\&lt;bc&lt;&gt;&quot;&amp;
+Test 19: a\&#039;\&#039;&amp;bc&lt;&gt;&quot;&amp;
+Test 20: &amp;amp;&amp;lt;
+
+Try with char set option - specify default ISO-8859-1
+Test 21: abc&lt;&gt;"&amp;
+Test 22: &amp;&amp;abc&lt;&gt;&quot;&amp;
+Test 23: a&gt;,\&lt;bc&lt;&gt;&quot;&amp;
+Test 24: &amp;amp;&amp;lt;
+
+Try with double decode FALSE
+Test 25: &quot;&amp;xyz&gt;abc&quot;
+Test 26: &quot;&amp;123&lt;456&quot;
+Test 27: "300 &lt; 400"
+
+Try with double decode TRUE
+Test 28: &amp;quot;&amp;amp;xyz&amp;gt;abc&amp;quot;
+Test 29: &amp;quot;&amp;amp;123&amp;lt;456&amp;quot;
+===DONE===

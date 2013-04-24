@@ -1,0 +1,40 @@
+*** Testing var_export() with valid boolean values ***
+
+*** Output for boolean values ***
+
+-- Iteration: 1 --
+1
+1
+string(1) "1"
+
+
+-- Iteration: TRUE --
+true
+true
+string(4) "true"
+
+
+-- Iteration: true --
+true
+true
+string(4) "true"
+
+
+-- Iteration: 0 --
+0
+0
+string(1) "0"
+
+
+-- Iteration: FALSE --
+false
+false
+string(5) "false"
+
+
+-- Iteration: false --
+false
+false
+string(5) "false"
+
+===DONE===

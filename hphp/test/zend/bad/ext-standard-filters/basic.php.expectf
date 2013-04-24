@@ -1,0 +1,14 @@
+filter: string.rot13
+resource(%d) of type (stream filter)
+string(12) "Uryyb Gurer!"
+filter: string.toupper
+resource(%d) of type (stream filter)
+string(12) "HELLO THERE!"
+filter: string.tolower
+resource(%d) of type (stream filter)
+string(12) "hello there!"
+filter: string.rot13
+resource(%d) of type (stream filter)
+filter: string.toupper
+resource(%d) of type (stream filter)
+string(12) "URYYB GURER!"

@@ -1,0 +1,71 @@
+*** Testing arsort() : usage variations ***
+
+-- Testing arsort() by supplying octal value array, 'flag' value is defualt  --
+bool(true)
+array(9) {
+  [669]=>
+  int(669)
+  [506]=>
+  int(506)
+  [229]=>
+  int(229)
+  [209]=>
+  int(209)
+  [63]=>
+  int(63)
+  [54]=>
+  int(54)
+  [0]=>
+  int(0)
+  [-54]=>
+  int(-54)
+  [-229]=>
+  int(-229)
+}
+
+-- Testing arsort() by supplying octal value array, 'flag' value is SORT_REGULAR  --
+bool(true)
+array(9) {
+  [669]=>
+  int(669)
+  [506]=>
+  int(506)
+  [229]=>
+  int(229)
+  [209]=>
+  int(209)
+  [63]=>
+  int(63)
+  [54]=>
+  int(54)
+  [0]=>
+  int(0)
+  [-54]=>
+  int(-54)
+  [-229]=>
+  int(-229)
+}
+
+-- Testing arsort() by supplying octal value array, 'flag' value is SORT_NUMERIC  --
+bool(true)
+array(9) {
+  [669]=>
+  int(669)
+  [506]=>
+  int(506)
+  [229]=>
+  int(229)
+  [209]=>
+  int(209)
+  [63]=>
+  int(63)
+  [54]=>
+  int(54)
+  [0]=>
+  int(0)
+  [-54]=>
+  int(-54)
+  [-229]=>
+  int(-229)
+}
+Done

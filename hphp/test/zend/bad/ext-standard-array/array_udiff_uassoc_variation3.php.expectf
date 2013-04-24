@@ -1,0 +1,118 @@
+*** Testing array_udiff_uassoc() : usage variation ***
+
+--int 0--
+HipHop Warning: %a
+NULL
+
+--int 1--
+HipHop Warning: %a
+NULL
+
+--int 12345--
+HipHop Warning: %a
+NULL
+
+--int -12345--
+HipHop Warning: %a
+NULL
+
+--float 10.5--
+HipHop Warning: %a
+NULL
+
+--float -10.5--
+HipHop Warning: %a
+NULL
+
+--float 12.3456789000e10--
+HipHop Warning: %a
+NULL
+
+--float -12.3456789000e10--
+HipHop Warning: %a
+NULL
+
+--float .5--
+HipHop Warning: %a
+NULL
+
+--empty array--
+HipHop Warning: %a
+NULL
+
+--int indexed array--
+HipHop Warning: %a
+NULL
+
+--associative array--
+HipHop Warning: %a
+NULL
+
+--nested arrays--
+HipHop Warning: %a
+NULL
+
+--uppercase NULL--
+HipHop Warning: %a
+NULL
+
+--lowercase null--
+HipHop Warning: %a
+NULL
+
+--lowercase true--
+HipHop Warning: %a
+NULL
+
+--lowercase false--
+HipHop Warning: %a
+NULL
+
+--uppercase TRUE--
+HipHop Warning: %a
+NULL
+
+--uppercase FALSE--
+HipHop Warning: %a
+NULL
+
+--empty string DQ--
+HipHop Warning: %a
+NULL
+
+--empty string SQ--
+HipHop Warning: %a
+NULL
+
+--string DQ--
+HipHop Warning: %a
+NULL
+
+--string SQ--
+HipHop Warning: %a
+NULL
+
+--mixed case string--
+HipHop Warning: %a
+NULL
+
+--heredoc--
+HipHop Warning: %a
+NULL
+
+--instance of classWithToString--
+HipHop Warning: %a
+NULL
+
+--instance of classWithoutToString--
+HipHop Warning: %a
+NULL
+
+--undefined var--
+HipHop Warning: %a
+NULL
+
+--unset var--
+HipHop Warning: %a
+NULL
+===DONE===

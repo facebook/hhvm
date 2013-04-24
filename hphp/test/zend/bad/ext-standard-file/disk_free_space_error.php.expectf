@@ -1,0 +1,17 @@
+*** Testing error conditions ***
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+float(%d)
+float(%d)
+
+-- Done --

@@ -1,0 +1,26 @@
+*** Testing array_product() : variation - using non numeric values ***
+boolean (true)
+int(1)
+
+boolean (false)
+int(0)
+
+string
+int(0)
+
+numeric string
+int(12)
+
+resource
+int(%d)
+
+object
+int(1)
+
+null
+int(0)
+
+array
+int(1)
+
+===DONE===

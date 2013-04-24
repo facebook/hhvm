@@ -1,0 +1,32 @@
+*** Testing sscanf() : basic functionality - - using hexadecimal format ***
+
+-- Try sccanf() WITHOUT optional args --
+int(297)
+int(303)
+int(4667)
+int(-4667)
+int(6844)
+int(1)
+int(297)
+int(303)
+int(4667)
+int(-4667)
+int(6844)
+int(1)
+
+-- Try sccanf() WITH optional args --
+int(6)
+int(297)
+int(303)
+int(4667)
+int(-4667)
+int(6844)
+int(1)
+int(6)
+int(297)
+int(303)
+int(4667)
+int(-4667)
+int(6844)
+int(1)
+===DONE===

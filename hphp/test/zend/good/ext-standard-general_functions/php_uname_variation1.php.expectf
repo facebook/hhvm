@@ -1,0 +1,42 @@
+*** Testing php_uname() - usage variations
+-- Iterator 0 --
+string(%d) "%s"
+-- Iterator 1 --
+string(%d) "%s"
+-- Iterator 12345 --
+string(%d) "%s"
+-- Iterator -2345 --
+string(%d) "%s"
+-- Iterator 10.5 --
+string(%d) "%s"
+-- Iterator -10.5 --
+string(%d) "%s"
+-- Iterator 10.1234567e10 --
+string(%d) "%s"
+-- Iterator 10.7654321E-10 --
+string(%d) "%s"
+-- Iterator .5 --
+string(%d) "%s"
+-- Iterator NULL --
+string(%d) "%s"
+-- Iterator null --
+string(%d) "%s"
+-- Iterator true --
+string(%d) "%s"
+-- Iterator false --
+string(%d) "%s"
+-- Iterator TRUE --
+string(%d) "%s"
+-- Iterator FALSE --
+string(%d) "%s"
+-- Iterator "" --
+string(%d) "%s"
+-- Iterator '' --
+string(%d) "%s"
+-- Iterator new fooClass() --
+string(%d) "%s"
+-- Iterator undefined var --
+string(%d) "%s"
+-- Iterator unset var --
+string(%d) "%s"
+===DONE===

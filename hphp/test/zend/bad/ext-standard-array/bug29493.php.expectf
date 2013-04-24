@@ -1,0 +1,40 @@
+array(1) {
+  ["foo"]=>
+  string(3) "aaa"
+}
+array(1) {
+  ["foo"]=>
+  string(3) "bbb"
+}
+array(1) {
+  ["foo"]=>
+  &string(3) "noo"
+}
+array(1) {
+  ["foo"]=>
+  string(3) "bbb"
+}
+array(1) {
+  ["foo"]=>
+  string(3) "bbb"
+}
+array(1) {
+  ["foo"]=>
+  string(3) "bbb"
+}
+array(1) {
+  ["foo"]=>
+  &string(3) "noo"
+}
+array(1) {
+  ["foo"]=>
+  &string(3) "noo"
+}
+array(1) {
+  ["foo"]=>
+  string(3) "aaa"
+}
+array(1) {
+  ["foo"]=>
+  &string(3) "noo"
+}

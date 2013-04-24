@@ -1,0 +1,10 @@
+bool(false)
+bool(false)
+__autoload(autoload_interface)
+__autoload(Autoload_Implements)
+object(autoload_implements)#%d (0) {
+}
+bool(true)
+bool(true)
+bool(true)
+===DONE===

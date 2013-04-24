@@ -1,0 +1,30 @@
+*** Testing print() : basic functionality ***
+
+-- Iteration 1 --
+Hello World
+-- Iteration 2 --
+print() also works without parentheses.
+-- Iteration 3 --
+This spans
+multiple lines. The newlines will be
+output as well
+-- Iteration 4 --
+This also spans
+multiple lines. The newlines will be
+output as well.
+-- Iteration 5 --
+escaping characters is done "Like this".
+-- Iteration 6 --
+foo is foobar
+-- Iteration 7 --
+this is foo !
+-- Iteration 8 --
+foo is $foo
+-- Iteration 9 --
+foobar
+-- Iteration 10 --
+This uses the "here document" syntax to output
+multiple lines with VARIABLE interpolation. Note
+that the here document terminator must appear on a
+line with just a semicolon no extra whitespace!
+===DONE===

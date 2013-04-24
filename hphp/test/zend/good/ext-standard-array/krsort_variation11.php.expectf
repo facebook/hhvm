@@ -1,0 +1,38 @@
+*** Testing krsort() : usage variations ***
+
+-- Testing krsort() by supplying boolean value array, 'flag' value is defualt --
+bool(true)
+array(2) {
+  [1]=>
+  bool(true)
+  [0]=>
+  bool(false)
+}
+
+-- Testing krsort() by supplying boolean value array, 'flag' value is SORT_REGULAR --
+bool(true)
+array(2) {
+  [1]=>
+  bool(true)
+  [0]=>
+  bool(false)
+}
+
+-- Testing krsort() by supplying boolean value array, 'flag' value is SORT_NUMERIC  --
+bool(true)
+array(2) {
+  [1]=>
+  bool(true)
+  [0]=>
+  bool(false)
+}
+
+-- Testing krsort() by supplying boolean value array, 'flag' value is SORT_STRING --
+bool(true)
+array(2) {
+  [1]=>
+  bool(true)
+  [0]=>
+  bool(false)
+}
+Done

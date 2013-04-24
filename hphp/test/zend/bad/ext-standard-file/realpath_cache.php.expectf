@@ -1,0 +1,12 @@
+int(%d)
+array(4) {
+  ["key"]=>
+  %s(%f)
+  ["is_dir"]=>
+  bool(true)
+  ["realpath"]=>
+  string(%d) "%sfile"
+  ["expires"]=>
+  int(%d)
+}
+Done

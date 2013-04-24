@@ -1,0 +1,89 @@
+*** Testing mkdir() : usage variation ***
+
+--int 0--
+Directory created
+
+--int 1--
+Directory created
+
+--int 12345--
+Directory created
+
+--int -12345--
+Directory created
+
+--float 10.5--
+Directory created
+
+--float -10.5--
+Directory created
+
+--float 12.3456789000e10--
+Directory created
+
+--float -12.3456789000e10--
+Directory created
+
+--float .5--
+Directory created
+
+--empty array--
+Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+--int indexed array--
+Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+--associative array--
+Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+--nested arrays--
+Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+--uppercase NULL--
+Directory created
+
+--lowercase null--
+Directory created
+
+--lowercase true--
+Directory created
+
+--lowercase false--
+Directory created
+
+--uppercase TRUE--
+Directory created
+
+--uppercase FALSE--
+Directory created
+
+--empty string DQ--
+Directory created
+
+--empty string SQ--
+Directory created
+
+--string DQ--
+Directory created
+
+--string SQ--
+Directory created
+
+--mixed case string--
+Directory created
+
+--heredoc--
+Directory created
+
+--instance of classWithToString--
+Error: 2 - mkdir() expects parameter 3 to be boolean, object given, %s(%d)
+
+--instance of classWithoutToString--
+Error: 2 - mkdir() expects parameter 3 to be boolean, object given, %s(%d)
+
+--undefined var--
+Directory created
+
+--unset var--
+Directory created
+===DONE===

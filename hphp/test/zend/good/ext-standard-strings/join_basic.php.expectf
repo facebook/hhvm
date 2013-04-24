@@ -1,0 +1,6 @@
+*** Testing join() : basic functionality ***
+string(7) "1,2,3,4"
+string(30) "Red, Green, Blue, Black, White"
+string(8) "10:20:40"
+string(21) "Friday/September/2007"
+Done

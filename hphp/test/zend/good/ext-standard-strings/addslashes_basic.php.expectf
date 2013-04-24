@@ -1,0 +1,6 @@
+*** Testing addslashes() : basic functionality ***
+string(16) "How\'s everybody"
+string(17) "Are you \"JOHN\"?"
+string(19) "c:\\php\\addslashes"
+string(12) "hello\0world"
+Done

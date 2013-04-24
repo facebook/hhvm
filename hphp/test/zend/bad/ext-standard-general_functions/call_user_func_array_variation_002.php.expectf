@@ -1,0 +1,102 @@
+*** Testing call_user_func_array() : usage variation ***
+
+--int 0--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--int 1--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--int 12345--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--int -12345--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--float 10.5--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--float -10.5--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--float 12.3456789000e10--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--float -12.3456789000e10--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--float .5--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--empty array--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, array must have exactly two members, %s(%d)
+NULL
+
+--int indexed array--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, array must have exactly two members, %s(%d)
+NULL
+
+--associative array--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, first array member is not a valid class name or object, %s(%d)
+NULL
+
+--nested arrays--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, array must have exactly two members, %s(%d)
+NULL
+
+--uppercase NULL--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--lowercase null--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--lowercase true--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--lowercase false--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--uppercase TRUE--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--uppercase FALSE--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--empty string DQ--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, function '' not found or invalid function name, %s(%d)
+NULL
+
+--empty string SQ--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, function '' not found or invalid function name, %s(%d)
+NULL
+
+--instance of classWithToString--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--instance of classWithoutToString--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--undefined var--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+
+--unset var--
+Error: 2 - call_user_func_array() expects parameter 1 to be a valid callback, no array or string given, %s(%d)
+NULL
+===DONE===

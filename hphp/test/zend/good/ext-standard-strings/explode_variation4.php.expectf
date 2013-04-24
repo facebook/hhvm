@@ -1,0 +1,18 @@
+*** Testing explode() function: match longer string ***
+array(7) {
+  [0]=>
+  string(6) "piece1"
+  [1]=>
+  string(5) "iece2"
+  [2]=>
+  string(5) "iece3"
+  [3]=>
+  string(5) "iece4"
+  [4]=>
+  string(5) "iece5"
+  [5]=>
+  string(5) "iece6"
+  [6]=>
+  string(0) ""
+}
+===DONE===

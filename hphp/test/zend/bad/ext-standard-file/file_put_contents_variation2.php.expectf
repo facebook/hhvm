@@ -1,0 +1,54 @@
+*** Testing file_put_contents() : usage variation ***
+
+--int 0--
+0
+--int 1--
+1
+--int 12345--
+12345
+--int -12345--
+-2345
+--float 10.5--
+10.5
+--float -10.5--
+-10.5
+--float 12.3456789000e10--
+123456789000
+--float -12.3456789000e10--
+-123456789000
+--float .5--
+0.5
+--empty array--
+
+--int indexed array--
+123
+--associative array--
+12
+--nested arrays--
+Error: 8 - Array to string conversion, %s(%d)
+Error: 8 - Array to string conversion, %s(%d)
+fooArrayArray
+--uppercase NULL--
+
+--lowercase null--
+
+--lowercase true--
+1
+--lowercase false--
+
+--uppercase TRUE--
+1
+--uppercase FALSE--
+
+--empty string DQ--
+
+--empty string SQ--
+
+--instance of classWithToString--
+Class A object
+--instance of classWithoutToString--
+
+--undefined var--
+
+--unset var--
+===DONE===

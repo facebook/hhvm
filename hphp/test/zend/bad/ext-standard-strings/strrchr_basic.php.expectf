@@ -1,0 +1,17 @@
+*** Testing strrchr() function: basic functionality ***
+string(12) "Hello, World"
+string(12) "Hello, World"
+string(12) "Hello, World"
+string(12) "Hello, World"
+bool(false)
+bool(false)
+string(5) "World"
+string(5) "World"
+string(7) ", World"
+string(7) ", World"
+string(12) "Hello, World"
+string(12) "Hello, World"
+string(4) "orld"
+string(4) "orld"
+bool(false)
+*** Done ***

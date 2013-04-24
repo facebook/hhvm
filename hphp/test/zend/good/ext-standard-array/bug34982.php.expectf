@@ -1,0 +1,18 @@
+Array
+(
+    [0] => changed
+    [1] => Array
+        (
+            [0] => changed
+        )
+
+)
+Array
+(
+    [0] => element 1
+    [1] => Array
+        (
+            [0] => subelement1
+        )
+
+)

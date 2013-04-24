@@ -1,0 +1,89 @@
+*** Testing base64_decode() : usage variations ***
+Error: 8 - Undefined variable: undefined_var, %s(%d)
+Error: 8 - Undefined variable: unset_var, %s(%d)
+
+-- Arg value 0 --
+string(12) "hello world!"
+
+-- Arg value 1 --
+bool(false)
+
+-- Arg value 12345 --
+bool(false)
+
+-- Arg value -2345 --
+bool(false)
+
+-- Arg value 10.5 --
+bool(false)
+
+-- Arg value -10.5 --
+bool(false)
+
+-- Arg value 10.1234567e10 --
+bool(false)
+
+-- Arg value 10.7654321E-10 --
+bool(false)
+
+-- Arg value .5 --
+bool(false)
+
+-- Arg value array() --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
+NULL
+
+-- Arg value array(0) --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
+NULL
+
+-- Arg value array(1) --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
+NULL
+
+-- Arg value array(1, 2) --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
+NULL
+
+-- Arg value array('color' => 'red', 'item' => 'pen' --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
+NULL
+
+-- Arg value NULL --
+string(12) "hello world!"
+
+-- Arg value null --
+string(12) "hello world!"
+
+-- Arg value true --
+bool(false)
+
+-- Arg value false --
+string(12) "hello world!"
+
+-- Arg value TRUE --
+bool(false)
+
+-- Arg value FALSE --
+string(12) "hello world!"
+
+-- Arg value "" --
+string(12) "hello world!"
+
+-- Arg value '' --
+string(12) "hello world!"
+
+-- Arg value stdClass object --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, object given, %s(%d)
+NULL
+
+-- Arg value undefined variable --
+string(12) "hello world!"
+
+-- Arg value unset variable --
+string(12) "hello world!"
+
+-- Arg value resource --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, resource given, %s(%d)
+NULL
+===Done===

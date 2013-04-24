@@ -1,0 +1,14 @@
+*** Testing filetype() with various types ***
+-- Checking with files --
+file
+file
+-- Checking with links: hardlink --
+file
+-- Checking with links: symlink --
+link
+-- Checking with directory --
+dir
+-- Checking with fifo --
+fifo
+
+*** Done ***

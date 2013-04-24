@@ -1,0 +1,8 @@
+*** Testing strrpos() function: with heredoc strings ***
+-- With heredoc string containing multi lines --
+int(44)
+int(44)
+int(44)
+bool(false)
+int(55)
+*** Done ***

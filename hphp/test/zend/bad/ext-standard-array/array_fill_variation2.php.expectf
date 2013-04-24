@@ -1,0 +1,90 @@
+*** Testing array_fill() : usage variations ***
+--- Testing array_fill() with different values for 'num' arg ---
+-- Iteration 1 --
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+}
+-- Iteration 2 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 3 --
+array(5) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(100)
+  [2]=>
+  int(100)
+  [3]=>
+  int(100)
+  [4]=>
+  int(100)
+}
+-- Iteration 4 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 5 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 6 --
+HipHop Warning: %a
+NULL
+-- Iteration 7 --
+HipHop Warning: %a
+NULL
+-- Iteration 8 --
+HipHop Warning: %a
+NULL
+-- Iteration 9 --
+HipHop Warning: %a
+NULL
+-- Iteration 10 --
+HipHop Warning: %a
+NULL
+-- Iteration 11 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 12 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 13 --
+array(1) {
+  [0]=>
+  int(100)
+}
+-- Iteration 14 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 15 --
+array(1) {
+  [0]=>
+  int(100)
+}
+-- Iteration 16 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 17 --
+HipHop Warning: %a
+NULL
+-- Iteration 18 --
+HipHop Warning: %a
+NULL
+-- Iteration 19 --
+HipHop Warning: %a
+NULL
+-- Iteration 20 --
+HipHop Warning: %a
+NULL
+-- Iteration 21 --
+HipHop Warning: %a
+NULL
+-- Iteration 22 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 23 --
+HipHop Warning: %a
+bool(false)
+Done

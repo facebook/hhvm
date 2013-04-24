@@ -1,0 +1,20 @@
+*** Testing sprintf() : error conditions ***
+
+-- Testing sprintf() function with Zero arguments --
+HipHop Warning: %a
+bool(false)
+
+-- Testing sprintf() function with less than expected no. of arguments --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+Done

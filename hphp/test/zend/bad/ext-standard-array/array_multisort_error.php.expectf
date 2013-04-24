@@ -1,0 +1,14 @@
+*** Testing array_multisort() : error conditions ***
+
+-- Testing array_multisort() function with Zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing array_multisort() function with repeated flags --
+HipHop Warning: %a
+bool(false)
+
+-- Testing array_multisort() function with repeated flags --
+HipHop Warning: %a
+bool(false)
+===DONE===

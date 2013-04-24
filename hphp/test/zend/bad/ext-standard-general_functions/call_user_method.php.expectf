@@ -1,0 +1,2 @@
+Deprecated: Function call_user_method() is deprecated in hphp/test/zend/bad/ext-standard-general_functions/call_user_method.phpt on line 8
+bool(true)

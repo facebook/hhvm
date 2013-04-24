@@ -1,0 +1,31 @@
+--- testing: 9223372036854775807 ---
+float(NAN)
+--- testing: -9223372036854775808 ---
+float(NAN)
+--- testing: 2147483647 ---
+float(NAN)
+--- testing: -2147483648 ---
+float(NAN)
+--- testing: 9223372034707292160 ---
+float(NAN)
+--- testing: -9223372034707292160 ---
+float(NAN)
+--- testing: 2147483648 ---
+float(NAN)
+--- testing: -2147483649 ---
+float(NAN)
+--- testing: 4294967294 ---
+float(NAN)
+--- testing: 4294967295 ---
+float(NAN)
+--- testing: 4294967293 ---
+float(NAN)
+--- testing: 9223372036854775806 ---
+float(NAN)
+--- testing: 9.2233720368548E+18 ---
+float(NAN)
+--- testing: -9223372036854775807 ---
+float(NAN)
+--- testing: -9.2233720368548E+18 ---
+float(NAN)
+===DONE===

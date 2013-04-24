@@ -1,0 +1,9 @@
+*** Test substituting argument 2 with array values ***
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL

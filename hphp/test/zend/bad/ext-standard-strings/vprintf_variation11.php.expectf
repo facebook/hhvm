@@ -1,0 +1,34 @@
+*** Testing vprintf() : octal formats with octal values ***
+
+-- Iteration 1 --
+0
+int(1)
+
+-- Iteration 2 --
+37777777777 1 
+int(14)
+
+-- Iteration 3 --
+20000000000 o, 17777777777 20000000001
+int(38)
+
+-- Iteration 4 --
+                      37776543211 0000
+int(38)
+
+-- Iteration 5 --
+111 2222 37777444445 37733333334
+int(32)
+
+-- Iteration 6 --
+11073 7653 123 12
+int(17)
+
+-- Iteration 7 --
+% %o o
+int(6)
+
+-- Iteration 8 --
+1 2 3 4
+int(7)
+===DONE===

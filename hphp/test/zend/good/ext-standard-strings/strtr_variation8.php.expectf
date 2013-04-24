@@ -1,0 +1,75 @@
+*** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***
+
+-- Iteration 1 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 2 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 3 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 4 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 5 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 6 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 7 --
+string(6) "012atm"
+
+-- Iteration 8 --
+string(6) "012atm"
+
+-- Iteration 9 --
+string(6) "122atm"
+
+-- Iteration 10 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 11 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 12 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 13 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 14 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 15 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 16 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 17 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 18 --
+HipHop Warning: %a
+bool(false)
+
+-- Iteration 19 --
+HipHop Warning: %a
+bool(false)
+*** Done ***

@@ -1,0 +1,85 @@
+Simple testcase for get_defined_vars() function
+
+
+-- Get variables at global scope --
+
+-- Function f1() called --
+
+-- ..define some local variables --
+array(6) {
+  ["vars"]=>
+  array(0) {
+  }
+  ["i"]=>
+  int(123)
+  ["f"]=>
+  float(123.456)
+  ["b"]=>
+  bool(false)
+  ["s"]=>
+  string(11) "Hello World"
+  ["arr"]=>
+  array(4) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+    [3]=>
+    int(4)
+  }
+}
+
+ -- Function f2() called --
+
+-- ...define some variables --
+array(6) {
+  ["vars"]=>
+  array(0) {
+  }
+  ["i"]=>
+  int(456)
+  ["f"]=>
+  float(456.678)
+  ["b"]=>
+  bool(true)
+  ["s"]=>
+  string(9) "Goodnight"
+  ["arr"]=>
+  array(2) {
+    [0]=>
+    string(3) "foo"
+    [1]=>
+    string(3) "bar"
+  }
+}
+
+-- ...define some more variables --
+array(9) {
+  ["vars"]=>
+  array(0) {
+  }
+  ["i"]=>
+  int(456)
+  ["f"]=>
+  float(456.678)
+  ["b"]=>
+  bool(true)
+  ["s"]=>
+  string(9) "Goodnight"
+  ["arr"]=>
+  array(2) {
+    [0]=>
+    string(3) "foo"
+    [1]=>
+    string(3) "bar"
+  }
+  ["i1"]=>
+  int(456)
+  ["f1"]=>
+  float(456.678)
+  ["b1"]=>
+  bool(true)
+}
+===DONE===

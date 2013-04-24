@@ -1,0 +1,14 @@
+*** Testing strcspn() : error conditions ***
+
+-- Testing strcspn() function with Zero arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing strcspn() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing strcspn() function with less than expected no. of arguments --
+HipHop Warning: %a
+NULL
+Done

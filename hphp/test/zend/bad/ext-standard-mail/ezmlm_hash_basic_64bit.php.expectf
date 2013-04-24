@@ -1,0 +1,4 @@
+*** Testing ezmlm_hash() : basic functionality ***
+int(1)
+int(7)
+===Done===

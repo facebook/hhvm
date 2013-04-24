@@ -1,0 +1,9 @@
+*** Testing get_declared_classes() : testing autoloaded classes ***
+
+-- before instance is declared --
+bool(false)
+
+-- after instance is declared --
+bool(true)
+
+DONE

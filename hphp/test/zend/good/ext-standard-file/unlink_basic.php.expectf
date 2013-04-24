@@ -1,0 +1,8 @@
+*** Testing unlink() on a file ***
+bool(true)
+bool(false)
+
+*** Testing unlink() : checking second argument ***
+bool(true)
+bool(false)
+Done

@@ -1,0 +1,37 @@
+*** Testing fwrite() : error conditions ***
+-- Testing fwrite() with less than expected number of arguments --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+-- Testing fwrite() with more than expected number of arguments --
+HipHop Warning: %a
+bool(false)
+-- Testing fwrite() with invalid length arguments --
+int(0)
+int(0)
+-- Testing fwrite() with invalid arguments --
+-- Iteration 1 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 2 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 3 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 4 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 5 --
+HipHop Warning: %a
+bool(false)
+-- Iteration 6 --
+HipHop Warning: %a
+bool(false)
+-- Testing fwrite() with closed/unset file handle --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+Done

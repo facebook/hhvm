@@ -1,0 +1,19 @@
+*** Testing vfprintf() : int formats with int values ***
+
+-- Iteration 1 --
+0
+-- Iteration 2 --
+-1 1 
+-- Iteration 3 --
+2147483647 d, 2147483640 -2147483640
+-- Iteration 4 --
+    123456 12345678   -1234567 1234567
+-- Iteration 5 --
+111 2222 333333 44444444
+-- Iteration 6 --
+4667 4011 83 10
+-- Iteration 7 --
+%-5678 d
+-- Iteration 8 --
+1 2 3 4
+===DONE===

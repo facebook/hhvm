@@ -1,0 +1,36 @@
+%sTEST
+<?PHP
+ECHO "-TEST\N";
+CLASS FILTER EXTENDS PHP_USER_FILTER {
+    FUNCTION FILTER($IN, $OUT, &$CONSUMED, $CLOSING)
+    {
+        $OUTPUT = 0;
+        WHILE ($BUCKET = STREAM_BUCKET_MAKE_WRITEABLE($IN)) {
+            $BUCKET->DATA = STRTOUPPER($BUCKET->DATA);
+            $CONSUMED += $BUCKET->DATALEN;
+            STREAM_BUCKET_APPEND($OUT, $BUCKET);
+            $OUTPUT = 1;
+        }
+        IF ($CLOSING) {
+            $BUCKET = STREAM_BUCKET_NEW($THIS->STREAM, "\N===CLOSE===\N");
+            STREAM_BUCKET_APPEND($OUT, $BUCKET);
+            $OUTPUT = 1;
+        }
+        RETURN $OUTPUT ? PSFS_PASS_ON : PSFS_FEED_ME;
+    }
+}
+STREAM_FILTER_REGISTER("STRTOUPPER", "FILTER")
+   OR DIE("FAILED TO REGISTER FILTER");
+
+IF ($F = FOPEN(__FILE__, "RB")) {
+    STREAM_FILTER_APPEND($F, "STRTOUPPER");
+    WHILE (!FEOF($F)) {
+        ECHO FREAD($F, 8192);
+    }
+    FCLOSE($F);
+}
+ECHO "DONE\N";
+?>
+
+===close===
+Done

@@ -1,0 +1,32 @@
+*** Testing array_multisort() : basic functionality ***
+
+-- Testing array_multisort() function with all normal arguments --
+bool(true)
+array(3) {
+  ["row2"]=>
+  int(1)
+  ["row3"]=>
+  int(1)
+  ["row1"]=>
+  int(2)
+}
+array(3) {
+  ["row2"]=>
+  string(2) "aa"
+  ["row3"]=>
+  string(1) "1"
+  ["row1"]=>
+  int(2)
+}
+
+-- Testing array_multisort() function with one argument --
+bool(true)
+array(3) {
+  ["row3"]=>
+  string(1) "1"
+  ["row2"]=>
+  string(2) "aa"
+  ["row1"]=>
+  int(2)
+}
+===DONE===

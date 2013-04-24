@@ -1,0 +1,9 @@
+*** Testing get_declared_traits() : testing autoloaded traits ***
+
+-- before instance is declared --
+bool(false)
+
+-- after use is declared --
+bool(true)
+
+DONE

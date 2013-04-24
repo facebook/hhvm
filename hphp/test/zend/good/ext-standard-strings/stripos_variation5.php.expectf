@@ -1,0 +1,7 @@
+*** Testing stripos() function: with heredoc strings ***
+-- With heredoc string containing escape characters --
+int(12)
+int(19)
+int(12)
+int(19)
+*** Done ***

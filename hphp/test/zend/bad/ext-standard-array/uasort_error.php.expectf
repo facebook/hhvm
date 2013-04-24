@@ -1,0 +1,17 @@
+*** Testing uasort() : error conditions ***
+-- Testing uasort() function with Zero argument --
+HipHop Warning: %a
+NULL
+-- Testing uasort() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+-- Testing uasort() function with less than expected no. of arguments --
+HipHop Warning: %a
+NULL
+-- Testing uasort() function with non-existent compare function --
+HipHop Warning: %a
+NULL
+-- Testing uasort() function with non-existent compare function and extra argument --
+HipHop Warning: %a
+NULL
+Done

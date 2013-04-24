@@ -1,0 +1,4 @@
+kake::__set_state(array(
+   'mann' => 42,
+   'kvinne' => 43,
+))

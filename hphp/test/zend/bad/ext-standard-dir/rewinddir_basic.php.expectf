@@ -1,0 +1,28 @@
+*** Testing rewinddir() : basic functionality ***
+resource(%d) of type (stream)
+resource(%d) of type (stream)
+
+-- Read and rewind first directory (argument supplied) --
+array(3) {
+  [0]=>
+  string(1) "."
+  [1]=>
+  string(2) ".."
+  [2]=>
+  string(9) "file1.tmp"
+}
+NULL
+bool(true)
+
+-- Read and rewind second directory (no argument supplied) --
+array(3) {
+  [0]=>
+  string(1) "."
+  [1]=>
+  string(2) ".."
+  [2]=>
+  string(9) "file2.tmp"
+}
+NULL
+bool(true)
+===DONE===

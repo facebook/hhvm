@@ -1,0 +1,5 @@
+*** Testing strcspn() : basic functionality ***
+int(2)
+int(2)
+int(3)
+Done

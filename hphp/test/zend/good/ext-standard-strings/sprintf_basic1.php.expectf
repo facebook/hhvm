@@ -1,0 +1,6 @@
+*** Testing sprintf() : basic functionality - using string format ***
+string(6) "format"
+string(13) "arg1 argument"
+string(27) "arg1 argument arg2 argument"
+string(41) "arg1 argument arg2 argument arg3 argument"
+Done

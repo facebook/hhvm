@@ -1,0 +1,146 @@
+*** Testing array_intersect() : Passing non-array values to $arr1 argument ***
+
+-- Iterator 1 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 2 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 3 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 4 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 5 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 6 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 7 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 8 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 9 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 10 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 11 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 12 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 13 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 14 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 15 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 16 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 17 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 18 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 19 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 20 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 21 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 22 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 23 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Iterator 24 --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+Done

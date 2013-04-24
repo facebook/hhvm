@@ -1,0 +1,8 @@
+*** Testing fileowner(): basic functionality ***
+-- Testing with the file or directory created by owner --
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+*** Done ***

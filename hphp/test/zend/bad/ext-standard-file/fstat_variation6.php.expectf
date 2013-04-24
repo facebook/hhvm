@@ -1,0 +1,5 @@
+Error: 2 - fstat() expects parameter 1 to be resource, object given, %s(%d)
+bool(false)
+Error: 2 - fstat() expects parameter 1 to be resource, object given, %s(%d)
+bool(false)
+===DONE===

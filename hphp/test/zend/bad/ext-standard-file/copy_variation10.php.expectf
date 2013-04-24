@@ -1,0 +1,5 @@
+*** Test copy(): Trying to create a copy of file with the same source name ***
+bool(false)
+bool(true)
+int(1500)
+*** Done ***

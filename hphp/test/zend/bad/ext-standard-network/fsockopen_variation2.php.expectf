@@ -1,0 +1,14 @@
+Open a server socket
+
+Calling fsockopen():
+resource(%d) of type (stream)
+
+Pass some data between the sockets:
+string(10) "0123456789"
+
+Calling fsockopen() with address and port in same string:
+resource(%d) of type (stream)
+
+Pass some data between the sockets:
+string(10) "0123456789"
+Done

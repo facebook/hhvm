@@ -1,0 +1,5 @@
+*** Testing size of files and directories with filesize() ***
+int(%d)
+int(%d)
+int(0)
+*** Done ***

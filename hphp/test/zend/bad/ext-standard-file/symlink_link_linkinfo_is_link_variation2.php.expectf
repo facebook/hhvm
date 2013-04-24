@@ -1,0 +1,7 @@
+*** Creating a hard link to a non-existent file ***
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+int(-1)
+bool(false)
+Done

@@ -1,0 +1,4 @@
+*** Testing image_type_to_mime_type() : usage variations ***
+string(24) "image/vnd.microsoft.icon"
+string(29) "application/x-shockwave-flash"
+===DONE===

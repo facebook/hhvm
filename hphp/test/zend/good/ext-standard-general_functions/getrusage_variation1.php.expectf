@@ -1,0 +1,65 @@
+*** Testing getrusage() : usage variations ***
+
+-- Iteration 1 --
+User time used (microseconds) %d
+
+-- Iteration 2 --
+User time used (microseconds) %d
+
+-- Iteration 3 --
+User time used (microseconds) %d
+
+-- Iteration 4 --
+User time used (microseconds) %d
+
+-- Iteration 5 --
+User time used (microseconds) %d
+
+-- Iteration 6 --
+User time used (microseconds) %d
+
+-- Iteration 7 --
+User time used (microseconds) %d
+
+-- Iteration 8 --
+User time used (microseconds) %d
+
+-- Iteration 9 --
+User time used (microseconds) %d
+
+-- Iteration 10 --
+User time used (microseconds) %d
+
+-- Iteration 11 --
+User time used (microseconds) %d
+
+-- Iteration 12 --
+User time used (microseconds) %d
+
+-- Iteration 13 --
+User time used (microseconds) %d
+
+-- Iteration 14 --
+User time used (microseconds) %d
+
+-- Iteration 15 --
+User time used (microseconds) %d
+
+-- Iteration 16 --
+User time used (microseconds) %d
+
+-- Iteration 17 --
+User time used (microseconds) %d
+
+-- Iteration 18 --
+User time used (microseconds) %d
+
+-- Iteration 19 --
+User time used (microseconds) %d
+
+-- Iteration 20 --
+User time used (microseconds) %d
+
+-- Iteration 21 --
+User time used (microseconds) %d
+===DONE===

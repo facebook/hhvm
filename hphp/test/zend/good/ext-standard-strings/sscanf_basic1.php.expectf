@@ -1,0 +1,13 @@
+*** Testing sscanf() : basic functionality - using string format ***
+
+-- Try sccanf() WITHOUT optional args --
+string(6) "Widget"
+string(7) "1234789"
+string(2) "25"
+
+-- Try sccanf() WITH optional args --
+int(3)
+string(6) "Widget"
+string(7) "1234789"
+string(2) "25"
+===DONE===

@@ -1,0 +1,36 @@
+bool(true)
+bool(true)
+
+------ valid stream: -------
+bool(true)
+
+------ stream_cast not implemented: -------
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)
+
+------ return value is false: -------
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)
+
+------ return value not a stream resource: -------
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)
+
+------ return value is stream itself: -------
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)
+
+------ return value cannot be casted: -------
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)

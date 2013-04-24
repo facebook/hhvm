@@ -1,0 +1,17 @@
+*** Testing wordwrap() : usage variations ***
+
+-- Testing wordwrap() with default break value and single space as value --
+-- with default break and cut value --
+string(24) "Testing
+wordrap
+function"
+-- with default cut value --
+string(24) "Testing wordrap function"
+string(26) "Testing  wordrap  function"
+-- with cut value as false --
+string(24) "Testing wordrap function"
+string(26) "Testing  wordrap  function"
+-- with cut value as true --
+string(43) "T e s t i n g w o r d r a p f u n c t i o n"
+string(64) "T  e  s  t  i  n  g  w  o  r  d  r  a  p  f  u  n  c  t  i  o  n"
+Done

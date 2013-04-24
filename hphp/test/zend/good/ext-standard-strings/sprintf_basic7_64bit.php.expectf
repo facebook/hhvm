@@ -1,0 +1,6 @@
+*** Testing sprintf() : basic functionality - using unsigned format ***
+string(6) "format"
+string(20) "18446744073709550505"
+string(41) "18446744073709550505 18446744073708317049"
+string(49) "18446744073709550505 18446744073708317049 2345432"
+Done

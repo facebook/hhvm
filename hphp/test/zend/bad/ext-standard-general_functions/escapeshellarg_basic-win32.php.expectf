@@ -1,0 +1,6 @@
+Simple testcase for escapeshellarg() function
+string(11) ""Mr O'Neil""
+string(12) ""Mr O\'Neil""
+string(11) "" FILENAME""
+string(2) """"
+Done

@@ -1,0 +1,158 @@
+*** Testing ksort() : object functionality ***
+
+-- Testing ksort() by supplying various object arrays, 'flag' value is defualt --
+bool(true)
+array(6) {
+  [-5]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    int(-5)
+  }
+  [0]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    int(0)
+  }
+  [1]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    float(0.001)
+  }
+  [11]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    int(11)
+  }
+  [23]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    int(23)
+  }
+  [66]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    int(66)
+  }
+}
+bool(true)
+array(8) {
+  ["Lemon"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(5) "Lemon"
+  }
+  ["Orange"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(6) "Orange"
+  }
+  ["aPPle"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(5) "aPPle"
+  }
+  ["apple"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(5) "apple"
+  }
+  ["axx"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(3) "axx"
+  }
+  ["py"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(2) "py"
+  }
+  ["t"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(1) "t"
+  }
+  ["w"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(1) "w"
+  }
+}
+
+-- Testing ksort() by supplying various object arrays, 'flag' value is SORT_REGULAR --
+bool(true)
+array(6) {
+  [-5]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    int(-5)
+  }
+  [0]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    int(0)
+  }
+  [1]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    float(0.001)
+  }
+  [11]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    int(11)
+  }
+  [23]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    int(23)
+  }
+  [66]=>
+  object(Integer)#%d (1) {
+    ["class_value"]=>
+    int(66)
+  }
+}
+bool(true)
+array(8) {
+  ["Lemon"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(5) "Lemon"
+  }
+  ["Orange"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(6) "Orange"
+  }
+  ["aPPle"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(5) "aPPle"
+  }
+  ["apple"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(5) "apple"
+  }
+  ["axx"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(3) "axx"
+  }
+  ["py"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(2) "py"
+  }
+  ["t"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(1) "t"
+  }
+  ["w"]=>
+  object(String)#%d (1) {
+    ["class_value"]=>
+    string(1) "w"
+  }
+}
+Done

@@ -1,0 +1,23 @@
+*** Testing fprintf() for string types ***
+
+-- Iteration 1 --
+
+     
+  abc
+  aaa
+-- Iteration 2 --
+
+     
+abc  
+aaa  
+-- Iteration 3 --
+
+00000
+00abc
+00aaa
+-- Iteration 4 --
+
+#####
+##abc
+##aaa
+Done

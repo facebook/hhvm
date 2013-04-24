@@ -1,0 +1,28 @@
+*** Testing unlink() : variation ***
+-- removing unlinkVar8.tmp/file.tmp --
+file removed
+-- removing ./unlinkVar8.tmp/file.tmp --
+file removed
+-- removing unlinkVar8.tmp/../unlinkVar8.tmp/file.tmp --
+file removed
+-- removing unlinkVar8.tmp/../BADDIR/file.tmp --
+HipHop Warning: %a
+-- removing BADDIR/file.tmp --
+HipHop Warning: %a
+-- removing %s/unlinkVar8.tmp/file.tmp --
+file removed
+-- removing %s/./unlinkVar8.tmp/file.tmp --
+file removed
+-- removing %s/unlinkVar8.tmp/../unlinkVar8.tmp/file.tmp --
+file removed
+-- removing %s/BADDIR/file.tmp --
+HipHop Warning: %a
+-- removing unlinkVar8.tmp/file.tmp/ --
+HipHop Warning: %a
+-- removing %s/unlinkVar8.tmp/file.tmp/ --
+HipHop Warning: %a
+-- removing unlinkVar8.tmp//file.tmp --
+file removed
+-- removing %s//unlinkVar8.tmp//file.tmp --
+file removed
+===DONE===

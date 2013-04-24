@@ -1,0 +1,10 @@
+*** Testing fgetcsv() : reading from file which is having zero content ***
+bool(false)
+int(0)
+bool(false)
+int(0)
+bool(false)
+int(0)
+bool(false)
+int(0)
+Done

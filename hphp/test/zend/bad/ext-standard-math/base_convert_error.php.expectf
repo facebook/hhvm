@@ -1,0 +1,10 @@
+*** Testing base_convert() : error conditions ***
+Incorrect number of arguments
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+HipHop Warning: %a
+Incorrect input
+
+Catchable fatal error: Object of class classA could not be converted to string in hphp/test/zend/bad/ext-standard-math/base_convert_error.phpt on line %d

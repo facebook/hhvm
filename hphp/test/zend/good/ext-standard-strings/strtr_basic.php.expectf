@@ -1,0 +1,14 @@
+*** Testing strtr() : basic functionality ***
+string(10) "TesT sTrTr"
+string(10) "TesT sTrTr"
+string(10) "TesT sTrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+*** Done ***

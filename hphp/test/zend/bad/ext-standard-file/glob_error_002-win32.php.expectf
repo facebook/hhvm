@@ -1,0 +1,4 @@
+*** Testing glob() : error condition - pattern too long. ***
+HipHop Warning: %a
+bool(false)
+Done

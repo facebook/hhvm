@@ -1,0 +1,5 @@
+*** Testing array_product() : variations ***
+
+-- Testing array_product() function with a keyed array array --
+int(10)
+===DONE===

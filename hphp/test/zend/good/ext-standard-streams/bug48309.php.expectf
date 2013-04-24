@@ -1,0 +1,6 @@
+-- stream_copy_to_stream() --
+te
+string(2) "st"
+-- fpassthru() --
+test
+string(0) ""

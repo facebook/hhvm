@@ -1,0 +1,27 @@
+*** Testing explode() function: misc tests ***
+
+-- positive limit with null separator --
+string(6) "6f6e65"
+string(28) "74776f00746872656500666f7572"
+
+-- negative limit (since PHP 5.1) with null separator --
+string(6) "6f6e65"
+string(6) "74776f"
+
+-- unknown string --
+string(36) "6f6e650074776f00746872656500666f7572"
+
+-- limit = 0 --
+string(36) "6f6e650074776f00746872656500666f7572"
+
+-- limit = -1 --
+string(6) "6f6e65"
+string(6) "74776f"
+string(10) "7468726565"
+
+-- large limit = -100 --
+string(6) "6f6e65"
+string(6) "74776f"
+string(10) "7468726565"
+string(8) "666f7572"
+===DONE===

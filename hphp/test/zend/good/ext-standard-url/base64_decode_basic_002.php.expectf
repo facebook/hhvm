@@ -1,0 +1,15 @@
+Decode 'hello world!':
+string(12) "hello world!"
+string(12) "hello world!"
+string(12) "hello world!"
+
+Whitespace does not affect base64_decode, even with $strict===true:
+string(12) "hello world!"
+string(12) "hello world!"
+string(12) "hello world!"
+
+Other chars outside the base64 alphabet are ignored when $strict===false, but cause failure with $strict===true:
+string(12) "hello world!"
+string(12) "hello world!"
+bool(false)
+Done

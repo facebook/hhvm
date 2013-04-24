@@ -1,0 +1,19 @@
+*** Testing touch() : basic functionality ***
+
+--- testing touch creates a file ---
+bool(true)
+
+ --- testing touch doesn't alter file contents ---
+Here is a test line
+
+ --- testing touch alters the correct file metadata ---
+stat data differs at atime
+stat data differs at mtime
+stat data differs at ctime
+
+ --- testing touch using all parameters ---
+bool(true)
+ctime=%d
+mtime=10000
+atime=20470
+Done

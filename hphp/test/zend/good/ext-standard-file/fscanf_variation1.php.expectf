@@ -1,0 +1,8 @@
+*** Testing fscanf(): for its return type without third argument ***
+bool(true)
+array(1) {
+  [0]=>
+  string(11) "hello_world"
+}
+
+*** Done ***

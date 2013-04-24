@@ -1,0 +1,24 @@
+*** Testing array_diff_uassoc() : usage variation ***
+
+-- Testing array_diff_key() function with float indexed array --
+array(5) {
+  [0]=>
+  string(1) "0"
+  [10]=>
+  string(2) "10"
+  [-10]=>
+  string(3) "-10"
+  [20]=>
+  string(2) "20"
+  [-20]=>
+  string(3) "-20"
+}
+array(3) {
+  [0]=>
+  string(3) "0.5"
+  [10]=>
+  string(4) "10.5"
+  [-10]=>
+  string(5) "-10.5"
+}
+===DONE===

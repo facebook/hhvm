@@ -1,0 +1,71 @@
+*** Testing krsort() : usage variations ***
+
+-- Testing krsort() by supplying octal value array, 'flag' value is defualt  --
+bool(true)
+array(9) {
+  [669]=>
+  int(1)
+  [506]=>
+  int(5)
+  [229]=>
+  int(3)
+  [209]=>
+  int(2)
+  [63]=>
+  int(6)
+  [54]=>
+  int(4)
+  [0]=>
+  int(0)
+  [-54]=>
+  int(-1)
+  [-229]=>
+  int(-2)
+}
+
+-- Testing krsort() by supplying octal value array, 'flag' value is SORT_REGULAR  --
+bool(true)
+array(9) {
+  [669]=>
+  int(1)
+  [506]=>
+  int(5)
+  [229]=>
+  int(3)
+  [209]=>
+  int(2)
+  [63]=>
+  int(6)
+  [54]=>
+  int(4)
+  [0]=>
+  int(0)
+  [-54]=>
+  int(-1)
+  [-229]=>
+  int(-2)
+}
+
+-- Testing krsort() by supplying octal value array, 'flag' value is SORT_NUMERIC  --
+bool(true)
+array(9) {
+  [669]=>
+  int(1)
+  [506]=>
+  int(5)
+  [229]=>
+  int(3)
+  [209]=>
+  int(2)
+  [63]=>
+  int(6)
+  [54]=>
+  int(4)
+  [0]=>
+  int(0)
+  [-54]=>
+  int(-1)
+  [-229]=>
+  int(-2)
+}
+Done

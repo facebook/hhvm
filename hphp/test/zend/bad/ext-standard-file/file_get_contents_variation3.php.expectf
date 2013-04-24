@@ -1,0 +1,95 @@
+*** Testing file_get_contents() : usage variation ***
+
+--int 0--
+string(13) "contents read"
+
+--int 1--
+string(13) "contents read"
+
+--int 12345--
+string(%d) "contents read"
+
+--int -12345--
+string(%d) "contents read"
+
+--float 10.5--
+string(%d) "contents read"
+
+--float -10.5--
+string(%d) "contents read"
+
+--float 12.3456789000e10--
+string(%d) "contents read"
+
+--float -12.3456789000e10--
+string(%d) "contents read"
+
+--float .5--
+string(%d) "contents read"
+
+--empty array--
+Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
+NULL
+
+--int indexed array--
+Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
+NULL
+
+--associative array--
+Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
+NULL
+
+--nested arrays--
+Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
+NULL
+
+--uppercase NULL--
+string(%d) "contents read"
+
+--lowercase null--
+string(%d) "contents read"
+
+--lowercase true--
+string(%d) "contents read"
+
+--lowercase false--
+string(%d) "contents read"
+
+--uppercase TRUE--
+string(%d) "contents read"
+
+--uppercase FALSE--
+string(%d) "contents read"
+
+--empty string DQ--
+string(%d) "contents read"
+
+--empty string SQ--
+string(%d) "contents read"
+
+--string DQ--
+string(%d) "contents read"
+
+--string SQ--
+string(%d) "contents read"
+
+--mixed case string--
+string(%d) "contents read"
+
+--heredoc--
+string(%d) "contents read"
+
+--instance of classWithToString--
+Error: 2 - file_get_contents() expects parameter 2 to be boolean, object given, %s(%d)
+NULL
+
+--instance of classWithoutToString--
+Error: 2 - file_get_contents() expects parameter 2 to be boolean, object given, %s(%d)
+NULL
+
+--undefined var--
+string(%d) "contents read"
+
+--unset var--
+string(%d) "contents read"
+===DONE===

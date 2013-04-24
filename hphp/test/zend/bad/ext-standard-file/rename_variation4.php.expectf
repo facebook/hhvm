@@ -1,0 +1,8 @@
+*** Testing rename() by renaming a file, link and directory to numeric name ***
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+Done

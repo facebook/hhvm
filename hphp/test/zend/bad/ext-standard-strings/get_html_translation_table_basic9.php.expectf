@@ -1,0 +1,48 @@
+*** Testing get_html_translation_table() : basic functionality/HTML5/SJIS ***
+*** Only basic entities supported! ***
+-- with table = HTML_ENTITIES, ENT_QUOTES --
+int(5)
+Array
+(
+    [&] => &amp;
+    ['] => &apos;
+    [>] => &gt;
+    [<] => &lt;
+    ["] => &quot;
+)
+-- with table = HTML_ENTITIES, ENT_COMPAT --
+int(4)
+-- with table = HTML_ENTITIES, ENT_NOQUOTES --
+int(3)
+-- with table = HTML_SPECIALCHARS, ENT_COMPAT --
+int(4)
+Array
+(
+    [&] => &amp;
+    [>] => &gt;
+    [<] => &lt;
+    ["] => &quot;
+)
+-- with table = HTML_SPECIALCHARS, ENT_QUOTES --
+array(5) {
+  ["&"]=>
+  string(5) "&amp;"
+  ["'"]=>
+  string(6) "&apos;"
+  [">"]=>
+  string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
+}
+-- with table = HTML_SPECIALCHARS, ENT_NOQUOTES --
+array(3) {
+  ["&"]=>
+  string(5) "&amp;"
+  [">"]=>
+  string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+}
+Done

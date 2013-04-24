@@ -14,7 +14,7 @@ import shutil
 import subprocess
 import sys
 
-# Don't even pull these into the repo. 
+# Don't even pull these into the repo.
 # We want runnig the bad tests to still complete.
 no_import = (
     # these hang forever
@@ -63,7 +63,7 @@ no_import = (
     '/Zend/tests/001.phpt',
     '/Zend/tests/002.phpt',
     '/Zend/tests/003.phpt',
-    
+
     # spews files until they work
     '/ext/spl/tests/SplFileInfo_getExtension_basic.phpt',
     '/ext/spl/tests/SplFileObject_fgetcsv_basic.phpt',
@@ -82,6 +82,14 @@ no_import = (
     '/ext/spl/tests/SplFileObject_setCsvControl_error001.phpt',
     '/ext/spl/tests/SplFileObject_setCsvControl_error002.phpt',
     '/ext/spl/tests/SplFileObject_setCsvControl_variation001.phpt',
+    '/ext/standard/tests/file/fopen_variation14-win32.phpt',
+    '/ext/standard/tests/file/fopen_variation15-win32.phpt',
+    '/ext/standard/tests/file/mkdir_variation5-win32.phpt',
+    '/ext/standard/tests/file/mkdir_variation5-win32.phpt',
+    '/ext/standard/tests/file/readfile_variation4.phpt',
+    '/ext/standard/tests/file/windows_links/bug48746.phpt',
+    '/ext/standard/tests/file/windows_links/bug48746_1.phpt',
+    '/ext/standard/tests/file/windows_links/bug48746_2.phpt',
     '/ext/xmlwriter/tests/001.phpt',
     '/ext/xmlwriter/tests/004.phpt',
     '/ext/xmlwriter/tests/005.phpt',
@@ -93,9 +101,6 @@ no_import = (
 
     # not tests
     '/ext/xmlwriter/examples/',
-
-    # not imported yet, but will be
-    '/ext/standard',
 
     # not implemented extensions
     '/ext/calendar',
@@ -144,7 +149,7 @@ no_import = (
 # For mark these as failing
 bad_tests = (
     # SESSION is bused on husdon
-    '/zend/unset_cv05.php', 
+    '/zend/unset_cv05.php',
     '/zend/unset_cv06.php',
 
     # unpredictable numbers - we need param matching
@@ -172,7 +177,7 @@ bad_tests = (
     '/ext-standard/general_functions/getrusage_basic.php',
     '/ext-standard/touch_basic.php',
     '/tests-basic/bug29971.php',
-   
+
     # not implemented extensions
     'phar', # this appears in filenames
 
@@ -181,14 +186,16 @@ bad_tests = (
     '/zend/bug34064.php',
     '/zend/objects_029.php',
     '/zend/objects_030.php',
+    '/ext-standard-strings/bug44242.php',
 
     # line number is inconsistent on stack overflow
     '/zend/bug41633_3.php',
 
     # broken in Jenkins
+    '/ext-standard-array/array_diff_assoc_variation6.php',
     '/zend/bug35239.php',
     '/zend/bug54265.php',
-    
+
     # our build machines have no members in group 0...
     '/ext-posix/posix_getgrgid.php',
 )
@@ -241,6 +248,24 @@ other_files = (
     '/ext-spl/testclass.class.inc',
     '/ext-sqlite3/new_db.inc',
     '/ext-sqlite3/stream_test.inc',
+    '/ext-standard-general_functions/004.data',
+    '/ext-standard-array/compare_function.inc',
+    '/ext-standard-class_object/AutoLoaded.inc',
+    '/ext-standard-class_object/AutoInterface.inc',
+    '/ext-standard-class_object/AutoTrait.inc',
+    '/ext-standard-file/test.csv',
+    '/ext-standard-file/test2.csv',
+    '/ext-standard-file/test3.csv',
+    '/ext-standard-file/fopen_include_path.inc',
+    '/ext-standard-general_functions/bug41445.ini',
+    '/ext-standard-image/bug13213.jpg',
+    '/ext-standard-image/246x247.png',
+    '/ext-standard-image/384x385.png',
+    '/ext-standard-image/testAPP.jpg',
+    '/ext-standard-image/test13pix.swf',
+    '/ext-standard-image/test1pix.jpg',
+    '/ext-standard-serialize/autoload_implements.p5c',
+    '/ext-standard-serialize/autoload_interface.p5c',
     '/ext-xml/xmltest.xml',
     '/ext-xmlreader/012.dtd',
     '/ext-xmlreader/012.xml',
@@ -275,7 +300,7 @@ other_files = (
 # Map strings from one style to another
 errors = (
     # generic inconsistencies
-    ('Variable passed to ([^\s]+)\(\) is not an array or object', 
+    ('Variable passed to ([^\s]+)\(\) is not an array or object',
         'Invalid operand type was used: expecting an array'),
     ('bcdiv\(\): ', ''),
     ('bcsqrt\(\): ', ''),
@@ -324,11 +349,11 @@ def walk(filename, source):
     dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)
     mkdir_p(dest_subdir)
     full_dest_filename = os.path.join(dest_subdir, dest_filename)
-   
+
     # Exactly mirror zend's directories incase some tests depend on random crap.
     # We'll only move things we want into 'good'
     shutil.copyfile(filename, full_dest_filename)
-    
+
     full_dest_filename = full_dest_filename.replace('.phpt', '.php')
 
     if not '.phpt' in filename:
@@ -368,11 +393,11 @@ def walk(filename, source):
     for key in ('EXPECT', 'EXPECTF', 'EXPECTREGEX'):
         if sections.has_key(key):
             exp = sections[key]
-            
+
             # tests are really inconsistent about whitespace
             exp = re.sub(r'(\r\n|\r|\n)', '\n', exp.strip())
 
-            exp = exp.replace('in %s on', 'in %s/%s/%s on' % 
+            exp = exp.replace('in %s on', 'in %s/%s/%s on' %
                     ('hphp/test/zend/all', source_dir, dest_filename))
 
             # PHP puts a newline in that we don't
@@ -384,11 +409,11 @@ def walk(filename, source):
             if key == 'EXPECTREGEX':
                 match_rest_of_line = '.+'
 
-            exp = re.sub(r'Fatal\\? error\\?:.*', 
+            exp = re.sub(r'Fatal\\? error\\?:.*',
                     'HipHop Fatal error: '+match_rest_of_line, exp)
-            exp = re.sub(r'Warning\\?:.*', 
+            exp = re.sub(r'Warning\\?:.*',
                     'HipHop Warning: '+match_rest_of_line, exp)
-            exp = re.sub(r'Notice\\?:.*', 
+            exp = re.sub(r'Notice\\?:.*',
                     'HipHop Notice: '+match_rest_of_line, exp)
 
             for error in errors:
@@ -414,18 +439,18 @@ def walk(filename, source):
 
     if sections.has_key('POST'):
         test = test.replace(
-            '<?php', 
+            '<?php',
             '<?php\nparse_str("' + sections['POST'] + '", $_POST);\n'
         )
     if sections.has_key('GET'):
         test = test.replace(
-            '<?php', 
+            '<?php',
             '<?php\nparse_str("' + sections['GET'] + '", $_GET);\n'
         )
     if sections.has_key('COOKIE'):
         test = test.replace(
-            '<?php', 
-            '<?php\n$_COOKIE = http_parse_cookie("' + 
+            '<?php',
+            '<?php\n$_COOKIE = http_parse_cookie("' +
                 sections['COOKIE'] + '");\n'
         )
     if sections.has_key('ENV'):
@@ -457,10 +482,13 @@ def walk(filename, source):
         test = test.replace("_002.xml", "_003.xml")
     if 'ext-xmlreader/004.php' in full_dest_filename:
         test = test.replace("_002.xml", "_004.xml")
+    if 'ext-standard-file/bug45181.php' in full_dest_filename:
+        test = test.replace('rmdir("bug45181_x");',
+                'chdir("..");\nrmdir("bug45181_x");')
     if 'bug61139.php' in full_dest_filename:
         test += "\nunlink('someFile');\n?>"
     if '/ext-pdo_' in full_dest_filename:
-        test = test.replace('/../../../ext/pdo/tests/pdo_test.inc', 
+        test = test.replace('/../../../ext/pdo/tests/pdo_test.inc',
                 '/../ext-pdo/pdo_test.inc')
     if '/ext-zlib/gzseek_variation7.php' in full_dest_filename:
         test = test.replace('temp3.txt.gz', 'gzseek_variation7.gz')
@@ -472,6 +500,18 @@ def walk(filename, source):
         test = test.replace('temp3.txt.gz', 'gzseek_variation4.gz')
     if '/ext-zlib/gzseek_variation5.php' in full_dest_filename:
         test = test.replace('temp3.txt.gz', 'gzseek_variation5.gz')
+    if '/ext-standard-strings/vfprintf_' in full_dest_filename:
+        test = test.replace('dump.txt', dest_filename + '.txt')
+    if '/ext-standard-file/touch_basic.php' in full_dest_filename:
+        test = test.replace('touch.dat', 'touch_basic.dat')
+    if '/ext-standard-file/touch_variation2.php' in full_dest_filename:
+        test = test.replace('touch.dat', 'touch_variation2.dat')
+    if '/ext-standard-file/file_put_contents_variation9.php' in full_dest_filename:
+        test = test.replace('fileGetContentsVar9', 'filePutContentsVar9')
+    if '/ext-standard-network/tcp4loop.php' in full_dest_filename:
+        test = test.replace('31337', '31338')
+    if '/ext-standard-file/fpassthru_variation.php' in full_dest_filename:
+        test = test.replace('passthru.tmp', 'fpassthru_variation.tmp')
 
     file(full_dest_filename, 'w').write(test)
 

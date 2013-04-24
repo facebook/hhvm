@@ -1,0 +1,71 @@
+*** Testing krsort() : usage variations ***
+
+-- Testing krsort() by supplying hexadecimal value array, 'flag' value is defualt  --
+bool(true)
+array(9) {
+  [4095]=>
+  int(4095)
+  [682]=>
+  int(682)
+  [427]=>
+  int(427)
+  [255]=>
+  int(255)
+  [187]=>
+  int(187)
+  [15]=>
+  int(15)
+  [0]=>
+  int(0)
+  [-255]=>
+  int(-255)
+  [-682]=>
+  int(-682)
+}
+
+-- Testing krsort() by supplying hexadecimal value array, 'flag' value is SORT_REGULAR  --
+bool(true)
+array(9) {
+  [4095]=>
+  int(4095)
+  [682]=>
+  int(682)
+  [427]=>
+  int(427)
+  [255]=>
+  int(255)
+  [187]=>
+  int(187)
+  [15]=>
+  int(15)
+  [0]=>
+  int(0)
+  [-255]=>
+  int(-255)
+  [-682]=>
+  int(-682)
+}
+
+-- Testing krsort() by supplying hexadecimal value array, 'flag' value is SORT_NUMERIC  --
+bool(true)
+array(9) {
+  [4095]=>
+  int(4095)
+  [682]=>
+  int(682)
+  [427]=>
+  int(427)
+  [255]=>
+  int(255)
+  [187]=>
+  int(187)
+  [15]=>
+  int(15)
+  [0]=>
+  int(0)
+  [-255]=>
+  int(-255)
+  [-682]=>
+  int(-682)
+}
+Done

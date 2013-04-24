@@ -1,0 +1,15 @@
+*** Testing str_rot13() : basic functionality ***
+
+Basic tests
+string(26) "fge_ebg13() grfgf fgnegvat"
+string(26) "nopqrstuvwxyzabcdefghijklm"
+
+Ensure numeric characters are left untouched
+Strings equal : TEST PASSED
+
+Ensure non-alphabetic characters are left untouched
+Strings unequal : TEST FAILED
+
+Ensure strings round trip
+Strings equal : TEST PASSED
+===DONE===

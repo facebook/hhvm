@@ -1,0 +1,5 @@
+*** Testing vsprintf() : basic functionality - using char format ***
+string(1) "A"
+string(3) "A B"
+string(5) "A B C"
+Done

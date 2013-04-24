@@ -1,0 +1,13 @@
+*** Testing error conditions of fileinode() ***
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+*** Done ***

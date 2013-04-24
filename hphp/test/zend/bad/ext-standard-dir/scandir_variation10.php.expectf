@@ -1,0 +1,30 @@
+SCANDIR_SORT_ASCENDING: 0
+SCANDIR_SORT_DESCENDING: 1
+SCANDIR_SORT_NONE: 2
+*** Testing scandir() : usage variations ***
+array(4) {
+  [0]=>
+  string(1) "."
+  [1]=>
+  string(2) ".."
+  [2]=>
+  string(9) "file1.tmp"
+  [3]=>
+  string(9) "file2.tmp"
+}
+array(4) {
+  [0]=>
+  string(9) "file2.tmp"
+  [1]=>
+  string(9) "file1.tmp"
+  [2]=>
+  string(2) ".."
+  [3]=>
+  string(1) "."
+}
+int(4)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+===DONE===

@@ -1,0 +1,25 @@
+*** Testing vfprintf() : with  white spaces in format strings ***
+
+-- Iteration 1 --
+111  222  333
+-- Iteration 2 --
+1.100000  0.200000  -0.600000
+-- Iteration 3 --
+1.120000  -1.130000  0.230000
+-- Iteration 4 --
+1  10  11
+-- Iteration 5 --
+A  B  C
+-- Iteration 6 --
+2.000000e+1  2.000000e-1  -2.000000e+1
+-- Iteration 7 --
+18446744073709551605  22  33
+-- Iteration 8 --
+12  1777777777777777777755  23
+-- Iteration 9 --
+11  ffffffffffffffde  33
+-- Iteration 10 --
+11  FFFFFFFFFFFFFFDE  33
+-- Iteration 11 --
+2.000000E+1  2.000000E-1  -2.000000E+1
+===DONE===

@@ -1,0 +1,16 @@
+*** Testing array_diff_uassoc() : usage variation ***
+
+-- Result of comparing strings containing integers and strings containing floating points --
+array(2) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(1) "2"
+}
+array(2) {
+  [0]=>
+  string(4) "1.00"
+  ["1.00"]=>
+  string(4) "2.00"
+}
+===DONE===

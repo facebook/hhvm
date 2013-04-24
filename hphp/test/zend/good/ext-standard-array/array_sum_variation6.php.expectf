@@ -1,0 +1,6 @@
+*** Testing array_sum() : with associative array ***
+-- with numeric keys --
+float(32.56)
+-- with string keys --
+int(140)
+Done

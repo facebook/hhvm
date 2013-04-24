@@ -1,0 +1,15 @@
+*** Testing array_walk() : object functionality ***
+%unicode|string%(18) "%r\0%rMyClass%r\0%rpri_value"
+int(10)
+int(1)
+
+%unicode|string%(9) "pub_value"
+int(10)
+int(1)
+
+%unicode|string%(12) "%r\0%r*%r\0%rpro_value"
+int(10)
+int(1)
+
+bool(true)
+Done

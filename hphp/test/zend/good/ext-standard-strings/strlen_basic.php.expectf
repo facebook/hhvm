@@ -1,0 +1,6 @@
+*** Testing strlen() : basic functionality ***
+int(6)
+int(7)
+int(0)
+int(18)
+===DONE===

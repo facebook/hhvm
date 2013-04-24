@@ -1,0 +1,19 @@
+*** Testing strripos() function: with heredoc strings ***
+-- With heredoc string containing multi lines --
+
+-- Multi line strings with +ve offsets -- 
+int(44)
+int(44)
+int(44)
+
+-- Multi line strings with +ve offsets -- 
+int(44)
+int(44)
+bool(false)
+
+-- Multi line strings with no offset -- 
+int(18)
+int(31)
+bool(false)
+int(55)
+===DONE===

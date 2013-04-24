@@ -1,0 +1,30 @@
+*** Testing array_intersect_key() : usage variation ***
+array(2) {
+  ["first"]=>
+  array(2) {
+    ["blue"]=>
+    int(1)
+    ["red"]=>
+    int(2)
+  }
+  ["second"]=>
+  array(1) {
+    ["yellow"]=>
+    int(7)
+  }
+}
+array(2) {
+  ["first"]=>
+  array(2) {
+    ["blue"]=>
+    int(1)
+    ["red"]=>
+    int(2)
+  }
+  ["second"]=>
+  array(1) {
+    ["cyan"]=>
+    int(8)
+  }
+}
+===DONE===

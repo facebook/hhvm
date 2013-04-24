@@ -1,0 +1,11 @@
+*** Testing array_count_values() : parameter variations ***
+array(3) {
+  ["bobv"]=>
+  int(1)
+  ["val"]=>
+  int(1)
+  ["val6"]=>
+  int(1)
+}
+
+Done

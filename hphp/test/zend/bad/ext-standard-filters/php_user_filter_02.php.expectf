@@ -1,0 +1,1 @@
+Strict Standards: Declaration of foo::filter() should be compatible with php_user_filter::filter($in, $out, &$consumed, $closing) in hphp/test/zend/bad/ext-standard-filters/php_user_filter_02.phpt on line %d

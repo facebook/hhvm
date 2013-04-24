@@ -1,0 +1,12 @@
+*** Testing strncmp() function: error conditions ***
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+bool(false)
+*** Done ***

@@ -1,0 +1,34 @@
+*** Testing usort() : usage variation ***
+
+-- Array with duplicate keys --
+bool(true)
+array(7) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(3)
+  [4]=>
+  int(6)
+  [5]=>
+  int(8)
+  [6]=>
+  int(9)
+}
+
+-- Array with default/assigned keys --
+bool(true)
+array(4) {
+  [0]=>
+  string(5) "Apple"
+  [1]=>
+  string(6) "Banana"
+  [2]=>
+  string(5) "Mango"
+  [3]=>
+  string(9) "Pineapple"
+}
+===DONE===

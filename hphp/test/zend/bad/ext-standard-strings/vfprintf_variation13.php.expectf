@@ -1,0 +1,19 @@
+*** Testing vfprintf() : hexa formats with hexa values ***
+
+-- Iteration 1 --
+0
+-- Iteration 2 --
+ffffffff 1 22
+-- Iteration 3 --
+7fffffff x, 7000000 80000000
+-- Iteration 4 --
+                      ffed2979 0000
+-- Iteration 5 --
+#1 2222 1b6db bbbbbbbc
+-- Iteration 6 --
+123b fab 0 a
+-- Iteration 7 --
+%34 x
+-- Iteration 8 --
+1 2 3 4
+===DONE===

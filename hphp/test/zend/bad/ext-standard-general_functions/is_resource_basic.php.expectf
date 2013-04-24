@@ -1,0 +1,20 @@
+*** Testing is_resource() : basic functionality ***
+
+Non-resource type cases
+bool=false test returns FALSE
+bool=true test returns FALSE
+integer test returns FALSE
+double test returns FALSE
+string test returns FALSE
+array test returns FALSE
+NULL test returns FALSE
+object test returns FALSE
+
+Resource type..var_dump after file open returns
+resource(%d) of type (%s)
+Resource type..after file open  is_resource() returns TRUE
+
+Resource type..var_dump after file close returns
+resource(%d) of type (Unknown)
+Resource type..after file close is_resource() returns FALSE
+===DONE===

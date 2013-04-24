@@ -1,0 +1,24 @@
+*** Testing stristr() : error conditions ***
+
+-- Testing stristr() function with no arguments --
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+-- Testing stristr() function with no needle --
+HipHop Warning: %a
+NULL
+
+-- Testing stristr() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing stristr() function with empty haystack --
+HipHop Warning: %a
+bool(false)
+
+-- Testing stristr() function with empty needle --
+HipHop Warning: %a
+bool(false)
+===DONE===

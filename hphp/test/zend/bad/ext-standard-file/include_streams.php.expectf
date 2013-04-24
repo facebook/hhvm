@@ -1,0 +1,9 @@
+<?php echo __FILE__ . "\n";?>
+test://GLOBALS/data1
+test://GLOBALS/data2
+<?php echo __FILE__ . "\n";?>
+test://GLOBALS/data3
+test://GLOBALS/data4
+<?php echo __FILE__ . "\n";?>
+test://GLOBALS/data5
+test://GLOBALS/data6

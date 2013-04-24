@@ -1,0 +1,21 @@
+*** Testing array_multisort() : basic functionality - renumbering of numeric keys ***
+
+-- Testing array_multisort() function with all normal arguments --
+bool(true)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(1)
+  ["strkey"]=>
+  int(2)
+}
+array(3) {
+  [0]=>
+  string(2) "aa"
+  [1]=>
+  string(1) "1"
+  [2]=>
+  int(2)
+}
+===DONE===

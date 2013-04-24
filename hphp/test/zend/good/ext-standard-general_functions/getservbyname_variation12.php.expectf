@@ -1,0 +1,5 @@
+*** Test substituting argument 2 with int values ***
+bool(false)
+bool(false)
+bool(false)
+bool(false)

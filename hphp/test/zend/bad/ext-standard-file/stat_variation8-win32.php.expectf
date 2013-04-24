@@ -1,0 +1,7 @@
+*** Testing stat(): on file by truncating it to given size ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+*** Done ***

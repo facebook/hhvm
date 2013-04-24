@@ -1,0 +1,118 @@
+*** Testing umask() : usage variation ***
+
+--int -100--
+int(0)
+int(412)
+
+--int 99999--
+int(0)
+int(159)
+
+--float 10.5--
+int(0)
+int(10)
+
+--float -10.5--
+int(0)
+int(502)
+
+--float 12.3456789000e10--
+int(0)
+int(%d)
+
+--float .5--
+int(0)
+int(0)
+
+--empty array--
+Error: 2 - umask() expects parameter 1 to be long, array given, %s(%d)
+bool(false)
+int(63)
+
+--int indexed array--
+Error: 2 - umask() expects parameter 1 to be long, array given, %s(%d)
+bool(false)
+int(63)
+
+--associative array--
+Error: 2 - umask() expects parameter 1 to be long, array given, %s(%d)
+bool(false)
+int(63)
+
+--nested arrays--
+Error: 2 - umask() expects parameter 1 to be long, array given, %s(%d)
+bool(false)
+int(63)
+
+--uppercase NULL--
+int(0)
+int(0)
+
+--lowercase null--
+int(0)
+int(0)
+
+--lowercase true--
+int(0)
+int(1)
+
+--lowercase false--
+int(0)
+int(0)
+
+--uppercase TRUE--
+int(0)
+int(1)
+
+--uppercase FALSE--
+int(0)
+int(0)
+
+--empty string DQ--
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+bool(false)
+int(63)
+
+--empty string SQ--
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+bool(false)
+int(63)
+
+--string DQ--
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+bool(false)
+int(63)
+
+--string SQ--
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+bool(false)
+int(63)
+
+--mixed case string--
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+bool(false)
+int(63)
+
+--heredoc--
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+bool(false)
+int(63)
+
+--instance of classWithToString--
+Error: 2 - umask() expects parameter 1 to be long, object given, %s(%d)
+bool(false)
+int(63)
+
+--instance of classWithoutToString--
+Error: 2 - umask() expects parameter 1 to be long, object given, %s(%d)
+bool(false)
+int(63)
+
+--undefined var--
+int(0)
+int(0)
+
+--unset var--
+int(0)
+int(0)
+===DONE===

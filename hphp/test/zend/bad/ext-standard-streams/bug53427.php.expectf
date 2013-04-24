@@ -1,0 +1,12 @@
+array(2) {
+  [1]=>
+  resource(%d) of type (stream)
+  ["myindex"]=>
+  resource(%d) of type (stream)
+}
+array(2) {
+  [1]=>
+  resource(%d) of type (stream)
+  ["myindex"]=>
+  resource(%d) of type (stream)
+}

@@ -1,0 +1,13 @@
+*** Testing error conditions ***
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+ in hphp/test/zend/bad/ext-standard-file/disk_total_space_error-win32.phpt on line %d
+bool(false)
+HipHop Warning: %a
+ in hphp/test/zend/bad/ext-standard-file/disk_total_space_error-win32.phpt on line %d
+bool(false)
+
+--- Done ---

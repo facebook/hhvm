@@ -1,0 +1,29 @@
+*** Testing array_unique() : two dimensional array for $input argument ***
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+HipHop Notice: %a
+array(1) {
+  [0]=>
+  array(4) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+    [3]=>
+    int(1)
+  }
+}
+Done

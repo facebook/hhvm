@@ -1,0 +1,10 @@
+array(4) {
+  ["dirname"]=>
+  string(1) "/"
+  ["basename"]=>
+  string(8) "dsds.asa"
+  ["extension"]=>
+  string(3) "asa"
+  ["filename"]=>
+  string(4) "dsds"
+}

@@ -1,0 +1,10 @@
+*** Testing chr() : error conditions ***
+
+-- Testing chr() function with no arguments --
+HipHop Warning: %a
+NULL
+
+-- Testing chr() function with more than expected no. of arguments --
+HipHop Warning: %a
+NULL
+===DONE===

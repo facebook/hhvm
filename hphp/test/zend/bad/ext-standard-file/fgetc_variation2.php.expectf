@@ -1,0 +1,9 @@
+*** Testing fgetc() : usage variations ***
+-- Testing fgetc() with closed handle --
+HipHop Warning: %a
+bool(false)
+-- Testing fgetc() with unset handle --
+HipHop Notice: %a
+HipHop Warning: %a
+bool(false)
+Done

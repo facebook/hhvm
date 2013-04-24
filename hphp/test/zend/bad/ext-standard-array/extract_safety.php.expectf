@@ -1,0 +1,5 @@
+string(4) "John" refcount(2)
+int(0)
+string(4) "John" refcount(2)
+
+Done

@@ -1,0 +1,12 @@
+*** Testing fsockopen() : basic functionality ***
+Open a server socket
+
+Calling fsockopen() with all possible arguments:
+resource(%d) of type (stream)
+
+Calling fsockopen() with mandatory arguments:
+resource(%d) of type (stream)
+
+Calling fsockopen() with address and port in same string:
+resource(%d) of type (stream)
+Done

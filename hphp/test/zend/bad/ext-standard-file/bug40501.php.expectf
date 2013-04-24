@@ -1,0 +1,7 @@
+array(2) {
+  [0]=>
+  string(%d) "this element contains the delimiter, and ends with an odd number of
+backslashes (ex: 1)\"
+  [1]=>
+  string(%d) "and it isn't the last element$"
+}

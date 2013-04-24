@@ -1,0 +1,11 @@
+*** Testing array_walk() : error conditions ***
+-- Testing array_walk() function with zero arguments --
+HipHop Warning: %a
+NULL
+-- Testing array_walk() function with one argument --
+HipHop Warning: %a
+NULL
+-- Testing array_walk() function with non existent callback function  --
+HipHop Warning: %a
+NULL
+Done

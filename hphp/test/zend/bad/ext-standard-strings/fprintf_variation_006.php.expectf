@@ -1,0 +1,11 @@
+*** Testing fprintf() for unsigned integers ***
+
+0
+1
+4294967295
+2
+4294967294
+23333333
+4271633963
+1234
+Done

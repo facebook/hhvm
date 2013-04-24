@@ -1,0 +1,12 @@
+*** Testing array_shift() : usage variations ***
+
+-- Incorrect Method: --
+
+Strict Standards: Only variables should be passed by reference in hphp/test/zend/bad/ext-standard-array/array_shift_variation5.phpt on line %d
+
+Strict Standards: Only variables should be passed by reference in hphp/test/zend/bad/ext-standard-array/array_shift_variation5.phpt on line %d
+string(4) "zero"
+
+-- Correct Method: --
+string(4) "zero"
+Done

@@ -1,0 +1,167 @@
+*** Testing krsort() : basic functionality ***
+
+-- Testing krsort() by supplying string array, 'flag' value is defualt --
+bool(true)
+array(8) {
+  ["o20"]=>
+  string(8) "orange20"
+  ["o2"]=>
+  string(7) "orange2"
+  ["o"]=>
+  string(6) "orange"
+  ["l"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["O"]=>
+  string(6) "Orange"
+}
+
+-- Testing krsort() by supplying numeric array, 'flag' value is defualt --
+bool(true)
+array(4) {
+  [555]=>
+  int(2)
+  [100]=>
+  int(4)
+  [33]=>
+  int(3)
+  [22]=>
+  int(1)
+}
+
+-- Testing krsort() by supplying string array, 'flag' = SORT_REGULAR --
+bool(true)
+array(8) {
+  ["o20"]=>
+  string(8) "orange20"
+  ["o2"]=>
+  string(7) "orange2"
+  ["o"]=>
+  string(6) "orange"
+  ["l"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["O"]=>
+  string(6) "Orange"
+}
+
+-- Testing krsort() by supplying numeric array, 'flag' = SORT_REGULAR --
+bool(true)
+array(4) {
+  [555]=>
+  int(2)
+  [100]=>
+  int(4)
+  [33]=>
+  int(3)
+  [22]=>
+  int(1)
+}
+
+-- Testing krsort() by supplying string array, 'flag' = SORT_STRING --
+bool(true)
+array(8) {
+  ["o20"]=>
+  string(8) "orange20"
+  ["o2"]=>
+  string(7) "orange2"
+  ["o"]=>
+  string(6) "orange"
+  ["l"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["O"]=>
+  string(6) "Orange"
+}
+
+-- Testing krsort() by supplying string array (case insensitive), 'flag' = SORT_STRING|SORT_FLAG_CASE --
+bool(true)
+array(8) {
+  ["O3"]=>
+  string(7) "Orange3"
+  ["o20"]=>
+  string(8) "orange20"
+  ["o2"]=>
+  string(7) "orange2"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["o"]=>
+  string(6) "orange"
+  ["O"]=>
+  string(6) "Orange"
+  ["l"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
+}
+
+-- Testing krsort() by supplying string array (natural), 'flag' = SORT_NATURAL --
+bool(true)
+array(8) {
+  ["o20"]=>
+  string(8) "orange20"
+  ["o2"]=>
+  string(7) "orange2"
+  ["o"]=>
+  string(6) "orange"
+  ["l"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["O"]=>
+  string(6) "Orange"
+}
+
+-- Testing krsort() by supplying string array (natural, case insensitive), 'flag' = SORT_NATURAL|SORT_FLAG_CASE --
+bool(true)
+array(8) {
+  ["o20"]=>
+  string(8) "orange20"
+  ["O3"]=>
+  string(7) "Orange3"
+  ["o2"]=>
+  string(7) "orange2"
+  ["O1"]=>
+  string(7) "Orange1"
+  ["o"]=>
+  string(6) "orange"
+  ["O"]=>
+  string(6) "Orange"
+  ["l"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
+}
+
+-- Testing krsort() by supplying numeric array, 'flag' = SORT_NUMERIC --
+bool(true)
+array(4) {
+  [555]=>
+  int(2)
+  [100]=>
+  int(4)
+  [33]=>
+  int(3)
+  [22]=>
+  int(1)
+}
+Done

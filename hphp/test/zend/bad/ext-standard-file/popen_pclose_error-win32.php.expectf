@@ -1,0 +1,17 @@
+*** Testing for error conditions ***
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+
+
+--- Done ---'abc.txt' is not recognized as an internal or external command,
+operable program or batch file.

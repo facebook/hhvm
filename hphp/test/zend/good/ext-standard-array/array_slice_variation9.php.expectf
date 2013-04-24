@@ -1,0 +1,17 @@
+*** Testing array_slice() : usage variations ***
+
+-- Array of referenced variables ($preserve_keys = default) --
+array(2) {
+  [0]=>
+  &string(3) "two"
+  [1]=>
+  &string(5) "three"
+}
+-- Change $val2 ($preserve_keys = TRUE) --
+array(2) {
+  [2]=>
+  &string(12) "hello, world"
+  [1]=>
+  &string(5) "three"
+}
+Done

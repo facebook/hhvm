@@ -1,0 +1,176 @@
+*** Testing ksort() : usage variations ***
+
+-- Testing ksort() by supplying various string arrays --
+
+-- Iteration 1 --
+- With defualt sort flag -
+bool(true)
+array(11) {
+  [""]=>
+  NULL
+  ["	"]=>
+  string(1) "	"
+  ["
+"]=>
+  string(1) "
+"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
+  [""]=>
+  string(1) ""
+  ["\a"]=>
+  string(2) "\a"
+  ["\cx"]=>
+  string(3) "\cx"
+  ["\ddd"]=>
+  string(4) "\ddd"
+  ["\xhh"]=>
+  string(4) "\xhh"
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+array(11) {
+  [""]=>
+  NULL
+  ["	"]=>
+  string(1) "	"
+  ["
+"]=>
+  string(1) "
+"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
+  [""]=>
+  string(1) ""
+  ["\a"]=>
+  string(2) "\a"
+  ["\cx"]=>
+  string(3) "\cx"
+  ["\ddd"]=>
+  string(4) "\ddd"
+  ["\xhh"]=>
+  string(4) "\xhh"
+}
+- Sort flag = SORT_STRING -
+bool(true)
+array(11) {
+  [""]=>
+  NULL
+  ["	"]=>
+  string(1) "	"
+  ["
+"]=>
+  string(1) "
+"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  ["
+"]=>
+  string(1) "
+"
+  [""]=>
+  string(1) ""
+  ["\a"]=>
+  string(2) "\a"
+  ["\cx"]=>
+  string(3) "\cx"
+  ["\ddd"]=>
+  string(4) "\ddd"
+  ["\xhh"]=>
+  string(4) "\xhh"
+}
+
+-- Iteration 2 --
+- With defualt sort flag -
+bool(true)
+array(11) {
+  ["Apple"]=>
+  string(5) "apple"
+  ["B"]=>
+  string(6) "BANANA"
+  ["Lemon"]=>
+  string(5) "lemoN"
+  ["O"]=>
+  string(6) "oraNGe"
+  ["T"]=>
+  string(3) "ttt"
+  ["W"]=>
+  string(2) "ww"
+  ["X"]=>
+  string(1) "x"
+  ["o"]=>
+  string(6) "Orange"
+  ["t"]=>
+  string(4) "TTTT"
+  ["te"]=>
+  string(4) "Test"
+  ["x"]=>
+  string(1) "X"
+}
+- Sort flag = SORT_REGULAR -
+bool(true)
+array(11) {
+  ["Apple"]=>
+  string(5) "apple"
+  ["B"]=>
+  string(6) "BANANA"
+  ["Lemon"]=>
+  string(5) "lemoN"
+  ["O"]=>
+  string(6) "oraNGe"
+  ["T"]=>
+  string(3) "ttt"
+  ["W"]=>
+  string(2) "ww"
+  ["X"]=>
+  string(1) "x"
+  ["o"]=>
+  string(6) "Orange"
+  ["t"]=>
+  string(4) "TTTT"
+  ["te"]=>
+  string(4) "Test"
+  ["x"]=>
+  string(1) "X"
+}
+- Sort flag = SORT_STRING -
+bool(true)
+array(11) {
+  ["Apple"]=>
+  string(5) "apple"
+  ["B"]=>
+  string(6) "BANANA"
+  ["Lemon"]=>
+  string(5) "lemoN"
+  ["O"]=>
+  string(6) "oraNGe"
+  ["T"]=>
+  string(3) "ttt"
+  ["W"]=>
+  string(2) "ww"
+  ["X"]=>
+  string(1) "x"
+  ["o"]=>
+  string(6) "Orange"
+  ["t"]=>
+  string(4) "TTTT"
+  ["te"]=>
+  string(4) "Test"
+  ["x"]=>
+  string(1) "X"
+}
+Done

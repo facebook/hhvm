@@ -1,0 +1,16 @@
+**** Testing gettype() and settype() functions ****
+
+*** Testing gettype(): error conditions ***
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+
+*** Testing settype(): error conditions ***
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+NULL
+HipHop Warning: %a
+bool(false)
+Done

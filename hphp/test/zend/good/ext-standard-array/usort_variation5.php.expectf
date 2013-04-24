@@ -1,0 +1,66 @@
+*** Testing usort() : usage variation ***
+
+-- Sorting Single Quoted String values --
+bool(true)
+array(10) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(1) " "
+  [2]=>
+  string(1) "'"
+  [3]=>
+  string(1) "0"
+  [4]=>
+  string(8) "123Hello"
+  [5]=>
+  string(4) "@#$%"
+  [6]=>
+  string(5) "HELLO"
+  [7]=>
+  string(5) "Hello"
+  [8]=>
+  string(2) "\t"
+  [9]=>
+  string(4) "test"
+}
+
+-- Sorting Double Quoted String values --
+bool(true)
+array(10) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(1) "	"
+  [2]=>
+  string(1) " "
+  [3]=>
+  string(1) """
+  [4]=>
+  string(1) "0"
+  [5]=>
+  string(8) "123Hello"
+  [6]=>
+  string(4) "@#$%"
+  [7]=>
+  string(5) "HELLO"
+  [8]=>
+  string(5) "Hello"
+  [9]=>
+  string(4) "test"
+}
+
+-- Sorting Heredoc String values --
+bool(true)
+array(4) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(7) "HEREDOC"
+  [2]=>
+  string(7) "Heredoc"
+  [3]=>
+  string(%d) "heredoc string	with!@# and 123
+Test this!!!"
+}
+===DONE===

@@ -1,0 +1,8 @@
+Open a server socket
+
+Calling fsockopen() without a protocol in the hostname string:
+resource(%d) of type (stream)
+
+Calling fsockopen() with address and port in same string, without a protocol:
+resource(%d) of type (stream)
+Done

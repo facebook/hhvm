@@ -1,0 +1,6 @@
+*** Checking stat() on a file opened using read/write mode ***
+bool(true)
+bool(true)
+bool(true)
+
+--- Done ---

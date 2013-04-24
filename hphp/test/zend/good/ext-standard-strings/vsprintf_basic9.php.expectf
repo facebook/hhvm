@@ -1,0 +1,8 @@
+*** Testing vsprintf() : basic functionality - using hexadecimal format ***
+string(1) "b"
+string(1) "B"
+string(4) "b 84"
+string(4) "B 84"
+string(7) "b 84 b1"
+string(7) "B 84 B1"
+Done

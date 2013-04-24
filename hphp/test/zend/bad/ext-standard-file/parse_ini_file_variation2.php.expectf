@@ -1,0 +1,60 @@
+*** Testing parse_ini_file() : variation ***
+array(8) {
+  ["section1"]=>
+  array(2) {
+    ["value1"]=>
+    string(1) "1"
+    ["value2"]=>
+    string(0) ""
+  }
+  ["section2"]=>
+  array(2) {
+    ["value1"]=>
+    string(1) "1"
+    ["value2"]=>
+    string(0) ""
+  }
+  ["section3"]=>
+  array(2) {
+    ["value1"]=>
+    string(1) "1"
+    ["value2"]=>
+    string(0) ""
+  }
+  ["section4"]=>
+  array(2) {
+    ["value1"]=>
+    string(0) ""
+    ["value2"]=>
+    string(0) ""
+  }
+  ["section5"]=>
+  array(2) {
+    ["value1"]=>
+    string(2) "on"
+    ["value2"]=>
+    string(3) "off"
+  }
+  ["section6"]=>
+  array(2) {
+    ["value1"]=>
+    string(4) "true"
+    ["value2"]=>
+    string(5) "false"
+  }
+  ["section7"]=>
+  array(2) {
+    ["value1"]=>
+    string(3) "yes"
+    ["value2"]=>
+    string(2) "no"
+  }
+  ["section8"]=>
+  array(2) {
+    ["value1"]=>
+    string(4) "null"
+    ["value2"]=>
+    string(0) ""
+  }
+}
+===DONE===

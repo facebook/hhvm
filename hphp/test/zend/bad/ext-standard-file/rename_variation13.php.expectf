@@ -1,0 +1,52 @@
+*** Testing rename() with obscure files ***
+-- testing '-1' --
+bool(true)
+HipHop Warning: %a
+bool(false)
+-- testing '1' --
+bool(true)
+HipHop Warning: %a
+bool(false)
+-- testing '' --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+-- testing '' --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+-- testing '' --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+-- testing ' ' --
+bool(true)
+HipHop Warning: %a
+bool(false)
+-- testing '%s' --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)
+-- testing 'Array' --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+HipHop Warning: %a
+bool(false)
+-- testing '/no/such/file/dir' --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+-- testing 'php/php' --
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+
+*** Done ***

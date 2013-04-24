@@ -26,7 +26,7 @@ var_dump($z);
 echo "Size: ".filesize($file)."\n";
 
 imap_close($stream_id);
-?><?php
+?><?php 
 @unlink(dirname(__FILE__).'/tmpsavebody.txt');
 require_once('clean.inc');
 ?>

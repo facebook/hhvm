@@ -9,6 +9,6 @@ var_dump(imap_undelete($stream_id, 1));
 
 imap_close($stream_id);
 
-?><?php
+?><?php 
 require_once('clean.inc');
 ?>

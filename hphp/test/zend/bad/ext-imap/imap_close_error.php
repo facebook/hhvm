@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool imap_close(resource $stream_id [, int $options])
- * Description: Close an IMAP stream
+ * Description: Close an IMAP stream 
  * Source code: ext/imap/php_imap.c
  */
 

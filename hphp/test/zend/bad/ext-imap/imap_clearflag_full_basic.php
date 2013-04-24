@@ -17,7 +17,7 @@ if (!is_resource($imap_stream)) {
 $check = imap_check($imap_stream);
 echo "Initial msg count in new_mailbox : ". $check->Nmsgs . "\n";
 
-echo "Set some flags\n";
+echo "Set some flags\n"; 
 var_dump(imap_setflag_full($imap_stream, "1,3", "\\Seen \\Answered"));
 var_dump(imap_setflag_full($imap_stream, "2,4", "\\Answered"));
 var_dump(imap_setflag_full($imap_stream, "5,7", "\\Flagged \\Deleted"));
@@ -40,6 +40,6 @@ var_dump(imap_search($imap_stream, "DELETED"));
 
 imap_close($imap_stream);
 ?>
-===Done===<?php
+===Done===<?php 
 require_once('clean.inc');
 ?>

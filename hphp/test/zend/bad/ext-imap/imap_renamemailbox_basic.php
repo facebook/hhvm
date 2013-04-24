@@ -8,7 +8,7 @@ imap_renamemailbox(false);
 
 
 require_once(dirname(__FILE__).'/imap_include.inc');
-
+	
 $stream_id = setup_test_mailbox('', 1);
 
 if (!is_resource($stream_id)) {
@@ -32,6 +32,6 @@ var_dump(imap_createmailbox($stream_id, $newbox.'.test'));
 var_dump(imap_renamemailbox($stream_id, $newbox.'.test', $newbox.'.testd'));
 
 imap_close($stream_id);
-?><?php
+?><?php 
 require_once('clean.inc');
 ?>

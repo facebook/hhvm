@@ -7,7 +7,7 @@ $z = imap_headerinfo($stream_id, 1);
 
 $fields = array ('toaddress','to','fromaddress','from',
 'reply_toaddress','reply_to',
-	'senderaddress', 'sender',
+	'senderaddress', 'sender', 
 'subject','Subject',
 	'Recent','Unseen','Flagged','Answered','Deleted','Draft',
 	'Msgno','MailDate','Size','udate');
@@ -73,6 +73,6 @@ var_dump($z->udate);
 
 imap_close($stream_id);
 
-?><?php
+?><?php 
 require_once('clean.inc');
 ?>

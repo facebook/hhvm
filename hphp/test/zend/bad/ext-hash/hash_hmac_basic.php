@@ -3,7 +3,7 @@
 /* Prototype  : string hash_hmac  ( string $algo  , string $data  , string $key  [, bool $raw_output  ] )
  * Description: Generate a keyed hash value using the HMAC method
  * Source code: ext/hash/hash.c
- * Alias to functions:
+ * Alias to functions: 
 */
 
 echo "*** Testing hash_hmac() : basic functionality ***\n";

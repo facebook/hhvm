@@ -14,100 +14,50 @@ import shutil
 import subprocess
 import sys
 
-bad_tests = (
-    # SESSION is bused on husdon
-    'unset_cv05.php', 
-    'unset_cv06.php',
-
-    # unpredictable numbers - we need param matching
-    'bug29971.php',
-    'bug35143.php',
-    'gettimeofday_basic.php',
-    'localtime_basic.php',
-    'time_basic.php',
-    'posix_getpgid_basic.php',
-    'posix_getpgid_basic.php',
-    'posix_getpgrp_basic.php',
-    'posix_getpid_basic.php',
-    'posix_getppid_basic.php',
-    'posix_getsid_basic.php',
-    'posix_times_basic.php',
-    'socket_getsockname.php',
-    'fileinode_variation1.php',
-    'filestat.php',
-    'fstat_basic.php',
-    'fstat.php',
-    'touch_basic.php',
-    'openssl_random_pseudo_bytes.php',
-    'pcntl_fork_basic.php',
-    'posix_times.php',
-    'array_diff_assoc_variation6.php',
-    'bug39322.php',
-    'getmypid_basic.php',
-    'getrusage_basic.php',
-   
-    # not implemented extensions
-    'phar', # this appears in filenames
-
-    # works in interp but not others
-    'bug25922.php',
-    'bug34064.php',
-    'objects_029.php',
-    'objects_030.php',
-
-    # line number is inconsistent on stack overflow
-    'bug41633_3.php',
-
-    # broken in Jenkins
-    'bug35239.php',
-    'bug54265.php',
-    
-    # our build machines have no members in group 0...
-    'ext-posix/posix_getgrgid.php',
-)
-
+# Don't even pull these into the repo. 
+# We want runnig the bad tests to still complete.
 no_import = (
     # these hang forever
-    '005a.phpt',
-    'array_012.phpt',
-    'array_pad_variation2.phpt',
-    'bug27508.phpt',
-    'gzgetc_basic.phpt',
-    'gzgets_basic.phpt',
-    'observer_003.phpt',
-    'observer_004.phpt',
-    'observer_005.phpt',
-    'observer_006.phpt',
-    'observer_009.phpt',
-    'sleep_error.phpt',
-    'socket_select-wrongparams-1.phpt',
-    'test010.phpt',
-    'usleep_error.phpt',
+    '/ext/sockets/tests/socket_select-wrongparams-1.phpt',
+    '/ext/spl/tests/array_012.phpt',
+    '/ext/spl/tests/observer_003.phpt',
+    '/ext/spl/tests/observer_004.phpt',
+    '/ext/spl/tests/observer_005.phpt',
+    '/ext/spl/tests/observer_006.phpt',
+    '/ext/spl/tests/observer_009.phpt',
+    '/ext/standard/tests/array/array_pad_variation2.phpt',
+    '/ext/standard/tests/file/bug27508.phpt',
+    '/ext/standard/tests/general_functions/sleep_error.phpt',
+    '/ext/standard/tests/general_functions/usleep_error.phpt',
+    '/ext/zlib/tests/gzgetc_basic.phpt',
+    '/ext/zlib/tests/gzgets_basic.phpt',
+    '/tests/func/005a.phpt',
+    '/tests/run-test/test010.phpt',
 
     # segfaults
-    'bz2/tests/004.phpt',
-    'date/tests/bug50055.phpt',
-    'operators/divide_basiclong_64bit.phpt',
-    'operators/modulus_basiclong_64bit.phpt',
-    'lang/bug21820.phpt',
-    'lang/func_get_arg.003.phpt',
-    'lang/func_num_args.003.phpt',
-    'lang/func_get_args.003.phpt',
-    'func/010.phpt',
-    'Zend/tests/020.phpt',
-    'Zend/tests/bug35239.phpt',
-    'Zend/tests/bug54265.phpt',
-    'Zend/tests/bug55705.phpt',
-    'Zend/tests/callable_type_hint_001.phpt',
-    'Zend/tests/callable_type_hint_003.phpt',
-    'Zend/tests/jump13.phpt',
-    'Zend/tests/heredoc_005.phpt',
-    'gd/tests/crafted_gd2.phpt',
-    'pcntl/tests/pcntl_exec.phpt',
-    'pcntl/tests/pcntl_exec_2.phpt',
-    'pcntl/tests/pcntl_exec_3.phpt',
-    'session/tests/bug61728.phpt',
-    'session/tests/session_module_name_variation2.phpt',
+    '/Zend/tests/020.phpt',
+    '/Zend/tests/bug35239.phpt',
+    '/Zend/tests/bug54265.phpt',
+    '/Zend/tests/bug55705.phpt',
+    '/Zend/tests/callable_type_hint_001.phpt',
+    '/Zend/tests/callable_type_hint_003.phpt',
+    '/Zend/tests/heredoc_005.phpt',
+    '/Zend/tests/jump13.phpt',
+    '/ext/bz2/tests/004.phpt',
+    '/ext/date/tests/bug50055.phpt',
+    '/ext/gd/tests/crafted_gd2.phpt',
+    '/ext/pcntl/tests/pcntl_exec.phpt',
+    '/ext/pcntl/tests/pcntl_exec_2.phpt',
+    '/ext/pcntl/tests/pcntl_exec_3.phpt',
+    '/ext/session/tests/bug61728.phpt',
+    '/ext/session/tests/session_module_name_variation2.phpt',
+    '/tests/func/010.phpt',
+    '/tests/lang/bug21820.phpt',
+    '/tests/lang/func_get_arg.003.phpt',
+    '/tests/lang/func_get_args.003.phpt',
+    '/tests/lang/func_num_args.003.phpt',
+    '/tests/lang/operators/divide_basiclong_64bit.phpt',
+    '/tests/lang/operators/modulus_basiclong_64bit.phpt',
 
     # intermittent segfaults
     '/Zend/tests/001.phpt',
@@ -115,18 +65,16 @@ no_import = (
     '/Zend/tests/003.phpt',
 
     # not imported yet, but will be
-    '/ext/gd',
-    '/ext/standard',
     '/ext/mysql',
     '/ext/pdo_mysql',
     '/ext/pdo_sqlite',
     '/ext/pgsql',
     '/ext/spl',
     '/ext/sqlite3',
+    '/ext/standard',
     '/ext/xmlwriter',
 
     # not implemented extensions
-    '/sapi',
     '/ext/calendar',
     '/ext/com_dotnet',
     '/ext/dba',
@@ -146,9 +94,9 @@ no_import = (
     '/ext/odbc',
     '/ext/pdo_dblib',
     '/ext/pdo_firebird',
+    '/ext/pdo_oci',
     '/ext/pdo_odbc',
     '/ext/pdo_pgsql',
-    '/ext/pdo_oci',
     '/ext/phar',
     '/ext/pspell',
     '/ext/readline',
@@ -167,32 +115,65 @@ no_import = (
     '/ext/xmlrpc',
     '/ext/xsl',
     '/ext/zip',
+    '/sapi',
+)
+
+# For mark these as failing
+bad_tests = (
+    # SESSION is bused on husdon
+    '/zend/unset_cv05.php', 
+    '/zend/unset_cv06.php',
+
+    # unpredictable numbers - we need param matching
+    '/ext-date/bug35143.php',
+    '/ext-date/gettimeofday_basic.php',
+    '/ext-date/localtime_basic.php',
+    '/ext-date/time_basic.php',
+    '/ext-openssl/openssl_random_pseudo_bytes.php',
+    '/ext-pcntl/pcntl_fork_basic.php',
+    '/ext-posix/posix_getpgid_basic.php',
+    '/ext-posix/posix_getpgrp_basic.php',
+    '/ext-posix/posix_getpid_basic.php',
+    '/ext-posix/posix_getppid_basic.php',
+    '/ext-posix/posix_getsid_basic.php',
+    '/ext-posix/posix_times.php',
+    '/ext-posix/posix_times_basic.php',
+    '/ext-sockets/socket_getsockname.php',
+    '/ext-standard/array/array_diff_assoc_variation6.php',
+    '/ext-standard/file/fileinode_variation1.php',
+    '/ext-standard/file/filestat.php',
+    '/ext-standard/fstat.php',
+    '/ext-standard/fstat_basic.php',
+    '/ext-standard/general_functions/bug39322.php',
+    '/ext-standard/general_functions/getmypid_basic.php',
+    '/ext-standard/general_functions/getrusage_basic.php',
+    '/ext-standard/touch_basic.php',
+    '/tests-basic/bug29971.php',
+   
+    # not implemented extensions
+    'phar', # this appears in filenames
+
+    # works in interp but not others
+    '/tests-lang/bug25922.php',
+    '/zend/bug34064.php',
+    '/zend/objects_029.php',
+    '/zend/objects_030.php',
+
+    # line number is inconsistent on stack overflow
+    '/zend/bug41633_3.php',
+
+    # broken in Jenkins
+    '/zend/bug35239.php',
+    '/zend/bug54265.php',
+    
+    # our build machines have no members in group 0...
+    '/ext-posix/posix_getgrgid.php',
 )
 
 # Random other files that zend wants
 other_files = (
-    'curl_testdata1.txt',
-    'curl_testdata2.txt',
-    'autoload_root.p5c',
-    'autoload_derived.p5c',
-    'autoload_implements.p5c',
-    'autoload_interface.p5c',
-    'constants_basic_003.inc',
-    'interface_optional_arg_003.inc',
-    '015.inc',
-    '016.inc',
-    '023-2.inc',
-    'inc.inc',
-    'inc_throw.inc',
-    'bug54804.inc',
-    'nowdoc.inc',
-    'ns_022.inc',
-    'ns_027.inc',
-    'ns_028.inc',
-    'ns_065.inc',
-    'ns_066.inc',
-    'ns_067.inc',
-    'unset.inc',
+    '/ext-curl/curl_testdata1.txt',
+    '/ext-curl/curl_testdata2.txt',
     '/ext-exif/bug48378.jpeg',
     '/ext-gd/Tuffy.ttf',
     '/ext-gd/bug37346.gif',
@@ -236,12 +217,34 @@ other_files = (
     '/ext-xmlreader/relaxNG2.rng',
     '/ext-xmlreader/relaxNG3.rng',
     '/ext-zlib/004.txt.gz',
+    '/tests-classes/autoload_derived.p5c',
+    '/tests-classes/autoload_implements.p5c',
+    '/tests-classes/autoload_interface.p5c',
+    '/tests-classes/autoload_root.p5c',
+    '/tests-classes/constants_basic_003.inc',
+    '/tests-classes/interface_optional_arg_003.inc',
+    '/tests-lang/015.inc',
+    '/tests-lang/016.inc',
+    '/tests-lang/023-2.inc',
+    '/tests-lang/inc.inc',
+    '/tests-lang/inc_throw.inc',
     '/tests/quicktester.inc',
+    '/zend/bug54804.inc',
+    '/zend/nowdoc.inc',
+    '/zend/ns_022.inc',
+    '/zend/ns_027.inc',
+    '/zend/ns_028.inc',
+    '/zend/ns_065.inc',
+    '/zend/ns_066.inc',
+    '/zend/ns_067.inc',
+    '/zend/unset.inc',
 )
 
+# Map strings from one style to another
 errors = (
     # generic inconsistencies
-    ('Variable passed to ([^\s]+)\(\) is not an array or object', 'Invalid operand type was used: expecting an array'),
+    ('Variable passed to ([^\s]+)\(\) is not an array or object', 
+        'Invalid operand type was used: expecting an array'),
     ('bcdiv\(\): ', ''),
     ('bcsqrt\(\): ', ''),
     ('bcpowmod\(\): ', ''),
@@ -332,7 +335,8 @@ def walk(filename, source):
             # tests are really inconsistent about whitespace
             exp = re.sub(r'(\r\n|\r|\n)', '\n', exp.strip())
 
-            exp = exp.replace('in %s on', 'in %s/%s/%s on' % ('hphp/test/zend/all', source_dir, dest_filename))
+            exp = exp.replace('in %s on', 'in %s/%s/%s on' % 
+                    ('hphp/test/zend/all', source_dir, dest_filename))
 
             # PHP puts a newline in that we don't
             exp = exp.replace('\n\nFatal error:', '\nFatal error:')
@@ -343,9 +347,12 @@ def walk(filename, source):
             if key == 'EXPECTREGEX':
                 match_rest_of_line = '.+'
 
-            exp = re.sub(r'Fatal\\? error\\?:.*', 'HipHop Fatal error: '+match_rest_of_line, exp)
-            exp = re.sub(r'Warning\\?:.*', 'HipHop Warning: '+match_rest_of_line, exp)
-            exp = re.sub(r'Notice\\?:.*', 'HipHop Notice: '+match_rest_of_line, exp)
+            exp = re.sub(r'Fatal\\? error\\?:.*', 
+                    'HipHop Fatal error: '+match_rest_of_line, exp)
+            exp = re.sub(r'Warning\\?:.*', 
+                    'HipHop Warning: '+match_rest_of_line, exp)
+            exp = re.sub(r'Notice\\?:.*', 
+                    'HipHop Notice: '+match_rest_of_line, exp)
 
             for error in errors:
                 exp = re.sub(error[0], error[1], exp)
@@ -363,7 +370,7 @@ def walk(filename, source):
         exp = sections['EXPECTF']
         file(full_dest_filename+'.expectf', 'w').write(exp)
     else:
-        print "Malformed test, no --EXPECT-- or --EXPECTF-- or --EXPECTREGEX--: ", filename
+        print "Malformed test, no --EXPECT*--: ", filename
         return
 
     test = sections['FILE']
@@ -381,7 +388,8 @@ def walk(filename, source):
     if sections.has_key('COOKIE'):
         test = test.replace(
             '<?php', 
-            '<?php\n$_COOKIE = http_parse_cookie("' + sections['COOKIE'] + '");\n'
+            '<?php\n$_COOKIE = http_parse_cookie("' + 
+                sections['COOKIE'] + '");\n'
         )
     if sections.has_key('ENV'):
         for line in sections['ENV'].split('\n'):
@@ -449,6 +457,11 @@ if not os.path.isdir('test/zend/all'):
 else:
     print "Running all tests from zend/all"
 
+file('test/zend/hphp_config.hdf', 'w').write('')
+file('test/zend/config.hdf', 'w').write(
+    'Eval {\n EnableObjDestructCall = true\n }'
+)
+
 stdout = subprocess.Popen(
     [
         'tools/verify_to_json.php',
@@ -465,7 +478,6 @@ stdout = subprocess.Popen(
 # segfaults also print on stderr
 stdout = re.sub('\nsh: line 1:.*', '', stdout)
 # fbmake, you are crazy
-print stdout
 results = json.loads('['+stdout.strip().replace("\n", ",\n")+']')[-1]['results']
 
 if args.verbose:

@@ -1,7 +1,7 @@
 <?php
-/* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section
+/* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section 
  *           [, int $options])
- * Description: Get a specific body section
+ * Description: Get a specific body section 
  * Source code: ext/imap/php_imap.c
  */
 
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-
+       
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-
+       
        // object data
 /*22*/ new classA(),
 

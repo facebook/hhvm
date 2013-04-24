@@ -1,7 +1,7 @@
 <?php
-/* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section
+/* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section 
  *           [, int $options])
- * Description: Get a specific body section
+ * Description: Get a specific body section 
  * Source code: ext/imap/php_imap.c
  */
 
@@ -27,14 +27,14 @@ foreach ($options as $key => $option) {
 		$msg_uid = imap_uid($stream_id, $msg_no);
 		var_dump( imap_fetchbody($stream_id, $msg_uid, $section, $option) );
 		break;
-
+		
 		case 'FT_PEEK';
 		var_dump( imap_fetchbody($stream_id, $msg_no, $section, $option) );
 		$overview = imap_fetch_overview($stream_id, 1);
 		echo "Seen Flag: ";
 		var_dump( $overview[0]->seen );
 		break;
-
+		
 		case 'FT_INTERNAL';
 		var_dump( imap_fetchbody($stream_id, $msg_no, $section, $option) );
 		break;

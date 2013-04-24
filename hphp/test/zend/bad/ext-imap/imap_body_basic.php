@@ -15,8 +15,8 @@ if (!is_resource($imap_stream)) {
 }
 
 $check = imap_check($imap_stream);
-echo "Msg Count in new mailbox: ". $check->Nmsgs . "\n";
-
+echo "Msg Count in new mailbox: ". $check->Nmsgs . "\n";    
+    
 // show body for msg 1
 var_dump(imap_body($imap_stream, 1));
 
@@ -25,6 +25,6 @@ var_dump(imap_body($imap_stream, 1, FT_UID));
 
 imap_close($imap_stream);
 ?>
-===Done===<?php
+===Done===<?php 
 require_once('clean.inc');
 ?>

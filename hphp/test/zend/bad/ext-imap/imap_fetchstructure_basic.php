@@ -28,6 +28,6 @@ var_dump($z->lines);
 var_dump(is_object($z->parameters));
 
 imap_close($stream_id);
-?><?php
+?><?php 
 require_once('clean.inc');
 ?>

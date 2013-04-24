@@ -78,7 +78,6 @@ no_import = (
     '/ext/xmlwriter/examples/',
 
     # not imported yet, but will be
-    '/ext/pdo_sqlite',
     '/ext/spl',
     '/ext/standard',
 
@@ -213,6 +212,8 @@ other_files = (
     '/ext-pdo/pdo_test.inc',
     '/ext-pdo_mysql/config.inc',
     '/ext-pdo_mysql/common.phpt',
+    '/ext-pdo_sqlite/config.inc',
+    '/ext-pdo_sqlite/common.phpt',
     '/ext-session/save_handler.inc',
     '/ext-simplexml/bug24392.xml',
     '/ext-soap-bugs/bug30928.wsdl',
@@ -439,7 +440,7 @@ def walk(filename, source):
         test = test.replace("_002.xml", "_004.xml")
     if 'bug61139.php' in full_dest_filename:
         test += "\nunlink('someFile');\n?>"
-    if '/ext-pdo_mysql/' in full_dest_filename:
+    if '/ext-pdo_' in full_dest_filename:
         test = test.replace('/../../../ext/pdo/tests/pdo_test.inc', 
                 '/../ext-pdo/pdo_test.inc')
 

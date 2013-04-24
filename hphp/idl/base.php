@@ -296,10 +296,15 @@ function DefineConstant($const) {
 function DefineFunction($func) {
   global $classes, $current_class;
 
-  $func['flags'] = read_array_of_constant_names($func['flags']);
-  if ($current_class && $classes[$current_class]['flags'] & HipHopSpecific) {
-    $func['flags'] |= HipHopSpecific;
+  if (empty($func['flags'])) {
+    $func['flags'] = 0;
+  } else {
+    $func['flags'] = read_array_of_constant_names($func['flags']);
+    if ($current_class && $classes[$current_class]['flags'] & HipHopSpecific) {
+      $func['flags'] |= HipHopSpecific;
+    }
   }
+
   if (!isset($func['return'])) $func['return'] = array();
   $func['ret_desc'] = idx($func['return'], 'desc');
   $func['ret_hint'] = idx($func['return'], 'hint');

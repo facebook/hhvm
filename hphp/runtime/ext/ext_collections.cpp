@@ -503,7 +503,7 @@ Object c_Vector::t_getiterator() {
 }
 
 Object c_Vector::t_map(CVarRef callback) {
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -527,7 +527,7 @@ Object c_Vector::t_map(CVarRef callback) {
 }
 
 Object c_Vector::t_filter(CVarRef callback) {
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -1429,7 +1429,7 @@ Object c_Map::t_getiterator() {
 }
 
 Object c_Map::t_map(CVarRef callback) {
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -1472,7 +1472,7 @@ Object c_Map::t_map(CVarRef callback) {
 }
 
 Object c_Map::t_filter(CVarRef callback) {
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -2615,7 +2615,7 @@ Object c_StableMap::t_getiterator() {
 }
 
 Object c_StableMap::t_map(CVarRef callback) {
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -2662,7 +2662,7 @@ Object c_StableMap::t_map(CVarRef callback) {
 }
 
 Object c_StableMap::t_filter(CVarRef callback) {
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -3564,7 +3564,7 @@ Object c_Pair::t_getiterator() {
 }
 
 Object c_Pair::t_map(CVarRef callback) {
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -3583,7 +3583,7 @@ Object c_Pair::t_map(CVarRef callback) {
 }
 
 Object c_Pair::t_filter(CVarRef callback) {
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(

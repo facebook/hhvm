@@ -36,8 +36,8 @@ code => rdx
 
 bool fh_override_function(Value* name, Value* args, Value* code) asm("_ZN4HPHP19f_override_functionERKNS_6StringES2_S2_");
 
-TypedValue * fg1_override_function(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_override_function(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_override_function(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_override_function(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -53,7 +53,7 @@ TypedValue * fg1_override_function(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_override_function(HPHP::VM::ActRec *ar) {
+TypedValue* fg_override_function(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -94,8 +94,8 @@ new_name => rsi
 
 bool fh_rename_function(Value* orig_name, Value* new_name) asm("_ZN4HPHP17f_rename_functionERKNS_6StringES2_");
 
-TypedValue * fg1_rename_function(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_rename_function(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_rename_function(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_rename_function(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -108,7 +108,7 @@ TypedValue * fg1_rename_function(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_rename_function(HPHP::VM::ActRec *ar) {
+TypedValue* fg_rename_function(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -146,7 +146,7 @@ _ZN4HPHP23f_apd_set_browser_traceEv
 
 void fh_apd_set_browser_trace() asm("_ZN4HPHP23f_apd_set_browser_traceEv");
 
-TypedValue* fg_apd_set_browser_trace(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apd_set_browser_trace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -182,8 +182,8 @@ frament => rdx
 
 Value* fh_apd_set_pprof_trace(Value* _rv, Value* dumpdir, Value* frament) asm("_ZN4HPHP21f_apd_set_pprof_traceERKNS_6StringES2_");
 
-TypedValue * fg1_apd_set_pprof_trace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apd_set_pprof_trace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apd_set_pprof_trace(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apd_set_pprof_trace(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -203,7 +203,7 @@ TypedValue * fg1_apd_set_pprof_trace(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_apd_set_pprof_trace(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apd_set_pprof_trace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -247,8 +247,8 @@ mask => rcx
 
 bool fh_apd_set_session_trace_socket(Value* ip_or_filename, int domain, int port, int mask) asm("_ZN4HPHP30f_apd_set_session_trace_socketERKNS_6StringEiii");
 
-TypedValue * fg1_apd_set_session_trace_socket(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apd_set_session_trace_socket(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apd_set_session_trace_socket(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apd_set_session_trace_socket(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-3)->m_type != KindOfInt64) {
@@ -267,7 +267,7 @@ TypedValue * fg1_apd_set_session_trace_socket(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_apd_set_session_trace_socket(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apd_set_session_trace_socket(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -305,7 +305,7 @@ _ZN4HPHP16f_apd_stop_traceEv
 
 void fh_apd_stop_trace() asm("_ZN4HPHP16f_apd_stop_traceEv");
 
-TypedValue* fg_apd_stop_trace(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apd_stop_trace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -338,7 +338,7 @@ _ZN4HPHP16f_apd_breakpointEv
 
 bool fh_apd_breakpoint() asm("_ZN4HPHP16f_apd_breakpointEv");
 
-TypedValue* fg_apd_breakpoint(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apd_breakpoint(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -370,7 +370,7 @@ _ZN4HPHP14f_apd_continueEv
 
 bool fh_apd_continue() asm("_ZN4HPHP14f_apd_continueEv");
 
-TypedValue* fg_apd_continue(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apd_continue(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -403,8 +403,8 @@ output => rdi
 
 bool fh_apd_echo(Value* output) asm("_ZN4HPHP10f_apd_echoERKNS_6StringE");
 
-TypedValue * fg1_apd_echo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apd_echo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apd_echo(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apd_echo(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -412,7 +412,7 @@ TypedValue * fg1_apd_echo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_apd_echo(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apd_echo(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

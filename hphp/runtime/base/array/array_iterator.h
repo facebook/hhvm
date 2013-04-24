@@ -31,9 +31,7 @@ class c_Vector;
 class c_Map;
 class c_StableMap;
 class c_Pair;
-namespace VM {
-  struct Iter;
-}
+struct Iter;
 
 /**
  * An iteration normally looks like this:
@@ -59,7 +57,7 @@ class ArrayIter {
    * Constructors.
    */
   ArrayIter();
-  ArrayIter(const ArrayData* data);
+  explicit ArrayIter(const ArrayData* data);
 
   enum NoInc { noInc = 0 };
   // Special constructor used by the VM. This constructor does not increment
@@ -81,19 +79,19 @@ class ArrayIter {
     setArrayData(data);
     m_pos = data->getIterBegin();
   }
-  ArrayIter(CArrRef array);
+  explicit ArrayIter(CArrRef array);
   void reset();
 
  private:
   // not defined.
   // Either use ArrayIter(const ArrayData*) or
   //            ArrayIter(const HphpArray*, NoIncNonNull)
-  ArrayIter(const HphpArray*);
+  explicit ArrayIter(const HphpArray*);
   template <bool incRef>
   void objInit(ObjectData* obj);
 
  public:
-  ArrayIter(ObjectData* obj);
+  explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
   enum TransferOwner { transferOwner };
   ArrayIter(Object& obj, TransferOwner);
@@ -235,7 +233,7 @@ class ArrayIter {
   int m_version;
   Type m_itype;
 
-  friend struct VM::Iter;
+  friend struct Iter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -380,7 +378,7 @@ class FullPos {
  */
 class FullPosRange {
  public:
-  FullPosRange(FullPos* list) : m_fpos(list) {}
+  explicit FullPosRange(FullPos* list) : m_fpos(list) {}
   FullPosRange(const FullPosRange& other) : m_fpos(other.m_fpos) {}
   bool empty() const { return m_fpos == 0; }
   FullPos* front() const { assert(!empty()); return m_fpos; }
@@ -412,8 +410,8 @@ class MutableArrayIter : public FullPos {
 class MArrayIter : public FullPos {
  public:
   MArrayIter() { m_data = NULL; }
-  MArrayIter(const RefData* ref);
-  MArrayIter(ArrayData* data);
+  explicit MArrayIter(const RefData* ref);
+  explicit MArrayIter(ArrayData* data);
   ~MArrayIter();
 
   /**
@@ -437,43 +435,40 @@ class MArrayIter : public FullPos {
     return data->getValueRef(m_pos);
   }
 
-  friend struct VM::Iter;
+  friend struct Iter;
 };
 
-namespace VM {
-  struct Iter {
-    ArrayIter& arr() {
-      return *(ArrayIter*)m_u;
-    }
-    MArrayIter& marr() {
-      return *(MArrayIter*)m_u;
-    }
-    bool init(TypedValue* c1);
-    bool minit(TypedValue* v1);
-    bool next();
-    bool mnext();
-    void free();
-    void mfree();
-   private:
-    // C++ won't let you have union members with constructors. So we get to
-    // implement unions by hand.
-    char m_u[MAX(sizeof(ArrayIter), sizeof(MArrayIter))];
-  } __attribute__ ((aligned(16)));
+struct Iter {
+  ArrayIter& arr() {
+    return *(ArrayIter*)m_u;
+  }
+  MArrayIter& marr() {
+    return *(MArrayIter*)m_u;
+  }
+  bool init(TypedValue* c1);
+  bool minit(TypedValue* v1);
+  bool next();
+  bool mnext();
+  void free();
+  void mfree();
+  private:
+  // C++ won't let you have union members with constructors. So we get to
+  // implement unions by hand.
+  char m_u[MAX(sizeof(ArrayIter), sizeof(MArrayIter))];
+} __attribute__ ((aligned(16)));
 
-  bool interp_init_iterator(Iter* it, TypedValue* c1);
-  bool interp_init_iterator_m(Iter* it, TypedValue* v1);
-  bool interp_iter_next(Iter* it);
-  bool interp_iter_next_m(Iter* it);
+bool interp_init_iterator(Iter* it, TypedValue* c1);
+bool interp_init_iterator_m(Iter* it, TypedValue* v1);
+bool interp_iter_next(Iter* it);
+bool interp_iter_next_m(Iter* it);
 
-  int64_t new_iter_array(HPHP::VM::Iter* dest, ArrayData* arr,
-                       TypedValue* val);
-  int64_t new_iter_array_key(HPHP::VM::Iter* dest, ArrayData* arr,
-                           TypedValue* val, TypedValue* key);
-  int64_t new_iter_object(HPHP::VM::Iter* dest, ObjectData* obj, Class* ctx,
+int64_t new_iter_array(Iter* dest, ArrayData* arr, TypedValue* val);
+int64_t new_iter_array_key(Iter* dest, ArrayData* arr, TypedValue* val,
+                           TypedValue* key);
+int64_t new_iter_object(Iter* dest, ObjectData* obj, VM::Class* ctx,
                         TypedValue* val, TypedValue* key);
-  int64_t iter_next(HPHP::VM::Iter* dest, TypedValue* val);
-  int64_t iter_next_key(HPHP::VM::Iter* dest, TypedValue* val, TypedValue* key);
-}
+int64_t iter_next(Iter* dest, TypedValue* val);
+int64_t iter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

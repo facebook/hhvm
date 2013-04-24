@@ -167,7 +167,7 @@ Variant f_array_fill(int start_index, int num, CVarRef value) {
 }
 
 static bool filter_func(CVarRef value, const void *data) {
-  HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+  CallCtx* ctx = (CallCtx*)data;
   Variant ret;
   g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func, CREATE_VECTOR1(value),
                           ctx->this_, ctx->cls,
@@ -180,7 +180,7 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
   if (callback.isNull()) {
     return ArrayUtil::Filter(arr_input);
   }
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   CallerFrame cf;
   ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
                                 ctx.invName);
@@ -242,7 +242,7 @@ Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
 }
 
 static Variant map_func(CArrRef params, const void *data) {
-  HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+  CallCtx* ctx = (CallCtx*)data;
   if (ctx == NULL) {
     if (params.size() == 1) {
       return params[0];
@@ -265,7 +265,7 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
   if (!_argv.empty()) {
     inputs = inputs.merge(_argv);
   }
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   ctx.func = NULL;
   if (!callback.isNull()) {
     CallerFrame cf;
@@ -465,7 +465,7 @@ Variant f_array_rand(CVarRef input, int num_req /* = 1 */) {
 }
 
 static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
-  HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+  CallCtx* ctx = (CallCtx*)data;
   Variant ret;
   g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func,
                           CREATE_VECTOR2(result, operand), ctx->this_,
@@ -475,7 +475,7 @@ static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
 Variant f_array_reduce(CVarRef input, CVarRef callback,
                        CVarRef initial /* = null_variant */) {
   getCheckedArray(input);
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   CallerFrame cf;
   ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
                                 ctx.invName);
@@ -573,7 +573,7 @@ Variant f_array_values(CVarRef input) {
 
 static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
                       const void *data) {
-  HPHP::VM::CallCtx* ctx = (HPHP::VM::CallCtx*)data;
+  CallCtx* ctx = (CallCtx*)data;
   Variant sink;
   g_vmContext->invokeFunc((TypedValue*)&sink, ctx->func,
                           CREATE_VECTOR3(ref(value), key, userdata),
@@ -586,7 +586,7 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
     throw_bad_array_exception();
     return false;
   }
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   CallerFrame cf;
   ctx.func = vm_decode_function(funcname, cf(), false, ctx.this_, ctx.cls,
                                 ctx.invName);
@@ -603,7 +603,7 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
     throw_bad_array_exception();
     return false;
   }
-  HPHP::VM::CallCtx ctx;
+  CallCtx ctx;
   CallerFrame cf;
   ctx.func = vm_decode_function(funcname, cf(), false, ctx.this_, ctx.cls,
                                 ctx.invName);
@@ -614,7 +614,7 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
   return true;
 }
 
-static void compact(HPHP::VM::VarEnv* v, Array &ret, CVarRef var) {
+static void compact(VarEnv* v, Array &ret, CVarRef var) {
   if (var.isArray()) {
     for (ArrayIter iter(var.getArrayData()); iter; ++iter) {
       compact(v, ret, iter.second());
@@ -629,7 +629,7 @@ static void compact(HPHP::VM::VarEnv* v, Array &ret, CVarRef var) {
 
 Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
   Array ret = Array::Create();
-  HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+  VarEnv* v = g_vmContext->getVarEnv();
   if (v) {
     compact(v, ret, varname);
     compact(v, ret, _argv);
@@ -736,7 +736,7 @@ static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
       if (!iterator.isObject()) break;
       obj = iterator.getObjectData();
     }
-    VM::Class*ctx = g_vmContext->getContextClass();
+    VM::Class* ctx = g_vmContext->getContextClass();
     CStrRef context = ctx ? ctx->nameRef() : empty_string;
     if (isMutable) {
       if (obj->instanceof(SystemLib::s_IteratorClass)) {

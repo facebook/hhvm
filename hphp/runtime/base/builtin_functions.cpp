@@ -83,7 +83,7 @@ bool array_is_valid_callback(CArrRef arr) {
 
 const HPHP::VM::Func*
 vm_decode_function(CVarRef function,
-                   HPHP::VM::ActRec* ar,
+                   ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
                    HPHP::VM::Class*& cls,
@@ -246,7 +246,7 @@ vm_decode_function(CVarRef function,
     CallType lookupType = this_ ? ObjMethod : ClsMethod;
     const HPHP::VM::Func* f =
       g_vmContext->lookupMethodCtx(cc, name.get(), ctx, lookupType);
-    if (f && (f->attrs() & HPHP::VM::AttrStatic)) {
+    if (f && (f->attrs() & AttrStatic)) {
       // If we found a method and its static, null out this_
       this_ = nullptr;
     } else {
@@ -264,11 +264,11 @@ vm_decode_function(CVarRef function,
           // If this_ is non-null AND we could not find a method, try
           // looking up __call in cls's method table
           f = cls->lookupMethod(s___call.get());
-          assert(!f || !(f->attrs() & HPHP::VM::AttrStatic));
+          assert(!f || !(f->attrs() & AttrStatic));
         }
         if (!f && lookupType == ClsMethod) {
           f = cls->lookupMethod(s___callStatic.get());
-          assert(!f || (f->attrs() & HPHP::VM::AttrStatic));
+          assert(!f || (f->attrs() & AttrStatic));
           this_ = nullptr;
         }
         if (f) {
@@ -314,7 +314,7 @@ vm_decode_function(CVarRef function,
     cls = nullptr;
     const HPHP::VM::Func *f = this_->getVMClass()->lookupMethod(invokeStr);
     if (f != nullptr &&
-        ((f->attrs() & HPHP::VM::AttrStatic) && !f->isClosureBody())) {
+        ((f->attrs() & AttrStatic) && !f->isClosureBody())) {
       // If __invoke is static, invoke it as such
       cls = this_->getVMClass();
       this_ = nullptr;
@@ -369,7 +369,7 @@ Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
     return uninit_null();
   }
   const HPHP::VM::Func* f = class_->lookupMethod(method.get());
-  if (f == nullptr || !(f->attrs() & HPHP::VM::AttrStatic)) {
+  if (f == nullptr || !(f->attrs() & AttrStatic)) {
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();
   }
@@ -584,7 +584,7 @@ void throw_bad_type_exception(const char *fmt, ...) {
 
 void throw_bad_array_exception() {
   const char* fn = "(unknown)";
-  HPHP::VM::ActRec *ar = g_vmContext->getStackFrame();
+  ActRec *ar = g_vmContext->getStackFrame();
   if (ar) {
     fn = ar->m_func->name()->data();
   }

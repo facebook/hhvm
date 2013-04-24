@@ -28,7 +28,8 @@
 namespace HPHP {
 namespace VM {
 
-void deepInitHelper(TypedValue*, const TypedValueAux*, size_t);
+void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
+                    size_t nProps);
 
 class Instance : public ObjectData {
   // Do not declare any fields directly in Instance; instead embed them in
@@ -250,7 +251,7 @@ namespace HPHP {
 
 class ExtObjectData : public HPHP::VM::Instance {
  public:
-  ExtObjectData(HPHP::VM::Class* cls)
+  explicit ExtObjectData(HPHP::VM::Class* cls)
     : HPHP::VM::Instance(cls, false) {
     assert(!m_cls->callsCustomInstanceInit());
   }
@@ -258,7 +259,7 @@ class ExtObjectData : public HPHP::VM::Instance {
 
 template <int flags> class ExtObjectDataFlags : public ExtObjectData {
  public:
-  ExtObjectDataFlags(HPHP::VM::Class* cb) : ExtObjectData(cb) {
+  explicit ExtObjectDataFlags(HPHP::VM::Class* cb) : ExtObjectData(cb) {
     ObjectData::setAttributes(flags);
   }
 };

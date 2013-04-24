@@ -83,7 +83,7 @@ public:
 
   SSATmp* genDefCns(const StringData* cnsName, SSATmp* val);
   SSATmp* genConcat(SSATmp* tl, SSATmp* tr);
-  void    genDefCls(PreClass*, const HPHP::VM::Opcode* after);
+  void    genDefCls(PreClass*, const Opcode* after);
   void    genDefFunc(Func*);
 
   SSATmp* genLdThis(Trace* trace);

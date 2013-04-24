@@ -31,7 +31,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-using HPHP::VM::ActRec;
 using HPHP::VM::Transl::CallerFrame;
 
 static const StaticString s_internal("internal");

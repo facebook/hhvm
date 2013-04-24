@@ -20,7 +20,7 @@
 #include "runtime/ext/ext_continuation.h"
 #include "runtime/vm/translator/translator-runtime.h"
 #include "runtime/vm/translator/translator-x64.h"
-#include "runtime/vm/stats.h"
+#include "runtime/base/stats.h"
 #include "runtime/vm/unit.h"
 #include "runtime/vm/runtime.h"
 #include "runtime/vm/translator/hopt/irfactory.h"

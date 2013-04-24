@@ -712,17 +712,17 @@ function phase2() {
       // Emit the fg1_ function if needed
       if ($obj->numTypeChecks > 0) {
         fwrite($ext_hhvm_cpp, "TypedValue * fg1_" . $obj->name .
-          "(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) " .
+          "(TypedValue* rv, ActRec* ar, int64_t count) " .
           "__attribute__((noinline,cold));\n");
         fwrite($ext_hhvm_cpp, "TypedValue * fg1_" . $obj->name .
-          "(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {\n");
+          "(TypedValue* rv, ActRec* ar, int64_t count) {\n");
         $indent = '  ';
         emitSlowPathHelper($obj, $ext_hhvm_cpp, $indent, 'fh_');
         fwrite($ext_hhvm_cpp, "}\n\n");
       }
       // Start emitting the fg_ function
       fwrite($ext_hhvm_cpp, "TypedValue* fg_" . $obj->name .
-        "(HPHP::VM::ActRec *ar) {\n");
+        "(ActRec *ar) {\n");
       $indent = '  ';
       $indent .= '  ';
       fwrite($ext_hhvm_cpp, $indent . "TypedValue rv;\n");
@@ -825,11 +825,11 @@ function phase2() {
         // Emit the tg1_ function if needed
         if ($obj->numTypeChecks > 0) {
           fwrite($ext_hhvm_cpp, "TypedValue* tg1_" . getUniqueFuncName($obj) .
-            "(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count" .
+            "(TypedValue* rv, ActRec* ar, int64_t count" .
             (!$obj->isStatic ? ", ObjectData* this_" : "") .
             ") __attribute__((noinline,cold));\n");
           fwrite($ext_hhvm_cpp, "TypedValue* tg1_" . getUniqueFuncName($obj) .
-            "(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count" .
+            "(TypedValue* rv, ActRec* ar, int64_t count" .
             (!$obj->isStatic ? ", ObjectData* this_" : "") .
             ") {\n");
           $indent = '  ';
@@ -839,7 +839,7 @@ function phase2() {
         }
         // Start emitting the tg_ function
         fwrite($ext_hhvm_cpp, "TypedValue* tg_" . getUniqueFuncName($obj) .
-          "(HPHP::VM::ActRec *ar) {\n");
+          "(ActRec *ar) {\n");
         $indent = '  ';
         $indent .= '  ';
         fwrite($ext_hhvm_cpp, $indent . "TypedValue rv;\n");

@@ -55,19 +55,17 @@ function main() {
     emit_include($outfile, "runtime/ext_hhvm/ext_hhvm.h");
     emit_include($outfile, "runtime/ext/ext.h");
     fwrite($outfile, "#include \"ext_hhvm_infotabs.h\"\n");
-    fwrite($outfile,
-      "namespace HPHP {\n" .
-      "  struct TypedValue;\n" .
-      "  namespace VM { struct ActRec; struct Class; }\n" .
-      "}\n\n"
-    );
 
-    fwrite($outfile, "namespace HPHP {\n\n");
+    fwrite($outfile, "\nnamespace HPHP {\n\n");
+    fwrite($outfile,
+      "struct TypedValue;\n" .
+      "struct ActRec;\n" .
+      "namespace VM { struct Class; }\n");
 
     // First declare all the stubs we need to be able to register.
     foreach ($ext_func_info as $obj) {
       fwrite($outfile, "TypedValue* fg_" . $obj->name .
-        "(VM::ActRec *ar);\n");
+        "(ActRec *ar);\n");
     }
     foreach ($ext_class_info as $cname => $cls_info) {
       if (!($cls_info['flags'] & IsCppAbstract)) {
@@ -77,7 +75,7 @@ function main() {
       }
       foreach ($cls_info['methods'] as $obj) {
         fwrite($outfile, "TypedValue* tg_" . getUniqueFuncName($obj) .
-          "(VM::ActRec *ar);\n");
+          "(ActRec *ar);\n");
       }
     }
     fwrite($outfile, "\n");

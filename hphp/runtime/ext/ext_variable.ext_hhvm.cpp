@@ -34,7 +34,7 @@ var => rdi
 
 bool fh_is_bool(TypedValue* var) asm("_ZN4HPHP9f_is_boolERKNS_7VariantE");
 
-TypedValue* fg_is_bool(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_bool(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -67,7 +67,7 @@ var => rdi
 
 bool fh_is_int(TypedValue* var) asm("_ZN4HPHP8f_is_intERKNS_7VariantE");
 
-TypedValue* fg_is_int(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_int(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -100,7 +100,7 @@ var => rdi
 
 bool fh_is_integer(TypedValue* var) asm("_ZN4HPHP12f_is_integerERKNS_7VariantE");
 
-TypedValue* fg_is_integer(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_integer(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -133,7 +133,7 @@ var => rdi
 
 bool fh_is_long(TypedValue* var) asm("_ZN4HPHP9f_is_longERKNS_7VariantE");
 
-TypedValue* fg_is_long(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_long(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -166,7 +166,7 @@ var => rdi
 
 bool fh_is_double(TypedValue* var) asm("_ZN4HPHP11f_is_doubleERKNS_7VariantE");
 
-TypedValue* fg_is_double(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_double(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -199,7 +199,7 @@ var => rdi
 
 bool fh_is_float(TypedValue* var) asm("_ZN4HPHP10f_is_floatERKNS_7VariantE");
 
-TypedValue* fg_is_float(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_float(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -232,7 +232,7 @@ var => rdi
 
 bool fh_is_numeric(TypedValue* var) asm("_ZN4HPHP12f_is_numericERKNS_7VariantE");
 
-TypedValue* fg_is_numeric(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_numeric(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -265,7 +265,7 @@ var => rdi
 
 bool fh_is_real(TypedValue* var) asm("_ZN4HPHP9f_is_realERKNS_7VariantE");
 
-TypedValue* fg_is_real(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_real(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -298,7 +298,7 @@ var => rdi
 
 bool fh_is_string(TypedValue* var) asm("_ZN4HPHP11f_is_stringERKNS_7VariantE");
 
-TypedValue* fg_is_string(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_string(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -331,7 +331,7 @@ var => rdi
 
 bool fh_is_scalar(TypedValue* var) asm("_ZN4HPHP11f_is_scalarERKNS_7VariantE");
 
-TypedValue* fg_is_scalar(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_scalar(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -364,7 +364,7 @@ var => rdi
 
 bool fh_is_array(TypedValue* var) asm("_ZN4HPHP10f_is_arrayERKNS_7VariantE");
 
-TypedValue* fg_is_array(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_array(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -397,7 +397,7 @@ var => rdi
 
 bool fh_is_object(TypedValue* var) asm("_ZN4HPHP11f_is_objectERKNS_7VariantE");
 
-TypedValue* fg_is_object(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_object(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -430,7 +430,7 @@ var => rdi
 
 bool fh_is_resource(TypedValue* var) asm("_ZN4HPHP13f_is_resourceERKNS_7VariantE");
 
-TypedValue* fg_is_resource(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_resource(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -463,7 +463,7 @@ var => rdi
 
 bool fh_is_null(TypedValue* var) asm("_ZN4HPHP9f_is_nullERKNS_7VariantE");
 
-TypedValue* fg_is_null(HPHP::VM::ActRec *ar) {
+TypedValue* fg_is_null(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -497,7 +497,7 @@ v => rsi
 
 Value* fh_gettype(Value* _rv, TypedValue* v) asm("_ZN4HPHP9f_gettypeERKNS_7VariantE");
 
-TypedValue* fg_gettype(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gettype(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -532,8 +532,8 @@ handle => rsi
 
 Value* fh_get_resource_type(Value* _rv, Value* handle) asm("_ZN4HPHP19f_get_resource_typeERKNS_6ObjectE");
 
-TypedValue * fg1_get_resource_type(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_get_resource_type(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_get_resource_type(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_get_resource_type(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -542,7 +542,7 @@ TypedValue * fg1_get_resource_type(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_get_resource_type(HPHP::VM::ActRec *ar) {
+TypedValue* fg_get_resource_type(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -584,8 +584,8 @@ base => rsi
 
 long fh_intval(TypedValue* v, long base) asm("_ZN4HPHP8f_intvalERKNS_7VariantEl");
 
-TypedValue * fg1_intval(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_intval(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_intval(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_intval(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToInt64InPlace(args-1);
@@ -593,7 +593,7 @@ TypedValue * fg1_intval(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_intval(HPHP::VM::ActRec *ar) {
+TypedValue* fg_intval(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -633,7 +633,7 @@ v => rdi
 
 double fh_doubleval(TypedValue* v) asm("_ZN4HPHP11f_doublevalERKNS_7VariantE");
 
-TypedValue* fg_doubleval(HPHP::VM::ActRec *ar) {
+TypedValue* fg_doubleval(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -666,7 +666,7 @@ v => rdi
 
 double fh_floatval(TypedValue* v) asm("_ZN4HPHP10f_floatvalERKNS_7VariantE");
 
-TypedValue* fg_floatval(HPHP::VM::ActRec *ar) {
+TypedValue* fg_floatval(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -700,7 +700,7 @@ v => rsi
 
 Value* fh_strval(Value* _rv, TypedValue* v) asm("_ZN4HPHP8f_strvalERKNS_7VariantE");
 
-TypedValue* fg_strval(HPHP::VM::ActRec *ar) {
+TypedValue* fg_strval(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -735,8 +735,8 @@ type => rsi
 
 bool fh_settype(TypedValue* var, Value* type) asm("_ZN4HPHP9f_settypeERKNS_14VRefParamValueERKNS_6StringE");
 
-TypedValue * fg1_settype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_settype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_settype(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_settype(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-1);
@@ -744,7 +744,7 @@ TypedValue * fg1_settype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_settype(HPHP::VM::ActRec *ar) {
+TypedValue* fg_settype(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -786,8 +786,8 @@ ret => rdx
 
 TypedValue* fh_print_r(TypedValue* _rv, TypedValue* expression, bool ret) asm("_ZN4HPHP9f_print_rERKNS_7VariantEb");
 
-TypedValue * fg1_print_r(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_print_r(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_print_r(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_print_r(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToBooleanInPlace(args-1);
   fh_print_r((rv), (args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
@@ -795,7 +795,7 @@ TypedValue * fg1_print_r(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_print_r(HPHP::VM::ActRec *ar) {
+TypedValue* fg_print_r(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -837,8 +837,8 @@ ret => rdx
 
 TypedValue* fh_var_export(TypedValue* _rv, TypedValue* expression, bool ret) asm("_ZN4HPHP12f_var_exportERKNS_7VariantEb");
 
-TypedValue * fg1_var_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_var_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_var_export(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_var_export(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToBooleanInPlace(args-1);
   fh_var_export((rv), (args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
@@ -846,7 +846,7 @@ TypedValue * fg1_var_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_var_export(HPHP::VM::ActRec *ar) {
+TypedValue* fg_var_export(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -887,7 +887,7 @@ _argv => rdx
 
 void fh_var_dump(int64_t _argc, TypedValue* expression, Value* _argv) asm("_ZN4HPHP10f_var_dumpEiRKNS_7VariantERKNS_5ArrayE");
 
-TypedValue* fg_var_dump(HPHP::VM::ActRec *ar) {
+TypedValue* fg_var_dump(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -933,7 +933,7 @@ variable => rdi
 
 void fh_debug_zval_dump(TypedValue* variable) asm("_ZN4HPHP17f_debug_zval_dumpERKNS_7VariantE");
 
-TypedValue* fg_debug_zval_dump(HPHP::VM::ActRec *ar) {
+TypedValue* fg_debug_zval_dump(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -969,8 +969,8 @@ class_whitelist => rdx
 
 TypedValue* fh_unserialize(TypedValue* _rv, Value* str, Value* class_whitelist) asm("_ZN4HPHP13f_unserializeERKNS_6StringERKNS_5ArrayE");
 
-TypedValue * fg1_unserialize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_unserialize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_unserialize(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_unserialize(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -989,7 +989,7 @@ TypedValue * fg1_unserialize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_unserialize(HPHP::VM::ActRec *ar) {
+TypedValue* fg_unserialize(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1030,7 +1030,7 @@ _rv => rdi
 
 Value* fh_get_defined_vars(Value* _rv) asm("_ZN4HPHP18f_get_defined_varsEv");
 
-TypedValue* fg_get_defined_vars(HPHP::VM::ActRec *ar) {
+TypedValue* fg_get_defined_vars(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1065,8 +1065,8 @@ prefix => rsi
 
 bool fh_import_request_variables(Value* types, Value* prefix) asm("_ZN4HPHP26f_import_request_variablesERKNS_6StringES2_");
 
-TypedValue * fg1_import_request_variables(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_import_request_variables(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_import_request_variables(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_import_request_variables(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1084,7 +1084,7 @@ TypedValue * fg1_import_request_variables(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_import_request_variables(HPHP::VM::ActRec *ar) {
+TypedValue* fg_import_request_variables(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1126,8 +1126,8 @@ prefix => rdx
 
 long fh_extract(Value* var_array, int extract_type, Value* prefix) asm("_ZN4HPHP9f_extractERKNS_5ArrayEiRKNS_6StringE");
 
-TypedValue * fg1_extract(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_extract(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_extract(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_extract(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -1149,7 +1149,7 @@ TypedValue * fg1_extract(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_extract(HPHP::VM::ActRec *ar) {
+TypedValue* fg_extract(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

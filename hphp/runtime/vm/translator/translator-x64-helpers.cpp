@@ -19,7 +19,7 @@
 #include <runtime/vm/translator/targetcache.h>
 #include <runtime/eval/runtime/file_repository.h>
 #include <runtime/vm/event_hook.h>
-#include <runtime/vm/stats.h>
+#include <runtime/base/stats.h>
 
 namespace HPHP {
 namespace VM {

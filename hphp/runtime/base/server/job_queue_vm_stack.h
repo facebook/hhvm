@@ -21,10 +21,10 @@
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
-namespace VM { void flush_evaluation_stack(); }
+void flush_evaluation_stack();
 
 struct JobQueueDropVMStack {
-  static void dropCache() { VM::flush_evaluation_stack(); }
+  static void dropCache() { flush_evaluation_stack(); }
 };
 
 //////////////////////////////////////////////////////////////////////

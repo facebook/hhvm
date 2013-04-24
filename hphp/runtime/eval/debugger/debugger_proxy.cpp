@@ -727,7 +727,7 @@ int DebuggerProxyVM::getRealStackDepth() {
   TRACE(2, "DebuggerProxyVM::getRealStackDepth\n");
   int depth = 0;
   VMExecutionContext* context = g_vmContext;
-  HPHP::VM::ActRec *fp = context->getFP();
+  ActRec *fp = context->getFP();
   if (!fp) return 0;
 
   while (fp != nullptr) {
@@ -741,9 +741,9 @@ int DebuggerProxyVM::getStackDepth() {
   TRACE(2, "DebuggerProxyVM::getStackDepth\n");
   int depth = 0;
   VMExecutionContext* context = g_vmContext;
-  HPHP::VM::ActRec *fp = context->getFP();
+  ActRec *fp = context->getFP();
   if (!fp) return 0;
-  HPHP::VM::ActRec *prev = context->arGetSfp(fp);
+  ActRec *prev = context->arGetSfp(fp);
   while (fp != prev) {
     fp = prev;
     prev = context->arGetSfp(fp);

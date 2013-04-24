@@ -36,8 +36,8 @@ notext => rdx
 
 bool fh_openssl_csr_export_to_file(TypedValue* csr, Value* outfilename, bool notext) asm("_ZN4HPHP28f_openssl_csr_export_to_fileERKNS_7VariantERKNS_6StringEb");
 
-TypedValue * fg1_openssl_csr_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_csr_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_csr_export_to_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_csr_export_to_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -55,7 +55,7 @@ TypedValue * fg1_openssl_csr_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_openssl_csr_export_to_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_csr_export_to_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -97,8 +97,8 @@ notext => rdx
 
 bool fh_openssl_csr_export(TypedValue* csr, TypedValue* out, bool notext) asm("_ZN4HPHP20f_openssl_csr_exportERKNS_7VariantERKNS_14VRefParamValueEb");
 
-TypedValue * fg1_openssl_csr_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_csr_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_csr_export(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_csr_export(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-2);
@@ -106,7 +106,7 @@ TypedValue * fg1_openssl_csr_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_openssl_csr_export(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_csr_export(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -147,7 +147,7 @@ csr => rsi
 
 TypedValue* fh_openssl_csr_get_public_key(TypedValue* _rv, TypedValue* csr) asm("_ZN4HPHP28f_openssl_csr_get_public_keyERKNS_7VariantE");
 
-TypedValue* fg_openssl_csr_get_public_key(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_csr_get_public_key(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -182,8 +182,8 @@ use_shortnames => rdx
 
 TypedValue* fh_openssl_csr_get_subject(TypedValue* _rv, TypedValue* csr, bool use_shortnames) asm("_ZN4HPHP25f_openssl_csr_get_subjectERKNS_7VariantEb");
 
-TypedValue * fg1_openssl_csr_get_subject(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_csr_get_subject(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_csr_get_subject(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_csr_get_subject(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToBooleanInPlace(args-1);
   fh_openssl_csr_get_subject((rv), (args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true));
@@ -191,7 +191,7 @@ TypedValue * fg1_openssl_csr_get_subject(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_openssl_csr_get_subject(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_csr_get_subject(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -235,8 +235,8 @@ extraattribs => r8
 
 TypedValue* fh_openssl_csr_new(TypedValue* _rv, Value* dn, TypedValue* privkey, TypedValue* configargs, TypedValue* extraattribs) asm("_ZN4HPHP17f_openssl_csr_newERKNS_5ArrayERKNS_14VRefParamValueERKNS_7VariantES8_");
 
-TypedValue * fg1_openssl_csr_new(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_csr_new(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_csr_new(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_csr_new(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToArrayInPlace(args-0);
   fh_openssl_csr_new((rv), &args[-0].m_data, (args-1), (count > 2) ? (args-2) : (TypedValue*)(&null_variant), (count > 3) ? (args-3) : (TypedValue*)(&null_variant));
@@ -244,7 +244,7 @@ TypedValue * fg1_openssl_csr_new(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_openssl_csr_new(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_csr_new(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -290,8 +290,8 @@ serial => st0
 
 TypedValue* fh_openssl_csr_sign(TypedValue* _rv, TypedValue* csr, TypedValue* cacert, TypedValue* priv_key, int days, TypedValue* configargs, int serial) asm("_ZN4HPHP18f_openssl_csr_signERKNS_7VariantES2_S2_iS2_i");
 
-TypedValue * fg1_openssl_csr_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_csr_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_csr_sign(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_csr_sign(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 6
@@ -310,7 +310,7 @@ TypedValue * fg1_openssl_csr_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_openssl_csr_sign(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_csr_sign(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -350,7 +350,7 @@ _rv => rdi
 
 TypedValue* fh_openssl_error_string(TypedValue* _rv) asm("_ZN4HPHP22f_openssl_error_stringEv");
 
-TypedValue* fg_openssl_error_string(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_error_string(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -386,8 +386,8 @@ priv_key_id => rcx
 
 bool fh_openssl_open(Value* sealed_data, TypedValue* open_data, Value* env_key, TypedValue* priv_key_id) asm("_ZN4HPHP14f_openssl_openERKNS_6StringERKNS_14VRefParamValueES2_RKNS_7VariantE");
 
-TypedValue * fg1_openssl_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_open(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_open(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -400,7 +400,7 @@ TypedValue * fg1_openssl_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_openssl_open(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_open(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -444,8 +444,8 @@ args => r8
 
 bool fh_openssl_pkcs12_export_to_file(TypedValue* x509, Value* filename, TypedValue* priv_key, Value* pass, TypedValue* args) asm("_ZN4HPHP31f_openssl_pkcs12_export_to_fileERKNS_7VariantERKNS_6StringES2_S5_S2_");
 
-TypedValue * fg1_openssl_pkcs12_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkcs12_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkcs12_export_to_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkcs12_export_to_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -463,7 +463,7 @@ TypedValue * fg1_openssl_pkcs12_export_to_file(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_openssl_pkcs12_export_to_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkcs12_export_to_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -507,8 +507,8 @@ args => r8
 
 bool fh_openssl_pkcs12_export(TypedValue* x509, TypedValue* out, TypedValue* priv_key, Value* pass, TypedValue* args) asm("_ZN4HPHP23f_openssl_pkcs12_exportERKNS_7VariantERKNS_14VRefParamValueES2_RKNS_6StringES2_");
 
-TypedValue * fg1_openssl_pkcs12_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkcs12_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkcs12_export(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkcs12_export(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-3);
@@ -516,7 +516,7 @@ TypedValue * fg1_openssl_pkcs12_export(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_openssl_pkcs12_export(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkcs12_export(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -558,8 +558,8 @@ pass => rdx
 
 bool fh_openssl_pkcs12_read(Value* pkcs12, TypedValue* certs, Value* pass) asm("_ZN4HPHP21f_openssl_pkcs12_readERKNS_6StringERKNS_14VRefParamValueES2_");
 
-TypedValue * fg1_openssl_pkcs12_read(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkcs12_read(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkcs12_read(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkcs12_read(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -572,7 +572,7 @@ TypedValue * fg1_openssl_pkcs12_read(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_openssl_pkcs12_read(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkcs12_read(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -615,8 +615,8 @@ recipkey => rcx
 
 bool fh_openssl_pkcs7_decrypt(Value* infilename, Value* outfilename, TypedValue* recipcert, TypedValue* recipkey) asm("_ZN4HPHP23f_openssl_pkcs7_decryptERKNS_6StringES2_RKNS_7VariantES5_");
 
-TypedValue * fg1_openssl_pkcs7_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkcs7_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkcs7_decrypt(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkcs7_decrypt(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -634,7 +634,7 @@ TypedValue * fg1_openssl_pkcs7_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_openssl_pkcs7_decrypt(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkcs7_decrypt(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -679,8 +679,8 @@ cipherid => r9
 
 bool fh_openssl_pkcs7_encrypt(Value* infilename, Value* outfilename, TypedValue* recipcerts, Value* headers, int flags, int cipherid) asm("_ZN4HPHP23f_openssl_pkcs7_encryptERKNS_6StringES2_RKNS_7VariantERKNS_5ArrayEii");
 
-TypedValue * fg1_openssl_pkcs7_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkcs7_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkcs7_encrypt(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkcs7_encrypt(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -708,7 +708,7 @@ TypedValue * fg1_openssl_pkcs7_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_openssl_pkcs7_encrypt(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkcs7_encrypt(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -754,8 +754,8 @@ extracerts => st0
 
 bool fh_openssl_pkcs7_sign(Value* infilename, Value* outfilename, TypedValue* signcert, TypedValue* privkey, TypedValue* headers, int flags, Value* extracerts) asm("_ZN4HPHP20f_openssl_pkcs7_signERKNS_6StringES2_RKNS_7VariantES5_S5_iS2_");
 
-TypedValue * fg1_openssl_pkcs7_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkcs7_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkcs7_sign(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkcs7_sign(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -780,7 +780,7 @@ TypedValue * fg1_openssl_pkcs7_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_openssl_pkcs7_sign(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkcs7_sign(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -826,8 +826,8 @@ content => st0
 
 TypedValue* fh_openssl_pkcs7_verify(TypedValue* _rv, Value* filename, int flags, Value* outfilename, Value* cainfo, Value* extracerts, Value* content) asm("_ZN4HPHP22f_openssl_pkcs7_verifyERKNS_6StringEiS2_RKNS_5ArrayES2_S2_");
 
-TypedValue * fg1_openssl_pkcs7_verify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkcs7_verify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkcs7_verify(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkcs7_verify(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 6
@@ -860,7 +860,7 @@ TypedValue * fg1_openssl_pkcs7_verify(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* fg_openssl_pkcs7_verify(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkcs7_verify(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -903,8 +903,8 @@ configargs => rcx
 
 bool fh_openssl_pkey_export_to_file(TypedValue* key, Value* outfilename, Value* passphrase, TypedValue* configargs) asm("_ZN4HPHP29f_openssl_pkey_export_to_fileERKNS_7VariantERKNS_6StringES5_S2_");
 
-TypedValue * fg1_openssl_pkey_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkey_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkey_export_to_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkey_export_to_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -923,7 +923,7 @@ TypedValue * fg1_openssl_pkey_export_to_file(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_openssl_pkey_export_to_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkey_export_to_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -966,8 +966,8 @@ configargs => rcx
 
 bool fh_openssl_pkey_export(TypedValue* key, TypedValue* out, Value* passphrase, TypedValue* configargs) asm("_ZN4HPHP21f_openssl_pkey_exportERKNS_7VariantERKNS_14VRefParamValueERKNS_6StringES2_");
 
-TypedValue * fg1_openssl_pkey_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkey_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkey_export(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkey_export(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-2);
@@ -975,7 +975,7 @@ TypedValue * fg1_openssl_pkey_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_openssl_pkey_export(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkey_export(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1014,8 +1014,8 @@ key => rdi
 
 void fh_openssl_pkey_free(Value* key) asm("_ZN4HPHP19f_openssl_pkey_freeERKNS_6ObjectE");
 
-TypedValue * fg1_openssl_pkey_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkey_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkey_free(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkey_free(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1024,7 +1024,7 @@ TypedValue * fg1_openssl_pkey_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_openssl_pkey_free(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkey_free(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1064,8 +1064,8 @@ key => rdi
 
 void fh_openssl_free_key(Value* key) asm("_ZN4HPHP18f_openssl_free_keyERKNS_6ObjectE");
 
-TypedValue * fg1_openssl_free_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_free_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_free_key(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_free_key(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1074,7 +1074,7 @@ TypedValue * fg1_openssl_free_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_openssl_free_key(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_free_key(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1116,8 +1116,8 @@ key => rsi
 
 Value* fh_openssl_pkey_get_details(Value* _rv, Value* key) asm("_ZN4HPHP26f_openssl_pkey_get_detailsERKNS_6ObjectE");
 
-TypedValue * fg1_openssl_pkey_get_details(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkey_get_details(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkey_get_details(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkey_get_details(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
@@ -1126,7 +1126,7 @@ TypedValue * fg1_openssl_pkey_get_details(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_openssl_pkey_get_details(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkey_get_details(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1169,8 +1169,8 @@ passphrase => rdx
 
 TypedValue* fh_openssl_pkey_get_private(TypedValue* _rv, TypedValue* key, Value* passphrase) asm("_ZN4HPHP26f_openssl_pkey_get_privateERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_openssl_pkey_get_private(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_pkey_get_private(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_pkey_get_private(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_pkey_get_private(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_openssl_pkey_get_private((rv), (args-0), (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
@@ -1178,7 +1178,7 @@ TypedValue * fg1_openssl_pkey_get_private(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_openssl_pkey_get_private(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkey_get_private(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1220,8 +1220,8 @@ passphrase => rdx
 
 TypedValue* fh_openssl_get_privatekey(TypedValue* _rv, TypedValue* key, Value* passphrase) asm("_ZN4HPHP24f_openssl_get_privatekeyERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_openssl_get_privatekey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_get_privatekey(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_get_privatekey(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_get_privatekey(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_openssl_get_privatekey((rv), (args-0), (count > 1) ? &args[-1].m_data : (Value*)(&null_string));
@@ -1229,7 +1229,7 @@ TypedValue * fg1_openssl_get_privatekey(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_openssl_get_privatekey(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_get_privatekey(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1270,7 +1270,7 @@ certificate => rsi
 
 TypedValue* fh_openssl_pkey_get_public(TypedValue* _rv, TypedValue* certificate) asm("_ZN4HPHP25f_openssl_pkey_get_publicERKNS_7VariantE");
 
-TypedValue* fg_openssl_pkey_get_public(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkey_get_public(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1304,7 +1304,7 @@ certificate => rsi
 
 TypedValue* fh_openssl_get_publickey(TypedValue* _rv, TypedValue* certificate) asm("_ZN4HPHP23f_openssl_get_publickeyERKNS_7VariantE");
 
-TypedValue* fg_openssl_get_publickey(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_get_publickey(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1338,7 +1338,7 @@ configargs => rsi
 
 Value* fh_openssl_pkey_new(Value* _rv, TypedValue* configargs) asm("_ZN4HPHP18f_openssl_pkey_newERKNS_7VariantE");
 
-TypedValue* fg_openssl_pkey_new(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_pkey_new(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1375,8 +1375,8 @@ padding => rcx
 
 bool fh_openssl_private_decrypt(Value* data, TypedValue* decrypted, TypedValue* key, int padding) asm("_ZN4HPHP25f_openssl_private_decryptERKNS_6StringERKNS_14VRefParamValueERKNS_7VariantEi");
 
-TypedValue * fg1_openssl_private_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_private_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_private_decrypt(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_private_decrypt(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1394,7 +1394,7 @@ TypedValue * fg1_openssl_private_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_openssl_private_decrypt(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_private_decrypt(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1437,8 +1437,8 @@ padding => rcx
 
 bool fh_openssl_private_encrypt(Value* data, TypedValue* crypted, TypedValue* key, int padding) asm("_ZN4HPHP25f_openssl_private_encryptERKNS_6StringERKNS_14VRefParamValueERKNS_7VariantEi");
 
-TypedValue * fg1_openssl_private_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_private_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_private_encrypt(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_private_encrypt(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1456,7 +1456,7 @@ TypedValue * fg1_openssl_private_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_openssl_private_encrypt(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_private_encrypt(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1499,8 +1499,8 @@ padding => rcx
 
 bool fh_openssl_public_decrypt(Value* data, TypedValue* decrypted, TypedValue* key, int padding) asm("_ZN4HPHP24f_openssl_public_decryptERKNS_6StringERKNS_14VRefParamValueERKNS_7VariantEi");
 
-TypedValue * fg1_openssl_public_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_public_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_public_decrypt(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_public_decrypt(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1518,7 +1518,7 @@ TypedValue * fg1_openssl_public_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_openssl_public_decrypt(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_public_decrypt(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1561,8 +1561,8 @@ padding => rcx
 
 bool fh_openssl_public_encrypt(Value* data, TypedValue* crypted, TypedValue* key, int padding) asm("_ZN4HPHP24f_openssl_public_encryptERKNS_6StringERKNS_14VRefParamValueERKNS_7VariantEi");
 
-TypedValue * fg1_openssl_public_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_public_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_public_encrypt(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_public_encrypt(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1580,7 +1580,7 @@ TypedValue * fg1_openssl_public_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_openssl_public_encrypt(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_public_encrypt(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1624,8 +1624,8 @@ pub_key_ids => r8
 
 TypedValue* fh_openssl_seal(TypedValue* _rv, Value* data, TypedValue* sealed_data, TypedValue* env_keys, Value* pub_key_ids) asm("_ZN4HPHP14f_openssl_sealERKNS_6StringERKNS_14VRefParamValueES5_RKNS_5ArrayE");
 
-TypedValue * fg1_openssl_seal(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_seal(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_seal(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_seal(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-3)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-3);
@@ -1638,7 +1638,7 @@ TypedValue * fg1_openssl_seal(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_openssl_seal(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_seal(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1681,8 +1681,8 @@ signature_alg => rcx
 
 bool fh_openssl_sign(Value* data, TypedValue* signature, TypedValue* priv_key_id, int signature_alg) asm("_ZN4HPHP14f_openssl_signERKNS_6StringERKNS_14VRefParamValueERKNS_7VariantEi");
 
-TypedValue * fg1_openssl_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_sign(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_sign(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1700,7 +1700,7 @@ TypedValue * fg1_openssl_sign(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_openssl_sign(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_sign(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1744,8 +1744,8 @@ signature_alg => r8
 
 TypedValue* fh_openssl_verify(TypedValue* _rv, Value* data, Value* signature, TypedValue* pub_key_id, int signature_alg) asm("_ZN4HPHP16f_openssl_verifyERKNS_6StringES2_RKNS_7VariantEi");
 
-TypedValue * fg1_openssl_verify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_verify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_verify(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_verify(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -1766,7 +1766,7 @@ TypedValue * fg1_openssl_verify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_openssl_verify(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_verify(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1807,7 +1807,7 @@ key => rsi
 
 bool fh_openssl_x509_check_private_key(TypedValue* cert, TypedValue* key) asm("_ZN4HPHP32f_openssl_x509_check_private_keyERKNS_7VariantES2_");
 
-TypedValue* fg_openssl_x509_check_private_key(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_x509_check_private_key(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1843,8 +1843,8 @@ untrustedfile => rcx
 
 long fh_openssl_x509_checkpurpose(TypedValue* x509cert, int purpose, Value* cainfo, Value* untrustedfile) asm("_ZN4HPHP27f_openssl_x509_checkpurposeERKNS_7VariantEiRKNS_5ArrayERKNS_6StringE");
 
-TypedValue * fg1_openssl_x509_checkpurpose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_x509_checkpurpose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_x509_checkpurpose(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_x509_checkpurpose(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -1866,7 +1866,7 @@ TypedValue * fg1_openssl_x509_checkpurpose(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_openssl_x509_checkpurpose(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_x509_checkpurpose(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1908,8 +1908,8 @@ notext => rdx
 
 bool fh_openssl_x509_export_to_file(TypedValue* x509, Value* outfilename, bool notext) asm("_ZN4HPHP29f_openssl_x509_export_to_fileERKNS_7VariantERKNS_6StringEb");
 
-TypedValue * fg1_openssl_x509_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_x509_export_to_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_x509_export_to_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_x509_export_to_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1927,7 +1927,7 @@ TypedValue * fg1_openssl_x509_export_to_file(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_openssl_x509_export_to_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_x509_export_to_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1969,8 +1969,8 @@ notext => rdx
 
 bool fh_openssl_x509_export(TypedValue* x509, TypedValue* output, bool notext) asm("_ZN4HPHP21f_openssl_x509_exportERKNS_7VariantERKNS_14VRefParamValueEb");
 
-TypedValue * fg1_openssl_x509_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_x509_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_x509_export(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_x509_export(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-2);
@@ -1978,7 +1978,7 @@ TypedValue * fg1_openssl_x509_export(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_openssl_x509_export(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_x509_export(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2017,8 +2017,8 @@ x509cert => rdi
 
 void fh_openssl_x509_free(Value* x509cert) asm("_ZN4HPHP19f_openssl_x509_freeERKNS_6ObjectE");
 
-TypedValue * fg1_openssl_x509_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_x509_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_x509_free(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_x509_free(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -2027,7 +2027,7 @@ TypedValue * fg1_openssl_x509_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_openssl_x509_free(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_x509_free(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2070,8 +2070,8 @@ shortnames => rdx
 
 TypedValue* fh_openssl_x509_parse(TypedValue* _rv, TypedValue* x509cert, bool shortnames) asm("_ZN4HPHP20f_openssl_x509_parseERKNS_7VariantEb");
 
-TypedValue * fg1_openssl_x509_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_x509_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_x509_parse(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_x509_parse(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToBooleanInPlace(args-1);
   fh_openssl_x509_parse((rv), (args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(true));
@@ -2079,7 +2079,7 @@ TypedValue * fg1_openssl_x509_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_openssl_x509_parse(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_x509_parse(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2120,7 +2120,7 @@ x509certdata => rsi
 
 TypedValue* fh_openssl_x509_read(TypedValue* _rv, TypedValue* x509certdata) asm("_ZN4HPHP19f_openssl_x509_readERKNS_7VariantE");
 
-TypedValue* fg_openssl_x509_read(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_x509_read(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2155,8 +2155,8 @@ crypto_strong => rdx
 
 TypedValue* fh_openssl_random_pseudo_bytes(TypedValue* _rv, int length, TypedValue* crypto_strong) asm("_ZN4HPHP29f_openssl_random_pseudo_bytesEiRKNS_14VRefParamValueE");
 
-TypedValue * fg1_openssl_random_pseudo_bytes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_random_pseudo_bytes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_random_pseudo_bytes(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_random_pseudo_bytes(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   VRefParamValue defVal1 = false;
@@ -2165,7 +2165,7 @@ TypedValue * fg1_openssl_random_pseudo_bytes(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_openssl_random_pseudo_bytes(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_random_pseudo_bytes(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2207,8 +2207,8 @@ method => rsi
 
 TypedValue* fh_openssl_cipher_iv_length(TypedValue* _rv, Value* method) asm("_ZN4HPHP26f_openssl_cipher_iv_lengthERKNS_6StringE");
 
-TypedValue * fg1_openssl_cipher_iv_length(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_cipher_iv_length(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_cipher_iv_length(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_cipher_iv_length(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_openssl_cipher_iv_length((rv), &args[-0].m_data);
@@ -2216,7 +2216,7 @@ TypedValue * fg1_openssl_cipher_iv_length(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_openssl_cipher_iv_length(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_cipher_iv_length(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2261,8 +2261,8 @@ iv => r9
 
 TypedValue* fh_openssl_encrypt(TypedValue* _rv, Value* data, Value* method, Value* password, int options, Value* iv) asm("_ZN4HPHP17f_openssl_encryptERKNS_6StringES2_S2_iS2_");
 
-TypedValue * fg1_openssl_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_encrypt(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_encrypt(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -2290,7 +2290,7 @@ TypedValue * fg1_openssl_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_openssl_encrypt(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_encrypt(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2335,8 +2335,8 @@ iv => r9
 
 TypedValue* fh_openssl_decrypt(TypedValue* _rv, Value* data, Value* method, Value* password, int options, Value* iv) asm("_ZN4HPHP17f_openssl_decryptERKNS_6StringES2_S2_iS2_");
 
-TypedValue * fg1_openssl_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_decrypt(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_decrypt(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -2364,7 +2364,7 @@ TypedValue * fg1_openssl_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_openssl_decrypt(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_decrypt(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2407,8 +2407,8 @@ raw_output => rcx
 
 TypedValue* fh_openssl_digest(TypedValue* _rv, Value* data, Value* method, bool raw_output) asm("_ZN4HPHP16f_openssl_digestERKNS_6StringES2_b");
 
-TypedValue * fg1_openssl_digest(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_digest(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_digest(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_digest(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -2429,7 +2429,7 @@ TypedValue * fg1_openssl_digest(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_openssl_digest(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_digest(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2470,8 +2470,8 @@ aliases => rsi
 
 Value* fh_openssl_get_cipher_methods(Value* _rv, bool aliases) asm("_ZN4HPHP28f_openssl_get_cipher_methodsEb");
 
-TypedValue * fg1_openssl_get_cipher_methods(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_get_cipher_methods(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_get_cipher_methods(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_get_cipher_methods(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToBooleanInPlace(args-0);
@@ -2480,7 +2480,7 @@ TypedValue * fg1_openssl_get_cipher_methods(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_openssl_get_cipher_methods(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_get_cipher_methods(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2522,8 +2522,8 @@ aliases => rsi
 
 Value* fh_openssl_get_md_methods(Value* _rv, bool aliases) asm("_ZN4HPHP24f_openssl_get_md_methodsEb");
 
-TypedValue * fg1_openssl_get_md_methods(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_openssl_get_md_methods(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_openssl_get_md_methods(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_openssl_get_md_methods(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToBooleanInPlace(args-0);
@@ -2532,7 +2532,7 @@ TypedValue * fg1_openssl_get_md_methods(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_openssl_get_md_methods(HPHP::VM::ActRec *ar) {
+TypedValue* fg_openssl_get_md_methods(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

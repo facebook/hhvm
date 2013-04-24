@@ -40,7 +40,7 @@
 #include "runtime/base/strings.h"
 #include "runtime/vm/func_inline.h"
 #include "runtime/eval/runtime/file_repository.h"
-#include "runtime/vm/stats.h"
+#include "runtime/base/stats.h"
 #include "runtime/vm/treadmill.h"
 
 namespace HPHP {

@@ -32,7 +32,7 @@ _ZN4HPHP20f_asio_enter_contextEv
 
 void fh_asio_enter_context() asm("_ZN4HPHP20f_asio_enter_contextEv");
 
-TypedValue* fg_asio_enter_context(HPHP::VM::ActRec *ar) {
+TypedValue* fg_asio_enter_context(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -64,7 +64,7 @@ _ZN4HPHP19f_asio_exit_contextEv
 
 void fh_asio_exit_context() asm("_ZN4HPHP19f_asio_exit_contextEv");
 
-TypedValue* fg_asio_exit_context(HPHP::VM::ActRec *ar) {
+TypedValue* fg_asio_exit_context(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -97,7 +97,7 @@ _ZN4HPHP30f_asio_get_current_context_idxEv
 
 int fh_asio_get_current_context_idx() asm("_ZN4HPHP30f_asio_get_current_context_idxEv");
 
-TypedValue* fg_asio_get_current_context_idx(HPHP::VM::ActRec *ar) {
+TypedValue* fg_asio_get_current_context_idx(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -131,8 +131,8 @@ ctx_idx => rsi
 
 Value* fh_asio_get_running_in_context(Value* _rv, int ctx_idx) asm("_ZN4HPHP29f_asio_get_running_in_contextEi");
 
-TypedValue * fg1_asio_get_running_in_context(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_asio_get_running_in_context(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_asio_get_running_in_context(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_asio_get_running_in_context(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToInt64InPlace(args-0);
@@ -141,7 +141,7 @@ TypedValue * fg1_asio_get_running_in_context(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_asio_get_running_in_context(HPHP::VM::ActRec *ar) {
+TypedValue* fg_asio_get_running_in_context(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -182,7 +182,7 @@ _rv => rdi
 
 Value* fh_asio_get_running(Value* _rv) asm("_ZN4HPHP18f_asio_get_runningEv");
 
-TypedValue* fg_asio_get_running(HPHP::VM::ActRec *ar) {
+TypedValue* fg_asio_get_running(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -216,7 +216,7 @@ _rv => rdi
 
 Value* fh_asio_get_current(Value* _rv) asm("_ZN4HPHP18f_asio_get_currentEv");
 
-TypedValue* fg_asio_get_current(HPHP::VM::ActRec *ar) {
+TypedValue* fg_asio_get_current(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -249,7 +249,7 @@ on_failed_cb => rdi
 
 void fh_asio_set_on_failed_callback(TypedValue* on_failed_cb) asm("_ZN4HPHP29f_asio_set_on_failed_callbackERKNS_7VariantE");
 
-TypedValue* fg_asio_set_on_failed_callback(HPHP::VM::ActRec *ar) {
+TypedValue* fg_asio_set_on_failed_callback(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -282,7 +282,7 @@ on_started_cb => rdi
 
 void fh_asio_set_on_started_callback(TypedValue* on_started_cb) asm("_ZN4HPHP30f_asio_set_on_started_callbackERKNS_7VariantE");
 
-TypedValue* fg_asio_set_on_started_callback(HPHP::VM::ActRec *ar) {
+TypedValue* fg_asio_set_on_started_callback(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

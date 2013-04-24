@@ -21,7 +21,7 @@
 #include <runtime/vm/translator/translator-runtime.h>
 #include <runtime/vm/translator/translator-x64.h>
 #include <runtime/vm/member_operations.h>
-#include <runtime/vm/stats.h>
+#include <runtime/base/stats.h>
 #include <runtime/base/shared/shared_map.h>
 
 #include <runtime/vm/translator/translator-x64-internal.h>

@@ -29,7 +29,7 @@
 #include "runtime/vm/translator/translator-deps.h"
 #include "runtime/vm/translator/translator-inline.h"
 #include "runtime/vm/translator/translator-x64.h"
-#include "runtime/vm/stats.h"
+#include "runtime/base/stats.h"
 
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/opt.h"

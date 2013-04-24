@@ -34,7 +34,7 @@ this_ => rdi
 
 void th_16StaticWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP18c_StaticWaitHandle13t___constructEv");
 
-TypedValue* tg_16StaticWaitHandle___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16StaticWaitHandle___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

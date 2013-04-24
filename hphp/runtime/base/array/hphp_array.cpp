@@ -31,7 +31,7 @@
 #include <util/util.h>
 #include <runtime/base/execution_context.h>
 #include <runtime/vm/member_operations.h>
-#include <runtime/vm/stats.h>
+#include <runtime/base/stats.h>
 
 // If PEDANTIC is defined, extra checks are performed to ensure correct
 // function even as an array approaches 2^31 elements.  In practice this is
@@ -500,7 +500,7 @@ ssize_t /*ElmInd*/ HphpArray::find(int64_t ki) const {
     // Try to get at it without dirtying a data cache line.
     Elm* e = m_data + uint64_t(ki);
     if (e->data.m_type != HphpArray::KindOfTombstone && hitIntKey(e, ki)) {
-      VM::Stats::inc(VM::Stats::HA_FindIntFast);
+      Stats::inc(Stats::HA_FindIntFast);
       assert([&] {
           // Our results had better match the other path
           FIND_BODY(ki, hitIntKey(&elms[pos], ki));
@@ -508,7 +508,7 @@ ssize_t /*ElmInd*/ HphpArray::find(int64_t ki) const {
       return ki;
     }
   }
-  VM::Stats::inc(VM::Stats::HA_FindIntSlow);
+  Stats::inc(Stats::HA_FindIntSlow);
   FIND_BODY(ki, hitIntKey(&elms[pos], ki));
 }
 

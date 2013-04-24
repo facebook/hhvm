@@ -43,7 +43,7 @@ this_ => rdi
 
 void th_22ContinuationWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP24c_ContinuationWaitHandle13t___constructEv");
 
-TypedValue* tg_22ContinuationWaitHandle___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_22ContinuationWaitHandle___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -82,8 +82,8 @@ continuation => rdx
 
 Value* th_22ContinuationWaitHandle_start(Value* _rv, char const* cls_, Value* continuation) asm("_ZN4HPHP24c_ContinuationWaitHandle8ti_startEPKcRKNS_6ObjectE");
 
-TypedValue* tg1_22ContinuationWaitHandle_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue* tg1_22ContinuationWaitHandle_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue* tg1_22ContinuationWaitHandle_start(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_22ContinuationWaitHandle_start(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
@@ -92,7 +92,7 @@ TypedValue* tg1_22ContinuationWaitHandle_start(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* tg_22ContinuationWaitHandle_start(HPHP::VM::ActRec *ar) {
+TypedValue* tg_22ContinuationWaitHandle_start(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -132,7 +132,7 @@ this_ => rsi
 
 Value* th_22ContinuationWaitHandle_getPrivData(Value* _rv, ObjectData* this_) asm("_ZN4HPHP24c_ContinuationWaitHandle13t_getprivdataEv");
 
-TypedValue* tg_22ContinuationWaitHandle_getPrivData(HPHP::VM::ActRec *ar) {
+TypedValue* tg_22ContinuationWaitHandle_getPrivData(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -169,8 +169,8 @@ data => rsi
 
 void th_22ContinuationWaitHandle_setPrivData(ObjectData* this_, Value* data) asm("_ZN4HPHP24c_ContinuationWaitHandle13t_setprivdataERKNS_6ObjectE");
 
-TypedValue* tg1_22ContinuationWaitHandle_setPrivData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_22ContinuationWaitHandle_setPrivData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_22ContinuationWaitHandle_setPrivData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_22ContinuationWaitHandle_setPrivData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -179,7 +179,7 @@ TypedValue* tg1_22ContinuationWaitHandle_setPrivData(TypedValue* rv, HPHP::VM::A
   return rv;
 }
 
-TypedValue* tg_22ContinuationWaitHandle_setPrivData(HPHP::VM::ActRec *ar) {
+TypedValue* tg_22ContinuationWaitHandle_setPrivData(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

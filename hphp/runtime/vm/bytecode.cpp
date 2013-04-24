@@ -57,7 +57,7 @@
 #include <runtime/ext/ext_function.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/ext/ext_array.h>
-#include <runtime/vm/stats.h>
+#include <runtime/base/stats.h>
 #include <runtime/vm/type_profile.h>
 #include <runtime/base/server/source_root_info.h>
 #include <runtime/base/util/extended_logger.h>
@@ -69,7 +69,6 @@
 #include "runtime/vm/request_arena.h"
 #include "util/arena.h"
 
-using std::string;
 
 namespace HPHP {
 
@@ -77,9 +76,15 @@ namespace HPHP {
 // to be closer to other bytecode.cpp data.
 bool RuntimeOption::RepoAuthoritative = false;
 
-namespace VM {
+using std::string;
 
-using Transl::tx64;
+using VM::Transl::tx64;
+using VM::Unit;
+using VM::Class;
+using VM::Func;
+using VM::FPIEnt;
+using VM::EHEnt;
+using VM::NameValueTable;
 
 #if DEBUG
 #define OPTBLD_INLINE
@@ -200,7 +205,7 @@ VarEnv::VarEnv()
   TypedValue globalArray;
   globalArray.m_type = KindOfArray;
   globalArray.m_data.parr =
-    new (request_arena()) GlobalNameValueTableWrapper(&*m_nvTable);
+    new (request_arena()) VM::GlobalNameValueTableWrapper(&*m_nvTable);
   globalArray.m_data.parr->incRefCount();
   m_nvTable->set(StringData::GetStaticString("GLOBALS"), &globalArray);
   tvRefcountedDecRef(&globalArray);
@@ -264,8 +269,9 @@ VarEnv* VarEnv::createLazyAttach(ActRec* fp,
   TRACE(3, "Creating lazily attached VarEnv\n");
 
   if (LIKELY(!skipInsert)) {
-    varenv_arena().beginFrame();
-    void* mem = varenv_arena().alloc(neededSz);
+    auto& va = varenv_arena();
+    va.beginFrame();
+    void* mem = va.alloc(neededSz);
     VarEnv* ret = new (mem) VarEnv(fp, eArgs);
     TRACE(3, "Creating lazily attached VarEnv %p\n", mem);
     ret->setPrevious(g_vmContext->m_topVarEnv);
@@ -890,7 +896,7 @@ string Stack::toString(const ActRec* fp, int offset,
                        const string prefix/* = "" */) const {
   std::ostringstream os;
   os << prefix << "=== Stack at " << curUnit()->filepath()->data() << ":" <<
-    curUnit()->getLineNumber(curUnit()->offsetOf(Transl::vmpc())) << " func " <<
+    curUnit()->getLineNumber(curUnit()->offsetOf(vmpc())) << " func " <<
     curFunc()->fullName()->data() << " ===\n";
 
   toStringFrame(os, fp, offset, m_top, prefix);
@@ -1131,8 +1137,6 @@ TypedValue* Stack::generatorStackBase(const ActRec* fp) {
 __thread RequestArenaStorage s_requestArenaStorage;
 __thread VarEnvArenaStorage s_varEnvArenaStorage;
 
-///////////////////////////////////////////////////////////////////////////////
-} // namespace VM
 
 //=============================================================================
 // ExecutionContext.
@@ -1537,8 +1541,8 @@ void VMExecutionContext::addRenameableFunctions(ArrayData* arr) {
 VarEnv* VMExecutionContext::getVarEnv() {
   Transl::VMRegAnchor _;
 
-  HPHP::VM::VarEnv* builtinVarEnv = nullptr;
-  HPHP::VM::ActRec* fp = getFP();
+  VarEnv* builtinVarEnv = nullptr;
+  ActRec* fp = getFP();
   if (UNLIKELY(!fp)) return NULL;
   if (fp->skipFrame()) {
     if (fp->hasVarEnv()) {
@@ -1815,7 +1819,7 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
       !ThreadInfo::s_threadInfo->m_reqInjectionData.coverage &&
       !(RuntimeOption::EvalJitDisabledByHphpd && isDebuggerAttached()) &&
       LIKELY(!DEBUGGER_FORCE_INTR)) {
-    Transl::SrcKey sk(Transl::curFunc(), m_pc);
+    Transl::SrcKey sk(curFunc(), m_pc);
     (void) curUnit()->offsetOf(m_pc); /* assert */
     tx64->enterTC(sk, start);
   } else {
@@ -2012,7 +2016,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   // If this is a method, either this_ or cls must be non-NULL
   assert(!f->preClass() || (this_ || cls));
   // If this is a static method, this_ must be NULL
-  assert(!(f->attrs() & HPHP::VM::AttrStatic && !f->isClosureBody()) ||
+  assert(!(f->attrs() & AttrStatic && !f->isClosureBody()) ||
          (!this_));
   // invName should only be non-NULL if we are calling __call or
   // __callStatic
@@ -2838,7 +2842,7 @@ CStrRef VMExecutionContext::createFunction(CStrRef args, CStrRef code) {
           << "(" << args.data() << ") {"
           << code.data() << "}\n";
   StringData* evalCode = StringData::GetStaticString(codeStr.str());
-  Unit* unit = VM::compile_string(evalCode->data(), evalCode->size());
+  Unit* unit = compile_string(evalCode->data(), evalCode->size());
   // Move the function to a different name.
   std::ostringstream newNameStr;
   newNameStr << '\0' << "lambda_" << ++m_lambdaCounter;
@@ -2879,7 +2883,7 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   ActRec *fp = getFP();
   ActRec *cfpSave = nullptr;
   if (fp) {
-    VM::VarEnv* vit = 0;
+    VarEnv* vit = nullptr;
     for (; frame > 0; --frame) {
       if (fp->hasVarEnv()) {
         if (!vit) {
@@ -5626,10 +5630,10 @@ inline void OPTBLD_INLINE VMExecutionContext::doFPushCuf(PC& pc,
   HPHP::VM::Class* cls = nullptr;
   StringData* invName = nullptr;
 
-  const HPHP::VM::Func* f = vm_decode_function(tvAsVariant(&func), getFP(),
-                                               forward,
-                                               obj, cls, invName,
-                                               !safe);
+  const Func* f = vm_decode_function(tvAsVariant(&func), getFP(),
+                                     forward,
+                                     obj, cls, invName,
+                                     !safe);
 
   if (safe) m_stack.topTV()[1] = m_stack.topTV()[0];
   m_stack.ndiscard(1);
@@ -6075,7 +6079,7 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
   return true;
 }
 
-static void cleanupParamsAndActRec(VM::Stack& stack,
+static void cleanupParamsAndActRec(Stack& stack,
                                    ActRec* ar,
                                    ExtraArgs* extraArgs) {
   assert(stack.top() + (extraArgs ?
@@ -7338,7 +7342,7 @@ void VMExecutionContext::requestInit() {
   new (&s_requestArenaStorage) RequestArena();
   new (&s_varEnvArenaStorage) VarEnvArena();
 
-  VM::VarEnv::createGlobal();
+  VarEnv::createGlobal();
   m_stack.requestInit();
   tx64 = nextTx64;
   tx64->requestInit();
@@ -7367,7 +7371,7 @@ void VMExecutionContext::requestExit() {
 
   if (m_globalVarEnv) {
     assert(m_topVarEnv = m_globalVarEnv);
-    VM::VarEnv::destroy(m_globalVarEnv);
+    VarEnv::destroy(m_globalVarEnv);
     m_globalVarEnv = m_topVarEnv = 0;
   }
 

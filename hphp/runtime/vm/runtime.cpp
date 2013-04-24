@@ -33,7 +33,10 @@
 #include "runtime/ext/ext_string.h"
 
 namespace HPHP {
-namespace VM {
+
+using VM::Unit;
+using VM::Func;
+using VM::Transl::tx64;
 
 static const Trace::Module TRACEMOD = Trace::runtime;
 
@@ -197,7 +200,7 @@ concat_si(StringData* v1, int64_t v2) {
  * incRef the output string
  */
 StringData*
-concat(DataType t1, uint64_t v1, DataType t2, uint64_t v2) {
+concat_tv(DataType t1, uint64_t v1, DataType t2, uint64_t v2) {
   const char *s1, *s2;
   size_t s1len, s2len;
   bool free1, free2;
@@ -283,7 +286,7 @@ int64_t arr0_to_bool(ArrayData* ad) {
 }
 
 int64_t arr_to_bool(ArrayData* ad) {
-  assert(Transl::tx64->stateIsDirty());
+  assert(tx64->stateIsDirty());
   int64_t retval = arr0_to_bool(ad);
   decRefArr(ad);
   return retval;
@@ -331,7 +334,7 @@ Unit* compile_string(const char* s, size_t sz) {
   int out_len;
   md5 = MD5(string_md5(s, sz, false, out_len));
 
-  VM::Unit* u = Repo::get().loadUnit("", md5);
+  VM::Unit* u = VM::Repo::get().loadUnit("", md5);
   if (u != nullptr) {
     return u;
   }
@@ -475,20 +478,6 @@ void assertTv(const TypedValue* tv) {
   always_assert(checkTv(tv));
 }
 
-void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
-                    size_t nProps) {
-  auto* dst = propVec;
-  auto* src = propData;
-  for (; src != propData + nProps; ++src, ++dst) {
-    *dst = *src;
-    // m_aux.u_deepInit is true for properties that need "deep" initialization
-    if (src->deepInit()) {
-      tvIncRef(dst);
-      collectionDeepCopyTV(dst);
-    }
-  }
-}
-
 int init_closure(ActRec* ar, TypedValue* sp) {
   c_Closure* closure = static_cast<c_Closure*>(ar->getThis());
 
@@ -529,5 +518,5 @@ HOT_FUNC int64_t modHelper(int64_t left, int64_t right) {
   return left % right;
 }
 
-} } // HPHP::VM
+} // HPHP::VM
 

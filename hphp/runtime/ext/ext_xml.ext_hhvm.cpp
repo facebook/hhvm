@@ -35,8 +35,8 @@ encoding => rsi
 
 Value* fh_xml_parser_create(Value* _rv, Value* encoding) asm("_ZN4HPHP19f_xml_parser_createERKNS_6StringE");
 
-TypedValue * fg1_xml_parser_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_parser_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_parser_create(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_parser_create(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
@@ -45,7 +45,7 @@ TypedValue * fg1_xml_parser_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_xml_parser_create(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_parser_create(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -86,8 +86,8 @@ parser => rdi
 
 bool fh_xml_parser_free(Value* parser) asm("_ZN4HPHP17f_xml_parser_freeERKNS_6ObjectE");
 
-TypedValue * fg1_xml_parser_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_parser_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_parser_free(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_parser_free(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -95,7 +95,7 @@ TypedValue * fg1_xml_parser_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_xml_parser_free(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_parser_free(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -137,8 +137,8 @@ is_final => rdx
 
 long fh_xml_parse(Value* parser, Value* data, bool is_final) asm("_ZN4HPHP11f_xml_parseERKNS_6ObjectERKNS_6StringEb");
 
-TypedValue * fg1_xml_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_parse(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_parse(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -159,7 +159,7 @@ TypedValue * fg1_xml_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_xml_parse(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_parse(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -202,8 +202,8 @@ index => rcx
 
 long fh_xml_parse_into_struct(Value* parser, Value* data, TypedValue* values, TypedValue* index) asm("_ZN4HPHP23f_xml_parse_into_structERKNS_6ObjectERKNS_6StringERKNS_14VRefParamValueES8_");
 
-TypedValue * fg1_xml_parse_into_struct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_parse_into_struct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_parse_into_struct(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_parse_into_struct(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -222,7 +222,7 @@ TypedValue * fg1_xml_parse_into_struct(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_xml_parse_into_struct(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_parse_into_struct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -265,8 +265,8 @@ separator => rdx
 
 Value* fh_xml_parser_create_ns(Value* _rv, Value* encoding, Value* separator) asm("_ZN4HPHP22f_xml_parser_create_nsERKNS_6StringES2_");
 
-TypedValue * fg1_xml_parser_create_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_parser_create_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_parser_create_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_parser_create_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -286,7 +286,7 @@ TypedValue * fg1_xml_parser_create_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* fg_xml_parser_create_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_parser_create_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -329,8 +329,8 @@ option => rdx
 
 TypedValue* fh_xml_parser_get_option(TypedValue* _rv, Value* parser, int option) asm("_ZN4HPHP23f_xml_parser_get_optionERKNS_6ObjectEi");
 
-TypedValue * fg1_xml_parser_get_option(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_parser_get_option(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_parser_get_option(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_parser_get_option(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -343,7 +343,7 @@ TypedValue * fg1_xml_parser_get_option(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_xml_parser_get_option(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_parser_get_option(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -385,8 +385,8 @@ value => rdx
 
 bool fh_xml_parser_set_option(Value* parser, int option, TypedValue* value) asm("_ZN4HPHP23f_xml_parser_set_optionERKNS_6ObjectEiRKNS_7VariantE");
 
-TypedValue * fg1_xml_parser_set_option(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_parser_set_option(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_parser_set_option(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_parser_set_option(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
@@ -399,7 +399,7 @@ TypedValue * fg1_xml_parser_set_option(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_xml_parser_set_option(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_parser_set_option(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -440,8 +440,8 @@ handler => rsi
 
 bool fh_xml_set_character_data_handler(Value* parser, TypedValue* handler) asm("_ZN4HPHP32f_xml_set_character_data_handlerERKNS_6ObjectERKNS_7VariantE");
 
-TypedValue * fg1_xml_set_character_data_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_set_character_data_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_set_character_data_handler(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_set_character_data_handler(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -449,7 +449,7 @@ TypedValue * fg1_xml_set_character_data_handler(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* fg_xml_set_character_data_handler(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_set_character_data_handler(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -490,8 +490,8 @@ handler => rsi
 
 bool fh_xml_set_default_handler(Value* parser, TypedValue* handler) asm("_ZN4HPHP25f_xml_set_default_handlerERKNS_6ObjectERKNS_7VariantE");
 
-TypedValue * fg1_xml_set_default_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_set_default_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_set_default_handler(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_set_default_handler(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -499,7 +499,7 @@ TypedValue * fg1_xml_set_default_handler(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_xml_set_default_handler(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_set_default_handler(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -541,8 +541,8 @@ end_element_handler => rdx
 
 bool fh_xml_set_element_handler(Value* parser, TypedValue* start_element_handler, TypedValue* end_element_handler) asm("_ZN4HPHP25f_xml_set_element_handlerERKNS_6ObjectERKNS_7VariantES5_");
 
-TypedValue * fg1_xml_set_element_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_set_element_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_set_element_handler(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_set_element_handler(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -550,7 +550,7 @@ TypedValue * fg1_xml_set_element_handler(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_xml_set_element_handler(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_set_element_handler(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -591,8 +591,8 @@ handler => rsi
 
 bool fh_xml_set_processing_instruction_handler(Value* parser, TypedValue* handler) asm("_ZN4HPHP40f_xml_set_processing_instruction_handlerERKNS_6ObjectERKNS_7VariantE");
 
-TypedValue * fg1_xml_set_processing_instruction_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_set_processing_instruction_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_set_processing_instruction_handler(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_set_processing_instruction_handler(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -600,7 +600,7 @@ TypedValue * fg1_xml_set_processing_instruction_handler(TypedValue* rv, HPHP::VM
   return rv;
 }
 
-TypedValue* fg_xml_set_processing_instruction_handler(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_set_processing_instruction_handler(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -641,8 +641,8 @@ handler => rsi
 
 bool fh_xml_set_start_namespace_decl_handler(Value* parser, TypedValue* handler) asm("_ZN4HPHP38f_xml_set_start_namespace_decl_handlerERKNS_6ObjectERKNS_7VariantE");
 
-TypedValue * fg1_xml_set_start_namespace_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_set_start_namespace_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_set_start_namespace_decl_handler(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_set_start_namespace_decl_handler(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -650,7 +650,7 @@ TypedValue * fg1_xml_set_start_namespace_decl_handler(TypedValue* rv, HPHP::VM::
   return rv;
 }
 
-TypedValue* fg_xml_set_start_namespace_decl_handler(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_set_start_namespace_decl_handler(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -691,8 +691,8 @@ handler => rsi
 
 bool fh_xml_set_end_namespace_decl_handler(Value* parser, TypedValue* handler) asm("_ZN4HPHP36f_xml_set_end_namespace_decl_handlerERKNS_6ObjectERKNS_7VariantE");
 
-TypedValue * fg1_xml_set_end_namespace_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_set_end_namespace_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_set_end_namespace_decl_handler(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_set_end_namespace_decl_handler(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -700,7 +700,7 @@ TypedValue * fg1_xml_set_end_namespace_decl_handler(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* fg_xml_set_end_namespace_decl_handler(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_set_end_namespace_decl_handler(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -741,8 +741,8 @@ handler => rsi
 
 bool fh_xml_set_unparsed_entity_decl_handler(Value* parser, TypedValue* handler) asm("_ZN4HPHP38f_xml_set_unparsed_entity_decl_handlerERKNS_6ObjectERKNS_7VariantE");
 
-TypedValue * fg1_xml_set_unparsed_entity_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_set_unparsed_entity_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_set_unparsed_entity_decl_handler(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_set_unparsed_entity_decl_handler(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -750,7 +750,7 @@ TypedValue * fg1_xml_set_unparsed_entity_decl_handler(TypedValue* rv, HPHP::VM::
   return rv;
 }
 
-TypedValue* fg_xml_set_unparsed_entity_decl_handler(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_set_unparsed_entity_decl_handler(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -791,8 +791,8 @@ handler => rsi
 
 bool fh_xml_set_external_entity_ref_handler(Value* parser, TypedValue* handler) asm("_ZN4HPHP37f_xml_set_external_entity_ref_handlerERKNS_6ObjectERKNS_7VariantE");
 
-TypedValue * fg1_xml_set_external_entity_ref_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_set_external_entity_ref_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_set_external_entity_ref_handler(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_set_external_entity_ref_handler(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -800,7 +800,7 @@ TypedValue * fg1_xml_set_external_entity_ref_handler(TypedValue* rv, HPHP::VM::A
   return rv;
 }
 
-TypedValue* fg_xml_set_external_entity_ref_handler(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_set_external_entity_ref_handler(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -841,8 +841,8 @@ handler => rsi
 
 bool fh_xml_set_notation_decl_handler(Value* parser, TypedValue* handler) asm("_ZN4HPHP31f_xml_set_notation_decl_handlerERKNS_6ObjectERKNS_7VariantE");
 
-TypedValue * fg1_xml_set_notation_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_set_notation_decl_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_set_notation_decl_handler(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_set_notation_decl_handler(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -850,7 +850,7 @@ TypedValue * fg1_xml_set_notation_decl_handler(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_xml_set_notation_decl_handler(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_set_notation_decl_handler(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -891,8 +891,8 @@ object => rsi
 
 bool fh_xml_set_object(Value* parser, TypedValue* object) asm("_ZN4HPHP16f_xml_set_objectERKNS_6ObjectERKNS_14VRefParamValueE");
 
-TypedValue * fg1_xml_set_object(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_set_object(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_set_object(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_set_object(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -900,7 +900,7 @@ TypedValue * fg1_xml_set_object(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_xml_set_object(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_set_object(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -940,8 +940,8 @@ parser => rdi
 
 long fh_xml_get_current_byte_index(Value* parser) asm("_ZN4HPHP28f_xml_get_current_byte_indexERKNS_6ObjectE");
 
-TypedValue * fg1_xml_get_current_byte_index(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_get_current_byte_index(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_get_current_byte_index(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_get_current_byte_index(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -949,7 +949,7 @@ TypedValue * fg1_xml_get_current_byte_index(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_xml_get_current_byte_index(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_get_current_byte_index(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -989,8 +989,8 @@ parser => rdi
 
 long fh_xml_get_current_column_number(Value* parser) asm("_ZN4HPHP31f_xml_get_current_column_numberERKNS_6ObjectE");
 
-TypedValue * fg1_xml_get_current_column_number(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_get_current_column_number(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_get_current_column_number(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_get_current_column_number(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -998,7 +998,7 @@ TypedValue * fg1_xml_get_current_column_number(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_xml_get_current_column_number(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_get_current_column_number(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1038,8 +1038,8 @@ parser => rdi
 
 long fh_xml_get_current_line_number(Value* parser) asm("_ZN4HPHP29f_xml_get_current_line_numberERKNS_6ObjectE");
 
-TypedValue * fg1_xml_get_current_line_number(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_get_current_line_number(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_get_current_line_number(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_get_current_line_number(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -1047,7 +1047,7 @@ TypedValue * fg1_xml_get_current_line_number(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_xml_get_current_line_number(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_get_current_line_number(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1087,8 +1087,8 @@ parser => rdi
 
 long fh_xml_get_error_code(Value* parser) asm("_ZN4HPHP20f_xml_get_error_codeERKNS_6ObjectE");
 
-TypedValue * fg1_xml_get_error_code(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_get_error_code(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_get_error_code(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_get_error_code(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -1096,7 +1096,7 @@ TypedValue * fg1_xml_get_error_code(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_xml_get_error_code(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_get_error_code(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1137,8 +1137,8 @@ code => rsi
 
 Value* fh_xml_error_string(Value* _rv, int code) asm("_ZN4HPHP18f_xml_error_stringEi");
 
-TypedValue * fg1_xml_error_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xml_error_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xml_error_string(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xml_error_string(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
@@ -1147,7 +1147,7 @@ TypedValue * fg1_xml_error_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_xml_error_string(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xml_error_string(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1189,8 +1189,8 @@ data => rsi
 
 Value* fh_utf8_decode(Value* _rv, Value* data) asm("_ZN4HPHP13f_utf8_decodeERKNS_6StringE");
 
-TypedValue * fg1_utf8_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_utf8_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_utf8_decode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_utf8_decode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -1199,7 +1199,7 @@ TypedValue * fg1_utf8_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_utf8_decode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_utf8_decode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1241,8 +1241,8 @@ data => rsi
 
 Value* fh_utf8_encode(Value* _rv, Value* data) asm("_ZN4HPHP13f_utf8_encodeERKNS_6StringE");
 
-TypedValue * fg1_utf8_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_utf8_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_utf8_encode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_utf8_encode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -1251,7 +1251,7 @@ TypedValue * fg1_utf8_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_utf8_encode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_utf8_encode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

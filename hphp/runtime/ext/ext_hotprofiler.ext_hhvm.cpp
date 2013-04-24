@@ -34,8 +34,8 @@ args => rsi
 
 void fh_xhprof_enable(int flags, Value* args) asm("_ZN4HPHP15f_xhprof_enableEiRKNS_5ArrayE");
 
-TypedValue * fg1_xhprof_enable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xhprof_enable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xhprof_enable(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xhprof_enable(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -55,7 +55,7 @@ TypedValue * fg1_xhprof_enable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_xhprof_enable(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xhprof_enable(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -96,7 +96,7 @@ _rv => rdi
 
 TypedValue* fh_xhprof_disable(TypedValue* _rv) asm("_ZN4HPHP16f_xhprof_disableEv");
 
-TypedValue* fg_xhprof_disable(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xhprof_disable(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -127,7 +127,7 @@ _ZN4HPHP23f_xhprof_network_enableEv
 
 void fh_xhprof_network_enable() asm("_ZN4HPHP23f_xhprof_network_enableEv");
 
-TypedValue* fg_xhprof_network_enable(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xhprof_network_enable(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -161,7 +161,7 @@ _rv => rdi
 
 TypedValue* fh_xhprof_network_disable(TypedValue* _rv) asm("_ZN4HPHP24f_xhprof_network_disableEv");
 
-TypedValue* fg_xhprof_network_disable(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xhprof_network_disable(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -193,8 +193,8 @@ name => rdi
 
 void fh_xhprof_frame_begin(Value* name) asm("_ZN4HPHP20f_xhprof_frame_beginERKNS_6StringE");
 
-TypedValue * fg1_xhprof_frame_begin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xhprof_frame_begin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xhprof_frame_begin(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xhprof_frame_begin(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -203,7 +203,7 @@ TypedValue * fg1_xhprof_frame_begin(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_xhprof_frame_begin(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xhprof_frame_begin(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -242,7 +242,7 @@ _ZN4HPHP18f_xhprof_frame_endEv
 
 void fh_xhprof_frame_end() asm("_ZN4HPHP18f_xhprof_frame_endEv");
 
-TypedValue* fg_xhprof_frame_end(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xhprof_frame_end(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -278,8 +278,8 @@ flags => rdx
 
 TypedValue* fh_xhprof_run_trace(TypedValue* _rv, Value* packedTrace, int flags) asm("_ZN4HPHP18f_xhprof_run_traceERKNS_6StringEi");
 
-TypedValue * fg1_xhprof_run_trace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xhprof_run_trace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xhprof_run_trace(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xhprof_run_trace(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -292,7 +292,7 @@ TypedValue * fg1_xhprof_run_trace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_xhprof_run_trace(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xhprof_run_trace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -330,7 +330,7 @@ _ZN4HPHP22f_xhprof_sample_enableEv
 
 void fh_xhprof_sample_enable() asm("_ZN4HPHP22f_xhprof_sample_enableEv");
 
-TypedValue* fg_xhprof_sample_enable(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xhprof_sample_enable(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -364,7 +364,7 @@ _rv => rdi
 
 TypedValue* fh_xhprof_sample_disable(TypedValue* _rv) asm("_ZN4HPHP23f_xhprof_sample_disableEv");
 
-TypedValue* fg_xhprof_sample_disable(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xhprof_sample_disable(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -396,7 +396,7 @@ callback => rdi
 
 void fh_fb_setprofile(TypedValue* callback) asm("_ZN4HPHP15f_fb_setprofileERKNS_7VariantE");
 
-TypedValue* fg_fb_setprofile(HPHP::VM::ActRec *ar) {
+TypedValue* fg_fb_setprofile(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

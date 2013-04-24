@@ -36,8 +36,8 @@ use_include_path => rdx
 
 TypedValue* fh_readgzfile(TypedValue* _rv, Value* filename, bool use_include_path) asm("_ZN4HPHP12f_readgzfileERKNS_6StringEb");
 
-TypedValue * fg1_readgzfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_readgzfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_readgzfile(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_readgzfile(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -55,7 +55,7 @@ TypedValue * fg1_readgzfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_readgzfile(HPHP::VM::ActRec *ar) {
+TypedValue* fg_readgzfile(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -97,8 +97,8 @@ use_include_path => rdx
 
 TypedValue* fh_gzfile(TypedValue* _rv, Value* filename, bool use_include_path) asm("_ZN4HPHP8f_gzfileERKNS_6StringEb");
 
-TypedValue * fg1_gzfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzfile(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzfile(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -116,7 +116,7 @@ TypedValue * fg1_gzfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzfile(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzfile(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -158,8 +158,8 @@ level => rdx
 
 TypedValue* fh_gzcompress(TypedValue* _rv, Value* data, int level) asm("_ZN4HPHP12f_gzcompressERKNS_6StringEi");
 
-TypedValue * fg1_gzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzcompress(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzcompress(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -177,7 +177,7 @@ TypedValue * fg1_gzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_gzcompress(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzcompress(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -219,8 +219,8 @@ limit => rdx
 
 TypedValue* fh_gzuncompress(TypedValue* _rv, Value* data, int limit) asm("_ZN4HPHP14f_gzuncompressERKNS_6StringEi");
 
-TypedValue * fg1_gzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzuncompress(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzuncompress(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -238,7 +238,7 @@ TypedValue * fg1_gzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_gzuncompress(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzuncompress(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -280,8 +280,8 @@ level => rdx
 
 TypedValue* fh_gzdeflate(TypedValue* _rv, Value* data, int level) asm("_ZN4HPHP11f_gzdeflateERKNS_6StringEi");
 
-TypedValue * fg1_gzdeflate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzdeflate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzdeflate(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzdeflate(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -299,7 +299,7 @@ TypedValue * fg1_gzdeflate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_gzdeflate(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzdeflate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -341,8 +341,8 @@ limit => rdx
 
 TypedValue* fh_gzinflate(TypedValue* _rv, Value* data, int limit) asm("_ZN4HPHP11f_gzinflateERKNS_6StringEi");
 
-TypedValue * fg1_gzinflate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzinflate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzinflate(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzinflate(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -360,7 +360,7 @@ TypedValue * fg1_gzinflate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_gzinflate(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzinflate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -403,8 +403,8 @@ encoding_mode => rcx
 
 TypedValue* fh_gzencode(TypedValue* _rv, Value* data, int level, int encoding_mode) asm("_ZN4HPHP10f_gzencodeERKNS_6StringEii");
 
-TypedValue * fg1_gzencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzencode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzencode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -426,7 +426,7 @@ TypedValue * fg1_gzencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzencode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzencode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -467,8 +467,8 @@ data => rsi
 
 TypedValue* fh_gzdecode(TypedValue* _rv, Value* data) asm("_ZN4HPHP10f_gzdecodeERKNS_6StringE");
 
-TypedValue * fg1_gzdecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzdecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzdecode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzdecode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_gzdecode((rv), &args[-0].m_data);
@@ -476,7 +476,7 @@ TypedValue * fg1_gzdecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzdecode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzdecode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -516,7 +516,7 @@ _rv => rdi
 
 Value* fh_zlib_get_coding_type(Value* _rv) asm("_ZN4HPHP22f_zlib_get_coding_typeEv");
 
-TypedValue* fg_zlib_get_coding_type(HPHP::VM::ActRec *ar) {
+TypedValue* fg_zlib_get_coding_type(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -553,8 +553,8 @@ use_include_path => rcx
 
 Value* fh_gzopen(Value* _rv, Value* filename, Value* mode, bool use_include_path) asm("_ZN4HPHP8f_gzopenERKNS_6StringES2_b");
 
-TypedValue * fg1_gzopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzopen(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzopen(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -576,7 +576,7 @@ TypedValue * fg1_gzopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzopen(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzopen(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -617,8 +617,8 @@ zp => rdi
 
 bool fh_gzclose(Value* zp) asm("_ZN4HPHP9f_gzcloseERKNS_6ObjectE");
 
-TypedValue * fg1_gzclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzclose(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzclose(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -626,7 +626,7 @@ TypedValue * fg1_gzclose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzclose(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzclose(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -666,8 +666,8 @@ zp => rdi
 
 bool fh_gzrewind(Value* zp) asm("_ZN4HPHP10f_gzrewindERKNS_6ObjectE");
 
-TypedValue * fg1_gzrewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzrewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzrewind(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzrewind(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -675,7 +675,7 @@ TypedValue * fg1_gzrewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzrewind(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzrewind(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -715,8 +715,8 @@ zp => rdi
 
 bool fh_gzeof(Value* zp) asm("_ZN4HPHP7f_gzeofERKNS_6ObjectE");
 
-TypedValue * fg1_gzeof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzeof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzeof(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzeof(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -724,7 +724,7 @@ TypedValue * fg1_gzeof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzeof(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzeof(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -765,8 +765,8 @@ zp => rsi
 
 TypedValue* fh_gzgetc(TypedValue* _rv, Value* zp) asm("_ZN4HPHP8f_gzgetcERKNS_6ObjectE");
 
-TypedValue * fg1_gzgetc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzgetc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzgetc(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzgetc(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_gzgetc((rv), &args[-0].m_data);
@@ -774,7 +774,7 @@ TypedValue * fg1_gzgetc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzgetc(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzgetc(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -816,8 +816,8 @@ length => rdx
 
 TypedValue* fh_gzgets(TypedValue* _rv, Value* zp, long length) asm("_ZN4HPHP8f_gzgetsERKNS_6ObjectEl");
 
-TypedValue * fg1_gzgets(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzgets(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzgets(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzgets(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -835,7 +835,7 @@ TypedValue * fg1_gzgets(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzgets(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzgets(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -878,8 +878,8 @@ allowable_tags => rcx
 
 TypedValue* fh_gzgetss(TypedValue* _rv, Value* zp, long length, Value* allowable_tags) asm("_ZN4HPHP9f_gzgetssERKNS_6ObjectElRKNS_6StringE");
 
-TypedValue * fg1_gzgetss(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzgetss(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzgetss(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzgetss(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -901,7 +901,7 @@ TypedValue * fg1_gzgetss(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzgetss(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzgetss(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -943,8 +943,8 @@ length => rdx
 
 TypedValue* fh_gzread(TypedValue* _rv, Value* zp, long length) asm("_ZN4HPHP8f_gzreadERKNS_6ObjectEl");
 
-TypedValue * fg1_gzread(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzread(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzread(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzread(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -962,7 +962,7 @@ TypedValue * fg1_gzread(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzread(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzread(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1003,8 +1003,8 @@ zp => rsi
 
 TypedValue* fh_gzpassthru(TypedValue* _rv, Value* zp) asm("_ZN4HPHP12f_gzpassthruERKNS_6ObjectE");
 
-TypedValue * fg1_gzpassthru(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzpassthru(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzpassthru(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzpassthru(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_gzpassthru((rv), &args[-0].m_data);
@@ -1012,7 +1012,7 @@ TypedValue * fg1_gzpassthru(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_gzpassthru(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzpassthru(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1055,8 +1055,8 @@ whence => rcx
 
 TypedValue* fh_gzseek(TypedValue* _rv, Value* zp, long offset, long whence) asm("_ZN4HPHP8f_gzseekERKNS_6ObjectEll");
 
-TypedValue * fg1_gzseek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzseek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzseek(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzseek(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -1077,7 +1077,7 @@ TypedValue * fg1_gzseek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzseek(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzseek(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1118,8 +1118,8 @@ zp => rsi
 
 TypedValue* fh_gztell(TypedValue* _rv, Value* zp) asm("_ZN4HPHP8f_gztellERKNS_6ObjectE");
 
-TypedValue * fg1_gztell(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gztell(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gztell(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gztell(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_gztell((rv), &args[-0].m_data);
@@ -1127,7 +1127,7 @@ TypedValue * fg1_gztell(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gztell(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gztell(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1170,8 +1170,8 @@ length => rcx
 
 TypedValue* fh_gzwrite(TypedValue* _rv, Value* zp, Value* str, long length) asm("_ZN4HPHP9f_gzwriteERKNS_6ObjectERKNS_6StringEl");
 
-TypedValue * fg1_gzwrite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzwrite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzwrite(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzwrite(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -1192,7 +1192,7 @@ TypedValue * fg1_gzwrite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzwrite(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzwrite(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1235,8 +1235,8 @@ length => rcx
 
 TypedValue* fh_gzputs(TypedValue* _rv, Value* zp, Value* str, long length) asm("_ZN4HPHP8f_gzputsERKNS_6ObjectERKNS_6StringEl");
 
-TypedValue * fg1_gzputs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gzputs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gzputs(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gzputs(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -1257,7 +1257,7 @@ TypedValue * fg1_gzputs(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gzputs(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gzputs(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1299,8 +1299,8 @@ level => rdx
 
 TypedValue* fh_qlzcompress(TypedValue* _rv, Value* data, int level) asm("_ZN4HPHP13f_qlzcompressERKNS_6StringEi");
 
-TypedValue * fg1_qlzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_qlzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_qlzcompress(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_qlzcompress(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -1318,7 +1318,7 @@ TypedValue * fg1_qlzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_qlzcompress(HPHP::VM::ActRec *ar) {
+TypedValue* fg_qlzcompress(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1360,8 +1360,8 @@ level => rdx
 
 TypedValue* fh_qlzuncompress(TypedValue* _rv, Value* data, int level) asm("_ZN4HPHP15f_qlzuncompressERKNS_6StringEi");
 
-TypedValue * fg1_qlzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_qlzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_qlzuncompress(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_qlzuncompress(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -1379,7 +1379,7 @@ TypedValue * fg1_qlzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_qlzuncompress(HPHP::VM::ActRec *ar) {
+TypedValue* fg_qlzuncompress(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1420,8 +1420,8 @@ data => rsi
 
 TypedValue* fh_sncompress(TypedValue* _rv, Value* data) asm("_ZN4HPHP12f_sncompressERKNS_6StringE");
 
-TypedValue * fg1_sncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_sncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_sncompress(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_sncompress(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_sncompress((rv), &args[-0].m_data);
@@ -1429,7 +1429,7 @@ TypedValue * fg1_sncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_sncompress(HPHP::VM::ActRec *ar) {
+TypedValue* fg_sncompress(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1470,8 +1470,8 @@ data => rsi
 
 TypedValue* fh_snuncompress(TypedValue* _rv, Value* data) asm("_ZN4HPHP14f_snuncompressERKNS_6StringE");
 
-TypedValue * fg1_snuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_snuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_snuncompress(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_snuncompress(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_snuncompress((rv), &args[-0].m_data);
@@ -1479,7 +1479,7 @@ TypedValue * fg1_snuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_snuncompress(HPHP::VM::ActRec *ar) {
+TypedValue* fg_snuncompress(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1520,8 +1520,8 @@ uncompressed => rsi
 
 TypedValue* fh_nzcompress(TypedValue* _rv, Value* uncompressed) asm("_ZN4HPHP12f_nzcompressERKNS_6StringE");
 
-TypedValue * fg1_nzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_nzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_nzcompress(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_nzcompress(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_nzcompress((rv), &args[-0].m_data);
@@ -1529,7 +1529,7 @@ TypedValue * fg1_nzcompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_nzcompress(HPHP::VM::ActRec *ar) {
+TypedValue* fg_nzcompress(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1570,8 +1570,8 @@ compressed => rsi
 
 TypedValue* fh_nzuncompress(TypedValue* _rv, Value* compressed) asm("_ZN4HPHP14f_nzuncompressERKNS_6StringE");
 
-TypedValue * fg1_nzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_nzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_nzuncompress(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_nzuncompress(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_nzuncompress((rv), &args[-0].m_data);
@@ -1579,7 +1579,7 @@ TypedValue * fg1_nzuncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_nzuncompress(HPHP::VM::ActRec *ar) {
+TypedValue* fg_nzuncompress(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1620,8 +1620,8 @@ uncompressed => rsi
 
 TypedValue* fh_lz4compress(TypedValue* _rv, Value* uncompressed) asm("_ZN4HPHP13f_lz4compressERKNS_6StringE");
 
-TypedValue * fg1_lz4compress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_lz4compress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_lz4compress(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_lz4compress(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_lz4compress((rv), &args[-0].m_data);
@@ -1629,7 +1629,7 @@ TypedValue * fg1_lz4compress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_lz4compress(HPHP::VM::ActRec *ar) {
+TypedValue* fg_lz4compress(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1670,8 +1670,8 @@ uncompressed => rsi
 
 TypedValue* fh_lz4hccompress(TypedValue* _rv, Value* uncompressed) asm("_ZN4HPHP15f_lz4hccompressERKNS_6StringE");
 
-TypedValue * fg1_lz4hccompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_lz4hccompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_lz4hccompress(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_lz4hccompress(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_lz4hccompress((rv), &args[-0].m_data);
@@ -1679,7 +1679,7 @@ TypedValue * fg1_lz4hccompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_lz4hccompress(HPHP::VM::ActRec *ar) {
+TypedValue* fg_lz4hccompress(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1720,8 +1720,8 @@ compressed => rsi
 
 TypedValue* fh_lz4uncompress(TypedValue* _rv, Value* compressed) asm("_ZN4HPHP15f_lz4uncompressERKNS_6StringE");
 
-TypedValue * fg1_lz4uncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_lz4uncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_lz4uncompress(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_lz4uncompress(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_lz4uncompress((rv), &args[-0].m_data);
@@ -1729,7 +1729,7 @@ TypedValue * fg1_lz4uncompress(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_lz4uncompress(HPHP::VM::ActRec *ar) {
+TypedValue* fg_lz4uncompress(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

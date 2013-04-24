@@ -47,13 +47,10 @@ class HhbcExtClassInfo;
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 
-using VM::Offset;
 using VM::Func;
 using VM::Class;
 using VM::Unit;
 using VM::InvalidAbsoluteOffset;
-using VM::Opcode;
-using VM::Id;
 
 using namespace VM;
 

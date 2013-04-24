@@ -43,35 +43,36 @@ class c_Continuation : public ExtObjectData {
   }
 
   // need to implement
-  public: c_Continuation(VM::Class* cls = c_Continuation::s_cls);
-  public: ~c_Continuation();
-  public: void t___construct(int64_t func, CStrRef origFuncName, CVarRef obj = uninit_null(), CArrRef args = null_array);
-  public: void t_update(int64_t label, CVarRef value);
-  public: Object t_getwaithandle();
-  public: int64_t t_getlabel();
-  public: int64_t t_num_args();
-  public: Array t_get_args();
-  public: Variant t_get_arg(int64_t id);
-  public: Variant t_current();
-  public: int64_t t_key();
-  public: void t_next();
-  public: void t_rewind();
-  public: bool t_valid();
-  public: void t_send(CVarRef v);
-  public: void t_raise(CVarRef v);
-  public: void t_raised();
-  public: String t_getorigfuncname();
-  public: Variant t___clone();
+  public:
+  explicit c_Continuation(VM::Class* cls = c_Continuation::s_cls);
+  ~c_Continuation();
+  void t___construct(int64_t func, CStrRef origFuncName, CVarRef obj = uninit_null(), CArrRef args = null_array);
+  void t_update(int64_t label, CVarRef value);
+  Object t_getwaithandle();
+  int64_t t_getlabel();
+  int64_t t_num_args();
+  Array t_get_args();
+  Variant t_get_arg(int64_t id);
+  Variant t_current();
+  int64_t t_key();
+  void t_next();
+  void t_rewind();
+  bool t_valid();
+  void t_send(CVarRef v);
+  void t_raise(CVarRef v);
+  void t_raised();
+  String t_getorigfuncname();
+  Variant t___clone();
 
   static c_Continuation* alloc(VM::Class* cls, int nLocals, int nIters) {
     c_Continuation* cont =
       (c_Continuation*)ALLOCOBJSZ(sizeForLocalsAndIters(nLocals, nIters));
     new ((void *)cont) c_Continuation(cls);
-    cont->m_localsOffset = sizeof(c_Continuation) + sizeof(VM::Iter) * nIters;
-    cont->m_arPtr = (VM::ActRec*)(cont->locals() + nLocals);
+    cont->m_localsOffset = sizeof(c_Continuation) + sizeof(Iter) * nIters;
+    cont->m_arPtr = (ActRec*)(cont->locals() + nLocals);
 
     memset((void*)((uintptr_t)cont + sizeof(c_Continuation)), 0,
-           sizeof(TypedValue) * nLocals + sizeof(VM::Iter) * nIters);
+           sizeof(TypedValue) * nLocals + sizeof(Iter) * nIters);
     return cont;
   }
 
@@ -115,7 +116,7 @@ public:
   int m_localsOffset;
   VM::Func *m_vmFunc;
   int64_t m_label;
-  VM::ActRec* m_arPtr;
+  ActRec* m_arPtr;
 
   p_ContinuationWaitHandle m_waitHandle;
 
@@ -126,9 +127,9 @@ public:
   HphpArray* getStaticLocals();
   static size_t sizeForLocalsAndIters(int nLocals, int nIters) {
     return (sizeof(c_Continuation) + sizeof(TypedValue) * nLocals +
-            sizeof(VM::Iter) * nIters + sizeof(VM::ActRec));
+            sizeof(Iter) * nIters + sizeof(ActRec));
   }
-  VM::ActRec* actRec() {
+  ActRec* actRec() {
     return m_arPtr;
   }
   TypedValue* locals() {

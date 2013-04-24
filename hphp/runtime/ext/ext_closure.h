@@ -45,7 +45,7 @@ class c_Closure : public ExtObjectData {
 public:
   public: ObjectData* clone();
 
-  c_Closure* init(int numArgs, VM::ActRec* ar, TypedValue* sp);
+  c_Closure* init(int numArgs, ActRec* ar, TypedValue* sp);
   ObjectData* getThisOrClass() { return m_thisOrClass; }
   const VM::Func* getInvokeFunc() { return m_func; }
   HphpArray* getStaticLocals();

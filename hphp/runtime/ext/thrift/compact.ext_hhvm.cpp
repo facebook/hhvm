@@ -34,8 +34,8 @@ version => rdi
 
 int fh_thrift_protocol_set_compact_version(int version) asm("_ZN4HPHP37f_thrift_protocol_set_compact_versionEi");
 
-TypedValue * fg1_thrift_protocol_set_compact_version(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_thrift_protocol_set_compact_version(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_thrift_protocol_set_compact_version(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_thrift_protocol_set_compact_version(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToInt64InPlace(args-0);
@@ -43,7 +43,7 @@ TypedValue * fg1_thrift_protocol_set_compact_version(TypedValue* rv, HPHP::VM::A
   return rv;
 }
 
-TypedValue* fg_thrift_protocol_set_compact_version(HPHP::VM::ActRec *ar) {
+TypedValue* fg_thrift_protocol_set_compact_version(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -86,8 +86,8 @@ seqid => r8
 
 void fh_thrift_protocol_write_compact(Value* transportobj, Value* method_name, long msgtype, Value* request_struct, int seqid) asm("_ZN4HPHP31f_thrift_protocol_write_compactERKNS_6ObjectERKNS_6StringElS2_i");
 
-TypedValue * fg1_thrift_protocol_write_compact(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_thrift_protocol_write_compact(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_thrift_protocol_write_compact(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_thrift_protocol_write_compact(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -110,7 +110,7 @@ TypedValue * fg1_thrift_protocol_write_compact(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_thrift_protocol_write_compact(HPHP::VM::ActRec *ar) {
+TypedValue* fg_thrift_protocol_write_compact(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -153,8 +153,8 @@ obj_typename => rdx
 
 TypedValue* fh_thrift_protocol_read_compact(TypedValue* _rv, Value* transportobj, Value* obj_typename) asm("_ZN4HPHP30f_thrift_protocol_read_compactERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_thrift_protocol_read_compact(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_thrift_protocol_read_compact(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_thrift_protocol_read_compact(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_thrift_protocol_read_compact(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -167,7 +167,7 @@ TypedValue * fg1_thrift_protocol_read_compact(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_thrift_protocol_read_compact(HPHP::VM::ActRec *ar) {
+TypedValue* fg_thrift_protocol_read_compact(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

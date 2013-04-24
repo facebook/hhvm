@@ -25,13 +25,6 @@
 #include <runtime/base/types.h>
 
 namespace HPHP {
-namespace VM {
-class Class;
-class Stack;
-}
-}
-
-namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename Data>

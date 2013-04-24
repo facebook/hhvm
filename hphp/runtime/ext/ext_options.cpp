@@ -676,8 +676,8 @@ int64_t f_memory_get_allocation() {
     MemoryManager *mm = MemoryManager::TheMemoryManager();
     const MemoryUsageStats &stats = mm->getStats(true);
     int64_t ret = stats.totalAlloc;
-    ret -= VM::request_arena().slackEstimate() +
-           VM::varenv_arena().slackEstimate();
+    ret -= request_arena().slackEstimate() +
+           varenv_arena().slackEstimate();
     return ret;
   }
   return 0;
@@ -697,8 +697,8 @@ int64_t f_memory_get_usage(bool real_usage /* = false */) {
     MemoryManager *mm = MemoryManager::TheMemoryManager();
     const MemoryUsageStats &stats = mm->getStats(true);
     int64_t ret = real_usage ? stats.usage : stats.alloc;
-    ret -= VM::request_arena().slackEstimate() +
-           VM::varenv_arena().slackEstimate();
+    ret -= request_arena().slackEstimate() +
+           varenv_arena().slackEstimate();
     return ret;
   }
   return (int64_t)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;

@@ -17,7 +17,7 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/vm/hhbc.h>
 #include <runtime/vm/unit.h>
-#include <runtime/vm/stats.h>
+#include <runtime/base/stats.h>
 #include <sstream>
 
 namespace HPHP {

@@ -28,11 +28,11 @@ const uchar* InstPointInfo::lookupPC() {
   VMExecutionContext* context = g_vmContext;
   if (m_locType == LocHere) {
     // Instrument to current location
-    HPHP::VM::ActRec *fp = context->getFP();
+    ActRec *fp = context->getFP();
     if (!fp) {
       return nullptr;
     }
-    HPHP::VM::PC pc = context->getPC();
+    PC pc = context->getPC();
     HPHP::VM::Unit *unit = fp->m_func->unit();
     if (!unit) {
       return nullptr;

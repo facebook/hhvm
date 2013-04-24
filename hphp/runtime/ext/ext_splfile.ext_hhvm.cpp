@@ -36,8 +36,8 @@ file_name => rdx
 
 Value* fh_hphp_splfileinfo___construct(Value* _rv, Value* obj, Value* file_name) asm("_ZN4HPHP30f_hphp_splfileinfo___constructERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_hphp_splfileinfo___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo___construct(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo___construct(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -51,7 +51,7 @@ TypedValue * fg1_hphp_splfileinfo___construct(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo___construct(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -92,8 +92,8 @@ obj => rdi
 
 long fh_hphp_splfileinfo_getatime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getatimeERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getatime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getatime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getatime(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getatime(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -101,7 +101,7 @@ TypedValue * fg1_hphp_splfileinfo_getatime(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getatime(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getatime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -143,8 +143,8 @@ suffix => rdx
 
 Value* fh_hphp_splfileinfo_getbasename(Value* _rv, Value* obj, Value* suffix) asm("_ZN4HPHP30f_hphp_splfileinfo_getbasenameERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_hphp_splfileinfo_getbasename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getbasename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getbasename(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getbasename(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -158,7 +158,7 @@ TypedValue * fg1_hphp_splfileinfo_getbasename(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getbasename(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getbasename(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -199,8 +199,8 @@ obj => rdi
 
 long fh_hphp_splfileinfo_getctime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getctimeERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getctime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getctime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getctime(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getctime(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -208,7 +208,7 @@ TypedValue * fg1_hphp_splfileinfo_getctime(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getctime(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getctime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -250,8 +250,8 @@ class_name => rdx
 
 Value* fh_hphp_splfileinfo_getfileinfo(Value* _rv, Value* obj, Value* class_name) asm("_ZN4HPHP30f_hphp_splfileinfo_getfileinfoERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_hphp_splfileinfo_getfileinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getfileinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getfileinfo(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getfileinfo(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -265,7 +265,7 @@ TypedValue * fg1_hphp_splfileinfo_getfileinfo(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getfileinfo(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getfileinfo(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -307,8 +307,8 @@ obj => rsi
 
 Value* fh_hphp_splfileinfo_getfilename(Value* _rv, Value* obj) asm("_ZN4HPHP30f_hphp_splfileinfo_getfilenameERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getfilename(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getfilename(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getfilename(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -317,7 +317,7 @@ TypedValue * fg1_hphp_splfileinfo_getfilename(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getfilename(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getfilename(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -358,8 +358,8 @@ obj => rdi
 
 long fh_hphp_splfileinfo_getgroup(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getgroupERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getgroup(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getgroup(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getgroup(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getgroup(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -367,7 +367,7 @@ TypedValue * fg1_hphp_splfileinfo_getgroup(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getgroup(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getgroup(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -407,8 +407,8 @@ obj => rdi
 
 long fh_hphp_splfileinfo_getinode(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getinodeERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getinode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getinode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getinode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getinode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -416,7 +416,7 @@ TypedValue * fg1_hphp_splfileinfo_getinode(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getinode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getinode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -457,8 +457,8 @@ obj => rsi
 
 Value* fh_hphp_splfileinfo_getlinktarget(Value* _rv, Value* obj) asm("_ZN4HPHP32f_hphp_splfileinfo_getlinktargetERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getlinktarget(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getlinktarget(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getlinktarget(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getlinktarget(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -467,7 +467,7 @@ TypedValue * fg1_hphp_splfileinfo_getlinktarget(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getlinktarget(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getlinktarget(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -508,8 +508,8 @@ obj => rdi
 
 long fh_hphp_splfileinfo_getmtime(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getmtimeERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getmtime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getmtime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getmtime(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getmtime(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -517,7 +517,7 @@ TypedValue * fg1_hphp_splfileinfo_getmtime(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getmtime(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getmtime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -557,8 +557,8 @@ obj => rdi
 
 long fh_hphp_splfileinfo_getowner(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getownerERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getowner(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getowner(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getowner(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getowner(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -566,7 +566,7 @@ TypedValue * fg1_hphp_splfileinfo_getowner(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getowner(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getowner(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -607,8 +607,8 @@ obj => rsi
 
 Value* fh_hphp_splfileinfo_getpath(Value* _rv, Value* obj) asm("_ZN4HPHP26f_hphp_splfileinfo_getpathERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getpath(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getpath(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -617,7 +617,7 @@ TypedValue * fg1_hphp_splfileinfo_getpath(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getpath(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getpath(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -660,8 +660,8 @@ class_name => rdx
 
 Value* fh_hphp_splfileinfo_getpathinfo(Value* _rv, Value* obj, Value* class_name) asm("_ZN4HPHP30f_hphp_splfileinfo_getpathinfoERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_hphp_splfileinfo_getpathinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getpathinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getpathinfo(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getpathinfo(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -675,7 +675,7 @@ TypedValue * fg1_hphp_splfileinfo_getpathinfo(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getpathinfo(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getpathinfo(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -717,8 +717,8 @@ obj => rsi
 
 Value* fh_hphp_splfileinfo_getpathname(Value* _rv, Value* obj) asm("_ZN4HPHP30f_hphp_splfileinfo_getpathnameERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getpathname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getpathname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getpathname(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getpathname(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -727,7 +727,7 @@ TypedValue * fg1_hphp_splfileinfo_getpathname(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getpathname(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getpathname(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -768,8 +768,8 @@ obj => rdi
 
 long fh_hphp_splfileinfo_getperms(Value* obj) asm("_ZN4HPHP27f_hphp_splfileinfo_getpermsERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getperms(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getperms(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getperms(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getperms(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -777,7 +777,7 @@ TypedValue * fg1_hphp_splfileinfo_getperms(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getperms(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getperms(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -818,8 +818,8 @@ obj => rsi
 
 TypedValue* fh_hphp_splfileinfo_getrealpath(TypedValue* _rv, Value* obj) asm("_ZN4HPHP30f_hphp_splfileinfo_getrealpathERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getrealpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getrealpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getrealpath(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getrealpath(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileinfo_getrealpath((rv), &args[-0].m_data);
@@ -827,7 +827,7 @@ TypedValue * fg1_hphp_splfileinfo_getrealpath(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getrealpath(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getrealpath(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -867,8 +867,8 @@ obj => rdi
 
 long fh_hphp_splfileinfo_getsize(Value* obj) asm("_ZN4HPHP26f_hphp_splfileinfo_getsizeERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_getsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_getsize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_getsize(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_getsize(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -876,7 +876,7 @@ TypedValue * fg1_hphp_splfileinfo_getsize(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_getsize(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_getsize(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -917,8 +917,8 @@ obj => rsi
 
 Value* fh_hphp_splfileinfo_gettype(Value* _rv, Value* obj) asm("_ZN4HPHP26f_hphp_splfileinfo_gettypeERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_gettype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_gettype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_gettype(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_gettype(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -927,7 +927,7 @@ TypedValue * fg1_hphp_splfileinfo_gettype(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_gettype(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_gettype(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -968,8 +968,8 @@ obj => rdi
 
 bool fh_hphp_splfileinfo_isdir(Value* obj) asm("_ZN4HPHP24f_hphp_splfileinfo_isdirERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_isdir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_isdir(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_isdir(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_isdir(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -977,7 +977,7 @@ TypedValue * fg1_hphp_splfileinfo_isdir(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_isdir(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_isdir(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1017,8 +1017,8 @@ obj => rdi
 
 bool fh_hphp_splfileinfo_isexecutable(Value* obj) asm("_ZN4HPHP31f_hphp_splfileinfo_isexecutableERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_isexecutable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_isexecutable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_isexecutable(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_isexecutable(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1026,7 +1026,7 @@ TypedValue * fg1_hphp_splfileinfo_isexecutable(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_isexecutable(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_isexecutable(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1066,8 +1066,8 @@ obj => rdi
 
 bool fh_hphp_splfileinfo_isfile(Value* obj) asm("_ZN4HPHP25f_hphp_splfileinfo_isfileERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_isfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_isfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_isfile(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_isfile(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1075,7 +1075,7 @@ TypedValue * fg1_hphp_splfileinfo_isfile(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_isfile(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_isfile(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1115,8 +1115,8 @@ obj => rdi
 
 bool fh_hphp_splfileinfo_islink(Value* obj) asm("_ZN4HPHP25f_hphp_splfileinfo_islinkERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_islink(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_islink(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_islink(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_islink(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1124,7 +1124,7 @@ TypedValue * fg1_hphp_splfileinfo_islink(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_islink(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_islink(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1164,8 +1164,8 @@ obj => rdi
 
 bool fh_hphp_splfileinfo_isreadable(Value* obj) asm("_ZN4HPHP29f_hphp_splfileinfo_isreadableERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_isreadable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_isreadable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_isreadable(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_isreadable(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1173,7 +1173,7 @@ TypedValue * fg1_hphp_splfileinfo_isreadable(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_isreadable(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_isreadable(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1213,8 +1213,8 @@ obj => rdi
 
 bool fh_hphp_splfileinfo_iswritable(Value* obj) asm("_ZN4HPHP29f_hphp_splfileinfo_iswritableERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo_iswritable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_iswritable(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_iswritable(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_iswritable(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1222,7 +1222,7 @@ TypedValue * fg1_hphp_splfileinfo_iswritable(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_iswritable(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_iswritable(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1266,8 +1266,8 @@ context => r8
 
 Value* fh_hphp_splfileinfo_openfile(Value* _rv, Value* obj, Value* open_mode, bool use_include_path, TypedValue* context) asm("_ZN4HPHP27f_hphp_splfileinfo_openfileERKNS_6ObjectERKNS_6StringEbRKNS_7VariantE");
 
-TypedValue * fg1_hphp_splfileinfo_openfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_openfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_openfile(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_openfile(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if ((args-2)->m_type != KindOfBoolean) {
@@ -1284,7 +1284,7 @@ TypedValue * fg1_hphp_splfileinfo_openfile(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_openfile(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_openfile(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1325,8 +1325,8 @@ class_name => rsi
 
 void fh_hphp_splfileinfo_setfileclass(Value* obj, Value* class_name) asm("_ZN4HPHP31f_hphp_splfileinfo_setfileclassERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_hphp_splfileinfo_setfileclass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_setfileclass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_setfileclass(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_setfileclass(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1340,7 +1340,7 @@ TypedValue * fg1_hphp_splfileinfo_setfileclass(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_setfileclass(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_setfileclass(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1381,8 +1381,8 @@ class_name => rsi
 
 void fh_hphp_splfileinfo_setinfoclass(Value* obj, Value* class_name) asm("_ZN4HPHP31f_hphp_splfileinfo_setinfoclassERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_hphp_splfileinfo_setinfoclass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo_setinfoclass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo_setinfoclass(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo_setinfoclass(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1396,7 +1396,7 @@ TypedValue * fg1_hphp_splfileinfo_setinfoclass(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo_setinfoclass(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo_setinfoclass(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1438,8 +1438,8 @@ obj => rsi
 
 Value* fh_hphp_splfileinfo___tostring(Value* _rv, Value* obj) asm("_ZN4HPHP29f_hphp_splfileinfo___tostringERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileinfo___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileinfo___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileinfo___tostring(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileinfo___tostring(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -1448,7 +1448,7 @@ TypedValue * fg1_hphp_splfileinfo___tostring(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_hphp_splfileinfo___tostring(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileinfo___tostring(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1494,8 +1494,8 @@ context => r9
 
 Value* fh_hphp_splfileobject___construct(Value* _rv, Value* obj, Value* filename, Value* open_mode, bool use_include_path, TypedValue* context) asm("_ZN4HPHP32f_hphp_splfileobject___constructERKNS_6ObjectERKNS_6StringES5_bRKNS_7VariantE");
 
-TypedValue * fg1_hphp_splfileobject___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject___construct(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject___construct(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if ((args-3)->m_type != KindOfBoolean) {
@@ -1515,7 +1515,7 @@ TypedValue * fg1_hphp_splfileobject___construct(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject___construct(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1557,8 +1557,8 @@ obj => rsi
 
 TypedValue* fh_hphp_splfileobject_current(TypedValue* _rv, Value* obj) asm("_ZN4HPHP28f_hphp_splfileobject_currentERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_current(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_current(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_current(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_current(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileobject_current((rv), &args[-0].m_data);
@@ -1566,7 +1566,7 @@ TypedValue * fg1_hphp_splfileobject_current(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_current(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_current(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1606,8 +1606,8 @@ obj => rdi
 
 bool fh_hphp_splfileobject_eof(Value* obj) asm("_ZN4HPHP24f_hphp_splfileobject_eofERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_eof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_eof(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_eof(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_eof(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1615,7 +1615,7 @@ TypedValue * fg1_hphp_splfileobject_eof(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_eof(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_eof(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1655,8 +1655,8 @@ obj => rdi
 
 bool fh_hphp_splfileobject_fflush(Value* obj) asm("_ZN4HPHP27f_hphp_splfileobject_fflushERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_fflush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_fflush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_fflush(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_fflush(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1664,7 +1664,7 @@ TypedValue * fg1_hphp_splfileobject_fflush(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_fflush(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_fflush(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1705,8 +1705,8 @@ obj => rsi
 
 Value* fh_hphp_splfileobject_fgetc(Value* _rv, Value* obj) asm("_ZN4HPHP26f_hphp_splfileobject_fgetcERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_fgetc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_fgetc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_fgetc(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_fgetc(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -1715,7 +1715,7 @@ TypedValue * fg1_hphp_splfileobject_fgetc(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_fgetc(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_fgetc(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1760,8 +1760,8 @@ escape => r8
 
 TypedValue* fh_hphp_splfileobject_fgetcsv(TypedValue* _rv, Value* obj, Value* delimiter, Value* enclosure, Value* escape) asm("_ZN4HPHP28f_hphp_splfileobject_fgetcsvERKNS_6ObjectERKNS_6StringES5_S5_");
 
-TypedValue * fg1_hphp_splfileobject_fgetcsv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_fgetcsv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_fgetcsv(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_fgetcsv(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -1780,7 +1780,7 @@ TypedValue * fg1_hphp_splfileobject_fgetcsv(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_fgetcsv(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_fgetcsv(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1821,8 +1821,8 @@ obj => rsi
 
 Value* fh_hphp_splfileobject_fgets(Value* _rv, Value* obj) asm("_ZN4HPHP26f_hphp_splfileobject_fgetsERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_fgets(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_fgets(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_fgets(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_fgets(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -1831,7 +1831,7 @@ TypedValue * fg1_hphp_splfileobject_fgets(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_fgets(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_fgets(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1874,8 +1874,8 @@ allowable_tags => rdx
 
 Value* fh_hphp_splfileobject_fgetss(Value* _rv, Value* obj, Value* allowable_tags) asm("_ZN4HPHP27f_hphp_splfileobject_fgetssERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_hphp_splfileobject_fgetss(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_fgetss(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_fgetss(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_fgetss(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -1889,7 +1889,7 @@ TypedValue * fg1_hphp_splfileobject_fgetss(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_fgetss(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_fgetss(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1931,8 +1931,8 @@ wouldblock => rsi
 
 bool fh_hphp_splfileobject_flock(Value* obj, TypedValue* wouldblock) asm("_ZN4HPHP26f_hphp_splfileobject_flockERKNS_6ObjectERKNS_14VRefParamValueE");
 
-TypedValue * fg1_hphp_splfileobject_flock(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_flock(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_flock(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_flock(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1940,7 +1940,7 @@ TypedValue * fg1_hphp_splfileobject_flock(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_flock(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_flock(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1980,8 +1980,8 @@ obj => rdi
 
 long fh_hphp_splfileobject_fpassthru(Value* obj) asm("_ZN4HPHP30f_hphp_splfileobject_fpassthruERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_fpassthru(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_fpassthru(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_fpassthru(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_fpassthru(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -1989,7 +1989,7 @@ TypedValue * fg1_hphp_splfileobject_fpassthru(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_fpassthru(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_fpassthru(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2033,8 +2033,8 @@ _argv => r8
 
 TypedValue* fh_hphp_splfileobject_fscanf(TypedValue* _rv, long _argc, Value* obj, Value* format, TypedValue* _argv) asm("_ZN4HPHP27f_hphp_splfileobject_fscanfElRKNS_6ObjectERKNS_6StringERKNS_7VariantE");
 
-TypedValue * fg1_hphp_splfileobject_fscanf(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_fscanf(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_fscanf(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_fscanf(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -2050,7 +2050,7 @@ TypedValue * fg1_hphp_splfileobject_fscanf(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_fscanf(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_fscanf(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2092,8 +2092,8 @@ whence => rdx
 
 long fh_hphp_splfileobject_fseek(Value* obj, long offset, long whence) asm("_ZN4HPHP26f_hphp_splfileobject_fseekERKNS_6ObjectEll");
 
-TypedValue * fg1_hphp_splfileobject_fseek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_fseek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_fseek(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_fseek(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   if ((args-2)->m_type != KindOfInt64) {
@@ -2109,7 +2109,7 @@ TypedValue * fg1_hphp_splfileobject_fseek(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_fseek(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_fseek(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2150,8 +2150,8 @@ obj => rsi
 
 TypedValue* fh_hphp_splfileobject_fstat(TypedValue* _rv, Value* obj) asm("_ZN4HPHP26f_hphp_splfileobject_fstatERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_fstat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_fstat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_fstat(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_fstat(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileobject_fstat((rv), &args[-0].m_data);
@@ -2159,7 +2159,7 @@ TypedValue * fg1_hphp_splfileobject_fstat(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_fstat(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_fstat(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2199,8 +2199,8 @@ obj => rdi
 
 long fh_hphp_splfileobject_ftell(Value* obj) asm("_ZN4HPHP26f_hphp_splfileobject_ftellERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_ftell(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_ftell(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_ftell(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_ftell(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -2208,7 +2208,7 @@ TypedValue * fg1_hphp_splfileobject_ftell(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_ftell(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_ftell(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2249,8 +2249,8 @@ size => rsi
 
 bool fh_hphp_splfileobject_ftruncate(Value* obj, long size) asm("_ZN4HPHP30f_hphp_splfileobject_ftruncateERKNS_6ObjectEl");
 
-TypedValue * fg1_hphp_splfileobject_ftruncate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_ftruncate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_ftruncate(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_ftruncate(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
@@ -2263,7 +2263,7 @@ TypedValue * fg1_hphp_splfileobject_ftruncate(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_ftruncate(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_ftruncate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2305,8 +2305,8 @@ length => rdx
 
 long fh_hphp_splfileobject_fwrite(Value* obj, Value* str, long length) asm("_ZN4HPHP27f_hphp_splfileobject_fwriteERKNS_6ObjectERKNS_6StringEl");
 
-TypedValue * fg1_hphp_splfileobject_fwrite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_fwrite(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_fwrite(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_fwrite(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   if ((args-2)->m_type != KindOfInt64) {
@@ -2322,7 +2322,7 @@ TypedValue * fg1_hphp_splfileobject_fwrite(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_fwrite(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_fwrite(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2363,8 +2363,8 @@ obj => rsi
 
 TypedValue* fh_hphp_splfileobject_getcvscontrol(TypedValue* _rv, Value* obj) asm("_ZN4HPHP34f_hphp_splfileobject_getcvscontrolERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_getcvscontrol(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_getcvscontrol(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_getcvscontrol(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_getcvscontrol(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_hphp_splfileobject_getcvscontrol((rv), &args[-0].m_data);
@@ -2372,7 +2372,7 @@ TypedValue * fg1_hphp_splfileobject_getcvscontrol(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_getcvscontrol(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_getcvscontrol(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2412,8 +2412,8 @@ obj => rdi
 
 long fh_hphp_splfileobject_getflags(Value* obj) asm("_ZN4HPHP29f_hphp_splfileobject_getflagsERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_getflags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_getflags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_getflags(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_getflags(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -2421,7 +2421,7 @@ TypedValue * fg1_hphp_splfileobject_getflags(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_getflags(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_getflags(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2461,8 +2461,8 @@ obj => rdi
 
 long fh_hphp_splfileobject_getmaxlinelen(Value* obj) asm("_ZN4HPHP34f_hphp_splfileobject_getmaxlinelenERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_getmaxlinelen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_getmaxlinelen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_getmaxlinelen(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_getmaxlinelen(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -2470,7 +2470,7 @@ TypedValue * fg1_hphp_splfileobject_getmaxlinelen(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_getmaxlinelen(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_getmaxlinelen(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2510,8 +2510,8 @@ obj => rdi
 
 long fh_hphp_splfileobject_key(Value* obj) asm("_ZN4HPHP24f_hphp_splfileobject_keyERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_key(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_key(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -2519,7 +2519,7 @@ TypedValue * fg1_hphp_splfileobject_key(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_key(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_key(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2558,8 +2558,8 @@ obj => rdi
 
 void fh_hphp_splfileobject_next(Value* obj) asm("_ZN4HPHP25f_hphp_splfileobject_nextERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_next(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_next(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -2568,7 +2568,7 @@ TypedValue * fg1_hphp_splfileobject_next(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_next(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_next(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2608,8 +2608,8 @@ obj => rdi
 
 void fh_hphp_splfileobject_rewind(Value* obj) asm("_ZN4HPHP27f_hphp_splfileobject_rewindERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_rewind(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_rewind(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -2618,7 +2618,7 @@ TypedValue * fg1_hphp_splfileobject_rewind(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_rewind(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_rewind(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2659,8 +2659,8 @@ obj => rdi
 
 bool fh_hphp_splfileobject_valid(Value* obj) asm("_ZN4HPHP26f_hphp_splfileobject_validERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_splfileobject_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_valid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_valid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -2668,7 +2668,7 @@ TypedValue * fg1_hphp_splfileobject_valid(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_valid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_valid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2708,8 +2708,8 @@ line_pos => rsi
 
 void fh_hphp_splfileobject_seek(Value* obj, long line_pos) asm("_ZN4HPHP25f_hphp_splfileobject_seekERKNS_6ObjectEl");
 
-TypedValue * fg1_hphp_splfileobject_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_seek(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_seek(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -2723,7 +2723,7 @@ TypedValue * fg1_hphp_splfileobject_seek(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_seek(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_seek(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2766,8 +2766,8 @@ escape => rcx
 
 void fh_hphp_splfileobject_setcsvcontrol(Value* obj, Value* delimiter, Value* enclosure, Value* escape) asm("_ZN4HPHP34f_hphp_splfileobject_setcsvcontrolERKNS_6ObjectERKNS_6StringES5_S5_");
 
-TypedValue * fg1_hphp_splfileobject_setcsvcontrol(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_setcsvcontrol(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_setcsvcontrol(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_setcsvcontrol(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -2787,7 +2787,7 @@ TypedValue * fg1_hphp_splfileobject_setcsvcontrol(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_setcsvcontrol(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_setcsvcontrol(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2828,8 +2828,8 @@ flags => rsi
 
 void fh_hphp_splfileobject_setflags(Value* obj, long flags) asm("_ZN4HPHP29f_hphp_splfileobject_setflagsERKNS_6ObjectEl");
 
-TypedValue * fg1_hphp_splfileobject_setflags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_setflags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_setflags(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_setflags(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -2843,7 +2843,7 @@ TypedValue * fg1_hphp_splfileobject_setflags(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_setflags(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_setflags(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2884,8 +2884,8 @@ max_len => rsi
 
 void fh_hphp_splfileobject_setmaxlinelen(Value* obj, long max_len) asm("_ZN4HPHP34f_hphp_splfileobject_setmaxlinelenERKNS_6ObjectEl");
 
-TypedValue * fg1_hphp_splfileobject_setmaxlinelen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_splfileobject_setmaxlinelen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_splfileobject_setmaxlinelen(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_splfileobject_setmaxlinelen(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -2899,7 +2899,7 @@ TypedValue * fg1_hphp_splfileobject_setmaxlinelen(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* fg_hphp_splfileobject_setmaxlinelen(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_splfileobject_setmaxlinelen(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

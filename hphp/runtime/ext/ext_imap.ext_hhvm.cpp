@@ -35,8 +35,8 @@ str => rsi
 
 TypedValue* fh_imap_8bit(TypedValue* _rv, Value* str) asm("_ZN4HPHP11f_imap_8bitERKNS_6StringE");
 
-TypedValue * fg1_imap_8bit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_8bit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_8bit(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_8bit(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imap_8bit((rv), &args[-0].m_data);
@@ -44,7 +44,7 @@ TypedValue * fg1_imap_8bit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_imap_8bit(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_8bit(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -84,7 +84,7 @@ _rv => rdi
 
 TypedValue* fh_imap_alerts(TypedValue* _rv) asm("_ZN4HPHP13f_imap_alertsEv");
 
-TypedValue* fg_imap_alerts(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_alerts(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -120,8 +120,8 @@ options => rcx
 
 bool fh_imap_append(Value* imap_stream, Value* mailbox, Value* message, Value* options) asm("_ZN4HPHP13f_imap_appendERKNS_6ObjectERKNS_6StringES5_S5_");
 
-TypedValue * fg1_imap_append(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_append(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_append(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_append(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -145,7 +145,7 @@ TypedValue * fg1_imap_append(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_append(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_append(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -186,8 +186,8 @@ text => rsi
 
 TypedValue* fh_imap_base64(TypedValue* _rv, Value* text) asm("_ZN4HPHP13f_imap_base64ERKNS_6StringE");
 
-TypedValue * fg1_imap_base64(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_base64(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_base64(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_base64(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imap_base64((rv), &args[-0].m_data);
@@ -195,7 +195,7 @@ TypedValue * fg1_imap_base64(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_base64(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_base64(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -236,8 +236,8 @@ str => rsi
 
 TypedValue* fh_imap_binary(TypedValue* _rv, Value* str) asm("_ZN4HPHP13f_imap_binaryERKNS_6StringE");
 
-TypedValue * fg1_imap_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_binary(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_binary(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imap_binary((rv), &args[-0].m_data);
@@ -245,7 +245,7 @@ TypedValue * fg1_imap_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_binary(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_binary(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -288,8 +288,8 @@ options => rcx
 
 TypedValue* fh_imap_body(TypedValue* _rv, Value* imap_stream, long msg_number, long options) asm("_ZN4HPHP11f_imap_bodyERKNS_6ObjectEll");
 
-TypedValue * fg1_imap_body(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_body(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_body(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_body(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -310,7 +310,7 @@ TypedValue * fg1_imap_body(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_imap_body(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_body(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -353,8 +353,8 @@ section => rcx
 
 TypedValue* fh_imap_bodystruct(TypedValue* _rv, Value* imap_stream, long msg_number, Value* section) asm("_ZN4HPHP17f_imap_bodystructERKNS_6ObjectElRKNS_6StringE");
 
-TypedValue * fg1_imap_bodystruct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_bodystruct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_bodystruct(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_bodystruct(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -370,7 +370,7 @@ TypedValue * fg1_imap_bodystruct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_imap_bodystruct(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_bodystruct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -411,8 +411,8 @@ imap_stream => rsi
 
 TypedValue* fh_imap_check(TypedValue* _rv, Value* imap_stream) asm("_ZN4HPHP12f_imap_checkERKNS_6ObjectE");
 
-TypedValue * fg1_imap_check(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_check(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_check(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_check(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_imap_check((rv), &args[-0].m_data);
@@ -420,7 +420,7 @@ TypedValue * fg1_imap_check(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_imap_check(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_check(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -463,8 +463,8 @@ options => rcx
 
 bool fh_imap_clearflag_full(Value* imap_stream, Value* sequence, Value* flag, long options) asm("_ZN4HPHP21f_imap_clearflag_fullERKNS_6ObjectERKNS_6StringES5_l");
 
-TypedValue * fg1_imap_clearflag_full(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_clearflag_full(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_clearflag_full(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_clearflag_full(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -488,7 +488,7 @@ TypedValue * fg1_imap_clearflag_full(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_imap_clearflag_full(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_clearflag_full(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -529,8 +529,8 @@ flag => rsi
 
 bool fh_imap_close(Value* imap_stream, long flag) asm("_ZN4HPHP12f_imap_closeERKNS_6ObjectEl");
 
-TypedValue * fg1_imap_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_close(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_close(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -548,7 +548,7 @@ TypedValue * fg1_imap_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_imap_close(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_close(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -589,8 +589,8 @@ mailbox => rsi
 
 bool fh_imap_createmailbox(Value* imap_stream, Value* mailbox) asm("_ZN4HPHP20f_imap_createmailboxERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_imap_createmailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_createmailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_createmailbox(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_createmailbox(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -603,7 +603,7 @@ TypedValue * fg1_imap_createmailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_imap_createmailbox(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_createmailbox(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -645,8 +645,8 @@ options => rdx
 
 bool fh_imap_delete(Value* imap_stream, Value* msg_number, long options) asm("_ZN4HPHP13f_imap_deleteERKNS_6ObjectERKNS_6StringEl");
 
-TypedValue * fg1_imap_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_delete(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_delete(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -667,7 +667,7 @@ TypedValue * fg1_imap_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_delete(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_delete(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -708,8 +708,8 @@ mailbox => rsi
 
 bool fh_imap_deletemailbox(Value* imap_stream, Value* mailbox) asm("_ZN4HPHP20f_imap_deletemailboxERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_imap_deletemailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_deletemailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_deletemailbox(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_deletemailbox(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -722,7 +722,7 @@ TypedValue * fg1_imap_deletemailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_imap_deletemailbox(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_deletemailbox(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -762,7 +762,7 @@ _rv => rdi
 
 TypedValue* fh_imap_errors(TypedValue* _rv) asm("_ZN4HPHP13f_imap_errorsEv");
 
-TypedValue* fg_imap_errors(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_errors(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -795,8 +795,8 @@ imap_stream => rdi
 
 bool fh_imap_expunge(Value* imap_stream) asm("_ZN4HPHP14f_imap_expungeERKNS_6ObjectE");
 
-TypedValue * fg1_imap_expunge(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_expunge(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_expunge(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_expunge(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -804,7 +804,7 @@ TypedValue * fg1_imap_expunge(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_imap_expunge(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_expunge(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -847,8 +847,8 @@ options => rcx
 
 TypedValue* fh_imap_fetch_overview(TypedValue* _rv, Value* imap_stream, Value* sequence, long options) asm("_ZN4HPHP21f_imap_fetch_overviewERKNS_6ObjectERKNS_6StringEl");
 
-TypedValue * fg1_imap_fetch_overview(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_fetch_overview(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_fetch_overview(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_fetch_overview(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -869,7 +869,7 @@ TypedValue * fg1_imap_fetch_overview(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_imap_fetch_overview(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_fetch_overview(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -913,8 +913,8 @@ options => r8
 
 TypedValue* fh_imap_fetchbody(TypedValue* _rv, Value* imap_stream, long msg_number, Value* section, long options) asm("_ZN4HPHP16f_imap_fetchbodyERKNS_6ObjectElRKNS_6StringEl");
 
-TypedValue * fg1_imap_fetchbody(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_fetchbody(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_fetchbody(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_fetchbody(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -938,7 +938,7 @@ TypedValue * fg1_imap_fetchbody(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_imap_fetchbody(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_fetchbody(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -981,8 +981,8 @@ options => rcx
 
 TypedValue* fh_imap_fetchheader(TypedValue* _rv, Value* imap_stream, long msg_number, long options) asm("_ZN4HPHP18f_imap_fetchheaderERKNS_6ObjectEll");
 
-TypedValue * fg1_imap_fetchheader(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_fetchheader(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_fetchheader(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_fetchheader(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -1003,7 +1003,7 @@ TypedValue * fg1_imap_fetchheader(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_imap_fetchheader(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_fetchheader(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1046,8 +1046,8 @@ options => rcx
 
 TypedValue* fh_imap_fetchstructure(TypedValue* _rv, Value* imap_stream, long msg_number, long options) asm("_ZN4HPHP21f_imap_fetchstructureERKNS_6ObjectEll");
 
-TypedValue * fg1_imap_fetchstructure(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_fetchstructure(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_fetchstructure(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_fetchstructure(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -1068,7 +1068,7 @@ TypedValue * fg1_imap_fetchstructure(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_imap_fetchstructure(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_fetchstructure(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1109,8 +1109,8 @@ caches => rsi
 
 bool fh_imap_gc(Value* imap_stream, long caches) asm("_ZN4HPHP9f_imap_gcERKNS_6ObjectEl");
 
-TypedValue * fg1_imap_gc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_gc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_gc(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_gc(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
@@ -1123,7 +1123,7 @@ TypedValue * fg1_imap_gc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_imap_gc(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_gc(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1165,8 +1165,8 @@ quota_root => rdx
 
 TypedValue* fh_imap_get_quota(TypedValue* _rv, Value* imap_stream, Value* quota_root) asm("_ZN4HPHP16f_imap_get_quotaERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_imap_get_quota(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_get_quota(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_get_quota(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_get_quota(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1179,7 +1179,7 @@ TypedValue * fg1_imap_get_quota(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_imap_get_quota(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_get_quota(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1221,8 +1221,8 @@ quota_root => rdx
 
 TypedValue* fh_imap_get_quotaroot(TypedValue* _rv, Value* imap_stream, Value* quota_root) asm("_ZN4HPHP20f_imap_get_quotarootERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_imap_get_quotaroot(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_get_quotaroot(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_get_quotaroot(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_get_quotaroot(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1235,7 +1235,7 @@ TypedValue * fg1_imap_get_quotaroot(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_imap_get_quotaroot(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_get_quotaroot(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1277,8 +1277,8 @@ mailbox => rdx
 
 TypedValue* fh_imap_getacl(TypedValue* _rv, Value* imap_stream, Value* mailbox) asm("_ZN4HPHP13f_imap_getaclERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_imap_getacl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_getacl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_getacl(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_getacl(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1291,7 +1291,7 @@ TypedValue * fg1_imap_getacl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_getacl(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_getacl(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1334,8 +1334,8 @@ pattern => rcx
 
 TypedValue* fh_imap_getmailboxes(TypedValue* _rv, Value* imap_stream, Value* ref, Value* pattern) asm("_ZN4HPHP19f_imap_getmailboxesERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_imap_getmailboxes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_getmailboxes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_getmailboxes(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_getmailboxes(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -1351,7 +1351,7 @@ TypedValue * fg1_imap_getmailboxes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_imap_getmailboxes(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_getmailboxes(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1394,8 +1394,8 @@ pattern => rcx
 
 TypedValue* fh_imap_getsubscribed(TypedValue* _rv, Value* imap_stream, Value* ref, Value* pattern) asm("_ZN4HPHP20f_imap_getsubscribedERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_imap_getsubscribed(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_getsubscribed(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_getsubscribed(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_getsubscribed(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -1411,7 +1411,7 @@ TypedValue * fg1_imap_getsubscribed(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_imap_getsubscribed(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_getsubscribed(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1456,8 +1456,8 @@ defaulthost => r9
 
 TypedValue* fh_imap_header(TypedValue* _rv, Value* imap_stream, long msg_number, long fromlength, long subjectlength, Value* defaulthost) asm("_ZN4HPHP13f_imap_headerERKNS_6ObjectElllRKNS_6StringE");
 
-TypedValue * fg1_imap_header(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_header(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_header(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_header(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -1486,7 +1486,7 @@ TypedValue * fg1_imap_header(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_header(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_header(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1531,8 +1531,8 @@ defaulthost => r9
 
 TypedValue* fh_imap_headerinfo(TypedValue* _rv, Value* imap_stream, long msg_number, long fromlength, long subjectlength, Value* defaulthost) asm("_ZN4HPHP17f_imap_headerinfoERKNS_6ObjectElllRKNS_6StringE");
 
-TypedValue * fg1_imap_headerinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_headerinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_headerinfo(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_headerinfo(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -1561,7 +1561,7 @@ TypedValue * fg1_imap_headerinfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_imap_headerinfo(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_headerinfo(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1602,8 +1602,8 @@ imap_stream => rsi
 
 TypedValue* fh_imap_headers(TypedValue* _rv, Value* imap_stream) asm("_ZN4HPHP14f_imap_headersERKNS_6ObjectE");
 
-TypedValue * fg1_imap_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_headers(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_headers(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_imap_headers((rv), &args[-0].m_data);
@@ -1611,7 +1611,7 @@ TypedValue * fg1_imap_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_imap_headers(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_headers(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1651,7 +1651,7 @@ _rv => rdi
 
 TypedValue* fh_imap_last_error(TypedValue* _rv) asm("_ZN4HPHP17f_imap_last_errorEv");
 
-TypedValue* fg_imap_last_error(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_last_error(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1687,8 +1687,8 @@ pattern => rcx
 
 TypedValue* fh_imap_list(TypedValue* _rv, Value* imap_stream, Value* ref, Value* pattern) asm("_ZN4HPHP11f_imap_listERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_imap_list(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_list(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_list(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_list(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -1704,7 +1704,7 @@ TypedValue * fg1_imap_list(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_imap_list(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_list(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1747,8 +1747,8 @@ pattern => rcx
 
 TypedValue* fh_imap_listmailbox(TypedValue* _rv, Value* imap_stream, Value* ref, Value* pattern) asm("_ZN4HPHP18f_imap_listmailboxERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_imap_listmailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_listmailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_listmailbox(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_listmailbox(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -1764,7 +1764,7 @@ TypedValue * fg1_imap_listmailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_imap_listmailbox(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_listmailbox(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1808,8 +1808,8 @@ content => r8
 
 TypedValue* fh_imap_listscan(TypedValue* _rv, Value* imap_stream, Value* ref, Value* pattern, Value* content) asm("_ZN4HPHP15f_imap_listscanERKNS_6ObjectERKNS_6StringES5_S5_");
 
-TypedValue * fg1_imap_listscan(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_listscan(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_listscan(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_listscan(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -1828,7 +1828,7 @@ TypedValue * fg1_imap_listscan(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_imap_listscan(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_listscan(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1871,8 +1871,8 @@ pattern => rcx
 
 TypedValue* fh_imap_listsubscribed(TypedValue* _rv, Value* imap_stream, Value* ref, Value* pattern) asm("_ZN4HPHP21f_imap_listsubscribedERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_imap_listsubscribed(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_listsubscribed(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_listsubscribed(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_listsubscribed(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -1888,7 +1888,7 @@ TypedValue * fg1_imap_listsubscribed(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_imap_listsubscribed(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_listsubscribed(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1931,8 +1931,8 @@ pattern => rcx
 
 TypedValue* fh_imap_lsub(TypedValue* _rv, Value* imap_stream, Value* ref, Value* pattern) asm("_ZN4HPHP11f_imap_lsubERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_imap_lsub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_lsub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_lsub(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_lsub(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -1948,7 +1948,7 @@ TypedValue * fg1_imap_lsub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_imap_lsub(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_lsub(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1990,8 +1990,8 @@ body => rdx
 
 TypedValue* fh_imap_mail_compose(TypedValue* _rv, Value* envelope, Value* body) asm("_ZN4HPHP19f_imap_mail_composeERKNS_5ArrayES2_");
 
-TypedValue * fg1_imap_mail_compose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_mail_compose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_mail_compose(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_mail_compose(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfArray) {
     tvCastToArrayInPlace(args-1);
@@ -2004,7 +2004,7 @@ TypedValue * fg1_imap_mail_compose(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_imap_mail_compose(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_mail_compose(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2047,8 +2047,8 @@ options => rcx
 
 bool fh_imap_mail_copy(Value* imap_stream, Value* msglist, Value* mailbox, long options) asm("_ZN4HPHP16f_imap_mail_copyERKNS_6ObjectERKNS_6StringES5_l");
 
-TypedValue * fg1_imap_mail_copy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_mail_copy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_mail_copy(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_mail_copy(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -2072,7 +2072,7 @@ TypedValue * fg1_imap_mail_copy(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_imap_mail_copy(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_mail_copy(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2115,8 +2115,8 @@ options => rcx
 
 bool fh_imap_mail_move(Value* imap_stream, Value* msglist, Value* mailbox, long options) asm("_ZN4HPHP16f_imap_mail_moveERKNS_6ObjectERKNS_6StringES5_l");
 
-TypedValue * fg1_imap_mail_move(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_mail_move(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_mail_move(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_mail_move(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -2140,7 +2140,7 @@ TypedValue * fg1_imap_mail_move(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_imap_mail_move(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_mail_move(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2186,8 +2186,8 @@ rpath => st0
 
 bool fh_imap_mail(Value* to, Value* subject, Value* message, Value* additional_headers, Value* cc, Value* bcc, Value* rpath) asm("_ZN4HPHP11f_imap_mailERKNS_6StringES2_S2_S2_S2_S2_S2_");
 
-TypedValue * fg1_imap_mail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_mail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_mail(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_mail(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -2223,7 +2223,7 @@ TypedValue * fg1_imap_mail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_imap_mail(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_mail(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2264,8 +2264,8 @@ imap_stream => rsi
 
 TypedValue* fh_imap_mailboxmsginfo(TypedValue* _rv, Value* imap_stream) asm("_ZN4HPHP21f_imap_mailboxmsginfoERKNS_6ObjectE");
 
-TypedValue * fg1_imap_mailboxmsginfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_mailboxmsginfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_mailboxmsginfo(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_mailboxmsginfo(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_imap_mailboxmsginfo((rv), &args[-0].m_data);
@@ -2273,7 +2273,7 @@ TypedValue * fg1_imap_mailboxmsginfo(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_imap_mailboxmsginfo(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_mailboxmsginfo(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2314,8 +2314,8 @@ text => rsi
 
 TypedValue* fh_imap_mime_header_decode(TypedValue* _rv, Value* text) asm("_ZN4HPHP25f_imap_mime_header_decodeERKNS_6StringE");
 
-TypedValue * fg1_imap_mime_header_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_mime_header_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_mime_header_decode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_mime_header_decode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imap_mime_header_decode((rv), &args[-0].m_data);
@@ -2323,7 +2323,7 @@ TypedValue * fg1_imap_mime_header_decode(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_imap_mime_header_decode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_mime_header_decode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2365,8 +2365,8 @@ uid => rdx
 
 TypedValue* fh_imap_msgno(TypedValue* _rv, Value* imap_stream, long uid) asm("_ZN4HPHP12f_imap_msgnoERKNS_6ObjectEl");
 
-TypedValue * fg1_imap_msgno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_msgno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_msgno(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_msgno(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -2379,7 +2379,7 @@ TypedValue * fg1_imap_msgno(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_imap_msgno(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_msgno(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2420,8 +2420,8 @@ imap_stream => rsi
 
 TypedValue* fh_imap_num_msg(TypedValue* _rv, Value* imap_stream) asm("_ZN4HPHP14f_imap_num_msgERKNS_6ObjectE");
 
-TypedValue * fg1_imap_num_msg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_num_msg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_num_msg(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_num_msg(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_imap_num_msg((rv), &args[-0].m_data);
@@ -2429,7 +2429,7 @@ TypedValue * fg1_imap_num_msg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_imap_num_msg(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_num_msg(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2470,8 +2470,8 @@ imap_stream => rsi
 
 TypedValue* fh_imap_num_recent(TypedValue* _rv, Value* imap_stream) asm("_ZN4HPHP17f_imap_num_recentERKNS_6ObjectE");
 
-TypedValue * fg1_imap_num_recent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_num_recent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_num_recent(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_num_recent(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_imap_num_recent((rv), &args[-0].m_data);
@@ -2479,7 +2479,7 @@ TypedValue * fg1_imap_num_recent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_imap_num_recent(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_num_recent(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2524,8 +2524,8 @@ retries => r9
 
 TypedValue* fh_imap_open(TypedValue* _rv, Value* mailbox, Value* username, Value* password, long options, long retries) asm("_ZN4HPHP11f_imap_openERKNS_6StringES2_S2_ll");
 
-TypedValue * fg1_imap_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_open(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_open(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -2553,7 +2553,7 @@ TypedValue * fg1_imap_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_imap_open(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_open(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2593,8 +2593,8 @@ imap_stream => rdi
 
 bool fh_imap_ping(Value* imap_stream) asm("_ZN4HPHP11f_imap_pingERKNS_6ObjectE");
 
-TypedValue * fg1_imap_ping(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_ping(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_ping(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_ping(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -2602,7 +2602,7 @@ TypedValue * fg1_imap_ping(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_imap_ping(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_ping(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2643,8 +2643,8 @@ str => rsi
 
 TypedValue* fh_imap_qprint(TypedValue* _rv, Value* str) asm("_ZN4HPHP13f_imap_qprintERKNS_6StringE");
 
-TypedValue * fg1_imap_qprint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_qprint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_qprint(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_qprint(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imap_qprint((rv), &args[-0].m_data);
@@ -2652,7 +2652,7 @@ TypedValue * fg1_imap_qprint(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_qprint(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_qprint(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2694,8 +2694,8 @@ new_mbox => rdx
 
 bool fh_imap_renamemailbox(Value* imap_stream, Value* old_mbox, Value* new_mbox) asm("_ZN4HPHP20f_imap_renamemailboxERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_imap_renamemailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_renamemailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_renamemailbox(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_renamemailbox(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -2711,7 +2711,7 @@ TypedValue * fg1_imap_renamemailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_imap_renamemailbox(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_renamemailbox(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2754,8 +2754,8 @@ retries => rcx
 
 bool fh_imap_reopen(Value* imap_stream, Value* mailbox, long options, long retries) asm("_ZN4HPHP13f_imap_reopenERKNS_6ObjectERKNS_6StringEll");
 
-TypedValue * fg1_imap_reopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_reopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_reopen(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_reopen(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -2780,7 +2780,7 @@ TypedValue * fg1_imap_reopen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_reopen(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_reopen(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2822,8 +2822,8 @@ default_host => rdx
 
 TypedValue* fh_imap_rfc822_parse_adrlist(TypedValue* _rv, Value* address, Value* default_host) asm("_ZN4HPHP27f_imap_rfc822_parse_adrlistERKNS_6StringES2_");
 
-TypedValue * fg1_imap_rfc822_parse_adrlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_rfc822_parse_adrlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_rfc822_parse_adrlist(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_rfc822_parse_adrlist(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -2836,7 +2836,7 @@ TypedValue * fg1_imap_rfc822_parse_adrlist(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_imap_rfc822_parse_adrlist(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_rfc822_parse_adrlist(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2878,8 +2878,8 @@ defaulthost => rdx
 
 TypedValue* fh_imap_rfc822_parse_headers(TypedValue* _rv, Value* headers, Value* defaulthost) asm("_ZN4HPHP27f_imap_rfc822_parse_headersERKNS_6StringES2_");
 
-TypedValue * fg1_imap_rfc822_parse_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_rfc822_parse_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_rfc822_parse_headers(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_rfc822_parse_headers(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -2897,7 +2897,7 @@ TypedValue * fg1_imap_rfc822_parse_headers(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_imap_rfc822_parse_headers(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_rfc822_parse_headers(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2940,8 +2940,8 @@ personal => rcx
 
 TypedValue* fh_imap_rfc822_write_address(TypedValue* _rv, Value* mailbox, Value* host, Value* personal) asm("_ZN4HPHP27f_imap_rfc822_write_addressERKNS_6StringES2_S2_");
 
-TypedValue * fg1_imap_rfc822_write_address(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_rfc822_write_address(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_rfc822_write_address(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_rfc822_write_address(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -2957,7 +2957,7 @@ TypedValue * fg1_imap_rfc822_write_address(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_imap_rfc822_write_address(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_rfc822_write_address(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3001,8 +3001,8 @@ options => r8
 
 bool fh_imap_savebody(Value* imap_stream, TypedValue* file, long msg_number, Value* part_number, long options) asm("_ZN4HPHP15f_imap_savebodyERKNS_6ObjectERKNS_7VariantElRKNS_6StringEl");
 
-TypedValue * fg1_imap_savebody(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_savebody(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_savebody(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_savebody(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -3027,7 +3027,7 @@ TypedValue * fg1_imap_savebody(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_imap_savebody(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_savebody(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3071,8 +3071,8 @@ content => r8
 
 TypedValue* fh_imap_scanmailbox(TypedValue* _rv, Value* imap_stream, Value* ref, Value* pattern, Value* content) asm("_ZN4HPHP18f_imap_scanmailboxERKNS_6ObjectERKNS_6StringES5_S5_");
 
-TypedValue * fg1_imap_scanmailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_scanmailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_scanmailbox(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_scanmailbox(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -3091,7 +3091,7 @@ TypedValue * fg1_imap_scanmailbox(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_imap_scanmailbox(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_scanmailbox(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3135,8 +3135,8 @@ charset => r8
 
 TypedValue* fh_imap_search(TypedValue* _rv, Value* imap_stream, Value* criteria, long options, Value* charset) asm("_ZN4HPHP13f_imap_searchERKNS_6ObjectERKNS_6StringElS5_");
 
-TypedValue * fg1_imap_search(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_search(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_search(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_search(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -3161,7 +3161,7 @@ TypedValue * fg1_imap_search(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_search(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_search(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3203,8 +3203,8 @@ quota_limit => rdx
 
 bool fh_imap_set_quota(Value* imap_stream, Value* quota_root, long quota_limit) asm("_ZN4HPHP16f_imap_set_quotaERKNS_6ObjectERKNS_6StringEl");
 
-TypedValue * fg1_imap_set_quota(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_set_quota(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_set_quota(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_set_quota(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfInt64) {
@@ -3220,7 +3220,7 @@ TypedValue * fg1_imap_set_quota(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_imap_set_quota(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_set_quota(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3263,8 +3263,8 @@ rights => rcx
 
 bool fh_imap_setacl(Value* imap_stream, Value* mailbox, Value* id, Value* rights) asm("_ZN4HPHP13f_imap_setaclERKNS_6ObjectERKNS_6StringES5_S5_");
 
-TypedValue * fg1_imap_setacl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_setacl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_setacl(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_setacl(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
@@ -3283,7 +3283,7 @@ TypedValue * fg1_imap_setacl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_setacl(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_setacl(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3326,8 +3326,8 @@ options => rcx
 
 bool fh_imap_setflag_full(Value* imap_stream, Value* sequence, Value* flag, long options) asm("_ZN4HPHP19f_imap_setflag_fullERKNS_6ObjectERKNS_6StringES5_l");
 
-TypedValue * fg1_imap_setflag_full(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_setflag_full(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_setflag_full(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_setflag_full(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -3351,7 +3351,7 @@ TypedValue * fg1_imap_setflag_full(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_imap_setflag_full(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_setflag_full(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3397,8 +3397,8 @@ charset => st0
 
 TypedValue* fh_imap_sort(TypedValue* _rv, Value* imap_stream, long criteria, long reverse, long options, Value* search_criteria, Value* charset) asm("_ZN4HPHP11f_imap_sortERKNS_6ObjectElllRKNS_6StringES5_");
 
-TypedValue * fg1_imap_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_sort(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_sort(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 6
@@ -3430,7 +3430,7 @@ TypedValue * fg1_imap_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_imap_sort(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_sort(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3473,8 +3473,8 @@ options => rcx
 
 TypedValue* fh_imap_status(TypedValue* _rv, Value* imap_stream, Value* mailbox, long options) asm("_ZN4HPHP13f_imap_statusERKNS_6ObjectERKNS_6StringEl");
 
-TypedValue * fg1_imap_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_status(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_status(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -3495,7 +3495,7 @@ TypedValue * fg1_imap_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_status(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_status(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3536,8 +3536,8 @@ mailbox => rsi
 
 bool fh_imap_subscribe(Value* imap_stream, Value* mailbox) asm("_ZN4HPHP16f_imap_subscribeERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_imap_subscribe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_subscribe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_subscribe(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_subscribe(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -3550,7 +3550,7 @@ TypedValue * fg1_imap_subscribe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_imap_subscribe(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_subscribe(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3592,8 +3592,8 @@ options => rdx
 
 TypedValue* fh_imap_thread(TypedValue* _rv, Value* imap_stream, long options) asm("_ZN4HPHP13f_imap_threadERKNS_6ObjectEl");
 
-TypedValue * fg1_imap_thread(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_thread(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_thread(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_thread(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -3611,7 +3611,7 @@ TypedValue * fg1_imap_thread(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_imap_thread(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_thread(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3653,8 +3653,8 @@ timeout => rdx
 
 TypedValue* fh_imap_timeout(TypedValue* _rv, long timeout_type, long timeout) asm("_ZN4HPHP14f_imap_timeoutEll");
 
-TypedValue * fg1_imap_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_timeout(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_timeout(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -3672,7 +3672,7 @@ TypedValue * fg1_imap_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_imap_timeout(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_timeout(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3714,8 +3714,8 @@ msg_number => rdx
 
 TypedValue* fh_imap_uid(TypedValue* _rv, Value* imap_stream, long msg_number) asm("_ZN4HPHP10f_imap_uidERKNS_6ObjectEl");
 
-TypedValue * fg1_imap_uid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_uid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_uid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_uid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-1);
@@ -3728,7 +3728,7 @@ TypedValue * fg1_imap_uid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_imap_uid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_uid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3770,8 +3770,8 @@ flags => rdx
 
 bool fh_imap_undelete(Value* imap_stream, Value* msg_number, long flags) asm("_ZN4HPHP15f_imap_undeleteERKNS_6ObjectERKNS_6StringEl");
 
-TypedValue * fg1_imap_undelete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_undelete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_undelete(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_undelete(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -3792,7 +3792,7 @@ TypedValue * fg1_imap_undelete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_imap_undelete(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_undelete(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3833,8 +3833,8 @@ mailbox => rsi
 
 bool fh_imap_unsubscribe(Value* imap_stream, Value* mailbox) asm("_ZN4HPHP18f_imap_unsubscribeERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_imap_unsubscribe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_unsubscribe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_unsubscribe(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_unsubscribe(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -3847,7 +3847,7 @@ TypedValue * fg1_imap_unsubscribe(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_imap_unsubscribe(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_unsubscribe(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3888,8 +3888,8 @@ text => rsi
 
 TypedValue* fh_imap_utf7_decode(TypedValue* _rv, Value* text) asm("_ZN4HPHP18f_imap_utf7_decodeERKNS_6StringE");
 
-TypedValue * fg1_imap_utf7_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_utf7_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_utf7_decode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_utf7_decode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imap_utf7_decode((rv), &args[-0].m_data);
@@ -3897,7 +3897,7 @@ TypedValue * fg1_imap_utf7_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_imap_utf7_decode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_utf7_decode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3938,8 +3938,8 @@ data => rsi
 
 TypedValue* fh_imap_utf7_encode(TypedValue* _rv, Value* data) asm("_ZN4HPHP18f_imap_utf7_encodeERKNS_6StringE");
 
-TypedValue * fg1_imap_utf7_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_utf7_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_utf7_encode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_utf7_encode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imap_utf7_encode((rv), &args[-0].m_data);
@@ -3947,7 +3947,7 @@ TypedValue * fg1_imap_utf7_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_imap_utf7_encode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_utf7_encode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3988,8 +3988,8 @@ mime_encoded_text => rsi
 
 TypedValue* fh_imap_utf8(TypedValue* _rv, Value* mime_encoded_text) asm("_ZN4HPHP11f_imap_utf8ERKNS_6StringE");
 
-TypedValue * fg1_imap_utf8(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_imap_utf8(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_imap_utf8(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_imap_utf8(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_imap_utf8((rv), &args[-0].m_data);
@@ -3997,7 +3997,7 @@ TypedValue * fg1_imap_utf8(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_imap_utf8(HPHP::VM::ActRec *ar) {
+TypedValue* fg_imap_utf8(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

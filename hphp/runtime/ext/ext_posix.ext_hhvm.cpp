@@ -35,8 +35,8 @@ mode => rsi
 
 bool fh_posix_access(Value* file, int mode) asm("_ZN4HPHP14f_posix_accessERKNS_6StringEi");
 
-TypedValue * fg1_posix_access(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_access(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_access(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_access(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -54,7 +54,7 @@ TypedValue * fg1_posix_access(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_posix_access(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_access(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -94,7 +94,7 @@ _rv => rdi
 
 Value* fh_posix_ctermid(Value* _rv) asm("_ZN4HPHP15f_posix_ctermidEv");
 
-TypedValue* fg_posix_ctermid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_ctermid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -127,7 +127,7 @@ _ZN4HPHP22f_posix_get_last_errorEv
 
 long fh_posix_get_last_error() asm("_ZN4HPHP22f_posix_get_last_errorEv");
 
-TypedValue* fg_posix_get_last_error(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_get_last_error(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -160,7 +160,7 @@ _rv => rdi
 
 Value* fh_posix_getcwd(Value* _rv) asm("_ZN4HPHP14f_posix_getcwdEv");
 
-TypedValue* fg_posix_getcwd(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getcwd(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -193,7 +193,7 @@ _ZN4HPHP15f_posix_getegidEv
 
 long fh_posix_getegid() asm("_ZN4HPHP15f_posix_getegidEv");
 
-TypedValue* fg_posix_getegid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getegid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -225,7 +225,7 @@ _ZN4HPHP15f_posix_geteuidEv
 
 long fh_posix_geteuid() asm("_ZN4HPHP15f_posix_geteuidEv");
 
-TypedValue* fg_posix_geteuid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_geteuid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -257,7 +257,7 @@ _ZN4HPHP14f_posix_getgidEv
 
 long fh_posix_getgid() asm("_ZN4HPHP14f_posix_getgidEv");
 
-TypedValue* fg_posix_getgid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getgid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -291,8 +291,8 @@ gid => rsi
 
 TypedValue* fh_posix_getgrgid(TypedValue* _rv, int gid) asm("_ZN4HPHP16f_posix_getgrgidEi");
 
-TypedValue * fg1_posix_getgrgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_getgrgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_getgrgid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_getgrgid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   fh_posix_getgrgid((rv), (int)(args[-0].m_data.num));
@@ -300,7 +300,7 @@ TypedValue * fg1_posix_getgrgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_posix_getgrgid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getgrgid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -341,8 +341,8 @@ name => rsi
 
 TypedValue* fh_posix_getgrnam(TypedValue* _rv, Value* name) asm("_ZN4HPHP16f_posix_getgrnamERKNS_6StringE");
 
-TypedValue * fg1_posix_getgrnam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_getgrnam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_getgrnam(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_getgrnam(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_posix_getgrnam((rv), &args[-0].m_data);
@@ -350,7 +350,7 @@ TypedValue * fg1_posix_getgrnam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_posix_getgrnam(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getgrnam(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -390,7 +390,7 @@ _rv => rdi
 
 TypedValue* fh_posix_getgroups(TypedValue* _rv) asm("_ZN4HPHP17f_posix_getgroupsEv");
 
-TypedValue* fg_posix_getgroups(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getgroups(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -423,7 +423,7 @@ _rv => rdi
 
 TypedValue* fh_posix_getlogin(TypedValue* _rv) asm("_ZN4HPHP16f_posix_getloginEv");
 
-TypedValue* fg_posix_getlogin(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getlogin(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -457,8 +457,8 @@ pid => rsi
 
 TypedValue* fh_posix_getpgid(TypedValue* _rv, int pid) asm("_ZN4HPHP15f_posix_getpgidEi");
 
-TypedValue * fg1_posix_getpgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_getpgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_getpgid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_getpgid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   fh_posix_getpgid((rv), (int)(args[-0].m_data.num));
@@ -466,7 +466,7 @@ TypedValue * fg1_posix_getpgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_posix_getpgid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getpgid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -505,7 +505,7 @@ _ZN4HPHP15f_posix_getpgrpEv
 
 long fh_posix_getpgrp() asm("_ZN4HPHP15f_posix_getpgrpEv");
 
-TypedValue* fg_posix_getpgrp(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getpgrp(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -537,7 +537,7 @@ _ZN4HPHP14f_posix_getpidEv
 
 long fh_posix_getpid() asm("_ZN4HPHP14f_posix_getpidEv");
 
-TypedValue* fg_posix_getpid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getpid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -569,7 +569,7 @@ _ZN4HPHP15f_posix_getppidEv
 
 long fh_posix_getppid() asm("_ZN4HPHP15f_posix_getppidEv");
 
-TypedValue* fg_posix_getppid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getppid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -603,8 +603,8 @@ username => rsi
 
 TypedValue* fh_posix_getpwnam(TypedValue* _rv, Value* username) asm("_ZN4HPHP16f_posix_getpwnamERKNS_6StringE");
 
-TypedValue * fg1_posix_getpwnam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_getpwnam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_getpwnam(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_getpwnam(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_posix_getpwnam((rv), &args[-0].m_data);
@@ -612,7 +612,7 @@ TypedValue * fg1_posix_getpwnam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_posix_getpwnam(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getpwnam(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -653,8 +653,8 @@ uid => rsi
 
 TypedValue* fh_posix_getpwuid(TypedValue* _rv, int uid) asm("_ZN4HPHP16f_posix_getpwuidEi");
 
-TypedValue * fg1_posix_getpwuid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_getpwuid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_getpwuid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_getpwuid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   fh_posix_getpwuid((rv), (int)(args[-0].m_data.num));
@@ -662,7 +662,7 @@ TypedValue * fg1_posix_getpwuid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_posix_getpwuid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getpwuid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -702,7 +702,7 @@ _rv => rdi
 
 TypedValue* fh_posix_getrlimit(TypedValue* _rv) asm("_ZN4HPHP17f_posix_getrlimitEv");
 
-TypedValue* fg_posix_getrlimit(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getrlimit(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -736,8 +736,8 @@ pid => rsi
 
 TypedValue* fh_posix_getsid(TypedValue* _rv, int pid) asm("_ZN4HPHP14f_posix_getsidEi");
 
-TypedValue * fg1_posix_getsid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_getsid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_getsid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_getsid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   fh_posix_getsid((rv), (int)(args[-0].m_data.num));
@@ -745,7 +745,7 @@ TypedValue * fg1_posix_getsid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_posix_getsid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getsid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -784,7 +784,7 @@ _ZN4HPHP14f_posix_getuidEv
 
 long fh_posix_getuid() asm("_ZN4HPHP14f_posix_getuidEv");
 
-TypedValue* fg_posix_getuid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_getuid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -818,8 +818,8 @@ base_group_id => rsi
 
 bool fh_posix_initgroups(Value* name, int base_group_id) asm("_ZN4HPHP18f_posix_initgroupsERKNS_6StringEi");
 
-TypedValue * fg1_posix_initgroups(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_initgroups(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_initgroups(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_initgroups(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
@@ -832,7 +832,7 @@ TypedValue * fg1_posix_initgroups(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_posix_initgroups(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_initgroups(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -872,7 +872,7 @@ fd => rdi
 
 bool fh_posix_isatty(TypedValue* fd) asm("_ZN4HPHP14f_posix_isattyERKNS_7VariantE");
 
-TypedValue* fg_posix_isatty(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_isatty(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -906,8 +906,8 @@ sig => rsi
 
 bool fh_posix_kill(int pid, int sig) asm("_ZN4HPHP12f_posix_killEii");
 
-TypedValue * fg1_posix_kill(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_kill(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_kill(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_kill(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
@@ -920,7 +920,7 @@ TypedValue * fg1_posix_kill(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_posix_kill(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_kill(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -961,8 +961,8 @@ mode => rsi
 
 bool fh_posix_mkfifo(Value* pathname, int mode) asm("_ZN4HPHP14f_posix_mkfifoERKNS_6StringEi");
 
-TypedValue * fg1_posix_mkfifo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_mkfifo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_mkfifo(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_mkfifo(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
@@ -975,7 +975,7 @@ TypedValue * fg1_posix_mkfifo(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_posix_mkfifo(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_mkfifo(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1018,8 +1018,8 @@ minor => rcx
 
 bool fh_posix_mknod(Value* pathname, int mode, int major, int minor) asm("_ZN4HPHP13f_posix_mknodERKNS_6StringEiii");
 
-TypedValue * fg1_posix_mknod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_mknod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_mknod(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_mknod(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1044,7 +1044,7 @@ TypedValue * fg1_posix_mknod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_posix_mknod(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_mknod(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1084,8 +1084,8 @@ gid => rdi
 
 bool fh_posix_setegid(int gid) asm("_ZN4HPHP15f_posix_setegidEi");
 
-TypedValue * fg1_posix_setegid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_setegid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_setegid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_setegid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -1093,7 +1093,7 @@ TypedValue * fg1_posix_setegid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_posix_setegid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_setegid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1133,8 +1133,8 @@ uid => rdi
 
 bool fh_posix_seteuid(int uid) asm("_ZN4HPHP15f_posix_seteuidEi");
 
-TypedValue * fg1_posix_seteuid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_seteuid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_seteuid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_seteuid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -1142,7 +1142,7 @@ TypedValue * fg1_posix_seteuid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_posix_seteuid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_seteuid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1182,8 +1182,8 @@ gid => rdi
 
 bool fh_posix_setgid(int gid) asm("_ZN4HPHP14f_posix_setgidEi");
 
-TypedValue * fg1_posix_setgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_setgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_setgid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_setgid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -1191,7 +1191,7 @@ TypedValue * fg1_posix_setgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_posix_setgid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_setgid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1232,8 +1232,8 @@ pgid => rsi
 
 bool fh_posix_setpgid(int pid, int pgid) asm("_ZN4HPHP15f_posix_setpgidEii");
 
-TypedValue * fg1_posix_setpgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_setpgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_setpgid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_setpgid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
@@ -1246,7 +1246,7 @@ TypedValue * fg1_posix_setpgid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_posix_setpgid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_setpgid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1285,7 +1285,7 @@ _ZN4HPHP14f_posix_setsidEv
 
 long fh_posix_setsid() asm("_ZN4HPHP14f_posix_setsidEv");
 
-TypedValue* fg_posix_setsid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_setsid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1318,8 +1318,8 @@ uid => rdi
 
 bool fh_posix_setuid(int uid) asm("_ZN4HPHP14f_posix_setuidEi");
 
-TypedValue * fg1_posix_setuid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_setuid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_setuid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_setuid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -1327,7 +1327,7 @@ TypedValue * fg1_posix_setuid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_posix_setuid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_setuid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1368,8 +1368,8 @@ errnum => rsi
 
 Value* fh_posix_strerror(Value* _rv, int errnum) asm("_ZN4HPHP16f_posix_strerrorEi");
 
-TypedValue * fg1_posix_strerror(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_posix_strerror(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_posix_strerror(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_posix_strerror(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
@@ -1378,7 +1378,7 @@ TypedValue * fg1_posix_strerror(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_posix_strerror(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_strerror(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1419,7 +1419,7 @@ _rv => rdi
 
 TypedValue* fh_posix_times(TypedValue* _rv) asm("_ZN4HPHP13f_posix_timesEv");
 
-TypedValue* fg_posix_times(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_times(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1453,7 +1453,7 @@ fd => rsi
 
 TypedValue* fh_posix_ttyname(TypedValue* _rv, TypedValue* fd) asm("_ZN4HPHP15f_posix_ttynameERKNS_7VariantE");
 
-TypedValue* fg_posix_ttyname(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_ttyname(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1486,7 +1486,7 @@ _rv => rdi
 
 TypedValue* fh_posix_uname(TypedValue* _rv) asm("_ZN4HPHP13f_posix_unameEv");
 
-TypedValue* fg_posix_uname(HPHP::VM::ActRec *ar) {
+TypedValue* fg_posix_uname(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

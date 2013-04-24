@@ -43,7 +43,7 @@ this_ => rdi
 
 void th_16EncodingDetector___construct(ObjectData* this_) asm("_ZN4HPHP18c_EncodingDetector13t___constructEv");
 
-TypedValue* tg_16EncodingDetector___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16EncodingDetector___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -80,8 +80,8 @@ text => rsi
 
 void th_16EncodingDetector_setText(ObjectData* this_, Value* text) asm("_ZN4HPHP18c_EncodingDetector9t_settextERKNS_6StringE");
 
-TypedValue* tg1_16EncodingDetector_setText(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16EncodingDetector_setText(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16EncodingDetector_setText(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16EncodingDetector_setText(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -90,7 +90,7 @@ TypedValue* tg1_16EncodingDetector_setText(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_16EncodingDetector_setText(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16EncodingDetector_setText(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -134,8 +134,8 @@ text => rsi
 
 void th_16EncodingDetector_setDeclaredEncoding(ObjectData* this_, Value* text) asm("_ZN4HPHP18c_EncodingDetector21t_setdeclaredencodingERKNS_6StringE");
 
-TypedValue* tg1_16EncodingDetector_setDeclaredEncoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16EncodingDetector_setDeclaredEncoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16EncodingDetector_setDeclaredEncoding(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16EncodingDetector_setDeclaredEncoding(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -144,7 +144,7 @@ TypedValue* tg1_16EncodingDetector_setDeclaredEncoding(TypedValue* rv, HPHP::VM:
   return rv;
 }
 
-TypedValue* tg_16EncodingDetector_setDeclaredEncoding(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16EncodingDetector_setDeclaredEncoding(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -189,7 +189,7 @@ this_ => rsi
 
 Value* th_16EncodingDetector_detect(Value* _rv, ObjectData* this_) asm("_ZN4HPHP18c_EncodingDetector8t_detectEv");
 
-TypedValue* tg_16EncodingDetector_detect(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16EncodingDetector_detect(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -227,7 +227,7 @@ this_ => rsi
 
 Value* th_16EncodingDetector_detectAll(Value* _rv, ObjectData* this_) asm("_ZN4HPHP18c_EncodingDetector11t_detectallEv");
 
-TypedValue* tg_16EncodingDetector_detectAll(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16EncodingDetector_detectAll(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -273,7 +273,7 @@ this_ => rdi
 
 void th_13EncodingMatch___construct(ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch13t___constructEv");
 
-TypedValue* tg_13EncodingMatch___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13EncodingMatch___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -310,7 +310,7 @@ this_ => rdi
 
 bool th_13EncodingMatch_isValid(ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch9t_isvalidEv");
 
-TypedValue* tg_13EncodingMatch_isValid(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13EncodingMatch_isValid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -347,7 +347,7 @@ this_ => rsi
 
 Value* th_13EncodingMatch_getEncoding(Value* _rv, ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch13t_getencodingEv");
 
-TypedValue* tg_13EncodingMatch_getEncoding(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13EncodingMatch_getEncoding(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -384,7 +384,7 @@ this_ => rdi
 
 long th_13EncodingMatch_getConfidence(ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch15t_getconfidenceEv");
 
-TypedValue* tg_13EncodingMatch_getConfidence(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13EncodingMatch_getConfidence(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -421,7 +421,7 @@ this_ => rsi
 
 Value* th_13EncodingMatch_getLanguage(Value* _rv, ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch13t_getlanguageEv");
 
-TypedValue* tg_13EncodingMatch_getLanguage(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13EncodingMatch_getLanguage(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -459,7 +459,7 @@ this_ => rsi
 
 Value* th_13EncodingMatch_getUTF8(Value* _rv, ObjectData* this_) asm("_ZN4HPHP15c_EncodingMatch9t_getutf8Ev");
 
-TypedValue* tg_13EncodingMatch_getUTF8(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13EncodingMatch_getUTF8(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

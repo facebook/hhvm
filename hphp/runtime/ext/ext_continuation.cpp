@@ -27,7 +27,7 @@
 #include <runtime/vm/translator/translator-inline.h>
 #include <runtime/vm/func.h>
 #include <runtime/vm/runtime.h>
-#include <runtime/vm/stats.h>
+#include <runtime/base/stats.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ c_Continuation::c_Continuation(VM::Class* cb) :
 }
 
 c_Continuation::~c_Continuation() {
-  VM::ActRec* ar = actRec();
+  ActRec* ar = actRec();
 
   // The first local is the object itself, and it wasn't increffed at creation
   // time (see createContinuation()). Overwrite its type to exempt it from

@@ -19,7 +19,7 @@
 
 #include "util/base.h"
 #include "runtime/base/types.h"
-#include "runtime/vm/stats.h"
+#include "runtime/base/stats.h"
 #include "runtime/vm/translator/translator.h"
 #include "runtime/vm/member_operations.h"
 

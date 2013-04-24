@@ -36,7 +36,7 @@ options => rdx
 
 Value* fh_json_encode(Value* _rv, TypedValue* value, TypedValue* options) asm("_ZN4HPHP13f_json_encodeERKNS_7VariantES2_");
 
-TypedValue* fg_json_encode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_json_encode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -74,8 +74,8 @@ options => rcx
 
 TypedValue* fh_json_decode(TypedValue* _rv, Value* json, bool assoc, TypedValue* options) asm("_ZN4HPHP13f_json_decodeERKNS_6StringEbRKNS_7VariantE");
 
-TypedValue * fg1_json_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_json_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_json_decode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_json_decode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -95,7 +95,7 @@ TypedValue * fg1_json_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_json_decode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_json_decode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

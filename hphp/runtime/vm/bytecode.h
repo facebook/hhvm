@@ -33,8 +33,6 @@
 
 namespace HPHP {
 
-namespace VM {
-
 // SETOP_BODY() would ideally be an inline function, but the header
 // dependencies for concat_assign() make this unfeasible.
 #define SETOP_BODY(lhs, op, rhs) do {                                         \
@@ -57,7 +55,8 @@ namespace VM {
   }                                                                           \
 } while (0)
 
-class Func;
+namespace VM { class Func; }
+class ActRec;
 
 // max number of arguments for direct call to builtin
 static const int kMaxBuiltinArgs = 5;
@@ -130,7 +129,7 @@ class VarEnv {
   // TinyVector<> for now increased icache misses, but maybe will be
   // feasable later (see D511561).
   std::vector<TypedValue**> m_restoreLocations;
-  boost::optional<NameValueTable> m_nvTable;
+  boost::optional<VM::NameValueTable> m_nvTable;
 
  private:
   explicit VarEnv();
@@ -229,7 +228,7 @@ struct ActRec {
   union {
     TypedValue _dummyB;
     struct {
-      const Func* m_func;      // Function.
+      const VM::Func* m_func;  // Function.
       uint32_t m_soff;         // Saved offset of caller from beginning of
                                //   caller's Func's bytecode.
 
@@ -244,7 +243,7 @@ struct ActRec {
     struct {
       union {
         ObjectData* m_this;    // This.
-        Class* m_cls;          // Late bound class.
+        VM::Class* m_cls;      // Late bound class.
       };
       union {
         VarEnv* m_varEnv;       // Variable environment; only used when the
@@ -358,7 +357,7 @@ struct ActRec {
 
   // Note that reordering these is likely to require changes to the
   // translator.
-  UNION_FIELD_ACCESSORS2(This, ObjectData*, m_this, Class, Class*, m_cls)
+  UNION_FIELD_ACCESSORS2(This, ObjectData*, m_this, Class, VM::Class*, m_cls)
   static const int8_t kInvNameBit   = 0x1;
   static const int8_t kExtraArgsBit = 0x2;
   UNION_FIELD_ACCESSORS3(VarEnv, VarEnv*, m_varEnv, InvName, StringData*,
@@ -396,18 +395,23 @@ inline void arSetSfp(ActRec* ar, const ActRec* sfp) {
   ar->m_savedRbp = (uint64_t)sfp;
 }
 
-template <bool crossBuiltin> Class* arGetContextClassImpl(const ActRec* ar);
-#define arGetContextClass(ar)    HPHP::VM::arGetContextClassImpl<false>(ar)
-#define arGetContextClassFromBuiltin(ar) \
-  HPHP::VM::arGetContextClassImpl<true>(ar)
+template <bool crossBuiltin> VM::Class* arGetContextClassImpl(const ActRec* ar);
+template <> VM::Class* arGetContextClassImpl<true>(const ActRec* ar);
+template <> VM::Class* arGetContextClassImpl<false>(const ActRec* ar);
+inline VM::Class* arGetContextClass(const ActRec* ar) {
+  return arGetContextClassImpl<false>(ar);
+}
+inline VM::Class* arGetContextClassFromBuiltin(const ActRec* ar) {
+  return arGetContextClassImpl<true>(ar);
+}
 
 // Used by extension functions that take a PHP "callback", since they need to
 // figure out the callback context once and call it multiple times. (e.g.
 // array_map, array_filter, ...)
 struct CallCtx {
-  const Func* func;
+  const VM::Func* func;
   ObjectData* this_;
-  Class* cls;
+  VM::Class* cls;
   StringData* invName;
 };
 
@@ -473,7 +477,7 @@ private:
   void toStringFrag(std::ostream& os, const ActRec* fp,
                     const TypedValue* top) const;
   void toStringAR(std::ostream& os, const ActRec* fp,
-                  const FPIEnt *fe, const TypedValue* top) const;
+                  const VM::FPIEnt *fe, const TypedValue* top) const;
   void toStringFragAR(std::ostream& os, const ActRec* fp,
                     int offset, const TypedValue* top) const;
   void toStringFrame(std::ostream& os, const ActRec* fp,
@@ -490,7 +494,7 @@ private:
   // it's impossible to have more than one chain of nested unactivated ActRecs
   // on the stack, this means that after this function returns, everything
   // between the stack pointer and frame pointer is a value, Iter or local.
-  void unwindAR(ActRec* fp, const FPIEnt* fe);
+  void unwindAR(ActRec* fp, const VM::FPIEnt* fe);
 public:
   static const int sSurprisePageSize;
   static const uint sMinStackElms;
@@ -774,7 +778,7 @@ public:
     assert(m_top != m_base);
     return &m_top[ind];
   }
-  inline void ALWAYS_INLINE pushClass(Class* clss) {
+  inline void ALWAYS_INLINE pushClass(VM::Class* clss) {
     assert(m_top != m_elms);
     m_top--;
     m_top->m_data.pcls = clss;
@@ -783,7 +787,6 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 }
 
 #endif // __VM_BYTECODE_H__

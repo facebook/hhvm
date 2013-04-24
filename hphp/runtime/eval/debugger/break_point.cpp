@@ -83,9 +83,9 @@ InterruptSiteVM::InterruptSiteVM(bool hardBreakPoint /* = false */,
   VM::Transl::VMRegAnchor _;
 #define bail_on(c) if (c) { return; }
   VMExecutionContext* context = g_vmContext;
-  VM::ActRec *fp = context->getFP();
+  ActRec *fp = context->getFP();
   bail_on(!fp);
-  VM::Offset offset;
+  Offset offset;
   if (hardBreakPoint && fp->skipFrame()) {
     // for hard breakpoint, the fp is for an extension function,
     // so we need to construct the site on the caller

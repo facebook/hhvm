@@ -24,7 +24,7 @@
 #include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/translator/runtime-type.h"
 #include "runtime/vm/translator/abi-x64.h"
-#include "runtime/vm/stats.h"
+#include "runtime/base/stats.h"
 #include "runtime/vm/runtime.h"
 
 // libgcc exports this for registering eh information for

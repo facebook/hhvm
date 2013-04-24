@@ -43,7 +43,7 @@ this_ => rdi
 
 void th_18GenArrayWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP20c_GenArrayWaitHandle13t___constructEv");
 
-TypedValue* tg_18GenArrayWaitHandle___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_18GenArrayWaitHandle___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -82,8 +82,8 @@ dependencies => rdx
 
 Value* th_18GenArrayWaitHandle_create(Value* _rv, char const* cls_, Value* dependencies) asm("_ZN4HPHP20c_GenArrayWaitHandle9ti_createEPKcRKNS_5ArrayE");
 
-TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToArrayInPlace(args-0);
@@ -92,7 +92,7 @@ TypedValue* tg1_18GenArrayWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_18GenArrayWaitHandle_create(HPHP::VM::ActRec *ar) {
+TypedValue* tg_18GenArrayWaitHandle_create(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

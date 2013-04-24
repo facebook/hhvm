@@ -39,8 +39,8 @@ is_prefix => r9
 
 TypedValue* fh_simplexml_load_string(TypedValue* _rv, Value* data, Value* class_name, long options, Value* ns, bool is_prefix) asm("_ZN4HPHP23f_simplexml_load_stringERKNS_6StringES2_lS2_b");
 
-TypedValue * fg1_simplexml_load_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_simplexml_load_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_simplexml_load_string(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_simplexml_load_string(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -71,7 +71,7 @@ TypedValue * fg1_simplexml_load_string(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_simplexml_load_string(HPHP::VM::ActRec *ar) {
+TypedValue* fg_simplexml_load_string(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -117,8 +117,8 @@ is_prefix => r9
 
 TypedValue* fh_simplexml_load_file(TypedValue* _rv, Value* filename, Value* class_name, long options, Value* ns, bool is_prefix) asm("_ZN4HPHP21f_simplexml_load_fileERKNS_6StringES2_lS2_b");
 
-TypedValue * fg1_simplexml_load_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_simplexml_load_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_simplexml_load_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_simplexml_load_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -149,7 +149,7 @@ TypedValue * fg1_simplexml_load_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_simplexml_load_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_simplexml_load_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -190,7 +190,7 @@ _rv => rdi
 
 TypedValue* fh_libxml_get_errors(TypedValue* _rv) asm("_ZN4HPHP19f_libxml_get_errorsEv");
 
-TypedValue* fg_libxml_get_errors(HPHP::VM::ActRec *ar) {
+TypedValue* fg_libxml_get_errors(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -223,7 +223,7 @@ _rv => rdi
 
 TypedValue* fh_libxml_get_last_error(TypedValue* _rv) asm("_ZN4HPHP23f_libxml_get_last_errorEv");
 
-TypedValue* fg_libxml_get_last_error(HPHP::VM::ActRec *ar) {
+TypedValue* fg_libxml_get_last_error(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -254,7 +254,7 @@ _ZN4HPHP21f_libxml_clear_errorsEv
 
 void fh_libxml_clear_errors() asm("_ZN4HPHP21f_libxml_clear_errorsEv");
 
-TypedValue* fg_libxml_clear_errors(HPHP::VM::ActRec *ar) {
+TypedValue* fg_libxml_clear_errors(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -288,7 +288,7 @@ use_errors => rdi
 
 bool fh_libxml_use_internal_errors(TypedValue* use_errors) asm("_ZN4HPHP28f_libxml_use_internal_errorsERKNS_7VariantE");
 
-TypedValue* fg_libxml_use_internal_errors(HPHP::VM::ActRec *ar) {
+TypedValue* fg_libxml_use_internal_errors(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -320,8 +320,8 @@ streams_context => rdi
 
 void fh_libxml_set_streams_context(Value* streams_context) asm("_ZN4HPHP28f_libxml_set_streams_contextERKNS_6ObjectE");
 
-TypedValue * fg1_libxml_set_streams_context(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_libxml_set_streams_context(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_libxml_set_streams_context(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_libxml_set_streams_context(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -330,7 +330,7 @@ TypedValue * fg1_libxml_set_streams_context(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_libxml_set_streams_context(HPHP::VM::ActRec *ar) {
+TypedValue* fg_libxml_set_streams_context(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -371,8 +371,8 @@ disable => rdi
 
 bool fh_libxml_disable_entity_loader(bool disable) asm("_ZN4HPHP30f_libxml_disable_entity_loaderEb");
 
-TypedValue * fg1_libxml_disable_entity_loader(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_libxml_disable_entity_loader(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_libxml_disable_entity_loader(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_libxml_disable_entity_loader(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-0);
@@ -380,7 +380,7 @@ TypedValue * fg1_libxml_disable_entity_loader(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_libxml_disable_entity_loader(HPHP::VM::ActRec *ar) {
+TypedValue* fg_libxml_disable_entity_loader(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -434,8 +434,8 @@ is_prefix => r9
 
 void th_16SimpleXMLElement___construct(ObjectData* this_, Value* data, long options, bool data_is_url, Value* ns, bool is_prefix) asm("_ZN4HPHP18c_SimpleXMLElement13t___constructERKNS_6StringElbS3_b");
 
-TypedValue* tg1_16SimpleXMLElement___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16SimpleXMLElement___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16SimpleXMLElement___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16SimpleXMLElement___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -466,7 +466,7 @@ TypedValue* tg1_16SimpleXMLElement___construct(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* tg_16SimpleXMLElement___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -511,7 +511,7 @@ index => rsi
 
 bool th_16SimpleXMLElement_offsetExists(ObjectData* this_, TypedValue* index) asm("_ZN4HPHP18c_SimpleXMLElement14t_offsetexistsERKNS_7VariantE");
 
-TypedValue* tg_16SimpleXMLElement_offsetExists(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_offsetExists(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -549,7 +549,7 @@ index => rdx
 
 TypedValue* th_16SimpleXMLElement_offsetGet(TypedValue* _rv, ObjectData* this_, TypedValue* index) asm("_ZN4HPHP18c_SimpleXMLElement11t_offsetgetERKNS_7VariantE");
 
-TypedValue* tg_16SimpleXMLElement_offsetGet(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_offsetGet(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -586,7 +586,7 @@ newvalue => rdx
 
 void th_16SimpleXMLElement_offsetSet(ObjectData* this_, TypedValue* index, TypedValue* newvalue) asm("_ZN4HPHP18c_SimpleXMLElement11t_offsetsetERKNS_7VariantES3_");
 
-TypedValue* tg_16SimpleXMLElement_offsetSet(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_offsetSet(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -623,7 +623,7 @@ index => rsi
 
 void th_16SimpleXMLElement_offsetUnset(ObjectData* this_, TypedValue* index) asm("_ZN4HPHP18c_SimpleXMLElement13t_offsetunsetERKNS_7VariantE");
 
-TypedValue* tg_16SimpleXMLElement_offsetUnset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_offsetUnset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -661,7 +661,7 @@ this_ => rsi
 
 TypedValue* th_16SimpleXMLElement_getIterator(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP18c_SimpleXMLElement13t_getiteratorEv");
 
-TypedValue* tg_16SimpleXMLElement_getIterator(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_getIterator(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -697,7 +697,7 @@ this_ => rdi
 
 long th_16SimpleXMLElement_count(ObjectData* this_) asm("_ZN4HPHP18c_SimpleXMLElement7t_countEv");
 
-TypedValue* tg_16SimpleXMLElement_count(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_count(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -735,8 +735,8 @@ path => rdx
 
 TypedValue* th_16SimpleXMLElement_xpath(TypedValue* _rv, ObjectData* this_, Value* path) asm("_ZN4HPHP18c_SimpleXMLElement7t_xpathERKNS_6StringE");
 
-TypedValue* tg1_16SimpleXMLElement_xpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16SimpleXMLElement_xpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16SimpleXMLElement_xpath(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16SimpleXMLElement_xpath(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_16SimpleXMLElement_xpath((rv), (this_), &args[-0].m_data);
@@ -744,7 +744,7 @@ TypedValue* tg1_16SimpleXMLElement_xpath(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* tg_16SimpleXMLElement_xpath(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_xpath(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -789,8 +789,8 @@ ns => rdx
 
 bool th_16SimpleXMLElement_registerXPathNamespace(ObjectData* this_, Value* prefix, Value* ns) asm("_ZN4HPHP18c_SimpleXMLElement24t_registerxpathnamespaceERKNS_6StringES3_");
 
-TypedValue* tg1_16SimpleXMLElement_registerXPathNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16SimpleXMLElement_registerXPathNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16SimpleXMLElement_registerXPathNamespace(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16SimpleXMLElement_registerXPathNamespace(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -803,7 +803,7 @@ TypedValue* tg1_16SimpleXMLElement_registerXPathNamespace(TypedValue* rv, HPHP::
   return rv;
 }
 
-TypedValue* tg_16SimpleXMLElement_registerXPathNamespace(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_registerXPathNamespace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -848,8 +848,8 @@ filename => rdx
 
 TypedValue* th_16SimpleXMLElement_asXML(TypedValue* _rv, ObjectData* this_, Value* filename) asm("_ZN4HPHP18c_SimpleXMLElement7t_asxmlERKNS_6StringE");
 
-TypedValue* tg1_16SimpleXMLElement_asXML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16SimpleXMLElement_asXML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16SimpleXMLElement_asXML(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16SimpleXMLElement_asXML(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_16SimpleXMLElement_asXML((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&empty_string));
@@ -857,7 +857,7 @@ TypedValue* tg1_16SimpleXMLElement_asXML(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* tg_16SimpleXMLElement_asXML(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_asXML(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -902,8 +902,8 @@ recursive => rdx
 
 Value* th_16SimpleXMLElement_getNamespaces(Value* _rv, ObjectData* this_, bool recursive) asm("_ZN4HPHP18c_SimpleXMLElement15t_getnamespacesEb");
 
-TypedValue* tg1_16SimpleXMLElement_getNamespaces(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16SimpleXMLElement_getNamespaces(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16SimpleXMLElement_getNamespaces(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16SimpleXMLElement_getNamespaces(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToBooleanInPlace(args-0);
@@ -912,7 +912,7 @@ TypedValue* tg1_16SimpleXMLElement_getNamespaces(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* tg_16SimpleXMLElement_getNamespaces(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_getNamespaces(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -958,8 +958,8 @@ recursive => rdx
 
 Value* th_16SimpleXMLElement_getDocNamespaces(Value* _rv, ObjectData* this_, bool recursive) asm("_ZN4HPHP18c_SimpleXMLElement18t_getdocnamespacesEb");
 
-TypedValue* tg1_16SimpleXMLElement_getDocNamespaces(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16SimpleXMLElement_getDocNamespaces(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16SimpleXMLElement_getDocNamespaces(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16SimpleXMLElement_getDocNamespaces(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToBooleanInPlace(args-0);
@@ -968,7 +968,7 @@ TypedValue* tg1_16SimpleXMLElement_getDocNamespaces(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* tg_16SimpleXMLElement_getDocNamespaces(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_getDocNamespaces(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1015,8 +1015,8 @@ is_prefix => rcx
 
 Value* th_16SimpleXMLElement_children(Value* _rv, ObjectData* this_, Value* ns, bool is_prefix) asm("_ZN4HPHP18c_SimpleXMLElement10t_childrenERKNS_6StringEb");
 
-TypedValue* tg1_16SimpleXMLElement_children(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16SimpleXMLElement_children(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16SimpleXMLElement_children(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16SimpleXMLElement_children(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -1036,7 +1036,7 @@ TypedValue* tg1_16SimpleXMLElement_children(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_16SimpleXMLElement_children(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_children(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1081,7 +1081,7 @@ this_ => rsi
 
 Value* th_16SimpleXMLElement_getName(Value* _rv, ObjectData* this_) asm("_ZN4HPHP18c_SimpleXMLElement9t_getnameEv");
 
-TypedValue* tg_16SimpleXMLElement_getName(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_getName(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1121,8 +1121,8 @@ is_prefix => rcx
 
 Value* th_16SimpleXMLElement_attributes(Value* _rv, ObjectData* this_, Value* ns, bool is_prefix) asm("_ZN4HPHP18c_SimpleXMLElement12t_attributesERKNS_6StringEb");
 
-TypedValue* tg1_16SimpleXMLElement_attributes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16SimpleXMLElement_attributes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16SimpleXMLElement_attributes(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16SimpleXMLElement_attributes(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -1142,7 +1142,7 @@ TypedValue* tg1_16SimpleXMLElement_attributes(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_16SimpleXMLElement_attributes(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_attributes(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1190,8 +1190,8 @@ ns => r8
 
 TypedValue* th_16SimpleXMLElement_addChild(TypedValue* _rv, ObjectData* this_, Value* qname, Value* value, Value* ns) asm("_ZN4HPHP18c_SimpleXMLElement10t_addchildERKNS_6StringES3_S3_");
 
-TypedValue* tg1_16SimpleXMLElement_addChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16SimpleXMLElement_addChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16SimpleXMLElement_addChild(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16SimpleXMLElement_addChild(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -1213,7 +1213,7 @@ TypedValue* tg1_16SimpleXMLElement_addChild(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_16SimpleXMLElement_addChild(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_addChild(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1258,8 +1258,8 @@ ns => rcx
 
 void th_16SimpleXMLElement_addAttribute(ObjectData* this_, Value* qname, Value* value, Value* ns) asm("_ZN4HPHP18c_SimpleXMLElement14t_addattributeERKNS_6StringES3_S3_");
 
-TypedValue* tg1_16SimpleXMLElement_addAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16SimpleXMLElement_addAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16SimpleXMLElement_addAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16SimpleXMLElement_addAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1282,7 +1282,7 @@ TypedValue* tg1_16SimpleXMLElement_addAttribute(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* tg_16SimpleXMLElement_addAttribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement_addAttribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1327,7 +1327,7 @@ this_ => rsi
 
 Value* th_16SimpleXMLElement___toString(Value* _rv, ObjectData* this_) asm("_ZN4HPHP18c_SimpleXMLElement12t___tostringEv");
 
-TypedValue* tg_16SimpleXMLElement___toString(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement___toString(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1366,7 +1366,7 @@ name => rdx
 
 TypedValue* th_16SimpleXMLElement___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP18c_SimpleXMLElement7t___getENS_7VariantE");
 
-TypedValue* tg_16SimpleXMLElement___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1405,7 +1405,7 @@ value => rcx
 
 TypedValue* th_16SimpleXMLElement___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP18c_SimpleXMLElement7t___setENS_7VariantES1_");
 
-TypedValue* tg_16SimpleXMLElement___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1442,7 +1442,7 @@ name => rsi
 
 bool th_16SimpleXMLElement___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP18c_SimpleXMLElement9t___issetENS_7VariantE");
 
-TypedValue* tg_16SimpleXMLElement___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1480,7 +1480,7 @@ name => rdx
 
 TypedValue* th_16SimpleXMLElement___unset(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP18c_SimpleXMLElement9t___unsetENS_7VariantE");
 
-TypedValue* tg_16SimpleXMLElement___unset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16SimpleXMLElement___unset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1525,7 +1525,7 @@ this_ => rdi
 
 void th_11LibXMLError___construct(ObjectData* this_) asm("_ZN4HPHP13c_LibXMLError13t___constructEv");
 
-TypedValue* tg_11LibXMLError___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11LibXMLError___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1571,7 +1571,7 @@ this_ => rdi
 
 void th_24SimpleXMLElementIterator___construct(ObjectData* this_) asm("_ZN4HPHP26c_SimpleXMLElementIterator13t___constructEv");
 
-TypedValue* tg_24SimpleXMLElementIterator___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_24SimpleXMLElementIterator___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1609,7 +1609,7 @@ this_ => rsi
 
 TypedValue* th_24SimpleXMLElementIterator_current(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP26c_SimpleXMLElementIterator9t_currentEv");
 
-TypedValue* tg_24SimpleXMLElementIterator_current(HPHP::VM::ActRec *ar) {
+TypedValue* tg_24SimpleXMLElementIterator_current(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1646,7 +1646,7 @@ this_ => rsi
 
 TypedValue* th_24SimpleXMLElementIterator_key(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP26c_SimpleXMLElementIterator5t_keyEv");
 
-TypedValue* tg_24SimpleXMLElementIterator_key(HPHP::VM::ActRec *ar) {
+TypedValue* tg_24SimpleXMLElementIterator_key(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1683,7 +1683,7 @@ this_ => rsi
 
 TypedValue* th_24SimpleXMLElementIterator_next(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP26c_SimpleXMLElementIterator6t_nextEv");
 
-TypedValue* tg_24SimpleXMLElementIterator_next(HPHP::VM::ActRec *ar) {
+TypedValue* tg_24SimpleXMLElementIterator_next(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1720,7 +1720,7 @@ this_ => rsi
 
 TypedValue* th_24SimpleXMLElementIterator_rewind(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP26c_SimpleXMLElementIterator8t_rewindEv");
 
-TypedValue* tg_24SimpleXMLElementIterator_rewind(HPHP::VM::ActRec *ar) {
+TypedValue* tg_24SimpleXMLElementIterator_rewind(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1757,7 +1757,7 @@ this_ => rsi
 
 TypedValue* th_24SimpleXMLElementIterator_valid(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP26c_SimpleXMLElementIterator7t_validEv");
 
-TypedValue* tg_24SimpleXMLElementIterator_valid(HPHP::VM::ActRec *ar) {
+TypedValue* tg_24SimpleXMLElementIterator_valid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

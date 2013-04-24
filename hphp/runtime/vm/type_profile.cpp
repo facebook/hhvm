@@ -23,7 +23,7 @@
 #include "util/trace.h"
 #include "runtime/base/types.h"
 #include "runtime/base/runtime_option.h"
-#include "runtime/vm/stats.h"
+#include "runtime/base/stats.h"
 #include "runtime/vm/translator/translator.h"
 #include "runtime/vm/type_profile.h"
 

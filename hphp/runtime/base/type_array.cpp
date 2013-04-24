@@ -395,7 +395,7 @@ bool Array::more(CVarRef v2) const {
 
 HOT_FUNC
 ArrayIter Array::begin(CStrRef context /* = null_string */) const {
-  return m_px;
+  return ArrayIter(m_px);
 }
 
 void Array::escalate() {

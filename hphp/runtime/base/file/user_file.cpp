@@ -75,7 +75,7 @@ const VM::Func* UserFile::lookupMethod(const StringData* name) {
   const VM::Func *f = m_cls->lookupMethod(name);
   if (!f) return nullptr;
 
-  if (f->attrs() & VM::AttrStatic) {
+  if (f->attrs() & AttrStatic) {
     throw InvalidArgumentException(0, "%s::%s() must not be declared static",
                                    m_cls->name()->data(), name->data());
   }
@@ -93,7 +93,7 @@ Variant UserFile::invoke(const VM::Func *func, CStrRef name,
 
   // Public method, no private ancestor, no need for further checks (common)
   if (func &&
-      !(func->attrs() & (VM::AttrPrivate|VM::AttrProtected|VM::AttrAbstract)) &&
+      !(func->attrs() & (AttrPrivate|AttrProtected|AttrAbstract)) &&
       !func->hasPrivateAncestor()) {
     Variant ret;
     g_vmContext->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());

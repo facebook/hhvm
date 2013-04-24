@@ -32,7 +32,7 @@
 #include "runtime/ext/ext_continuation.h"
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/runtime.h"
-#include "runtime/vm/stats.h"
+#include "runtime/base/stats.h"
 #include "runtime/vm/translator/targetcache.h"
 #include "runtime/vm/translator/translator-inline.h"
 #include "runtime/vm/translator/translator-x64.h"
@@ -4555,21 +4555,12 @@ void CodeGenerator::cgDefCns(IRInstruction* inst) {
   UNUSED SSATmp* cnsName = inst->getSrc(0);
   UNUSED SSATmp* val     = inst->getSrc(1);
   using namespace TargetCache;
-#if 0
-  UNUSED CacheHandle ch = allocConstant((StringData*)cnsName->getValStr());
-  // ALIA:TODO
-  // XXX second param is an inout pointer to a Ref, so we need to pass
-  // the pointer to a stack slot
-  EMIT_CALL3(a, defCnsHelper, IMM(ch), A(i.inputs[0]->location),
-             IMM((uint64_t)name));
-#endif
-
   CG_PUNT(DefCns);
 }
 
 // TODO: Kill this #2031980
 static StringData* concat_value(TypedValue tv1, TypedValue tv2) {
-  return concat(tv1.m_type, tv1.m_data.num, tv2.m_type, tv2.m_data.num);
+  return concat_tv(tv1.m_type, tv1.m_data.num, tv2.m_type, tv2.m_data.num);
 }
 
 void CodeGenerator::cgConcat(IRInstruction* inst) {

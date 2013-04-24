@@ -351,7 +351,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
 
 const HPHP::VM::Func*
 vm_decode_function(CVarRef function,
-                   HPHP::VM::ActRec* ar,
+                   ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
                    HPHP::VM::Class*& cls,
@@ -360,15 +360,15 @@ vm_decode_function(CVarRef function,
 
 inline void
 vm_decode_function(CVarRef function,
-                   HPHP::VM::ActRec* ar,
+                   ActRec* ar,
                    bool forwarding,
-                   HPHP::VM::CallCtx& ctx,
+                   CallCtx& ctx,
                    bool warn = true) {
   ctx.func = vm_decode_function(function, ar, forwarding, ctx.this_, ctx.cls,
                                 ctx.invName, warn);
 }
 
-HPHP::VM::ActRec* vm_get_previous_frame();
+ActRec* vm_get_previous_frame();
 Variant vm_call_user_func(CVarRef function, CArrRef params,
                           bool forwarding = false);
 

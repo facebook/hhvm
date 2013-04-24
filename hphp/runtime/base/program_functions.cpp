@@ -954,7 +954,7 @@ static int execute_program_impl(int argc, char **argv) {
 
   ShmCounters::initialize(true, Logger::Error);
   // Initialize compiler state
-  VM::compile_file(0, 0, MD5(), 0);
+  compile_file(0, 0, MD5(), 0);
 
   if (!po.lint.empty()) {
     if (po.isTempFile) {

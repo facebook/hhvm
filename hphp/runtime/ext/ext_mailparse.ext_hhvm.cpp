@@ -38,8 +38,8 @@ additional_parameters => r8
 
 bool fh_mail(Value* to, Value* subject, Value* message, Value* additional_headers, Value* additional_parameters) asm("_ZN4HPHP6f_mailERKNS_6StringES2_S2_S2_S2_");
 
-TypedValue * fg1_mail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mail(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mail(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -67,7 +67,7 @@ TypedValue * fg1_mail(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_mail(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mail(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -107,8 +107,8 @@ addr => rdi
 
 long fh_ezmlm_hash(Value* addr) asm("_ZN4HPHP12f_ezmlm_hashERKNS_6StringE");
 
-TypedValue * fg1_ezmlm_hash(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_ezmlm_hash(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_ezmlm_hash(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_ezmlm_hash(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToStringInPlace(args-0);
@@ -116,7 +116,7 @@ TypedValue * fg1_ezmlm_hash(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_ezmlm_hash(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ezmlm_hash(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -156,7 +156,7 @@ _rv => rdi
 
 Value* fh_mailparse_msg_create(Value* _rv) asm("_ZN4HPHP22f_mailparse_msg_createEv");
 
-TypedValue* fg_mailparse_msg_create(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_msg_create(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -190,8 +190,8 @@ mimemail => rdi
 
 bool fh_mailparse_msg_free(Value* mimemail) asm("_ZN4HPHP20f_mailparse_msg_freeERKNS_6ObjectE");
 
-TypedValue * fg1_mailparse_msg_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_msg_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_msg_free(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_msg_free(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -199,7 +199,7 @@ TypedValue * fg1_mailparse_msg_free(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_mailparse_msg_free(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_msg_free(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -240,8 +240,8 @@ filename => rsi
 
 TypedValue* fh_mailparse_msg_parse_file(TypedValue* _rv, Value* filename) asm("_ZN4HPHP26f_mailparse_msg_parse_fileERKNS_6StringE");
 
-TypedValue * fg1_mailparse_msg_parse_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_msg_parse_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_msg_parse_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_msg_parse_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_mailparse_msg_parse_file((rv), &args[-0].m_data);
@@ -249,7 +249,7 @@ TypedValue * fg1_mailparse_msg_parse_file(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_mailparse_msg_parse_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_msg_parse_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -290,8 +290,8 @@ data => rsi
 
 bool fh_mailparse_msg_parse(Value* mimemail, Value* data) asm("_ZN4HPHP21f_mailparse_msg_parseERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_mailparse_msg_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_msg_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_msg_parse(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_msg_parse(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -304,7 +304,7 @@ TypedValue * fg1_mailparse_msg_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_mailparse_msg_parse(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_msg_parse(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -347,8 +347,8 @@ callbackfunc => rcx
 
 TypedValue* fh_mailparse_msg_extract_part_file(TypedValue* _rv, Value* mimemail, TypedValue* filename, TypedValue* callbackfunc) asm("_ZN4HPHP33f_mailparse_msg_extract_part_fileERKNS_6ObjectERKNS_7VariantES5_");
 
-TypedValue * fg1_mailparse_msg_extract_part_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_msg_extract_part_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_msg_extract_part_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_msg_extract_part_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   Variant defVal2 = empty_string;
@@ -357,7 +357,7 @@ TypedValue * fg1_mailparse_msg_extract_part_file(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* fg_mailparse_msg_extract_part_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_msg_extract_part_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -401,8 +401,8 @@ callbackfunc => rcx
 
 TypedValue* fh_mailparse_msg_extract_whole_part_file(TypedValue* _rv, Value* mimemail, TypedValue* filename, TypedValue* callbackfunc) asm("_ZN4HPHP39f_mailparse_msg_extract_whole_part_fileERKNS_6ObjectERKNS_7VariantES5_");
 
-TypedValue * fg1_mailparse_msg_extract_whole_part_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_msg_extract_whole_part_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_msg_extract_whole_part_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_msg_extract_whole_part_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   Variant defVal2 = empty_string;
@@ -411,7 +411,7 @@ TypedValue * fg1_mailparse_msg_extract_whole_part_file(TypedValue* rv, HPHP::VM:
   return rv;
 }
 
-TypedValue* fg_mailparse_msg_extract_whole_part_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_msg_extract_whole_part_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -455,8 +455,8 @@ callbackfunc => rcx
 
 TypedValue* fh_mailparse_msg_extract_part(TypedValue* _rv, Value* mimemail, TypedValue* msgbody, TypedValue* callbackfunc) asm("_ZN4HPHP28f_mailparse_msg_extract_partERKNS_6ObjectERKNS_7VariantES5_");
 
-TypedValue * fg1_mailparse_msg_extract_part(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_msg_extract_part(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_msg_extract_part(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_msg_extract_part(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   Variant defVal2 = empty_string;
@@ -465,7 +465,7 @@ TypedValue * fg1_mailparse_msg_extract_part(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_mailparse_msg_extract_part(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_msg_extract_part(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -507,8 +507,8 @@ mimemail => rsi
 
 Value* fh_mailparse_msg_get_part_data(Value* _rv, Value* mimemail) asm("_ZN4HPHP29f_mailparse_msg_get_part_dataERKNS_6ObjectE");
 
-TypedValue * fg1_mailparse_msg_get_part_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_msg_get_part_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_msg_get_part_data(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_msg_get_part_data(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
@@ -517,7 +517,7 @@ TypedValue * fg1_mailparse_msg_get_part_data(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_mailparse_msg_get_part_data(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_msg_get_part_data(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -560,8 +560,8 @@ mimesection => rdx
 
 TypedValue* fh_mailparse_msg_get_part(TypedValue* _rv, Value* mimemail, Value* mimesection) asm("_ZN4HPHP24f_mailparse_msg_get_partERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_mailparse_msg_get_part(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_msg_get_part(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_msg_get_part(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_msg_get_part(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -574,7 +574,7 @@ TypedValue * fg1_mailparse_msg_get_part(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_mailparse_msg_get_part(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_msg_get_part(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -615,8 +615,8 @@ mimemail => rsi
 
 Value* fh_mailparse_msg_get_structure(Value* _rv, Value* mimemail) asm("_ZN4HPHP29f_mailparse_msg_get_structureERKNS_6ObjectE");
 
-TypedValue * fg1_mailparse_msg_get_structure(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_msg_get_structure(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_msg_get_structure(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_msg_get_structure(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
@@ -625,7 +625,7 @@ TypedValue * fg1_mailparse_msg_get_structure(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_mailparse_msg_get_structure(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_msg_get_structure(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -667,8 +667,8 @@ addresses => rsi
 
 Value* fh_mailparse_rfc822_parse_addresses(Value* _rv, Value* addresses) asm("_ZN4HPHP34f_mailparse_rfc822_parse_addressesERKNS_6StringE");
 
-TypedValue * fg1_mailparse_rfc822_parse_addresses(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_rfc822_parse_addresses(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_rfc822_parse_addresses(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_rfc822_parse_addresses(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
@@ -677,7 +677,7 @@ TypedValue * fg1_mailparse_rfc822_parse_addresses(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* fg_mailparse_rfc822_parse_addresses(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_rfc822_parse_addresses(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -720,8 +720,8 @@ encoding => rdx
 
 bool fh_mailparse_stream_encode(Value* sourcefp, Value* destfp, Value* encoding) asm("_ZN4HPHP25f_mailparse_stream_encodeERKNS_6ObjectES2_RKNS_6StringE");
 
-TypedValue * fg1_mailparse_stream_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_stream_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_stream_encode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_stream_encode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -737,7 +737,7 @@ TypedValue * fg1_mailparse_stream_encode(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_mailparse_stream_encode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_stream_encode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -778,8 +778,8 @@ fp => rsi
 
 TypedValue* fh_mailparse_uudecode_all(TypedValue* _rv, Value* fp) asm("_ZN4HPHP24f_mailparse_uudecode_allERKNS_6ObjectE");
 
-TypedValue * fg1_mailparse_uudecode_all(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_uudecode_all(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_uudecode_all(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_uudecode_all(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_mailparse_uudecode_all((rv), &args[-0].m_data);
@@ -787,7 +787,7 @@ TypedValue * fg1_mailparse_uudecode_all(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_mailparse_uudecode_all(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_uudecode_all(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -828,8 +828,8 @@ fp => rsi
 
 TypedValue* fh_mailparse_determine_best_xfer_encoding(TypedValue* _rv, Value* fp) asm("_ZN4HPHP40f_mailparse_determine_best_xfer_encodingERKNS_6ObjectE");
 
-TypedValue * fg1_mailparse_determine_best_xfer_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mailparse_determine_best_xfer_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mailparse_determine_best_xfer_encoding(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mailparse_determine_best_xfer_encoding(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_mailparse_determine_best_xfer_encoding((rv), &args[-0].m_data);
@@ -837,7 +837,7 @@ TypedValue * fg1_mailparse_determine_best_xfer_encoding(TypedValue* rv, HPHP::VM
   return rv;
 }
 
-TypedValue* fg_mailparse_determine_best_xfer_encoding(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mailparse_determine_best_xfer_encoding(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

@@ -38,8 +38,8 @@ timeoutms => r8
 
 Value* fh_memcache_connect(Value* _rv, Value* host, int port, int timeout, int timeoutms) asm("_ZN4HPHP18f_memcache_connectERKNS_6StringEiii");
 
-TypedValue * fg1_memcache_connect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_connect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_connect(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_connect(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -66,7 +66,7 @@ TypedValue * fg1_memcache_connect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_memcache_connect(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_connect(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -111,8 +111,8 @@ timeoutms => r8
 
 Value* fh_memcache_pconnect(Value* _rv, Value* host, int port, int timeout, int timeoutms) asm("_ZN4HPHP19f_memcache_pconnectERKNS_6StringEiii");
 
-TypedValue * fg1_memcache_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_pconnect(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_pconnect(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -139,7 +139,7 @@ TypedValue * fg1_memcache_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_memcache_pconnect(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_pconnect(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -184,8 +184,8 @@ expire => r8
 
 bool fh_memcache_add(Value* memcache, Value* key, TypedValue* var, int flag, int expire) asm("_ZN4HPHP14f_memcache_addERKNS_6ObjectERKNS_6StringERKNS_7VariantEii");
 
-TypedValue * fg1_memcache_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_add(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_add(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -210,7 +210,7 @@ TypedValue * fg1_memcache_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_memcache_add(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_add(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -254,8 +254,8 @@ expire => r8
 
 bool fh_memcache_set(Value* memcache, Value* key, TypedValue* var, int flag, int expire) asm("_ZN4HPHP14f_memcache_setERKNS_6ObjectERKNS_6StringERKNS_7VariantEii");
 
-TypedValue * fg1_memcache_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_set(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_set(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -280,7 +280,7 @@ TypedValue * fg1_memcache_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_memcache_set(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -324,8 +324,8 @@ expire => r8
 
 bool fh_memcache_replace(Value* memcache, Value* key, TypedValue* var, int flag, int expire) asm("_ZN4HPHP18f_memcache_replaceERKNS_6ObjectERKNS_6StringERKNS_7VariantEii");
 
-TypedValue * fg1_memcache_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_replace(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_replace(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -350,7 +350,7 @@ TypedValue * fg1_memcache_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_memcache_replace(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_replace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -393,8 +393,8 @@ flags => rcx
 
 TypedValue* fh_memcache_get(TypedValue* _rv, Value* memcache, TypedValue* key, TypedValue* flags) asm("_ZN4HPHP14f_memcache_getERKNS_6ObjectERKNS_7VariantERKNS_14VRefParamValueE");
 
-TypedValue * fg1_memcache_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_get(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_get(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   VRefParamValue defVal2 = uninit_null();
@@ -403,7 +403,7 @@ TypedValue * fg1_memcache_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_memcache_get(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -446,8 +446,8 @@ expire => rdx
 
 bool fh_memcache_delete(Value* memcache, Value* key, int expire) asm("_ZN4HPHP17f_memcache_deleteERKNS_6ObjectERKNS_6StringEi");
 
-TypedValue * fg1_memcache_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_delete(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_delete(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -468,7 +468,7 @@ TypedValue * fg1_memcache_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_memcache_delete(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_delete(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -510,8 +510,8 @@ offset => rdx
 
 long fh_memcache_increment(Value* memcache, Value* key, int offset) asm("_ZN4HPHP20f_memcache_incrementERKNS_6ObjectERKNS_6StringEi");
 
-TypedValue * fg1_memcache_increment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_increment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_increment(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_increment(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -532,7 +532,7 @@ TypedValue * fg1_memcache_increment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_memcache_increment(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_increment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -574,8 +574,8 @@ offset => rdx
 
 long fh_memcache_decrement(Value* memcache, Value* key, int offset) asm("_ZN4HPHP20f_memcache_decrementERKNS_6ObjectERKNS_6StringEi");
 
-TypedValue * fg1_memcache_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_decrement(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_decrement(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -596,7 +596,7 @@ TypedValue * fg1_memcache_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_memcache_decrement(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_decrement(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -636,8 +636,8 @@ memcache => rdi
 
 bool fh_memcache_close(Value* memcache) asm("_ZN4HPHP16f_memcache_closeERKNS_6ObjectE");
 
-TypedValue * fg1_memcache_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_close(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_close(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -645,7 +645,7 @@ TypedValue * fg1_memcache_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_memcache_close(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_close(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -685,8 +685,8 @@ onoff => rdi
 
 bool fh_memcache_debug(bool onoff) asm("_ZN4HPHP16f_memcache_debugEb");
 
-TypedValue * fg1_memcache_debug(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_debug(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_debug(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_debug(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-0);
@@ -694,7 +694,7 @@ TypedValue * fg1_memcache_debug(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_memcache_debug(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_debug(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -735,8 +735,8 @@ memcache => rsi
 
 TypedValue* fh_memcache_get_version(TypedValue* _rv, Value* memcache) asm("_ZN4HPHP22f_memcache_get_versionERKNS_6ObjectE");
 
-TypedValue * fg1_memcache_get_version(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_get_version(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_get_version(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_get_version(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_memcache_get_version((rv), &args[-0].m_data);
@@ -744,7 +744,7 @@ TypedValue * fg1_memcache_get_version(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* fg_memcache_get_version(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_get_version(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -785,8 +785,8 @@ timestamp => rsi
 
 bool fh_memcache_flush(Value* memcache, int timestamp) asm("_ZN4HPHP16f_memcache_flushERKNS_6ObjectEi");
 
-TypedValue * fg1_memcache_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_flush(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_flush(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -804,7 +804,7 @@ TypedValue * fg1_memcache_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_memcache_flush(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_flush(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -845,8 +845,8 @@ timeoutms => rsi
 
 bool fh_memcache_setoptimeout(Value* memcache, int timeoutms) asm("_ZN4HPHP23f_memcache_setoptimeoutERKNS_6ObjectEi");
 
-TypedValue * fg1_memcache_setoptimeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_setoptimeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_setoptimeout(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_setoptimeout(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
@@ -859,7 +859,7 @@ TypedValue * fg1_memcache_setoptimeout(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_memcache_setoptimeout(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_setoptimeout(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -901,8 +901,8 @@ port => rdx
 
 long fh_memcache_get_server_status(Value* memcache, Value* host, int port) asm("_ZN4HPHP28f_memcache_get_server_statusERKNS_6ObjectERKNS_6StringEi");
 
-TypedValue * fg1_memcache_get_server_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_get_server_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_get_server_status(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_get_server_status(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -923,7 +923,7 @@ TypedValue * fg1_memcache_get_server_status(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_memcache_get_server_status(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_get_server_status(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -965,8 +965,8 @@ min_savings => xmm0
 
 bool fh_memcache_set_compress_threshold(Value* memcache, int threshold, double min_savings) asm("_ZN4HPHP33f_memcache_set_compress_thresholdERKNS_6ObjectEid");
 
-TypedValue * fg1_memcache_set_compress_threshold(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_set_compress_threshold(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_set_compress_threshold(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_set_compress_threshold(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -987,7 +987,7 @@ TypedValue * fg1_memcache_set_compress_threshold(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* fg_memcache_set_compress_threshold(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_set_compress_threshold(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1031,8 +1031,8 @@ limit => r8
 
 Value* fh_memcache_get_stats(Value* _rv, Value* memcache, Value* type, int slabid, int limit) asm("_ZN4HPHP20f_memcache_get_statsERKNS_6ObjectERKNS_6StringEii");
 
-TypedValue * fg1_memcache_get_stats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_get_stats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_get_stats(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_get_stats(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   switch (count) {
@@ -1059,7 +1059,7 @@ TypedValue * fg1_memcache_get_stats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_memcache_get_stats(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_get_stats(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1104,8 +1104,8 @@ limit => r8
 
 Value* fh_memcache_get_extended_stats(Value* _rv, Value* memcache, Value* type, int slabid, int limit) asm("_ZN4HPHP29f_memcache_get_extended_statsERKNS_6ObjectERKNS_6StringEii");
 
-TypedValue * fg1_memcache_get_extended_stats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_get_extended_stats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_get_extended_stats(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_get_extended_stats(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   switch (count) {
@@ -1132,7 +1132,7 @@ TypedValue * fg1_memcache_get_extended_stats(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_memcache_get_extended_stats(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_get_extended_stats(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1179,8 +1179,8 @@ failure_callback => st0
 
 bool fh_memcache_set_server_params(Value* memcache, Value* host, int port, int timeout, int retry_interval, bool status, TypedValue* failure_callback) asm("_ZN4HPHP28f_memcache_set_server_paramsERKNS_6ObjectERKNS_6StringEiiibRKNS_7VariantE");
 
-TypedValue * fg1_memcache_set_server_params(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_set_server_params(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_set_server_params(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_set_server_params(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1214,7 +1214,7 @@ TypedValue * fg1_memcache_set_server_params(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_memcache_set_server_params(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_set_server_params(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1263,8 +1263,8 @@ timeoutms => st24
 
 bool fh_memcache_add_server(Value* memcache, Value* host, int port, bool persistent, int weight, int timeout, int retry_interval, bool status, TypedValue* failure_callback, int timeoutms) asm("_ZN4HPHP21f_memcache_add_serverERKNS_6ObjectERKNS_6StringEibiiibRKNS_7VariantEi");
 
-TypedValue * fg1_memcache_add_server(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_memcache_add_server(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_memcache_add_server(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_memcache_add_server(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1310,7 +1310,7 @@ TypedValue * fg1_memcache_add_server(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_memcache_add_server(HPHP::VM::ActRec *ar) {
+TypedValue* fg_memcache_add_server(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1359,7 +1359,7 @@ this_ => rdi
 
 void th_8Memcache___construct(ObjectData* this_) asm("_ZN4HPHP10c_Memcache13t___constructEv");
 
-TypedValue* tg_8Memcache___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1400,8 +1400,8 @@ timeoutms => r8
 
 bool th_8Memcache_connect(ObjectData* this_, Value* host, int port, int timeout, int timeoutms) asm("_ZN4HPHP10c_Memcache9t_connectERKNS_6StringEiii");
 
-TypedValue* tg1_8Memcache_connect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_connect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_connect(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_connect(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1427,7 +1427,7 @@ TypedValue* tg1_8Memcache_connect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* tg_8Memcache_connect(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_connect(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1474,8 +1474,8 @@ timeoutms => r8
 
 bool th_8Memcache_pconnect(ObjectData* this_, Value* host, int port, int timeout, int timeoutms) asm("_ZN4HPHP10c_Memcache10t_pconnectERKNS_6StringEiii");
 
-TypedValue* tg1_8Memcache_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_pconnect(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_pconnect(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1501,7 +1501,7 @@ TypedValue* tg1_8Memcache_pconnect(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* tg_8Memcache_pconnect(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_pconnect(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1548,8 +1548,8 @@ expire => r8
 
 bool th_8Memcache_add(ObjectData* this_, Value* key, TypedValue* var, int flag, int expire) asm("_ZN4HPHP10c_Memcache5t_addERKNS_6StringERKNS_7VariantEii");
 
-TypedValue* tg1_8Memcache_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_add(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_add(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1571,7 +1571,7 @@ TypedValue* tg1_8Memcache_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* tg_8Memcache_add(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_add(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1618,8 +1618,8 @@ expire => r8
 
 bool th_8Memcache_set(ObjectData* this_, Value* key, TypedValue* var, int flag, int expire) asm("_ZN4HPHP10c_Memcache5t_setERKNS_6StringERKNS_7VariantEii");
 
-TypedValue* tg1_8Memcache_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_set(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_set(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1641,7 +1641,7 @@ TypedValue* tg1_8Memcache_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* tg_8Memcache_set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1688,8 +1688,8 @@ expire => r8
 
 bool th_8Memcache_replace(ObjectData* this_, Value* key, TypedValue* var, int flag, int expire) asm("_ZN4HPHP10c_Memcache9t_replaceERKNS_6StringERKNS_7VariantEii");
 
-TypedValue* tg1_8Memcache_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_replace(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_replace(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1711,7 +1711,7 @@ TypedValue* tg1_8Memcache_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* tg_8Memcache_replace(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_replace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1757,7 +1757,7 @@ flags => rcx
 
 TypedValue* th_8Memcache_get(TypedValue* _rv, ObjectData* this_, TypedValue* key, TypedValue* flags) asm("_ZN4HPHP10c_Memcache5t_getERKNS_7VariantERKNS_14VRefParamValueE");
 
-TypedValue* tg_8Memcache_get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1796,8 +1796,8 @@ expire => rdx
 
 bool th_8Memcache_delete(ObjectData* this_, Value* key, int expire) asm("_ZN4HPHP10c_Memcache8t_deleteERKNS_6StringEi");
 
-TypedValue* tg1_8Memcache_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_delete(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_delete(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1815,7 +1815,7 @@ TypedValue* tg1_8Memcache_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* tg_8Memcache_delete(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_delete(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1860,8 +1860,8 @@ offset => rdx
 
 long th_8Memcache_increment(ObjectData* this_, Value* key, int offset) asm("_ZN4HPHP10c_Memcache11t_incrementERKNS_6StringEi");
 
-TypedValue* tg1_8Memcache_increment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_increment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_increment(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_increment(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -1879,7 +1879,7 @@ TypedValue* tg1_8Memcache_increment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* tg_8Memcache_increment(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_increment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1924,8 +1924,8 @@ offset => rdx
 
 long th_8Memcache_decrement(ObjectData* this_, Value* key, int offset) asm("_ZN4HPHP10c_Memcache11t_decrementERKNS_6StringEi");
 
-TypedValue* tg1_8Memcache_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_decrement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_decrement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -1943,7 +1943,7 @@ TypedValue* tg1_8Memcache_decrement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* tg_8Memcache_decrement(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_decrement(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1987,7 +1987,7 @@ this_ => rsi
 
 TypedValue* th_8Memcache_getversion(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP10c_Memcache12t_getversionEv");
 
-TypedValue* tg_8Memcache_getversion(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_getversion(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2024,8 +2024,8 @@ expire => rsi
 
 bool th_8Memcache_flush(ObjectData* this_, int expire) asm("_ZN4HPHP10c_Memcache7t_flushEi");
 
-TypedValue* tg1_8Memcache_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_flush(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_flush(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -2033,7 +2033,7 @@ TypedValue* tg1_8Memcache_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* tg_8Memcache_flush(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_flush(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2077,8 +2077,8 @@ timeoutms => rsi
 
 bool th_8Memcache_setoptimeout(ObjectData* this_, long timeoutms) asm("_ZN4HPHP10c_Memcache14t_setoptimeoutEl");
 
-TypedValue* tg1_8Memcache_setoptimeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_setoptimeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_setoptimeout(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_setoptimeout(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -2086,7 +2086,7 @@ TypedValue* tg1_8Memcache_setoptimeout(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* tg_8Memcache_setoptimeout(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_setoptimeout(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2129,7 +2129,7 @@ this_ => rdi
 
 bool th_8Memcache_close(ObjectData* this_) asm("_ZN4HPHP10c_Memcache7t_closeEv");
 
-TypedValue* tg_8Memcache_close(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_close(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2167,8 +2167,8 @@ port => rdx
 
 long th_8Memcache_getserverstatus(ObjectData* this_, Value* host, int port) asm("_ZN4HPHP10c_Memcache17t_getserverstatusERKNS_6StringEi");
 
-TypedValue* tg1_8Memcache_getserverstatus(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_getserverstatus(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_getserverstatus(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_getserverstatus(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -2186,7 +2186,7 @@ TypedValue* tg1_8Memcache_getserverstatus(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_8Memcache_getserverstatus(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_getserverstatus(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2231,8 +2231,8 @@ min_savings => xmm0
 
 bool th_8Memcache_setcompressthreshold(ObjectData* this_, int threshold, double min_savings) asm("_ZN4HPHP10c_Memcache22t_setcompressthresholdEid");
 
-TypedValue* tg1_8Memcache_setcompressthreshold(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_setcompressthreshold(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_setcompressthreshold(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_setcompressthreshold(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -2250,7 +2250,7 @@ TypedValue* tg1_8Memcache_setcompressthreshold(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* tg_8Memcache_setcompressthreshold(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_setcompressthreshold(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2297,8 +2297,8 @@ limit => r8
 
 Value* th_8Memcache_getstats(Value* _rv, ObjectData* this_, Value* type, int slabid, int limit) asm("_ZN4HPHP10c_Memcache10t_getstatsERKNS_6StringEii");
 
-TypedValue* tg1_8Memcache_getstats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_getstats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_getstats(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_getstats(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   switch (count) {
@@ -2322,7 +2322,7 @@ TypedValue* tg1_8Memcache_getstats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* tg_8Memcache_getstats(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_getstats(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2370,8 +2370,8 @@ limit => r8
 
 Value* th_8Memcache_getextendedstats(Value* _rv, ObjectData* this_, Value* type, int slabid, int limit) asm("_ZN4HPHP10c_Memcache18t_getextendedstatsERKNS_6StringEii");
 
-TypedValue* tg1_8Memcache_getextendedstats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_getextendedstats(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_getextendedstats(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_getextendedstats(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   switch (count) {
@@ -2395,7 +2395,7 @@ TypedValue* tg1_8Memcache_getextendedstats(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_8Memcache_getextendedstats(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_getextendedstats(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2445,8 +2445,8 @@ failure_callback => st0
 
 bool th_8Memcache_setserverparams(ObjectData* this_, Value* host, int port, int timeout, int retry_interval, bool status, TypedValue* failure_callback) asm("_ZN4HPHP10c_Memcache17t_setserverparamsERKNS_6StringEiiibRKNS_7VariantE");
 
-TypedValue* tg1_8Memcache_setserverparams(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_setserverparams(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_setserverparams(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_setserverparams(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -2477,7 +2477,7 @@ TypedValue* tg1_8Memcache_setserverparams(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_8Memcache_setserverparams(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_setserverparams(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2529,8 +2529,8 @@ timeoutms => st24
 
 bool th_8Memcache_addserver(ObjectData* this_, Value* host, int port, bool persistent, int weight, int timeout, int retry_interval, bool status, TypedValue* failure_callback, int timeoutms) asm("_ZN4HPHP10c_Memcache11t_addserverERKNS_6StringEibiiibRKNS_7VariantEi");
 
-TypedValue* tg1_8Memcache_addserver(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Memcache_addserver(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Memcache_addserver(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Memcache_addserver(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -2573,7 +2573,7 @@ TypedValue* tg1_8Memcache_addserver(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* tg_8Memcache_addserver(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache_addserver(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2617,7 +2617,7 @@ this_ => rsi
 
 TypedValue* th_8Memcache___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP10c_Memcache12t___destructEv");
 
-TypedValue* tg_8Memcache___destruct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Memcache___destruct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

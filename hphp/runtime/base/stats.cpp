@@ -16,10 +16,9 @@
 #include <util/base.h>
 #include <runtime/vm/translator/x64-util.h>
 #include <runtime/vm/translator/translator-x64.h>
-#include <runtime/vm/stats.h>
+#include <runtime/base/stats.h>
 
 namespace HPHP {
-namespace VM {
 namespace Stats {
 
 using namespace HPHP::VM::Transl;
@@ -72,7 +71,7 @@ emitInc(X64Assembler& a, uint64_t* tl_table, uint index, int n,
 void emitIncTranslOp(X64Assembler& a, Opcode opc, bool force) {
   if (!force && !enableInstrCount()) return;
   emitInc(a, &tl_counters[0], opcodeToTranslStatCounter(opc), 1,
-          Transl::CC_None, force);
+          CC_None, force);
 }
 
 void init() {
@@ -146,4 +145,4 @@ void incStatGrouped(const StringData* category, const StringData* name, int n) {
   (*tl_stat_groups)[category->data()][name->data()] += n;
 }
 
-} } }
+} }

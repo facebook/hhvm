@@ -36,8 +36,8 @@ note_value => rdx
 
 TypedValue* fh_apache_note(TypedValue* _rv, Value* note_name, Value* note_value) asm("_ZN4HPHP13f_apache_noteERKNS_6StringES2_");
 
-TypedValue * fg1_apache_note(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apache_note(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apache_note(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apache_note(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -55,7 +55,7 @@ TypedValue * fg1_apache_note(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_apache_note(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apache_note(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -95,7 +95,7 @@ _rv => rdi
 
 Value* fh_apache_request_headers(Value* _rv) asm("_ZN4HPHP24f_apache_request_headersEv");
 
-TypedValue* fg_apache_request_headers(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apache_request_headers(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -129,7 +129,7 @@ _rv => rdi
 
 Value* fh_apache_response_headers(Value* _rv) asm("_ZN4HPHP25f_apache_response_headersEv");
 
-TypedValue* fg_apache_response_headers(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apache_response_headers(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -165,8 +165,8 @@ walk_to_top => rdx
 
 bool fh_apache_setenv(Value* variable, Value* value, bool walk_to_top) asm("_ZN4HPHP15f_apache_setenvERKNS_6StringES2_b");
 
-TypedValue * fg1_apache_setenv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apache_setenv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apache_setenv(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apache_setenv(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -187,7 +187,7 @@ TypedValue * fg1_apache_setenv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_apache_setenv(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apache_setenv(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -227,7 +227,7 @@ _rv => rdi
 
 Value* fh_getallheaders(Value* _rv) asm("_ZN4HPHP15f_getallheadersEv");
 
-TypedValue* fg_getallheaders(HPHP::VM::ActRec *ar) {
+TypedValue* fg_getallheaders(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -261,8 +261,8 @@ filename => rdi
 
 bool fh_virtual(Value* filename) asm("_ZN4HPHP9f_virtualERKNS_6StringE");
 
-TypedValue * fg1_virtual(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_virtual(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_virtual(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_virtual(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -270,7 +270,7 @@ TypedValue * fg1_virtual(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_virtual(HPHP::VM::ActRec *ar) {
+TypedValue* fg_virtual(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -310,7 +310,7 @@ _rv => rdi
 
 TypedValue* fh_apache_get_config(TypedValue* _rv) asm("_ZN4HPHP19f_apache_get_configEv");
 
-TypedValue* fg_apache_get_config(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apache_get_config(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -343,7 +343,7 @@ _rv => rdi
 
 TypedValue* fh_apache_get_scoreboard(TypedValue* _rv) asm("_ZN4HPHP23f_apache_get_scoreboardEv");
 
-TypedValue* fg_apache_get_scoreboard(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apache_get_scoreboard(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -376,7 +376,7 @@ _rv => rdi
 
 TypedValue* fh_apache_get_rewrite_rules(TypedValue* _rv) asm("_ZN4HPHP26f_apache_get_rewrite_rulesEv");
 
-TypedValue* fg_apache_get_rewrite_rules(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apache_get_rewrite_rules(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

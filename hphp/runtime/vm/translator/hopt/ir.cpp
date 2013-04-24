@@ -31,7 +31,7 @@
 #include "util/text_color.h"
 #include "runtime/base/string_data.h"
 #include "runtime/vm/runtime.h"
-#include "runtime/vm/stats.h"
+#include "runtime/base/stats.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
 #include "runtime/vm/translator/hopt/linearscan.h"
 #include "runtime/vm/translator/hopt/cse.h"

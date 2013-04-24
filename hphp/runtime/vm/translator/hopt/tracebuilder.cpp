@@ -76,7 +76,7 @@ SSATmp* TraceBuilder::genConcat(SSATmp* tl, SSATmp* tr) {
   return gen(Concat, tl, tr);
 }
 
-void TraceBuilder::genDefCls(PreClass* clss, const HPHP::VM::Opcode* after) {
+void TraceBuilder::genDefCls(PreClass* clss, const Opcode* after) {
   PUNT(DefCls);
 }
 

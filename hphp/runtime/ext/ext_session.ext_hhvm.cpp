@@ -37,8 +37,8 @@ httponly => r8
 
 void fh_session_set_cookie_params(long lifetime, Value* path, Value* domain, TypedValue* secure, TypedValue* httponly) asm("_ZN4HPHP27f_session_set_cookie_paramsElRKNS_6StringES2_RKNS_7VariantES5_");
 
-TypedValue * fg1_session_set_cookie_params(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_set_cookie_params(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_set_cookie_params(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_set_cookie_params(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -65,7 +65,7 @@ TypedValue * fg1_session_set_cookie_params(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_session_set_cookie_params(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_set_cookie_params(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -108,7 +108,7 @@ _rv => rdi
 
 Value* fh_session_get_cookie_params(Value* _rv) asm("_ZN4HPHP27f_session_get_cookie_paramsEv");
 
-TypedValue* fg_session_get_cookie_params(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_get_cookie_params(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -143,8 +143,8 @@ newname => rsi
 
 Value* fh_session_name(Value* _rv, Value* newname) asm("_ZN4HPHP14f_session_nameERKNS_6StringE");
 
-TypedValue * fg1_session_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_name(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_name(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -153,7 +153,7 @@ TypedValue * fg1_session_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_session_name(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_name(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -195,8 +195,8 @@ newname => rsi
 
 TypedValue* fh_session_module_name(TypedValue* _rv, Value* newname) asm("_ZN4HPHP21f_session_module_nameERKNS_6StringE");
 
-TypedValue * fg1_session_module_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_module_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_module_name(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_module_name(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_session_module_name((rv), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
@@ -204,7 +204,7 @@ TypedValue * fg1_session_module_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_session_module_name(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_module_name(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -249,8 +249,8 @@ gc => r9
 
 bool fh_session_set_save_handler(Value* open, Value* close, Value* read, Value* write, Value* destroy, Value* gc) asm("_ZN4HPHP26f_session_set_save_handlerERKNS_6StringES2_S2_S2_S2_S2_");
 
-TypedValue * fg1_session_set_save_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_set_save_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_set_save_handler(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_set_save_handler(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-5)->m_type)) {
@@ -275,7 +275,7 @@ TypedValue * fg1_session_set_save_handler(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_session_set_save_handler(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_set_save_handler(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -316,8 +316,8 @@ newname => rsi
 
 Value* fh_session_save_path(Value* _rv, Value* newname) asm("_ZN4HPHP19f_session_save_pathERKNS_6StringE");
 
-TypedValue * fg1_session_save_path(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_save_path(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_save_path(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_save_path(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -326,7 +326,7 @@ TypedValue * fg1_session_save_path(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_session_save_path(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_save_path(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -368,8 +368,8 @@ newid => rsi
 
 Value* fh_session_id(Value* _rv, Value* newid) asm("_ZN4HPHP12f_session_idERKNS_6StringE");
 
-TypedValue * fg1_session_id(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_id(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_id(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_id(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -378,7 +378,7 @@ TypedValue * fg1_session_id(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_session_id(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_id(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -419,8 +419,8 @@ delete_old_session => rdi
 
 bool fh_session_regenerate_id(bool delete_old_session) asm("_ZN4HPHP23f_session_regenerate_idEb");
 
-TypedValue * fg1_session_regenerate_id(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_regenerate_id(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_regenerate_id(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_regenerate_id(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-0);
@@ -428,7 +428,7 @@ TypedValue * fg1_session_regenerate_id(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_session_regenerate_id(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_regenerate_id(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -469,8 +469,8 @@ new_cache_limiter => rsi
 
 Value* fh_session_cache_limiter(Value* _rv, Value* new_cache_limiter) asm("_ZN4HPHP23f_session_cache_limiterERKNS_6StringE");
 
-TypedValue * fg1_session_cache_limiter(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_cache_limiter(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_cache_limiter(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_cache_limiter(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -479,7 +479,7 @@ TypedValue * fg1_session_cache_limiter(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_session_cache_limiter(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_cache_limiter(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -520,8 +520,8 @@ new_cache_expire => rdi
 
 long fh_session_cache_expire(Value* new_cache_expire) asm("_ZN4HPHP22f_session_cache_expireERKNS_6StringE");
 
-TypedValue * fg1_session_cache_expire(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_cache_expire(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_cache_expire(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_cache_expire(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToStringInPlace(args-0);
@@ -529,7 +529,7 @@ TypedValue * fg1_session_cache_expire(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* fg_session_cache_expire(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_cache_expire(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -569,7 +569,7 @@ _rv => rdi
 
 TypedValue* fh_session_encode(TypedValue* _rv) asm("_ZN4HPHP16f_session_encodeEv");
 
-TypedValue* fg_session_encode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_encode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -602,8 +602,8 @@ data => rdi
 
 bool fh_session_decode(Value* data) asm("_ZN4HPHP16f_session_decodeERKNS_6StringE");
 
-TypedValue * fg1_session_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_decode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_decode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -611,7 +611,7 @@ TypedValue * fg1_session_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_session_decode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_decode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -650,7 +650,7 @@ _ZN4HPHP15f_session_startEv
 
 bool fh_session_start() asm("_ZN4HPHP15f_session_startEv");
 
-TypedValue* fg_session_start(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_start(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -682,7 +682,7 @@ _ZN4HPHP17f_session_destroyEv
 
 bool fh_session_destroy() asm("_ZN4HPHP17f_session_destroyEv");
 
-TypedValue* fg_session_destroy(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_destroy(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -715,7 +715,7 @@ _rv => rdi
 
 TypedValue* fh_session_unset(TypedValue* _rv) asm("_ZN4HPHP15f_session_unsetEv");
 
-TypedValue* fg_session_unset(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_unset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -746,7 +746,7 @@ _ZN4HPHP16f_session_commitEv
 
 void fh_session_commit() asm("_ZN4HPHP16f_session_commitEv");
 
-TypedValue* fg_session_commit(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_commit(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -778,7 +778,7 @@ _ZN4HPHP21f_session_write_closeEv
 
 void fh_session_write_close() asm("_ZN4HPHP21f_session_write_closeEv");
 
-TypedValue* fg_session_write_close(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_write_close(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -814,7 +814,7 @@ _argv => rdx
 
 bool fh_session_register(int64_t _argc, TypedValue* var_names, Value* _argv) asm("_ZN4HPHP18f_session_registerEiRKNS_7VariantERKNS_5ArrayE");
 
-TypedValue* fg_session_register(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_register(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -860,8 +860,8 @@ varname => rdi
 
 bool fh_session_unregister(Value* varname) asm("_ZN4HPHP20f_session_unregisterERKNS_6StringE");
 
-TypedValue * fg1_session_unregister(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_unregister(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_unregister(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_unregister(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -869,7 +869,7 @@ TypedValue * fg1_session_unregister(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_session_unregister(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_unregister(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -909,8 +909,8 @@ varname => rdi
 
 bool fh_session_is_registered(Value* varname) asm("_ZN4HPHP23f_session_is_registeredERKNS_6StringE");
 
-TypedValue * fg1_session_is_registered(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_session_is_registered(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_session_is_registered(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_session_is_registered(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -918,7 +918,7 @@ TypedValue * fg1_session_is_registered(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_session_is_registered(HPHP::VM::ActRec *ar) {
+TypedValue* fg_session_is_registered(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

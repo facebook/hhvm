@@ -78,7 +78,7 @@ void ObjectData::destruct() {
       // case.
       auto& faults = g_vmContext->m_faults;
       if (!faults.empty()) {
-        if (faults.back().m_faultType == HPHP::VM::Fault::CppException) return;
+        if (faults.back().m_faultType == Fault::CppException) return;
       }
       // We raise the refcount around the call to __destruct(). This is to
       // prevent the refcount from going to zero when the destructor returns.
@@ -485,7 +485,7 @@ Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
   // to incorrect behavior in some corner cases. o_invoke is gradually being
   // removed from the HPHP runtime this should be ok for the short term.
   const HPHP::VM::Func* f = cls->lookupMethod(s.get());
-  if (f && (f->attrs() & HPHP::VM::AttrStatic)) {
+  if (f && (f->attrs() & AttrStatic)) {
     // If we found a method and its static, null out this_
     this_ = nullptr;
   } else if (!f) {
@@ -500,7 +500,7 @@ Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
       return uninit_null();
     }
     // We found __call! Stash the original name into invName.
-    assert(!(f->attrs() & HPHP::VM::AttrStatic));
+    assert(!(f->attrs() & AttrStatic));
     invName = s.get();
     invName->incRefCount();
   }
@@ -636,10 +636,9 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
         thiz->getProp(m_cls, name.get(), visible, accessible, unset);
         if (accessible && !unset) {
           String propName = name;
-          VM::Slot propInd =
-            m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
-          if (accessible && propInd != VM::kInvalidSlot) {
-            if (m_cls->m_declProperties[propInd].m_attrs & VM::AttrPrivate) {
+          Slot propInd = m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
+          if (accessible && propInd != kInvalidSlot) {
+            if (m_cls->m_declProperties[propInd].m_attrs & AttrPrivate) {
               propName = concat4(s_zero, o_getClassName(), s_zero, name);
             }
           }

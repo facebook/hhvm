@@ -14,13 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/complex_types.h>
-
 #ifndef incl_HPHP_EXT_HHBC_H_
 #define incl_HPHP_EXT_HHBC_H_
 
+#include <runtime/base/complex_types.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+struct ActRec;
 
 namespace VM {
   class Instance;
@@ -28,13 +30,13 @@ namespace VM {
 
 struct HhbcExtFuncInfo {
   const char* m_name;
-  TypedValue* (*m_builtinFunc)(HPHP::VM::ActRec* ar);
+  TypedValue* (*m_builtinFunc)(ActRec* ar);
   void* m_nativeFunc;
 };
 
 struct HhbcExtMethodInfo {
   const char* m_name;
-  TypedValue* (*m_pGenericMethod)(HPHP::VM::ActRec* ar);
+  TypedValue* (*m_pGenericMethod)(ActRec* ar);
 };
 
 struct HhbcExtClassInfo {

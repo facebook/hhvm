@@ -34,7 +34,7 @@ _rv => rdi
 
 Value* fh_pdo_drivers(Value* _rv) asm("_ZN4HPHP13f_pdo_driversEv");
 
-TypedValue* fg_pdo_drivers(HPHP::VM::ActRec *ar) {
+TypedValue* fg_pdo_drivers(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -81,8 +81,8 @@ options => r8
 
 void th_3PDO___construct(ObjectData* this_, Value* dsn, Value* username, Value* password, Value* options) asm("_ZN4HPHP5c_PDO13t___constructERKNS_6StringES3_S3_RKNS_5ArrayE");
 
-TypedValue* tg1_3PDO___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_3PDO___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_3PDO___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -109,7 +109,7 @@ TypedValue* tg1_3PDO___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* tg_3PDO___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -156,8 +156,8 @@ options => rcx
 
 TypedValue* th_3PDO_prepare(TypedValue* _rv, ObjectData* this_, Value* statement, Value* options) asm("_ZN4HPHP5c_PDO9t_prepareERKNS_6StringERKNS_5ArrayE");
 
-TypedValue* tg1_3PDO_prepare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_prepare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_3PDO_prepare(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_3PDO_prepare(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -175,7 +175,7 @@ TypedValue* tg1_3PDO_prepare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* tg_3PDO_prepare(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_prepare(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -218,7 +218,7 @@ this_ => rdi
 
 bool th_3PDO_begintransaction(ObjectData* this_) asm("_ZN4HPHP5c_PDO18t_begintransactionEv");
 
-TypedValue* tg_3PDO_begintransaction(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_begintransaction(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -254,7 +254,7 @@ this_ => rdi
 
 bool th_3PDO_commit(ObjectData* this_) asm("_ZN4HPHP5c_PDO8t_commitEv");
 
-TypedValue* tg_3PDO_commit(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_commit(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -290,7 +290,7 @@ this_ => rdi
 
 bool th_3PDO_rollback(ObjectData* this_) asm("_ZN4HPHP5c_PDO10t_rollbackEv");
 
-TypedValue* tg_3PDO_rollback(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_rollback(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -328,8 +328,8 @@ value => rdx
 
 bool th_3PDO_setattribute(ObjectData* this_, long attribute, TypedValue* value) asm("_ZN4HPHP5c_PDO14t_setattributeElRKNS_7VariantE");
 
-TypedValue* tg1_3PDO_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_3PDO_setattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_3PDO_setattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -337,7 +337,7 @@ TypedValue* tg1_3PDO_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* tg_3PDO_setattribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_setattribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -382,8 +382,8 @@ attribute => rdx
 
 TypedValue* th_3PDO_getattribute(TypedValue* _rv, ObjectData* this_, long attribute) asm("_ZN4HPHP5c_PDO14t_getattributeEl");
 
-TypedValue* tg1_3PDO_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_3PDO_getattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_3PDO_getattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   th_3PDO_getattribute((rv), (this_), (long)(args[-0].m_data.num));
@@ -391,7 +391,7 @@ TypedValue* tg1_3PDO_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* tg_3PDO_getattribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_getattribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -436,8 +436,8 @@ query => rdx
 
 TypedValue* th_3PDO_exec(TypedValue* _rv, ObjectData* this_, Value* query) asm("_ZN4HPHP5c_PDO6t_execERKNS_6StringE");
 
-TypedValue* tg1_3PDO_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_3PDO_exec(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_3PDO_exec(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_3PDO_exec((rv), (this_), &args[-0].m_data);
@@ -445,7 +445,7 @@ TypedValue* tg1_3PDO_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, O
   return rv;
 }
 
-TypedValue* tg_3PDO_exec(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_exec(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -490,8 +490,8 @@ seqname => rdx
 
 TypedValue* th_3PDO_lastinsertid(TypedValue* _rv, ObjectData* this_, Value* seqname) asm("_ZN4HPHP5c_PDO14t_lastinsertidERKNS_6StringE");
 
-TypedValue* tg1_3PDO_lastinsertid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_lastinsertid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_3PDO_lastinsertid(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_3PDO_lastinsertid(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_3PDO_lastinsertid((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_string));
@@ -499,7 +499,7 @@ TypedValue* tg1_3PDO_lastinsertid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* tg_3PDO_lastinsertid(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_lastinsertid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -543,7 +543,7 @@ this_ => rsi
 
 TypedValue* th_3PDO_errorcode(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO11t_errorcodeEv");
 
-TypedValue* tg_3PDO_errorcode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_errorcode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -580,7 +580,7 @@ this_ => rsi
 
 Value* th_3PDO_errorinfo(Value* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO11t_errorinfoEv");
 
-TypedValue* tg_3PDO_errorinfo(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_errorinfo(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -619,8 +619,8 @@ sql => rdx
 
 TypedValue* th_3PDO_query(TypedValue* _rv, ObjectData* this_, Value* sql) asm("_ZN4HPHP5c_PDO7t_queryERKNS_6StringE");
 
-TypedValue* tg1_3PDO_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_3PDO_query(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_3PDO_query(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_3PDO_query((rv), (this_), &args[-0].m_data);
@@ -628,7 +628,7 @@ TypedValue* tg1_3PDO_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, 
   return rv;
 }
 
-TypedValue* tg_3PDO_query(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_query(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -674,8 +674,8 @@ paramtype => rcx
 
 TypedValue* th_3PDO_quote(TypedValue* _rv, ObjectData* this_, Value* str, long paramtype) asm("_ZN4HPHP5c_PDO7t_quoteERKNS_6StringEl");
 
-TypedValue* tg1_3PDO_quote(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_3PDO_quote(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_3PDO_quote(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_3PDO_quote(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -693,7 +693,7 @@ TypedValue* tg1_3PDO_quote(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, 
   return rv;
 }
 
-TypedValue* tg_3PDO_quote(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_quote(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -737,7 +737,7 @@ this_ => rsi
 
 TypedValue* th_3PDO___wakeup(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO10t___wakeupEv");
 
-TypedValue* tg_3PDO___wakeup(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO___wakeup(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -774,7 +774,7 @@ this_ => rsi
 
 TypedValue* th_3PDO___sleep(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP5c_PDO9t___sleepEv");
 
-TypedValue* tg_3PDO___sleep(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO___sleep(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -811,7 +811,7 @@ cls_ => rsi
 
 Value* th_3PDO_getavailabledrivers(Value* _rv, char const* cls_) asm("_ZN4HPHP5c_PDO22ti_getavailabledriversEPKc");
 
-TypedValue* tg_3PDO_getavailabledrivers(HPHP::VM::ActRec *ar) {
+TypedValue* tg_3PDO_getavailabledrivers(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -852,7 +852,7 @@ this_ => rdi
 
 void th_12PDOStatement___construct(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement13t___constructEv");
 
-TypedValue* tg_12PDOStatement___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -891,8 +891,8 @@ params => rdx
 
 TypedValue* th_12PDOStatement_execute(TypedValue* _rv, ObjectData* this_, Value* params) asm("_ZN4HPHP14c_PDOStatement9t_executeERKNS_5ArrayE");
 
-TypedValue* tg1_12PDOStatement_execute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_execute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_execute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_execute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToArrayInPlace(args-0);
   th_12PDOStatement_execute((rv), (this_), (count > 0) ? &args[-0].m_data : (Value*)(&null_array));
@@ -900,7 +900,7 @@ TypedValue* tg1_12PDOStatement_execute(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_execute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_execute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -947,8 +947,8 @@ offset => r8
 
 TypedValue* th_12PDOStatement_fetch(TypedValue* _rv, ObjectData* this_, long how, long orientation, long offset) asm("_ZN4HPHP14c_PDOStatement7t_fetchElll");
 
-TypedValue* tg1_12PDOStatement_fetch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_fetch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_fetch(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_fetch(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -971,7 +971,7 @@ TypedValue* tg1_12PDOStatement_fetch(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_fetch(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_fetch(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1017,8 +1017,8 @@ ctor_args => rcx
 
 TypedValue* th_12PDOStatement_fetchobject(TypedValue* _rv, ObjectData* this_, Value* class_name, TypedValue* ctor_args) asm("_ZN4HPHP14c_PDOStatement13t_fetchobjectERKNS_6StringERKNS_7VariantE");
 
-TypedValue* tg1_12PDOStatement_fetchobject(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_fetchobject(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_fetchobject(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_fetchobject(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Variant defVal1;
@@ -1027,7 +1027,7 @@ TypedValue* tg1_12PDOStatement_fetchobject(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_fetchobject(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_fetchobject(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1073,8 +1073,8 @@ column_numner => rdx
 
 TypedValue* th_12PDOStatement_fetchcolumn(TypedValue* _rv, ObjectData* this_, long column_numner) asm("_ZN4HPHP14c_PDOStatement13t_fetchcolumnEl");
 
-TypedValue* tg1_12PDOStatement_fetchcolumn(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_fetchcolumn(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_fetchcolumn(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_fetchcolumn(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   th_12PDOStatement_fetchcolumn((rv), (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0));
@@ -1082,7 +1082,7 @@ TypedValue* tg1_12PDOStatement_fetchcolumn(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_fetchcolumn(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_fetchcolumn(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1129,8 +1129,8 @@ ctor_args => r8
 
 TypedValue* th_12PDOStatement_fetchall(TypedValue* _rv, ObjectData* this_, long how, TypedValue* class_name, TypedValue* ctor_args) asm("_ZN4HPHP14c_PDOStatement10t_fetchallElRKNS_7VariantES3_");
 
-TypedValue* tg1_12PDOStatement_fetchall(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_fetchall(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_fetchall(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_fetchall(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   Variant defVal1;
@@ -1140,7 +1140,7 @@ TypedValue* tg1_12PDOStatement_fetchall(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_fetchall(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_fetchall(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1188,8 +1188,8 @@ type => rcx
 
 bool th_12PDOStatement_bindvalue(ObjectData* this_, TypedValue* paramno, TypedValue* param, long type) asm("_ZN4HPHP14c_PDOStatement11t_bindvalueERKNS_7VariantES3_l");
 
-TypedValue* tg1_12PDOStatement_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_bindvalue(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_bindvalue(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-2);
@@ -1197,7 +1197,7 @@ TypedValue* tg1_12PDOStatement_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_bindvalue(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_bindvalue(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1245,8 +1245,8 @@ driver_params => r9
 
 bool th_12PDOStatement_bindparam(ObjectData* this_, TypedValue* paramno, TypedValue* param, long type, long max_value_len, TypedValue* driver_params) asm("_ZN4HPHP14c_PDOStatement11t_bindparamERKNS_7VariantERKNS_14VRefParamValueEllS3_");
 
-TypedValue* tg1_12PDOStatement_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_bindparam(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_bindparam(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1267,7 +1267,7 @@ TypedValue* tg1_12PDOStatement_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_bindparam(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_bindparam(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1316,8 +1316,8 @@ driver_params => r9
 
 bool th_12PDOStatement_bindcolumn(ObjectData* this_, TypedValue* paramno, TypedValue* param, long type, long max_value_len, TypedValue* driver_params) asm("_ZN4HPHP14c_PDOStatement12t_bindcolumnERKNS_7VariantERKNS_14VRefParamValueEllS3_");
 
-TypedValue* tg1_12PDOStatement_bindcolumn(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_bindcolumn(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_bindcolumn(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_bindcolumn(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1338,7 +1338,7 @@ TypedValue* tg1_12PDOStatement_bindcolumn(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_bindcolumn(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_bindcolumn(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1382,7 +1382,7 @@ this_ => rdi
 
 long th_12PDOStatement_rowcount(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement10t_rowcountEv");
 
-TypedValue* tg_12PDOStatement_rowcount(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_rowcount(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1419,7 +1419,7 @@ this_ => rsi
 
 TypedValue* th_12PDOStatement_errorcode(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement11t_errorcodeEv");
 
-TypedValue* tg_12PDOStatement_errorcode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_errorcode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1456,7 +1456,7 @@ this_ => rsi
 
 Value* th_12PDOStatement_errorinfo(Value* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement11t_errorinfoEv");
 
-TypedValue* tg_12PDOStatement_errorinfo(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_errorinfo(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1496,8 +1496,8 @@ value => rcx
 
 TypedValue* th_12PDOStatement_setattribute(TypedValue* _rv, ObjectData* this_, long attribute, TypedValue* value) asm("_ZN4HPHP14c_PDOStatement14t_setattributeElRKNS_7VariantE");
 
-TypedValue* tg1_12PDOStatement_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_setattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_setattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   th_12PDOStatement_setattribute((rv), (this_), (long)(args[-0].m_data.num), (args-1));
@@ -1505,7 +1505,7 @@ TypedValue* tg1_12PDOStatement_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_setattribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_setattribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1550,8 +1550,8 @@ attribute => rdx
 
 TypedValue* th_12PDOStatement_getattribute(TypedValue* _rv, ObjectData* this_, long attribute) asm("_ZN4HPHP14c_PDOStatement14t_getattributeEl");
 
-TypedValue* tg1_12PDOStatement_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_getattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_getattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   th_12PDOStatement_getattribute((rv), (this_), (long)(args[-0].m_data.num));
@@ -1559,7 +1559,7 @@ TypedValue* tg1_12PDOStatement_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_getattribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_getattribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1602,7 +1602,7 @@ this_ => rdi
 
 long th_12PDOStatement_columncount(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement13t_columncountEv");
 
-TypedValue* tg_12PDOStatement_columncount(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_columncount(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1640,8 +1640,8 @@ column => rdx
 
 TypedValue* th_12PDOStatement_getcolumnmeta(TypedValue* _rv, ObjectData* this_, long column) asm("_ZN4HPHP14c_PDOStatement15t_getcolumnmetaEl");
 
-TypedValue* tg1_12PDOStatement_getcolumnmeta(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_getcolumnmeta(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_getcolumnmeta(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_getcolumnmeta(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   th_12PDOStatement_getcolumnmeta((rv), (this_), (long)(args[-0].m_data.num));
@@ -1649,7 +1649,7 @@ TypedValue* tg1_12PDOStatement_getcolumnmeta(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_getcolumnmeta(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_getcolumnmeta(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1695,8 +1695,8 @@ _argv => rcx
 
 bool th_12PDOStatement_setfetchmode(ObjectData* this_, int64_t _argc, long mode, Value* _argv) asm("_ZN4HPHP14c_PDOStatement14t_setfetchmodeEilRKNS_5ArrayE");
 
-TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -1717,7 +1717,7 @@ TypedValue* tg1_12PDOStatement_setfetchmode(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_12PDOStatement_setfetchmode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_setfetchmode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1773,7 +1773,7 @@ this_ => rdi
 
 bool th_12PDOStatement_nextrowset(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement12t_nextrowsetEv");
 
-TypedValue* tg_12PDOStatement_nextrowset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_nextrowset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1809,7 +1809,7 @@ this_ => rdi
 
 bool th_12PDOStatement_closecursor(ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement13t_closecursorEv");
 
-TypedValue* tg_12PDOStatement_closecursor(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_closecursor(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1846,7 +1846,7 @@ this_ => rsi
 
 TypedValue* th_12PDOStatement_debugdumpparams(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement17t_debugdumpparamsEv");
 
-TypedValue* tg_12PDOStatement_debugdumpparams(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_debugdumpparams(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1883,7 +1883,7 @@ this_ => rsi
 
 TypedValue* th_12PDOStatement_current(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement9t_currentEv");
 
-TypedValue* tg_12PDOStatement_current(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_current(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1920,7 +1920,7 @@ this_ => rsi
 
 TypedValue* th_12PDOStatement_key(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement5t_keyEv");
 
-TypedValue* tg_12PDOStatement_key(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_key(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1957,7 +1957,7 @@ this_ => rsi
 
 TypedValue* th_12PDOStatement_next(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement6t_nextEv");
 
-TypedValue* tg_12PDOStatement_next(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_next(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1994,7 +1994,7 @@ this_ => rsi
 
 TypedValue* th_12PDOStatement_rewind(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement8t_rewindEv");
 
-TypedValue* tg_12PDOStatement_rewind(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_rewind(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2031,7 +2031,7 @@ this_ => rsi
 
 TypedValue* th_12PDOStatement_valid(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement7t_validEv");
 
-TypedValue* tg_12PDOStatement_valid(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement_valid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2068,7 +2068,7 @@ this_ => rsi
 
 TypedValue* th_12PDOStatement___wakeup(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement10t___wakeupEv");
 
-TypedValue* tg_12PDOStatement___wakeup(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement___wakeup(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2105,7 +2105,7 @@ this_ => rsi
 
 TypedValue* th_12PDOStatement___sleep(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP14c_PDOStatement9t___sleepEv");
 
-TypedValue* tg_12PDOStatement___sleep(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12PDOStatement___sleep(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

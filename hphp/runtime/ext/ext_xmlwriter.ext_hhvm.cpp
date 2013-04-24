@@ -34,7 +34,7 @@ _rv => rdi
 
 TypedValue* fh_xmlwriter_open_memory(TypedValue* _rv) asm("_ZN4HPHP23f_xmlwriter_open_memoryEv");
 
-TypedValue* fg_xmlwriter_open_memory(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_open_memory(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -68,8 +68,8 @@ uri => rsi
 
 Value* fh_xmlwriter_open_uri(Value* _rv, Value* uri) asm("_ZN4HPHP20f_xmlwriter_open_uriERKNS_6StringE");
 
-TypedValue * fg1_xmlwriter_open_uri(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_open_uri(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_open_uri(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_open_uri(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
@@ -78,7 +78,7 @@ TypedValue * fg1_xmlwriter_open_uri(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_xmlwriter_open_uri(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_open_uri(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -120,8 +120,8 @@ indentstring => rsi
 
 bool fh_xmlwriter_set_indent_string(Value* xmlwriter, Value* indentstring) asm("_ZN4HPHP29f_xmlwriter_set_indent_stringERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_xmlwriter_set_indent_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_set_indent_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_set_indent_string(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_set_indent_string(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -134,7 +134,7 @@ TypedValue * fg1_xmlwriter_set_indent_string(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_xmlwriter_set_indent_string(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_set_indent_string(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -175,8 +175,8 @@ indent => rsi
 
 bool fh_xmlwriter_set_indent(Value* xmlwriter, bool indent) asm("_ZN4HPHP22f_xmlwriter_set_indentERKNS_6ObjectEb");
 
-TypedValue * fg1_xmlwriter_set_indent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_set_indent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_set_indent(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_set_indent(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfBoolean) {
@@ -189,7 +189,7 @@ TypedValue * fg1_xmlwriter_set_indent(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* fg_xmlwriter_set_indent(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_set_indent(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -232,8 +232,8 @@ standalone => rcx
 
 bool fh_xmlwriter_start_document(Value* xmlwriter, Value* version, Value* encoding, Value* standalone) asm("_ZN4HPHP26f_xmlwriter_start_documentERKNS_6ObjectERKNS_6StringES5_S5_");
 
-TypedValue * fg1_xmlwriter_start_document(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_document(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_document(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_document(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -260,7 +260,7 @@ TypedValue * fg1_xmlwriter_start_document(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_document(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_document(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -302,8 +302,8 @@ name => rsi
 
 bool fh_xmlwriter_start_element(Value* xmlwriter, Value* name) asm("_ZN4HPHP25f_xmlwriter_start_elementERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_xmlwriter_start_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_element(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_element(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -316,7 +316,7 @@ TypedValue * fg1_xmlwriter_start_element(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_element(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_element(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -359,8 +359,8 @@ uri => rcx
 
 bool fh_xmlwriter_start_element_ns(Value* xmlwriter, Value* prefix, Value* name, Value* uri) asm("_ZN4HPHP28f_xmlwriter_start_element_nsERKNS_6ObjectERKNS_6StringES5_S5_");
 
-TypedValue * fg1_xmlwriter_start_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_element_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_element_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
@@ -379,7 +379,7 @@ TypedValue * fg1_xmlwriter_start_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_element_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_element_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -423,8 +423,8 @@ content => r8
 
 bool fh_xmlwriter_write_element_ns(Value* xmlwriter, Value* prefix, Value* name, Value* uri, Value* content) asm("_ZN4HPHP28f_xmlwriter_write_element_nsERKNS_6ObjectERKNS_6StringES5_S5_S5_");
 
-TypedValue * fg1_xmlwriter_write_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_element_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_element_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -451,7 +451,7 @@ TypedValue * fg1_xmlwriter_write_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_element_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_element_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -493,8 +493,8 @@ content => rdx
 
 bool fh_xmlwriter_write_element(Value* xmlwriter, Value* name, Value* content) asm("_ZN4HPHP25f_xmlwriter_write_elementERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_xmlwriter_write_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_element(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_element(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -515,7 +515,7 @@ TypedValue * fg1_xmlwriter_write_element(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_element(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_element(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -555,8 +555,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_end_element(Value* xmlwriter) asm("_ZN4HPHP23f_xmlwriter_end_elementERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_end_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_end_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_end_element(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_end_element(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -564,7 +564,7 @@ TypedValue * fg1_xmlwriter_end_element(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_xmlwriter_end_element(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_end_element(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -604,8 +604,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_full_end_element(Value* xmlwriter) asm("_ZN4HPHP28f_xmlwriter_full_end_elementERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_full_end_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_full_end_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_full_end_element(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_full_end_element(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -613,7 +613,7 @@ TypedValue * fg1_xmlwriter_full_end_element(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_xmlwriter_full_end_element(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_full_end_element(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -656,8 +656,8 @@ uri => rcx
 
 bool fh_xmlwriter_start_attribute_ns(Value* xmlwriter, Value* prefix, Value* name, Value* uri) asm("_ZN4HPHP30f_xmlwriter_start_attribute_nsERKNS_6ObjectERKNS_6StringES5_S5_");
 
-TypedValue * fg1_xmlwriter_start_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
@@ -676,7 +676,7 @@ TypedValue * fg1_xmlwriter_start_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_attribute_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_attribute_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -717,8 +717,8 @@ name => rsi
 
 bool fh_xmlwriter_start_attribute(Value* xmlwriter, Value* name) asm("_ZN4HPHP27f_xmlwriter_start_attributeERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_xmlwriter_start_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_attribute(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_attribute(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -731,7 +731,7 @@ TypedValue * fg1_xmlwriter_start_attribute(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_attribute(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_attribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -775,8 +775,8 @@ content => r8
 
 bool fh_xmlwriter_write_attribute_ns(Value* xmlwriter, Value* prefix, Value* name, Value* uri, Value* content) asm("_ZN4HPHP30f_xmlwriter_write_attribute_nsERKNS_6ObjectERKNS_6StringES5_S5_S5_");
 
-TypedValue * fg1_xmlwriter_write_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-4)->m_type)) {
@@ -798,7 +798,7 @@ TypedValue * fg1_xmlwriter_write_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_attribute_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_attribute_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -840,8 +840,8 @@ value => rdx
 
 bool fh_xmlwriter_write_attribute(Value* xmlwriter, Value* name, Value* value) asm("_ZN4HPHP27f_xmlwriter_write_attributeERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_xmlwriter_write_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_attribute(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_attribute(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -857,7 +857,7 @@ TypedValue * fg1_xmlwriter_write_attribute(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_attribute(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_attribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -897,8 +897,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_end_attribute(Value* xmlwriter) asm("_ZN4HPHP25f_xmlwriter_end_attributeERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_end_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_end_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_end_attribute(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_end_attribute(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -906,7 +906,7 @@ TypedValue * fg1_xmlwriter_end_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_xmlwriter_end_attribute(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_end_attribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -946,8 +946,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_start_cdata(Value* xmlwriter) asm("_ZN4HPHP23f_xmlwriter_start_cdataERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_start_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_cdata(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_cdata(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -955,7 +955,7 @@ TypedValue * fg1_xmlwriter_start_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_cdata(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_cdata(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -996,8 +996,8 @@ content => rsi
 
 bool fh_xmlwriter_write_cdata(Value* xmlwriter, Value* content) asm("_ZN4HPHP23f_xmlwriter_write_cdataERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_xmlwriter_write_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_cdata(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_cdata(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -1010,7 +1010,7 @@ TypedValue * fg1_xmlwriter_write_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_cdata(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_cdata(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1050,8 +1050,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_end_cdata(Value* xmlwriter) asm("_ZN4HPHP21f_xmlwriter_end_cdataERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_end_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_end_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_end_cdata(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_end_cdata(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1059,7 +1059,7 @@ TypedValue * fg1_xmlwriter_end_cdata(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_xmlwriter_end_cdata(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_end_cdata(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1099,8 +1099,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_start_comment(Value* xmlwriter) asm("_ZN4HPHP25f_xmlwriter_start_commentERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_start_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_comment(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_comment(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1108,7 +1108,7 @@ TypedValue * fg1_xmlwriter_start_comment(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_comment(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_comment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1149,8 +1149,8 @@ content => rsi
 
 bool fh_xmlwriter_write_comment(Value* xmlwriter, Value* content) asm("_ZN4HPHP25f_xmlwriter_write_commentERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_xmlwriter_write_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_comment(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_comment(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -1163,7 +1163,7 @@ TypedValue * fg1_xmlwriter_write_comment(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_comment(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_comment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1203,8 +1203,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_end_comment(Value* xmlwriter) asm("_ZN4HPHP23f_xmlwriter_end_commentERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_end_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_end_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_end_comment(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_end_comment(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1212,7 +1212,7 @@ TypedValue * fg1_xmlwriter_end_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_xmlwriter_end_comment(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_end_comment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1252,8 +1252,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_end_document(Value* xmlwriter) asm("_ZN4HPHP24f_xmlwriter_end_documentERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_end_document(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_end_document(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_end_document(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_end_document(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1261,7 +1261,7 @@ TypedValue * fg1_xmlwriter_end_document(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_xmlwriter_end_document(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_end_document(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1302,8 +1302,8 @@ target => rsi
 
 bool fh_xmlwriter_start_pi(Value* xmlwriter, Value* target) asm("_ZN4HPHP20f_xmlwriter_start_piERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_xmlwriter_start_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_pi(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_pi(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -1316,7 +1316,7 @@ TypedValue * fg1_xmlwriter_start_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_pi(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_pi(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1358,8 +1358,8 @@ content => rdx
 
 bool fh_xmlwriter_write_pi(Value* xmlwriter, Value* target, Value* content) asm("_ZN4HPHP20f_xmlwriter_write_piERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_xmlwriter_write_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_pi(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_pi(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -1375,7 +1375,7 @@ TypedValue * fg1_xmlwriter_write_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_pi(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_pi(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1415,8 +1415,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_end_pi(Value* xmlwriter) asm("_ZN4HPHP18f_xmlwriter_end_piERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_end_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_end_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_end_pi(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_end_pi(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1424,7 +1424,7 @@ TypedValue * fg1_xmlwriter_end_pi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_xmlwriter_end_pi(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_end_pi(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1465,8 +1465,8 @@ content => rsi
 
 bool fh_xmlwriter_text(Value* xmlwriter, Value* content) asm("_ZN4HPHP16f_xmlwriter_textERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_xmlwriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_text(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_text(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -1479,7 +1479,7 @@ TypedValue * fg1_xmlwriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_xmlwriter_text(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_text(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1520,8 +1520,8 @@ content => rsi
 
 bool fh_xmlwriter_write_raw(Value* xmlwriter, Value* content) asm("_ZN4HPHP21f_xmlwriter_write_rawERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_xmlwriter_write_raw(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_raw(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_raw(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_raw(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -1534,7 +1534,7 @@ TypedValue * fg1_xmlwriter_write_raw(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_raw(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_raw(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1577,8 +1577,8 @@ systemid => rcx
 
 bool fh_xmlwriter_start_dtd(Value* xmlwriter, Value* qualifiedname, Value* publicid, Value* systemid) asm("_ZN4HPHP21f_xmlwriter_start_dtdERKNS_6ObjectERKNS_6StringES5_S5_");
 
-TypedValue * fg1_xmlwriter_start_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_dtd(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_dtd(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1603,7 +1603,7 @@ TypedValue * fg1_xmlwriter_start_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_dtd(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_dtd(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1647,8 +1647,8 @@ subset => r8
 
 bool fh_xmlwriter_write_dtd(Value* xmlwriter, Value* name, Value* publicid, Value* systemid, Value* subset) asm("_ZN4HPHP21f_xmlwriter_write_dtdERKNS_6ObjectERKNS_6StringES5_S5_S5_");
 
-TypedValue * fg1_xmlwriter_write_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_dtd(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_dtd(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1677,7 +1677,7 @@ TypedValue * fg1_xmlwriter_write_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_dtd(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_dtd(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1718,8 +1718,8 @@ qualifiedname => rsi
 
 bool fh_xmlwriter_start_dtd_element(Value* xmlwriter, Value* qualifiedname) asm("_ZN4HPHP29f_xmlwriter_start_dtd_elementERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_xmlwriter_start_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_dtd_element(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_dtd_element(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -1732,7 +1732,7 @@ TypedValue * fg1_xmlwriter_start_dtd_element(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_dtd_element(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_dtd_element(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1774,8 +1774,8 @@ content => rdx
 
 bool fh_xmlwriter_write_dtd_element(Value* xmlwriter, Value* name, Value* content) asm("_ZN4HPHP29f_xmlwriter_write_dtd_elementERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_xmlwriter_write_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_dtd_element(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_dtd_element(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -1791,7 +1791,7 @@ TypedValue * fg1_xmlwriter_write_dtd_element(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_dtd_element(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_dtd_element(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1831,8 +1831,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_end_dtd_element(Value* xmlwriter) asm("_ZN4HPHP27f_xmlwriter_end_dtd_elementERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_end_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_end_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_end_dtd_element(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_end_dtd_element(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1840,7 +1840,7 @@ TypedValue * fg1_xmlwriter_end_dtd_element(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_xmlwriter_end_dtd_element(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_end_dtd_element(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1881,8 +1881,8 @@ name => rsi
 
 bool fh_xmlwriter_start_dtd_attlist(Value* xmlwriter, Value* name) asm("_ZN4HPHP29f_xmlwriter_start_dtd_attlistERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_xmlwriter_start_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_dtd_attlist(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_dtd_attlist(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -1895,7 +1895,7 @@ TypedValue * fg1_xmlwriter_start_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_dtd_attlist(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_dtd_attlist(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1937,8 +1937,8 @@ content => rdx
 
 bool fh_xmlwriter_write_dtd_attlist(Value* xmlwriter, Value* name, Value* content) asm("_ZN4HPHP29f_xmlwriter_write_dtd_attlistERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_xmlwriter_write_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_dtd_attlist(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_dtd_attlist(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -1954,7 +1954,7 @@ TypedValue * fg1_xmlwriter_write_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_dtd_attlist(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_dtd_attlist(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1994,8 +1994,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_end_dtd_attlist(Value* xmlwriter) asm("_ZN4HPHP27f_xmlwriter_end_dtd_attlistERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_end_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_end_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_end_dtd_attlist(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_end_dtd_attlist(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -2003,7 +2003,7 @@ TypedValue * fg1_xmlwriter_end_dtd_attlist(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_xmlwriter_end_dtd_attlist(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_end_dtd_attlist(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2045,8 +2045,8 @@ isparam => rdx
 
 bool fh_xmlwriter_start_dtd_entity(Value* xmlwriter, Value* name, bool isparam) asm("_ZN4HPHP28f_xmlwriter_start_dtd_entityERKNS_6ObjectERKNS_6StringEb");
 
-TypedValue * fg1_xmlwriter_start_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_start_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_start_dtd_entity(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_start_dtd_entity(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfBoolean) {
@@ -2062,7 +2062,7 @@ TypedValue * fg1_xmlwriter_start_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_xmlwriter_start_dtd_entity(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_start_dtd_entity(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2108,8 +2108,8 @@ ndataid => st0
 
 bool fh_xmlwriter_write_dtd_entity(Value* xmlwriter, Value* name, Value* content, bool pe, Value* publicid, Value* systemid, Value* ndataid) asm("_ZN4HPHP28f_xmlwriter_write_dtd_entityERKNS_6ObjectERKNS_6StringES5_bS5_S5_S5_");
 
-TypedValue * fg1_xmlwriter_write_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_write_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_write_dtd_entity(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_write_dtd_entity(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -2145,7 +2145,7 @@ TypedValue * fg1_xmlwriter_write_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_xmlwriter_write_dtd_entity(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_write_dtd_entity(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2185,8 +2185,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_end_dtd_entity(Value* xmlwriter) asm("_ZN4HPHP26f_xmlwriter_end_dtd_entityERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_end_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_end_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_end_dtd_entity(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_end_dtd_entity(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -2194,7 +2194,7 @@ TypedValue * fg1_xmlwriter_end_dtd_entity(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_xmlwriter_end_dtd_entity(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_end_dtd_entity(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2234,8 +2234,8 @@ xmlwriter => rdi
 
 bool fh_xmlwriter_end_dtd(Value* xmlwriter) asm("_ZN4HPHP19f_xmlwriter_end_dtdERKNS_6ObjectE");
 
-TypedValue * fg1_xmlwriter_end_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_end_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_end_dtd(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_end_dtd(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -2243,7 +2243,7 @@ TypedValue * fg1_xmlwriter_end_dtd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_xmlwriter_end_dtd(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_end_dtd(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2285,8 +2285,8 @@ empty => rdx
 
 TypedValue* fh_xmlwriter_flush(TypedValue* _rv, Value* xmlwriter, bool empty) asm("_ZN4HPHP17f_xmlwriter_flushERKNS_6ObjectEb");
 
-TypedValue * fg1_xmlwriter_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_flush(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_flush(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -2304,7 +2304,7 @@ TypedValue * fg1_xmlwriter_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_xmlwriter_flush(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_flush(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2346,8 +2346,8 @@ flush => rdx
 
 Value* fh_xmlwriter_output_memory(Value* _rv, Value* xmlwriter, bool flush) asm("_ZN4HPHP25f_xmlwriter_output_memoryERKNS_6ObjectEb");
 
-TypedValue * fg1_xmlwriter_output_memory(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xmlwriter_output_memory(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xmlwriter_output_memory(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xmlwriter_output_memory(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -2366,7 +2366,7 @@ TypedValue * fg1_xmlwriter_output_memory(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_xmlwriter_output_memory(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xmlwriter_output_memory(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2416,7 +2416,7 @@ this_ => rdi
 
 void th_9XMLWriter___construct(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter13t___constructEv");
 
-TypedValue* tg_9XMLWriter___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2453,7 +2453,7 @@ this_ => rdi
 
 bool th_9XMLWriter_openMemory(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter12t_openmemoryEv");
 
-TypedValue* tg_9XMLWriter_openMemory(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_openMemory(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2490,8 +2490,8 @@ uri => rsi
 
 bool th_9XMLWriter_openURI(ObjectData* this_, Value* uri) asm("_ZN4HPHP11c_XMLWriter9t_openuriERKNS_6StringE");
 
-TypedValue* tg1_9XMLWriter_openURI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_openURI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_openURI(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_openURI(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -2499,7 +2499,7 @@ TypedValue* tg1_9XMLWriter_openURI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_openURI(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_openURI(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2543,8 +2543,8 @@ indentstring => rsi
 
 bool th_9XMLWriter_setIndentString(ObjectData* this_, Value* indentstring) asm("_ZN4HPHP11c_XMLWriter17t_setindentstringERKNS_6StringE");
 
-TypedValue* tg1_9XMLWriter_setIndentString(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_setIndentString(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_setIndentString(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_setIndentString(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -2552,7 +2552,7 @@ TypedValue* tg1_9XMLWriter_setIndentString(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_setIndentString(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_setIndentString(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2596,8 +2596,8 @@ indent => rsi
 
 bool th_9XMLWriter_setIndent(ObjectData* this_, bool indent) asm("_ZN4HPHP11c_XMLWriter11t_setindentEb");
 
-TypedValue* tg1_9XMLWriter_setIndent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_setIndent(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_setIndent(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_setIndent(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToBooleanInPlace(args-0);
@@ -2605,7 +2605,7 @@ TypedValue* tg1_9XMLWriter_setIndent(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_setIndent(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_setIndent(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2651,8 +2651,8 @@ standalone => rcx
 
 bool th_9XMLWriter_startDocument(ObjectData* this_, Value* version, Value* encoding, Value* standalone) asm("_ZN4HPHP11c_XMLWriter15t_startdocumentERKNS_6StringES3_S3_");
 
-TypedValue* tg1_9XMLWriter_startDocument(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_startDocument(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_startDocument(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_startDocument(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -2676,7 +2676,7 @@ TypedValue* tg1_9XMLWriter_startDocument(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_startDocument(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startDocument(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2721,8 +2721,8 @@ name => rsi
 
 bool th_9XMLWriter_startElement(ObjectData* this_, Value* name) asm("_ZN4HPHP11c_XMLWriter14t_startelementERKNS_6StringE");
 
-TypedValue* tg1_9XMLWriter_startElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_startElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_startElement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_startElement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -2730,7 +2730,7 @@ TypedValue* tg1_9XMLWriter_startElement(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_startElement(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startElement(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2776,8 +2776,8 @@ uri => rcx
 
 bool th_9XMLWriter_startElementNS(ObjectData* this_, Value* prefix, Value* name, Value* uri) asm("_ZN4HPHP11c_XMLWriter16t_startelementnsERKNS_6StringES3_S3_");
 
-TypedValue* tg1_9XMLWriter_startElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_startElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_startElementNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_startElementNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -2793,7 +2793,7 @@ TypedValue* tg1_9XMLWriter_startElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_startElementNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startElementNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2840,8 +2840,8 @@ content => r8
 
 bool th_9XMLWriter_writeElementNS(ObjectData* this_, Value* prefix, Value* name, Value* uri, Value* content) asm("_ZN4HPHP11c_XMLWriter16t_writeelementnsERKNS_6StringES3_S3_S3_");
 
-TypedValue* tg1_9XMLWriter_writeElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writeElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writeElementNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writeElementNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -2865,7 +2865,7 @@ TypedValue* tg1_9XMLWriter_writeElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writeElementNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writeElementNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2910,8 +2910,8 @@ content => rdx
 
 bool th_9XMLWriter_writeElement(ObjectData* this_, Value* name, Value* content) asm("_ZN4HPHP11c_XMLWriter14t_writeelementERKNS_6StringES3_");
 
-TypedValue* tg1_9XMLWriter_writeElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writeElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writeElement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writeElement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -2929,7 +2929,7 @@ TypedValue* tg1_9XMLWriter_writeElement(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writeElement(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writeElement(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2972,7 +2972,7 @@ this_ => rdi
 
 bool th_9XMLWriter_endElement(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter12t_endelementEv");
 
-TypedValue* tg_9XMLWriter_endElement(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_endElement(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3008,7 +3008,7 @@ this_ => rdi
 
 bool th_9XMLWriter_fullEndElement(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter16t_fullendelementEv");
 
-TypedValue* tg_9XMLWriter_fullEndElement(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_fullEndElement(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3047,8 +3047,8 @@ uri => rcx
 
 bool th_9XMLWriter_startAttributens(ObjectData* this_, Value* prefix, Value* name, Value* uri) asm("_ZN4HPHP11c_XMLWriter18t_startattributensERKNS_6StringES3_S3_");
 
-TypedValue* tg1_9XMLWriter_startAttributens(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_startAttributens(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_startAttributens(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_startAttributens(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -3064,7 +3064,7 @@ TypedValue* tg1_9XMLWriter_startAttributens(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_startAttributens(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startAttributens(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3108,8 +3108,8 @@ name => rsi
 
 bool th_9XMLWriter_startAttribute(ObjectData* this_, Value* name) asm("_ZN4HPHP11c_XMLWriter16t_startattributeERKNS_6StringE");
 
-TypedValue* tg1_9XMLWriter_startAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_startAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_startAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_startAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -3117,7 +3117,7 @@ TypedValue* tg1_9XMLWriter_startAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_startAttribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startAttribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3164,8 +3164,8 @@ content => r8
 
 bool th_9XMLWriter_writeAttributeNS(ObjectData* this_, Value* prefix, Value* name, Value* uri, Value* content) asm("_ZN4HPHP11c_XMLWriter18t_writeattributensERKNS_6StringES3_S3_S3_");
 
-TypedValue* tg1_9XMLWriter_writeAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writeAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writeAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writeAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
@@ -3184,7 +3184,7 @@ TypedValue* tg1_9XMLWriter_writeAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writeAttributeNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writeAttributeNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3229,8 +3229,8 @@ value => rdx
 
 bool th_9XMLWriter_writeAttribute(ObjectData* this_, Value* name, Value* value) asm("_ZN4HPHP11c_XMLWriter16t_writeattributeERKNS_6StringES3_");
 
-TypedValue* tg1_9XMLWriter_writeAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writeAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writeAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writeAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -3243,7 +3243,7 @@ TypedValue* tg1_9XMLWriter_writeAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writeAttribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writeAttribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3286,7 +3286,7 @@ this_ => rdi
 
 bool th_9XMLWriter_endAttribute(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter14t_endattributeEv");
 
-TypedValue* tg_9XMLWriter_endAttribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_endAttribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3322,7 +3322,7 @@ this_ => rdi
 
 bool th_9XMLWriter_startCData(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter12t_startcdataEv");
 
-TypedValue* tg_9XMLWriter_startCData(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startCData(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3359,8 +3359,8 @@ content => rsi
 
 bool th_9XMLWriter_writeCData(ObjectData* this_, Value* content) asm("_ZN4HPHP11c_XMLWriter12t_writecdataERKNS_6StringE");
 
-TypedValue* tg1_9XMLWriter_writeCData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writeCData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writeCData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writeCData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -3368,7 +3368,7 @@ TypedValue* tg1_9XMLWriter_writeCData(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writeCData(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writeCData(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3411,7 +3411,7 @@ this_ => rdi
 
 bool th_9XMLWriter_endCData(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter10t_endcdataEv");
 
-TypedValue* tg_9XMLWriter_endCData(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_endCData(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3447,7 +3447,7 @@ this_ => rdi
 
 bool th_9XMLWriter_startComment(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter14t_startcommentEv");
 
-TypedValue* tg_9XMLWriter_startComment(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startComment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3484,8 +3484,8 @@ content => rsi
 
 bool th_9XMLWriter_writeComment(ObjectData* this_, Value* content) asm("_ZN4HPHP11c_XMLWriter14t_writecommentERKNS_6StringE");
 
-TypedValue* tg1_9XMLWriter_writeComment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writeComment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writeComment(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writeComment(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -3493,7 +3493,7 @@ TypedValue* tg1_9XMLWriter_writeComment(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writeComment(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writeComment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3536,7 +3536,7 @@ this_ => rdi
 
 bool th_9XMLWriter_endComment(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter12t_endcommentEv");
 
-TypedValue* tg_9XMLWriter_endComment(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_endComment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3572,7 +3572,7 @@ this_ => rdi
 
 bool th_9XMLWriter_endDocument(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter13t_enddocumentEv");
 
-TypedValue* tg_9XMLWriter_endDocument(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_endDocument(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3609,8 +3609,8 @@ target => rsi
 
 bool th_9XMLWriter_startPI(ObjectData* this_, Value* target) asm("_ZN4HPHP11c_XMLWriter9t_startpiERKNS_6StringE");
 
-TypedValue* tg1_9XMLWriter_startPI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_startPI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_startPI(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_startPI(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -3618,7 +3618,7 @@ TypedValue* tg1_9XMLWriter_startPI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_startPI(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startPI(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3663,8 +3663,8 @@ content => rdx
 
 bool th_9XMLWriter_writePI(ObjectData* this_, Value* target, Value* content) asm("_ZN4HPHP11c_XMLWriter9t_writepiERKNS_6StringES3_");
 
-TypedValue* tg1_9XMLWriter_writePI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writePI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writePI(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writePI(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -3677,7 +3677,7 @@ TypedValue* tg1_9XMLWriter_writePI(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writePI(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writePI(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3720,7 +3720,7 @@ this_ => rdi
 
 bool th_9XMLWriter_endPI(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter7t_endpiEv");
 
-TypedValue* tg_9XMLWriter_endPI(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_endPI(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3757,8 +3757,8 @@ content => rsi
 
 bool th_9XMLWriter_text(ObjectData* this_, Value* content) asm("_ZN4HPHP11c_XMLWriter6t_textERKNS_6StringE");
 
-TypedValue* tg1_9XMLWriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_text(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_text(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -3766,7 +3766,7 @@ TypedValue* tg1_9XMLWriter_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_text(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_text(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3810,8 +3810,8 @@ content => rsi
 
 bool th_9XMLWriter_writeRaw(ObjectData* this_, Value* content) asm("_ZN4HPHP11c_XMLWriter10t_writerawERKNS_6StringE");
 
-TypedValue* tg1_9XMLWriter_writeRaw(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writeRaw(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writeRaw(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writeRaw(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -3819,7 +3819,7 @@ TypedValue* tg1_9XMLWriter_writeRaw(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writeRaw(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writeRaw(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3865,8 +3865,8 @@ systemid => rcx
 
 bool th_9XMLWriter_startDTD(ObjectData* this_, Value* qualifiedname, Value* publicid, Value* systemid) asm("_ZN4HPHP11c_XMLWriter10t_startdtdERKNS_6StringES3_S3_");
 
-TypedValue* tg1_9XMLWriter_startDTD(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_startDTD(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_startDTD(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_startDTD(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -3888,7 +3888,7 @@ TypedValue* tg1_9XMLWriter_startDTD(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_startDTD(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startDTD(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3935,8 +3935,8 @@ subset => r8
 
 bool th_9XMLWriter_writeDTD(ObjectData* this_, Value* name, Value* publicid, Value* systemid, Value* subset) asm("_ZN4HPHP11c_XMLWriter10t_writedtdERKNS_6StringES3_S3_S3_");
 
-TypedValue* tg1_9XMLWriter_writeDTD(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writeDTD(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writeDTD(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writeDTD(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -3962,7 +3962,7 @@ TypedValue* tg1_9XMLWriter_writeDTD(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writeDTD(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writeDTD(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4006,8 +4006,8 @@ qualifiedname => rsi
 
 bool th_9XMLWriter_startDTDElement(ObjectData* this_, Value* qualifiedname) asm("_ZN4HPHP11c_XMLWriter17t_startdtdelementERKNS_6StringE");
 
-TypedValue* tg1_9XMLWriter_startDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_startDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_startDTDElement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_startDTDElement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -4015,7 +4015,7 @@ TypedValue* tg1_9XMLWriter_startDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_startDTDElement(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startDTDElement(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4060,8 +4060,8 @@ content => rdx
 
 bool th_9XMLWriter_writeDTDElement(ObjectData* this_, Value* name, Value* content) asm("_ZN4HPHP11c_XMLWriter17t_writedtdelementERKNS_6StringES3_");
 
-TypedValue* tg1_9XMLWriter_writeDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writeDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writeDTDElement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writeDTDElement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -4074,7 +4074,7 @@ TypedValue* tg1_9XMLWriter_writeDTDElement(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writeDTDElement(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writeDTDElement(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4117,7 +4117,7 @@ this_ => rdi
 
 bool th_9XMLWriter_endDTDElement(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter15t_enddtdelementEv");
 
-TypedValue* tg_9XMLWriter_endDTDElement(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_endDTDElement(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4154,8 +4154,8 @@ name => rsi
 
 bool th_9XMLWriter_startDTDAttlist(ObjectData* this_, Value* name) asm("_ZN4HPHP11c_XMLWriter17t_startdtdattlistERKNS_6StringE");
 
-TypedValue* tg1_9XMLWriter_startDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_startDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_startDTDAttlist(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_startDTDAttlist(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -4163,7 +4163,7 @@ TypedValue* tg1_9XMLWriter_startDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_startDTDAttlist(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startDTDAttlist(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4208,8 +4208,8 @@ content => rdx
 
 bool th_9XMLWriter_writeDTDAttlist(ObjectData* this_, Value* name, Value* content) asm("_ZN4HPHP11c_XMLWriter17t_writedtdattlistERKNS_6StringES3_");
 
-TypedValue* tg1_9XMLWriter_writeDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writeDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writeDTDAttlist(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writeDTDAttlist(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -4222,7 +4222,7 @@ TypedValue* tg1_9XMLWriter_writeDTDAttlist(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writeDTDAttlist(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writeDTDAttlist(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4265,7 +4265,7 @@ this_ => rdi
 
 bool th_9XMLWriter_endDTDAttlist(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter15t_enddtdattlistEv");
 
-TypedValue* tg_9XMLWriter_endDTDAttlist(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_endDTDAttlist(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4303,8 +4303,8 @@ isparam => rdx
 
 bool th_9XMLWriter_startDTDEntity(ObjectData* this_, Value* name, bool isparam) asm("_ZN4HPHP11c_XMLWriter16t_startdtdentityERKNS_6StringEb");
 
-TypedValue* tg1_9XMLWriter_startDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_startDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_startDTDEntity(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_startDTDEntity(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfBoolean) {
@@ -4317,7 +4317,7 @@ TypedValue* tg1_9XMLWriter_startDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_startDTDEntity(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_startDTDEntity(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4366,8 +4366,8 @@ ndataid => st0
 
 bool th_9XMLWriter_writeDTDEntity(ObjectData* this_, Value* name, Value* content, bool pe, Value* publicid, Value* systemid, Value* ndataid) asm("_ZN4HPHP11c_XMLWriter16t_writedtdentityERKNS_6StringES3_bS3_S3_S3_");
 
-TypedValue* tg1_9XMLWriter_writeDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_writeDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_writeDTDEntity(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_writeDTDEntity(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -4400,7 +4400,7 @@ TypedValue* tg1_9XMLWriter_writeDTDEntity(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_writeDTDEntity(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_writeDTDEntity(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4443,7 +4443,7 @@ this_ => rdi
 
 bool th_9XMLWriter_endDTDEntity(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter14t_enddtdentityEv");
 
-TypedValue* tg_9XMLWriter_endDTDEntity(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_endDTDEntity(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4479,7 +4479,7 @@ this_ => rdi
 
 bool th_9XMLWriter_endDTD(ObjectData* this_) asm("_ZN4HPHP11c_XMLWriter8t_enddtdEv");
 
-TypedValue* tg_9XMLWriter_endDTD(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_endDTD(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4517,8 +4517,8 @@ empty => rdx
 
 TypedValue* th_9XMLWriter_flush(TypedValue* _rv, ObjectData* this_, bool empty) asm("_ZN4HPHP11c_XMLWriter7t_flushEb");
 
-TypedValue* tg1_9XMLWriter_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_flush(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_flush(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToBooleanInPlace(args-0);
   th_9XMLWriter_flush((rv), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(true));
@@ -4526,7 +4526,7 @@ TypedValue* tg1_9XMLWriter_flush(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_flush(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_flush(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4571,8 +4571,8 @@ flush => rdx
 
 Value* th_9XMLWriter_outputMemory(Value* _rv, ObjectData* this_, bool flush) asm("_ZN4HPHP11c_XMLWriter14t_outputmemoryEb");
 
-TypedValue* tg1_9XMLWriter_outputMemory(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_9XMLWriter_outputMemory(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_9XMLWriter_outputMemory(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_9XMLWriter_outputMemory(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToBooleanInPlace(args-0);
@@ -4581,7 +4581,7 @@ TypedValue* tg1_9XMLWriter_outputMemory(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* tg_9XMLWriter_outputMemory(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9XMLWriter_outputMemory(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

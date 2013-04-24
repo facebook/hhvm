@@ -38,8 +38,8 @@ flags => r8
 
 TypedValue* fh_icu_match(TypedValue* _rv, Value* pattern, Value* subject, TypedValue* matches, long flags) asm("_ZN4HPHP11f_icu_matchERKNS_6StringES2_RKNS_14VRefParamValueEl");
 
-TypedValue * fg1_icu_match(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_icu_match(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_icu_match(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_icu_match(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -62,7 +62,7 @@ TypedValue * fg1_icu_match(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_icu_match(HPHP::VM::ActRec *ar) {
+TypedValue* fg_icu_match(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -105,8 +105,8 @@ remove_accents => rdx
 
 Value* fh_icu_transliterate(Value* _rv, Value* str, bool remove_accents) asm("_ZN4HPHP19f_icu_transliterateERKNS_6StringEb");
 
-TypedValue * fg1_icu_transliterate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_icu_transliterate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_icu_transliterate(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_icu_transliterate(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   if ((args-1)->m_type != KindOfBoolean) {
@@ -120,7 +120,7 @@ TypedValue * fg1_icu_transliterate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_icu_transliterate(HPHP::VM::ActRec *ar) {
+TypedValue* fg_icu_transliterate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -162,8 +162,8 @@ text => rsi
 
 Value* fh_icu_tokenize(Value* _rv, Value* text) asm("_ZN4HPHP14f_icu_tokenizeERKNS_6StringE");
 
-TypedValue * fg1_icu_tokenize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_icu_tokenize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_icu_tokenize(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_icu_tokenize(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
@@ -172,7 +172,7 @@ TypedValue * fg1_icu_tokenize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_icu_tokenize(HPHP::VM::ActRec *ar) {
+TypedValue* fg_icu_tokenize(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

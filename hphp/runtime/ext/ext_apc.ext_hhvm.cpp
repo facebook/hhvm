@@ -37,8 +37,8 @@ cache_id => rcx
 
 bool fh_apc_add(Value* key, TypedValue* var, long ttl, long cache_id) asm("_ZN4HPHP9f_apc_addERKNS_6StringERKNS_7VariantEll");
 
-TypedValue * fg1_apc_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_add(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_add(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -60,7 +60,7 @@ TypedValue * fg1_apc_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_apc_add(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_add(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -103,8 +103,8 @@ cache_id => rcx
 
 bool fh_apc_store(Value* key, TypedValue* var, long ttl, long cache_id) asm("_ZN4HPHP11f_apc_storeERKNS_6StringERKNS_7VariantEll");
 
-TypedValue * fg1_apc_store(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_store(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_store(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_store(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -126,7 +126,7 @@ TypedValue * fg1_apc_store(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_apc_store(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_store(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -169,8 +169,8 @@ cache_id => rcx
 
 TypedValue* fh_apc_fetch(TypedValue* _rv, TypedValue* key, TypedValue* success, long cache_id) asm("_ZN4HPHP11f_apc_fetchERKNS_7VariantERKNS_14VRefParamValueEl");
 
-TypedValue * fg1_apc_fetch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_fetch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_fetch(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_fetch(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-2);
   VRefParamValue defVal1 = uninit_null();
@@ -179,7 +179,7 @@ TypedValue * fg1_apc_fetch(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_apc_fetch(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_fetch(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -222,8 +222,8 @@ cache_id => rdx
 
 TypedValue* fh_apc_delete(TypedValue* _rv, TypedValue* key, long cache_id) asm("_ZN4HPHP12f_apc_deleteERKNS_7VariantEl");
 
-TypedValue * fg1_apc_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_delete(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_delete(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_apc_delete((rv), (args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
@@ -231,7 +231,7 @@ TypedValue * fg1_apc_delete(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_apc_delete(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_delete(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -273,8 +273,8 @@ cache_id => rdx
 
 bool fh_apc_compile_file(Value* filename, bool atomic, long cache_id) asm("_ZN4HPHP18f_apc_compile_fileERKNS_6StringEbl");
 
-TypedValue * fg1_apc_compile_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_compile_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_compile_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_compile_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -296,7 +296,7 @@ TypedValue * fg1_apc_compile_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_apc_compile_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_compile_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -338,8 +338,8 @@ limited => rdx
 
 TypedValue* fh_apc_cache_info(TypedValue* _rv, long cache_id, bool limited) asm("_ZN4HPHP16f_apc_cache_infoElb");
 
-TypedValue * fg1_apc_cache_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_cache_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_cache_info(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_cache_info(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -358,7 +358,7 @@ TypedValue * fg1_apc_cache_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_apc_cache_info(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_cache_info(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -398,8 +398,8 @@ cache_id => rdi
 
 bool fh_apc_clear_cache(long cache_id) asm("_ZN4HPHP17f_apc_clear_cacheEl");
 
-TypedValue * fg1_apc_clear_cache(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_clear_cache(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_clear_cache(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_clear_cache(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -407,7 +407,7 @@ TypedValue * fg1_apc_clear_cache(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_apc_clear_cache(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_clear_cache(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -450,8 +450,8 @@ cache_id => rcx
 
 bool fh_apc_define_constants(Value* key, Value* constants, bool case_sensitive, long cache_id) asm("_ZN4HPHP22f_apc_define_constantsERKNS_6StringES2_bl");
 
-TypedValue * fg1_apc_define_constants(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_define_constants(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_define_constants(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_define_constants(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -476,7 +476,7 @@ TypedValue * fg1_apc_define_constants(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* fg_apc_define_constants(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_define_constants(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -518,8 +518,8 @@ cache_id => rdx
 
 bool fh_apc_load_constants(Value* key, bool case_sensitive, long cache_id) asm("_ZN4HPHP20f_apc_load_constantsERKNS_6StringEbl");
 
-TypedValue * fg1_apc_load_constants(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_load_constants(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_load_constants(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_load_constants(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -541,7 +541,7 @@ TypedValue * fg1_apc_load_constants(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_apc_load_constants(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_load_constants(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -582,8 +582,8 @@ limited => rsi
 
 Value* fh_apc_sma_info(Value* _rv, bool limited) asm("_ZN4HPHP14f_apc_sma_infoEb");
 
-TypedValue * fg1_apc_sma_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_sma_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_sma_info(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_sma_info(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToBooleanInPlace(args-0);
@@ -592,7 +592,7 @@ TypedValue * fg1_apc_sma_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_apc_sma_info(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_sma_info(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -633,7 +633,7 @@ _rv => rdi
 
 Value* fh_apc_filehits(Value* _rv) asm("_ZN4HPHP14f_apc_filehitsEv");
 
-TypedValue* fg_apc_filehits(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_filehits(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -669,8 +669,8 @@ cache_id => rdx
 
 TypedValue* fh_apc_delete_file(TypedValue* _rv, TypedValue* keys, long cache_id) asm("_ZN4HPHP17f_apc_delete_fileERKNS_7VariantEl");
 
-TypedValue * fg1_apc_delete_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_delete_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_delete_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_delete_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_apc_delete_file((rv), (args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
@@ -678,7 +678,7 @@ TypedValue * fg1_apc_delete_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_apc_delete_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_delete_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -722,8 +722,8 @@ cache_id => r8
 
 TypedValue* fh_apc_inc(TypedValue* _rv, Value* key, long step, TypedValue* success, long cache_id) asm("_ZN4HPHP9f_apc_incERKNS_6StringElRKNS_14VRefParamValueEl");
 
-TypedValue * fg1_apc_inc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_inc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_inc(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_inc(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -747,7 +747,7 @@ TypedValue * fg1_apc_inc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_apc_inc(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_inc(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -792,8 +792,8 @@ cache_id => r8
 
 TypedValue* fh_apc_dec(TypedValue* _rv, Value* key, long step, TypedValue* success, long cache_id) asm("_ZN4HPHP9f_apc_decERKNS_6StringElRKNS_14VRefParamValueEl");
 
-TypedValue * fg1_apc_dec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_dec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_dec(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_dec(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -817,7 +817,7 @@ TypedValue * fg1_apc_dec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_apc_dec(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_dec(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -861,8 +861,8 @@ cache_id => rcx
 
 bool fh_apc_cas(Value* key, long old_cas, long new_cas, long cache_id) asm("_ZN4HPHP9f_apc_casERKNS_6StringElll");
 
-TypedValue * fg1_apc_cas(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_cas(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_cas(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_cas(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -886,7 +886,7 @@ TypedValue * fg1_apc_cas(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_apc_cas(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_cas(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -928,8 +928,8 @@ cache_id => rdx
 
 TypedValue* fh_apc_exists(TypedValue* _rv, TypedValue* key, long cache_id) asm("_ZN4HPHP12f_apc_existsERKNS_7VariantEl");
 
-TypedValue * fg1_apc_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_exists(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_exists(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_apc_exists((rv), (args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
@@ -937,7 +937,7 @@ TypedValue * fg1_apc_exists(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_apc_exists(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_exists(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -979,8 +979,8 @@ filter => rdx
 
 TypedValue* fh_apc_bin_dump(TypedValue* _rv, long cache_id, TypedValue* filter) asm("_ZN4HPHP14f_apc_bin_dumpElRKNS_7VariantE");
 
-TypedValue * fg1_apc_bin_dump(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_bin_dump(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_bin_dump(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_bin_dump(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   fh_apc_bin_dump((rv), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0), (count > 1) ? (args-1) : (TypedValue*)(&null_variant));
@@ -988,7 +988,7 @@ TypedValue * fg1_apc_bin_dump(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_apc_bin_dump(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_bin_dump(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1030,8 +1030,8 @@ cache_id => rdx
 
 bool fh_apc_bin_load(Value* data, long flags, long cache_id) asm("_ZN4HPHP14f_apc_bin_loadERKNS_6StringEll");
 
-TypedValue * fg1_apc_bin_load(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_bin_load(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_bin_load(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_bin_load(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1053,7 +1053,7 @@ TypedValue * fg1_apc_bin_load(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_apc_bin_load(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_bin_load(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1098,8 +1098,8 @@ context => r9
 
 TypedValue* fh_apc_bin_dumpfile(TypedValue* _rv, long cache_id, TypedValue* filter, Value* filename, long flags, Value* context) asm("_ZN4HPHP18f_apc_bin_dumpfileElRKNS_7VariantERKNS_6StringElRKNS_6ObjectE");
 
-TypedValue * fg1_apc_bin_dumpfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_bin_dumpfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_bin_dumpfile(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_bin_dumpfile(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -1125,7 +1125,7 @@ TypedValue * fg1_apc_bin_dumpfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_apc_bin_dumpfile(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_bin_dumpfile(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1169,8 +1169,8 @@ cache_id => rcx
 
 bool fh_apc_bin_loadfile(Value* filename, Value* context, long flags, long cache_id) asm("_ZN4HPHP18f_apc_bin_loadfileERKNS_6StringERKNS_6ObjectEll");
 
-TypedValue * fg1_apc_bin_loadfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_apc_bin_loadfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_apc_bin_loadfile(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_apc_bin_loadfile(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -1197,7 +1197,7 @@ TypedValue * fg1_apc_bin_loadfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_apc_bin_loadfile(HPHP::VM::ActRec *ar) {
+TypedValue* fg_apc_bin_loadfile(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

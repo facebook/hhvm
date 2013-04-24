@@ -34,8 +34,8 @@ scale => rdi
 
 bool fh_bcscale(long scale) asm("_ZN4HPHP9f_bcscaleEl");
 
-TypedValue * fg1_bcscale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_bcscale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_bcscale(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bcscale(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -43,7 +43,7 @@ TypedValue * fg1_bcscale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_bcscale(HPHP::VM::ActRec *ar) {
+TypedValue* fg_bcscale(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -86,8 +86,8 @@ scale => rcx
 
 Value* fh_bcadd(Value* _rv, Value* left, Value* right, long scale) asm("_ZN4HPHP7f_bcaddERKNS_6StringES2_l");
 
-TypedValue * fg1_bcadd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_bcadd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_bcadd(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bcadd(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -109,7 +109,7 @@ TypedValue * fg1_bcadd(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_bcadd(HPHP::VM::ActRec *ar) {
+TypedValue* fg_bcadd(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -153,8 +153,8 @@ scale => rcx
 
 Value* fh_bcsub(Value* _rv, Value* left, Value* right, long scale) asm("_ZN4HPHP7f_bcsubERKNS_6StringES2_l");
 
-TypedValue * fg1_bcsub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_bcsub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_bcsub(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bcsub(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -176,7 +176,7 @@ TypedValue * fg1_bcsub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_bcsub(HPHP::VM::ActRec *ar) {
+TypedValue* fg_bcsub(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -219,8 +219,8 @@ scale => rdx
 
 long fh_bccomp(Value* left, Value* right, long scale) asm("_ZN4HPHP8f_bccompERKNS_6StringES2_l");
 
-TypedValue * fg1_bccomp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_bccomp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_bccomp(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bccomp(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -241,7 +241,7 @@ TypedValue * fg1_bccomp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_bccomp(HPHP::VM::ActRec *ar) {
+TypedValue* fg_bccomp(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -284,8 +284,8 @@ scale => rcx
 
 Value* fh_bcmul(Value* _rv, Value* left, Value* right, long scale) asm("_ZN4HPHP7f_bcmulERKNS_6StringES2_l");
 
-TypedValue * fg1_bcmul(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_bcmul(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_bcmul(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bcmul(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -307,7 +307,7 @@ TypedValue * fg1_bcmul(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_bcmul(HPHP::VM::ActRec *ar) {
+TypedValue* fg_bcmul(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -351,8 +351,8 @@ scale => rcx
 
 Value* fh_bcdiv(Value* _rv, Value* left, Value* right, long scale) asm("_ZN4HPHP7f_bcdivERKNS_6StringES2_l");
 
-TypedValue * fg1_bcdiv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_bcdiv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_bcdiv(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bcdiv(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -374,7 +374,7 @@ TypedValue * fg1_bcdiv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_bcdiv(HPHP::VM::ActRec *ar) {
+TypedValue* fg_bcdiv(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -417,8 +417,8 @@ right => rdx
 
 Value* fh_bcmod(Value* _rv, Value* left, Value* right) asm("_ZN4HPHP7f_bcmodERKNS_6StringES2_");
 
-TypedValue * fg1_bcmod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_bcmod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_bcmod(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bcmod(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -432,7 +432,7 @@ TypedValue * fg1_bcmod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_bcmod(HPHP::VM::ActRec *ar) {
+TypedValue* fg_bcmod(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -476,8 +476,8 @@ scale => rcx
 
 Value* fh_bcpow(Value* _rv, Value* left, Value* right, long scale) asm("_ZN4HPHP7f_bcpowERKNS_6StringES2_l");
 
-TypedValue * fg1_bcpow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_bcpow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_bcpow(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bcpow(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -499,7 +499,7 @@ TypedValue * fg1_bcpow(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_bcpow(HPHP::VM::ActRec *ar) {
+TypedValue* fg_bcpow(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -544,8 +544,8 @@ scale => r8
 
 TypedValue* fh_bcpowmod(TypedValue* _rv, Value* left, Value* right, Value* modulus, long scale) asm("_ZN4HPHP10f_bcpowmodERKNS_6StringES2_S2_l");
 
-TypedValue * fg1_bcpowmod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_bcpowmod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_bcpowmod(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bcpowmod(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -569,7 +569,7 @@ TypedValue * fg1_bcpowmod(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_bcpowmod(HPHP::VM::ActRec *ar) {
+TypedValue* fg_bcpowmod(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -611,8 +611,8 @@ scale => rdx
 
 TypedValue* fh_bcsqrt(TypedValue* _rv, Value* operand, long scale) asm("_ZN4HPHP8f_bcsqrtERKNS_6StringEl");
 
-TypedValue * fg1_bcsqrt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_bcsqrt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_bcsqrt(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_bcsqrt(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -630,7 +630,7 @@ TypedValue * fg1_bcsqrt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_bcsqrt(HPHP::VM::ActRec *ar) {
+TypedValue* fg_bcsqrt(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

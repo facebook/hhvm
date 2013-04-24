@@ -36,8 +36,8 @@ year => rdx
 
 bool fh_checkdate(int month, int day, int year) asm("_ZN4HPHP11f_checkdateEiii");
 
-TypedValue * fg1_checkdate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_checkdate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_checkdate(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_checkdate(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfInt64) {
@@ -53,7 +53,7 @@ TypedValue * fg1_checkdate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_checkdate(HPHP::VM::ActRec *ar) {
+TypedValue* fg_checkdate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -95,8 +95,8 @@ interval => rdx
 
 Value* fh_date_add(Value* _rv, Value* datetime, Value* interval) asm("_ZN4HPHP10f_date_addERKNS_6ObjectES2_");
 
-TypedValue * fg1_date_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_add(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_add(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if ((args-1)->m_type != KindOfObject) {
@@ -110,7 +110,7 @@ TypedValue * fg1_date_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_date_add(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_add(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -154,8 +154,8 @@ timezone => rcx
 
 Value* fh_date_create_from_format(Value* _rv, Value* format, Value* time, Value* timezone) asm("_ZN4HPHP25f_date_create_from_formatERKNS_6StringES2_RKNS_6ObjectE");
 
-TypedValue * fg1_date_create_from_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_create_from_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_create_from_format(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_create_from_format(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -177,7 +177,7 @@ TypedValue * fg1_date_create_from_format(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_date_create_from_format(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_create_from_format(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -220,8 +220,8 @@ timezone => rdx
 
 Value* fh_date_create(Value* _rv, Value* time, Value* timezone) asm("_ZN4HPHP13f_date_createERKNS_6StringERKNS_6ObjectE");
 
-TypedValue * fg1_date_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_create(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_create(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -241,7 +241,7 @@ TypedValue * fg1_date_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_date_create(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_create(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -284,8 +284,8 @@ day => rcx
 
 void fh_date_date_set(Value* object, int year, int month, int day) asm("_ZN4HPHP15f_date_date_setERKNS_6ObjectEiii");
 
-TypedValue * fg1_date_date_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_date_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_date_set(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_date_set(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -305,7 +305,7 @@ TypedValue * fg1_date_date_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_date_date_set(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_date_set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -346,7 +346,7 @@ _rv => rdi
 
 Value* fh_date_default_timezone_get(Value* _rv) asm("_ZN4HPHP27f_date_default_timezone_getEv");
 
-TypedValue* fg_date_default_timezone_get(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_default_timezone_get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -380,8 +380,8 @@ name => rdi
 
 bool fh_date_default_timezone_set(Value* name) asm("_ZN4HPHP27f_date_default_timezone_setERKNS_6StringE");
 
-TypedValue * fg1_date_default_timezone_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_default_timezone_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_default_timezone_set(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_default_timezone_set(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -389,7 +389,7 @@ TypedValue * fg1_date_default_timezone_set(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_date_default_timezone_set(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_default_timezone_set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -432,8 +432,8 @@ absolute => rcx
 
 Value* fh_date_diff(Value* _rv, Value* datetime, Value* datetime2, bool absolute) asm("_ZN4HPHP11f_date_diffERKNS_6ObjectES2_b");
 
-TypedValue * fg1_date_diff(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_diff(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_diff(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_diff(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -455,7 +455,7 @@ TypedValue * fg1_date_diff(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_date_diff(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_diff(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -498,8 +498,8 @@ format => rdx
 
 Value* fh_date_format(Value* _rv, Value* object, Value* format) asm("_ZN4HPHP13f_date_formatERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_date_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_format(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_format(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -513,7 +513,7 @@ TypedValue * fg1_date_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_date_format(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_format(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -554,7 +554,7 @@ _rv => rdi
 
 Value* fh_date_get_last_errors(Value* _rv) asm("_ZN4HPHP22f_date_get_last_errorsEv");
 
-TypedValue* fg_date_get_last_errors(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_get_last_errors(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -589,8 +589,8 @@ time => rsi
 
 Value* fh_date_interval_create_from_date_string(Value* _rv, Value* time) asm("_ZN4HPHP39f_date_interval_create_from_date_stringERKNS_6StringE");
 
-TypedValue * fg1_date_interval_create_from_date_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_interval_create_from_date_string(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_interval_create_from_date_string(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_interval_create_from_date_string(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
@@ -599,7 +599,7 @@ TypedValue * fg1_date_interval_create_from_date_string(TypedValue* rv, HPHP::VM:
   return rv;
 }
 
-TypedValue* fg_date_interval_create_from_date_string(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_interval_create_from_date_string(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -642,8 +642,8 @@ format_spec => rdx
 
 Value* fh_date_interval_format(Value* _rv, Value* interval, Value* format_spec) asm("_ZN4HPHP22f_date_interval_formatERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_date_interval_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_interval_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_interval_format(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_interval_format(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -657,7 +657,7 @@ TypedValue * fg1_date_interval_format(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* fg_date_interval_format(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_interval_format(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -700,8 +700,8 @@ day => rcx
 
 void fh_date_isodate_set(Value* object, int year, int week, int day) asm("_ZN4HPHP18f_date_isodate_setERKNS_6ObjectEiii");
 
-TypedValue * fg1_date_isodate_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_isodate_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_isodate_set(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_isodate_set(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -726,7 +726,7 @@ TypedValue * fg1_date_isodate_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_date_isodate_set(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_isodate_set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -767,8 +767,8 @@ modify => rsi
 
 void fh_date_modify(Value* object, Value* modify) asm("_ZN4HPHP13f_date_modifyERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_date_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_modify(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_modify(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -782,7 +782,7 @@ TypedValue * fg1_date_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_date_modify(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_modify(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -823,8 +823,8 @@ object => rdi
 
 long fh_date_offset_get(Value* object) asm("_ZN4HPHP17f_date_offset_getERKNS_6ObjectE");
 
-TypedValue * fg1_date_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_offset_get(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_offset_get(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -832,7 +832,7 @@ TypedValue * fg1_date_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_date_offset_get(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_offset_get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -873,8 +873,8 @@ date => rsi
 
 TypedValue* fh_date_parse(TypedValue* _rv, Value* date) asm("_ZN4HPHP12f_date_parseERKNS_6StringE");
 
-TypedValue * fg1_date_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_parse(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_parse(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_date_parse((rv), &args[-0].m_data);
@@ -882,7 +882,7 @@ TypedValue * fg1_date_parse(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_date_parse(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_parse(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -924,8 +924,8 @@ interval => rdx
 
 Value* fh_date_sub(Value* _rv, Value* datetime, Value* interval) asm("_ZN4HPHP10f_date_subERKNS_6ObjectES2_");
 
-TypedValue * fg1_date_sub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_sub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_sub(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_sub(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if ((args-1)->m_type != KindOfObject) {
@@ -939,7 +939,7 @@ TypedValue * fg1_date_sub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_date_sub(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_sub(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -983,8 +983,8 @@ longitude => xmm1
 
 Value* fh_date_sun_info(Value* _rv, long ts, double latitude, double longitude) asm("_ZN4HPHP15f_date_sun_infoEldd");
 
-TypedValue * fg1_date_sun_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_sun_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_sun_info(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_sun_info(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   if ((args-2)->m_type != KindOfDouble) {
@@ -1001,7 +1001,7 @@ TypedValue * fg1_date_sun_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_date_sun_info(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_sun_info(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1048,8 +1048,8 @@ gmt_offset => xmm3
 
 TypedValue* fh_date_sunrise(TypedValue* _rv, long timestamp, int format, double latitude, double longitude, double zenith, double gmt_offset) asm("_ZN4HPHP14f_date_sunriseElidddd");
 
-TypedValue * fg1_date_sunrise(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_sunrise(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_sunrise(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_sunrise(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 6
@@ -1083,7 +1083,7 @@ TypedValue * fg1_date_sunrise(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_date_sunrise(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_sunrise(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1129,8 +1129,8 @@ gmt_offset => xmm3
 
 TypedValue* fh_date_sunset(TypedValue* _rv, long timestamp, int format, double latitude, double longitude, double zenith, double gmt_offset) asm("_ZN4HPHP13f_date_sunsetElidddd");
 
-TypedValue * fg1_date_sunset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_sunset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_sunset(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_sunset(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 6
@@ -1164,7 +1164,7 @@ TypedValue * fg1_date_sunset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_date_sunset(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_sunset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1206,8 +1206,8 @@ second => rcx
 
 void fh_date_time_set(Value* object, int hour, int minute, int second) asm("_ZN4HPHP15f_date_time_setERKNS_6ObjectEiii");
 
-TypedValue * fg1_date_time_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_time_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_time_set(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_time_set(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1232,7 +1232,7 @@ TypedValue * fg1_date_time_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_date_time_set(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_time_set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1273,8 +1273,8 @@ datetime => rdi
 
 long fh_date_timestamp_get(Value* datetime) asm("_ZN4HPHP20f_date_timestamp_getERKNS_6ObjectE");
 
-TypedValue * fg1_date_timestamp_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_timestamp_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_timestamp_get(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_timestamp_get(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -1282,7 +1282,7 @@ TypedValue * fg1_date_timestamp_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_date_timestamp_get(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_timestamp_get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1324,8 +1324,8 @@ timestamp => rdx
 
 Value* fh_date_timestamp_set(Value* _rv, Value* datetime, long timestamp) asm("_ZN4HPHP20f_date_timestamp_setERKNS_6ObjectEl");
 
-TypedValue * fg1_date_timestamp_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_timestamp_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_timestamp_set(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_timestamp_set(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if ((args-1)->m_type != KindOfInt64) {
@@ -1339,7 +1339,7 @@ TypedValue * fg1_date_timestamp_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_date_timestamp_set(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_timestamp_set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1381,8 +1381,8 @@ object => rsi
 
 TypedValue* fh_date_timezone_get(TypedValue* _rv, Value* object) asm("_ZN4HPHP19f_date_timezone_getERKNS_6ObjectE");
 
-TypedValue * fg1_date_timezone_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_timezone_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_timezone_get(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_timezone_get(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_date_timezone_get((rv), &args[-0].m_data);
@@ -1390,7 +1390,7 @@ TypedValue * fg1_date_timezone_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_date_timezone_get(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_timezone_get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1430,8 +1430,8 @@ timezone => rsi
 
 void fh_date_timezone_set(Value* object, Value* timezone) asm("_ZN4HPHP19f_date_timezone_setERKNS_6ObjectES2_");
 
-TypedValue * fg1_date_timezone_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date_timezone_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date_timezone_set(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date_timezone_set(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1445,7 +1445,7 @@ TypedValue * fg1_date_timezone_set(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_date_timezone_set(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date_timezone_set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1488,8 +1488,8 @@ timestamp => rdx
 
 TypedValue* fh_date(TypedValue* _rv, Value* format, long timestamp) asm("_ZN4HPHP6f_dateERKNS_6StringEl");
 
-TypedValue * fg1_date(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_date(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_date(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_date(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -1507,7 +1507,7 @@ TypedValue * fg1_date(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_date(HPHP::VM::ActRec *ar) {
+TypedValue* fg_date(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1548,8 +1548,8 @@ timestamp => rsi
 
 Value* fh_getdate(Value* _rv, long timestamp) asm("_ZN4HPHP9f_getdateEl");
 
-TypedValue * fg1_getdate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_getdate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_getdate(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_getdate(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToInt64InPlace(args-0);
@@ -1558,7 +1558,7 @@ TypedValue * fg1_getdate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_getdate(HPHP::VM::ActRec *ar) {
+TypedValue* fg_getdate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1600,8 +1600,8 @@ return_float => rsi
 
 TypedValue* fh_gettimeofday(TypedValue* _rv, bool return_float) asm("_ZN4HPHP14f_gettimeofdayEb");
 
-TypedValue * fg1_gettimeofday(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gettimeofday(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gettimeofday(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gettimeofday(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToBooleanInPlace(args-0);
   fh_gettimeofday((rv), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
@@ -1609,7 +1609,7 @@ TypedValue * fg1_gettimeofday(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_gettimeofday(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gettimeofday(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1651,8 +1651,8 @@ timestamp => rdx
 
 TypedValue* fh_gmdate(TypedValue* _rv, Value* format, long timestamp) asm("_ZN4HPHP8f_gmdateERKNS_6StringEl");
 
-TypedValue * fg1_gmdate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gmdate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gmdate(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gmdate(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -1670,7 +1670,7 @@ TypedValue * fg1_gmdate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gmdate(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gmdate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1716,8 +1716,8 @@ year => st0
 
 TypedValue* fh_gmmktime(TypedValue* _rv, int hour, int minute, int second, int month, int day, int year) asm("_ZN4HPHP10f_gmmktimeEiiiiii");
 
-TypedValue * fg1_gmmktime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gmmktime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gmmktime(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gmmktime(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 6
@@ -1752,7 +1752,7 @@ TypedValue * fg1_gmmktime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_gmmktime(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gmmktime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1794,8 +1794,8 @@ timestamp => rdx
 
 Value* fh_gmstrftime(Value* _rv, Value* format, long timestamp) asm("_ZN4HPHP12f_gmstrftimeERKNS_6StringEl");
 
-TypedValue * fg1_gmstrftime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_gmstrftime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_gmstrftime(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_gmstrftime(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -1814,7 +1814,7 @@ TypedValue * fg1_gmstrftime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_gmstrftime(HPHP::VM::ActRec *ar) {
+TypedValue* fg_gmstrftime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1857,8 +1857,8 @@ timestamp => rdx
 
 TypedValue* fh_idate(TypedValue* _rv, Value* format, long timestamp) asm("_ZN4HPHP7f_idateERKNS_6StringEl");
 
-TypedValue * fg1_idate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_idate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_idate(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_idate(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -1876,7 +1876,7 @@ TypedValue * fg1_idate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_idate(HPHP::VM::ActRec *ar) {
+TypedValue* fg_idate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1918,8 +1918,8 @@ is_associative => rdx
 
 Value* fh_localtime(Value* _rv, long timestamp, bool is_associative) asm("_ZN4HPHP11f_localtimeElb");
 
-TypedValue * fg1_localtime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_localtime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_localtime(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_localtime(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   switch (count) {
@@ -1939,7 +1939,7 @@ TypedValue * fg1_localtime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_localtime(HPHP::VM::ActRec *ar) {
+TypedValue* fg_localtime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1981,8 +1981,8 @@ get_as_float => rsi
 
 TypedValue* fh_microtime(TypedValue* _rv, bool get_as_float) asm("_ZN4HPHP11f_microtimeEb");
 
-TypedValue * fg1_microtime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_microtime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_microtime(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_microtime(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToBooleanInPlace(args-0);
   fh_microtime((rv), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
@@ -1990,7 +1990,7 @@ TypedValue * fg1_microtime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_microtime(HPHP::VM::ActRec *ar) {
+TypedValue* fg_microtime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2036,8 +2036,8 @@ year => st0
 
 TypedValue* fh_mktime(TypedValue* _rv, int hour, int minute, int second, int month, int day, int year) asm("_ZN4HPHP8f_mktimeEiiiiii");
 
-TypedValue * fg1_mktime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mktime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mktime(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mktime(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 6
@@ -2072,7 +2072,7 @@ TypedValue * fg1_mktime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_mktime(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mktime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2114,8 +2114,8 @@ timestamp => rdx
 
 TypedValue* fh_strftime(TypedValue* _rv, Value* format, long timestamp) asm("_ZN4HPHP10f_strftimeERKNS_6StringEl");
 
-TypedValue * fg1_strftime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_strftime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_strftime(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_strftime(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -2133,7 +2133,7 @@ TypedValue * fg1_strftime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_strftime(HPHP::VM::ActRec *ar) {
+TypedValue* fg_strftime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2175,8 +2175,8 @@ format => rdx
 
 TypedValue* fh_strptime(TypedValue* _rv, Value* date, Value* format) asm("_ZN4HPHP10f_strptimeERKNS_6StringES2_");
 
-TypedValue * fg1_strptime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_strptime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_strptime(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_strptime(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -2189,7 +2189,7 @@ TypedValue * fg1_strptime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_strptime(HPHP::VM::ActRec *ar) {
+TypedValue* fg_strptime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2231,8 +2231,8 @@ timestamp => rdx
 
 TypedValue* fh_strtotime(TypedValue* _rv, Value* input, long timestamp) asm("_ZN4HPHP11f_strtotimeERKNS_6StringEl");
 
-TypedValue * fg1_strtotime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_strtotime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_strtotime(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_strtotime(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -2250,7 +2250,7 @@ TypedValue * fg1_strtotime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_strtotime(HPHP::VM::ActRec *ar) {
+TypedValue* fg_strtotime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2289,7 +2289,7 @@ _ZN4HPHP6f_timeEv
 
 long fh_time() asm("_ZN4HPHP6f_timeEv");
 
-TypedValue* fg_time(HPHP::VM::ActRec *ar) {
+TypedValue* fg_time(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2322,7 +2322,7 @@ _rv => rdi
 
 Value* fh_timezone_abbreviations_list(Value* _rv) asm("_ZN4HPHP29f_timezone_abbreviations_listEv");
 
-TypedValue* fg_timezone_abbreviations_list(HPHP::VM::ActRec *ar) {
+TypedValue* fg_timezone_abbreviations_list(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2356,7 +2356,7 @@ _rv => rdi
 
 Value* fh_timezone_identifiers_list(Value* _rv) asm("_ZN4HPHP27f_timezone_identifiers_listEv");
 
-TypedValue* fg_timezone_identifiers_list(HPHP::VM::ActRec *ar) {
+TypedValue* fg_timezone_identifiers_list(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2391,8 +2391,8 @@ timezone => rsi
 
 Value* fh_timezone_location_get(Value* _rv, Value* timezone) asm("_ZN4HPHP23f_timezone_location_getERKNS_6ObjectE");
 
-TypedValue * fg1_timezone_location_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_timezone_location_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_timezone_location_get(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_timezone_location_get(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
@@ -2401,7 +2401,7 @@ TypedValue * fg1_timezone_location_get(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_timezone_location_get(HPHP::VM::ActRec *ar) {
+TypedValue* fg_timezone_location_get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2445,8 +2445,8 @@ isdst => rcx
 
 TypedValue* fh_timezone_name_from_abbr(TypedValue* _rv, Value* abbr, int gmtoffset, bool isdst) asm("_ZN4HPHP25f_timezone_name_from_abbrERKNS_6StringEib");
 
-TypedValue * fg1_timezone_name_from_abbr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_timezone_name_from_abbr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_timezone_name_from_abbr(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_timezone_name_from_abbr(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -2468,7 +2468,7 @@ TypedValue * fg1_timezone_name_from_abbr(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_timezone_name_from_abbr(HPHP::VM::ActRec *ar) {
+TypedValue* fg_timezone_name_from_abbr(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2509,8 +2509,8 @@ object => rsi
 
 Value* fh_timezone_name_get(Value* _rv, Value* object) asm("_ZN4HPHP19f_timezone_name_getERKNS_6ObjectE");
 
-TypedValue * fg1_timezone_name_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_timezone_name_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_timezone_name_get(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_timezone_name_get(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -2519,7 +2519,7 @@ TypedValue * fg1_timezone_name_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_timezone_name_get(HPHP::VM::ActRec *ar) {
+TypedValue* fg_timezone_name_get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2561,8 +2561,8 @@ dt => rsi
 
 long fh_timezone_offset_get(Value* object, Value* dt) asm("_ZN4HPHP21f_timezone_offset_getERKNS_6ObjectES2_");
 
-TypedValue * fg1_timezone_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_timezone_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_timezone_offset_get(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_timezone_offset_get(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   if ((args-1)->m_type != KindOfObject) {
@@ -2575,7 +2575,7 @@ TypedValue * fg1_timezone_offset_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_timezone_offset_get(HPHP::VM::ActRec *ar) {
+TypedValue* fg_timezone_offset_get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2616,8 +2616,8 @@ timezone => rsi
 
 Value* fh_timezone_open(Value* _rv, Value* timezone) asm("_ZN4HPHP15f_timezone_openERKNS_6StringE");
 
-TypedValue * fg1_timezone_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_timezone_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_timezone_open(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_timezone_open(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
@@ -2626,7 +2626,7 @@ TypedValue * fg1_timezone_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_timezone_open(HPHP::VM::ActRec *ar) {
+TypedValue* fg_timezone_open(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2668,8 +2668,8 @@ object => rsi
 
 Value* fh_timezone_transitions_get(Value* _rv, Value* object) asm("_ZN4HPHP26f_timezone_transitions_getERKNS_6ObjectE");
 
-TypedValue * fg1_timezone_transitions_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_timezone_transitions_get(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_timezone_transitions_get(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_timezone_transitions_get(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
@@ -2678,7 +2678,7 @@ TypedValue * fg1_timezone_transitions_get(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_timezone_transitions_get(HPHP::VM::ActRec *ar) {
+TypedValue* fg_timezone_transitions_get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2719,7 +2719,7 @@ _rv => rdi
 
 Value* fh_timezone_version_get(Value* _rv) asm("_ZN4HPHP22f_timezone_version_getEv");
 
-TypedValue* fg_timezone_version_get(HPHP::VM::ActRec *ar) {
+TypedValue* fg_timezone_version_get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2755,8 +2755,8 @@ interval => rdx
 
 Value* th_8DateTime_add(Value* _rv, ObjectData* this_, Value* interval) asm("_ZN4HPHP10c_DateTime5t_addERKNS_6ObjectE");
 
-TypedValue* tg1_8DateTime_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DateTime_add(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime_add(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
@@ -2765,7 +2765,7 @@ TypedValue* tg1_8DateTime_add(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* tg_8DateTime_add(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_add(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2820,8 +2820,8 @@ timezone => rdx
 
 void th_8DateTime___construct(ObjectData* this_, Value* time, Value* timezone) asm("_ZN4HPHP10c_DateTime13t___constructERKNS_6StringERKNS_6ObjectE");
 
-TypedValue* tg1_8DateTime___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DateTime___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -2842,7 +2842,7 @@ TypedValue* tg1_8DateTime___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_8DateTime___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2891,8 +2891,8 @@ timezone => r8
 
 Value* th_8DateTime_createFromFormat(Value* _rv, char const* cls_, Value* format, Value* time, Value* timezone) asm("_ZN4HPHP10c_DateTime19ti_createfromformatEPKcRKNS_6StringES5_RKNS_6ObjectE");
 
-TypedValue* tg1_8DateTime_createFromFormat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime_createFromFormat(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue* tg1_8DateTime_createFromFormat(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime_createFromFormat(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -2914,7 +2914,7 @@ TypedValue* tg1_8DateTime_createFromFormat(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_8DateTime_createFromFormat(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_createFromFormat(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2956,8 +2956,8 @@ absolute => rcx
 
 Value* th_8DateTime_diff(Value* _rv, ObjectData* this_, Value* datetime2, bool absolute) asm("_ZN4HPHP10c_DateTime6t_diffERKNS_6ObjectEb");
 
-TypedValue* tg1_8DateTime_diff(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime_diff(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DateTime_diff(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime_diff(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -2976,7 +2976,7 @@ TypedValue* tg1_8DateTime_diff(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* tg_8DateTime_diff(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_diff(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3022,8 +3022,8 @@ format => rdx
 
 Value* th_8DateTime_format(Value* _rv, ObjectData* this_, Value* format) asm("_ZN4HPHP10c_DateTime8t_formatERKNS_6StringE");
 
-TypedValue* tg1_8DateTime_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DateTime_format(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime_format(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -3032,7 +3032,7 @@ TypedValue* tg1_8DateTime_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* tg_8DateTime_format(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_format(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3077,7 +3077,7 @@ cls_ => rsi
 
 Value* th_8DateTime_getLastErrors(Value* _rv, char const* cls_) asm("_ZN4HPHP10c_DateTime16ti_getlasterrorsEPKc");
 
-TypedValue* tg_8DateTime_getLastErrors(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_getLastErrors(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3109,7 +3109,7 @@ this_ => rdi
 
 long th_8DateTime_getOffset(ObjectData* this_) asm("_ZN4HPHP10c_DateTime11t_getoffsetEv");
 
-TypedValue* tg_8DateTime_getOffset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_getOffset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3145,7 +3145,7 @@ this_ => rdi
 
 long th_8DateTime_getTimestamp(ObjectData* this_) asm("_ZN4HPHP10c_DateTime14t_gettimestampEv");
 
-TypedValue* tg_8DateTime_getTimestamp(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_getTimestamp(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3182,7 +3182,7 @@ this_ => rsi
 
 TypedValue* th_8DateTime_getTimezone(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP10c_DateTime13t_gettimezoneEv");
 
-TypedValue* tg_8DateTime_getTimezone(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_getTimezone(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3220,8 +3220,8 @@ modify => rdx
 
 Value* th_8DateTime_modify(Value* _rv, ObjectData* this_, Value* modify) asm("_ZN4HPHP10c_DateTime8t_modifyERKNS_6StringE");
 
-TypedValue* tg1_8DateTime_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DateTime_modify(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime_modify(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
@@ -3230,7 +3230,7 @@ TypedValue* tg1_8DateTime_modify(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* tg_8DateTime_modify(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_modify(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3278,8 +3278,8 @@ day => r8
 
 Value* th_8DateTime_setDate(Value* _rv, ObjectData* this_, long year, long month, long day) asm("_ZN4HPHP10c_DateTime9t_setdateElll");
 
-TypedValue* tg1_8DateTime_setDate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime_setDate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DateTime_setDate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime_setDate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if ((args-2)->m_type != KindOfInt64) {
@@ -3296,7 +3296,7 @@ TypedValue* tg1_8DateTime_setDate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* tg_8DateTime_setDate(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_setDate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3344,8 +3344,8 @@ day => r8
 
 Value* th_8DateTime_setISODate(Value* _rv, ObjectData* this_, long year, long week, long day) asm("_ZN4HPHP10c_DateTime12t_setisodateElll");
 
-TypedValue* tg1_8DateTime_setISODate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime_setISODate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DateTime_setISODate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime_setISODate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -3367,7 +3367,7 @@ TypedValue* tg1_8DateTime_setISODate(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_8DateTime_setISODate(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_setISODate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3415,8 +3415,8 @@ second => r8
 
 Value* th_8DateTime_setTime(Value* _rv, ObjectData* this_, long hour, long minute, long second) asm("_ZN4HPHP10c_DateTime9t_settimeElll");
 
-TypedValue* tg1_8DateTime_setTime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime_setTime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DateTime_setTime(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime_setTime(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -3438,7 +3438,7 @@ TypedValue* tg1_8DateTime_setTime(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* tg_8DateTime_setTime(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_setTime(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3484,8 +3484,8 @@ unixtimestamp => rdx
 
 Value* th_8DateTime_setTimestamp(Value* _rv, ObjectData* this_, long unixtimestamp) asm("_ZN4HPHP10c_DateTime14t_settimestampEl");
 
-TypedValue* tg1_8DateTime_setTimestamp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime_setTimestamp(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DateTime_setTimestamp(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime_setTimestamp(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToInt64InPlace(args-0);
@@ -3494,7 +3494,7 @@ TypedValue* tg1_8DateTime_setTimestamp(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* tg_8DateTime_setTimestamp(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_setTimestamp(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3540,8 +3540,8 @@ timezone => rdx
 
 Value* th_8DateTime_setTimezone(Value* _rv, ObjectData* this_, Value* timezone) asm("_ZN4HPHP10c_DateTime13t_settimezoneERKNS_6ObjectE");
 
-TypedValue* tg1_8DateTime_setTimezone(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime_setTimezone(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DateTime_setTimezone(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime_setTimezone(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
@@ -3550,7 +3550,7 @@ TypedValue* tg1_8DateTime_setTimezone(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_8DateTime_setTimezone(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_setTimezone(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3596,8 +3596,8 @@ interval => rdx
 
 Value* th_8DateTime_sub(Value* _rv, ObjectData* this_, Value* interval) asm("_ZN4HPHP10c_DateTime5t_subERKNS_6ObjectE");
 
-TypedValue* tg1_8DateTime_sub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DateTime_sub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DateTime_sub(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DateTime_sub(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
@@ -3606,7 +3606,7 @@ TypedValue* tg1_8DateTime_sub(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* tg_8DateTime_sub(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DateTime_sub(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3660,8 +3660,8 @@ timezone => rsi
 
 void th_12DateTimeZone___construct(ObjectData* this_, Value* timezone) asm("_ZN4HPHP14c_DateTimeZone13t___constructERKNS_6StringE");
 
-TypedValue* tg1_12DateTimeZone___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12DateTimeZone___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12DateTimeZone___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12DateTimeZone___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -3670,7 +3670,7 @@ TypedValue* tg1_12DateTimeZone___construct(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_12DateTimeZone___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateTimeZone___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3715,7 +3715,7 @@ this_ => rsi
 
 Value* th_12DateTimeZone_getLocation(Value* _rv, ObjectData* this_) asm("_ZN4HPHP14c_DateTimeZone13t_getlocationEv");
 
-TypedValue* tg_12DateTimeZone_getLocation(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateTimeZone_getLocation(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3753,7 +3753,7 @@ this_ => rsi
 
 Value* th_12DateTimeZone_getName(Value* _rv, ObjectData* this_) asm("_ZN4HPHP14c_DateTimeZone9t_getnameEv");
 
-TypedValue* tg_12DateTimeZone_getName(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateTimeZone_getName(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3791,8 +3791,8 @@ datetime => rsi
 
 long th_12DateTimeZone_getOffset(ObjectData* this_, Value* datetime) asm("_ZN4HPHP14c_DateTimeZone11t_getoffsetERKNS_6ObjectE");
 
-TypedValue* tg1_12DateTimeZone_getOffset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12DateTimeZone_getOffset(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12DateTimeZone_getOffset(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12DateTimeZone_getOffset(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -3800,7 +3800,7 @@ TypedValue* tg1_12DateTimeZone_getOffset(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* tg_12DateTimeZone_getOffset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateTimeZone_getOffset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3844,7 +3844,7 @@ this_ => rsi
 
 Value* th_12DateTimeZone_getTransitions(Value* _rv, ObjectData* this_) asm("_ZN4HPHP14c_DateTimeZone16t_gettransitionsEv");
 
-TypedValue* tg_12DateTimeZone_getTransitions(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateTimeZone_getTransitions(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3882,7 +3882,7 @@ cls_ => rsi
 
 Value* th_12DateTimeZone_listAbbreviations(Value* _rv, char const* cls_) asm("_ZN4HPHP14c_DateTimeZone20ti_listabbreviationsEPKc");
 
-TypedValue* tg_12DateTimeZone_listAbbreviations(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateTimeZone_listAbbreviations(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3915,7 +3915,7 @@ cls_ => rsi
 
 Value* th_12DateTimeZone_listIdentifiers(Value* _rv, char const* cls_) asm("_ZN4HPHP14c_DateTimeZone18ti_listidentifiersEPKc");
 
-TypedValue* tg_12DateTimeZone_listIdentifiers(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateTimeZone_listIdentifiers(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3957,8 +3957,8 @@ interval_spec => rsi
 
 void th_12DateInterval___construct(ObjectData* this_, Value* interval_spec) asm("_ZN4HPHP14c_DateInterval13t___constructERKNS_6StringE");
 
-TypedValue* tg1_12DateInterval___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12DateInterval___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12DateInterval___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12DateInterval___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -3967,7 +3967,7 @@ TypedValue* tg1_12DateInterval___construct(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_12DateInterval___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateInterval___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4013,7 +4013,7 @@ member => rdx
 
 TypedValue* th_12DateInterval___get(TypedValue* _rv, ObjectData* this_, TypedValue* member) asm("_ZN4HPHP14c_DateInterval7t___getENS_7VariantE");
 
-TypedValue* tg_12DateInterval___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateInterval___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4052,7 +4052,7 @@ value => rcx
 
 TypedValue* th_12DateInterval___set(TypedValue* _rv, ObjectData* this_, TypedValue* member, TypedValue* value) asm("_ZN4HPHP14c_DateInterval7t___setENS_7VariantES1_");
 
-TypedValue* tg_12DateInterval___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateInterval___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4090,8 +4090,8 @@ time => rdx
 
 Value* th_12DateInterval_createFromDateString(Value* _rv, char const* cls_, Value* time) asm("_ZN4HPHP14c_DateInterval23ti_createfromdatestringEPKcRKNS_6StringE");
 
-TypedValue* tg1_12DateInterval_createFromDateString(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue* tg1_12DateInterval_createFromDateString(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue* tg1_12DateInterval_createFromDateString(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_12DateInterval_createFromDateString(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
@@ -4100,7 +4100,7 @@ TypedValue* tg1_12DateInterval_createFromDateString(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* tg_12DateInterval_createFromDateString(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateInterval_createFromDateString(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4141,8 +4141,8 @@ format => rdx
 
 Value* th_12DateInterval_format(Value* _rv, ObjectData* this_, Value* format) asm("_ZN4HPHP14c_DateInterval8t_formatERKNS_6StringE");
 
-TypedValue* tg1_12DateInterval_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_12DateInterval_format(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_12DateInterval_format(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_12DateInterval_format(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -4151,7 +4151,7 @@ TypedValue* tg1_12DateInterval_format(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_12DateInterval_format(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DateInterval_format(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

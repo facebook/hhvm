@@ -21,11 +21,11 @@
 #include <util/trace.h>
 
 namespace HPHP {
-namespace VM {
-namespace Transl { class X64Assembler; }
+
+namespace VM { namespace Transl { class X64Assembler; } }
 namespace Stats {
 
-#include "stats-opcodeDef.h"
+#include "runtime/vm/stats-opcodeDef.h"
 
 #define STATS \
   STAT(Instr_TC) \
@@ -214,7 +214,7 @@ static inline void inc(StatCounter stat, int n = 1) {
 }
 
 static inline StatCounter opcodeToStatCounter(Opcode opc) {
-  assert(OpLowInvalid == 0);
+  assert(VM::OpLowInvalid == 0);
   return StatCounter(Instr_InterpBBLowInvalid + STATS_PER_OPCODE * opc);
 }
 
@@ -223,34 +223,34 @@ static inline void incOp(Opcode opc) {
 }
 
 static inline StatCounter opcodeToTranslStatCounter(Opcode opc) {
-  assert(OpLowInvalid == 0);
+  assert(VM::OpLowInvalid == 0);
   return StatCounter(Instr_TranslLowInvalid + STATS_PER_OPCODE * opc);
 }
 
 static inline StatCounter opcodeToIRPreStatCounter(Opcode opc) {
-  assert(OpLowInvalid == 0);
+  assert(VM::OpLowInvalid == 0);
   return StatCounter(Instr_TranslIRPreLowInvalid + STATS_PER_OPCODE * opc);
 }
 
 static inline StatCounter opcodeToIRPostStatCounter(Opcode opc) {
-  assert(OpLowInvalid == 0);
+  assert(VM::OpLowInvalid == 0);
   return StatCounter(Instr_TranslIRPostLowInvalid + STATS_PER_OPCODE * opc);
 }
 
 // Both emitIncs use r10.
-extern void emitInc(Transl::X64Assembler& a,
+extern void emitInc(VM::Transl::X64Assembler& a,
                     uint64_t* tl_table,
                     uint index,
                     int n = 1,
-                    Transl::ConditionCode cc = Transl::CC_None,
+                    VM::Transl::ConditionCode cc = VM::Transl::CC_None,
                     bool force = false);
-inline void emitInc(Transl::X64Assembler& a, StatCounter stat, int n = 1,
-                    Transl::ConditionCode cc = Transl::CC_None,
+inline void emitInc(VM::Transl::X64Assembler& a, StatCounter stat, int n = 1,
+                    VM::Transl::ConditionCode cc = VM::Transl::CC_None,
                     bool force = false) {
   emitInc(a, &tl_counters[0], stat, n, cc, force);
 }
 
-extern void emitIncTranslOp(Transl::X64Assembler& a, Opcode opc,
+extern void emitIncTranslOp(VM::Transl::X64Assembler& a, Opcode opc,
                             bool force = false);
 extern void init();
 extern void dump();
@@ -258,6 +258,6 @@ extern void clear();
 
 void incStatGrouped(const StringData* cat, const StringData* name, int n = 1);
 
-} } }
+} }
 
 #endif

@@ -190,7 +190,7 @@ Variant f_unserialize(CStrRef str, CArrRef class_whitelist /* = empty_array */) 
 // variable table
 
 Array f_get_defined_vars() {
-  HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+  VarEnv* v = g_vmContext->getVarEnv();
   if (v) {
     return v->getDefinedVariables();
   } else {
@@ -214,7 +214,7 @@ int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
   bool reference = extract_type & EXTR_REFS;
   extract_type &= ~EXTR_REFS;
 
-  HPHP::VM::VarEnv* v = g_vmContext->getVarEnv();
+  VarEnv* v = g_vmContext->getVarEnv();
   if (!v) return 0;
   int count = 0;
   for (ArrayIter iter(var_array); iter; ++iter) {

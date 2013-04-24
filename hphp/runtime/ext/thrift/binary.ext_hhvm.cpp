@@ -38,8 +38,8 @@ strict_write => r9
 
 void fh_thrift_protocol_write_binary(Value* transportobj, Value* method_name, long msgtype, Value* request_struct, int seqid, bool strict_write) asm("_ZN4HPHP30f_thrift_protocol_write_binaryERKNS_6ObjectERKNS_6StringElS2_ib");
 
-TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -65,7 +65,7 @@ TypedValue * fg1_thrift_protocol_write_binary(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_thrift_protocol_write_binary(HPHP::VM::ActRec *ar) {
+TypedValue* fg_thrift_protocol_write_binary(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -109,8 +109,8 @@ strict_read => rcx
 
 TypedValue* fh_thrift_protocol_read_binary(TypedValue* _rv, Value* transportobj, Value* obj_typename, bool strict_read) asm("_ZN4HPHP29f_thrift_protocol_read_binaryERKNS_6ObjectERKNS_6StringEb");
 
-TypedValue * fg1_thrift_protocol_read_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_thrift_protocol_read_binary(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_thrift_protocol_read_binary(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_thrift_protocol_read_binary(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-2);
@@ -126,7 +126,7 @@ TypedValue * fg1_thrift_protocol_read_binary(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_thrift_protocol_read_binary(HPHP::VM::ActRec *ar) {
+TypedValue* fg_thrift_protocol_read_binary(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

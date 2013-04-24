@@ -37,8 +37,8 @@ preferences => rcx
 
 TypedValue* fh_iconv_mime_encode(TypedValue* _rv, Value* field_name, Value* field_value, TypedValue* preferences) asm("_ZN4HPHP19f_iconv_mime_encodeERKNS_6StringES2_RKNS_7VariantE");
 
-TypedValue * fg1_iconv_mime_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_mime_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_iconv_mime_encode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_mime_encode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -56,7 +56,7 @@ TypedValue * fg1_iconv_mime_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_iconv_mime_encode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_iconv_mime_encode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -99,8 +99,8 @@ charset => rcx
 
 TypedValue* fh_iconv_mime_decode(TypedValue* _rv, Value* encoded_string, int mode, Value* charset) asm("_ZN4HPHP19f_iconv_mime_decodeERKNS_6StringEiS2_");
 
-TypedValue * fg1_iconv_mime_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_mime_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_iconv_mime_decode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_mime_decode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -122,7 +122,7 @@ TypedValue * fg1_iconv_mime_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_iconv_mime_decode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_iconv_mime_decode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -165,8 +165,8 @@ charset => rcx
 
 TypedValue* fh_iconv_mime_decode_headers(TypedValue* _rv, Value* encoded_headers, int mode, Value* charset) asm("_ZN4HPHP27f_iconv_mime_decode_headersERKNS_6StringEiS2_");
 
-TypedValue * fg1_iconv_mime_decode_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_mime_decode_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_iconv_mime_decode_headers(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_mime_decode_headers(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -188,7 +188,7 @@ TypedValue * fg1_iconv_mime_decode_headers(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_iconv_mime_decode_headers(HPHP::VM::ActRec *ar) {
+TypedValue* fg_iconv_mime_decode_headers(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -229,8 +229,8 @@ type => rsi
 
 TypedValue* fh_iconv_get_encoding(TypedValue* _rv, Value* type) asm("_ZN4HPHP20f_iconv_get_encodingERKNS_6StringE");
 
-TypedValue * fg1_iconv_get_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_get_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_iconv_get_encoding(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_get_encoding(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   String defVal0 = "all";
@@ -239,7 +239,7 @@ TypedValue * fg1_iconv_get_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_iconv_get_encoding(HPHP::VM::ActRec *ar) {
+TypedValue* fg_iconv_get_encoding(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -281,8 +281,8 @@ charset => rsi
 
 bool fh_iconv_set_encoding(Value* type, Value* charset) asm("_ZN4HPHP20f_iconv_set_encodingERKNS_6StringES2_");
 
-TypedValue * fg1_iconv_set_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_set_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_iconv_set_encoding(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_set_encoding(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -295,7 +295,7 @@ TypedValue * fg1_iconv_set_encoding(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_iconv_set_encoding(HPHP::VM::ActRec *ar) {
+TypedValue* fg_iconv_set_encoding(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -338,8 +338,8 @@ str => rcx
 
 TypedValue* fh_iconv(TypedValue* _rv, Value* in_charset, Value* out_charset, Value* str) asm("_ZN4HPHP7f_iconvERKNS_6StringES2_S2_");
 
-TypedValue * fg1_iconv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_iconv(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -355,7 +355,7 @@ TypedValue * fg1_iconv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_iconv(HPHP::VM::ActRec *ar) {
+TypedValue* fg_iconv(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -397,8 +397,8 @@ charset => rdx
 
 TypedValue* fh_iconv_strlen(TypedValue* _rv, Value* str, Value* charset) asm("_ZN4HPHP14f_iconv_strlenERKNS_6StringES2_");
 
-TypedValue * fg1_iconv_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_iconv_strlen(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_strlen(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -416,7 +416,7 @@ TypedValue * fg1_iconv_strlen(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_iconv_strlen(HPHP::VM::ActRec *ar) {
+TypedValue* fg_iconv_strlen(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -460,8 +460,8 @@ charset => r8
 
 TypedValue* fh_iconv_strpos(TypedValue* _rv, Value* haystack, Value* needle, int offset, Value* charset) asm("_ZN4HPHP14f_iconv_strposERKNS_6StringES2_iS2_");
 
-TypedValue * fg1_iconv_strpos(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_strpos(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_iconv_strpos(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_strpos(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -486,7 +486,7 @@ TypedValue * fg1_iconv_strpos(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_iconv_strpos(HPHP::VM::ActRec *ar) {
+TypedValue* fg_iconv_strpos(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -529,8 +529,8 @@ charset => rcx
 
 TypedValue* fh_iconv_strrpos(TypedValue* _rv, Value* haystack, Value* needle, Value* charset) asm("_ZN4HPHP15f_iconv_strrposERKNS_6StringES2_S2_");
 
-TypedValue * fg1_iconv_strrpos(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_strrpos(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_iconv_strrpos(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_strrpos(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -551,7 +551,7 @@ TypedValue * fg1_iconv_strrpos(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_iconv_strrpos(HPHP::VM::ActRec *ar) {
+TypedValue* fg_iconv_strrpos(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -595,8 +595,8 @@ charset => r8
 
 TypedValue* fh_iconv_substr(TypedValue* _rv, Value* str, int offset, int length, Value* charset) asm("_ZN4HPHP14f_iconv_substrERKNS_6StringEiiS2_");
 
-TypedValue * fg1_iconv_substr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_iconv_substr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_iconv_substr(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_iconv_substr(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -621,7 +621,7 @@ TypedValue * fg1_iconv_substr(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_iconv_substr(HPHP::VM::ActRec *ar) {
+TypedValue* fg_iconv_substr(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -663,8 +663,8 @@ status => rdx
 
 Value* fh_ob_iconv_handler(Value* _rv, Value* contents, int status) asm("_ZN4HPHP18f_ob_iconv_handlerERKNS_6StringEi");
 
-TypedValue * fg1_ob_iconv_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_ob_iconv_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_ob_iconv_handler(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_ob_iconv_handler(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   if ((args-1)->m_type != KindOfInt64) {
@@ -678,7 +678,7 @@ TypedValue * fg1_ob_iconv_handler(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_ob_iconv_handler(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ob_iconv_handler(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

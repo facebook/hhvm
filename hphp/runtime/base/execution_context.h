@@ -81,9 +81,9 @@ protected:
 };
 
 struct VMState {
-  HPHP::VM::PC pc;
-  HPHP::VM::ActRec* fp;
-  HPHP::VM::ActRec* firstAR;
+  PC pc;
+  ActRec* fp;
+  ActRec* firstAR;
   TypedValue *sp;
 };
 
@@ -184,9 +184,9 @@ public:
   // are accessed from within the TC and having their offset fit
   // within a single byte makes the generated code slightly smaller
   // and faster.
-  HPHP::VM::Stack m_stack;
-  HPHP::VM::ActRec* m_fp;
-  HPHP::VM::PC m_pc;
+  Stack m_stack;
+  ActRec* m_fp;
+  PC m_pc;
   uint32_t m_isValid; /* Debug-only: non-zero iff m_fp/m_stack are trustworthy */
   HPHP::VM::EventHook* m_eventHook;
   int64_t m_currentThreadIdx;
@@ -427,14 +427,14 @@ public:
 
   static void getElem(TypedValue* base, TypedValue* key, TypedValue* dest);
   template<bool isMethod>
-  static c_Continuation* createContinuation(VM::ActRec* fp, bool getArgs,
+  static c_Continuation* createContinuation(ActRec* fp, bool getArgs,
                                             const VM::Func* origFunc,
                                             const VM::Func* genFunc);
   static c_Continuation* fillContinuationVars(
-    VM::ActRec* fp, const VM::Func* origFunc, const VM::Func* genFunc,
+    ActRec* fp, const VM::Func* origFunc, const VM::Func* genFunc,
     c_Continuation* cont);
-  static void unpackContVarEnvLinkage(VM::ActRec* fp);
-  static void packContVarEnvLinkage(VM::ActRec* fp);
+  static void unpackContVarEnvLinkage(ActRec* fp);
+  static void packContVarEnvLinkage(ActRec* fp);
   void pushLocalsAndIterators(const HPHP::VM::Func* f, int nparams = 0);
 
 private:
@@ -444,13 +444,13 @@ private:
   };
   template <bool setMember, bool warn, bool define, bool unset, bool reffy,
             unsigned mdepth, VectorLeaveCode mleave, bool saveResult>
-  bool memberHelperPre(VM::PC& pc, unsigned& ndiscard, TypedValue*& base,
+  bool memberHelperPre(PC& pc, unsigned& ndiscard, TypedValue*& base,
                        TypedValue& tvScratch,
                        TypedValue& tvLiteral,
                        TypedValue& tvRef, TypedValue& tvRef2,
                        VM::MemberCode& mcode, TypedValue*& curMember);
   template <bool warn, bool saveResult, VectorLeaveCode mleave>
-  void getHelperPre(VM::PC& pc, unsigned& ndiscard,
+  void getHelperPre(PC& pc, unsigned& ndiscard,
                     TypedValue*& base, TypedValue& tvScratch,
                     TypedValue& tvLiteral,
                     TypedValue& tvRef, TypedValue& tvRef2,
@@ -459,7 +459,7 @@ private:
   void getHelperPost(unsigned ndiscard, TypedValue*& tvRet,
                      TypedValue& tvScratch, TypedValue& tvRef,
                      TypedValue& tvRef2);
-  void getHelper(VM::PC& pc, unsigned& ndiscard, TypedValue*& tvRet,
+  void getHelper(PC& pc, unsigned& ndiscard, TypedValue*& tvRet,
                  TypedValue*& base, TypedValue& tvScratch,
                  TypedValue& tvLiteral,
                  TypedValue& tvRef, TypedValue& tvRef2,
@@ -467,7 +467,7 @@ private:
 
   template <bool warn, bool define, bool unset, bool reffy, unsigned mdepth,
             VectorLeaveCode mleave>
-  bool setHelperPre(VM::PC& pc, unsigned& ndiscard, TypedValue*& base,
+  bool setHelperPre(PC& pc, unsigned& ndiscard, TypedValue*& base,
                     TypedValue& tvScratch,
                     TypedValue& tvLiteral,
                     TypedValue& tvRef, TypedValue& tvRef2,
@@ -476,18 +476,18 @@ private:
   void setHelperPost(unsigned ndiscard, TypedValue& tvRef,
                      TypedValue& tvRef2);
   bool cellInstanceOf(TypedValue* c, const HPHP::VM::NamedEntity* s);
-  bool initIterator(HPHP::VM::PC& pc, HPHP::VM::PC& origPc, HPHP::VM::Iter* it,
-                    HPHP::VM::Offset offset, HPHP::VM::Cell* c1);
-  bool initIteratorM(HPHP::VM::PC& pc, HPHP::VM::PC& origPc, HPHP::VM::Iter* it,
-                     HPHP::VM::Offset offset, HPHP::VM::Var* v1);
+  bool initIterator(PC& pc, PC& origPc, Iter* it,
+                    Offset offset, Cell* c1);
+  bool initIteratorM(PC& pc, PC& origPc, Iter* it,
+                     Offset offset, Var* v1);
 #define O(name, imm, pusph, pop, flags)                                       \
-  void iop##name(HPHP::VM::PC& pc);
+  void iop##name(PC& pc);
 OPCODES
 #undef O
 
   template<bool raise>
   void contSendImpl();
-  void classExistsImpl(HPHP::VM::PC& pc, HPHP::VM::Attr typeAttr);
+  void classExistsImpl(PC& pc, Attr typeAttr);
   void fPushObjMethodImpl(
       VM::Class* cls, StringData* name, ObjectData* obj, int numArgs);
 
@@ -560,15 +560,15 @@ public:
   TypedValue* lookupClsCns(const StringData* cls,
                            const StringData* cns);
 
-  HPHP::VM::ActRec* arGetSfp(const HPHP::VM::ActRec* ar);
+  ActRec* arGetSfp(const ActRec* ar);
 
   std::string prettyStack(const std::string& prefix) const;
   static void DumpStack();
   static void DumpCurUnit(int skip = 0);
   static void PrintTCCallerInfo();
 
-  VM::VarEnv* m_globalVarEnv;
-  VM::VarEnv* m_topVarEnv;
+  VarEnv* m_globalVarEnv;
+  VarEnv* m_topVarEnv;
 
   HPHP::VM::RenamedFuncDict m_renamedFuncs;
   EvaledFilesMap m_evaledFiles;
@@ -585,16 +585,16 @@ public:
   void checkRegStateWork() const;
   void checkRegState() const { if (debug) checkRegStateWork(); }
 
-  const VM::ActRec* getFP()    const { checkRegState(); return m_fp; }
-        VM::ActRec* getFP()          { checkRegState(); return m_fp; }
-        VM::PC      getPC()    const { checkRegState(); return m_pc; }
-  const VM::Stack&  getStack() const { checkRegState(); return m_stack; }
-        VM::Stack&  getStack()       { checkRegState(); return m_stack; }
+  const ActRec* getFP()    const { checkRegState(); return m_fp; }
+        ActRec* getFP()          { checkRegState(); return m_fp; }
+        PC      getPC()    const { checkRegState(); return m_pc; }
+  const Stack&  getStack() const { checkRegState(); return m_stack; }
+        Stack&  getStack()       { checkRegState(); return m_stack; }
 
-  HPHP::VM::ActRec* m_firstAR;
-  std::vector<HPHP::VM::Fault> m_faults;
+  ActRec* m_firstAR;
+  std::vector<Fault> m_faults;
 
-  HPHP::VM::ActRec* getStackFrame();
+  ActRec* getStackFrame();
   ObjectData* getThis();
   VM::Class* getContextClass();
   VM::Class* getParentContextClass();
@@ -614,7 +614,7 @@ public:
                                          InclOpFlags flags, bool* initial,
                                          HPHP::VM::Unit* unit = 0);
   bool evalUnit(HPHP::VM::Unit* unit, bool local,
-                HPHP::VM::PC& pc, int funcType);
+                PC& pc, int funcType);
   void invokeUnit(TypedValue* retval, HPHP::VM::Unit* unit);
   HPHP::VM::Unit* compileEvalString(StringData* code);
   CStrRef createFunction(CStrRef args, CStrRef code);
@@ -625,8 +625,8 @@ public:
   int m_lambdaCounter;
   struct ReentryRecord {
     VMState m_savedState;
-    const VM::ActRec* m_entryFP;
-    ReentryRecord(const VMState &s, const VM::ActRec* entryFP) :
+    const ActRec* m_entryFP;
+    ReentryRecord(const VMState &s, const ActRec* entryFP) :
         m_savedState(s), m_entryFP(entryFP) { }
     ReentryRecord() {}
   };
@@ -635,19 +635,19 @@ public:
 
   int m_nesting;
   bool isNested() { return m_nesting != 0; }
-  void pushVMState(VMState &savedVM, const VM::ActRec* reentryAR);
+  void pushVMState(VMState &savedVM, const ActRec* reentryAR);
   void popVMState();
 
   int hhvmPrepareThrow();
-  VM::ActRec* getPrevVMState(const VM::ActRec* fp,
-                             VM::Offset* prevPc = nullptr,
+  ActRec* getPrevVMState(const ActRec* fp,
+                             Offset* prevPc = nullptr,
                              TypedValue** prevSp = nullptr);
   Array debugBacktrace(bool skip = false,
                        bool withSelf = false,
                        bool withThis = false,
                        VMParserFrame* parserFrame = nullptr);
-  int handleUnwind(VM::UnwindStatus unwindType);
-  HPHP::VM::VarEnv* getVarEnv();
+  int handleUnwind(UnwindStatus unwindType);
+  VarEnv* getVarEnv();
   void setVar(StringData* name, TypedValue* v, bool ref);
   Array getLocalDefinedVariables(int frame);
   HPHP::VM::InjectionTables* m_injTables;
@@ -657,49 +657,49 @@ public:
   bool m_dbgNoBreak;
   int switchMode(bool unwindBuiltin);
   template <bool handle_throw>
-  void doFCall(HPHP::VM::ActRec* ar, HPHP::VM::PC& pc);
-  bool doFCallArray(HPHP::VM::PC& pc);
+  void doFCall(HPHP::ActRec* ar, PC& pc);
+  bool doFCallArray(PC& pc);
   CVarRef getEvaledArg(const StringData* val);
 private:
-  void enterVMWork(VM::ActRec* enterFnAr);
+  void enterVMWork(ActRec* enterFnAr);
   void enterVM(TypedValue* retval,
-               VM::ActRec* ar,
-               VM::ExtraArgs* extraArgs);
+               ActRec* ar,
+               ExtraArgs* extraArgs);
   void reenterVM(TypedValue* retval,
-                 VM::ActRec* ar,
-                 VM::ExtraArgs* extraArgs,
+                 ActRec* ar,
+                 ExtraArgs* extraArgs,
                  TypedValue* savedSP);
-  void doFPushCuf(VM::PC& pc, bool forward, bool safe);
+  void doFPushCuf(PC& pc, bool forward, bool safe);
   void unwindBuiltinFrame();
   template <bool forwarding>
   void pushClsMethodImpl(VM::Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
   template <bool reenter, bool handle_throw>
-  bool prepareFuncEntry(VM::ActRec* ar,
-                        VM::PC& pc,
-                        VM::ExtraArgs* extraArgs);
-  bool prepareArrayArgs(VM::ActRec* ar, ArrayData* args,
-                        VM::ExtraArgs*& extraArgs);
-  void recordCodeCoverage(VM::PC pc);
+  bool prepareFuncEntry(ActRec* ar,
+                        PC& pc,
+                        ExtraArgs* extraArgs);
+  bool prepareArrayArgs(ActRec* ar, ArrayData* args,
+                        ExtraArgs*& extraArgs);
+  void recordCodeCoverage(PC pc);
   int m_coverPrevLine;
   HPHP::VM::Unit* m_coverPrevUnit;
   Array m_evaledArgs;
 public:
   void resetCoverageCounters();
-  void shuffleMagicArgs(HPHP::VM::ActRec* ar);
+  void shuffleMagicArgs(ActRec* ar);
   void syncGdbState();
   void invokeFunc(TypedValue* retval,
                   const HPHP::VM::Func* f,
                   CArrRef params,
                   ObjectData* this_ = nullptr,
                   HPHP::VM::Class* class_ = nullptr,
-                  HPHP::VM::VarEnv* varEnv = nullptr,
+                  VarEnv* varEnv = nullptr,
                   StringData* invName = nullptr,
                   HPHP::VM::Unit* mergeUnit = nullptr);
   void invokeFunc(TypedValue* retval,
-                  HPHP::VM::CallCtx& ctx,
+                  CallCtx& ctx,
                   CArrRef params,
-                  HPHP::VM::VarEnv* varEnv = nullptr,
+                  VarEnv* varEnv = nullptr,
                   HPHP::VM::Unit* toMerge = nullptr) {
     invokeFunc(retval, ctx.func, params, ctx.this_, ctx.cls, varEnv,
                ctx.invName, toMerge);
@@ -752,7 +752,7 @@ public:
   static int64_t s_threadIdxCounter;
   Variant m_setprofileCallback;
   bool m_executingSetprofileCallback;
-  inline HPHP::VM::Offset pcOff() const {
+  inline Offset pcOff() const {
     return m_fp->m_func->unit()->offsetOf(m_pc);
   }
 
@@ -794,7 +794,7 @@ private:
 class Silencer {
 public:
   Silencer() : m_active(false) {}
-  Silencer(bool);
+  explicit Silencer(bool);
 
   ~Silencer() { if (m_active) disableHelper(); }
   void enable();

@@ -34,7 +34,7 @@ this_ => rdi
 
 void th_19BlockableWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP21c_BlockableWaitHandle13t___constructEv");
 
-TypedValue* tg_19BlockableWaitHandle___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_19BlockableWaitHandle___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

@@ -34,7 +34,7 @@ this_ => rdi
 
 void th_18WaitableWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP20c_WaitableWaitHandle13t___constructEv");
 
-TypedValue* tg_18WaitableWaitHandle___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_18WaitableWaitHandle___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -71,7 +71,7 @@ this_ => rdi
 
 int th_18WaitableWaitHandle_getContextIdx(ObjectData* this_) asm("_ZN4HPHP20c_WaitableWaitHandle15t_getcontextidxEv");
 
-TypedValue* tg_18WaitableWaitHandle_getContextIdx(HPHP::VM::ActRec *ar) {
+TypedValue* tg_18WaitableWaitHandle_getContextIdx(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -108,7 +108,7 @@ this_ => rsi
 
 Value* th_18WaitableWaitHandle_getCreator(Value* _rv, ObjectData* this_) asm("_ZN4HPHP20c_WaitableWaitHandle12t_getcreatorEv");
 
-TypedValue* tg_18WaitableWaitHandle_getCreator(HPHP::VM::ActRec *ar) {
+TypedValue* tg_18WaitableWaitHandle_getCreator(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -146,7 +146,7 @@ this_ => rsi
 
 Value* th_18WaitableWaitHandle_getParents(Value* _rv, ObjectData* this_) asm("_ZN4HPHP20c_WaitableWaitHandle12t_getparentsEv");
 
-TypedValue* tg_18WaitableWaitHandle_getParents(HPHP::VM::ActRec *ar) {
+TypedValue* tg_18WaitableWaitHandle_getParents(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -184,7 +184,7 @@ this_ => rsi
 
 Value* th_18WaitableWaitHandle_getStackTrace(Value* _rv, ObjectData* this_) asm("_ZN4HPHP20c_WaitableWaitHandle15t_getstacktraceEv");
 
-TypedValue* tg_18WaitableWaitHandle_getStackTrace(HPHP::VM::ActRec *ar) {
+TypedValue* tg_18WaitableWaitHandle_getStackTrace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

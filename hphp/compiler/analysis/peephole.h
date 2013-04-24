@@ -50,7 +50,7 @@ private:
   void buildJumpTargets();
 
   VM::UnitEmitter& m_ue;
-  hphp_hash_set<VM::Offset> m_jumpTargets;
+  hphp_hash_set<Offset> m_jumpTargets;
 };
 
 }}

@@ -33,7 +33,7 @@ _ZN4HPHP21f_intl_get_error_codeEv
 
 long fh_intl_get_error_code() asm("_ZN4HPHP21f_intl_get_error_codeEv");
 
-TypedValue* fg_intl_get_error_code(HPHP::VM::ActRec *ar) {
+TypedValue* fg_intl_get_error_code(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -66,7 +66,7 @@ _rv => rdi
 
 Value* fh_intl_get_error_message(Value* _rv) asm("_ZN4HPHP24f_intl_get_error_messageEv");
 
-TypedValue* fg_intl_get_error_message(HPHP::VM::ActRec *ar) {
+TypedValue* fg_intl_get_error_message(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -101,8 +101,8 @@ error_code => rsi
 
 Value* fh_intl_error_name(Value* _rv, long error_code) asm("_ZN4HPHP17f_intl_error_nameEl");
 
-TypedValue * fg1_intl_error_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_intl_error_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_intl_error_name(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_intl_error_name(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
@@ -111,7 +111,7 @@ TypedValue * fg1_intl_error_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_intl_error_name(HPHP::VM::ActRec *ar) {
+TypedValue* fg_intl_error_name(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -152,8 +152,8 @@ error_code => rdi
 
 bool fh_intl_is_failure(long error_code) asm("_ZN4HPHP17f_intl_is_failureEl");
 
-TypedValue * fg1_intl_is_failure(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_intl_is_failure(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_intl_is_failure(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_intl_is_failure(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -161,7 +161,7 @@ TypedValue * fg1_intl_is_failure(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_intl_is_failure(HPHP::VM::ActRec *ar) {
+TypedValue* fg_intl_is_failure(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -204,8 +204,8 @@ sort_flag => rcx
 
 TypedValue* fh_collator_asort(TypedValue* _rv, TypedValue* obj, TypedValue* arr, long sort_flag) asm("_ZN4HPHP16f_collator_asortERKNS_7VariantERKNS_14VRefParamValueEl");
 
-TypedValue * fg1_collator_asort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_collator_asort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_collator_asort(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_collator_asort(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-2);
   fh_collator_asort((rv), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_Collator$$SORT_REGULAR));
@@ -213,7 +213,7 @@ TypedValue * fg1_collator_asort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_collator_asort(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_asort(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -256,8 +256,8 @@ str2 => rcx
 
 TypedValue* fh_collator_compare(TypedValue* _rv, TypedValue* obj, Value* str1, Value* str2) asm("_ZN4HPHP18f_collator_compareERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_collator_compare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_collator_compare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_collator_compare(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_collator_compare(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -270,7 +270,7 @@ TypedValue * fg1_collator_compare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_collator_compare(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_compare(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -311,8 +311,8 @@ locale => rsi
 
 TypedValue* fh_collator_create(TypedValue* _rv, Value* locale) asm("_ZN4HPHP17f_collator_createERKNS_6StringE");
 
-TypedValue * fg1_collator_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_collator_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_collator_create(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_collator_create(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_collator_create((rv), &args[-0].m_data);
@@ -320,7 +320,7 @@ TypedValue * fg1_collator_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_collator_create(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_create(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -362,8 +362,8 @@ attr => rdx
 
 TypedValue* fh_collator_get_attribute(TypedValue* _rv, TypedValue* obj, long attr) asm("_ZN4HPHP24f_collator_get_attributeERKNS_7VariantEl");
 
-TypedValue * fg1_collator_get_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_collator_get_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_collator_get_attribute(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_collator_get_attribute(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_collator_get_attribute((rv), (args-0), (long)(args[-1].m_data.num));
@@ -371,7 +371,7 @@ TypedValue * fg1_collator_get_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_collator_get_attribute(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_get_attribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -412,7 +412,7 @@ obj => rsi
 
 TypedValue* fh_collator_get_error_code(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP25f_collator_get_error_codeERKNS_7VariantE");
 
-TypedValue* fg_collator_get_error_code(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_get_error_code(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -446,7 +446,7 @@ obj => rsi
 
 TypedValue* fh_collator_get_error_message(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP28f_collator_get_error_messageERKNS_7VariantE");
 
-TypedValue* fg_collator_get_error_message(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_get_error_message(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -481,8 +481,8 @@ type => rdx
 
 TypedValue* fh_collator_get_locale(TypedValue* _rv, TypedValue* obj, long type) asm("_ZN4HPHP21f_collator_get_localeERKNS_7VariantEl");
 
-TypedValue * fg1_collator_get_locale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_collator_get_locale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_collator_get_locale(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_collator_get_locale(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_collator_get_locale((rv), (args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
@@ -490,7 +490,7 @@ TypedValue * fg1_collator_get_locale(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_collator_get_locale(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_get_locale(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -531,7 +531,7 @@ obj => rsi
 
 TypedValue* fh_collator_get_strength(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP23f_collator_get_strengthERKNS_7VariantE");
 
-TypedValue* fg_collator_get_strength(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_get_strength(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -567,8 +567,8 @@ val => rcx
 
 TypedValue* fh_collator_set_attribute(TypedValue* _rv, TypedValue* obj, long attr, long val) asm("_ZN4HPHP24f_collator_set_attributeERKNS_7VariantEll");
 
-TypedValue * fg1_collator_set_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_collator_set_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_collator_set_attribute(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_collator_set_attribute(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -581,7 +581,7 @@ TypedValue * fg1_collator_set_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_collator_set_attribute(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_set_attribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -623,8 +623,8 @@ strength => rdx
 
 TypedValue* fh_collator_set_strength(TypedValue* _rv, TypedValue* obj, long strength) asm("_ZN4HPHP23f_collator_set_strengthERKNS_7VariantEl");
 
-TypedValue * fg1_collator_set_strength(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_collator_set_strength(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_collator_set_strength(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_collator_set_strength(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_collator_set_strength((rv), (args-0), (long)(args[-1].m_data.num));
@@ -632,7 +632,7 @@ TypedValue * fg1_collator_set_strength(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_collator_set_strength(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_set_strength(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -674,7 +674,7 @@ arr => rdx
 
 TypedValue* fh_collator_sort_with_sort_keys(TypedValue* _rv, TypedValue* obj, TypedValue* arr) asm("_ZN4HPHP30f_collator_sort_with_sort_keysERKNS_7VariantERKNS_14VRefParamValueE");
 
-TypedValue* fg_collator_sort_with_sort_keys(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_sort_with_sort_keys(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -710,8 +710,8 @@ sort_flag => rcx
 
 TypedValue* fh_collator_sort(TypedValue* _rv, TypedValue* obj, TypedValue* arr, long sort_flag) asm("_ZN4HPHP15f_collator_sortERKNS_7VariantERKNS_14VRefParamValueEl");
 
-TypedValue * fg1_collator_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_collator_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_collator_sort(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_collator_sort(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-2);
   fh_collator_sort((rv), (args-0), (args-1), (count > 2) ? (long)(args[-2].m_data.num) : (long)(q_Collator$$SORT_REGULAR));
@@ -719,7 +719,7 @@ TypedValue * fg1_collator_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_collator_sort(HPHP::VM::ActRec *ar) {
+TypedValue* fg_collator_sort(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -763,8 +763,8 @@ idna_info => r8
 
 TypedValue* fh_idn_to_ascii(TypedValue* _rv, Value* domain, long options, long variant, TypedValue* idna_info) asm("_ZN4HPHP14f_idn_to_asciiERKNS_6StringEllRKNS_14VRefParamValueE");
 
-TypedValue * fg1_idn_to_ascii(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_idn_to_ascii(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_idn_to_ascii(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_idn_to_ascii(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -788,7 +788,7 @@ TypedValue * fg1_idn_to_ascii(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_idn_to_ascii(HPHP::VM::ActRec *ar) {
+TypedValue* fg_idn_to_ascii(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -833,8 +833,8 @@ idna_info => r8
 
 TypedValue* fh_idn_to_unicode(TypedValue* _rv, Value* domain, long options, long variant, TypedValue* idna_info) asm("_ZN4HPHP16f_idn_to_unicodeERKNS_6StringEllRKNS_14VRefParamValueE");
 
-TypedValue * fg1_idn_to_unicode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_idn_to_unicode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_idn_to_unicode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_idn_to_unicode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -858,7 +858,7 @@ TypedValue * fg1_idn_to_unicode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_idn_to_unicode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_idn_to_unicode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -903,8 +903,8 @@ idna_info => r8
 
 TypedValue* fh_idn_to_utf8(TypedValue* _rv, Value* domain, long options, long variant, TypedValue* idna_info) asm("_ZN4HPHP13f_idn_to_utf8ERKNS_6StringEllRKNS_14VRefParamValueE");
 
-TypedValue * fg1_idn_to_utf8(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_idn_to_utf8(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_idn_to_utf8(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_idn_to_utf8(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -928,7 +928,7 @@ TypedValue * fg1_idn_to_utf8(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_idn_to_utf8(HPHP::VM::ActRec *ar) {
+TypedValue* fg_idn_to_utf8(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -979,8 +979,8 @@ locale => rsi
 
 void th_8Collator___construct(ObjectData* this_, Value* locale) asm("_ZN4HPHP10c_Collator13t___constructERKNS_6StringE");
 
-TypedValue* tg1_8Collator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Collator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Collator___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Collator___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -989,7 +989,7 @@ TypedValue* tg1_8Collator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_8Collator___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1035,8 +1035,8 @@ sort_flag => rdx
 
 bool th_8Collator_asort(ObjectData* this_, TypedValue* arr, long sort_flag) asm("_ZN4HPHP10c_Collator7t_asortERKNS_14VRefParamValueEl");
 
-TypedValue* tg1_8Collator_asort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Collator_asort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Collator_asort(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Collator_asort(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-1);
@@ -1044,7 +1044,7 @@ TypedValue* tg1_8Collator_asort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* tg_8Collator_asort(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_asort(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1090,8 +1090,8 @@ str2 => rcx
 
 TypedValue* th_8Collator_compare(TypedValue* _rv, ObjectData* this_, Value* str1, Value* str2) asm("_ZN4HPHP10c_Collator9t_compareERKNS_6StringES3_");
 
-TypedValue* tg1_8Collator_compare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Collator_compare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Collator_compare(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Collator_compare(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1104,7 +1104,7 @@ TypedValue* tg1_8Collator_compare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* tg_8Collator_compare(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_compare(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1149,8 +1149,8 @@ locale => rdx
 
 TypedValue* th_8Collator_create(TypedValue* _rv, char const* cls_, Value* locale) asm("_ZN4HPHP10c_Collator9ti_createEPKcRKNS_6StringE");
 
-TypedValue* tg1_8Collator_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue* tg1_8Collator_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue* tg1_8Collator_create(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_8Collator_create(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_8Collator_create((rv), ("Collator"), &args[-0].m_data);
@@ -1158,7 +1158,7 @@ TypedValue* tg1_8Collator_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* tg_8Collator_create(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_create(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1197,8 +1197,8 @@ attr => rsi
 
 long th_8Collator_getattribute(ObjectData* this_, long attr) asm("_ZN4HPHP10c_Collator14t_getattributeEl");
 
-TypedValue* tg1_8Collator_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Collator_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Collator_getattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Collator_getattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToInt64InPlace(args-0);
@@ -1206,7 +1206,7 @@ TypedValue* tg1_8Collator_getattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* tg_8Collator_getattribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_getattribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1249,7 +1249,7 @@ this_ => rdi
 
 long th_8Collator_geterrorcode(ObjectData* this_) asm("_ZN4HPHP10c_Collator14t_geterrorcodeEv");
 
-TypedValue* tg_8Collator_geterrorcode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_geterrorcode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1286,7 +1286,7 @@ this_ => rsi
 
 Value* th_8Collator_geterrormessage(Value* _rv, ObjectData* this_) asm("_ZN4HPHP10c_Collator17t_geterrormessageEv");
 
-TypedValue* tg_8Collator_geterrormessage(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_geterrormessage(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1325,8 +1325,8 @@ type => rdx
 
 Value* th_8Collator_getlocale(Value* _rv, ObjectData* this_, long type) asm("_ZN4HPHP10c_Collator11t_getlocaleEl");
 
-TypedValue* tg1_8Collator_getlocale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Collator_getlocale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Collator_getlocale(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Collator_getlocale(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
@@ -1335,7 +1335,7 @@ TypedValue* tg1_8Collator_getlocale(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* tg_8Collator_getlocale(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_getlocale(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1379,7 +1379,7 @@ this_ => rdi
 
 long th_8Collator_getstrength(ObjectData* this_) asm("_ZN4HPHP10c_Collator13t_getstrengthEv");
 
-TypedValue* tg_8Collator_getstrength(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_getstrength(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1417,8 +1417,8 @@ val => rdx
 
 bool th_8Collator_setattribute(ObjectData* this_, long attr, long val) asm("_ZN4HPHP10c_Collator14t_setattributeEll");
 
-TypedValue* tg1_8Collator_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Collator_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Collator_setattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Collator_setattribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
@@ -1431,7 +1431,7 @@ TypedValue* tg1_8Collator_setattribute(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* tg_8Collator_setattribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_setattribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1475,8 +1475,8 @@ strength => rsi
 
 bool th_8Collator_setstrength(ObjectData* this_, long strength) asm("_ZN4HPHP10c_Collator13t_setstrengthEl");
 
-TypedValue* tg1_8Collator_setstrength(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Collator_setstrength(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Collator_setstrength(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Collator_setstrength(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -1484,7 +1484,7 @@ TypedValue* tg1_8Collator_setstrength(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_8Collator_setstrength(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_setstrength(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1528,7 +1528,7 @@ arr => rsi
 
 bool th_8Collator_sortwithsortkeys(ObjectData* this_, TypedValue* arr) asm("_ZN4HPHP10c_Collator18t_sortwithsortkeysERKNS_14VRefParamValueE");
 
-TypedValue* tg_8Collator_sortwithsortkeys(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_sortwithsortkeys(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1566,8 +1566,8 @@ sort_flag => rdx
 
 bool th_8Collator_sort(ObjectData* this_, TypedValue* arr, long sort_flag) asm("_ZN4HPHP10c_Collator6t_sortERKNS_14VRefParamValueEl");
 
-TypedValue* tg1_8Collator_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8Collator_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8Collator_sort(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8Collator_sort(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-1);
@@ -1575,7 +1575,7 @@ TypedValue* tg1_8Collator_sort(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* tg_8Collator_sort(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8Collator_sort(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1627,7 +1627,7 @@ this_ => rdi
 
 void th_6Locale___construct(ObjectData* this_) asm("_ZN4HPHP8c_Locale13t___constructEv");
 
-TypedValue* tg_6Locale___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_6Locale___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1673,7 +1673,7 @@ this_ => rdi
 
 void th_10Normalizer___construct(ObjectData* this_) asm("_ZN4HPHP12c_Normalizer13t___constructEv");
 
-TypedValue* tg_10Normalizer___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10Normalizer___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1713,8 +1713,8 @@ form => rcx
 
 TypedValue* th_10Normalizer_isnormalized(TypedValue* _rv, char const* cls_, Value* input, long form) asm("_ZN4HPHP12c_Normalizer15ti_isnormalizedEPKcRKNS_6StringEl");
 
-TypedValue* tg1_10Normalizer_isnormalized(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue* tg1_10Normalizer_isnormalized(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue* tg1_10Normalizer_isnormalized(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_10Normalizer_isnormalized(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -1732,7 +1732,7 @@ TypedValue* tg1_10Normalizer_isnormalized(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_10Normalizer_isnormalized(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10Normalizer_isnormalized(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1773,8 +1773,8 @@ form => rcx
 
 TypedValue* th_10Normalizer_normalize(TypedValue* _rv, char const* cls_, Value* input, long form) asm("_ZN4HPHP12c_Normalizer12ti_normalizeEPKcRKNS_6StringEl");
 
-TypedValue* tg1_10Normalizer_normalize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue* tg1_10Normalizer_normalize(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue* tg1_10Normalizer_normalize(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_10Normalizer_normalize(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -1792,7 +1792,7 @@ TypedValue* tg1_10Normalizer_normalize(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* tg_10Normalizer_normalize(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10Normalizer_normalize(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

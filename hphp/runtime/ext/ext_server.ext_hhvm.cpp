@@ -33,7 +33,7 @@ _ZN4HPHP35f_dangling_server_proxy_old_requestEv
 
 bool fh_dangling_server_proxy_old_request() asm("_ZN4HPHP35f_dangling_server_proxy_old_requestEv");
 
-TypedValue* fg_dangling_server_proxy_old_request(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dangling_server_proxy_old_request(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -66,8 +66,8 @@ host => rdi
 
 bool fh_dangling_server_proxy_new_request(Value* host) asm("_ZN4HPHP35f_dangling_server_proxy_new_requestERKNS_6StringE");
 
-TypedValue * fg1_dangling_server_proxy_new_request(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dangling_server_proxy_new_request(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dangling_server_proxy_new_request(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dangling_server_proxy_new_request(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -75,7 +75,7 @@ TypedValue * fg1_dangling_server_proxy_new_request(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* fg_dangling_server_proxy_new_request(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dangling_server_proxy_new_request(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -114,7 +114,7 @@ _ZN4HPHP27f_pagelet_server_is_enabledEv
 
 bool fh_pagelet_server_is_enabled() asm("_ZN4HPHP27f_pagelet_server_is_enabledEv");
 
-TypedValue* fg_pagelet_server_is_enabled(HPHP::VM::ActRec *ar) {
+TypedValue* fg_pagelet_server_is_enabled(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -151,8 +151,8 @@ files => r8
 
 Value* fh_pagelet_server_task_start(Value* _rv, Value* url, Value* headers, Value* post_data, Value* files) asm("_ZN4HPHP27f_pagelet_server_task_startERKNS_6StringERKNS_5ArrayES2_S5_");
 
-TypedValue * fg1_pagelet_server_task_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_pagelet_server_task_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_pagelet_server_task_start(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pagelet_server_task_start(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -179,7 +179,7 @@ TypedValue * fg1_pagelet_server_task_start(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_pagelet_server_task_start(HPHP::VM::ActRec *ar) {
+TypedValue* fg_pagelet_server_task_start(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -220,8 +220,8 @@ task => rdi
 
 long fh_pagelet_server_task_status(Value* task) asm("_ZN4HPHP28f_pagelet_server_task_statusERKNS_6ObjectE");
 
-TypedValue * fg1_pagelet_server_task_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_pagelet_server_task_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_pagelet_server_task_status(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pagelet_server_task_status(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -229,7 +229,7 @@ TypedValue * fg1_pagelet_server_task_status(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_pagelet_server_task_status(HPHP::VM::ActRec *ar) {
+TypedValue* fg_pagelet_server_task_status(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -273,8 +273,8 @@ timeout_ms => r8
 
 Value* fh_pagelet_server_task_result(Value* _rv, Value* task, TypedValue* headers, TypedValue* code, long timeout_ms) asm("_ZN4HPHP28f_pagelet_server_task_resultERKNS_6ObjectERKNS_14VRefParamValueES5_l");
 
-TypedValue * fg1_pagelet_server_task_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_pagelet_server_task_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_pagelet_server_task_result(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_pagelet_server_task_result(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -293,7 +293,7 @@ TypedValue * fg1_pagelet_server_task_result(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_pagelet_server_task_result(HPHP::VM::ActRec *ar) {
+TypedValue* fg_pagelet_server_task_result(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -332,7 +332,7 @@ _ZN4HPHP22f_pagelet_server_flushEv
 
 void fh_pagelet_server_flush() asm("_ZN4HPHP22f_pagelet_server_flushEv");
 
-TypedValue* fg_pagelet_server_flush(HPHP::VM::ActRec *ar) {
+TypedValue* fg_pagelet_server_flush(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -369,8 +369,8 @@ host => rcx
 
 bool fh_xbox_send_message(Value* msg, TypedValue* ret, long timeout_ms, Value* host) asm("_ZN4HPHP19f_xbox_send_messageERKNS_6StringERKNS_14VRefParamValueElS2_");
 
-TypedValue * fg1_xbox_send_message(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xbox_send_message(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xbox_send_message(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xbox_send_message(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -392,7 +392,7 @@ TypedValue * fg1_xbox_send_message(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_xbox_send_message(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xbox_send_message(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -434,8 +434,8 @@ host => rsi
 
 bool fh_xbox_post_message(Value* msg, Value* host) asm("_ZN4HPHP19f_xbox_post_messageERKNS_6StringES2_");
 
-TypedValue * fg1_xbox_post_message(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xbox_post_message(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xbox_post_message(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xbox_post_message(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -454,7 +454,7 @@ TypedValue * fg1_xbox_post_message(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_xbox_post_message(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xbox_post_message(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -496,8 +496,8 @@ message => rsi
 
 Value* fh_xbox_task_start(Value* _rv, Value* message) asm("_ZN4HPHP17f_xbox_task_startERKNS_6StringE");
 
-TypedValue * fg1_xbox_task_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xbox_task_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xbox_task_start(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xbox_task_start(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
@@ -506,7 +506,7 @@ TypedValue * fg1_xbox_task_start(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_xbox_task_start(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xbox_task_start(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -547,8 +547,8 @@ task => rdi
 
 bool fh_xbox_task_status(Value* task) asm("_ZN4HPHP18f_xbox_task_statusERKNS_6ObjectE");
 
-TypedValue * fg1_xbox_task_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xbox_task_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xbox_task_status(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xbox_task_status(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -556,7 +556,7 @@ TypedValue * fg1_xbox_task_status(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_xbox_task_status(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xbox_task_status(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -598,8 +598,8 @@ ret => rdx
 
 long fh_xbox_task_result(Value* task, long timeout_ms, TypedValue* ret) asm("_ZN4HPHP18f_xbox_task_resultERKNS_6ObjectElRKNS_14VRefParamValueE");
 
-TypedValue * fg1_xbox_task_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xbox_task_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xbox_task_result(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xbox_task_result(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   if ((args-1)->m_type != KindOfInt64) {
@@ -612,7 +612,7 @@ TypedValue * fg1_xbox_task_result(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_xbox_task_result(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xbox_task_result(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -653,8 +653,8 @@ msg => rsi
 
 TypedValue* fh_xbox_process_call_message(TypedValue* _rv, Value* msg) asm("_ZN4HPHP27f_xbox_process_call_messageERKNS_6StringE");
 
-TypedValue * fg1_xbox_process_call_message(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xbox_process_call_message(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xbox_process_call_message(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xbox_process_call_message(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_xbox_process_call_message((rv), &args[-0].m_data);
@@ -662,7 +662,7 @@ TypedValue * fg1_xbox_process_call_message(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_xbox_process_call_message(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xbox_process_call_message(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -701,7 +701,7 @@ _ZN4HPHP25f_xbox_get_thread_timeoutEv
 
 long fh_xbox_get_thread_timeout() asm("_ZN4HPHP25f_xbox_get_thread_timeoutEv");
 
-TypedValue* fg_xbox_get_thread_timeout(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xbox_get_thread_timeout(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -733,8 +733,8 @@ timeout => rdi
 
 void fh_xbox_set_thread_timeout(int timeout) asm("_ZN4HPHP25f_xbox_set_thread_timeoutEi");
 
-TypedValue * fg1_xbox_set_thread_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_xbox_set_thread_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_xbox_set_thread_timeout(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_xbox_set_thread_timeout(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -743,7 +743,7 @@ TypedValue * fg1_xbox_set_thread_timeout(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_xbox_set_thread_timeout(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xbox_set_thread_timeout(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -782,7 +782,7 @@ _ZN4HPHP28f_xbox_schedule_thread_resetEv
 
 void fh_xbox_schedule_thread_reset() asm("_ZN4HPHP28f_xbox_schedule_thread_resetEv");
 
-TypedValue* fg_xbox_schedule_thread_reset(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xbox_schedule_thread_reset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -815,7 +815,7 @@ _ZN4HPHP22f_xbox_get_thread_timeEv
 
 long fh_xbox_get_thread_time() asm("_ZN4HPHP22f_xbox_get_thread_timeEv");
 
-TypedValue* fg_xbox_get_thread_time(HPHP::VM::ActRec *ar) {
+TypedValue* fg_xbox_get_thread_time(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

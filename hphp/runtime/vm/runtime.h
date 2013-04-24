@@ -27,8 +27,6 @@ namespace HPHP {
 struct HhbcExtFuncInfo;
 struct HhbcExtClassInfo;
 
-namespace VM {
-
 ArrayData* new_array(int capacity);
 ArrayData* new_tuple(int numArgs, const TypedValue* args);
 
@@ -40,7 +38,7 @@ ObjectData* newPairHelper();
 StringData* concat_is(int64_t v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64_t v2);
 StringData* concat_ss(StringData* v1, StringData* v2);
-StringData* concat(DataType t1, uint64_t v1, DataType t2, uint64_t v2);
+StringData* concat_tv(DataType t1, uint64_t v1, DataType t2, uint64_t v2);
 
 int64_t tv_to_bool(TypedValue* tv);
 
@@ -128,13 +126,13 @@ frame_free_locals_inl(ActRec* fp, int numLocals) {
     decRefObj(this_);
   }
   frame_free_locals_helper_inl(fp, numLocals);
-  EventHook::FunctionExit(fp);
+  VM::EventHook::FunctionExit(fp);
 }
 
 inline void ALWAYS_INLINE
 frame_free_locals_no_this_inl(ActRec* fp, int numLocals) {
   frame_free_locals_helper_inl(fp, numLocals);
-  EventHook::FunctionExit(fp);
+  VM::EventHook::FunctionExit(fp);
 }
 
 inline void ALWAYS_INLINE
@@ -155,12 +153,13 @@ frame_free_args(TypedValue* args, int count) {
 
 }
 
-Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname);
-Unit* compile_string(const char* s, size_t sz);
-Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
-                             ssize_t numBuiltinFuncs);
-Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
-                              ssize_t numBuiltinClasses);
+VM::Unit*
+compile_file(const char* s, size_t sz, const MD5& md5, const char* fname);
+VM::Unit* compile_string(const char* s, size_t sz);
+VM::Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
+                                 ssize_t numBuiltinFuncs);
+VM::Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
+                                  ssize_t numBuiltinClasses);
 
 HphpArray* pack_args_into_array(ActRec* ar, int nargs);
 
@@ -171,11 +170,12 @@ void call_intercept_handler(TypedValue* retval,
                             Variant* ihandler) {
   if (handle_throw) { assert(ar); }
   ObjectData* intThis = nullptr;
-  Class* intCls = nullptr;
+  VM::Class* intCls = nullptr;
   StringData* intInvName = nullptr;
-  const Func* handler = vm_decode_function(ihandler->asCArrRef()[0],
-                                           g_vmContext->getFP(),
-                                           false, intThis, intCls, intInvName);
+  const VM::Func* handler = vm_decode_function(ihandler->asCArrRef()[0],
+                                               g_vmContext->getFP(),
+                                               false, intThis, intCls,
+                                               intInvName);
   if (handle_throw) {
     // It's possible for the intercept handler could throw an exception.
     // If run_intercept_handler() was called from the translator and the
@@ -244,16 +244,16 @@ bool run_intercept_handler(ActRec* ar, Variant* ihandler) {
 }
 
 bool run_intercept_handler_for_invokefunc(TypedValue* retval,
-                                          const Func* f,
+                                          const VM::Func* f,
                                           CArrRef params,
                                           ObjectData* this_,
                                           StringData* invName,
                                           Variant* ihandler);
 
-static inline Instance*
-newInstance(Class* cls) {
+static inline VM::Instance*
+newInstance(VM::Class* cls) {
   assert(cls);
-  Instance *inst = Instance::newInstance(cls);
+  auto* inst = VM::Instance::newInstance(cls);
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     g_vmContext->m_liveBCObjs.insert(inst);
   }
@@ -270,9 +270,9 @@ HphpArray* get_static_locals(const ActRec* ar);
  * be set up before you use those parts of the runtime.
  */
 
-typedef Unit* (*CompileStringFn)(const char*, int, const MD5&, const char*);
-typedef Unit* (*BuildNativeFuncUnitFn)(const HhbcExtFuncInfo*, ssize_t);
-typedef Unit* (*BuildNativeClassUnitFn)(const HhbcExtClassInfo*, ssize_t);
+typedef VM::Unit* (*CompileStringFn)(const char*, int, const MD5&, const char*);
+typedef VM::Unit* (*BuildNativeFuncUnitFn)(const HhbcExtFuncInfo*, ssize_t);
+typedef VM::Unit* (*BuildNativeClassUnitFn)(const HhbcExtClassInfo*, ssize_t);
 
 extern CompileStringFn g_hphp_compiler_parse;
 extern BuildNativeFuncUnitFn g_hphp_build_native_func_unit;
@@ -289,11 +289,8 @@ bool checkTv(const TypedValue* tv);
 // always_assert tv is a plausible TypedValue*
 void assertTv(const TypedValue* tv);
 
-void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
-                    size_t nProps);
-
 // returns the number of things it put on sp
 int init_closure(ActRec* ar, TypedValue* sp);
 
-} }
+}
 #endif

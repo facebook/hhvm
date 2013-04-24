@@ -80,7 +80,7 @@ typedef __sighandler_t *sighandler_t;
 #include "runtime/vm/translator/srcdb.h"
 #include "runtime/vm/translator/x64-util.h"
 #include "runtime/vm/translator/unwind-x64.h"
-#include "runtime/vm/stats.h"
+#include "runtime/base/stats.h"
 #include "runtime/vm/pendq.h"
 #include "runtime/vm/treadmill.h"
 #include "runtime/vm/repo.h"
@@ -5765,12 +5765,12 @@ TranslatorX64::translateConcat(const Tracelet& t,
     if (false) { // type check
       uint64_t v1 = 0, v2 = 0;
       DataType t1 = KindOfUninit, t2 = KindOfUninit;
-      StringData *retval = concat(t1, v1, t2, v2);
+      StringData *retval = concat_tv(t1, v1, t2, v2);
       printf("%p", retval); // use retval
     }
     // concat will decRef the two inputs and incRef the output
     // for us if appropriate
-    EMIT_RCALL(a, i, concat,
+    EMIT_RCALL(a, i, concat_tv,
                IMM(l.valueType()), V(l.location),
                IMM(r.valueType()), V(r.location));
     assert(i.outStack->isString());

@@ -41,6 +41,20 @@ TRACE_SET_MOD(runtime);
 int HPHP::VM::Instance::ObjAllocatorSizeClassCount =
   HPHP::VM::InitializeAllocators();
 
+void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
+                    size_t nProps) {
+  auto* dst = propVec;
+  auto* src = propData;
+  for (; src != propData + nProps; ++src, ++dst) {
+    *dst = *src;
+    // m_aux.u_deepInit is true for properties that need "deep" initialization
+    if (src->deepInit()) {
+      tvIncRef(dst);
+      collectionDeepCopyTV(dst);
+    }
+  }
+}
+
 TypedValue* Instance::propVec() {
   uintptr_t ret = (uintptr_t)this + sizeof(ObjectData) + builtinPropSize();
   // TODO(#1432007): some builtins still do not have TypedValue-aligned sizes.

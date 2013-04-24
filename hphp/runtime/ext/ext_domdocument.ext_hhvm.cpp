@@ -37,8 +37,8 @@ value => rcx
 
 TypedValue* fh_dom_document_create_element(TypedValue* _rv, TypedValue* obj, Value* name, Value* value) asm("_ZN4HPHP29f_dom_document_create_elementERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_document_create_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_create_element(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_create_element(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_create_element(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -56,7 +56,7 @@ TypedValue * fg1_dom_document_create_element(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_dom_document_create_element(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_create_element(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -97,7 +97,7 @@ obj => rsi
 
 TypedValue* fh_dom_document_create_document_fragment(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP39f_dom_document_create_document_fragmentERKNS_7VariantE");
 
-TypedValue* fg_dom_document_create_document_fragment(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_create_document_fragment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -132,8 +132,8 @@ data => rdx
 
 TypedValue* fh_dom_document_create_text_node(TypedValue* _rv, TypedValue* obj, Value* data) asm("_ZN4HPHP31f_dom_document_create_text_nodeERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_create_text_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_create_text_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_create_text_node(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_create_text_node(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_create_text_node((rv), (args-0), &args[-1].m_data);
@@ -141,7 +141,7 @@ TypedValue * fg1_dom_document_create_text_node(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_dom_document_create_text_node(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_create_text_node(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -183,8 +183,8 @@ data => rdx
 
 TypedValue* fh_dom_document_create_comment(TypedValue* _rv, TypedValue* obj, Value* data) asm("_ZN4HPHP29f_dom_document_create_commentERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_create_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_create_comment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_create_comment(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_create_comment(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_create_comment((rv), (args-0), &args[-1].m_data);
@@ -192,7 +192,7 @@ TypedValue * fg1_dom_document_create_comment(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_dom_document_create_comment(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_create_comment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -234,8 +234,8 @@ data => rdx
 
 TypedValue* fh_dom_document_create_cdatasection(TypedValue* _rv, TypedValue* obj, Value* data) asm("_ZN4HPHP34f_dom_document_create_cdatasectionERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_create_cdatasection(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_create_cdatasection(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_create_cdatasection(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_create_cdatasection(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_create_cdatasection((rv), (args-0), &args[-1].m_data);
@@ -243,7 +243,7 @@ TypedValue * fg1_dom_document_create_cdatasection(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* fg_dom_document_create_cdatasection(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_create_cdatasection(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -286,8 +286,8 @@ data => rcx
 
 TypedValue* fh_dom_document_create_processing_instruction(TypedValue* _rv, TypedValue* obj, Value* target, Value* data) asm("_ZN4HPHP44f_dom_document_create_processing_instructionERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_document_create_processing_instruction(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_create_processing_instruction(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_create_processing_instruction(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_create_processing_instruction(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -305,7 +305,7 @@ TypedValue * fg1_dom_document_create_processing_instruction(TypedValue* rv, HPHP
   return rv;
 }
 
-TypedValue* fg_dom_document_create_processing_instruction(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_create_processing_instruction(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -347,8 +347,8 @@ name => rdx
 
 TypedValue* fh_dom_document_create_attribute(TypedValue* _rv, TypedValue* obj, Value* name) asm("_ZN4HPHP31f_dom_document_create_attributeERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_create_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_create_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_create_attribute(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_create_attribute(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_create_attribute((rv), (args-0), &args[-1].m_data);
@@ -356,7 +356,7 @@ TypedValue * fg1_dom_document_create_attribute(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_dom_document_create_attribute(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_create_attribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -398,8 +398,8 @@ name => rdx
 
 TypedValue* fh_dom_document_create_entity_reference(TypedValue* _rv, TypedValue* obj, Value* name) asm("_ZN4HPHP38f_dom_document_create_entity_referenceERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_create_entity_reference(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_create_entity_reference(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_create_entity_reference(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_create_entity_reference(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_create_entity_reference((rv), (args-0), &args[-1].m_data);
@@ -407,7 +407,7 @@ TypedValue * fg1_dom_document_create_entity_reference(TypedValue* rv, HPHP::VM::
   return rv;
 }
 
-TypedValue* fg_dom_document_create_entity_reference(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_create_entity_reference(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -449,8 +449,8 @@ name => rdx
 
 TypedValue* fh_dom_document_get_elements_by_tag_name(TypedValue* _rv, TypedValue* obj, Value* name) asm("_ZN4HPHP39f_dom_document_get_elements_by_tag_nameERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_get_elements_by_tag_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_get_elements_by_tag_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_get_elements_by_tag_name(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_get_elements_by_tag_name(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_get_elements_by_tag_name((rv), (args-0), &args[-1].m_data);
@@ -458,7 +458,7 @@ TypedValue * fg1_dom_document_get_elements_by_tag_name(TypedValue* rv, HPHP::VM:
   return rv;
 }
 
-TypedValue* fg_dom_document_get_elements_by_tag_name(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_get_elements_by_tag_name(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -501,8 +501,8 @@ deep => rcx
 
 TypedValue* fh_dom_document_import_node(TypedValue* _rv, TypedValue* obj, Value* importednode, bool deep) asm("_ZN4HPHP26f_dom_document_import_nodeERKNS_7VariantERKNS_6ObjectEb");
 
-TypedValue * fg1_dom_document_import_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_import_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_import_node(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_import_node(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -520,7 +520,7 @@ TypedValue * fg1_dom_document_import_node(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_dom_document_import_node(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_import_node(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -564,8 +564,8 @@ value => r8
 
 TypedValue* fh_dom_document_create_element_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* qualifiedname, Value* value) asm("_ZN4HPHP32f_dom_document_create_element_nsERKNS_7VariantERKNS_6StringES5_S5_");
 
-TypedValue * fg1_dom_document_create_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_create_element_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_create_element_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_create_element_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -586,7 +586,7 @@ TypedValue * fg1_dom_document_create_element_ns(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* fg_dom_document_create_element_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_create_element_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -629,8 +629,8 @@ qualifiedname => rcx
 
 TypedValue* fh_dom_document_create_attribute_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* qualifiedname) asm("_ZN4HPHP34f_dom_document_create_attribute_nsERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_document_create_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_create_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_create_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_create_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -643,7 +643,7 @@ TypedValue * fg1_dom_document_create_attribute_ns(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* fg_dom_document_create_attribute_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_create_attribute_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -686,8 +686,8 @@ localname => rcx
 
 TypedValue* fh_dom_document_get_elements_by_tag_name_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* localname) asm("_ZN4HPHP42f_dom_document_get_elements_by_tag_name_nsERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_document_get_elements_by_tag_name_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_get_elements_by_tag_name_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_get_elements_by_tag_name_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_get_elements_by_tag_name_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -700,7 +700,7 @@ TypedValue * fg1_dom_document_get_elements_by_tag_name_ns(TypedValue* rv, HPHP::
   return rv;
 }
 
-TypedValue* fg_dom_document_get_elements_by_tag_name_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_get_elements_by_tag_name_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -742,8 +742,8 @@ elementid => rdx
 
 TypedValue* fh_dom_document_get_element_by_id(TypedValue* _rv, TypedValue* obj, Value* elementid) asm("_ZN4HPHP32f_dom_document_get_element_by_idERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_get_element_by_id(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_get_element_by_id(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_get_element_by_id(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_get_element_by_id(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_get_element_by_id((rv), (args-0), &args[-1].m_data);
@@ -751,7 +751,7 @@ TypedValue * fg1_dom_document_get_element_by_id(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* fg_dom_document_get_element_by_id(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_get_element_by_id(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -792,7 +792,7 @@ obj => rsi
 
 TypedValue* fh_dom_document_normalize_document(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP33f_dom_document_normalize_documentERKNS_7VariantE");
 
-TypedValue* fg_dom_document_normalize_document(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_normalize_document(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -828,8 +828,8 @@ options => rcx
 
 TypedValue* fh_dom_document_save(TypedValue* _rv, TypedValue* obj, Value* file, long options) asm("_ZN4HPHP19f_dom_document_saveERKNS_7VariantERKNS_6StringEl");
 
-TypedValue * fg1_dom_document_save(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_save(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_save(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_save(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -847,7 +847,7 @@ TypedValue * fg1_dom_document_save(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_dom_document_save(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_save(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -890,8 +890,8 @@ options => rcx
 
 TypedValue* fh_dom_document_savexml(TypedValue* _rv, TypedValue* obj, Value* node, long options) asm("_ZN4HPHP22f_dom_document_savexmlERKNS_7VariantERKNS_6ObjectEl");
 
-TypedValue * fg1_dom_document_savexml(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_savexml(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_savexml(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_savexml(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -910,7 +910,7 @@ TypedValue * fg1_dom_document_savexml(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* fg_dom_document_savexml(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_savexml(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -951,7 +951,7 @@ obj => rsi
 
 TypedValue* fh_dom_document_validate(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP23f_dom_document_validateERKNS_7VariantE");
 
-TypedValue* fg_dom_document_validate(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_validate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -986,8 +986,8 @@ options => rdx
 
 TypedValue* fh_dom_document_xinclude(TypedValue* _rv, TypedValue* obj, long options) asm("_ZN4HPHP23f_dom_document_xincludeERKNS_7VariantEl");
 
-TypedValue * fg1_dom_document_xinclude(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_xinclude(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_xinclude(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_xinclude(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_dom_document_xinclude((rv), (args-0), (count > 1) ? (long)(args[-1].m_data.num) : (long)(0));
@@ -995,7 +995,7 @@ TypedValue * fg1_dom_document_xinclude(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_dom_document_xinclude(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_xinclude(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1036,7 +1036,7 @@ obj => rsi
 
 TypedValue* fh_dom_document_save_html(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP24f_dom_document_save_htmlERKNS_7VariantE");
 
-TypedValue* fg_dom_document_save_html(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_save_html(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1071,8 +1071,8 @@ file => rdx
 
 TypedValue* fh_dom_document_save_html_file(TypedValue* _rv, TypedValue* obj, Value* file) asm("_ZN4HPHP29f_dom_document_save_html_fileERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_save_html_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_save_html_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_save_html_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_save_html_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_save_html_file((rv), (args-0), &args[-1].m_data);
@@ -1080,7 +1080,7 @@ TypedValue * fg1_dom_document_save_html_file(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_dom_document_save_html_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_save_html_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1122,8 +1122,8 @@ filename => rdx
 
 TypedValue* fh_dom_document_schema_validate_file(TypedValue* _rv, TypedValue* obj, Value* filename) asm("_ZN4HPHP35f_dom_document_schema_validate_fileERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_schema_validate_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_schema_validate_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_schema_validate_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_schema_validate_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_schema_validate_file((rv), (args-0), &args[-1].m_data);
@@ -1131,7 +1131,7 @@ TypedValue * fg1_dom_document_schema_validate_file(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* fg_dom_document_schema_validate_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_schema_validate_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1173,8 +1173,8 @@ source => rdx
 
 TypedValue* fh_dom_document_schema_validate_xml(TypedValue* _rv, TypedValue* obj, Value* source) asm("_ZN4HPHP34f_dom_document_schema_validate_xmlERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_schema_validate_xml(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_schema_validate_xml(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_schema_validate_xml(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_schema_validate_xml(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_schema_validate_xml((rv), (args-0), &args[-1].m_data);
@@ -1182,7 +1182,7 @@ TypedValue * fg1_dom_document_schema_validate_xml(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* fg_dom_document_schema_validate_xml(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_schema_validate_xml(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1224,8 +1224,8 @@ filename => rdx
 
 TypedValue* fh_dom_document_relaxng_validate_file(TypedValue* _rv, TypedValue* obj, Value* filename) asm("_ZN4HPHP36f_dom_document_relaxng_validate_fileERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_relaxng_validate_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_relaxng_validate_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_relaxng_validate_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_relaxng_validate_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_relaxng_validate_file((rv), (args-0), &args[-1].m_data);
@@ -1233,7 +1233,7 @@ TypedValue * fg1_dom_document_relaxng_validate_file(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* fg_dom_document_relaxng_validate_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_relaxng_validate_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1275,8 +1275,8 @@ source => rdx
 
 TypedValue* fh_dom_document_relaxng_validate_xml(TypedValue* _rv, TypedValue* obj, Value* source) asm("_ZN4HPHP35f_dom_document_relaxng_validate_xmlERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_document_relaxng_validate_xml(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_document_relaxng_validate_xml(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_document_relaxng_validate_xml(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_document_relaxng_validate_xml(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_document_relaxng_validate_xml((rv), (args-0), &args[-1].m_data);
@@ -1284,7 +1284,7 @@ TypedValue * fg1_dom_document_relaxng_validate_xml(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* fg_dom_document_relaxng_validate_xml(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_document_relaxng_validate_xml(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1327,8 +1327,8 @@ refnode => rcx
 
 TypedValue* fh_dom_node_insert_before(TypedValue* _rv, TypedValue* obj, Value* newnode, Value* refnode) asm("_ZN4HPHP24f_dom_node_insert_beforeERKNS_7VariantERKNS_6ObjectES5_");
 
-TypedValue * fg1_dom_node_insert_before(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_node_insert_before(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_node_insert_before(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_node_insert_before(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -1347,7 +1347,7 @@ TypedValue * fg1_dom_node_insert_before(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_dom_node_insert_before(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_insert_before(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1391,8 +1391,8 @@ oldchildobj => rcx
 
 TypedValue* fh_dom_node_replace_child(TypedValue* _rv, TypedValue* obj, Value* newchildobj, Value* oldchildobj) asm("_ZN4HPHP24f_dom_node_replace_childERKNS_7VariantERKNS_6ObjectES5_");
 
-TypedValue * fg1_dom_node_replace_child(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_node_replace_child(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_node_replace_child(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_node_replace_child(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-2);
@@ -1405,7 +1405,7 @@ TypedValue * fg1_dom_node_replace_child(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_dom_node_replace_child(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_replace_child(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1447,8 +1447,8 @@ node => rdx
 
 TypedValue* fh_dom_node_remove_child(TypedValue* _rv, TypedValue* obj, Value* node) asm("_ZN4HPHP23f_dom_node_remove_childERKNS_7VariantERKNS_6ObjectE");
 
-TypedValue * fg1_dom_node_remove_child(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_node_remove_child(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_node_remove_child(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_node_remove_child(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
   fh_dom_node_remove_child((rv), (args-0), &args[-1].m_data);
@@ -1456,7 +1456,7 @@ TypedValue * fg1_dom_node_remove_child(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_dom_node_remove_child(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_remove_child(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1498,8 +1498,8 @@ newnode => rdx
 
 TypedValue* fh_dom_node_append_child(TypedValue* _rv, TypedValue* obj, Value* newnode) asm("_ZN4HPHP23f_dom_node_append_childERKNS_7VariantERKNS_6ObjectE");
 
-TypedValue * fg1_dom_node_append_child(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_node_append_child(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_node_append_child(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_node_append_child(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
   fh_dom_node_append_child((rv), (args-0), &args[-1].m_data);
@@ -1507,7 +1507,7 @@ TypedValue * fg1_dom_node_append_child(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_dom_node_append_child(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_append_child(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1548,7 +1548,7 @@ obj => rsi
 
 TypedValue* fh_dom_node_has_child_nodes(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP26f_dom_node_has_child_nodesERKNS_7VariantE");
 
-TypedValue* fg_dom_node_has_child_nodes(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_has_child_nodes(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1583,8 +1583,8 @@ deep => rdx
 
 TypedValue* fh_dom_node_clone_node(TypedValue* _rv, TypedValue* obj, bool deep) asm("_ZN4HPHP21f_dom_node_clone_nodeERKNS_7VariantEb");
 
-TypedValue * fg1_dom_node_clone_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_node_clone_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_node_clone_node(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_node_clone_node(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToBooleanInPlace(args-1);
   fh_dom_node_clone_node((rv), (args-0), (count > 1) ? (bool)(args[-1].m_data.num) : (bool)(false));
@@ -1592,7 +1592,7 @@ TypedValue * fg1_dom_node_clone_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_dom_node_clone_node(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_clone_node(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1633,7 +1633,7 @@ obj => rsi
 
 TypedValue* fh_dom_node_normalize(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP20f_dom_node_normalizeERKNS_7VariantE");
 
-TypedValue* fg_dom_node_normalize(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_normalize(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1669,8 +1669,8 @@ version => rcx
 
 TypedValue* fh_dom_node_is_supported(TypedValue* _rv, TypedValue* obj, Value* feature, Value* version) asm("_ZN4HPHP23f_dom_node_is_supportedERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_node_is_supported(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_node_is_supported(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_node_is_supported(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_node_is_supported(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -1683,7 +1683,7 @@ TypedValue * fg1_dom_node_is_supported(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_dom_node_is_supported(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_is_supported(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1724,7 +1724,7 @@ obj => rsi
 
 TypedValue* fh_dom_node_has_attributes(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP25f_dom_node_has_attributesERKNS_7VariantE");
 
-TypedValue* fg_dom_node_has_attributes(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_has_attributes(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1759,8 +1759,8 @@ node => rdx
 
 TypedValue* fh_dom_node_is_same_node(TypedValue* _rv, TypedValue* obj, Value* node) asm("_ZN4HPHP23f_dom_node_is_same_nodeERKNS_7VariantERKNS_6ObjectE");
 
-TypedValue * fg1_dom_node_is_same_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_node_is_same_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_node_is_same_node(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_node_is_same_node(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
   fh_dom_node_is_same_node((rv), (args-0), &args[-1].m_data);
@@ -1768,7 +1768,7 @@ TypedValue * fg1_dom_node_is_same_node(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_dom_node_is_same_node(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_is_same_node(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1810,8 +1810,8 @@ prefix => rdx
 
 TypedValue* fh_dom_node_lookup_prefix(TypedValue* _rv, TypedValue* obj, Value* prefix) asm("_ZN4HPHP24f_dom_node_lookup_prefixERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_node_lookup_prefix(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_node_lookup_prefix(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_node_lookup_prefix(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_node_lookup_prefix(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_node_lookup_prefix((rv), (args-0), &args[-1].m_data);
@@ -1819,7 +1819,7 @@ TypedValue * fg1_dom_node_lookup_prefix(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_dom_node_lookup_prefix(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_lookup_prefix(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1861,8 +1861,8 @@ namespaceuri => rdx
 
 TypedValue* fh_dom_node_is_default_namespace(TypedValue* _rv, TypedValue* obj, Value* namespaceuri) asm("_ZN4HPHP31f_dom_node_is_default_namespaceERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_node_is_default_namespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_node_is_default_namespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_node_is_default_namespace(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_node_is_default_namespace(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_node_is_default_namespace((rv), (args-0), &args[-1].m_data);
@@ -1870,7 +1870,7 @@ TypedValue * fg1_dom_node_is_default_namespace(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_dom_node_is_default_namespace(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_is_default_namespace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1912,8 +1912,8 @@ namespaceuri => rdx
 
 TypedValue* fh_dom_node_lookup_namespace_uri(TypedValue* _rv, TypedValue* obj, Value* namespaceuri) asm("_ZN4HPHP31f_dom_node_lookup_namespace_uriERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_node_lookup_namespace_uri(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_node_lookup_namespace_uri(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_node_lookup_namespace_uri(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_node_lookup_namespace_uri(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_node_lookup_namespace_uri((rv), (args-0), &args[-1].m_data);
@@ -1921,7 +1921,7 @@ TypedValue * fg1_dom_node_lookup_namespace_uri(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_dom_node_lookup_namespace_uri(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_node_lookup_namespace_uri(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1963,8 +1963,8 @@ index => rdx
 
 TypedValue* fh_dom_nodelist_item(TypedValue* _rv, TypedValue* obj, long index) asm("_ZN4HPHP19f_dom_nodelist_itemERKNS_7VariantEl");
 
-TypedValue * fg1_dom_nodelist_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_nodelist_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_nodelist_item(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_nodelist_item(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_dom_nodelist_item((rv), (args-0), (long)(args[-1].m_data.num));
@@ -1972,7 +1972,7 @@ TypedValue * fg1_dom_nodelist_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_dom_nodelist_item(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_nodelist_item(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2014,8 +2014,8 @@ name => rdx
 
 TypedValue* fh_dom_namednodemap_get_named_item(TypedValue* _rv, TypedValue* obj, Value* name) asm("_ZN4HPHP33f_dom_namednodemap_get_named_itemERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_namednodemap_get_named_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_namednodemap_get_named_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_namednodemap_get_named_item(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_namednodemap_get_named_item(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_namednodemap_get_named_item((rv), (args-0), &args[-1].m_data);
@@ -2023,7 +2023,7 @@ TypedValue * fg1_dom_namednodemap_get_named_item(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* fg_dom_namednodemap_get_named_item(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_namednodemap_get_named_item(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2065,8 +2065,8 @@ index => rdx
 
 TypedValue* fh_dom_namednodemap_item(TypedValue* _rv, TypedValue* obj, long index) asm("_ZN4HPHP23f_dom_namednodemap_itemERKNS_7VariantEl");
 
-TypedValue * fg1_dom_namednodemap_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_namednodemap_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_namednodemap_item(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_namednodemap_item(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_dom_namednodemap_item((rv), (args-0), (long)(args[-1].m_data.num));
@@ -2074,7 +2074,7 @@ TypedValue * fg1_dom_namednodemap_item(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_dom_namednodemap_item(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_namednodemap_item(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2117,8 +2117,8 @@ localname => rcx
 
 TypedValue* fh_dom_namednodemap_get_named_item_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* localname) asm("_ZN4HPHP36f_dom_namednodemap_get_named_item_nsERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_namednodemap_get_named_item_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_namednodemap_get_named_item_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_namednodemap_get_named_item_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_namednodemap_get_named_item_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -2131,7 +2131,7 @@ TypedValue * fg1_dom_namednodemap_get_named_item_ns(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* fg_dom_namednodemap_get_named_item_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_namednodemap_get_named_item_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2174,8 +2174,8 @@ count => rcx
 
 TypedValue* fh_dom_characterdata_substring_data(TypedValue* _rv, TypedValue* obj, long offset, long count) asm("_ZN4HPHP34f_dom_characterdata_substring_dataERKNS_7VariantEll");
 
-TypedValue * fg1_dom_characterdata_substring_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_characterdata_substring_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_characterdata_substring_data(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_characterdata_substring_data(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -2188,7 +2188,7 @@ TypedValue * fg1_dom_characterdata_substring_data(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* fg_dom_characterdata_substring_data(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_characterdata_substring_data(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2230,8 +2230,8 @@ arg => rdx
 
 TypedValue* fh_dom_characterdata_append_data(TypedValue* _rv, TypedValue* obj, Value* arg) asm("_ZN4HPHP31f_dom_characterdata_append_dataERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_characterdata_append_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_characterdata_append_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_characterdata_append_data(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_characterdata_append_data(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_characterdata_append_data((rv), (args-0), &args[-1].m_data);
@@ -2239,7 +2239,7 @@ TypedValue * fg1_dom_characterdata_append_data(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_dom_characterdata_append_data(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_characterdata_append_data(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2282,8 +2282,8 @@ data => rcx
 
 TypedValue* fh_dom_characterdata_insert_data(TypedValue* _rv, TypedValue* obj, long offset, Value* data) asm("_ZN4HPHP31f_dom_characterdata_insert_dataERKNS_7VariantElRKNS_6StringE");
 
-TypedValue * fg1_dom_characterdata_insert_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_characterdata_insert_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_characterdata_insert_data(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_characterdata_insert_data(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -2296,7 +2296,7 @@ TypedValue * fg1_dom_characterdata_insert_data(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_dom_characterdata_insert_data(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_characterdata_insert_data(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2339,8 +2339,8 @@ count => rcx
 
 TypedValue* fh_dom_characterdata_delete_data(TypedValue* _rv, TypedValue* obj, long offset, long count) asm("_ZN4HPHP31f_dom_characterdata_delete_dataERKNS_7VariantEll");
 
-TypedValue * fg1_dom_characterdata_delete_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_characterdata_delete_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_characterdata_delete_data(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_characterdata_delete_data(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfInt64) {
     tvCastToInt64InPlace(args-2);
@@ -2353,7 +2353,7 @@ TypedValue * fg1_dom_characterdata_delete_data(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_dom_characterdata_delete_data(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_characterdata_delete_data(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2397,8 +2397,8 @@ data => r8
 
 TypedValue* fh_dom_characterdata_replace_data(TypedValue* _rv, TypedValue* obj, long offset, long count, Value* data) asm("_ZN4HPHP32f_dom_characterdata_replace_dataERKNS_7VariantEllRKNS_6StringE");
 
-TypedValue * fg1_dom_characterdata_replace_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_characterdata_replace_data(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_characterdata_replace_data(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_characterdata_replace_data(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -2414,7 +2414,7 @@ TypedValue * fg1_dom_characterdata_replace_data(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* fg_dom_characterdata_replace_data(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_characterdata_replace_data(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2455,7 +2455,7 @@ obj => rsi
 
 TypedValue* fh_dom_attr_is_id(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP16f_dom_attr_is_idERKNS_7VariantE");
 
-TypedValue* fg_dom_attr_is_id(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_attr_is_id(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2490,8 +2490,8 @@ name => rdx
 
 TypedValue* fh_dom_element_get_attribute(TypedValue* _rv, TypedValue* obj, Value* name) asm("_ZN4HPHP27f_dom_element_get_attributeERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_element_get_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_get_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_get_attribute(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_get_attribute(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_element_get_attribute((rv), (args-0), &args[-1].m_data);
@@ -2499,7 +2499,7 @@ TypedValue * fg1_dom_element_get_attribute(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_dom_element_get_attribute(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_get_attribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2542,8 +2542,8 @@ value => rcx
 
 TypedValue* fh_dom_element_set_attribute(TypedValue* _rv, TypedValue* obj, Value* name, Value* value) asm("_ZN4HPHP27f_dom_element_set_attributeERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_element_set_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_set_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_set_attribute(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_set_attribute(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -2556,7 +2556,7 @@ TypedValue * fg1_dom_element_set_attribute(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_dom_element_set_attribute(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_set_attribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2598,8 +2598,8 @@ name => rdx
 
 TypedValue* fh_dom_element_remove_attribute(TypedValue* _rv, TypedValue* obj, Value* name) asm("_ZN4HPHP30f_dom_element_remove_attributeERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_element_remove_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_remove_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_remove_attribute(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_remove_attribute(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_element_remove_attribute((rv), (args-0), &args[-1].m_data);
@@ -2607,7 +2607,7 @@ TypedValue * fg1_dom_element_remove_attribute(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_dom_element_remove_attribute(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_remove_attribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2649,8 +2649,8 @@ name => rdx
 
 TypedValue* fh_dom_element_get_attribute_node(TypedValue* _rv, TypedValue* obj, Value* name) asm("_ZN4HPHP32f_dom_element_get_attribute_nodeERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_element_get_attribute_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_get_attribute_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_get_attribute_node(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_get_attribute_node(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_element_get_attribute_node((rv), (args-0), &args[-1].m_data);
@@ -2658,7 +2658,7 @@ TypedValue * fg1_dom_element_get_attribute_node(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* fg_dom_element_get_attribute_node(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_get_attribute_node(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2700,8 +2700,8 @@ newattr => rdx
 
 TypedValue* fh_dom_element_set_attribute_node(TypedValue* _rv, TypedValue* obj, Value* newattr) asm("_ZN4HPHP32f_dom_element_set_attribute_nodeERKNS_7VariantERKNS_6ObjectE");
 
-TypedValue * fg1_dom_element_set_attribute_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_set_attribute_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_set_attribute_node(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_set_attribute_node(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
   fh_dom_element_set_attribute_node((rv), (args-0), &args[-1].m_data);
@@ -2709,7 +2709,7 @@ TypedValue * fg1_dom_element_set_attribute_node(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* fg_dom_element_set_attribute_node(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_set_attribute_node(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2751,8 +2751,8 @@ oldattr => rdx
 
 TypedValue* fh_dom_element_remove_attribute_node(TypedValue* _rv, TypedValue* obj, Value* oldattr) asm("_ZN4HPHP35f_dom_element_remove_attribute_nodeERKNS_7VariantERKNS_6ObjectE");
 
-TypedValue * fg1_dom_element_remove_attribute_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_remove_attribute_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_remove_attribute_node(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_remove_attribute_node(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
   fh_dom_element_remove_attribute_node((rv), (args-0), &args[-1].m_data);
@@ -2760,7 +2760,7 @@ TypedValue * fg1_dom_element_remove_attribute_node(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* fg_dom_element_remove_attribute_node(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_remove_attribute_node(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2802,8 +2802,8 @@ name => rdx
 
 TypedValue* fh_dom_element_get_elements_by_tag_name(TypedValue* _rv, TypedValue* obj, Value* name) asm("_ZN4HPHP38f_dom_element_get_elements_by_tag_nameERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_element_get_elements_by_tag_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_get_elements_by_tag_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_get_elements_by_tag_name(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_get_elements_by_tag_name(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_element_get_elements_by_tag_name((rv), (args-0), &args[-1].m_data);
@@ -2811,7 +2811,7 @@ TypedValue * fg1_dom_element_get_elements_by_tag_name(TypedValue* rv, HPHP::VM::
   return rv;
 }
 
-TypedValue* fg_dom_element_get_elements_by_tag_name(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_get_elements_by_tag_name(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2854,8 +2854,8 @@ localname => rcx
 
 TypedValue* fh_dom_element_get_attribute_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* localname) asm("_ZN4HPHP30f_dom_element_get_attribute_nsERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_element_get_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_get_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_get_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_get_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -2868,7 +2868,7 @@ TypedValue * fg1_dom_element_get_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_dom_element_get_attribute_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_get_attribute_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2912,8 +2912,8 @@ value => r8
 
 TypedValue* fh_dom_element_set_attribute_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* name, Value* value) asm("_ZN4HPHP30f_dom_element_set_attribute_nsERKNS_7VariantERKNS_6StringES5_S5_");
 
-TypedValue * fg1_dom_element_set_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_set_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_set_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_set_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -2929,7 +2929,7 @@ TypedValue * fg1_dom_element_set_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_dom_element_set_attribute_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_set_attribute_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2972,8 +2972,8 @@ localname => rcx
 
 TypedValue* fh_dom_element_remove_attribute_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* localname) asm("_ZN4HPHP33f_dom_element_remove_attribute_nsERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_element_remove_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_remove_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_remove_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_remove_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -2986,7 +2986,7 @@ TypedValue * fg1_dom_element_remove_attribute_ns(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* fg_dom_element_remove_attribute_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_remove_attribute_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3029,8 +3029,8 @@ localname => rcx
 
 TypedValue* fh_dom_element_get_attribute_node_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* localname) asm("_ZN4HPHP35f_dom_element_get_attribute_node_nsERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_element_get_attribute_node_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_get_attribute_node_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_get_attribute_node_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_get_attribute_node_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -3043,7 +3043,7 @@ TypedValue * fg1_dom_element_get_attribute_node_ns(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* fg_dom_element_get_attribute_node_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_get_attribute_node_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3085,8 +3085,8 @@ newattr => rdx
 
 TypedValue* fh_dom_element_set_attribute_node_ns(TypedValue* _rv, TypedValue* obj, Value* newattr) asm("_ZN4HPHP35f_dom_element_set_attribute_node_nsERKNS_7VariantERKNS_6ObjectE");
 
-TypedValue * fg1_dom_element_set_attribute_node_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_set_attribute_node_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_set_attribute_node_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_set_attribute_node_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-1);
   fh_dom_element_set_attribute_node_ns((rv), (args-0), &args[-1].m_data);
@@ -3094,7 +3094,7 @@ TypedValue * fg1_dom_element_set_attribute_node_ns(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* fg_dom_element_set_attribute_node_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_set_attribute_node_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3137,8 +3137,8 @@ localname => rcx
 
 TypedValue* fh_dom_element_get_elements_by_tag_name_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* localname) asm("_ZN4HPHP41f_dom_element_get_elements_by_tag_name_nsERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_element_get_elements_by_tag_name_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_get_elements_by_tag_name_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_get_elements_by_tag_name_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_get_elements_by_tag_name_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -3151,7 +3151,7 @@ TypedValue * fg1_dom_element_get_elements_by_tag_name_ns(TypedValue* rv, HPHP::V
   return rv;
 }
 
-TypedValue* fg_dom_element_get_elements_by_tag_name_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_get_elements_by_tag_name_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3193,8 +3193,8 @@ name => rdx
 
 TypedValue* fh_dom_element_has_attribute(TypedValue* _rv, TypedValue* obj, Value* name) asm("_ZN4HPHP27f_dom_element_has_attributeERKNS_7VariantERKNS_6StringE");
 
-TypedValue * fg1_dom_element_has_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_has_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_has_attribute(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_has_attribute(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-1);
   fh_dom_element_has_attribute((rv), (args-0), &args[-1].m_data);
@@ -3202,7 +3202,7 @@ TypedValue * fg1_dom_element_has_attribute(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_dom_element_has_attribute(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_has_attribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3245,8 +3245,8 @@ localname => rcx
 
 TypedValue* fh_dom_element_has_attribute_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* localname) asm("_ZN4HPHP30f_dom_element_has_attribute_nsERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_element_has_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_has_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_has_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_has_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -3259,7 +3259,7 @@ TypedValue * fg1_dom_element_has_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_dom_element_has_attribute_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_has_attribute_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3302,8 +3302,8 @@ isid => rcx
 
 TypedValue* fh_dom_element_set_id_attribute(TypedValue* _rv, TypedValue* obj, Value* name, bool isid) asm("_ZN4HPHP30f_dom_element_set_id_attributeERKNS_7VariantERKNS_6StringEb");
 
-TypedValue * fg1_dom_element_set_id_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_set_id_attribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_set_id_attribute(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_set_id_attribute(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-2);
@@ -3316,7 +3316,7 @@ TypedValue * fg1_dom_element_set_id_attribute(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_dom_element_set_id_attribute(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_set_id_attribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3360,8 +3360,8 @@ isid => r8
 
 TypedValue* fh_dom_element_set_id_attribute_ns(TypedValue* _rv, TypedValue* obj, Value* namespaceuri, Value* localname, bool isid) asm("_ZN4HPHP33f_dom_element_set_id_attribute_nsERKNS_7VariantERKNS_6StringES5_b");
 
-TypedValue * fg1_dom_element_set_id_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_set_id_attribute_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_set_id_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_set_id_attribute_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-3)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-3);
@@ -3377,7 +3377,7 @@ TypedValue * fg1_dom_element_set_id_attribute_ns(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* fg_dom_element_set_id_attribute_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_set_id_attribute_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3420,8 +3420,8 @@ isid => rcx
 
 TypedValue* fh_dom_element_set_id_attribute_node(TypedValue* _rv, TypedValue* obj, Value* idattr, bool isid) asm("_ZN4HPHP35f_dom_element_set_id_attribute_nodeERKNS_7VariantERKNS_6ObjectEb");
 
-TypedValue * fg1_dom_element_set_id_attribute_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_element_set_id_attribute_node(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_element_set_id_attribute_node(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_element_set_id_attribute_node(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-2);
@@ -3434,7 +3434,7 @@ TypedValue * fg1_dom_element_set_id_attribute_node(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* fg_dom_element_set_id_attribute_node(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_element_set_id_attribute_node(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3476,8 +3476,8 @@ offset => rdx
 
 TypedValue* fh_dom_text_split_text(TypedValue* _rv, TypedValue* obj, long offset) asm("_ZN4HPHP21f_dom_text_split_textERKNS_7VariantEl");
 
-TypedValue * fg1_dom_text_split_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_text_split_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_text_split_text(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_text_split_text(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-1);
   fh_dom_text_split_text((rv), (args-0), (long)(args[-1].m_data.num));
@@ -3485,7 +3485,7 @@ TypedValue * fg1_dom_text_split_text(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_dom_text_split_text(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_text_split_text(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3526,7 +3526,7 @@ obj => rsi
 
 TypedValue* fh_dom_text_is_whitespace_in_element_content(TypedValue* _rv, TypedValue* obj) asm("_ZN4HPHP43f_dom_text_is_whitespace_in_element_contentERKNS_7VariantE");
 
-TypedValue* fg_dom_text_is_whitespace_in_element_content(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_text_is_whitespace_in_element_content(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3562,8 +3562,8 @@ uri => rcx
 
 TypedValue* fh_dom_xpath_register_ns(TypedValue* _rv, TypedValue* obj, Value* prefix, Value* uri) asm("_ZN4HPHP23f_dom_xpath_register_nsERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_dom_xpath_register_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_xpath_register_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_xpath_register_ns(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_xpath_register_ns(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -3576,7 +3576,7 @@ TypedValue * fg1_dom_xpath_register_ns(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_dom_xpath_register_ns(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_xpath_register_ns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3619,8 +3619,8 @@ context => rcx
 
 TypedValue* fh_dom_xpath_query(TypedValue* _rv, TypedValue* obj, Value* expr, Value* context) asm("_ZN4HPHP17f_dom_xpath_queryERKNS_7VariantERKNS_6StringERKNS_6ObjectE");
 
-TypedValue * fg1_dom_xpath_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_xpath_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_xpath_query(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_xpath_query(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -3638,7 +3638,7 @@ TypedValue * fg1_dom_xpath_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_dom_xpath_query(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_xpath_query(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3681,8 +3681,8 @@ context => rcx
 
 TypedValue* fh_dom_xpath_evaluate(TypedValue* _rv, TypedValue* obj, Value* expr, Value* context) asm("_ZN4HPHP20f_dom_xpath_evaluateERKNS_7VariantERKNS_6StringERKNS_6ObjectE");
 
-TypedValue * fg1_dom_xpath_evaluate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_dom_xpath_evaluate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_dom_xpath_evaluate(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_dom_xpath_evaluate(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -3700,7 +3700,7 @@ TypedValue * fg1_dom_xpath_evaluate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_dom_xpath_evaluate(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_xpath_evaluate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3742,7 +3742,7 @@ funcs => rdx
 
 TypedValue* fh_dom_xpath_register_php_functions(TypedValue* _rv, TypedValue* obj, TypedValue* funcs) asm("_ZN4HPHP34f_dom_xpath_register_php_functionsERKNS_7VariantES2_");
 
-TypedValue* fg_dom_xpath_register_php_functions(HPHP::VM::ActRec *ar) {
+TypedValue* fg_dom_xpath_register_php_functions(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3785,7 +3785,7 @@ this_ => rdi
 
 void th_7DOMNode___construct(ObjectData* this_) asm("_ZN4HPHP9c_DOMNode13t___constructEv");
 
-TypedValue* tg_7DOMNode___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3824,8 +3824,8 @@ newnode => rdx
 
 TypedValue* th_7DOMNode_appendChild(TypedValue* _rv, ObjectData* this_, Value* newnode) asm("_ZN4HPHP9c_DOMNode13t_appendchildERKNS_6ObjectE");
 
-TypedValue* tg1_7DOMNode_appendChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_appendChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_appendChild(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_appendChild(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   th_7DOMNode_appendChild((rv), (this_), &args[-0].m_data);
@@ -3833,7 +3833,7 @@ TypedValue* tg1_7DOMNode_appendChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_7DOMNode_appendChild(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_appendChild(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3878,8 +3878,8 @@ deep => rdx
 
 TypedValue* th_7DOMNode_cloneNode(TypedValue* _rv, ObjectData* this_, bool deep) asm("_ZN4HPHP9c_DOMNode11t_clonenodeEb");
 
-TypedValue* tg1_7DOMNode_cloneNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_cloneNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_cloneNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_cloneNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToBooleanInPlace(args-0);
   th_7DOMNode_cloneNode((rv), (this_), (count > 0) ? (bool)(args[-0].m_data.num) : (bool)(false));
@@ -3887,7 +3887,7 @@ TypedValue* tg1_7DOMNode_cloneNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* tg_7DOMNode_cloneNode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_cloneNode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3930,7 +3930,7 @@ this_ => rdi
 
 long th_7DOMNode_getLineNo(ObjectData* this_) asm("_ZN4HPHP9c_DOMNode11t_getlinenoEv");
 
-TypedValue* tg_7DOMNode_getLineNo(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_getLineNo(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -3966,7 +3966,7 @@ this_ => rdi
 
 bool th_7DOMNode_hasAttributes(ObjectData* this_) asm("_ZN4HPHP9c_DOMNode15t_hasattributesEv");
 
-TypedValue* tg_7DOMNode_hasAttributes(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_hasAttributes(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4002,7 +4002,7 @@ this_ => rdi
 
 bool th_7DOMNode_hasChildNodes(ObjectData* this_) asm("_ZN4HPHP9c_DOMNode15t_haschildnodesEv");
 
-TypedValue* tg_7DOMNode_hasChildNodes(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_hasChildNodes(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4041,8 +4041,8 @@ refnode => rcx
 
 TypedValue* th_7DOMNode_insertBefore(TypedValue* _rv, ObjectData* this_, Value* newnode, Value* refnode) asm("_ZN4HPHP9c_DOMNode14t_insertbeforeERKNS_6ObjectES3_");
 
-TypedValue* tg1_7DOMNode_insertBefore(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_insertBefore(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_insertBefore(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_insertBefore(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -4061,7 +4061,7 @@ TypedValue* tg1_7DOMNode_insertBefore(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_7DOMNode_insertBefore(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_insertBefore(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4106,8 +4106,8 @@ namespaceuri => rsi
 
 bool th_7DOMNode_isDefaultNamespace(ObjectData* this_, Value* namespaceuri) asm("_ZN4HPHP9c_DOMNode20t_isdefaultnamespaceERKNS_6StringE");
 
-TypedValue* tg1_7DOMNode_isDefaultNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_isDefaultNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_isDefaultNamespace(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_isDefaultNamespace(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -4115,7 +4115,7 @@ TypedValue* tg1_7DOMNode_isDefaultNamespace(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_7DOMNode_isDefaultNamespace(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_isDefaultNamespace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4159,8 +4159,8 @@ node => rsi
 
 bool th_7DOMNode_isSameNode(ObjectData* this_, Value* node) asm("_ZN4HPHP9c_DOMNode12t_issamenodeERKNS_6ObjectE");
 
-TypedValue* tg1_7DOMNode_isSameNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_isSameNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_isSameNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_isSameNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -4168,7 +4168,7 @@ TypedValue* tg1_7DOMNode_isSameNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* tg_7DOMNode_isSameNode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_isSameNode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4213,8 +4213,8 @@ version => rdx
 
 bool th_7DOMNode_isSupported(ObjectData* this_, Value* feature, Value* version) asm("_ZN4HPHP9c_DOMNode13t_issupportedERKNS_6StringES3_");
 
-TypedValue* tg1_7DOMNode_isSupported(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_isSupported(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_isSupported(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_isSupported(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -4227,7 +4227,7 @@ TypedValue* tg1_7DOMNode_isSupported(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_7DOMNode_isSupported(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_isSupported(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4272,8 +4272,8 @@ namespaceuri => rdx
 
 TypedValue* th_7DOMNode_lookupNamespaceUri(TypedValue* _rv, ObjectData* this_, Value* namespaceuri) asm("_ZN4HPHP9c_DOMNode20t_lookupnamespaceuriERKNS_6StringE");
 
-TypedValue* tg1_7DOMNode_lookupNamespaceUri(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_lookupNamespaceUri(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_lookupNamespaceUri(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_lookupNamespaceUri(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_7DOMNode_lookupNamespaceUri((rv), (this_), &args[-0].m_data);
@@ -4281,7 +4281,7 @@ TypedValue* tg1_7DOMNode_lookupNamespaceUri(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_7DOMNode_lookupNamespaceUri(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_lookupNamespaceUri(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4326,8 +4326,8 @@ prefix => rdx
 
 TypedValue* th_7DOMNode_lookupPrefix(TypedValue* _rv, ObjectData* this_, Value* prefix) asm("_ZN4HPHP9c_DOMNode14t_lookupprefixERKNS_6StringE");
 
-TypedValue* tg1_7DOMNode_lookupPrefix(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_lookupPrefix(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_lookupPrefix(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_lookupPrefix(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_7DOMNode_lookupPrefix((rv), (this_), &args[-0].m_data);
@@ -4335,7 +4335,7 @@ TypedValue* tg1_7DOMNode_lookupPrefix(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_7DOMNode_lookupPrefix(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_lookupPrefix(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4377,7 +4377,7 @@ this_ => rdi
 
 void th_7DOMNode_normalize(ObjectData* this_) asm("_ZN4HPHP9c_DOMNode11t_normalizeEv");
 
-TypedValue* tg_7DOMNode_normalize(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_normalize(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4416,8 +4416,8 @@ node => rdx
 
 TypedValue* th_7DOMNode_removeChild(TypedValue* _rv, ObjectData* this_, Value* node) asm("_ZN4HPHP9c_DOMNode13t_removechildERKNS_6ObjectE");
 
-TypedValue* tg1_7DOMNode_removeChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_removeChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_removeChild(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_removeChild(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   th_7DOMNode_removeChild((rv), (this_), &args[-0].m_data);
@@ -4425,7 +4425,7 @@ TypedValue* tg1_7DOMNode_removeChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_7DOMNode_removeChild(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_removeChild(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4471,8 +4471,8 @@ oldchildobj => rcx
 
 TypedValue* th_7DOMNode_replaceChild(TypedValue* _rv, ObjectData* this_, Value* newchildobj, Value* oldchildobj) asm("_ZN4HPHP9c_DOMNode14t_replacechildERKNS_6ObjectES3_");
 
-TypedValue* tg1_7DOMNode_replaceChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_replaceChild(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_replaceChild(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_replaceChild(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfObject) {
     tvCastToObjectInPlace(args-1);
@@ -4485,7 +4485,7 @@ TypedValue* tg1_7DOMNode_replaceChild(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_7DOMNode_replaceChild(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_replaceChild(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4533,8 +4533,8 @@ ns_prefixes => r9
 
 TypedValue* th_7DOMNode_c14n(TypedValue* _rv, ObjectData* this_, bool exclusive, bool with_comments, TypedValue* xpath, TypedValue* ns_prefixes) asm("_ZN4HPHP9c_DOMNode6t_c14nEbbRKNS_7VariantES3_");
 
-TypedValue* tg1_7DOMNode_c14n(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_c14n(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_c14n(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_c14n(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -4557,7 +4557,7 @@ TypedValue* tg1_7DOMNode_c14n(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* tg_7DOMNode_c14n(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_c14n(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4608,8 +4608,8 @@ ns_prefixes => st0
 
 TypedValue* th_7DOMNode_c14nfile(TypedValue* _rv, ObjectData* this_, Value* uri, bool exclusive, bool with_comments, TypedValue* xpath, TypedValue* ns_prefixes) asm("_ZN4HPHP9c_DOMNode10t_c14nfileERKNS_6StringEbbRKNS_7VariantES6_");
 
-TypedValue* tg1_7DOMNode_c14nfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMNode_c14nfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMNode_c14nfile(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMNode_c14nfile(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -4635,7 +4635,7 @@ TypedValue* tg1_7DOMNode_c14nfile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* tg_7DOMNode_c14nfile(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_c14nfile(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4681,7 +4681,7 @@ this_ => rsi
 
 TypedValue* th_7DOMNode_getNodePath(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP9c_DOMNode13t_getnodepathEv");
 
-TypedValue* tg_7DOMNode_getNodePath(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode_getNodePath(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4719,7 +4719,7 @@ name => rdx
 
 TypedValue* th_7DOMNode___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP9c_DOMNode7t___getENS_7VariantE");
 
-TypedValue* tg_7DOMNode___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4758,7 +4758,7 @@ value => rcx
 
 TypedValue* th_7DOMNode___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP9c_DOMNode7t___setENS_7VariantES1_");
 
-TypedValue* tg_7DOMNode___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4795,7 +4795,7 @@ name => rsi
 
 bool th_7DOMNode___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP9c_DOMNode9t___issetENS_7VariantE");
 
-TypedValue* tg_7DOMNode___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMNode___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4842,8 +4842,8 @@ value => rdx
 
 void th_7DOMAttr___construct(ObjectData* this_, Value* name, Value* value) asm("_ZN4HPHP9c_DOMAttr13t___constructERKNS_6StringES3_");
 
-TypedValue* tg1_7DOMAttr___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMAttr___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMAttr___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMAttr___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -4862,7 +4862,7 @@ TypedValue* tg1_7DOMAttr___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_7DOMAttr___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMAttr___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4906,7 +4906,7 @@ this_ => rdi
 
 bool th_7DOMAttr_isId(ObjectData* this_) asm("_ZN4HPHP9c_DOMAttr6t_isidEv");
 
-TypedValue* tg_7DOMAttr_isId(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMAttr_isId(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4944,7 +4944,7 @@ name => rdx
 
 TypedValue* th_7DOMAttr___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP9c_DOMAttr7t___getENS_7VariantE");
 
-TypedValue* tg_7DOMAttr___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMAttr___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -4983,7 +4983,7 @@ value => rcx
 
 TypedValue* th_7DOMAttr___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP9c_DOMAttr7t___setENS_7VariantES1_");
 
-TypedValue* tg_7DOMAttr___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMAttr___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5020,7 +5020,7 @@ name => rsi
 
 bool th_7DOMAttr___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP9c_DOMAttr9t___issetENS_7VariantE");
 
-TypedValue* tg_7DOMAttr___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMAttr___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5065,7 +5065,7 @@ this_ => rdi
 
 void th_16DOMCharacterData___construct(ObjectData* this_) asm("_ZN4HPHP18c_DOMCharacterData13t___constructEv");
 
-TypedValue* tg_16DOMCharacterData___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16DOMCharacterData___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5103,8 +5103,8 @@ arg => rsi
 
 bool th_16DOMCharacterData_appendData(ObjectData* this_, Value* arg) asm("_ZN4HPHP18c_DOMCharacterData12t_appenddataERKNS_6StringE");
 
-TypedValue* tg1_16DOMCharacterData_appendData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16DOMCharacterData_appendData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16DOMCharacterData_appendData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16DOMCharacterData_appendData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -5112,7 +5112,7 @@ TypedValue* tg1_16DOMCharacterData_appendData(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_16DOMCharacterData_appendData(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16DOMCharacterData_appendData(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5157,8 +5157,8 @@ count => rdx
 
 bool th_16DOMCharacterData_deleteData(ObjectData* this_, long offset, long count) asm("_ZN4HPHP18c_DOMCharacterData12t_deletedataEll");
 
-TypedValue* tg1_16DOMCharacterData_deleteData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16DOMCharacterData_deleteData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16DOMCharacterData_deleteData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16DOMCharacterData_deleteData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-1)->m_type != KindOfInt64) {
@@ -5171,7 +5171,7 @@ TypedValue* tg1_16DOMCharacterData_deleteData(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_16DOMCharacterData_deleteData(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16DOMCharacterData_deleteData(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5216,8 +5216,8 @@ data => rdx
 
 bool th_16DOMCharacterData_insertData(ObjectData* this_, long offset, Value* data) asm("_ZN4HPHP18c_DOMCharacterData12t_insertdataElRKNS_6StringE");
 
-TypedValue* tg1_16DOMCharacterData_insertData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16DOMCharacterData_insertData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16DOMCharacterData_insertData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16DOMCharacterData_insertData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -5230,7 +5230,7 @@ TypedValue* tg1_16DOMCharacterData_insertData(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_16DOMCharacterData_insertData(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16DOMCharacterData_insertData(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5276,8 +5276,8 @@ data => rcx
 
 bool th_16DOMCharacterData_replaceData(ObjectData* this_, long offset, long count, Value* data) asm("_ZN4HPHP18c_DOMCharacterData13t_replacedataEllRKNS_6StringE");
 
-TypedValue* tg1_16DOMCharacterData_replaceData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16DOMCharacterData_replaceData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16DOMCharacterData_replaceData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16DOMCharacterData_replaceData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -5293,7 +5293,7 @@ TypedValue* tg1_16DOMCharacterData_replaceData(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* tg_16DOMCharacterData_replaceData(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16DOMCharacterData_replaceData(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5339,8 +5339,8 @@ count => rcx
 
 Value* th_16DOMCharacterData_substringData(Value* _rv, ObjectData* this_, long offset, long count) asm("_ZN4HPHP18c_DOMCharacterData15t_substringdataEll");
 
-TypedValue* tg1_16DOMCharacterData_substringData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_16DOMCharacterData_substringData(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_16DOMCharacterData_substringData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_16DOMCharacterData_substringData(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   if ((args-1)->m_type != KindOfInt64) {
@@ -5354,7 +5354,7 @@ TypedValue* tg1_16DOMCharacterData_substringData(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* tg_16DOMCharacterData_substringData(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16DOMCharacterData_substringData(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5400,7 +5400,7 @@ name => rdx
 
 TypedValue* th_16DOMCharacterData___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP18c_DOMCharacterData7t___getENS_7VariantE");
 
-TypedValue* tg_16DOMCharacterData___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16DOMCharacterData___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5439,7 +5439,7 @@ value => rcx
 
 TypedValue* th_16DOMCharacterData___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP18c_DOMCharacterData7t___setENS_7VariantES1_");
 
-TypedValue* tg_16DOMCharacterData___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16DOMCharacterData___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5476,7 +5476,7 @@ name => rsi
 
 bool th_16DOMCharacterData___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP18c_DOMCharacterData9t___issetENS_7VariantE");
 
-TypedValue* tg_16DOMCharacterData___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_16DOMCharacterData___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5522,8 +5522,8 @@ value => rsi
 
 void th_10DOMComment___construct(ObjectData* this_, Value* value) asm("_ZN4HPHP12c_DOMComment13t___constructERKNS_6StringE");
 
-TypedValue* tg1_10DOMComment___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMComment___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMComment___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMComment___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -5532,7 +5532,7 @@ TypedValue* tg1_10DOMComment___construct(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* tg_10DOMComment___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMComment___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5586,8 +5586,8 @@ value => rsi
 
 void th_7DOMText___construct(ObjectData* this_, Value* value) asm("_ZN4HPHP9c_DOMText13t___constructERKNS_6StringE");
 
-TypedValue* tg1_7DOMText___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMText___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMText___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMText___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -5596,7 +5596,7 @@ TypedValue* tg1_7DOMText___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_7DOMText___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMText___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5640,7 +5640,7 @@ this_ => rdi
 
 bool th_7DOMText_isWhitespaceInElementContent(ObjectData* this_) asm("_ZN4HPHP9c_DOMText30t_iswhitespaceinelementcontentEv");
 
-TypedValue* tg_7DOMText_isWhitespaceInElementContent(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMText_isWhitespaceInElementContent(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5678,8 +5678,8 @@ offset => rdx
 
 TypedValue* th_7DOMText_splitText(TypedValue* _rv, ObjectData* this_, long offset) asm("_ZN4HPHP9c_DOMText11t_splittextEl");
 
-TypedValue* tg1_7DOMText_splitText(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7DOMText_splitText(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7DOMText_splitText(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7DOMText_splitText(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   th_7DOMText_splitText((rv), (this_), (long)(args[-0].m_data.num));
@@ -5687,7 +5687,7 @@ TypedValue* tg1_7DOMText_splitText(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* tg_7DOMText_splitText(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMText_splitText(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5732,7 +5732,7 @@ name => rdx
 
 TypedValue* th_7DOMText___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP9c_DOMText7t___getENS_7VariantE");
 
-TypedValue* tg_7DOMText___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMText___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5771,7 +5771,7 @@ value => rcx
 
 TypedValue* th_7DOMText___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP9c_DOMText7t___setENS_7VariantES1_");
 
-TypedValue* tg_7DOMText___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMText___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5808,7 +5808,7 @@ name => rsi
 
 bool th_7DOMText___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP9c_DOMText9t___issetENS_7VariantE");
 
-TypedValue* tg_7DOMText___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7DOMText___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5854,8 +5854,8 @@ value => rsi
 
 void th_15DOMCDATASection___construct(ObjectData* this_, Value* value) asm("_ZN4HPHP17c_DOMCDATASection13t___constructERKNS_6StringE");
 
-TypedValue* tg1_15DOMCDATASection___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_15DOMCDATASection___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_15DOMCDATASection___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_15DOMCDATASection___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -5864,7 +5864,7 @@ TypedValue* tg1_15DOMCDATASection___construct(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_15DOMCDATASection___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMCDATASection___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5919,8 +5919,8 @@ encoding => rdx
 
 void th_11DOMDocument___construct(ObjectData* this_, Value* version, Value* encoding) asm("_ZN4HPHP13c_DOMDocument13t___constructERKNS_6StringES3_");
 
-TypedValue* tg1_11DOMDocument___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -5940,7 +5940,7 @@ TypedValue* tg1_11DOMDocument___construct(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_11DOMDocument___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -5986,8 +5986,8 @@ name => rdx
 
 TypedValue* th_11DOMDocument_createAttribute(TypedValue* _rv, ObjectData* this_, Value* name) asm("_ZN4HPHP13c_DOMDocument17t_createattributeERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_createAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_createAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_createAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_createAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_11DOMDocument_createAttribute((rv), (this_), &args[-0].m_data);
@@ -5995,7 +5995,7 @@ TypedValue* tg1_11DOMDocument_createAttribute(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_createAttribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_createAttribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6041,8 +6041,8 @@ qualifiedname => rcx
 
 TypedValue* th_11DOMDocument_createAttributens(TypedValue* _rv, ObjectData* this_, Value* namespaceuri, Value* qualifiedname) asm("_ZN4HPHP13c_DOMDocument19t_createattributensERKNS_6StringES3_");
 
-TypedValue* tg1_11DOMDocument_createAttributens(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_createAttributens(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_createAttributens(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_createAttributens(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -6055,7 +6055,7 @@ TypedValue* tg1_11DOMDocument_createAttributens(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_createAttributens(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_createAttributens(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6100,8 +6100,8 @@ data => rdx
 
 TypedValue* th_11DOMDocument_createCDATASection(TypedValue* _rv, ObjectData* this_, Value* data) asm("_ZN4HPHP13c_DOMDocument20t_createcdatasectionERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_createCDATASection(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_createCDATASection(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_createCDATASection(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_createCDATASection(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_11DOMDocument_createCDATASection((rv), (this_), &args[-0].m_data);
@@ -6109,7 +6109,7 @@ TypedValue* tg1_11DOMDocument_createCDATASection(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_createCDATASection(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_createCDATASection(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6154,8 +6154,8 @@ data => rdx
 
 TypedValue* th_11DOMDocument_createComment(TypedValue* _rv, ObjectData* this_, Value* data) asm("_ZN4HPHP13c_DOMDocument15t_createcommentERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_createComment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_createComment(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_createComment(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_createComment(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_11DOMDocument_createComment((rv), (this_), &args[-0].m_data);
@@ -6163,7 +6163,7 @@ TypedValue* tg1_11DOMDocument_createComment(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_createComment(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_createComment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6207,7 +6207,7 @@ this_ => rsi
 
 TypedValue* th_11DOMDocument_createDocumentFragment(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_DOMDocument24t_createdocumentfragmentEv");
 
-TypedValue* tg_11DOMDocument_createDocumentFragment(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_createDocumentFragment(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6246,8 +6246,8 @@ value => rcx
 
 TypedValue* th_11DOMDocument_createElement(TypedValue* _rv, ObjectData* this_, Value* name, Value* value) asm("_ZN4HPHP13c_DOMDocument15t_createelementERKNS_6StringES3_");
 
-TypedValue* tg1_11DOMDocument_createElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_createElement(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_createElement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_createElement(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -6265,7 +6265,7 @@ TypedValue* tg1_11DOMDocument_createElement(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_createElement(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_createElement(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6312,8 +6312,8 @@ value => r8
 
 TypedValue* th_11DOMDocument_createElementNS(TypedValue* _rv, ObjectData* this_, Value* namespaceuri, Value* qualifiedname, Value* value) asm("_ZN4HPHP13c_DOMDocument17t_createelementnsERKNS_6StringES3_S3_");
 
-TypedValue* tg1_11DOMDocument_createElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_createElementNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_createElementNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_createElementNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -6334,7 +6334,7 @@ TypedValue* tg1_11DOMDocument_createElementNS(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_createElementNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_createElementNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6379,8 +6379,8 @@ name => rdx
 
 TypedValue* th_11DOMDocument_createEntityReference(TypedValue* _rv, ObjectData* this_, Value* name) asm("_ZN4HPHP13c_DOMDocument23t_createentityreferenceERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_createEntityReference(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_createEntityReference(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_createEntityReference(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_createEntityReference(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_11DOMDocument_createEntityReference((rv), (this_), &args[-0].m_data);
@@ -6388,7 +6388,7 @@ TypedValue* tg1_11DOMDocument_createEntityReference(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_createEntityReference(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_createEntityReference(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6434,8 +6434,8 @@ data => rcx
 
 TypedValue* th_11DOMDocument_createProcessingInstruction(TypedValue* _rv, ObjectData* this_, Value* target, Value* data) asm("_ZN4HPHP13c_DOMDocument29t_createprocessinginstructionERKNS_6StringES3_");
 
-TypedValue* tg1_11DOMDocument_createProcessingInstruction(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_createProcessingInstruction(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_createProcessingInstruction(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_createProcessingInstruction(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -6453,7 +6453,7 @@ TypedValue* tg1_11DOMDocument_createProcessingInstruction(TypedValue* rv, HPHP::
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_createProcessingInstruction(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_createProcessingInstruction(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6498,8 +6498,8 @@ data => rdx
 
 TypedValue* th_11DOMDocument_createTextNode(TypedValue* _rv, ObjectData* this_, Value* data) asm("_ZN4HPHP13c_DOMDocument16t_createtextnodeERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_createTextNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_createTextNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_createTextNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_createTextNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_11DOMDocument_createTextNode((rv), (this_), &args[-0].m_data);
@@ -6507,7 +6507,7 @@ TypedValue* tg1_11DOMDocument_createTextNode(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_createTextNode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_createTextNode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6552,8 +6552,8 @@ elementid => rdx
 
 TypedValue* th_11DOMDocument_getElementById(TypedValue* _rv, ObjectData* this_, Value* elementid) asm("_ZN4HPHP13c_DOMDocument16t_getelementbyidERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_getElementById(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_getElementById(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_getElementById(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_getElementById(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_11DOMDocument_getElementById((rv), (this_), &args[-0].m_data);
@@ -6561,7 +6561,7 @@ TypedValue* tg1_11DOMDocument_getElementById(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_getElementById(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_getElementById(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6606,8 +6606,8 @@ name => rdx
 
 TypedValue* th_11DOMDocument_getElementsByTagName(TypedValue* _rv, ObjectData* this_, Value* name) asm("_ZN4HPHP13c_DOMDocument22t_getelementsbytagnameERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_getElementsByTagName(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_getElementsByTagName(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_getElementsByTagName(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_getElementsByTagName(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_11DOMDocument_getElementsByTagName((rv), (this_), &args[-0].m_data);
@@ -6615,7 +6615,7 @@ TypedValue* tg1_11DOMDocument_getElementsByTagName(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_getElementsByTagName(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_getElementsByTagName(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6661,8 +6661,8 @@ localname => rcx
 
 TypedValue* th_11DOMDocument_getElementsByTagNameNS(TypedValue* _rv, ObjectData* this_, Value* namespaceuri, Value* localname) asm("_ZN4HPHP13c_DOMDocument24t_getelementsbytagnamensERKNS_6StringES3_");
 
-TypedValue* tg1_11DOMDocument_getElementsByTagNameNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_getElementsByTagNameNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_getElementsByTagNameNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_getElementsByTagNameNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -6675,7 +6675,7 @@ TypedValue* tg1_11DOMDocument_getElementsByTagNameNS(TypedValue* rv, HPHP::VM::A
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_getElementsByTagNameNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_getElementsByTagNameNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6721,8 +6721,8 @@ deep => rcx
 
 TypedValue* th_11DOMDocument_importNode(TypedValue* _rv, ObjectData* this_, Value* importednode, bool deep) asm("_ZN4HPHP13c_DOMDocument12t_importnodeERKNS_6ObjectEb");
 
-TypedValue* tg1_11DOMDocument_importNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_importNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_importNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_importNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -6740,7 +6740,7 @@ TypedValue* tg1_11DOMDocument_importNode(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_importNode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_importNode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6786,8 +6786,8 @@ options => rcx
 
 TypedValue* th_11DOMDocument_load(TypedValue* _rv, ObjectData* this_, Value* filename, long options) asm("_ZN4HPHP13c_DOMDocument6t_loadERKNS_6StringEl");
 
-TypedValue* tg1_11DOMDocument_load(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_load(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_load(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_load(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -6805,7 +6805,7 @@ TypedValue* tg1_11DOMDocument_load(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_load(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_load(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6850,8 +6850,8 @@ source => rdx
 
 TypedValue* th_11DOMDocument_loadHTML(TypedValue* _rv, ObjectData* this_, Value* source) asm("_ZN4HPHP13c_DOMDocument10t_loadhtmlERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_loadHTML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_loadHTML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_loadHTML(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_loadHTML(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_11DOMDocument_loadHTML((rv), (this_), &args[-0].m_data);
@@ -6859,7 +6859,7 @@ TypedValue* tg1_11DOMDocument_loadHTML(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_loadHTML(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_loadHTML(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6904,8 +6904,8 @@ filename => rdx
 
 TypedValue* th_11DOMDocument_loadHTMLFile(TypedValue* _rv, ObjectData* this_, Value* filename) asm("_ZN4HPHP13c_DOMDocument14t_loadhtmlfileERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_loadHTMLFile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_loadHTMLFile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_loadHTMLFile(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_loadHTMLFile(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_11DOMDocument_loadHTMLFile((rv), (this_), &args[-0].m_data);
@@ -6913,7 +6913,7 @@ TypedValue* tg1_11DOMDocument_loadHTMLFile(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_loadHTMLFile(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_loadHTMLFile(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -6959,8 +6959,8 @@ options => rcx
 
 TypedValue* th_11DOMDocument_loadXML(TypedValue* _rv, ObjectData* this_, Value* source, long options) asm("_ZN4HPHP13c_DOMDocument9t_loadxmlERKNS_6StringEl");
 
-TypedValue* tg1_11DOMDocument_loadXML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_loadXML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_loadXML(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_loadXML(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -6978,7 +6978,7 @@ TypedValue* tg1_11DOMDocument_loadXML(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_loadXML(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_loadXML(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7020,7 +7020,7 @@ this_ => rdi
 
 void th_11DOMDocument_normalizeDocument(ObjectData* this_) asm("_ZN4HPHP13c_DOMDocument19t_normalizedocumentEv");
 
-TypedValue* tg_11DOMDocument_normalizeDocument(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_normalizeDocument(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7059,8 +7059,8 @@ extendedclass => rdx
 
 bool th_11DOMDocument_registerNodeClass(ObjectData* this_, Value* baseclass, Value* extendedclass) asm("_ZN4HPHP13c_DOMDocument19t_registernodeclassERKNS_6StringES3_");
 
-TypedValue* tg1_11DOMDocument_registerNodeClass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_registerNodeClass(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_registerNodeClass(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_registerNodeClass(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -7073,7 +7073,7 @@ TypedValue* tg1_11DOMDocument_registerNodeClass(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_registerNodeClass(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_registerNodeClass(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7117,8 +7117,8 @@ filename => rsi
 
 bool th_11DOMDocument_relaxNGValidate(ObjectData* this_, Value* filename) asm("_ZN4HPHP13c_DOMDocument17t_relaxngvalidateERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_relaxNGValidate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_relaxNGValidate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_relaxNGValidate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_relaxNGValidate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -7126,7 +7126,7 @@ TypedValue* tg1_11DOMDocument_relaxNGValidate(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_relaxNGValidate(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_relaxNGValidate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7170,8 +7170,8 @@ source => rsi
 
 bool th_11DOMDocument_relaxNGValidateSource(ObjectData* this_, Value* source) asm("_ZN4HPHP13c_DOMDocument23t_relaxngvalidatesourceERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_relaxNGValidateSource(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_relaxNGValidateSource(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_relaxNGValidateSource(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_relaxNGValidateSource(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -7179,7 +7179,7 @@ TypedValue* tg1_11DOMDocument_relaxNGValidateSource(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_relaxNGValidateSource(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_relaxNGValidateSource(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7225,8 +7225,8 @@ options => rcx
 
 TypedValue* th_11DOMDocument_save(TypedValue* _rv, ObjectData* this_, Value* file, long options) asm("_ZN4HPHP13c_DOMDocument6t_saveERKNS_6StringEl");
 
-TypedValue* tg1_11DOMDocument_save(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_save(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_save(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_save(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -7244,7 +7244,7 @@ TypedValue* tg1_11DOMDocument_save(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_save(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_save(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7288,7 +7288,7 @@ this_ => rsi
 
 TypedValue* th_11DOMDocument_saveHTML(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_DOMDocument10t_savehtmlEv");
 
-TypedValue* tg_11DOMDocument_saveHTML(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_saveHTML(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7326,8 +7326,8 @@ file => rdx
 
 TypedValue* th_11DOMDocument_saveHTMLFile(TypedValue* _rv, ObjectData* this_, Value* file) asm("_ZN4HPHP13c_DOMDocument14t_savehtmlfileERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_saveHTMLFile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_saveHTMLFile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_saveHTMLFile(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_saveHTMLFile(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_11DOMDocument_saveHTMLFile((rv), (this_), &args[-0].m_data);
@@ -7335,7 +7335,7 @@ TypedValue* tg1_11DOMDocument_saveHTMLFile(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_saveHTMLFile(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_saveHTMLFile(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7381,8 +7381,8 @@ options => rcx
 
 TypedValue* th_11DOMDocument_saveXML(TypedValue* _rv, ObjectData* this_, Value* node, long options) asm("_ZN4HPHP13c_DOMDocument9t_savexmlERKNS_6ObjectEl");
 
-TypedValue* tg1_11DOMDocument_saveXML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_saveXML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_saveXML(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_saveXML(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -7401,7 +7401,7 @@ TypedValue* tg1_11DOMDocument_saveXML(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_saveXML(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_saveXML(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7445,8 +7445,8 @@ filename => rsi
 
 bool th_11DOMDocument_schemaValidate(ObjectData* this_, Value* filename) asm("_ZN4HPHP13c_DOMDocument16t_schemavalidateERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_schemaValidate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_schemaValidate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_schemaValidate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_schemaValidate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -7454,7 +7454,7 @@ TypedValue* tg1_11DOMDocument_schemaValidate(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_schemaValidate(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_schemaValidate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7498,8 +7498,8 @@ source => rsi
 
 bool th_11DOMDocument_schemaValidateSource(ObjectData* this_, Value* source) asm("_ZN4HPHP13c_DOMDocument22t_schemavalidatesourceERKNS_6StringE");
 
-TypedValue* tg1_11DOMDocument_schemaValidateSource(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_schemaValidateSource(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_schemaValidateSource(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_schemaValidateSource(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -7507,7 +7507,7 @@ TypedValue* tg1_11DOMDocument_schemaValidateSource(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_schemaValidateSource(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_schemaValidateSource(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7550,7 +7550,7 @@ this_ => rdi
 
 bool th_11DOMDocument_validate(ObjectData* this_) asm("_ZN4HPHP13c_DOMDocument10t_validateEv");
 
-TypedValue* tg_11DOMDocument_validate(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_validate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7588,8 +7588,8 @@ options => rdx
 
 TypedValue* th_11DOMDocument_xinclude(TypedValue* _rv, ObjectData* this_, long options) asm("_ZN4HPHP13c_DOMDocument10t_xincludeEl");
 
-TypedValue* tg1_11DOMDocument_xinclude(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMDocument_xinclude(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMDocument_xinclude(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMDocument_xinclude(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   th_11DOMDocument_xinclude((rv), (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(0));
@@ -7597,7 +7597,7 @@ TypedValue* tg1_11DOMDocument_xinclude(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* tg_11DOMDocument_xinclude(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument_xinclude(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7642,7 +7642,7 @@ name => rdx
 
 TypedValue* th_11DOMDocument___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP13c_DOMDocument7t___getENS_7VariantE");
 
-TypedValue* tg_11DOMDocument___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7681,7 +7681,7 @@ value => rcx
 
 TypedValue* th_11DOMDocument___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP13c_DOMDocument7t___setENS_7VariantES1_");
 
-TypedValue* tg_11DOMDocument___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7718,7 +7718,7 @@ name => rsi
 
 bool th_11DOMDocument___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP13c_DOMDocument9t___issetENS_7VariantE");
 
-TypedValue* tg_11DOMDocument___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMDocument___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7763,7 +7763,7 @@ this_ => rdi
 
 void th_19DOMDocumentFragment___construct(ObjectData* this_) asm("_ZN4HPHP21c_DOMDocumentFragment13t___constructEv");
 
-TypedValue* tg_19DOMDocumentFragment___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_19DOMDocumentFragment___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7801,8 +7801,8 @@ data => rsi
 
 bool th_19DOMDocumentFragment_appendXML(ObjectData* this_, Value* data) asm("_ZN4HPHP21c_DOMDocumentFragment11t_appendxmlERKNS_6StringE");
 
-TypedValue* tg1_19DOMDocumentFragment_appendXML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_19DOMDocumentFragment_appendXML(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_19DOMDocumentFragment_appendXML(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_19DOMDocumentFragment_appendXML(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -7810,7 +7810,7 @@ TypedValue* tg1_19DOMDocumentFragment_appendXML(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* tg_19DOMDocumentFragment_appendXML(HPHP::VM::ActRec *ar) {
+TypedValue* tg_19DOMDocumentFragment_appendXML(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7862,7 +7862,7 @@ this_ => rdi
 
 void th_15DOMDocumentType___construct(ObjectData* this_) asm("_ZN4HPHP17c_DOMDocumentType13t___constructEv");
 
-TypedValue* tg_15DOMDocumentType___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMDocumentType___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7901,7 +7901,7 @@ name => rdx
 
 TypedValue* th_15DOMDocumentType___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP17c_DOMDocumentType7t___getENS_7VariantE");
 
-TypedValue* tg_15DOMDocumentType___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMDocumentType___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7940,7 +7940,7 @@ value => rcx
 
 TypedValue* th_15DOMDocumentType___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP17c_DOMDocumentType7t___setENS_7VariantES1_");
 
-TypedValue* tg_15DOMDocumentType___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMDocumentType___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -7977,7 +7977,7 @@ name => rsi
 
 bool th_15DOMDocumentType___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP17c_DOMDocumentType9t___issetENS_7VariantE");
 
-TypedValue* tg_15DOMDocumentType___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMDocumentType___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8025,8 +8025,8 @@ namespaceuri => rcx
 
 void th_10DOMElement___construct(ObjectData* this_, Value* name, Value* value, Value* namespaceuri) asm("_ZN4HPHP12c_DOMElement13t___constructERKNS_6StringES3_S3_");
 
-TypedValue* tg1_10DOMElement___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -8049,7 +8049,7 @@ TypedValue* tg1_10DOMElement___construct(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* tg_10DOMElement___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8095,8 +8095,8 @@ name => rdx
 
 Value* th_10DOMElement_getAttribute(Value* _rv, ObjectData* this_, Value* name) asm("_ZN4HPHP12c_DOMElement14t_getattributeERKNS_6StringE");
 
-TypedValue* tg1_10DOMElement_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_getAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_getAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -8105,7 +8105,7 @@ TypedValue* tg1_10DOMElement_getAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_10DOMElement_getAttribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_getAttribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8151,8 +8151,8 @@ name => rdx
 
 TypedValue* th_10DOMElement_getAttributeNode(TypedValue* _rv, ObjectData* this_, Value* name) asm("_ZN4HPHP12c_DOMElement18t_getattributenodeERKNS_6StringE");
 
-TypedValue* tg1_10DOMElement_getAttributeNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_getAttributeNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_getAttributeNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_getAttributeNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_10DOMElement_getAttributeNode((rv), (this_), &args[-0].m_data);
@@ -8160,7 +8160,7 @@ TypedValue* tg1_10DOMElement_getAttributeNode(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_10DOMElement_getAttributeNode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_getAttributeNode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8206,8 +8206,8 @@ localname => rcx
 
 Value* th_10DOMElement_getAttributeNodeNS(Value* _rv, ObjectData* this_, Value* namespaceuri, Value* localname) asm("_ZN4HPHP12c_DOMElement20t_getattributenodensERKNS_6StringES3_");
 
-TypedValue* tg1_10DOMElement_getAttributeNodeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_getAttributeNodeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_getAttributeNodeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_getAttributeNodeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -8221,7 +8221,7 @@ TypedValue* tg1_10DOMElement_getAttributeNodeNS(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* tg_10DOMElement_getAttributeNodeNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_getAttributeNodeNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8268,8 +8268,8 @@ localname => rcx
 
 Value* th_10DOMElement_getAttributeNS(Value* _rv, ObjectData* this_, Value* namespaceuri, Value* localname) asm("_ZN4HPHP12c_DOMElement16t_getattributensERKNS_6StringES3_");
 
-TypedValue* tg1_10DOMElement_getAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_getAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_getAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_getAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -8283,7 +8283,7 @@ TypedValue* tg1_10DOMElement_getAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_10DOMElement_getAttributeNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_getAttributeNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8329,8 +8329,8 @@ name => rdx
 
 Value* th_10DOMElement_getElementsByTagName(Value* _rv, ObjectData* this_, Value* name) asm("_ZN4HPHP12c_DOMElement22t_getelementsbytagnameERKNS_6StringE");
 
-TypedValue* tg1_10DOMElement_getElementsByTagName(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_getElementsByTagName(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_getElementsByTagName(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_getElementsByTagName(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToStringInPlace(args-0);
@@ -8339,7 +8339,7 @@ TypedValue* tg1_10DOMElement_getElementsByTagName(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* tg_10DOMElement_getElementsByTagName(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_getElementsByTagName(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8386,8 +8386,8 @@ localname => rcx
 
 Value* th_10DOMElement_getElementsByTagNameNS(Value* _rv, ObjectData* this_, Value* namespaceuri, Value* localname) asm("_ZN4HPHP12c_DOMElement24t_getelementsbytagnamensERKNS_6StringES3_");
 
-TypedValue* tg1_10DOMElement_getElementsByTagNameNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_getElementsByTagNameNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_getElementsByTagNameNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_getElementsByTagNameNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -8401,7 +8401,7 @@ TypedValue* tg1_10DOMElement_getElementsByTagNameNS(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* tg_10DOMElement_getElementsByTagNameNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_getElementsByTagNameNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8446,8 +8446,8 @@ name => rsi
 
 bool th_10DOMElement_hasAttribute(ObjectData* this_, Value* name) asm("_ZN4HPHP12c_DOMElement14t_hasattributeERKNS_6StringE");
 
-TypedValue* tg1_10DOMElement_hasAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_hasAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_hasAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_hasAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -8455,7 +8455,7 @@ TypedValue* tg1_10DOMElement_hasAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_10DOMElement_hasAttribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_hasAttribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8500,8 +8500,8 @@ localname => rdx
 
 bool th_10DOMElement_hasAttributeNS(ObjectData* this_, Value* namespaceuri, Value* localname) asm("_ZN4HPHP12c_DOMElement16t_hasattributensERKNS_6StringES3_");
 
-TypedValue* tg1_10DOMElement_hasAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_hasAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_hasAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_hasAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -8514,7 +8514,7 @@ TypedValue* tg1_10DOMElement_hasAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_10DOMElement_hasAttributeNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_hasAttributeNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8558,8 +8558,8 @@ name => rsi
 
 bool th_10DOMElement_removeAttribute(ObjectData* this_, Value* name) asm("_ZN4HPHP12c_DOMElement17t_removeattributeERKNS_6StringE");
 
-TypedValue* tg1_10DOMElement_removeAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_removeAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_removeAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_removeAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -8567,7 +8567,7 @@ TypedValue* tg1_10DOMElement_removeAttribute(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* tg_10DOMElement_removeAttribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_removeAttribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8612,8 +8612,8 @@ oldattr => rdx
 
 TypedValue* th_10DOMElement_removeAttributeNode(TypedValue* _rv, ObjectData* this_, Value* oldattr) asm("_ZN4HPHP12c_DOMElement21t_removeattributenodeERKNS_6ObjectE");
 
-TypedValue* tg1_10DOMElement_removeAttributeNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_removeAttributeNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_removeAttributeNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_removeAttributeNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   th_10DOMElement_removeAttributeNode((rv), (this_), &args[-0].m_data);
@@ -8621,7 +8621,7 @@ TypedValue* tg1_10DOMElement_removeAttributeNode(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* tg_10DOMElement_removeAttributeNode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_removeAttributeNode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8667,8 +8667,8 @@ localname => rcx
 
 TypedValue* th_10DOMElement_removeAttributeNS(TypedValue* _rv, ObjectData* this_, Value* namespaceuri, Value* localname) asm("_ZN4HPHP12c_DOMElement19t_removeattributensERKNS_6StringES3_");
 
-TypedValue* tg1_10DOMElement_removeAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_removeAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_removeAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_removeAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -8681,7 +8681,7 @@ TypedValue* tg1_10DOMElement_removeAttributeNS(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* tg_10DOMElement_removeAttributeNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_removeAttributeNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8727,8 +8727,8 @@ value => rcx
 
 TypedValue* th_10DOMElement_setAttribute(TypedValue* _rv, ObjectData* this_, Value* name, Value* value) asm("_ZN4HPHP12c_DOMElement14t_setattributeERKNS_6StringES3_");
 
-TypedValue* tg1_10DOMElement_setAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_setAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_setAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_setAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -8741,7 +8741,7 @@ TypedValue* tg1_10DOMElement_setAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_10DOMElement_setAttribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_setAttribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8786,8 +8786,8 @@ newattr => rdx
 
 TypedValue* th_10DOMElement_setAttributeNode(TypedValue* _rv, ObjectData* this_, Value* newattr) asm("_ZN4HPHP12c_DOMElement18t_setattributenodeERKNS_6ObjectE");
 
-TypedValue* tg1_10DOMElement_setAttributeNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_setAttributeNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_setAttributeNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_setAttributeNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   th_10DOMElement_setAttributeNode((rv), (this_), &args[-0].m_data);
@@ -8795,7 +8795,7 @@ TypedValue* tg1_10DOMElement_setAttributeNode(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_10DOMElement_setAttributeNode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_setAttributeNode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8840,8 +8840,8 @@ newattr => rdx
 
 TypedValue* th_10DOMElement_setAttributeNodeNS(TypedValue* _rv, ObjectData* this_, Value* newattr) asm("_ZN4HPHP12c_DOMElement20t_setattributenodensERKNS_6ObjectE");
 
-TypedValue* tg1_10DOMElement_setAttributeNodeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_setAttributeNodeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_setAttributeNodeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_setAttributeNodeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   th_10DOMElement_setAttributeNodeNS((rv), (this_), &args[-0].m_data);
@@ -8849,7 +8849,7 @@ TypedValue* tg1_10DOMElement_setAttributeNodeNS(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* tg_10DOMElement_setAttributeNodeNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_setAttributeNodeNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8896,8 +8896,8 @@ value => r8
 
 TypedValue* th_10DOMElement_setAttributeNS(TypedValue* _rv, ObjectData* this_, Value* namespaceuri, Value* name, Value* value) asm("_ZN4HPHP12c_DOMElement16t_setattributensERKNS_6StringES3_S3_");
 
-TypedValue* tg1_10DOMElement_setAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_setAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_setAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_setAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
     tvCastToStringInPlace(args-2);
@@ -8913,7 +8913,7 @@ TypedValue* tg1_10DOMElement_setAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_10DOMElement_setAttributeNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_setAttributeNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -8959,8 +8959,8 @@ isid => rcx
 
 TypedValue* th_10DOMElement_setIDAttribute(TypedValue* _rv, ObjectData* this_, Value* name, bool isid) asm("_ZN4HPHP12c_DOMElement16t_setidattributeERKNS_6StringEb");
 
-TypedValue* tg1_10DOMElement_setIDAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_setIDAttribute(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_setIDAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_setIDAttribute(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-1);
@@ -8973,7 +8973,7 @@ TypedValue* tg1_10DOMElement_setIDAttribute(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_10DOMElement_setIDAttribute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_setIDAttribute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9019,8 +9019,8 @@ isid => rcx
 
 TypedValue* th_10DOMElement_setIDAttributeNode(TypedValue* _rv, ObjectData* this_, Value* idattr, bool isid) asm("_ZN4HPHP12c_DOMElement20t_setidattributenodeERKNS_6ObjectEb");
 
-TypedValue* tg1_10DOMElement_setIDAttributeNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_setIDAttributeNode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_setIDAttributeNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_setIDAttributeNode(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-1)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-1);
@@ -9033,7 +9033,7 @@ TypedValue* tg1_10DOMElement_setIDAttributeNode(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* tg_10DOMElement_setIDAttributeNode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_setIDAttributeNode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9080,8 +9080,8 @@ isid => r8
 
 TypedValue* th_10DOMElement_setIDAttributeNS(TypedValue* _rv, ObjectData* this_, Value* namespaceuri, Value* localname, bool isid) asm("_ZN4HPHP12c_DOMElement18t_setidattributensERKNS_6StringES3_b");
 
-TypedValue* tg1_10DOMElement_setIDAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_10DOMElement_setIDAttributeNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_10DOMElement_setIDAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_10DOMElement_setIDAttributeNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if ((args-2)->m_type != KindOfBoolean) {
     tvCastToBooleanInPlace(args-2);
@@ -9097,7 +9097,7 @@ TypedValue* tg1_10DOMElement_setIDAttributeNS(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_10DOMElement_setIDAttributeNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement_setIDAttributeNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9142,7 +9142,7 @@ name => rdx
 
 TypedValue* th_10DOMElement___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP12c_DOMElement7t___getENS_7VariantE");
 
-TypedValue* tg_10DOMElement___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9181,7 +9181,7 @@ value => rcx
 
 TypedValue* th_10DOMElement___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP12c_DOMElement7t___setENS_7VariantES1_");
 
-TypedValue* tg_10DOMElement___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9218,7 +9218,7 @@ name => rsi
 
 bool th_10DOMElement___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP12c_DOMElement9t___issetENS_7VariantE");
 
-TypedValue* tg_10DOMElement___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_10DOMElement___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9263,7 +9263,7 @@ this_ => rdi
 
 void th_9DOMEntity___construct(ObjectData* this_) asm("_ZN4HPHP11c_DOMEntity13t___constructEv");
 
-TypedValue* tg_9DOMEntity___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9DOMEntity___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9302,7 +9302,7 @@ name => rdx
 
 TypedValue* th_9DOMEntity___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP11c_DOMEntity7t___getENS_7VariantE");
 
-TypedValue* tg_9DOMEntity___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9DOMEntity___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9341,7 +9341,7 @@ value => rcx
 
 TypedValue* th_9DOMEntity___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP11c_DOMEntity7t___setENS_7VariantES1_");
 
-TypedValue* tg_9DOMEntity___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9DOMEntity___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9378,7 +9378,7 @@ name => rsi
 
 bool th_9DOMEntity___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP11c_DOMEntity9t___issetENS_7VariantE");
 
-TypedValue* tg_9DOMEntity___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_9DOMEntity___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9424,8 +9424,8 @@ name => rsi
 
 void th_18DOMEntityReference___construct(ObjectData* this_, Value* name) asm("_ZN4HPHP20c_DOMEntityReference13t___constructERKNS_6StringE");
 
-TypedValue* tg1_18DOMEntityReference___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_18DOMEntityReference___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_18DOMEntityReference___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_18DOMEntityReference___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -9434,7 +9434,7 @@ TypedValue* tg1_18DOMEntityReference___construct(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* tg_18DOMEntityReference___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_18DOMEntityReference___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9487,7 +9487,7 @@ this_ => rdi
 
 void th_11DOMNotation___construct(ObjectData* this_) asm("_ZN4HPHP13c_DOMNotation13t___constructEv");
 
-TypedValue* tg_11DOMNotation___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMNotation___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9526,7 +9526,7 @@ name => rdx
 
 TypedValue* th_11DOMNotation___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP13c_DOMNotation7t___getENS_7VariantE");
 
-TypedValue* tg_11DOMNotation___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMNotation___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9565,7 +9565,7 @@ value => rcx
 
 TypedValue* th_11DOMNotation___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP13c_DOMNotation7t___setENS_7VariantES1_");
 
-TypedValue* tg_11DOMNotation___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMNotation___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9602,7 +9602,7 @@ name => rsi
 
 bool th_11DOMNotation___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP13c_DOMNotation9t___issetENS_7VariantE");
 
-TypedValue* tg_11DOMNotation___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMNotation___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9649,8 +9649,8 @@ value => rdx
 
 void th_24DOMProcessingInstruction___construct(ObjectData* this_, Value* name, Value* value) asm("_ZN4HPHP26c_DOMProcessingInstruction13t___constructERKNS_6StringES3_");
 
-TypedValue* tg1_24DOMProcessingInstruction___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_24DOMProcessingInstruction___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_24DOMProcessingInstruction___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_24DOMProcessingInstruction___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -9669,7 +9669,7 @@ TypedValue* tg1_24DOMProcessingInstruction___construct(TypedValue* rv, HPHP::VM:
   return rv;
 }
 
-TypedValue* tg_24DOMProcessingInstruction___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_24DOMProcessingInstruction___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9715,7 +9715,7 @@ name => rdx
 
 TypedValue* th_24DOMProcessingInstruction___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP26c_DOMProcessingInstruction7t___getENS_7VariantE");
 
-TypedValue* tg_24DOMProcessingInstruction___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_24DOMProcessingInstruction___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9754,7 +9754,7 @@ value => rcx
 
 TypedValue* th_24DOMProcessingInstruction___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP26c_DOMProcessingInstruction7t___setENS_7VariantES1_");
 
-TypedValue* tg_24DOMProcessingInstruction___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_24DOMProcessingInstruction___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9791,7 +9791,7 @@ name => rsi
 
 bool th_24DOMProcessingInstruction___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP26c_DOMProcessingInstruction9t___issetENS_7VariantE");
 
-TypedValue* tg_24DOMProcessingInstruction___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_24DOMProcessingInstruction___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9836,7 +9836,7 @@ this_ => rdi
 
 void th_15DOMNodeIterator___construct(ObjectData* this_) asm("_ZN4HPHP17c_DOMNodeIterator13t___constructEv");
 
-TypedValue* tg_15DOMNodeIterator___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNodeIterator___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9874,7 +9874,7 @@ this_ => rsi
 
 TypedValue* th_15DOMNodeIterator_current(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP17c_DOMNodeIterator9t_currentEv");
 
-TypedValue* tg_15DOMNodeIterator_current(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNodeIterator_current(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9911,7 +9911,7 @@ this_ => rsi
 
 TypedValue* th_15DOMNodeIterator_key(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP17c_DOMNodeIterator5t_keyEv");
 
-TypedValue* tg_15DOMNodeIterator_key(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNodeIterator_key(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9948,7 +9948,7 @@ this_ => rsi
 
 TypedValue* th_15DOMNodeIterator_next(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP17c_DOMNodeIterator6t_nextEv");
 
-TypedValue* tg_15DOMNodeIterator_next(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNodeIterator_next(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -9985,7 +9985,7 @@ this_ => rsi
 
 TypedValue* th_15DOMNodeIterator_rewind(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP17c_DOMNodeIterator8t_rewindEv");
 
-TypedValue* tg_15DOMNodeIterator_rewind(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNodeIterator_rewind(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10022,7 +10022,7 @@ this_ => rsi
 
 TypedValue* th_15DOMNodeIterator_valid(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP17c_DOMNodeIterator7t_validEv");
 
-TypedValue* tg_15DOMNodeIterator_valid(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNodeIterator_valid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10067,7 +10067,7 @@ this_ => rdi
 
 void th_15DOMNamedNodeMap___construct(ObjectData* this_) asm("_ZN4HPHP17c_DOMNamedNodeMap13t___constructEv");
 
-TypedValue* tg_15DOMNamedNodeMap___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNamedNodeMap___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10106,8 +10106,8 @@ name => rdx
 
 TypedValue* th_15DOMNamedNodeMap_getNamedItem(TypedValue* _rv, ObjectData* this_, Value* name) asm("_ZN4HPHP17c_DOMNamedNodeMap14t_getnameditemERKNS_6StringE");
 
-TypedValue* tg1_15DOMNamedNodeMap_getNamedItem(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_15DOMNamedNodeMap_getNamedItem(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_15DOMNamedNodeMap_getNamedItem(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_15DOMNamedNodeMap_getNamedItem(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_15DOMNamedNodeMap_getNamedItem((rv), (this_), &args[-0].m_data);
@@ -10115,7 +10115,7 @@ TypedValue* tg1_15DOMNamedNodeMap_getNamedItem(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* tg_15DOMNamedNodeMap_getNamedItem(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNamedNodeMap_getNamedItem(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10161,8 +10161,8 @@ localname => rcx
 
 TypedValue* th_15DOMNamedNodeMap_getNamedItemNS(TypedValue* _rv, ObjectData* this_, Value* namespaceuri, Value* localname) asm("_ZN4HPHP17c_DOMNamedNodeMap16t_getnameditemnsERKNS_6StringES3_");
 
-TypedValue* tg1_15DOMNamedNodeMap_getNamedItemNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_15DOMNamedNodeMap_getNamedItemNS(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_15DOMNamedNodeMap_getNamedItemNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_15DOMNamedNodeMap_getNamedItemNS(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -10175,7 +10175,7 @@ TypedValue* tg1_15DOMNamedNodeMap_getNamedItemNS(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* tg_15DOMNamedNodeMap_getNamedItemNS(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNamedNodeMap_getNamedItemNS(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10220,8 +10220,8 @@ index => rdx
 
 TypedValue* th_15DOMNamedNodeMap_item(TypedValue* _rv, ObjectData* this_, long index) asm("_ZN4HPHP17c_DOMNamedNodeMap6t_itemEl");
 
-TypedValue* tg1_15DOMNamedNodeMap_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_15DOMNamedNodeMap_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_15DOMNamedNodeMap_item(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_15DOMNamedNodeMap_item(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   th_15DOMNamedNodeMap_item((rv), (this_), (long)(args[-0].m_data.num));
@@ -10229,7 +10229,7 @@ TypedValue* tg1_15DOMNamedNodeMap_item(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* tg_15DOMNamedNodeMap_item(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNamedNodeMap_item(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10274,7 +10274,7 @@ name => rdx
 
 TypedValue* th_15DOMNamedNodeMap___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP17c_DOMNamedNodeMap7t___getENS_7VariantE");
 
-TypedValue* tg_15DOMNamedNodeMap___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNamedNodeMap___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10313,7 +10313,7 @@ value => rcx
 
 TypedValue* th_15DOMNamedNodeMap___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP17c_DOMNamedNodeMap7t___setENS_7VariantES1_");
 
-TypedValue* tg_15DOMNamedNodeMap___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNamedNodeMap___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10350,7 +10350,7 @@ name => rsi
 
 bool th_15DOMNamedNodeMap___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP17c_DOMNamedNodeMap9t___issetENS_7VariantE");
 
-TypedValue* tg_15DOMNamedNodeMap___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNamedNodeMap___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10387,7 +10387,7 @@ this_ => rsi
 
 TypedValue* th_15DOMNamedNodeMap_getIterator(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP17c_DOMNamedNodeMap13t_getiteratorEv");
 
-TypedValue* tg_15DOMNamedNodeMap_getIterator(HPHP::VM::ActRec *ar) {
+TypedValue* tg_15DOMNamedNodeMap_getIterator(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10432,7 +10432,7 @@ this_ => rdi
 
 void th_11DOMNodeList___construct(ObjectData* this_) asm("_ZN4HPHP13c_DOMNodeList13t___constructEv");
 
-TypedValue* tg_11DOMNodeList___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMNodeList___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10471,8 +10471,8 @@ index => rdx
 
 TypedValue* th_11DOMNodeList_item(TypedValue* _rv, ObjectData* this_, long index) asm("_ZN4HPHP13c_DOMNodeList6t_itemEl");
 
-TypedValue* tg1_11DOMNodeList_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11DOMNodeList_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11DOMNodeList_item(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11DOMNodeList_item(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   th_11DOMNodeList_item((rv), (this_), (long)(args[-0].m_data.num));
@@ -10480,7 +10480,7 @@ TypedValue* tg1_11DOMNodeList_item(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* tg_11DOMNodeList_item(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMNodeList_item(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10525,7 +10525,7 @@ name => rdx
 
 TypedValue* th_11DOMNodeList___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP13c_DOMNodeList7t___getENS_7VariantE");
 
-TypedValue* tg_11DOMNodeList___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMNodeList___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10564,7 +10564,7 @@ value => rcx
 
 TypedValue* th_11DOMNodeList___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP13c_DOMNodeList7t___setENS_7VariantES1_");
 
-TypedValue* tg_11DOMNodeList___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMNodeList___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10601,7 +10601,7 @@ name => rsi
 
 bool th_11DOMNodeList___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP13c_DOMNodeList9t___issetENS_7VariantE");
 
-TypedValue* tg_11DOMNodeList___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMNodeList___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10638,7 +10638,7 @@ this_ => rsi
 
 TypedValue* th_11DOMNodeList_getIterator(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_DOMNodeList13t_getiteratorEv");
 
-TypedValue* tg_11DOMNodeList_getIterator(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11DOMNodeList_getIterator(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10683,7 +10683,7 @@ this_ => rdi
 
 void th_17DOMImplementation___construct(ObjectData* this_) asm("_ZN4HPHP19c_DOMImplementation13t___constructEv");
 
-TypedValue* tg_17DOMImplementation___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_17DOMImplementation___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10724,8 +10724,8 @@ doctypeobj => r8
 
 TypedValue* th_17DOMImplementation_createDocument(TypedValue* _rv, ObjectData* this_, Value* namespaceuri, Value* qualifiedname, Value* doctypeobj) asm("_ZN4HPHP19c_DOMImplementation16t_createdocumentERKNS_6StringES3_RKNS_6ObjectE");
 
-TypedValue* tg1_17DOMImplementation_createDocument(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_17DOMImplementation_createDocument(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_17DOMImplementation_createDocument(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_17DOMImplementation_createDocument(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -10748,7 +10748,7 @@ TypedValue* tg1_17DOMImplementation_createDocument(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* tg_17DOMImplementation_createDocument(HPHP::VM::ActRec *ar) {
+TypedValue* tg_17DOMImplementation_createDocument(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10795,8 +10795,8 @@ systemid => r8
 
 TypedValue* th_17DOMImplementation_createDocumentType(TypedValue* _rv, ObjectData* this_, Value* qualifiedname, Value* publicid, Value* systemid) asm("_ZN4HPHP19c_DOMImplementation20t_createdocumenttypeERKNS_6StringES3_S3_");
 
-TypedValue* tg1_17DOMImplementation_createDocumentType(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_17DOMImplementation_createDocumentType(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_17DOMImplementation_createDocumentType(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_17DOMImplementation_createDocumentType(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -10819,7 +10819,7 @@ TypedValue* tg1_17DOMImplementation_createDocumentType(TypedValue* rv, HPHP::VM:
   return rv;
 }
 
-TypedValue* tg_17DOMImplementation_createDocumentType(HPHP::VM::ActRec *ar) {
+TypedValue* tg_17DOMImplementation_createDocumentType(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10864,8 +10864,8 @@ version => rdx
 
 bool th_17DOMImplementation_hasFeature(ObjectData* this_, Value* feature, Value* version) asm("_ZN4HPHP19c_DOMImplementation12t_hasfeatureERKNS_6StringES3_");
 
-TypedValue* tg1_17DOMImplementation_hasFeature(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_17DOMImplementation_hasFeature(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_17DOMImplementation_hasFeature(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_17DOMImplementation_hasFeature(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -10878,7 +10878,7 @@ TypedValue* tg1_17DOMImplementation_hasFeature(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* tg_17DOMImplementation_hasFeature(HPHP::VM::ActRec *ar) {
+TypedValue* tg_17DOMImplementation_hasFeature(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10931,7 +10931,7 @@ doc => rsi
 
 void th_8DOMXPath___construct(ObjectData* this_, TypedValue* doc) asm("_ZN4HPHP10c_DOMXPath13t___constructERKNS_7VariantE");
 
-TypedValue* tg_8DOMXPath___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DOMXPath___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -10971,8 +10971,8 @@ context => rcx
 
 TypedValue* th_8DOMXPath_evaluate(TypedValue* _rv, ObjectData* this_, Value* expr, Value* context) asm("_ZN4HPHP10c_DOMXPath10t_evaluateERKNS_6StringERKNS_6ObjectE");
 
-TypedValue* tg1_8DOMXPath_evaluate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DOMXPath_evaluate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DOMXPath_evaluate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DOMXPath_evaluate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -10990,7 +10990,7 @@ TypedValue* tg1_8DOMXPath_evaluate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* tg_8DOMXPath_evaluate(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DOMXPath_evaluate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -11036,8 +11036,8 @@ context => rcx
 
 TypedValue* th_8DOMXPath_query(TypedValue* _rv, ObjectData* this_, Value* expr, Value* context) asm("_ZN4HPHP10c_DOMXPath7t_queryERKNS_6StringERKNS_6ObjectE");
 
-TypedValue* tg1_8DOMXPath_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DOMXPath_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DOMXPath_query(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DOMXPath_query(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -11055,7 +11055,7 @@ TypedValue* tg1_8DOMXPath_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* tg_8DOMXPath_query(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DOMXPath_query(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -11100,8 +11100,8 @@ uri => rdx
 
 bool th_8DOMXPath_registerNamespace(ObjectData* this_, Value* prefix, Value* uri) asm("_ZN4HPHP10c_DOMXPath19t_registernamespaceERKNS_6StringES3_");
 
-TypedValue* tg1_8DOMXPath_registerNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_8DOMXPath_registerNamespace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_8DOMXPath_registerNamespace(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_8DOMXPath_registerNamespace(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -11114,7 +11114,7 @@ TypedValue* tg1_8DOMXPath_registerNamespace(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_8DOMXPath_registerNamespace(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DOMXPath_registerNamespace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -11159,7 +11159,7 @@ funcs => rdx
 
 TypedValue* th_8DOMXPath_registerPHPFunctions(TypedValue* _rv, ObjectData* this_, TypedValue* funcs) asm("_ZN4HPHP10c_DOMXPath22t_registerphpfunctionsERKNS_7VariantE");
 
-TypedValue* tg_8DOMXPath_registerPHPFunctions(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DOMXPath_registerPHPFunctions(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -11198,7 +11198,7 @@ name => rdx
 
 TypedValue* th_8DOMXPath___get(TypedValue* _rv, ObjectData* this_, TypedValue* name) asm("_ZN4HPHP10c_DOMXPath7t___getENS_7VariantE");
 
-TypedValue* tg_8DOMXPath___get(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DOMXPath___get(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -11237,7 +11237,7 @@ value => rcx
 
 TypedValue* th_8DOMXPath___set(TypedValue* _rv, ObjectData* this_, TypedValue* name, TypedValue* value) asm("_ZN4HPHP10c_DOMXPath7t___setENS_7VariantES1_");
 
-TypedValue* tg_8DOMXPath___set(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DOMXPath___set(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -11274,7 +11274,7 @@ name => rsi
 
 bool th_8DOMXPath___isset(ObjectData* this_, TypedValue* name) asm("_ZN4HPHP10c_DOMXPath9t___issetENS_7VariantE");
 
-TypedValue* tg_8DOMXPath___isset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_8DOMXPath___isset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

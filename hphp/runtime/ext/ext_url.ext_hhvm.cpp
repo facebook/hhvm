@@ -36,8 +36,8 @@ strict => rdx
 
 TypedValue* fh_base64_decode(TypedValue* _rv, Value* data, bool strict) asm("_ZN4HPHP15f_base64_decodeERKNS_6StringEb");
 
-TypedValue * fg1_base64_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_base64_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_base64_decode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_base64_decode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -55,7 +55,7 @@ TypedValue * fg1_base64_decode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_base64_decode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_base64_decode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -96,8 +96,8 @@ data => rsi
 
 Value* fh_base64_encode(Value* _rv, Value* data) asm("_ZN4HPHP15f_base64_encodeERKNS_6StringE");
 
-TypedValue * fg1_base64_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_base64_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_base64_encode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_base64_encode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -106,7 +106,7 @@ TypedValue * fg1_base64_encode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_base64_encode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_base64_encode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -149,8 +149,8 @@ format => rdx
 
 TypedValue* fh_get_headers(TypedValue* _rv, Value* url, int format) asm("_ZN4HPHP13f_get_headersERKNS_6StringEi");
 
-TypedValue * fg1_get_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_get_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_get_headers(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_get_headers(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -168,7 +168,7 @@ TypedValue * fg1_get_headers(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_get_headers(HPHP::VM::ActRec *ar) {
+TypedValue* fg_get_headers(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -210,8 +210,8 @@ use_include_path => rdx
 
 Value* fh_get_meta_tags(Value* _rv, Value* filename, bool use_include_path) asm("_ZN4HPHP15f_get_meta_tagsERKNS_6StringEb");
 
-TypedValue * fg1_get_meta_tags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_get_meta_tags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_get_meta_tags(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_get_meta_tags(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   switch (count) {
@@ -230,7 +230,7 @@ TypedValue * fg1_get_meta_tags(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_get_meta_tags(HPHP::VM::ActRec *ar) {
+TypedValue* fg_get_meta_tags(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -274,8 +274,8 @@ arg_separator => rcx
 
 TypedValue* fh_http_build_query(TypedValue* _rv, TypedValue* formdata, Value* numeric_prefix, Value* arg_separator) asm("_ZN4HPHP18f_http_build_queryERKNS_7VariantERKNS_6StringES5_");
 
-TypedValue * fg1_http_build_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_http_build_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_http_build_query(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_http_build_query(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -294,7 +294,7 @@ TypedValue * fg1_http_build_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_http_build_query(HPHP::VM::ActRec *ar) {
+TypedValue* fg_http_build_query(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -336,8 +336,8 @@ component => rdx
 
 TypedValue* fh_parse_url(TypedValue* _rv, Value* url, int component) asm("_ZN4HPHP11f_parse_urlERKNS_6StringEi");
 
-TypedValue * fg1_parse_url(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_parse_url(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_parse_url(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_parse_url(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -355,7 +355,7 @@ TypedValue * fg1_parse_url(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_parse_url(HPHP::VM::ActRec *ar) {
+TypedValue* fg_parse_url(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -396,8 +396,8 @@ str => rsi
 
 Value* fh_rawurldecode(Value* _rv, Value* str) asm("_ZN4HPHP14f_rawurldecodeERKNS_6StringE");
 
-TypedValue * fg1_rawurldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_rawurldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_rawurldecode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_rawurldecode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -406,7 +406,7 @@ TypedValue * fg1_rawurldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_rawurldecode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_rawurldecode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -448,8 +448,8 @@ str => rsi
 
 Value* fh_rawurlencode(Value* _rv, Value* str) asm("_ZN4HPHP14f_rawurlencodeERKNS_6StringE");
 
-TypedValue * fg1_rawurlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_rawurlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_rawurlencode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_rawurlencode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -458,7 +458,7 @@ TypedValue * fg1_rawurlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_rawurlencode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_rawurlencode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -500,8 +500,8 @@ str => rsi
 
 Value* fh_urldecode(Value* _rv, Value* str) asm("_ZN4HPHP11f_urldecodeERKNS_6StringE");
 
-TypedValue * fg1_urldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_urldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_urldecode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_urldecode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -510,7 +510,7 @@ TypedValue * fg1_urldecode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_urldecode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_urldecode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -552,8 +552,8 @@ str => rsi
 
 Value* fh_urlencode(Value* _rv, Value* str) asm("_ZN4HPHP11f_urlencodeERKNS_6StringE");
 
-TypedValue * fg1_urlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_urlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_urlencode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_urlencode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -562,7 +562,7 @@ TypedValue * fg1_urlencode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_urlencode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_urlencode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

@@ -43,7 +43,7 @@ this_ => rdi
 
 void th_7Closure___construct(ObjectData* this_) asm("_ZN4HPHP9c_Closure13t___constructEv");
 
-TypedValue* tg_7Closure___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7Closure___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -89,7 +89,7 @@ this_ => rdi
 
 void th_12DummyClosure___construct(ObjectData* this_) asm("_ZN4HPHP14c_DummyClosure13t___constructEv");
 
-TypedValue* tg_12DummyClosure___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_12DummyClosure___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

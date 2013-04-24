@@ -43,7 +43,7 @@ this_ => rdi
 
 void th_22StaticResultWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP24c_StaticResultWaitHandle13t___constructEv");
 
-TypedValue* tg_22StaticResultWaitHandle___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_22StaticResultWaitHandle___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -82,7 +82,7 @@ result => rdx
 
 Value* th_22StaticResultWaitHandle_create(Value* _rv, char const* cls_, TypedValue* result) asm("_ZN4HPHP24c_StaticResultWaitHandle9ti_createEPKcRKNS_7VariantE");
 
-TypedValue* tg_22StaticResultWaitHandle_create(HPHP::VM::ActRec *ar) {
+TypedValue* tg_22StaticResultWaitHandle_create(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

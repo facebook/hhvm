@@ -34,7 +34,7 @@ text => rdi
 
 bool fh_ctype_alnum(TypedValue* text) asm("_ZN4HPHP13f_ctype_alnumERKNS_7VariantE");
 
-TypedValue* fg_ctype_alnum(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ctype_alnum(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -67,7 +67,7 @@ text => rdi
 
 bool fh_ctype_alpha(TypedValue* text) asm("_ZN4HPHP13f_ctype_alphaERKNS_7VariantE");
 
-TypedValue* fg_ctype_alpha(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ctype_alpha(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -100,7 +100,7 @@ text => rdi
 
 bool fh_ctype_cntrl(TypedValue* text) asm("_ZN4HPHP13f_ctype_cntrlERKNS_7VariantE");
 
-TypedValue* fg_ctype_cntrl(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ctype_cntrl(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -133,7 +133,7 @@ text => rdi
 
 bool fh_ctype_digit(TypedValue* text) asm("_ZN4HPHP13f_ctype_digitERKNS_7VariantE");
 
-TypedValue* fg_ctype_digit(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ctype_digit(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -166,7 +166,7 @@ text => rdi
 
 bool fh_ctype_graph(TypedValue* text) asm("_ZN4HPHP13f_ctype_graphERKNS_7VariantE");
 
-TypedValue* fg_ctype_graph(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ctype_graph(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -199,7 +199,7 @@ text => rdi
 
 bool fh_ctype_lower(TypedValue* text) asm("_ZN4HPHP13f_ctype_lowerERKNS_7VariantE");
 
-TypedValue* fg_ctype_lower(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ctype_lower(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -232,7 +232,7 @@ text => rdi
 
 bool fh_ctype_print(TypedValue* text) asm("_ZN4HPHP13f_ctype_printERKNS_7VariantE");
 
-TypedValue* fg_ctype_print(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ctype_print(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -265,7 +265,7 @@ text => rdi
 
 bool fh_ctype_punct(TypedValue* text) asm("_ZN4HPHP13f_ctype_punctERKNS_7VariantE");
 
-TypedValue* fg_ctype_punct(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ctype_punct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -298,7 +298,7 @@ text => rdi
 
 bool fh_ctype_space(TypedValue* text) asm("_ZN4HPHP13f_ctype_spaceERKNS_7VariantE");
 
-TypedValue* fg_ctype_space(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ctype_space(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -331,7 +331,7 @@ text => rdi
 
 bool fh_ctype_upper(TypedValue* text) asm("_ZN4HPHP13f_ctype_upperERKNS_7VariantE");
 
-TypedValue* fg_ctype_upper(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ctype_upper(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -364,7 +364,7 @@ text => rdi
 
 bool fh_ctype_xdigit(TypedValue* text) asm("_ZN4HPHP14f_ctype_xdigitERKNS_7VariantE");
 
-TypedValue* fg_ctype_xdigit(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ctype_xdigit(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

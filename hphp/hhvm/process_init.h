@@ -36,10 +36,10 @@ namespace VM {
  */
 inline void register_process_init() {
   g_vmProcessInit = &VM::ProcessInit;
-  VM::g_hphp_compiler_parse = &HPHP::Compiler::hphp_compiler_parse;
-  VM::g_hphp_build_native_func_unit = &HPHP::Compiler::
+  g_hphp_compiler_parse = &HPHP::Compiler::hphp_compiler_parse;
+  g_hphp_build_native_func_unit = &HPHP::Compiler::
     hphp_build_native_func_unit;
-  VM::g_hphp_build_native_class_unit = &HPHP::Compiler::
+  g_hphp_build_native_class_unit = &HPHP::Compiler::
     hphp_build_native_class_unit;
 }
 
@@ -54,7 +54,7 @@ inline void init_for_unit_test() {
   init_thread_locals();
   Hdf config;
   RuntimeOption::Load(config);
-  VM::compile_file(0, 0, MD5(), 0);
+  compile_file(0, 0, MD5(), 0);
   hphp_process_init();
 }
 

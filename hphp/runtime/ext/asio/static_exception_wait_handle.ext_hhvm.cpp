@@ -43,7 +43,7 @@ this_ => rdi
 
 void th_25StaticExceptionWaitHandle___construct(ObjectData* this_) asm("_ZN4HPHP27c_StaticExceptionWaitHandle13t___constructEv");
 
-TypedValue* tg_25StaticExceptionWaitHandle___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_25StaticExceptionWaitHandle___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -82,8 +82,8 @@ exception => rdx
 
 Value* th_25StaticExceptionWaitHandle_create(Value* _rv, char const* cls_, Value* exception) asm("_ZN4HPHP27c_StaticExceptionWaitHandle9ti_createEPKcRKNS_6ObjectE");
 
-TypedValue* tg1_25StaticExceptionWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue* tg1_25StaticExceptionWaitHandle_create(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue* tg1_25StaticExceptionWaitHandle_create(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue* tg1_25StaticExceptionWaitHandle_create(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
@@ -92,7 +92,7 @@ TypedValue* tg1_25StaticExceptionWaitHandle_create(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* tg_25StaticExceptionWaitHandle_create(HPHP::VM::ActRec *ar) {
+TypedValue* tg_25StaticExceptionWaitHandle_create(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

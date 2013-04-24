@@ -34,7 +34,7 @@ value => rsi
 
 Value* fh_serialize(Value* _rv, TypedValue* value) asm("_ZN4HPHP11f_serializeERKNS_7VariantE");
 
-TypedValue* fg_serialize(HPHP::VM::ActRec *ar) {
+TypedValue* fg_serialize(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
   }
 
   // Initialize compiler state
-  VM::compile_file(0, 0, MD5(), 0);
+  compile_file(0, 0, MD5(), 0);
   hphp_process_init();
   Test test;
   return test.RunTests(suite, which, set) ? 0 : -1;

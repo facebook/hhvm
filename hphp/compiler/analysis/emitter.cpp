@@ -28,7 +28,7 @@
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/repo.h>
 #include <runtime/vm/as.h>
-#include <runtime/vm/stats.h>
+#include <runtime/base/stats.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/type_conversions.h>
@@ -6288,7 +6288,7 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     // initialization support.
     static const StringData* methName = StringData::GetStaticString("86cinit");
     FuncEmitter* fe = m_ue.newMethodEmitter(methName, pce);
-    assert(!(attr & VM::AttrTrait));
+    assert(!(attr & AttrTrait));
     bool added UNUSED = pce->addMethod(fe);
     assert(added);
     postponeCinit(is, fe, nonScalarConstVec);

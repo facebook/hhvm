@@ -46,8 +46,8 @@ encryption_key => rcx
 
 void th_7SQLite3___construct(ObjectData* this_, Value* filename, long flags, Value* encryption_key) asm("_ZN4HPHP9c_SQLite313t___constructERKNS_6StringElS3_");
 
-TypedValue* tg1_7SQLite3___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -70,7 +70,7 @@ TypedValue* tg1_7SQLite3___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_7SQLite3___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -116,8 +116,8 @@ encryption_key => rcx
 
 void th_7SQLite3_open(ObjectData* this_, Value* filename, long flags, Value* encryption_key) asm("_ZN4HPHP9c_SQLite36t_openERKNS_6StringElS3_");
 
-TypedValue* tg1_7SQLite3_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3_open(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3_open(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -140,7 +140,7 @@ TypedValue* tg1_7SQLite3_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* tg_7SQLite3_open(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_open(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -185,8 +185,8 @@ msecs => rsi
 
 bool th_7SQLite3_busytimeout(ObjectData* this_, long msecs) asm("_ZN4HPHP9c_SQLite313t_busytimeoutEl");
 
-TypedValue* tg1_7SQLite3_busytimeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3_busytimeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3_busytimeout(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3_busytimeout(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-0);
@@ -194,7 +194,7 @@ TypedValue* tg1_7SQLite3_busytimeout(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_7SQLite3_busytimeout(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_busytimeout(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -237,7 +237,7 @@ this_ => rdi
 
 bool th_7SQLite3_close(ObjectData* this_) asm("_ZN4HPHP9c_SQLite37t_closeEv");
 
-TypedValue* tg_7SQLite3_close(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_close(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -274,8 +274,8 @@ sql => rsi
 
 bool th_7SQLite3_exec(ObjectData* this_, Value* sql) asm("_ZN4HPHP9c_SQLite36t_execERKNS_6StringE");
 
-TypedValue* tg1_7SQLite3_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3_exec(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3_exec(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -283,7 +283,7 @@ TypedValue* tg1_7SQLite3_exec(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* tg_7SQLite3_exec(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_exec(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -327,7 +327,7 @@ this_ => rsi
 
 Value* th_7SQLite3_version(Value* _rv, ObjectData* this_) asm("_ZN4HPHP9c_SQLite39t_versionEv");
 
-TypedValue* tg_7SQLite3_version(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_version(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -364,7 +364,7 @@ this_ => rdi
 
 long th_7SQLite3_lastinsertrowid(ObjectData* this_) asm("_ZN4HPHP9c_SQLite317t_lastinsertrowidEv");
 
-TypedValue* tg_7SQLite3_lastinsertrowid(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_lastinsertrowid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -400,7 +400,7 @@ this_ => rdi
 
 long th_7SQLite3_lasterrorcode(ObjectData* this_) asm("_ZN4HPHP9c_SQLite315t_lasterrorcodeEv");
 
-TypedValue* tg_7SQLite3_lasterrorcode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_lasterrorcode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -437,7 +437,7 @@ this_ => rsi
 
 Value* th_7SQLite3_lasterrormsg(Value* _rv, ObjectData* this_) asm("_ZN4HPHP9c_SQLite314t_lasterrormsgEv");
 
-TypedValue* tg_7SQLite3_lasterrormsg(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_lasterrormsg(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -475,8 +475,8 @@ extension => rsi
 
 bool th_7SQLite3_loadextension(ObjectData* this_, Value* extension) asm("_ZN4HPHP9c_SQLite315t_loadextensionERKNS_6StringE");
 
-TypedValue* tg1_7SQLite3_loadextension(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3_loadextension(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3_loadextension(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3_loadextension(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToStringInPlace(args-0);
@@ -484,7 +484,7 @@ TypedValue* tg1_7SQLite3_loadextension(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* tg_7SQLite3_loadextension(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_loadextension(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -527,7 +527,7 @@ this_ => rdi
 
 long th_7SQLite3_changes(ObjectData* this_) asm("_ZN4HPHP9c_SQLite39t_changesEv");
 
-TypedValue* tg_7SQLite3_changes(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_changes(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -565,8 +565,8 @@ sql => rdx
 
 Value* th_7SQLite3_escapestring(Value* _rv, ObjectData* this_, Value* sql) asm("_ZN4HPHP9c_SQLite314t_escapestringERKNS_6StringE");
 
-TypedValue* tg1_7SQLite3_escapestring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3_escapestring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3_escapestring(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3_escapestring(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -575,7 +575,7 @@ TypedValue* tg1_7SQLite3_escapestring(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_7SQLite3_escapestring(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_escapestring(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -621,8 +621,8 @@ sql => rdx
 
 TypedValue* th_7SQLite3_prepare(TypedValue* _rv, ObjectData* this_, Value* sql) asm("_ZN4HPHP9c_SQLite39t_prepareERKNS_6StringE");
 
-TypedValue* tg1_7SQLite3_prepare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3_prepare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3_prepare(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3_prepare(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_7SQLite3_prepare((rv), (this_), &args[-0].m_data);
@@ -630,7 +630,7 @@ TypedValue* tg1_7SQLite3_prepare(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* tg_7SQLite3_prepare(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_prepare(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -675,8 +675,8 @@ sql => rdx
 
 TypedValue* th_7SQLite3_query(TypedValue* _rv, ObjectData* this_, Value* sql) asm("_ZN4HPHP9c_SQLite37t_queryERKNS_6StringE");
 
-TypedValue* tg1_7SQLite3_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3_query(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3_query(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   th_7SQLite3_query((rv), (this_), &args[-0].m_data);
@@ -684,7 +684,7 @@ TypedValue* tg1_7SQLite3_query(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* tg_7SQLite3_query(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_query(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -730,8 +730,8 @@ entire_row => rcx
 
 TypedValue* th_7SQLite3_querysingle(TypedValue* _rv, ObjectData* this_, Value* sql, bool entire_row) asm("_ZN4HPHP9c_SQLite313t_querysingleERKNS_6StringEb");
 
-TypedValue* tg1_7SQLite3_querysingle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3_querysingle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3_querysingle(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3_querysingle(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -749,7 +749,7 @@ TypedValue* tg1_7SQLite3_querysingle(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_7SQLite3_querysingle(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_querysingle(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -795,8 +795,8 @@ argcount => rcx
 
 bool th_7SQLite3_createfunction(ObjectData* this_, Value* name, TypedValue* callback, long argcount) asm("_ZN4HPHP9c_SQLite316t_createfunctionERKNS_6StringERKNS_7VariantEl");
 
-TypedValue* tg1_7SQLite3_createfunction(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3_createfunction(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3_createfunction(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3_createfunction(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -814,7 +814,7 @@ TypedValue* tg1_7SQLite3_createfunction(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* tg_7SQLite3_createfunction(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_createfunction(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -861,8 +861,8 @@ argcount => r8
 
 bool th_7SQLite3_createaggregate(ObjectData* this_, Value* name, TypedValue* step, TypedValue* final, long argcount) asm("_ZN4HPHP9c_SQLite317t_createaggregateERKNS_6StringERKNS_7VariantES6_l");
 
-TypedValue* tg1_7SQLite3_createaggregate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3_createaggregate(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3_createaggregate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3_createaggregate(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -880,7 +880,7 @@ TypedValue* tg1_7SQLite3_createaggregate(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* tg_7SQLite3_createaggregate(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_createaggregate(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -927,8 +927,8 @@ dbname => r8
 
 bool th_7SQLite3_openblob(ObjectData* this_, Value* table, Value* column, long rowid, Value* dbname) asm("_ZN4HPHP9c_SQLite310t_openblobERKNS_6StringES3_lS3_");
 
-TypedValue* tg1_7SQLite3_openblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_7SQLite3_openblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_7SQLite3_openblob(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_7SQLite3_openblob(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -952,7 +952,7 @@ TypedValue* tg1_7SQLite3_openblob(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* tg_7SQLite3_openblob(HPHP::VM::ActRec *ar) {
+TypedValue* tg_7SQLite3_openblob(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1006,8 +1006,8 @@ statement => rdx
 
 void th_11SQLite3Stmt___construct(ObjectData* this_, Value* dbobject, Value* statement) asm("_ZN4HPHP13c_SQLite3Stmt13t___constructERKNS_6ObjectERKNS_6StringE");
 
-TypedValue* tg1_11SQLite3Stmt___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11SQLite3Stmt___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11SQLite3Stmt___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11SQLite3Stmt___construct(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1021,7 +1021,7 @@ TypedValue* tg1_11SQLite3Stmt___construct(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* tg_11SQLite3Stmt___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11SQLite3Stmt___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1065,7 +1065,7 @@ this_ => rdi
 
 long th_11SQLite3Stmt_paramcount(ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt12t_paramcountEv");
 
-TypedValue* tg_11SQLite3Stmt_paramcount(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11SQLite3Stmt_paramcount(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1101,7 +1101,7 @@ this_ => rdi
 
 bool th_11SQLite3Stmt_close(ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt7t_closeEv");
 
-TypedValue* tg_11SQLite3Stmt_close(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11SQLite3Stmt_close(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1137,7 +1137,7 @@ this_ => rdi
 
 bool th_11SQLite3Stmt_reset(ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt7t_resetEv");
 
-TypedValue* tg_11SQLite3Stmt_reset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11SQLite3Stmt_reset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1173,7 +1173,7 @@ this_ => rdi
 
 bool th_11SQLite3Stmt_clear(ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt7t_clearEv");
 
-TypedValue* tg_11SQLite3Stmt_clear(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11SQLite3Stmt_clear(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1212,8 +1212,8 @@ type => rcx
 
 bool th_11SQLite3Stmt_bindparam(ObjectData* this_, TypedValue* name, TypedValue* parameter, long type) asm("_ZN4HPHP13c_SQLite3Stmt11t_bindparamERKNS_7VariantERKNS_14VRefParamValueEl");
 
-TypedValue* tg1_11SQLite3Stmt_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11SQLite3Stmt_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11SQLite3Stmt_bindparam(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11SQLite3Stmt_bindparam(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-2);
@@ -1221,7 +1221,7 @@ TypedValue* tg1_11SQLite3Stmt_bindparam(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* tg_11SQLite3Stmt_bindparam(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11SQLite3Stmt_bindparam(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1267,8 +1267,8 @@ type => rcx
 
 bool th_11SQLite3Stmt_bindvalue(ObjectData* this_, TypedValue* name, TypedValue* parameter, long type) asm("_ZN4HPHP13c_SQLite3Stmt11t_bindvalueERKNS_7VariantES3_l");
 
-TypedValue* tg1_11SQLite3Stmt_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11SQLite3Stmt_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11SQLite3Stmt_bindvalue(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11SQLite3Stmt_bindvalue(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToInt64InPlace(args-2);
@@ -1276,7 +1276,7 @@ TypedValue* tg1_11SQLite3Stmt_bindvalue(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* tg_11SQLite3Stmt_bindvalue(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11SQLite3Stmt_bindvalue(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1320,7 +1320,7 @@ this_ => rsi
 
 TypedValue* th_11SQLite3Stmt_execute(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_SQLite3Stmt9t_executeEv");
 
-TypedValue* tg_11SQLite3Stmt_execute(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11SQLite3Stmt_execute(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1365,7 +1365,7 @@ this_ => rdi
 
 void th_13SQLite3Result___construct(ObjectData* this_) asm("_ZN4HPHP15c_SQLite3Result13t___constructEv");
 
-TypedValue* tg_13SQLite3Result___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13SQLite3Result___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1402,7 +1402,7 @@ this_ => rdi
 
 long th_13SQLite3Result_numcolumns(ObjectData* this_) asm("_ZN4HPHP15c_SQLite3Result12t_numcolumnsEv");
 
-TypedValue* tg_13SQLite3Result_numcolumns(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13SQLite3Result_numcolumns(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1440,8 +1440,8 @@ column => rdx
 
 Value* th_13SQLite3Result_columnname(Value* _rv, ObjectData* this_, long column) asm("_ZN4HPHP15c_SQLite3Result12t_columnnameEl");
 
-TypedValue* tg1_13SQLite3Result_columnname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_13SQLite3Result_columnname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_13SQLite3Result_columnname(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_13SQLite3Result_columnname(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
@@ -1450,7 +1450,7 @@ TypedValue* tg1_13SQLite3Result_columnname(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_13SQLite3Result_columnname(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13SQLite3Result_columnname(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1495,8 +1495,8 @@ column => rsi
 
 long th_13SQLite3Result_columntype(ObjectData* this_, long column) asm("_ZN4HPHP15c_SQLite3Result12t_columntypeEl");
 
-TypedValue* tg1_13SQLite3Result_columntype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_13SQLite3Result_columntype(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_13SQLite3Result_columntype(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_13SQLite3Result_columntype(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToInt64InPlace(args-0);
@@ -1504,7 +1504,7 @@ TypedValue* tg1_13SQLite3Result_columntype(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_13SQLite3Result_columntype(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13SQLite3Result_columntype(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1549,8 +1549,8 @@ mode => rdx
 
 TypedValue* th_13SQLite3Result_fetcharray(TypedValue* _rv, ObjectData* this_, long mode) asm("_ZN4HPHP15c_SQLite3Result12t_fetcharrayEl");
 
-TypedValue* tg1_13SQLite3Result_fetcharray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_13SQLite3Result_fetcharray(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_13SQLite3Result_fetcharray(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_13SQLite3Result_fetcharray(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-0);
   th_13SQLite3Result_fetcharray((rv), (this_), (count > 0) ? (long)(args[-0].m_data.num) : (long)(k_SQLITE3_BOTH));
@@ -1558,7 +1558,7 @@ TypedValue* tg1_13SQLite3Result_fetcharray(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* tg_13SQLite3Result_fetcharray(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13SQLite3Result_fetcharray(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1601,7 +1601,7 @@ this_ => rdi
 
 bool th_13SQLite3Result_reset(ObjectData* this_) asm("_ZN4HPHP15c_SQLite3Result7t_resetEv");
 
-TypedValue* tg_13SQLite3Result_reset(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13SQLite3Result_reset(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1637,7 +1637,7 @@ this_ => rdi
 
 bool th_13SQLite3Result_finalize(ObjectData* this_) asm("_ZN4HPHP15c_SQLite3Result10t_finalizeEv");
 
-TypedValue* tg_13SQLite3Result_finalize(HPHP::VM::ActRec *ar) {
+TypedValue* tg_13SQLite3Result_finalize(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

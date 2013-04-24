@@ -146,7 +146,6 @@ class Exception {
  * @return     mixed   Returns the Exception stack trace as a string.
  */
   final function getTraceAsString() {
-    // works with the new FrameInjection-based stacktrace.
     $i = 0;
     $s = "";
     foreach ($this->getTrace() as $frame) {

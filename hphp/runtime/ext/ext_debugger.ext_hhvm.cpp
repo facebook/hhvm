@@ -35,8 +35,8 @@ clsname => rsi
 
 bool fh_hphpd_install_user_command(Value* cmd, Value* clsname) asm("_ZN4HPHP28f_hphpd_install_user_commandERKNS_6StringES2_");
 
-TypedValue * fg1_hphpd_install_user_command(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphpd_install_user_command(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphpd_install_user_command(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphpd_install_user_command(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -49,7 +49,7 @@ TypedValue * fg1_hphpd_install_user_command(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_hphpd_install_user_command(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphpd_install_user_command(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -89,7 +89,7 @@ _rv => rdi
 
 Value* fh_hphpd_get_user_commands(Value* _rv) asm("_ZN4HPHP25f_hphpd_get_user_commandsEv");
 
-TypedValue* fg_hphpd_get_user_commands(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphpd_get_user_commands(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -122,8 +122,8 @@ condition => rdi
 
 void fh_hphpd_break(bool condition) asm("_ZN4HPHP13f_hphpd_breakEb");
 
-TypedValue * fg1_hphpd_break(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphpd_break(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphpd_break(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphpd_break(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -132,7 +132,7 @@ TypedValue * fg1_hphpd_break(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_hphpd_break(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphpd_break(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -174,8 +174,8 @@ name => rsi
 
 TypedValue* fh_hphpd_get_client(TypedValue* _rv, Value* name) asm("_ZN4HPHP18f_hphpd_get_clientERKNS_6StringE");
 
-TypedValue * fg1_hphpd_get_client(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphpd_get_client(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphpd_get_client(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphpd_get_client(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   String defVal0 = uninit_null();
@@ -184,7 +184,7 @@ TypedValue * fg1_hphpd_get_client(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_hphpd_get_client(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphpd_get_client(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -227,8 +227,8 @@ op => rdx
 
 TypedValue* fh_hphpd_client_ctrl(TypedValue* _rv, Value* name, Value* op) asm("_ZN4HPHP19f_hphpd_client_ctrlERKNS_6StringES2_");
 
-TypedValue * fg1_hphpd_client_ctrl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphpd_client_ctrl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphpd_client_ctrl(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphpd_client_ctrl(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -241,7 +241,7 @@ TypedValue * fg1_hphpd_client_ctrl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_hphpd_client_ctrl(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphpd_client_ctrl(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -290,7 +290,7 @@ this_ => rdi
 
 void th_20DebuggerProxyCmdUser___construct(ObjectData* this_) asm("_ZN4HPHP22c_DebuggerProxyCmdUser13t___constructEv");
 
-TypedValue* tg_20DebuggerProxyCmdUser___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_20DebuggerProxyCmdUser___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -327,7 +327,7 @@ this_ => rdi
 
 bool th_20DebuggerProxyCmdUser_isLocal(ObjectData* this_) asm("_ZN4HPHP22c_DebuggerProxyCmdUser9t_islocalEv");
 
-TypedValue* tg_20DebuggerProxyCmdUser_isLocal(HPHP::VM::ActRec *ar) {
+TypedValue* tg_20DebuggerProxyCmdUser_isLocal(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -365,8 +365,8 @@ cmd => rdx
 
 TypedValue* th_20DebuggerProxyCmdUser_send(TypedValue* _rv, ObjectData* this_, Value* cmd) asm("_ZN4HPHP22c_DebuggerProxyCmdUser6t_sendERKNS_6ObjectE");
 
-TypedValue* tg1_20DebuggerProxyCmdUser_send(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_20DebuggerProxyCmdUser_send(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_20DebuggerProxyCmdUser_send(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_20DebuggerProxyCmdUser_send(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   th_20DebuggerProxyCmdUser_send((rv), (this_), &args[-0].m_data);
@@ -374,7 +374,7 @@ TypedValue* tg1_20DebuggerProxyCmdUser_send(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_20DebuggerProxyCmdUser_send(HPHP::VM::ActRec *ar) {
+TypedValue* tg_20DebuggerProxyCmdUser_send(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -426,7 +426,7 @@ this_ => rdi
 
 void th_21DebuggerClientCmdUser___construct(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser13t___constructEv");
 
-TypedValue* tg_21DebuggerClientCmdUser___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -462,7 +462,7 @@ this_ => rdi
 
 void th_21DebuggerClientCmdUser_quit(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser6t_quitEv");
 
-TypedValue* tg_21DebuggerClientCmdUser_quit(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_quit(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -501,8 +501,8 @@ _argv => rcx
 
 void th_21DebuggerClientCmdUser_print(ObjectData* this_, int64_t _argc, Value* format, Value* _argv) asm("_ZN4HPHP23c_DebuggerClientCmdUser7t_printEiRKNS_6StringERKNS_5ArrayE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_print(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_print(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_print(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_print(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -524,7 +524,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_print(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_print(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_print(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -583,8 +583,8 @@ _argv => rcx
 
 void th_21DebuggerClientCmdUser_help(ObjectData* this_, int64_t _argc, Value* format, Value* _argv) asm("_ZN4HPHP23c_DebuggerClientCmdUser6t_helpEiRKNS_6StringERKNS_5ArrayE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_help(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_help(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_help(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_help(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -606,7 +606,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_help(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_help(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_help(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -665,8 +665,8 @@ _argv => rcx
 
 void th_21DebuggerClientCmdUser_info(ObjectData* this_, int64_t _argc, Value* format, Value* _argv) asm("_ZN4HPHP23c_DebuggerClientCmdUser6t_infoEiRKNS_6StringERKNS_5ArrayE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_info(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_info(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_info(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -688,7 +688,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_info(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_info(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_info(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -747,8 +747,8 @@ _argv => rcx
 
 void th_21DebuggerClientCmdUser_output(ObjectData* this_, int64_t _argc, Value* format, Value* _argv) asm("_ZN4HPHP23c_DebuggerClientCmdUser8t_outputEiRKNS_6StringERKNS_5ArrayE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_output(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_output(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_output(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_output(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -770,7 +770,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_output(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_output(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_output(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -829,8 +829,8 @@ _argv => rcx
 
 void th_21DebuggerClientCmdUser_error(ObjectData* this_, int64_t _argc, Value* format, Value* _argv) asm("_ZN4HPHP23c_DebuggerClientCmdUser7t_errorEiRKNS_6StringERKNS_5ArrayE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_error(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_error(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_error(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -852,7 +852,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_error(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_error(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_error(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -912,8 +912,8 @@ end_line_no => r8
 
 void th_21DebuggerClientCmdUser_code(ObjectData* this_, Value* source, int highlight_line, int start_line_no, int end_line_no) asm("_ZN4HPHP23c_DebuggerClientCmdUser6t_codeERKNS_6StringEiii");
 
-TypedValue* tg1_21DebuggerClientCmdUser_code(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_code(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_code(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_code(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -940,7 +940,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_code(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_code(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_code(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -988,8 +988,8 @@ _argv => r8
 
 TypedValue* th_21DebuggerClientCmdUser_ask(TypedValue* _rv, ObjectData* this_, int64_t _argc, Value* format, Value* _argv) asm("_ZN4HPHP23c_DebuggerClientCmdUser5t_askEiRKNS_6StringERKNS_5ArrayE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_ask(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_ask(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_ask(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_ask(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   Array extraArgs;
@@ -1010,7 +1010,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_ask(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_ask(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_ask(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1068,8 +1068,8 @@ str => rdx
 
 Value* th_21DebuggerClientCmdUser_wrap(Value* _rv, ObjectData* this_, Value* str) asm("_ZN4HPHP23c_DebuggerClientCmdUser6t_wrapERKNS_6StringE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_wrap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_wrap(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_wrap(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_wrap(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -1078,7 +1078,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_wrap(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_wrap(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_wrap(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1122,8 +1122,8 @@ str => rsi
 
 void th_21DebuggerClientCmdUser_helpTitle(ObjectData* this_, Value* str) asm("_ZN4HPHP23c_DebuggerClientCmdUser11t_helptitleERKNS_6StringE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_helpTitle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_helpTitle(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_helpTitle(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_helpTitle(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1132,7 +1132,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpTitle(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_helpTitle(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_helpTitle(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1179,8 +1179,8 @@ _argv => r8
 
 void th_21DebuggerClientCmdUser_helpCmds(ObjectData* this_, int64_t _argc, Value* cmd, Value* desc, Value* _argv) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_helpcmdsEiRKNS_6StringES3_RKNS_5ArrayE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_helpCmds(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_helpCmds(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_helpCmds(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_helpCmds(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1207,7 +1207,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpCmds(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_helpCmds(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_helpCmds(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1264,8 +1264,8 @@ str => rsi
 
 void th_21DebuggerClientCmdUser_helpBody(ObjectData* this_, Value* str) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_helpbodyERKNS_6StringE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_helpBody(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_helpBody(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_helpBody(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_helpBody(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1274,7 +1274,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpBody(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_helpBody(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_helpBody(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1318,8 +1318,8 @@ str => rsi
 
 void th_21DebuggerClientCmdUser_helpSection(ObjectData* this_, Value* str) asm("_ZN4HPHP23c_DebuggerClientCmdUser13t_helpsectionERKNS_6StringE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_helpSection(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_helpSection(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_helpSection(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_helpSection(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1328,7 +1328,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_helpSection(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_helpSection(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_helpSection(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1372,8 +1372,8 @@ str => rsi
 
 void th_21DebuggerClientCmdUser_tutorial(ObjectData* this_, Value* str) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_tutorialERKNS_6StringE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_tutorial(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_tutorial(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_tutorial(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_tutorial(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1382,7 +1382,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_tutorial(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_tutorial(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_tutorial(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1427,7 +1427,7 @@ this_ => rsi
 
 Value* th_21DebuggerClientCmdUser_getCode(Value* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser9t_getcodeEv");
 
-TypedValue* tg_21DebuggerClientCmdUser_getCode(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_getCode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1465,7 +1465,7 @@ this_ => rsi
 
 Value* th_21DebuggerClientCmdUser_getCommand(Value* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser12t_getcommandEv");
 
-TypedValue* tg_21DebuggerClientCmdUser_getCommand(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_getCommand(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1504,8 +1504,8 @@ str => rdx
 
 bool th_21DebuggerClientCmdUser_arg(ObjectData* this_, int index, Value* str) asm("_ZN4HPHP23c_DebuggerClientCmdUser5t_argEiRKNS_6StringE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_arg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_arg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_arg(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_arg(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -1518,7 +1518,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_arg(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_arg(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_arg(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1561,7 +1561,7 @@ this_ => rdi
 
 long th_21DebuggerClientCmdUser_argCount(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_argcountEv");
 
-TypedValue* tg_21DebuggerClientCmdUser_argCount(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_argCount(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1599,8 +1599,8 @@ index => rdx
 
 Value* th_21DebuggerClientCmdUser_argValue(Value* _rv, ObjectData* this_, int index) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_argvalueEi");
 
-TypedValue* tg1_21DebuggerClientCmdUser_argValue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_argValue(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_argValue(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_argValue(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
@@ -1609,7 +1609,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_argValue(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_argValue(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_argValue(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1655,8 +1655,8 @@ index => rdx
 
 Value* th_21DebuggerClientCmdUser_lineRest(Value* _rv, ObjectData* this_, int index) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_linerestEi");
 
-TypedValue* tg1_21DebuggerClientCmdUser_lineRest(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_lineRest(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_lineRest(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_lineRest(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToInt64InPlace(args-0);
@@ -1665,7 +1665,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_lineRest(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_lineRest(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_lineRest(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1710,7 +1710,7 @@ this_ => rsi
 
 Value* th_21DebuggerClientCmdUser_args(Value* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser6t_argsEv");
 
-TypedValue* tg_21DebuggerClientCmdUser_args(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_args(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1749,8 +1749,8 @@ cmd => rdx
 
 TypedValue* th_21DebuggerClientCmdUser_send(TypedValue* _rv, ObjectData* this_, Value* cmd) asm("_ZN4HPHP23c_DebuggerClientCmdUser6t_sendERKNS_6ObjectE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_send(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_send(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_send(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_send(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   th_21DebuggerClientCmdUser_send((rv), (this_), &args[-0].m_data);
@@ -1758,7 +1758,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_send(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_send(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_send(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1803,8 +1803,8 @@ cmd => rdx
 
 TypedValue* th_21DebuggerClientCmdUser_xend(TypedValue* _rv, ObjectData* this_, Value* cmd) asm("_ZN4HPHP23c_DebuggerClientCmdUser6t_xendERKNS_6ObjectE");
 
-TypedValue* tg1_21DebuggerClientCmdUser_xend(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_xend(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_xend(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_xend(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   th_21DebuggerClientCmdUser_xend((rv), (this_), &args[-0].m_data);
@@ -1812,7 +1812,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_xend(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_xend(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_xend(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1856,7 +1856,7 @@ this_ => rsi
 
 TypedValue* th_21DebuggerClientCmdUser_getCurrentLocation(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser20t_getcurrentlocationEv");
 
-TypedValue* tg_21DebuggerClientCmdUser_getCurrentLocation(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_getCurrentLocation(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1893,7 +1893,7 @@ this_ => rsi
 
 TypedValue* th_21DebuggerClientCmdUser_getStackTrace(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser15t_getstacktraceEv");
 
-TypedValue* tg_21DebuggerClientCmdUser_getStackTrace(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_getStackTrace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1929,7 +1929,7 @@ this_ => rdi
 
 long th_21DebuggerClientCmdUser_getFrame(ObjectData* this_) asm("_ZN4HPHP23c_DebuggerClientCmdUser10t_getframeEv");
 
-TypedValue* tg_21DebuggerClientCmdUser_getFrame(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_getFrame(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1965,8 +1965,8 @@ index => rsi
 
 void th_21DebuggerClientCmdUser_printFrame(ObjectData* this_, int index) asm("_ZN4HPHP23c_DebuggerClientCmdUser12t_printframeEi");
 
-TypedValue* tg1_21DebuggerClientCmdUser_printFrame(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_21DebuggerClientCmdUser_printFrame(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_21DebuggerClientCmdUser_printFrame(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_21DebuggerClientCmdUser_printFrame(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1975,7 +1975,7 @@ TypedValue* tg1_21DebuggerClientCmdUser_printFrame(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* tg_21DebuggerClientCmdUser_printFrame(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_printFrame(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2019,7 +2019,7 @@ list => rsi
 
 void th_21DebuggerClientCmdUser_addCompletion(ObjectData* this_, TypedValue* list) asm("_ZN4HPHP23c_DebuggerClientCmdUser15t_addcompletionERKNS_7VariantE");
 
-TypedValue* tg_21DebuggerClientCmdUser_addCompletion(HPHP::VM::ActRec *ar) {
+TypedValue* tg_21DebuggerClientCmdUser_addCompletion(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2065,7 +2065,7 @@ this_ => rdi
 
 void th_14DebuggerClient___construct(ObjectData* this_) asm("_ZN4HPHP16c_DebuggerClient13t___constructEv");
 
-TypedValue* tg_14DebuggerClient___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_14DebuggerClient___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2102,7 +2102,7 @@ this_ => rdi
 
 long th_14DebuggerClient_getState(ObjectData* this_) asm("_ZN4HPHP16c_DebuggerClient10t_getstateEv");
 
-TypedValue* tg_14DebuggerClient_getState(HPHP::VM::ActRec *ar) {
+TypedValue* tg_14DebuggerClient_getState(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2140,7 +2140,7 @@ options => rdx
 
 TypedValue* th_14DebuggerClient_init(TypedValue* _rv, ObjectData* this_, TypedValue* options) asm("_ZN4HPHP16c_DebuggerClient6t_initERKNS_7VariantE");
 
-TypedValue* tg_14DebuggerClient_init(HPHP::VM::ActRec *ar) {
+TypedValue* tg_14DebuggerClient_init(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2179,7 +2179,7 @@ args => rcx
 
 TypedValue* th_14DebuggerClient_processCmd(TypedValue* _rv, ObjectData* this_, TypedValue* cmdName, TypedValue* args) asm("_ZN4HPHP16c_DebuggerClient12t_processcmdERKNS_7VariantES3_");
 
-TypedValue* tg_14DebuggerClient_processCmd(HPHP::VM::ActRec *ar) {
+TypedValue* tg_14DebuggerClient_processCmd(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

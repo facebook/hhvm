@@ -60,10 +60,6 @@ public:
   };
 };
 
-namespace VM {
-  struct ActRec;
-}
-
 void raise_error(const std::string &msg);
 void raise_error(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_error_without_first_frame(const std::string &msg);

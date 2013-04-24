@@ -37,8 +37,8 @@ raw_output => rcx
 
 TypedValue* fh_hash(TypedValue* _rv, Value* algo, Value* data, bool raw_output) asm("_ZN4HPHP6f_hashERKNS_6StringES2_b");
 
-TypedValue * fg1_hash(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hash(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hash(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hash(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -59,7 +59,7 @@ TypedValue * fg1_hash(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_hash(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hash(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -99,7 +99,7 @@ _rv => rdi
 
 Value* fh_hash_algos(Value* _rv) asm("_ZN4HPHP12f_hash_algosEv");
 
-TypedValue* fg_hash_algos(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hash_algos(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -136,8 +136,8 @@ key => rcx
 
 TypedValue* fh_hash_init(TypedValue* _rv, Value* algo, int options, Value* key) asm("_ZN4HPHP11f_hash_initERKNS_6StringEiS2_");
 
-TypedValue * fg1_hash_init(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hash_init(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hash_init(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hash_init(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -159,7 +159,7 @@ TypedValue * fg1_hash_init(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_hash_init(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hash_init(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -202,8 +202,8 @@ raw_output => rcx
 
 TypedValue* fh_hash_file(TypedValue* _rv, Value* algo, Value* filename, bool raw_output) asm("_ZN4HPHP11f_hash_fileERKNS_6StringES2_b");
 
-TypedValue * fg1_hash_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hash_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hash_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hash_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -224,7 +224,7 @@ TypedValue * fg1_hash_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_hash_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hash_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -266,8 +266,8 @@ raw_output => rdx
 
 Value* fh_hash_final(Value* _rv, Value* context, bool raw_output) asm("_ZN4HPHP12f_hash_finalERKNS_6ObjectEb");
 
-TypedValue * fg1_hash_final(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hash_final(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hash_final(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hash_final(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -286,7 +286,7 @@ TypedValue * fg1_hash_final(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_hash_final(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hash_final(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -331,8 +331,8 @@ raw_output => r8
 
 TypedValue* fh_hash_hmac_file(TypedValue* _rv, Value* algo, Value* filename, Value* key, bool raw_output) asm("_ZN4HPHP16f_hash_hmac_fileERKNS_6StringES2_S2_b");
 
-TypedValue * fg1_hash_hmac_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hash_hmac_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hash_hmac_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hash_hmac_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -356,7 +356,7 @@ TypedValue * fg1_hash_hmac_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_hash_hmac_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hash_hmac_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -400,8 +400,8 @@ raw_output => r8
 
 TypedValue* fh_hash_hmac(TypedValue* _rv, Value* algo, Value* data, Value* key, bool raw_output) asm("_ZN4HPHP11f_hash_hmacERKNS_6StringES2_S2_b");
 
-TypedValue * fg1_hash_hmac(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hash_hmac(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hash_hmac(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hash_hmac(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -425,7 +425,7 @@ TypedValue * fg1_hash_hmac(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_hash_hmac(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hash_hmac(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -467,8 +467,8 @@ stream_context => rdx
 
 bool fh_hash_update_file(Value* init_context, Value* filename, Value* stream_context) asm("_ZN4HPHP18f_hash_update_fileERKNS_6ObjectERKNS_6StringES2_");
 
-TypedValue * fg1_hash_update_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hash_update_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hash_update_file(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hash_update_file(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -490,7 +490,7 @@ TypedValue * fg1_hash_update_file(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_hash_update_file(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hash_update_file(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -533,8 +533,8 @@ length => rdx
 
 long fh_hash_update_stream(Value* context, Value* handle, int length) asm("_ZN4HPHP20f_hash_update_streamERKNS_6ObjectES2_i");
 
-TypedValue * fg1_hash_update_stream(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hash_update_stream(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hash_update_stream(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hash_update_stream(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -555,7 +555,7 @@ TypedValue * fg1_hash_update_stream(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_hash_update_stream(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hash_update_stream(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -596,8 +596,8 @@ data => rsi
 
 bool fh_hash_update(Value* context, Value* data) asm("_ZN4HPHP13f_hash_updateERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_hash_update(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hash_update(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hash_update(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hash_update(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -610,7 +610,7 @@ TypedValue * fg1_hash_update(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_hash_update(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hash_update(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -652,8 +652,8 @@ nPart => rdx
 
 long fh_furchash_hphp_ext(Value* key, int len, int nPart) asm("_ZN4HPHP19f_furchash_hphp_extERKNS_6StringEii");
 
-TypedValue * fg1_furchash_hphp_ext(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_furchash_hphp_ext(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_furchash_hphp_ext(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_furchash_hphp_ext(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   if ((args-2)->m_type != KindOfInt64) {
@@ -669,7 +669,7 @@ TypedValue * fg1_furchash_hphp_ext(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_furchash_hphp_ext(HPHP::VM::ActRec *ar) {
+TypedValue* fg_furchash_hphp_ext(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -708,7 +708,7 @@ _ZN4HPHP29f_furchash_hphp_ext_supportedEv
 
 bool fh_furchash_hphp_ext_supported() asm("_ZN4HPHP29f_furchash_hphp_ext_supportedEv");
 
-TypedValue* fg_furchash_hphp_ext_supported(HPHP::VM::ActRec *ar) {
+TypedValue* fg_furchash_hphp_ext_supported(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -743,8 +743,8 @@ seed => rdx
 
 long fh_hphp_murmurhash(Value* key, int len, int seed) asm("_ZN4HPHP17f_hphp_murmurhashERKNS_6StringEii");
 
-TypedValue * fg1_hphp_murmurhash(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_murmurhash(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_murmurhash(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_murmurhash(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   if ((args-2)->m_type != KindOfInt64) {
@@ -760,7 +760,7 @@ TypedValue * fg1_hphp_murmurhash(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t c
   return rv;
 }
 
-TypedValue* fg_hphp_murmurhash(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_murmurhash(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

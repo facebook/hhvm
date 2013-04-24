@@ -38,8 +38,8 @@ mode_directory => r8
 
 TypedValue* fh_mcrypt_module_open(TypedValue* _rv, Value* algorithm, Value* algorithm_directory, Value* mode, Value* mode_directory) asm("_ZN4HPHP20f_mcrypt_module_openERKNS_6StringES2_S2_S2_");
 
-TypedValue * fg1_mcrypt_module_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_module_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_module_open(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_module_open(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-3)->m_type)) {
     tvCastToStringInPlace(args-3);
@@ -58,7 +58,7 @@ TypedValue * fg1_mcrypt_module_open(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_mcrypt_module_open(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_module_open(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -98,8 +98,8 @@ td => rdi
 
 bool fh_mcrypt_module_close(Value* td) asm("_ZN4HPHP21f_mcrypt_module_closeERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_module_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_module_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_module_close(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_module_close(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -107,7 +107,7 @@ TypedValue * fg1_mcrypt_module_close(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_mcrypt_module_close(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_module_close(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -148,8 +148,8 @@ lib_dir => rsi
 
 Value* fh_mcrypt_list_algorithms(Value* _rv, Value* lib_dir) asm("_ZN4HPHP24f_mcrypt_list_algorithmsERKNS_6StringE");
 
-TypedValue * fg1_mcrypt_list_algorithms(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_list_algorithms(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_list_algorithms(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_list_algorithms(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
@@ -158,7 +158,7 @@ TypedValue * fg1_mcrypt_list_algorithms(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_mcrypt_list_algorithms(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_list_algorithms(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -200,8 +200,8 @@ lib_dir => rsi
 
 Value* fh_mcrypt_list_modes(Value* _rv, Value* lib_dir) asm("_ZN4HPHP19f_mcrypt_list_modesERKNS_6StringE");
 
-TypedValue * fg1_mcrypt_list_modes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_list_modes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_list_modes(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_list_modes(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToStringInPlace(args-0);
@@ -210,7 +210,7 @@ TypedValue * fg1_mcrypt_list_modes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t
   return rv;
 }
 
-TypedValue* fg_mcrypt_list_modes(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_list_modes(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -252,8 +252,8 @@ lib_dir => rsi
 
 long fh_mcrypt_module_get_algo_block_size(Value* algorithm, Value* lib_dir) asm("_ZN4HPHP35f_mcrypt_module_get_algo_block_sizeERKNS_6StringES2_");
 
-TypedValue * fg1_mcrypt_module_get_algo_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_module_get_algo_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_module_get_algo_block_size(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_module_get_algo_block_size(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -271,7 +271,7 @@ TypedValue * fg1_mcrypt_module_get_algo_block_size(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* fg_mcrypt_module_get_algo_block_size(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_module_get_algo_block_size(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -312,8 +312,8 @@ lib_dir => rsi
 
 long fh_mcrypt_module_get_algo_key_size(Value* algorithm, Value* lib_dir) asm("_ZN4HPHP33f_mcrypt_module_get_algo_key_sizeERKNS_6StringES2_");
 
-TypedValue * fg1_mcrypt_module_get_algo_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_module_get_algo_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_module_get_algo_key_size(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_module_get_algo_key_size(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   switch (count) {
@@ -331,7 +331,7 @@ TypedValue * fg1_mcrypt_module_get_algo_key_size(TypedValue* rv, HPHP::VM::ActRe
   return rv;
 }
 
-TypedValue* fg_mcrypt_module_get_algo_key_size(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_module_get_algo_key_size(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -373,8 +373,8 @@ lib_dir => rdx
 
 Value* fh_mcrypt_module_get_supported_key_sizes(Value* _rv, Value* algorithm, Value* lib_dir) asm("_ZN4HPHP39f_mcrypt_module_get_supported_key_sizesERKNS_6StringES2_");
 
-TypedValue * fg1_mcrypt_module_get_supported_key_sizes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_module_get_supported_key_sizes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_module_get_supported_key_sizes(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_module_get_supported_key_sizes(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   switch (count) {
@@ -393,7 +393,7 @@ TypedValue * fg1_mcrypt_module_get_supported_key_sizes(TypedValue* rv, HPHP::VM:
   return rv;
 }
 
-TypedValue* fg_mcrypt_module_get_supported_key_sizes(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_module_get_supported_key_sizes(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -435,8 +435,8 @@ lib_dir => rsi
 
 bool fh_mcrypt_module_is_block_algorithm_mode(Value* mode, Value* lib_dir) asm("_ZN4HPHP39f_mcrypt_module_is_block_algorithm_modeERKNS_6StringES2_");
 
-TypedValue * fg1_mcrypt_module_is_block_algorithm_mode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_module_is_block_algorithm_mode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_module_is_block_algorithm_mode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_module_is_block_algorithm_mode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -454,7 +454,7 @@ TypedValue * fg1_mcrypt_module_is_block_algorithm_mode(TypedValue* rv, HPHP::VM:
   return rv;
 }
 
-TypedValue* fg_mcrypt_module_is_block_algorithm_mode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_module_is_block_algorithm_mode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -495,8 +495,8 @@ lib_dir => rsi
 
 bool fh_mcrypt_module_is_block_algorithm(Value* algorithm, Value* lib_dir) asm("_ZN4HPHP34f_mcrypt_module_is_block_algorithmERKNS_6StringES2_");
 
-TypedValue * fg1_mcrypt_module_is_block_algorithm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_module_is_block_algorithm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_module_is_block_algorithm(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_module_is_block_algorithm(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -514,7 +514,7 @@ TypedValue * fg1_mcrypt_module_is_block_algorithm(TypedValue* rv, HPHP::VM::ActR
   return rv;
 }
 
-TypedValue* fg_mcrypt_module_is_block_algorithm(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_module_is_block_algorithm(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -555,8 +555,8 @@ lib_dir => rsi
 
 bool fh_mcrypt_module_is_block_mode(Value* mode, Value* lib_dir) asm("_ZN4HPHP29f_mcrypt_module_is_block_modeERKNS_6StringES2_");
 
-TypedValue * fg1_mcrypt_module_is_block_mode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_module_is_block_mode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_module_is_block_mode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_module_is_block_mode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -574,7 +574,7 @@ TypedValue * fg1_mcrypt_module_is_block_mode(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_mcrypt_module_is_block_mode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_module_is_block_mode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -615,8 +615,8 @@ lib_dir => rsi
 
 bool fh_mcrypt_module_self_test(Value* algorithm, Value* lib_dir) asm("_ZN4HPHP25f_mcrypt_module_self_testERKNS_6StringES2_");
 
-TypedValue * fg1_mcrypt_module_self_test(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_module_self_test(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_module_self_test(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_module_self_test(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   switch (count) {
@@ -634,7 +634,7 @@ TypedValue * fg1_mcrypt_module_self_test(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_mcrypt_module_self_test(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_module_self_test(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -676,8 +676,8 @@ source => rdx
 
 TypedValue* fh_mcrypt_create_iv(TypedValue* _rv, int size, int source) asm("_ZN4HPHP18f_mcrypt_create_ivEii");
 
-TypedValue * fg1_mcrypt_create_iv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_create_iv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_create_iv(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_create_iv(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -695,7 +695,7 @@ TypedValue * fg1_mcrypt_create_iv(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_mcrypt_create_iv(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_create_iv(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -740,8 +740,8 @@ iv => r9
 
 TypedValue* fh_mcrypt_encrypt(TypedValue* _rv, Value* cipher, Value* key, Value* data, Value* mode, Value* iv) asm("_ZN4HPHP16f_mcrypt_encryptERKNS_6StringES2_S2_S2_S2_");
 
-TypedValue * fg1_mcrypt_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_encrypt(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_encrypt(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -768,7 +768,7 @@ TypedValue * fg1_mcrypt_encrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_mcrypt_encrypt(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_encrypt(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -813,8 +813,8 @@ iv => r9
 
 TypedValue* fh_mcrypt_decrypt(TypedValue* _rv, Value* cipher, Value* key, Value* data, Value* mode, Value* iv) asm("_ZN4HPHP16f_mcrypt_decryptERKNS_6StringES2_S2_S2_S2_");
 
-TypedValue * fg1_mcrypt_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_decrypt(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_decrypt(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -841,7 +841,7 @@ TypedValue * fg1_mcrypt_decrypt(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_mcrypt_decrypt(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_decrypt(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -886,8 +886,8 @@ iv => r9
 
 TypedValue* fh_mcrypt_cbc(TypedValue* _rv, Value* cipher, Value* key, Value* data, int mode, Value* iv) asm("_ZN4HPHP12f_mcrypt_cbcERKNS_6StringES2_S2_iS2_");
 
-TypedValue * fg1_mcrypt_cbc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_cbc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_cbc(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_cbc(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -914,7 +914,7 @@ TypedValue * fg1_mcrypt_cbc(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_mcrypt_cbc(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_cbc(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -959,8 +959,8 @@ iv => r9
 
 TypedValue* fh_mcrypt_cfb(TypedValue* _rv, Value* cipher, Value* key, Value* data, int mode, Value* iv) asm("_ZN4HPHP12f_mcrypt_cfbERKNS_6StringES2_S2_iS2_");
 
-TypedValue * fg1_mcrypt_cfb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_cfb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_cfb(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_cfb(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -987,7 +987,7 @@ TypedValue * fg1_mcrypt_cfb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_mcrypt_cfb(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_cfb(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1032,8 +1032,8 @@ iv => r9
 
 TypedValue* fh_mcrypt_ecb(TypedValue* _rv, Value* cipher, Value* key, Value* data, int mode, Value* iv) asm("_ZN4HPHP12f_mcrypt_ecbERKNS_6StringES2_S2_iS2_");
 
-TypedValue * fg1_mcrypt_ecb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_ecb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_ecb(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_ecb(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -1060,7 +1060,7 @@ TypedValue * fg1_mcrypt_ecb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_mcrypt_ecb(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_ecb(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1105,8 +1105,8 @@ iv => r9
 
 TypedValue* fh_mcrypt_ofb(TypedValue* _rv, Value* cipher, Value* key, Value* data, int mode, Value* iv) asm("_ZN4HPHP12f_mcrypt_ofbERKNS_6StringES2_S2_iS2_");
 
-TypedValue * fg1_mcrypt_ofb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_ofb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_ofb(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_ofb(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -1133,7 +1133,7 @@ TypedValue * fg1_mcrypt_ofb(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_mcrypt_ofb(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_ofb(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1175,8 +1175,8 @@ module => rdx
 
 TypedValue* fh_mcrypt_get_block_size(TypedValue* _rv, Value* cipher, Value* module) asm("_ZN4HPHP23f_mcrypt_get_block_sizeERKNS_6StringES2_");
 
-TypedValue * fg1_mcrypt_get_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_get_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_get_block_size(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_get_block_size(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 2
@@ -1194,7 +1194,7 @@ TypedValue * fg1_mcrypt_get_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_mcrypt_get_block_size(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_get_block_size(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1235,8 +1235,8 @@ cipher => rsi
 
 TypedValue* fh_mcrypt_get_cipher_name(TypedValue* _rv, Value* cipher) asm("_ZN4HPHP24f_mcrypt_get_cipher_nameERKNS_6StringE");
 
-TypedValue * fg1_mcrypt_get_cipher_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_get_cipher_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_get_cipher_name(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_get_cipher_name(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToStringInPlace(args-0);
   fh_mcrypt_get_cipher_name((rv), &args[-0].m_data);
@@ -1244,7 +1244,7 @@ TypedValue * fg1_mcrypt_get_cipher_name(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_mcrypt_get_cipher_name(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_get_cipher_name(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1286,8 +1286,8 @@ mode => rdx
 
 TypedValue* fh_mcrypt_get_iv_size(TypedValue* _rv, Value* cipher, Value* mode) asm("_ZN4HPHP20f_mcrypt_get_iv_sizeERKNS_6StringES2_");
 
-TypedValue * fg1_mcrypt_get_iv_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_get_iv_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_get_iv_size(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_get_iv_size(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1300,7 +1300,7 @@ TypedValue * fg1_mcrypt_get_iv_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_mcrypt_get_iv_size(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_get_iv_size(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1341,8 +1341,8 @@ module => rsi
 
 long fh_mcrypt_get_key_size(Value* cipher, Value* module) asm("_ZN4HPHP21f_mcrypt_get_key_sizeERKNS_6StringES2_");
 
-TypedValue * fg1_mcrypt_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_get_key_size(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_get_key_size(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -1355,7 +1355,7 @@ TypedValue * fg1_mcrypt_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_mcrypt_get_key_size(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_get_key_size(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1396,8 +1396,8 @@ td => rsi
 
 Value* fh_mcrypt_enc_get_algorithms_name(Value* _rv, Value* td) asm("_ZN4HPHP32f_mcrypt_enc_get_algorithms_nameERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_enc_get_algorithms_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_enc_get_algorithms_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_enc_get_algorithms_name(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_enc_get_algorithms_name(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -1406,7 +1406,7 @@ TypedValue * fg1_mcrypt_enc_get_algorithms_name(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* fg_mcrypt_enc_get_algorithms_name(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_enc_get_algorithms_name(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1447,8 +1447,8 @@ td => rdi
 
 long fh_mcrypt_enc_get_block_size(Value* td) asm("_ZN4HPHP27f_mcrypt_enc_get_block_sizeERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_enc_get_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_enc_get_block_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_enc_get_block_size(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_enc_get_block_size(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -1456,7 +1456,7 @@ TypedValue * fg1_mcrypt_enc_get_block_size(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_mcrypt_enc_get_block_size(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_enc_get_block_size(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1496,8 +1496,8 @@ td => rdi
 
 long fh_mcrypt_enc_get_iv_size(Value* td) asm("_ZN4HPHP24f_mcrypt_enc_get_iv_sizeERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_enc_get_iv_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_enc_get_iv_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_enc_get_iv_size(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_enc_get_iv_size(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -1505,7 +1505,7 @@ TypedValue * fg1_mcrypt_enc_get_iv_size(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* fg_mcrypt_enc_get_iv_size(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_enc_get_iv_size(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1545,8 +1545,8 @@ td => rdi
 
 long fh_mcrypt_enc_get_key_size(Value* td) asm("_ZN4HPHP25f_mcrypt_enc_get_key_sizeERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_enc_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_enc_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_enc_get_key_size(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_enc_get_key_size(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -1554,7 +1554,7 @@ TypedValue * fg1_mcrypt_enc_get_key_size(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* fg_mcrypt_enc_get_key_size(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_enc_get_key_size(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1595,8 +1595,8 @@ td => rsi
 
 Value* fh_mcrypt_enc_get_modes_name(Value* _rv, Value* td) asm("_ZN4HPHP27f_mcrypt_enc_get_modes_nameERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_enc_get_modes_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_enc_get_modes_name(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_enc_get_modes_name(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_enc_get_modes_name(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -1605,7 +1605,7 @@ TypedValue * fg1_mcrypt_enc_get_modes_name(TypedValue* rv, HPHP::VM::ActRec* ar,
   return rv;
 }
 
-TypedValue* fg_mcrypt_enc_get_modes_name(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_enc_get_modes_name(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1647,8 +1647,8 @@ td => rsi
 
 Value* fh_mcrypt_enc_get_supported_key_sizes(Value* _rv, Value* td) asm("_ZN4HPHP36f_mcrypt_enc_get_supported_key_sizesERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_enc_get_supported_key_sizes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_enc_get_supported_key_sizes(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_enc_get_supported_key_sizes(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_enc_get_supported_key_sizes(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfArray;
   tvCastToObjectInPlace(args-0);
@@ -1657,7 +1657,7 @@ TypedValue * fg1_mcrypt_enc_get_supported_key_sizes(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* fg_mcrypt_enc_get_supported_key_sizes(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_enc_get_supported_key_sizes(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1698,8 +1698,8 @@ td => rdi
 
 bool fh_mcrypt_enc_is_block_algorithm_mode(Value* td) asm("_ZN4HPHP36f_mcrypt_enc_is_block_algorithm_modeERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_enc_is_block_algorithm_mode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_enc_is_block_algorithm_mode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_enc_is_block_algorithm_mode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_enc_is_block_algorithm_mode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1707,7 +1707,7 @@ TypedValue * fg1_mcrypt_enc_is_block_algorithm_mode(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* fg_mcrypt_enc_is_block_algorithm_mode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_enc_is_block_algorithm_mode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1747,8 +1747,8 @@ td => rdi
 
 bool fh_mcrypt_enc_is_block_algorithm(Value* td) asm("_ZN4HPHP31f_mcrypt_enc_is_block_algorithmERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_enc_is_block_algorithm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_enc_is_block_algorithm(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_enc_is_block_algorithm(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_enc_is_block_algorithm(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1756,7 +1756,7 @@ TypedValue * fg1_mcrypt_enc_is_block_algorithm(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_mcrypt_enc_is_block_algorithm(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_enc_is_block_algorithm(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1796,8 +1796,8 @@ td => rdi
 
 bool fh_mcrypt_enc_is_block_mode(Value* td) asm("_ZN4HPHP26f_mcrypt_enc_is_block_modeERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_enc_is_block_mode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_enc_is_block_mode(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_enc_is_block_mode(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_enc_is_block_mode(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1805,7 +1805,7 @@ TypedValue * fg1_mcrypt_enc_is_block_mode(TypedValue* rv, HPHP::VM::ActRec* ar, 
   return rv;
 }
 
-TypedValue* fg_mcrypt_enc_is_block_mode(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_enc_is_block_mode(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1845,8 +1845,8 @@ td => rdi
 
 long fh_mcrypt_enc_self_test(Value* td) asm("_ZN4HPHP22f_mcrypt_enc_self_testERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_enc_self_test(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_enc_self_test(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_enc_self_test(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_enc_self_test(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   tvCastToObjectInPlace(args-0);
@@ -1854,7 +1854,7 @@ TypedValue * fg1_mcrypt_enc_self_test(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* fg_mcrypt_enc_self_test(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_enc_self_test(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1896,8 +1896,8 @@ data => rdx
 
 TypedValue* fh_mcrypt_generic(TypedValue* _rv, Value* td, Value* data) asm("_ZN4HPHP16f_mcrypt_genericERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_mcrypt_generic(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_generic(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_generic(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_generic(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -1910,7 +1910,7 @@ TypedValue * fg1_mcrypt_generic(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_mcrypt_generic(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_generic(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1952,8 +1952,8 @@ iv => rdx
 
 long fh_mcrypt_generic_init(Value* td, Value* key, Value* iv) asm("_ZN4HPHP21f_mcrypt_generic_initERKNS_6ObjectERKNS_6StringES5_");
 
-TypedValue * fg1_mcrypt_generic_init(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_generic_init(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_generic_init(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_generic_init(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfInt64;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -1969,7 +1969,7 @@ TypedValue * fg1_mcrypt_generic_init(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* fg_mcrypt_generic_init(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_generic_init(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2011,8 +2011,8 @@ data => rdx
 
 TypedValue* fh_mdecrypt_generic(TypedValue* _rv, Value* td, Value* data) asm("_ZN4HPHP18f_mdecrypt_genericERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_mdecrypt_generic(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mdecrypt_generic(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mdecrypt_generic(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mdecrypt_generic(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
     tvCastToStringInPlace(args-1);
@@ -2025,7 +2025,7 @@ TypedValue * fg1_mdecrypt_generic(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* fg_mdecrypt_generic(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mdecrypt_generic(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2065,8 +2065,8 @@ td => rdi
 
 bool fh_mcrypt_generic_deinit(Value* td) asm("_ZN4HPHP23f_mcrypt_generic_deinitERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_generic_deinit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_generic_deinit(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_generic_deinit(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_generic_deinit(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -2074,7 +2074,7 @@ TypedValue * fg1_mcrypt_generic_deinit(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_mcrypt_generic_deinit(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_generic_deinit(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -2114,8 +2114,8 @@ td => rdi
 
 bool fh_mcrypt_generic_end(Value* td) asm("_ZN4HPHP20f_mcrypt_generic_endERKNS_6ObjectE");
 
-TypedValue * fg1_mcrypt_generic_end(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_mcrypt_generic_end(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_mcrypt_generic_end(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_mcrypt_generic_end(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -2123,7 +2123,7 @@ TypedValue * fg1_mcrypt_generic_end(TypedValue* rv, HPHP::VM::ActRec* ar, int64_
   return rv;
 }
 
-TypedValue* fg_mcrypt_generic_end(HPHP::VM::ActRec *ar) {
+TypedValue* fg_mcrypt_generic_end(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

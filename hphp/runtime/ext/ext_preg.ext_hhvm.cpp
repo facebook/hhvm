@@ -37,8 +37,8 @@ flags => rcx
 
 TypedValue* fh_preg_grep(TypedValue* _rv, Value* pattern, Value* input, int flags) asm("_ZN4HPHP11f_preg_grepERKNS_6StringERKNS_5ArrayEi");
 
-TypedValue * fg1_preg_grep(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_preg_grep(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_preg_grep(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_preg_grep(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -59,7 +59,7 @@ TypedValue * fg1_preg_grep(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) 
   return rv;
 }
 
-TypedValue* fg_preg_grep(HPHP::VM::ActRec *ar) {
+TypedValue* fg_preg_grep(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -104,8 +104,8 @@ offset => r9
 
 TypedValue* fh_preg_match(TypedValue* _rv, Value* pattern, Value* subject, TypedValue* matches, int flags, int offset) asm("_ZN4HPHP12f_preg_matchERKNS_6StringES2_RKNS_14VRefParamValueEii");
 
-TypedValue * fg1_preg_match(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_preg_match(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_preg_match(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_preg_match(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -132,7 +132,7 @@ TypedValue * fg1_preg_match(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_preg_match(HPHP::VM::ActRec *ar) {
+TypedValue* fg_preg_match(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -178,8 +178,8 @@ offset => r9
 
 TypedValue* fh_preg_match_all(TypedValue* _rv, Value* pattern, Value* subject, TypedValue* matches, int flags, int offset) asm("_ZN4HPHP16f_preg_match_allERKNS_6StringES2_RKNS_14VRefParamValueEii");
 
-TypedValue * fg1_preg_match_all(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_preg_match_all(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_preg_match_all(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_preg_match_all(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 5
@@ -204,7 +204,7 @@ TypedValue * fg1_preg_match_all(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t co
   return rv;
 }
 
-TypedValue* fg_preg_match_all(HPHP::VM::ActRec *ar) {
+TypedValue* fg_preg_match_all(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -249,8 +249,8 @@ count => r9
 
 TypedValue* fh_preg_replace(TypedValue* _rv, TypedValue* pattern, TypedValue* replacement, TypedValue* subject, int limit, TypedValue* count) asm("_ZN4HPHP14f_preg_replaceERKNS_7VariantES2_S2_iRKNS_14VRefParamValueE");
 
-TypedValue * fg1_preg_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_preg_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_preg_replace(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_preg_replace(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-3);
   VRefParamValue defVal4 = uninit_null();
@@ -259,7 +259,7 @@ TypedValue * fg1_preg_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_preg_replace(HPHP::VM::ActRec *ar) {
+TypedValue* fg_preg_replace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -305,8 +305,8 @@ count => r9
 
 TypedValue* fh_preg_replace_callback(TypedValue* _rv, TypedValue* pattern, TypedValue* callback, TypedValue* subject, int limit, TypedValue* count) asm("_ZN4HPHP23f_preg_replace_callbackERKNS_7VariantES2_S2_iRKNS_14VRefParamValueE");
 
-TypedValue * fg1_preg_replace_callback(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_preg_replace_callback(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_preg_replace_callback(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_preg_replace_callback(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToInt64InPlace(args-3);
   VRefParamValue defVal4 = uninit_null();
@@ -315,7 +315,7 @@ TypedValue * fg1_preg_replace_callback(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* fg_preg_replace_callback(HPHP::VM::ActRec *ar) {
+TypedValue* fg_preg_replace_callback(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -360,8 +360,8 @@ flags => r8
 
 TypedValue* fh_preg_split(TypedValue* _rv, TypedValue* pattern, TypedValue* subject, int limit, int flags) asm("_ZN4HPHP12f_preg_splitERKNS_7VariantES2_ii");
 
-TypedValue * fg1_preg_split(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_preg_split(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_preg_split(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_preg_split(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 4
@@ -380,7 +380,7 @@ TypedValue * fg1_preg_split(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_preg_split(HPHP::VM::ActRec *ar) {
+TypedValue* fg_preg_split(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -422,8 +422,8 @@ delimiter => rdx
 
 Value* fh_preg_quote(Value* _rv, Value* str, Value* delimiter) asm("_ZN4HPHP12f_preg_quoteERKNS_6StringES2_");
 
-TypedValue * fg1_preg_quote(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_preg_quote(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_preg_quote(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_preg_quote(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -442,7 +442,7 @@ TypedValue * fg1_preg_quote(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count)
   return rv;
 }
 
-TypedValue* fg_preg_quote(HPHP::VM::ActRec *ar) {
+TypedValue* fg_preg_quote(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -482,7 +482,7 @@ _ZN4HPHP17f_preg_last_errorEv
 
 long fh_preg_last_error() asm("_ZN4HPHP17f_preg_last_errorEv");
 
-TypedValue* fg_preg_last_error(HPHP::VM::ActRec *ar) {
+TypedValue* fg_preg_last_error(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -518,8 +518,8 @@ str => rcx
 
 Value* fh_ereg_replace(Value* _rv, Value* pattern, Value* replacement, Value* str) asm("_ZN4HPHP14f_ereg_replaceERKNS_6StringES2_S2_");
 
-TypedValue * fg1_ereg_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_ereg_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_ereg_replace(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_ereg_replace(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -536,7 +536,7 @@ TypedValue * fg1_ereg_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t coun
   return rv;
 }
 
-TypedValue* fg_ereg_replace(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ereg_replace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -580,8 +580,8 @@ str => rcx
 
 Value* fh_eregi_replace(Value* _rv, Value* pattern, Value* replacement, Value* str) asm("_ZN4HPHP15f_eregi_replaceERKNS_6StringES2_S2_");
 
-TypedValue * fg1_eregi_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_eregi_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_eregi_replace(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_eregi_replace(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   if (!IS_STRING_TYPE((args-2)->m_type)) {
@@ -598,7 +598,7 @@ TypedValue * fg1_eregi_replace(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t cou
   return rv;
 }
 
-TypedValue* fg_eregi_replace(HPHP::VM::ActRec *ar) {
+TypedValue* fg_eregi_replace(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -642,8 +642,8 @@ regs => rcx
 
 TypedValue* fh_ereg(TypedValue* _rv, Value* pattern, Value* str, TypedValue* regs) asm("_ZN4HPHP6f_eregERKNS_6StringES2_RKNS_14VRefParamValueE");
 
-TypedValue * fg1_ereg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_ereg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_ereg(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_ereg(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -662,7 +662,7 @@ TypedValue * fg1_ereg(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_ereg(HPHP::VM::ActRec *ar) {
+TypedValue* fg_ereg(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -706,8 +706,8 @@ regs => rcx
 
 TypedValue* fh_eregi(TypedValue* _rv, Value* pattern, Value* str, TypedValue* regs) asm("_ZN4HPHP7f_eregiERKNS_6StringES2_RKNS_14VRefParamValueE");
 
-TypedValue * fg1_eregi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_eregi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_eregi(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_eregi(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -726,7 +726,7 @@ TypedValue * fg1_eregi(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_eregi(HPHP::VM::ActRec *ar) {
+TypedValue* fg_eregi(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -770,8 +770,8 @@ limit => rcx
 
 TypedValue* fh_split(TypedValue* _rv, Value* pattern, Value* str, int limit) asm("_ZN4HPHP7f_splitERKNS_6StringES2_i");
 
-TypedValue * fg1_split(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_split(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_split(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_split(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -792,7 +792,7 @@ TypedValue * fg1_split(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_split(HPHP::VM::ActRec *ar) {
+TypedValue* fg_split(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -835,8 +835,8 @@ limit => rcx
 
 TypedValue* fh_spliti(TypedValue* _rv, Value* pattern, Value* str, int limit) asm("_ZN4HPHP8f_splitiERKNS_6StringES2_i");
 
-TypedValue * fg1_spliti(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_spliti(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_spliti(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_spliti(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   switch (count) {
   default: // count >= 3
@@ -857,7 +857,7 @@ TypedValue * fg1_spliti(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
   return rv;
 }
 
-TypedValue* fg_spliti(HPHP::VM::ActRec *ar) {
+TypedValue* fg_spliti(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -898,8 +898,8 @@ str => rsi
 
 Value* fh_sql_regcase(Value* _rv, Value* str) asm("_ZN4HPHP13f_sql_regcaseERKNS_6StringE");
 
-TypedValue * fg1_sql_regcase(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_sql_regcase(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_sql_regcase(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_sql_regcase(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToStringInPlace(args-0);
@@ -908,7 +908,7 @@ TypedValue * fg1_sql_regcase(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count
   return rv;
 }
 
-TypedValue* fg_sql_regcase(HPHP::VM::ActRec *ar) {
+TypedValue* fg_sql_regcase(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

@@ -43,7 +43,7 @@ this_ => rdi
 
 void th_11ImageSprite___construct(ObjectData* this_) asm("_ZN4HPHP13c_ImageSprite13t___constructEv");
 
-TypedValue* tg_11ImageSprite___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -83,8 +83,8 @@ options => rcx
 
 Value* th_11ImageSprite_addFile(Value* _rv, ObjectData* this_, Value* file, Value* options) asm("_ZN4HPHP13c_ImageSprite9t_addfileERKNS_6StringERKNS_5ArrayE");
 
-TypedValue* tg1_11ImageSprite_addFile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11ImageSprite_addFile(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11ImageSprite_addFile(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11ImageSprite_addFile(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -104,7 +104,7 @@ TypedValue* tg1_11ImageSprite_addFile(TypedValue* rv, HPHP::VM::ActRec* ar, int6
   return rv;
 }
 
-TypedValue* tg_11ImageSprite_addFile(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite_addFile(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -153,8 +153,8 @@ options => r8
 
 Value* th_11ImageSprite_addString(Value* _rv, ObjectData* this_, Value* id, Value* data, Value* options) asm("_ZN4HPHP13c_ImageSprite11t_addstringERKNS_6StringES3_RKNS_5ArrayE");
 
-TypedValue* tg1_11ImageSprite_addString(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11ImageSprite_addString(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11ImageSprite_addString(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11ImageSprite_addString(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -177,7 +177,7 @@ TypedValue* tg1_11ImageSprite_addString(TypedValue* rv, HPHP::VM::ActRec* ar, in
   return rv;
 }
 
-TypedValue* tg_11ImageSprite_addString(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite_addString(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -226,8 +226,8 @@ Options => r8
 
 Value* th_11ImageSprite_addUrl(Value* _rv, ObjectData* this_, Value* url, int timeout_ms, Value* Options) asm("_ZN4HPHP13c_ImageSprite8t_addurlERKNS_6StringEiRKNS_5ArrayE");
 
-TypedValue* tg1_11ImageSprite_addUrl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11ImageSprite_addUrl(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11ImageSprite_addUrl(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11ImageSprite_addUrl(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   switch (count) {
@@ -251,7 +251,7 @@ TypedValue* tg1_11ImageSprite_addUrl(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_11ImageSprite_addUrl(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite_addUrl(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -298,7 +298,7 @@ paths => rdx
 
 Value* th_11ImageSprite_clear(Value* _rv, ObjectData* this_, TypedValue* paths) asm("_ZN4HPHP13c_ImageSprite7t_clearERKNS_7VariantE");
 
-TypedValue* tg_11ImageSprite_clear(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite_clear(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -338,8 +338,8 @@ block => rdx
 
 Value* th_11ImageSprite_loadDims(Value* _rv, ObjectData* this_, bool block) asm("_ZN4HPHP13c_ImageSprite10t_loaddimsEb");
 
-TypedValue* tg1_11ImageSprite_loadDims(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11ImageSprite_loadDims(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11ImageSprite_loadDims(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11ImageSprite_loadDims(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToBooleanInPlace(args-0);
@@ -348,7 +348,7 @@ TypedValue* tg1_11ImageSprite_loadDims(TypedValue* rv, HPHP::VM::ActRec* ar, int
   return rv;
 }
 
-TypedValue* tg_11ImageSprite_loadDims(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite_loadDims(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -394,8 +394,8 @@ block => rdx
 
 Value* th_11ImageSprite_loadImages(Value* _rv, ObjectData* this_, bool block) asm("_ZN4HPHP13c_ImageSprite12t_loadimagesEb");
 
-TypedValue* tg1_11ImageSprite_loadImages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11ImageSprite_loadImages(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11ImageSprite_loadImages(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11ImageSprite_loadImages(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToBooleanInPlace(args-0);
@@ -404,7 +404,7 @@ TypedValue* tg1_11ImageSprite_loadImages(TypedValue* rv, HPHP::VM::ActRec* ar, i
   return rv;
 }
 
-TypedValue* tg_11ImageSprite_loadImages(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite_loadImages(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -452,8 +452,8 @@ quality => r8
 
 Value* th_11ImageSprite_output(Value* _rv, ObjectData* this_, Value* output_file, Value* format, int quality) asm("_ZN4HPHP13c_ImageSprite8t_outputERKNS_6StringES3_i");
 
-TypedValue* tg1_11ImageSprite_output(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11ImageSprite_output(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11ImageSprite_output(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11ImageSprite_output(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -478,7 +478,7 @@ TypedValue* tg1_11ImageSprite_output(TypedValue* rv, HPHP::VM::ActRec* ar, int64
   return rv;
 }
 
-TypedValue* tg_11ImageSprite_output(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite_output(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -528,8 +528,8 @@ verbose => r9
 
 Value* th_11ImageSprite_css(Value* _rv, ObjectData* this_, Value* css_namespace, Value* sprite_file, Value* output_file, bool verbose) asm("_ZN4HPHP13c_ImageSprite5t_cssERKNS_6StringES3_S3_b");
 
-TypedValue* tg1_11ImageSprite_css(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
-TypedValue* tg1_11ImageSprite_css(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count, ObjectData* this_) {
+TypedValue* tg1_11ImageSprite_css(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) __attribute__((noinline,cold));
+TypedValue* tg1_11ImageSprite_css(TypedValue* rv, ActRec* ar, int64_t count, ObjectData* this_) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   switch (count) {
@@ -556,7 +556,7 @@ TypedValue* tg1_11ImageSprite_css(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t 
   return rv;
 }
 
-TypedValue* tg_11ImageSprite_css(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite_css(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -601,7 +601,7 @@ this_ => rsi
 
 Value* th_11ImageSprite_getErrors(Value* _rv, ObjectData* this_) asm("_ZN4HPHP13c_ImageSprite11t_geterrorsEv");
 
-TypedValue* tg_11ImageSprite_getErrors(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite_getErrors(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -639,7 +639,7 @@ this_ => rsi
 
 Value* th_11ImageSprite_mapping(Value* _rv, ObjectData* this_) asm("_ZN4HPHP13c_ImageSprite9t_mappingEv");
 
-TypedValue* tg_11ImageSprite_mapping(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite_mapping(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -677,7 +677,7 @@ this_ => rsi
 
 TypedValue* th_11ImageSprite___destruct(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP13c_ImageSprite12t___destructEv");
 
-TypedValue* tg_11ImageSprite___destruct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_11ImageSprite___destruct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

@@ -433,9 +433,9 @@ PhpFile *FileRepository::readHhbc(const std::string &name,
 PhpFile *FileRepository::parseFile(const std::string &name,
                                    const FileInfo &fileInfo) {
   MD5 md5 = MD5(fileInfo.m_unitMd5.c_str());
-  VM::Unit* unit = VM::compile_file(fileInfo.m_inputString->data(),
-                                    fileInfo.m_inputString->size(),
-                                    md5, name.c_str());
+  VM::Unit* unit = compile_file(fileInfo.m_inputString->data(),
+                                fileInfo.m_inputString->size(),
+                                md5, name.c_str());
   PhpFile *p = new PhpFile(name, fileInfo.m_srcRoot, fileInfo.m_relPath,
                            fileInfo.m_md5, unit);
   return p;

@@ -38,8 +38,8 @@ flags => r8
 
 Value* fh_hphp_recursiveiteratoriterator___construct(Value* _rv, Value* obj, Value* iterator, long mode, long flags) asm("_ZN4HPHP44f_hphp_recursiveiteratoriterator___constructERKNS_6ObjectES2_ll");
 
-TypedValue * fg1_hphp_recursiveiteratoriterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursiveiteratoriterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursiveiteratoriterator___construct(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursiveiteratoriterator___construct(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   if ((args-3)->m_type != KindOfInt64) {
@@ -59,7 +59,7 @@ TypedValue * fg1_hphp_recursiveiteratoriterator___construct(TypedValue* rv, HPHP
   return rv;
 }
 
-TypedValue* fg_hphp_recursiveiteratoriterator___construct(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursiveiteratoriterator___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -101,8 +101,8 @@ obj => rsi
 
 Value* fh_hphp_recursiveiteratoriterator_getinneriterator(Value* _rv, Value* obj) asm("_ZN4HPHP49f_hphp_recursiveiteratoriterator_getinneriteratorERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursiveiteratoriterator_getinneriterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursiveiteratoriterator_getinneriterator(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursiveiteratoriterator_getinneriterator(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursiveiteratoriterator_getinneriterator(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
@@ -111,7 +111,7 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_getinneriterator(TypedValue* rv,
   return rv;
 }
 
-TypedValue* fg_hphp_recursiveiteratoriterator_getinneriterator(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursiveiteratoriterator_getinneriterator(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -153,8 +153,8 @@ obj => rsi
 
 TypedValue* fh_hphp_recursiveiteratoriterator_current(TypedValue* _rv, Value* obj) asm("_ZN4HPHP40f_hphp_recursiveiteratoriterator_currentERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursiveiteratoriterator_current(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursiveiteratoriterator_current(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursiveiteratoriterator_current(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursiveiteratoriterator_current(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursiveiteratoriterator_current((rv), &args[-0].m_data);
@@ -162,7 +162,7 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_current(TypedValue* rv, HPHP::VM
   return rv;
 }
 
-TypedValue* fg_hphp_recursiveiteratoriterator_current(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursiveiteratoriterator_current(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -203,8 +203,8 @@ obj => rsi
 
 TypedValue* fh_hphp_recursiveiteratoriterator_key(TypedValue* _rv, Value* obj) asm("_ZN4HPHP36f_hphp_recursiveiteratoriterator_keyERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursiveiteratoriterator_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursiveiteratoriterator_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursiveiteratoriterator_key(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursiveiteratoriterator_key(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursiveiteratoriterator_key((rv), &args[-0].m_data);
@@ -212,7 +212,7 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_key(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* fg_hphp_recursiveiteratoriterator_key(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursiveiteratoriterator_key(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -251,8 +251,8 @@ obj => rdi
 
 void fh_hphp_recursiveiteratoriterator_next(Value* obj) asm("_ZN4HPHP37f_hphp_recursiveiteratoriterator_nextERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursiveiteratoriterator_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursiveiteratoriterator_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursiveiteratoriterator_next(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursiveiteratoriterator_next(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -261,7 +261,7 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_next(TypedValue* rv, HPHP::VM::A
   return rv;
 }
 
-TypedValue* fg_hphp_recursiveiteratoriterator_next(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursiveiteratoriterator_next(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -301,8 +301,8 @@ obj => rdi
 
 void fh_hphp_recursiveiteratoriterator_rewind(Value* obj) asm("_ZN4HPHP39f_hphp_recursiveiteratoriterator_rewindERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursiveiteratoriterator_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursiveiteratoriterator_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursiveiteratoriterator_rewind(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursiveiteratoriterator_rewind(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -311,7 +311,7 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_rewind(TypedValue* rv, HPHP::VM:
   return rv;
 }
 
-TypedValue* fg_hphp_recursiveiteratoriterator_rewind(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursiveiteratoriterator_rewind(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -352,8 +352,8 @@ obj => rdi
 
 bool fh_hphp_recursiveiteratoriterator_valid(Value* obj) asm("_ZN4HPHP38f_hphp_recursiveiteratoriterator_validERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursiveiteratoriterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursiveiteratoriterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursiveiteratoriterator_valid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursiveiteratoriterator_valid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -361,7 +361,7 @@ TypedValue * fg1_hphp_recursiveiteratoriterator_valid(TypedValue* rv, HPHP::VM::
   return rv;
 }
 
-TypedValue* fg_hphp_recursiveiteratoriterator_valid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursiveiteratoriterator_valid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -402,8 +402,8 @@ path => rsi
 
 bool fh_hphp_directoryiterator___construct(Value* obj, Value* path) asm("_ZN4HPHP36f_hphp_directoryiterator___constructERKNS_6ObjectERKNS_6StringE");
 
-TypedValue * fg1_hphp_directoryiterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_directoryiterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_directoryiterator___construct(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_directoryiterator___construct(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if (!IS_STRING_TYPE((args-1)->m_type)) {
@@ -416,7 +416,7 @@ TypedValue * fg1_hphp_directoryiterator___construct(TypedValue* rv, HPHP::VM::Ac
   return rv;
 }
 
-TypedValue* fg_hphp_directoryiterator___construct(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_directoryiterator___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -457,8 +457,8 @@ obj => rsi
 
 TypedValue* fh_hphp_directoryiterator_key(TypedValue* _rv, Value* obj) asm("_ZN4HPHP28f_hphp_directoryiterator_keyERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_directoryiterator_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_directoryiterator_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_directoryiterator_key(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_directoryiterator_key(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_hphp_directoryiterator_key((rv), &args[-0].m_data);
@@ -466,7 +466,7 @@ TypedValue * fg1_hphp_directoryiterator_key(TypedValue* rv, HPHP::VM::ActRec* ar
   return rv;
 }
 
-TypedValue* fg_hphp_directoryiterator_key(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_directoryiterator_key(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -505,8 +505,8 @@ obj => rdi
 
 void fh_hphp_directoryiterator_next(Value* obj) asm("_ZN4HPHP29f_hphp_directoryiterator_nextERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_directoryiterator_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_directoryiterator_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_directoryiterator_next(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_directoryiterator_next(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -515,7 +515,7 @@ TypedValue * fg1_hphp_directoryiterator_next(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_hphp_directoryiterator_next(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_directoryiterator_next(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -555,8 +555,8 @@ obj => rdi
 
 void fh_hphp_directoryiterator_rewind(Value* obj) asm("_ZN4HPHP31f_hphp_directoryiterator_rewindERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_directoryiterator_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_directoryiterator_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_directoryiterator_rewind(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_directoryiterator_rewind(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -565,7 +565,7 @@ TypedValue * fg1_hphp_directoryiterator_rewind(TypedValue* rv, HPHP::VM::ActRec*
   return rv;
 }
 
-TypedValue* fg_hphp_directoryiterator_rewind(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_directoryiterator_rewind(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -606,8 +606,8 @@ position => rsi
 
 void fh_hphp_directoryiterator_seek(Value* obj, long position) asm("_ZN4HPHP29f_hphp_directoryiterator_seekERKNS_6ObjectEl");
 
-TypedValue * fg1_hphp_directoryiterator_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_directoryiterator_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_directoryiterator_seek(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_directoryiterator_seek(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -621,7 +621,7 @@ TypedValue * fg1_hphp_directoryiterator_seek(TypedValue* rv, HPHP::VM::ActRec* a
   return rv;
 }
 
-TypedValue* fg_hphp_directoryiterator_seek(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_directoryiterator_seek(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -663,8 +663,8 @@ obj => rsi
 
 TypedValue* fh_hphp_directoryiterator_current(TypedValue* _rv, Value* obj) asm("_ZN4HPHP32f_hphp_directoryiterator_currentERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_directoryiterator_current(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_directoryiterator_current(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_directoryiterator_current(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_directoryiterator_current(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_hphp_directoryiterator_current((rv), &args[-0].m_data);
@@ -672,7 +672,7 @@ TypedValue * fg1_hphp_directoryiterator_current(TypedValue* rv, HPHP::VM::ActRec
   return rv;
 }
 
-TypedValue* fg_hphp_directoryiterator_current(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_directoryiterator_current(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -713,8 +713,8 @@ obj => rsi
 
 Value* fh_hphp_directoryiterator___tostring(Value* _rv, Value* obj) asm("_ZN4HPHP35f_hphp_directoryiterator___tostringERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_directoryiterator___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_directoryiterator___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_directoryiterator___tostring(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_directoryiterator___tostring(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -723,7 +723,7 @@ TypedValue * fg1_hphp_directoryiterator___tostring(TypedValue* rv, HPHP::VM::Act
   return rv;
 }
 
-TypedValue* fg_hphp_directoryiterator___tostring(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_directoryiterator___tostring(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -764,8 +764,8 @@ obj => rdi
 
 bool fh_hphp_directoryiterator_valid(Value* obj) asm("_ZN4HPHP30f_hphp_directoryiterator_validERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_directoryiterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_directoryiterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_directoryiterator_valid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_directoryiterator_valid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -773,7 +773,7 @@ TypedValue * fg1_hphp_directoryiterator_valid(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_hphp_directoryiterator_valid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_directoryiterator_valid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -813,8 +813,8 @@ obj => rdi
 
 bool fh_hphp_directoryiterator_isdot(Value* obj) asm("_ZN4HPHP30f_hphp_directoryiterator_isdotERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_directoryiterator_isdot(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_directoryiterator_isdot(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_directoryiterator_isdot(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_directoryiterator_isdot(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -822,7 +822,7 @@ TypedValue * fg1_hphp_directoryiterator_isdot(TypedValue* rv, HPHP::VM::ActRec* 
   return rv;
 }
 
-TypedValue* fg_hphp_directoryiterator_isdot(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_directoryiterator_isdot(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -864,8 +864,8 @@ flags => rdx
 
 bool fh_hphp_recursivedirectoryiterator___construct(Value* obj, Value* path, long flags) asm("_ZN4HPHP45f_hphp_recursivedirectoryiterator___constructERKNS_6ObjectERKNS_6StringEl");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator___construct(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator___construct(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator___construct(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   if ((args-2)->m_type != KindOfInt64) {
@@ -881,7 +881,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator___construct(TypedValue* rv, HPH
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator___construct(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -922,8 +922,8 @@ obj => rsi
 
 TypedValue* fh_hphp_recursivedirectoryiterator_key(TypedValue* _rv, Value* obj) asm("_ZN4HPHP37f_hphp_recursivedirectoryiterator_keyERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator_key(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator_key(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator_key(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursivedirectoryiterator_key((rv), &args[-0].m_data);
@@ -931,7 +931,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_key(TypedValue* rv, HPHP::VM::A
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator_key(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator_key(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -970,8 +970,8 @@ obj => rdi
 
 void fh_hphp_recursivedirectoryiterator_next(Value* obj) asm("_ZN4HPHP38f_hphp_recursivedirectoryiterator_nextERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator_next(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator_next(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator_next(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -980,7 +980,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_next(TypedValue* rv, HPHP::VM::
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator_next(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator_next(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1020,8 +1020,8 @@ obj => rdi
 
 void fh_hphp_recursivedirectoryiterator_rewind(Value* obj) asm("_ZN4HPHP40f_hphp_recursivedirectoryiterator_rewindERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator_rewind(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator_rewind(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator_rewind(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1030,7 +1030,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_rewind(TypedValue* rv, HPHP::VM
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator_rewind(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator_rewind(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1071,8 +1071,8 @@ position => rsi
 
 void fh_hphp_recursivedirectoryiterator_seek(Value* obj, long position) asm("_ZN4HPHP38f_hphp_recursivedirectoryiterator_seekERKNS_6ObjectEl");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator_seek(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator_seek(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator_seek(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_data.num = 0LL;
   rv->m_type = KindOfNull;
@@ -1086,7 +1086,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_seek(TypedValue* rv, HPHP::VM::
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator_seek(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator_seek(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1128,8 +1128,8 @@ obj => rsi
 
 TypedValue* fh_hphp_recursivedirectoryiterator_current(TypedValue* _rv, Value* obj) asm("_ZN4HPHP41f_hphp_recursivedirectoryiterator_currentERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator_current(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator_current(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator_current(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator_current(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   tvCastToObjectInPlace(args-0);
   fh_hphp_recursivedirectoryiterator_current((rv), &args[-0].m_data);
@@ -1137,7 +1137,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_current(TypedValue* rv, HPHP::V
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator_current(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator_current(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1178,8 +1178,8 @@ obj => rsi
 
 Value* fh_hphp_recursivedirectoryiterator___tostring(Value* _rv, Value* obj) asm("_ZN4HPHP44f_hphp_recursivedirectoryiterator___tostringERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator___tostring(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator___tostring(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator___tostring(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -1188,7 +1188,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator___tostring(TypedValue* rv, HPHP
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator___tostring(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator___tostring(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1229,8 +1229,8 @@ obj => rdi
 
 bool fh_hphp_recursivedirectoryiterator_valid(Value* obj) asm("_ZN4HPHP39f_hphp_recursivedirectoryiterator_validERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator_valid(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator_valid(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator_valid(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1238,7 +1238,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_valid(TypedValue* rv, HPHP::VM:
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator_valid(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator_valid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1278,8 +1278,8 @@ obj => rdi
 
 bool fh_hphp_recursivedirectoryiterator_haschildren(Value* obj) asm("_ZN4HPHP45f_hphp_recursivedirectoryiterator_haschildrenERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator_haschildren(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator_haschildren(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator_haschildren(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator_haschildren(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfBoolean;
   tvCastToObjectInPlace(args-0);
@@ -1287,7 +1287,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_haschildren(TypedValue* rv, HPH
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator_haschildren(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator_haschildren(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1328,8 +1328,8 @@ obj => rsi
 
 Value* fh_hphp_recursivedirectoryiterator_getchildren(Value* _rv, Value* obj) asm("_ZN4HPHP45f_hphp_recursivedirectoryiterator_getchildrenERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator_getchildren(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator_getchildren(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator_getchildren(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator_getchildren(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfObject;
   tvCastToObjectInPlace(args-0);
@@ -1338,7 +1338,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_getchildren(TypedValue* rv, HPH
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator_getchildren(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator_getchildren(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1380,8 +1380,8 @@ obj => rsi
 
 Value* fh_hphp_recursivedirectoryiterator_getsubpath(Value* _rv, Value* obj) asm("_ZN4HPHP44f_hphp_recursivedirectoryiterator_getsubpathERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpath(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpath(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpath(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -1390,7 +1390,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpath(TypedValue* rv, HPHP
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator_getsubpath(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator_getsubpath(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1432,8 +1432,8 @@ obj => rsi
 
 Value* fh_hphp_recursivedirectoryiterator_getsubpathname(Value* _rv, Value* obj) asm("_ZN4HPHP48f_hphp_recursivedirectoryiterator_getsubpathnameERKNS_6ObjectE");
 
-TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpathname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) __attribute__((noinline,cold));
-TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpathname(TypedValue* rv, HPHP::VM::ActRec* ar, int64_t count) {
+TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpathname(TypedValue* rv, ActRec* ar, int64_t count) __attribute__((noinline,cold));
+TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpathname(TypedValue* rv, ActRec* ar, int64_t count) {
   TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
   rv->m_type = KindOfString;
   tvCastToObjectInPlace(args-0);
@@ -1442,7 +1442,7 @@ TypedValue * fg1_hphp_recursivedirectoryiterator_getsubpathname(TypedValue* rv, 
   return rv;
 }
 
-TypedValue* fg_hphp_recursivedirectoryiterator_getsubpathname(HPHP::VM::ActRec *ar) {
+TypedValue* fg_hphp_recursivedirectoryiterator_getsubpathname(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1493,7 +1493,7 @@ array => rsi
 
 void th_20MutableArrayIterator___construct(ObjectData* this_, TypedValue* array) asm("_ZN4HPHP22c_MutableArrayIterator13t___constructERKNS_14VRefParamValueE");
 
-TypedValue* tg_20MutableArrayIterator___construct(HPHP::VM::ActRec *ar) {
+TypedValue* tg_20MutableArrayIterator___construct(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1531,7 +1531,7 @@ this_ => rsi
 
 TypedValue* th_20MutableArrayIterator_currentRef(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP22c_MutableArrayIterator12t_currentrefEv");
 
-TypedValue* tg_20MutableArrayIterator_currentRef(HPHP::VM::ActRec *ar) {
+TypedValue* tg_20MutableArrayIterator_currentRef(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1568,7 +1568,7 @@ this_ => rsi
 
 TypedValue* th_20MutableArrayIterator_current(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP22c_MutableArrayIterator9t_currentEv");
 
-TypedValue* tg_20MutableArrayIterator_current(HPHP::VM::ActRec *ar) {
+TypedValue* tg_20MutableArrayIterator_current(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1605,7 +1605,7 @@ this_ => rsi
 
 TypedValue* th_20MutableArrayIterator_key(TypedValue* _rv, ObjectData* this_) asm("_ZN4HPHP22c_MutableArrayIterator5t_keyEv");
 
-TypedValue* tg_20MutableArrayIterator_key(HPHP::VM::ActRec *ar) {
+TypedValue* tg_20MutableArrayIterator_key(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1640,7 +1640,7 @@ this_ => rdi
 
 void th_20MutableArrayIterator_next(ObjectData* this_) asm("_ZN4HPHP22c_MutableArrayIterator6t_nextEv");
 
-TypedValue* tg_20MutableArrayIterator_next(HPHP::VM::ActRec *ar) {
+TypedValue* tg_20MutableArrayIterator_next(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
@@ -1677,7 +1677,7 @@ this_ => rdi
 
 bool th_20MutableArrayIterator_valid(ObjectData* this_) asm("_ZN4HPHP22c_MutableArrayIterator7t_validEv");
 
-TypedValue* tg_20MutableArrayIterator_valid(HPHP::VM::ActRec *ar) {
+TypedValue* tg_20MutableArrayIterator_valid(ActRec *ar) {
     TypedValue rv;
     int64_t count = ar->numArgs();
     TypedValue* args UNUSED = ((TypedValue*)ar) - 1;

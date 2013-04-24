@@ -30,16 +30,16 @@
 #include "util/tiny_vector.h"
 
 namespace HPHP {
+// Forward declarations.
 namespace Compiler { class Peephole; }
+struct ActRec;
 namespace VM {
 
-// Forward declarations.
 class Func;
 class FuncEmitter;
 class Repo;
 class FuncDict;
 class Unit;
-struct ActRec;
 
 enum UnitOrigin {
   UnitOriginFile = 0,
@@ -714,7 +714,7 @@ class UnitEmitter {
   friend class UnitRepoProxy;
   friend class ::HPHP::Compiler::Peephole;
  public:
-  UnitEmitter(const MD5& md5);
+  explicit UnitEmitter(const MD5& md5);
   ~UnitEmitter();
 
   int repoId() const { return m_repoId; }
@@ -885,7 +885,7 @@ class UnitRepoProxy : public RepoProxy {
   friend class Unit;
   friend class UnitEmitter;
  public:
-  UnitRepoProxy(Repo& repo);
+  explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
   Unit* load(const std::string& name, const MD5& md5);

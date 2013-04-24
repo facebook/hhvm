@@ -22,7 +22,6 @@
 #include "runtime/base/complex_types.h"
 
 namespace HPHP {
-namespace VM {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -123,6 +122,6 @@ static inline const char * attrToVisibilityStr(Attr attr) {
          (attr & AttrProtected) ? "protected" : "public";
 }
 
-} }
+}
 
 #endif

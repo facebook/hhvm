@@ -39,11 +39,11 @@ void c_Closure::t___construct() {
  * sp points to the last use variable on the stack.
  * returns the closure so that translator-x64 can just return "rax".
  */
-c_Closure* c_Closure::init(int numArgs, VM::ActRec* ar, TypedValue* sp) {
+c_Closure* c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   static StringData* invokeName = StringData::GetStaticString("__invoke");
   VM::Func* invokeFunc = getVMClass()->lookupMethod(invokeName);
 
-  if (invokeFunc->attrs() & VM::AttrStatic) {
+  if (invokeFunc->attrs() & AttrStatic) {
     // Only set the class for static closures
     m_thisOrClass = (ObjectData*)(intptr_t(ar->m_func->cls()) | 1LL);
   } else {

@@ -546,7 +546,7 @@ Array c_UConverter::ti_getaliases(const char* cls , CStrRef encoding) {
   Array ret = Array::Create();
   for(i = 0; i < count; ++i) {
     error = U_ZERO_ERROR;
-    const char *alias = ucnv_getAlias(encoding, i, &error);
+    const char *alias = ucnv_getAlias(encoding.c_str(), i, &error);
     if (U_FAILURE(error)) {
       THROW_UFAILURE(ucnv_getAlias, error, s_intl_error->m_error);
       return uninit_null();

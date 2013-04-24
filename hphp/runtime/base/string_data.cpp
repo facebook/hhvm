@@ -91,6 +91,11 @@ StringData *StringData::GetStaticString(const StringData *str) {
   return const_cast<StringData*>(pair.first->first);
 }
 
+StringData* StringData::GetStaticString(const String& str) {
+  assert(!str.isNull());
+  return GetStaticString(str.get());
+}
+
 StringData* StringData::FindStaticString(const StringData* str) {
   if (UNLIKELY(!s_stringDataMap)) s_stringDataMap = new StringDataMap();
   StringDataMap::const_iterator it = s_stringDataMap->find(str);

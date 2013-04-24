@@ -1827,11 +1827,11 @@ String f_ob_iconv_handler(CStrRef contents, int status) {
     char *out_buffer;
     size_t out_len;
     php_iconv_err_t err =
-      php_iconv_string(contents.data(), contents.size(),
-                       &out_buffer, &out_len,
-                       ICONVG(output_encoding), ICONVG(internal_encoding));
-    _php_iconv_show_error(err, ICONVG(output_encoding),
-                          ICONVG(internal_encoding));
+      php_iconv_string(contents.data(), contents.size(), &out_buffer, &out_len,
+                       ICONVG(output_encoding).c_str(),
+                       ICONVG(internal_encoding).c_str());
+    _php_iconv_show_error(err, ICONVG(output_encoding).c_str(),
+                          ICONVG(internal_encoding).c_str());
     if (out_buffer != NULL) {
       g_context->setContentType(mimetype, ICONVG(output_encoding));
       return String(out_buffer, out_len, AttachString);

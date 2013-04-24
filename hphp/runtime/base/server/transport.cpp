@@ -648,7 +648,7 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
         f_openssl_decrypt(encrypted, cipher, key, k_OPENSSL_RAW_DATA, iv);
       assert(decrypted->same(ip.get()));
     }
-    addHeaderImpl("X-FB-Debug", output);
+    addHeaderImpl("X-FB-Debug", output.c_str());
   }
 
   // shutting down servers, so need to terminate all Keep-Alive connections

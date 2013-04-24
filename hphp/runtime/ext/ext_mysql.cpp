@@ -561,7 +561,8 @@ static Variant php_mysql_do_connect(String server, String username,
   }
 
   if (mySQL == NULL) {
-    mySQL = new MySQL(host, port, username, password, database);
+    mySQL = new MySQL(host.c_str(), port, username.c_str(), password.c_str(),
+                      database.c_str());
     ret = mySQL;
     if (async) {
 #ifdef FACEBOOK

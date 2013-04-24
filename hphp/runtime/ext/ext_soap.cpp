@@ -68,7 +68,7 @@ private:
 
 class SoapServerScope : public SoapScope {
 public:
-  SoapServerScope(c_SoapServer *server) {
+  explicit SoapServerScope(c_SoapServer *server) {
     USE_SOAP_GLOBAL;
     SOAP_GLOBAL(error_code) = "Server";
     SOAP_GLOBAL(error_object) = Object(server);
@@ -77,7 +77,7 @@ public:
 
 class SoapClientScope : public SoapScope {
 public:
-  SoapClientScope(c_SoapClient *client) {
+  explicit SoapClientScope(c_SoapClient *client) {
     USE_SOAP_GLOBAL;
     SOAP_GLOBAL(error_code) = "Client";
     SOAP_GLOBAL(error_object) = Object(client);
@@ -86,7 +86,7 @@ public:
 
 class SoapServiceScope {
 public:
-  SoapServiceScope(c_SoapServer *server) {
+  explicit SoapServiceScope(c_SoapServer *server) {
     save();
     USE_SOAP_GLOBAL;
     SOAP_GLOBAL(soap_version) = server->m_version;
@@ -97,7 +97,7 @@ public:
     SOAP_GLOBAL(features) = server->m_features;
   }
 
-  SoapServiceScope(c_SoapClient *client) {
+  explicit SoapServiceScope(c_SoapClient *client) {
     save();
     USE_SOAP_GLOBAL;
     SOAP_GLOBAL(soap_version) = client->m_soap_version;
@@ -1009,7 +1009,7 @@ static sdlFunctionPtr deserialize_function_call
               key += (char*)hdr_func->ns->href;
               key += ':';
             }
-            key += h->function_name;
+            key += (std::string)h->function_name;
             sdlSoapBindingFunctionHeaderMap::iterator iter =
               fnb->input.headers.find(key);
             if (iter != fnb->input.headers.end()) {
@@ -1132,7 +1132,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunction *function,
         param_index = key.toInt64();
       }
 
-      parameter = get_param(function, param_name, param_index, true);
+      parameter = get_param(function, param_name.c_str(), param_index, true);
       if (style == SOAP_RPC) {
         param = serialize_parameter(parameter, data, i, param_name.data(),
                                     use, method);
@@ -2131,9 +2131,9 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
   int soap_version = 0;
   sdlFunctionPtr function;
   try {
-    function = deserialize_function_call
-      (m_sdl, doc_request, m_actor, function_name, params, soap_version,
-       m_soap_headers);
+    function = deserialize_function_call(m_sdl, doc_request, m_actor.c_str(),
+                                         function_name, params, soap_version,
+                                         m_soap_headers);
   } catch (Exception &e) {
     xmlFreeDoc(doc_request);
     send_soap_server_fault(function, e, NULL);
@@ -2560,11 +2560,11 @@ Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
         action += '#';
         action += name.data();
       } else {
-        action += soap_action;
+        action += (std::string) soap_action;
       }
       Variant response;
       try {
-        ret = do_request(this, request, location, action.c_str(),
+        ret = do_request(this, request, location.c_str(), action.c_str(),
                          m_soap_version, 0, response);
       } catch (Exception &e) {
         xmlFreeDoc(request);

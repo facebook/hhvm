@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_STRING_H_
+#define incl_HPHP_STRING_H_
+
 #ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'type_string.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
-
-#ifndef incl_HPHP_STRING_H_
-#define incl_HPHP_STRING_H_
 
 #include <util/assertions.h>
 #include <runtime/base/util/smart_ptr.h>
@@ -119,21 +119,21 @@ public:
   /**
    * Constructors
    */
-  String(StringData *data) : StringBase(data) { }
-  String(int     n);
-  String(int64_t   n);
-  String(double  n);
-  String(litstr  s) {
+  /* implicit */ String(StringData *data) : StringBase(data) { }
+  /* implicit */ String(int     n);
+  /* implicit */ String(int64_t   n);
+  /* implicit */ String(double  n);
+  /* implicit */ String(litstr  s) {
     if (s) {
       m_px = buildStringData(s);
       m_px->setRefCount(1);
     }
   }
-  String(CStrRef str) : StringBase(str.m_px) { }
+  String(const String& str) : StringBase(str.m_px) { }
 
   // Move ctor
-  String(String&& str) : StringBase(std::move(str)) {}
-  String(Variant&& src);
+  /* implicit */ String(String&& str) : StringBase(std::move(str)) {}
+  /* implicit */ String(Variant&& src);
   // Move assign
   String& operator=(String&& src) {
     static_assert(sizeof(String) == sizeof(StringBase),"Fix this.");
@@ -144,7 +144,7 @@ public:
   // Move assign from Variant
   String& operator=(Variant&& src);
 
-  String(const std::string &s) { // always make a copy
+  /* implicit */ String(const std::string &s) { // always make a copy
     m_px = NEW(StringData)(s.data(), s.size(), CopyString);
     m_px->setRefCount(1);
   }
@@ -190,6 +190,13 @@ public:
       m_px->setRefCount(1);
     }
   }
+  // force a copy of a String
+  String(const String& s, CopyStringMode mode) {
+    if (s.m_px) {
+      m_px = NEW(StringData)(s.c_str(), s.size(), mode);
+      m_px->setRefCount(1);
+    }
+  }
   // make an empty string with cap reserve bytes, plus 1 for '\0'
   String(int cap, ReserveStringMode mode) {
     m_px = NEW(StringData)(cap);
@@ -203,9 +210,6 @@ public:
   /**
    * Informational
    */
-  operator const char *() const {
-    return m_px ? m_px->data() : "";
-  }
   const char *data() const {
     return m_px ? m_px->data() : "";
   }
@@ -326,6 +330,12 @@ public:
   String &operator &= (CStrRef v);
   String &operator ^= (CStrRef v);
   String  operator ~  () const;
+  explicit operator std::string () const {
+    return std::string(c_str(), size());
+  }
+  explicit operator bool() const {
+    return m_px != nullptr;
+  }
 
   /**
    * These are convenient functions for writing extensions, since code
@@ -600,9 +610,9 @@ class StaticString : public String {
 public:
   friend class StringUtil;
 
-  StaticString(litstr s);
+  explicit StaticString(litstr s);
   StaticString(litstr s, int length); // binary string
-  StaticString(std::string s);
+  explicit StaticString(std::string s);
   StaticString(const StaticString &str);
   ~StaticString() {
     // prevent ~SmartPtr from calling decRefCount after data is released

@@ -107,7 +107,7 @@ Array f_hphp_get_iostatus() {
   return ServerStats::GetThreadIOStatuses();
 }
 void f_hphp_set_iostatus_address(CStrRef name) {
-  return ServerStats::SetThreadIOStatusAddress(name);
+  return ServerStats::SetThreadIOStatusAddress(name.c_str());
 }
 
 

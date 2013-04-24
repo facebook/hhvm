@@ -407,7 +407,7 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
       String value = data.toString();
       if (!value.empty()) {
         numbytes += value.size();
-        int written = f->writeImpl(value, value.size());
+        int written = f->writeImpl(value.data(), value.size());
         if (written != value.size()) {
           numbytes = -1;
         }
@@ -821,9 +821,9 @@ Variant f_realpath(CStrRef path) {
       StaticContentCache::TheFileCache->exists(translated.data(), false)) {
     return translated;
   }
-  if (access(translated.data(), F_OK) == 0) {
+  if (access(translated.c_str(), F_OK) == 0) {
     char resolved_path[PATH_MAX];
-    if (!realpath(translated, resolved_path)) {
+    if (!realpath(translated.c_str(), resolved_path)) {
       return false;
     }
     return String(resolved_path, CopyString);
@@ -891,7 +891,8 @@ Variant f_pathinfo(CStrRef path, int opt /* = 15 */) {
 
 Variant f_disk_free_space(CStrRef directory) {
   struct statfs buf;
-  CHECK_SYSTEM(statfs(File::TranslatePath(directory), &buf));
+  String translated = File::TranslatePath(directory);
+  CHECK_SYSTEM(statfs(translated.c_str(), &buf));
   return (double)buf.f_bsize * (double)buf.f_bavail;
 }
 
@@ -901,7 +902,8 @@ Variant f_diskfreespace(CStrRef directory) {
 
 Variant f_disk_total_space(CStrRef directory) {
   struct statfs buf;
-  CHECK_SYSTEM(statfs(File::TranslatePath(directory), &buf));
+  String translated = File::TranslatePath(directory);
+  CHECK_SYSTEM(statfs(translated.c_str(), &buf));
   return (double)buf.f_bsize * (double)buf.f_blocks;
 }
 
@@ -909,7 +911,8 @@ Variant f_disk_total_space(CStrRef directory) {
 // system wrappers
 
 bool f_chmod(CStrRef filename, int64_t mode) {
-  CHECK_SYSTEM(chmod(File::TranslatePath(filename).data(), mode));
+  String translated = File::TranslatePath(filename);
+  CHECK_SYSTEM(chmod(translated.c_str(), mode));
   return true;
 }
 

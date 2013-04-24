@@ -138,7 +138,7 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
   // build environment pair list
   std::vector<String> senvs; // holding those char *
   char **envp = build_envp(envs, senvs);
-  if (execve(path, argv, envp) == -1) {
+  if (execve(path.c_str(), argv, envp) == -1) {
     raise_warning("Error has occured: (errno %d) %s",
                     errno, Util::safe_strerror(errno).c_str());
   }
@@ -418,7 +418,7 @@ private:
 
 String f_shell_exec(CStrRef cmd) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(cmd);
+  FILE *fp = ctx.exec(cmd.c_str());
   if (!fp) return "";
   StringBuffer sbuf;
   sbuf.read(fp);
@@ -428,7 +428,7 @@ String f_shell_exec(CStrRef cmd) {
 String f_exec(CStrRef command, VRefParam output /* = null */,
               VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command);
+  FILE *fp = ctx.exec(command.c_str());
   if (!fp) return "";
   StringBuffer sbuf;
   sbuf.read(fp);
@@ -457,7 +457,7 @@ String f_exec(CStrRef command, VRefParam output /* = null */,
 
 void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command);
+  FILE *fp = ctx.exec(command.c_str());
   if (!fp) return;
 
   char buffer[1024];
@@ -475,7 +475,7 @@ void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
 
 String f_system(CStrRef command, VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command);
+  FILE *fp = ctx.exec(command.c_str());
   if (!fp) return "";
   StringBuffer sbuf;
   if (fp) {
@@ -612,7 +612,7 @@ public:
   bool openFile(CStrRef zfile, CStrRef zmode) {
     mode = DESC_FILE;
     /* try a wrapper */
-    FILE *file = fopen(zfile, zmode);
+    FILE *file = fopen(zfile.c_str(), zmode.c_str());
     if (!file) {
       raise_warning("Unable to open specified file: %s (mode %s)",
                       zfile.data(), zmode.data());
@@ -894,7 +894,7 @@ bool f_proc_nice(int increment) {
 
 String f_escapeshellarg(CStrRef arg) {
   if (!arg.empty()) {
-    char *ret = string_escape_shell_arg(arg);
+    char *ret = string_escape_shell_arg(arg.c_str());
     return String(ret, AttachString);
   }
   return arg;
@@ -902,7 +902,7 @@ String f_escapeshellarg(CStrRef arg) {
 
 String f_escapeshellcmd(CStrRef command) {
   if (!command.empty()) {
-    char *ret = string_escape_shell_cmd(command);
+    char *ret = string_escape_shell_cmd(command.c_str());
     return String(ret, AttachString);
   }
   return command;

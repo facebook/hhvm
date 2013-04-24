@@ -2548,7 +2548,8 @@ rewrite:
       String name(plc->pos, plc->len, AttachLiteral);
 
       /* check if bound parameter is already available */
-      if (!strcmp(name, "?") || !stmt->bound_param_map.exists(name)) {
+      if (!strcmp(name.c_str(), "?") ||
+          !stmt->bound_param_map.exists(name.c_str())) {
         idxbuf.printf(tmpl, bind_no++);
       } else {
         idxbuf.clear();

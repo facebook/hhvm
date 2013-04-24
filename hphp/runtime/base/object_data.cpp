@@ -123,7 +123,7 @@ bool ObjectData::o_instanceof(CStrRef s) const {
 }
 
 bool ObjectData::o_isClass(const char *s) const {
-  return strcasecmp(s, o_getClassName()) == 0;
+  return strcasecmp(s, o_getClassName().c_str()) == 0;
 }
 
 int64_t ObjectData::o_toInt64() const {

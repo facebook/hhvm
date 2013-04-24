@@ -282,10 +282,10 @@ String f_uniqid(CStrRef prefix /* = null_string */,
   char uniqid[256];
   if (more_entropy) {
     snprintf(uniqid, sizeof(uniqid), "%s%08x%05x%.8F",
-             (const char *)prefix, sec, usec, math_combined_lcg() * 10);
+             prefix.c_str(), sec, usec, math_combined_lcg() * 10);
   } else {
     snprintf(uniqid, sizeof(uniqid), "%s%08x%05x",
-             (const char *)prefix, sec, usec);
+             prefix.c_str(), sec, usec);
   }
   return String(uniqid, CopyString);
 }

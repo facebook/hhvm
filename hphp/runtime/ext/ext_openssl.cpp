@@ -1379,7 +1379,7 @@ bool f_openssl_pkcs7_encrypt(CStrRef infilename, CStrRef outfilename,
     raise_warning("error opening the file, %s", infilename.data());
     goto clean_exit;
   }
-  outfile = BIO_new_file(outfilename, "w");
+  outfile = BIO_new_file(outfilename.data(), "w");
   if (outfile == NULL) {
     raise_warning("error opening the file, %s", outfilename.data());
     goto clean_exit;
@@ -2352,7 +2352,7 @@ static String php_openssl_validate_iv(String piv, int iv_required_len) {
 Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
                           int options /* = 0 */,
                           CStrRef iv /* = null_string */) {
-  const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method);
+  const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method.c_str());
   if (!cipher_type) {
     raise_warning("Unknown cipher algorithm");
     return false;
@@ -2426,7 +2426,7 @@ Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
 Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
                           int options /* = 0 */,
                           CStrRef iv /* = null_string */) {
-  const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method);
+  const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method.c_str());
   if (!cipher_type) {
     raise_warning("Unknown cipher algorithm");
     return false;
@@ -2489,7 +2489,7 @@ Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
 
 Variant f_openssl_digest(CStrRef data, CStrRef method,
                          bool raw_output /* = false */) {
-  const EVP_MD *mdtype = EVP_get_digestbyname(method);
+  const EVP_MD *mdtype = EVP_get_digestbyname(method.c_str());
 
   if (!mdtype) {
     raise_warning("Unknown signature algorithm");

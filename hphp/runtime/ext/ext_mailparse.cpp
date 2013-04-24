@@ -183,7 +183,7 @@ Array f_mailparse_msg_get_part_data(CObjRef mimemail) {
 }
 
 Variant f_mailparse_msg_get_part(CObjRef mimemail, CStrRef mimesection) {
-  Object part = mimemail.getTyped<MimePart>()->findByName(mimesection);
+  Object part = mimemail.getTyped<MimePart>()->findByName(mimesection.c_str());
   if (part.isNull()) {
     raise_warning("cannot find section %s in message", mimesection.data());
     return false;

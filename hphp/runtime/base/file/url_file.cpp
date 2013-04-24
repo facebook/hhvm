@@ -41,7 +41,8 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
 }
 
 bool UrlFile::open(CStrRef url, CStrRef mode) {
-  if (strchr(mode, '+') || strchr(mode, 'a') || strchr(mode, 'w')) {
+  const char* modestr = mode.c_str();
+  if (strchr(modestr, '+') || strchr(modestr, 'a') || strchr(modestr, 'w')) {
     std::string msg = "cannot open a url stream for write/append operation: ";
     msg += url.c_str();
     m_error = msg;
@@ -78,7 +79,7 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
   m_responseHeaders = r;
 
   if (code == 200) {
-    m_name = url;
+    m_name = (std::string) url;
     m_data = const_cast<char*>(m_response.data());
     m_len = m_response.size();
     return true;

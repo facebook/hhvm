@@ -224,8 +224,8 @@ string SourceRootInfo::parseSandboxServerVariable(const string &format) const {
           res.write(data, n);
           break;
         }
-      case 's': res << m_sandbox; break;
-      case 'u': res << m_user; break;
+      case 's': res << m_sandbox.c_str(); break;
+      case 'u': res << m_user.c_str(); break;
       default: res << c; break;
       }
       control = false;

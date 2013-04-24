@@ -98,7 +98,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
 
       Variant res = f_curl_exec(c);
       if (!same(res, false)) {
-        actual = res.toString();
+        actual = (std::string) res.toString();
         break;
       }
       sleep(1); // wait until HTTP server is up and running

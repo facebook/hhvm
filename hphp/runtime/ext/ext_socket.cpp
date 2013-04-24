@@ -773,7 +773,7 @@ Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
       s_un.sun_family = AF_UNIX;
       snprintf(s_un.sun_path, 108, "%s", addr.data());
 
-      retval = sendto(sock->fd(), buf, len, flags,
+      retval = sendto(sock->fd(), buf.data(), len, flags,
                       (struct sockaddr *)&s_un, SUN_LEN(&s_un));
     }
     break;
@@ -783,11 +783,11 @@ Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
       memset(&sin, 0, sizeof(sin));
       sin.sin_family = AF_INET;
       sin.sin_port = htons((unsigned short) port);
-      if (!php_set_inet_addr(&sin, addr, sock)) {
+      if (!php_set_inet_addr(&sin, addr.c_str(), sock)) {
         return false;
       }
 
-      retval = sendto(sock->fd(), buf, len, flags,
+      retval = sendto(sock->fd(), buf.data(), len, flags,
                       (struct sockaddr *)&sin, sizeof(sin));
     }
     break;
@@ -798,11 +798,11 @@ Variant f_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags,
       sin6.sin6_family = AF_INET6;
       sin6.sin6_port = htons((unsigned short) port);
 
-      if (!php_set_inet6_addr(&sin6, addr, sock)) {
+      if (!php_set_inet6_addr(&sin6, addr.c_str(), sock)) {
         return false;
       }
 
-      retval = sendto(sock->fd(), buf, len, flags,
+      retval = sendto(sock->fd(), buf.data(), len, flags,
                       (struct sockaddr *)&sin6, sizeof(sin6));
     }
     break;

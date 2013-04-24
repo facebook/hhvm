@@ -2404,7 +2404,7 @@ Variant Variant::o_invoke(CStrRef s, CArrRef params, int64_t hash /* = -1 */) {
   } else if (m_type == KindOfRef) {
     return m_data.pref->var()->o_invoke(s, params, hash);
   } else {
-    throw_call_non_object(s);
+    throw_call_non_object(s.c_str());
   }
 }
 
@@ -2417,7 +2417,7 @@ Variant Variant::o_invoke_few_args(CStrRef s, int64_t hash, int count,
     return m_data.pref->var()->o_invoke_few_args(s, hash, count,
                                                  INVOKE_FEW_ARGS_PASS_ARGS);
   } else {
-    throw_call_non_object(s);
+    throw_call_non_object(s.c_str());
   }
 }
 
@@ -3041,7 +3041,7 @@ void Variant::unserialize(VariableUnserializer *uns,
       Object obj;
       if (RuntimeOption::UnserializationWhitelistCheck &&
           !uns->isWhitelistedClass(clsName)) {
-        String err_msg =
+        const char* err_msg =
           "The object being unserialized with class name '%s' "
           "is not in the given whitelist. "
           "See http://fburl.com/SafeSerializable for more detail";

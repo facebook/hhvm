@@ -45,7 +45,7 @@ void ZipFile::sweep() {
 bool ZipFile::open(CStrRef filename, CStrRef mode) {
   assert(m_gzFile == nullptr);
 
-  if (strchr(mode, '+')) {
+  if (strchr(mode.c_str(), '+')) {
     raise_warning("cannot open a zlib stream for reading and writing "
                     "at the same time!");
     return false;

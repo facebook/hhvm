@@ -1159,7 +1159,7 @@ Array f_fb_crossall_query(CStrRef sql, int max_thread /* = 50 */,
 
   Array ret;
   // parameter checking
-  if (!sql || !*sql) {
+  if (sql.empty()) {
     static const StaticString s_errstr("empty SQL");
     ret.set(s_error, s_errstr);
     return ret;

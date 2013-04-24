@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_OBJECT_H_
+#define incl_HPHP_OBJECT_H_
+
 #ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'type_object.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
-
-#ifndef incl_HPHP_OBJECT_H_
-#define incl_HPHP_OBJECT_H_
 
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/object_data.h>
@@ -57,8 +57,8 @@ public:
   /**
    * Constructors
    */
-  Object(ObjectData *data) : ObjectBase(data) { }
-  Object(CObjRef src) : ObjectBase(src.m_px) { }
+  /* implicit */ Object(ObjectData *data) : ObjectBase(data) { }
+  /* implicit */ Object(CObjRef src) : ObjectBase(src.m_px) { }
 
   // Move ctor
   Object(Object&& src) : ObjectBase(std::move(src)) {
@@ -125,7 +125,7 @@ public:
     T *px = dynamic_cast<T*>(cur);
     if (!px) {
       if (!badTypeOkay) {
-        throw InvalidObjectTypeException(m_px->o_getClassName());
+        throw InvalidObjectTypeException(m_px->o_getClassName().c_str());
       }
       return nullptr;
     }

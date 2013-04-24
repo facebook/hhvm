@@ -288,8 +288,8 @@ Variant StringUtil::ChunkSplit(CStrRef body, int chunklen /* = 76 */,
     ret = body;
     ret += end;
   } else {
-    char *chunked = string_chunk_split(body.data(), len, end, end.size(),
-                                       chunklen);
+    char *chunked = string_chunk_split(body.data(), len, end.c_str(),
+                                       end.size(), chunklen);
     return String(chunked, len, AttachString);
   }
   return ret;
@@ -305,35 +305,36 @@ String StringUtil::CEncode(CStrRef input, CStrRef charlist) {
   }
   if (input.empty() || chars.empty()) return input;
   int len = input.size();
-  char *ret = string_addcslashes(input, len, chars.data(), chars.size());
+  char *ret = string_addcslashes(input.c_str(), len, chars.data(),
+                                 chars.size());
   return String(ret, len, AttachString);
 }
 
 String StringUtil::CDecode(CStrRef input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_stripcslashes(input, len);
+  char *ret = string_stripcslashes(input.c_str(), len);
   return String(ret, len, AttachString);
 }
 
 String StringUtil::SqlEncode(CStrRef input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_addslashes(input, len);
+  char *ret = string_addslashes(input.c_str(), len);
   return String(ret, len, AttachString);
 }
 
 String StringUtil::SqlDecode(CStrRef input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_stripslashes(input, len);
+  char *ret = string_stripslashes(input.c_str(), len);
   return String(ret, len, AttachString);
 }
 
 String StringUtil::RegExEncode(CStrRef input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_quotemeta(input, len);
+  char *ret = string_quotemeta(input.c_str(), len);
   return String(ret, len, AttachString);
 }
 
@@ -350,7 +351,7 @@ String StringUtil::HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
   }
 
   int len = input.size();
-  char *ret = string_html_encode(input, len, quoteStyle != NoQuotes,
+  char *ret = string_html_encode(input.data(), len, quoteStyle != NoQuotes,
                                  quoteStyle == BothQuotes, utf8, nbsp);
   if (!ret) {
     raise_error("HtmlEncode called on too large input (%d)", len);
@@ -435,7 +436,7 @@ String StringUtil::HtmlEncodeExtra(CStrRef input, QuoteStyle quoteStyle,
   }
 
   int len = input.size();
-  char *ret = string_html_encode_extra(input, len,
+  char *ret = string_html_encode_extra(input.data(), len,
                                        (StringHtmlEncoding)flags, am);
   if (!ret) {
     raise_error("HtmlEncode called on too large input (%d)", len);
@@ -450,7 +451,7 @@ String StringUtil::HtmlDecode(CStrRef input, QuoteStyle quoteStyle,
   assert(charset);
 
   int len = input.size();
-  char *ret = string_html_decode(input, len, quoteStyle != NoQuotes,
+  char *ret = string_html_decode(input.data(), len, quoteStyle != NoQuotes,
                                  quoteStyle == BothQuotes, charset, all);
   if (!ret) {
     // null iff charset was not recognized
@@ -464,28 +465,28 @@ String StringUtil::HtmlDecode(CStrRef input, QuoteStyle quoteStyle,
 String StringUtil::QuotedPrintableEncode(CStrRef input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_quoted_printable_encode(input, len);
+  char *ret = string_quoted_printable_encode(input.data(), len);
   return String(ret, len, AttachString);
 }
 
 String StringUtil::QuotedPrintableDecode(CStrRef input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_quoted_printable_decode(input, len, false);
+  char *ret = string_quoted_printable_decode(input.data(), len, false);
   return String(ret, len, AttachString);
 }
 
 String StringUtil::HexEncode(CStrRef input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_bin2hex(input, len);
+  char *ret = string_bin2hex(input.data(), len);
   return String(ret, len, AttachString);
 }
 
 String StringUtil::HexDecode(CStrRef input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_hex2bin(input, len);
+  char *ret = string_hex2bin(input.data(), len);
   return String(ret, len, AttachString);
 }
 
@@ -493,7 +494,7 @@ String StringUtil::UUEncode(CStrRef input) {
   if (input.empty()) return input;
 
   int len;
-  char *encoded = string_uuencode(input, input.size(), len);
+  char *encoded = string_uuencode(input.data(), input.size(), len);
   return String(encoded, len, AttachString);
 }
 
@@ -558,38 +559,37 @@ String StringUtil::Translate(CStrRef input, CStrRef from, CStrRef to) {
   if (input.empty()) return input;
 
   int len = input.size();
-  char *ret = (char *)malloc(len + 1);
-  memcpy(ret, input, len);
-  ret[len] = '\0';
-  int fromSize = from.size();
-  int toSize = to.size();
-  int trlen = (fromSize < toSize) ? fromSize : toSize;
-  string_translate(ret, len, from, to, trlen);
-  return String(ret, len, AttachString);
+  String retstr(len, ReserveString);
+  char *ret = retstr.mutableSlice().ptr;
+  memcpy(ret, input.data(), len);
+  auto trlen = std::min(from.size(), to.size());
+  string_translate(ret, len, from.data(), to.data(), trlen);
+  return retstr.setSize(len);
 }
 
 String StringUtil::ROT13(CStrRef input) {
   if (input.empty()) return input;
-  return String(string_rot13(input, input.size()), input.size(), AttachString);
+  return String(string_rot13(input.data(), input.size()),
+                input.size(), AttachString);
 }
 
 int64_t StringUtil::CRC32(CStrRef input) {
-  return string_crc32(input, input.size());
+  return string_crc32(input.data(), input.size());
 }
 
 String StringUtil::Crypt(CStrRef input, const char *salt /* = "" */) {
-  return String(string_crypt(input, salt), AttachString);
+  return String(string_crypt(input.c_str(), salt), AttachString);
 }
 
 String StringUtil::MD5(CStrRef input, bool raw /* = false */) {
   int len;
-  char *ret = string_md5(input, input.size(), raw, len);
+  char *ret = string_md5(input.data(), input.size(), raw, len);
   return String(ret, len, AttachString);
 }
 
 String StringUtil::SHA1(CStrRef input, bool raw /* = false */) {
   int len;
-  char *ret = string_sha1(input, input.size(), raw, len);
+  char *ret = string_sha1(input.data(), input.size(), raw, len);
   return String(ret, len, AttachString);
 }
 

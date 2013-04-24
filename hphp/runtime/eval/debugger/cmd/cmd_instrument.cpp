@@ -85,13 +85,13 @@ bool CmdInstrument::onClient(DebuggerClient *client) {
   if (loc == "here") {
     InstPointInfoPtr ipi(new InstPointInfo());
     ipi->setLocHere();
-    ipi->m_code = code.toString();
+    ipi->m_code = (std::string) code.toString();
     ipi->m_desc = desc;
     m_instPoints->push_back(ipi);
   } else if (loc.rfind("()") == loc.size() - 2){
     InstPointInfoPtr ipi(new InstPointInfo());
     ipi->setLocFuncEntry(loc.substr(0, loc.size() - 2));
-    ipi->m_code = code.toString();
+    ipi->m_code = (std::string) code.toString();
     ipi->m_desc = desc;
     m_instPoints->push_back(ipi);
   } else {

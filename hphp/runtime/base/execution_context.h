@@ -311,7 +311,7 @@ public:
   int getErrorReportingLevel() const { return m_errorReportingLevel;}
   void setErrorReportingLevel(int level) { m_errorReportingLevel = level;}
   String getErrorPage() const { return m_errorPage;}
-  void setErrorPage(CStrRef page) { m_errorPage = page;}
+  void setErrorPage(CStrRef page) { m_errorPage = (std::string) page; }
   bool getLogErrors() const { return m_logErrors;}
   void setLogErrors(bool on);
   String getErrorLog() const { return m_errorLog;}

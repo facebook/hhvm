@@ -164,7 +164,7 @@ static void thrift_error(CStrRef what, TError why) {
 
 class CompactWriter {
   public:
-    CompactWriter(CObjRef _transportobj) :
+    explicit CompactWriter(CObjRef _transportobj) :
       transport(_transportobj),
       version(VERSION),
       state(STATE_CLEAR),
@@ -336,9 +336,9 @@ class CompactWriter {
         case T_UTF16:
         case T_STRING: {
             String s = value.toString();
-            uint32_t len = s.size();
-            writeVarint(len);
-            transport.write(s, len);
+            auto slice = s.slice();
+            writeVarint(slice.len);
+            transport.write(slice.ptr, slice.len);
             break;
           }
 
@@ -458,9 +458,9 @@ class CompactWriter {
     }
 
     void writeString(CStrRef s) {
-      uint32_t len = s.size();
-      writeVarint(len);
-      transport.write(s, len);
+      auto slice = s.slice();
+      writeVarint(slice.len);
+      transport.write(slice.ptr, slice.len);
     }
 
     uint64_t i64ToZigzag(int64_t n) {
@@ -470,7 +470,7 @@ class CompactWriter {
 
 class CompactReader {
   public:
-    CompactReader(CObjRef _transportobj) :
+    explicit CompactReader(CObjRef _transportobj) :
       transport(_transportobj),
       version(VERSION),
       state(STATE_CLEAR),

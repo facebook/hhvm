@@ -198,7 +198,7 @@ void BaseExecutionContext::setContentType(CStrRef mimetype, CStrRef charset) {
     contentType += "; ";
     contentType += "charset=";
     contentType += charset;
-    m_transport->addHeader("Content-Type", contentType);
+    m_transport->addHeader("Content-Type", contentType.c_str());
     m_transport->setDefaultContentType(false);
   }
 }
@@ -638,7 +638,7 @@ void BaseExecutionContext::handleError(const std::string &msg,
       if (!Eval::Debugger::InterruptException(String(msg))) return;
     } catch (const Eval::DebuggerClientExitException &e) {}
 
-    const char *file = nullptr;
+    String file = empty_string;
     int line = 0;
     if (RuntimeOption::InjectedStackTrace) {
       if (!bt.empty()) {
@@ -648,7 +648,7 @@ void BaseExecutionContext::handleError(const std::string &msg,
       }
     }
 
-    Logger::Log(Logger::LogError, prefix.c_str(), ee, file, line);
+    Logger::Log(Logger::LogError, prefix.c_str(), ee, file.c_str(), line);
   }
 }
 
@@ -702,7 +702,7 @@ void BaseExecutionContext::recordLastError(const Exception &e,
 
 bool BaseExecutionContext::onFatalError(const Exception &e) {
   recordLastError(e);
-  const char *file = nullptr;
+  String file = empty_string;
   int line = 0;
   if (RuntimeOption::InjectedStackTrace) {
     const ExtendedException *ee = dynamic_cast<const ExtendedException *>(&e);
@@ -716,7 +716,8 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
     }
   }
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e, file, line);
+    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e,
+                file.c_str(), line);
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
@@ -724,7 +725,8 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e, file, line);
+    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e,
+                file.c_str(), line);
   }
   return handled;
 }

@@ -144,7 +144,7 @@ public:
 
   struct MethodInfo {
     MethodInfo() : docComment(nullptr) {}
-    MethodInfo(const char **&p);
+    explicit MethodInfo(const char **&p);
     ~MethodInfo();
     MethodInfo *getDeclared();
     Attribute attribute;
@@ -397,7 +397,6 @@ public:
                         bool staticCall, bool hasCallObject);
   static bool IsSubClass(CStrRef className1, CStrRef className2,
                          bool considerInterface);
-  const char *getConstructor() const;
 
   /**
    * Property functions.
@@ -457,7 +456,7 @@ public:
   /**
    * Read one class's information from specified map pointer and move it.
    */
-  ClassInfoUnique(const char **&p);
+  explicit ClassInfoUnique(const char **&p);
   virtual ~ClassInfoUnique();
 
   // implementing ClassInfo

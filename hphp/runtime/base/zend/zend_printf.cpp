@@ -926,7 +926,7 @@ char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
     switch (ch) {
     case 's': {
       String s = tmp.toString();
-      appendstring(&result, &outpos, &size, s,
+      appendstring(&result, &outpos, &size, s.c_str(),
                    width, precision, padding, alignment, s.size(),
                    0, expprec, 0);
       break;

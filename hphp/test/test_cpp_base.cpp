@@ -53,7 +53,7 @@ bool TestCppBase::RunTests(const std::string &which) {
 
 class Timer {
 public:
-  Timer(const char *name = nullptr) {
+  explicit Timer(const char *name = nullptr) {
     if (name) m_name = name;
     gettimeofday(&m_start, 0);
   }
@@ -126,13 +126,13 @@ bool TestCppBase::TestSmartAllocator() {
 bool TestCppBase::TestString() {
   // constructors
   {
-    VS((const char *)String(15), "15");
-    VS((const char *)String(-15), "-15");
-    VS((const char *)String(int64_t(12345678912345678LL)), "12345678912345678");
-    VS((const char *)String(int64_t(-12345678912345678LL)), "-12345678912345678");
-    VS((const char *)String(5.603), "5.603");
-    VS((const char *)String("test"), "test");
-    VS((const char *)String(String("test")), "test");
+    VS(String(15).c_str(), "15");
+    VS(String(-15).c_str(), "-15");
+    VS(String(int64_t(12345678912345678LL)).c_str(), "12345678912345678");
+    VS(String(int64_t(-12345678912345678LL)).c_str(), "-12345678912345678");
+    VS(String(5.603).c_str(), "5.603");
+    VS(String("test").c_str(), "test");
+    VS(String(String("test")).c_str(), "test");
   }
 
   // informational
@@ -163,27 +163,27 @@ bool TestCppBase::TestString() {
   // operators
   {
     String s;
-    s = "test1";                   VS((const char *)s, "test1");
-    s = String("test2");           VS((const char *)s, "test2");
-    s = Variant("test3");          VS((const char *)s, "test3");
-    s = String("a") + "b";         VS((const char *)s, "ab");
-    s = String("c") + String("d"); VS((const char *)s, "cd");
-    s += "efg";                    VS((const char *)s, "cdefg");
-    s += String("hij");            VS((const char *)s, "cdefghij");
+    s = "test1";                   VS(s.c_str(), "test1");
+    s = String("test2");           VS(s.c_str(), "test2");
+    s = Variant("test3");          VS(s.c_str(), "test3");
+    s = String("a") + "b";         VS(s.c_str(), "ab");
+    s = String("c") + String("d"); VS(s.c_str(), "cd");
+    s += "efg";                    VS(s.c_str(), "cdefg");
+    s += String("hij");            VS(s.c_str(), "cdefghij");
 
-    s = String("\x50\x51") | "\x51\x51"; VS((const char *)s, "\x51\x51");
-    s = String("\x50\x51") & "\x51\x51"; VS((const char *)s, "\x50\x51");
-    s = String("\x50\x51") ^ "\x51\x51"; VS((const char *)s, "\x01");
-    s = "\x50\x51"; s |= "\x51\x51";     VS((const char *)s, "\x51\x51");
-    s = "\x50\x51"; s &= "\x51\x51";     VS((const char *)s, "\x50\x51");
-    s = "\x50\x51"; s ^= "\x51\x51";     VS((const char *)s, "\x01");
-    s = "\x50\x51"; s = ~s;              VS((const char *)s, "\xAF\xAE");
+    s = String("\x50\x51") | "\x51\x51"; VS(s.c_str(), "\x51\x51");
+    s = String("\x50\x51") & "\x51\x51"; VS(s.c_str(), "\x50\x51");
+    s = String("\x50\x51") ^ "\x51\x51"; VS(s.c_str(), "\x01");
+    s = "\x50\x51"; s |= "\x51\x51";     VS(s.c_str(), "\x51\x51");
+    s = "\x50\x51"; s &= "\x51\x51";     VS(s.c_str(), "\x50\x51");
+    s = "\x50\x51"; s ^= "\x51\x51";     VS(s.c_str(), "\x01");
+    s = "\x50\x51"; s = ~s;              VS(s.c_str(), "\xAF\xAE");
   }
 
   // manipulations
   {
     String s = StringUtil::ToLower("Test");
-    VS((const char *)s, "test");
+    VS(s.c_str(), "test");
   }
 
   // conversions
@@ -199,7 +199,7 @@ bool TestCppBase::TestString() {
 
   // offset
   {
-    VS((const char *)String("test").rvalAt(2), "s");
+    VS(String("test").rvalAt(2).c_str(), "s");
     String s = "test";
     s.lvalAt(2) = "";
     VS(s, String("te\0t", 4, AttachLiteral));

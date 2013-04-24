@@ -552,7 +552,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, CVarRef data, int style,
 
     if (style == SOAP_ENCODED || (SOAP_GLOBAL(sdl) && encode != enc)) {
       if (!p->m_stype.empty()) {
-        set_ns_and_type_ex(node, p->m_ns, p->m_stype);
+        set_ns_and_type_ex(node, p->m_ns.c_str(), p->m_stype.c_str());
       }
     }
 

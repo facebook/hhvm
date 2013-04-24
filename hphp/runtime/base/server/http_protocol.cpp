@@ -282,10 +282,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   if (!transport->isSSL() && RuntimeOption::ServerPort != 80) {
     port_suffix = ":" + RuntimeOption::ServerPort;
   }
-  server.set("SCRIPT_URI", String(prefix +
-                                  (hostHeader.empty() ?
-                                    hostName + port_suffix : hostHeader)
-                                  + r.originalURL()));
+  server.set("SCRIPT_URI",
+             String(prefix + (hostHeader.empty() ? hostName + port_suffix :
+                              String(hostHeader)) + r.originalURL()));
 
   if (r.rewritten()) {
     // when URL is rewritten, PHP decided to put original URL as SCRIPT_NAME

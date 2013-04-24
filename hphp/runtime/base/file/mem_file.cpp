@@ -51,7 +51,8 @@ MemFile::~MemFile() {
 bool MemFile::open(CStrRef filename, CStrRef mode) {
   assert(m_len == -1);
   // mem files are read-only
-  if (strchr(mode, '+') || strchr(mode, 'a') || strchr(mode, 'w')) {
+  const char* mode_str = mode.c_str();
+  if (strchr(mode_str, '+') || strchr(mode_str, 'a') || strchr(mode_str, 'w')) {
     return false;
   }
   int len = INT_MIN;
@@ -72,7 +73,7 @@ bool MemFile::open(CStrRef filename, CStrRef mode) {
       m_len = len;
       return true;
     }
-    m_name = filename;
+    m_name = (std::string) filename;
     m_data = data;
     m_len = len;
     return true;

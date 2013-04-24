@@ -111,7 +111,7 @@ Variant ZendPack::pack(CStrRef fmt, CArrRef argv) {
   vector<int> formatargs;
   int argc = argv.size();
 
-  const char *format = fmt;
+  const char *format = fmt.c_str();
   int formatlen = fmt.size();
   int currentarg = 0;
   for (int i = 0; i < formatlen; ) {
@@ -288,7 +288,7 @@ Variant ZendPack::pack(CStrRef fmt, CArrRef argv) {
     case 'A':
       memset(&output[outputpos], (code == 'a') ? '\0' : ' ', arg);
       val = argv[currentarg++].toString();
-      s = (const char *)val;
+      s = val.c_str();
       slen = val.size();
       memcpy(&output[outputpos], s, (slen < arg) ? slen : arg);
       outputpos += arg;
@@ -454,9 +454,9 @@ int32_t ZendPack::unpack(const char *data, int size, int issigned, int *map) {
 }
 
 Variant ZendPack::unpack(CStrRef fmt, CStrRef data) {
-  const char *format = fmt;
+  const char *format = fmt.c_str();
   int formatlen = fmt.size();
-  const char *input = data;
+  const char *input = data.c_str();
   int inputlen = data.size();
   int inputpos = 0;
 

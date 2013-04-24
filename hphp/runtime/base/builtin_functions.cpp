@@ -685,7 +685,9 @@ void throw_unexpected_argument_type(int argNum, const char *fnName,
   case KindOfStaticString:
   case KindOfString:  otype = "string";      break;
   case KindOfArray:   otype = "array";       break;
-  case KindOfObject:  otype = val.getObjectData()->o_getClassName(); break;
+  case KindOfObject:
+    otype = val.getObjectData()->o_getClassName().c_str();
+    break;
   default:
     assert(false);
   }

@@ -372,7 +372,7 @@ Variant f_vsprintf(CStrRef format, CArrRef args) {
 Variant f_sscanf(int _argc, CStrRef str, CStrRef format, CArrRef _argv /* = null_array */) {
   Variant ret;
   int result;
-  result = string_sscanf(str, format, _argv.size(), ret);
+  result = string_sscanf(str.c_str(), format.c_str(), _argv.size(), ret);
   if (SCAN_ERROR_WRONG_PARAM_COUNT == result) return uninit_null();
   if (_argv.empty()) return ret;
 
@@ -391,11 +391,13 @@ String f_chr(int64_t ascii) {
   char buf[2]; buf[0] = ascii; buf[1] = 0;
   return String(buf, 1, CopyString);
 }
+
 int64_t f_ord(CStrRef str) {
-  return (int64_t)(unsigned char)(*((const char *)str));
+  return (int64_t)(unsigned char)str[0];
 }
+
 Variant f_money_format(CStrRef format, double number) {
-  String s = StringUtil::MoneyFormat(format, number);
+  String s = StringUtil::MoneyFormat(format.c_str(), number);
   if (s.isNull()) return false;
   return s;
 }
@@ -406,7 +408,7 @@ String f_number_format(double number, int decimals /* = 0 */,
   char ch_dec_point = '.';
   if (!dec_point.isNull()) {
     if (dec_point.size() >= 1) {
-      ch_dec_point = ((const char *)dec_point)[0];
+      ch_dec_point = dec_point[0];
     } else {
       ch_dec_point = 0;
     }
@@ -414,7 +416,7 @@ String f_number_format(double number, int decimals /* = 0 */,
   char ch_thousands_sep = ',';
   if (!thousands_sep.isNull()) {
     if (thousands_sep.size() >= 1) {
-      ch_thousands_sep = ((const char *)thousands_sep)[0];
+      ch_thousands_sep = thousands_sep[0];
     } else {
       ch_thousands_sep = 0;
     }
@@ -439,9 +441,11 @@ int64_t f_strnatcmp(CStrRef str1, CStrRef str2) {
   return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             false);
 }
+
 int64_t f_strcasecmp(CStrRef str1, CStrRef str2) {
   return bstrcasecmp(str1.data(), str1.size(), str2.data(), str2.size());
 }
+
 Variant f_strncasecmp(CStrRef str1, CStrRef str2, int len) {
   if (len < 0) {
     raise_warning("Length must be greater than or equal to 0");
@@ -450,12 +454,14 @@ Variant f_strncasecmp(CStrRef str1, CStrRef str2, int len) {
   return string_strncasecmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             len);
 }
+
 int64_t f_strnatcasecmp(CStrRef str1, CStrRef str2) {
   return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             true);
 }
+
 int64_t f_strcoll(CStrRef str1, CStrRef str2) {
-  return strcoll(str1, str2);
+  return strcoll(str1.c_str(), str2.c_str());
 }
 
 Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
@@ -478,9 +484,9 @@ Variant f_substr_compare(CStrRef main_str, CStrRef str, int offset,
 
   const char *s1 = main_str.data();
   if (case_insensitivity) {
-    return bstrcasecmp(s1 + offset, cmp_len, str, cmp_len);
+    return bstrcasecmp(s1 + offset, cmp_len, str.data(), cmp_len);
   }
-  return string_ncmp(s1 + offset, str, cmp_len);
+  return string_ncmp(s1 + offset, str.data(), cmp_len);
 }
 
 Variant f_strrchr(CStrRef haystack, CVarRef needle) {
@@ -517,7 +523,7 @@ Variant f_strpbrk(CStrRef haystack, CStrRef char_list) {
     throw_invalid_argument("char_list: (empty)");
     return false;
   }
-  const char *p = strpbrk(haystack, char_list);
+  const char *p = strpbrk(haystack.c_str(), char_list.c_str());
   if (p) {
     return String(p, CopyString);
   }
@@ -624,8 +630,8 @@ Variant f_substr_count(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
 
 Variant f_strspn(CStrRef str1, CStrRef str2, int start /* = 0 */,
                  int length /* = 0x7FFFFFFF */) {
-  const char *s1 = str1;
-  const char *s2 = str2;
+  const char *s1 = str1.data();
+  const char *s2 = str2.data();
   int s1_len = str1.size();
   int s2_len = str2.size();
 
@@ -643,8 +649,8 @@ Variant f_strspn(CStrRef str1, CStrRef str2, int start /* = 0 */,
 
 Variant f_strcspn(CStrRef str1, CStrRef str2, int start /* = 0 */,
                   int length /* = 0x7FFFFFFF */) {
-  const char *s1 = str1;
-  const char *s2 = str2;
+  const char *s1 = str1.data();
+  const char *s2 = str2.data();
   int s1_len = str1.size();
   int s2_len = str2.size();
 
@@ -683,7 +689,7 @@ Variant f_strlen(CVarRef vstr) {
 Variant f_count_chars(CStrRef str, int64_t mode /* = 0 */) {
   int chars[256];
   memset((void*)chars, 0, sizeof(chars));
-  const unsigned char *buf = (const unsigned char *)(const char *)str;
+  const unsigned char *buf = (const unsigned char *)str.data();
   for (int len = str.size(); len > 0; len--) {
     chars[*buf++]++;
   }
@@ -763,15 +769,15 @@ Variant f_str_word_count(CStrRef str, int64_t format /* = 0 */,
   }
 
   char ch[256];
-  const char *char_list = charlist;
+  const char *char_list = charlist.data();
   if (*char_list) {
-    string_charmask(charlist, charlist.size(), ch);
+    string_charmask(char_list, charlist.size(), ch);
   } else {
     char_list = NULL;
   }
 
   int word_count = 0;
-  const char *s0 = str;
+  const char *s0 = str.data();
   const char *p = s0;
   const char *e = p + str_len;
 
@@ -818,23 +824,26 @@ Variant f_str_word_count(CStrRef str, int64_t format /* = 0 */,
 
 int64_t f_levenshtein(CStrRef str1, CStrRef str2, int cost_ins /* = 1 */,
                          int cost_rep /* = 1 */, int cost_del /* = 1 */) {
-  return string_levenshtein(str1, str1.size(), str2, str2.size(),
+  return string_levenshtein(str1.data(), str1.size(), str2.data(), str2.size(),
                             cost_ins, cost_rep, cost_del);
 }
+
 int64_t f_similar_text(CStrRef first, CStrRef second,
                        VRefParam percent /* = uninit_null() */) {
   float p;
-  int ret = string_similar_text(first, first.size(), second, second.size(),
-                                &p);
+  int ret = string_similar_text(first.data(), first.size(),
+                                second.data(), second.size(), &p);
   percent = p;
   return ret;
 }
+
 Variant f_soundex(CStrRef str) {
   if (str.empty()) return false;
-  return String(string_soundex(str), AttachString);
+  return String(string_soundex(str.c_str()), AttachString);
 }
+
 Variant f_metaphone(CStrRef str, int phones /* = 0 */) {
-  char *ret = string_metaphone(str, str.size(), 0, 1);
+  char *ret = string_metaphone(str.data(), str.size(), 0, 1);
   if (ret) {
     return String(ret, AttachString);
   }
@@ -848,6 +857,7 @@ String f_html_entity_decode(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
   return StringUtil::HtmlDecode(str, (StringUtil::QuoteStyle)quote_style,
                                 scharset, true);
 }
+
 String f_htmlentities(CStrRef str, int quote_style /* = k_ENT_COMPAT */,
                       CStrRef charset /* = "ISO-8859-1" */,
                       bool double_encode /* = true */) {
@@ -901,7 +911,7 @@ int64_t f_crc32(CStrRef str) {
   return (uint32_t)StringUtil::CRC32(str);
 }
 String f_crypt(CStrRef str, CStrRef salt /* = "" */) {
-  return StringUtil::Crypt(str, salt);
+  return StringUtil::Crypt(str, salt.c_str());
 }
 String f_md5(CStrRef str, bool raw_output /* = false */) {
   return StringUtil::MD5(str, raw_output);
@@ -992,7 +1002,7 @@ Variant f_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv /* = 
       slocale = argv[i].toString();
     }
 
-    const char *loc = slocale;
+    const char *loc = slocale.c_str();
     if (slocale.size() >= 255) {
       throw_invalid_argument("locale name is too long: %s", loc);
       return false;
@@ -1082,8 +1092,8 @@ String f_nl_langinfo(int item) {
 }
 
 String f_convert_cyr_string(CStrRef str, CStrRef from, CStrRef to) {
-  char ch_from = ((const char *)from)[0];
-  char ch_to = ((const char *)to)[0];
+  char ch_from = from[0];
+  char ch_to = to[0];
   char *ret = string_convert_cyrillic_string(str.data(), str.size(),
                                              ch_from, ch_to);
   return String(ret, str.size(), AttachString);

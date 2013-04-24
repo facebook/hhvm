@@ -154,7 +154,7 @@ class StringData {
    * Different ways of constructing StringData. Default constructor at above
    * is actually only for SmartAllocator to pre-allocate the objects.
    */
-  StringData(const char* data) {
+  explicit StringData(const char* data) {
     initLiteral(data);
   }
   StringData(const char *data, AttachLiteralMode) {
@@ -208,9 +208,9 @@ class StringData {
    * Create a new empty string big enough to hold the requested size,
    * not counting the \0 terminator.
    */
-  StringData(int reserve);
+  explicit StringData(int reserve);
 
-  StringData(SharedVariant *shared);
+  explicit StringData(SharedVariant *shared);
 
 public:
   void append(StringSlice r) { append(r.ptr, r.len); }
@@ -360,10 +360,11 @@ public:
   std::string toCPPString() const;
   static void sweepAll();
 
-  static StringData *FindStaticString(const StringData *str);
-  static StringData *GetStaticString(const StringData *str);
-  static StringData *GetStaticString(const std::string &str);
-  static StringData *GetStaticString(const char *str);
+  static StringData *FindStaticString(const StringData* str);
+  static StringData *GetStaticString(const StringData* str);
+  static StringData *GetStaticString(const std::string& str);
+  static StringData *GetStaticString(const String& str);
+  static StringData *GetStaticString(const char* str);
   static StringData *GetStaticString(char c);
   static size_t GetStaticStringCount();
   static uint32_t GetCnsHandle(const StringData* cnsName);
@@ -440,7 +441,7 @@ public:
 class StackStringData : public StringData {
  public:
   StackStringData() { incRefCount(); }
-  StackStringData(const char* s) : StringData(s) { incRefCount(); }
+  explicit StackStringData(const char* s) : StringData(s) { incRefCount(); }
   template <class T>
   StackStringData(const char* s, T p) : StringData(s, p) { incRefCount(); }
   template <class T>

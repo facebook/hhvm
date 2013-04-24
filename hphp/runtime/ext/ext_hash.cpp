@@ -381,7 +381,7 @@ String f_hash_final(CObjRef context, bool raw_output /* = false */) {
 
 int64_t f_furchash_hphp_ext(CStrRef key, int len, int nPart) {
   len = std::max(std::min(len, key.size()), 0);
-  return furc_hash(key, len, nPart);
+  return furc_hash(key.data(), len, nPart);
 }
 
 bool f_furchash_hphp_ext_supported() {
@@ -390,7 +390,7 @@ bool f_furchash_hphp_ext_supported() {
 
 int64_t f_hphp_murmurhash(CStrRef key, int len, int seed) {
   len = std::max(std::min(len, key.size()), 0);
-  return murmur_hash_64A(key, len, seed);
+  return murmur_hash_64A(key.data(), len, seed);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -654,17 +654,6 @@ bool ClassInfo::checkAccess(ClassInfo *defClass,
   return false;
 }
 
-const char *ClassInfo::getConstructor() const {
-  ClassInfo *defClass;
-  if (hasMethod("__construct", defClass)) {
-    return "__construct";
-  }
-  if (!(m_attribute & IsTrait) && hasMethod(m_name, defClass)) {
-    return m_name;
-  }
-  return nullptr;
-}
-
 void ClassInfo::getAllProperties(PropertyMap &props) const {
   const PropertyMap &properties = getProperties();
   props.insert(properties.begin(), properties.end());

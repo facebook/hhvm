@@ -510,7 +510,7 @@ static void get_attributes(Array &ret, LDAP *ldap,
     ldap_value_free_len(ldap_value);
 
     String sAttribute(attribute, CopyString);
-    ret.set(to_lower ? Util::toLower(attribute) : sAttribute, tmp);
+    ret.set(to_lower ? String(Util::toLower(attribute)) : sAttribute, tmp);
     ret.set(num_attrib, sAttribute);
 
     num_attrib++;

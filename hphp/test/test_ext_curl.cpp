@@ -36,7 +36,7 @@ public:
       const void *data = transport->getPostData(len);
       String res = "POST: ";
       res += String((char*)data, len, CopyString);
-      transport->sendString(res);
+      transport->sendString(res.c_str());
     } else {
       transport->sendString("OK");
     }

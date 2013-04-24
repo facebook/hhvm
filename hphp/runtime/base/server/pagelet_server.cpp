@@ -72,7 +72,7 @@ public:
 
     disableCompression(); // so we don't have to decompress during sendImpl()
     m_rfc1867UploadedFiles = rfc1867UploadedFiles;
-    m_files = f_serialize(files);
+    m_files = (std::string) f_serialize(files);
   }
 
   /**

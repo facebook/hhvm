@@ -42,7 +42,7 @@ StaticString
 static RecursiveIteratorIterator *
 get_recursiveiteratoriterator(CObjRef obj) {
   if (!obj->instanceof(SystemLib::s_RecursiveIteratorIteratorClass)) {
-    throw InvalidObjectTypeException(obj->o_getClassName());
+    throw InvalidObjectTypeException(obj->o_getClassName().c_str());
   }
   CObjRef rsrc = obj->o_get("rsrc", true, "RecursiveIteratorIterator");
   return rsrc.getTyped<RecursiveIteratorIterator>();
@@ -51,7 +51,7 @@ get_recursiveiteratoriterator(CObjRef obj) {
 static RecursiveDirectoryIterator *
 get_recursivedirectoryiterator(CObjRef obj) {
   if (!obj->instanceof(SystemLib::s_RecursiveDirectoryIteratorClass)) {
-    throw InvalidObjectTypeException(obj->o_getClassName());
+    throw InvalidObjectTypeException(obj->o_getClassName().c_str());
   }
   // SplFileInfo as context -- rsrc is a private property
   CObjRef rsrc = obj->o_get("rsrc", true, "SplFileInfo");
@@ -61,7 +61,7 @@ get_recursivedirectoryiterator(CObjRef obj) {
 static DirectoryIterator *
 get_directoryiterator(CObjRef obj) {
   if (!obj->instanceof(SystemLib::s_DirectoryIteratorClass)) {
-    throw InvalidObjectTypeException(obj->o_getClassName());
+    throw InvalidObjectTypeException(obj->o_getClassName().c_str());
   }
   // SplFileInfo as context -- rsrc is a private property
   CObjRef rsrc = obj->o_get("rsrc", true, "SplFileInfo");

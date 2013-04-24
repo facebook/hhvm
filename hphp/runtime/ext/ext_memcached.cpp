@@ -169,7 +169,7 @@ namespace {
 class MemcachedResultWrapper {
 public:
   memcached_result_st value;
-  MemcachedResultWrapper(memcached_st *memcached) {
+  explicit MemcachedResultWrapper(memcached_st *memcached) {
     memcached_result_create(memcached, &value);
   }
   ~MemcachedResultWrapper() {
@@ -630,7 +630,7 @@ Variant c_Memcached::t_getserverbykey(CStrRef server_key) {
 
   memcached_return_t error;
   const memcached_server_st *server = memcached_server_by_key(
-      &m_impl->memcached, server_key, server_key.length(), &error);
+      &m_impl->memcached, server_key.c_str(), server_key.size(), &error);
   if (!server) {
     handleError(error);
     return false;

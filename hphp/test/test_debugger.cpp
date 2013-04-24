@@ -93,7 +93,7 @@ bool TestDebugger::getResponse(const string& path, string& result,
     printf("  Request failed\n");
     return false;
   }
-  result = res.toString();
+  result = (std::string) res.toString();
   printf("  Request succeeded, returning '%s'\n", result.c_str());
   return true;
 }

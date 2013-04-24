@@ -529,7 +529,7 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
   }
   info("Connecting to %s:%d...", host.c_str(), port);
   Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
-                            String(host), port);
+                            host.c_str(), port);
   // Ensure the socket is not swept---it is cached across requests in
   // API mode, and in client mode we expect to destruct it ourselves
   // when ~DebuggerClient runs.
@@ -556,7 +556,7 @@ bool DebuggerClient::reconnect() {
   if (port) {
     info("Re-connecting to %s:%d...", host.c_str(), port);
     Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
-                              String(host), port);
+                              host.c_str(), port);
     sock->unregister();
     Object obj(sock);
     if (f_socket_connect(sock, String(host), port)) {

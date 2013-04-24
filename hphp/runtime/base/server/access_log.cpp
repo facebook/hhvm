@@ -381,7 +381,7 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
     {
       String b, q;
       RequestURI::splitURL(transport->getUrl(), b, q);
-      out << b;
+      out << b.c_str();
     }
     break;
   case 'v':

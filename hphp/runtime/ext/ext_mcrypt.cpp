@@ -31,7 +31,7 @@ IMPLEMENT_DEFAULT_EXTENSION(mcrypt);
 
 class MCrypt : public SweepableResourceData {
 public:
-  MCrypt(MCRYPT td) : m_td(td), m_init(false) {
+  explicit MCrypt(MCRYPT td) : m_td(td), m_init(false) {
   }
 
   ~MCrypt() {
@@ -241,7 +241,7 @@ bool f_mcrypt_module_close(CObjRef td) {
 }
 
 Array f_mcrypt_list_algorithms(CStrRef lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? MCG(algorithms_dir) : lib_dir;
+  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
 
   int count = 0;
   char **modules = mcrypt_list_algorithms((char*)dir.data(), &count);
@@ -257,7 +257,7 @@ Array f_mcrypt_list_algorithms(CStrRef lib_dir /* = null_string */) {
 }
 
 Array f_mcrypt_list_modes(CStrRef lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? MCG(modes_dir) : lib_dir;
+  String dir = lib_dir.empty() ? String(MCG(modes_dir)) : lib_dir;
 
   int count = 0;
   char **modules = mcrypt_list_modes((char*)dir.data(), &count);
@@ -274,21 +274,21 @@ Array f_mcrypt_list_modes(CStrRef lib_dir /* = null_string */) {
 
 int64_t f_mcrypt_module_get_algo_block_size(CStrRef algorithm,
                                         CStrRef lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? MCG(algorithms_dir) : lib_dir;
+  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_get_algo_block_size((char*)algorithm.data(),
                                            (char*)dir.data());
 }
 
 int64_t f_mcrypt_module_get_algo_key_size(CStrRef algorithm,
                                       CStrRef lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? MCG(algorithms_dir) : lib_dir;
+  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_get_algo_key_size((char*)algorithm.data(),
                                          (char*)dir.data());
 }
 
 Array f_mcrypt_module_get_supported_key_sizes(CStrRef algorithm,
                                               CStrRef lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? MCG(algorithms_dir) : lib_dir;
+  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
 
   int count = 0;
   int *key_sizes = mcrypt_module_get_algo_supported_key_sizes
@@ -304,28 +304,28 @@ Array f_mcrypt_module_get_supported_key_sizes(CStrRef algorithm,
 
 bool f_mcrypt_module_is_block_algorithm_mode(CStrRef mode,
                                              CStrRef lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? MCG(modes_dir) : lib_dir;
+  String dir = lib_dir.empty() ? String(MCG(modes_dir)) : lib_dir;
   return mcrypt_module_is_block_algorithm_mode((char*)mode.data(),
                                                (char*)dir.data()) == 1;
 }
 
 bool f_mcrypt_module_is_block_algorithm(CStrRef algorithm,
                                         CStrRef lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? MCG(algorithms_dir) : lib_dir;
+  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_is_block_algorithm((char*)algorithm.data(),
                                           (char*)dir.data()) == 1;
 }
 
 bool f_mcrypt_module_is_block_mode(CStrRef mode,
                                    CStrRef lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? MCG(modes_dir) : lib_dir;
+  String dir = lib_dir.empty() ? String(MCG(modes_dir)) : lib_dir;
   return mcrypt_module_is_block_mode((char*)mode.data(),
                                      (char*)dir.data()) == 1;
 }
 
 bool f_mcrypt_module_self_test(CStrRef algorithm,
                                CStrRef lib_dir /* = null_string */) {
-  String dir = lib_dir.empty() ? MCG(algorithms_dir) : lib_dir;
+  String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_self_test((char*)algorithm.data(),
                                  (char*)dir.data()) == 0;
 }

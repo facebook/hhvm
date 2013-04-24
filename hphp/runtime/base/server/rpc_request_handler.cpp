@@ -220,7 +220,9 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       reqInitDoc = m_serverInfo->getReqInitDoc();
     }
 
-    if (!reqInitDoc.empty()) reqInitDoc = canonicalize_path(reqInitDoc, "", 0);
+    if (!reqInitDoc.empty()) {
+      reqInitDoc = (std::string)canonicalize_path(reqInitDoc, "", 0);
+    }
     if (!reqInitDoc.empty()) {
       reqInitDoc = getSourceFilename(reqInitDoc, sourceRootInfo);
     }
@@ -248,7 +250,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         }
       }
       if (!forbidden) {
-        rpcFile = canonicalize_path(rpcFile, "", 0);
+        rpcFile = (std::string) canonicalize_path(rpcFile, "", 0);
         rpcFile = getSourceFilename(rpcFile, sourceRootInfo);
         ret = hphp_invoke(m_context, rpcFile, false, Array(), uninit_null(),
                           reqInitFunc, reqInitDoc, error, errorMsg, runOnce);

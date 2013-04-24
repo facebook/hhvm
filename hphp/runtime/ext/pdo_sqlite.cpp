@@ -120,8 +120,8 @@ PDOSqliteConnection::~PDOSqliteConnection() {
 }
 
 bool PDOSqliteConnection::create(CArrRef options) {
-  String filename = data_source.substr(0,1) == ":" ? data_source :
-    File::TranslatePath(data_source);
+  String filename = data_source.substr(0,1) == ":" ? String(data_source) :
+                    File::TranslatePath(data_source);
   if (filename.empty()) {
     throw_pdo_exception(0, Array(),
                         "safe_mode/open_basedir prohibits opening %s",
@@ -467,7 +467,8 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam *param,
 
     if (param->is_param) {
       if (param->paramno == -1) {
-        param->paramno = sqlite3_bind_parameter_index(m_stmt, param->name) - 1;
+        param->paramno = sqlite3_bind_parameter_index(m_stmt,
+                                                      param->name.c_str()) - 1;
       }
 
       switch (PDO_PARAM_TYPE(param->param_type)) {

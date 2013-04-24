@@ -400,7 +400,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, CStrRef file,
     }
   }
   if (mode == 1) {
-    buf = xmlOutputBufferCreateFilename(file, NULL, 0);
+    buf = xmlOutputBufferCreateFilename(file.c_str(), nullptr, 0);
   } else {
     buf = xmlAllocOutputBuffer(NULL);
   }
@@ -1499,8 +1499,8 @@ struct PropertyAccessor {
 
 class PropertyAccessorMap : private hphp_const_char_imap<PropertyAccessor*> {
 public:
-  PropertyAccessorMap(PropertyAccessor* props,
-                      PropertyAccessorMap *base = NULL) {
+  explicit PropertyAccessorMap(PropertyAccessor* props,
+                               PropertyAccessorMap *base = nullptr) {
     if (base) {
       *this = *base;
     }
@@ -5434,17 +5434,17 @@ Variant c_DOMNodeIterator::t_valid() {
 ///////////////////////////////////////////////////////////////////////////////
 // function-style wrappers
 
-#define DOM_GET_OBJ(name)					\
+#define DOM_GET_OBJ(name)                                       \
   c_DOM ##name *pobj = NULL;                                    \
   if (obj.isObject()) {                                         \
     pobj = obj.toObject().getTyped<c_DOM ##name>(true, true);   \
     if (pobj == NULL) {                                         \
       raise_warning("Expecting dom " #name " object");          \
-      return uninit_null();                                              \
+      return uninit_null();                                     \
     }                                                           \
   } else {                                                      \
     raise_warning("Expecting dom objects in parameters");       \
-    return uninit_null();                                                \
+    return uninit_null();                                       \
   }
 
 Variant f_dom_document_create_element(CVarRef obj, CStrRef name,

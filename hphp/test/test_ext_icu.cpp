@@ -174,7 +174,7 @@ bool TestExtIcu::test_icu_transliterate() {
   VERIFY(output_de == "Ich mochte uberzeugend oder ahnliche sein");
 
   // Verify that keeping accents works.
-  VERIFY(f_icu_transliterate(input_de, false) == (const char*)input_de);
+  VERIFY(f_icu_transliterate(input_de, false) == input_de.c_str());
 
   // Check an non-Latin language.
   String input_zh = String("\xe5\x9b\x9b"

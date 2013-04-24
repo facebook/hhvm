@@ -67,10 +67,10 @@ public:
    * IRFactory::gen.
    */
   template<class... Args>
-  SSATmp* gen(Args... args) {
+  SSATmp* gen(Args&&... args) {
     return makeInstruction(
       [this] (IRInstruction* inst) { return optimizeInst(inst); },
-      args...
+      std::forward<Args>(args)...
     );
   }
 
@@ -277,20 +277,17 @@ public:
 
   template<typename T>
   SSATmp* genDefConst(T val) {
-    ConstData cdata(val);
-    return gen(DefConst, typeForConst(val), &cdata);
+    return gen(DefConst, typeForConst(val), ConstData(val));
   }
 
   template<typename T>
   SSATmp* genDefConst(T val, Type type) {
-    ConstData cdata(val);
-    return gen(DefConst, type, &cdata);
+    return gen(DefConst, type, ConstData(val));
   }
 
   template<typename T>
   SSATmp* genLdConst(T val) {
-    ConstData cdata(val);
-    return gen(LdConst, typeForConst(val), &cdata);
+    return gen(LdConst, typeForConst(val), ConstData(val));
   }
 
   Trace* getTrace() const { return m_trace.get(); }
@@ -508,8 +505,7 @@ private:
 
 template<>
 inline SSATmp* TraceBuilder::genDefConst(Type t) {
-  ConstData cdata(0);
-  return gen(DefConst, t, &cdata);
+  return gen(DefConst, t, ConstData(0));
 }
 
 }}}

@@ -52,6 +52,8 @@ namespace JIT {
 
 using namespace HPHP::VM::Transl;
 
+struct IRInstruction;
+
 class FailedIRGen : public std::exception {
  public:
   const char* file;
@@ -725,8 +727,8 @@ private:
  * to the list head.
  */
 struct EdgeData : IRExtraData {
-  struct IRInstruction* jmp;  // owner of this edge
-  EdgeData* next;             // next edge to same target
+  IRInstruction* jmp;    // owner of this edge
+  EdgeData* next;        // next edge to same target
 };
 
 /*
@@ -1653,6 +1655,13 @@ struct IRInstruction {
    * clones).
    */
   void setExtra(IRExtraData* data) { assert(!m_extra); m_extra = data; }
+
+  /*
+   * Clear the extra data pointer in a IRInstruction.  Used during
+   * IRFactory::gen to avoid having dangling IRExtraData*'s into stack
+   * memory.
+   */
+  void clearExtra() { m_extra = nullptr; }
 
   /*
    * Replace an instruction in place with a Nop.  This sometimes may

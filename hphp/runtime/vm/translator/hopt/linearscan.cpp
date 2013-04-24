@@ -505,9 +505,8 @@ void LinearScan::insertAllocFreeSpill(Trace* trace, uint32_t numExtraSpillLocs) 
 
 void LinearScan::insertAllocFreeSpillAux(Trace* trace,
                                          uint32_t numExtraSpillLocs) {
-  ConstData numSpillConst(numExtraSpillLocs);
   SSATmp* tmp = m_irFactory->gen(DefConst, Type::Int,
-    &numSpillConst)->getDst();
+    ConstData(numExtraSpillLocs))->getDst();
 
   for (Block* block : trace->getBlocks()) {
     for (auto it = block->begin(); it != block->end(); ) {
@@ -1016,8 +1015,12 @@ void LinearScan::rematerializeAux() {
           // Rematerialize LdLoc.
           int loc = findLocal(spilledTmp);
           if (loc != -1) {
-            LocalId localId(loc);
-            newInst = m_irFactory->gen(LdLoc, dst->getType(), &localId, curFp);
+            newInst = m_irFactory->gen(
+              LdLoc,
+              dst->getType(),
+              LocalId(loc),
+              curFp
+            );
           }
         }
         if (newInst) {

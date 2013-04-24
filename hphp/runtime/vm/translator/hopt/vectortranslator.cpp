@@ -308,8 +308,7 @@ SSATmp* HhbcTranslator::VectorTranslator::genMisPtr() {
   if (m_needMIS) {
     return m_tb.genLdAddr(m_misBase, kReservedRSPSpillSpace);
   } else {
-    ConstData cdata(nullptr);
-    return m_tb.gen(DefConst, Type::PtrToCell, &cdata);
+    return m_tb.gen(DefConst, Type::PtrToCell, ConstData(nullptr));
   }
 }
 
@@ -559,8 +558,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
     if (baseType.subtypeOf(Type::Uninit)) {
       if (mia & MIA_warn) {
         m_ht.spillStack();
-        LocalId data(base.location.offset);
-        m_tb.gen(RaiseUninitLoc, &data);
+        m_tb.gen(RaiseUninitLoc, LocalId(base.location.offset));
       }
       if (mia & MIA_define) {
         m_tb.genStLoc(base.location.offset, m_tb.genDefInitNull(),

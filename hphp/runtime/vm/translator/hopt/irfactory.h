@@ -18,12 +18,12 @@
 #define incl_HPHP_VM_IRFACTORY_H_
 
 #include <type_traits>
+#include <vector>
 
+#include "folly/ScopeGuard.h"
 #include "util/arena.h"
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/cse.h"
-
-#include <vector>
 
 namespace HPHP { namespace VM { namespace JIT {
 
@@ -37,7 +37,7 @@ namespace HPHP { namespace VM { namespace JIT {
  *
  *   Normally IRInstruction creation should go through either
  *   IRFactory::gen or TraceBuilder::gen.  This utility is used to
- *   implement those.
+ *   implement those.  The lambda must not escape the IRInstruction*.
  */
 
 namespace detail {
@@ -46,12 +46,26 @@ template<class Ret, class Func>
 struct InstructionBuilder {
   explicit InstructionBuilder(const Func& func) : func(func) {}
 
-  // Create an IRInstruction, and then recursively chew on the Args
-  // list to populate its fields.
+  /*
+   * Create an IRInstruction, and then recursively chew on the Args
+   * list to populate its fields.
+   *
+   * The IRInstruction is stack allocated, and should not escape the
+   * lambda, so we fill it with 0xc0 in debug builds after we're done.
+   */
   template<class... Args>
-  Ret go(Opcode op, Args... args) {
-    IRInstruction inst(op);
-    return go2(&inst, args...);
+  Ret go(Opcode op, Args&&... args) {
+    std::aligned_storage<
+      sizeof(IRInstruction)
+    >::type buffer;
+    void* const vpBuffer = &buffer;
+    SCOPE_EXIT { if (debug) memset(&buffer, 0xc0, sizeof buffer); };
+
+    new (vpBuffer) IRInstruction(op);
+    auto const inst = static_cast<IRInstruction*>(vpBuffer);
+
+    SCOPE_EXIT { inst->clearExtra(); };
+    return go2(inst, std::forward<Args>(args)...);
   }
 
 private:
@@ -59,9 +73,9 @@ private:
   // until there's no overload for the Head type; then it will fall
   // through to the base case.
   template<class Head, class... Tail>
-  Ret go2(IRInstruction* inst, Head x, Tail... xs) {
+  Ret go2(IRInstruction* inst, const Head& x, Tail&&... xs) {
     setter(inst, x);
-    return go2(inst, xs...);
+    return go2(inst, std::forward<Tail>(xs)...);
   }
 
   // Base cases: either there are no SSATmps, or there's a variadic
@@ -76,14 +90,12 @@ private:
     return stop(inst);
   }
 
-  template<class Int>
-  Ret go2(IRInstruction* inst, Int num, SSATmp** ssas) {
-    inst->initializeSrcs(num, ssas);
-    return stop(inst);
-  }
-
   // For each of the optional parameters, there's an overloaded
   // setter:
+
+  void setter(IRInstruction* inst, std::pair<uint32_t,SSATmp**> ssas) {
+    inst->initializeSrcs(ssas.first, ssas.second);
+  }
 
   void setter(IRInstruction* inst, Block* target) {
     inst->setTaken(target);
@@ -97,8 +109,21 @@ private:
     inst->setTypeParam(t);
   }
 
-  void setter(IRInstruction* inst, IRExtraData* extra) {
-    inst->setExtra(extra);
+  void setter(IRInstruction* inst, const IRExtraData& extra) {
+    /*
+     * Taking the address of this temporary seems scary, but actually
+     * it is safe: `extra' was forwarded in all the way from the
+     * makeInstruction call, but then we bound a const reference to it
+     * at go2() when it was the head of the varargs list, so it must
+     * last until the end of the full-expression that called that
+     * go2().
+     *
+     * This is long enough for it to outlast our call to func,
+     * although the transient IRInstruction actually will outlive it.
+     * We null out the extra data in go() before ~IRInstruction runs,
+     * though.
+     */
+    inst->setExtra(const_cast<IRExtraData*>(&extra));
   }
 
   // Finally we end up here.
@@ -115,7 +140,7 @@ private:
 
 template<class Func, class... Args>
 typename std::result_of<Func (IRInstruction*)>::type
-makeInstruction(Func func, Args... args) {
+makeInstruction(Func func, Args&&... args) {
   typedef typename std::result_of<Func (IRInstruction*)>::type Ret;
   return detail::InstructionBuilder<Ret,Func>(func).go(args...);
 }
@@ -139,17 +164,17 @@ public:
    *
    * Arguments are passed in the following format:
    *
-   *   gen(Opcode, [IRExtraData*,] [type param,] [exit label,] [srcs ...]);
+   *   gen(Opcode, [IRExtraData&,] [type param,] [exit label,] [srcs ...]);
    *
    * All arguments are optional except the opcode.  `srcs' may be
    * specified either as a list of SSATmp*'s, or as a integer size and
    * a SSATmp**.
    */
   template<class... Args>
-  IRInstruction* gen(Args... args) {
+  IRInstruction* gen(Args&&... args) {
     return makeInstruction(
       [this] (IRInstruction* inst) { return inst->clone(this); },
-      args...
+      std::forward<Args>(args)...
     );
   }
 

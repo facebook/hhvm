@@ -238,7 +238,7 @@ Trace* TraceBuilder::genExitGuardFailure(uint32_t bcOff) {
   marker.bcOff    = bcOff;
   marker.stackOff = m_spOffset;
   marker.func     = m_curFunc->getValFunc();
-  gen(Marker, &marker); // goes on main trace
+  gen(Marker, marker); // goes on main trace
 
   SSATmp* pc = genDefConst((int64_t)bcOff);
   // TODO change exit trace to a control flow instruction that
@@ -305,7 +305,7 @@ Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
   marker.bcOff    = bcOff;
   marker.stackOff = m_spOffset + numOpnds - stackDeficit;
   marker.func     = m_curFunc->getValFunc();
-  exitTrace->back()->push_back(m_irFactory.gen(Marker, &marker));
+  exitTrace->back()->push_back(m_irFactory.gen(Marker, marker));
 
   if (beforeExit) {
     beforeExit(&m_irFactory, exitTrace);
@@ -317,7 +317,11 @@ Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
     srcs[1] = genDefConst<int64_t>(stackDeficit);
     std::copy(opnds, opnds + numOpnds, srcs + 2);
 
-    auto* spillInst = m_irFactory.gen(SpillStack, numOpnds + 2, srcs);
+    SSATmp** decayedPtr = srcs;
+    auto* spillInst = m_irFactory.gen(
+      SpillStack,
+      std::make_pair(numOpnds + 2, decayedPtr)
+    );
     sp = spillInst->getDst();
     exitTrace->back()->push_back(spillInst);
   }
@@ -369,33 +373,27 @@ SSATmp* TraceBuilder::genNot(SSATmp* src) {
 }
 
 SSATmp* TraceBuilder::genDefUninit() {
-  ConstData cdata(0);
-  return gen(DefConst, Type::Uninit, &cdata);
+  return gen(DefConst, Type::Uninit, ConstData(0));
 }
 
 SSATmp* TraceBuilder::genDefInitNull() {
-  ConstData cdata(0);
-  return gen(DefConst, Type::InitNull, &cdata);
+  return gen(DefConst, Type::InitNull, ConstData(0));
 }
 
 SSATmp* TraceBuilder::genDefNull() {
-  ConstData cdata(0);
-  return gen(DefConst, Type::Null, &cdata);
+  return gen(DefConst, Type::Null, ConstData(0));
 }
 
 SSATmp* TraceBuilder::genPtrToInitNull() {
-  ConstData cdata(&null_variant);
-  return gen(DefConst, Type::PtrToUninit, &cdata);
+  return gen(DefConst, Type::PtrToUninit, ConstData(&null_variant));
 }
 
 SSATmp* TraceBuilder::genPtrToUninit() {
-  ConstData cdata(&init_null_variant);
-  return gen(DefConst, Type::PtrToInitNull, &cdata);
+  return gen(DefConst, Type::PtrToInitNull, ConstData(&init_null_variant));
 }
 
 SSATmp* TraceBuilder::genDefNone() {
-  ConstData cdata(0);
-  return gen(DefConst, Type::None, &cdata);
+  return gen(DefConst, Type::None, ConstData(0));
 }
 
 SSATmp* TraceBuilder::genConvToBool(SSATmp* src) {
@@ -436,8 +434,7 @@ SSATmp* TraceBuilder::genJmpCond(SSATmp* boolSrc, Trace* target, bool negate) {
 }
 
 void TraceBuilder::genJmp(Block* target, SSATmp* src) {
-  EdgeData edge;
-  gen(Jmp_, target, &edge, src);
+  gen(Jmp_, target, EdgeData(), src);
 }
 
 void TraceBuilder::genExitWhenSurprised(Trace* targetTrace) {
@@ -460,8 +457,7 @@ void TraceBuilder::genGuardLoc(uint32_t id, Type type, Trace* exitTrace) {
   }
   Type prevType = getLocalType(id);
   if (prevType == Type::None) {
-    LocalId local(id);
-    gen(GuardLoc, type, getFirstBlock(exitTrace), &local, m_fpValue);
+    gen(GuardLoc, type, getFirstBlock(exitTrace), LocalId(id), m_fpValue);
   } else {
     // It doesn't make sense to be guarding on something that's deemed to fail
     assert(prevType == type);
@@ -477,8 +473,7 @@ void TraceBuilder::genAssertLoc(uint32_t id, Type type,
                                 bool overrideType /* =false */) {
   Type prevType = overrideType ? Type::None : getLocalType(id);
   if (prevType == Type::None || type.strictSubtypeOf(prevType)) {
-    LocalId local(id);
-    gen(AssertLoc, type, &local, m_fpValue);
+    gen(AssertLoc, type, LocalId(id), m_fpValue);
   } else {
     assert(prevType == type || prevType.strictSubtypeOf(type));
   }
@@ -586,8 +581,7 @@ SSATmp* TraceBuilder::genLdLoc(uint32_t id) {
   if (type.isNull()) {
     tmp = genDefConst(type);
   } else {
-    LocalId loc(id);
-    tmp = gen(LdLoc, type, &loc, m_fpValue);
+    tmp = gen(LdLoc, type, LocalId(id), m_fpValue);
   }
   return tmp;
 }
@@ -604,14 +598,12 @@ SSATmp* TraceBuilder::genLdLocAsCell(uint32_t id, Trace* exitTrace) {
 }
 
 SSATmp* TraceBuilder::genLdLocAddr(uint32_t id) {
-  LocalId baseLocalId(id);
-  return gen(LdLocAddr, getLocalType(id).ptr(), &baseLocalId, getFp());
+  return gen(LdLocAddr, getLocalType(id).ptr(), LocalId(id), getFp());
 }
 
 void TraceBuilder::genStLocAux(uint32_t id, SSATmp* newValue, bool storeType) {
-  LocalId locId(id);
   gen(storeType ? StLoc : StLocNT,
-      &locId,
+      LocalId(id),
       m_fpValue,
       newValue);
 }
@@ -637,8 +629,7 @@ void TraceBuilder::genDecRefLoc(int id) {
   bool setNull = id < m_curFunc->getValFunc()->numParams();
   SSATmp* val = getLocalValue(id);
   if (val == nullptr && setNull) {
-    LocalId locId(id);
-    val = gen(LdLoc, type, &locId, m_fpValue);
+    val = gen(LdLoc, type, LocalId(id), m_fpValue);
   }
   if (val) {
     if (setNull) {
@@ -655,8 +646,7 @@ void TraceBuilder::genDecRefLoc(int id) {
     type = Type::BoxedCell;
   }
 
-  LocalId local(id);
-  gen(DecRefLoc, type, &local, m_fpValue);
+  gen(DecRefLoc, type, LocalId(id), m_fpValue);
 }
 
 /*
@@ -665,12 +655,11 @@ void TraceBuilder::genDecRefLoc(int id) {
 void TraceBuilder::genBindLoc(uint32_t id,
                               SSATmp* newValue,
                               bool doRefCount /* = true */) {
-  LocalId locId(id);
   Type trackedType = getLocalType(id);
   SSATmp* prevValue = 0;
   if (trackedType == Type::None) {
     if (doRefCount) {
-      prevValue = gen(LdLoc, Type::Gen, &locId, m_fpValue);
+      prevValue = gen(LdLoc, Type::Gen, LocalId(id), m_fpValue);
     }
   } else {
     prevValue = getLocalValue(id);
@@ -684,7 +673,7 @@ void TraceBuilder::genBindLoc(uint32_t id,
       return;
     }
     if (trackedType.maybeCounted() && !prevValue && doRefCount) {
-      prevValue = gen(LdLoc, trackedType, &locId, m_fpValue);
+      prevValue = gen(LdLoc, trackedType, LocalId(id), m_fpValue);
     }
   }
   bool genStoreType = true;
@@ -731,8 +720,7 @@ SSATmp* TraceBuilder::genStLoc(uint32_t id,
   // prevRef is a ref
   if (prevRef == nullptr) {
     // prevRef = ldLoc
-    LocalId locId(id);
-    prevRef = gen(LdLoc, trackedType, &locId, m_fpValue);
+    prevRef = gen(LdLoc, trackedType, LocalId(id), m_fpValue);
   }
   SSATmp* prevValue = nullptr;
   if (doRefCount) {
@@ -1003,7 +991,8 @@ SSATmp* TraceBuilder::genCall(SSATmp* actRec,
   srcs[1] = genDefConst<int64_t>(returnBcOffset);
   srcs[2] = func;
   std::copy(params, params + numParams, srcs + 3);
-  return gen(Call, numParams + 3, srcs);
+  SSATmp** decayedPtr = srcs;
+  return gen(Call, std::make_pair(numParams + 3, decayedPtr));
 }
 
 SSATmp* TraceBuilder::genCallBuiltin(SSATmp* func,
@@ -1013,7 +1002,8 @@ SSATmp* TraceBuilder::genCallBuiltin(SSATmp* func,
   SSATmp* srcs[numArgs + 1];
   srcs[0] = func;
   std::copy(args, args + numArgs, srcs + 1);
-  return gen(CallBuiltin, type, numArgs + 1, srcs);
+  SSATmp** decayedPtr = srcs;
+  return gen(CallBuiltin, type, std::make_pair(numArgs + 1, decayedPtr));
 }
 
 void TraceBuilder::genRetVal(SSATmp* val) {
@@ -1081,7 +1071,8 @@ SSATmp* TraceBuilder::genSpillStack(uint32_t stackAdjustment,
   srcs[0] = m_spValue;
   srcs[1] = genDefConst<int64_t>(stackAdjustment);
   std::copy(spillOpnds, spillOpnds + numOpnds, srcs + 2);
-  return gen(SpillStack, numOpnds + 2, srcs);
+  SSATmp** decayedPtr = srcs;
+  return gen(SpillStack, std::make_pair(numOpnds + 2, decayedPtr));
 }
 
 SSATmp* TraceBuilder::genLdStack(int32_t stackOff, Type type) {

@@ -436,9 +436,11 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
     case NInstanceOfBitmask:
       // TODO: combine this with the above check and use isQueryOp or
       // add an isNegatable.
-      return m_tb->gen(negateQueryOp(op),
-                       inst->getNumSrcs(),
-                       inst->getSrcs().begin());
+      return m_tb->gen(
+        negateQueryOp(op),
+        std::make_pair(inst->getNumSrcs(), inst->getSrcs().begin())
+      );
+      return nullptr;
     // TODO !(X | non_zero) --> 0
     default: (void)op;
   }
@@ -1390,14 +1392,15 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   // Fuse jumps with query operators.
   if (isQueryOp(srcOpcode) && !disableBranchFusion(srcOpcode)) {
     SrcRange ssas = srcInst->getSrcs();
-    return m_tb->gen(queryToJmpOp(
-                       inst->getOpcode() == JmpZero
-                         ? negateQueryOp(srcOpcode)
-                         : srcOpcode),
-                     srcInst->getTypeParam(), // if it had a type param
-                     inst->getTaken(),
-                     ssas.size(),
-                     ssas.begin());
+    return m_tb->gen(
+      queryToJmpOp(
+        inst->getOpcode() == JmpZero
+          ? negateQueryOp(srcOpcode)
+          : srcOpcode),
+        srcInst->getTypeParam(), // if it had a type param
+        inst->getTaken(),
+        std::make_pair(ssas.size(), ssas.begin())
+    );
   }
 
   return nullptr;

@@ -168,7 +168,7 @@ void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
     marker.func      = getCurFunc();
     marker.stackOff  = m_tb->getSpOffset() +
                          m_evalStack.numCells() - m_stackDeficit;
-    m_tb->gen(Marker, &marker);
+    m_tb->gen(Marker, marker);
   }
   m_lastBcOff = lastBcOff;
 }
@@ -641,7 +641,6 @@ void HhbcTranslator::emitTraitExists(const StringData* traitName) {
 
 void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
   const StringData* name = lookupStringId(litStrId);
-  LocalId id(locId);
   SSATmp* value = popC();
   SSATmp* box;
 
@@ -668,7 +667,7 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
       }
     );
   }
-  m_tb->gen(StLoc, &id, m_tb->getFp(), box);
+  m_tb->gen(StLoc, LocalId(locId), m_tb->getFp(), box);
   m_tb->gen(DecRef, value);
 }
 
@@ -1824,7 +1823,7 @@ void HhbcTranslator::emitSwitch(const ImmVector& iv,
   SSATmp* stack = spillStack();
   m_tb->gen(SyncVMRegs, m_tb->getFp(), stack);
 
-  m_tb->gen(JmpSwitchDest, &data, index);
+  m_tb->gen(JmpSwitchDest, data, index);
   m_hasExit = true;
 }
 
@@ -1868,7 +1867,7 @@ void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
 
   SSATmp* dest = m_tb->gen(fastPath ? LdSSwitchDestFast
                                     : LdSSwitchDestSlow,
-                           &data,
+                           data,
                            testVal);
   m_tb->genDecRef(testVal);
   SSATmp* stack = spillStack();

@@ -37,7 +37,8 @@ typedef struct {
   unsigned char buffer[64];   /* input buffer */
 } PHP_SHA256_CTX;
 
-hash_sha256::hash_sha256() : HashEngine(32, 64, sizeof(PHP_SHA256_CTX)) {
+hash_sha256::hash_sha256(int size /*= 32 */) :
+             HashEngine(size, 64, sizeof(PHP_SHA256_CTX)) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -347,22 +348,22 @@ void hash_sha1::hash_final(unsigned char *digest, void *context_) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define ROTR32(b,x)		((x >> b) | (x << (32 - b)))
-#define ROTR64(b,x)		((x >> b) | (x << (64 - b)))
-#define SHR(b, x)		(x >> b)
+#define ROTR32(b,x)         ((x >> b) | (x << (32 - b)))
+#define ROTR64(b,x)         ((x >> b) | (x << (64 - b)))
+#define SHR(b, x)           (x >> b)
 
 /* Ch */
-#define SHA256_F0(x,y,z)	(((x) & (y)) ^ ((~(x)) & (z)))
+#define SHA256_F0(x,y,z)    (((x) & (y)) ^ ((~(x)) & (z)))
 /* Maj */
-#define SHA256_F1(x,y,z)	(((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+#define SHA256_F1(x,y,z)    (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
 /* SUM0 */
-#define SHA256_F2(x)		(ROTR32( 2,(x)) ^ ROTR32(13,(x)) ^ ROTR32(22,(x)))
+#define SHA256_F2(x)        (ROTR32( 2,(x)) ^ ROTR32(13,(x)) ^ ROTR32(22,(x)))
 /* SUM1 */
-#define SHA256_F3(x)		(ROTR32( 6,(x)) ^ ROTR32(11,(x)) ^ ROTR32(25,(x)))
+#define SHA256_F3(x)        (ROTR32( 6,(x)) ^ ROTR32(11,(x)) ^ ROTR32(25,(x)))
 /* OM0 */
-#define SHA256_F4(x)		(ROTR32( 7,(x)) ^ ROTR32(18,(x)) ^ SHR( 3,(x)))
+#define SHA256_F4(x)        (ROTR32( 7,(x)) ^ ROTR32(18,(x)) ^ SHR( 3,(x)))
 /* OM1 */
-#define SHA256_F5(x)		(ROTR32(17,(x)) ^ ROTR32(19,(x)) ^ SHR(10,(x)))
+#define SHA256_F5(x)        (ROTR32(17,(x)) ^ ROTR32(19,(x)) ^ SHR(10,(x)))
 
 static const unsigned int SHA256_K[64] = {
   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -512,20 +513,43 @@ void hash_sha256::hash_final(unsigned char *digest, void *context_) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void hash_sha224::hash_init(void *context_) {
+  PHP_SHA256_CTX *context = (PHP_SHA256_CTX*)context_;
+  context->count[0] = context->count[1] = 0;
+  /* Load magic initialization constants.
+   */
+  context->state[0] = 0xc1059ed8;
+  context->state[1] = 0x367cd507;
+  context->state[2] = 0x3070dd17;
+  context->state[3] = 0xf70e5939;
+  context->state[4] = 0xffc00b31;
+  context->state[5] = 0x68581511;
+  context->state[6] = 0x64f98fa7;
+  context->state[7] = 0xbefa4fa4;
+}
+
+void hash_sha224::hash_final(unsigned char *digest, void *context_) {
+  unsigned char digest256[32];
+  hash_sha256::hash_final(digest256, context_);
+  memcpy(digest, digest256, 28);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /* sha384/sha512 */
 
 /* Ch */
-#define SHA512_F0(x,y,z)	(((x) & (y)) ^ ((~(x)) & (z)))
+#define SHA512_F0(x,y,z)        (((x) & (y)) ^ ((~(x)) & (z)))
 /* Maj */
-#define SHA512_F1(x,y,z)	(((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+#define SHA512_F1(x,y,z)        (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
 /* SUM0 */
-#define SHA512_F2(x)		(ROTR64(28, x) ^ ROTR64(34, x) ^ ROTR64(39, x))
+#define SHA512_F2(x)            (ROTR64(28, x) ^ ROTR64(34, x) ^ ROTR64(39, x))
 /* SUM1 */
-#define SHA512_F3(x)		(ROTR64(14, x) ^ ROTR64(18, x) ^ ROTR64(41, x))
+#define SHA512_F3(x)            (ROTR64(14, x) ^ ROTR64(18, x) ^ ROTR64(41, x))
 /* OM0 */
-#define SHA512_F4(x)		(ROTR64( 1, x) ^ ROTR64( 8, x) ^ SHR(7, x))
+#define SHA512_F4(x)            (ROTR64( 1, x) ^ ROTR64( 8, x) ^ SHR(7, x))
 /* OM1 */
-#define SHA512_F5(x)		(ROTR64(19, x) ^ ROTR64(61, x) ^ SHR(6, x))
+#define SHA512_F5(x)            (ROTR64(19, x) ^ ROTR64(61, x) ^ SHR(6, x))
 
 static const uint64_t SHA512_K[128] = {
   L64(0x428a2f98d728ae22), L64(0x7137449123ef65cd), L64(0xb5c0fbcfec4d3b2f), L64(0xe9b5dba58189dbbc),

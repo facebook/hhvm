@@ -15,66 +15,41 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HASH_SHA_H_
-#define incl_HPHP_EXT_HASH_SHA_H_
+#ifndef incl_HPHP_EXT_HASH_FNV1_H_
+#define incl_HPHP_EXT_HASH_FNV1_H_
 
 #include <runtime/ext/hash/hash_engine.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_sha1 : public HashEngine {
+class hash_fnv132 : public HashEngine {
 public:
-  hash_sha1();
+  explicit hash_fnv132(bool a);
 
   virtual void hash_init(void *context);
   virtual void hash_update(void *context, const unsigned char *buf,
                            unsigned int count);
   virtual void hash_final(unsigned char *digest, void *context);
+
+private:
+  bool m_a;
 };
 
-class hash_sha256 : public HashEngine {
+class hash_fnv164 : public HashEngine {
 public:
-  explicit hash_sha256(int size = 32);
+  explicit hash_fnv164(bool a);
 
   virtual void hash_init(void *context);
   virtual void hash_update(void *context, const unsigned char *buf,
                            unsigned int count);
   virtual void hash_final(unsigned char *digest, void *context);
-};
 
-/* sha224 is just sha256 with a different initial vector
- * and a truncated output.
- */
-class hash_sha224 : public hash_sha256 {
-public:
-  hash_sha224() : hash_sha256(28) {}
-
-  virtual void hash_init(void *context);
-  virtual void hash_final(unsigned char *digest, void *context);
-};
-
-class hash_sha384 : public HashEngine {
-public:
-  hash_sha384();
-
-  virtual void hash_init(void *context);
-  virtual void hash_update(void *context, const unsigned char *buf,
-                           unsigned int count);
-  virtual void hash_final(unsigned char *digest, void *context);
-};
-
-class hash_sha512 : public HashEngine {
-public:
-  hash_sha512();
-
-  virtual void hash_init(void *context);
-  virtual void hash_update(void *context, const unsigned char *buf,
-                           unsigned int count);
-  virtual void hash_final(unsigned char *digest, void *context);
+private:
+  bool m_a;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_HASH_SHA_H_
+#endif // incl_HPHP_EXT_HASH_FNV1_H_

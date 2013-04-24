@@ -92,6 +92,63 @@ Variant f_array_chunk(CVarRef input, int size,
   getCheckedArray(input);
   return ArrayUtil::Chunk(arr_input, size, preserve_keys);
 }
+
+static inline bool array_column_coerce_key(Variant &key, const char *name) {
+  /* NULL has a special meaning for each field */
+  if (key.isNull()) {
+    return true;
+  }
+
+  /* Custom coercion rules for key types */
+  if (key.isInteger() || key.isDouble()) {
+    key = key.toInt64();
+    return true;
+  } else if (key.isString() || key.isObject()) {
+    key = key.toString();
+    return true;
+  } else {
+    raise_warning("The %s key should be either a string or an integer", name);
+    return false;
+  }
+}
+
+Variant f_array_column(CVarRef input, CVarRef val_key,
+                       CVarRef idx_key /* = null_variant */) {
+  /* Be strict about array type */
+  getCheckedArrayRet(input, uninit_null());
+  Variant val = val_key, idx = idx_key;
+  if (!array_column_coerce_key(val, "column") ||
+      !array_column_coerce_key(idx, "index")) {
+    return false;
+  }
+  Array ret = Array::Create();
+  for(auto it = arr_input.begin(); !it.end(); it.next()) {
+    if (!it.second().isArray()) {
+      continue;
+    }
+    Array sub = it.second().toArray();
+
+    Variant elem;
+    if (val.isNull()) {
+      elem = sub;
+    } else if (sub.exists(val)) {
+      elem = sub[val];
+    } else {
+      // skip subarray without named element
+      continue;
+    }
+
+    if (idx.isNull() || !sub.exists(idx)) {
+      ret.append(elem);
+    } else if (sub[idx].isObject()) {
+      ret.set(sub[idx].toString(), elem);
+    } else {
+      ret.set(sub[idx], elem);
+    }
+  }
+  return ret;
+}
+
 Variant f_array_combine(CVarRef keys, CVarRef values) {
   getCheckedArray(keys);
   getCheckedArray(values);
@@ -1077,7 +1134,7 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
 
 class ArraySortTmp {
  public:
-  ArraySortTmp(Array& arr) : m_arr(arr) {
+  explicit ArraySortTmp(Array& arr) : m_arr(arr) {
     m_ad = arr.get()->escalateForSort();
     m_ad->incRefCount();
   }

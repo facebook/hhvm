@@ -42,6 +42,19 @@ preserve_keys => rcx
 TypedValue* fh_array_chunk(TypedValue* _rv, TypedValue* input, int size, bool preserve_keys) asm("_ZN4HPHP13f_array_chunkERKNS_7VariantEib");
 
 /*
+HPHP::Variant HPHP::f_array_column(HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&)
+_ZN4HPHP14f_array_columnERKNS_7VariantES2_S2_
+
+(return value) => rax
+_rv => rdi
+arr => rsi
+val_key => rdx
+idx_key => rcx
+*/
+
+TypedValue* fh_array_column(TypedValue* _rv, TypedValue* arr, TypedValue* val_key, TypedValue* idx_key) asm("_ZN4HPHP14f_array_columnERKNS_7VariantES2_S2_");
+
+/*
 HPHP::Variant HPHP::f_array_combine(HPHP::Variant const&, HPHP::Variant const&)
 _ZN4HPHP15f_array_combineERKNS_7VariantES2_
 

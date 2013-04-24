@@ -51,6 +51,8 @@ extern const int64_t k_UCOL_NUMERIC_COLLATION;
 Variant f_array_change_key_case(CVarRef input, bool upper = false);
 Variant f_array_chunk(CVarRef input, int size,
                       bool preserve_keys = false);
+Variant f_array_column(CVarRef arr, CVarRef val_key,
+                       CVarRef idx_key = null_variant);
 Variant f_array_combine(CVarRef keys, CVarRef values);
 Variant f_array_count_values(CVarRef input);
 Variant f_array_fill_keys(CVarRef keys, CVarRef value);

@@ -63,6 +63,7 @@ TypedValue* fg_apd_continue(VM::ActRec *ar);
 TypedValue* fg_apd_echo(VM::ActRec *ar);
 TypedValue* fg_array_change_key_case(VM::ActRec *ar);
 TypedValue* fg_array_chunk(VM::ActRec *ar);
+TypedValue* fg_array_column(VM::ActRec *ar);
 TypedValue* fg_array_combine(VM::ActRec *ar);
 TypedValue* fg_array_count_values(VM::ActRec *ar);
 TypedValue* fg_array_fill_keys(VM::ActRec *ar);
@@ -3057,7 +3058,7 @@ TypedValue* tg_9XMLWriter_endDTD(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_flush(VM::ActRec *ar);
 TypedValue* tg_9XMLWriter_outputMemory(VM::ActRec *ar);
 
-const long long hhbc_ext_funcs_count = 2204;
+const long long hhbc_ext_funcs_count = 2205;
 const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apache_note", fg_apache_note, (void *)&fh_apache_note },
   { "apache_request_headers", fg_apache_request_headers, (void *)&fh_apache_request_headers },
@@ -3099,6 +3100,7 @@ const HhbcExtFuncInfo hhbc_ext_funcs[] = {
   { "apd_echo", fg_apd_echo, (void *)&fh_apd_echo },
   { "array_change_key_case", fg_array_change_key_case, (void *)&fh_array_change_key_case },
   { "array_chunk", fg_array_chunk, (void *)&fh_array_chunk },
+  { "array_column", fg_array_column, (void *)&fh_array_column },
   { "array_combine", fg_array_combine, (void *)&fh_array_combine },
   { "array_count_values", fg_array_count_values, (void *)&fh_array_count_values },
   { "array_fill_keys", fg_array_fill_keys, (void *)&fh_array_fill_keys },

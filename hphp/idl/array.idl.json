@@ -143,6 +143,32 @@
             ]
         },
         {
+            "name": "array_column",
+            "desc": "Return the values from a single column in the input array, identified by the value_key and optionally indexed by the index_key",
+            "return": {
+              "type": "Variant",
+              "desc": "Returns the array column, or FALSE on failure"
+            },
+            "args": [
+                {
+                    "name": "arr",
+                    "type": "Variant",
+                    "desc": "Source array to pull column of values from"
+                },
+                {
+                    "name": "val_key",
+                    "type": "Variant",
+                    "desc": "Key to pull values from in sub-arrays"
+                },
+                {
+                    "name": "idx_key",
+                    "type": "Variant",
+                    "desc": "Key to pull indexs from in sub-arrays",
+                    "value": "null_variant"
+                }
+            ]
+        },
+        {
             "name": "array_combine",
             "desc": "Creates an array by using the values from the keys array as keys and the values from the values array as the corresponding values.",
             "flags": [

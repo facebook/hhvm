@@ -1,0 +1,11 @@
+Array
+(
+    [2135] => John
+    [3245] => Sally
+)
+object(ColumnKeyClass)#%d (0) {
+}
+object(IndexKeyClass)#%d (0) {
+}
+object(ValueClass)#%d (0) {
+}

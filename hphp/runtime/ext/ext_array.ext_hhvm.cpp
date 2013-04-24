@@ -138,6 +138,42 @@ TypedValue* fg_array_chunk(HPHP::VM::ActRec *ar) {
 
 
 /*
+HPHP::Variant HPHP::f_array_column(HPHP::Variant const&, HPHP::Variant const&, HPHP::Variant const&)
+_ZN4HPHP14f_array_columnERKNS_7VariantES2_S2_
+
+(return value) => rax
+_rv => rdi
+arr => rsi
+val_key => rdx
+idx_key => rcx
+*/
+
+TypedValue* fh_array_column(TypedValue* _rv, TypedValue* arr, TypedValue* val_key, TypedValue* idx_key) asm("_ZN4HPHP14f_array_columnERKNS_7VariantES2_S2_");
+
+TypedValue* fg_array_column(HPHP::VM::ActRec *ar) {
+    TypedValue rv;
+    int64_t count = ar->numArgs();
+    TypedValue* args UNUSED = ((TypedValue*)ar) - 1;
+    if (count >= 2LL && count <= 3LL) {
+      fh_array_column((&(rv)), (args-0), (args-1), (count > 2) ? (args-2) : (TypedValue*)(&null_variant));
+      if (rv.m_type == KindOfUninit) rv.m_type = KindOfNull;
+      frame_free_locals_no_this_inl(ar, 3);
+      memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+      return &ar->m_r;
+    } else {
+      throw_wrong_arguments_nr("array_column", count, 2, 3, 1);
+    }
+    rv.m_data.num = 0LL;
+    rv.m_type = KindOfNull;
+    frame_free_locals_no_this_inl(ar, 3);
+    memcpy(&ar->m_r, &rv, sizeof(TypedValue));
+    return &ar->m_r;
+  return &ar->m_r;
+}
+
+
+
+/*
 HPHP::Variant HPHP::f_array_combine(HPHP::Variant const&, HPHP::Variant const&)
 _ZN4HPHP15f_array_combineERKNS_7VariantES2_
 

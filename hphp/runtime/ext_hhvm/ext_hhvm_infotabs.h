@@ -67,6 +67,7 @@
 #include "../ext/hash/hash_adler32.ext_hhvm.h"
 #include "../ext/hash/hash_sha.ext_hhvm.h"
 #include "../ext/hash/hash_snefru.ext_hhvm.h"
+#include "../ext/hash/hash_fnv1.ext_hhvm.h"
 #include "../ext/hash/hash_whirlpool.ext_hhvm.h"
 #include "../ext/hash/hash_crc32.ext_hhvm.h"
 #include "../ext/hash/hash_ripemd.ext_hhvm.h"

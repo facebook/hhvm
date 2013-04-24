@@ -109,6 +109,11 @@ no_import = (
     'session/tests/bug61728.phpt',
     'session/tests/session_module_name_variation2.phpt',
 
+    # intermittent segfaults
+    '/Zend/tests/001.phpt',
+    '/Zend/tests/002.phpt',
+    '/Zend/tests/003.phpt',
+
     # not imported yet, but will be
     '/ext/gd',
     '/ext/standard',

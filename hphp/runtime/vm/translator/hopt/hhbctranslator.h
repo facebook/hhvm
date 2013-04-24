@@ -138,7 +138,6 @@ struct HhbcTranslator {
   void setBcOffNextTrace(Offset bcOff) { m_bcOffNextTrace = bcOff; }
   uint32_t getBcOffNextTrace() { return m_bcOffNextTrace; }
 
-  void emitUninitLoc(uint32_t id);
   void emitPrint();
   void emitThis();
   void emitCheckThis();
@@ -523,7 +522,6 @@ private:
   SSATmp* getStrName(const StringData* propName = nullptr);
   SSATmp* emitLdGblAddrDef(const StringData* gblName = nullptr);
   SSATmp* emitLdGblAddr(const StringData* gblName, Block* block);
-  SSATmp* unboxPtr(SSATmp* ptr);
   void emitUnboxRAux();
   void emitAGet(SSATmp* src, const StringData* clsName);
   void emitRetFromInlined(Type type);
@@ -575,7 +573,7 @@ private:
    * Eval stack helpers
    */
   SSATmp* push(SSATmp* tmp);
-  SSATmp* pushIncRef(SSATmp* tmp) { return push(m_tb->genIncRef(tmp)); }
+  SSATmp* pushIncRef(SSATmp* tmp) { return push(m_tb->gen(IncRef, tmp)); }
   SSATmp* pop(Type type);
   void    popDecRef(Type type);
   void    discard(unsigned n);

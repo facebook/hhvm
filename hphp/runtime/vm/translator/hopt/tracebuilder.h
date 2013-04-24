@@ -86,18 +86,8 @@ public:
     return instr;
   }
 
-  SSATmp* genDefCns(const StringData* cnsName, SSATmp* val);
-  SSATmp* genConcat(SSATmp* tl, SSATmp* tr);
-
-  SSATmp* genLdThis(Trace* trace);
-  SSATmp* genLdCtx(const Func* func);
-  SSATmp* genLdRetAddr();
-  SSATmp* genLdRaw(SSATmp* base, RawMemSlot::Kind kind, Type type);
-  void    genStRaw(SSATmp* base, RawMemSlot::Kind kind, SSATmp* value);
-
   SSATmp* genLdLoc(uint32_t id);
   SSATmp* genLdLocAddr(uint32_t id);
-  void genRaiseUninitLoc(uint32_t id);
 
   /*
    * Returns an SSATmp containing the (inner) value of the given local.
@@ -121,47 +111,20 @@ public:
                    bool doRefCount,
                    bool genStoreType,
                    Trace* exit);
-  SSATmp* genLdMem(SSATmp* addr, Type type, Trace* target);
-  SSATmp* genLdMem(SSATmp* addr, int64_t offset,
-                   Type type, Trace* target);
-  void    genStMem(SSATmp* addr, SSATmp* src, bool genStoreType);
-  void    genStMem(SSATmp* addr, int64_t offset, SSATmp* src, bool stType);
-  SSATmp* genLdProp(SSATmp* obj, SSATmp* prop, Type type, Trace* exit);
-  void    genStProp(SSATmp* obj, SSATmp* prop, SSATmp* src, bool genStoreType);
   void    genSetPropCell(SSATmp* base, int64_t offset, SSATmp* value);
 
   SSATmp* genBoxLoc(uint32_t id);
   void    genBindLoc(uint32_t id, SSATmp* ref, bool doRefCount = true);
-  void    genInitLoc(uint32_t id, SSATmp* t);
 
   void    genCheckClsCnsDefined(SSATmp* cns, Trace* exitTrace);
   SSATmp* genLdCurFuncPtr();
-  SSATmp* genLdARFuncPtr(SSATmp* baseAddr, SSATmp* offset);
-  SSATmp* genLdFuncCls(SSATmp* func);
-  SSATmp* genNewObjNoCtorCached(const StringData* className);
-  SSATmp* genNewObjCached(int32_t numParams, const StringData* clsName);
-  SSATmp* genNewObj(int32_t numParams, SSATmp* cls);
-  SSATmp* genNewArray(int32_t capacity);
-  SSATmp* genNewTuple(int32_t numArgs, SSATmp* sp);
   void    genGuardLoc(uint32_t id, Type type, Trace* exitTrace);
-  void    genGuardStk(uint32_t id, Type type, Trace* exitTrace);
   void    genAssertStk(uint32_t id, Type type);
-  SSATmp* genGuardType(SSATmp* src, Type type, Trace* nextTrace);
-  void    genGuardRefs(SSATmp* funcPtr,
-                       SSATmp* nParams,
-                       SSATmp* bitsPtr,
-                       SSATmp* firstBitNum,
-                       SSATmp* mask64,
-                       SSATmp* vals64,
-                       Trace*  exitTrace);
   void    genAssertLoc(uint32_t id,
                        Type type,
                        bool override = false); // ignores conflict w/ prev type
 
-  SSATmp* genUnboxPtr(SSATmp* ptr);
-  SSATmp* genLdRef(SSATmp* ref, Type type, Trace* exit);
   SSATmp* genAdd(SSATmp* src1, SSATmp* src2);
-  SSATmp* genLdAddr(SSATmp* base, int64_t offset);
 
   SSATmp* genSub(SSATmp* src1, SSATmp* src2);
   SSATmp* genMul(SSATmp* src1, SSATmp* src2);
@@ -176,42 +139,16 @@ public:
   SSATmp* genPtrToInitNull();
   SSATmp* genPtrToUninit();
   SSATmp* genDefNone();
-  SSATmp* genJmp(Trace* target);
-  SSATmp* genJmpCond(SSATmp* src, Trace* target, bool negate);
-  void    genJmp(Block* target, SSATmp* src);
-  void    genExitWhenSurprised(Trace* target);
-  void    genExitOnVarEnv(Trace* target);
-  void    genCheckInit(SSATmp* src, Trace* target) {
-    gen(CheckInit, getFirstBlock(target), src);
-  }
+
   SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
   SSATmp* genCastStk(uint32_t id, Type type);
   SSATmp* genConvToBool(SSATmp* src);
-  SSATmp* genLdPropAddr(SSATmp* obj, SSATmp* prop);
-  SSATmp* genLdClsMethod(SSATmp* cls, uint32_t methodSlot);
-  SSATmp* genLdClsMethodCache(SSATmp* className,
-                              SSATmp* methodName,
-                              SSATmp* baseClass,
-                              Trace* slowPathExit);
-  SSATmp* genCall(SSATmp* actRec,
-                  uint32_t returnBcOffset,
-                  SSATmp* func,
-                  uint32_t numParams,
-                  SSATmp** params);
   SSATmp* genCallBuiltin(SSATmp* func, Type type,
                          uint32_t numArgs, SSATmp** args);
-  void    genReleaseVVOrExit(Trace* exit);
-  SSATmp* genGenericRetDecRefs(SSATmp* retVal, int numLocals);
-  void    genRetVal(SSATmp* val);
-  SSATmp* genRetAdjustStack();
-  void    genRetCtrl(SSATmp* sp, SSATmp* fp, SSATmp* retAddr);
   void    genDecRef(SSATmp* tmp);
-  void    genDecRefMem(SSATmp* base, int64_t offset, Type type);
   void    genDecRefStack(Type type, uint32_t stackOff);
   void    genDecRefLoc(int id);
   void    genDecRefThis();
-  void    genIncStat(int32_t counter, int32_t value, bool force = false);
-  SSATmp* genIncRef(SSATmp* src);
   SSATmp* genSpillStack(uint32_t stackAdjustment,
                         uint32_t numOpnds,
                         SSATmp** opnds);
@@ -221,25 +158,6 @@ public:
     return genLdStackAddr(m_spValue, offset);
   }
 
-  void    genNativeImpl();
-
-  void    genUnlinkContVarEnv();
-  void    genLinkContVarEnv();
-  Trace*  genContRaiseCheck(SSATmp* cont, Trace* target);
-  Trace*  genContPreNext(SSATmp* cont, Trace* target);
-  Trace*  genContStartedCheck(SSATmp* cont, Trace* target);
-
-  SSATmp* genIterInit(SSATmp* src, uint32_t iterId, uint32_t valLocalId);
-  SSATmp* genIterInitK(SSATmp* src,
-                       uint32_t iterId,
-                       uint32_t valLocalId,
-                       uint32_t keyLocalId);
-  SSATmp* genIterNext(uint32_t iterId, uint32_t valLocalId);
-  SSATmp* genIterNextK(uint32_t iterId, uint32_t valLocalId, uint32_t keyLocalId);
-  SSATmp* genIterFree(uint32_t iterId);
-
-  SSATmp* genInterpOne(uint32_t pcOff, int32_t stackAdjustment,
-                       Type resultType);
   Trace* getExitSlowTrace(uint32_t bcOff,
                           int32_t stackDeficit,
                           uint32_t numOpnds,
@@ -281,6 +199,10 @@ public:
   template<typename T>
   SSATmp* genDefConst(T val, Type type) {
     return gen(DefConst, type, ConstData(val));
+  }
+
+  SSATmp* genDefConst(Type t) {
+    return gen(DefConst, t, ConstData(0));
   }
 
   template<typename T>
@@ -334,10 +256,10 @@ public:
     DisableCseGuard guard(*this);
     branch(taken_block);
     SSATmp* v1 = next();
-    genJmp(done_block, v1);
+    gen(Jmp_, done_block, EdgeData(), v1);
     appendBlock(taken_block);
     SSATmp* v2 = taken();
-    genJmp(done_block, v2);
+    gen(Jmp_, done_block, EdgeData(), v2);
     appendBlock(done_block);
     SSATmp* result = done_block->getLabel()->getDst(0);
     result->setType(Type::unionOf(v1->type(), v2->type()));
@@ -396,12 +318,18 @@ public:
   }
 
 private:
+  SSATmp*   preOptimizeLdThis(IRInstruction*);
+  SSATmp*   preOptimizeLdCtx(IRInstruction*);
+
+  SSATmp*   preOptimize(IRInstruction* inst);
+  SSATmp*   optimizeWork(IRInstruction* inst);
+  SSATmp*   optimizeInst(IRInstruction* inst);
+
+private:
   static void appendInstruction(IRInstruction* inst, Block* block);
   void      appendInstruction(IRInstruction* inst);
   void      appendBlock(Block* block);
   enum      CloneInstMode { kCloneInst, kUseInst };
-  SSATmp*   optimizeWork(IRInstruction* inst);
-  SSATmp*   optimizeInst(IRInstruction* inst);
   SSATmp*   cseLookup(IRInstruction* inst);
   void      cseInsert(IRInstruction* inst);
   void      cseKill(SSATmp* src);
@@ -421,7 +349,6 @@ private:
   Trace* makeTrace(const Func* func, uint32_t bcOff) {
     return new Trace(m_irFactory.defBlock(func), bcOff);
   }
-  void genStLocAux(uint32_t id, SSATmp* t0, bool genStoreType);
 
   // Saved state information associated with the start of a block, or
   // for the caller of an inlined function.
@@ -513,11 +440,6 @@ private:
   // the caller needs to be preserved here.
   std::vector<std::unique_ptr<State>> m_inlineSavedStates;
 };
-
-template<>
-inline SSATmp* TraceBuilder::genDefConst(Type t) {
-  return gen(DefConst, t, ConstData(0));
-}
 
 }}}
 

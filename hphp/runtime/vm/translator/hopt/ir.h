@@ -1497,10 +1497,11 @@ static_assert(sizeof(Type) <= sizeof(uint64_t),
  *   ConstData.
  */
 
-// The only interesting case is int/bool disambiguation.
+// The only interesting case is int/bool disambiguation.  Enums are
+// treated as ints.
 template<class T>
 typename std::enable_if<
-  std::is_integral<T>::value,
+  std::is_integral<T>::value || std::is_enum<T>::value,
   Type
 >::type typeForConst(T) {
   return std::is_same<T,bool>::value ? Type::Bool : Type::Int;

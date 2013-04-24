@@ -1,0 +1,7 @@
+With seek(2) we get %d
+With seek(0) we get %d
+Without seek we get %d
+bool(true)
+bool(true)
+bool(true)
+===DONE===

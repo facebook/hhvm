@@ -1,0 +1,5 @@
+HipHop Fatal error: %a
+Stack trace:
+#0 %s
+#1 {main}
+  thrown in hphp/test/zend/bad/ext-spl/SplDoublyLinkedList_offsetGet_param_string.php on line %d

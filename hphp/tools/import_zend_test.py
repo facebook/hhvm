@@ -65,6 +65,23 @@ no_import = (
     '/Zend/tests/003.phpt',
     
     # spews files until they work
+    '/ext/spl/tests/SplFileInfo_getExtension_basic.phpt',
+    '/ext/spl/tests/SplFileObject_fgetcsv_basic.phpt',
+    '/ext/spl/tests/SplFileObject_fgetcsv_delimiter_basic.phpt',
+    '/ext/spl/tests/SplFileObject_fgetcsv_delimiter_error.phpt',
+    '/ext/spl/tests/SplFileObject_fgetcsv_enclosure_basic.phpt',
+    '/ext/spl/tests/SplFileObject_fgetcsv_enclosure_error.phpt',
+    '/ext/spl/tests/SplFileObject_fgetcsv_escape_basic.phpt',
+    '/ext/spl/tests/SplFileObject_fgetcsv_escape_default.phpt',
+    '/ext/spl/tests/SplFileObject_fgetcsv_escape_error.phpt',
+    '/ext/spl/tests/SplFileObject_getflags_basic.phpt',
+    '/ext/spl/tests/SplFileObject_getflags_error001.phpt',
+    '/ext/spl/tests/SplFileObject_getflags_error002.phpt',
+    '/ext/spl/tests/SplFileObject_rewind_error001.phpt',
+    '/ext/spl/tests/SplFileObject_setCsvControl_basic.phpt',
+    '/ext/spl/tests/SplFileObject_setCsvControl_error001.phpt',
+    '/ext/spl/tests/SplFileObject_setCsvControl_error002.phpt',
+    '/ext/spl/tests/SplFileObject_setCsvControl_variation001.phpt',
     '/ext/xmlwriter/tests/001.phpt',
     '/ext/xmlwriter/tests/004.phpt',
     '/ext/xmlwriter/tests/005.phpt',
@@ -78,7 +95,6 @@ no_import = (
     '/ext/xmlwriter/examples/',
 
     # not imported yet, but will be
-    '/ext/spl',
     '/ext/standard',
 
     # not implemented extensions
@@ -222,6 +238,7 @@ other_files = (
     '/ext-soap-schema/test_schema.inc',
     '/ext-soap-soap12/soap12-test.inc',
     '/ext-soap-soap12/soap12-test.wsdl',
+    '/ext-spl/testclass.class.inc',
     '/ext-sqlite3/new_db.inc',
     '/ext-sqlite3/stream_test.inc',
     '/ext-xml/xmltest.xml',

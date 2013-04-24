@@ -1,0 +1,14 @@
+*** Testing class_implements() : variation ***
+--- testing no interfaces ---
+array(0) {
+}
+array(0) {
+}
+
+--- testing autoload ---
+attempting to autoload non-existent
+HipHop Warning: %a
+bool(false)
+HipHop Warning: %a
+bool(false)
+===DONE===

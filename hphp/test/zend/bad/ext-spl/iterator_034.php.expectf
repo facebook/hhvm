@@ -1,0 +1,66 @@
+RecursiveArrayIteratorIterator::rewind() - BEGIN
+MyRecursiveArrayIterator::rewind()
+RecursiveArrayIteratorIterator::callHasChildren(0) = no/no
+RecursiveArrayIteratorIterator::rewind() - DONE
+RecursiveArrayIteratorIterator::valid()
+RecursiveArrayIteratorIterator::current()
+RecursiveArrayIteratorIterator::key()
+0=>a
+RecursiveArrayIteratorIterator::next()
+RecursiveArrayIteratorIterator::callHasChildren(0) = yes/yes
+MyRecursiveArrayIterator::getChildren()
+MyRecursiveArrayIterator::rewind()
+RecursiveArrayIteratorIterator::beginChildren(1)
+RecursiveArrayIteratorIterator::callHasChildren(1) = no/no
+RecursiveArrayIteratorIterator::valid()
+RecursiveArrayIteratorIterator::current()
+RecursiveArrayIteratorIterator::key()
+0=>ba
+RecursiveArrayIteratorIterator::next()
+RecursiveArrayIteratorIterator::callHasChildren(1) = yes/yes
+MyRecursiveArrayIterator::getChildren()
+MyRecursiveArrayIterator::rewind()
+RecursiveArrayIteratorIterator::beginChildren(2)
+RecursiveArrayIteratorIterator::callHasChildren(2) = no/no
+RecursiveArrayIteratorIterator::valid()
+RecursiveArrayIteratorIterator::current()
+RecursiveArrayIteratorIterator::key()
+0=>bba
+RecursiveArrayIteratorIterator::next()
+RecursiveArrayIteratorIterator::callHasChildren(2) = no/no
+RecursiveArrayIteratorIterator::valid()
+RecursiveArrayIteratorIterator::current()
+RecursiveArrayIteratorIterator::key()
+1=>bbb
+RecursiveArrayIteratorIterator::next()
+MyRecursiveArrayIterator::valid() = false
+RecursiveArrayIteratorIterator::endChildren(2)
+RecursiveArrayIteratorIterator::callHasChildren(1) = yes/yes
+MyRecursiveArrayIterator::getChildren()
+MyRecursiveArrayIterator::rewind()
+RecursiveArrayIteratorIterator::beginChildren(2)
+RecursiveArrayIteratorIterator::callHasChildren(2) = no/yes
+RecursiveArrayIteratorIterator::valid()
+RecursiveArrayIteratorIterator::current()
+RecursiveArrayIteratorIterator::key()
+0=>bcaa
+RecursiveArrayIteratorIterator::next()
+RecursiveArrayIteratorIterator::callHasChildren(2) = no/yes
+RecursiveArrayIteratorIterator::valid()
+RecursiveArrayIteratorIterator::current()
+RecursiveArrayIteratorIterator::key()
+1=>bcba
+===BREAK===
+===FOREND===
+RecursiveArrayIteratorIterator::rewind() - BEGIN
+RecursiveArrayIteratorIterator::endChildren(1)
+RecursiveArrayIteratorIterator::endChildren(0)
+MyRecursiveArrayIterator::rewind()
+RecursiveArrayIteratorIterator::callHasChildren(0) = no/no
+RecursiveArrayIteratorIterator::rewind() - DONE
+===CHECK===
+RecursiveArrayIteratorIterator::valid()
+bool(true)
+RecursiveArrayIteratorIterator::current()
+bool(true)
+===DONE===

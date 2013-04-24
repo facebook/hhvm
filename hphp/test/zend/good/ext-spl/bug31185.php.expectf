@@ -1,0 +1,15 @@
+FooBar::offsetSet(0, 0)
+FooBar::offsetSet(1, 1)
+FooBar::offsetSet(2, 2)
+CAUGHT: FAIL
+FooBar Object
+(
+    [array:FooBar:private] => Array
+        (
+            [0] => 0
+            [1] => 1
+            [2] => 2
+        )
+
+)
+===DONE===

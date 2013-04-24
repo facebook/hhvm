@@ -1,0 +1,3 @@
+<?php
+$it = new DirectoryIterator("");
+?>

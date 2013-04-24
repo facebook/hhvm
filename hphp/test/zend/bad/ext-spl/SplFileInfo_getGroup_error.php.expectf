@@ -1,0 +1,5 @@
+HipHop Fatal error: %a
+Stack trace:
+#0 %s: SplFileInfo->getGroup()
+#1 {main}
+  thrown in hphp/test/zend/bad/ext-spl/SplFileInfo_getGroup_error.php on line %d

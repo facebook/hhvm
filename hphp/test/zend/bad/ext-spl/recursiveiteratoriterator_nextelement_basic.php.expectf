@@ -1,0 +1,12 @@
+int(1)
+int(2)
+int(3)
+int(4)
+::nextElement() was invoked
+int(1)
+::nextElement() was invoked
+int(2)
+::nextElement() was invoked
+int(3)
+::nextElement() was invoked
+int(4)

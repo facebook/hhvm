@@ -1,0 +1,5 @@
+HipHop Fatal error: %a
+Stack trace:
+#0 %s(%d): DirectoryIterator->__construct('?/abc')
+#1 {main}
+  thrown in hphp/test/zend/bad/ext-spl/bug54291.php on line %d

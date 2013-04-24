@@ -1,0 +1,9 @@
+.
+..
+depth1%c.
+depth1%c..
+depth1%cdepth2%c.
+depth1%cdepth2%c..
+depth1%cdepth2%cgetSubPathname_test_2.tmp
+depth1%cgetSubPathname_test_3.tmp
+getSubPathname_test_1.tmp

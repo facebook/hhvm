@@ -1,0 +1,11 @@
+1
+2
+===NEXT LOOP===
+1
+2
+HipHop Fatal error: %a
+Stack trace:
+#0 [internal function]: MyRecursiveIteratorIterator->endchildren()
+#1 %s: RecursiveIteratorIterator->next()
+#2 {main}
+  thrown in hphp/test/zend/bad/ext-spl/recursiveIteratorIterator_endchildren_error.php on line %d

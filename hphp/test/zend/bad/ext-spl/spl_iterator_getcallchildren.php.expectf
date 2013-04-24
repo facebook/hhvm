@@ -1,0 +1,12 @@
+array(3) {
+  [0]=>
+  int(7)
+  [1]=>
+  int(8)
+  [2]=>
+  int(9)
+}
+int(7)
+invalid argument exception
+NULL
+===DONE===

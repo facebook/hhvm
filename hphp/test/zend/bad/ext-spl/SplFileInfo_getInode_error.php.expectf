@@ -1,0 +1,5 @@
+HipHop Fatal error: %a
+Stack trace:
+#0 %s: SplFileInfo->getInode()
+#1 {main}
+  thrown in hphp/test/zend/bad/ext-spl/SplFileInfo_getInode_error.php on line %d

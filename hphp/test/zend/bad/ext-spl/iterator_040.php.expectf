@@ -1,0 +1,17 @@
+===
+int(0)
+int(0)
+int(1)
+===
+int(1)
+int(0)
+int(21)
+===
+int(1)
+int(1)
+int(22)
+===
+int(0)
+int(2)
+int(3)
+===DONE===

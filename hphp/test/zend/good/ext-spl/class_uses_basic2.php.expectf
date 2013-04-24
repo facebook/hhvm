@@ -1,0 +1,26 @@
+*** Testing class_uses() : basic ***
+array(2) {
+  ["foo"]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(3) "bar"
+}
+array(2) {
+  ["foo"]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(3) "bar"
+}
+array(1) {
+  ["foo"]=>
+  string(3) "foo"
+}
+array(1) {
+  ["foo"]=>
+  string(3) "foo"
+}
+array(0) {
+}
+array(0) {
+}
+===DONE===

@@ -1,0 +1,7 @@
+NULL
+HipHop Fatal error: %a
+Stack trace:
+#0 [internal function]: MyRecursiveIteratorIterator->nextelement()
+#1 %s: RecursiveIteratorIterator->next()
+#2 {main}
+  thrown in hphp/test/zend/bad/ext-spl/recursiveIteratorIterator_nextelement_error.php on line %d

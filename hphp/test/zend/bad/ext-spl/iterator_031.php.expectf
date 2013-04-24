@@ -1,0 +1,29 @@
+MyArrayIterator::rewind
+0=>1
+1=>2
+MyAppendIterator::__construct
+MyAppendIterator::append
+The object is in an invalid state as the parent constructor was not called
+AppendIterator::getIterator() must be called exactly once per instance
+MyAppendIterator::append
+MyArrayIterator::rewind
+MyAppendIterator::append
+MyAppendIterator::append
+MyAppendIterator::rewind
+MyArrayIterator::rewind
+MyAppendIterator::valid
+0=>1
+MyAppendIterator::valid
+1=>2
+MyArrayIterator::rewind
+MyAppendIterator::valid
+0=>1
+MyAppendIterator::valid
+1=>2
+MyArrayIterator::rewind
+MyAppendIterator::valid
+0=>1
+MyAppendIterator::valid
+1=>2
+MyAppendIterator::valid
+===DONE===

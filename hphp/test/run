@@ -248,6 +248,25 @@ function verify_args($options) {
   return $args;
 }
 
+function run($cmd, $tests) {
+  $descriptorspec = array(
+   0 => array("pipe", "r"),
+   1 => array("pipe", "w"),
+   2 => array("pipe", "w"),
+  );
+  $process = proc_open($cmd, $descriptorspec, $pipes);
+  if (!is_resource($process)) {
+    error("Can't run $cmd");
+  }
+  fwrite($pipes[0], implode(' ', $tests));
+  fclose($pipes[0]);
+  while(!feof($pipes[1])) {
+    echo fgets($pipes[1], 1024);
+  }
+  fclose($pipes[1]);
+  return proc_close($process);
+}
+
 list($options, $files) = get_options($argv);
 if (isset($options['help'])) {
   error(help());
@@ -261,23 +280,7 @@ $verify = array(
   '--hphp="'.implode(' ', hphp_arg($options, $tests)).'"',
 );
 
-$cmd = implode(' ', $verify);
-$descriptorspec = array(
- 0 => array("pipe", "r"),
- 1 => array("pipe", "w"),
- 2 => array("pipe", "w"),
-);
-$process = proc_open($cmd, $descriptorspec, $pipes);
-if (!is_resource($process)) {
-  error("Can't run $cmd");
-}
-fwrite($pipes[0], implode(' ', $tests));
-fclose($pipes[0]);
-while(!feof($pipes[1])) {
-  echo fgets($pipes[1], 1024);
-}
-fclose($pipes[1]);
-$return_value = proc_close($process);
+$return_value = run(implode(' ', $verify), $tests);
 
 if ($return_value) {
   $command = implode(' ', command_arg($options, $tests));

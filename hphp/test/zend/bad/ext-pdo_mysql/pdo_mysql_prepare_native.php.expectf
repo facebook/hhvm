@@ -1,0 +1,41 @@
+array(1) {
+  [0]=>
+  array(1) {
+    ["label"]=>
+    string(12) ":placeholder"
+  }
+}
+array(2) {
+  [0]=>
+  array(1) {
+    ["label"]=>
+    string(9) "first row"
+  }
+  [1]=>
+  array(1) {
+    ["label"]=>
+    string(10) "second row"
+  }
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  array(1) {
+    ["label"]=>
+    string(1) "?"
+  }
+}
+array(2) {
+  [0]=>
+  array(1) {
+    ["label"]=>
+    string(9) "first row"
+  }
+  [1]=>
+  array(1) {
+    ["label"]=>
+    string(10) "second row"
+  }
+}
+done!

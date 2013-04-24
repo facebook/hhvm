@@ -1,0 +1,5 @@
+in = 0 -> id = 1 (integer) / label = 'a' (string)
+in = 0 -> id = 2 (integer) / label = 'b' (string)
+in = 0 -> id = 1 (integer) / label = 'a' (string)
+in = 0 -> id = 2 (integer) / label = 'b' (string)
+done!

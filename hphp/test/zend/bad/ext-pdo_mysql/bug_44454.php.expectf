@@ -1,0 +1,36 @@
+Native Prepared Statements
+... SELECT has returned 1 row...
+... INSERT should fail...
+... STMT - '00000'
+... PDO  - array (
+  0 => '23000',
+  1 => 1062,
+  2 => 'Duplicate entry \'1-1\' for key %s',
+)
+... SELECT has returned 1 row...
+... INSERT should fail...
+... STMT - '00000'
+... PDO  - array (
+  0 => '23000',
+  1 => 1062,
+  2 => 'Duplicate entry \'1-1\' for key %s',
+)
+
+Emulated Prepared Statements
+... SELECT has returned 1 row...
+... INSERT should fail...
+... STMT - '00000'
+... PDO  - array (
+  0 => '23000',
+  1 => 1062,
+  2 => 'Duplicate entry \'1-1\' for key %s',
+)
+... SELECT has returned 1 row...
+... INSERT should fail...
+... STMT - '00000'
+... PDO  - array (
+  0 => '23000',
+  1 => 1062,
+  2 => 'Duplicate entry \'1-1\' for key %s',
+)
+done!

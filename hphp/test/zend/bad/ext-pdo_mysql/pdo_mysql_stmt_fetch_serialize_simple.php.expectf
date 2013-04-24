@@ -1,0 +1,20 @@
+Lets see what the Serializeable interface makes our object behave like...
+myclass::__construct('Called by script') - note that it must not be called when unserializing
+myclass::serialize()
+myclass::unserialize('Value from serialize()')
+object(myclass)#%d (0) {
+}
+
+And now magic PDO using fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE)...
+myclass::unserialize('Data fetched from DB to be given to unserialize()')
+object(myclass)#%d (0) {
+}
+myclass::unserialize('Data fetched from DB to be given to unserialize()')
+object(myclass)#%d (0) {
+}
+
+And now PDO using setFetchMode(PDO::FETCH:CLASS|PDO::FETCH_SERIALIZE) + fetch()...
+myclass::unserialize('Data fetched from DB to be given to unserialize()')
+object(myclass)#%d (0) {
+}
+done!

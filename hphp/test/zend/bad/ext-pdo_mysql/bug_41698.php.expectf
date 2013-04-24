@@ -1,0 +1,12 @@
+array(2) {
+  [0]=>
+  array(1) {
+    [%u|b%"floatval"]=>
+    %unicode|string%(8) "2.340000"
+  }
+  [1]=>
+  array(1) {
+    [%u|b%"floatval"]=>
+    %unicode|string%(8) "4.560000"
+  }
+}

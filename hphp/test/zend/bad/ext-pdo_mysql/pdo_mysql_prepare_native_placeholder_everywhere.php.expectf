@@ -1,0 +1,22 @@
+array(1) {
+  [0]=>
+  array(2) {
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(4) "row1"
+  }
+}
+now the same with native PS
+array(1) {
+  [0]=>
+  array(3) {
+    ["?"]=>
+    string(2) "id"
+    ["id"]=>
+    int(1)
+    ["label"]=>
+    string(4) "row1"
+  }
+}
+done!

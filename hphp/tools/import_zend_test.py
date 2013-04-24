@@ -78,7 +78,6 @@ no_import = (
     '/ext/xmlwriter/examples/',
 
     # not imported yet, but will be
-    '/ext/pdo_mysql',
     '/ext/pdo_sqlite',
     '/ext/spl',
     '/ext/standard',
@@ -211,6 +210,9 @@ other_files = (
     '/ext-openssl/openssl.cnf',
     '/ext-openssl/private.key',
     '/ext-openssl/public.key',
+    '/ext-pdo/pdo_test.inc',
+    '/ext-pdo_mysql/config.inc',
+    '/ext-pdo_mysql/common.phpt',
     '/ext-session/save_handler.inc',
     '/ext-simplexml/bug24392.xml',
     '/ext-soap-bugs/bug30928.wsdl',
@@ -297,16 +299,21 @@ def mkdir_p(path):
         pass
 
 def walk(filename, source):
-    dest_filename = os.path.basename(filename).replace('.phpt', '.php')
+    dest_filename = os.path.basename(filename)
     source_dir = source.lower().replace('/tests', '').replace('/', '-')
 
     cur_dir = os.path.dirname(__file__)
     dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)
     mkdir_p(dest_subdir)
     full_dest_filename = os.path.join(dest_subdir, dest_filename)
+   
+    # Exactly mirror zend's directories incase some tests depend on random crap.
+    # We'll only move things we want into 'good'
+    shutil.copyfile(filename, full_dest_filename)
+    
+    full_dest_filename = full_dest_filename.replace('.phpt', '.php')
 
     if not '.phpt' in filename:
-        shutil.copyfile(filename, full_dest_filename)
         return
 
     print "Importing %s" % filename
@@ -432,6 +439,9 @@ def walk(filename, source):
         test = test.replace("_002.xml", "_004.xml")
     if 'bug61139.php' in full_dest_filename:
         test += "\nunlink('someFile');\n?>"
+    if '/ext-pdo_mysql/' in full_dest_filename:
+        test = test.replace('/../../../ext/pdo/tests/pdo_test.inc', 
+                '/../ext-pdo/pdo_test.inc')
 
     file(full_dest_filename, 'w').write(test)
 

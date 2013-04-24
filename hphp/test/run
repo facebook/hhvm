@@ -259,12 +259,27 @@ $verify = array(
   '--command="'.implode(' ', command_arg($options, $tests)).'"',
   implode(' ', verify_args($options)),
   '--hphp="'.implode(' ', hphp_arg($options, $tests)).'"',
-  implode(' ', $tests),
 );
 
-passthru(implode(' ', $verify), $return_status);
+$cmd = implode(' ', $verify);
+$descriptorspec = array(
+ 0 => array("pipe", "r"),
+ 1 => array("pipe", "w"),
+ 2 => array("pipe", "w"),
+);
+$process = proc_open($cmd, $descriptorspec, $pipes);
+if (!is_resource($process)) {
+  error("Can't run $cmd");
+}
+fwrite($pipes[0], implode(' ', $tests));
+fclose($pipes[0]);
+while(!feof($pipes[1])) {
+  echo fgets($pipes[1], 1024);
+}
+fclose($pipes[1]);
+$return_value = proc_close($process);
 
-if ($return_status) {
+if ($return_value) {
   $command = implode(' ', command_arg($options, $tests));
   $filename = 'FILENAME';
   $extra_help = ' change FILENAME to the test you want';
@@ -285,4 +300,4 @@ if ($return_status) {
   print "\nTo run these by hand$extra_help:\n".
         "$command\n";
 }
-exit($return_status);
+exit($return_value);

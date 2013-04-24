@@ -98,9 +98,8 @@ if ($opt_verbose && $opt_quiet)
 
 if ($#ARGV + 1 == 0)
 {
-    print STDERR "No tests specified\n";
-    &usage();
-    exit 1;
+    print STDOUT "Reading tests from stdin\n";
+    @ARGV = split(/\s+/, <>);
 }
 
 if ($opt_verbose)

@@ -27,7 +27,6 @@
 #include <runtime/eval/debugger/cmd/cmd_global.h>
 #include <runtime/eval/debugger/cmd/cmd_help.h>
 #include <runtime/eval/debugger/cmd/cmd_info.h>
-#include <runtime/eval/debugger/cmd/cmd_jump.h>
 #include <runtime/eval/debugger/cmd/cmd_constant.h>
 #include <runtime/eval/debugger/cmd/cmd_list.h>
 #include <runtime/eval/debugger/cmd/cmd_machine.h>

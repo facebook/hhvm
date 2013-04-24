@@ -49,7 +49,6 @@ class CmdInterrupt;
 DECLARE_BOOST_TYPES(DebuggerProxy);
 DECLARE_BOOST_TYPES(DebuggerCommand);
 DECLARE_BOOST_TYPES(CmdFlowControl);
-DECLARE_BOOST_TYPES(CmdJump);
 
 class DebuggerProxy : public Synchronizable,
                       public boost::enable_shared_from_this<DebuggerProxy> {
@@ -128,7 +127,6 @@ protected:
   StringDataMap m_breaksEnterFunc;
 
   CmdFlowControlPtr m_flow; // c, s, n, o commands that can skip breakpoints
-  CmdJumpPtr m_jump;
 
   Mutex m_signalMutex; // who can talk to client
   AsyncFunc<DebuggerProxy> m_signalThread; // polling signals from client
@@ -139,8 +137,8 @@ protected:
   // helpers
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);
   virtual bool checkBreakPoints(CmdInterrupt &cmd);
-  bool checkJumpFlowBreak(CmdInterrupt &cmd);
-  virtual bool processJumpFlowBreak(CmdInterrupt &cmd);
+  bool checkFlowBreak(CmdInterrupt &cmd);
+  virtual bool processFlowBreak(CmdInterrupt &cmd);
   void processInterrupt(CmdInterrupt &cmd);
   virtual void processFlowControl(CmdInterrupt &cmd);
   virtual bool breakByFlowControl(CmdInterrupt &cmd);

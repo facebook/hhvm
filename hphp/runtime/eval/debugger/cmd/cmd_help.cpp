@@ -35,7 +35,6 @@ void CmdHelp::HelpAll(DebuggerClient *client) {
     "[s]tep     *", "steps into a function call or an expression",
     "[n]ext     *", "steps over a function call or a line",
     "[o]ut      *", "steps out a function call",
-    "[j]ump",       "jumps to specified line of code for execution",
 
     "Display Commands", "",
     "[p]rint",      "prints a variable's value",

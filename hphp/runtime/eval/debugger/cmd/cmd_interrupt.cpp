@@ -27,7 +27,9 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_program);
   thrift.write(m_errorMsg);
   thrift.write(m_threadId);
-  thrift.write(m_pendingJump);
+  // Used to be m_pendingJump, but that's been removed. Write false until
+  // we rev the protocol.
+  thrift.write(false);
   if (m_site) {
     thrift.write(true);
     thrift.write(m_site->getFile());
@@ -60,7 +62,10 @@ void CmdInterrupt::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_program);
   thrift.read(m_errorMsg);
   thrift.read(m_threadId);
-  thrift.read(m_pendingJump);
+  // Used to be m_pendingJump, but that's been removed. Read a dummy bool until
+  // we rev the protocol.
+  bool dummy;
+  thrift.read(dummy);
   m_bpi = BreakPointInfoPtr(new BreakPointInfo());
   bool site; thrift.read(site);
   if (site) {
@@ -132,17 +137,6 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
     }
   }
   client->setMatchedBreakPoints(m_matched);
-
-  switch (m_interrupt) {
-    case SessionEnded:
-    case RequestEnded:
-    case PSPEnded:
-      if (m_pendingJump) {
-        client->error("Your jump point cannot be reached. You may only jump "
-                      "to certain parallel or outer execution points.");
-      }
-      break;
-  }
 
   switch (m_interrupt) {
     case SessionStarted:

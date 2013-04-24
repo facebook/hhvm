@@ -102,7 +102,6 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfFrame    :  cmd = DebuggerCommandPtr(new CmdFrame    ()); break;
     case KindOfGlobal   :  cmd = DebuggerCommandPtr(new CmdGlobal   ()); break;
     case KindOfInfo     :  cmd = DebuggerCommandPtr(new CmdInfo     ()); break;
-    case KindOfJump     :  cmd = DebuggerCommandPtr(new CmdJump     ()); break;
     case KindOfConstant :  cmd = DebuggerCommandPtr(new CmdConstant ()); break;
     case KindOfList     :  cmd = DebuggerCommandPtr(new CmdList     ()); break;
     case KindOfMachine  :  cmd = DebuggerCommandPtr(new CmdMachine  ()); break;

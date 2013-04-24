@@ -53,17 +53,13 @@ public:
   std::string &url() const { return m_url;}
   std::string desc() const;
 
-  bool isJumping() const { return m_jumping;}
-  void setJumping() { m_jumping = true;}
-
 protected:
   explicit InterruptSite(CVarRef e = null_variant, const char *cls = nullptr,
                          const char *function = nullptr,
                          StringData *file = nullptr, int line0 = 0,
                          int char0 = 0, int line1 = 0, int char1 = 0)
     : m_exception(e), m_class(cls), m_function(function), m_file(file),
-      m_line0(line0), m_char0(char0), m_line1(line1), m_char1(char1),
-      m_jumping(false) { }
+      m_line0(line0), m_char0(char0), m_line1(line1), m_char1(char1) {}
 
   Variant m_exception;
 
@@ -77,9 +73,6 @@ protected:
   int32_t m_char0;
   int32_t m_line1;
   int32_t m_char1;
-
-  // jump instruction
-  bool m_jumping;
 };
 
 // Forms an InterruptSite by looking at the current thread's current PC and

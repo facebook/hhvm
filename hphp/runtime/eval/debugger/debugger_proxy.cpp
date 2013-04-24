@@ -16,7 +16,6 @@
 #include <runtime/eval/debugger/debugger_proxy.h>
 #include <runtime/eval/debugger/cmd/cmd_interrupt.h>
 #include <runtime/eval/debugger/cmd/cmd_flow_control.h>
-#include <runtime/eval/debugger/cmd/cmd_jump.h>
 #include <runtime/eval/debugger/cmd/cmd_signal.h>
 #include <runtime/eval/debugger/cmd/cmd_machine.h>
 #include <runtime/eval/debugger/debugger.h>
@@ -131,7 +130,6 @@ void DebuggerProxy::switchThreadMode(ThreadMode mode,
     m_thread = (int64_t)Process::GetThreadId();
   }
   if (mode == Normal) {
-    m_jump.reset();
     m_flow.reset();
   }
 }
@@ -241,7 +239,7 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   if (!blockUntilOwn(cmd, true)) {
     return;
   }
-  if (processJumpFlowBreak(cmd)) {
+  if (processFlowBreak(cmd)) {
     while (true) {
       try {
         Lock lock(m_signalMutex);
@@ -431,7 +429,7 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
   Lock lock(this);
   if (m_thread && m_thread != self) {
     if (check && (m_threadMode == Exclusive || !checkBreakPoints(cmd))) {
-      // jumps and flow control commands only belong to sticky thread
+      // Flow control commands only belong to sticky thread
       return false;
     }
     m_threads[self] = createThreadInfo(cmd.desc());
@@ -444,7 +442,6 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
         m_threadMode = Normal;
         m_thread = self;
         m_newThread.reset();
-        m_jump.reset();
         m_flow.reset();
       }
     }
@@ -454,7 +451,7 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
       // The breakpoint might have been removed while I'm waiting
       return false;
     }
-  } else if (check && !checkJumpFlowBreak(cmd)) {
+  } else if (check && !checkFlowBreak(cmd)) {
     return false;
   }
 
@@ -473,69 +470,41 @@ bool DebuggerProxy::checkBreakPoints(CmdInterrupt &cmd) {
 }
 
 // Check if we should stop due to flow control, breakpoints, and signals.
-bool DebuggerProxy::checkJumpFlowBreak(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxy::checkJumpFlowBreak\n");
+bool DebuggerProxy::checkFlowBreak(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxy::checkFlowBreak\n");
   // If there is an outstanding Ctrl-C from the client, go ahead and break now.
   // Note: this stops any flow control command we might have in-flight.
   if (m_signum == CmdSignal::SignalBreak) {
     Lock lock(m_signumMutex);
     if (m_signum == CmdSignal::SignalBreak) {
       m_signum = CmdSignal::SignalNone;
-      m_jump.reset();
       m_flow.reset();
       return true;
     }
   }
 
-  // jump command skips everything until the file:line or label is reached
-  bool jumpBreak = false;
-  if (m_jump) {
-    InterruptSite *site = cmd.getSite();
-    if (site) {
-      if (!m_jump->match(site)) {
-        site->setJumping();
-        return false;
-      }
-      m_jump.reset();
-      jumpBreak = true;
-    }
+  // Note that even if fcShouldBreak, we still need to test bpShouldBreak
+  // so to correctly report breakpoint reached + evaluating watchpoints;
+  // vice versa, so to decCount() on m_flow.
+  bool fcShouldBreak = false; // should I break according to flow control?
+  bool bpShouldBreak = false; // should I break according to breakpoints?
+
+  if ((cmd.getInterruptType() == BreakPointReached ||
+       cmd.getInterruptType() == HardBreakPoint) && m_flow) {
+    fcShouldBreak = breakByFlowControl(cmd);
   }
 
-  if (!jumpBreak) {
-    // Note that even if fcShouldBreak, we still need to test bpShouldBreak
-    // so to correctly report breakpoint reached + evaluating watchpoints;
-    // vice versa, so to decCount() on m_flow.
-    bool fcShouldBreak = false; // should I break according to flow control?
-    bool bpShouldBreak = false; // should I break according to breakpoints?
-
-    if ((cmd.getInterruptType() == BreakPointReached ||
-         cmd.getInterruptType() == HardBreakPoint) && m_flow) {
-      fcShouldBreak = breakByFlowControl(cmd);
-    }
-
-    bpShouldBreak = checkBreakPoints(cmd);
-    if (!fcShouldBreak && !bpShouldBreak) {
-      return false; // this is done before KindOfContinue testing
-    }
+  bpShouldBreak = checkBreakPoints(cmd);
+  if (!fcShouldBreak && !bpShouldBreak) {
+    return false; // this is done before KindOfContinue testing
   }
+
 
   return true;
 }
 
-bool DebuggerProxy::processJumpFlowBreak(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxy::processJumpFlowBreak\n");
-  if (m_jump) {
-    switch (cmd.getInterruptType()) {
-      case SessionEnded:
-      case RequestEnded:
-      case PSPEnded:
-        cmd.setPendingJump();
-        m_jump.reset();
-        break;
-      default:
-        break;
-    }
-  }
+bool DebuggerProxy::processFlowBreak(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxy::processFlowBreak\n");
   if ((cmd.getInterruptType() == BreakPointReached ||
        cmd.getInterruptType() == HardBreakPoint) && m_flow) {
     if (m_flow->is(DebuggerCommand::KindOfContinue)) {
@@ -581,17 +550,6 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
         processFlowControl(cmd);
         if (m_flow && m_threadMode == Normal) {
           switchThreadMode(Sticky);
-        }
-        return;
-      }
-      if (res->is(DebuggerCommand::KindOfJump)) {
-        m_jump = static_pointer_cast<CmdJump>(res);
-        if (m_threadMode == Normal) {
-          switchThreadMode(Sticky);
-        }
-        InterruptSite *site = cmd.getSite();
-        if (site) {
-          site->setJumping();
         }
         return;
       }

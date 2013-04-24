@@ -1517,7 +1517,7 @@ void DebuggerClient::setTutorial(int mode) {
 const char **DebuggerClient::GetCommands() {
   static const char *cmds[] = {
     "abort",    "break",    "continue",   "down",    "exception",
-    "frame",    "global",   "help",       "info",    "jump",
+    "frame",    "global",   "help",       "info",
     "konstant", "list",     "machine",    "next",    "out",
     "print",    "quit",     "run",        "step",    "thread",
     "up",       "variable", "where",      "x",       "y",
@@ -1569,7 +1569,6 @@ do {                                         \
     case 'g': MATCH_CMD("global"   , CmdGlobal   );
     case 'h': MATCH_CMD("help"     , CmdHelp     );
     case 'i': MATCH_CMD("info"     , CmdInfo     );
-    case 'j': MATCH_CMD("jump"     , CmdJump     );
     case 'k': MATCH_CMD("konstant" , CmdConstant );
     case 'l': MATCH_CMD("list"     , CmdList     );
     case 'm': MATCH_CMD("machine"  , CmdMachine  );

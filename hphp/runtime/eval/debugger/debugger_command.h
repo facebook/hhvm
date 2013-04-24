@@ -51,7 +51,7 @@ public:
     KindOfGlobal              = 7,
     KindOfHelp                = 8,
     KindOfInfo                = 9,
-    KindOfJump                = 10,
+    KindOfJump_UNUSED         = 10,
     KindOfConstant            = 11,
     KindOfList                = 12,
     KindOfMachine             = 13,

@@ -277,6 +277,9 @@ if ($return_status) {
   if (isset($options['repo'])) {
     $command .= " -v Repo.Authoritative=true ";
     $command = str_replace(verify_hhbc(), "$filename.repo/hhvm.hhbc", $command);
+    $command = implode(' ', hphp_arg($options, $tests)).
+      " -thhbc -l0 -k1 -o $filename.repo $filename\n".
+      $command;
   }
 
   print "\nTo run these by hand$extra_help:\n".

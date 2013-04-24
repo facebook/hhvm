@@ -614,7 +614,7 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
     addHeaderImpl("Content-Encoding", "gzip");
     removeHeaderImpl("Content-Length");
     if (m_responseHeaders.find("Content-MD5") != m_responseHeaders.end()) {
-      String response((const char *)data, size, AttachLiteral);
+      String response((const char *)data, size, CopyString);
       removeHeaderImpl("Content-MD5");
       addHeaderImpl("Content-MD5", StringUtil::Base64Encode(
                       StringUtil::MD5(response, true)).c_str());
@@ -663,7 +663,7 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
 
 String Transport::prepareResponse(const void *data, int size, bool &compressed,
                                   bool last) {
-  String response((const char *)data, size, AttachLiteral);
+  String response((const char *)data, size, CopyString);
 
   // we don't use chunk encoding to send anything pre-compressed
   assert(!compressed || !m_chunkedEncoding);

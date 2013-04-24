@@ -77,7 +77,7 @@ static VarNR ToKey(CVarRef v) { return v.toKey(); }
 
 Variant::Variant(litstr  v) {
   m_type = KindOfString;
-  m_data.pstr = NEW(StringData)(v);
+  m_data.pstr = NEW(StringData)(v, CopyString);
   m_data.pstr->incRefCount();
 }
 
@@ -293,7 +293,7 @@ HOT_FUNC IMPLEMENT_SET(int64_t, m_type = KindOfInt64; m_data.num = v)
 IMPLEMENT_SET(double, m_type = KindOfDouble; m_data.dbl = v)
 IMPLEMENT_SET(litstr,
               m_type = KindOfString;
-              m_data.pstr = NEW(StringData)(v);
+              m_data.pstr = NEW(StringData)(v, CopyString);
               m_data.pstr->incRefCount())
 IMPLEMENT_SET(const StaticString&,
               StringData* s = v.get();
@@ -1563,7 +1563,7 @@ bool Variant::same(double v2) const {
 }
 
 bool Variant::same(litstr v2) const {
-  StackStringData sd2(v2);
+  StackStringData sd2(v2, CopyString);
   return same(&sd2);
 }
 
@@ -3100,12 +3100,12 @@ void Variant::unserialize(VariableUnserializer *uns,
                   throw Exception("Mangled private object property");
                 }
               }
-              String k(kdata + subLen, ksize - subLen, AttachLiteral);
+              String k(kdata + subLen, ksize - subLen, CopyString);
               if (kdata[1] == '*') {
                 unserializeProp(uns, obj.get(), k, clsName, key, i + 1);
               } else {
                 unserializeProp(uns, obj.get(), k,
-                                String(kdata + 1, subLen - 2, AttachLiteral),
+                                String(kdata + 1, subLen - 2, CopyString),
                                 key, i + 1);
               }
             } else {

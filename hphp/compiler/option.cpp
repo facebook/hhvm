@@ -390,13 +390,13 @@ std::string Option::MangleFilename(const std::string &name, bool id) {
 
 bool Option::IsFileExcluded(const std::string &file,
                             const std::set<std::string> &patterns) {
-  String sfile(file.c_str(), file.size(), AttachLiteral);
+  String sfile(file.c_str(), file.size(), CopyString);
   for (set<string>::const_iterator iter = patterns.begin();
        iter != patterns.end(); ++iter) {
     const std::string &pattern = *iter;
     Variant matches;
     Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
-                                    AttachLiteral), sfile, matches);
+                                    CopyString), sfile, matches);
     if (ret.toInt64() > 0) {
       return true;
     }

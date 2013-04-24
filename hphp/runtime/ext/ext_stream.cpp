@@ -105,7 +105,7 @@ Variant f_stream_copy_to_stream(CObjRef source, CObjRef dest,
     if (rbytes == 0) break;
     if (rbytes < 0) return false;
     buf[rbytes] = '\0';
-    if (destFile->write(String(buf, rbytes, AttachLiteral)) != rbytes) {
+    if (destFile->write(String(buf, rbytes, CopyString)) != rbytes) {
       return false;
     }
     cbytes += rbytes;

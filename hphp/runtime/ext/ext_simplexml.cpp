@@ -965,7 +965,7 @@ void c_SimpleXMLElement::t_offsetunset(CVarRef index) {
 
   if (m_attributes.toArray().exists(name) && m_node) {
     for (xmlAttrPtr attr = m_node->properties; attr; attr = attr->next) {
-      if (String((char*)attr->name, xmlStrlen(attr->name), AttachLiteral) ==
+      if (String((char*)attr->name, xmlStrlen(attr->name), CopyString) ==
           name) {
         xmlUnlinkNode((xmlNodePtr)attr);
         break;

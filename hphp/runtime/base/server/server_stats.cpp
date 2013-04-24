@@ -158,8 +158,8 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
           const string &rule = riter->first;
           if (rule[0] == ':') {
             Variant ret = preg_match(String(rule.c_str(), rule.size(),
-                  AttachLiteral),
-                String(key.c_str(), key.size(), AttachLiteral));
+                  CopyString),
+                String(key.c_str(), key.size(), CopyString));
             if (!same(ret, false) && more(ret, 0)) {
               wantedKeys[key] |= riter->second;
             }
@@ -307,7 +307,7 @@ void ServerStats::FreeSlots(list<TimeSlot*> &slots) {
 
 class Writer {
 public:
-  Writer(ostream &out) : m_out(out), m_indent(0) {}
+  explicit Writer(ostream &out) : m_out(out), m_indent(0) {}
   virtual ~Writer() {}
 
   virtual void writeFileHeader() = 0;
@@ -350,8 +350,7 @@ protected:
 
 class XMLWriter : public Writer {
 public:
-  XMLWriter(ostream &out) : Writer(out) {}
-
+  explicit XMLWriter(ostream &out) : Writer(out) {}
 
   virtual void writeFileHeader() {
     m_out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
@@ -483,10 +482,7 @@ protected:
   }
 
 public:
-
-  JSONWriter(ostream &out) : Writer(out),
-      m_justIndented(true) {
-
+  explicit JSONWriter(ostream &out) : Writer(out), m_justIndented(true) {
     // A valid json object begins in the nameless context. See
     // json.org for JSON state machine.
     m_namelessContextStack.push(true);
@@ -533,9 +529,8 @@ public:
 };
 
 class HTMLWriter : public Writer {
-
 public:
-  HTMLWriter(ostream &out) : Writer(out) {}
+  explicit HTMLWriter(ostream &out) : Writer(out) {}
 
   virtual void writeFileHeader() {
     m_out << "<!doctype html>\n<html>\n<head>\n"

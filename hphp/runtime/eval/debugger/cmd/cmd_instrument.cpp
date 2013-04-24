@@ -213,7 +213,7 @@ void CmdInstrument::validateAndWriteToTable(DebuggerProxy *proxy) {
       (*tablePC)[(int64_t)pc] = inj;
     }
     if (ipi->m_locType == InstPointInfo::LocFuncEntry) {
-      StackStringData sd(ipi->m_func.c_str(), ipi->m_func.size(), AttachLiteral);
+      StackStringData sd(ipi->m_func.c_str(), ipi->m_func.size(), CopyString);
       const StringData* sdCache = VM::InjectionCache::GetStringData(&sd);
       if (tableFEntry == nullptr) {
         tableFEntry = new VM::InjectionTableSD();

@@ -213,10 +213,10 @@ bool TestExtMisc::test_unpack() {
   // Also covered in TestCodeRun::TestExtMisc
 
   String iFF = f_str_repeat("\xFF", sizeof(int));
-  String le32_FF("\xFF\x00\x00\x00", 4, AttachLiteral);
-  String be32_FF("\x00\x00\x00\xFF", 4, AttachLiteral);
-  String le16_FF("\xFF\x00", 2, AttachLiteral);
-  String be16_FF("\x00\xFF", 2, AttachLiteral);
+  String le32_FF("\xFF\x00\x00\x00", 4, CopyString);
+  String be32_FF("\x00\x00\x00\xFF", 4, CopyString);
+  String le16_FF("\xFF\x00", 2, CopyString);
+  String be16_FF("\x00\xFF", 2, CopyString);
 
   uint32_t endian_check = 1;
   bool le = ((char*)&endian_check)[0];

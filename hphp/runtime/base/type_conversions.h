@@ -51,7 +51,9 @@ inline char toByte(short   v) { return v;}
 inline char toByte(int     v) { return v;}
 inline char toByte(int64_t   v) { return v;}
 inline char toByte(double  v) { return (char)v;}
-inline char toByte(litstr  v) { return StringData(v).toByte();}
+inline char toByte(litstr  v) {
+  return StringData(v, CopyString).toByte();
+}
 inline char toByte(const StringData *v) { return v ? v->toByte() : 0;}
 inline char toByte(CStrRef v) { return toByte(v.get());}
 inline char toByte(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
@@ -66,7 +68,9 @@ inline short toInt16(short   v) { return v;}
 inline short toInt16(int     v) { return v;}
 inline short toInt16(int64_t   v) { return v;}
 inline short toInt16(double  v) { return (short)v;}
-inline short toInt16(litstr  v) { return StringData(v).toInt16();}
+inline short toInt16(litstr  v) {
+  return StringData(v, CopyString).toInt16();
+}
 inline short toInt16(const StringData *v) { return v ? v->toInt16() : 0;}
 inline short toInt16(CStrRef v) { return toInt16(v.get());}
 inline short toInt16(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
@@ -81,7 +85,9 @@ inline int toInt32(short   v) { return v;}
 inline int toInt32(int     v) { return v;}
 inline int toInt32(int64_t   v) { return v;}
 inline int toInt32(double  v) { return (int)v;}
-inline int toInt32(litstr  v) { return StringData(v).toInt32();}
+inline int toInt32(litstr  v) {
+  return StringData(v, CopyString).toInt32();
+}
 inline int toInt32(const StringData *v) { return v ? v->toInt32() : 0;}
 inline int toInt32(CStrRef v) { return toInt32(v.get());}
 inline int toInt32(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
@@ -103,7 +109,9 @@ inline int64_t toInt64(double  v) {
           ? (v > std::numeric_limits<uint64_t>::max() ? 0u : (uint64_t)v)
           : (v < 0 ? (int64_t)v : std::numeric_limits<int64_t>::min()));
 }
-inline int64_t toInt64(litstr  v) { return StringData(v).toInt64();}
+inline int64_t toInt64(litstr  v) {
+  return StringData(v, CopyString).toInt64();
+}
 inline int64_t toInt64(const StringData *v) { return v ? v->toInt64() : 0;}
 inline int64_t toInt64(CStrRef v) { return toInt64(v.get());}
 inline int64_t toInt64(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
@@ -118,7 +126,9 @@ inline double toDouble(short   v) { return v;}
 inline double toDouble(int     v) { return v;}
 inline double toDouble(int64_t   v) { return v;}
 inline double toDouble(double  v) { return v;}
-inline double toDouble(litstr  v) { return StringData(v).toDouble();}
+inline double toDouble(litstr  v) {
+  return StringData(v, CopyString).toDouble();
+}
 inline double toDouble(const StringData *v) { return v? v->toDouble() : 0;}
 inline double toDouble(CStrRef v) { return toDouble(v.get());}
 inline double toDouble(const ArrayData *v) {

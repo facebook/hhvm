@@ -479,7 +479,7 @@ void const_load_impl(struct cache_info *info,
       const char **p = objects;
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         const_load_set(key, unserialize_from_string(value));
       }
     }
@@ -491,7 +491,7 @@ void const_load_impl(struct cache_info *info,
       const char **p = thrifts;
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant success;
         Variant v = f_fb_thrift_unserialize(value, ref(success));
         if (same(success, false)) {
@@ -507,7 +507,7 @@ void const_load_impl(struct cache_info *info,
       const char **p = others;
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant v = unserialize_from_string(value);
         if (same(v, false)) {
           throw Exception("bad apc archive, unserialize_from_string failed");
@@ -574,7 +574,7 @@ void apc_load_impl(struct cache_info *info,
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
         // Strings would be copied into APC anyway.
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         value.checkStatic();
         s.constructPrime(value, item, false);
       }
@@ -590,7 +590,7 @@ void apc_load_impl(struct cache_info *info,
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         s.constructPrime(value, item, true);
       }
       s.prime(vars);
@@ -605,7 +605,7 @@ void apc_load_impl(struct cache_info *info,
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant success;
         Variant v = f_fb_thrift_unserialize(value, ref(success));
         if (same(success, false)) {
@@ -626,7 +626,7 @@ void apc_load_impl(struct cache_info *info,
         item.key = *p;
         item.len = (int)(int64_t)*(p+1);
 
-        String value(*(p+2), (int)(int64_t)*(p+3), AttachLiteral);
+        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant v = unserialize_from_string(value);
         if (same(v, false)) {
           // we can't possibly get here if it was a boolean "false" that's
@@ -727,7 +727,7 @@ void const_load_impl_compressed
       for (int i = 0; i < count; i++) {
         String key(p, object_lens[i + i + 2], CopyString);
         p += object_lens[i + i + 2] + 1;
-        String value(p, object_lens[i + i + 3], AttachLiteral);
+        String value(p, object_lens[i + i + 3], CopyString);
         const_load_set(key, unserialize_from_string(value));
         p += object_lens[i + i + 3] + 1;
       }
@@ -745,7 +745,7 @@ void const_load_impl_compressed
       for (int i = 0; i < count; i++) {
         String key(p, thrift_lens[i + i + 2], CopyString);
         p += thrift_lens[i + i + 2] + 1;
-        String value(p, thrift_lens[i + i + 3], AttachLiteral);
+        String value(p, thrift_lens[i + i + 3], CopyString);
         Variant success;
         Variant v = f_fb_thrift_unserialize(value, ref(success));
         if (same(success, false)) {
@@ -768,7 +768,7 @@ void const_load_impl_compressed
       for (int i = 0; i < count; i++) {
         String key(p, other_lens[i + i + 2], CopyString);
         p += other_lens[i + i + 2] + 1;
-        String value(p, other_lens[i + i + 3], AttachLiteral);
+        String value(p, other_lens[i + i + 3], CopyString);
         Variant v = unserialize_from_string(value);
         if (same(v, false)) {
           throw Exception("bad apc archive, unserialize_from_string failed");
@@ -857,7 +857,7 @@ void apc_load_impl_compressed
         item.len = string_lens[i + i + 2];
         p += string_lens[i + i + 2] + 1; // skip \0
         // Strings would be copied into APC anyway.
-        String value(p, string_lens[i + i + 3], AttachLiteral);
+        String value(p, string_lens[i + i + 3], CopyString);
         value.checkStatic();
         s.constructPrime(value, item, false);
         p += string_lens[i + i + 3] + 1; // skip \0
@@ -880,7 +880,7 @@ void apc_load_impl_compressed
         item.key = p;
         item.len = object_lens[i + i + 2];
         p += object_lens[i + i + 2] + 1; // skip \0
-        String value(p, object_lens[i + i + 3], AttachLiteral);
+        String value(p, object_lens[i + i + 3], CopyString);
         s.constructPrime(value, item, true);
         p += object_lens[i + i + 3] + 1; // skip \0
       }
@@ -902,7 +902,7 @@ void apc_load_impl_compressed
         item.key = p;
         item.len = thrift_lens[i + i + 2];
         p += thrift_lens[i + i + 2] + 1; // skip \0
-        String value(p, thrift_lens[i + i + 3], AttachLiteral);
+        String value(p, thrift_lens[i + i + 3], CopyString);
         Variant success;
         Variant v = f_fb_thrift_unserialize(value, ref(success));
         if (same(success, false)) {
@@ -929,7 +929,7 @@ void apc_load_impl_compressed
         item.key = p;
         item.len = other_lens[i + i + 2];
         p += other_lens[i + i + 2] + 1; // skip \0
-        String value(p, other_lens[i + i + 3], AttachLiteral);
+        String value(p, other_lens[i + i + 3], CopyString);
         Variant v = unserialize_from_string(value);
         if (same(v, false)) {
           // we can't possibly get here if it was a boolean "false" that's

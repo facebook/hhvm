@@ -151,7 +151,7 @@ Array TimeZone::GetNames() {
 
   Array ret;
   for (int i = 0; i < item_count; ++i) {
-    ret.append(String(table[i].id, AttachLiteral));
+    ret.append(String(table[i].id, CopyString));
   }
   return ret;
 }
@@ -168,7 +168,7 @@ Array TimeZone::GetAbbreviations() {
     element.set(s_dst, (bool)entry->type);
     element.set(s_offset, entry->gmtoffset);
     if (entry->full_tz_name) {
-      element.set(s_timezone_id, String(entry->full_tz_name, AttachLiteral));
+      element.set(s_timezone_id, String(entry->full_tz_name, CopyString));
     } else {
       element.set(s_timezone_id, uninit_null());
     }

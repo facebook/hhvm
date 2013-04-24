@@ -1353,7 +1353,7 @@ void DebuggerClient::print(CStrRef msg) {
     name(msg);                                                          \
   }                                                                     \
   void DebuggerClient::name(const std::string &msg) {                   \
-    name(String(msg.data(), msg.length(), AttachLiteral));              \
+    name(String(msg.data(), msg.length(), CopyString));                 \
   }                                                                     \
 
 IMPLEMENT_COLOR_OUTPUT(help,     stdout,  HelpColor);
@@ -1366,7 +1366,7 @@ IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor);
 
 string DebuggerClient::wrap(const std::string &s) {
   TRACE(2, "DebuggerClient::wrap\n");
-  String ret = StringUtil::WordWrap(String(s.c_str(), s.size(), AttachLiteral),
+  String ret = StringUtil::WordWrap(String(s.c_str(), s.size(), CopyString),
                                     LineWidth - 4, "\n", true);
   return string(ret.data(), ret.size());
 }
@@ -1411,8 +1411,8 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
 
   StringBuffer sb;
   for (unsigned int i = 0; i < cmds.size() - 1; i += 2) {
-    String cmd(cmds[i], AttachLiteral);
-    String desc(cmds[i+1], AttachLiteral);
+    String cmd(cmds[i], CopyString);
+    String desc(cmds[i+1], CopyString);
 
     // two special formats
     if (cmd.empty() && desc.empty()) {

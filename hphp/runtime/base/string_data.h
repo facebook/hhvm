@@ -58,7 +58,7 @@ enum AttachStringMode { AttachString };
 // const char* points to client-owned memory, StringData will copy it
 // at construct-time using smart_malloc.  This is only ok when the StringData
 // itself was smart-allocated.
-enum CopyStringMode { CopyString, AttachLiteral = CopyString };
+enum CopyStringMode { CopyString };
 
 // reserve space for buffer that will be filled in by client.
 enum ReserveStringMode { ReserveString };
@@ -147,9 +147,6 @@ class StringData {
    * Different ways of constructing StringData. Default constructor at above
    * is actually only for SmartAllocator to pre-allocate the objects.
    */
-  explicit StringData(const char* data) {
-    initCopy(data);
-  }
   StringData(const char *data, AttachStringMode) {
     initAttach(data);
   }
@@ -421,12 +418,14 @@ public:
 class StackStringData : public StringData {
  public:
   StackStringData() { incRefCount(); }
-  explicit StackStringData(const char* s) : StringData(s) { incRefCount(); }
   template <class T>
-  StackStringData(const char* s, T p) : StringData(s, p) { incRefCount(); }
+  StackStringData(const char* s, T p) : StringData(s, p) {
+    incRefCount();
+  }
   template <class T>
-  StackStringData(const char* s, int len, T p) :
-      StringData(s, len, p) { incRefCount(); }
+  StackStringData(const char* s, int len, T p) : StringData(s, len, p) {
+    incRefCount();
+  }
 
   ~StackStringData() {
     // verify that no references escaped

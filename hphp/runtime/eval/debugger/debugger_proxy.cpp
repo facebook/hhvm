@@ -33,7 +33,7 @@ DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
     : m_stopped(false), m_local(local), m_dummySandbox(nullptr),
       m_hasBreakPoints(false), m_threadMode(Normal), m_thread(0),
       m_signalThread(this, &DebuggerProxy::pollSignal),
-      m_signum(CmdSignal::SignalNone) {
+      m_signum(CmdSignal::SignalNone), m_injTables(nullptr) {
   TRACE(2, "DebuggerProxy::DebuggerProxy\n");
   m_thrift.create(socket);
   m_dummyInfo = DSandboxInfo::CreateDummyInfo((int64_t)this);
@@ -47,6 +47,8 @@ DebuggerProxy::~DebuggerProxy() {
   if (m_dummySandbox) {
     m_dummySandbox->stop();
   }
+
+  delete m_injTables;
 }
 
 const char *DebuggerProxy::getThreadType() const {
@@ -151,29 +153,34 @@ void DebuggerProxy::notifyDummySandbox() {
 // class name into separate containers for later.
 void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
   TRACE(2, "DebuggerProxy::setBreakPoints\n");
-  WriteLock lock(m_breakMutex);
-  m_breakpoints = breakpoints;
-  m_hasBreakPoints = !m_breakpoints.empty();
-  m_breaksEnterFunc.clear();
-  m_breaksEnterClsMethod.clear();
-  for (unsigned int i = 0; i < m_breakpoints.size(); i++) {
-    BreakPointInfoPtr bp = m_breakpoints[i];
-    std::string funcFullName = bp->getFuncName();
-    if (funcFullName.empty()) {
-      continue;
-    }
-    {
-      StringDataMap::accessor acc;
-      const StringData* sd = StringData::GetStaticString(funcFullName);
-      m_breaksEnterFunc.insert(acc, sd);
-    }
-    std::string clsName = bp->getClass();
-    if (!clsName.empty()) {
-      StringDataMap::accessor acc;
-      const StringData* sd = StringData::GetStaticString(clsName);
-      m_breaksEnterClsMethod.insert(acc, sd);
+  // Hold the break mutex while we update the proxy's state. There's no need
+  // to hold it over the longer operation to set breakpoints in each file later.
+  {
+    WriteLock lock(m_breakMutex);
+    m_breakpoints = breakpoints;
+    m_hasBreakPoints = !m_breakpoints.empty();
+    m_breaksEnterFunc.clear();
+    m_breaksEnterClsMethod.clear();
+    for (unsigned int i = 0; i < m_breakpoints.size(); i++) {
+      BreakPointInfoPtr bp = m_breakpoints[i];
+      std::string funcFullName = bp->getFuncName();
+      if (funcFullName.empty()) {
+        continue;
+      }
+      {
+        StringDataMap::accessor acc;
+        const StringData* sd = StringData::GetStaticString(funcFullName);
+        m_breaksEnterFunc.insert(acc, sd);
+      }
+      std::string clsName = bp->getClass();
+      if (!clsName.empty()) {
+        StringDataMap::accessor acc;
+        const StringData* sd = StringData::GetStaticString(clsName);
+        m_breaksEnterClsMethod.insert(acc, sd);
+      }
     }
   }
+  VM::phpSetBreakPointsInAllFiles(this); // Apply breakpoints to the code.
 }
 
 void DebuggerProxy::getBreakPoints(BreakPointInfoPtrVec &breakpoints) {
@@ -229,10 +236,48 @@ bool DebuggerProxy::needInterruptForNonBreak() {
   return m_flow || m_signum != CmdSignal::SignalNone;
 }
 
-// Handle an interrupt from the VM. Note: some work for breakpoints has already
-// occured in DebuggerProxyVM::interrupt().
+// Handle an interrupt from the VM.
 void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   TRACE(2, "DebuggerProxy::interrupt\n");
+  changeBreakPointDepth(cmd);
+
+  if (cmd.getInterruptType() == BreakPointReached) {
+    if (!needInterrupt()) return;
+
+    // NB: stepping is represented as a BreakPointReached interrupt.
+
+    // Modify m_lastLocFilter to save current location. This will short-circuit
+    // the work done up in phpDebuggerOpcodeHook() and ensure we don't break on
+    // this line until we're completely off of it.
+    InterruptSite *site = cmd.getSite();
+    if (g_vmContext->m_lastLocFilter) {
+      g_vmContext->m_lastLocFilter->clear();
+    } else {
+      g_vmContext->m_lastLocFilter = new VM::PCFilter();
+    }
+    if (debug && Trace::moduleEnabled(Trace::bcinterp, 5)) {
+      Trace::trace("prepare source loc filter\n");
+      const VM::OffsetRangeVec& offsets = site->getCurOffsetRange();
+      for (VM::OffsetRangeVec::const_iterator it = offsets.begin();
+           it != offsets.end(); ++it) {
+        Trace::trace("block source loc in %s:%d: unit %p offset [%d, %d)\n",
+                     site->getFile(), site->getLine0(),
+                     site->getUnit(), it->m_base, it->m_past);
+      }
+    }
+    g_vmContext->m_lastLocFilter->addRanges(site->getUnit(),
+                                            site->getCurOffsetRange());
+    // If the breakpoint is not to be processed, we should continue execution.
+    BreakPointInfoPtr bp = getBreakPointAtCmd(cmd);
+    if (bp) {
+      if (!bp->breakable(getRealStackDepth())) {
+        return;
+      } else {
+        bp->unsetBreakable(getRealStackDepth());
+      }
+    }
+  }
+
   // Wait until this thread is the thread this proxy wants to debug.
   // NB: breakpoints and control flow checks happen here, too, and return false
   // if we're not done with the flow, or not at a breakpoint, etc.
@@ -382,26 +427,6 @@ static void append_stderr(const char *header, const char *msg,
   }
 }
 
-Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
-                                  bool log, int frame) {
-  TRACE(2, "DebuggerProxy::ExecutePHP\n");
-  Variant ret;
-  StringBuffer sb;
-  StringBuffer *save = g_context->swapOutputBuffer(nullptr);
-  g_context->setStdout(append_stdout, &sb);
-  if (log) {
-    Logger::SetThreadHook(append_stderr, &sb);
-  }
-  ret = uninit_null();
-  g_context->setStdout(nullptr, nullptr);
-  g_context->swapOutputBuffer(save);
-  if (log) {
-    Logger::SetThreadHook(nullptr, nullptr);
-  }
-  output = sb.detach();
-  return ret;
-}
-
 DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
   TRACE(2, "DebuggerProxy::createThreadInfo\n");
   DThreadInfoPtr info(new DThreadInfo());
@@ -526,7 +551,7 @@ void DebuggerProxy::checkStop() {
 
 void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
   TRACE(2, "DebuggerProxy::processInterrupt\n");
-  // Do the server-side work for this cmd.
+  // Do the server-side work for this cmd, which just notifies the client.
   if (!cmd.onServer(this)) {
     Debugger::RemoveProxy(shared_from_this()); // on socket error
     return;
@@ -559,7 +584,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       }
     }
     try {
-      // Perform the server-size work for this command.
+      // Perform the server-side work for this command.
       if (!res || !res->onServer(this)) {
         Debugger::RemoveProxy(shared_from_this());
         return;
@@ -578,22 +603,11 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
   }
 }
 
-void DebuggerProxy::processFlowControl(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxy::processFlowControl\n");
-  const_assert(false);
-}
-
-bool DebuggerProxy::breakByFlowControl(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxy::breakByFlowControl\n");
-  const_assert(false);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-// DebuggerProxyVM
 
-Variant DebuggerProxyVM::ExecutePHP(const std::string &php, String &output,
-                                    bool log, int frame) {
-  TRACE(2, "DebuggerProxyVM::ExecutePHP\n");
+Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
+                                  bool log, int frame) {
+  TRACE(2, "DebuggerProxy::ExecutePHP\n");
   Variant ret;
   StringBuffer sb;
   StringBuffer *save = g_context->swapOutputBuffer(nullptr);
@@ -632,8 +646,8 @@ Variant DebuggerProxyVM::ExecutePHP(const std::string &php, String &output,
 
 // There could be multiple breakpoints at one place but we can manage this
 // with only one breakpoint.
-BreakPointInfoPtr DebuggerProxyVM::getBreakPointAtCmd(CmdInterrupt& cmd) {
-  TRACE(2, "DebuggerProxyVM::getBreakPointAtCmd\n");
+BreakPointInfoPtr DebuggerProxy::getBreakPointAtCmd(CmdInterrupt& cmd) {
+  TRACE(2, "DebuggerProxy::getBreakPointAtCmd\n");
   for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
     BreakPointInfoPtr bp = m_breakpoints[i];
     if (bp->m_state != BreakPointInfo::Disabled &&
@@ -644,59 +658,8 @@ BreakPointInfoPtr DebuggerProxyVM::getBreakPointAtCmd(CmdInterrupt& cmd) {
   return BreakPointInfoPtr();
 }
 
-// Handle an interrupt from the VM.
-void DebuggerProxyVM::interrupt(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxyVM::interrupt\n");
-  changeBreakPointDepth(cmd);
-
-  if (cmd.getInterruptType() == BreakPointReached) {
-    if (!needInterrupt()) return;
-
-    // NB: stepping is represented as a BreakPointReached interrupt.
-
-    // Modify m_lastLocFilter to save current location. This will short-circuit
-    // the work done up in phpDebuggerOpcodeHook() and ensure we don't break on
-    // this line until we're completely off of it.
-    InterruptSiteVM *site = (InterruptSiteVM*)cmd.getSite();
-    if (g_vmContext->m_lastLocFilter) {
-      g_vmContext->m_lastLocFilter->clear();
-    } else {
-      g_vmContext->m_lastLocFilter = new VM::PCFilter();
-    }
-    if (debug && Trace::moduleEnabled(Trace::bcinterp, 5)) {
-      Trace::trace("prepare source loc filter\n");
-      const VM::OffsetRangeVec& offsets = site->getCurOffsetRange();
-      for (VM::OffsetRangeVec::const_iterator it = offsets.begin();
-           it != offsets.end(); ++it) {
-        Trace::trace("block source loc in %s:%d: unit %p offset [%d, %d)\n",
-                     site->getFile(), site->getLine0(),
-                     site->getUnit(), it->m_base, it->m_past);
-      }
-    }
-    g_vmContext->m_lastLocFilter->addRanges(site->getUnit(),
-                                            site->getCurOffsetRange());
-    // If the breakpoint is not to be processed, we should continue execution.
-    BreakPointInfoPtr bp = getBreakPointAtCmd(cmd);
-    if (bp) {
-      if (!bp->breakable(getRealStackDepth())) {
-        return;
-      } else {
-        bp->unsetBreakable(getRealStackDepth());
-      }
-    }
-  }
-
-  DebuggerProxy::interrupt(cmd);
-}
-
-void DebuggerProxyVM::setBreakPoints(BreakPointInfoPtrVec& breakpoints) {
-  TRACE(2, "DebuggerProxyVM::setBreakPoints\n");
-  DebuggerProxy::setBreakPoints(breakpoints); // Hold bp's in the proxy.
-  VM::phpSetBreakPointsInAllFiles(this); // Apply breakpoints to the code.
-}
-
-void DebuggerProxyVM::readInjTablesFromThread() {
-  TRACE(2, "DebuggerProxyVM::readInjTablesFromThread\n");
+void DebuggerProxy::readInjTablesFromThread() {
+  TRACE(2, "DebuggerProxy::readInjTablesFromThread\n");
   ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
   if (ti->m_reqInjectionData.dummySandbox) {
     return;
@@ -711,8 +674,8 @@ void DebuggerProxyVM::readInjTablesFromThread() {
   m_injTables = g_vmContext->m_injTables->clone();
 }
 
-void DebuggerProxyVM::writeInjTablesToThread() {
-  TRACE(2, "DebuggerProxyVM::writeInjTablesToThread\n");
+void DebuggerProxy::writeInjTablesToThread() {
+  TRACE(2, "DebuggerProxy::writeInjTablesToThread\n");
   if (g_vmContext->m_injTables) {
     delete g_vmContext->m_injTables;
     g_vmContext->m_injTables = nullptr;
@@ -723,8 +686,8 @@ void DebuggerProxyVM::writeInjTablesToThread() {
   g_vmContext->m_injTables = m_injTables->clone();
 }
 
-int DebuggerProxyVM::getRealStackDepth() {
-  TRACE(2, "DebuggerProxyVM::getRealStackDepth\n");
+int DebuggerProxy::getRealStackDepth() {
+  TRACE(2, "DebuggerProxy::getRealStackDepth\n");
   int depth = 0;
   VMExecutionContext* context = g_vmContext;
   ActRec *fp = context->getFP();
@@ -737,8 +700,8 @@ int DebuggerProxyVM::getRealStackDepth() {
   return depth;
 }
 
-int DebuggerProxyVM::getStackDepth() {
-  TRACE(2, "DebuggerProxyVM::getStackDepth\n");
+int DebuggerProxy::getStackDepth() {
+  TRACE(2, "DebuggerProxy::getStackDepth\n");
   int depth = 0;
   VMExecutionContext* context = g_vmContext;
   ActRec *fp = context->getFP();
@@ -753,8 +716,8 @@ int DebuggerProxyVM::getStackDepth() {
 }
 
 // Handle a continue cmd, or setup stepping.
-void DebuggerProxyVM::processFlowControl(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxyVM::processFlowControl\n");
+void DebuggerProxy::processFlowControl(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxy::processFlowControl\n");
   switch (m_flow->getType()) {
     case DebuggerCommand::KindOfContinue:
       if (!m_flow->decCount()) {
@@ -789,8 +752,8 @@ void DebuggerProxyVM::processFlowControl(CmdInterrupt &cmd) {
  * after the breakpoint has passed
  */
 
-void DebuggerProxyVM::changeBreakPointDepth(CmdInterrupt& cmd) {
-  TRACE(2, "DebuggerProxyVM::changeBreakPointDepth\n");
+void DebuggerProxy::changeBreakPointDepth(CmdInterrupt& cmd) {
+  TRACE(2, "DebuggerProxy::changeBreakPointDepth\n");
   for (unsigned int i = 0; i < m_breakpoints.size(); ++i) {
     // if the site changes, then update the breakpoint depth
     BreakPointInfoPtr bp = m_breakpoints[i];
@@ -803,8 +766,8 @@ void DebuggerProxyVM::changeBreakPointDepth(CmdInterrupt& cmd) {
 
 // Determine if an outstanding flow control cmd has run it's course and we
 // should stop execution.
-bool DebuggerProxyVM::breakByFlowControl(CmdInterrupt &cmd) {
-  TRACE(2, "DebuggerProxyVM::breakByFlowControl\n");
+bool DebuggerProxy::breakByFlowControl(CmdInterrupt &cmd) {
+  TRACE(2, "DebuggerProxy::breakByFlowControl\n");
   switch (m_flow->getType()) {
     case DebuggerCommand::KindOfStep: {
       if (!m_flow->decCount()) {

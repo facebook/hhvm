@@ -371,8 +371,8 @@ bool CmdPrint::onServer(DebuggerProxy *proxy) {
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
   {
     EvalBreakControl eval(m_noBreak);
-    m_ret = DebuggerProxyVM::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                                        m_output, !proxy->isLocal(), m_frame);
+    m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
+                                      m_output, !proxy->isLocal(), m_frame);
   }
   g_vmContext->setDebuggerBypassCheck(false);
   delete g_vmContext->m_lastLocFilter;

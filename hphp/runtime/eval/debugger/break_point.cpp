@@ -74,12 +74,12 @@ std::string InterruptSite::desc() const {
   return ret;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-InterruptSiteVM::InterruptSiteVM(bool hardBreakPoint /* = false */,
-                                 CVarRef e /* = null_variant */)
-  : InterruptSite(e), m_unit(nullptr), m_valid(false), m_funcEntry(false) {
-  TRACE(2, "InterruptSite::InterruptSiteVM\n");
+InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef e)
+    : m_exception(e), m_class(nullptr), m_function(nullptr),
+      m_file((StringData*)nullptr),
+      m_line0(0), m_char0(0), m_line1(0), m_char1(0),
+      m_unit(nullptr), m_valid(false), m_funcEntry(false) {
+  TRACE(2, "InterruptSite::InterruptSite\n");
   VM::Transl::VMRegAnchor _;
 #define bail_on(c) if (c) { return; }
   VMExecutionContext* context = g_vmContext;
@@ -135,27 +135,6 @@ InterruptSiteVM::InterruptSiteVM(bool hardBreakPoint /* = false */,
   }
 #undef bail_on
   m_valid = true;
-}
-
-const char *InterruptSiteVM::getFile() const {
-  TRACE(2, "InterruptSiteVM::getFile\n");
-  return m_file.data();
-}
-
-const char *InterruptSiteVM::getClass() const {
-  TRACE(2, "InterruptSiteVM::getClass\n");
-  if (m_class) {
-    return m_class;
-  }
-  return "";
-}
-
-const char *InterruptSiteVM::getFunction() const {
-  TRACE(2, "InterruptSiteVM::getFunction\n");
-  if (m_function) {
-    return m_function;
-  }
-  return "";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -367,10 +346,9 @@ bool BreakPointInfo::match(InterruptType interrupt, InterruptSite &site) {
           checkLines(site.getLine0()) && checkStack(site) &&
           checkUrl(site.url()) && checkClause();
 
-        InterruptSiteVM &siteVM = dynamic_cast<InterruptSiteVM&>(site);
         if (!getFuncName().empty()) {
           // function entry breakpoint
-          match = match && siteVM.funcEntry();
+          match = match && site.funcEntry();
         }
         return match;
       }
@@ -866,7 +844,7 @@ bool BreakPointInfo::checkClause() {
     String output;
     {
       EvalBreakControl eval(false);
-      Variant ret = DebuggerProxyVM::ExecutePHP(m_php, output, false, 0);
+      Variant ret = DebuggerProxy::ExecutePHP(m_php, output, false, 0);
       if (m_check) {
         return ret.toBoolean();
       }

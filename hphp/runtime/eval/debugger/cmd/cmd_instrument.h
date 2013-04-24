@@ -48,8 +48,8 @@ private:
   InstPointInfoPtrVec *m_instPoints;
   InstPointInfoPtrVec m_ips;
 
-  void readFromTable(DebuggerProxyVM *proxy);
-  void validateAndWriteToTable(DebuggerProxyVM *proxy);
+  void readFromTable(DebuggerProxy *proxy);
+  void validateAndWriteToTable(DebuggerProxy *proxy);
 
   void listInst(DebuggerClient *client);
   void clearInst(DebuggerClient *client);

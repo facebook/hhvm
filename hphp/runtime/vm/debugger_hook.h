@@ -21,7 +21,7 @@
 
 namespace HPHP {
 namespace Eval{
-class DebuggerProxyVM;
+class DebuggerProxy;
 class PhpFile;
 }}
 
@@ -47,7 +47,7 @@ void phpDebuggerDefClassHook(const Class* cls);
 void phpDebuggerDefFuncHook(const Func* func);
 
 // Helper to apply pending breakpoints to all files.
-void phpSetBreakPointsInAllFiles(Eval::DebuggerProxyVM* proxy);
+void phpSetBreakPointsInAllFiles(Eval::DebuggerProxy* proxy);
 
 // Is this thread being debugged?
 static inline bool isDebuggerAttached() {

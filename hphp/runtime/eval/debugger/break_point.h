@@ -34,33 +34,38 @@ enum InterruptType {
 };
 
 // Represents a site in the code, at the source level.
-// Note: this class currently has just one subclass, InterruptSiteVM, which will
-// be combined with this shortly.
+// Forms an InterruptSite by looking at the current thread's current PC and
+// grabbing source data out of the corresponding Unit.
 class InterruptSite {
 public:
-  virtual const char *getFile() const = 0;
-  virtual const char *getClass() const = 0;
-  virtual const char *getFunction() const = 0;
-  virtual const char *getNamespace() const { return nullptr; }
+  InterruptSite(bool hardBreakPoint, CVarRef e);
+
+  const char *getFile() const { return m_file.data(); }
+  const char *getClass() const { return m_class ? m_class : ""; }
+  const char *getFunction() const { return m_function ? m_function : ""; }
+  // Placeholder for future namespace support.
+  const char *getNamespace() const { return nullptr; }
   int getFileLen() const;
 
-  int32_t getLine0() const { return m_line0;}
-  int32_t getChar0() const { return m_char0;}
-  int32_t getLine1() const { return m_line1;}
-  int32_t getChar1() const { return m_char1;}
-  CVarRef getException() { return m_exception;}
+  int32_t getLine0() const { return m_line0; }
+  int32_t getChar0() const { return m_char0; }
+  int32_t getLine1() const { return m_line1; }
+  int32_t getChar1() const { return m_char1; }
+  CVarRef getException() { return m_exception; }
 
-  std::string &url() const { return m_url;}
+  std::string &url() const { return m_url; }
   std::string desc() const;
 
-protected:
-  explicit InterruptSite(CVarRef e = null_variant, const char *cls = nullptr,
-                         const char *function = nullptr,
-                         StringData *file = nullptr, int line0 = 0,
-                         int char0 = 0, int line1 = 0, int char1 = 0)
-    : m_exception(e), m_class(cls), m_function(function), m_file(file),
-      m_line0(line0), m_char0(char0), m_line1(line1), m_char1(char1) {}
+  const VM::SourceLoc *getSourceLoc() const { return &m_sourceLoc; }
+  const VM::OffsetRangeVec& getCurOffsetRange() const {
+    return m_offsetRangeVec;
+  }
+  const VM::Unit* getUnit() const { return m_unit; }
 
+  bool valid() const { return m_valid; }
+  bool funcEntry() const { return m_funcEntry; }
+
+private:
   Variant m_exception;
 
   // cached
@@ -73,29 +78,7 @@ protected:
   int32_t m_char0;
   int32_t m_line1;
   int32_t m_char1;
-};
 
-// Forms an InterruptSite by looking at the current thread's current PC and
-// grabbing source data out of the corresponding Unit.
-class InterruptSiteVM : public InterruptSite {
-public:
-  explicit InterruptSiteVM(bool hardBreakPoint = false,
-                           CVarRef e = null_variant);
-  virtual const char *getFile() const;
-  virtual const char *getClass() const;
-  virtual const char *getFunction() const;
-  const VM::SourceLoc *getSourceLoc() const {
-    return &m_sourceLoc;
-  }
-  const VM::OffsetRangeVec& getCurOffsetRange() const {
-    return m_offsetRangeVec;
-  }
-  const VM::Unit* getUnit() const {
-    return m_unit;
-  }
-  bool valid() const { return m_valid; }
-  bool funcEntry() const { return m_funcEntry; }
-private:
   VM::SourceLoc m_sourceLoc;
   VM::OffsetRangeVec m_offsetRangeVec;
   VM::Unit* m_unit;

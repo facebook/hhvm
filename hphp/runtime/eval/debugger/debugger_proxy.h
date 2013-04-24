@@ -42,8 +42,6 @@ namespace HPHP { namespace Eval {
 // The client always creates its own "local proxy", which allows debugging any
 // code running on the VM within the client. The two are easily confused.
 //
-// Note: currently DebuggerProxy has a single subclass, DebuggerProxyVM.
-// There used to be other subclasses, but they're gong now. These can be merged.
 
 class CmdInterrupt;
 DECLARE_BOOST_TYPES(DebuggerProxy);
@@ -65,6 +63,9 @@ public:
                             int frame);
 
 public:
+  DebuggerProxy(SmartPtr<Socket> socket, bool local);
+  ~DebuggerProxy();
+
   bool isLocal() const { return m_local;}
 
   const char *getThreadType() const;
@@ -81,7 +82,7 @@ public:
   void startDummySandbox();
   void notifyDummySandbox();
 
-  virtual void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
+  void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
   void getBreakPoints(BreakPointInfoPtrVec &breakpoints);
   bool couldBreakEnterClsMethod(const StringData* className);
   bool couldBreakEnterFunc(const StringData* funcFullName);
@@ -90,7 +91,7 @@ public:
 
   bool needInterrupt();
   bool needInterruptForNonBreak();
-  virtual void interrupt(CmdInterrupt &cmd);
+  void interrupt(CmdInterrupt &cmd);
   bool sendToClient(DebuggerCommand *cmd);
 
   void startSignalThread();
@@ -99,9 +100,28 @@ public:
   void checkStop();
   void forceQuit();
 
-protected:
-  DebuggerProxy(SmartPtr<Socket> socket, bool local);
-  virtual ~DebuggerProxy();
+  // For instrumentation
+  HPHP::VM::InjectionTables* getInjTables() const { return m_injTables; }
+  void setInjTables(HPHP::VM::InjectionTables* tables) { m_injTables = tables;}
+  void readInjTablesFromThread();
+  void writeInjTablesToThread();
+
+private:
+  bool blockUntilOwn(CmdInterrupt &cmd, bool check);
+  bool checkBreakPoints(CmdInterrupt &cmd);
+  bool checkFlowBreak(CmdInterrupt &cmd);
+  bool processFlowBreak(CmdInterrupt &cmd);
+  void processInterrupt(CmdInterrupt &cmd);
+  void processFlowControl(CmdInterrupt &cmd);
+  bool breakByFlowControl(CmdInterrupt &cmd);
+
+  DThreadInfoPtr createThreadInfo(const std::string &desc);
+
+  void changeBreakPointDepth(CmdInterrupt& cmd);
+  BreakPointInfoPtr getBreakPointAtCmd(CmdInterrupt& cmd);
+
+  int getRealStackDepth();
+  int getStackDepth();
 
   bool m_stopped;
 
@@ -133,49 +153,6 @@ protected:
 
   Mutex m_signumMutex;
   int m_signum;
-
-  // helpers
-  bool blockUntilOwn(CmdInterrupt &cmd, bool check);
-  virtual bool checkBreakPoints(CmdInterrupt &cmd);
-  bool checkFlowBreak(CmdInterrupt &cmd);
-  virtual bool processFlowBreak(CmdInterrupt &cmd);
-  void processInterrupt(CmdInterrupt &cmd);
-  virtual void processFlowControl(CmdInterrupt &cmd);
-  virtual bool breakByFlowControl(CmdInterrupt &cmd);
-
-  DThreadInfoPtr createThreadInfo(const std::string &desc);
-};
-
-class DebuggerProxyVM : public DebuggerProxy {
-public:
-  static Variant ExecutePHP(const std::string &php, String &output, bool log,
-                            int frame);
-
-public:
-  DebuggerProxyVM(SmartPtr<Socket> socket, bool local)
-    : DebuggerProxy(socket, local), m_injTables(nullptr) {
-  }
-  virtual ~DebuggerProxyVM() {
-    delete m_injTables;
-  }
-  virtual void interrupt(CmdInterrupt &cmd);
-  virtual void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
-
-  // For instrumentation
-  HPHP::VM::InjectionTables* getInjTables() const { return m_injTables; }
-  void setInjTables(HPHP::VM::InjectionTables* tables) { m_injTables = tables;}
-  void readInjTablesFromThread();
-  void writeInjTablesToThread();
-
-private:
-  void changeBreakPointDepth(CmdInterrupt& cmd);
-  BreakPointInfoPtr getBreakPointAtCmd(CmdInterrupt& cmd);
-
-  int getStackDepth();
-  int getRealStackDepth();
-
-  virtual void processFlowControl(CmdInterrupt &cmd);
-  virtual bool breakByFlowControl(CmdInterrupt &cmd);
 
   // For instrumentation
   HPHP::VM::InjectionTables* m_injTables;

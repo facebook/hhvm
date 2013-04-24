@@ -211,7 +211,7 @@ void phpDebuggerDefFuncHook(const Func* func) {
 
 // Helper which will look at every loaded file and attempt to see if any
 // existing file:line breakpoints should be set.
-void phpSetBreakPointsInAllFiles(Eval::DebuggerProxyVM* proxy) {
+void phpSetBreakPointsInAllFiles(Eval::DebuggerProxy* proxy) {
   for (EvaledFilesMap::const_iterator it =
        g_vmContext->m_evaledFiles.begin();
        it != g_vmContext->m_evaledFiles.end(); ++it) {

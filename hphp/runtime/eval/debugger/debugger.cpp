@@ -260,7 +260,7 @@ void Debugger::InterruptVMHook(int type /* = BreakPointReached */,
   TRACE(2, "Debugger::InterruptVMHook\n");
   // Computing the interrupt site here pulls in more data from the Unit to
   // describe the current execution point.
-  InterruptSiteVM site(type == HardBreakPoint, e);
+  InterruptSite site(type == HardBreakPoint, e);
   if (!site.valid()) {
     // An invalid site is missing something like an ActRec, a func, or a
     // Unit. Currently the debugger has no action to take at such sites.
@@ -359,8 +359,7 @@ void Debugger::registerSandbox(const DSandboxInfo &sandbox) {
   DebuggerProxyPtr proxy = findProxy(sid);
   if (proxy) {
     ti->m_reqInjectionData.debugger = true;
-    DebuggerProxyVM* proxyVM = (DebuggerProxyVM*)proxy.get();
-    proxyVM->writeInjTablesToThread();
+    proxy->writeInjTablesToThread();
   }
 }
 
@@ -416,7 +415,7 @@ DebuggerProxyPtr Debugger::createProxy(SmartPtr<Socket> socket, bool local) {
   TRACE(2, "Debugger::createProxy\n");
   // Creates a proxy and threads needed to handle it. At this point, there is
   // not enough information to attach a sandbox.
-  DebuggerProxyPtr proxy(new DebuggerProxyVM(socket, local));
+  DebuggerProxyPtr proxy(new DebuggerProxy(socket, local));
   const StringData* sid =
     StringData::GetStaticString(proxy->getDummyInfo().id());
   {

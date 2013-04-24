@@ -134,16 +134,15 @@ void CmdInstrument::setClientOutput(DebuggerClient *client) {
 bool CmdInstrument::onServer(DebuggerProxy *proxy) {
   m_instPoints = &m_ips;
   m_enabled = true;
-  DebuggerProxyVM* proxyVM = static_cast<DebuggerProxyVM*>(proxy);
   if (m_type == ActionRead) {
-    readFromTable(proxyVM);
+    readFromTable(proxy);
   } else if (m_type == ActionWrite) {
-    validateAndWriteToTable(proxyVM);
+    validateAndWriteToTable(proxy);
   }
   return proxy->sendToClient(this);
 }
 
-void CmdInstrument::readFromTable(DebuggerProxyVM *proxy) {
+void CmdInstrument::readFromTable(DebuggerProxy *proxy) {
   proxy->readInjTablesFromThread();
   m_ips.clear();
   if (!proxy->getInjTables()) {
@@ -186,7 +185,7 @@ void CmdInstrument::readFromTable(DebuggerProxyVM *proxy) {
   }
 }
 
-void CmdInstrument::validateAndWriteToTable(DebuggerProxyVM *proxy) {
+void CmdInstrument::validateAndWriteToTable(DebuggerProxy *proxy) {
   if (!proxy->getInjTables()) {
     proxy->setInjTables(new VM::InjectionTables());
   }

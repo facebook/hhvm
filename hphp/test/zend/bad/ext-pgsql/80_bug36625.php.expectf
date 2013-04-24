@@ -1,0 +1,5 @@
+bool(false)
+resource(%d) of type (pgsql result)
+bool(true)
+bool(true)
+===DONE===

@@ -1,0 +1,9 @@
+create/write/close LO
+open/read/tell/seek/close LO
+open/read_all/close LO
+large object data
+unlink LO
+Test without connection
+Test with string oid value
+import/export LO
+OK

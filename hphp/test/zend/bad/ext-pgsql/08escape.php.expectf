@@ -1,0 +1,5 @@
+pg_escape_string() is Ok
+pg_escape_bytea() is Ok
+pg_escape_bytea() actually works with database
+pg_escape_literal() is Ok
+pg_escape_identifier() is Ok

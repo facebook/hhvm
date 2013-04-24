@@ -1,0 +1,22 @@
+HipHop Warning: %a
+bool(false)
+array(1) {
+  [0]=>
+  array(2) {
+    ["id"]=>
+    string(1) "1"
+    ["id2"]=>
+    string(1) "2"
+  }
+}
+HipHop Notice: %a
+bool(false)
+array(1) {
+  [0]=>
+  array(2) {
+    ["id4"]=>
+    string(1) "4"
+    ["id3"]=>
+    string(1) "5"
+  }
+}

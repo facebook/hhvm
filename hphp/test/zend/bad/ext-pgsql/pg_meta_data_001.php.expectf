@@ -1,0 +1,64 @@
+array(2) {
+  ["id"]=>
+  array(6) {
+    ["num"]=>
+    int(1)
+    ["type"]=>
+    string(4) "int4"
+    ["len"]=>
+    int(4)
+    ["not null"]=>
+    bool(false)
+    ["has default"]=>
+    bool(false)
+    ["array dims"]=>
+    int(0)
+  }
+  ["id3"]=>
+  array(6) {
+    ["num"]=>
+    int(2)
+    ["type"]=>
+    string(4) "int4"
+    ["len"]=>
+    int(4)
+    ["not null"]=>
+    bool(false)
+    ["has default"]=>
+    bool(false)
+    ["array dims"]=>
+    int(0)
+  }
+}
+array(2) {
+  ["id"]=>
+  array(6) {
+    ["num"]=>
+    int(1)
+    ["type"]=>
+    string(4) "int4"
+    ["len"]=>
+    int(4)
+    ["not null"]=>
+    bool(false)
+    ["has default"]=>
+    bool(false)
+    ["array dims"]=>
+    int(0)
+  }
+  ["id2"]=>
+  array(6) {
+    ["num"]=>
+    int(2)
+    ["type"]=>
+    string(4) "int4"
+    ["len"]=>
+    int(4)
+    ["not null"]=>
+    bool(false)
+    ["has default"]=>
+    bool(false)
+    ["array dims"]=>
+    int(0)
+  }
+}

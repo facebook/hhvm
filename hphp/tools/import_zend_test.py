@@ -68,7 +68,6 @@ no_import = (
     '/ext/mysql',
     '/ext/pdo_mysql',
     '/ext/pdo_sqlite',
-    '/ext/pgsql',
     '/ext/spl',
     '/ext/sqlite3',
     '/ext/standard',

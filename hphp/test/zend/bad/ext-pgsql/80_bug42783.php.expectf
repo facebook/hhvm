@@ -1,0 +1,7 @@
+array(2) {
+  ["id"]=>
+  string(%d) "%d"
+  ["time"]=>
+  string(%d) "%s"
+}
+===DONE===

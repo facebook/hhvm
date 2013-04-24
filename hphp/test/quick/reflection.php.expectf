@@ -27,12 +27,14 @@ array(4) {
   [0]=>
   object(ReflectionParameter)#5 (1) {
     ["info"]=>
-    array(6) {
+    array(7) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(1) "a"
       ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
       string(0) ""
       ["function"]=>
       string(1) "f"
@@ -46,12 +48,14 @@ array(4) {
   [1]=>
   object(ReflectionParameter)#6 (1) {
     ["info"]=>
-    array(7) {
+    array(8) {
       ["index"]=>
       int(1)
       ["name"]=>
       string(1) "b"
       ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
       string(0) ""
       ["function"]=>
       string(1) "f"
@@ -67,12 +71,14 @@ array(4) {
   [2]=>
   object(ReflectionParameter)#7 (1) {
     ["info"]=>
-    array(8) {
+    array(9) {
       ["index"]=>
       int(2)
       ["name"]=>
       string(1) "c"
       ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
       string(0) ""
       ["function"]=>
       string(1) "f"
@@ -90,12 +96,14 @@ array(4) {
   [3]=>
   object(ReflectionParameter)#8 (1) {
     ["info"]=>
-    array(8) {
+    array(9) {
       ["index"]=>
       int(3)
       ["name"]=>
       string(1) "d"
       ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
       string(0) ""
       ["function"]=>
       string(1) "f"

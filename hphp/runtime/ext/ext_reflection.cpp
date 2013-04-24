@@ -83,6 +83,7 @@ static StaticString s___invoke("__invoke");
 static StaticString s_closure_in_braces("{closure}");
 static StaticString s_closureobj("closureobj");
 static StaticString s_return_type("return_type");
+static StaticString s_type_hint("type_hint");
 
 static const VM::Class* get_cls(CVarRef class_or_object) {
   VM::Class* cls = NULL;
@@ -348,9 +349,12 @@ static void set_function_info(Array &ret, const VM::Func* func) {
       param.set(s_index, VarNR((int)i));
       VarNR name(func->localNames()[i]);
       param.set(s_name, name);
-      const StringData* type = fpi.userType() ?
-        fpi.userType() : empty_string.get();
+      const StringData* type = fpi.typeConstraint().exists() ?
+        fpi.typeConstraint().typeName() : empty_string.get();
       param.set(s_type, VarNR(type));
+      const StringData* typeHint = fpi.userType() ?
+        fpi.userType() : empty_string.get();
+      param.set(s_type_hint, VarNR(typeHint));
       param.set(s_function, VarNR(func->name()));
       if (func->preClass()) {
         param.set(s_class, VarNR(func->cls() ? func->cls()->name() :

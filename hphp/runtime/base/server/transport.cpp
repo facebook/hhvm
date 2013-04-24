@@ -793,7 +793,7 @@ void Transport::redirect(const char *location, int code /* = 302 */,
                          const char *info) {
   addHeaderImpl("Location", location);
   setResponse(code, info);
-  sendStringLocked(location, code);
+  sendStringLocked("Moved", code);
 }
 
 void Transport::onFlushProgress(int writtenSize, int64_t delayUs) {

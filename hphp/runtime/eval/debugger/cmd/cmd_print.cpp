@@ -366,14 +366,6 @@ void CmdPrint::setClientOutput(DebuggerClient *client) {
 }
 
 bool CmdPrint::onServer(DebuggerProxy *proxy) {
-  g_context->setDebuggerBypassCheck(m_bypassAccessCheck);
-  m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                                    m_output, !proxy->isLocal(), m_frame);
-  g_context->setDebuggerBypassCheck(false);
-  return proxy->sendToClient(this);
-}
-
-bool CmdPrint::onServerVM(DebuggerProxy *proxy) {
   VM::PCFilter* locSave = g_vmContext->m_lastLocFilter;
   g_vmContext->m_lastLocFilter = new VM::PCFilter();
   g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);

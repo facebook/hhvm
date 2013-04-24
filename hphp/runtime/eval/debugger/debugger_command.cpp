@@ -163,19 +163,19 @@ bool DebuggerCommand::onClient(DebuggerClient *client) {
   return false;
 }
 
-void DebuggerCommand::setClientOutput(DebuggerClient *client) {
-  TRACE(2, "DebuggerCommand::setClientOutput\n");
-  // Just default to text
-  client->setOutputType(DebuggerClient::OTText);
-}
-
 bool DebuggerCommand::onClientD(DebuggerClient *client) {
   TRACE(2, "DebuggerCommand::onClientD\n");
-  bool ret = onClientVM(client);
+  bool ret = onClient(client);
   if (client->isApiMode() && !m_incomplete) {
     setClientOutput(client);
   }
   return ret;
+}
+
+void DebuggerCommand::setClientOutput(DebuggerClient *client) {
+  TRACE(2, "DebuggerCommand::setClientOutput\n");
+  // Just default to text
+  client->setOutputType(DebuggerClient::OTText);
 }
 
 bool DebuggerCommand::onServer(DebuggerProxy *proxy) {

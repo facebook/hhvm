@@ -311,7 +311,7 @@ void DebuggerProxy::pollSignal() {
 
     // Send CmdSignal over to the client and wait for a response.
     CmdSignal cmd;
-    if (!cmd.onServerD(this)) break; // on socket error
+    if (!cmd.onServer(this)) break; // on socket error
 
     DebuggerCommandPtr res;
     while (!DebuggerCommand::Receive(m_thrift, res,
@@ -527,7 +527,7 @@ void DebuggerProxy::checkStop() {
 void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
   TRACE(2, "DebuggerProxy::processInterrupt\n");
   // Do the server-side work for this cmd.
-  if (!cmd.onServerD(this)) {
+  if (!cmd.onServer(this)) {
     Debugger::RemoveProxy(shared_from_this()); // on socket error
     return;
   }
@@ -546,7 +546,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       // Any control flow command gets installed here and we continue execution.
       m_flow = dynamic_pointer_cast<CmdFlowControl>(res);
       if (m_flow) {
-        m_flow->onServerD(this);
+        m_flow->onServer(this);
         processFlowControl(cmd);
         if (m_flow && m_threadMode == Normal) {
           switchThreadMode(Sticky);
@@ -560,14 +560,14 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     }
     try {
       // Perform the server-size work for this command.
-      if (!res || !res->onServerD(this)) {
+      if (!res || !res->onServer(this)) {
         Debugger::RemoveProxy(shared_from_this());
         return;
       }
     } catch (const DebuggerException &e) {
       throw;
     } catch (...) {
-      Logger::Error("onServerD() throws non DebuggerException: %d",
+      Logger::Error("onServer() throws non DebuggerException: %d",
                     res->getType());
       Debugger::RemoveProxy(shared_from_this());
       return;

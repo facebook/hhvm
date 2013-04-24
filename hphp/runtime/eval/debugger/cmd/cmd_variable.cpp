@@ -152,7 +152,7 @@ Array CmdVariable::GetGlobalVariables() {
   return ret;
 }
 
-bool CmdVariable::onServerVM(DebuggerProxy *proxy) {
+bool CmdVariable::onServer(DebuggerProxy *proxy) {
   m_variables = g_vmContext->getLocalDefinedVariables(m_frame);
   return proxy->sendToClient(this);
 }

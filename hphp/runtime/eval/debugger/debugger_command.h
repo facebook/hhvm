@@ -98,14 +98,9 @@ public:
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
   virtual bool onClient(DebuggerClient *client);
-  virtual bool onClientVM(DebuggerClient *client) { return onClient(client); }
-  virtual void setClientOutput(DebuggerClient *client);
   bool onClientD(DebuggerClient *client);
+  virtual void setClientOutput(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
-  virtual bool onServerVM(DebuggerProxy *proxy) { return onServer(proxy); }
-  bool onServerD(DebuggerProxy *proxy) {
-    return onServerVM(proxy);
-  }
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 

@@ -54,7 +54,7 @@ bool CmdInstrument::help(DebuggerClient *client) {
   return true;
 }
 
-bool CmdInstrument::onClientVM(DebuggerClient *client) {
+bool CmdInstrument::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
   if (client->argCount() == 1) {
     if (client->argValue(1) == "list" || client->argValue(1) == "l") {
@@ -131,7 +131,7 @@ void CmdInstrument::setClientOutput(DebuggerClient *client) {
   client->setOTValues(values);
 }
 
-bool CmdInstrument::onServerVM(DebuggerProxy *proxy) {
+bool CmdInstrument::onServer(DebuggerProxy *proxy) {
   m_instPoints = &m_ips;
   m_enabled = true;
   DebuggerProxyVM* proxyVM = static_cast<DebuggerProxyVM*>(proxy);

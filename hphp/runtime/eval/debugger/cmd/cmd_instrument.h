@@ -30,16 +30,9 @@ public:
                     m_enabled(false), m_instPoints(nullptr) {}
 
   virtual bool help(DebuggerClient *client);
-  virtual bool onClient(DebuggerClient *client) {
-    client->error("not supported\n");
-    return true;
-  }
   virtual void setClientOutput(DebuggerClient *client);
-  virtual bool onClientVM(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy) {
-    return true;
-  }
-  virtual bool onServerVM(DebuggerProxy *proxy);
+  virtual bool onClient(DebuggerClient *client);
+  virtual bool onServer(DebuggerProxy *proxy);
 
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);

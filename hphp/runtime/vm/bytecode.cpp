@@ -2346,8 +2346,23 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       const char *filename = unit->filepath()->data();
       assert(filename);
       frame.set(String(s_file), filename, true);
+
+      // In the normal method case, the "saved pc" for line number printing is
+      // pointing at the cell conversion (Unbox/Pop) instruction, not the call
+      // itself. For multi-line calls, this instruction is associated with the
+      // subsequent line which results in an off-by-n. We're subtracting one
+      // in order to look up the line associated with the FCall/FCallArray
+      // instruction. Exception handling and the other opcodes (ex. BoxR)
+      // already do the right thing. The emitter associates object access with
+      // the subsequent expression and this would be difficult to modify.
+      Opcode* opAtSavedPc = (Opcode*)unit->at(pc);
+      assert(opAtSavedPc);
+      Offset pcAdjust = 0;
+      if (*opAtSavedPc == Op::OpPopR || *opAtSavedPc == Op::OpUnboxR) {
+        pcAdjust = 1;
+      }
       frame.set(String(s_line),
-                prevFp->m_func->unit()->getLineNumber(pc), true);
+                prevFp->m_func->unit()->getLineNumber(pc - pcAdjust), true);
     }
     // check for include
     String funcname = const_cast<StringData*>(fp->m_func->name());

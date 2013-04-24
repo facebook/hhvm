@@ -1399,6 +1399,8 @@ Func* Unit::getMain(Class* cls /*= NULL*/) const {
   return f;
 }
 
+// This uses range lookups so offsets in the middle of instructions are
+// supported.
 int Unit::getLineNumber(Offset pc) const {
   LineEntry key = LineEntry(pc, -1);
   std::vector<LineEntry>::const_iterator it =

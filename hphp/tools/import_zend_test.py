@@ -63,6 +63,19 @@ no_import = (
     '/Zend/tests/001.phpt',
     '/Zend/tests/002.phpt',
     '/Zend/tests/003.phpt',
+    
+    # spews files until they work
+    '/ext/xmlwriter/tests/001.phpt',
+    '/ext/xmlwriter/tests/004.phpt',
+    '/ext/xmlwriter/tests/005.phpt',
+    '/ext/xmlwriter/tests/006.phpt',
+    '/ext/xmlwriter/tests/OO_001.phpt',
+    '/ext/xmlwriter/tests/OO_004.phpt',
+    '/ext/xmlwriter/tests/OO_005.phpt',
+    '/ext/xmlwriter/tests/OO_006.phpt',
+
+    # not tests
+    '/ext/xmlwriter/examples/',
 
     # not imported yet, but will be
     '/ext/mysql',
@@ -70,7 +83,6 @@ no_import = (
     '/ext/pdo_sqlite',
     '/ext/spl',
     '/ext/standard',
-    '/ext/xmlwriter',
 
     # not implemented extensions
     '/ext/calendar',

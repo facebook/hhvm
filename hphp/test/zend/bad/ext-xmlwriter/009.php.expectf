@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root id="elem1">
+ <elem1 attr1="first">
+  <!--start PI-->
+  <pi><?php echo "hello world"; ?>%w</pi>
+  <cdata><![CDATA[<>&"]]></cdata>
+ </elem1>
+</root>

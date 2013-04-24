@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT sxe (elem1+, elem11, elem22*)>
+<!ATTLIST sxe id     CDATA  #implied>
+<!ELEMENT elem1 elem2*>
+<!ATTLIST elem1 attr1  CDATA  #required
+attr2  CDATA  #implied>

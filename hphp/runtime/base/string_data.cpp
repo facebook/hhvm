@@ -166,25 +166,6 @@ Array StringData::GetConstants() {
   return a;
 }
 
-void StringData::initLiteral(const char* data) {
-  return initLiteral(data, strlen(data));
-}
-
-void StringData::initLiteral(const char* data, int len) {
-  if (uint32_t(len) > MaxSize) {
-    throw InvalidArgumentException("len > 2^31-2", len);
-  }
-  // Do not copy literals, this StringData can have a shorter lifetime than
-  // the literal, and the client can count on this->data() giving back
-  // the literal ptr with the longer lifetime. Sketchy!
-  m_hash = 0;
-  _count = 0;
-  m_len = len;
-  m_cdata = data;
-  m_big.cap = len | IsLiteral;
-  assert(checkSane());
-}
-
 void StringData::enlist() {
   assert(isShared());
   SweepNode& head = MemoryManager::TheMemoryManager()->m_strings;
@@ -403,7 +384,7 @@ void StringData::append(const char *s, int len) {
   // TODO: t1122987: in any of the cases below where we need a bigger buffer,
   // we can probably assume we're in a concat-loop and pick a good buffer
   // size to avoid O(N^2) copying cost.
-  if (isShared() || isLiteral()) {
+  if (isShared()) {
     // buffer is immutable, don't modify it.
     StringSlice r = slice();
     char* newdata = smart_concat(r.ptr, r.len, s, len);
@@ -533,12 +514,8 @@ StringData *StringData::copy(bool sharedMemory /* = false */) const {
     // which will be freed at the end of the request, and so must be
     // copied.
     return new StringData(data(), size(), CopyMalloc);
-  } else {
-    if (isLiteral()) {
-      return NEW(StringData)(data(), size(), AttachLiteral);
-    }
-    return NEW(StringData)(data(), size(), CopyString);
   }
+  return NEW(StringData)(data(), size(), CopyString);
 }
 
 MutableSlice StringData::escalate(uint32_t cap) {
@@ -568,8 +545,7 @@ StringData *StringData::Escalate(StringData *in) {
 void StringData::dump() const {
   StringSlice s = slice();
 
-  printf("StringData(%d) (%s%s%s%d): [", _count,
-         isLiteral() ? "literal " : "",
+  printf("StringData(%d) (%s%s%d): [", _count,
          isShared() ? "shared " : "",
          isStatic() ? "static " : "",
          s.len);

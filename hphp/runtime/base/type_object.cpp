@@ -82,7 +82,7 @@ bool Object::equal(CObjRef v2) const {
   if (isResource() || v2.isResource()) {
     return false;
   }
-  if (!v2.get()->o_isClass(m_px->o_getClassName().c_str())) {
+  if (v2.get()->getVMClass() != m_px->getVMClass()) {
     return false;
   }
   if (m_px->isCollection()) {

@@ -122,10 +122,6 @@ bool ObjectData::o_instanceof(CStrRef s) const {
   return m_cls->classof(cls);
 }
 
-bool ObjectData::o_isClass(const char *s) const {
-  return strcasecmp(s, o_getClassName().c_str()) == 0;
-}
-
 int64_t ObjectData::o_toInt64() const {
   raise_notice("Object of class %s could not be converted to int",
                o_getClassName().data());

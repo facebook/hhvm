@@ -204,7 +204,7 @@ function mode_arg($options) {
   switch ($mode) {
     case '':
     case 'jit':
-      return $jit_args;
+      return "$jit_args -v Eval.JitUseIR=false";
     case 'hhir':
       return "$jit_args -v Eval.JitUseIR=true -v Eval.HHIRDisableTx64=true";
     case 'interp':

@@ -27,7 +27,7 @@
 #include <runtime/ext/hash/hash_adler32.h>
 #include <runtime/ext/hash/hash_crc32.h>
 #include <runtime/ext/hash/hash_haval.h>
-#include <runtime/ext/hash/hash_fnv1.h>
+
 #include <runtime/ext/hash/hash_furc.h>
 #include <runtime/ext/hash/hash_murmur.h>
 
@@ -51,7 +51,6 @@ public:
     HashEngines["md4"]        = HashEnginePtr(new hash_md4());
     HashEngines["md5"]        = HashEnginePtr(new hash_md5());
     HashEngines["sha1"]       = HashEnginePtr(new hash_sha1());
-    HashEngines["sha224"]     = HashEnginePtr(new hash_sha224());
     HashEngines["sha256"]     = HashEnginePtr(new hash_sha256());
     HashEngines["sha384"]     = HashEnginePtr(new hash_sha384());
     HashEngines["sha512"]     = HashEnginePtr(new hash_sha512());
@@ -86,10 +85,6 @@ public:
     HashEngines["haval192,5"] = HashEnginePtr(new hash_haval(5,192));
     HashEngines["haval224,5"] = HashEnginePtr(new hash_haval(5,224));
     HashEngines["haval256,5"] = HashEnginePtr(new hash_haval(5,256));
-    HashEngines["fnv132"]     = HashEnginePtr(new hash_fnv132(false));
-    HashEngines["fnv1a32"]    = HashEnginePtr(new hash_fnv132(true));
-    HashEngines["fnv164"]     = HashEnginePtr(new hash_fnv164(false));
-    HashEngines["fnv1a64"]    = HashEnginePtr(new hash_fnv164(true));
   }
 };
 

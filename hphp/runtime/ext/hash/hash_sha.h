@@ -35,22 +35,11 @@ public:
 
 class hash_sha256 : public HashEngine {
 public:
-  explicit hash_sha256(int size = 32);
+  hash_sha256();
 
   virtual void hash_init(void *context);
   virtual void hash_update(void *context, const unsigned char *buf,
                            unsigned int count);
-  virtual void hash_final(unsigned char *digest, void *context);
-};
-
-/* sha224 is just sha256 with a different initial vector
- * and a truncated output.
- */
-class hash_sha224 : public hash_sha256 {
-public:
-  hash_sha224() : hash_sha256(28) {}
-
-  virtual void hash_init(void *context);
   virtual void hash_final(unsigned char *digest, void *context);
 };
 

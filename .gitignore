@@ -34,10 +34,6 @@ hphp.log
 /hphp/hphp_build_info.cpp
 /hphp/hphp_repo_schema.h
 
-
-/hphp/hphpi/gen
-/hphp/hphpi/hphpi
-
 /hphp/hhvm/gen
 /hphp/hhvm/hhvm
 

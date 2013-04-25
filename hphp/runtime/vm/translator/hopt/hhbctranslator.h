@@ -350,6 +350,11 @@ struct HhbcTranslator {
     return m_tb->genDefConst(val);
   }
 
+  template<class... Args>
+  SSATmp* gen(Args&&... args) {
+    return m_tb->gen(std::forward<Args>(args)...);
+  }
+
   // tracelet guards
   Trace* guardTypeStack(uint32_t stackIndex,
                         Type type,
@@ -464,6 +469,11 @@ private:
     template<typename T>
     SSATmp* cns(T val) {
       return m_tb.genDefConst(val);
+    }
+
+    template<class... Args>
+    SSATmp* gen(Args&&... args) {
+      return m_tb.gen(std::forward<Args>(args)...);
     }
 
     const Transl::NormalizedInstruction& m_ni;

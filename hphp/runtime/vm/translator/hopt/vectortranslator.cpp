@@ -287,7 +287,7 @@ SSATmp* HhbcTranslator::VectorTranslator::genStk(Opcode opc, Srcs... srcs) {
     }
   }
 
-  return m_tb.gen(opc, srcs...);
+  return gen(opc, srcs...);
 }
 
 void HhbcTranslator::VectorTranslator::emit() {
@@ -305,9 +305,9 @@ void HhbcTranslator::VectorTranslator::emit() {
 // a null pointer if it's not needed.
 SSATmp* HhbcTranslator::VectorTranslator::genMisPtr() {
   if (m_needMIS) {
-    return m_tb.gen(LdAddr, m_misBase, cns(kReservedRSPSpillSpace));
+    return gen(LdAddr, m_misBase, cns(kReservedRSPSpillSpace));
   } else {
-    return m_tb.gen(DefConst, Type::PtrToCell, ConstData(nullptr));
+    return gen(DefConst, Type::PtrToCell, ConstData(nullptr));
   }
 }
 
@@ -396,12 +396,12 @@ void HhbcTranslator::VectorTranslator::emitMPre() {
   }
 
   if (m_needMIS) {
-    m_misBase = m_tb.gen(DefMIStateBase);
+    m_misBase = gen(DefMIStateBase);
     SSATmp* uninit = m_tb.genDefUninit();
 
     if (nLogicalRatchets() > 0) {
-      m_tb.gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef)), uninit);
-      m_tb.gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef2)), uninit);
+      gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef)), uninit);
+      gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef2)), uninit);
     }
   }
 
@@ -450,7 +450,7 @@ void HhbcTranslator::VectorTranslator::emitMTrace() {
     separator = " ";
   }
   shape << '>';
-  m_tb.gen(IncStatGrouped,
+  gen(IncStatGrouped,
            cns(StringData::GetStaticString("vector instructions")),
            cns(StringData::GetStaticString(shape.str())),
            cns(1));
@@ -496,7 +496,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getKey() {
   auto keyType = key->type();
   assert(keyType.isBoxed() || keyType.notBoxed());
   if (keyType.isBoxed()) {
-    key = m_tb.gen(LdRef, Type::Cell, key);
+    key = gen(LdRef, Type::Cell, key);
   }
   return key;
 }
@@ -541,7 +541,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
       return cns(l.offset);
 
     case Location::This:
-      return m_tb.gen(LdThis, m_tb.getFp());
+      return gen(LdThis, m_tb.getFp());
 
     default: not_reached();
   }
@@ -558,7 +558,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
     if (baseType.subtypeOf(Type::Uninit)) {
       if (mia & MIA_warn) {
         m_ht.exceptionBarrier();
-        m_tb.gen(RaiseUninitLoc, LocalId(base.location.offset));
+        gen(RaiseUninitLoc, LocalId(base.location.offset));
       }
       if (mia & MIA_define) {
         m_tb.genStLoc(base.location.offset, m_tb.genDefInitNull(),
@@ -579,7 +579,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
        mcodeMaybePropName(m_ni.immVecM[0])) ||
       isSimpleArrayOp()) {
     // In these cases we can pass the base by value, after unboxing if needed.
-    m_base = m_tb.gen(Unbox, failedRef, getBase());
+    m_base = gen(Unbox, failedRef, getBase());
     assert(m_base->isA(baseType.unbox()));
   } else {
     // Everything else is passed by reference. We don't have to worry about
@@ -588,7 +588,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
       SSATmp* box = getBase();
       assert(box->isA(Type::BoxedCell));
       // Guard that the inner type hasn't changed
-      m_tb.gen(LdRef, baseType.innerType(), failedRef, box);
+      gen(LdRef, baseType.innerType(), failedRef, box);
     }
 
     if (base.location.space == Location::Local) {
@@ -630,7 +630,7 @@ bool HhbcTranslator::VectorTranslator::isSingleMember() {
 }
 
 void HhbcTranslator::VectorTranslator::emitBaseH() {
-  m_base = m_tb.gen(LdThis, m_tb.getFp());
+  m_base = gen(LdThis, m_tb.getFp());
 }
 
 void HhbcTranslator::VectorTranslator::emitBaseN() {
@@ -691,7 +691,7 @@ void HhbcTranslator::VectorTranslator::emitBaseG() {
   OpFunc opFunc = opFuncs[mia & MIA_base];
   SSATmp* gblName = getBase();
   m_ht.exceptionBarrier();
-  m_base = m_tb.gen(BaseG,
+  m_base = gen(BaseG,
                     m_tb.genDefConst((TCA)opFunc),
                     gblName,
                     genMisPtr());
@@ -701,7 +701,7 @@ void HhbcTranslator::VectorTranslator::emitBaseS() {
   const int kClassIdx = m_ni.inputs.size() - 1;
   SSATmp* key = getKey();
   SSATmp* clsRef = getInput(kClassIdx);
-  m_base = m_tb.gen(LdClsPropAddr,
+  m_base = gen(LdClsPropAddr,
                     clsRef,
                     key,
                     CTX());
@@ -798,7 +798,7 @@ void HhbcTranslator::VectorTranslator::emitPropGeneric() {
   if (mia & Define) {
     m_base = genStk(PropDX, cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
   } else {
-    m_base = m_tb.gen(PropX, cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
+    m_base = gen(PropX, cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
   }
 }
 #undef HELPER_TABLE
@@ -832,7 +832,7 @@ SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
 
   return m_tb.cond(m_ht.getCurFunc(),
     [&] (Block* taken) {
-      m_tb.gen(CheckInitMem, taken, propAddr, cns(0));
+      gen(CheckInitMem, taken, propAddr, cns(0));
     },
     [&] { // Next: Property isn't Uninit. Do nothing.
       return propAddr;
@@ -843,10 +843,10 @@ SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
       m_tb.hint(Block::Unlikely);
       if (doWarn && wantPropSpecializedWarnings()) {
         // We did the exceptionBarrier for this back in emitMPre.
-        m_tb.gen(RaiseUndefProp, baseAsObj, key);
+        gen(RaiseUndefProp, baseAsObj, key);
       }
       if (doDefine) {
-        m_tb.gen(
+        gen(
           StProp,
           baseAsObj,
           cns(propInfo.offset),
@@ -884,19 +884,19 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
    * check against null here in the intermediate cases.
    */
   if (m_base->isA(Type::Obj)) {
-    SSATmp* propAddr = m_tb.gen(LdPropAddr, m_base, cns(propInfo.offset));
+    SSATmp* propAddr = gen(LdPropAddr, m_base, cns(propInfo.offset));
     m_base = checkInitProp(m_base, propAddr, propInfo, doWarn, doDefine);
   } else {
     SSATmp* baseAsObj = nullptr;
     m_base = m_tb.cond(m_ht.getCurFunc(),
       [&] (Block* taken) {
         // baseAsObj is only available in the Next branch
-        baseAsObj = m_tb.gen(LdMem, Type::Obj, taken, m_base, cns(0));
+        baseAsObj = gen(LdMem, Type::Obj, taken, m_base, cns(0));
       },
       [&] { // Next: Base is an object. Load property address and
             // check for uninit
         return checkInitProp(baseAsObj,
-                             m_tb.gen(LdPropAddr, baseAsObj,
+                             gen(LdPropAddr, baseAsObj,
                                                   cns(propInfo.offset)),
                              propInfo,
                              doWarn,
@@ -905,7 +905,7 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
       [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
         m_tb.hint(Block::Unlikely);
         if (doWarn) {
-          m_tb.gen(WarnNonObjProp);
+          gen(WarnNonObjProp);
         }
         if (doDefine) {
           /*
@@ -929,7 +929,7 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
            *   #1789661 (this can cause bugs if bytecode.cpp promotes)
            *   #1124706 (we want to get rid of stdClass promotion in general)
            */
-          m_tb.gen(ThrowNonObjProp);
+          gen(ThrowNonObjProp);
         }
         return initNull;
       }
@@ -1002,7 +1002,7 @@ void HhbcTranslator::VectorTranslator::emitElem() {
     Type baseType = m_base->type().strip();
     if (baseType.subtypeOf(Type::Str)) {
       m_ht.exceptionBarrier();
-      m_tb.gen(
+      gen(
         RaiseError,
         cns(StringData::GetStaticString(Strings::OP_NOT_SUPPORTED_STRING))
       );
@@ -1022,7 +1022,7 @@ void HhbcTranslator::VectorTranslator::emitElem() {
     m_base = genStk(define ? ElemDX : ElemUX, cns((TCA)opFunc), m_base,
                     key, genMisPtr());
   } else {
-    m_base = m_tb.gen(ElemX, cns((TCA)opFunc), m_base, key, genMisPtr());
+    m_base = gen(ElemX, cns((TCA)opFunc), m_base, key, genMisPtr());
   }
 }
 #undef HELPER_TABLE
@@ -1038,25 +1038,25 @@ void HhbcTranslator::VectorTranslator::emitRatchetRefs() {
 
   m_base = m_tb.cond(m_ht.getCurFunc(),
     [&] (Block* taken) {
-      m_tb.gen(CheckInitMem, taken, m_misBase, cns(HHIR_MISOFF(tvRef)));
+      gen(CheckInitMem, taken, m_misBase, cns(HHIR_MISOFF(tvRef)));
     },
     [&] { // Next: tvRef isn't Uninit. Ratchet the refs
       // Clean up tvRef2 before overwriting it.
       if (ratchetInd() > 0) {
-        m_tb.gen(DecRefMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef2)));
+        gen(DecRefMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef2)));
       }
       // Copy tvRef to tvRef2. Use mmx at some point
-      SSATmp* tvRef = m_tb.gen(
+      SSATmp* tvRef = gen(
         LdMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef))
       );
-      m_tb.gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef2)), tvRef);
+      gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef2)), tvRef);
 
       // Reset tvRef.
-      m_tb.gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef)), m_tb.genDefUninit());
+      gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef)), m_tb.genDefUninit());
 
       // Adjust base pointer.
       assert(m_base->type().isPtr());
-      return m_tb.gen(LdAddr, m_misBase, cns(HHIR_MISOFF(tvRef2)));
+      return gen(LdAddr, m_misBase, cns(HHIR_MISOFF(tvRef2)));
     },
     [&] { // Taken: tvRef is Uninit. Do nothing.
       return m_base;
@@ -1144,9 +1144,9 @@ void HhbcTranslator::VectorTranslator::emitCGetProp() {
                                             m_mii, m_mInd, m_iInd);
   if (propInfo.offset != -1) {
     emitPropSpecialized(MIA_warn, propInfo);
-    SSATmp* cellPtr = m_tb.gen(UnboxPtr, m_base);
-    SSATmp* propVal = m_tb.gen(LdMem, Type::Cell, cellPtr, cns(0));
-    m_result = m_tb.gen(IncRef, propVal);
+    SSATmp* cellPtr = gen(UnboxPtr, m_base);
+    SSATmp* propVal = gen(LdMem, Type::Cell, cellPtr, cns(0));
+    m_result = gen(IncRef, propVal);
     return;
   }
 
@@ -1154,7 +1154,7 @@ void HhbcTranslator::VectorTranslator::emitCGetProp() {
   SSATmp* key = getKey();
   BUILD_OPTAB_HOT(getKeyTypeS(key), m_base->isA(Type::Obj));
   m_ht.exceptionBarrier();
-  m_result = m_tb.gen(CGetProp, cns((TCA)opFunc), CTX(),
+  m_result = gen(CGetProp, cns((TCA)opFunc), CTX(),
                       m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
@@ -1235,7 +1235,7 @@ void HhbcTranslator::VectorTranslator::emitIssetEmptyProp(bool isEmpty) {
   typedef uint64_t (*OpFunc)(Class*, TypedValue*, TypedValue);
   BUILD_OPTAB(isEmpty, m_base->isA(Type::Obj));
   m_ht.exceptionBarrier();
-  m_result = m_tb.gen(isEmpty ? EmptyProp : IssetProp, cns((TCA)opFunc),
+  m_result = gen(isEmpty ? EmptyProp : IssetProp, cns((TCA)opFunc),
                       CTX(), m_base, key);
 }
 #undef HELPER_TABLE
@@ -1278,11 +1278,11 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
                                             m_mii, m_mInd, m_iInd);
   if (propInfo.offset != -1) {
     emitPropSpecialized(MIA_define, propInfo);
-    SSATmp* cellPtr = m_tb.gen(UnboxPtr, m_base);
-    SSATmp* oldVal = m_tb.gen(LdMem, Type::Cell, cellPtr, cns(0));
+    SSATmp* cellPtr = gen(UnboxPtr, m_base);
+    SSATmp* oldVal = gen(LdMem, Type::Cell, cellPtr, cns(0));
     // The object owns a reference now
-    SSATmp* increffed = m_tb.gen(IncRef, value);
-    m_tb.gen(StMem, cellPtr, cns(0), value);
+    SSATmp* increffed = gen(IncRef, value);
+    gen(StMem, cellPtr, cns(0), value);
     m_tb.genDecRef(oldVal);
     m_result = increffed;
     return;
@@ -1338,7 +1338,7 @@ void HhbcTranslator::VectorTranslator::emitSetOpProp() {
 # define SETOP_OP(op, bcOp) HELPER_TABLE(FILL_ROW, op)
   BUILD_OPTAB_ARG(SETOP_OPS, op, m_base->isA(Type::Obj));
 # undef SETOP_OP
-  m_tb.gen(StRaw, m_misBase, cns(RawMemSlot::MisCtx), CTX());
+  gen(StRaw, m_misBase, cns(RawMemSlot::MisCtx), CTX());
   m_ht.exceptionBarrier();
   m_result =
     genStk(SetOpProp, cns((TCA)opFunc), m_base, key, value, genMisPtr());
@@ -1450,7 +1450,7 @@ void HhbcTranslator::VectorTranslator::emitUnsetProp() {
 
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue);
   BUILD_OPTAB(m_base->isA(Type::Obj));
-  m_tb.gen(UnsetProp, cns((TCA)opFunc), CTX(), m_base, key);
+  gen(UnsetProp, cns((TCA)opFunc), CTX(), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1517,7 +1517,7 @@ void HhbcTranslator::VectorTranslator::emitArrayGet(SSATmp* key) {
   typedef TypedValue (*OpFunc)(ArrayData*, TypedValue*);
   BUILD_OPTAB_HOT(keyType, checkForInt);
   assert(m_base->isA(Type::Arr));
-  m_result = m_tb.gen(ArrayGet, cns((TCA)opFunc), m_base, key);
+  m_result = gen(ArrayGet, cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1564,7 +1564,7 @@ void HhbcTranslator::VectorTranslator::emitCGetElem() {
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeIS(key));
   m_ht.exceptionBarrier();
-  m_result = m_tb.gen(CGetElem, cns((TCA)opFunc),
+  m_result = gen(CGetElem, cns((TCA)opFunc),
                       m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
@@ -1649,7 +1649,7 @@ void HhbcTranslator::VectorTranslator::emitIssetEmptyElem(bool isEmpty) {
   typedef uint64_t (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
   BUILD_OPTAB_HOT(getKeyTypeIS(key), isEmpty);
   m_ht.exceptionBarrier();
-  m_result = m_tb.gen(isEmpty ? EmptyElem : IssetElem,
+  m_result = gen(isEmpty ? EmptyElem : IssetElem,
                       cns((TCA)opFunc), m_base, key, genMisPtr());
 }
 #undef HELPER_TABLE
@@ -1698,7 +1698,7 @@ void HhbcTranslator::VectorTranslator::emitArrayIsset() {
   BUILD_OPTAB(keyType, checkForInt);
   assert(m_base->isA(Type::Arr));
   m_ht.exceptionBarrier();
-  m_result = m_tb.gen(ArrayIsset, cns((TCA)opFunc), m_base, key);
+  m_result = gen(ArrayIsset, cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1782,11 +1782,11 @@ void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
     assert(base.location.space == Location::Local ||
            base.location.space == Location::Stack);
     SSATmp* box = getInput(baseStkIdx);
-    m_tb.gen(ArraySetRef, cns((TCA)opFunc), m_base, key, value, box);
+    gen(ArraySetRef, cns((TCA)opFunc), m_base, key, value, box);
     // Unlike the non-ref case, we don't need to do anything to the stack
     // because any load of the box will be guarded.
   } else {
-    SSATmp* newArr = m_tb.gen(ArraySet, cns((TCA)opFunc), m_base, key, value);
+    SSATmp* newArr = gen(ArraySet, cns((TCA)opFunc), m_base, key, value);
 
     // Update the base's value with the new array
     if (base.location.space == Location::Local) {
@@ -1971,7 +1971,7 @@ void HhbcTranslator::VectorTranslator::emitUnsetElem() {
   Type baseType = m_base->type().strip();
   if (baseType.subtypeOf(Type::Str)) {
     m_ht.exceptionBarrier();
-    m_tb.gen(RaiseError,
+    gen(RaiseError,
              cns(StringData::GetStaticString(Strings::CANT_UNSET_STRING)));
     return;
   }
@@ -1998,7 +1998,7 @@ void HhbcTranslator::VectorTranslator::emitVGetNewElem() {
 void HhbcTranslator::VectorTranslator::emitSetNewElem() {
   SSATmp* value = getValue();
   m_ht.exceptionBarrier();
-  SSATmp* result = m_tb.gen(SetNewElem, m_base, value);
+  SSATmp* result = gen(SetNewElem, m_base, value);
   VectorEffects ve(result->inst());
   m_result = ve.valTypeChanged ? result : value;
 }
@@ -2058,10 +2058,10 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
 
   // Clean up tvRef(2)
   if (nLogicalRatchets() > 1) {
-    m_tb.gen(DecRefMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef2)));
+    gen(DecRefMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef2)));
   }
   if (nLogicalRatchets() > 0) {
-    m_tb.gen(DecRefMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef)));
+    gen(DecRefMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef)));
   }
 }
 

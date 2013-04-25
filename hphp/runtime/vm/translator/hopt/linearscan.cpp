@@ -323,10 +323,6 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   if (dsts.empty()) return;
 
   Opcode opc = inst->getOpcode();
-  if (opc == DefFP || opc == FreeActRec) {
-    allocRegToTmp(&m_regs[int(rVmFp)], &dsts[0], 0);
-    return;
-  }
   if (opc == DefMIStateBase) {
     assert(dsts[0].isA(Type::PtrToCell));
     allocRegToTmp(&m_regs[int(rsp)], &dsts[0], 0);
@@ -335,20 +331,27 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
 
   for (SSATmp& dst : dsts) {
     for (int i = 0, n = dst.numNeededRegs(); i < n; ++i) {
-      if (dst.isA(Type::StkPtr) && opc != LdRaw) {
-        assert(opc == DefSP || opc == Call || opc == SpillStack ||
-               opc == RetAdjustStack ||
-               opc == NewObj || opc == NewObjCached ||
-               opc == NewObjNoCtorCached ||
-               opc == InterpOne || opc == GenericRetDecRefs ||
-               opc == GuardStk || opc == AssertStk || opc == CastStk ||
-               VectorEffects::supported(opc));
-        allocRegToTmp(&m_regs[int(rVmSp)], &dst, 0);
-        continue;
-      }
-
       // LdRaw, loading a generator's embedded AR, is the only time we have a
       // pointer to an AR that is not in rVmFp or rVmSp.
+      if (opc != LdRaw) {
+        if (dst.isA(Type::StkPtr)) {
+          assert(opc == DefSP || opc == Call || opc == SpillStack ||
+                 opc == RetAdjustStack ||
+                 opc == NewObj || opc == NewObjCached ||
+                 opc == NewObjNoCtorCached ||
+                 opc == InterpOne || opc == GenericRetDecRefs ||
+                 opc == GuardStk || opc == AssertStk || opc == CastStk ||
+                 VectorEffects::supported(opc));
+          allocRegToTmp(&m_regs[int(rVmSp)], &dst, 0);
+          continue;
+        }
+        if (dst.isA(Type::FramePtr)) {
+          assert(opc == DefFP || opc == FreeActRec);
+          allocRegToTmp(&m_regs[int(rVmFp)], &dst, 0);
+          continue;
+        }
+      }
+
       assert(!dst.isA(Type::StkPtr) ||
              (opc == LdRaw &&
               inst->getSrc(1)->getValInt() == RawMemSlot::ContARPtr));

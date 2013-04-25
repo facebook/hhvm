@@ -108,7 +108,7 @@ private:
   void computeLiveRegs();
 
   template<typename T> SSATmp* cns(T val) {
-    return m_irFactory->defConst(val);
+    return m_irFactory->cns(val);
   }
   void initFreeList();
   void coalesce(Trace* trace);

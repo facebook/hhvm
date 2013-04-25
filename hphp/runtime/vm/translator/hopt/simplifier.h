@@ -99,7 +99,7 @@ private:
   SSATmp* simplifyExitOnVarEnv(IRInstruction*);
 
 private: // tracebuilder forwarders
-  template<class T> SSATmp* cns(T);
+  template<class... Args> SSATmp* cns(Args&&...);
   template<class... Args> SSATmp* gen(Args&&...);
 
 private:

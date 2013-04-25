@@ -54,7 +54,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   FTRACE(2, "TraceBuilder: initial sp offset {}\n", initialSpOffsetFromFp);
 
   // put a function marker at the start of trace
-  m_curFunc = genDefConst<const Func*>(func);
+  m_curFunc = cns(func);
   if (RuntimeOption::EvalHHIRGenOpts) {
     m_enableCse = RuntimeOption::EvalHHIRCse;
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
@@ -71,8 +71,8 @@ TraceBuilder::~TraceBuilder() {
 }
 
 void TraceBuilder::genSetPropCell(SSATmp* base, int64_t offset, SSATmp* value) {
-  SSATmp* oldVal = gen(LdProp, Type::Cell, base, genDefConst(offset));
-  gen(StProp, base, genDefConst(offset), value);
+  SSATmp* oldVal = gen(LdProp, Type::Cell, base, cns(offset));
+  gen(StProp, base, cns(offset), value);
   genDecRef(oldVal);
 }
 
@@ -152,7 +152,7 @@ Trace* TraceBuilder::genExitGuardFailure(uint32_t bcOff) {
   marker.func     = m_curFunc->getValFunc();
   gen(Marker, marker); // goes on main trace
 
-  SSATmp* pc = genDefConst((int64_t)bcOff);
+  SSATmp* pc = cns((int64_t)bcOff);
   // TODO change exit trace to a control flow instruction that
   // takes sp, fp, and a Marker as the target label instruction
   trace->back()->push_back(
@@ -184,7 +184,7 @@ void TraceBuilder::genTraceEnd(uint32_t nextPc,
                                TraceExitType::ExitType exitType /* = Normal */) {
   gen(getExitOpcode(TraceExitType::Normal),
       m_curFunc,
-      genDefConst<int64_t>(nextPc),
+      cns(nextPc),
       m_spValue,
       m_fpValue);
 }
@@ -212,7 +212,7 @@ Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
   if (numOpnds != 0 || stackDeficit != 0) {
     SSATmp* srcs[numOpnds + 2];
     srcs[0] = m_spValue;
-    srcs[1] = genDefConst<int64_t>(stackDeficit);
+    srcs[1] = cns(stackDeficit);
     std::copy(opnds, opnds + numOpnds, srcs + 2);
 
     SSATmp** decayedPtr = srcs;
@@ -223,10 +223,10 @@ Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
     sp = spillInst->getDst();
     exitTrace->back()->push_back(spillInst);
   }
-  SSATmp* pc = genDefConst<int64_t>(bcOff);
+  SSATmp* pc = cns(int64_t(bcOff));
   if (exitType == TraceExitType::NormalCc) {
     assert(notTakenBcOff != 0);
-    SSATmp* notTakenPC = genDefConst(notTakenBcOff);
+    SSATmp* notTakenPC = cns(notTakenBcOff);
     genFor(exitTrace, getExitOpcode(exitType),
            m_curFunc,
            pc, sp, m_fpValue,
@@ -242,7 +242,7 @@ Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
 
 SSATmp* TraceBuilder::genNot(SSATmp* src) {
   assert(src->type() == Type::Bool);
-  return genConvToBool(gen(OpXor, src, genDefConst<int64_t>(1)));
+  return genConvToBool(gen(OpXor, src, cns(1)));
 }
 
 SSATmp* TraceBuilder::genDefUninit() {
@@ -274,7 +274,7 @@ SSATmp* TraceBuilder::genConvToBool(SSATmp* src) {
   if (fromType.isBool()) {
     return src;
   } else if (fromType.isNull()) {
-    return genDefConst(false);
+    return cns(false);
   } else if (fromType.isArray()) {
     return gen(ConvArrToBool, src);
   } else if (fromType.isDbl()) {
@@ -285,7 +285,7 @@ SSATmp* TraceBuilder::genConvToBool(SSATmp* src) {
     return gen(ConvStrToBool, src);
   } else if (fromType.isObj()) {
     // If a value is known to be an object, it is known to be non null.
-    return genDefConst(true);
+    return cns(true);
   } else {
     return gen(ConvCellToBool, src);
   }
@@ -367,7 +367,7 @@ SSATmp* TraceBuilder::genLdLoc(uint32_t id) {
   assert(type != Type::None); // tracelet guards guarantee we have a type
   assert(type != Type::Null); // we can get Uninit or InitNull but not both
   if (type.isNull()) {
-    tmp = genDefConst(type);
+    tmp = cns(type);
   } else {
     tmp = gen(LdLoc, type, LocalId(id), m_fpValue);
   }
@@ -677,7 +677,7 @@ void TraceBuilder::genAssertStk(uint32_t id, Type type) {
   }
 
   if (knownType == Type::None || type.strictSubtypeOf(knownType)) {
-    gen(AssertStk, type, m_spValue, genDefConst<int64_t>(id));
+    gen(AssertStk, type, m_spValue, cns(id));
   }
 }
 
@@ -686,7 +686,7 @@ SSATmp* TraceBuilder::genCastStk(uint32_t id, Type type) {
   Type knownType = Type::None;
   getStackValue(m_spValue, id, spansCall, knownType);
   if (knownType.subtypeOf(Type::None) || !knownType.subtypeOf(type)) {
-    SSATmp* off = genDefConst<int>(id);
+    SSATmp* off = cns(id);
     gen(CastStk, m_spValue, off);
     IRInstruction* inst = m_spValue->inst();
     inst->setTypeParam(type);
@@ -701,7 +701,7 @@ SSATmp* TraceBuilder::genLdStackAddr(SSATmp* sp, int64_t index) {
   type = noneToGen(type);
   assert(IMPLIES(val != nullptr, val->type().equals(type)));
   assert(type.notPtr());
-  return gen(LdStackAddr, type.ptr(), sp, genDefConst(index));
+  return gen(LdStackAddr, type.ptr(), sp, cns(index));
 }
 
 SSATmp* TraceBuilder::genCallBuiltin(SSATmp* func,
@@ -726,7 +726,7 @@ void TraceBuilder::genDecRefStack(Type type, uint32_t stackOff) {
     if (knownType != Type::None) {
       type = Type::mostRefined(type, knownType);
     }
-    gen(DecRefStack, type, m_spValue, genDefConst<int64_t>(stackOff));
+    gen(DecRefStack, type, m_spValue, cns(int64_t(stackOff)));
   } else {
     genDecRef(tmp);
   }
@@ -761,7 +761,7 @@ SSATmp* TraceBuilder::genSpillStack(uint32_t stackAdjustment,
 
   SSATmp* srcs[numOpnds + 2];
   srcs[0] = m_spValue;
-  srcs[1] = genDefConst<int64_t>(stackAdjustment);
+  srcs[1] = cns(int64_t(stackAdjustment));
   std::copy(spillOpnds, spillOpnds + numOpnds, srcs + 2);
   SSATmp** decayedPtr = srcs;
   return gen(SpillStack, std::make_pair(numOpnds + 2, decayedPtr));
@@ -781,7 +781,7 @@ SSATmp* TraceBuilder::genLdStack(int32_t stackOff, Type type) {
     return gen(LdStack,
                type,
                m_spValue,
-               genDefConst<int64_t>(stackOff));
+               cns(int64_t(stackOff)));
   }
   return tmp;
 }
@@ -991,7 +991,7 @@ void TraceBuilder::beginInlining(const Func* target,
   m_fpValue         = calleeFP;
   m_spValue         = calleeSP;
   m_thisIsAvailable = target->cls() != nullptr;
-  m_curFunc         = genDefConst(target);
+  m_curFunc         = cns(target);
 
   /*
    * Keep the outer locals somewhere for isValueAvailable() to know

@@ -345,16 +345,6 @@ struct HhbcTranslator {
   void emitIncStat(int32_t counter, int32_t value, bool force = false);
   void emitIncTransCounter();
 
-  template<typename T>
-  SSATmp* cns(T val) {
-    return m_tb->genDefConst(val);
-  }
-
-  template<class... Args>
-  SSATmp* gen(Args&&... args) {
-    return m_tb->gen(std::forward<Args>(args)...);
-  }
-
   // tracelet guards
   Trace* guardTypeStack(uint32_t stackIndex,
                         Type type,
@@ -466,9 +456,9 @@ private:
     unsigned nLogicalRatchets() const;
     int ratchetInd() const;
 
-    template<typename T>
-    SSATmp* cns(T val) {
-      return m_tb.genDefConst(val);
+    template<class... Args>
+    SSATmp* cns(Args&&... args) {
+      return m_tb.cns(std::forward<Args>(args)...);
     }
 
     template<class... Args>
@@ -492,6 +482,18 @@ private:
     SSATmp* m_result;
   };
 
+private: // tracebuilder forwarding utilities
+  template<class... Args>
+  SSATmp* cns(Args&&... args) {
+    return m_tb->cns(std::forward<Args>(args)...);
+  }
+
+  template<class... Args>
+  SSATmp* gen(Args&&... args) {
+    return m_tb->gen(std::forward<Args>(args)...);
+  }
+
+private:
   /*
    * Emit helpers.
    */

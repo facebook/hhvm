@@ -186,16 +186,16 @@ public:
                    TraceExitType::ExitType exitType = TraceExitType::Normal);
 
   template<typename T>
-  SSATmp* genDefConst(T val) {
+  SSATmp* cns(T val) {
     return gen(DefConst, typeForConst(val), ConstData(val));
   }
 
   template<typename T>
-  SSATmp* genDefConst(T val, Type type) {
+  SSATmp* cns(T val, Type type) {
     return gen(DefConst, type, ConstData(val));
   }
 
-  SSATmp* genDefConst(Type t) {
+  SSATmp* cns(Type t) {
     return gen(DefConst, t, ConstData(0));
   }
 

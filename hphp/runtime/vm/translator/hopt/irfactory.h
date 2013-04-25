@@ -221,7 +221,7 @@ public:
    */
   IRInstruction* defLabel();
   IRInstruction* defLabel(unsigned numDst);
-  template<typename T> SSATmp* defConst(T val) {
+  template<typename T> SSATmp* cns(T val) {
     ConstData cdata(val);
     return findConst(cdata, typeForConst(val));
   }

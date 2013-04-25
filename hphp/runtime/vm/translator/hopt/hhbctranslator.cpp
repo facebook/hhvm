@@ -471,7 +471,7 @@ void HhbcTranslator::emitColAddNewElemC() {
 
 void HhbcTranslator::emitCns(uint32_t id) {
   StringData* name = curUnit()->lookupLitstrId(id);
-  SSATmp* cnsNameTmp = m_tb->genDefConst(name);
+  SSATmp* cnsNameTmp = cns(name);
   const TypedValue* tv = Unit::lookupPersistentCns(name);
   SSATmp* result = nullptr;
   Type cnsType = Type::Cell;
@@ -482,17 +482,17 @@ void HhbcTranslator::emitCns(uint32_t id) {
         result = gen(LookupCns, cnsType, cnsNameTmp);
         break;
       case KindOfBoolean:
-        result = m_tb->genDefConst((bool)tv->m_data.num);
+        result = cns((bool)tv->m_data.num);
         break;
       case KindOfInt64:
-        result = m_tb->genDefConst(tv->m_data.num);
+        result = cns(tv->m_data.num);
         break;
       case KindOfDouble:
-        result = m_tb->genDefConst(tv->m_data.dbl);
+        result = cns(tv->m_data.dbl);
         break;
       case KindOfString:
       case KindOfStaticString:
-        result = m_tb->genDefConst(tv->m_data.pstr);
+        result = cns(tv->m_data.pstr);
         break;
       default:
         not_reached();
@@ -753,8 +753,7 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
   if (getCurFunc()->isClosureBody() || getCurFunc()->isGeneratorFromClosure()) {
     box = gen(StaticLocInit, cns(name), m_tb->getFp(), value);
   } else {
-    SSATmp* ch =
-      m_tb->genDefConst(TargetCache::allocStatic(), Type::CacheHandle);
+    SSATmp* ch = cns(TargetCache::allocStatic(), Type::CacheHandle);
     SSATmp* cachedBox = nullptr;
     box = m_tb->cond(getCurFunc(),
       [&](Block* taken) {

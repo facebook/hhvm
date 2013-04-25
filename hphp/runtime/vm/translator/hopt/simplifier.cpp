@@ -58,8 +58,8 @@ void copyProp(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class T> SSATmp* Simplifier::cns(T cns) {
-  return m_tb->genDefConst(cns);
+template<class... Args> SSATmp* Simplifier::cns(Args&&... cns) {
+  return m_tb->cns(std::forward<Args>(cns)...);
 }
 
 template<class... Args> SSATmp* Simplifier::gen(Args&&... args) {

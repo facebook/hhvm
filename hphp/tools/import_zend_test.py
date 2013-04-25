@@ -512,6 +512,10 @@ def walk(filename, source):
         test = test.replace('31337', '31338')
     if '/ext-standard-file/fpassthru_variation.php' in full_dest_filename:
         test = test.replace('passthru.tmp', 'fpassthru_variation.tmp')
+    if '/ext-spl/SplFileInfo_getPerms_basic.php' in full_dest_filename:
+        test = test.replace('test_file_ptfi', 'SplFileInfo_getPerms_basic.txt')
+    if '/ext-spl/SplFileInfo_getInode_basic.php' in full_dest_filename:
+        test = test.replace('test_file_ptfi', 'SplFileInfo_getInode_basic.txt')
 
     file(full_dest_filename, 'w').write(test)
 

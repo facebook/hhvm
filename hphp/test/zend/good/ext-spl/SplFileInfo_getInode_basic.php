@@ -1,11 +1,11 @@
 <?php
 
 //file
-touch ('test_file_ptfi');
-$fileInfo = new SplFileInfo('test_file_ptfi');
-$result = shell_exec('ls -i test_file_ptfi');
+touch ('SplFileInfo_getInode_basic.txt');
+$fileInfo = new SplFileInfo('SplFileInfo_getInode_basic.txt');
+$result = shell_exec('ls -i SplFileInfo_getInode_basic.txt');
 var_dump($fileInfo->getInode() == $result);
 
 ?><?php
-unlink('test_file_ptfi');
+unlink('SplFileInfo_getInode_basic.txt');
 ?>

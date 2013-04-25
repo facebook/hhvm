@@ -186,7 +186,6 @@ struct TraceBuilder {
   //////////////////////////////////////////////////////////////////////
   // stack
 
-  void    genAssertStk(uint32_t id, Type type);
   SSATmp* genSpillStack(uint32_t stackAdjustment,
                         uint32_t numOpnds,
                         SSATmp** opnds);
@@ -233,7 +232,6 @@ struct TraceBuilder {
   // TODO(#2058865): we should have a real not opcode
   SSATmp* genNot(SSATmp* src);
 
-  SSATmp* genCastStk(uint32_t id, Type type);
   SSATmp* genConvToBool(SSATmp* src);
 
   //////////////////////////////////////////////////////////////////////

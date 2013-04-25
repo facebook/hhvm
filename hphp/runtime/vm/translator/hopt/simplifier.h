@@ -117,6 +117,8 @@ private:
   SSATmp* simplifyCondJmp(IRInstruction*);
   SSATmp* simplifyQueryJmp(IRInstruction*);
   SSATmp* simplifyExitOnVarEnv(IRInstruction*);
+  SSATmp* simplifyCastStk(IRInstruction*);
+  SSATmp* simplifyAssertStk(IRInstruction*);
 
 private: // tracebuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);
@@ -127,6 +129,20 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Track down a value using the StkPtr chain.
+ *
+ * The spansCall parameter tracks whether the returned value's
+ * lifetime on the stack spans a call.  This search bottoms out on
+ * hitting either the initial DefSP instruction (failure), or some
+ * instruction that produced a view of the stack with the requested
+ * value.
+ */
+SSATmp* getStackValue(SSATmp* stack,
+                      uint32_t index,
+                      bool& spansCall,
+                      Type& type);
 
 /*
  * Propagate very simple copies on the given instruction.

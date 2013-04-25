@@ -1825,8 +1825,12 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
       case KindOfArray:
       case KindOfObject:
       case KindOfString:
-        m_tb->genCastStk(numArgs - i - 1,
-                         Type::fromDataType(pi.builtinType(), KindOfInvalid));
+        gen(
+          CastStk,
+          Type::fromDataType(pi.builtinType(), KindOfInvalid),
+          m_tb->getSp(),
+          cns(numArgs - i - 1)
+        );
         break;
       case KindOfDouble: not_reached();
       case KindOfUnknown: break;
@@ -2185,7 +2189,7 @@ void HhbcTranslator::checkTypeTopOfStack(Type type,
 void HhbcTranslator::assertTypeStack(uint32_t stackIndex, Type type) {
   SSATmp* tmp = m_evalStack.top(stackIndex);
   if (!tmp) {
-    m_tb->genAssertStk(stackIndex, type);
+    gen(AssertStk, type, m_tb->getSp(), cns(stackIndex));
     return;
   }
 

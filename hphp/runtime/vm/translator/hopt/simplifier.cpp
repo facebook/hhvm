@@ -29,6 +29,152 @@ namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
+//////////////////////////////////////////////////////////////////////
+
+SSATmp* getStackValue(SSATmp* sp,
+                      uint32_t index,
+                      bool& spansCall,
+                      Type& type) {
+  IRInstruction* inst = sp->inst();
+  switch (inst->op()) {
+  case DefSP:
+    return nullptr;
+
+  case ReDefGeneratorSP: {
+    auto srcInst = inst->getSrc(0)->inst();
+    assert(srcInst->op() == StashGeneratorSP);
+    return getStackValue(srcInst->getSrc(0), index, spansCall, type);
+  }
+  case ReDefSP:
+    return getStackValue(inst->getSrc(1), index, spansCall, type);
+
+  case ExceptionBarrier:
+    return getStackValue(inst->getSrc(0), index, spansCall, type);
+
+  case AssertStk:
+    // fallthrough
+  case CastStk:
+    // fallthrough
+  case GuardStk: {
+    // sp = GuardStk<T> sp, offset
+    // We don't have a value, but we may know the type due to guarding
+    // on it.
+    if (inst->getSrc(1)->getValInt() == index) {
+      type = inst->getTypeParam();
+      return nullptr;
+    }
+    return getStackValue(inst->getSrc(0),
+                         index,
+                         spansCall,
+                         type);
+  }
+
+  case Call:
+    // sp = call(actrec, bcoffset, func, args...)
+    if (index == 0) {
+      // return value from call
+      return nullptr;
+    }
+    spansCall = true;
+    // search recursively on the actrec argument
+    return getStackValue(inst->getSrc(0), // sp = actrec argument to call
+                         index -
+                           (1 /* pushed */ - kNumActRecCells /* popped */),
+                         spansCall,
+                         type);
+
+  case SpillStack: {
+    int64_t numPushed    = 0;
+    int32_t numSpillSrcs = inst->getNumSrcs() - 2;
+
+    for (int i = 0; i < numSpillSrcs; ++i) {
+      SSATmp* tmp = inst->getSrc(i + 2);
+      if (index == numPushed) {
+        if (tmp->inst()->op() == IncRef) {
+          tmp = tmp->inst()->getSrc(0);
+        }
+        type = tmp->type();
+        if (!type.equals(Type::None)) {
+          return tmp;
+        }
+      }
+      ++numPushed;
+    }
+
+    // This is not one of the values pushed onto the stack by this
+    // spillstack instruction, so continue searching.
+    SSATmp* prevSp = inst->getSrc(0);
+    int64_t numPopped = inst->getSrc(1)->getValInt();
+    return getStackValue(prevSp,
+                         // pop values pushed by spillstack
+                         index - (numPushed - numPopped),
+                         spansCall,
+                         type);
+  }
+
+  case InterpOne: {
+    SSATmp* prevSp = inst->getSrc(1);
+    int64_t spAdjustment = inst->getSrc(3)->getValInt(); // # popped - # pushed
+    Type resultType = inst->getTypeParam();
+    if (index == 0 && resultType != Type::None) {
+      type = resultType;
+      return nullptr;
+    }
+    return getStackValue(prevSp, index + spAdjustment, spansCall, type);
+  }
+
+  case SpillFrame:
+    return getStackValue(inst->getSrc(0),
+                         // pushes an ActRec
+                         index - kNumActRecCells,
+                         spansCall,
+                         type);
+
+  case NewObj:
+  case NewObjCached:
+    if (index == kNumActRecCells) {
+      // newly allocated object, which we unfortunately don't have any
+      // kind of handle to :-(
+      type = Type::Obj;
+      return nullptr;
+    }
+
+    return getStackValue(sp->inst()->getSrc(2),
+                         // NewObj pushes an object and an ActRec
+                         index - (1 + kNumActRecCells),
+                         spansCall,
+                         type);
+
+  case NewObjNoCtorCached:
+    if (index == 0) {
+      type = Type::Obj;
+      return nullptr;
+    }
+
+    return getStackValue(sp->inst()->getSrc(1),
+                         index - 1,
+                         spansCall,
+                         type);
+
+  default: {
+    SSATmp* value;
+    if (VectorEffects::getStackValue(sp->inst(), index,
+                                     value, type)) {
+      return value;
+    } else {
+      // If VectorEffects::getStackValue failed, it returns the next
+      // sp to search in value.
+      return getStackValue(value, index, spansCall, type);
+    }
+  }
+  }
+
+  // Should not get here!
+  not_reached();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 static void copyPropSrc(IRInstruction* inst, int index) {
   auto tmp     = inst->getSrc(index);
   auto srcInst = tmp->inst();
@@ -170,14 +316,14 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
 
   case LdCls:        return simplifyLdCls(inst);
   case LdThis:       return simplifyLdThis(inst);
-
   case LdCtx:        return simplifyLdCtx(inst);
   case LdClsCtx:     return simplifyLdClsCtx(inst);
   case GetCtxFwdCall:return simplifyGetCtxFwdCall(inst);
 
   case SpillStack:   return simplifySpillStack(inst);
   case Call:         return simplifyCall(inst);
-
+  case CastStk:      return simplifyCastStk(inst);
+  case AssertStk:    return simplifyAssertStk(inst);
   case ExitOnVarEnv: return simplifyExitOnVarEnv(inst);
 
   default:
@@ -1435,4 +1581,38 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   return nullptr;
 }
 
-}}} // namespace HPHP::VM::JIT
+SSATmp* Simplifier::simplifyCastStk(IRInstruction* inst) {
+  bool spansCall = false;
+  Type knownType = Type::None;
+  getStackValue(inst->getSrc(0),
+                inst->getSrc(1)->getValInt(),
+                spansCall,
+                knownType);
+  if (knownType.subtypeOf(inst->getTypeParam())) {
+    // No need to cast---the type was as good or better.
+    inst->convertToNop();
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyAssertStk(IRInstruction* inst) {
+  Type knownType = Type::None;
+  bool spansCall = false;
+  UNUSED SSATmp* tmp = getStackValue(inst->getSrc(0),
+                                     inst->getSrc(1)->getValInt(),
+                                     spansCall,
+                                     knownType);
+
+  // AssertStk indicated that we knew the type from static analysis,
+  // so this assert just double checks.
+  if (tmp) assert(tmp->isA(inst->getTypeParam()));
+
+  if (knownType.subtypeOf(inst->getTypeParam())) {
+    inst->convertToNop();
+  }
+  return nullptr;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}}}

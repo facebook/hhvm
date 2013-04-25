@@ -77,6 +77,13 @@ Type stkReturn(const IRInstruction* inst, int dstId,
   return Type::StkPtr;
 }
 
+Type binArithResultType(Type t1, Type t2) {
+  if (t1.subtypeOf(Type::Dbl) || t2.subtypeOf(Type::Dbl)) {
+    return Type::Dbl;
+  }
+  return Type::Int;
+}
+
 }
 
 Type outputType(const IRInstruction* inst, int dstId) {
@@ -92,6 +99,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DVector   return vectorReturn(inst);
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin  return builtinReturn(inst);
+#define DArith    return binArithResultType(inst->getSrc(0)->type(), \
+                                            inst->getSrc(1)->type());
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -112,6 +121,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DVector
 #undef ND
 #undef DBuiltin
+#undef DArith
 
 }
 
@@ -261,6 +271,8 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DParam      checkDst(inst->getTypeParam() != Type::None ||      \
                              inst->op() == DefConst /* for DefNone */, \
                              "DParam with paramType None");
+#define DArith      checkDst(inst->getTypeParam() == Type::None, \
+                             "DArith should have no type parameter");
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
   case opcode: dstinfo srcinfo countCheck(); return;
@@ -288,6 +300,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DBox
 #undef DofS
 #undef DParam
+#undef DArith
 
 }
 

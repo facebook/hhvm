@@ -579,7 +579,7 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
 #define SIMPLIFY_COMMUTATIVE(OP, NAME) do {                             \
   SIMPLIFY_CONST(OP);                                                   \
   if (src1->isConst() && !src2->isConst()) {                            \
-    return m_tb->gen##NAME(src2, src1);                                 \
+    return gen(Op##NAME, src2, src1);                                   \
   }                                                                     \
   if (src1->isA(Type::Int) && src2->isA(Type::Int)) {                   \
     IRInstruction* inst1 = src1->inst();                                \
@@ -589,14 +589,14 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
       if (src2->isConst()) {                                            \
         int64_t right = inst1->getSrc(1)->getValInt();                  \
         right OP##= src2->getValInt();                                  \
-        return m_tb->gen##NAME(inst1->getSrc(0), cns(right));           \
+        return gen(Op##NAME, inst1->getSrc(0), cns(right));             \
       }                                                                 \
       /* (X + C1) + (Y + C2) --> X + Y + C3 */                          \
       if (inst2->op() == Op##NAME && inst2->getSrc(1)->isConst()) {     \
         int64_t right = inst1->getSrc(1)->getValInt();                  \
         right OP##= inst2->getSrc(1)->getValInt();                      \
-        SSATmp* left = m_tb->gen##NAME(inst1->getSrc(0), inst2->getSrc(0)); \
-        return m_tb->gen##NAME(left, cns(right));                       \
+        SSATmp* left = gen(Op##NAME, inst1->getSrc(0), inst2->getSrc(0)); \
+        return gen(Op##NAME, left, cns(right));                         \
       }                                                                 \
     }                                                                   \
   }                                                                     \
@@ -612,20 +612,20 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
   /* all combinations of X * Y + X * Z --> X * (Y + Z) */               \
   if (op1 == Op##INNAME && op2 == Op##INNAME) {                         \
     if (inst1->getSrc(0) == inst2->getSrc(0)) {                         \
-      SSATmp* fold = m_tb->gen##OUTNAME(inst1->getSrc(1), inst2->getSrc(1)); \
-      return m_tb->gen##INNAME(inst1->getSrc(0), fold);                 \
+      SSATmp* fold = gen(Op##OUTNAME, inst1->getSrc(1), inst2->getSrc(1)); \
+      return gen(Op##INNAME, inst1->getSrc(0), fold);                   \
     }                                                                   \
     if (inst1->getSrc(0) == inst2->getSrc(1)) {                         \
-      SSATmp* fold = m_tb->gen##OUTNAME(inst1->getSrc(1), inst2->getSrc(0)); \
-      return m_tb->gen##INNAME(inst1->getSrc(0), fold);                 \
+      SSATmp* fold = gen(Op##OUTNAME, inst1->getSrc(1), inst2->getSrc(0)); \
+      return gen(Op##INNAME, inst1->getSrc(0), fold);                   \
     }                                                                   \
     if (inst1->getSrc(1) == inst2->getSrc(0)) {                         \
-      SSATmp* fold = m_tb->gen##OUTNAME(inst1->getSrc(0), inst2->getSrc(1)); \
-      return m_tb->gen##INNAME(inst1->getSrc(1), fold);                 \
+      SSATmp* fold = gen(Op##OUTNAME, inst1->getSrc(0), inst2->getSrc(1)); \
+      return gen(Op##INNAME, inst1->getSrc(1), fold);                   \
     }                                                                   \
     if (inst1->getSrc(1) == inst2->getSrc(1)) {                         \
-      SSATmp* fold = m_tb->gen##OUTNAME(inst1->getSrc(0), inst2->getSrc(0)); \
-      return m_tb->gen##INNAME(inst1->getSrc(1), fold);                 \
+      SSATmp* fold = gen(Op##OUTNAME, inst1->getSrc(0), inst2->getSrc(0)); \
+      return gen(Op##INNAME, inst1->getSrc(1), fold);                   \
     }                                                                   \
   }                                                                     \
 } while (0)
@@ -643,7 +643,7 @@ SSATmp* Simplifier::simplifyAdd(SSATmp* src1, SSATmp* src2) {
     }
     // X + -C --> X - C
     if (src2Val < 0) {
-      return m_tb->genSub(src1, cns(-src2Val));
+      return gen(OpSub, src1, cns(-src2Val));
     }
   }
   // X + (0 - Y) --> X - Y
@@ -653,7 +653,7 @@ SSATmp* Simplifier::simplifyAdd(SSATmp* src1, SSATmp* src2) {
     SSATmp* src = inst2->getSrc(0);
     if (src->isConst() && src->type() == Type::Int) {
       if (src->getValInt() == 0) {
-        return m_tb->genSub(src1, inst2->getSrc(1));
+        return gen(OpSub, src1, inst2->getSrc(1));
       }
     }
   }
@@ -676,7 +676,7 @@ SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
     }
     // X - -C --> X + C
     if (src2Val < 0 && src2Val > std::numeric_limits<int64_t>::min()) {
-      return m_tb->genAdd(src1, cns(-src2Val));
+      return gen(OpAdd, src1, cns(-src2Val));
     }
   }
   // X - (0 - Y) --> X + Y
@@ -686,7 +686,7 @@ SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
     SSATmp* src = inst2->getSrc(0);
     if (src->isConst() && src->type() == Type::Int) {
       if (src->getValInt() == 0) {
-        return m_tb->genAdd(src1, inst2->getSrc(1));
+        return gen(OpAdd, src1, inst2->getSrc(1));
       }
     }
   }
@@ -701,7 +701,7 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
   if (src2->isConst() && src2->type() == Type::Int) {
     // X * (-1) --> -X
     if (src2->getValInt() == -1) {
-      return m_tb->genSub(cns(0), src1);
+      return gen(OpSub, cns(0), src1);
     }
     // X * 0 --> 0
     if (src2->getValInt() == 0) {
@@ -716,7 +716,7 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
     }
     // X * 2 --> X + X
     if (src2->getValInt() == 2) {
-      return m_tb->genAdd(src1, src1);
+      return gen(OpAdd, src1, src1);
     }
     // TODO once IR has shifts
     // X * 2^C --> X << C

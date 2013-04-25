@@ -108,6 +108,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *     DUnbox(N) single dst has unboxed type of src N
  *     DBox(N)   single dst has boxed type of src N
  *     DParam    single dst has type of the instruction's type parameter
+ *     DArith    single dst has a type based on arithmetic type rules
  *     DMulti    multiple dests. type and number depend on instruction
  *     DVector   single dst depends on semantics of the vector instruction
  *     DStk(x)   up to two dests. x should be another D* macro and indicates
@@ -171,13 +172,13 @@ O(CastStk,                   D(StkPtr), S(StkPtr) C(Int),           Mem|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr) C(Int),                  E) \
 O(GuardRefs,                        ND, SUnk,                              E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
-O(OpAdd,                        DParam, SNum SNum,                         C) \
-O(OpSub,                        DParam, SNum SNum,                         C) \
+O(OpAdd,                        DArith, SNum SNum,                         C) \
+O(OpSub,                        DArith, SNum SNum,                         C) \
 O(OpAnd,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpOr,                         D(Int), SNum SNum,                         C) \
 O(OpXor,                        D(Int), SNumInt SNumInt,                   C) \
-O(OpMul,                        DParam, SNum SNum,                         C) \
-O(OpDiv,                        DParam, SNum SNum,                         C) \
+O(OpMul,                        DArith, SNum SNum,                         C) \
+O(OpDiv,                        DArith, SNum SNum,                         C) \
 O(OpMod,                        D(Int), SNumInt SNumInt,                 C|N) \
                                                                               \
 O(ConvBoolToArr,                D(Arr), S(Bool),                         C|N) \
@@ -1275,13 +1276,6 @@ public:
   static Type mostRefined(Type t1, Type t2) {
     assert(t1.subtypeOf(t2) || t2.subtypeOf(t1));
     return t1.subtypeOf(t2) ? t1 : t2;
-  }
-
-  static Type binArithResultType(Type t1, Type t2) {
-    if (t1.subtypeOf(Type::Dbl) || t2.subtypeOf(Type::Dbl)) {
-      return Type::Dbl;
-    }
-    return Type::Int;
   }
 
   bool isArray() const {

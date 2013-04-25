@@ -676,7 +676,7 @@ void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
 SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
   assert(src->isA(Type::Int) || src->isA(Type::Dbl));
   SSATmp* one = src->isA(Type::Int) ? cns(1) : cns(1.0);
-  SSATmp* res = inc ? m_tb->genAdd(src, one) : m_tb->genSub(src, one);
+  SSATmp* res = inc ? gen(OpAdd, src, one) : gen(OpSub, src, one);
   // no incref necessary on push since result is an int
   push(pre ? res : src);
   return res;
@@ -724,9 +724,7 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
                                     loc->type(),
                                     topC()->type())) {
     SSATmp* val = popC();
-    Type resultType = Type::binArithResultType(loc->type(),
-                                               val->type());
-    SSATmp* result = gen(subOpc, resultType, loc, val);
+    SSATmp* result = gen(subOpc, loc, val);
     push(m_tb->genStLoc(id, result, true, true, exitTrace));
   } else {
     PUNT(SetOpL);
@@ -2740,7 +2738,7 @@ void HhbcTranslator::emitBinaryArith(Opcode opc) {
   if (isSupportedBinaryArith(opc, type1, type2)) {
     SSATmp* tr = popC();
     SSATmp* tl = popC();
-    push(gen(opc, Type::binArithResultType(type1, type2), tl, tr));
+    push(gen(opc, tl, tr));
   } else if (isBitOp && (type1 == Type::Obj || type2 == Type::Obj)) {
     // raise fatal
     emitInterpOne(Type::Cell, 2);
@@ -2771,8 +2769,8 @@ void HhbcTranslator::emitNot() {
 }
 
 #define BINOP(Opp) \
-void HhbcTranslator::emit ## Opp() {     \
-    emitBinaryArith(Op ## Opp);          \
+void HhbcTranslator::emit ## Opp() {  \
+  emitBinaryArith(Op ## Opp);         \
 }
 
 BINOP(Add)
@@ -2824,7 +2822,7 @@ void HhbcTranslator::emitMod() {
       bcOff()
     );
   gen(JmpZero, exit, r);
-  push(gen(OpMod, Type::Int, l, r));
+  push(gen(OpMod, l, r));
 }
 
 void HhbcTranslator::emitBitNot() {
@@ -2832,7 +2830,7 @@ void HhbcTranslator::emitBitNot() {
   if (srcType == Type::Int) {
     SSATmp* src = popC();
     SSATmp* ones = cns(~uint64_t(0));
-    push(m_tb->genXor(src, ones));
+    push(gen(OpXor, src, ones));
   } else if (srcType.subtypeOf(Type::Null | Type::Bool | Type::Arr | Type::Obj)) {
     // raise fatal
     emitInterpOne(Type::Cell, 1);
@@ -2852,7 +2850,7 @@ void HhbcTranslator::emitXor() {
   SSATmp* btl = popC();
   SSATmp* tr = m_tb->genConvToBool(btr);
   SSATmp* tl = m_tb->genConvToBool(btl);
-  push(m_tb->genConvToBool(m_tb->genXor(tl, tr)));
+  push(m_tb->genConvToBool(gen(OpXor, tl, tr)));
   m_tb->genDecRef(btl);
   m_tb->genDecRef(btr);
 }

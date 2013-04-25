@@ -240,34 +240,9 @@ Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
   return exitTrace;
 }
 
-SSATmp* TraceBuilder::genAdd(SSATmp* src1, SSATmp* src2) {
-  Type resultType = Type::binArithResultType(src1->type(),
-                                             src2->type());
-  return gen(OpAdd, resultType, src1, src2);
-}
-SSATmp* TraceBuilder::genSub(SSATmp* src1, SSATmp* src2) {
-  Type resultType = Type::binArithResultType(src1->type(),
-                                             src2->type());
-  return gen(OpSub, resultType, src1, src2);
-}
-SSATmp* TraceBuilder::genAnd(SSATmp* src1, SSATmp* src2) {
-  return gen(OpAnd, src1, src2);
-}
-SSATmp* TraceBuilder::genOr(SSATmp* src1, SSATmp* src2) {
-  return gen(OpOr, src1, src2);
-}
-SSATmp* TraceBuilder::genXor(SSATmp* src1, SSATmp* src2) {
-  return gen(OpXor, src1, src2);
-}
-SSATmp* TraceBuilder::genMul(SSATmp* src1, SSATmp* src2) {
-  Type resultType = Type::binArithResultType(src1->type(),
-                                             src2->type());
-  return gen(OpMul, resultType, src1, src2);
-}
-
 SSATmp* TraceBuilder::genNot(SSATmp* src) {
   assert(src->type() == Type::Bool);
-  return genConvToBool(genXor(src, genDefConst<int64_t>(1)));
+  return genConvToBool(gen(OpXor, src, genDefConst<int64_t>(1)));
 }
 
 SSATmp* TraceBuilder::genDefUninit() {

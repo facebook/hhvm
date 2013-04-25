@@ -105,6 +105,7 @@ namespace {
 #define DUnbox(n) HasDest
 #define DBox(n)   HasDest
 #define DParam    HasDest
+#define DArith    HasDest
 #define DMulti    NaryDest
 #define DVector   HasDest
 #define DStk(x)   ModifiesStack|(x)
@@ -147,6 +148,7 @@ struct {
 #undef DUnbox
 #undef DBox
 #undef DParam
+#undef DArith
 #undef DMulti
 #undef DVector
 #undef DStk

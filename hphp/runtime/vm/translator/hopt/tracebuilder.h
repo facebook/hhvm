@@ -124,13 +124,7 @@ public:
                        Type type,
                        bool override = false); // ignores conflict w/ prev type
 
-  SSATmp* genAdd(SSATmp* src1, SSATmp* src2);
-
-  SSATmp* genSub(SSATmp* src1, SSATmp* src2);
-  SSATmp* genMul(SSATmp* src1, SSATmp* src2);
-  SSATmp* genAnd(SSATmp* src1, SSATmp* src2);
-  SSATmp* genOr(SSATmp* src1, SSATmp* src2);
-  SSATmp* genXor(SSATmp* src1, SSATmp* src2);
+  // TODO(#2058865): we should have a real not opcode
   SSATmp* genNot(SSATmp* src);
 
   SSATmp* genDefUninit();

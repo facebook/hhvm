@@ -68,6 +68,7 @@ public:
    */
   static SmartPtr<Socket> Start(const DebuggerClientOptions &options);
   static void Stop();
+  static void Shutdown();
 
   /**
    * Pre-defined auto-complete lists. Append-only, as they will be used in

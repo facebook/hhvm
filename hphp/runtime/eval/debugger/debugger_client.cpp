@@ -65,14 +65,6 @@ static DebuggerClient& getStaticDebuggerClient() {
   return *debugger_client;
 }
 
-void shutdown_hphpd() {
-  TRACE(2, "DebuggerClient::shutdown_hphpd\n");
-  if (debugger_client) {
-    debugger_client->resetSmartAllocatedMembers();
-    debugger_client.reset();
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // readline setups
 
@@ -295,6 +287,14 @@ SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
   SmartPtr<Socket> ret = getStaticDebuggerClient().connectLocal();
   getStaticDebuggerClient().start(options);
   return ret;
+}
+
+void DebuggerClient::Shutdown() {
+  TRACE(2, "DebuggerClient::Shutdown\n");
+  if (debugger_client) {
+    debugger_client->resetSmartAllocatedMembers();
+    debugger_client.reset();
+  }
 }
 
 void DebuggerClient::Stop() {

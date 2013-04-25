@@ -516,6 +516,12 @@ def walk(filename, source):
         test = test.replace('test_file_ptfi', 'SplFileInfo_getPerms_basic.txt')
     if '/ext-spl/SplFileInfo_getInode_basic.php' in full_dest_filename:
         test = test.replace('test_file_ptfi', 'SplFileInfo_getInode_basic.txt')
+    if '/ext-standard-file/mkdir-001.php' in full_dest_filename:
+        test = test.replace('testdir', 'mkdir-001')
+    if '/ext-standard-file/mkdir-002.php' in full_dest_filename:
+        test = test.replace('testdir', 'mkdir-002')
+    if '/ext-standard-file/mkdir-003.php' in full_dest_filename:
+        test = test.replace('testdir', 'mkdir-003')
 
     file(full_dest_filename, 'w').write(test)
 

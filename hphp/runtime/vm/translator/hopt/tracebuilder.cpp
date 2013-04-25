@@ -1238,7 +1238,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       int64_t stackAdjustment = inst->getSrc(3)->getValInt();
       Type resultType = inst->getTypeParam();
       // push the return value if any and adjust for the popped values
-      m_spOffset += -stackAdjustment;
+      m_spOffset -= stackAdjustment;
       break;
     }
 

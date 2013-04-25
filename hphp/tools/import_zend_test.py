@@ -439,6 +439,8 @@ def walk(filename, source):
     if sections.has_key('CLEAN'):
         test += sections['CLEAN']
 
+    # If you put an exception in here, please send a pull request upstream to 
+    # php-src. Then when it gets merged kill your hack.
     if 'bug60771.php' in full_dest_filename:
         test = test.replace("?>", "unlink('test.php');\n?>")
     if 'bug44805.php' in full_dest_filename:
@@ -460,6 +462,16 @@ def walk(filename, source):
     if '/ext-pdo_' in full_dest_filename:
         test = test.replace('/../../../ext/pdo/tests/pdo_test.inc', 
                 '/../ext-pdo/pdo_test.inc')
+    if '/ext-zlib/gzseek_variation7.php' in full_dest_filename:
+        test = test.replace('temp3.txt.gz', 'gzseek_variation7.gz')
+    if '/ext-zlib/gzseek_basic2.php' in full_dest_filename:
+        test = test.replace('temp3.txt.gz', 'gzseek_basic2.gz')
+    if '/ext-zlib/gzseek_variation1.php' in full_dest_filename:
+        test = test.replace('temp3.txt.gz', 'gzseek_variation1.gz')
+    if '/ext-zlib/gzseek_variation4.php' in full_dest_filename:
+        test = test.replace('temp3.txt.gz', 'gzseek_variation4.gz')
+    if '/ext-zlib/gzseek_variation5.php' in full_dest_filename:
+        test = test.replace('temp3.txt.gz', 'gzseek_variation5.gz')
 
     file(full_dest_filename, 'w').write(test)
 

@@ -151,32 +151,6 @@ bad_tests = (
     '/zend/unset_cv05.php',
     '/zend/unset_cv06.php',
 
-    # unpredictable numbers - we need param matching
-    '/ext-date/bug35143.php',
-    '/ext-date/gettimeofday_basic.php',
-    '/ext-date/localtime_basic.php',
-    '/ext-date/time_basic.php',
-    '/ext-openssl/openssl_random_pseudo_bytes.php',
-    '/ext-pcntl/pcntl_fork_basic.php',
-    '/ext-posix/posix_getpgid_basic.php',
-    '/ext-posix/posix_getpgrp_basic.php',
-    '/ext-posix/posix_getpid_basic.php',
-    '/ext-posix/posix_getppid_basic.php',
-    '/ext-posix/posix_getsid_basic.php',
-    '/ext-posix/posix_times.php',
-    '/ext-posix/posix_times_basic.php',
-    '/ext-sockets/socket_getsockname.php',
-    '/ext-standard/array/array_diff_assoc_variation6.php',
-    '/ext-standard/file/fileinode_variation1.php',
-    '/ext-standard/file/filestat.php',
-    '/ext-standard/fstat.php',
-    '/ext-standard/fstat_basic.php',
-    '/ext-standard/general_functions/bug39322.php',
-    '/ext-standard/general_functions/getmypid_basic.php',
-    '/ext-standard/general_functions/getrusage_basic.php',
-    '/ext-standard/touch_basic.php',
-    '/tests-basic/bug29971.php',
-
     # not implemented extensions
     'phar', # this appears in filenames
 

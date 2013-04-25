@@ -144,7 +144,8 @@ void EventHook::onFunctionExit(const ActRec* ar) {
   // exception).
   if (ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
     RunUserProfiler(ar, ProfileExit);
-    CheckSurprise();
+    // XXX Disabled until t2329497 is fixed:
+    // CheckSurprise();
   }
 }
 

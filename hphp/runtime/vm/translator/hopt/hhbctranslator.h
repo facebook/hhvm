@@ -631,7 +631,6 @@ private:
 
     Kind      getKind()  const { return m_kind;  }
     uint32_t  getIndex() const { return m_index; }
-    Type      getType()  const { return m_type;  }
 
   private:
     Kind      m_kind;

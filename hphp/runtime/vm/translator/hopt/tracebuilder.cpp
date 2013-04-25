@@ -70,12 +70,6 @@ TraceBuilder::~TraceBuilder() {
   for (State* state : m_snapshots) delete state;
 }
 
-void TraceBuilder::genSetPropCell(SSATmp* base, int64_t offset, SSATmp* value) {
-  SSATmp* oldVal = gen(LdProp, Type::Cell, base, cns(offset));
-  gen(StProp, base, cns(offset), value);
-  gen(DecRef, oldVal);
-}
-
 /**
  * Checks if the given SSATmp, or any of its aliases, is available in
  * any VM location, including locals and the This pointer.
@@ -257,10 +251,6 @@ SSATmp* TraceBuilder::genConvToBool(SSATmp* src) {
   } else {
     return gen(ConvCellToBool, src);
   }
-}
-
-SSATmp* TraceBuilder::genCmp(Opcode opc, SSATmp* src1, SSATmp* src2) {
-  return gen(opc, src1, src2);
 }
 
 SSATmp* TraceBuilder::genBoxLoc(uint32_t id) {
@@ -637,17 +627,6 @@ SSATmp* TraceBuilder::genLdStackAddr(SSATmp* sp, int64_t index) {
   return gen(LdStackAddr, type.ptr(), sp, cns(index));
 }
 
-SSATmp* TraceBuilder::genCallBuiltin(SSATmp* func,
-                                     Type type,
-                                     uint32_t numArgs,
-                                     SSATmp** args) {
-  SSATmp* srcs[numArgs + 1];
-  srcs[0] = func;
-  std::copy(args, args + numArgs, srcs + 1);
-  SSATmp** decayedPtr = srcs;
-  return gen(CallBuiltin, type, std::make_pair(numArgs + 1, decayedPtr));
-}
-
 void TraceBuilder::genDecRefStack(Type type, uint32_t stackOff) {
   bool spansCall = false;
   Type knownType = Type::None;
@@ -663,26 +642,6 @@ void TraceBuilder::genDecRefStack(Type type, uint32_t stackOff) {
   } else {
     gen(DecRef, tmp);
   }
-}
-
-void TraceBuilder::genDecRefThis() {
-  if (isThisAvailable()) {
-    auto const thiss = gen(LdThis, m_fpValue);
-    auto const thisInst = thiss->inst();
-
-    if (thisInst->op() == IncRef &&
-        callerLocalHasValue(thisInst->getSrc(0))) {
-      gen(DecRefNZ, thiss);
-      return;
-    }
-
-    // It's a shame to keep a reference to the frame just to kill the
-    // this pointer.  This is handled in optimizeActRecs.
-    gen(DecRefKillThis, thiss, m_fpValue);
-    return;
-  }
-
-  gen(DecRefThis, m_fpValue);
 }
 
 SSATmp* TraceBuilder::genSpillStack(uint32_t stackAdjustment,
@@ -1200,6 +1159,43 @@ SSATmp* TraceBuilder::preOptimizeDecRef(IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
+  /*
+   * If $this is available, convert to an instruction sequence that
+   * doesn't need to test if it's already live.
+   */
+  if (isThisAvailable()) {
+    auto const thiss = gen(LdThis, m_fpValue);
+    auto const thisInst = thiss->inst();
+
+    /*
+     * DecRef optimization for $this in an inlined frame: if a caller
+     * local contains the $this, we know it can't go to zero and can
+     * switch DecRef to DecRefNZ.
+     *
+     * It's ok not to do DecRefThis (which normally nulls out the ActRec
+     * $this), because there is still a reference to it in the caller
+     * frame, so debug_backtrace() can't see a non-live pointer value.
+     */
+    if (thisInst->op() == IncRef &&
+        callerLocalHasValue(thisInst->getSrc(0))) {
+      gen(DecRefNZ, thiss);
+      inst->convertToNop();
+      return nullptr;
+    }
+
+    // If we're in an inlined callee, it's a shame to keep a reference
+    // to the frame just to kill the $this pointer.  But this is
+    // handled in optimizeActRecs.
+    assert(inst->getSrc(0) == m_fpValue);
+    gen(DecRefKillThis, thiss, m_fpValue);
+    inst->convertToNop();
+    return nullptr;
+  }
+
+  return nullptr;
+}
+
 SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst)
   switch (inst->op()) {
@@ -1208,6 +1204,7 @@ SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
     X(LdThis);
     X(LdCtx);
     X(DecRef);
+    X(DecRefThis);
   default:
     break;
   }

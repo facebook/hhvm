@@ -975,7 +975,10 @@ void HhbcTranslator::emitPackCont(int64_t labelId) {
   gen(UnlinkContVarEnv, m_tb->getFp());
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->getFp());
   auto const cont = m_tb->genLdLoc(0);
-  m_tb->genSetPropCell(cont, CONTOFF(m_value), popC());
+  auto const newVal = popC();
+  auto const oldValue = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_value)));
+  gen(StProp, cont, cns(CONTOFF(m_value)), newVal);
+  gen(DecRef, oldValue);
   gen(
     StRaw, cont, cns(RawMemSlot::ContLabel), cns(labelId)
   );
@@ -997,7 +1000,10 @@ void HhbcTranslator::emitContRetC() {
   gen(
     StRaw, cont, cns(RawMemSlot::ContDone), cns(true)
   );
-  m_tb->genSetPropCell(cont, CONTOFF(m_value), popC());
+  auto const newVal = popC();
+  auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_value)));
+  gen(StProp, cont, cns(CONTOFF(m_value)), newVal);
+  gen(DecRef, oldVal);
 
   // transfer control
   emitContExitImpl();
@@ -1007,7 +1013,10 @@ void HhbcTranslator::emitContNext() {
   assert(getCurClass());
   SSATmp* cont = gen(LdThis, m_tb->getFp());
   gen(ContPreNext, getExitSlowTrace(), cont);
-  m_tb->genSetPropCell(cont, CONTOFF(m_received), m_tb->genDefInitNull());
+
+  auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_received)));
+  gen(StProp, cont, cns(CONTOFF(m_received)), m_tb->genDefInitNull());
+  gen(DecRef, oldVal);
 }
 
 void HhbcTranslator::emitContSendImpl(bool raise) {
@@ -1017,8 +1026,10 @@ void HhbcTranslator::emitContSendImpl(bool raise) {
   gen(ContPreNext, getExitSlowTrace(), cont);
 
   gen(AssertLoc, Type::Cell, LocalId(0), m_tb->getFp());
-  auto const value = gen(IncRef, m_tb->genLdLoc(0));
-  m_tb->genSetPropCell(cont, CONTOFF(m_received), value);
+  auto const newVal = gen(IncRef, m_tb->genLdLoc(0));
+  auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_received)));
+  gen(StProp, cont, cns(CONTOFF(m_received)), newVal);
+  gen(DecRef, oldVal);
   if (raise) {
     gen(
       StRaw, cont, cns(RawMemSlot::ContShouldThrow), cns(true)
@@ -1311,7 +1322,7 @@ void HhbcTranslator::emitCmp(Opcode opc) {
   // src2 opc src1
   SSATmp* src1 = popC();
   SSATmp* src2 = popC();
-  push(m_tb->genCmp(opc, src2, src1));
+  push(gen(opc, src2, src1));
   gen(DecRef, src2);
   gen(DecRef, src1);
 }
@@ -1789,7 +1800,8 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
 }
 
 void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
-                                      uint32_t numNonDefault, int32_t funcId) {
+                                      uint32_t numNonDefault,
+                                      int32_t funcId) {
   const NamedEntityPair& nep = lookupNamedEntityPairId(funcId);
   const StringData* name = nep.first;
   const Func* callee = Unit::lookupFunc(nep.second, name);
@@ -1798,12 +1810,13 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
 
   // spill args to stack. We need to spill these for two resons:
   // 1. some of the arguments may be passed by reference, for which
-  //    case we will generate LdStackAddr() (see below).
+  //    case we will pass a stack address.
   // 2. type conversions of the arguments (using tvCast* helpers)
   //    may throw an exception, so we need to have the VM stack
   //    in a clean state at that point.
   exceptionBarrier();
-  // Convert types if needed
+
+  // Convert types if needed.
   for (int i = 0; i < numNonDefault; i++) {
     const Func::ParamInfo& pi = callee->params()[i];
     switch (pi.builtinType()) {
@@ -1821,38 +1834,41 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
     }
   }
 
-  // pass arguments for call
+  // Pass arguments for CallBuiltin.
   SSATmp* args[numArgs + 1];
-
+  args[0] = cns(callee);
   for (int i = numArgs - 1; i >= 0; i--) {
     const Func::ParamInfo& pi = callee->params()[i];
     switch (pi.builtinType()) {
       case KindOfBoolean:
       case KindOfInt64:
-        args[i] = top(Type::fromDataType(pi.builtinType(), KindOfInvalid),
-                      numArgs - i - 1);
+        args[i + 1] = top(Type::fromDataType(pi.builtinType(), KindOfInvalid),
+                          numArgs - i - 1);
         break;
       case KindOfDouble: assert(false);
       default:
-        args[i] = loadStackAddr(numArgs - i - 1);
+        args[i + 1] = loadStackAddr(numArgs - i - 1);
         break;
     }
   }
-  // generate call and set return type
-  SSATmp* func = cns(callee);
-  Type type = Type::fromDataTypeWithRef(callee->returnType(),
-                       (callee->attrs() & ClassInfo::IsReference));
-  SSATmp* ret = m_tb->genCallBuiltin(func, type, numArgs, args);
 
-  // decref and free args
+  // Generate call and set return type
+  SSATmp** decayedPtr = args;
+  auto const ret = gen(
+    CallBuiltin,
+    Type::fromDataTypeWithRef(callee->returnType(),
+                              (callee->attrs() & ClassInfo::IsReference)),
+    std::make_pair(numArgs + 1, decayedPtr)
+  );
+
+  // Decref and free args
   for (int i = 0; i < numArgs; i++) {
-    SSATmp* arg = popR();
+    auto const arg = popR();
     if (i >= numArgs - numNonDefault) {
       gen(DecRef, arg);
     }
   }
 
-  // push return value
   push(ret);
 }
 
@@ -1883,16 +1899,17 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   emitMarker();
 }
 
-/*
- * In case retVal comes from a local, the logic below tweaks the code
- * so that retVal is DecRef'd and the corresponding local's SSATmp is
- * returned. This enables the ref-count optimization to eliminate the
- * IncRef/DecRef pair in the main trace.
- */
 SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
   SSATmp* retValSrcLoc = nullptr;
   Opcode  retValSrcOpc = Nop; // Nop flags the ref-count opt is impossible
   IRInstruction* retValSrcInstr = retVal->inst();
+
+  /*
+   * In case retVal comes from a local, the logic below tweaks the code
+   * so that retVal is DecRef'd and the corresponding local's SSATmp is
+   * returned. This enables the ref-count optimization to eliminate the
+   * IncRef/DecRef pair in the main trace.
+   */
   if (retValSrcInstr->op() == IncRef) {
     retValSrcLoc = retValSrcInstr->getSrc(0);
     retValSrcOpc = retValSrcLoc->inst()->op();
@@ -1904,9 +1921,14 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
 
   if (mayHaveThis(getCurFunc())) {
     if (retValSrcLoc && retValSrcOpc == LdThis) {
+      // Note that this doesn't need to be DecRefThis or
+      // DecRefKillThis because we're carefully setting things up to
+      // get turned to DecRefNZ.  This means even if a
+      // debug_backtrace() occurs it can't see a stale $this on the
+      // ActRec.
       gen(DecRef, retVal);
     } else {
-      m_tb->genDecRefThis();
+      gen(DecRefThis, m_tb->getFp());
     }
   }
 
@@ -1953,7 +1975,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     sp = gen(RetAdjustStack, m_tb->getFp());
   } else {
     if (mayHaveThis(curFunc)) {
-      m_tb->genDecRefThis();
+      gen(DecRefThis, m_tb->getFp());
     }
     sp = gen(
       GenericRetDecRefs, m_tb->getFp(), retVal, cns(curFunc->numLocals())

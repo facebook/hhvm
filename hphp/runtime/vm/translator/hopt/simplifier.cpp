@@ -453,9 +453,7 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
       //
       // TODO(#2058865): This would make more sense with a real Not
       // instruction and allowing boolean output types for query ops.
-      return m_tb->genCmp(negateQueryOp(op),
-                          inst->getSrc(0),
-                          inst->getSrc(1));
+      return gen(negateQueryOp(op), inst->getSrc(0), inst->getSrc(1));
     case InstanceOf:
     case NInstanceOf:
     case InstanceOfBitmask:
@@ -854,9 +852,9 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
     }
     // Type is neither a string nor an object - simplify to OpEq/OpNeq
     if (opName == OpSame) {
-      return m_tb->genCmp(OpEq, src1, src2);
+      return gen(OpEq, src1, src2);
     }
-    return m_tb->genCmp(OpNeq, src1, src2);
+    return gen(OpNeq, src1, src2);
   }
 
   // ---------------------------------------------------------------------
@@ -916,9 +914,9 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
     // E.g. `some-int > false` is equivalent to `some-int == true`
     if (opName != OpEq) {
       if (cmpOp(opName, false, b)) {
-        return m_tb->genCmp(OpEq, src1, cns(false));
+        return gen(OpEq, src1, cns(false));
       } else {
-        return m_tb->genCmp(OpEq, src1, cns(true));
+        return gen(OpEq, src1, cns(true));
       }
     }
   }
@@ -931,7 +929,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
   if (src1->type() == src2->type() ||
       (src1->type().isString() && src2->type().isString())) {
     if (src1->isConst() && !src2->isConst()) {
-      return m_tb->genCmp(commuteQueryOp(opName), src2, src1);
+      return gen(commuteQueryOp(opName), src2, src1);
     }
     return nullptr;
   }
@@ -943,33 +941,32 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
 
   // nulls get canonicalized to the right
   if (src1->type().isNull()) {
-    return m_tb->genCmp(commuteQueryOp(opName), src2, src1);
+    return gen(commuteQueryOp(opName), src2, src1);
   }
 
   // case 1: null cmp string. Convert null to ""
   if (src1->type().isString() && src2->type().isNull()) {
-    return m_tb->genCmp(opName, src1,
-                        cns(StringData::GetStaticString("")));
+    return gen(opName, src1, cns(StringData::GetStaticString("")));
   }
 
   // case 2a: null cmp anything. Convert null to false
   if (src2->type().isNull()) {
-    return m_tb->genCmp(opName, src1, cns(false));
+    return gen(opName, src1, cns(false));
   }
 
   // bools get canonicalized to the right
   if (src1->type() == Type::Bool) {
-    return m_tb->genCmp(commuteQueryOp(opName), src2, src1);
+    return gen(commuteQueryOp(opName), src2, src1);
   }
 
   // case 2b: bool cmp anything. Convert anything to bool
   if (src2->type() == Type::Bool) {
     if (src1->isConst()) {
       if (src1->type() == Type::Int) {
-        return m_tb->genCmp(opName, cns(bool(src1->getValInt())), src2);
+        return gen(opName, cns(bool(src1->getValInt())), src2);
       } else if (src1->type().isString()) {
         auto str = src1->getValStr();
-        return m_tb->genCmp(opName, cns(str->toBoolean()), src2);
+        return gen(opName, cns(str->toBoolean()), src2);
       }
     }
 
@@ -979,14 +976,14 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
       always_assert(opName == OpEq);
 
       if (src2->getValBool()) {
-        return m_tb->genCmp(OpNeq, src1, cns(0));
+        return gen(OpNeq, src1, cns(0));
       } else {
-        return m_tb->genCmp(OpEq, src1, cns(0));
+        return gen(OpEq, src1, cns(0));
       }
     }
 
     // Nothing fancy to do - perform juggling as normal.
-    return m_tb->genCmp(opName, m_tb->genConvToBool(src1), src2);
+    return gen(opName, m_tb->genConvToBool(src1), src2);
   }
 
   // From here on, we must be careful of how Type::Obj gets dealt with,
@@ -997,12 +994,12 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
 
   // strings get canonicalized to the left
   if (src2->type().isString()) {
-    return m_tb->genCmp(commuteQueryOp(opName), src2, src1);
+    return gen(commuteQueryOp(opName), src2, src1);
   }
 
   // ints get canonicalized to the right
   if (src1->type() == Type::Int) {
-    return m_tb->genCmp(commuteQueryOp(opName), src2, src1);
+    return gen(commuteQueryOp(opName), src2, src1);
   }
 
   // case 4: number/string/resource cmp. Convert to number (int OR double)
@@ -1016,12 +1013,12 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
     int64_t si; double sd;
     auto st = str->isNumericWithVal(si, sd, true /* allow errors */);
     if (st == KindOfDouble) {
-      return m_tb->genCmp(opName, cns(sd), src2);
+      return gen(opName, cns(sd), src2);
     }
     if (st == KindOfNull) {
       si = 0;
     }
-    return m_tb->genCmp(opName, cns(si), src2);
+    return gen(opName, cns(si), src2);
   }
 
   // case 5: array cmp array. No juggling to do

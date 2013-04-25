@@ -230,17 +230,11 @@ struct TraceBuilder {
   //////////////////////////////////////////////////////////////////////
   // dubious
 
-  void    genSetPropCell(SSATmp* base, int64_t offset, SSATmp* value);
-
   // TODO(#2058865): we should have a real not opcode
   SSATmp* genNot(SSATmp* src);
 
-  SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
   SSATmp* genCastStk(uint32_t id, Type type);
   SSATmp* genConvToBool(SSATmp* src);
-  SSATmp* genCallBuiltin(SSATmp* func, Type type,
-                         uint32_t numArgs, SSATmp** args);
-  void    genDecRefThis();
 
   //////////////////////////////////////////////////////////////////////
   // control flow
@@ -397,6 +391,7 @@ private:
   SSATmp*   preOptimizeLdThis(IRInstruction*);
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
   SSATmp*   preOptimizeDecRef(IRInstruction*);
+  SSATmp*   preOptimizeDecRefThis(IRInstruction*);
 
   SSATmp*   preOptimize(IRInstruction* inst);
   SSATmp*   optimizeWork(IRInstruction* inst);

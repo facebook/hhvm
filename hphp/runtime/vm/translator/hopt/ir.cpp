@@ -203,17 +203,17 @@ RetType dispatchExtra(Opcode opc, IRExtraData* data, Args&&... args) {
   not_reached();
 }
 
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_hash,   hash);
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_equals, equals);
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_clone,  clone);
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_show,   show);
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_cseHash,   cseHash);
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_cseEquals, cseEquals);
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_clone,     clone);
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_show,      show);
 
 template<class T>
 typename std::enable_if<
-  has_hash<T,size_t () const>::value,
+  has_cseHash<T,size_t () const>::value,
   size_t
->::type hashExtraImpl(T* t) { return t->hash(); }
-size_t hashExtraImpl(IRExtraData*) {
+>::type cseHashExtraImpl(T* t) { return t->cseHash(); }
+size_t cseHashExtraImpl(IRExtraData*) {
   // This probably means an instruction was marked CanCSE but its
   // extra data had no hash function.
   always_assert(!"attempted to hash extra data that didn't "
@@ -222,13 +222,13 @@ size_t hashExtraImpl(IRExtraData*) {
 
 template<class T>
 typename std::enable_if<
-  has_equals<T,bool (T const&) const>::value ||
-  has_equals<T,bool (T)        const>::value,
+  has_cseEquals<T,bool (T const&) const>::value ||
+  has_cseEquals<T,bool (T)        const>::value,
   bool
->::type equalsExtraImpl(T* t, IRExtraData* o) {
-  return t->equals(*static_cast<T*>(o));
+>::type cseEqualsExtraImpl(T* t, IRExtraData* o) {
+  return t->cseEquals(*static_cast<T*>(o));
 }
-bool equalsExtraImpl(IRExtraData*, IRExtraData*) {
+bool cseEqualsExtraImpl(IRExtraData*, IRExtraData*) {
   // This probably means an instruction was marked CanCSE but its
   // extra data had no equals function.
   always_assert(!"attempted to compare extra data that didn't "
@@ -260,13 +260,13 @@ typename std::enable_if<
 >::type showExtraImpl(T* t) { return t->show(); }
 std::string showExtraImpl(IRExtraData*) { return "..."; }
 
-MAKE_DISPATCHER(HashDispatcher, size_t, hashExtraImpl);
-size_t hashExtra(Opcode opc, IRExtraData* data) {
+MAKE_DISPATCHER(HashDispatcher, size_t, cseHashExtraImpl);
+size_t cseHashExtra(Opcode opc, IRExtraData* data) {
   return dispatchExtra<size_t,HashDispatcher>(opc, data);
 }
 
-MAKE_DISPATCHER(EqualsDispatcher, bool, equalsExtraImpl);
-bool equalsExtra(Opcode opc, IRExtraData* data, IRExtraData* other) {
+MAKE_DISPATCHER(EqualsDispatcher, bool, cseEqualsExtraImpl);
+bool cseEqualsExtra(Opcode opc, IRExtraData* data, IRExtraData* other) {
   return dispatchExtra<bool,EqualsDispatcher>(opc, data, other);
 }
 
@@ -679,7 +679,9 @@ void Block::removeEdge(IRInstruction* jmp) {
   assert((node->next = nullptr, true));
 }
 
-bool IRInstruction::equals(IRInstruction* inst) const {
+bool IRInstruction::cseEquals(IRInstruction* inst) const {
+  assert(canCSE());
+
   if (m_op != inst->m_op ||
       m_typeParam != inst->m_typeParam ||
       m_numSrcs != inst->m_numSrcs) {
@@ -690,20 +692,29 @@ bool IRInstruction::equals(IRInstruction* inst) const {
       return false;
     }
   }
-  if (hasExtra() && !equalsExtra(getOpcode(), m_extra, inst->m_extra)) {
+  if (hasExtra() && !cseEqualsExtra(getOpcode(), m_extra, inst->m_extra)) {
     return false;
   }
-  // TODO: check label for ControlFlowInstructions?
+  /*
+   * Don't CSE on m_taken---it's ok to use the destination of some
+   * earlier guarded load even though the instruction we may have
+   * generated here would've exited to a different trace.
+   *
+   * For example, we use this to cse LdThis regardless of its label.
+   */
   return true;
 }
 
-size_t IRInstruction::hash() const {
+size_t IRInstruction::cseHash() const {
+  assert(canCSE());
+
   size_t srcHash = 0;
   for (unsigned i = 0; i < getNumSrcs(); ++i) {
     srcHash = CSEHash::hashCombine(srcHash, getSrc(i));
   }
   if (hasExtra()) {
-    srcHash = CSEHash::hashCombine(srcHash, hashExtra(getOpcode(), m_extra));
+    srcHash = CSEHash::hashCombine(srcHash,
+      cseHashExtra(getOpcode(), m_extra));
   }
   return CSEHash::hashCombine(srcHash, m_op, m_typeParam);
 }

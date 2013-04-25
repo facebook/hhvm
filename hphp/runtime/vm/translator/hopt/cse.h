@@ -71,16 +71,16 @@ struct CSEHash {
 private:
   struct EqualsOp {
     bool operator()(IRInstruction* i1, IRInstruction* i2) const {
-      return i1->equals(i2);
+      return i1->cseEquals(i2);
     }
   };
 
   struct HashOp {
     size_t operator()(IRInstruction* inst) const {
-      return inst->hash();
+      return inst->cseHash();
     }
     size_t hash(IRInstruction* inst) const {
-      return inst->hash();
+      return inst->cseHash();
     }
   };
 

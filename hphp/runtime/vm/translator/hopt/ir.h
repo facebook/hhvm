@@ -610,9 +610,9 @@ enum Opcode : uint16_t {
  *
  * In addition, for extra data used with a cse-able instruction:
  *
- *   - Implement an equals() member that indicates equality for CSE
+ *   - Implement an cseEquals() member that indicates equality for CSE
  *     purposes.
- *   - Implement a hash() method.
+ *   - Implement a cseHash() method.
  *
  * Finally, optionally they may implement a show() method for use in
  * debug printouts.
@@ -688,8 +688,8 @@ struct LocalId : IRExtraData {
     : locId(id)
   {}
 
-  bool equals(LocalId o) const { return locId == o.locId; }
-  size_t hash() const { return std::hash<uint32_t>()(locId); }
+  bool cseEquals(LocalId o) const { return locId == o.locId; }
+  size_t cseHash() const { return std::hash<uint32_t>()(locId); }
   std::string show() const { return folly::to<std::string>(locId); }
 
   uint32_t locId;
@@ -714,8 +714,8 @@ struct ConstData : IRExtraData {
     return ret;
   }
 
-  bool equals(ConstData o) const { return m_dataBits == o.m_dataBits; }
-  size_t hash() const { return std::hash<uintptr_t>()(m_dataBits); }
+  bool cseEquals(ConstData o) const { return m_dataBits == o.m_dataBits; }
+  size_t cseHash() const { return std::hash<uintptr_t>()(m_dataBits); }
 
 private:
   uintptr_t m_dataBits;
@@ -1765,8 +1765,14 @@ struct IRInstruction {
   bool isControlFlowInstruction() const { return m_taken != nullptr; }
   bool isBlockEnd() const { return m_taken || isTerminal(); }
 
-  bool equals(IRInstruction* inst) const;
-  size_t hash() const;
+  /*
+   * Comparison and hashing for the purposes of CSE-equality.
+   *
+   * Pre: canCSE()
+   */
+  bool cseEquals(IRInstruction* inst) const;
+  size_t cseHash() const;
+
   void print(std::ostream& ostream) const;
   void print() const;
   std::string toString() const;

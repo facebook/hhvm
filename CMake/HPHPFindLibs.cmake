@@ -18,7 +18,6 @@
 include(CheckFunctionExists)
 
 # boost checks
-
 find_package(Boost 1.48.0 COMPONENTS system program_options filesystem regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
@@ -255,6 +254,10 @@ include_directories(${LDAP_INCLUDE_DIR})
 find_package(Ncurses REQUIRED)
 include_directories(${NCURSES_INCLUDE_PATH})
 
+# libpthreads
+find_package(PThread REQUIRED)
+include_directories(${LIBPTHREAD_INCLUDE_DIRS})
+
 find_package(Readline REQUIRED)
 include_directories(${READLINE_INCLUDE_DIR})
 
@@ -394,7 +397,9 @@ endif()
 
 	target_link_libraries(${target} ${BFD_LIB})
 	target_link_libraries(${target} ${BINUTIL_LIB})
-	target_link_libraries(${target} pthread)
+if (${LIBPTHREAD_LIBRARIES})
+	target_link_libraries(${target} ${LIBPTHREAD_LIBRARIES})
+endif()
 	target_link_libraries(${target} ${TBB_LIBRARIES})
 	target_link_libraries(${target} ${OPENSSL_LIBRARIES})
 	target_link_libraries(${target} ${ZLIB_LIBRARIES})

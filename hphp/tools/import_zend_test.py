@@ -63,6 +63,9 @@ no_import = (
     '/Zend/tests/002.phpt',
     '/Zend/tests/003.phpt',
 
+    # too large input
+    '/tests/lang/024.phpt',
+
     # spews files until they work
     '/ext/spl/tests/SplFileInfo_getExtension_basic.phpt',
     '/ext/spl/tests/SplFileObject_fgetcsv_basic.phpt',
@@ -620,12 +623,11 @@ file('test/zend/config.hdf', 'w').write(
 
 stdout = subprocess.Popen(
     [
-        'tools/verify_to_json.php',
         'test/run',
         'test/zend/all',
+        '-m',
         'interp',
-        '',
-        '../_bin',
+        '--fbmake',
     ],
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT

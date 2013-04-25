@@ -1283,7 +1283,7 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
     // The object owns a reference now
     SSATmp* increffed = gen(IncRef, value);
     gen(StMem, cellPtr, cns(0), value);
-    m_tb.genDecRef(oldVal);
+    gen(DecRef, oldVal);
     m_result = increffed;
     return;
   }
@@ -2031,7 +2031,10 @@ void HhbcTranslator::VectorTranslator::emitMPost() {
     switch (input.location.space) {
     case Location::Stack: {
       ++nStack;
-      m_tb.genDecRef(getInput(i));
+      auto input = getInput(i);
+      if (input->isA(Type::Gen)) {
+        gen(DecRef, input);
+      }
       break;
     }
     case Location::Local:

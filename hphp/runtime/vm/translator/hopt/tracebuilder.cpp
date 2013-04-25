@@ -73,7 +73,7 @@ TraceBuilder::~TraceBuilder() {
 void TraceBuilder::genSetPropCell(SSATmp* base, int64_t offset, SSATmp* value) {
   SSATmp* oldVal = gen(LdProp, Type::Cell, base, cns(offset));
   gen(StProp, base, cns(offset), value);
-  genDecRef(oldVal);
+  gen(DecRef, oldVal);
 }
 
 /**
@@ -97,38 +97,6 @@ bool TraceBuilder::isValueAvailable(SSATmp* tmp) const {
       return false;
     }
   }
-}
-
-void TraceBuilder::genDecRef(SSATmp* tmp) {
-  if (!isRefCounted(tmp)) {
-    return;
-  }
-
-  Type type = tmp->type();
-  if (type.isBoxed()) {
-    // we can't really rely on the types held in the boxed values since
-    // aliasing stores may change them. We conservatively set the type
-    // of the decref to a boxed cell and rely on later optimizations to
-    // refine it based on alias analysis.
-    type = Type::BoxedCell;
-  }
-
-  // refcount optimization:
-  // If the decref'ed value is guaranteed to be available after the decref,
-  // generate DecRefNZ instead of DecRef.
-  // We could do more accurate availability analysis. For now, we handle
-  // simple cases:
-  // 1) LdThis is always available.
-  // 2) A value stored in a local is always available.
-  IRInstruction* incRefInst = tmp->inst();
-  if (incRefInst->op() == IncRef) {
-    if (isValueAvailable(incRefInst->getSrc(0))) {
-      gen(DecRefNZ, tmp);
-      return;
-    }
-  }
-
-  gen(DecRef, tmp);
 }
 
 /*
@@ -409,7 +377,7 @@ void TraceBuilder::genDecRefLoc(int id) {
     if (setNull) {
       gen(StLoc, LocalId(id), m_fpValue, genDefUninit());
     }
-    genDecRef(val);
+    gen(DecRef, val);
     return;
   }
 
@@ -442,7 +410,7 @@ void TraceBuilder::genBindLoc(uint32_t id,
       // Silent store: local already contains value being stored
       // NewValue needs to be decref'ed
       if (!trackedType.notCounted() && doRefCount) {
-        genDecRef(prevValue);
+        gen(DecRef, prevValue);
       }
       return;
     }
@@ -458,7 +426,7 @@ void TraceBuilder::genBindLoc(uint32_t id,
   }
   gen(genStoreType ? StLoc : StLocNT, LocalId(id), m_fpValue, newValue);
   if (trackedType.maybeCounted() && doRefCount) {
-    genDecRef(prevValue);
+    gen(DecRef, prevValue);
   }
 }
 
@@ -509,7 +477,7 @@ SSATmp* TraceBuilder::genStLoc(uint32_t id,
   SSATmp* retVal = newValue;
   if (doRefCount) {
     retVal = gen(IncRef, newValue);
-    genDecRef(prevValue);
+    gen(DecRef, prevValue);
   }
   return retVal;
 }
@@ -728,7 +696,7 @@ void TraceBuilder::genDecRefStack(Type type, uint32_t stackOff) {
     }
     gen(DecRefStack, type, m_spValue, cns(int64_t(stackOff)));
   } else {
-    genDecRef(tmp);
+    gen(DecRef, tmp);
   }
 }
 
@@ -1204,11 +1172,35 @@ SSATmp* TraceBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* TraceBuilder::preOptimizeDecRef(IRInstruction* inst) {
+  /*
+   * Refcount optimization:
+   *
+   * If the decref'ed value is guaranteed to be available after the decref,
+   * generate DecRefNZ instead of DecRef.
+   *
+   * This is safe WRT copy-on-write because all the instructions that
+   * could cause a COW return a new SSATmp that will replace the
+   * tracked state that we are using to determine the value is still
+   * available.  I.e. by the time they get to the DecRef we won't see
+   * it in isValueAvailable anymore and won't convert to DecRefNZ.
+   */
+  auto const srcInst = inst->getSrc(0)->inst();
+  if (srcInst->op() == IncRef) {
+    if (isValueAvailable(srcInst->getSrc(0))) {
+      inst->setOpcode(DecRefNZ);
+    }
+  }
+
+  return nullptr;
+}
+
 SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst)
   switch (inst->op()) {
     X(LdThis);
     X(LdCtx);
+    X(DecRef);
   default:
     break;
   }
@@ -1235,6 +1227,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst) {
            indent(), preOpt->inst()->toString());
     return preOpt;
   }
+  if (inst->op() == Nop) return nullptr;
 
   // copy propagation on inst source operands
   copyProp(inst);

@@ -116,8 +116,6 @@ public:
   SSATmp* genBoxLoc(uint32_t id);
   void    genBindLoc(uint32_t id, SSATmp* ref, bool doRefCount = true);
 
-  void    genCheckClsCnsDefined(SSATmp* cns, Trace* exitTrace);
-  SSATmp* genLdCurFuncPtr();
   void    genGuardLoc(uint32_t id, Type type, Trace* exitTrace);
   void    genAssertStk(uint32_t id, Type type);
   void    genAssertLoc(uint32_t id,
@@ -139,7 +137,6 @@ public:
   SSATmp* genConvToBool(SSATmp* src);
   SSATmp* genCallBuiltin(SSATmp* func, Type type,
                          uint32_t numArgs, SSATmp** args);
-  void    genDecRef(SSATmp* tmp);
   void    genDecRefStack(Type type, uint32_t stackOff);
   void    genDecRefLoc(int id);
   void    genDecRefThis();
@@ -314,6 +311,7 @@ public:
 private:
   SSATmp*   preOptimizeLdThis(IRInstruction*);
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
+  SSATmp*   preOptimizeDecRef(IRInstruction*);
 
   SSATmp*   preOptimize(IRInstruction* inst);
   SSATmp*   optimizeWork(IRInstruction* inst);

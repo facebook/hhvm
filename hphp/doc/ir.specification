@@ -1082,6 +1082,12 @@ DecRef S0:Gen
   Decrease the reference count of S0 by one, and call a destructor for
   types that require it if it goes to zero.
 
+  Note that although DecRef takes a Gen, we don't allow it to use
+  information about the inner types of a BoxedCell.  This is because
+  we don't guard on the inner types of a BoxedCell except when doing
+  LdRef.  For any S0 that is a strict subtype of BoxedCell, the DecRef
+  must just decref it as if it were a BoxedCell.
+
 DecRefMem S0:PtrToGen S1:ConstInt
 
   Decref the value pointed to by S0 at offset S1 (in bytes), calling

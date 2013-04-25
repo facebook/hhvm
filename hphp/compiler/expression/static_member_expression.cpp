@@ -24,7 +24,7 @@
 #include <compiler/analysis/function_scope.h>
 #include <util/util.h>
 #include <util/hash.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 #include <compiler/option.h>
 
 using namespace HPHP;

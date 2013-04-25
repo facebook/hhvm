@@ -21,7 +21,7 @@
 #include <compiler/option.h>
 #include <compiler/builtin_symbols.h>
 #include <compiler/expression/scalar_expression.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 #include <util/parser/parser.h>
 
 using namespace HPHP;

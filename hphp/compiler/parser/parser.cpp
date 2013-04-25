@@ -16,7 +16,7 @@
 
 #include <compiler/parser/parser.h>
 #include <compiler/type_annotation.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 #include <compiler/analysis/file_scope.h>
 
 #include <compiler/expression/expression_list.h>

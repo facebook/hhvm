@@ -29,7 +29,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/ext/ext_iconv.h>
 #include <unicode/coll.h> // icu
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 
 namespace HPHP {
 

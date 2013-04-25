@@ -20,7 +20,7 @@
 #include <sstream>
 #include <util/exception.h>
 #include <util/parser/location.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

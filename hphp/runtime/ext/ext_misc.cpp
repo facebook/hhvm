@@ -328,7 +328,7 @@ String f_token_name(int64_t token) {
 #endif
 #define YYTOKEN(num, name) #name
 #define YYTOKEN_MAP static const char *names[] =
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 #undef YYTOKEN_MAP
 #undef YYTOKEN
 

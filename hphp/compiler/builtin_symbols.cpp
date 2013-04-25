@@ -27,7 +27,7 @@
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/constant_table.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 #include <runtime/base/class_info.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/base/array/array_iterator.h>

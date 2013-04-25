@@ -24,7 +24,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/array/array_iterator.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 #include <runtime/vm/translator/translator-x64.h>
 #include <runtime/vm/runtime.h>
 #include <runtime/vm/instance.h>

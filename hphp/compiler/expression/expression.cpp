@@ -17,7 +17,7 @@
 #include <compiler/expression/expression.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/parser/parser.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 #include <util/util.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/function_scope.h>

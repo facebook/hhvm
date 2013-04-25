@@ -24,7 +24,7 @@
 #include <util/logger.h>
 #include <util/util.h>
 #include <util/job_queue.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 #include <runtime/vm/bytecode.h>
 #include <runtime/vm/repo.h>
 #include <runtime/vm/as.h>

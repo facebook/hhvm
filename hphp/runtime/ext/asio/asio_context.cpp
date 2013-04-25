@@ -26,12 +26,24 @@ namespace HPHP {
 
 namespace {
   template<class TWaitHandle>
-  void exitContextQueue(context_idx_t ctx_idx, smart::queue<TWaitHandle*> &queue) {
+  void exitContextQueue(context_idx_t ctx_idx,
+                        smart::queue<TWaitHandle*> &queue) {
     while (!queue.empty()) {
       auto wait_handle = queue.front();
       queue.pop();
       wait_handle->exitContext(ctx_idx);
       decRefObj(wait_handle);
+    }
+  }
+
+  template<bool decRef, class TWaitHandle>
+  void exitContextVector(context_idx_t ctx_idx,
+                         smart::vector<TWaitHandle*> &vector) {
+    while (!vector.empty()) {
+      auto wait_handle = vector.back();
+      vector.pop_back();
+      wait_handle->exitContext(ctx_idx);
+      if (decRef) decRefObj(wait_handle);
     }
   }
 }
@@ -40,7 +52,7 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
   assert(!m_current);
 
-  exitContextQueue(ctx_idx, m_runnableQueue);
+  exitContextVector<true>(ctx_idx, m_runnableQueue);
 
   for (auto it : m_priorityQueueDefault) {
     exitContextQueue(ctx_idx, it.second);
@@ -50,15 +62,11 @@ void AsioContext::exit(context_idx_t ctx_idx) {
     exitContextQueue(ctx_idx, it.second);
   }
 
-  while (!m_externalThreadEvents.empty()) {
-    auto ete_wh = m_externalThreadEvents.back();
-    m_externalThreadEvents.pop_back();
-    ete_wh->exitContext(ctx_idx);
-  }
+  exitContextVector<false>(ctx_idx, m_externalThreadEvents);
 }
 
 void AsioContext::schedule(c_AsyncFunctionWaitHandle* wait_handle) {
-  m_runnableQueue.push(wait_handle);
+  m_runnableQueue.push_back(wait_handle);
   wait_handle->incRefCount();
 }
 
@@ -114,8 +122,8 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
     // run queue of ready continuations once
     if (!m_runnableQueue.empty()) {
-      auto current = m_runnableQueue.front();
-      m_runnableQueue.pop();
+      auto current = m_runnableQueue.back();
+      m_runnableQueue.pop_back();
       m_current = current;
       auto exit_guard = folly::makeGuard([&] {
         m_current = nullptr;

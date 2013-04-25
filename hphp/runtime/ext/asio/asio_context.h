@@ -62,7 +62,7 @@ class AsioContext {
     c_AsyncFunctionWaitHandle* m_current;
 
     // queue of AsyncFunctionWaitHandles ready for immediate execution
-    smart::queue<c_AsyncFunctionWaitHandle*> m_runnableQueue;
+    smart::vector<c_AsyncFunctionWaitHandle*> m_runnableQueue;
 
     // queue of RescheduleWaitHandles scheduled in default mode
     reschedule_priority_queue_t m_priorityQueueDefault;

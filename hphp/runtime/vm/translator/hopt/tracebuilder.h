@@ -100,12 +100,6 @@ public:
    */
   SSATmp* genLdLocAsCell(uint32_t id, Trace* exitTrace);
 
-  /*
-   * Asserts that local 'id' has type 'type' and loads it into the
-   * returned SSATmp.
-   */
-  SSATmp* genLdAssertedLoc(uint32_t id, Type type);
-
   SSATmp* genStLoc(uint32_t id,
                    SSATmp* src,
                    bool doRefCount,
@@ -116,11 +110,7 @@ public:
   SSATmp* genBoxLoc(uint32_t id);
   void    genBindLoc(uint32_t id, SSATmp* ref, bool doRefCount = true);
 
-  void    genGuardLoc(uint32_t id, Type type, Trace* exitTrace);
   void    genAssertStk(uint32_t id, Type type);
-  void    genAssertLoc(uint32_t id,
-                       Type type,
-                       bool override = false); // ignores conflict w/ prev type
 
   // TODO(#2058865): we should have a real not opcode
   SSATmp* genNot(SSATmp* src);
@@ -309,6 +299,8 @@ public:
   }
 
 private:
+  SSATmp*   preOptimizeGuardLoc(IRInstruction*);
+  SSATmp*   preOptimizeAssertLoc(IRInstruction*);
   SSATmp*   preOptimizeLdThis(IRInstruction*);
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
   SSATmp*   preOptimizeDecRef(IRInstruction*);

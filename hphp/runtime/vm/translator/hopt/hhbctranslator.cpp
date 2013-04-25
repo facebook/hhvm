@@ -889,7 +889,13 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
 
     SSATmp* locals = gen(LdContLocalsPtr, cont);
     for (int i = 0; i < origLocals; ++i) {
-      SSATmp* loc = gen(IncRef, m_tb->genLdAssertedLoc(i, Type::Gen));
+      // We must generate an AssertLoc because we don't have tracelet
+      // guards on the object type in these outer generator functions.
+      gen(AssertLoc, Type::Gen, LocalId(i), m_tb->getFp());
+      auto const loc = gen(
+        IncRef,
+        m_tb->genLdLoc(i)
+      );
       gen(
         StMem,
         locals,
@@ -960,13 +966,15 @@ void HhbcTranslator::emitContExit() {
 
 void HhbcTranslator::emitUnpackCont() {
   gen(LinkContVarEnv, m_tb->getFp());
-  SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
+  gen(AssertLoc, Type::Obj, LocalId(0), m_tb->getFp());
+  auto const cont = m_tb->genLdLoc(0);
   push(gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel)));
 }
 
 void HhbcTranslator::emitPackCont(int64_t labelId) {
   gen(UnlinkContVarEnv, m_tb->getFp());
-  SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
+  gen(AssertLoc, Type::Obj, LocalId(0), m_tb->getFp());
+  auto const cont = m_tb->genLdLoc(0);
   m_tb->genSetPropCell(cont, CONTOFF(m_value), popC());
   gen(
     StRaw, cont, cns(RawMemSlot::ContLabel), cns(labelId)
@@ -974,7 +982,8 @@ void HhbcTranslator::emitPackCont(int64_t labelId) {
 }
 
 void HhbcTranslator::emitContReceive() {
-  SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
+  gen(AssertLoc, Type::Obj, LocalId(0), m_tb->getFp());
+  auto const cont = m_tb->genLdLoc(0);
   gen(ContRaiseCheck, getExitSlowTrace(), cont);
   auto const valOffset = cns(CONTOFF(m_received));
   push(gen(LdProp, Type::Cell, cont, valOffset));
@@ -982,7 +991,8 @@ void HhbcTranslator::emitContReceive() {
 }
 
 void HhbcTranslator::emitContRetC() {
-  SSATmp* cont = m_tb->genLdAssertedLoc(0, Type::Obj);
+  gen(AssertLoc, Type::Obj, LocalId(0), m_tb->getFp());
+  auto const cont = m_tb->genLdLoc(0);
   gen(ExitWhenSurprised, getExitSlowTrace());
   gen(
     StRaw, cont, cns(RawMemSlot::ContDone), cns(true)
@@ -1006,8 +1016,8 @@ void HhbcTranslator::emitContSendImpl(bool raise) {
   gen(ContStartedCheck, getExitSlowTrace(), cont);
   gen(ContPreNext, getExitSlowTrace(), cont);
 
-  SSATmp* value = m_tb->genLdAssertedLoc(0, Type::Cell);
-  value = gen(IncRef, value);
+  gen(AssertLoc, Type::Cell, LocalId(0), m_tb->getFp());
+  auto const value = gen(IncRef, m_tb->genLdLoc(0));
   m_tb->genSetPropCell(cont, CONTOFF(m_received), value);
   if (raise) {
     gen(
@@ -2105,20 +2115,15 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type) {
 }
 
 void HhbcTranslator::checkTypeLocal(uint32_t locId, Type type) {
-  m_tb->genGuardLoc(locId, type, getExitTrace());
+  gen(GuardLoc, type, getExitTrace(), LocalId(locId), m_tb->getFp());
 }
 
-void HhbcTranslator::assertTypeLocal(uint32_t localIndex, Type type) {
-  m_tb->genAssertLoc(localIndex, type, false);
+void HhbcTranslator::assertTypeLocal(uint32_t locId, Type type) {
+  gen(AssertLoc, type, LocalId(locId), m_tb->getFp());
 }
 
-void HhbcTranslator::overrideTypeLocal(uint32_t localIndex, Type type) {
-  // if changing the inner type of a boxed local, also drop the
-  // information about inner types for any other boxed local
-  if (type.isBoxed()) {
-    m_tb->dropLocalRefsInnerTypes();
-  }
-  m_tb->genAssertLoc(localIndex, type, true);
+void HhbcTranslator::overrideTypeLocal(uint32_t locId, Type type) {
+  gen(OverrideLoc, type, LocalId(locId), m_tb->getFp());
 }
 
 Trace* HhbcTranslator::guardTypeStack(uint32_t stackIndex,

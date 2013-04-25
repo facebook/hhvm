@@ -343,6 +343,11 @@ AssertLoc<T,localId> S0:FramePtr
   GuardLoc except it doesn't imply a runtime check and cannot cause
   control flow.
 
+OverrideLoc<T,localId> S0:StkPtr
+
+  Overrides tracked information about the type of a local in frame S0.
+  This is used to fix tracked state after InterpOne instructions.
+
 D:StkPtr = GuardStk<T> S0:StkPtr S1:ConstInt -> L
 
   Check that the type of the cell on the stack pointed to by S0 at

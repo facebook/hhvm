@@ -172,6 +172,7 @@ O(CastStk,                   D(StkPtr), S(StkPtr) C(Int),           Mem|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr) C(Int),                  E) \
 O(GuardRefs,                        ND, SUnk,                              E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
+O(OverrideLoc,                      ND, S(FramePtr),                       E) \
 O(OpAdd,                        DArith, SNum SNum,                         C) \
 O(OpSub,                        DArith, SNum SNum,                         C) \
 O(OpAnd,                        D(Int), SNumInt SNumInt,                   C) \
@@ -812,6 +813,7 @@ X(Marker,             MarkerData);
 X(RaiseUninitLoc,     LocalId);
 X(GuardLoc,           LocalId);
 X(AssertLoc,          LocalId);
+X(OverrideLoc,        LocalId);
 X(LdLocAddr,          LocalId);
 X(DecRefLoc,          LocalId);
 X(LdLoc,              LocalId);

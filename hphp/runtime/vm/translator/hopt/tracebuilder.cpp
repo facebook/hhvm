@@ -263,41 +263,6 @@ SSATmp* TraceBuilder::genCmp(Opcode opc, SSATmp* src1, SSATmp* src2) {
   return gen(opc, src1, src2);
 }
 
-void TraceBuilder::genGuardLoc(uint32_t id, Type type, Trace* exitTrace) {
-  SSATmp* prevValue = getLocalValue(id);
-  if (prevValue) {
-    gen(GuardType, type, exitTrace, prevValue);
-    return;
-  }
-  Type prevType = getLocalType(id);
-  if (prevType == Type::None) {
-    gen(GuardLoc, type, getFirstBlock(exitTrace), LocalId(id), m_fpValue);
-  } else {
-    // It doesn't make sense to be guarding on something that's deemed to fail
-    assert(prevType == type);
-  }
-}
-
-/**
- * Generates an AssertLoc instruction for the given local 'id' and 'type'.
- * If the 'override' flag is not set, then 'type' must be a subtype of the
- * previous tracked type for this local.
- */
-void TraceBuilder::genAssertLoc(uint32_t id, Type type,
-                                bool overrideType /* =false */) {
-  Type prevType = overrideType ? Type::None : getLocalType(id);
-  if (prevType == Type::None || type.strictSubtypeOf(prevType)) {
-    gen(AssertLoc, type, LocalId(id), m_fpValue);
-  } else {
-    assert(prevType == type || prevType.strictSubtypeOf(type));
-  }
-}
-
-SSATmp* TraceBuilder::genLdAssertedLoc(uint32_t id, Type type) {
-  genAssertLoc(id, type);
-  return genLdLoc(id);
-}
-
 SSATmp* TraceBuilder::genBoxLoc(uint32_t id) {
   SSATmp* prevValue  = genLdLoc(id);
   Type prevType = prevValue->type();
@@ -867,6 +832,13 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       setLocalValue(inst->getExtra<LdLoc>()->locId, inst->getDst());
       break;
 
+    case OverrideLoc:
+      // If changing the inner type of a boxed local, also drop the
+      // information about inner types for any other boxed locals.
+      if (inst->getTypeParam().isBoxed()) {
+        dropLocalRefsInnerTypes();
+      }
+      // fallthrough
     case AssertLoc:
     case GuardLoc:
       setLocalType(inst->getExtra<LocalId>()->locId,
@@ -1162,6 +1134,39 @@ SSATmp* TraceBuilder::cseLookup(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
+SSATmp* TraceBuilder::preOptimizeGuardLoc(IRInstruction* inst) {
+  auto const locId = inst->getExtra<GuardLoc>()->locId;
+
+  if (auto const prevValue = getLocalValue(locId)) {
+    return gen(
+      GuardType, inst->getTypeParam(), inst->getTaken(), prevValue
+    );
+  }
+
+  auto const prevType = getLocalType(locId);
+  if (prevType != Type::None) {
+    // It doesn't make sense to be guarding on something that's deemed
+    // to fail.
+    assert(prevType == inst->getTypeParam());
+    inst->convertToNop();
+  }
+
+  return nullptr;
+}
+
+SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
+  auto const locId = inst->getExtra<AssertLoc>()->locId;
+  auto const prevType = getLocalType(locId);
+  auto const typeParam = inst->getTypeParam();
+
+  if (prevType != Type::None && !typeParam.strictSubtypeOf(prevType)) {
+    assert(prevType.subtypeOf(typeParam));
+    inst->convertToNop();
+  }
+
+  return nullptr;
+}
+
 SSATmp* TraceBuilder::preOptimizeLdThis(IRInstruction* inst) {
   if (isThisAvailable()) inst->setTaken(nullptr);
   return nullptr;
@@ -1198,6 +1203,8 @@ SSATmp* TraceBuilder::preOptimizeDecRef(IRInstruction* inst) {
 SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst)
   switch (inst->op()) {
+    X(GuardLoc);
+    X(AssertLoc);
     X(LdThis);
     X(LdCtx);
     X(DecRef);

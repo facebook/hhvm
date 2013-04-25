@@ -100,7 +100,7 @@ int BuiltinSymbols::NumGlobalNames() {
     sizeof(BuiltinSymbols::GlobalNames[0]);
 }
 
-static TypePtr typePtrFromDataType(DataType dt) {
+static TypePtr typePtrFromDataType(DataType dt, TypePtr unknown) {
   switch (dt) {
     case KindOfNull:    return Type::Null;
     case KindOfBoolean: return Type::Boolean;
@@ -111,7 +111,7 @@ static TypePtr typePtrFromDataType(DataType dt) {
     case KindOfObject:  return Type::Object;
     case KindOfUnknown:
     default:
-      return Type::Any;
+      return unknown;
   }
 }
 
@@ -142,7 +142,7 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
     if (pinfo->attribute & ClassInfo::IsReference) {
       f->setRefParam(idx);
     }
-    f->setParamType(ar, idx, typePtrFromDataType(pinfo->argType));
+    f->setParamType(ar, idx, typePtrFromDataType(pinfo->argType, Type::Any));
     if (pinfo->valueLen) {
       f->setParamDefault(idx, pinfo->value, pinfo->valueLen,
                          std::string(pinfo->valueText, pinfo->valueTextLen));
@@ -150,7 +150,8 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   }
 
   if (method->returnType != KindOfNull) {
-    f->setReturnType(ar, typePtrFromDataType(method->returnType));
+    f->setReturnType(ar, typePtrFromDataType(method->returnType,
+                                             Type::Variant));
   }
 
   f->setClassInfoAttribute(attrs);
@@ -249,7 +250,8 @@ void BuiltinSymbols::ImportExtProperties(AnalysisResultPtr ar,
       modifiers->add(T_STATIC);
     }
 
-    dest->add(pinfo->name.data(), typePtrFromDataType(pinfo->type),
+    dest->add(pinfo->name.data(),
+              typePtrFromDataType(pinfo->type, Type::Variant),
               false, ar, ExpressionPtr(), modifiers);
   }
 }
@@ -264,9 +266,9 @@ void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
     // And that if it's deferred (SID) it'll be a String.
     ClassInfo::ConstantInfo *cinfo = *it;
     dest->add(cinfo->name.data(),
-              cinfo->isDeferred()
-                ? (cinfo->isCallback() ? Type::Object : Type::String)
-                : typePtrFromDataType(cinfo->getValue().getType()),
+              cinfo->isDeferred() ?
+              (cinfo->isCallback() ? Type::Object : Type::String) :
+              typePtrFromDataType(cinfo->getValue().getType(), Type::Variant),
               ExpressionPtr(), ar, ConstructPtr());
   }
 }
@@ -286,7 +288,8 @@ ClassScopePtr BuiltinSymbols::ImportClassScopePtr(AnalysisResultPtr ar,
     stdIfaces.push_back(it->data());
   }
 
-  ClassScopePtr cl(new ClassScope(ar, cls->getName().data(), parent.data(), stdIfaces, methods));
+  ClassScopePtr cl(new ClassScope(ar, cls->getName().data(), parent.data(),
+                                  stdIfaces, methods));
   for (uint i = 0; i < methods.size(); ++i) {
     methods[i]->setOuterScope(cl);
   }

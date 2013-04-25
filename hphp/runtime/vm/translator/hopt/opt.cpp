@@ -113,7 +113,7 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
   if (RuntimeOption::EvalHHIRExtraOptPass
       && (RuntimeOption::EvalHHIRCse
           || RuntimeOption::EvalHHIRSimplification)) {
-    traceBuilder->optimizeTrace();
+    traceBuilder->reoptimize();
     finishPass("after CSE/Simplification");
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned

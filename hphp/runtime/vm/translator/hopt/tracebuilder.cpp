@@ -433,7 +433,7 @@ SSATmp* TraceBuilder::genStLoc(uint32_t id,
   if (doRefCount) {
     assert(exit);
     Type innerType = trackedType.innerType();
-    prevValue = gen(LdRef, innerType, getFirstBlock(exit), prevRef);
+    prevValue = gen(LdRef, innerType, exit, prevRef);
   }
   // stref [prevRef] = t1
   Opcode opc = genStoreType ? StRef : StRefNT;
@@ -1289,8 +1289,8 @@ void CSEHash::filter(Block* block, IdomVector& idoms) {
 }
 
 /*
- * optimizeTrace runs another pass of CSE and simplification on an
- * already-built trace, like this:
+ * reoptimize() runs a trace through a second pass of TraceBuilder
+ * optimizations, like this:
  *
  *   reset state.
  *   move all blocks to a temporary list.
@@ -1310,7 +1310,7 @@ void CSEHash::filter(Block* block, IdomVector& idoms) {
  *     if the last conditional branch was turned into a jump, remove the
  *     fall-through edge to the next block.
  */
-void TraceBuilder::optimizeTrace() {
+void TraceBuilder::reoptimize() {
   m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_enableCse && !m_enableSimplification) return;

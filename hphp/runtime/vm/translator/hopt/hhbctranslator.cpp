@@ -1327,7 +1327,7 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId) {
     // TODO: 2068502 pick one of these two implementations and remove the other.
     Trace* exitTrace = getExitSlowTrace();
     SSATmp* cns = gen(LdClsCns, Type::Cell, cnsNameTmp, clsNameTmp);
-    gen(CheckInit, m_tb->getFirstBlock(exitTrace), cns);
+    gen(CheckInit, exitTrace, cns);
     push(cns);
   } else {
     // if-then-else
@@ -2713,7 +2713,7 @@ void HhbcTranslator::emitCGet(const StringData* name,
                 ? nullptr : getExitSlowTrace();
   SSATmp* ptr = (this->*emitLdAddr)(name,
                                     exitOnFailure
-                                      ? m_tb->getFirstBlock(getExitSlowTrace())
+                                      ? getExitSlowTrace()->front()
                                       : nullptr);
   if (!isInferedType) ptr = gen(UnboxPtr, ptr);
   pushIncRef(gen(LdMem, resultType, exit, ptr, cns(0)));

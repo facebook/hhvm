@@ -35,6 +35,8 @@ namespace VM {
 namespace Transl { struct PropInfo; }
 namespace JIT {
 
+//////////////////////////////////////////////////////////////////////
+
 struct EvalStack {
   void push(SSATmp* tmp) {
     m_vector.push_back(tmp);
@@ -78,30 +80,26 @@ private:
   std::vector<SSATmp*> m_vector;
 };
 
-class TypeGuard {
- public:
-  enum Kind {
-    Local,
-    Stack,
-    Iter
-  };
+//////////////////////////////////////////////////////////////////////
 
-  TypeGuard(Kind kind, uint32_t index, Type type)
-    : m_kind(kind)
-    , m_index(index)
-    , m_type(type)
-  {}
-
-  Kind      getKind()  const { return m_kind;  }
-  uint32_t  getIndex() const { return m_index; }
-  Type      type()  const { return m_type;  }
-
- private:
-  Kind      m_kind;
-  uint32_t  m_index;
-  Type      m_type;
-};
-
+/*
+ * This module is responsible for determining high-level HHBC->IR
+ * compilation strategy.
+ *
+ * For each bytecode Foo in HHBC, there is a function in this class
+ * called emitFoo which handles translating it into HHIR.
+ *
+ * Additionally, while transating bytecode, this module manages a
+ * virtual execution stack modelling the state of the stack since the
+ * last time we emitted an IR instruction that materialized it
+ * (e.g. SpillStack or SpillFrame).
+ *
+ * HhbcTranslator is where we make optimiations that relate to overall
+ * knowledge of the runtime and HHBC.  For example, decisions like
+ * whether to use IR instructions that have constant Class*'s (for a
+ * AttrUnique class) instead of loading a Class* from TargetCache are
+ * made at this level.
+ */
 struct HhbcTranslator {
   HhbcTranslator(IRFactory& irFactory,
                  Offset bcStartOffset,
@@ -618,6 +616,29 @@ private:
     const Func* func;
   };
 
+  struct TypeGuard {
+    enum Kind {
+      Local,
+      Stack,
+      Iter
+    };
+
+    TypeGuard(Kind kind, uint32_t index, Type type)
+      : m_kind(kind)
+      , m_index(index)
+      , m_type(type)
+    {}
+
+    Kind      getKind()  const { return m_kind;  }
+    uint32_t  getIndex() const { return m_index; }
+    Type      getType()  const { return m_type;  }
+
+  private:
+    Kind      m_kind;
+    uint32_t  m_index;
+    Type      m_type;
+  };
+
 private:
   IRFactory&        m_irFactory;
   std::unique_ptr<TraceBuilder>
@@ -656,6 +677,8 @@ private:
   vector<TypeGuard> m_typeGuards;
   Trace* const      m_exitGuardFailureTrace;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 }}} // namespace HPHP::VM::JIT
 

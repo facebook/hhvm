@@ -26,17 +26,71 @@
 
 #include "folly/ScopeGuard.h"
 
-namespace HPHP {
-namespace VM {
-namespace JIT {
+namespace HPHP { namespace VM { namespace JIT {
 
-class TraceBuilder {
-public:
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * This module provides the basic utilities for generating the IR
+ * instructions in a trace, emitting control flow, tracking the state
+ * of locals, and managing how state should merge at control flow join
+ * points.  It also performs some optimizations while generating IR,
+ * and may be reinvoked for a second optimization pass.
+ *
+ *
+ * The types of state tracked by TraceBuilder include:
+ *
+ *   - value availability
+ *
+ *      Used for value propagation and tracking which values can be
+ *      CSE'd (value numbering below).
+ *
+ *   - local types and values
+ *
+ *      We track the current view of these types as we link in new
+ *      instructions that mutate these.  The state of the stack is
+ *      encoded in the IR via the StkPtr chain instead.
+ *
+ *   - current frame and stack pointers
+ *
+ *   - the current function and bytecode offset
+ *
+ *
+ * This module is also responsible for organizing a few types of
+ * gen-time optimizations:
+ *
+ *   - preOptimize pass
+ *
+ *      Before an instruction is linked into the trace, TraceBuilder
+ *      internally runs preOptimize() on it, which can do some
+ *      tracelet-state related modifications to the instruction.  For
+ *      example, it can eliminate redundant guards or weaken DecRef
+ *      instructions that cannot go to zero to DecRefNZ.
+ *
+ *   - value numbering
+ *
+ *      After preOptimize, instructions that support it are hashed and
+ *      looked up in the CSEHash for this trace.  If we find an
+ *      available expression for the same value, instead of linking a
+ *      new instruction into the trace we will just add a use to the
+ *      previous SSATmp.
+ *
+ *   - simplification pass
+ *
+ *      After the preOptimize pass, TraceBuilder calls out to
+ *      Simplifier to perform state-independent optimizations, like
+ *      copy propagation and strength reduction.  (See simplifier.h.)
+ *
+ *
+ * After all the instructions are linked into the trace, this module
+ * can also be used to perform a second round of the above two
+ * optimizations via the reoptimize() entry point.
+ */
+struct TraceBuilder {
   TraceBuilder(Offset initialBcOffset,
                uint32_t initialSpOffsetFromFp,
                IRFactory&,
                const Func* func);
-
   ~TraceBuilder();
 
   void beginInlining(const Func* target,
@@ -51,6 +105,13 @@ public:
   void setEnableCse(bool val)            { m_enableCse = val; }
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
+
+  Trace* getTrace() const { return m_trace.get(); }
+  IRFactory* getIrFactory() { return &m_irFactory; }
+  int32_t getSpOffset() { return m_spOffset; }
+  SSATmp* getSp() const { return m_spValue; }
+  SSATmp* getFp() const { return m_fpValue; }
+
   Trace* makeExitTrace(uint32_t bcOff) {
     return m_trace->addExitTrace(makeTrace(m_curFunc->getValFunc(),
                                            bcOff));
@@ -61,15 +122,17 @@ public:
   void setThisAvailable() {
     m_thisIsAvailable = true;
   }
-  void dropLocalRefsInnerTypes();
-
-  // Run one more pass of simplification on this builder's trace.
-  void optimizeTrace();
 
   /*
-   * Create an IRInstruction attached to this Trace, and allocate a
-   * destination SSATmp for it.  Uses the same argument list format as
-   * IRFactory::gen.
+   * Run another pass of TraceBuilder-managed optimizations on this
+   * trace.
+   */
+  void reoptimize();
+
+  /*
+   * Create an IRInstruction attached to the current main Trace, and
+   * allocate a destination SSATmp for it.  Uses the same argument
+   * list format as IRFactory::gen.
    */
   template<class... Args>
   SSATmp* gen(Args&&... args) {
@@ -79,12 +142,21 @@ public:
     );
   }
 
+  /*
+   * Create an IRInstruction, similar to gen(), except link it into
+   * the Trace t instead of the current main trace.
+   */
   template<class... Args>
   IRInstruction* genFor(Trace* t, Args... args) {
     auto instr = m_irFactory.gen(args...);
     t->back()->push_back(instr);
     return instr;
   }
+
+  //////////////////////////////////////////////////////////////////////
+  // locals
+
+  Type getLocalType(unsigned id) const;
 
   SSATmp* genLdLoc(uint32_t id);
   SSATmp* genLdLocAddr(uint32_t id);
@@ -105,31 +177,16 @@ public:
                    bool doRefCount,
                    bool genStoreType,
                    Trace* exit);
-  void    genSetPropCell(SSATmp* base, int64_t offset, SSATmp* value);
 
   SSATmp* genBoxLoc(uint32_t id);
   void    genBindLoc(uint32_t id, SSATmp* ref, bool doRefCount = true);
 
-  void    genAssertStk(uint32_t id, Type type);
-
-  // TODO(#2058865): we should have a real not opcode
-  SSATmp* genNot(SSATmp* src);
-
-  SSATmp* genDefUninit();
-  SSATmp* genDefInitNull();
-  SSATmp* genDefNull();
-  SSATmp* genPtrToInitNull();
-  SSATmp* genPtrToUninit();
-  SSATmp* genDefNone();
-
-  SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
-  SSATmp* genCastStk(uint32_t id, Type type);
-  SSATmp* genConvToBool(SSATmp* src);
-  SSATmp* genCallBuiltin(SSATmp* func, Type type,
-                         uint32_t numArgs, SSATmp** args);
-  void    genDecRefStack(Type type, uint32_t stackOff);
   void    genDecRefLoc(int id);
-  void    genDecRefThis();
+
+  //////////////////////////////////////////////////////////////////////
+  // stack
+
+  void    genAssertStk(uint32_t id, Type type);
   SSATmp* genSpillStack(uint32_t stackAdjustment,
                         uint32_t numOpnds,
                         SSATmp** opnds);
@@ -139,38 +196,17 @@ public:
     return genLdStackAddr(m_spValue, offset);
   }
 
-  Trace* getExitSlowTrace(uint32_t bcOff,
-                          int32_t stackDeficit,
-                          uint32_t numOpnds,
-                          SSATmp** opnds);
+  void    genDecRefStack(Type type, uint32_t stackOff);
 
-  /*
-   * Generates a trace exit that can be the target of a conditional
-   * or unconditional control flow instruction from the main trace.
-   *
-   * Lifetime of the returned pointer is managed by the trace this
-   * TraceBuilder is generating.
-   */
-  typedef std::function<void(IRFactory*, Trace*)> ExitTraceCallback;
-  Trace* genExitTrace(uint32_t bcOff,
-                      int32_t  stackDeficit,
-                      uint32_t numOpnds,
-                      SSATmp* const* opnds,
-                      TraceExitType::ExitType,
-                      uint32_t notTakenBcOff = 0,
-                      ExitTraceCallback beforeExit = ExitTraceCallback());
+  //////////////////////////////////////////////////////////////////////
+  // constants
 
-  /*
-   * Generates a target exit trace for GuardFailure exits.
-   *
-   * Lifetime of the returned pointer is managed by the trace this
-   * TraceBuilder is generating.
-   */
-  Trace* genExitGuardFailure(uint32_t off);
-
-  // generates the ExitTrace instruction at the end of a trace
-  void genTraceEnd(uint32_t nextPc,
-                   TraceExitType::ExitType exitType = TraceExitType::Normal);
+  SSATmp* genDefUninit();
+  SSATmp* genDefInitNull();
+  SSATmp* genDefNull();
+  SSATmp* genPtrToInitNull();
+  SSATmp* genPtrToUninit();
+  SSATmp* genDefNone();
 
   template<typename T>
   SSATmp* cns(T val) {
@@ -191,38 +227,30 @@ public:
     return gen(LdConst, typeForConst(val), ConstData(val));
   }
 
-  Trace* getTrace() const { return m_trace.get(); }
-  IRFactory* getIrFactory() { return &m_irFactory; }
-  int32_t getSpOffset() { return m_spOffset; }
-  SSATmp* getSp() const { return m_spValue; }
-  SSATmp* getFp() const { return m_fpValue; }
+  //////////////////////////////////////////////////////////////////////
+  // dubious
 
-  Type getLocalType(unsigned id) const;
+  void    genSetPropCell(SSATmp* base, int64_t offset, SSATmp* value);
 
-  Block* getFirstBlock(Trace* trace) {
-    return trace ? trace->front() : nullptr;
-  }
+  // TODO(#2058865): we should have a real not opcode
+  SSATmp* genNot(SSATmp* src);
+
+  SSATmp* genCmp(Opcode opc, SSATmp* src1, SSATmp* src2);
+  SSATmp* genCastStk(uint32_t id, Type type);
+  SSATmp* genConvToBool(SSATmp* src);
+  SSATmp* genCallBuiltin(SSATmp* func, Type type,
+                         uint32_t numArgs, SSATmp** args);
+  void    genDecRefThis();
+
+  //////////////////////////////////////////////////////////////////////
+  // control flow
+
+  typedef std::function<void(IRFactory*, Trace*)> ExitTraceCallback;
 
   // hint the execution frequency of the current block
   void hint(Block::Hint h) const {
     m_trace->back()->setHint(h);
   }
-
-  struct DisableCseGuard {
-    explicit DisableCseGuard(TraceBuilder& tb)
-      : m_tb(tb)
-      , m_oldEnable(tb.m_enableCse)
-    {
-        m_tb.m_enableCse = false;
-    }
-    ~DisableCseGuard() {
-      m_tb.m_enableCse = m_oldEnable;
-    }
-
-   private:
-    TraceBuilder& m_tb;
-    bool m_oldEnable;
-  };
 
   /*
    * cond() generates if-then-else blocks within a trace.  The caller
@@ -298,6 +326,71 @@ public:
     appendBlock(done_block);
   }
 
+  Trace* getExitSlowTrace(uint32_t bcOff,
+                          int32_t stackDeficit,
+                          uint32_t numOpnds,
+                          SSATmp** opnds);
+
+  /*
+   * Generates a trace exit that can be the target of a conditional
+   * or unconditional control flow instruction from the main trace.
+   *
+   * Lifetime of the returned pointer is managed by the trace this
+   * TraceBuilder is generating.
+   */
+  Trace* genExitTrace(uint32_t bcOff,
+                      int32_t  stackDeficit,
+                      uint32_t numOpnds,
+                      SSATmp* const* opnds,
+                      TraceExitType::ExitType,
+                      uint32_t notTakenBcOff = 0,
+                      ExitTraceCallback beforeExit = ExitTraceCallback());
+
+  /*
+   * Generates a target exit trace for GuardFailure exits.
+   *
+   * Lifetime of the returned pointer is managed by the trace this
+   * TraceBuilder is generating.
+   */
+  Trace* genExitGuardFailure(uint32_t off);
+
+  // generates the ExitTrace instruction at the end of a trace
+  void genTraceEnd(uint32_t nextPc,
+                   TraceExitType::ExitType exitType = TraceExitType::Normal);
+
+private:
+  // RAII disable of CSE; only restores if it used to be on.  Used for
+  // control flow, where we currently don't allow CSE.
+  struct DisableCseGuard {
+    explicit DisableCseGuard(TraceBuilder& tb)
+      : m_tb(tb)
+      , m_oldEnable(tb.m_enableCse)
+    {
+        m_tb.m_enableCse = false;
+    }
+    ~DisableCseGuard() {
+      m_tb.m_enableCse = m_oldEnable;
+    }
+
+   private:
+    TraceBuilder& m_tb;
+    bool m_oldEnable;
+  };
+
+  // Saved state information associated with the start of a block, or
+  // for the caller of an inlined function.
+  struct State {
+    SSATmp* spValue;
+    SSATmp* fpValue;
+    SSATmp* curFunc;
+    int32_t spOffset;
+    bool thisAvailable;
+    std::vector<SSATmp*> localValues;
+    std::vector<Type> localTypes;
+    SSATmp* refCountedMemValue;
+    std::vector<SSATmp*> callerAvailableValues; // unordered list
+  };
+
 private:
   SSATmp*   preOptimizeGuardLoc(IRInstruction*);
   SSATmp*   preOptimizeAssertLoc(IRInstruction*);
@@ -329,33 +422,20 @@ private:
   void      updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
   void      updateTrackedState(IRInstruction* inst);
   void      clearTrackedState();
+  void      dropLocalRefsInnerTypes();
 
   Trace* makeTrace(const Func* func, uint32_t bcOff) {
     return new Trace(m_irFactory.defBlock(func), bcOff);
   }
 
-  // Saved state information associated with the start of a block, or
-  // for the caller of an inlined function.
-  struct State {
-    SSATmp* spValue;
-    SSATmp* fpValue;
-    SSATmp* curFunc;
-    int32_t spOffset;
-    bool thisAvailable;
-    std::vector<SSATmp*> localValues;
-    std::vector<Type> localTypes;
-    SSATmp* refCountedMemValue;
-    std::vector<SSATmp*> callerAvailableValues; // unordered list
-  };
+private:
   std::unique_ptr<State> createState() const;
   void saveState(Block*);
   void mergeState(State* s1);
   void useState(std::unique_ptr<State> state);
   void useState(Block*);
 
-  /*
-   * Fields
-   */
+private:
   IRFactory& m_irFactory;
   Simplifier m_simplifier;
 
@@ -424,6 +504,8 @@ private:
   // the caller needs to be preserved here.
   std::vector<std::unique_ptr<State>> m_inlineSavedStates;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 }}}
 

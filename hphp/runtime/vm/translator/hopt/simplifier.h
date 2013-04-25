@@ -20,12 +20,32 @@
 #include "runtime/vm/translator/hopt/cse.h"
 #include "runtime/vm/translator/hopt/ir.h"
 
-namespace HPHP {
-namespace VM {
-namespace JIT {
+namespace HPHP { namespace VM { namespace JIT {
+
+//////////////////////////////////////////////////////////////////////
 
 class TraceBuilder;
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Module that handles state-independent optimizations.
+ *
+ * Specifically, the optimizations in this module should be those that
+ * we can do based only on chasing the use-def chain.  Instructions
+ * can be modified in place or replaced with new instructions as
+ * needed.
+ *
+ * The Simplifier recursively invokes TraceBuilder, which can call
+ * back into it.  It's used both during our initial gen-time
+ * optimizations and in the TraceBuilder::reoptimize pass.
+ *
+ * The line of separation between these two modules is essentially
+ * about who needs to know about tracked state.  If an optimization is
+ * completely stateless (e.g. strength reduction, constant folding,
+ * etc) it goes in here, otherwise it goes in TraceBuilder or some
+ * other pass.
+ */
 struct Simplifier {
   explicit Simplifier(TraceBuilder* t) : m_tb(t) {}
 
@@ -106,6 +126,8 @@ private:
   TraceBuilder* const m_tb;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Propagate very simple copies on the given instruction.
  * Specifically, Movs, and also IncRefs of non-refcounted types.
@@ -113,6 +135,8 @@ private:
  * More complicated copy-propagation is performed in the Simplifier.
  */
 void copyProp(IRInstruction*);
+
+//////////////////////////////////////////////////////////////////////
 
 }}}
 

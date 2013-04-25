@@ -25,7 +25,7 @@
 
 namespace HPHP { namespace VM { namespace JIT {
 
-#define CTX() m_tb.genDefConst(contextClass())
+#define CTX() cns(contextClass())
 
 static const MInstrAttr Warn = MIA_warn;
 static const MInstrAttr Unset = MIA_unset;

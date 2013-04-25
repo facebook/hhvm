@@ -692,9 +692,9 @@ void HhbcTranslator::VectorTranslator::emitBaseG() {
   SSATmp* gblName = getBase();
   m_ht.exceptionBarrier();
   m_base = gen(BaseG,
-                    m_tb.genDefConst((TCA)opFunc),
-                    gblName,
-                    genMisPtr());
+               cns(reinterpret_cast<TCA>(opFunc)),
+               gblName,
+               genMisPtr());
 }
 
 void HhbcTranslator::VectorTranslator::emitBaseS() {

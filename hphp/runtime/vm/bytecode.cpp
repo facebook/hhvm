@@ -2096,7 +2096,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   }
 #endif
 
-  HphpArray *arr = dynamic_cast<HphpArray*>(params.get());
+  ArrayData *arr = params.get();
   ExtraArgs* extraArgs = nullptr;
   if (isMagicCall) {
     // Put the method name into the location of the first parameter. We
@@ -2104,68 +2104,57 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
     m_stack.pushStringNoRc(invName);
     // Put array of arguments into the location of the second parameter
     m_stack.pushArray(arr);
-  } else {
-    Array hphpArrCopy(HphpArray::GetStaticEmptyArray());
-    if (UNLIKELY(!arr) && !params.empty()) {
-      // empty() check needed because we sometimes represent empty arrays
-      // as smart pointers with m_px == NULL, which freaks out
-      // ArrayData::merge.
-      hphpArrCopy.merge(params);
-      arr = dynamic_cast<HphpArray*>(hphpArrCopy.get());
-      assert(arr && arr->isHphpArray());
+  } else if (arr) {
+    const int numParams = f->numParams();
+    const int numExtraArgs = arr->size() - numParams;
+    if (numExtraArgs > 0 && (f->attrs() & AttrMayUseVV)) {
+      extraArgs = ExtraArgs::allocateUninit(numExtraArgs);
     }
-    if (arr) {
-      const int numParams = f->numParams();
-      const int numExtraArgs = arr->size() - numParams;
-      if (numExtraArgs > 0 && (f->attrs() & AttrMayUseVV)) {
-        extraArgs = ExtraArgs::allocateUninit(numExtraArgs);
-      }
-      int paramId = 0;
-      for (ssize_t i = arr->iter_begin();
-           i != ArrayData::invalid_index;
-           i = arr->iter_advance(i), ++paramId) {
-        TypedValue *from = arr->nvGetValueRef(i);
-        TypedValue *to;
-        if (LIKELY(paramId < numParams)) {
-          to = m_stack.allocTV();
-        } else {
-          if (!(f->attrs() & AttrMayUseVV)) {
-            // Discard extra arguments, since the function cannot
-            // possibly use them.
-            assert(extraArgs == nullptr);
-            ar->setNumArgs(numParams);
-            break;
-          }
-          assert(extraArgs != nullptr && numExtraArgs > 0);
-          // VarEnv expects the extra args to be in "reverse" order
-          // (i.e. the last extra arg has the lowest address)
-          to = extraArgs->getExtraArg(paramId - numParams);
+    int paramId = 0;
+    for (ssize_t i = arr->iter_begin();
+         i != ArrayData::invalid_index;
+         i = arr->iter_advance(i), ++paramId) {
+      TypedValue *from = arr->nvGetValueRef(i);
+      TypedValue *to;
+      if (LIKELY(paramId < numParams)) {
+        to = m_stack.allocTV();
+      } else {
+        if (!(f->attrs() & AttrMayUseVV)) {
+          // Discard extra arguments, since the function cannot
+          // possibly use them.
+          assert(extraArgs == nullptr);
+          ar->setNumArgs(numParams);
+          break;
         }
-        tvDup(from, to);
-        if (LIKELY(!f->byRef(paramId))) {
-          if (to->m_type == KindOfRef) {
-            tvUnbox(to);
+        assert(extraArgs != nullptr && numExtraArgs > 0);
+        // VarEnv expects the extra args to be in "reverse" order
+        // (i.e. the last extra arg has the lowest address)
+        to = extraArgs->getExtraArg(paramId - numParams);
+      }
+      tvDup(from, to);
+      if (LIKELY(!f->byRef(paramId))) {
+        if (to->m_type == KindOfRef) {
+          tvUnbox(to);
+        }
+      } else if (!(flags & InvokeIgnoreByRefErrors) &&
+                 (from->m_type != KindOfRef ||
+                  from->m_data.pref->_count == 2)) {
+        raise_warning("Parameter %d to %s() expected to be "
+                      "a reference, value given",
+                      paramId + 1, f->fullName()->data());
+        if (skipCufOnInvalidParams) {
+          if (extraArgs) {
+            int n = paramId >= numParams ? paramId - numParams + 1 : 0;
+            ExtraArgs::deallocate(extraArgs, n);
+            paramId -= n;
           }
-        } else if (!(flags & InvokeIgnoreByRefErrors) &&
-                   (from->m_type != KindOfRef ||
-                    from->m_data.pref->_count == 2)) {
-          raise_warning("Parameter %d to %s() expected to be "
-                        "a reference, value given",
-                        paramId + 1, f->fullName()->data());
-          if (skipCufOnInvalidParams) {
-            if (extraArgs) {
-              int n = paramId >= numParams ? paramId - numParams + 1 : 0;
-              ExtraArgs::deallocate(extraArgs, n);
-              paramId -= n;
-            }
-            while (paramId >= 0) {
-              m_stack.popTV();
-              paramId--;
-            }
-            m_stack.popAR();
-            tvWriteNull(retval);
-            return;
+          while (paramId >= 0) {
+            m_stack.popTV();
+            paramId--;
           }
+          m_stack.popAR();
+          tvWriteNull(retval);
+          return;
         }
       }
     }

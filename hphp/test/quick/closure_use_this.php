@@ -1,0 +1,3 @@
+<?php
+
+function () use ($this) {};

@@ -2,7 +2,7 @@
 
 class X {
   function foo() {
-    return function() use(&$this) {
+    return function() {
       return $this->bar();
     }
 ;

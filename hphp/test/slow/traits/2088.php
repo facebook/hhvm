@@ -3,7 +3,7 @@
 trait Too {
   function gen() {
     $abc = $this->input();
-    $a = function ($arg) use ($abc, $this) {
+    $a = function ($arg) use ($abc) {
       var_dump($arg);
       var_dump($abc);
       return $this->output();

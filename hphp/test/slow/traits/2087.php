@@ -3,7 +3,7 @@
 trait T {
   public function foo() {
     $values = array(1, 2, 3);
-    $values = array_map(function($p) use ($this) {
+    $values = array_map(function($p) {
       return $this->goo($p);
     }
 , $values);

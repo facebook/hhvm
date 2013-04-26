@@ -1653,10 +1653,22 @@ void Parser::onClosure(Token &out, Token* modifiers, Token &ret, Token &ref,
   auto stmt = onFunctionHelper(FunctionType::Closure,
                 modifiers, ret, ref, nullptr, params, stmts, nullptr, true);
 
+  ExpressionListPtr vars = dynamic_pointer_cast<ExpressionList>(cparams->exp);
+  if (vars) {
+    for (int i = vars->getCount() - 1; i >= 0; i--) {
+      ParameterExpressionPtr param(
+        dynamic_pointer_cast<ParameterExpression>((*vars)[i]));
+      if (param->getName() == "this") {
+        PARSE_ERROR("Cannot use $this as lexical variable");
+      }
+    }
+  }
+
   ClosureExpressionPtr closure = NEW_EXP(
     ClosureExpression,
     dynamic_pointer_cast<FunctionStatement>(stmt),
-    dynamic_pointer_cast<ExpressionList>(cparams->exp));
+    vars
+  );
   closure->getClosureFunction()->setContainingClosure(closure);
   out->exp = closure;
 }

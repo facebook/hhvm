@@ -16,6 +16,7 @@
 */
 
 #include <runtime/ext/ext_asio.h>
+#include <runtime/ext/ext_closure.h>
 #include <runtime/ext/asio/asio_context.h>
 #include <runtime/ext/asio/asio_session.h>
 #include <system/lib/systemlib.h>
@@ -41,6 +42,15 @@ void c_SetResultToRefWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use SetResultToRefWaitHandle::create() instead of constructor"));
   throw e;
+}
+
+void c_SetResultToRefWaitHandle::ti_setoncreatecallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set SetResultToRefWaitHandle::onCreate: on_create_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnSetResultToRefCreateCallback(callback.getObjectDataOrNull());
 }
 
 Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref) {
@@ -78,8 +88,14 @@ Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref)
     tvBox(var_or_cell);
   }
 
-  c_SetResultToRefWaitHandle* my_wh = NEWOBJ(c_SetResultToRefWaitHandle)();
+  p_SetResultToRefWaitHandle my_wh = NEWOBJ(c_SetResultToRefWaitHandle)();
   my_wh->initialize(child_wh, var_or_cell->m_data.pref);
+
+  AsioSession* session = AsioSession::Get();
+  if (UNLIKELY(session->hasOnSetResultToRefCreateCallback())) {
+    session->onSetResultToRefCreate(my_wh.get(), child_wh);
+  }
+
   return my_wh;
 }
 

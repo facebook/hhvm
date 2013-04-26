@@ -23,10 +23,14 @@
 #include <mutex>
 #include <runtime/base/base_includes.h>
 #include <runtime/ext/asio/asio_context.h>
+#include <runtime/ext/ext_closure.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+FORWARD_DECLARE_CLASS_BUILTIN(WaitHandle);
+FORWARD_DECLARE_CLASS_BUILTIN(GenArrayWaitHandle);
+FORWARD_DECLARE_CLASS_BUILTIN(SetResultToRefWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(ContinuationWaitHandle);
 FORWARD_DECLARE_CLASS_BUILTIN(ExternalThreadEventWaitHandle);
 
@@ -79,13 +83,62 @@ class AsioSession {
     void enqueueExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle);
 
     // callback: on failed
-    void setOnFailedCallback(ObjectData* on_failed_callback);
+    void setOnFailedCallback(ObjectData* on_failed_callback) {
+      assert(!on_failed_callback || on_failed_callback->instanceof(c_Closure::s_cls));
+      m_onFailedCallback = on_failed_callback;
+    }
     void onFailed(CObjRef exception);
 
-    // callback: on started
-    void setOnStartedCallback(ObjectData* on_started_callback);
-    void onStarted(CObjRef wait_handle);
-    bool hasOnStartedCallback() { return m_onStartedCallback; }
+    // ContinuationWaitHandle callbacks:
+    void setOnContinuationCreateCallback(ObjectData* on_start) {
+      assert(!on_start || on_start->instanceof(c_Closure::s_cls));
+      m_onContinuationCreateCallback = on_start;
+    }
+    void setOnContinuationYieldCallback(ObjectData* on_yield) {
+      assert(!on_yield || on_yield->instanceof(c_Closure::s_cls));
+      m_onContinuationYieldCallback = on_yield;
+    }
+    void setOnContinuationSuccessCallback(ObjectData* on_success) {
+      assert(!on_success || on_success->instanceof(c_Closure::s_cls));
+      m_onContinuationSuccessCallback = on_success;
+    }
+    void setOnContinuationFailCallback(ObjectData* on_fail) {
+      assert(!on_fail || on_fail->instanceof(c_Closure::s_cls));
+      m_onContinuationFailCallback = on_fail;
+    }
+    bool hasOnContinuationCreateCallback() { return m_onContinuationCreateCallback.get(); }
+    bool hasOnContinuationYieldCallback() { return m_onContinuationYieldCallback.get(); }
+    bool hasOnContinuationSuccessCallback() { return m_onContinuationSuccessCallback.get(); }
+    bool hasOnContinuationFailCallback() { return m_onContinuationFailCallback.get(); }
+    void onContinuationCreate(c_ContinuationWaitHandle* cont);
+    void onContinuationYield(c_ContinuationWaitHandle* cont, c_WaitHandle* child);
+    void onContinuationSuccess(c_ContinuationWaitHandle* cont, CVarRef result);
+    void onContinuationFail(c_ContinuationWaitHandle* cont, CObjRef exception);
+
+    // WaitHandle callbacks:
+    void setOnJoinCallback(ObjectData* on_join) {
+      assert(!on_join || on_join->instanceof(c_Closure::s_cls));
+      m_onJoinCallback = on_join;
+    }
+    bool hasOnJoinCallback() { return m_onJoinCallback.get(); }
+    void onJoin(c_WaitHandle* wait_handle);
+
+    // GenArrayWaitHandle callbacks:
+    void setOnGenArrayCreateCallback(ObjectData* on_create) {
+      assert(!on_create || on_create->instanceof(c_Closure::s_cls));
+      m_onGenArrayCreateCallback = on_create;
+    }
+    bool hasOnGenArrayCreateCallback() { return m_onGenArrayCreateCallback.get(); }
+    void onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, CVarRef dependencies);
+
+    // SetResultToRefWaitHandle callbacks:
+    void setOnSetResultToRefCreateCallback(ObjectData* on_create) {
+      assert(!on_create || on_create->instanceof(c_Closure::s_cls));
+      m_onSetResultToRefCreateCallback = on_create;
+    }
+    bool hasOnSetResultToRefCreateCallback() { return m_onSetResultToRefCreateCallback.get(); }
+    void onSetResultToRefCreate(c_SetResultToRefWaitHandle* wait_handle, CObjRef child);
+
 
   private:
     static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);
@@ -100,8 +153,16 @@ class AsioSession {
     std::mutex m_readyExternalThreadEventsMutex;
     std::condition_variable m_readyExternalThreadEventsCondition;
 
-    ObjectData* m_onFailedCallback;
-    ObjectData* m_onStartedCallback;
+    Object m_onContinuationCreateCallback;
+    Object m_onContinuationYieldCallback;
+    Object m_onContinuationSuccessCallback;
+    Object m_onContinuationFailCallback;
+    Object m_onGenArrayCreateCallback;
+    Object m_onSetResultToRefCreateCallback;
+    Object m_onJoinCallback;
+
+    // Legacy callback for backwards compatibility.
+    Object m_onFailedCallback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

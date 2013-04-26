@@ -134,6 +134,10 @@ void c_WaitableWaitHandle::join() {
   assert(!isFinished());
   assert(!session->isInContext() || session->getCurrentContext()->isRunning());
 
+  if (UNLIKELY(session->hasOnJoinCallback())) {
+    session->onJoin(this);
+  }
+
   // enter new asio context and set up guard that will exit once we are done
   session->enterContext();
 

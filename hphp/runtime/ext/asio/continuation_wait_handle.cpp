@@ -16,6 +16,7 @@
 */
 
 #include <runtime/ext/ext_asio.h>
+#include <runtime/ext/ext_closure.h>
 #include <runtime/ext/ext_continuation.h>
 #include <runtime/ext/asio/asio_context.h>
 #include <runtime/ext/asio/asio_session.h>
@@ -47,6 +48,42 @@ void c_ContinuationWaitHandle::t___construct() {
   throw e;
 }
 
+void c_ContinuationWaitHandle::ti_setoncreatecallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set ContinuationWaitHandle::onStart: on_start_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnContinuationCreateCallback(callback.getObjectDataOrNull());
+}
+
+void c_ContinuationWaitHandle::ti_setonyieldcallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set ContinuationWaitHandle::onYield: on_yield_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnContinuationYieldCallback(callback.getObjectDataOrNull());
+}
+
+void c_ContinuationWaitHandle::ti_setonsuccesscallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set ContinuationWaitHandle::onSuccess: on_success_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnContinuationSuccessCallback(callback.getObjectDataOrNull());
+}
+
+void c_ContinuationWaitHandle::ti_setonfailcallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set ContinuationWaitHandle::onFail: on_fail_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnContinuationFailCallback(callback.getObjectDataOrNull());
+}
+
 void c_ContinuationWaitHandle::Create(c_Continuation* continuation) {
   assert(continuation);
   assert(continuation->m_waitHandle.isNull());
@@ -71,8 +108,8 @@ void c_ContinuationWaitHandle::Create(c_Continuation* continuation) {
   continuation->m_waitHandle->initialize(continuation, depth + 1);
 
   // needs to be called after continuation->m_waitHandle is set
-  if (UNLIKELY(session->hasOnStartedCallback())) {
-    session->onStarted(continuation->m_waitHandle);
+  if (UNLIKELY(session->hasOnContinuationCreateCallback())) {
+    session->onContinuationCreate(continuation->m_waitHandle.get());
   }
 }
 
@@ -139,6 +176,12 @@ void c_ContinuationWaitHandle::run() {
               "Expected yield argument to be an instance of WaitHandle"));
           throw e;
         }
+
+        AsioSession* session = AsioSession::Get();
+        if (UNLIKELY(session->hasOnContinuationYieldCallback())) {
+          session->onContinuationYield(this, child);
+        }
+
         m_child = child;
       }
     } while (m_child.isNull() || m_child->isFinished());
@@ -160,6 +203,11 @@ void c_ContinuationWaitHandle::onUnblocked() {
 }
 
 void c_ContinuationWaitHandle::markAsSucceeded(const TypedValue* result) {
+  AsioSession* session = AsioSession::Get();
+  if (UNLIKELY(session->hasOnContinuationSuccessCallback())) {
+    session->onContinuationSuccess(this, tvAsCVarRef(result));
+  }
+
   setResult(result);
 
   // free m_continuation / m_child later, result may be stored there
@@ -168,7 +216,11 @@ void c_ContinuationWaitHandle::markAsSucceeded(const TypedValue* result) {
 }
 
 void c_ContinuationWaitHandle::markAsFailed(CObjRef exception) {
-  AsioSession::Get()->onFailed(exception);
+  AsioSession* session = AsioSession::Get();
+  session->onFailed(exception);
+  if (UNLIKELY(session->hasOnContinuationFailCallback())) {
+    session->onContinuationFail(this, exception);
+  }
   setException(exception.get());
 
   m_continuation = nullptr;

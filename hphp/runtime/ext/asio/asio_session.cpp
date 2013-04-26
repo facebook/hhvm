@@ -35,8 +35,7 @@ void AsioSession::Init() {
 AsioSession::AsioSession()
     : m_contexts(), m_readyExternalThreadEvents(nullptr),
       m_readyExternalThreadEventsMutex(),
-      m_readyExternalThreadEventsCondition(),
-      m_onFailedCallback(nullptr), m_onStartedCallback(nullptr) {
+      m_readyExternalThreadEventsCondition() {
 }
 
 void AsioSession::enterContext() {
@@ -118,20 +117,8 @@ void AsioSession::enqueueExternalThreadEvent(c_ExternalThreadEventWaitHandle* wa
   }
 }
 
-void AsioSession::setOnFailedCallback(ObjectData* on_failed_callback) {
-  if (on_failed_callback) {
-    on_failed_callback->incRefCount();
-  }
-
-  if (m_onFailedCallback) {
-    decRefObj(m_onFailedCallback);
-  }
-
-  m_onFailedCallback = on_failed_callback;
-}
-
 void AsioSession::onFailed(CObjRef exception) {
-  if (m_onFailedCallback) {
+  if (m_onFailedCallback.get()) {
     try {
       vm_call_user_func(m_onFailedCallback, Array::Create(exception));
     } catch (const Object& callback_exception) {
@@ -140,24 +127,78 @@ void AsioSession::onFailed(CObjRef exception) {
   }
 }
 
-void AsioSession::setOnStartedCallback(ObjectData* on_started_callback) {
-  if (on_started_callback) {
-    on_started_callback->incRefCount();
+void AsioSession::onContinuationCreate(c_ContinuationWaitHandle* cont) {
+  assert(m_onContinuationCreateCallback.get());
+  try {
+    vm_call_user_func(
+      m_onContinuationCreateCallback,
+      Array::Create(cont));
+  } catch (const Object& callback_exception) {
+    raise_warning("[asio] Ignoring exception thrown by ContinuationWaitHandle::onCreate callback");
   }
-
-  if (m_onStartedCallback) {
-    decRefObj(m_onStartedCallback);
-  }
-
-  m_onStartedCallback = on_started_callback;
 }
 
-void AsioSession::onStarted(CObjRef wait_handle) {
-  assert(m_onStartedCallback);
+void AsioSession::onContinuationYield(c_ContinuationWaitHandle* cont, c_WaitHandle* child) {
+  assert(m_onContinuationYieldCallback.get());
   try {
-    vm_call_user_func(m_onStartedCallback, Array::Create(wait_handle));
+    vm_call_user_func(
+      m_onContinuationYieldCallback,
+      CREATE_VECTOR2(cont, child));
   } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by onStarted callback");
+    raise_warning("[asio] Ignoring exception thrown by ContinuationWaitHandle::onYield callback");
+  }
+}
+
+void AsioSession::onContinuationSuccess(c_ContinuationWaitHandle* cont, CVarRef result) {
+  assert(m_onContinuationSuccessCallback.get());
+  try {
+    vm_call_user_func(
+      m_onContinuationSuccessCallback,
+      CREATE_VECTOR2(cont, result));
+  } catch (const Object& callback_exception) {
+    raise_warning("[asio] Ignoring exception thrown by ContinuationWaitHandle::onSuccess callback");
+  }
+}
+
+void AsioSession::onContinuationFail(c_ContinuationWaitHandle* cont, CObjRef exception) {
+  assert(m_onContinuationFailCallback.get());
+  try {
+    vm_call_user_func(
+      m_onContinuationFailCallback,
+      CREATE_VECTOR2(cont, exception));
+  } catch (const Object& callback_exception) {
+    raise_warning("[asio] Ignoring exception thrown by ContinuationWaitHandle::onFail callback");
+  }
+}
+
+void AsioSession::onJoin(c_WaitHandle* wait_handle) {
+  assert(m_onJoinCallback.get());
+  try {
+    vm_call_user_func(m_onJoinCallback, Array::Create(wait_handle));
+  } catch (const Object& callback_exception) {
+    raise_warning("[asio] Ignoring exception thrown by WaitHandle::onJoin callback");
+  }
+}
+
+void AsioSession::onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, CVarRef dependencies) {
+  assert(m_onGenArrayCreateCallback.get());
+  try {
+    vm_call_user_func(
+      m_onGenArrayCreateCallback,
+      CREATE_VECTOR2(wait_handle, dependencies));
+  } catch (const Object& callback_exception) {
+    raise_warning("[asio] Ignoring exception thrown by GenArrayWaitHandle::onCreate callback");
+  }
+}
+
+void AsioSession::onSetResultToRefCreate(c_SetResultToRefWaitHandle* wait_handle, CObjRef child) {
+  assert(m_onSetResultToRefCreateCallback.get());
+  try {
+    vm_call_user_func(
+      m_onSetResultToRefCreateCallback,
+      CREATE_VECTOR2(wait_handle, child));
+  } catch (const Object& callback_exception) {
+    raise_warning("[asio] Ignoring exception thrown by SetResultToRefWaitHandle::onCreate callback");
   }
 }
 

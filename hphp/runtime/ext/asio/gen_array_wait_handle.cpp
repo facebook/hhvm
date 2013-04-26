@@ -16,6 +16,7 @@
 */
 
 #include <runtime/ext/ext_asio.h>
+#include <runtime/ext/ext_closure.h>
 #include <runtime/ext/asio/asio_context.h>
 #include <runtime/ext/asio/asio_session.h>
 #include <system/lib/systemlib.h>
@@ -47,6 +48,15 @@ void c_GenArrayWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use GenArrayWaitHandle::create() instead of constructor"));
   throw e;
+}
+
+void c_GenArrayWaitHandle::ti_setoncreatecallback(CVarRef callback) {
+  if (!callback.isNull() && !callback.instanceof(c_Closure::s_cls)) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Unable to set GenArrayWaitHandle::onCreate: on_create_cb not a closure"));
+    throw e;
+  }
+  AsioSession::Get()->setOnGenArrayCreateCallback(callback.getObjectDataOrNull());
 }
 
 Object c_GenArrayWaitHandle::ti_create(CArrRef dependencies) {
@@ -92,8 +102,14 @@ Object c_GenArrayWaitHandle::ti_create(CArrRef dependencies) {
       assert(dynamic_cast<c_WaitableWaitHandle*>(child));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
-      c_GenArrayWaitHandle* my_wh = NEWOBJ(c_GenArrayWaitHandle)();
+      p_GenArrayWaitHandle my_wh = NEWOBJ(c_GenArrayWaitHandle)();
       my_wh->initialize(exception, deps, iter_pos, child_wh);
+
+      AsioSession* session = AsioSession::Get();
+      if (UNLIKELY(session->hasOnGenArrayCreateCallback())) {
+        session->onGenArrayCreate(my_wh.get(), dependencies);
+      }
+
       return my_wh;
     }
   }

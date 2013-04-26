@@ -63,6 +63,7 @@ class c_WaitHandle : public ExtObjectData {
   public: c_WaitHandle(VM::Class* cls = c_WaitHandle::s_cls);
   public: ~c_WaitHandle();
   public: void t___construct();
+  public: static void ti_setonjoincallback(CVarRef callback);
   public: Object t_getwaithandle();
   public: void t_import();
   public: Variant t_join();
@@ -272,9 +273,12 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   public: c_ContinuationWaitHandle(VM::Class* cls = c_ContinuationWaitHandle::s_cls);
   public: ~c_ContinuationWaitHandle();
   public: void t___construct();
+  public: static void ti_setoncreatecallback(CVarRef callback);
+  public: static void ti_setonyieldcallback(CVarRef callback);
+  public: static void ti_setonsuccesscallback(CVarRef callback);
+  public: static void ti_setonfailcallback(CVarRef callback);
   public: Object t_getprivdata();
   public: void t_setprivdata(CObjRef data);
-
 
  public:
   static void Create(c_Continuation* continuation);
@@ -320,7 +324,9 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   public: c_GenArrayWaitHandle(VM::Class* cls = c_GenArrayWaitHandle::s_cls);
   public: ~c_GenArrayWaitHandle();
   public: void t___construct();
+  public: static void ti_setoncreatecallback(CVarRef callback);
   public: static Object ti_create(CArrRef dependencies);
+
 
  public:
   String getName();
@@ -354,7 +360,9 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
   public: c_SetResultToRefWaitHandle(VM::Class* cls = c_SetResultToRefWaitHandle::s_cls);
   public: ~c_SetResultToRefWaitHandle();
   public: void t___construct();
+  public: static void ti_setoncreatecallback(CVarRef callback);
   public: static Object ti_create(CObjRef wait_handle, VRefParam ref);
+
 
  public:
   String getName();

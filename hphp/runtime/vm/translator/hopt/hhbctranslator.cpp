@@ -951,6 +951,8 @@ SSATmp* HhbcTranslator::getStrName(const StringData* knownName) {
 
 SSATmp* HhbcTranslator::emitLdClsPropAddrOrExit(const StringData* propName,
                                                 Block* block) {
+  if (!block) spillStack();
+
   SSATmp* clsTmp = popA();
   SSATmp* prop = getStrName(propName);
   SSATmp* addr = m_tb->gen(LdClsPropAddr,

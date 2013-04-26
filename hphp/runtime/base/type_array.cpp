@@ -703,7 +703,7 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
 Array Array::values() const {
   ArrayInit ai(size(), ArrayInit::vectorInit);
   for (ArrayIter iter(*this); iter; ++iter) {
-    ai.set(iter.secondRef());
+    ai.set(withRefBind(iter.secondRef()));
   }
   return ai.create();
 }

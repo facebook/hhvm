@@ -1219,7 +1219,7 @@ void HhbcTranslator::emitEmptyL(int32_t id) {
   } else {
     Trace* exitTrace = getExitTrace();
     SSATmp* ld = m_tb->genLdLocAsCell(id, exitTrace);
-    push(m_tb->genNot(m_tb->genConvToBool(ld)));
+    push(m_tb->genNot(gen(ConvCellToBool, ld)));
   }
 }
 
@@ -1300,7 +1300,7 @@ SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
   } else {
     target = getExitTrace(offset);
   }
-  SSATmp* boolSrc = m_tb->genConvToBool(src);
+  auto const boolSrc = gen(ConvCellToBool, src);
   gen(DecRef, src);
   return gen(negate ? JmpZero : JmpNZero, target, boolSrc);
 }
@@ -2451,8 +2451,8 @@ void HhbcTranslator::emitCastArray() {
 }
 
 void HhbcTranslator::emitCastBool() {
-  SSATmp* src = popC();
-  push(m_tb->genConvToBool(src));
+  auto const src = popC();
+  push(gen(ConvCellToBool, src));
   gen(DecRef, src);
 }
 
@@ -2651,7 +2651,7 @@ void HhbcTranslator::emitIsset(const StringData* name,
 
 void HhbcTranslator::emitEmptyMem(SSATmp* ptr) {
   SSATmp* ld = gen(LdMem, Type::Cell, gen(UnboxPtr, ptr), cns(0));
-  push(m_tb->genNot(m_tb->genConvToBool(ld)));
+  push(m_tb->genNot(gen(ConvCellToBool, ld)));
 }
 
 template<class CheckSupportedFun, class EmitLdAddrFun>
@@ -2671,7 +2671,7 @@ void HhbcTranslator::emitEmpty(const StringData* name,
                             gen(UnboxPtr, ptr),
                             cns(0)
                           );
-                          return m_tb->genNot(m_tb->genConvToBool(ld));
+                          return m_tb->genNot(gen(ConvCellToBool, ld));
                         },
                         [&] { // Taken
                           return cns(true);
@@ -2794,7 +2794,7 @@ void HhbcTranslator::emitBinaryArith(Opcode opc) {
 
 void HhbcTranslator::emitNot() {
   SSATmp* src = popC();
-  push(m_tb->genNot(m_tb->genConvToBool(src)));
+  push(m_tb->genNot(gen(ConvCellToBool, src)));
   gen(DecRef, src);
 }
 
@@ -2878,9 +2878,9 @@ void HhbcTranslator::emitBitNot() {
 void HhbcTranslator::emitXor() {
   SSATmp* btr = popC();
   SSATmp* btl = popC();
-  SSATmp* tr = m_tb->genConvToBool(btr);
-  SSATmp* tl = m_tb->genConvToBool(btl);
-  push(m_tb->genConvToBool(gen(OpXor, tl, tr)));
+  SSATmp* tr = gen(ConvCellToBool, btr);
+  SSATmp* tl = gen(ConvCellToBool, btl);
+  push(gen(ConvCellToBool, gen(OpXor, tl, tr)));
   gen(DecRef, btl);
   gen(DecRef, btr);
 }

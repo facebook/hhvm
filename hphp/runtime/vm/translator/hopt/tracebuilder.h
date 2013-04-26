@@ -232,8 +232,6 @@ struct TraceBuilder {
   // TODO(#2058865): we should have a real not opcode
   SSATmp* genNot(SSATmp* src);
 
-  SSATmp* genConvToBool(SSATmp* src);
-
   //////////////////////////////////////////////////////////////////////
   // control flow
 

@@ -98,6 +98,7 @@ private:
   SSATmp* simplifyConvBoolToStr(IRInstruction*);
   SSATmp* simplifyConvDblToStr(IRInstruction*);
   SSATmp* simplifyConvIntToStr(IRInstruction*);
+  SSATmp* simplifyConvCellToBool(IRInstruction*);
   SSATmp* simplifyUnbox(IRInstruction*);
   SSATmp* simplifyUnboxPtr(IRInstruction*);
   SSATmp* simplifyCheckInit(IRInstruction* inst);

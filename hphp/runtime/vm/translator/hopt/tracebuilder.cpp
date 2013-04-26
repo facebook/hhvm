@@ -204,7 +204,7 @@ Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
 
 SSATmp* TraceBuilder::genNot(SSATmp* src) {
   assert(src->type() == Type::Bool);
-  return genConvToBool(gen(OpXor, src, cns(1)));
+  return gen(ConvCellToBool, gen(OpXor, src, cns(1)));
 }
 
 SSATmp* TraceBuilder::genDefUninit() {
@@ -229,28 +229,6 @@ SSATmp* TraceBuilder::genPtrToUninit() {
 
 SSATmp* TraceBuilder::genDefNone() {
   return gen(DefConst, Type::None, ConstData(0));
-}
-
-SSATmp* TraceBuilder::genConvToBool(SSATmp* src) {
-  Type fromType = src->type();
-  if (fromType.isBool()) {
-    return src;
-  } else if (fromType.isNull()) {
-    return cns(false);
-  } else if (fromType.isArray()) {
-    return gen(ConvArrToBool, src);
-  } else if (fromType.isDbl()) {
-    return gen(ConvDblToBool, src);
-  } else if (fromType.isInt()) {
-    return gen(ConvIntToBool, src);
-  } else if (fromType.isString()) {
-    return gen(ConvStrToBool, src);
-  } else if (fromType.isObj()) {
-    // If a value is known to be an object, it is known to be non null.
-    return cns(true);
-  } else {
-    return gen(ConvCellToBool, src);
-  }
 }
 
 SSATmp* TraceBuilder::genBoxLoc(uint32_t id) {

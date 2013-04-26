@@ -280,6 +280,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConvBoolToStr: return simplifyConvBoolToStr(inst);
   case ConvDblToStr:  return simplifyConvDblToStr(inst);
   case ConvIntToStr:  return simplifyConvIntToStr(inst);
+  case ConvCellToBool:return simplifyConvCellToBool(inst);
   case Unbox:         return simplifyUnbox(inst);
   case UnboxPtr:      return simplifyUnboxPtr(inst);
   case IsType:
@@ -580,7 +581,7 @@ SSATmp* Simplifier::simplifyNot(SSATmp* src) {
     case OpXor: {
       // !!X --> bool(X)
       if (isNotInst(inst->getSrc(0))) {
-        return m_tb->genConvToBool(inst->getSrc(0));
+        return gen(ConvCellToBool, inst->getSrc(0));
       }
       break;
     }
@@ -1129,7 +1130,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, SSATmp* src1, SSATmp* src2) {
     }
 
     // Nothing fancy to do - perform juggling as normal.
-    return gen(opName, m_tb->genConvToBool(src1), src2);
+    return gen(opName, gen(ConvCellToBool, src1), src2);
   }
 
   // From here on, we must be careful of how Type::Obj gets dealt with,
@@ -1398,6 +1399,25 @@ SSATmp* Simplifier::simplifyConvIntToStr(IRInstruction* inst) {
     return cns(
       StringData::convert_integer_helper(src->getValInt()));
   }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
+  auto const src     = inst->getSrc(0);
+  auto const srcType = src->type();
+
+  if (srcType.isBool())   return src;
+  if (srcType.isNull())   return cns(false);
+  if (srcType.isArray())  return gen(ConvArrToBool, src);
+  if (srcType.isDbl())    return gen(ConvDblToBool, src);
+  if (srcType.isInt())    return gen(ConvIntToBool, src);
+  if (srcType.isString()) return gen(ConvStrToBool, src);
+
+  if (srcType.isObj()) {
+    // If a value is known to be an object, it is known to be non null.
+    return cns(true);
+  }
+
   return nullptr;
 }
 

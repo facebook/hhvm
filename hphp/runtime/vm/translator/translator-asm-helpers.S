@@ -12,7 +12,6 @@
  */
 
 ///////////////////////////////////////////////////////////////////////////////
-#if defined(__x86_64__)
   .byte 0
   .align 16
   .section .text
@@ -21,8 +20,10 @@ enterTCHelper:
   // Prologue
   .cfi_startproc
   push %rbp
-  .cfi_adjust_cfa_offset 8  // offset to previous frame relative to %rsp
-  .cfi_offset rbp, -16      // Where to find previous value of rbp
+  // offset to previous frame relative to %rsp
+  .cfi_adjust_cfa_offset 8
+  // Where to find previous value of rbp
+  .cfi_offset rbp, -16
 
   // Set firstAR->m_savedRbp to point to this frame.
   mov %rsp, (%r8)
@@ -32,10 +33,14 @@ enterTCHelper:
   .cfi_adjust_cfa_offset 8
 
   // Set up special registers used for translated code.
-  mov %rdi, %rbx          // rVmSp
-  mov %r9, %r12           // rVmTl
-  mov %rsi, %rbp          // rVmFp
-  mov 0x30(%rcx), %r15    // rStashedAR saved across service requests
+  // rVmSp
+  mov %rdi, %rbx
+  // rVmTl
+  mov %r9, %r12
+  // rVmFp
+  mov %rsi, %rbp
+  // rStashedAR saved across service requests
+  mov 0x30(%rcx), %r15
 
   /*
    * The translated code we are about to enter does not follow the
@@ -45,7 +50,8 @@ enterTCHelper:
    * 16-byte aligned.
    */
 
-  sub $0x100, %rsp // kReservedRSPScratchSpace
+  // kReservedRSPScratchSpace
+  sub $0x100, %rsp
 
   /*
    * If returning from a BIND_CALL request, push the return IP saved
@@ -63,7 +69,8 @@ enterTCHelper:
   call *%rdx
 .LenterTCHelper$serviceReqLabel:
 
-  add $0x100, %rsp // kReservedRSPScratchSpace
+  // kReservedRSPScratchSpace
+  add $0x100, %rsp
   // Restore infoPtr into %rbx
   pop %rbx
   .cfi_adjust_cfa_offset -8
@@ -98,10 +105,3 @@ enterTCHelper:
   .cfi_adjust_cfa_offset -8
   ret
   .cfi_endproc
-///////////////////////////////////////////////////////////////////////////////
-#elif defined(__AARCH64_EL__)
-  .globl enterTCHelper
-enterTCHelper:
-  brk 0
-
-#endif

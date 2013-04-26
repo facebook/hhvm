@@ -14,20 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <boost/checked_delete.hpp>
-#include <boost/optional.hpp>
-#include <boost/utility/typed_in_place_factory.hpp>
-
-#include <iostream>
-#include <algorithm>
-
+#include "runtime/vm/class.h"
 #include "runtime/base/base_includes.h"
 #include "runtime/base/array/hphp_array.h"
 #include "util/util.h"
 #include "util/debug.h"
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/hhbc.h"
-#include "runtime/vm/class.h"
 #include "runtime/vm/repo.h"
 #include "runtime/vm/translator/targetcache.h"
 #include "runtime/vm/translator/translator.h"
@@ -38,6 +31,13 @@
 #include "runtime/vm/request_arena.h"
 #include "system/lib/systemlib.h"
 #include "util/logger.h"
+
+#include <boost/checked_delete.hpp>
+#include <boost/optional.hpp>
+#include <boost/utility/typed_in_place_factory.hpp>
+
+#include <iostream>
+#include <algorithm>
 
 namespace HPHP {
 namespace VM {
@@ -123,7 +123,7 @@ void PreClass::Prop::prettyPrint(std::ostream& out) const {
 // PreClass::Const.
 
 PreClass::Const::Const(PreClass* preClass, const StringData* n,
-		               const StringData* typeConstraint,
+                       const StringData* typeConstraint,
                        const TypedValue& val, const StringData* phpCode)
   : m_preClass(preClass), m_name(n), m_typeConstraint(typeConstraint),
     m_phpCode(phpCode) {
@@ -270,7 +270,7 @@ bool PreClassEmitter::addMethod(FuncEmitter* method) {
 }
 
 bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
-		                          const StringData* typeConstraint,
+                                  const StringData* typeConstraint,
                                   const StringData* docComment,
                                   TypedValue* val,
                                   DataType hphpcType) {
@@ -293,8 +293,8 @@ PreClassEmitter::lookupProp(const StringData* propName) const {
 }
 
 bool PreClassEmitter::addConstant(const StringData* n,
-		                          const StringData* typeConstraint,
-		                          TypedValue* val,
+                                  const StringData* typeConstraint,
+                                  TypedValue* val,
                                   const StringData* phpCode) {
   ConstMap::Builder::const_iterator it = m_constMap.find(n);
   if (it != m_constMap.end()) {
@@ -844,49 +844,53 @@ Class::PropInitVec* Class::initPropsImpl() const {
   // we prevent it by setting AttrNoInjection (see Func::init)
   NameValueTable propNvt(numDeclProperties());
   NameValueTableWrapper propArr(&propNvt);
+  // bump the refCount until we have a real reference to it
   propArr.incRefCount();
 
-  // Create a sentinel that uniquely identifies uninitialized properties.
-  ObjectData* sentinel = SystemLib::AllocPinitSentinel();
-  sentinel->incRefCount();
   // Insert propArr and sentinel into the args array, transferring ownership.
-  HphpArray* args = NEW(HphpArray)(2);
+  ArrayData* args = NEW(HphpArray)(2);
   args->incRefCount();
   {
-    TypedValue tv;
-    tv.m_data.parr = &propArr;
-    tv.m_type = KindOfArray;
-    args->nvAppend(&tv);
+    // the first argument is byRef. Make a reference,
+    // and hold its refCount above one until after the call
+    Variant arg0(&propArr);
+    // match the incRef above, now we have an owner
     propArr.decRefCount();
-  }
-  {
-    TypedValue tv;
-    tv.m_data.pobj = sentinel;
-    tv.m_type = KindOfObject;
-    args->nvAppend(&tv);
-    sentinel->decRefCount();
-  }
-  TypedValue* tvSentinel = args->nvGetValueRef(1);
-  for (size_t i = 0; i < nProps; ++i) {
-    TypedValue& prop = (*propVec)[i];
-    if (prop.m_type == KindOfUninit) {
-      // Replace undefined values with tvSentinel, which acts as a
-      // unique sentinel for undefined properties in 86pinit().
-      tvDup(tvSentinel, &prop);
+    args = args->appendRef(arg0, 0);
+    {
+      // Create a sentinel that uniquely identifies uninitialized properties.
+      ObjectData* sentinel = SystemLib::AllocPinitSentinel();
+      sentinel->incRefCount();
+      TypedValue tv;
+      tv.m_data.pobj = sentinel;
+      tv.m_type = KindOfObject;
+      args = args->append(tvAsCVarRef(&tv), false);
+      sentinel->decRefCount();
     }
-    // We have to use m_originalMangledName here because the
-    // 86pinit methods for traits depend on it
-    const StringData* k = (m_declProperties[i].m_attrs & AttrPrivate)
-                           ? m_declProperties[i].m_originalMangledName
-                           : m_declProperties[i].m_name;
-    propNvt.migrateSet(k, &prop);
-  }
-  // Iteratively invoke 86pinit() methods upward through the inheritance chain.
-  for (Class::InitVec::const_reverse_iterator it = m_pinitVec.rbegin();
-       it != m_pinitVec.rend(); ++it) {
-    TypedValue retval;
-    g_vmContext->invokeFunc(&retval, *it, args, nullptr, const_cast<Class*>(this));
-    assert(!IS_REFCOUNTED_TYPE(retval.m_type));
+    TypedValue* tvSentinel = args->nvGetValueRef(1);
+    for (size_t i = 0; i < nProps; ++i) {
+      TypedValue& prop = (*propVec)[i];
+      if (prop.m_type == KindOfUninit) {
+        // Replace undefined values with tvSentinel, which acts as a
+        // unique sentinel for undefined properties in 86pinit().
+        tvDup(tvSentinel, &prop);
+      }
+      // We have to use m_originalMangledName here because the
+      // 86pinit methods for traits depend on it
+      const StringData* k = (m_declProperties[i].m_attrs & AttrPrivate)
+        ? m_declProperties[i].m_originalMangledName
+        : m_declProperties[i].m_name;
+      propNvt.migrateSet(k, &prop);
+    }
+    // Iteratively invoke 86pinit() methods upward
+    // through the inheritance chain.
+    for (Class::InitVec::const_reverse_iterator it = m_pinitVec.rbegin();
+         it != m_pinitVec.rend(); ++it) {
+      TypedValue retval;
+      g_vmContext->invokeFunc(&retval, *it, args, nullptr,
+                              const_cast<Class*>(this));
+      assert(!IS_REFCOUNTED_TYPE(retval.m_type));
+    }
   }
   // For properties that do not require deep initialization, promote strings
   // and arrays that came from 86pinit to static. This allows us to initialize
@@ -1044,20 +1048,19 @@ TypedValue* Class::initSPropsImpl() const {
     NameValueTableWrapper nvtWrapper(&*nvt);
     nvtWrapper.incRefCount();
 
-    HphpArray* args = NEW(HphpArray)(1);
+    ArrayData* args = NEW(HphpArray)(1);
     args->incRefCount();
     try {
       {
-        TypedValue tv;
-        tv.m_data.parr = &nvtWrapper;
-        tv.m_type = KindOfArray;
-        args->nvAppend(&tv);
-      }
-      for (unsigned i = 0; i < m_sinitVec.size(); i++) {
-        TypedValue retval;
-        g_vmContext->invokeFunc(&retval, m_sinitVec[i], args, nullptr,
-                                const_cast<Class*>(this));
-        assert(!IS_REFCOUNTED_TYPE(retval.m_type));
+        Variant arg0(&nvtWrapper);
+        args = args->appendRef(arg0, false);
+
+        for (unsigned i = 0; i < m_sinitVec.size(); i++) {
+          TypedValue retval;
+          g_vmContext->invokeFunc(&retval, m_sinitVec[i], args, nullptr,
+                                  const_cast<Class*>(this));
+          assert(!IS_REFCOUNTED_TYPE(retval.m_type));
+        }
       }
       // Release the args array.  nvtWrapper is on the stack, so it
       // better have a single reference.

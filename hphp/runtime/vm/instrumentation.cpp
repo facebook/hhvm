@@ -53,7 +53,7 @@ void Injection::execute() const {
   // Note: For now we don't merge analysis code's class and function.
   // Later we might decide to do so
   g_vmContext->invokeFunc(&retval, m_unit->getMain(curClass()),
-                          Array::Create(), this_, cls, varEnv, nullptr, nullptr);
+                          null_array, this_, cls, varEnv);
   if (varEnv) {
     varEnv->setCfp(cfpSave);
   }

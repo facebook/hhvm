@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include "runtime/vm/instance.h"
 #include "runtime/base/base_includes.h"
 #include "runtime/base/variable_serializer.h"
 #include "runtime/vm/core_types.h"
 #include "runtime/vm/member_operations.h"
 #include "runtime/vm/hhbc.h"
 #include "runtime/vm/class.h"
-#include "runtime/vm/instance.h"
 #include "runtime/vm/object_allocator_sizes.h"
 #include "runtime/vm/translator/translator-inline.h"
 #include "runtime/ext/ext_collections.h"
@@ -76,7 +76,7 @@ Instance* Instance::callCustomInstanceInit() {
     // reasonable refcount.
     try {
       incRefCount();
-      g_vmContext->invokeFunc(&tv, init, Array::Create(), this);
+      g_vmContext->invokeFunc(&tv, init, null_array, this);
       decRefCount();
       assert(!IS_REFCOUNTED_TYPE(tv.m_type));
     } catch (...) {
@@ -625,7 +625,7 @@ Variant Instance::t___destruct() {
   const Func* method = m_cls->lookupMethod(sd__destruct);
   if (method) {
     Variant v;
-    g_vmContext->invokeFunc((TypedValue*)&v, method, Array::Create(), this);
+    g_vmContext->invokeFunc((TypedValue*)&v, method, null_array, this);
     return v;
   } else {
     return uninit_null();
@@ -638,7 +638,7 @@ Variant Instance::t___call(Variant v_name, Variant v_arguments) {
   if (method) {
     Variant v;
     g_vmContext->invokeFunc((TypedValue*)&v, method,
-                          CREATE_VECTOR2(v_name, v_arguments), this);
+                            CREATE_VECTOR2(v_name, v_arguments), this);
     return v;
   } else {
     return uninit_null();
@@ -663,7 +663,7 @@ Variant Instance::t___get(Variant v_name) {
   if (method) {
     Variant v;
     g_vmContext->invokeFunc((TypedValue*)&v, method,
-                          CREATE_VECTOR1(v_name), this);
+                            CREATE_VECTOR1(v_name), this);
     return v;
   } else {
     return uninit_null();
@@ -675,7 +675,7 @@ bool Instance::t___isset(Variant v_name) {
   if (method) {
     Variant v;
     g_vmContext->invokeFunc((TypedValue*)&v, method,
-                          CREATE_VECTOR1(v_name), this);
+                            CREATE_VECTOR1(v_name), this);
     return v;
   } else {
     return uninit_null();
@@ -687,7 +687,7 @@ Variant Instance::t___unset(Variant v_name) {
   if (method) {
     Variant v;
     g_vmContext->invokeFunc((TypedValue*)&v, method,
-                          CREATE_VECTOR1(v_name), this);
+                            CREATE_VECTOR1(v_name), this);
     return v;
   } else {
     return uninit_null();
@@ -699,7 +699,7 @@ Variant Instance::t___sleep() {
   const Func *method = m_cls->lookupMethod(sd__sleep);
   if (method) {
     TypedValue tv;
-    g_vmContext->invokeFunc(&tv, method, Array::Create(), this);
+    g_vmContext->invokeFunc(&tv, method, null_array, this);
     return tvAsVariant(&tv);
   } else {
     clearAttribute(HasSleep);
@@ -712,7 +712,7 @@ Variant Instance::t___wakeup() {
   const Func *method = m_cls->lookupMethod(sd__wakeup);
   if (method) {
     TypedValue tv;
-    g_vmContext->invokeFunc(&tv, method, Array::Create(), this);
+    g_vmContext->invokeFunc(&tv, method, null_array, this);
     return tvAsVariant(&tv);
   } else {
     return uninit_null();
@@ -725,7 +725,7 @@ Variant Instance::t___set_state(Variant v_properties) {
   if (method) {
     Variant v;
     g_vmContext->invokeFunc((TypedValue*)&v, method,
-                          CREATE_VECTOR1(v_properties), this);
+                            CREATE_VECTOR1(v_properties), this);
     return v;
   } else {
     return false;
@@ -736,7 +736,7 @@ String Instance::t___tostring() {
   const Func *method = m_cls->getToString();
   if (method) {
     TypedValue tv;
-    g_vmContext->invokeFunc(&tv, method, Array::Create(), this);
+    g_vmContext->invokeFunc(&tv, method, null_array, this);
     if (!IS_STRING_TYPE(tv.m_type)) {
       void (*notify_user)(const char *, ...) = &raise_error;
       if (hphpiCompat) {
@@ -759,7 +759,7 @@ Variant Instance::t___clone() {
   const Func *method = m_cls->lookupMethod(sd__clone);
   if (method) {
     TypedValue tv;
-    g_vmContext->invokeFunc(&tv, method, Array::Create(), this);
+    g_vmContext->invokeFunc(&tv, method, null_array, this);
     return false;
   } else {
     return false;

@@ -18,13 +18,17 @@ if (count($argv) != 6) {
 $cmd = "FBMAKE_BIN_ROOT=$argv[5] $argv[1] $argv[2] -m $argv[3] $argv[4]";
 loop_tests($cmd, function ($line) {
   if (preg_match('/^(?:hphp\/)?(test[^\s]*).*/', $line, &$m)) {
+    if (test_is_running()) {
+      // Previous test made it! Just needs finishing.
+      finish('passed');
+    }
     start($m[1]);
     return;
   }
-  if (!test_is_running()) return;
-  if (preg_match('/^\s*passed.*/', $line)) {
-    finish('passed');
-  } else if (preg_match('/^[\s\*]*FAILED.*/', $line)) {
+  if (preg_match('/^[\s\*]*FAILED.*/', $line)) {
     finish('failed');
+  } else if (preg_match('/^\s*Totals.*/', $line) && test_is_running()) {
+    // Account for last test if it was successful
+    finish('passed');
   }
 });

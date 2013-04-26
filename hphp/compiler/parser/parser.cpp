@@ -400,7 +400,9 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
   } else {
     const string &s = name.text();
     if (s == "func_num_args" || s == "func_get_args" || s == "func_get_arg") {
-      m_hasCallToGetArgs.back() = true;
+      if (m_hasCallToGetArgs.size() > 0) {
+        m_hasCallToGetArgs.back() = true;
+      }
     }
 
     SimpleFunctionCallPtr call

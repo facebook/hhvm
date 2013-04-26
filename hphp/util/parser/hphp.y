@@ -1673,6 +1673,7 @@ shape_literal:
 
 array_literal:
     T_ARRAY '(' array_pair_list ')'   { _p->onArray($$,$3,T_ARRAY);}
+    | '[' array_pair_list ']'         { _p->onArray($$,$2,T_ARRAY);}
 ;
 
 collection_literal:
@@ -1998,6 +1999,7 @@ static_scalar_ae:
   | '-' static_numeric_scalar_ae       { UEXP($$,$2,'-',1);}
   | T_ARRAY '('
     static_array_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY);}
+  | '[' static_array_pair_list_ae ']'  { _p->onArray($$,$2,T_ARRAY);}
   | T_SHAPE '('
     static_shape_pair_list_ae ')'      { only_in_strict_mode(_p);
                                          _p->onArray($$,$3,T_ARRAY); }

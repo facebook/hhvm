@@ -181,6 +181,7 @@ O(OpXor,                        D(Int), SNumInt SNumInt,                   C) \
 O(OpMul,                        DArith, SNum SNum,                         C) \
 O(OpDiv,                        DArith, SNum SNum,                         C) \
 O(OpMod,                        D(Int), SNumInt SNumInt,                 C|N) \
+O(OpNot,                       D(Bool), S(Bool),                           C) \
                                                                               \
 O(ConvBoolToArr,                D(Arr), S(Bool),                         C|N) \
 O(ConvDblToArr,                 D(Arr), S(Dbl),                          C|N) \
@@ -218,6 +219,7 @@ O(ConvObjToStr,                 D(Str), S(Obj),                   N|Er|CRc|K) \
 O(ConvCellToStr,                D(Str), S(Cell),                  N|Er|CRc|K) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
+O(InstanceOf,                  D(Bool), S(Cls) S(Cls) C(Bool),           C|N) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
 O(IsNTypeMem,                  D(Bool), S(PtrToGen),                      NA) \
                                                                               \
@@ -230,8 +232,6 @@ O(OpEq,                        D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpNeq,                       D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpSame,                      D(Bool), S(Gen) S(Gen),                   C|N) \
 O(OpNSame,                     D(Bool), S(Gen) S(Gen),                   C|N) \
-O(InstanceOf,                  D(Bool), S(Cls) S(Cls) C(Bool),           C|N) \
-O(NInstanceOf,                 D(Bool), S(Cls) S(Cls) C(Bool),           C|N) \
 O(InstanceOfBitmask,           D(Bool), S(Cls) CStr,                       C) \
 O(NInstanceOfBitmask,          D(Bool), S(Cls) CStr,                       C) \
 O(IsType,                      D(Bool), S(Cell),                           C) \
@@ -245,8 +245,6 @@ O(JmpEq,                       D(None), S(Gen) S(Gen),                     E) \
 O(JmpNeq,                      D(None), S(Gen) S(Gen),                     E) \
 O(JmpSame,                     D(None), S(Gen) S(Gen),                     E) \
 O(JmpNSame,                    D(None), S(Gen) S(Gen),                     E) \
-O(JmpInstanceOf,               D(None), S(Cls) S(Cls) C(Bool),           E|N) \
-O(JmpNInstanceOf,              D(None), S(Cls) S(Cls) C(Bool),           E|N) \
 O(JmpInstanceOfBitmask,        D(None), S(Cls) CStr,                       E) \
 O(JmpNInstanceOfBitmask,       D(None), S(Cls) CStr,                       E) \
 O(JmpIsType,                   D(None), SUnk,                              E) \
@@ -905,8 +903,6 @@ inline bool isQueryJmpOp(Opcode opc) {
     case JmpNeq:
     case JmpSame:
     case JmpNSame:
-    case JmpInstanceOf:
-    case JmpNInstanceOf:
     case JmpInstanceOfBitmask:
     case JmpNInstanceOfBitmask:
     case JmpIsType:
@@ -939,8 +935,6 @@ inline ConditionCode queryJmpToCC(Opcode opc) {
     case JmpNeq:                return CC_NE;
     case JmpSame:               return CC_E;
     case JmpNSame:              return CC_NE;
-    case JmpInstanceOf:         return CC_NZ;
-    case JmpNInstanceOf:        return CC_Z;
     case JmpInstanceOfBitmask:  return CC_NZ;
     case JmpNInstanceOfBitmask: return CC_Z;
     case JmpIsType:             return CC_NZ;
@@ -950,14 +944,6 @@ inline ConditionCode queryJmpToCC(Opcode opc) {
     default:
       not_reached();
   }
-}
-
-/*
- * Right now branch fusion is too indiscriminate to handle fusing
- * with potentially expensive-to-repeat operations.  TODO(#2053369)
- */
-inline bool disableBranchFusion(Opcode opc) {
-  return opc == InstanceOf || opc == NInstanceOf;
 }
 
 /*

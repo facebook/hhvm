@@ -1051,7 +1051,7 @@ void HhbcTranslator::emitContValid() {
   SSATmp* done = gen(
     LdRaw, Type::Bool, cont, cns(RawMemSlot::ContDone)
   );
-  push(m_tb->genNot(done));
+  push(gen(OpNot, done));
 }
 
 void HhbcTranslator::emitContCurrent() {
@@ -1219,7 +1219,7 @@ void HhbcTranslator::emitEmptyL(int32_t id) {
   } else {
     Trace* exitTrace = getExitTrace();
     SSATmp* ld = m_tb->genLdLocAsCell(id, exitTrace);
-    push(m_tb->genNot(gen(ConvCellToBool, ld)));
+    push(gen(OpNot, gen(ConvCellToBool, ld)));
   }
 }
 
@@ -2653,7 +2653,7 @@ void HhbcTranslator::emitIsset(const StringData* name,
 
 void HhbcTranslator::emitEmptyMem(SSATmp* ptr) {
   SSATmp* ld = gen(LdMem, Type::Cell, gen(UnboxPtr, ptr), cns(0));
-  push(m_tb->genNot(gen(ConvCellToBool, ld)));
+  push(gen(OpNot, gen(ConvCellToBool, ld)));
 }
 
 template<class CheckSupportedFun, class EmitLdAddrFun>
@@ -2673,7 +2673,7 @@ void HhbcTranslator::emitEmpty(const StringData* name,
                             gen(UnboxPtr, ptr),
                             cns(0)
                           );
-                          return m_tb->genNot(gen(ConvCellToBool, ld));
+                          return gen(OpNot, gen(ConvCellToBool, ld));
                         },
                         [&] { // Taken
                           return cns(true);
@@ -2796,7 +2796,7 @@ void HhbcTranslator::emitBinaryArith(Opcode opc) {
 
 void HhbcTranslator::emitNot() {
   SSATmp* src = popC();
-  push(m_tb->genNot(gen(ConvCellToBool, src)));
+  push(gen(OpNot, gen(ConvCellToBool, src)));
   gen(DecRef, src);
 }
 

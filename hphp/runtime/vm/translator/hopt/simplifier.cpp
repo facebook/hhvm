@@ -226,27 +226,6 @@ template<class... Args> SSATmp* Simplifier::gen(Args&&... args) {
 
 //////////////////////////////////////////////////////////////////////
 
-static bool isNotInst(SSATmp *src1, SSATmp *src2) {
-  // right operand should be 1
-  if (!src2->isConst() || src2->type() != Type::Int ||
-      src2->getValInt() != 1) {
-    return false;
-  }
-  // left operand should be a boolean
-  if (src1->type() != Type::Bool) {
-    return false;
-  }
-  return true;
-}
-
-static bool isNotInst(SSATmp *tmp) {
-  IRInstruction* inst = tmp->inst();
-  if (inst->op() != OpXor) {
-    return false;
-  }
-  return isNotInst(inst->getSrc(0), inst->getSrc(1));
-}
-
 SSATmp* Simplifier::simplify(IRInstruction* inst) {
   SSATmp* src1 = inst->getSrc(0);
   SSATmp* src2 = inst->getSrc(1);
@@ -272,6 +251,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
 
   case Concat:        return simplifyConcat(src1, src2);
   case Mov:           return simplifyMov(src1);
+  case OpNot:         return simplifyNot(src1);
   case LdClsPropAddr: return simplifyLdClsPropAddr(inst);
   case ConvBoolToArr: return simplifyConvToArr(inst);
   case ConvDblToArr:  return simplifyConvToArr(inst);
@@ -580,52 +560,45 @@ SSATmp* Simplifier::simplifyMov(SSATmp* src) {
 }
 
 SSATmp* Simplifier::simplifyNot(SSATmp* src) {
+  if (src->isConst()) {
+    return cns(!src->getValBool());
+  }
+
   IRInstruction* inst = src->inst();
   Opcode op = inst->op();
 
-  // TODO: Add more algebraic simplification rules for NOT
   switch (op) {
-    case ConvArrToBool:
-    case ConvDblToBool:
-    case ConvIntToBool:
-    case ConvStrToBool:
-      return simplifyNot(inst->getSrc(0));
-    case OpXor: {
-      // !!X --> bool(X)
-      if (isNotInst(inst->getSrc(0))) {
-        return gen(ConvCellToBool, inst->getSrc(0));
-      }
-      break;
-    }
-    // !(X cmp Y) --> X opposite_cmp Y
-    case OpLt:
-    case OpLte:
-    case OpGt:
-    case OpGte:
-    case OpEq:
-    case OpNeq:
-    case OpSame:
-    case OpNSame:
-      // XXX: this could technically be losing a ConvToBool, except
-      // that we kinda know "not" instructions (Xor with 1) are always
-      // going to be followed by ConvToBool.
-      //
-      // TODO(#2058865): This would make more sense with a real Not
-      // instruction and allowing boolean output types for query ops.
+  // !!X --> X
+  case OpNot:
+    return inst->getSrc(0);
+
+  // !(X cmp Y) --> X opposite_cmp Y
+  case OpLt:
+  case OpLte:
+  case OpGt:
+  case OpGte:
+  case OpEq:
+  case OpNeq:
+  case OpSame:
+  case OpNSame:
+    // Not for Dbl:  (x < NaN) != !(x >= NaN)
+    if (!inst->getSrc(0)->isA(Type::Dbl) &&
+        !inst->getSrc(1)->isA(Type::Dbl)) {
       return gen(negateQueryOp(op), inst->getSrc(0), inst->getSrc(1));
-    case InstanceOf:
-    case NInstanceOf:
-    case InstanceOfBitmask:
-    case NInstanceOfBitmask:
-      // TODO: combine this with the above check and use isQueryOp or
-      // add an isNegatable.
-      return gen(
-        negateQueryOp(op),
-        std::make_pair(inst->getNumSrcs(), inst->getSrcs().begin())
-      );
-      return nullptr;
-    // TODO !(X | non_zero) --> 0
-    default: (void)op;
+    }
+    break;
+
+  case InstanceOfBitmask:
+  case NInstanceOfBitmask:
+    // TODO: combine this with the above check and use isQueryOp or
+    // add an isNegatable.
+    return gen(
+      negateQueryOp(op),
+      std::make_pair(inst->getNumSrcs(), inst->getSrcs().begin())
+    );
+    return nullptr;
+  // TODO !(X | non_zero) --> 0
+  default: (void)op;
   }
   return nullptr;
 }
@@ -816,6 +789,7 @@ SSATmp* Simplifier::simplifyAdd(SSATmp* src1, SSATmp* src2) {
   }
   return nullptr;
 }
+
 SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_CONST(-);
   // X - X --> 0
@@ -853,6 +827,7 @@ SSATmp* Simplifier::simplifySub(SSATmp* src1, SSATmp* src2) {
   // (X - C1) + (X + C2)
   return nullptr;
 }
+
 SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_COMMUTATIVE(*, Mul);
   if (src2->isConst() && src2->type() == Type::Int) {
@@ -882,6 +857,7 @@ SSATmp* Simplifier::simplifyMul(SSATmp* src1, SSATmp* src2) {
   }
   return nullptr;
 }
+
 SSATmp* Simplifier::simplifyAnd(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_DISTRIBUTIVE(&, |, And, Or);
   // X & X --> X
@@ -900,6 +876,7 @@ SSATmp* Simplifier::simplifyAnd(SSATmp* src1, SSATmp* src2) {
   }
   return nullptr;
 }
+
 SSATmp* Simplifier::simplifyOr(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_DISTRIBUTIVE(|, &, Or, And);
   // X | X --> X
@@ -918,6 +895,7 @@ SSATmp* Simplifier::simplifyOr(SSATmp* src1, SSATmp* src2) {
   }
   return nullptr;
 }
+
 SSATmp* Simplifier::simplifyXor(SSATmp* src1, SSATmp* src2) {
   SIMPLIFY_COMMUTATIVE(^, Xor);
   // X ^ X --> 0
@@ -929,8 +907,12 @@ SSATmp* Simplifier::simplifyXor(SSATmp* src1, SSATmp* src2) {
       return src1;
     }
   }
-  if (isNotInst(src1, src2)) {
-    return simplifyNot(src1);
+  // Bool(X) ^ 1    --> Int(!X)
+  // Bool(X) ^ true --> Int(!X)
+  if (src1->isA(Type::Bool) && src2->isConst() &&
+      ((src2->isA(Type::Int) && src2->getValInt() == 1) ||
+       (src2->isA(Type::Bool) && src2->getValBool() == true))) {
+    return gen(ConvBoolToInt, gen(OpNot, src1));
   }
   return nullptr;
 }
@@ -1424,11 +1406,7 @@ SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
   if (srcType.isDbl())    return gen(ConvDblToBool, src);
   if (srcType.isInt())    return gen(ConvIntToBool, src);
   if (srcType.isString()) return gen(ConvStrToBool, src);
-
-  if (srcType.isObj()) {
-    // If a value is known to be an object, it is known to be non null.
-    return cns(true);
-  }
+  if (srcType.isObj())    return cns(true);
 
   return nullptr;
 }
@@ -1574,7 +1552,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   }
 
   // Pull negations into the jump.
-  if (isNotInst(src)) {
+  if (src->inst()->op() == OpNot) {
     return gen(inst->op() == JmpZero ? JmpNZero : JmpZero,
                inst->getTaken(),
                srcInst->getSrc(0));
@@ -1597,7 +1575,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   }
 
   // Fuse jumps with query operators.
-  if (isQueryOp(srcOpcode) && !disableBranchFusion(srcOpcode)) {
+  if (isQueryOp(srcOpcode)) {
     SrcRange ssas = srcInst->getSrcs();
     return gen(
       queryToJmpOp(

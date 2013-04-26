@@ -547,8 +547,6 @@ Opcode negateQueryOp(Opcode opc) {
   case OpNeq:               return OpEq;
   case OpSame:              return OpNSame;
   case OpNSame:             return OpSame;
-  case InstanceOf:          return NInstanceOf;
-  case NInstanceOf:         return InstanceOf;
   case InstanceOfBitmask:   return NInstanceOfBitmask;
   case NInstanceOfBitmask:  return InstanceOfBitmask;
   case IsType:              return IsNType;

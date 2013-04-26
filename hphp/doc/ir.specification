@@ -452,7 +452,6 @@ D:Bool = OpNSame S0:Gen S1:Gen
   result in D.
 
 D:Bool =  InstanceOf S0:Cls S1:Cls S2:ConstBool
-D:Bool = NInstanceOf S0:Cls S1:Cls S2:ConstBool
 
   Sets D based on whether S0 is a descendant of the class, interface,
   or trait in S1.  (Note that this is always false for a trait).  S1
@@ -500,7 +499,6 @@ JmpNeq
 JmpSame
 JmpNSame
 JmpInstanceOf
-JmpNInstanceOf
 JmpInstanceOfBitmask
 JmpNInstanceOfBitmask
 JmpIsType

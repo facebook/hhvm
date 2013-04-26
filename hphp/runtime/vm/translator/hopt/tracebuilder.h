@@ -228,12 +228,6 @@ struct TraceBuilder {
   }
 
   //////////////////////////////////////////////////////////////////////
-  // dubious
-
-  // TODO(#2058865): we should have a real not opcode
-  SSATmp* genNot(SSATmp* src);
-
-  //////////////////////////////////////////////////////////////////////
   // control flow
 
   typedef std::function<void(IRFactory*, Trace*)> ExitTraceCallback;

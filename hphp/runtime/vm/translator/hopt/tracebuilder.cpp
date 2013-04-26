@@ -202,11 +202,6 @@ Trace* TraceBuilder::genExitTrace(uint32_t   bcOff,
   return exitTrace;
 }
 
-SSATmp* TraceBuilder::genNot(SSATmp* src) {
-  assert(src->type() == Type::Bool);
-  return gen(ConvCellToBool, gen(OpXor, src, cns(1)));
-}
-
 SSATmp* TraceBuilder::genDefUninit() {
   return gen(DefConst, Type::Uninit, ConstData(0));
 }

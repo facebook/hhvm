@@ -1257,6 +1257,21 @@ void CodeGenerator::cgOpMul(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgOpNot(IRInstruction* inst) {
+  auto const src = inst->getSrc(0);
+  auto const dstReg = inst->getDst()->getReg();
+  auto& a = m_as;
+
+  if (src->isConst()) {
+    a.    movb   (!src->getValBool(), rbyte(dstReg));
+  } else {
+    if (dstReg != src->getReg()) {
+      a.  movb   (rbyte(src->getReg()), rbyte(dstReg));
+    }
+    a.    xorb   (1, rbyte(dstReg));
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Comparison Operators
 ///////////////////////////////////////////////////////////////////////////////
@@ -1599,44 +1614,15 @@ HOT_FUNC_VM static bool instanceOfHelperIFace(const Class* objClass,
   return testClass && objClass->classof(testClass->preClass());
 }
 
-void CodeGenerator::emitInstanceCheck(IRInstruction* inst, PhysReg dstReg) {
+void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
   const bool ifaceHint = inst->getSrc(2)->getValBool();
   cgCallHelper(m_as,
                TCA(ifaceHint ? instanceOfHelperIFace : instanceOfHelper),
-               dstReg,
+               inst->getDst(),
                kNoSyncPoint,
                ArgGroup()
                  .ssa(inst->getSrc(0))
                  .ssa(inst->getSrc(1)));
-}
-
-void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
-  emitInstanceCheck(inst, inst->getDst()->getReg());
-}
-
-void CodeGenerator::cgNInstanceOf(IRInstruction* inst) {
-  // TODO(#2058865): having NInstanceOf is no better than InstanceOf
-  // followed by boolean Not opcode.
-  PhysReg dstReg = inst->getDst()->getReg();
-  emitInstanceCheck(inst, dstReg);
-  Reg8 dr((int(dstReg)));
-  auto& a = m_as;
-  a.    testb   (dr, dr);
-  a.    setz    (dr);
-}
-
-void CodeGenerator::cgJmpInstanceOf(IRInstruction* inst) {
-  auto& a = m_as;
-  emitInstanceCheck(inst, rax);
-  a.    testb   (al, al);
-  emitJccDirectExit(inst, CC_NZ);
-}
-
-void CodeGenerator::cgJmpNInstanceOf(IRInstruction* inst) {
-  auto& a = m_as;
-  emitInstanceCheck(inst, rax);
-  a.    testb  (al, al);
-  emitJccDirectExit(inst, CC_Z);
 }
 
 /*

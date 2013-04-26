@@ -39,6 +39,15 @@ public:
 
   ~TraceBuilder();
 
+  void beginInlining(const Func* target,
+                     SSATmp* calleeFP,
+                     SSATmp* calleeSP,
+                     SSATmp* prevSP,
+                     int32_t prevSPOff);
+  void endInlining();
+
+  void setLocalValue(unsigned id, SSATmp* value);
+
   void setEnableCse(bool val)            { m_enableCse = val; }
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
@@ -56,10 +65,6 @@ public:
 
   // Run one more pass of simplification on this builder's trace.
   void optimizeTrace();
-
-  SSATmp* getFP() {
-    return m_fpValue;
-  }
 
   /*
    * Create an IRInstruction attached to this Trace, and allocate a
@@ -83,8 +88,6 @@ public:
 
   SSATmp* genDefCns(const StringData* cnsName, SSATmp* val);
   SSATmp* genConcat(SSATmp* tl, SSATmp* tr);
-  void    genDefCls(PreClass*, const Opcode* after);
-  void    genDefFunc(Func*);
 
   SSATmp* genLdThis(Trace* trace);
   SSATmp* genLdCtx(const Func* func);
@@ -140,9 +143,6 @@ public:
   SSATmp* genNewObj(int32_t numParams, SSATmp* cls);
   SSATmp* genNewArray(int32_t capacity);
   SSATmp* genNewTuple(int32_t numArgs, SSATmp* sp);
-  SSATmp* genDefActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
-                       const StringData* invName);
-  SSATmp* genFreeActRec();
   void    genGuardLoc(uint32_t id, Type type, Trace* exitTrace);
   void    genGuardStk(uint32_t id, Type type, Trace* exitTrace);
   void    genAssertStk(uint32_t id, Type type);
@@ -216,8 +216,6 @@ public:
                         uint32_t numOpnds,
                         SSATmp** opnds);
   SSATmp* genLdStack(int32_t stackOff, Type type);
-  SSATmp* genDefFP();
-  SSATmp* genDefSP(int32_t spOffset);
   SSATmp* genLdStackAddr(SSATmp* sp, int64_t offset);
   SSATmp* genLdStackAddr(int64_t offset) {
     return genLdStackAddr(m_spValue, offset);
@@ -411,11 +409,11 @@ private:
   void      killCse();
   void      killLocals();
   void      killLocalValue(uint32_t id);
-  void      setLocalValue(unsigned id, SSATmp* value);
   void      setLocalType(uint32_t id, Type type);
   SSATmp*   getLocalValue(unsigned id) const;
-  bool      isValueAvailable(SSATmp* tmp) const;
-  bool      anyLocalHasValue(SSATmp* tmp) const;
+  bool      isValueAvailable(SSATmp*) const;
+  bool      anyLocalHasValue(SSATmp*) const;
+  bool      callerLocalHasValue(SSATmp*) const;
   void      updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef);
   void      updateTrackedState(IRInstruction* inst);
   void      clearTrackedState();
@@ -425,17 +423,23 @@ private:
   }
   void genStLocAux(uint32_t id, SSATmp* t0, bool genStoreType);
 
-  // saved state information associated with the start of a block
+  // Saved state information associated with the start of a block, or
+  // for the caller of an inlined function.
   struct State {
-    SSATmp *spValue, *fpValue;
+    SSATmp* spValue;
+    SSATmp* fpValue;
+    SSATmp* curFunc;
     int32_t spOffset;
     bool thisAvailable;
     std::vector<SSATmp*> localValues;
     std::vector<Type> localTypes;
     SSATmp* refCountedMemValue;
+    std::vector<SSATmp*> callerAvailableValues; // unordered list
   };
+  std::unique_ptr<State> createState() const;
   void saveState(Block*);
   void mergeState(State* s1);
+  void useState(std::unique_ptr<State> state);
   void useState(Block*);
 
   /*
@@ -464,9 +468,7 @@ private:
    *   (2) m_spOffset tracks the offset of the m_spValue from m_fpValue.
    *
    *   (3) m_curFunc tracks the current function containing the
-   *       generated code; currently, this remains constant during
-   *       tracebuilding but once we implement inlining it'll have to
-   *       be updated to track the context of inlined functions.
+   *       generated code.
    *
    *   (4) m_cseHash is for common sub-expression elimination of non-constants.
    *       constants are globally available and managed by IRFactory.
@@ -499,8 +501,17 @@ private:
   SSATmp*    m_refCountedMemValue;
 
   // vectors that track local values & types
-  std::vector<SSATmp*>   m_localValues;
-  std::vector<Type>      m_localTypes;
+  std::vector<SSATmp*> m_localValues;
+  std::vector<Type>    m_localTypes;
+
+  // Values known to be "available" for the purposes of DecRef to
+  // DecRefNZ transformations due to locals of the caller for an
+  // inlined call.
+  std::vector<SSATmp*> m_callerAvailableValues;
+
+  // When we're building traces for an inlined callee, the state of
+  // the caller needs to be preserved here.
+  std::vector<std::unique_ptr<State>> m_inlineSavedStates;
 };
 
 template<>

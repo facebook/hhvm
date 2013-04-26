@@ -119,11 +119,17 @@ void dump() {
                                          group.first, url))
           << folly::format("{:>45}   {:>9} {:>8} {:>8}\n",
                            "name", "count", "% total", "accum %");
+
+    static const auto maxGroupEnv = getenv("HHVM_STATS_GROUPMAX");
+    static const auto maxGroup = maxGroupEnv ? atoi(maxGroupEnv) : INT_MAX;
+
+    int counter = 0;
     for (auto const& row : rows) {
       accum += row.second;
-      stats << folly::format("{:>45} {} {:9} {:8.2%} {:8.2%}\n",
+      stats << folly::format("{:>70} {} {:9} {:8.2%} {:8.2%}\n",
                              row.first, ':', row.second,
                              (double)row.second / total, (double)accum / total);
+      if (++counter >= maxGroup) break;
     }
     FTRACE(0, "{}\n", stats.str());
   }

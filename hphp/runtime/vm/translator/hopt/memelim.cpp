@@ -745,7 +745,7 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
           }
         }
       }
-      Simplifier::copyProp(&inst);
+      copyProp(&inst);
       processInstruction(&inst, curFunc && curFunc->isPseudoMain());
     }
   }

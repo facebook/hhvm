@@ -120,7 +120,6 @@ class TranslatorX64 : public Translator
   template<ConditionCode, typename smasher> friend class JccBlock;
   template<ConditionCode> friend class IfElseBlock;
   friend class UnlikelyIfBlock;
-  typedef HPHP::DataType DataType;
 
   typedef tbb::concurrent_hash_map<TCA, TCA> SignalStubMap;
   typedef void (*sigaction_t)(int, siginfo_t*, void*);
@@ -170,6 +169,7 @@ class TranslatorX64 : public Translator
   sigaction_t            m_segvChain;
   TCA                    m_callToExit;
   TCA                    m_retHelper;
+  TCA                    m_retInlHelper;
   TCA                    m_genRetHelper;
   TCA                    m_stackOverflowHelper;
   TCA                    m_irPopRHelper;
@@ -752,6 +752,10 @@ PSEUDOINSTRS
     return m_retHelper;
   }
 
+  TCA getRetFromInlinedFrame() {
+    return m_retInlHelper;
+  }
+
   TCA getRetFromInterpretedGeneratorFrame() {
     return m_genRetHelper;
   }
@@ -1162,7 +1166,9 @@ SrcKey nextSrcKey(const Tracelet& t, const NormalizedInstruction& i);
 bool isNormalPropertyAccess(const NormalizedInstruction& i,
                        int propInput,
                        int objInput);
-bool mInstrHasUnknownOffsets(const NormalizedInstruction& i);
+
+bool mInstrHasUnknownOffsets(const NormalizedInstruction& i,
+                             Class* contextClass);
 
 struct PropInfo {
   PropInfo()
@@ -1179,10 +1185,12 @@ struct PropInfo {
 };
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+                           Class* contextClass,
                            const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd);
 PropInfo getFinalPropertyOffset(const NormalizedInstruction&,
+                                Class* contextClass,
                                 const MInstrInfo&);
 
 bool isSupportedCGetM_LE(const NormalizedInstruction& i);

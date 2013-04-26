@@ -29,24 +29,31 @@ namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
-void Simplifier::copyProp(IRInstruction* inst) {
-  for (uint32_t i = 0; i < inst->getNumSrcs(); i++) {
-    IRInstruction* srcInst = inst->getSrc(i)->getInstruction();
-    if (srcInst->getOpcode() == Mov) {
-      inst->setSrc(i, srcInst->getSrc(0));
-    } else if (srcInst->getOpcode() == IncRef &&
-               !isRefCounted(srcInst->getSrc(0))) {
+static void copyPropSrc(IRInstruction* inst, int index) {
+  auto tmp     = inst->getSrc(index);
+  auto srcInst = tmp->getInstruction();
+
+  switch (srcInst->getOpcode()) {
+  case Mov:
+    inst->setSrc(index, srcInst->getSrc(0));
+    break;
+
+  case IncRef:
+    if (!isRefCounted(srcInst->getSrc(0))) {
       srcInst->setOpcode(Mov);
-      inst->setSrc(i, srcInst->getSrc(0));
+      inst->setSrc(index, srcInst->getSrc(0));
     }
+    break;
+
+  default:
+    return;
   }
 }
 
-static void unimplementedSimplify(Opcode opc) {
-  // Do not assert(false), it is fine to not simplify as the default
-  TRACE(3, "HHIR Simplifier: unimplemented support for opcode %s\n",
-        opcodeName(opc));
-  return;
+void copyProp(IRInstruction* inst) {
+  for (uint32_t i = 0; i < inst->getNumSrcs(); i++) {
+    copyPropSrc(inst, i);
+  }
 }
 
 static bool isNotInst(SSATmp *src1, SSATmp *src2) {
@@ -150,6 +157,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case GuardType:    return simplifyGuardType(inst);
 
   case LdCls:        return simplifyLdCls(inst);
+  case LdThis:       return simplifyLdThis(inst);
 
   case LdCtx:        return simplifyLdCtx(inst);
   case LdClsCtx:     return simplifyLdClsCtx(inst);
@@ -159,7 +167,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case Call:         return simplifyCall(inst);
 
   default:
-    unimplementedSimplify(inst->getOpcode());
     return nullptr;
   }
 }
@@ -222,11 +229,6 @@ SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
   int64_t adjustment = spDeficit - spillCells;
   for (uint32_t i = 0, cellOff = 0; i < numSpillSrcs; i++) {
     const int64_t offset = cellOff + adjustment;
-    if (spillVals[i]->getType() == Type::ActRec) {
-      cellOff += kNumActRecCells;
-      i += kSpillStackActRecExtraArgs;
-      continue;
-    }
     auto* srcInst = spillVals[i]->getInstruction();
     // If our value came from a LdStack on the same sp and offset,
     // we don't need to spill it.
@@ -1268,6 +1270,26 @@ SSATmp* Simplifier::simplifyLdClsPropAddr(IRInstruction* inst) {
                    propName,
                    m_tb->genDefConst(clsNameString),
                    inst->getSrc(2));
+}
+
+/*
+ * If we're in an inlined frame, use the this that we put in the
+ * inlined ActRec.  (This could chase more intervening SpillStack
+ * instructions to find the SpillFrame, but for now we don't inline
+ * calls that will have that.)
+ */
+SSATmp* Simplifier::simplifyLdThis(IRInstruction* inst) {
+  auto fpInst = inst->getSrc(0)->getInstruction();
+  if (fpInst->getOpcode() == DefInlineFP) {
+    auto spInst = fpInst->getSrc(0)->getInstruction();
+    if (spInst->getOpcode() == SpillFrame &&
+        spInst->getSrc(3)->isA(Type::Obj)) {
+      return spInst->getSrc(3);
+    }
+    return nullptr;
+  }
+
+  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {

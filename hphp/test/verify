@@ -98,8 +98,14 @@ if ($opt_verbose && $opt_quiet)
 
 if ($#ARGV + 1 == 0)
 {
-    print STDOUT "Reading tests from stdin\n";
-    @ARGV = split(/\s+/, <>);
+    while (<STDIN>) {
+      push @ARGV, split /\s+/;
+    }
+    @ARGV = grep !/^$/, @ARGV;
+    if (scalar @ARGV == 0) {
+      print STDERR "no files passed in or on stdin\n";
+      exit 1;
+    }
 }
 
 if ($opt_verbose)

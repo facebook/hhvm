@@ -50,12 +50,6 @@ struct Slice {
 typedef Slice<const char> StringSlice;
 typedef Slice<char> MutableSlice;
 
-// const char* points to a string which must remain valid for the lifetime
-// of the StringData.  It is fragile to rely on StringData.data() returning
-// the same pointer after construction -- this invariant will probably be
-// deprecated to enable copying of small strings.
-enum AttachLiteralMode { AttachLiteral };
-
 // Aggressively copy small strings and free the passed-in buffer immediately;
 // otherwise keep the buffer for long strings, and free it when the string
 // is mutated or released.
@@ -64,7 +58,7 @@ enum AttachStringMode { AttachString };
 // const char* points to client-owned memory, StringData will copy it
 // at construct-time using smart_malloc.  This is only ok when the StringData
 // itself was smart-allocated.
-enum CopyStringMode { CopyString };
+enum CopyStringMode { CopyString, AttachLiteral = CopyString };
 
 // reserve space for buffer that will be filled in by client.
 enum ReserveStringMode { ReserveString };
@@ -89,7 +83,7 @@ enum CopyMallocMode { CopyMalloc };
  * big:   m_data:8, _count:4, m_len:4, m_hash:4,
  *        junk[12], node:16, shared:8, cap:8
  *
- * If the format is IsLiteral or IsShared, we always use the "big" layout.
+ * If the format is IsShared, we always use the "big" layout.
  * resemblences to fbstring are not accidental.
  */
 class StringData {
@@ -99,10 +93,9 @@ class StringData {
 
   enum Format {
     IsSmall   = 0, // short str overlaps m_big
-    IsLiteral = 0x1000000000000000, // literal string
-    IsShared  = 0x2000000000000000, // shared memory string
-    IsMalloc  = 0x3000000000000000, // m_big.data is malloc'd
-    IsSmart   = 0x4000000000000000, // m_big.data is smart_malloc'd
+    IsShared  = 0x1000000000000000, // shared memory string
+    IsMalloc  = 0x2000000000000000, // m_big.data is malloc'd
+    IsSmart   = 0x3000000000000000, // m_big.data is smart_malloc'd
     IsMask    = 0xF000000000000000
   };
 
@@ -155,20 +148,13 @@ class StringData {
    * is actually only for SmartAllocator to pre-allocate the objects.
    */
   explicit StringData(const char* data) {
-    initLiteral(data);
-  }
-  StringData(const char *data, AttachLiteralMode) {
-    initLiteral(data);
+    initCopy(data);
   }
   StringData(const char *data, AttachStringMode) {
     initAttach(data);
   }
   StringData(const char *data, CopyStringMode) {
     initCopy(data);
-  }
-
-  StringData(const char *data, int len, AttachLiteralMode) {
-    initLiteral(data, len);
   }
   StringData(const char* data, int len, AttachStringMode) {
     initAttach(data, len);
@@ -263,13 +249,9 @@ public:
     return StringSlice(m_data, m_len);
   }
   bool empty() const { return size() == 0;}
-  bool isLiteral() const { return format() == IsLiteral; }
   bool isShared() const { return format() == IsShared; }
   bool isSmall() const { return format() == IsSmall; }
-  bool isImmutable() const {
-    Format f = format();
-    return f == IsLiteral || f == IsShared || isStatic();
-  }
+  bool isImmutable() const { return isShared() || isStatic(); }
   DataType isNumericWithVal(int64_t &lval, double &dval, int allow_errors) const;
   bool isNumeric() const;
   bool isInteger() const;
@@ -407,10 +389,8 @@ public:
   /**
    * Helpers.
    */
-  void initLiteral(const char* data);
   void initAttach(const char* data);
   void initCopy(const char* data);
-  void initLiteral(const char* data, int len);
   void initAttach(const char* data, int len);
   void initCopy(const char* data, int len);
   void initMalloc(const char* data, int len);

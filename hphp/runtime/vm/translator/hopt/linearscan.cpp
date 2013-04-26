@@ -323,10 +323,6 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   if (dsts.empty()) return;
 
   Opcode opc = inst->getOpcode();
-  if (opc == DefFP || opc == FreeActRec) {
-    allocRegToTmp(&m_regs[int(rVmFp)], &dsts[0], 0);
-    return;
-  }
   if (opc == DefMIStateBase) {
     assert(dsts[0].isA(Type::PtrToCell));
     allocRegToTmp(&m_regs[int(rsp)], &dsts[0], 0);
@@ -335,23 +331,49 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
 
   for (SSATmp& dst : dsts) {
     for (int i = 0, n = dst.numNeededRegs(); i < n; ++i) {
-      if (dst.isA(Type::StkPtr) && opc != LdRaw) {
-        assert(opc == DefSP || opc == Call || opc == SpillStack ||
+      // LdRaw, loading a generator's embedded AR, is the only time we have a
+      // pointer to an AR that is not in rVmFp.
+      const bool abnormalFramePtr =
+        (opc == LdRaw &&
+          inst->getSrc(1)->getValInt() == RawMemSlot::ContARPtr);
+
+      // Note that the point of StashGeneratorSP is to save a StkPtr
+      // somewhere other than rVmSp.  (TODO(#2288359): make rbx not
+      // special.)
+      const bool abnormalStkPtr = opc == StashGeneratorSP;
+
+      if (!abnormalStkPtr && dst.isA(Type::StkPtr)) {
+        assert(opc == DefSP ||
+               opc == ReDefSP ||
+               opc == ReDefGeneratorSP ||
+               opc == Call ||
+               opc == SpillStack ||
+               opc == SpillFrame ||
+               opc == ExceptionBarrier ||
                opc == RetAdjustStack ||
-               opc == NewObj || opc == NewObjCached ||
+               opc == NewObj ||
+               opc == NewObjCached ||
                opc == NewObjNoCtorCached ||
-               opc == InterpOne || opc == GenericRetDecRefs ||
-               opc == GuardStk || opc == AssertStk || opc == CastStk ||
+               opc == InterpOne ||
+               opc == GenericRetDecRefs ||
+               opc == GuardStk ||
+               opc == AssertStk ||
+               opc == CastStk ||
                VectorEffects::supported(opc));
         allocRegToTmp(&m_regs[int(rVmSp)], &dst, 0);
         continue;
       }
+      if (!abnormalFramePtr && dst.isA(Type::FramePtr)) {
+        assert(opc == DefFP || opc == FreeActRec || opc == DefInlineFP);
+        allocRegToTmp(&m_regs[int(rVmFp)], &dst, 0);
+        continue;
+      }
 
-      // LdRaw, loading a generator's embedded AR, is the only time we have a
-      // pointer to an AR that is not in rVmFp or rVmSp.
-      assert(!dst.isA(Type::StkPtr) ||
-             (opc == LdRaw &&
-              inst->getSrc(1)->getValInt() == RawMemSlot::ContARPtr));
+      // Generally speaking, StkPtrs are pretty special due to
+      // tracelet ABI registers. Keep track here of the allowed uses
+      // that don't use the above allocation.
+      assert(!dst.isA(Type::FramePtr) || abnormalFramePtr);
+      assert(!dst.isA(Type::StkPtr) || abnormalStkPtr);
 
       if (!RuntimeOption::EvalHHIRDeadCodeElim || dst.getLastUseId() != 0) {
         allocRegToTmp(&dst, i);

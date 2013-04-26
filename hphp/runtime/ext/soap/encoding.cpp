@@ -1169,7 +1169,7 @@ static bool get_zval_property(Variant &object, const char* name,
 }
 
 static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
-  const char* name = NULL;
+  const char* name = nullptr;
   Variant any;
   while (node != NULL) {
     if (!get_zval_property(ret, (const char *)node->name)) {
@@ -1212,8 +1212,9 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
       } else {
         /* Add array element */
         if (name) {
-          if (any.toArray().exists(name)) {
-            Variant &el = any.lvalAt(name);
+          String name_str(name);
+          if (any.toArray().exists(name_str)) {
+            Variant &el = any.lvalAt(name_str);
             if (!el.isArray()) {
               /* Convert into array */
               Array arr = Array::Create();
@@ -1222,7 +1223,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
             }
             el.append(val);
           } else {
-            any.set(String(name, CopyString), val);
+            any.set(name_str, val);
           }
         } else {
           any.append(val);

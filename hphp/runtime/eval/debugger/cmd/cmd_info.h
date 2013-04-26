@@ -61,7 +61,7 @@ private:
   DebuggerClient::LiveListsPtr m_acLiveLists;
 
   static String GetParams(CArrRef params, bool varg, bool detailed = false);
-  static String GetModifier(CArrRef info, const char *name);
+  static String GetModifier(CArrRef info, CStrRef);
 
   static bool TryConstant(StringBuffer &sb, CArrRef info,
                           const std::string &subsymbol);

@@ -77,22 +77,39 @@ bool TestExtMemcached::test_Memcached_get_set() {
   return Count(true);
 }
 
+static const StaticString s_boolean_true("boolean_true");
+static const StaticString s_boolean_false("boolean_false");
+static const StaticString s_string("string");
+static const StaticString s_string_empty("string_empty");
+static const StaticString
+       s_integer_positive_integer("integer_positive_integer");
+static const StaticString
+       s_integer_negative_integer("integer_negative_integer");
+static const StaticString s_integer_zero_integer("integer_zero_integer");
+static const StaticString s_float_positive1("float_positive1");
+static const StaticString s_float_positive2("float_positive2");
+static const StaticString s_float_negative("float_negative");
+static const StaticString s_float_zero("float_zero");
+static const StaticString s_null("null");
+static const StaticString s_array_empty("array_empty");
+static const StaticString s_array("array");
+
 bool TestExtMemcached::test_Memcached_types() {
   Array list;
-  list.add("boolean_true", true);
-  list.add("boolean_false", false);
-  list.add("string", "just a string");
-  list.add("string_empty", "");
-  list.add("integer_positive_integer", 10);
-  list.add("integer_negative_integer", -10);
-  list.add("integer_zero_integer", 0);
-  list.add("float_positive1", 3.912131);
-  list.add("float_positive2", 1.2131E+52);
-  list.add("float_negative", -42.123312);
-  list.add("float_zero", 0.0);
-  list.add("null", uninit_null());
-  list.add("array_empty", Array());
-  list.add("array", CREATE_VECTOR4(1, 2, 3, "foo"));
+  list.add(s_boolean_true, true);
+  list.add(s_boolean_false, false);
+  list.add(s_string, "just a string");
+  list.add(s_string_empty, empty_string);
+  list.add(s_integer_positive_integer, 10);
+  list.add(s_integer_negative_integer, -10);
+  list.add(s_integer_zero_integer, 0);
+  list.add(s_float_positive1, 3.912131);
+  list.add(s_float_positive2, 1.2131E+52);
+  list.add(s_float_negative, -42.123312);
+  list.add(s_float_zero, 0.0);
+  list.add(s_null, uninit_null());
+  list.add(s_array_empty, Array());
+  list.add(s_array, CREATE_VECTOR4(1, 2, 3, "foo"));
 
   CREATE_MEMCACHED();
   for (ArrayIter iter(list); iter; ++iter) {

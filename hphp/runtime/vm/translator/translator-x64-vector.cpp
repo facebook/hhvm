@@ -365,7 +365,7 @@ bool TranslatorX64::useTvResult(const Tracelet& t,
   // ArrayAccess-related destruction. For now we make the very conservative
   // assumption that any instruction with statically unknown offsets can
   // reenter.
-  bool result = mInstrHasUnknownOffsets(ni);
+  bool result = mInstrHasUnknownOffsets(ni, curFunc()->cls());
   SKTRACE(2, ni.source, "%s (no stack inputs) --> %s\n",
           __func__, result ? "true" : "false");
   return result;
@@ -859,6 +859,7 @@ void TranslatorX64::emitPropGeneric(const Tracelet& t,
 #undef HELPER_TABLE
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+                           Class* ctx,
                            const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd) {
@@ -879,7 +880,6 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
   if (!name) return PropInfo();
 
   bool accessible;
-  Class* ctx = curFunc()->cls();
   // If we are not in repo-authoriative mode, we need to check that
   // baseClass cannot change in between requests
   if (!RuntimeOption::RepoAuthoritative ||
@@ -915,12 +915,13 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
 }
 
 PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
+                                Class* context,
                                 const MInstrInfo& mii) {
   unsigned mInd = ni.immVecM.size() - 1;
   unsigned iInd = mii.valCount() + 1 + mInd;
 
   const Class* cls = nullptr;
-  return getPropertyOffset(ni, cls, mii, mInd, iInd);
+  return getPropertyOffset(ni, context, cls, mii, mInd, iInd);
 }
 
 void TranslatorX64::emitPropSpecialized(MInstrAttr const mia,
@@ -1041,7 +1042,8 @@ void TranslatorX64::emitProp(const MInstrInfo& mii,
           __func__, long(a.code.frontier), mInd, iInd);
 
   const Class* knownCls = nullptr;
-  const auto propInfo   = getPropertyOffset(*m_curNI, knownCls, mii,
+  const auto propInfo   = getPropertyOffset(*m_curNI, curFunc()->cls(),
+                                            knownCls, mii,
                                             mInd, iInd);
 
   if (propInfo.offset == -1) {
@@ -1255,8 +1257,8 @@ void TranslatorX64::emitCGetProp(const Tracelet& t,
    * access.
    */
   const Class* knownCls = nullptr;
-  const auto propInfo  = getPropertyOffset(*m_curNI, knownCls,
-                                            mii, mInd, iInd);
+  const auto propInfo  = getPropertyOffset(*m_curNI, curFunc()->cls(),
+                                           knownCls, mii, mInd, iInd);
   if (propInfo.offset != -1) {
     emitPropSpecialized(MIA_warn, knownCls, propInfo.offset,
                         mInd, iInd, rBase);
@@ -1672,8 +1674,8 @@ void TranslatorX64::emitSetProp(const Tracelet& t,
    * set.
    */
   const Class* knownCls = nullptr;
-  const auto propInfo   = getPropertyOffset(*m_curNI, knownCls,
-                                            mii, mInd, iInd);
+  const auto propInfo   = getPropertyOffset(*m_curNI, curFunc()->cls(),
+                                            knownCls, mii, mInd, iInd);
   if (propInfo.offset != -1 && !ni.outLocal && !ni.outStack) {
     emitPropSpecialized(MIA_define, knownCls, propInfo.offset,
                         mInd, iInd, rBase);
@@ -2504,7 +2506,8 @@ void TranslatorX64::emitMPre(const Tracelet& t,
                              const MInstrInfo& mii,
                              unsigned& mInd, unsigned& iInd,
                              LazyScratchReg& rBase) {
-  if (!mInstrHasUnknownOffsets(ni) && !useTvResult(t, ni, mii) &&
+  if (!mInstrHasUnknownOffsets(ni, curFunc()->cls()) &&
+      !useTvResult(t, ni, mii) &&
       (ni.mInstrOp() == OpCGetM || ni.mInstrOp() == OpSetM)) {
     m_vecState->setNoMIState();
   }
@@ -2719,7 +2722,7 @@ isNormalPropertyAccess(const NormalizedInstruction& i,
 }
 
 bool
-mInstrHasUnknownOffsets(const NormalizedInstruction& ni) {
+mInstrHasUnknownOffsets(const NormalizedInstruction& ni, Class* context) {
   const MInstrInfo& mii = getMInstrInfo(ni.mInstrOp());
   unsigned mi = 0;
   unsigned ii = mii.valCount() + 1;
@@ -2727,7 +2730,7 @@ mInstrHasUnknownOffsets(const NormalizedInstruction& ni) {
     MemberCode mc = ni.immVecM[mi];
     if (mcodeMaybePropName(mc)) {
       const Class* cls = nullptr;
-      if (getPropertyOffset(ni, cls, mii, mi, ii).offset == -1) {
+      if (getPropertyOffset(ni, context, cls, mii, mi, ii).offset == -1) {
         return true;
       }
       ++ii;

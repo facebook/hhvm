@@ -1555,6 +1555,8 @@ void TranslatorX64::unprotectCode() {
 
 void
 TranslatorX64::emitStackCheck(int funcDepth, Offset pc) {
+  funcDepth += kMaxJITInlineStackCells * sizeof(Cell);
+
   uint64_t stackMask = cellsToBytes(RuntimeOption::EvalVMStackElms) - 1;
   a.    mov_reg64_reg64(rVmSp, rScratch); // copy to destroy
   a.    and_imm64_reg64(stackMask, rScratch);
@@ -11640,8 +11642,21 @@ TranslatorX64::TranslatorX64()
   // the return stack.
   m_callToExit = emitServiceReq(SRFlags(SRAlign | SRJmpInsteadOfRet),
                                 REQ_EXIT, 0ull);
+
+  /*
+   * Helpers for returning from a function where the ActRec was pushed
+   * by the interpreter.
+   */
   m_retHelper = emitRetFromInterpretedFrame();
   m_genRetHelper = emitRetFromInterpretedGeneratorFrame();
+
+  /*
+   * Returning from a function where the ActRec was pushed by an
+   * inlined call.  This is separate from m_retHelper just for
+   * debugability---it does the same thing.
+   */
+  m_retInlHelper = emitRetFromInterpretedFrame();
+  FTRACE(1, "retInlHelper: {}\n", (void*)m_retInlHelper);
 
   moveToAlign(astubs);
   m_resumeHelperRet = astubs.code.frontier;

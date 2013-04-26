@@ -256,7 +256,6 @@ class Array : protected SmartPtr<ArrayData> {
   Variant rvalAt(int     key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(int64_t   key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(double  key, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(litstr  key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CStrRef key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CVarRef key, ACCESSPARAMS_DECL) const;
 
@@ -266,14 +265,12 @@ class Array : protected SmartPtr<ArrayData> {
   CVarRef rvalAtRef(int     key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(int64_t   key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(double  key, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(litstr  key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(CVarRef key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(CStrRef key, ACCESSPARAMS_DECL) const;
 
   const Variant operator[](int     key) const;
   const Variant operator[](int64_t   key) const;
   const Variant operator[](double  key) const;
-  const Variant operator[](litstr  key) const;
   const Variant operator[](CStrRef key) const;
   const Variant operator[](CVarRef key) const;
 
@@ -308,7 +305,6 @@ class Array : protected SmartPtr<ArrayData> {
   Variant &lvalAt(double  key, ACCESSPARAMS_DECL) {
     return lvalAtImpl(ToKey(key), flags);
   }
-  Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CVarRef key, ACCESSPARAMS_DECL);
 
@@ -326,7 +322,6 @@ class Array : protected SmartPtr<ArrayData> {
     return set(ToKey(key), v);
   }
 
-  CVarRef set(litstr  key, CVarRef v, bool isKey = false);
   CVarRef set(CStrRef key, CVarRef v, bool isKey = false);
   CVarRef set(CVarRef key, CVarRef v, bool isKey = false);
 
@@ -336,9 +331,6 @@ class Array : protected SmartPtr<ArrayData> {
   CVarRef set(int64_t   key, RefResult v) { return setRef(key,variant(v)); }
   CVarRef set(double  key, RefResult v) { return setRef(key,variant(v)); }
 
-  CVarRef set(litstr  key, RefResult v, bool isKey = false) {
-    return setRef(key,variant(v), isKey);
-  }
   CVarRef set(CStrRef key, RefResult v, bool isKey = false) {
     return setRef(key,variant(v), isKey);
   }
@@ -354,7 +346,6 @@ class Array : protected SmartPtr<ArrayData> {
     return setRef(ToKey(key), v);
   }
 
-  CVarRef setRef(litstr  key, CVarRef v, bool isKey = false);
   CVarRef setRef(CStrRef key, CVarRef v, bool isKey = false);
   CVarRef setRef(CVarRef key, CVarRef v, bool isKey = false);
 
@@ -370,7 +361,6 @@ class Array : protected SmartPtr<ArrayData> {
     return add(ToKey(key), v);
   }
 
-  CVarRef add(litstr  key, CVarRef v, bool isKey = false);
   CVarRef add(CStrRef key, CVarRef v, bool isKey = false);
   CVarRef add(CVarRef key, CVarRef v, bool isKey = false);
 
@@ -395,7 +385,6 @@ class Array : protected SmartPtr<ArrayData> {
     return addLvalImpl(ToKey(key));
   }
 
-  Variant &addLval(litstr  key, bool isKey = false);
   Variant &addLval(CStrRef key, bool isKey = false);
   Variant &addLval(CVarRef key, bool isKey = false);
 
@@ -422,7 +411,6 @@ class Array : protected SmartPtr<ArrayData> {
   bool exists(double  key) const {
     return existsImpl(ToKey(key));
   }
-  bool exists(litstr  key, bool isKey = false) const;
   bool exists(CStrRef key, bool isKey = false) const;
   bool exists(CVarRef key, bool isKey = false) const;
 
@@ -448,7 +436,6 @@ class Array : protected SmartPtr<ArrayData> {
   void remove(double  key) {
     removeImpl(ToKey(key));
   }
-  void remove(litstr  key, bool isString = false);
   void remove(CStrRef key, bool isString = false);
   void remove(CVarRef key);
 
@@ -485,6 +472,15 @@ class Array : protected SmartPtr<ArrayData> {
   }
 
   void setEvalScalar() const;
+
+  //litstr overloads
+  const Variant operator[](litstr key) const;
+  Variant rvalAt(litstr key, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(litstr key, ACCESSPARAMS_DECL) const;
+  Variant &lval(litstr key);
+  Variant *lvalPtr(litstr key, bool forWrite, bool create);
+  Variant &lvalAt(litstr key, ACCESSPARAMS_DECL);
+  CVarRef set(litstr key, CVarRef v, bool isKey = false);
 
  private:
   // helpers

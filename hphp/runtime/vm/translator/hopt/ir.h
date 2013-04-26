@@ -121,6 +121,7 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
  *     CStr          same as C(StaticStr)
  *     SNumInt       same as S(Int,Bool)
  *     SNum          same as S(Int,Bool,Dbl)
+ *     SSpills       SpillStack's variadic source list
  *
  * flags:
  *
@@ -157,12 +158,12 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(GuardType,                    DParam, S(Gen),                C|E|CRc|PRc|P) \
-O(GuardLoc,                         ND, S(StkPtr),                         E) \
+O(GuardLoc,                         ND, S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr) C(Int),                  E) \
 O(CastStk,                   D(StkPtr), S(StkPtr) C(Int),           Mem|N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr) C(Int),                  E) \
 O(GuardRefs,                        ND, SUnk,                              E) \
-O(AssertLoc,                        ND, S(StkPtr),                         E) \
+O(AssertLoc,                        ND, S(FramePtr),                       E) \
 O(OpAdd,                        DParam, SNum SNum,                         C) \
 O(OpSub,                        DParam, SNum SNum,                         C) \
 O(OpAnd,                        D(Int), SNumInt SNumInt,                   C) \
@@ -249,8 +250,8 @@ O(JmpNZero,                    D(None), SNum,                              E) \
 O(Jmp_,                        D(None), SUnk,                            T|E) \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(ExitWhenSurprised,                ND, NA,                                E) \
-O(ExitOnVarEnv,                     ND, S(StkPtr),                         E) \
-O(ReleaseVVOrExit,                  ND, S(StkPtr),                       N|E) \
+O(ExitOnVarEnv,                     ND, S(FramePtr),                       E) \
+O(ReleaseVVOrExit,                  ND, S(FramePtr),                     N|E) \
 O(RaiseError,                       ND, S(Str),               E|N|Mem|Refs|T) \
 O(RaiseWarning,                     ND, S(Str),              E|N|Mem|Refs|Er) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
@@ -260,18 +261,18 @@ O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(BoxPtr,            D(PtrToBoxedCell), S(PtrToGen),                   N|Mem) \
 O(LdStack,                      DParam, S(StkPtr) C(Int),                 NF) \
-O(LdLoc,                        DParam, S(StkPtr),                        NF) \
+O(LdLoc,                        DParam, S(FramePtr),                      NF) \
 O(LdStackAddr,                  DParam, S(StkPtr) C(Int),                  C) \
-O(LdLocAddr,                    DParam, S(StkPtr),                         C) \
+O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),               NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
 O(LdRef,                        DParam, S(BoxedCell),                     NF) \
-O(LdThis,                       D(Obj), S(StkPtr),                      C|Rm) \
-O(LdRetAddr,                D(RetAddr), S(StkPtr),                        NF) \
+O(LdThis,                       D(Obj), S(FramePtr),                    C|Rm) \
+O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
 O(LdConst,                      DParam, NA,                             C|Rm) \
 O(DefConst,                     DParam, NA,                                C) \
-O(LdCtx,                        D(Ctx), S(StkPtr) S(Func),              C|Rm) \
-O(LdCctx,                      D(Cctx), S(StkPtr),                      C|Rm) \
+O(LdCtx,                        D(Ctx), S(FramePtr) S(Func),            C|Rm) \
+O(LdCctx,                      D(Cctx), S(FramePtr),                    C|Rm) \
 O(LdCls,                        D(Cls), S(Str) C(Cls),     C|E|N|Refs|Er|Mem) \
 O(LdClsCached,                  D(Cls), CStr,              C|E|N|Refs|Er|Mem) \
 O(LdClsCachedSafe,              D(Cls), CStr,                              C) \
@@ -290,12 +291,12 @@ O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),    C|E|N|Er) \
 O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),   E|N|Refs|Er) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
-O(LdGblAddr,               D(PtrToGen), S(Str),                        N    ) \
+O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
 O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
 O(LdFuncCached,                D(Func), CStr,                       N|C|E|Er) \
 O(LdFuncCachedSafe,            D(Func), CStr,                              C) \
-O(LdARFuncPtr,                 D(Func), S(StkPtr) C(Int),                  C) \
+O(LdARFuncPtr,                 D(Func), S(StkPtr,FramePtr) C(Int),         C) \
 O(LdContLocalsPtr,        D(PtrToCell), S(Obj),                            C) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
 O(LdSSwitchDestSlow,            D(TCA), S(Gen),                  E|N|Refs|Er) \
@@ -306,68 +307,71 @@ O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
 O(NewObj,                    D(StkPtr), S(Cls)                                \
                                           C(Int)                              \
                                           S(StkPtr)                           \
-                                          S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
+                                          S(FramePtr),   E|Mem|N|Refs|PRc|Er) \
 O(NewObjCached,              D(StkPtr), C(Int)                                \
                                           S(Str)                              \
                                           S(StkPtr)                           \
-                                          S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
+                                          S(FramePtr),   E|Mem|N|Refs|PRc|Er) \
 O(NewObjNoCtorCached,        D(StkPtr), S(Str)                                \
                                           S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
 O(CreateCl,                     D(Obj), C(Cls)                                \
                                           C(Int)                              \
-                                          S(StkPtr)                           \
+                                          S(FramePtr)                         \
                                           S(StkPtr),                   Mem|N) \
 O(NewArray,                     D(Arr), C(Int),                  E|Mem|N|PRc) \
 O(NewTuple,                     D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
-O(DefActRec,                 D(ActRec), S(StkPtr)                             \
-                                          S(Func,FuncCls,FuncCtx,Null)        \
-                                          S(Ctx,Cls,InitNull)                 \
-                                          C(Int)                              \
-                                          S(Str,Null),                   Mem) \
-O(FreeActRec,                D(StkPtr), S(StkPtr),                       Mem) \
+O(FreeActRec,                D(FramePtr), S(FramePtr),                   Mem) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(Call,                      D(StkPtr), SUnk,                 E|Mem|CRc|Refs) \
 O(CallBuiltin,                DBuiltin, SUnk,            E|Mem|Refs|Er|N|PRc) \
-O(NativeImpl,                       ND, C(Func) S(StkPtr),      E|Mem|N|Refs) \
+O(NativeImpl,                       ND, C(Func) S(FramePtr),    E|Mem|N|Refs) \
   /* XXX: why does RetCtrl sometimes get PtrToGen */                          \
 O(RetCtrl,                          ND, S(StkPtr,PtrToGen)                    \
-                                          S(StkPtr)                           \
+                                          S(FramePtr)                         \
                                           S(RetAddr),                T|E|Mem) \
-O(RetVal,                           ND, S(StkPtr) S(Gen),          E|Mem|CRc) \
-O(RetAdjustStack,            D(StkPtr), S(StkPtr),                         E) \
+O(RetVal,                           ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
+O(RetAdjustStack,            D(StkPtr), S(FramePtr),                       E) \
 O(StMem,                            ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),      E|Mem|CRc|Refs) \
 O(StMemNT,                          ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),           E|Mem|CRc) \
 O(StProp,                           ND, S(Obj) S(Int) S(Gen), E|Mem|CRc|Refs) \
 O(StPropNT,                         ND, S(Obj) S(Int) S(Gen),      E|Mem|CRc) \
-O(StLoc,                            ND, S(StkPtr) S(Gen),          E|Mem|CRc) \
-O(StLocNT,                          ND, S(StkPtr) S(Gen),          E|Mem|CRc) \
+O(StLoc,                            ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
+O(StLocNT,                          ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
 O(StRef,                       DBox(1), SUnk,                 E|Mem|CRc|Refs) \
 O(StRefNT,                     DBox(1), SUnk,                      E|Mem|CRc) \
 O(StRaw,                            ND, SUnk,                          E|Mem) \
 O(LdStaticLocCached,      D(BoxedCell), C(CacheHandle),                   NF) \
-O(StaticLocInit,          D(BoxedCell), CStr S(StkPtr) S(Cell),  PRc|E|N|Mem) \
+O(StaticLocInit,          D(BoxedCell), CStr                                  \
+                                          S(FramePtr)                         \
+                                          S(Cell),               PRc|E|N|Mem) \
 O(StaticLocInitCached,    D(BoxedCell), CStr                                  \
-                                          S(StkPtr)                           \
+                                          S(FramePtr)                         \
                                           S(Cell)                             \
                                             C(CacheHandle),      PRc|E|N|Mem) \
-O(SpillStack,                D(StkPtr), SUnk,                      E|Mem|CRc) \
+O(SpillStack,                D(StkPtr), S(StkPtr) C(Int) SSpills,        CRc) \
+O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
+                                          S(FramePtr)                         \
+                                          S(Func,FuncCls,FuncCtx,Null)        \
+                                          S(Ctx,Cls,InitNull),           CRc) \
+O(ExceptionBarrier,          D(StkPtr), S(StkPtr),                         E) \
 O(ExitTrace,                        ND, SUnk,                            T|E) \
 O(ExitTraceCc,                      ND, SUnk,                            T|E) \
 O(ExitSlow,                         ND, SUnk,                            T|E) \
 O(ExitSlowNoProgress,               ND, SUnk,                            T|E) \
 O(ExitGuardFailure,                 ND, SUnk,                            T|E) \
-O(SyncVMRegs,                       ND, S(StkPtr) S(StkPtr),               E) \
+O(SyncVMRegs,                       ND, S(FramePtr) S(StkPtr),             E) \
 O(Mov,                         DofS(0), SUnk,                            C|P) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
 O(IncRef,                      DofS(0), S(Gen),                    Mem|PRc|P) \
-O(DecRefLoc,                        ND, S(StkPtr),              N|E|Mem|Refs) \
+O(DecRefLoc,                        ND, S(FramePtr),            N|E|Mem|Refs) \
 O(DecRefStack,                      ND, S(StkPtr) C(Int),       N|E|Mem|Refs) \
-O(DecRefThis,                       ND, SUnk,                   N|E|Mem|Refs) \
-O(DecRefKillThis,                   ND, S(Obj) S(StkPtr), N|E|Mem|CRc|Refs|K) \
-O(GenericRetDecRefs,         D(StkPtr), S(StkPtr)                             \
+O(DecRefThis,                       ND, S(FramePtr),            N|E|Mem|Refs) \
+O(DecRefKillThis,                   ND, S(Obj)                                \
+                                          S(FramePtr),    N|E|Mem|CRc|Refs|K) \
+O(GenericRetDecRefs,         D(StkPtr), S(FramePtr)                           \
                                           S(Gen) C(Int),        E|N|Mem|Refs) \
 O(DecRef,                           ND, S(Gen),           N|E|Mem|CRc|Refs|K) \
 O(DecRefMem,                        ND, S(PtrToGen)                           \
@@ -376,8 +380,13 @@ O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
 O(DecRefNZOrBranch,                 ND, S(Gen),                      Mem|CRc) \
 O(DefLabel,                     DMulti, SUnk,                              E) \
 O(Marker,                           ND, NA,                                E) \
-O(DefFP,                     D(StkPtr), NA,                                E) \
-O(DefSP,                     D(StkPtr), S(StkPtr) C(Int),                  E) \
+O(DefInlineFP,             D(FramePtr), S(StkPtr),                        NF) \
+O(InlineReturn,                     ND, S(FramePtr),                       E) \
+O(DefFP,                   D(FramePtr), NA,                                E) \
+O(DefSP,                     D(StkPtr), S(FramePtr),                       E) \
+O(ReDefSP,                   D(StkPtr), S(FramePtr) S(StkPtr),            NF) \
+O(StashGeneratorSP,          D(StkPtr), S(StkPtr),                        NF) \
+O(ReDefGeneratorSP,          D(StkPtr), S(StkPtr),                        NF) \
 O(VerifyParamCls,                   ND, S(Cls)                                \
                                           S(Cls)                              \
                                           C(Int)                              \
@@ -405,45 +414,46 @@ O(ArrayAdd,                     D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 O(DefCls,                           ND, SUnk,                          C|E|N) \
 O(DefFunc,                          ND, SUnk,                       C|E|N|Er) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                 C|N) \
-O(InterpOne,                 D(StkPtr), S(StkPtr) S(StkPtr)                   \
+O(InterpOne,                 D(StkPtr), S(FramePtr) S(StkPtr)                 \
                                           C(Int) C(Int),     E|N|Mem|Refs|Er) \
-O(InterpOneCF,                      ND, S(StkPtr) S(StkPtr)                   \
+O(InterpOneCF,                      ND, S(FramePtr) S(StkPtr)                 \
                                           C(Int),          T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
 O(AllocSpill,                       ND, C(Int),                        E|Mem) \
 O(FreeSpill,                        ND, C(Int),                        E|Mem) \
 O(CreateCont,                   D(Obj), C(TCA)                                \
-                                          S(StkPtr)                           \
+                                          S(FramePtr)                         \
                                           C(Bool)                             \
                                           C(Func)                             \
                                           C(Func),               E|N|Mem|PRc) \
-O(FillContLocals,                   ND, S(StkPtr)                             \
+O(FillContLocals,                   ND, S(FramePtr)                           \
                                           C(Func)                             \
                                           C(Func)                             \
                                           S(Obj),                    E|N|Mem) \
 O(FillContThis,                     ND, S(Obj)                                \
                                           S(PtrToCell) C(Int),         E|Mem) \
-O(ContEnter,                        ND, S(StkPtr)                             \
-                                          S(TCA) C(Int) S(StkPtr),     E|Mem) \
-O(UnlinkContVarEnv,                 ND, S(StkPtr),                   E|N|Mem) \
-O(LinkContVarEnv,                   ND, S(StkPtr),                   E|N|Mem) \
+O(ContEnter,                        ND, S(FramePtr)                           \
+                                          S(TCA) C(Int) S(FramePtr),   E|Mem) \
+O(UnlinkContVarEnv,                 ND, S(FramePtr),                 E|N|Mem) \
+O(LinkContVarEnv,                   ND, S(FramePtr),                 E|N|Mem) \
 O(ContRaiseCheck,                   ND, S(Obj),                            E) \
 O(ContPreNext,                      ND, S(Obj),                        E|Mem) \
 O(ContStartedCheck,                 ND, S(Obj),                            E) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
-                                          S(StkPtr)                           \
+                                          S(FramePtr)                         \
                                           C(Int)                              \
                                           C(Int),           E|N|Mem|Refs|CRc) \
 O(IterInitK,                   D(Bool), S(Arr,Obj)                            \
-                                          S(StkPtr)                           \
+                                          S(FramePtr)                         \
                                           C(Int)                              \
                                           C(Int)                              \
                                           C(Int),           E|N|Mem|Refs|CRc) \
-O(IterNext,                    D(Bool), S(StkPtr) C(Int) C(Int),E|N|Mem|Refs) \
-O(IterNextK,                   D(Bool), S(StkPtr)                             \
+O(IterNext,                    D(Bool), S(FramePtr)                           \
+                                          C(Int) C(Int),        E|N|Mem|Refs) \
+O(IterNextK,                   D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int) C(Int), E|N|Mem|Refs) \
-O(IterFree,                         ND, S(StkPtr) C(Int),       E|N|Mem|Refs) \
+O(IterFree,                         ND, S(FramePtr) C(Int),     E|N|Mem|Refs) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
 O(BaseG,                   D(PtrToGen), C(TCA)                                \
                                           S(Str)                              \
@@ -742,6 +752,37 @@ struct ExitData : IRExtraData {
   std::string show() const;
 };
 
+/*
+ * Compile-time metadata about an ActRec allocation.
+ */
+struct ActRecInfo : IRExtraData {
+  const StringData* invName;  // may be nullptr
+  int32_t numArgs;
+
+  std::string show() const {
+    return folly::to<std::string>(numArgs, invName ? " M" : "");
+  }
+};
+
+/*
+ * Stack and bytecode offsets.
+ */
+struct StackOffset : IRExtraData {
+  explicit StackOffset(int32_t offset) : offset(offset) {}
+
+  std::string show() const { return folly::to<std::string>(offset); }
+
+  int32_t offset;
+};
+
+struct BCOffset : IRExtraData {
+  explicit BCOffset(Offset offset) : offset(offset) {}
+
+  std::string show() const { return folly::to<std::string>(offset); }
+
+  Offset offset;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -767,6 +808,12 @@ X(LdConst,            ConstData);
 X(Jmp_,               EdgeData);
 X(ExitTrace,          ExitData);
 X(ExitTraceCc,        ExitData);
+X(SpillFrame,         ActRecInfo);
+X(ReDefSP,            StackOffset);
+X(ReDefGeneratorSP,   StackOffset);
+X(DefSP,              StackOffset);
+X(DefInlineFP,        BCOffset);
+
 #undef X
 
 //////////////////////////////////////////////////////////////////////
@@ -976,11 +1023,12 @@ Opcode getStackModifyingOpcode(Opcode opc);
   IRT(Cctx,        1ULL << 46) /* Class* with the lowest bit set,  */   \
                                /* as stored in ActRec.m_cls field  */   \
   IRT(RetAddr,     1ULL << 47) /* Return address */                     \
-  IRT(StkPtr,      1ULL << 48) /* any pointer into VM stack: VmSP or VmFP*/ \
-  IRT(TCA,         1ULL << 49)                                          \
-  IRT(ActRec,      1ULL << 50)                                          \
-  IRT(None,        1ULL << 51)                                          \
-  IRT(CacheHandle, 1ULL << 52) /* TargetCache::CacheHandle */
+  IRT(StkPtr,      1ULL << 48) /* stack pointer */                      \
+  IRT(FramePtr,    1ULL << 49) /* frame pointer */                      \
+  IRT(TCA,         1ULL << 50)                                          \
+  IRT(ActRec,      1ULL << 51)                                          \
+  IRT(None,        1ULL << 52)                                          \
+  IRT(CacheHandle, 1ULL << 53) /* TargetCache::CacheHandle */
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
@@ -2155,7 +2203,6 @@ struct Block : boost::noncopyable {
   }
 
   uint32_t    getId() const      { return m_id; }
-  const Func* getFunc() const    { return m_func; }
   Trace*      getTrace() const   { return m_trace; }
   void        setTrace(Trace* t) { m_trace = t; }
   void        setHint(Hint hint) { m_hint = hint; }
@@ -2311,14 +2358,6 @@ public:
     return b;
   }
 
-  const Func* getFunc() const {
-    return front()->getFunc();
-  }
-
-  const Unit* getUnit() const {
-    return getFunc()->unit();
-  }
-
   uint32_t getBcOff() const { return m_bcOff; }
   Trace* addExitTrace(Trace* exit) {
     m_exitTraces.push_back(exit);
@@ -2401,12 +2440,6 @@ void optimizeTrace(Trace*, IRFactory* irFactory);
  * spill sources, this totals up whether it is an ActRec or a cell.
  */
 int32_t spillValueCells(IRInstruction* spillStack);
-
-/*
- * When SpillStack takes an ActRec, it has this many extra
- * dependencies in the spill vector for the values in the ActRec.
- */
-constexpr int kSpillStackActRecExtraArgs = 5;
 
 inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
   switch (instr->getOpcode()) {

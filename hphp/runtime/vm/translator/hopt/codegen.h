@@ -255,9 +255,6 @@ private:
                    PhysReg baseReg,
                    int64_t offset,
                    Block* exit);
-  void emitSpillActRec(SSATmp* sp,
-                       int64_t spOffset,
-                       SSATmp* defAR);
 
   void cgIterNextCommon(IRInstruction* inst, bool isNextK);
   void cgIterInitCommon(IRInstruction* inst, bool isInitK);
@@ -282,6 +279,8 @@ private:
   Address getDtorTyped();
   int getIterOffset(SSATmp* tmp);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
+
+  void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int64_t adjustment);
 
   /*
    * Generate an if-block that branches around some unlikely code, handling

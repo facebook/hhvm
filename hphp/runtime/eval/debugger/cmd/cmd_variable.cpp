@@ -146,9 +146,11 @@ void CmdVariable::setClientOutput(DebuggerClient *client) {
   client->setOTValues(values);
 }
 
+static const StaticString s_GLOBALS("GLOBALS");
+
 Array CmdVariable::GetGlobalVariables() {
   Array ret = g_vmContext->m_globalVarEnv->getDefinedVariables();
-  ret.remove("GLOBALS");
+  ret.remove(s_GLOBALS);
   return ret;
 }
 

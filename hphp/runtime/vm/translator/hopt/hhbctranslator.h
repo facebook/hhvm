@@ -86,10 +86,10 @@ class TypeGuard {
   };
 
   TypeGuard(Kind kind, uint32_t index, Type type)
-      : m_kind(kind)
-      , m_index(index)
-      , m_type(type) {
-  }
+    : m_kind(kind)
+    , m_index(index)
+    , m_type(type)
+  {}
 
   Kind      getKind()  const { return m_kind;  }
   uint32_t  getIndex() const { return m_index; }
@@ -97,8 +97,8 @@ class TypeGuard {
 
  private:
   Kind      m_kind;
-  uint32_t    m_index;
-  Type m_type;
+  uint32_t  m_index;
+  Type      m_type;
 };
 
 struct HhbcTranslator {
@@ -111,8 +111,7 @@ struct HhbcTranslator {
                             initialSpOffsetFromFp,
                             m_irFactory,
                             func))
-    , m_curFunc(func)
-    , m_bcOff(-1)
+    , m_bcStateStack {BcState(-1, func)}
     , m_startBcOff(bcStartOffset)
     , m_lastBcOff(false)
     , m_hasExit(false)
@@ -123,6 +122,16 @@ struct HhbcTranslator {
   void end(int nextBcOff);
   Trace* getTrace() const { return m_tb->getTrace(); }
   TraceBuilder* getTraceBuilder() const { return m_tb.get(); }
+
+  void beginInlining(unsigned numArgs,
+                     const Func* target,
+                     Offset returnBcOffset);
+  void endInlining();
+  bool isInlining() const;
+  void profileFunctionEntry(const char* category);
+  void profileInlineFunctionShape(const std::string& str);
+  void profileSmallFunctionShape(const std::string& str);
+  void profileFailedInlShape(const std::string& str);
 
   void setBcOff(Offset newOff, bool lastBcOff);
   void setBcOffNextTrace(Offset bcOff) { m_bcOffNextTrace = bcOff; }
@@ -271,6 +280,8 @@ struct HhbcTranslator {
   void emitSwitch(const ImmVector&, int64_t base, bool bounded);
   void emitSSwitch(const ImmVector&);
 
+  // freeInline indicates whether we should be doing decrefs inlined in
+  // the TC, or using the generic decref helper.
   void emitRetC(bool freeInline);
   void emitRetV(bool freeInline);
 
@@ -427,6 +438,7 @@ private:
                           PropInfo propOffset,
                           bool warn,
                           bool define);
+    Class* contextClass() const;
 
     /*
      * genStk is a wrapper around TraceBuilder::gen() to deal with instructions
@@ -479,34 +491,23 @@ private:
                 bool exitOnFailure,
                 CheckSupportedFun checkSupported,
                 EmitLdAddrFun emitLdAddr);
-
   void emitVGetMem(SSATmp* addr);
-
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitVGet(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
-
   void emitBindMem(SSATmp* ptr, SSATmp* src);
-
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitBind(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
-
   void emitSetMem(SSATmp* ptr, SSATmp* src);
-
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitSet(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
-
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitIsset(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
-
   void emitEmptyMem(SSATmp* ptr);
-
   template<class CheckSupportedFun, class EmitLdAddrFun>
   void emitEmpty(const StringData* name,
                  CheckSupportedFun checkSupported,
                  EmitLdAddrFun emitLdAddr);
-
   void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Trace* exitTrace);
-
   bool checkSupportedClsProp(const StringData* propName,
                              Type resultType,
                              int stkIndex);
@@ -521,9 +522,10 @@ private:
   SSATmp* emitLdGblAddrDef(const StringData* gblName = nullptr);
   SSATmp* emitLdGblAddr(const StringData* gblName, Block* block);
   SSATmp* unboxPtr(SSATmp* ptr);
-
   void emitUnboxRAux();
   void emitAGet(SSATmp* src, const StringData* clsName);
+  void emitRetFromInlined(Type type);
+  SSATmp* emitDecRefLocalsInline(SSATmp* retVal);
   void emitRet(Type type, bool freeInline);
   void emitIsTypeC(Type t);
   void emitIsTypeL(Type t, int id);
@@ -540,19 +542,21 @@ private:
   void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc);
+  void emitMarker();
 
   /*
    * Accessors for the current function being compiled and its
    * class and unit.
    */
-  const Func* getCurFunc()  { return m_curFunc; }
-  Class*      getCurClass() { return getCurFunc()->cls(); }
-  Unit*       getCurUnit()  { return getCurFunc()->unit(); }
+  const Func* getCurFunc()  const { return m_bcStateStack.back().func; }
+  Class*      getCurClass() const { return getCurFunc()->cls(); }
+  Unit*       getCurUnit()  const { return getCurFunc()->unit(); }
+  Offset      bcOff()       const { return m_bcStateStack.back().bcOff; }
 
-  SrcKey      getCurSrcKey()  { return SrcKey(m_curFunc, m_bcOff); }
-  SrcKey      getNextSrcKey() {
-    SrcKey srcKey(m_curFunc, m_bcOff);
-    srcKey.advance(m_curFunc->unit());
+  SrcKey      getCurSrcKey()  const { return SrcKey(getCurFunc(), bcOff()); }
+  SrcKey      getNextSrcKey() const {
+    SrcKey srcKey(getCurFunc(), bcOff());
+    srcKey.advance(getCurFunc()->unit());
     return srcKey;
   }
 
@@ -581,6 +585,7 @@ private:
   SSATmp* topC(uint32_t i = 0) { return top(Type::Cell, i); }
   std::vector<SSATmp*> getSpillValues() const;
   SSATmp* spillStack();
+  void    exceptionBarrier();
   SSATmp* loadStackAddr(int32_t offset);
   SSATmp* top(Type type, uint32_t index = 0);
   void    extendStack(uint32_t index, Type type);
@@ -588,11 +593,25 @@ private:
   void    refineType(SSATmp* tmp, Type type);
 
 private:
+  // Tracks information about the current bytecode offset and which
+  // function we are in.  Goes in m_bcStateStack; we push and pop as
+  // we deal with inlined calls.
+  struct BcState {
+    explicit BcState(Offset bcOff, const Func* func)
+      : bcOff(bcOff)
+      , func(func)
+    {}
+
+    Offset bcOff;
+    const Func* func;
+  };
+
+private:
   IRFactory&        m_irFactory;
   std::unique_ptr<TraceBuilder>
                     m_tb;
-  const Func*       m_curFunc;
-  Offset            m_bcOff;
+  std::vector<BcState>
+                    m_bcStateStack;
   Offset            m_startBcOff;
   Offset            m_bcOffNextTrace;
   bool              m_lastBcOff;
@@ -613,6 +632,14 @@ private:
    */
   uint32_t          m_stackDeficit;
   EvalStack         m_evalStack;
+
+  /*
+   * The FPI stack is used for inlining---when we start inlining at an
+   * FCall, we look in here to find a definition of the StkPtr,offset
+   * that can be used after the inlined callee "returns".
+   */
+  std::stack<std::pair<SSATmp*,int32_t>>
+                    m_fpiStack;
 
   vector<TypeGuard> m_typeGuards;
   Trace* const      m_exitGuardFailureTrace;

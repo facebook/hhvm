@@ -421,6 +421,7 @@ public:
   F(bool, HHIRExtraOptPass,            true)                            \
   F(bool, HHIRMemOpt,                  true)                            \
   F(uint32_t, HHIRNumFreeRegs,         -1)                              \
+  F(bool, HHIREnableGenTimeInlining,   true)                            \
   F(bool, HHIREnableRematerialization, true)                            \
   F(bool, HHIREnableCalleeSavedOpt,    true)                            \
   F(bool, HHIREnablePreColoring,       true)                            \

@@ -59,8 +59,10 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
     m_enableCse = RuntimeOption::EvalHHIRCse;
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
-  genDefFP();
-  genDefSP(initialSpOffsetFromFp);
+
+  gen(DefFP);
+  gen(DefSP, StackOffset(initialSpOffsetFromFp), m_fpValue);
+
   assert(m_spOffset >= 0);
 }
 
@@ -76,16 +78,8 @@ SSATmp* TraceBuilder::genConcat(SSATmp* tl, SSATmp* tr) {
   return gen(Concat, tl, tr);
 }
 
-void TraceBuilder::genDefCls(PreClass* clss, const Opcode* after) {
-  PUNT(DefCls);
-}
-
-void TraceBuilder::genDefFunc(Func* func) {
-  gen(DefFunc, genDefConst<const Func*>(func));
-}
-
 SSATmp* TraceBuilder::genLdThis(Trace* exitTrace) {
-  if (m_thisIsAvailable) {
+  if (isThisAvailable()) {
     return gen(LdThis, m_fpValue);
   } else {
     return gen(LdThis, getFirstBlock(exitTrace), m_fpValue);
@@ -169,6 +163,7 @@ bool TraceBuilder::isValueAvailable(SSATmp* tmp) const {
   while (true) {
     if (m_refCountedMemValue == tmp) return true;
     if (anyLocalHasValue(tmp)) return true;
+    if (callerLocalHasValue(tmp)) return true;
 
     IRInstruction* srcInstr = tmp->getInstruction();
     Opcode srcOpcode = srcInstr->getOpcode();
@@ -768,22 +763,6 @@ SSATmp* TraceBuilder::genNewTuple(int32_t numArgs, SSATmp* sp) {
   return gen(NewTuple, genDefConst<int64_t>(numArgs), sp);
 }
 
-SSATmp* TraceBuilder::genDefActRec(SSATmp* func,
-                                   SSATmp* objOrClass,
-                                   int32_t numArgs,
-                                   const StringData* invName) {
-  return gen(DefActRec,
-             m_fpValue,
-             func,
-             objOrClass,
-             genDefConst<int64_t>(numArgs),
-             invName ? genDefConst(invName) : genDefInitNull());
-}
-
-SSATmp* TraceBuilder::genFreeActRec() {
-  return gen(FreeActRec, m_fpValue);
-}
-
 /*
  * Track down a value that was previously spilled onto the stack
  * The spansCall parameter tracks whether the returned value's
@@ -801,10 +780,21 @@ static SSATmp* getStackValue(SSATmp* sp,
   case DefSP:
     return nullptr;
 
+  case ReDefGeneratorSP: {
+    auto srcInst = inst->getSrc(0)->getInstruction();
+    assert(srcInst->getOpcode() == StashGeneratorSP);
+    return getStackValue(srcInst->getSrc(0), index, spansCall, type);
+  }
+  case ReDefSP:
+    return getStackValue(inst->getSrc(1), index, spansCall, type);
+
+  case ExceptionBarrier:
+    return getStackValue(inst->getSrc(0), index, spansCall, type);
+
   case AssertStk:
     // fallthrough
   case CastStk:
-    // fallthrough: sp = CastStk<T> sp, offset
+    // fallthrough
   case GuardStk: {
     // sp = GuardStk<T> sp, offset
     // We don't have a value, but we may know the type due to guarding
@@ -834,18 +824,11 @@ static SSATmp* getStackValue(SSATmp* sp,
                          type);
 
   case SpillStack: {
-    // sp = spillstack(stkptr, stkAdjustment, spilledtmp0, spilledtmp1, ...)
     int64_t numPushed    = 0;
     int32_t numSpillSrcs = inst->getNumSrcs() - 2;
 
     for (int i = 0; i < numSpillSrcs; ++i) {
       SSATmp* tmp = inst->getSrc(i + 2);
-      if (tmp->getType() == Type::ActRec) {
-        numPushed += kNumActRecCells;
-        i += kSpillStackActRecExtraArgs;
-        continue;
-      }
-
       if (index == numPushed) {
         if (tmp->getInstruction()->getOpcode() == IncRef) {
           tmp = tmp->getInstruction()->getSrc(0);
@@ -858,8 +841,8 @@ static SSATmp* getStackValue(SSATmp* sp,
       ++numPushed;
     }
 
-    // this is not one of the values pushed onto the stack by this
-    // spillstack instruction, so continue searching
+    // This is not one of the values pushed onto the stack by this
+    // spillstack instruction, so continue searching.
     SSATmp* prevSp = inst->getSrc(0);
     int64_t numPopped = inst->getSrc(1)->getValInt();
     return getStackValue(prevSp,
@@ -870,7 +853,6 @@ static SSATmp* getStackValue(SSATmp* sp,
   }
 
   case InterpOne: {
-    // sp = InterpOne(fp, sp, bcOff, stackAdjustment, resultType)
     SSATmp* prevSp = inst->getSrc(1);
     int64_t spAdjustment = inst->getSrc(3)->getValInt(); // # popped - # pushed
     Type resultType = inst->getTypeParam();
@@ -881,9 +863,15 @@ static SSATmp* getStackValue(SSATmp* sp,
     return getStackValue(prevSp, index + spAdjustment, spansCall, type);
   }
 
+  case SpillFrame:
+    return getStackValue(inst->getSrc(0),
+                         // pushes an ActRec
+                         index - kNumActRecCells,
+                         spansCall,
+                         type);
+
   case NewObj:
   case NewObjCached:
-    // sp = NewObj(numParams, className, sp, fp)
     if (index == kNumActRecCells) {
       // newly allocated object, which we unfortunately don't have any
       // kind of handle to :-(
@@ -929,7 +917,14 @@ void TraceBuilder::genAssertStk(uint32_t id, Type type) {
   Type knownType = Type::None;
   bool spansCall = false;
   UNUSED SSATmp* tmp = getStackValue(m_spValue, id, spansCall, knownType);
-  assert(!tmp);
+
+  // We may have found a value if there was an inlined call.
+  // AssertStk indicated that we knew the type from static analysis,
+  // so let's double check.
+  if (tmp) {
+    assert(tmp->isA(type));
+  }
+
   if (knownType == Type::None || type.strictSubtypeOf(knownType)) {
     gen(AssertStk, type, m_spValue, genDefConst<int64_t>(id));
   }
@@ -946,14 +941,6 @@ SSATmp* TraceBuilder::genCastStk(uint32_t id, Type type) {
     inst->setTypeParam(type);
   }
   return m_spValue;
-}
-
-SSATmp* TraceBuilder::genDefFP() {
-  return gen(DefFP);
-}
-
-SSATmp* TraceBuilder::genDefSP(int32_t spOffset) {
-  return gen(DefSP, m_fpValue, genDefConst(spOffset));
 }
 
 SSATmp* TraceBuilder::genLdStackAddr(SSATmp* sp, int64_t index) {
@@ -1037,11 +1024,22 @@ void TraceBuilder::genDecRefStack(Type type, uint32_t stackOff) {
 
 void TraceBuilder::genDecRefThis() {
   if (isThisAvailable()) {
-    SSATmp* thiss = genLdThis(nullptr);
+    auto const thiss = genLdThis(nullptr);
+    auto const thisInst = thiss->getInstruction();
+
+    if (thisInst->getOpcode() == IncRef &&
+        callerLocalHasValue(thisInst->getSrc(0))) {
+      gen(DecRefNZ, thiss);
+      return;
+    }
+
+    // It's a shame to keep a reference to the frame just to kill the
+    // this pointer.  This is handled in optimizeActRecs.
     gen(DecRefKillThis, thiss, m_fpValue);
-  } else {
-    gen(DecRefThis, m_fpValue);
+    return;
   }
+
+  gen(DecRefThis, m_fpValue);
 }
 
 SSATmp* TraceBuilder::genGenericRetDecRefs(SSATmp* retVal, int numLocals) {
@@ -1181,7 +1179,7 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   }
 
   switch (opc) {
-    case Call: {
+    case Call:
       m_spValue = inst->getDst();
       // A call pops the ActRec and pushes a return value.
       m_spOffset -= kNumActRecCells;
@@ -1190,49 +1188,57 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       killCse();
       killLocals();
       break;
-    }
-    case ContEnter: {
+
+    case ContEnter:
       killCse();
       killLocals();
       break;
-    }
-    case DefFP: {
+
+    case DefFP:
+    case FreeActRec:
       m_fpValue = inst->getDst();
       break;
-    }
-    case DefSP: {
+
+    case ReDefGeneratorSP:
+    case DefSP:
+    case ReDefSP:
       m_spValue = inst->getDst();
-      m_spOffset = inst->getSrc(1)->getValInt();
+      m_spOffset = inst->getExtra<StackOffset>()->offset;
       break;
-    }
+
     case AssertStk:
     case CastStk:
-    case GuardStk: {
+    case GuardStk:
+    case ExceptionBarrier:
       m_spValue = inst->getDst();
       break;
-    }
+
     case SpillStack: {
       m_spValue = inst->getDst();
       // Push the spilled values but adjust for the popped values
       int64_t stackAdjustment = inst->getSrc(1)->getValInt();
       m_spOffset -= stackAdjustment;
       m_spOffset += spillValueCells(inst);
-      assert(m_spOffset >= 0);
       break;
     }
+
+    case SpillFrame:
+      m_spValue = inst->getDst();
+      m_spOffset += kNumActRecCells;
+      break;
+
     case NewObj:
-    case NewObjCached: {
+    case NewObjCached:
       m_spValue = inst->getDst();
       // new obj leaves the new object and an actrec on the stack
-      m_spOffset += (sizeof(ActRec) / sizeof(Cell)) + 1;
-      assert(m_spOffset >= 0);
+      m_spOffset += kNumActRecCells + 1;
       break;
-    }
-    case NewObjNoCtorCached: {
+
+    case NewObjNoCtorCached:
       m_spValue = inst->getDst();
       m_spOffset += 1;
       break;
-    }
+
     case InterpOne: {
       m_spValue = inst->getDst();
       int64_t stackAdjustment = inst->getSrc(3)->getValInt();
@@ -1246,17 +1252,15 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     case StPropNT:
       // fall through to StMem; stored value is the same arg number (2)
     case StMem:
-    case StMemNT: {
+    case StMemNT:
       m_refCountedMemValue = inst->getSrc(2);
       break;
-    }
 
     case LdMem:
     case LdProp:
-    case LdRef: {
+    case LdRef:
       m_refCountedMemValue = inst->getDst();
       break;
-    }
 
     case StRefNT:
     case StRef: {
@@ -1269,47 +1273,47 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     }
 
     case StLocNT:
-    case StLoc: {
+    case StLoc:
       setLocalValue(inst->getExtra<LocalId>()->locId,
                     inst->getSrc(1));
       break;
-    }
-    case LdLoc: {
+
+    case LdLoc:
       setLocalValue(inst->getExtra<LdLoc>()->locId, inst->getDst());
       break;
-    }
+
     case AssertLoc:
-    case GuardLoc: {
+    case GuardLoc:
       setLocalType(inst->getExtra<LocalId>()->locId,
                    inst->getTypeParam());
       break;
-    }
-    case IterInitK: {
+
+    case IterInitK:
       // kill the locals to which this instruction stores iter's key and value
       killLocalValue(inst->getSrc(3)->getValInt());
       killLocalValue(inst->getSrc(4)->getValInt());
       break;
-    }
-    case IterInit: {
+
+    case IterInit:
       // kill the local to which this instruction stores iter's value
       killLocalValue(inst->getSrc(3)->getValInt());
       break;
-    }
-    case IterNextK: {
+
+    case IterNextK:
       // kill the locals to which this instruction stores iter's key and value
       killLocalValue(inst->getSrc(2)->getValInt());
       killLocalValue(inst->getSrc(3)->getValInt());
       break;
-    }
-    case IterNext: {
+
+    case IterNext:
       // kill the local to which this instruction stores iter's value
       killLocalValue(inst->getSrc(2)->getValInt());
       break;
-    }
-    case LdThis: {
+
+    case LdThis:
       m_thisIsAvailable = true;
       break;
-    }
+
     default:
       break;
   }
@@ -1347,6 +1351,76 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   if (Block* target = inst->getTaken()) saveState(target);
 }
 
+void TraceBuilder::beginInlining(const Func* target,
+                                 SSATmp* calleeFP,
+                                 SSATmp* calleeSP,
+                                 SSATmp* savedSP,
+                                 int32_t savedSPOff) {
+  // Saved tracebuilder state will include the "return" fp/sp.
+  // Whatever the current fpValue is is good enough, but we have to be
+  // passed in the StkPtr that represents the stack prior to the
+  // ActRec being allocated.
+  m_spOffset = savedSPOff;
+  m_spValue = savedSP;
+
+  m_inlineSavedStates.push_back(createState());
+
+  /*
+   * Set up the callee state.
+   *
+   * We set m_thisIsAvailable to true on any object method, because we
+   * just don't inline calls to object methods with a null $this.
+   */
+  m_fpValue         = calleeFP;
+  m_spValue         = calleeSP;
+  m_thisIsAvailable = target->cls() != nullptr;
+  m_curFunc         = genDefConst(target);
+
+  /*
+   * Keep the outer locals somewhere for isValueAvailable() to know
+   * about their liveness, to help with incref/decref elimination.
+   */
+  m_callerAvailableValues.insert(m_callerAvailableValues.end(),
+                                 m_localValues.begin(),
+                                 m_localValues.end());
+
+  m_localValues.clear();
+  m_localTypes.clear();
+  m_localValues.resize(target->numLocals(), nullptr);
+  m_localTypes.resize(target->numLocals(), Type::None);
+
+  gen(ReDefSP, StackOffset(target->numParams()), m_fpValue, m_spValue);
+}
+
+void TraceBuilder::endInlining() {
+  auto calleeAR = m_fpValue;
+  gen(InlineReturn, calleeAR);
+
+  useState(std::move(m_inlineSavedStates.back()));
+  m_inlineSavedStates.pop_back();
+
+  // See the comment in beginInlining about generator frames.
+  if (m_curFunc->getValFunc()->isGenerator()) {
+    gen(ReDefGeneratorSP, StackOffset(m_spOffset), m_spValue);
+  } else {
+    gen(ReDefSP, StackOffset(m_spOffset), m_fpValue, m_spValue);
+  }
+}
+
+std::unique_ptr<TraceBuilder::State> TraceBuilder::createState() const {
+  std::unique_ptr<State> state(new State);
+  state->spValue = m_spValue;
+  state->fpValue = m_fpValue;
+  state->curFunc = m_curFunc;
+  state->spOffset = m_spOffset;
+  state->thisAvailable = m_thisIsAvailable;
+  state->localValues = m_localValues;
+  state->localTypes = m_localTypes;
+  state->callerAvailableValues = m_callerAvailableValues;
+  state->refCountedMemValue = m_refCountedMemValue;
+  return state;
+}
+
 /*
  * Save current state for block.  If this is the first time saving state
  * for block, create a new snapshot.  Otherwise merge the current state into
@@ -1356,15 +1430,7 @@ void TraceBuilder::saveState(Block* block) {
   if (State* state = m_snapshots[block]) {
     mergeState(state);
   } else {
-    state = new State;
-    state->spValue = m_spValue;
-    state->fpValue = m_fpValue;
-    state->spOffset = m_spOffset;
-    state->thisAvailable = m_thisIsAvailable;
-    state->localValues = m_localValues;
-    state->localTypes = m_localTypes;
-    state->refCountedMemValue = m_refCountedMemValue;
-    m_snapshots[block] = state;
+    m_snapshots[block] = createState().release();
   }
 }
 
@@ -1381,6 +1447,7 @@ void TraceBuilder::mergeState(State* state) {
   // cannot merge fp or spOffset state, so assert they match
   assert(state->fpValue == m_fpValue);
   assert(state->spOffset == m_spOffset);
+  assert(state->curFunc == m_curFunc);
   if (state->spValue != m_spValue) {
     // we have two different sp definitions but we know they're equal
     // because spOffset matched.
@@ -1408,23 +1475,33 @@ void TraceBuilder::mergeState(State* state) {
   if (state->refCountedMemValue != m_refCountedMemValue) {
     state->refCountedMemValue = nullptr;
   }
+
+  // Don't attempt to continue tracking caller's available values.
+  state->callerAvailableValues.clear();
 }
 
-void TraceBuilder::useState(Block* block) {
-  assert(m_snapshots[block]);
-  State* state = m_snapshots[block];
-  m_snapshots[block] = nullptr;
+void TraceBuilder::useState(std::unique_ptr<State> state) {
   m_spValue = state->spValue;
   m_fpValue = state->fpValue;
   m_spOffset = state->spOffset;
+  m_curFunc = state->curFunc;
   m_thisIsAvailable = state->thisAvailable;
   m_refCountedMemValue = state->refCountedMemValue;
   m_localValues = std::move(state->localValues);
   m_localTypes = std::move(state->localTypes);
-  delete state;
+  m_callerAvailableValues = std::move(state->callerAvailableValues);
   // If spValue is null, we merged two different but equivalent values.
   // Define a new sp using the known-good spOffset.
-  if (!m_spValue) genDefSP(m_spOffset);
+  if (!m_spValue) {
+    gen(DefSP, StackOffset(m_spOffset), m_fpValue);
+  }
+}
+
+void TraceBuilder::useState(Block* block) {
+  assert(m_snapshots[block]);
+  std::unique_ptr<State> state(m_snapshots[block]);
+  m_snapshots[block] = nullptr;
+  useState(std::move(state));
 }
 
 void TraceBuilder::clearTrackedState() {
@@ -1435,6 +1512,7 @@ void TraceBuilder::clearTrackedState() {
   for (uint32_t i = 0; i < m_localTypes.size(); i++) {
     m_localTypes[i] = Type::None;
   }
+  m_callerAvailableValues.clear();
   m_spValue = m_fpValue = nullptr;
   m_spOffset = 0;
   m_thisIsAvailable = false;
@@ -1506,7 +1584,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst) {
   FTRACE(1, "{}{}\n", indent(), inst->toString());
 
   // copy propagation on inst source operands
-  Simplifier::copyProp(inst);
+  copyProp(inst);
 
   SSATmp* result = nullptr;
   if (m_enableCse && inst->canCSE()) {
@@ -1676,12 +1754,15 @@ void TraceBuilder::killLocalValue(uint32_t id) {
 }
 
 bool TraceBuilder::anyLocalHasValue(SSATmp* tmp) const {
-  for (size_t id = 0; id < m_localValues.size(); id++) {
-    if (m_localValues[id] == tmp) {
-      return true;
-    }
-  }
-  return false;
+  return std::find(m_localValues.begin(),
+                   m_localValues.end(),
+                   tmp) != m_localValues.end();
+}
+
+bool TraceBuilder::callerLocalHasValue(SSATmp* tmp) const {
+  return std::find(m_callerAvailableValues.begin(),
+                   m_callerAvailableValues.end(),
+                   tmp) != m_callerAvailableValues.end();
 }
 
 //

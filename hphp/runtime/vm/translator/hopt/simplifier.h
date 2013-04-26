@@ -29,8 +29,6 @@ class TraceBuilder;
 struct Simplifier {
   explicit Simplifier(TraceBuilder* t) : m_tb(t) {}
 
-  static void copyProp(IRInstruction* tmp);
-
   /*
    * Simplify performs a number of optimizations.
    *
@@ -87,6 +85,7 @@ private:
   SSATmp* simplifyDecRef(IRInstruction* inst);
   SSATmp* simplifyIncRef(IRInstruction* inst);
   SSATmp* simplifyGuardType(IRInstruction* inst);
+  SSATmp* simplifyLdThis(IRInstruction*);
   SSATmp* simplifyLdCls(IRInstruction* inst);
   SSATmp* simplifyLdClsPropAddr(IRInstruction*);
   SSATmp* simplifyLdCtx(IRInstruction*);
@@ -106,6 +105,14 @@ private:
 private:
   TraceBuilder* const m_tb;
 };
+
+/*
+ * Propagate very simple copies on the given instruction.
+ * Specifically, Movs, and also IncRefs of non-refcounted types.
+ *
+ * More complicated copy-propagation is performed in the Simplifier.
+ */
+void copyProp(IRInstruction*);
 
 }}}
 

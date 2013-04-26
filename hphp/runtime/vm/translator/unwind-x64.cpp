@@ -127,6 +127,9 @@ tc_unwind_personality(int version,
                       _Unwind_Context* context) {
   assert(version == 1);
 
+  FTRACE(2, "unwind: tc_unwind_personality {}\n",
+         int(tl_regState));
+
   /*
    * We don't do anything during the search phase---before attempting
    * cleanup, we want all deeper frames to have run their object

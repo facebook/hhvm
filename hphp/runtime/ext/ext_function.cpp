@@ -174,6 +174,8 @@ Variant f_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth,
 
 static const StaticString s_func("func");
 static const StaticString s_args("args");
+static const StaticString s_exception("exception");
+static const StaticString s_ret("ret");
 
 Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
                              int timeout, CVarRef function,
@@ -228,17 +230,18 @@ Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
     return false;
   }
 
-  if (res.toArray().exists("exception")) {
-    throw res["exception"];
+  if (res.toArray().exists(s_exception)) {
+    throw res[s_exception];
   }
-  return res["ret"];
+  return res[s_ret];
 }
 
 Variant f_forward_static_call_array(CVarRef function, CArrRef params) {
   return f_forward_static_call(0, function, params);
 }
 
-Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+Variant f_forward_static_call(int _argc, CVarRef function,
+                              CArrRef _argv /* = null_array */) {
   // Setting the bound parameter to true tells vm_call_user_func()
   // propogate the current late bound class
   return vm_call_user_func(function, _argv, true);

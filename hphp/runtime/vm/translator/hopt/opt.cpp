@@ -46,27 +46,21 @@ static void insertRefCountAsserts(IRInstruction& inst, IRFactory* factory) {
 
 /*
  * Insert a DbgAssertTv instruction for each stack location stored to by
- * a SpillStack instruction
+ * a SpillStack instruction.
  */
 static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
   SSATmp* sp = inst.getDst();
   auto const vals = inst.getSrcs().subpiece(2);
   auto* block = inst.getBlock();
   auto pos = block->iteratorTo(&inst); ++pos;
-  for (unsigned i = 0, offset = 0, n = vals.size(); i < n; ++i) {
+  for (unsigned i = 0, n = vals.size(); i < n; ++i) {
     Type t = vals[i]->getType();
-    if (t == Type::ActRec) {
-      offset += kNumActRecCells;
-      i += kSpillStackActRecExtraArgs;
-    } else {
-      if (t.subtypeOf(Type::Gen)) {
-        IRInstruction* addr = factory->gen(LdStackAddr, Type::PtrToGen,
-                                           sp, factory->defConst(offset));
-        block->insert(pos, addr);
-        IRInstruction* check = factory->gen(DbgAssertPtr, addr->getDst());
-        block->insert(pos, check);
-      }
-      ++offset;
+    if (t.subtypeOf(Type::Gen)) {
+      IRInstruction* addr = factory->gen(LdStackAddr, Type::PtrToGen,
+                                         sp, factory->defConst(i));
+      block->insert(pos, addr);
+      IRInstruction* check = factory->gen(DbgAssertPtr, addr->getDst());
+      block->insert(pos, check);
     }
   }
 }
@@ -107,10 +101,12 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
     optimizeMemoryAccesses(trace, irFactory);
     finishPass("after MemeLim");
   }
+
   if (RuntimeOption::EvalHHIRDeadCodeElim) {
     eliminateDeadCode(trace, irFactory);
     finishPass("after DCE");
   }
+
   if (RuntimeOption::EvalHHIRExtraOptPass
       && (RuntimeOption::EvalHHIRCse
           || RuntimeOption::EvalHHIRSimplification)) {
@@ -124,10 +120,12 @@ void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
       finishPass("after DCE");
     }
   }
+
   if (RuntimeOption::EvalHHIRJumpOpts) {
     optimizeJumps(trace, irFactory);
     finishPass("jump opts");
   }
+
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     insertAsserts(trace, irFactory);
     finishPass("RefCnt asserts");

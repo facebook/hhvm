@@ -109,6 +109,11 @@ bool TestExtApc::test_apc_add() {
   return Count(true);
 }
 
+static const StaticString s_a("a");
+static const StaticString s_q("q");
+static const StaticString s_ts("ts");
+static const StaticString s_TestString("TestString");
+
 bool TestExtApc::test_apc_store() {
   Array complexMap = CREATE_MAP2("a",
                                  CREATE_MAP2("b", 1, "c",
@@ -129,9 +134,9 @@ bool TestExtApc::test_apc_store() {
 
   // Make sure it doesn't change the shared value.
   Array complexMapFetched = f_apc_fetch("complexMap");
-  VERIFY(complexMapFetched.exists("a"));
+  VERIFY(complexMapFetched.exists(s_a));
   complexMapFetched.set("q",0);
-  VERIFY(complexMapFetched.exists("q"));
+  VERIFY(complexMapFetched.exists(s_q));
   VS(f_apc_fetch("complexMap"), complexMap);
 
   String tsFetched = f_apc_fetch("ts");
@@ -318,9 +323,9 @@ bool TestExtApc::test_apc_bin_loadfile() {
 }
 
 bool TestExtApc::test_apc_exists() {
-  f_apc_store("ts", "TestString");
-  VS(f_apc_exists("ts"), true);
-  VS(f_apc_exists("TestString"), false);
-  VS(f_apc_exists(CREATE_VECTOR2("ts", "TestString")), CREATE_VECTOR1("ts"));
+  f_apc_store(s_ts, s_TestString);
+  VS(f_apc_exists(s_ts), true);
+  VS(f_apc_exists(s_TestString), false);
+  VS(f_apc_exists(CREATE_VECTOR2(s_ts, s_TestString)), CREATE_VECTOR1(s_ts));
   return Count(true);
 }

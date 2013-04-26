@@ -246,7 +246,7 @@ SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyCall(IRInstruction* inst) {
   auto spillVals  = inst->getSrcs().subpiece(3);
-  IRInstruction* spillStack = m_tb->getSp()->inst();
+  auto const spillStack = inst->getSrc(0)->inst();
   if (spillStack->op() != SpillStack) {
     return nullptr;
   }

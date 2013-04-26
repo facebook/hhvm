@@ -3225,7 +3225,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   SSATmp* returnBcOffset = inst->getSrc(1);
   SSATmp* func           = inst->getSrc(2);
   SrcRange args          = inst->getSrcs().subpiece(3);
-  int32_t numArgs          = args.size();
+  int32_t numArgs        = args.size();
 
   auto spReg = actRec->getReg();
   // put all outgoing arguments onto the VM stack

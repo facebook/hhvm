@@ -1,4 +1,4 @@
-#!/bin/env php
+#!/usr/bin/env php
 <?php
 /**
 * Run the test suites in various configurations.
@@ -65,15 +65,23 @@ function idx($array, $key, $default = null) {
 }
 
 function idx_file($array, $key, $default = null) {
-  return is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
+  $file = is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
+  if (!is_file($file)) {
+    error("$file doesn't exist");
+  }
+  return $file;
 }
 
 function bin_root() {
-  return idx($_ENV, 'FBMAKE_BIN_ROOT', hphp_home().'/_bin');
+  return idx($_ENV, 'FBMAKE_BIN_ROOT', 
+    is_dir(hphp_home().'/_bin') ? 
+      hphp_home().'/_bin' : # fbmake
+      hphp_home() # github
+  );
 }
 
 function verify_hhbc() {
-  return idx_file($_ENV, 'VERIFY_HHBC', bin_root().'/verify.hhbc');
+  return idx($_ENV, 'VERIFY_HHBC', bin_root().'/verify.hhbc');
 }
 
 function get_options($argv) {
@@ -114,7 +122,7 @@ function get_options($argv) {
  * We support some 'special' file names, that just know where the test
  * suites are, to avoid typing 'hphp/test/foo'.
  */
-function map_convenience_filename(string $file) {
+function map_convenience_filename($file) {
   if ($file == 'jit' || $file == 'hhir' || $file == 'interp') {
     error(
       "I'm really sorry to change this, but now the mode is ".

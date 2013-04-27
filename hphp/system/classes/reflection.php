@@ -162,6 +162,13 @@ class ReflectionParameter implements Reflector {
   }
 
   public function getTypehintText() {
+    if (isset($this->info['type'])) {
+      return $this->info['type'];
+    }
+    return '';
+  }
+
+  public function getTypeText() {
     if (isset($this->info['type_hint'])) {
       return $this->info['type_hint'];
     }
@@ -1777,7 +1784,7 @@ class ReflectionProperty implements Reflector {
     return $this->info['doc'];
   }
 
-  public function getTypehintText() {
+  public function getTypeText() {
     if (isset($this->info['type'])) {
       return $this->info['type'];
     }

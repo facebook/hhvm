@@ -120,6 +120,9 @@ private:
   SSATmp* simplifyExitOnVarEnv(IRInstruction*);
   SSATmp* simplifyCastStk(IRInstruction*);
   SSATmp* simplifyAssertStk(IRInstruction*);
+  SSATmp* simplifyLdStack(IRInstruction*);
+  SSATmp* simplifyLdStackAddr(IRInstruction*);
+  SSATmp* simplifyDecRefStack(IRInstruction*);
 
 private: // tracebuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);
@@ -131,8 +134,26 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+struct StackValueInfo {
+  explicit StackValueInfo(SSATmp* value = nullptr)
+    : value(value)
+    , knownType(value ? value->type() : Type::None)
+    , spansCall(false)
+  {}
+
+  explicit StackValueInfo(Type type)
+    : value(nullptr)
+    , knownType(type)
+    , spansCall(false)
+  {}
+
+  SSATmp* value;   // may be null
+  Type knownType;  // currently Type::None if we don't know (TODO(#2135185)
+  bool spansCall;  // whether the tmp's definition was above a call
+};
+
 /*
- * Track down a value using the StkPtr chain.
+ * Track down a value or type using the StkPtr chain.
  *
  * The spansCall parameter tracks whether the returned value's
  * lifetime on the stack spans a call.  This search bottoms out on
@@ -140,10 +161,7 @@ private:
  * instruction that produced a view of the stack with the requested
  * value.
  */
-SSATmp* getStackValue(SSATmp* stack,
-                      uint32_t index,
-                      bool& spansCall,
-                      Type& type);
+StackValueInfo getStackValue(SSATmp* stack, uint32_t index);
 
 /*
  * Propagate very simple copies on the given instruction.

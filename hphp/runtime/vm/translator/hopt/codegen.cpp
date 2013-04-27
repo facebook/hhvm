@@ -2578,12 +2578,9 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
-  Type type = inst->getTypeParam();
-  SSATmp* sp     = inst->getSrc(0);
-  SSATmp* index  = inst->getSrc(1);
-  cgDecRefMem(type,
-              sp->getReg(),
-              index->getValInt() * sizeof(Cell),
+  cgDecRefMem(inst->getTypeParam(),
+              inst->getSrc(0)->getReg(),
+              cellsToBytes(inst->getExtra<DecRefStack>()->offset),
               nullptr);
 }
 
@@ -3397,11 +3394,10 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCastStk(IRInstruction *inst) {
-  Type type      = inst->getTypeParam();
-  SSATmp* sp     = inst->getSrc(0);
-  SSATmp* off    = inst->getSrc(1);
-  uint32_t offset  = off->getValInt();
-  PhysReg spReg  = sp->getReg();
+  Type type       = inst->getTypeParam();
+  SSATmp* sp      = inst->getSrc(0);
+  uint32_t offset = inst->getExtra<CastStk>()->offset;
+  PhysReg spReg   = sp->getReg();
 
   ArgGroup args;
   args.addr(spReg, cellsToBytes(offset));
@@ -3545,7 +3541,7 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
     // If our value came from a LdStack on the same sp and offset,
     // we don't need to spill it.
     if (inst->op() == LdStack && inst->getSrc(0) == sp &&
-        inst->getSrc(1)->getValInt() * sizeof(Cell) == offset) {
+        inst->getExtra<LdStack>()->offset * sizeof(Cell) == offset) {
       FTRACE(1, "{}: Not spilling spill value {} from {}\n",
              __func__, i, inst->toString());
     } else {
@@ -3944,21 +3940,21 @@ void CodeGenerator::cgLdLocAddr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
-  auto base = inst->getSrc(0)->getReg();
-  int64_t offset = cellsToBytes(inst->getSrc(1)->getValInt());
+  auto const base   = inst->getSrc(0)->getReg();
+  auto const offset = cellsToBytes(inst->getExtra<LdStackAddr>()->offset);
   m_as.lea (base[offset], inst->getDst()->getReg());
 }
 
 void CodeGenerator::cgLdStack(IRInstruction* inst) {
   assert(inst->getTaken() == nullptr);
   cgLoad(inst->getSrc(0)->getReg(),
-         cellsToBytes(inst->getSrc(1)->getValInt()),
+         cellsToBytes(inst->getExtra<LdStack>()->offset),
          inst);
 }
 
 void CodeGenerator::cgGuardStk(IRInstruction* inst) {
   cgGuardTypeCell(inst->getSrc(0)->getReg(),
-                  cellsToBytes(inst->getSrc(1)->getValInt()),
+                  cellsToBytes(inst->getExtra<GuardStk>()->offset),
                   inst);
 }
 

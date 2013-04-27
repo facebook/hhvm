@@ -106,7 +106,6 @@ struct TraceBuilder {
   void setEnableCse(bool val)            { m_enableCse = val; }
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
 
-
   Trace* getTrace() const { return m_trace.get(); }
   IRFactory* getIrFactory() { return &m_irFactory; }
   int32_t getSpOffset() { return m_spOffset; }
@@ -183,20 +182,6 @@ struct TraceBuilder {
   void    genBindLoc(uint32_t id, SSATmp* ref, bool doRefCount = true);
 
   void    genDecRefLoc(int id);
-
-  //////////////////////////////////////////////////////////////////////
-  // stack
-
-  SSATmp* genSpillStack(uint32_t stackAdjustment,
-                        uint32_t numOpnds,
-                        SSATmp** opnds);
-  SSATmp* genLdStack(int32_t stackOff, Type type);
-  SSATmp* genLdStackAddr(SSATmp* sp, int64_t offset);
-  SSATmp* genLdStackAddr(int64_t offset) {
-    return genLdStackAddr(m_spValue, offset);
-  }
-
-  void    genDecRefStack(Type type, uint32_t stackOff);
 
   //////////////////////////////////////////////////////////////////////
   // constants

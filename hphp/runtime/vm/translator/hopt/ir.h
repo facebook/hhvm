@@ -167,9 +167,9 @@ static const TCA kIRDirectGuardActive = (TCA)0x03;
 /*    name                      dstinfo srcinfo                      flags */ \
 O(GuardType,                    DParam, S(Gen),                C|E|CRc|PRc|P) \
 O(GuardLoc,                         ND, S(FramePtr),                       E) \
-O(GuardStk,                  D(StkPtr), S(StkPtr) C(Int),                  E) \
-O(CastStk,                   D(StkPtr), S(StkPtr) C(Int),           Mem|N|Er) \
-O(AssertStk,                 D(StkPtr), S(StkPtr) C(Int),                  E) \
+O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
+O(CastStk,                   D(StkPtr), S(StkPtr),                  Mem|N|Er) \
+O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
 O(GuardRefs,                        ND, SUnk,                              E) \
 O(AssertLoc,                        ND, S(FramePtr),                       E) \
 O(OverrideLoc,                      ND, S(FramePtr),                       E) \
@@ -267,9 +267,9 @@ O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(BoxPtr,            D(PtrToBoxedCell), S(PtrToGen),                   N|Mem) \
-O(LdStack,                      DParam, S(StkPtr) C(Int),                 NF) \
+O(LdStack,                      DParam, S(StkPtr),                        NF) \
 O(LdLoc,                        DParam, S(FramePtr),                      NF) \
-O(LdStackAddr,                  DParam, S(StkPtr) C(Int),                  C) \
+O(LdStackAddr,                  DParam, S(StkPtr),                         C) \
 O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),               NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
@@ -334,8 +334,7 @@ O(Call,                      D(StkPtr), SUnk,                 E|Mem|CRc|Refs) \
 O(CallArray,                 D(StkPtr), S(StkPtr),          E|Mem|N|CRc|Refs) \
 O(CallBuiltin,                DBuiltin, SUnk,            E|Mem|Refs|Er|N|PRc) \
 O(NativeImpl,                       ND, C(Func) S(FramePtr),    E|Mem|N|Refs) \
-  /* XXX: why does RetCtrl sometimes get PtrToGen */                          \
-O(RetCtrl,                          ND, S(StkPtr,PtrToGen)                    \
+O(RetCtrl,                          ND, S(StkPtr)                             \
                                           S(FramePtr)                         \
                                           S(RetAddr),                T|E|Mem) \
 O(RetVal,                           ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
@@ -375,7 +374,7 @@ O(Mov,                         DofS(0), SUnk,                            C|P) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
 O(IncRef,                      DofS(0), S(Gen),                    Mem|PRc|P) \
 O(DecRefLoc,                        ND, S(FramePtr),            N|E|Mem|Refs) \
-O(DecRefStack,                      ND, S(StkPtr) C(Int),       N|E|Mem|Refs) \
+O(DecRefStack,                      ND, S(StkPtr),              N|E|Mem|Refs) \
 O(DecRefThis,                       ND, S(FramePtr),            N|E|Mem|Refs) \
 O(DecRefKillThis,                   ND, S(Obj)                                \
                                           S(FramePtr),    N|E|Mem|CRc|Refs|K) \
@@ -780,20 +779,25 @@ struct ActRecInfo : IRExtraData {
 };
 
 /*
- * Stack and bytecode offsets.
+ * Stack offsets.
  */
 struct StackOffset : IRExtraData {
   explicit StackOffset(int32_t offset) : offset(offset) {}
 
   std::string show() const { return folly::to<std::string>(offset); }
 
+  bool cseEquals(StackOffset o) const { return offset == o.offset; }
+  size_t cseHash() const { return std::hash<int32_t>()(offset); }
+
   int32_t offset;
 };
+
+/*
+ * Bytecode offsets.
+ */
 struct BCOffset : IRExtraData {
   explicit BCOffset(Offset offset) : offset(offset) {}
-
   std::string show() const { return folly::to<std::string>(offset); }
-
   Offset offset;
 };
 
@@ -804,7 +808,7 @@ struct CallArrayData : IRExtraData {
   explicit CallArrayData(Offset pcOffset, Offset aft)
     : pc(pcOffset), after(aft) {}
 
-  std::string show() const { return folly::to<std::string>(pc, ", ", after); }
+  std::string show() const { return folly::to<std::string>(pc, ",", after); }
 
   Offset pc, after;
 };
@@ -837,9 +841,15 @@ X(Jmp_,               EdgeData);
 X(ExitTrace,          ExitData);
 X(ExitTraceCc,        ExitData);
 X(SpillFrame,         ActRecInfo);
+X(GuardStk,           StackOffset);
+X(CastStk,            StackOffset);
+X(AssertStk,          StackOffset);
 X(ReDefSP,            StackOffset);
 X(ReDefGeneratorSP,   StackOffset);
 X(DefSP,              StackOffset);
+X(LdStack,            StackOffset);
+X(LdStackAddr,        StackOffset);
+X(DecRefStack,        StackOffset);
 X(DefInlineFP,        BCOffset);
 X(InlineCreateCont,   CreateContData);
 X(CallArray,          CallArrayData);
@@ -2157,16 +2167,6 @@ struct VectorEffects {
   static void get(const IRInstruction*,
                   StoreLocFunc storeLocValue,
                   SetLocTypeFunc setLocType);
-
-  /*
-   * Given a vector instruction that defines a new StkPtr, attempts to find the
-   * stack value matching the given index. If the index does not match a value
-   * modified by this instruction, false is returned and the 'value' parameter
-   * is set to the next StkPtr in the chain. Otherwise, true is returned and
-   * the 'value' and 'type' parameters are set appropriately.
-   */
-  static bool getStackValue(const IRInstruction* inst, uint32_t index,
-                            SSATmp*& value, Type& type);
 
   explicit VectorEffects(const IRInstruction* inst) {
     int keyIdx = vectorKeyIdx(inst);

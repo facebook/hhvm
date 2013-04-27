@@ -410,67 +410,6 @@ SSATmp* TraceBuilder::genStLoc(uint32_t id,
   return retVal;
 }
 
-SSATmp* TraceBuilder::genLdStackAddr(SSATmp* sp, int64_t index) {
-  Type type;
-  bool spansCall;
-  UNUSED SSATmp* val = getStackValue(sp, index, spansCall, type);
-  type = noneToGen(type);
-  assert(IMPLIES(val != nullptr, val->type().equals(type)));
-  assert(type.notPtr());
-  return gen(LdStackAddr, type.ptr(), sp, cns(index));
-}
-
-void TraceBuilder::genDecRefStack(Type type, uint32_t stackOff) {
-  bool spansCall = false;
-  Type knownType = Type::None;
-  SSATmp* tmp = getStackValue(m_spValue, stackOff, spansCall, knownType);
-  if (!tmp || (spansCall && tmp->inst()->op() != DefConst)) {
-    // We don't want to extend live ranges of tmps across calls, so we
-    // don't get the value if spansCall is true; however, we can use
-    // any type information known.
-    if (knownType != Type::None) {
-      type = Type::mostRefined(type, knownType);
-    }
-    gen(DecRefStack, type, m_spValue, cns(int64_t(stackOff)));
-  } else {
-    gen(DecRef, tmp);
-  }
-}
-
-SSATmp* TraceBuilder::genSpillStack(uint32_t stackAdjustment,
-                                    uint32_t numOpnds,
-                                    SSATmp** spillOpnds) {
-  if (stackAdjustment == 0 && numOpnds == 0) {
-    return m_spValue;
-  }
-
-  SSATmp* srcs[numOpnds + 2];
-  srcs[0] = m_spValue;
-  srcs[1] = cns(int64_t(stackAdjustment));
-  std::copy(spillOpnds, spillOpnds + numOpnds, srcs + 2);
-  SSATmp** decayedPtr = srcs;
-  return gen(SpillStack, std::make_pair(numOpnds + 2, decayedPtr));
-}
-
-SSATmp* TraceBuilder::genLdStack(int32_t stackOff, Type type) {
-  bool spansCall = false;
-  Type knownType = Type::None;
-  SSATmp* tmp = getStackValue(m_spValue, stackOff, spansCall, knownType);
-  if (!tmp || (spansCall && tmp->inst()->op() != DefConst)) {
-    // We don't want to extend live ranges of tmps across calls, so we
-    // don't get the value if spansCall is true; however, we can use
-    // any type information known.
-    if (knownType != Type::None) {
-      type = Type::mostRefined(type, knownType);
-    }
-    return gen(LdStack,
-               type,
-               m_spValue,
-               cns(int64_t(stackOff)));
-  }
-  return tmp;
-}
-
 void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   Opcode opc = inst->op();
   // Update tracked state of local values/types, stack/frame pointer, CSE, etc.

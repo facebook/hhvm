@@ -31,69 +31,63 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* getStackValue(SSATmp* sp,
-                      uint32_t index,
-                      bool& spansCall,
-                      Type& type) {
+StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
+  assert(sp->isA(Type::StkPtr));
   IRInstruction* inst = sp->inst();
+
   switch (inst->op()) {
   case DefSP:
-    return nullptr;
+    return {};
 
   case ReDefGeneratorSP: {
     auto srcInst = inst->getSrc(0)->inst();
     assert(srcInst->op() == StashGeneratorSP);
-    return getStackValue(srcInst->getSrc(0), index, spansCall, type);
+    return getStackValue(srcInst->getSrc(0), index);
   }
   case ReDefSP:
-    return getStackValue(inst->getSrc(1), index, spansCall, type);
+    return getStackValue(inst->getSrc(1), index);
 
   case ExceptionBarrier:
-    return getStackValue(inst->getSrc(0), index, spansCall, type);
+    return getStackValue(inst->getSrc(0), index);
 
   case AssertStk:
     // fallthrough
   case CastStk:
     // fallthrough
-  case GuardStk: {
-    // sp = GuardStk<T> sp, offset
+  case GuardStk:
     // We don't have a value, but we may know the type due to guarding
     // on it.
-    if (inst->getSrc(1)->getValInt() == index) {
-      type = inst->getTypeParam();
-      return nullptr;
+    if (inst->getExtra<StackOffset>()->offset == index) {
+      return StackValueInfo { inst->getTypeParam() };
     }
-    return getStackValue(inst->getSrc(0),
-                         index,
-                         spansCall,
-                         type);
+    return getStackValue(inst->getSrc(0), index);
+
+  case CallArray: {
+    if (index == 0) {
+      // return value from call
+      return StackValueInfo { nullptr };
+    }
+    auto info =
+      getStackValue(inst->getSrc(0),
+                    // Pushes a return value, pops an ActRec and args Array
+                    index -
+                      (1 /* pushed */ - kNumActRecCells + 1 /* popped */));
+    info.spansCall = true;
+    return info;
   }
 
-  case CallArray:
-    // sp = CallArray(stack)
+  case Call: {
     if (index == 0) {
       // return value from call
-      return nullptr;
+      return StackValueInfo { nullptr };
     }
-    spansCall = true;
-    return getStackValue(inst->getSrc(0), // sp == ActRec + array arg
-                         index + kNumActRecCells,
-                         spansCall,
-                         type);
-
-  case Call:
-    // sp = call(actrec, bcoffset, func, args...)
-    if (index == 0) {
-      // return value from call
-      return nullptr;
-    }
-    spansCall = true;
-    // search recursively on the actrec argument
-    return getStackValue(inst->getSrc(0), // sp = actrec argument to call
-                         index -
-                           (1 /* pushed */ - kNumActRecCells /* popped */),
-                         spansCall,
-                         type);
+    auto info =
+      getStackValue(inst->getSrc(0),
+                    index -
+                     (1 /* pushed */ - kNumActRecCells /* popped */));
+    info.spansCall = true;
+    return info;
+  }
 
   case SpillStack: {
     int64_t numPushed    = 0;
@@ -105,9 +99,8 @@ SSATmp* getStackValue(SSATmp* sp,
         if (tmp->inst()->op() == IncRef) {
           tmp = tmp->inst()->getSrc(0);
         }
-        type = tmp->type();
-        if (!type.equals(Type::None)) {
-          return tmp;
+        if (!tmp->type().equals(Type::None)) {
+          return StackValueInfo { tmp };
         }
       }
       ++numPushed;
@@ -119,66 +112,55 @@ SSATmp* getStackValue(SSATmp* sp,
     int64_t numPopped = inst->getSrc(1)->getValInt();
     return getStackValue(prevSp,
                          // pop values pushed by spillstack
-                         index - (numPushed - numPopped),
-                         spansCall,
-                         type);
+                         index - (numPushed - numPopped));
   }
 
   case InterpOne: {
     SSATmp* prevSp = inst->getSrc(1);
     int64_t spAdjustment = inst->getSrc(3)->getValInt(); // # popped - # pushed
     Type resultType = inst->getTypeParam();
-    if (index == 0 && resultType != Type::None) {
-      type = resultType;
-      return nullptr;
+    if (index == 0 && !resultType.equals(Type::None)) {
+      return StackValueInfo { resultType };
     }
-    return getStackValue(prevSp, index + spAdjustment, spansCall, type);
+    return getStackValue(prevSp, index + spAdjustment);
   }
 
   case SpillFrame:
     return getStackValue(inst->getSrc(0),
                          // pushes an ActRec
-                         index - kNumActRecCells,
-                         spansCall,
-                         type);
+                         index - kNumActRecCells);
 
   case NewObj:
   case NewObjCached:
     if (index == kNumActRecCells) {
       // newly allocated object, which we unfortunately don't have any
       // kind of handle to :-(
-      type = Type::Obj;
-      return nullptr;
+      return StackValueInfo { Type::Obj };
     }
 
     return getStackValue(sp->inst()->getSrc(2),
                          // NewObj pushes an object and an ActRec
-                         index - (1 + kNumActRecCells),
-                         spansCall,
-                         type);
+                         index - (1 + kNumActRecCells));
 
   case NewObjNoCtorCached:
     if (index == 0) {
-      type = Type::Obj;
-      return nullptr;
+      return StackValueInfo { Type::Obj };
     }
+    return getStackValue(sp->inst()->getSrc(1), index - 1);
 
-    return getStackValue(sp->inst()->getSrc(1),
-                         index - 1,
-                         spansCall,
-                         type);
-
-  default: {
-    SSATmp* value;
-    if (VectorEffects::getStackValue(sp->inst(), index,
-                                     value, type)) {
-      return value;
-    } else {
-      // If VectorEffects::getStackValue failed, it returns the next
-      // sp to search in value.
-      return getStackValue(value, index, spansCall, type);
+  default:
+    {
+      // Assume it's a vector instruction.  This will assert in
+      // vectorBaseIdx if not.
+      auto const base = inst->getSrc(vectorBaseIdx(inst));
+      assert(base->inst()->op() == LdStackAddr);
+      if (base->inst()->getExtra<LdStackAddr>()->offset == index) {
+        VectorEffects ve(inst);
+        assert(ve.baseTypeChanged || ve.baseValChanged);
+        return StackValueInfo { ve.baseType.derefIfPtr() };
+      }
+      return getStackValue(base->inst()->getSrc(0), index);
     }
-  }
   }
 
   // Should not get here!
@@ -317,6 +299,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case Call:         return simplifyCall(inst);
   case CastStk:      return simplifyCastStk(inst);
   case AssertStk:    return simplifyAssertStk(inst);
+  case LdStack:      return simplifyLdStack(inst);
+  case LdStackAddr:  return simplifyLdStackAddr(inst);
+  case DecRefStack:  return simplifyDecRefStack(inst);
+
   case ExitOnVarEnv: return simplifyExitOnVarEnv(inst);
 
   default:
@@ -374,19 +360,24 @@ static bool hoistGuardToLoad(SSATmp* tmp, Type type) {
 }
 
 SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
-  SSATmp* sp = inst->getSrc(0);
-  auto const spDeficit = inst->getSrc(1)->getValInt();
-  auto       spillVals = inst->getSrcs().subpiece(2);
+  auto const sp           = inst->getSrc(0);
+  auto const spDeficit    = inst->getSrc(1)->getValInt();
+  auto       spillVals    = inst->getSrcs().subpiece(2);
   auto const numSpillSrcs = spillVals.size();
-  auto const spillCells = spillValueCells(inst);
-  int64_t adjustment = spDeficit - spillCells;
+  auto const spillCells   = spillValueCells(inst);
+  int64_t    adjustment   = spDeficit - spillCells;
+
+  // If there's nothing to spill, and no stack adjustment, we don't
+  // need the instruction; the old stack is still accurate.
+  if (!numSpillSrcs && spDeficit == 0) return sp;
+
+  // If our value came from a LdStack on the same sp and offset,
+  // we don't need to spill it.
   for (uint32_t i = 0, cellOff = 0; i < numSpillSrcs; i++) {
     const int64_t offset = cellOff + adjustment;
     auto* srcInst = spillVals[i]->inst();
-    // If our value came from a LdStack on the same sp and offset,
-    // we don't need to spill it.
     if (srcInst->op() == LdStack && srcInst->getSrc(0) == sp &&
-        srcInst->getSrc(1)->getValInt() == offset) {
+        srcInst->getExtra<LdStack>()->offset == offset) {
       spillVals[i] = m_tb->genDefNone();
     }
     cellOff++;
@@ -418,7 +409,7 @@ SSATmp* Simplifier::simplifyCall(IRInstruction* inst) {
     // If our value came from a LdStack on the same sp and offset,
     // we don't need to spill it.
     if (srcInst->op() == LdStack && srcInst->getSrc(0) == sp &&
-        srcInst->getSrc(1)->getValInt() == offset) {
+        srcInst->getExtra<LdStack>()->offset == offset) {
       spillVals[i] = m_tb->genDefNone();
     }
   }
@@ -1592,13 +1583,9 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyCastStk(IRInstruction* inst) {
-  bool spansCall = false;
-  Type knownType = Type::None;
-  getStackValue(inst->getSrc(0),
-                inst->getSrc(1)->getValInt(),
-                spansCall,
-                knownType);
-  if (knownType.subtypeOf(inst->getTypeParam())) {
+  auto const info = getStackValue(inst->getSrc(0),
+                                  inst->getExtra<CastStk>()->offset);
+  if (info.knownType.subtypeOf(inst->getTypeParam())) {
     // No need to cast---the type was as good or better.
     inst->convertToNop();
   }
@@ -1606,19 +1593,59 @@ SSATmp* Simplifier::simplifyCastStk(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyAssertStk(IRInstruction* inst) {
-  Type knownType = Type::None;
-  bool spansCall = false;
-  UNUSED SSATmp* tmp = getStackValue(inst->getSrc(0),
-                                     inst->getSrc(1)->getValInt(),
-                                     spansCall,
-                                     knownType);
+  auto const info = getStackValue(inst->getSrc(0),
+                                  inst->getExtra<AssertStk>()->offset);
 
   // AssertStk indicated that we knew the type from static analysis,
   // so this assert just double checks.
-  if (tmp) assert(tmp->isA(inst->getTypeParam()));
+  if (info.value) assert(info.value->isA(inst->getTypeParam()));
 
-  if (knownType.subtypeOf(inst->getTypeParam())) {
+  if (info.knownType.subtypeOf(inst->getTypeParam())) {
     inst->convertToNop();
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
+  auto const info = getStackValue(inst->getSrc(0),
+                                  inst->getExtra<LdStack>()->offset);
+
+  // We don't want to extend live ranges of tmps across calls, so we
+  // don't get the value if spansCall is true; however, we can use
+  // any type information known.
+  if (info.value && (!info.spansCall ||
+                      info.value->inst()->op() == DefConst)) {
+    return info.value;
+  }
+  if (!info.knownType.equals(Type::None)) {
+    inst->setTypeParam(
+      Type::mostRefined(inst->getTypeParam(), info.knownType)
+    );
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyLdStackAddr(IRInstruction* inst) {
+  auto const info = getStackValue(inst->getSrc(0),
+                                  inst->getExtra<StackOffset>()->offset);
+  if (!info.knownType.equals(Type::None)) {
+    inst->setTypeParam(
+      Type::mostRefined(inst->getTypeParam(), info.knownType.ptr())
+    );
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
+  auto const info = getStackValue(inst->getSrc(0),
+                                  inst->getExtra<StackOffset>()->offset);
+  if (info.value && !info.spansCall) {
+    return gen(DecRef, info.knownType, info.value);
+  }
+  if (!info.knownType.equals(Type::None)) {
+    inst->setTypeParam(
+      Type::mostRefined(inst->getTypeParam(), info.knownType)
+    );
   }
   return nullptr;
 }

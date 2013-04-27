@@ -60,23 +60,6 @@ void VectorEffects::get(const IRInstruction* inst,
   }
 }
 
-bool VectorEffects::getStackValue(const IRInstruction* inst, uint32_t index,
-                                  SSATmp*& value, Type& type) {
-  SSATmp* base = inst->getSrc(vectorBaseIdx(inst));
-  assert(base->inst()->op() == LdStackAddr);
-  if (base->inst()->getSrc(1)->getValInt() != index) {
-    value = base->inst()->getSrc(0);
-    assert(value->isA(Type::StkPtr));
-    return false;
-  }
-
-  VectorEffects ve(inst);
-  assert(ve.baseTypeChanged || ve.baseValChanged);
-  value = nullptr;
-  type = ve.baseType.derefIfPtr();
-  return true;
-}
-
 namespace {
 // Reduce baseType to a canonical unboxed, non-pointer form, returning (in
 // basePtr and baseBoxed) whether the original type was a pointer or boxed,
@@ -597,7 +580,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
       assert(base.location.space == Location::Stack);
       m_ht.spillStack();
       assert(m_stackInputs.count(m_iInd));
-      m_base = m_tb.genLdStackAddr(m_stackInputs[m_iInd]);
+      m_base = m_ht.loadStackAddr(m_stackInputs[m_iInd]);
     }
     assert(m_base->type().isPtr());
   }

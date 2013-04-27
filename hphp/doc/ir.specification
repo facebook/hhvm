@@ -348,24 +348,24 @@ OverrideLoc<T,localId> S0:StkPtr
   Overrides tracked information about the type of a local in frame S0.
   This is used to fix tracked state after InterpOne instructions.
 
-D:StkPtr = GuardStk<T> S0:StkPtr S1:ConstInt -> L
+D:StkPtr = GuardStk<T,offset> S0:StkPtr -> L
 
   Check that the type of the cell on the stack pointed to by S0 at
-  index S1 (in cells) is T; if not, branch to the exit trace label L.
+  offset (in cells) is T; if not, branch to the exit trace label L.
   Returns a new StkPtr that represents the same stack but with the
   knowledge that the slot at the index S1 has type T.
 
-D:StkPtr = AssertStk<T> S0:StkPtr S1:ConstInt
+D:StkPtr = AssertStk<T,offset> S0:StkPtr
 
   Returns a new StkPtr that represents the same stack as S0, but with
-  the knowledge that the slot at the index S1 (in cells) has type T.
-  This is similar to a GuardStk except that it does not imply a
-  runtime check and cannot cause control flow.
+  the knowledge that the slot at offset (in cells) has type T.  This
+  is similar to a GuardStk except that it does not imply a runtime
+  check and cannot cause control flow.
 
-D:StkPtr = CastStk<T> S0:StkPtr S1:ConstInt
+D:StkPtr = CastStk<T,offset> S0:StkPtr
 
   Returns a new StkPtr that represents the same stack as S0, but with
-  the slot at index S1 (in cells) converted to type T.
+  the slot at offset (in cells) converted to type T.
 
 CheckInit S0:Gen -> L
 
@@ -596,20 +596,20 @@ be decoupled gives the compiler the flexibility to avoid partially
 dead loads of local and stack values and to avoid unnecessarily long
 live ranges due to eagerly loaded values at the start of the tracelet.
 
-D:T = LdStack<T> S0:StkPtr S1:ConstInt
+D:T = LdStack<T,offset> S0:StkPtr
 
-  Loads from S0 at index S1 (in cells), and puts the value in D as
-  type T.
+  Loads from S0 at offset (in cells), and puts the value in D as type
+  T.
 
 D:T = LdLoc<T,localId> S0:FramePtr
 
   Loads local number localId from the frame S0 and puts the value in D
   as type T.
 
-D:PtrToGen = LdStackAddr S0:StkPtr S1:ConstInt
+D:PtrToGen = LdStackAddr<offset> S0:StkPtr
 
-  Loads the address of the stack slot given by the pointer in S0 and
-  the index S1 (in cells).
+  Loads the address of the stack slot given by the pointer in S0 at
+  the offset (in cells).
 
 D:T* = LdLocAddr<T, localId> S0:FramePtr
 
@@ -932,7 +932,7 @@ D:RetAddr = LdRetAddr S0:FramePtr
   to free the activation record S0.  This is the reason why LdRetAddr
   is a separate instruction from RetCtrl.
 
-RetCtrl S0:{StkPtr|PtrToGen} S1:FramePtr S2:RetAddr
+RetCtrl S0:StkPtr S1:FramePtr S2:RetAddr
 
   Ensure that S0 is stored in rVmSp and S1 is stored in rVmFp and then
   execute a hardware procedure-return using the return address
@@ -1066,9 +1066,9 @@ DecRefLoc<localId> S0:FramePtr
 
   DecRef the local given by localId on the frame S0.
 
-DecRefStack<T> S0:StkPtr S1:ConstInt
+DecRefStack<T,offset> S0:StkPtr
 
-  DecRef a value of type T at offset S1 on the stack pointed to by S0.
+  DecRef a value of type T at offset on the stack pointed to by S0.
 
 DecRefThis S0:FramePtr
 

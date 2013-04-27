@@ -102,7 +102,7 @@ SSATmp* HhbcTranslator::pop(Type type) {
   if (opnd == nullptr) {
     uint32_t stackOff = m_stackDeficit;
     m_stackDeficit++;
-    return m_tb->genLdStack(stackOff, type);
+    return gen(LdStack, type, StackOffset(stackOff), m_tb->getSp());
   }
 
   // Refine the type of the temp given the information we have from
@@ -125,8 +125,7 @@ void HhbcTranslator::popDecRef(Type type) {
     return;
   }
 
-  uint32_t stackOff = m_stackDeficit;
-  m_tb->genDecRefStack(type, stackOff);
+  gen(DecRefStack, StackOffset(m_stackDeficit), type, m_tb->getSp());
   m_stackDeficit++;
 }
 
@@ -941,20 +940,9 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
 }
 
 void HhbcTranslator::emitContExitImpl() {
-  SSATmp* retAddr = gen(LdRetAddr, m_tb->getFp());
-  // Despite the name, this doesn't actually free the AR; it updates the
-  // hardware fp and returns the old one
-  SSATmp* fp = gen(FreeActRec, m_tb->getFp());
-
-  SSATmp* sp;
-  if (m_stackDeficit) {
-    // Adjust the hardware sp before leaving.
-    // XXX This returns a ptrToGen
-    sp = m_tb->genLdStackAddr(m_stackDeficit);
-  } else {
-    sp = m_tb->getSp();
-  }
-
+  auto const retAddr = gen(LdRetAddr, m_tb->getFp());
+  auto const fp = gen(FreeActRec, m_tb->getFp());
+  auto const sp = spillStack();
   gen(RetCtrl, sp, fp, retAddr);
   m_hasExit = true;
 }
@@ -1830,8 +1818,8 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
         gen(
           CastStk,
           Type::fromDataType(pi.builtinType(), KindOfInvalid),
-          m_tb->getSp(),
-          cns(numArgs - i - 1)
+          StackOffset(numArgs - i - 1),
+          m_tb->getSp()
         );
         break;
       case KindOfDouble: not_reached();
@@ -2165,7 +2153,7 @@ Trace* HhbcTranslator::guardTypeStack(uint32_t stackIndex,
   if (nextTrace == nullptr) {
     nextTrace = getGuardExit();
   }
-  gen(GuardStk, type, nextTrace, m_tb->getSp(), cns(stackIndex));
+  gen(GuardStk, type, nextTrace, StackOffset(stackIndex), m_tb->getSp());
   m_typeGuards.push_back(TypeGuard(TypeGuard::Stack, stackIndex, type));
 
   return nextTrace;
@@ -2177,7 +2165,7 @@ void HhbcTranslator::checkTypeTopOfStack(Type type,
   SSATmp* tmp = m_evalStack.top();
   if (!tmp) {
     FTRACE(1, "checkTypeTopOfStack: no tmp: {}\n", type.toString());
-    gen(GuardStk, type, exitTrace, m_tb->getSp(), cns(0));
+    gen(GuardStk, type, exitTrace, StackOffset(0), m_tb->getSp());
     push(pop(type));
   } else {
     FTRACE(1, "checkTypeTopOfStack: generating GuardType for {}\n",
@@ -2191,7 +2179,7 @@ void HhbcTranslator::checkTypeTopOfStack(Type type,
 void HhbcTranslator::assertTypeStack(uint32_t stackIndex, Type type) {
   SSATmp* tmp = m_evalStack.top(stackIndex);
   if (!tmp) {
-    gen(AssertStk, type, m_tb->getSp(), cns(stackIndex));
+    gen(AssertStk, type, StackOffset(stackIndex), m_tb->getSp());
     return;
   }
 
@@ -3012,13 +3000,14 @@ Trace* HhbcTranslator::getExitTrace(uint32_t targetBcOff,
 }
 
 SSATmp* HhbcTranslator::spillStack() {
-  std::vector<SSATmp*> stackValues = getSpillValues();
+  auto ssaArgs = getSpillValues();
+  ssaArgs.insert(
+    ssaArgs.begin(),
+    { m_tb->getSp(), cns(int64_t(m_stackDeficit)) }
+  );
   m_evalStack.clear();
-  SSATmp* sp = m_tb->genSpillStack(m_stackDeficit,
-                                   stackValues.size(),
-                                   stackValues.size() ? &stackValues[0] : 0);
   m_stackDeficit = 0;
-  return sp;
+  return gen(SpillStack, std::make_pair(ssaArgs.size(), &ssaArgs[0]));
 }
 
 void HhbcTranslator::exceptionBarrier() {
@@ -3030,8 +3019,12 @@ SSATmp* HhbcTranslator::loadStackAddr(int32_t offset) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in m_evalStack.
   assert(offset >= (int32_t)m_evalStack.numCells());
-  return m_tb->genLdStackAddr(
-    offset + m_stackDeficit - m_evalStack.numCells());
+  return gen(
+    LdStackAddr,
+    Type::PtrToGen,
+    StackOffset(offset + m_stackDeficit - m_evalStack.numCells()),
+    m_tb->getSp()
+  );
 }
 
 //

@@ -1000,6 +1000,8 @@ static const struct {
   { OpColAddElemC, {StackTop3,        Stack1,       OutObject,        -2 }},
   { OpColAddNewElemC, {StackTop2,     Stack1,       OutObject,        -1 }},
   { OpCns,         {None,             Stack1,       OutCns,            1 }},
+  { OpCnsE,        {None,             Stack1,       OutCns,            1 }},
+  { OpCnsU,        {None,             Stack1,       OutCns,            1 }},
   { OpClsCns,      {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpClsCnsD,     {None,             Stack1,       OutPred,           1 }},
   { OpFile,        {None,             Stack1,       OutString,         1 }},
@@ -1151,6 +1153,8 @@ static const struct {
   { OpFPushFunc,   {Stack1,           FStack,       OutFDesc,
                                                      kNumActRecCells - 1 }},
   { OpFPushFuncD,  {None,             FStack,       OutFDesc,
+                                                         kNumActRecCells }},
+  { OpFPushFuncU,  {None,             FStack,       OutFDesc,
                                                          kNumActRecCells }},
   { OpFPushObjMethod,
                    {StackTop2,        FStack,       OutFDesc,
@@ -3396,6 +3400,10 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
           StringData *funcName =
             curUnit()->lookupLitstrId(getImm(fpushPc, 1).u_SA);
           doVarEnvTaint = checkTaintFuncs(funcName);
+        } else if (*fpushPc == OpFPushFuncU) {
+          StringData *fallbackName =
+            curUnit()->lookupLitstrId(getImm(fpushPc, 2).u_SA);
+          doVarEnvTaint = checkTaintFuncs(fallbackName);
         }
       }
       t.m_arState.pop();

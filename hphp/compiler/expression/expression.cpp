@@ -506,7 +506,7 @@ ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,
                                        const std::string &value) {
   ConstantExpressionPtr exp(new ConstantExpression(
                               scope, loc,
-                              value));
+                              value, false));
   if (value == "true" || value == "false") {
     if (ar->getPhase() >= AnalysisResult::PostOptimize) {
       exp->m_actualType = Type::Boolean;

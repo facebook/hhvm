@@ -3884,10 +3884,41 @@ inline void OPTBLD_INLINE VMExecutionContext::iopCns(PC& pc) {
   DECODE_LITSTR(s);
   TypedValue* cns = Unit::loadCns(s);
   if (cns == nullptr) {
-    raise_notice(Strings::UNDEFINED_CONSTANT,
-                 s->data(), s->data());
+    raise_notice(Strings::UNDEFINED_CONSTANT, s->data(), s->data());
     m_stack.pushStaticString(s);
     return;
+  }
+  Cell* c1 = m_stack.allocC();
+  tvReadCell(cns, c1);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopCnsE(PC& pc) {
+  NEXT();
+  DECODE_LITSTR(s);
+  TypedValue* cns = Unit::loadCns(s);
+  if (cns == nullptr) {
+    raise_error("Undefined constant '%s'", s->data());
+  }
+  Cell* c1 = m_stack.allocC();
+  tvReadCell(cns, c1);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopCnsU(PC& pc) {
+  NEXT();
+  DECODE_LITSTR(name);
+  DECODE_LITSTR(fallback);
+  TypedValue* cns = Unit::loadCns(name);
+  if (cns == nullptr) {
+    cns = Unit::loadCns(fallback);
+    if (cns == nullptr) {
+      raise_notice(
+        Strings::UNDEFINED_CONSTANT,
+        fallback->data(),
+        fallback->data()
+      );
+      m_stack.pushStaticString(fallback);
+      return;
+    }
   }
   Cell* c1 = m_stack.allocC();
   tvReadCell(cns, c1);
@@ -5416,6 +5447,18 @@ inline void OPTBLD_INLINE VMExecutionContext::iopUnsetM(PC& pc) {
   setHelperPost<0>(SETHELPERPOST_ARGS);
 }
 
+inline ActRec* OPTBLD_INLINE VMExecutionContext::fPushFuncImpl(
+    const Func* func,
+    int numArgs) {
+  DEBUGGER_IF(phpBreakpointEnabled(func->name()->data()));
+  ActRec* ar = m_stack.allocA();
+  arSetSfp(ar, m_fp);
+  ar->m_func = func;
+  ar->initNumArgs(numArgs);
+  ar->setVarEnv(nullptr);
+  return ar;
+}
+
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
   NEXT();
   DECODE_IVA(numArgs);
@@ -5438,7 +5481,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   if (func == nullptr) {
-    raise_error("Undefined function: %s", c1->m_data.pstr->data());
+    raise_error("Call to undefined function %s()", c1->m_data.pstr->data());
   }
   assert(!origObj || !origSd);
   assert(origObj || origSd);
@@ -5446,9 +5489,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
   // overwriting the pointer on the stack.  Don't refcount it now; defer
   // till after we're done with it.
   m_stack.discard();
-  ActRec* ar = m_stack.allocA();
-  ar->m_func = func;
-  arSetSfp(ar, m_fp);
+  ActRec* ar = fPushFuncImpl(func, numArgs);
   if (origObj) {
     if (func->attrs() & AttrStatic && !func->isClosureBody()) {
       ar->setClass(origObj->getVMClass());
@@ -5462,8 +5503,6 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFunc(PC& pc) {
     ar->setThis(nullptr);
     decRefStr(origSd);
   }
-  ar->initNumArgs(numArgs);
-  ar->setVarEnv(nullptr);
 }
 
 inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncD(PC& pc) {
@@ -5473,16 +5512,31 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncD(PC& pc) {
   const NamedEntityPair nep = m_fp->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::loadFunc(nep.second, nep.first);
   if (func == nullptr) {
-    raise_error("Undefined function: %s",
+    raise_error("Call to undefined function %s()",
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());
   }
-  DEBUGGER_IF(phpBreakpointEnabled(func->name()->data()));
-  ActRec* ar = m_stack.allocA();
-  arSetSfp(ar, m_fp);
-  ar->m_func = func;
+  ActRec* ar = fPushFuncImpl(func, numArgs);
   ar->setThis(nullptr);
-  ar->initNumArgs(numArgs);
-  ar->setVarEnv(nullptr);
+}
+
+inline void OPTBLD_INLINE VMExecutionContext::iopFPushFuncU(PC& pc) {
+  NEXT();
+  DECODE_IVA(numArgs);
+  DECODE(Id, nsFunc);
+  DECODE(Id, globalFunc);
+  Unit* unit = m_fp->m_func->unit();
+  const NamedEntityPair nep = unit->lookupNamedEntityPairId(nsFunc);
+  Func* func = Unit::loadFunc(nep.second, nep.first);
+  if (func == nullptr) {
+    const NamedEntityPair nep2 = unit->lookupNamedEntityPairId(globalFunc);
+    func = Unit::loadFunc(nep2.second, nep2.first);
+    if (func == nullptr) {
+      const char *funcName = unit->lookupLitstrId(nsFunc)->data();
+      raise_error("Call to undefined function %s()", funcName);
+    }
+  }
+  ActRec* ar = fPushFuncImpl(func, numArgs);
+  ar->setThis(nullptr);
 }
 
 void VMExecutionContext::fPushObjMethodImpl(

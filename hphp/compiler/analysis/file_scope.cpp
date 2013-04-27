@@ -98,7 +98,8 @@ void FileScope::cleanupForError(AnalysisResultConstPtr ar,
   ExpressionListPtr args(new ExpressionList(scope, loc));
   args->addElement(Expression::MakeScalarExpression(ar, scope, loc, msg));
   SimpleFunctionCallPtr e(
-    new SimpleFunctionCall(scope, loc, "throw_fatal", args, ExpressionPtr()));
+    new SimpleFunctionCall(scope, loc, "throw_fatal", false, args,
+      ExpressionPtr()));
   e->setThrowFatal();
   ExpStatementPtr exp(new ExpStatement(scope, loc, e));
   StatementListPtr stmts(new StatementList(scope, loc));

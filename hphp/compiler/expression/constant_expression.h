@@ -30,6 +30,7 @@ class ConstantExpression : public Expression, IParseHandler {
 public:
   ConstantExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                      const std::string &name,
+                     bool hadBackslash,
                      const std::string &docComment = "");
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
@@ -50,6 +51,14 @@ public:
   virtual bool canonCompare(ExpressionPtr e) const;
 
   const std::string &getName() const { return m_name;}
+  const std::string &getOriginalName() const { return m_origName;}
+  const std::string getNonNSOriginalName() const {
+    int nsPos = m_origName.rfind('\\');
+    if (nsPos == string::npos) {
+      return m_origName;
+    }
+    return m_origName.substr(nsPos + 1);
+  }
   const std::string &getDocComment() const {
     return m_docComment;
   }
@@ -64,10 +73,13 @@ public:
   std::string getComment() { return m_comment;}
   bool isValid() const { return m_valid; }
   bool isDynamic() const { return m_dynamic; }
+  bool hadBackslash() const { return m_hadBackslash; }
 private:
 
   Symbol *resolveNS(AnalysisResultConstPtr ar);
   std::string m_name;
+  std::string m_origName;
+  bool m_hadBackslash;
   std::string m_docComment;
   std::string m_comment; // for inlined constant name
   bool m_valid;

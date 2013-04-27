@@ -30,8 +30,8 @@ public:
 
 public:
   SimpleFunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                     const std::string &name, ExpressionListPtr params,
-                     ExpressionPtr cls);
+                     const std::string &name, bool hadBackslash,
+                     ExpressionListPtr params, ExpressionPtr cls);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
@@ -128,7 +128,7 @@ private:
 
 SimpleFunctionCallPtr NewSimpleFunctionCall(
   EXPRESSION_CONSTRUCTOR_PARAMETERS,
-  const std::string &name, ExpressionListPtr params,
+  const std::string &name, bool hadBackslash, ExpressionListPtr params,
   ExpressionPtr cls);
 
 ///////////////////////////////////////////////////////////////////////////////

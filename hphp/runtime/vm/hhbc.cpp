@@ -490,6 +490,7 @@ bool pushesActRec(Opcode opcode) {
   switch (opcode) {
     case OpFPushFunc:
     case OpFPushFuncD:
+    case OpFPushFuncU:
     case OpFPushObjMethod:
     case OpFPushObjMethodD:
     case OpFPushClsMethod:

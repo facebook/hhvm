@@ -874,30 +874,32 @@ use_declaration:
 namespace_name:
     ident                              { $$ = $1;}
   | namespace_name T_NS_SEPARATOR
-    ident                              { $$ = $1 + $2 + $3;}
+    ident                              { $$ = $1 + $2 + $3; $$ = $1.num() | 2;}
 ;
 namespace_string_base:
-    namespace_name                     { $$ = $1; $$ = 1;}
-  | T_NS_SEPARATOR namespace_name      { $$ = $2; $$ = 0;}
+    namespace_name                     { $$ = $1; $$ = $$.num() | 1;}
   | T_NAMESPACE T_NS_SEPARATOR
-    namespace_name                     { $$.setText(_p->nsDecl($3.text()));
-                                         $$ = 0;}
+    namespace_name                     { $$.set($3.num() | 2, _p->nsDecl($3.text()));}
+  | T_NS_SEPARATOR namespace_name      { $$ = $2; $$ = $$.num() | 2;}
 ;
 namespace_string:
-    namespace_string_base              { if ($1.num())
+    namespace_string_base              { if ($1.num() & 1) {
                                            $1.setText(_p->resolve($1.text(),0));
+                                         }
                                          $$ = $1;}
 ;
 namespace_string_typeargs:
     namespace_string_base
-    sm_typeargs_opt                    { if ($1.num())
+    sm_typeargs_opt                    { if ($1.num() & 1) {
                                            $1.setText(_p->resolve($1.text(),0));
+                                         }
                                          $$ = $1;}
 ;
 class_namespace_string_typeargs:
     namespace_string_base
-    sm_typeargs_opt                    { if ($1.num())
+    sm_typeargs_opt                    { if ($1.num() & 1) {
                                            $1.setText(_p->resolve($1.text(),1));
+                                         }
                                          $$ = $1;}
 ;
 constant_declaration:

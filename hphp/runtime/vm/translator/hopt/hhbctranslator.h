@@ -153,6 +153,8 @@ struct HhbcTranslator {
   void emitColAddNewElemC();
   void emitDefCns(uint32_t id);
   void emitCns(uint32_t id);
+  void emitCnsE(uint32_t id);
+  void emitCnsU(uint32_t id);
   void emitConcat();
   void emitDefCls(int id, Offset after);
   void emitDefFunc(int id);
@@ -225,6 +227,9 @@ struct HhbcTranslator {
   void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
                        const StringData* invName);
   void emitFPushFuncD(int32_t numParams, int32_t funcId);
+  void emitFPushFuncU(int32_t numParams,
+                      int32_t funcId,
+                      int32_t fallbackFuncId);
   void emitFPushFunc(int32_t numParams);
   void emitFPushFunc(int32_t numParams, SSATmp* funcName);
   SSATmp* getClsMethodCtx(const Func* callee, const Class* cls);

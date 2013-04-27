@@ -34,7 +34,7 @@ DynamicFunctionCall::DynamicFunctionCall
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr name, ExpressionListPtr params, ExpressionPtr cls)
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(DynamicFunctionCall),
-                 name, "", params, cls) {
+                 name, "", false, params, cls) {
 }
 
 ExpressionPtr DynamicFunctionCall::clone() {
@@ -84,7 +84,7 @@ ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
       }
       return ExpressionPtr(NewSimpleFunctionCall(
         getScope(), getLocation(),
-        name, m_params, cls));
+        name, false, m_params, cls));
     }
   }
   return ExpressionPtr();

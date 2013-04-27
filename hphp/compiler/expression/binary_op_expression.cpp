@@ -412,7 +412,7 @@ static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
 
   SimpleFunctionCallPtr call
     (new SimpleFunctionCall(exp->getScope(), loc,
-                            "is_null", expList, ExpressionPtr()));
+                            "is_null", false, expList, ExpressionPtr()));
 
   call->setValid();
   call->setActualType(Type::Boolean);

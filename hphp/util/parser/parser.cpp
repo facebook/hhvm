@@ -355,6 +355,17 @@ std::string ParserBase::resolve(const std::string &ns, bool cls) {
     return iter->second;
   }
 
+  // Classes are special. They don't fallback to the global namespace.
+  if (cls) {
+    if (!strcasecmp("self", ns.c_str()) ||
+        !strcasecmp("parent", ns.c_str())) {
+      return ns;
+    }
+    // Don't prefix with \ because that isn't the real classname and we don't
+    // need a flag to signal fallback.
+    return nsDecl(ns);
+  }
+
   // if qualified name, prepend current namespace
   if (pos != string::npos) {
     return nsDecl(ns);
@@ -365,23 +376,12 @@ std::string ParserBase::resolve(const std::string &ns, bool cls) {
     return ns;
   }
 
-  // unqualified class name always prefixed with NAMESPACE_SEP
-  if (cls) {
-    if (strcasecmp("self", ns.c_str()) && strcasecmp("parent", ns.c_str())) {
-      return m_namespace + NAMESPACE_SEP + ns;
-    }
-    return ns;
-  }
-
   if (!strcasecmp("true", ns.c_str()) ||
       !strcasecmp("false", ns.c_str()) ||
       !strcasecmp("null", ns.c_str())) {
     return ns;
   }
-
-  // unqualified function name needs leading NAMESPACE_SEP to indicate this
-  // needs runtime resolution
-  return NAMESPACE_SEP + m_namespace + NAMESPACE_SEP + ns;
+  return nsDecl(ns);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

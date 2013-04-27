@@ -37,10 +37,11 @@ using namespace HPHP;
 
 ConstantExpression::ConstantExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- const string &name, const string &docComment)
+ const string &name, bool hadBackslash, const string &docComment)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ConstantExpression)),
-    m_name(name), m_docComment(docComment),
-    m_valid(false), m_dynamic(false), m_visited(false), m_depsSet(false) {
+    m_name(name), m_origName(name), m_hadBackslash(hadBackslash),
+    m_docComment(docComment), m_valid(false), m_dynamic(false),
+    m_visited(false), m_depsSet(false) {
 }
 
 void ConstantExpression::onParse(AnalysisResultConstPtr ar,

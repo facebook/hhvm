@@ -39,7 +39,7 @@ ObjectMethodExpression::ObjectMethodExpression
  ExpressionPtr object, ExpressionPtr method, ExpressionListPtr params)
   : FunctionCall(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ObjectMethodExpression),
-      method, "", params, ExpressionPtr()),
+      method, "", false, params, ExpressionPtr()),
     m_object(object), m_bindClass(true) {
   m_object->setContext(Expression::ObjectContext);
   m_object->clearContext(Expression::LValue);

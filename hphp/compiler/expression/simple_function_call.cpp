@@ -96,9 +96,10 @@ public:
 
 SimpleFunctionCall::SimpleFunctionCall
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- const std::string &name, ExpressionListPtr params, ExpressionPtr cls)
+ const std::string &name, bool hadBackslash, ExpressionListPtr params,
+ ExpressionPtr cls)
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(SimpleFunctionCall),
-                 ExpressionPtr(), name, params, cls),
+                 ExpressionPtr(), name, hadBackslash, params, cls),
     m_type(UnknownType), m_dynamicConstant(false),
     m_builtinFunction(false), m_noPrefix(false), m_fromCompiler(false),
     m_dynamicInvoke(false), m_transformed(false), m_no_volatile_check(false),
@@ -1369,7 +1370,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           }
           SimpleFunctionCallPtr rep(
             NewSimpleFunctionCall(call->getScope(), call->getLocation(),
-                                  name, p2, ExpressionPtr()));
+                                  name, false, p2, ExpressionPtr()));
           return rep;
         }
         v = t;
@@ -1464,7 +1465,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
         }
         SimpleFunctionCallPtr rep(
           NewSimpleFunctionCall(call->getScope(), call->getLocation(),
-                                smethod, p2, cl));
+                                smethod, false, p2, cl));
         return rep;
       }
     }

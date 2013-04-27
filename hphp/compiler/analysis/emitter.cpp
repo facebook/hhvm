@@ -1824,7 +1824,7 @@ static DataType getPredictedDataType(ExpressionPtr expr) {
 }
 
 void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
-                                   bool isBuiltinCall) {
+                                   bool useFCallBuiltin) {
   int ref = -1;
   if (fn->hasAnyContext(Expression::RefValue |
                         Expression::DeepReference |
@@ -1867,7 +1867,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
   } else if (!ref) {
     DataType dt = getPredictedDataType(fn);
     if (dt != KindOfUnknown) {
-      if (isBuiltinCall) {
+      if (useFCallBuiltin) {
         switch (dt) {
           case KindOfBoolean:
           case KindOfInt64:
@@ -3033,8 +3033,20 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
           return true;
         } else {
-          StringData* nName = StringData::GetStaticString(c->getName());
-          e.Cns(nName);
+          std::string nameStr = c->getOriginalName();
+          StringData* nName = StringData::GetStaticString(nameStr);
+          if (c->hadBackslash()) {
+            e.CnsE(nName);
+          } else {
+            const std::string& nonNSName = c->getNonNSOriginalName();
+            if (nonNSName != nameStr) {
+              StringData* nsName = nName;
+              nName = StringData::GetStaticString(nonNSName);
+              e.CnsU(nsName, nName);
+            } else {
+              e.Cns(StringData::GetStaticString(c->getName()));
+            }
+          }
         }
         return true;
       }
@@ -5860,7 +5872,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   const std::string& nameStr = node->getOriginalName();
   ExpressionListPtr params(node->getParams());
   int numParams = params ? params->getCount() : 0;
-  bool isBuiltinCall = false;
+  bool useFCallBuiltin = false;
   StringData* nLiteral = nullptr;
   Offset fpiStart;
   if (node->getClass() || !node->getClassName().empty()) {
@@ -5900,12 +5912,27 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
   } else if (!nameStr.empty()) {
     // foo()
     nLiteral = StringData::GetStaticString(nameStr);
-    isBuiltinCall = canEmitBuiltinCall(node, nameStr, numParams);
+    useFCallBuiltin = canEmitBuiltinCall(node, nameStr, numParams);
 
-    if (isBuiltinCall) {
+    StringData* nsName = nullptr;
+    if (!node->hadBackslash()) {
+      const std::string& nonNSName = node->getNonNSOriginalName();
+      if (nonNSName != nameStr) {
+        nsName = nLiteral;
+        nLiteral = StringData::GetStaticString(nonNSName);
+        useFCallBuiltin = false;
+      }
+    }
+
+    if (useFCallBuiltin) {
     } else if (!m_curFunc->isGenerator()) {
       fpiStart = m_ue.bcPos();
-      e.FPushFuncD(numParams, nLiteral);
+
+      if (nsName == nullptr) {
+        e.FPushFuncD(numParams, nLiteral);
+      } else {
+        e.FPushFuncU(numParams, nsName, nLiteral);
+      }
     } else {
       // Special handling for func_get_args and friends inside a generator.
       const StringData* specialMethodName = nullptr;
@@ -5926,7 +5953,9 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
         specialMethodName = s_get_arg;
       }
 
-      if (specialMethodName != nullptr) {
+      if (nsName != nullptr) {
+        e.FPushFuncU(numParams, nsName, nLiteral);
+      } else if (specialMethodName != nullptr) {
         emitVirtualLocal(contId);
         emitCGet(e);
         fpiStart = m_ue.bcPos();
@@ -5944,7 +5973,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
     fpiStart = m_ue.bcPos();
     e.FPushFunc(numParams);
   }
-  if (isBuiltinCall) {
+  if (useFCallBuiltin) {
     FunctionScopePtr func = node->getFuncScope();
     assert(func);
     assert(numParams <= func->getMaxParamCount()
@@ -5972,7 +6001,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
     e.FCall(numParams);
   }
   if (Option::WholeProgram) {
-    fixReturnType(e, node, isBuiltinCall);
+    fixReturnType(e, node, useFCallBuiltin);
   }
 }
 

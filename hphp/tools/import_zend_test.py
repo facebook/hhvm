@@ -271,6 +271,7 @@ other_files = (
     '/zend/ns_065.inc',
     '/zend/ns_066.inc',
     '/zend/ns_067.inc',
+    '/zend/ns_069.inc',
     '/zend/unset.inc',
 )
 

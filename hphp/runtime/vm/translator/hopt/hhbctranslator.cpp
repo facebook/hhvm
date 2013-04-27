@@ -520,6 +520,14 @@ void HhbcTranslator::emitCns(uint32_t id) {
   push(result);
 }
 
+void HhbcTranslator::emitCnsE(uint32_t id) {
+  PUNT(CnsE);
+}
+
+void HhbcTranslator::emitCnsU(uint32_t id) {
+  PUNT(CnsU);
+}
+
 void HhbcTranslator::emitDefCns(uint32_t id) {
   StringData* name = lookupStringId(id);
   SSATmp* val = popC();
@@ -1628,6 +1636,12 @@ void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {
                   m_tb->genDefInitNull(),
                   numParams,
                   nullptr);
+}
+
+void HhbcTranslator::emitFPushFuncU(int32_t numParams,
+                                    int32_t funcId,
+                                    int32_t fallbackFuncId) {
+  PUNT(FPushFuncU);
 }
 
 void HhbcTranslator::emitFPushFunc(int32_t numParams) {

@@ -44,15 +44,15 @@ using namespace HPHP;
 
 FunctionCall::FunctionCall
 (EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS,
- ExpressionPtr nameExp, const std::string &name, ExpressionListPtr params,
- ExpressionPtr classExp)
+ ExpressionPtr nameExp, const std::string &name, bool hadBackslash,
+ ExpressionListPtr params, ExpressionPtr classExp)
   : Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETER_VALUES),
     StaticClassName(classExp), m_nameExp(nameExp),
     m_ciTemp(-1), m_params(params), m_valid(false),
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
     m_voidWrapper(false), m_redeclared(false),
     m_noStatic(false), m_noInline(false), m_invokeFewArgsDecision(true),
-    m_arrayParams(false),
+    m_arrayParams(false), m_hadBackslash(hadBackslash),
     m_argArrayId(-1), m_argArrayHash(-1), m_argArrayIndex(-1) {
 
   if (m_nameExp &&

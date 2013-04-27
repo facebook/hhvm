@@ -122,12 +122,12 @@ namespace HPHP {
 
 SimpleFunctionCallPtr NewSimpleFunctionCall(
   EXPRESSION_CONSTRUCTOR_PARAMETERS,
-  const std::string &name, ExpressionListPtr params,
+  const std::string &name, bool hadBackslash, ExpressionListPtr params,
   ExpressionPtr cls) {
   return SimpleFunctionCallPtr(
     new RealSimpleFunctionCall(
       EXPRESSION_CONSTRUCTOR_DERIVED_PARAMETER_VALUES,
-      name, params, cls));
+      name, hadBackslash, params, cls));
 }
 
 namespace Compiler {
@@ -296,7 +296,7 @@ void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
   }
   ExpressionPtr exp;
   if (constant) {
-    exp = NEW_EXP(ConstantExpression, var->text(), docComment);
+    exp = NEW_EXP(ConstantExpression, var->text(), false, docComment);
   } else {
     exp = NEW_EXP(SimpleVariable, var->text(), docComment);
   }
@@ -337,7 +337,7 @@ void Parser::onStaticMember(Token &out, Token &cls, Token &name) {
 
 void Parser::onRefDim(Token &out, Token &var, Token &offset) {
   if (!var->exp) {
-    var->exp = NEW_EXP(ConstantExpression, var->text());
+    var->exp = NEW_EXP(ConstantExpression, var->text(), var->num() & 2);
   }
   if (!offset->exp) {
     UnaryOpExpressionPtr uop;
@@ -407,7 +407,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
 
     SimpleFunctionCallPtr call
       (new RealSimpleFunctionCall
-       (BlockScopePtr(), getLocation(), name->text(),
+       (BlockScopePtr(), getLocation(), name->text(), name->num() & 2,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
     if (fromCompiler) {
       call->setFromCompiler();
@@ -504,7 +504,8 @@ void Parser::encapArray(Token &out, Token &var, Token &expr) {
 // expressions
 
 void Parser::onConstantValue(Token &out, Token &constant) {
-  ConstantExpressionPtr con = NEW_EXP(ConstantExpression, constant->text());
+  ConstantExpressionPtr con = NEW_EXP(ConstantExpression, constant->text(),
+      constant->num() & 2);
   con->onParse(m_ar, m_file);
   out->exp = con;
 }
@@ -1372,6 +1373,7 @@ void Parser::onReturn(Token &out, Token *expr) {
 
 static void invalidYield(LocationPtr loc) {
   ExpressionPtr exp(new SimpleFunctionCall(BlockScopePtr(), loc, "yield",
+                                           false,
                                            ExpressionListPtr(),
                                            ExpressionPtr()));
   Compiler::Error(Compiler::InvalidYield, exp);

@@ -501,6 +501,7 @@ OPCODES
   void classExistsImpl(PC& pc, Attr typeAttr);
   void fPushObjMethodImpl(
       VM::Class* cls, StringData* name, ObjectData* obj, int numArgs);
+  ActRec* fPushFuncImpl(const VM::Func* func, int numArgs);
 
 public:
   typedef hphp_hash_map<const StringData*, ClassInfo::ConstantInfo*,

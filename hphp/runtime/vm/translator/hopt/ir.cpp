@@ -304,7 +304,7 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
   , m_taken(nullptr)
   , m_block(nullptr)
   , m_tca(nullptr)
-  , m_extra(inst->m_extra ? cloneExtra(getOpcode(), inst->m_extra, arena)
+  , m_extra(inst->m_extra ? cloneExtra(op(), inst->m_extra, arena)
                           : nullptr)
 {
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
@@ -325,39 +325,39 @@ Opcode getStackModifyingOpcode(Opcode opc) {
 }
 
 bool IRInstruction::hasExtra() const {
-  return opcodeHasFlags(getOpcode(), HasExtra) && m_extra;
+  return opcodeHasFlags(op(), HasExtra) && m_extra;
 }
 
 // Instructions with ModifiesStack are always naryDst regardless of
 // the inner dest.
 
 bool IRInstruction::hasDst() const {
-  return opcodeHasFlags(getOpcode(), HasDest) &&
-    !opcodeHasFlags(getOpcode(), ModifiesStack);
+  return opcodeHasFlags(op(), HasDest) &&
+    !opcodeHasFlags(op(), ModifiesStack);
 }
 
 bool IRInstruction::naryDst() const {
-  return opcodeHasFlags(getOpcode(), NaryDest | ModifiesStack);
+  return opcodeHasFlags(op(), NaryDest | ModifiesStack);
 }
 
 bool IRInstruction::isNative() const {
-  return opcodeHasFlags(getOpcode(), CallsNative);
+  return opcodeHasFlags(op(), CallsNative);
 }
 
 bool IRInstruction::producesReference() const {
-  return opcodeHasFlags(getOpcode(), ProducesRC);
+  return opcodeHasFlags(op(), ProducesRC);
 }
 
 bool IRInstruction::isRematerializable() const {
-  return opcodeHasFlags(getOpcode(), Rematerializable);
+  return opcodeHasFlags(op(), Rematerializable);
 }
 
 bool IRInstruction::hasMemEffects() const {
-  return opcodeHasFlags(getOpcode(), MemEffects) || mayReenterHelper();
+  return opcodeHasFlags(op(), MemEffects) || mayReenterHelper();
 }
 
 bool IRInstruction::canCSE() const {
-  auto canCSE = opcodeHasFlags(getOpcode(), CanCSE);
+  auto canCSE = opcodeHasFlags(op(), CanCSE);
   // Make sure that instructions that are CSE'able can't produce a reference
   // count or consume reference counts. GuardType is special because it can
   // refine a maybeCounted type to a notCounted type, so it logically consumes
@@ -368,7 +368,7 @@ bool IRInstruction::canCSE() const {
 }
 
 bool IRInstruction::consumesReferences() const {
-  return opcodeHasFlags(getOpcode(), ConsumesRC);
+  return opcodeHasFlags(op(), ConsumesRC);
 }
 
 bool IRInstruction::consumesReference(int srcNo) const {
@@ -379,7 +379,7 @@ bool IRInstruction::consumesReference(int srcNo) const {
   // to a notCounted type.
   if (m_op == GuardType) {
     assert(srcNo == 0);
-    return getSrc(0)->getType().maybeCounted() && getTypeParam().notCounted();
+    return getSrc(0)->type().maybeCounted() && getTypeParam().notCounted();
   }
   // SpillStack consumes inputs 2 and onward
   if (m_op == SpillStack) return srcNo >= 2;
@@ -404,11 +404,11 @@ bool IRInstruction::consumesReference(int srcNo) const {
 }
 
 bool IRInstruction::mayModifyRefs() const {
-  Opcode opc = getOpcode();
+  Opcode opc = op();
   // DecRefNZ does not have side effects other than decrementing the ref
   // count. Therefore, its MayModifyRefs should be false.
   if (opc == DecRef) {
-    auto type = getSrc(0)->getType();
+    auto type = getSrc(0)->type();
     if (isControlFlowInstruction()) {
       // If the decref has a target label, then it exits if the destructor
       // has to be called, so it does not have any side effects on the main
@@ -423,18 +423,18 @@ bool IRInstruction::mayModifyRefs() const {
 }
 
 bool IRInstruction::mayRaiseError() const {
-  return opcodeHasFlags(getOpcode(), MayRaiseError) || mayReenterHelper();
+  return opcodeHasFlags(op(), MayRaiseError) || mayReenterHelper();
 }
 
 bool IRInstruction::isEssential() const {
-  Opcode opc = getOpcode();
+  Opcode opc = op();
   if (opc == DecRefNZ) {
     // If the source of a DecRefNZ is not an IncRef, mark it as essential
     // because we won't remove its source as well as itself.
     // If the ref count optimization is turned off, mark all DecRefNZ as
     // essential.
     if (!RuntimeOption::EvalHHIREnableRefCountOpt ||
-        getSrc(0)->getInstruction()->getOpcode() != IncRef) {
+        getSrc(0)->inst()->op() != IncRef) {
       return true;
     }
   }
@@ -444,11 +444,11 @@ bool IRInstruction::isEssential() const {
 }
 
 bool IRInstruction::isTerminal() const {
-  return opcodeHasFlags(getOpcode(), Terminal);
+  return opcodeHasFlags(op(), Terminal);
 }
 
 bool IRInstruction::isPassthrough() const {
-  return opcodeHasFlags(getOpcode(), Passthrough);
+  return opcodeHasFlags(op(), Passthrough);
 }
 
 SSATmp* IRInstruction::getPassthroughValue() const {
@@ -458,7 +458,7 @@ SSATmp* IRInstruction::getPassthroughValue() const {
 }
 
 bool IRInstruction::killsSources() const {
-  return opcodeHasFlags(getOpcode(), KillsSources);
+  return opcodeHasFlags(op(), KillsSources);
 }
 
 bool IRInstruction::killsSource(int idx) const {
@@ -490,7 +490,7 @@ bool IRInstruction::killsSource(int idx) const {
 }
 
 bool IRInstruction::modifiesStack() const {
-  return opcodeHasFlags(getOpcode(), ModifiesStack);
+  return opcodeHasFlags(op(), ModifiesStack);
 }
 
 SSATmp* IRInstruction::modifiedStkPtr() const {
@@ -502,14 +502,14 @@ SSATmp* IRInstruction::modifiedStkPtr() const {
 }
 
 bool IRInstruction::hasMainDst() const {
-  return opcodeHasFlags(getOpcode(), HasDest);
+  return opcodeHasFlags(op(), HasDest);
 }
 
 bool IRInstruction::mayReenterHelper() const {
-  if (isCmpOp(getOpcode())) {
-    return cmpOpTypesMayReenter(getOpcode(),
-                                getSrc(0)->getType(),
-                                getSrc(1)->getType());
+  if (isCmpOp(op())) {
+    return cmpOpTypesMayReenter(op(),
+                                getSrc(0)->type(),
+                                getSrc(1)->type());
   }
   // Not necessarily actually false; this is just a helper for other
   // bits.
@@ -584,11 +584,11 @@ Opcode getExitOpcode(TraceExitType::ExitType type) {
 }
 
 bool isRefCounted(SSATmp* tmp) {
-  if (tmp->getType().notCounted()) {
+  if (tmp->type().notCounted()) {
     return false;
   }
-  IRInstruction* inst = tmp->getInstruction();
-  Opcode opc = inst->getOpcode();
+  IRInstruction* inst = tmp->inst();
+  Opcode opc = inst->op();
   if (opc == DefConst || opc == LdConst || opc == LdClsCns) {
     return false;
   }
@@ -692,7 +692,7 @@ bool IRInstruction::cseEquals(IRInstruction* inst) const {
       return false;
     }
   }
-  if (hasExtra() && !cseEqualsExtra(getOpcode(), m_extra, inst->m_extra)) {
+  if (hasExtra() && !cseEqualsExtra(op(), m_extra, inst->m_extra)) {
     return false;
   }
   /*
@@ -714,7 +714,7 @@ size_t IRInstruction::cseHash() const {
   }
   if (hasExtra()) {
     srcHash = CSEHash::hashCombine(srcHash,
-      cseHashExtra(getOpcode(), m_extra));
+      cseHashExtra(op(), m_extra));
   }
   return CSEHash::hashCombine(srcHash, m_op, m_typeParam);
 }
@@ -740,7 +740,7 @@ void IRInstruction::printOpcode(std::ostream& os) const {
   }
   if (hasExtra()) {
     os << color(ANSI_COLOR_GREEN)
-       << showExtra(getOpcode(), m_extra)
+       << showExtra(op(), m_extra)
        << color(ANSI_COLOR_END);
   }
   os << color(ANSI_COLOR_LIGHT_BLUE)
@@ -777,7 +777,7 @@ void IRInstruction::printSrc(std::ostream& ostream, uint32_t i) const {
 
 void IRInstruction::printSrcs(std::ostream& os) const {
   bool first = true;
-  if (getOpcode() == IncStat) {
+  if (op() == IncStat) {
     os << " " << Stats::g_counterNames[getSrc(0)->getValInt()]
        << ", " << getSrc(1)->getValInt();
     return;
@@ -794,7 +794,7 @@ void IRInstruction::printSrcs(std::ostream& os) const {
 }
 
 void IRInstruction::print(std::ostream& ostream) const {
-  if (getOpcode() == Marker) {
+  if (op() == Marker) {
     auto* marker = getExtra<Marker>();
     ostream << color(ANSI_COLOR_BLUE)
             << folly::format("--- bc {}, spOff {} ({})",
@@ -913,8 +913,8 @@ void Block::printLabel(std::ostream& os) const {
 }
 
 int SSATmp::numNeededRegs() const {
-  auto type = getType();
-  if (type.subtypeOfAny(Type::None, Type::Null, Type::ActRec, Type::RetAddr)) {
+  auto t = type();
+  if (t.subtypeOfAny(Type::None, Type::Null, Type::ActRec, Type::RetAddr)) {
     // These don't need a register because their values are static or unused.
     //
     // RetAddr doesn't take any register because currently we only target x86,
@@ -922,23 +922,23 @@ int SSATmp::numNeededRegs() const {
     // moved to a machine-specific section once we target other architectures.
     return 0;
   }
-  if (type.subtypeOf(Type::Ctx) || type.isPtr()) {
+  if (t.subtypeOf(Type::Ctx) || t.isPtr()) {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
     return 1;
   }
-  if (type.subtypeOf(Type::FuncCtx)) {
+  if (t.subtypeOf(Type::FuncCtx)) {
     // 2 registers regardless of union status: 1 for the Func* and 1
     // for the {Obj|Cctx}, differentiated by the low bit.
     return 2;
   }
-  if (!type.isUnion()) {
+  if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assert(IMPLIES(type.subtypeOf(Type::Gen), type.isKnownDataType()));
+    assert(IMPLIES(t.subtypeOf(Type::Gen), t.isKnownDataType()));
     return 1;
   }
 
-  assert(type.subtypeOf(Type::Gen));
-  return type.needsReg() ? 2 : 1;
+  assert(t.subtypeOf(Type::Gen));
+  return t.needsReg() ? 2 : 1;
 }
 
 int SSATmp::numAllocatedRegs() const {
@@ -1067,7 +1067,7 @@ std::string SSATmp::toString() const {
 }
 
 void SSATmp::print(std::ostream& os, bool printLastUse) const {
-  if (m_inst->getOpcode() == DefConst) {
+  if (m_inst->op() == DefConst) {
     printConst(os, m_inst);
     return;
   }
@@ -1096,7 +1096,7 @@ void SSATmp::print(std::ostream& os, bool printLastUse) const {
   }
   os << punc(":")
      << color(ANSI_COLOR_GREEN)
-     << getType().toString()
+     << type().toString()
      << color(ANSI_COLOR_END)
      ;
 }
@@ -1139,7 +1139,7 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
     for (auto it = block->begin(); it != block->end();) {
       auto& inst = *it; ++it;
 
-      if (inst.getOpcode() == Marker) {
+      if (inst.op() == Marker) {
         os << std::string(kIndent, ' ');
         inst.print(os);
         os << '\n';
@@ -1165,7 +1165,7 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
         }
       }
 
-      if (inst.getOpcode() == DefLabel) {
+      if (inst.op() == DefLabel) {
         os << std::string(kIndent - 2, ' ');
         inst.getBlock()->printLabel(os);
         os << punc(":") << "\n";
@@ -1233,7 +1233,7 @@ void Trace::print(std::ostream& os, const AsmInfo* asmInfo) const {
 }
 
 int32_t spillValueCells(IRInstruction* spillStack) {
-  assert(spillStack->getOpcode() == SpillStack);
+  assert(spillStack->op() == SpillStack);
   int32_t numSrcs = spillStack->getNumSrcs();
   return numSrcs - 2;
 }
@@ -1346,11 +1346,11 @@ bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
  */
 bool checkBlock(Block* b) {
   assert(!b->empty());
-  assert(b->front()->getOpcode() == DefLabel);
+  assert(b->front()->op() == DefLabel);
   if (b->back()->isTerminal()) assert(!b->getNext());
   if (b->getTaken()) {
     // only Jmp_ can branch to a join block expecting values.
-    assert(b->back()->getOpcode() == Jmp_ ||
+    assert(b->back()->op() == Jmp_ ||
            b->getTaken()->front()->getNumDsts() == 0);
   }
   if (b->getNext()) {
@@ -1361,7 +1361,7 @@ bool checkBlock(Block* b) {
   ++i;
   if (b->back()->isBlockEnd()) --e;
   for (UNUSED IRInstruction& inst : folly::makeRange(i, e)) {
-    assert(inst.getOpcode() != DefLabel);
+    assert(inst.op() != DefLabel);
     assert(!inst.isBlockEnd());
   }
   return true;
@@ -1394,19 +1394,19 @@ bool checkCfg(Trace* trace, const IRFactory& factory) {
                   [] (Block* block, boost::dynamic_bitset<>& defined) {
     for (IRInstruction& inst : *block) {
       for (SSATmp* UNUSED src : inst.getSrcs()) {
-        assert(src->getInstruction() != &inst);
-        assert_log(src->getInstruction()->getOpcode() == DefConst ||
+        assert(src->inst() != &inst);
+        assert_log(src->inst()->op() == DefConst ||
                    defined[src->getId()],
                    [&]{ return folly::format(
                        "src '{}' in '{}' came from '{}', which is not a "
                        "DefConst and is not defined at this use site",
                        src->toString(), inst.toString(),
-                       src->getInstruction()->toString()).str();
+                       src->inst()->toString()).str();
                    });
       }
       for (SSATmp& dst : inst.getDsts()) {
-        assert(dst.getInstruction() == &inst &&
-               inst.getOpcode() != DefConst);
+        assert(dst.inst() == &inst &&
+               inst.op() != DefConst);
         assert(!defined[dst.getId()]);
         defined[dst.getId()] = 1;
       }

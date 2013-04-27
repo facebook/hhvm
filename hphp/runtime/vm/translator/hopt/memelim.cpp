@@ -197,7 +197,7 @@ private:
     for (it = map.begin(), end = map.end(); it != end; ) {
       copy = it;
       ++it;
-      if (copy->first->getInstruction()->getOpcode() != Mov) {
+      if (copy->first->inst()->op() != Mov) {
         copy->second->dec();
       }
       map.erase(copy);
@@ -215,7 +215,7 @@ private:
   static SSATmp* findValue(IRInstruction* inst) {
     assert(inst != nullptr);
 
-    Opcode op = inst->getOpcode();
+    Opcode op = inst->op();
     if (isLoad(op)) {
       return inst->getDst();
     }
@@ -240,7 +240,7 @@ private:
 
   static SSATmp* findRefValue(IRInstruction* inst) {
     assert(inst != nullptr);
-    switch (inst->getOpcode()) {
+    switch (inst->op()) {
       case LdRef:
         return inst->getDst();
       case StRef:
@@ -293,11 +293,11 @@ void MemMap::killRefInfo(IRInstruction* save) {
        it != end; ++it) {
     // if 'save' is a load, then don't kill access info of refs that have a
     // different type than 'save'
-    if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMem)) {
-      auto saveType = save->getDst()->getType();
+    if ((isLoad(save->op()) || save->op() == LdMem)) {
+      auto saveType = save->getDst()->type();
       if (it->second->value != nullptr &&
-          it->second->value->getType() != saveType &&
-          it->second->value->getType().isKnownDataType() &&
+          it->second->value->type() != saveType &&
+          it->second->value->type().isKnownDataType() &&
           saveType.isKnownDataType()) {
         continue;
       }
@@ -309,8 +309,8 @@ void MemMap::killRefInfo(IRInstruction* save) {
     // we're saving, kill its info
     if (it->second->access != save) {
       it->second->access = nullptr;
-      if (isStore(save->getOpcode()) ||
-          save->getOpcode() == StMem || save->getOpcode() == StMemNT) {
+      if (isStore(save->op()) ||
+          save->op() == StMem || save->op() == StMemNT) {
         it->second->value = nullptr;
       }
     }
@@ -328,7 +328,7 @@ void MemMap::killPropInfo(IRInstruction* save) {
 
   // get out the offset only if we know one exists (we might be killing because
   // of a LdMem or StMem), otherwise -1
-  Opcode op = save->getOpcode();
+  Opcode op = save->op();
   int offset = (op == LdProp || op == StProp || op == StPropNT) ?
                save->getSrc(1)->getValInt() : -1;
 
@@ -349,18 +349,18 @@ void MemMap::killPropInfo(IRInstruction* save) {
       if (offset == -1 || (copy->offset == offset && copy->access != save)) {
         // if 'save' is a load, then don't kill access info of properties that
         // have a different type than 'save'
-        if ((isLoad(save->getOpcode()) || save->getOpcode() == LdMem) &&
+        if ((isLoad(save->op()) || save->op() == LdMem) &&
             copy->value != nullptr &&
-            copy->value->getType() != save->getDst()->getType() &&
-            copy->value->getType().isKnownDataType() &&
-            save->getDst()->getType().isKnownDataType()) {
+            copy->value->type() != save->getDst()->type() &&
+            copy->value->type().isKnownDataType() &&
+            save->getDst()->type().isKnownDataType()) {
           continue;
         }
         // TODO consider doing the same with the type of the base ref pointer
         // of a store
 
-        if (isStore(save->getOpcode()) ||
-            save->getOpcode() == StMem || save->getOpcode() == StMemNT) {
+        if (isStore(save->op()) ||
+            save->op() == StMem || save->op() == StMemNT) {
           accesses.erase(copy);
         } else {
           copy->access = nullptr;
@@ -408,7 +408,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
 
   assert(inst != nullptr);
 
-  Opcode op = inst->getOpcode();
+  Opcode op = inst->op();
 
   switch (op) {
     case Box: {
@@ -458,7 +458,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
       SSATmp* source = inst->getSrc(0);
 
       // figure out which map the new alias is supposed to be inserted into
-      if (source->getType().isBoxed()) {
+      if (source->type().isBoxed()) {
         if (m_unescaped.count(source) > 0) {
           m_unescaped[dest] = m_unescaped[source];
           if (op == IncRef) {
@@ -470,13 +470,13 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
             m_unknown[dest]->inc();
           }
         } else {
-          m_unknown[source] = new RefInfo(source->getInstruction());
+          m_unknown[source] = new RefInfo(source->inst());
           m_unknown[dest] = m_unknown[source];
           if (op == IncRef) {
             m_unknown[dest]->inc();
           }
         }
-      } else if (source->getType() == Type::Obj) {
+      } else if (source->type() == Type::Obj) {
         if (m_props.count(source) > 0) {
           m_props[dest] = m_props[source];
           if (op == IncRef) {
@@ -566,7 +566,7 @@ void MemMap::processInstruction(IRInstruction* inst, bool isPseudoMain) {
     case DecRef:
     case DecRefNZ: {
       SSATmp* ref = inst->getSrc(0);
-      Type ty = inst->getSrc(0)->getType();
+      Type ty = inst->getSrc(0)->type();
 
       if (ref->isConst()) {
         // cannot be ref-counted
@@ -678,14 +678,14 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
   for (Block* block : trace->getBlocks()) {
     for (IRInstruction& inst : *block) {
-      if (inst.getOpcode() == Marker) {
+      if (inst.op() == Marker) {
         curFunc = inst.getExtra<Marker>()->func;
       }
       // initialize each instruction as live
       setLive(inst, true);
 
       int offset = -1;
-      Opcode op = inst.getOpcode();
+      Opcode op = inst.op();
 
       if (isLoad(op)) {
         if (op == LdProp) {
@@ -702,17 +702,17 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 
         // if we see a store, first check if its last available access is a store
         // if it is, then the last access is a dead store
-        auto access = inst.getOpcode() == StLoc || inst.getOpcode() == StLocNT
+        auto access = inst.op() == StLoc || inst.op() == StLocNT
           ? lastLocalAccess(inst.getExtra<LocalId>()->locId)
           : getLastAccess(inst.getSrc(0), offset);
-        if (access && isStore(access->getOpcode())) {
+        if (access && isStore(access->op())) {
           // if a dead St* is followed by a St*NT, then the second store needs to
           // now write in the type because the first store will be removed
-          if (access->getOpcode() == StProp && op == StPropNT) {
+          if (access->op() == StProp && op == StPropNT) {
             inst.setOpcode(StProp);
-          } else if (access->getOpcode() == StLoc && op == StLocNT) {
+          } else if (access->op() == StLoc && op == StLocNT) {
             inst.setOpcode(StLoc);
-          } else if (access->getOpcode() == StRef && op == StRefNT) {
+          } else if (access->op() == StRef && op == StRefNT) {
             inst.setOpcode(StRef);
           }
 
@@ -759,22 +759,22 @@ void MemMap::optimizeMemoryAccesses(Trace* trace) {
 void MemMap::optimizeLoad(IRInstruction* inst, int offset) {
   // check if we still know the value at this memory location. if we do,
   // then replace the load with a Mov
-  auto value = inst->getOpcode() == LdLoc
+  auto value = inst->op() == LdLoc
     ? getLocalValue(inst->getExtra<LocalId>()->locId)
     : getValue(inst->getSrc(0), offset);
   if (value == nullptr) {
     return;
   }
 
-  Type instTy = inst->getDst()->getType();
-  Type valTy = value->getType();
+  Type instTy = inst->getDst()->type();
+  Type valTy = value->type();
 
   // check for loads that have a guard that will definitely fail
   if (inst->getTaken() && instTy.not(valTy)) {
     return inst->convertToJmp();
   }
 
-  Opcode op = inst->getOpcode();
+  Opcode op = inst->op();
 
   // fix the instruction's arguments and rip off its label if it had one
   inst->setSrc(0, value);
@@ -806,7 +806,7 @@ void MemMap::sinkStores(StoreList& stores) {
 
     // StRefs cannot just be removed, they have to be converted into Movs
     // as the destination of the StRef still has the DecRef attached to it.
-    if (store->getOpcode() == StRef || store->getOpcode() == StRefNT) {
+    if (store->op() == StRef || store->op() == StRefNT) {
       store->setOpcode(Mov);
       store->setSrc(1, nullptr);
       store->setNumSrcs(1);

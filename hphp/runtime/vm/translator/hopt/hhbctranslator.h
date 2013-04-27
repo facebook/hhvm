@@ -65,7 +65,7 @@ struct EvalStack {
   uint32_t numCells() const {
     uint32_t ret = 0;
     for (auto& t : m_vector) {
-      ret += t->getType() == Type::ActRec ? kNumActRecCells : 1;
+      ret += t->type() == Type::ActRec ? kNumActRecCells : 1;
     }
     return ret;
   }
@@ -93,7 +93,7 @@ class TypeGuard {
 
   Kind      getKind()  const { return m_kind;  }
   uint32_t  getIndex() const { return m_index; }
-  Type      getType()  const { return m_type;  }
+  Type      type()  const { return m_type;  }
 
  private:
   Kind      m_kind;

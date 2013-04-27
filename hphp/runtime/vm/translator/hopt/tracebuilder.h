@@ -340,7 +340,7 @@ public:
     genJmp(done_block, v2);
     appendBlock(done_block);
     SSATmp* result = done_block->getLabel()->getDst(0);
-    result->setType(Type::unionOf(v1->getType(), v2->getType()));
+    result->setType(Type::unionOf(v1->type(), v2->type()));
     return result;
   }
 

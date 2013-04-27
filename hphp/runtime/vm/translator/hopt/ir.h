@@ -1532,7 +1532,7 @@ class RawMemSlot {
 
   int64_t getOffset()   const { return m_offset; }
   int32_t getSize()     const { return m_size; }
-  Type getType() const { return m_type; }
+  Type type() const { return m_type; }
   bool allowExtra()   const { return m_allowExtra; }
 
  private:
@@ -1661,18 +1661,18 @@ struct IRInstruction {
    * Return access to extra-data on this instruction, for the
    * specified opcode type.
    *
-   * Pre: getOpcode() == opc
+   * Pre: op() == opc
    */
   template<Opcode opc>
   const typename IRExtraDataType<opc>::type* getExtra() const {
-    assert(opc == getOpcode() && "getExtra type error");
+    assert(opc == op() && "getExtra type error");
     assert(m_extra != nullptr);
     return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
   }
 
   template<Opcode opc>
   typename IRExtraDataType<opc>::type* getExtra() {
-    assert(opc == getOpcode() && "getExtra type error");
+    assert(opc == op() && "getExtra type error");
     return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
   }
 
@@ -1686,7 +1686,7 @@ struct IRInstruction {
    * share the same kind of extra data.
    */
   template<class T> const T* getExtra() const {
-    auto opcode = getOpcode();
+    auto opcode = op();
     if (debug) assert_opcode_extra<T>(opcode);
     return static_cast<const T*>(m_extra);
   }
@@ -1735,7 +1735,7 @@ struct IRInstruction {
    */
   IRInstruction* clone(IRFactory* factory) const;
 
-  Opcode     getOpcode()   const       { return m_op; }
+  Opcode     op()   const       { return m_op; }
   void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
   Type       getTypeParam() const      { return m_typeParam; }
   void       setTypeParam(Type t)      { m_typeParam = t; }
@@ -1930,9 +1930,9 @@ inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
 class SSATmp {
 public:
   uint32_t          getId() const { return m_id; }
-  IRInstruction*    getInstruction() const { return m_inst; }
+  IRInstruction*    inst() const { return m_inst; }
   void              setInstruction(IRInstruction* i) { m_inst = i; }
-  Type              getType() const { return m_type; }
+  Type              type() const { return m_type; }
   void              setType(Type t) { m_type = t; }
   uint32_t          getLastUseId() const { return m_lastUseId; }
   void              setLastUseId(uint32_t newId) { m_lastUseId = newId; }
@@ -1940,7 +1940,7 @@ public:
   void              setUseCount(uint32_t count) { m_useCount = count; }
   void              incUseCount() { m_useCount++; }
   uint32_t          decUseCount() { return --m_useCount; }
-  bool              isBoxed() const { return getType().isBoxed(); }
+  bool              isBoxed() const { return type().isBoxed(); }
   bool              isString() const { return isA(Type::Str); }
   bool              isArray() const { return isA(Type::Arr); }
   std::string       toString() const;
@@ -1951,17 +1951,17 @@ public:
   // XXX: false for Null, etc.  Would rather it returns whether we
   // have a compile-time constant value.
   bool isConst() const {
-    return m_inst->getOpcode() == DefConst ||
-      m_inst->getOpcode() == LdConst;
+    return m_inst->op() == DefConst ||
+      m_inst->op() == LdConst;
   }
 
   /*
    * For SSATmps with a compile-time constant value, the following
    * functions allow accessing it.
    *
-   * Pre: getInstruction() &&
-   *   (getInstruction()->getOpcode() == DefConst ||
-   *    getInstruction()->getOpcode() == LdConst)
+   * Pre: inst() &&
+   *   (inst()->op() == DefConst ||
+   *    inst()->op() == LdConst)
    */
   bool               getValBool() const;
   int64_t            getValInt() const;
@@ -1977,13 +1977,13 @@ public:
   TCA                getValTCA() const;
 
   /*
-   * Returns: Type::subtypeOf(getType(), tag).
+   * Returns: Type::subtypeOf(type(), tag).
    *
    * This should be used for most checks on the types of IRInstruction
    * sources.
    */
   bool isA(Type tag) const {
-    return getType().subtypeOf(tag);
+    return type().subtypeOf(tag);
   }
 
   /*
@@ -2092,19 +2092,19 @@ int vectorBaseIdx(Opcode opc);
 int vectorKeyIdx(Opcode opc);
 int vectorValIdx(Opcode opc);
 inline int vectorBaseIdx(const IRInstruction* inst) {
-  return vectorBaseIdx(inst->getOpcode());
+  return vectorBaseIdx(inst->op());
 }
 inline int vectorKeyIdx(const IRInstruction* inst) {
-  return vectorKeyIdx(inst->getOpcode());
+  return vectorKeyIdx(inst->op());
 }
 inline int vectorValIdx(const IRInstruction* inst) {
-  return vectorValIdx(inst->getOpcode());
+  return vectorValIdx(inst->op());
 }
 
 struct VectorEffects {
   static bool supported(Opcode op);
   static bool supported(const IRInstruction* inst) {
-    return supported(inst->getOpcode());
+    return supported(inst->op());
   }
 
   /*
@@ -2136,10 +2136,10 @@ struct VectorEffects {
   explicit VectorEffects(const IRInstruction* inst) {
     int keyIdx = vectorKeyIdx(inst);
     int valIdx = vectorValIdx(inst);
-    init(inst->getOpcode(),
-         inst->getSrc(vectorBaseIdx(inst))->getType(),
-         keyIdx == -1 ? Type::None : inst->getSrc(keyIdx)->getType(),
-         valIdx == -1 ? Type::None : inst->getSrc(valIdx)->getType());
+    init(inst->op(),
+         inst->getSrc(vectorBaseIdx(inst))->type(),
+         keyIdx == -1 ? Type::None : inst->getSrc(keyIdx)->type(),
+         valIdx == -1 ? Type::None : inst->getSrc(valIdx)->type());
   }
 
   template<typename Container>
@@ -2147,9 +2147,9 @@ struct VectorEffects {
     int keyIdx = vectorKeyIdx(opc);
     int valIdx = vectorValIdx(opc);
     init(opc,
-         srcs[vectorBaseIdx(opc)]->getType(),
-         keyIdx == -1 ? Type::None : srcs[keyIdx]->getType(),
-         valIdx == -1 ? Type::None : srcs[valIdx]->getType());
+         srcs[vectorBaseIdx(opc)]->type(),
+         keyIdx == -1 ? Type::None : srcs[keyIdx]->type(),
+         valIdx == -1 ? Type::None : srcs[valIdx]->type());
   }
 
   VectorEffects(Opcode op, Type base, Type key, Type val) {
@@ -2158,7 +2158,7 @@ struct VectorEffects {
 
   VectorEffects(Opcode op, SSATmp* base, SSATmp* key, SSATmp* val) {
     auto typeOrNone =
-      [](SSATmp* val){ return val ? val->getType() : Type::None; };
+      [](SSATmp* val){ return val ? val->type() : Type::None; };
     init(op, typeOrNone(base), typeOrNone(key), typeOrNone(val));
   }
 
@@ -2198,7 +2198,7 @@ struct Block : boost::noncopyable {
   }
 
   IRInstruction* getLabel() const {
-    assert(front()->getOpcode() == DefLabel);
+    assert(front()->op() == DefLabel);
     return front();
   }
 
@@ -2244,7 +2244,7 @@ struct Block : boost::noncopyable {
   // insert inst after this block's label, return an iterator to the
   // newly inserted instruction.
   iterator prepend(IRInstruction* inst) {
-    assert(front()->getOpcode() == DefLabel);
+    assert(front()->op() == DefLabel);
     auto it = begin();
     return insert(++it, inst);
   }
@@ -2266,7 +2266,7 @@ struct Block : boost::noncopyable {
   template<typename L>
   void forEachSrc(unsigned i, L body) {
     for (const EdgeData* n = m_preds; n; n = n->next) {
-      assert(n->jmp->getOpcode() == Jmp_ && n->jmp->getTaken() == this);
+      assert(n->jmp->op() == Jmp_ && n->jmp->getTaken() == this);
       body(n->jmp, n->jmp->getSrc(i));
     }
   }
@@ -2442,11 +2442,11 @@ void optimizeTrace(Trace*, IRFactory* irFactory);
 int32_t spillValueCells(IRInstruction* spillStack);
 
 inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
-  switch (instr->getOpcode()) {
+  switch (instr->op()) {
     case ConvIntToBool:
       return true;
     case ConvCellToBool:
-      return instr->getSrc(0)->getType().subtypeOfAny(
+      return instr->getSrc(0)->type().subtypeOfAny(
         Type::Func, Type::Cls, Type::FuncCls, Type::VarEnv, Type::TCA);
     default:
       return false;

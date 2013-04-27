@@ -47,7 +47,7 @@ private:
     bool isPinned() const { return m_pinned; }
     bool isRetAddr() const {
       if (!m_ssaTmp) return false;
-      Type type = m_ssaTmp->getType();
+      Type type = m_ssaTmp->type();
       return type == Type::RetAddr;
     }
 
@@ -166,8 +166,8 @@ static_assert(kReservedRSPSpillSpace == NumPreAllocatedSpillLocs * sizeof(void*)
 // following the dst-src chain.
 static SSATmp* canonicalize(SSATmp* tmp) {
   while (true) {
-    IRInstruction* inst = tmp->getInstruction();
-    Opcode opc = inst->getOpcode();
+    IRInstruction* inst = tmp->inst();
+    Opcode opc = inst->op();
     // The dst of IncRef, Mov, StRef, and StRefNT has the same value
     // as the src.
     // We follow these instructions to canonicalize an SSATmp.
@@ -300,7 +300,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
       inst->setSrc(i, reloadTmp);
       // reloadTmp and tmp share the same type.  Since it was spilled, it
       // must be using its entire needed-count of registers.
-      assert(reloadTmp->getType() == tmp->getType());
+      assert(reloadTmp->type() == tmp->type());
       assert(tmp->numNeededRegs() == tmp->numAllocatedRegs());
       for (int locIndex = 0; locIndex < tmp->numNeededRegs(); ++locIndex) {
         allocRegToTmp(reloadTmp, locIndex);
@@ -322,7 +322,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   Range<SSATmp*> dsts = inst->getDsts();
   if (dsts.empty()) return;
 
-  Opcode opc = inst->getOpcode();
+  Opcode opc = inst->op();
   if (opc == DefMIStateBase) {
     assert(dsts[0].isA(Type::PtrToCell));
     allocRegToTmp(&m_regs[int(rsp)], &dsts[0], 0);
@@ -421,7 +421,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
   }
   if (reg == nullptr &&
       RuntimeOption::EvalHHIREnablePreColoring &&
-      ssaTmp->getInstruction()->isNative()) {
+      ssaTmp->inst()->isNative()) {
     // Pre-colors ssaTmp if it's the return value of a native.
     if (index == 0) {
       reg = getReg(&m_regs[int(rax)]);
@@ -489,7 +489,7 @@ uint32_t LinearScan::assignSpillLoc() {
         assert(!m_natives.empty());
         m_natives.pop_front();
       }
-      if (inst.getOpcode() == Spill) {
+      if (inst.op() == Spill) {
         SSATmp* dst = inst.getDst();
         SSATmp* src = inst.getSrc(0);
         for (int locIndex = 0;
@@ -505,7 +505,7 @@ uint32_t LinearScan::assignSpillLoc() {
           TRACE(3, "[counter] 1 spill\n");
         }
       }
-      if (inst.getOpcode() == Reload) {
+      if (inst.op() == Reload) {
         SSATmp* src = inst.getSrc(0);
         for (int locIndex = 0;
              locIndex < src->numNeededRegs();
@@ -534,7 +534,7 @@ void LinearScan::insertAllocFreeSpillAux(Trace* trace,
     for (auto it = block->begin(); it != block->end(); ) {
       auto next = it; ++next;
       IRInstruction& inst = *it;
-      Opcode opc = inst.getOpcode();
+      Opcode opc = inst.op();
       if (opc == Call) {
         // Insert FreeSpill and AllocSpill around each Call.
         IRInstruction* allocSpill = m_irFactory->gen(AllocSpill, tmp);
@@ -574,7 +574,7 @@ void LinearScan::collectJmps() {
   m_jmps.reset();
   for (Block* block : m_blocks) {
     IRInstruction* jmp = block->back();
-    if (jmp->getOpcode() != Jmp_ || jmp->getNumSrcs() == 0) continue;
+    if (jmp->op() != Jmp_ || jmp->getNumSrcs() == 0) continue;
     for (SSATmp* src : jmp->getSrcs()) {
       m_jmps[src].push_back(jmp);
     }
@@ -588,7 +588,7 @@ void LinearScan::computePreColoringHint() {
     return;
   }
 
-  Opcode opc = inst->getOpcode();
+  Opcode opc = inst->op();
   using namespace NativeCalls;
   if (CallMap::hasInfo(opc)) {
     unsigned reg = 0;
@@ -626,8 +626,8 @@ void LinearScan::computePreColoringHint() {
       break;
     case Concat:
       {
-        Type lType = inst->getSrc(0)->getType();
-        Type rType = inst->getSrc(1)->getType();
+        Type lType = inst->getSrc(0)->type();
+        Type rType = inst->getSrc(1)->type();
         if ((lType.isString() && rType.isString()) ||
             (lType.isString() && rType == Type::Int) ||
             (lType == Type::Int && rType.isString())) {
@@ -653,8 +653,8 @@ void LinearScan::computePreColoringHint() {
         auto src1 = inst->getSrc(0);
         auto src2 = inst->getSrc(1);
 
-        auto type1 = src1->getType();
-        auto type2 = src2->getType();
+        auto type1 = src1->type();
+        auto type2 = src2->type();
 
         if ((type1.isArray() && type2.isArray())
             || (type1.isString() && type2.isString())
@@ -705,10 +705,10 @@ void LinearScan::computePreColoringHint() {
 // allocated at the specified index.
 static RegNumber findLabelSrcReg(IRInstruction* label, unsigned dstIdx,
                                  uint32_t regIndex) {
-  assert(label->getOpcode() == DefLabel);
+  assert(label->op() == DefLabel);
   SSATmp* withReg = label->getBlock()->findSrc(dstIdx, [&](SSATmp* src) {
     return src->getReg(regIndex) != InvalidReg &&
-      src->getInstruction()->getBlock()->getHint() != Block::Unlikely;
+      src->inst()->getBlock()->getHint() != Block::Unlikely;
   });
   return withReg ? withReg->getReg(regIndex) : reg::noreg;
 }
@@ -722,9 +722,9 @@ static RegNumber findLabelSrcReg(IRInstruction* label, unsigned dstIdx,
 // proceed unhinted.
 RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
                                      bool isReload) {
-  IRInstruction* srcInst = tmp->getInstruction();
+  IRInstruction* srcInst = tmp->inst();
   const JmpList& jmps = m_jmps[tmp];
-  if (isReload && (srcInst->getOpcode() == DefLabel || !jmps.empty())) {
+  if (isReload && (srcInst->op() == DefLabel || !jmps.empty())) {
     // If we're precoloring a Reload of a temp that we'd normally find
     // a hint for, just return the register allocated to the spilled
     // temp.
@@ -733,7 +733,7 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
     return reg;
   }
 
-  if (srcInst->getOpcode() == DefLabel) {
+  if (srcInst->op() == DefLabel) {
     // Figure out which dst of the label is tmp
     for (unsigned i = 0, n = srcInst->getNumDsts(); i < n; ++i) {
       if (srcInst->getDst(i) == tmp) {
@@ -799,7 +799,7 @@ void LinearScan::coalesce(Trace* trace) {
 void LinearScan::preAllocSpillLoc(uint32_t numSpillLocs) {
   for (Block* block : m_blocks) {
     for (IRInstruction& inst : *block) {
-      if (inst.getOpcode() == Spill) {
+      if (inst.op() == Spill) {
         SSATmp* dst = inst.getDst();
         for (int index = 0; index < dst->numNeededRegs(); ++index) {
           assert(!dst->hasReg(index));
@@ -842,7 +842,7 @@ void numberInstructions(const BlockList& blocks) {
   });
   uint32_t nextId = 1;
   forEachInst(blocks, [&](IRInstruction* inst) {
-    if (inst->getOpcode() == Marker) return; // don't number markers
+    if (inst->op() == Marker) return; // don't number markers
     uint32_t id = nextId++;
     inst->setId(id);
     for (SSATmp* tmp : inst->getSrcs()) {
@@ -912,7 +912,7 @@ void LinearScan::allocRegsToTrace() {
     // clear remembered reloads that don't dominate this block
     for (SlotInfo& slot : m_slots) {
       if (SSATmp* reload = slot.m_latestReload) {
-        if (!dominates(reload->getInstruction()->getBlock(), block, m_idoms)) {
+        if (!dominates(reload->inst()->getBlock(), block, m_idoms)) {
           slot.m_latestReload = nullptr;
         }
       }
@@ -929,8 +929,8 @@ void LinearScan::allocRegsToTrace() {
   // For each spill slot, insert the spill right after the instruction
   // that generated the value (without traversing everything else).
   for (SlotInfo& slot : m_slots) {
-    IRInstruction* spill = slot.m_spillTmp->getInstruction();
-    IRInstruction* inst = spill->getSrc(0)->getInstruction();
+    IRInstruction* spill = slot.m_spillTmp->inst();
+    IRInstruction* inst = spill->getSrc(0)->inst();
     Block* block = inst->getBlock();
     if (inst->isBlockEnd()) {
       block->getNext()->prepend(spill);
@@ -1009,7 +1009,7 @@ void LinearScan::rematerializeAux() {
     }
     for (auto it = block->begin(); it != block->end(); ++it) {
       IRInstruction& inst = *it;
-      Opcode opc = inst.getOpcode();
+      Opcode opc = inst.op();
       if (opc == DefFP || opc == FreeActRec) {
         assert(inst.getDst()->getReg() == rVmFp);
         curFp = inst.getDst();
@@ -1019,10 +1019,10 @@ void LinearScan::rematerializeAux() {
         // t = Reload s
         SSATmp* dst = inst.getDst();
         SSATmp* spilledTmp = getSpilledTmp(dst);
-        IRInstruction* spilledInst = spilledTmp->getInstruction();
+        IRInstruction* spilledInst = spilledTmp->inst();
         IRInstruction* newInst = NULL;
         if (spilledInst->isRematerializable() ||
-            (spilledInst->getOpcode() == LdStack &&
+            (spilledInst->op() == LdStack &&
              spilledInst->getSrc(0) == curSp)) {
           // XXX: could change <newInst> to the non-check version.
           // Rematerialize those rematerializable instructions (i.e.,
@@ -1039,14 +1039,14 @@ void LinearScan::rematerializeAux() {
           if (loc != -1) {
             newInst = m_irFactory->gen(
               LdLoc,
-              dst->getType(),
+              dst->type(),
               LocalId(loc),
               curFp
             );
           }
         }
         if (newInst) {
-          UNUSED Type oldType = dst->getType();
+          UNUSED Type oldType = dst->type();
           newInst->setDst(dst);
           dst->setInstruction(newInst);
           assert(outputType(newInst) == oldType);
@@ -1088,13 +1088,13 @@ void LinearScan::rematerializeAux() {
 
 void LinearScan::removeUnusedSpills() {
   for (SlotInfo& slot : m_slots) {
-    IRInstruction* spill = slot.m_spillTmp->getInstruction();
+    IRInstruction* spill = slot.m_spillTmp->inst();
     if (spill->getDst()->getUseCount() == 0) {
       Block* block = spill->getBlock();
       block->erase(block->iteratorTo(spill));
       SSATmp* src = spill->getSrc(0);
       if (src->decUseCount() == 0) {
-        Opcode srcOpc = src->getInstruction()->getOpcode();
+        Opcode srcOpc = src->inst()->op();
         // Not all instructions are able to take noreg as its dest
         // reg.  We pick LdLoc and IncRef because they occur often.
         if (srcOpc == IncRef || srcOpc == LdLoc) {
@@ -1273,16 +1273,16 @@ uint32_t LinearScan::getNextNativeId() const {
 }
 
 SSATmp* LinearScan::getSpilledTmp(SSATmp* tmp) {
-  assert(tmp->getInstruction()->getOpcode() == Reload);
-  SSATmp* slot = tmp->getInstruction()->getSrc(0);
-  assert(slot->getInstruction()->getOpcode() == Spill);
-  return slot->getInstruction()->getSrc(0);
+  assert(tmp->inst()->op() == Reload);
+  SSATmp* slot = tmp->inst()->getSrc(0);
+  assert(slot->inst()->op() == Spill);
+  return slot->inst()->getSrc(0);
 }
 
 // If <tmp> is a reloaded value, follow the spill-reload chain to find
 // its source; otherwise, return <tmp> itself.
 SSATmp* LinearScan::getOrigTmp(SSATmp* tmp) {
-  if (tmp->getInstruction()->getOpcode() == Reload)
+  if (tmp->inst()->op() == Reload)
     return getSpilledTmp(tmp);
   return tmp;
 }

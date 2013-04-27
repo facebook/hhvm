@@ -48,7 +48,7 @@ static void elimUnconditionalJump(Trace* trace, IRFactory* irFactory) {
   Block* lastBlock = trace->back();
   auto lastInst = lastBlock->backIter(); // iterator to last instruction
   IRInstruction& jmp = *lastInst;
-  if (jmp.getOpcode() == Jmp_ && !isJoin[jmp.getTaken()->getId()]) {
+  if (jmp.op() == Jmp_ && !isJoin[jmp.getTaken()->getId()]) {
     Block* target = jmp.getTaken();
     lastBlock->splice(lastInst, target, target->skipLabel(), target->end());
     lastBlock->erase(lastInst); // delete the jmp
@@ -95,12 +95,12 @@ static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
   Block* jccBlock  = *(--it);
 
   IRInstruction& jccInst = *(jccBlock->back());
-  if (!jccCanBeDirectExit(jccInst.getOpcode())) return;
+  if (!jccCanBeDirectExit(jccInst.op())) return;
 
   for (auto it = lastBlock->skipLabel(), end = lastBlock->end(); it != end;
        it++) {
     IRInstruction& inst = *it;
-    opc = inst.getOpcode();
+    opc = inst.op();
     if (opc == ExitTrace) {
       exitInst = &inst;
       break;
@@ -118,7 +118,7 @@ static void hoistConditionalJumps(Trace* trace, IRFactory* irFactory) {
     for (auto it = targetInstIter, end = targetBlock->end(); it != end; ++it) {
       IRInstruction* instr = &*it;
       // Extend to support ExitSlow, ExitSlowNoProgress, ...
-      Opcode opc = instr->getOpcode();
+      Opcode opc = instr->op();
       if (opc == ExitTraceCc) {
         exitCcInst = instr;
         break;
@@ -147,7 +147,7 @@ static void hoistGuardJumps(Trace* trace, IRFactory* irFactory) {
   for (Block* block : trace->getBlocks()) {
     for (IRInstruction& instr : *block) {
       IRInstruction* inst = &instr;
-      Opcode opc = inst->getOpcode();
+      Opcode opc = inst->op();
       if (inst->getTaken() &&
           (opc == LdLoc    || opc == LdStack ||
            opc == GuardLoc || opc == GuardStk)) {
@@ -157,7 +157,7 @@ static void hoistGuardJumps(Trace* trace, IRFactory* irFactory) {
           auto instIter = exitLabel->skipLabel();
           // Confirm this is a GuardExit
           for (auto it = instIter, end = exitLabel->end(); it != end; ++it) {
-            Opcode op = it->getOpcode();
+            Opcode op = it->op();
             if (op == Marker) {
               continue;
             }

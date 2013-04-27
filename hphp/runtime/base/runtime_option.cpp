@@ -435,8 +435,8 @@ std::string RuntimeOption::DebuggerUsageLogFile;
 std::string RuntimeOption::SendmailPath;
 std::string RuntimeOption::MailForceExtraParameters;
 
-int RuntimeOption::PregBacktraceLimit = 100000;
-int RuntimeOption::PregRecursionLimit = 100000;
+long RuntimeOption::PregBacktraceLimit = 1000000;
+long RuntimeOption::PregRecursionLimit = 100000;
 bool RuntimeOption::EnablePregErrorLog = true;
 
 bool RuntimeOption::EnableHotProfiler = true;
@@ -1251,8 +1251,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   }
   {
     Hdf preg = config["Preg"];
-    PregBacktraceLimit = preg["BacktraceLimit"].getInt32(100000);
-    PregRecursionLimit = preg["RecursionLimit"].getInt32(100000);
+    PregBacktraceLimit = preg["BacktraceLimit"].getInt64(1000000);
+    PregRecursionLimit = preg["RecursionLimit"].getInt64(100000);
     EnablePregErrorLog = preg["ErrorLog"].getBool(true);
   }
 

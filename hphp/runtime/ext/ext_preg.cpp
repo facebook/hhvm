@@ -18,6 +18,7 @@
 #include <runtime/base/preg.h>
 #include <runtime/ext/ext_mb.h>
 #include <runtime/ext/ext_string.h>
+#include <runtime/base/ini_setting.h>
 #include <runtime/base/util/request_local.h>
 
 namespace HPHP {

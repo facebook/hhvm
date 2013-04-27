@@ -72,6 +72,8 @@ BaseExecutionContext::BaseExecutionContext() :
 }
 
 VMExecutionContext::VMExecutionContext() :
+    m_preg_backtrace_limit(RuntimeOption::PregBacktraceLimit),
+    m_preg_recursion_limit(RuntimeOption::PregRecursionLimit),
     m_lambdaCounter(0), m_nesting(0),
     m_injTables(nullptr), m_breakPointFilter(nullptr), m_lastLocFilter(nullptr),
     m_interpreting(false), m_dbgNoBreak(false),

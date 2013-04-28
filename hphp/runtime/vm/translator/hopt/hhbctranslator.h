@@ -547,7 +547,6 @@ private:
   Trace* getExitTrace(uint32_t targetBcOff, uint32_t notTakenBcOff);
   Trace* getExitSlowTrace();
   Trace* getGuardExit();
-  SSATmp* emitLdLocWarn(uint32_t id, Trace* target);
   void emitInterpOneOrPunt(Type type, int numPopped, int numExtraPushed = 0);
   void emitBinaryArith(Opcode);
   template<class Lambda>
@@ -580,7 +579,7 @@ private:
   const NamedEntityPair& lookupNamedEntityPairId(int id);
 
   /*
-   * Eval stack helpers
+   * Eval stack helpers.
    */
   SSATmp* push(SSATmp* tmp);
   SSATmp* pushIncRef(SSATmp* tmp) { return push(gen(IncRef, tmp)); }
@@ -596,11 +595,22 @@ private:
   std::vector<SSATmp*> getSpillValues() const;
   SSATmp* spillStack();
   void    exceptionBarrier();
-  SSATmp* loadStackAddr(int32_t offset);
+  SSATmp* ldStackAddr(int32_t offset);
   SSATmp* top(Type type, uint32_t index = 0);
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
   void    refineType(SSATmp* tmp, Type type);
+
+  /*
+   * Local instruction helpers.
+   */
+  SSATmp* ldLoc(uint32_t id);
+  SSATmp* ldLocAddr(uint32_t id);
+  SSATmp* ldLocInner(uint32_t id, Trace* exitTrace);
+  SSATmp* ldLocInnerWarn(uint32_t id, Trace* target);
+  SSATmp* stLoc(uint32_t id, Trace* exitTrace, SSATmp* newVal);
+  SSATmp* stLocNRC(uint32_t id, Trace* exitTrace, SSATmp* newVal);
+  SSATmp* stLocImpl(uint32_t id, Trace*, SSATmp* newVal, bool doRefCount);
 
 private:
   // Tracks information about the current bytecode offset and which

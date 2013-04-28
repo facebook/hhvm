@@ -1978,7 +1978,6 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
   });
 }
 
-
 void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
   cgLdFuncCachedCommon(inst);
   if (Block* taken = inst->getTaken()) {

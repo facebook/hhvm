@@ -28,10 +28,6 @@ namespace JIT {
 
 static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::hhir;
 
-static inline Type noneToGen(Type t) {
-  return t.subtypeOf(Type::None) ? Type::Gen : t;
-}
-
 TraceBuilder::TraceBuilder(Offset initialBcOffset,
                            uint32_t initialSpOffsetFromFp,
                            IRFactory& irFactory,
@@ -224,190 +220,6 @@ SSATmp* TraceBuilder::genPtrToUninit() {
 
 SSATmp* TraceBuilder::genDefNone() {
   return gen(DefConst, Type::None, ConstData(0));
-}
-
-SSATmp* TraceBuilder::genBoxLoc(uint32_t id) {
-  SSATmp* prevValue  = genLdLoc(id);
-  Type prevType = prevValue->type();
-  // Don't box if local's value already boxed
-  if (prevType.isBoxed()) {
-    return prevValue;
-  }
-  assert(prevType.notBoxed());
-  // The Box helper requires us to incref the values its boxing, but in
-  // this case we don't need to incref prevValue because we are simply
-  // transfering its refcount from the local to the box.
-  if (prevValue->isA(Type::Uninit)) {
-    // No box can ever contain Uninit, so promote it to InitNull here.
-    prevValue = genDefInitNull();
-  }
-  SSATmp* newValue = gen(Box, prevValue);
-  gen(StLoc, LocalId(id), m_fpValue, newValue);
-  return newValue;
-}
-
-/**
- * Returns an SSATmp containing the current value of the given local.
- * This generates a LdLoc instruction if needed.
- *
- * Note: the type of the local must be known already (due to type guards
- *       or assertions).
- */
-SSATmp* TraceBuilder::genLdLoc(uint32_t id) {
-  SSATmp* tmp = getLocalValue(id);
-  if (tmp) {
-    return tmp;
-  }
-  // No prior value for this local is available, so actually generate a LdLoc.
-  auto type = getLocalType(id);
-  assert(type != Type::None); // tracelet guards guarantee we have a type
-  assert(type != Type::Null); // we can get Uninit or InitNull but not both
-  if (type.isNull()) {
-    tmp = cns(type);
-  } else {
-    tmp = gen(LdLoc, type, LocalId(id), m_fpValue);
-  }
-  return tmp;
-}
-
-SSATmp* TraceBuilder::genLdLocAsCell(uint32_t id, Trace* exitTrace) {
-  SSATmp*    tmp = genLdLoc(id);
-  Type type = tmp->type();
-  assert(type.isBoxed() || type.notBoxed());
-  if (!type.isBoxed()) {
-    return tmp;
-  }
-  // Unbox tmp into a cell via a LdRef
-  return gen(LdRef, type.innerType(), exitTrace, tmp);
-}
-
-SSATmp* TraceBuilder::genLdLocAddr(uint32_t id) {
-  return gen(LdLocAddr, getLocalType(id).ptr(), LocalId(id), getFp());
-}
-
-void TraceBuilder::genDecRefLoc(int id) {
-  Type type = getLocalType(id);
-
-  // Don't generate code if type is not refcounted
-  if (type != Type::None && type.notCounted()) {
-    return;
-  }
-  type = noneToGen(type);
-  // When a parameter goes out of scope, we need to null
-  // it out so that debug_backtrace can't capture stale
-  // values.
-  bool setNull = id < m_curFunc->getValFunc()->numParams();
-  SSATmp* val = getLocalValue(id);
-  if (val == nullptr && setNull) {
-    val = gen(LdLoc, type, LocalId(id), m_fpValue);
-  }
-  if (val) {
-    if (setNull) {
-      gen(StLoc, LocalId(id), m_fpValue, genDefUninit());
-    }
-    gen(DecRef, val);
-    return;
-  }
-
-  if (type.isBoxed()) {
-    // we can't really rely on the types held in the boxed values since
-    // aliasing stores may change them. We conservatively set the type
-    // of the decref to a boxed cell.
-    type = Type::BoxedCell;
-  }
-
-  gen(DecRefLoc, type, LocalId(id), m_fpValue);
-}
-
-/*
- * Stores a ref (boxed value) to a local. Also handles unsetting a local.
- */
-void TraceBuilder::genBindLoc(uint32_t id,
-                              SSATmp* newValue,
-                              bool doRefCount /* = true */) {
-  Type trackedType = getLocalType(id);
-  SSATmp* prevValue = 0;
-  if (trackedType == Type::None) {
-    if (doRefCount) {
-      prevValue = gen(LdLoc, Type::Gen, LocalId(id), m_fpValue);
-    }
-  } else {
-    prevValue = getLocalValue(id);
-    assert(prevValue == nullptr || prevValue->type() == trackedType);
-    if (prevValue == newValue) {
-      // Silent store: local already contains value being stored
-      // NewValue needs to be decref'ed
-      if (!trackedType.notCounted() && doRefCount) {
-        gen(DecRef, prevValue);
-      }
-      return;
-    }
-    if (trackedType.maybeCounted() && !prevValue && doRefCount) {
-      prevValue = gen(LdLoc, trackedType, LocalId(id), m_fpValue);
-    }
-  }
-  bool genStoreType = true;
-  if ((trackedType.isBoxed() && newValue->type().isBoxed()) ||
-      (trackedType == newValue->type() && !trackedType.isString())) {
-    // no need to store type with local value
-    genStoreType = false;
-  }
-  gen(genStoreType ? StLoc : StLocNT, LocalId(id), m_fpValue, newValue);
-  if (trackedType.maybeCounted() && doRefCount) {
-    gen(DecRef, prevValue);
-  }
-}
-
-/*
- * Store a cell value to a local that might be boxed.
- */
-SSATmp* TraceBuilder::genStLoc(uint32_t id,
-                               SSATmp* newValue,
-                               bool doRefCount,
-                               bool genStoreType,
-                               Trace* exit) {
-  assert(!newValue->type().isBoxed());
-  /*
-   * If prior value of local is a cell, then  re-use genBindLoc.
-   * Otherwise, if prior value of local is a ref:
-   *
-   * prevLocValue = LdLoc<T>{id} fp
-   *    prevValue = LdRef [prevLocValue]
-   *       newRef = StRef [prevLocValue], newValue
-   * DecRef prevValue
-   * -- track local value in newRef
-   */
-  Type trackedType = getLocalType(id);
-  assert(trackedType != Type::None);  // tracelet guards guarantee a type
-  if (trackedType.notBoxed()) {
-    SSATmp* retVal = doRefCount ? gen(IncRef, newValue) : newValue;
-    genBindLoc(id, newValue, doRefCount);
-    return retVal;
-  }
-  assert(trackedType.isBoxed());
-  SSATmp* prevRef = getLocalValue(id);
-  assert(prevRef == nullptr || prevRef->type() == trackedType);
-  // prevRef is a ref
-  if (prevRef == nullptr) {
-    // prevRef = ldLoc
-    prevRef = gen(LdLoc, trackedType, LocalId(id), m_fpValue);
-  }
-  SSATmp* prevValue = nullptr;
-  if (doRefCount) {
-    assert(exit);
-    Type innerType = trackedType.innerType();
-    prevValue = gen(LdRef, innerType, exit, prevRef);
-  }
-  // stref [prevRef] = t1
-  Opcode opc = genStoreType ? StRef : StRefNT;
-  gen(opc, prevRef, newValue);
-
-  SSATmp* retVal = newValue;
-  if (doRefCount) {
-    retVal = gen(IncRef, newValue);
-    gen(DecRef, prevValue);
-  }
-  return retVal;
 }
 
 void TraceBuilder::updateTrackedState(IRInstruction* inst) {
@@ -930,6 +742,81 @@ SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* TraceBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
+  auto const locId = inst->getExtra<DecRefLoc>()->locId;
+
+  /*
+   * Refine the type if we can.
+   *
+   * We can't really rely on the types held in the boxed values since
+   * aliasing stores may change them, and we only guard during LdRef.
+   * So we have to change any boxed type to BoxedCell.
+   */
+  auto knownType = getLocalType(locId);
+  if (knownType.isBoxed()) {
+    knownType = Type::BoxedCell;
+  }
+  if (knownType != Type::None) { // TODO(#2135185)
+    inst->setTypeParam(
+      Type::mostRefined(knownType, inst->getTypeParam())
+    );
+  }
+
+  /*
+   * If we have the local value in flight, use a DecRef on it instead
+   * of doing it in memory.
+   */
+  if (auto tmp = getLocalValue(locId)) {
+    gen(DecRef, tmp);
+    inst->convertToNop();
+  }
+
+  return nullptr;
+}
+
+SSATmp* TraceBuilder::preOptimizeLdLoc(IRInstruction* inst) {
+  auto const locId = inst->getExtra<LdLoc>()->locId;
+  if (auto tmp = getLocalValue(locId)) {
+    return tmp;
+  }
+  if (getLocalType(locId) != Type::None) { // TODO(#2135185)
+    inst->setTypeParam(
+      Type::mostRefined(getLocalType(locId), inst->getTypeParam())
+    );
+  }
+  return nullptr;
+}
+
+SSATmp* TraceBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
+  auto const locId = inst->getExtra<LdLocAddr>()->locId;
+  if (getLocalType(locId) != Type::None) { // TODO(#2135185)
+    inst->setTypeParam(
+      Type::mostRefined(getLocalType(locId).ptr(), inst->getTypeParam())
+    );
+  }
+  return nullptr;
+}
+
+SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
+  auto const curType = getLocalType(inst->getExtra<StLoc>()->locId);
+  auto const newType = inst->getSrc(1)->type();
+
+  assert(inst->getTypeParam().equals(Type::None));
+
+  // There's no need to store the type if it's going to be the same
+  // KindOfFoo.  We still have to store string types because we don't
+  // guard on KindOfStaticString vs. KindOfString.
+  auto const bothBoxed = curType.isBoxed() && newType.isBoxed();
+  auto const sameUnboxed = curType != Type::None && // TODO(#2135185)
+    curType.isKnownDataType() &&
+    curType.equals(newType) && !curType.isString();
+  if (bothBoxed || sameUnboxed) {
+    inst->setOpcode(StLocNT);
+  }
+
+  return nullptr;
+}
+
 SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst)
   switch (inst->op()) {
@@ -939,6 +826,10 @@ SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
     X(LdCtx);
     X(DecRef);
     X(DecRefThis);
+    X(DecRefLoc);
+    X(LdLoc);
+    X(LdLocAddr);
+    X(StLoc);
   default:
     break;
   }
@@ -1186,7 +1077,7 @@ void TraceBuilder::dropLocalRefsInnerTypes() {
  * locals, however.
  */
 void TraceBuilder::killLocals() {
-   for (uint32_t i = 0; i < m_localValues.size(); i++) {
+  for (uint32_t i = 0; i < m_localValues.size(); i++) {
     SSATmp* t = m_localValues[i];
     // should not kill DefConst, and LdConst should be replaced by DefConst
     if (!t || t->inst()->op() == DefConst) {

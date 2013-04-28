@@ -605,18 +605,26 @@ void HhbcTranslator::emitInitThisLoc(int32_t id) {
 
 void HhbcTranslator::emitCGetL(int32_t id) {
   Trace* exitTrace = getExitTrace();
-  pushIncRef(emitLdLocWarn(id, exitTrace));
+  pushIncRef(ldLocInnerWarn(id, exitTrace));
 }
 
 void HhbcTranslator::emitCGetL2(int32_t id) {
   Trace* exitTrace = getExitTrace();
   SSATmp* oldTop = pop(Type::Gen);
-  pushIncRef(emitLdLocWarn(id, exitTrace));
+  pushIncRef(ldLocInnerWarn(id, exitTrace));
   push(oldTop);
 }
 
 void HhbcTranslator::emitVGetL(int32_t id) {
-  pushIncRef(m_tb->genBoxLoc(id));
+  auto value = ldLoc(id);
+  if (!value->type().isBoxed()) {
+    if (value->isA(Type::Uninit)) {
+      value = m_tb->genDefInitNull();
+    }
+    value = gen(Box, value);
+    gen(StLoc, LocalId(id), m_tb->getFp(), value);
+  }
+  pushIncRef(value);
 }
 
 void HhbcTranslator::emitUnsetN() {
@@ -630,45 +638,49 @@ void HhbcTranslator::emitUnsetG(const StringData* gblName) {
 }
 
 void HhbcTranslator::emitUnsetL(int32_t id) {
-  m_tb->genBindLoc(id, m_tb->genDefUninit());
+  auto const prev = ldLoc(id);
+  gen(StLoc, LocalId(id), m_tb->getFp(), m_tb->genDefUninit());
+  gen(DecRef, prev);
 }
 
 void HhbcTranslator::emitBindL(int32_t id) {
-  SSATmp* src = popV();
+  auto const newValue = popV();
+  // XXX: does this cause user-visible semantic differences?  What
+  // about the stack being different when we re-enter the dtor?  What
+  // is this for?
   if (getCurFunc()->isPseudoMain()) {
     // in pseudo mains, the value of locals could change in functions
     // called explicitly (or implicitly via exceptions or destructors)
     // so we need to incref eagerly in case one of these functions
     // changes the value of our local and makes src dead.
-    pushIncRef(src);
+    pushIncRef(newValue);
   }
-  m_tb->genBindLoc(id, src);
+  auto const oldValue = ldLoc(id);
+  gen(StLoc, LocalId(id), m_tb->getFp(), newValue);
+  gen(DecRef, oldValue);
   if (!getCurFunc()->isPseudoMain()) {
-    pushIncRef(src);
+    pushIncRef(newValue);
   }
 }
 
 void HhbcTranslator::emitSetL(int32_t id) {
-  Trace* exitTrace = getExitTrace();
-  SSATmp* src = popC();
-  // Note we can't use the same trick as emitBindL in which we
-  // move the incref to after the store because the stored location
-  // might contain a ref, which could then be modified by the decref
-  // inserted after the stloc
-  push(m_tb->genStLoc(id, src, true, true, exitTrace));
+  auto const exitTrace = getExitTrace();
+  auto const src = popC();
+  push(stLoc(id, exitTrace, src));
 }
 
 void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
-  // Handle only integer inc/dec for now
   Trace* exitTrace = getExitTrace();
-  SSATmp* src = m_tb->genLdLocAsCell(id, exitTrace);
+  auto const src = ldLocInner(id, exitTrace);
+
+  // Inc/Dec of a bool is a no-op.
   if (src->isA(Type::Bool)) {
-    // inc/dec of a bool is a no-op
     push(src);
-  } else {
-    SSATmp* res = emitIncDec(pre, inc, src);
-    m_tb->genStLoc(id, res, false, false, nullptr);
+    return;
   }
+
+  auto const res = emitIncDec(pre, inc, src);
+  stLoc(id, exitTrace, res);
 }
 
 // only handles integer or double inc/dec
@@ -693,41 +705,43 @@ void HhbcTranslator::emitIncDecMem(bool pre,
   gen(StMemNT, propAddr, cns(0), res);
 }
 
-static bool isSupportedBinaryArith(Opcode opc,
-                                   Type t1,
-                                   Type t2) {
+static bool isSupportedBinaryArith(Opcode opc, Type t1, Type t2) {
   switch (opc) {
-    // Opcodes supporting FP
-    case OpAdd:
-    case OpSub:
-    case OpMul: return (t1.subtypeOf(Type::Int | Type::Bool | Type::Dbl) &&
-                        t2.subtypeOf(Type::Int | Type::Bool | Type::Dbl));
+  case OpAdd:
+  case OpSub:
+  case OpMul: return t1.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl) &&
+                     t2.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
 
-    default:    return (t1.subtypeOf(Type::Int | Type::Bool) &&
-                        t2.subtypeOf(Type::Int | Type::Bool));
+  default:    return t1.subtypeOfAny(Type::Int, Type::Bool) &&
+                     t2.subtypeOfAny(Type::Int, Type::Bool);
   }
 }
 
 void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
-  Trace* exitTrace = getExitTrace();
-  SSATmp* loc = emitLdLocWarn(id, exitTrace);
+  auto const exitTrace = getExitTrace();
+  auto const loc       = ldLocInnerWarn(id, exitTrace);
+
   if (subOpc == Concat) {
-    // The concat helpers decref their args, so don't decref pop'ed values
-    // and don't decref the old value held in the local. The concat helpers
-    // also incref their results, which will be consumed by the stloc. We
-    // need an extra incref for the push onto the stack.
-    SSATmp* val = popC();
-    SSATmp* result = gen(Concat, loc, val);
-    pushIncRef(m_tb->genStLoc(id, result, false, true, exitTrace));
-  } else if (isSupportedBinaryArith(subOpc,
-                                    loc->type(),
-                                    topC()->type())) {
-    SSATmp* val = popC();
-    SSATmp* result = gen(subOpc, loc, val);
-    push(m_tb->genStLoc(id, result, true, true, exitTrace));
-  } else {
-    PUNT(SetOpL);
+    /*
+     * The concat helpers decref their args, so don't decref pop'ed values
+     * and don't decref the old value held in the local. The concat helpers
+     * also incref their results, which will be consumed by the stloc. We
+     * need an extra incref for the push onto the stack.
+     */
+    auto const val    = popC();
+    auto const result = gen(Concat, loc, val);
+    pushIncRef(stLocNRC(id, exitTrace, result));
+    return;
   }
+
+  if (isSupportedBinaryArith(subOpc, loc->type(), topC()->type())) {
+    auto const val    = popC();
+    auto const result = gen(subOpc, loc, val);
+    push(stLoc(id, exitTrace, result));
+    return;
+  }
+
+  PUNT(SetOpL);
 }
 
 void HhbcTranslator::emitClassExists(const StringData* clsName) {
@@ -891,10 +905,7 @@ void HhbcTranslator::emitCreateCont(bool getArgs,
       // We must generate an AssertLoc because we don't have tracelet
       // guards on the object type in these outer generator functions.
       gen(AssertLoc, Type::Gen, LocalId(i), m_tb->getFp());
-      auto const loc = gen(
-        IncRef,
-        m_tb->genLdLoc(i)
-      );
+      auto const loc = gen(IncRef, ldLoc(i));
       gen(
         StMem,
         locals,
@@ -955,14 +966,14 @@ void HhbcTranslator::emitContExit() {
 void HhbcTranslator::emitUnpackCont() {
   gen(LinkContVarEnv, m_tb->getFp());
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->getFp());
-  auto const cont = m_tb->genLdLoc(0);
+  auto const cont = ldLoc(0);
   push(gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel)));
 }
 
 void HhbcTranslator::emitPackCont(int64_t labelId) {
   gen(UnlinkContVarEnv, m_tb->getFp());
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->getFp());
-  auto const cont = m_tb->genLdLoc(0);
+  auto const cont = ldLoc(0);
   auto const newVal = popC();
   auto const oldValue = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_value)));
   gen(StProp, cont, cns(CONTOFF(m_value)), newVal);
@@ -974,7 +985,7 @@ void HhbcTranslator::emitPackCont(int64_t labelId) {
 
 void HhbcTranslator::emitContReceive() {
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->getFp());
-  auto const cont = m_tb->genLdLoc(0);
+  auto const cont = ldLoc(0);
   gen(ContRaiseCheck, getExitSlowTrace(), cont);
   auto const valOffset = cns(CONTOFF(m_received));
   push(gen(LdProp, Type::Cell, cont, valOffset));
@@ -983,7 +994,7 @@ void HhbcTranslator::emitContReceive() {
 
 void HhbcTranslator::emitContRetC() {
   gen(AssertLoc, Type::Obj, LocalId(0), m_tb->getFp());
-  auto const cont = m_tb->genLdLoc(0);
+  auto const cont = ldLoc(0);
   gen(ExitWhenSurprised, getExitSlowTrace());
   gen(
     StRaw, cont, cns(RawMemSlot::ContDone), cns(true)
@@ -1014,7 +1025,7 @@ void HhbcTranslator::emitContSendImpl(bool raise) {
   gen(ContPreNext, getExitSlowTrace(), cont);
 
   gen(AssertLoc, Type::Cell, LocalId(0), m_tb->getFp());
-  auto const newVal = gen(IncRef, m_tb->genLdLoc(0));
+  auto const newVal = gen(IncRef, ldLoc(0));
   auto const oldVal = gen(LdProp, Type::Cell, cont, cns(CONTOFF(m_received)));
   gen(StProp, cont, cns(CONTOFF(m_received)), newVal);
   gen(DecRef, oldVal);
@@ -1175,16 +1186,9 @@ void HhbcTranslator::emitMInstr(const NormalizedInstruction& ni) {
  * Unboxes var if necessary when var is not uninit.
  */
 void HhbcTranslator::emitIssetL(int32_t id) {
-  Type trackedType = m_tb->getLocalType(id);
-  // guards should ensure we have type info at this point
-  assert(trackedType != Type::None);
-  if (trackedType.subtypeOf(Type::Uninit)) {
-    push(cns(false));
-  } else {
-    Trace* exitTrace = getExitTrace();
-    SSATmp* ld = m_tb->genLdLocAsCell(id, exitTrace);
-    push(gen(IsNType, Type::Null, ld));
-  }
+  auto const exitTrace = getExitTrace();
+  auto const ld = ldLocInner(id, exitTrace);
+  push(gen(IsNType, Type::Null, ld));
 }
 
 void HhbcTranslator::emitIssetG(const StringData* gblName) {
@@ -1200,15 +1204,9 @@ void HhbcTranslator::emitIssetS(const StringData* propName) {
 }
 
 void HhbcTranslator::emitEmptyL(int32_t id) {
-  Type trackedType = m_tb->getLocalType(id);
-  assert(trackedType != Type::None);
-  if (trackedType == Type::Uninit) {
-    push(cns(true));
-  } else {
-    Trace* exitTrace = getExitTrace();
-    SSATmp* ld = m_tb->genLdLocAsCell(id, exitTrace);
-    push(gen(OpNot, gen(ConvCellToBool, ld)));
-  }
+  auto const exitTrace = getExitTrace();
+  auto const ld = ldLocInner(id, exitTrace);
+  push(gen(OpNot, gen(ConvCellToBool, ld)));
 }
 
 void HhbcTranslator::emitEmptyG(const StringData* gblName) {
@@ -1231,7 +1229,7 @@ void HhbcTranslator::emitIsTypeC(Type t) {
 
 void HhbcTranslator::emitIsTypeL(Type t, int id) {
   Trace* exitTrace = getExitTrace();
-  push(gen(IsType, t, emitLdLocWarn(id, exitTrace)));
+  push(gen(IsType, t, ldLocInnerWarn(id, exitTrace)));
 }
 
 void HhbcTranslator::emitIsNullL(int id)   { emitIsTypeL(Type::Null, id);}
@@ -1857,7 +1855,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
         break;
       case KindOfDouble: assert(false);
       default:
-        args[i + 1] = loadStackAddr(numArgs - i - 1);
+        args[i + 1] = ldStackAddr(numArgs - i - 1);
         break;
     }
   }
@@ -1957,8 +1955,21 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
   for (int id = getCurFunc()->numLocals() - 1; id >= 0; --id) {
     if (retValLocId == id) {
       gen(DecRef, retVal);
+      continue;
+    }
+
+    // When a parameter goes out of scope during return, we need to
+    // null it out so that debug_backtrace can't capture stale values.
+    // TODO(#2332775): we shouldn't have to do this.
+    const bool needSetNull = id < getCurFunc()->numParams();
+    if (needSetNull) {
+      auto const loc = ldLoc(id);
+      if (needSetNull) {
+        gen(StLoc, LocalId(id), m_tb->getFp(), m_tb->genDefUninit());
+      }
+      gen(DecRef, loc);
     } else {
-      m_tb->genDecRefLoc(id);
+      gen(DecRefLoc, Type::Gen, LocalId(id), m_tb->getFp());
     }
   }
 
@@ -2216,7 +2227,7 @@ void HhbcTranslator::emitLoadDeps() {
   for (auto& guard : m_typeGuards) {
     switch (guard.getKind()) {
     case TypeGuard::Local:
-      m_tb->genLdLoc(guard.getIndex());
+      ldLoc(guard.getIndex());
       break;
     case TypeGuard::Stack:
       break;
@@ -2270,7 +2281,7 @@ Trace* HhbcTranslator::guardRefs(int64_t               entryArDelta,
 void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   const Func* func = getCurFunc();
   const TypeConstraint& tc = func->params()[paramId].typeConstraint();
-  SSATmp* locVal = m_tb->genLdLoc(paramId);
+  auto locVal = ldLoc(paramId);
   Type locType = locVal->type().unbox();
   assert(locType.isKnownDataType());
 
@@ -2580,7 +2591,7 @@ void HhbcTranslator::emitAGetC(const StringData* clsName) {
 }
 
 void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
-  SSATmp* src = m_tb->genLdLocAsCell(id, getExitTrace());
+  auto const src = ldLocInner(id, getExitTrace());
   if (isSupportedAGet(src, clsName)) {
     emitAGet(src, clsName);
   } else {
@@ -3035,7 +3046,7 @@ void HhbcTranslator::exceptionBarrier() {
   gen(ExceptionBarrier, sp);
 }
 
-SSATmp* HhbcTranslator::loadStackAddr(int32_t offset) {
+SSATmp* HhbcTranslator::ldStackAddr(int32_t offset) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in m_evalStack.
   assert(offset >= (int32_t)m_evalStack.numCells());
@@ -3047,13 +3058,47 @@ SSATmp* HhbcTranslator::loadStackAddr(int32_t offset) {
   );
 }
 
-//
-// This is a wrapper to TraceBuilder::genLdLoc() that also emits the
-// RaiseUninitLoc if the local is uninitialized
-//
-SSATmp* HhbcTranslator::emitLdLocWarn(uint32_t id,
-                                      Trace* target) {
-  SSATmp* locVal = m_tb->genLdLocAsCell(id, target);
+SSATmp* HhbcTranslator::ldLoc(uint32_t locId) {
+  return gen(
+    LdLoc,
+    Type::Gen,
+    LocalId(locId),
+    m_tb->getFp()
+  );
+}
+
+SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId) {
+  return gen(
+    LdLocAddr,
+    Type::PtrToGen,
+    LocalId(locId),
+    m_tb->getFp()
+  );
+}
+
+/*
+ * Load a local, and if it's boxed dereference to get the inner cell.
+ *
+ * Note: For boxed values, this will generate a LdRef instruction which
+ *       takes the given exit trace in case the inner type doesn't match
+ *       the tracked type for this local.  This check may be optimized away
+ *       if we can determine that the inner type must match the tracked type.
+ */
+SSATmp* HhbcTranslator::ldLocInner(uint32_t locId, Trace* exitTrace) {
+  auto loc = ldLoc(locId);
+  assert((loc->type().isBoxed() || loc->type().notBoxed()) &&
+         "Currently we don't handle traces where locals are maybeBoxed");
+  return loc->type().isBoxed()
+    ? gen(LdRef, loc->type().innerType(), exitTrace, loc)
+    : loc;
+}
+
+/*
+ * This is a wrapper to ldLocInner that also emits the RaiseUninitLoc
+ * if the local is uninitialized
+ */
+SSATmp* HhbcTranslator::ldLocInnerWarn(uint32_t id, Trace* target) {
+  auto const locVal = ldLocInner(id, target);
 
   if (locVal->type().subtypeOf(Type::Uninit)) {
     exceptionBarrier();
@@ -3062,6 +3107,59 @@ SSATmp* HhbcTranslator::emitLdLocWarn(uint32_t id,
   }
 
   return locVal;
+}
+
+/*
+ * Store to a local, if it's boxed set the value on the inner cell.
+ *
+ * Returns the value that was stored to the local, after incrementing
+ * its reference count.
+ *
+ * Pre: !newVal->type().isBoxed() && !newVal->type().maybeBoxed()
+ * Pre: exitTrace != nullptr if the local may be boxed
+ */
+SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
+                                  Trace* exitTrace,
+                                  SSATmp* newVal,
+                                  bool doRefCount) {
+  assert(!newVal->type().maybeBoxed());
+
+  auto const oldLoc = ldLoc(id);
+  assert((oldLoc->type().isBoxed() || oldLoc->type().notBoxed()) &&
+         "We don't support maybeBoxed locals right now");
+
+  if (oldLoc->type().notBoxed()) {
+    gen(StLoc, LocalId(id), m_tb->getFp(), newVal);
+    auto const ret = doRefCount ? gen(IncRef, newVal) : newVal;
+    if (doRefCount) {
+      gen(DecRef, oldLoc);
+    }
+    return ret;
+  }
+
+  // It's important that the IncRef happens after the LdRef, since the
+  // LdRef is also a guard on the inner type and may side-exit.
+  assert(exitTrace);
+  auto const innerCell = gen(
+    LdRef, oldLoc->type().innerType(), exitTrace, oldLoc
+  );
+  auto const ret = doRefCount ? gen(IncRef, newVal) : newVal;
+  gen(StRef, oldLoc, newVal);
+  if (doRefCount) {
+    gen(DecRef, innerCell);
+  }
+
+  return ret;
+}
+
+SSATmp* HhbcTranslator::stLoc(uint32_t id, Trace* exit, SSATmp* newVal) {
+  const bool doRefCount = true;
+  return stLocImpl(id, exit, newVal, doRefCount);
+}
+
+SSATmp* HhbcTranslator::stLocNRC(uint32_t id, Trace* exit, SSATmp* newVal) {
+  const bool doRefCount = false;
+  return stLocImpl(id, exit, newVal, doRefCount);
 }
 
 void HhbcTranslator::end(int nextPc) {

@@ -343,8 +343,8 @@ O(StProp,                           ND, S(Obj) S(Int) S(Gen), E|Mem|CRc|Refs) \
 O(StPropNT,                         ND, S(Obj) S(Int) S(Gen),      E|Mem|CRc) \
 O(StLoc,                            ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
 O(StLocNT,                          ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
-O(StRef,                       DBox(1), SUnk,                 E|Mem|CRc|Refs) \
-O(StRefNT,                     DBox(1), SUnk,                      E|Mem|CRc) \
+O(StRef,                       DBox(1), S(BoxedCell) S(Cell), E|Mem|CRc|Refs) \
+O(StRefNT,                     DBox(1), S(BoxedCell) S(Cell),      E|Mem|CRc) \
 O(StRaw,                            ND, SUnk,                          E|Mem) \
 O(LdStaticLocCached,      D(BoxedCell), C(CacheHandle),                   NF) \
 O(StaticLocInit,          D(BoxedCell), CStr                                  \

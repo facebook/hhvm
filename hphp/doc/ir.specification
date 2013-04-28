@@ -343,7 +343,7 @@ AssertLoc<T,localId> S0:FramePtr
   GuardLoc except it doesn't imply a runtime check and cannot cause
   control flow.
 
-OverrideLoc<T,localId> S0:StkPtr
+OverrideLoc<T,localId> S0:FramePtr
 
   Overrides tracked information about the type of a local in frame S0.
   This is used to fix tracked state after InterpOne instructions.
@@ -990,8 +990,18 @@ StLocNT<localId> S0:FramePtr S1:Gen
   Store S1 to local number localId on the frame pointed to by S0,
   without storing the type.
 
-StRef
-StRefNT
+D:BoxedCell = StRef S0:BoxedCell S1:Cell
+
+  Store the value in S1 into the RefData pointed to by S0.  Stores the
+  RefData::m_type also.  Returns a new value for S0, which will now
+  have the type of S1 after boxing.
+
+D:BoxedCell = StRefNT S0:BoxedCell S1:Cell
+
+  Store the value in S1 into the RefData pointed to by S0.  Does not
+  change RefData::m_type.  Returns a new value for S0, which will now
+  have the type of S1 after boxing.
+
 StRaw
 
 D:StkPtr = SpillStack S0:StkP S1:ConstInt, S2...

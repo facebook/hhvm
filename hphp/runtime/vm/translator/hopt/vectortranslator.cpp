@@ -515,7 +515,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
     }
 
     case Location::Local:
-      return m_tb.genLdLoc(l.offset);
+      return m_ht.ldLoc(l.offset);
 
     case Location::Litstr:
       return cns(m_ht.lookupStringId(l.offset));
@@ -544,8 +544,12 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
         gen(RaiseUninitLoc, LocalId(base.location.offset));
       }
       if (mia & MIA_define) {
-        m_tb.genStLoc(base.location.offset, m_tb.genDefInitNull(),
-                      false, true, nullptr);
+        gen(
+          StLoc,
+          LocalId(base.location.offset),
+          m_tb.getFp(),
+          m_tb.genDefInitNull()
+        );
         baseType = Type::InitNull;
       }
     }
@@ -575,12 +579,12 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
     }
 
     if (base.location.space == Location::Local) {
-      m_base = m_tb.genLdLocAddr(base.location.offset);
+      m_base = m_ht.ldLocAddr(base.location.offset);
     } else {
       assert(base.location.space == Location::Stack);
       m_ht.spillStack();
       assert(m_stackInputs.count(m_iInd));
-      m_base = m_ht.loadStackAddr(m_stackInputs[m_iInd]);
+      m_base = m_ht.ldStackAddr(m_stackInputs[m_iInd]);
     }
     assert(m_base->type().isPtr());
   }
@@ -1711,8 +1715,8 @@ static inline ArrayData* checkedSet(ArrayData* a, int64_t key,
 
 template<KeyType keyType, bool checkForInt, bool setRef>
 static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
-  ArrayData* a, typename KeyTypeTraits<keyType>::rawType key,
-  CVarRef value, RefData* ref) {
+    ArrayData* a, typename KeyTypeTraits<keyType>::rawType key,
+    CVarRef value, RefData* ref) {
   static_assert(keyType != AnyKey, "AnyKey is not supported in arraySetMImpl");
   const bool copy = a->getCount() > 1;
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
@@ -1772,7 +1776,9 @@ void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
 
     // Update the base's value with the new array
     if (base.location.space == Location::Local) {
-      m_tb.genStLoc(base.location.offset, newArr, false, false, nullptr);
+      // We know it's not boxed (setRef above handles that), and
+      // newArr has already been incref'd in the helper.
+      gen(StLoc, LocalId(base.location.offset), m_tb.getFp(), newArr);
     } else if (base.location.space == Location::Stack) {
       VectorEffects ve(newArr->inst());
       assert(ve.baseValChanged);

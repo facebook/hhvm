@@ -123,6 +123,9 @@ private:
   SSATmp* simplifyLdStack(IRInstruction*);
   SSATmp* simplifyLdStackAddr(IRInstruction*);
   SSATmp* simplifyDecRefStack(IRInstruction*);
+  SSATmp* simplifyDecRefLoc(IRInstruction*);
+  SSATmp* simplifyLdLoc(IRInstruction*);
+  SSATmp* simplifyStRef(IRInstruction*);
 
 private: // tracebuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);

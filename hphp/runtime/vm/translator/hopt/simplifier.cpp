@@ -295,6 +295,9 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case LdStack:      return simplifyLdStack(inst);
   case LdStackAddr:  return simplifyLdStackAddr(inst);
   case DecRefStack:  return simplifyDecRefStack(inst);
+  case DecRefLoc:    return simplifyDecRefLoc(inst);
+  case LdLoc:        return simplifyLdLoc(inst);
+  case StRef:        return simplifyStRef(inst);
 
   case ExitOnVarEnv: return simplifyExitOnVarEnv(inst);
 
@@ -1611,6 +1614,32 @@ SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
     inst->setTypeParam(
       Type::mostRefined(inst->getTypeParam(), info.knownType)
     );
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyDecRefLoc(IRInstruction* inst) {
+  if (inst->getTypeParam().notCounted()) {
+    inst->convertToNop();
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyLdLoc(IRInstruction* inst) {
+  if (inst->getTypeParam().isNull()) {
+    return cns(inst->getTypeParam());
+  }
+  return nullptr;
+}
+
+// Replace StRef with StRefNT when we know we aren't going to change
+// its m_type field.
+SSATmp* Simplifier::simplifyStRef(IRInstruction* inst) {
+  auto const oldUnbox = inst->getSrc(0)->type().unbox();
+  auto const newType = inst->getSrc(1)->type();
+  if (oldUnbox.isKnownDataType() &&
+      oldUnbox.equals(newType) && !oldUnbox.isString()) {
+    inst->setOpcode(StRefNT);
   }
   return nullptr;
 }

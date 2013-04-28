@@ -101,6 +101,7 @@ struct TraceBuilder {
                      int32_t prevSPOff);
   void endInlining();
 
+  // XXX: Accessible for inlining, for now.
   void setLocalValue(unsigned id, SSATmp* value);
 
   void setEnableCse(bool val)            { m_enableCse = val; }
@@ -152,36 +153,6 @@ struct TraceBuilder {
     t->back()->push_back(instr);
     return instr;
   }
-
-  //////////////////////////////////////////////////////////////////////
-  // locals
-
-  Type getLocalType(unsigned id) const;
-
-  SSATmp* genLdLoc(uint32_t id);
-  SSATmp* genLdLocAddr(uint32_t id);
-
-  /*
-   * Returns an SSATmp containing the (inner) value of the given local.
-   * If the local is a boxed value, this returns its inner value.
-   *
-   * Note: For boxed values, this will generate a LdRef instruction which
-   *       takes the given exit trace in case the inner type doesn't match
-   *       the tracked type for this local.  This check may be optimized away
-   *       if we can determine that the inner type must match the tracked type.
-   */
-  SSATmp* genLdLocAsCell(uint32_t id, Trace* exitTrace);
-
-  SSATmp* genStLoc(uint32_t id,
-                   SSATmp* src,
-                   bool doRefCount,
-                   bool genStoreType,
-                   Trace* exit);
-
-  SSATmp* genBoxLoc(uint32_t id);
-  void    genBindLoc(uint32_t id, SSATmp* ref, bool doRefCount = true);
-
-  void    genDecRefLoc(int id);
 
   //////////////////////////////////////////////////////////////////////
   // constants
@@ -368,6 +339,10 @@ private:
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
   SSATmp*   preOptimizeDecRef(IRInstruction*);
   SSATmp*   preOptimizeDecRefThis(IRInstruction*);
+  SSATmp*   preOptimizeDecRefLoc(IRInstruction*);
+  SSATmp*   preOptimizeLdLoc(IRInstruction*);
+  SSATmp*   preOptimizeLdLocAddr(IRInstruction*);
+  SSATmp*   preOptimizeStLoc(IRInstruction*);
 
   SSATmp*   preOptimize(IRInstruction* inst);
   SSATmp*   optimizeWork(IRInstruction* inst);
@@ -386,6 +361,7 @@ private:
   void      killLocals();
   void      killLocalValue(uint32_t id);
   void      setLocalType(uint32_t id, Type type);
+  Type      getLocalType(unsigned id) const;
   SSATmp*   getLocalValue(unsigned id) const;
   bool      isValueAvailable(SSATmp*) const;
   bool      anyLocalHasValue(SSATmp*) const;

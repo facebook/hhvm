@@ -4035,9 +4035,10 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg ctxReg,
 }
 
 /**
- * This method is similar to emitGetCtxFwdCallWithThis above,
- * but whether or not the callee is a static method is uknown at JIT time,
- * and that is determined dynamically by looking up into the StaticMethodFCache.
+ * This method is similar to emitGetCtxFwdCallWithThis above, but
+ * whether or not the callee is a static method is unknown at JIT
+ * time, and that is determined dynamically by looking up into the
+ * StaticMethodFCache.
  */
 void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
                                                  PhysReg      thisReg,

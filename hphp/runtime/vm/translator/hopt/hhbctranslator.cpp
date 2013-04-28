@@ -550,7 +550,7 @@ void HhbcTranslator::emitLateBoundCls() {
 
 void HhbcTranslator::emitSelf() {
   Class* clss = getCurClass();
-  if (clss == NULL) {
+  if (clss == nullptr) {
     emitInterpOne(Type::Cls, 0);
   } else {
     push(m_tb->genDefConst(clss));
@@ -558,8 +558,8 @@ void HhbcTranslator::emitSelf() {
 }
 
 void HhbcTranslator::emitParent() {
-  const Class* clss = getCurClass()->parent();
-  if (clss == NULL || clss->parent() == NULL) {
+  auto const clss = getCurClass();
+  if (clss == nullptr || clss->parent() == nullptr) {
     emitInterpOne(Type::Cls, 0);
   } else {
     push(m_tb->genDefConst(clss->parent()));

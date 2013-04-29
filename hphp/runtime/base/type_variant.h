@@ -1495,11 +1495,6 @@ inline Variant uninit_null() {
   return Variant();
 }
 
-//litstr overloads
-inline const Variant Array::operator[](litstr key) const {
-  return (*this)[String(key)];
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

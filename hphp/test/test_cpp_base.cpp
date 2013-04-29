@@ -257,22 +257,22 @@ bool TestCppBase::TestArray() {
     arr = Array::Create("name", 1);
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
-    VERIFY((int)arr["name"] == 1);
-    VS(arr, Array(ArrayInit(1).set("name", 1).create()));
+    VERIFY((int)arr[s_name] == 1);
+    VS(arr, Array(ArrayInit(1).set(s_name, 1).create()));
 
-    arr = Array::Create("name", "test");
+    arr = Array::Create(s_name, "test");
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
-    VERIFY(arr["name"] == "test");
-    VS(arr, Array(ArrayInit(1).set("name", "test").create()));
+    VERIFY(arr[s_name] == "test");
+    VS(arr, Array(ArrayInit(1).set(s_name, "test").create()));
 
     arrCopy = arr;
-    arr = Array::Create("name", arr);
+    arr = Array::Create(s_name, arr);
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
-    VS(arr["name"], arrCopy);
-    VERIFY(arr["name"].toArray().size() == 1);
-    VS(arr, Array(ArrayInit(1).set("name", arrCopy).create()));
+    VS(arr[s_name], arrCopy);
+    VERIFY(arr[s_name].toArray().size() == 1);
+    VS(arr, Array(ArrayInit(1).set(s_name, arrCopy).create()));
   }
 
   // iteration

@@ -1156,17 +1156,19 @@ String DebuggerClient::getPrintString() {
   return s;
 }
 
-static const StaticString s_output_type("output_type");
-static const StaticString s_file("file");
-static const StaticString s_line_no("line_no");
-static const StaticString s_watch_values("watch_values");
-static const StaticString s_stacktrace("stacktrace");
-static const StaticString s_frame("frame");
-static const StaticString s_values("values");
-static const StaticString s_text("text");
-static const StaticString s_invalid("invalid");
-static const StaticString s_cmd("cmd");
-static const StaticString s_code_loc("code_loc");
+static const StaticString
+  s_output_type("output_type"),
+  s_file("file"),
+  s_line("line"),
+  s_line_no("line_no"),
+  s_watch_values("watch_values"),
+  s_stacktrace("stacktrace"),
+  s_frame("frame"),
+  s_values("values"),
+  s_text("text"),
+  s_invalid("invalid"),
+  s_cmd("cmd"),
+  s_code_loc("code_loc");
 
 Array DebuggerClient::getOutputArray() {
   TRACE(2, "DebuggerClient::getOutputArray\n");
@@ -2074,8 +2076,8 @@ void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   }
   CArrRef frame = m_stacktrace[m_frame];
   if (!frame.isNull()) {
-    String file = frame["file"];
-    int line = frame["line"].toInt32();
+    String file = frame[s_file];
+    int line = frame[s_line].toInt32();
     if (!file.empty() && line) {
       if (m_frame == 0) {
         m_listFile.clear();
@@ -2091,11 +2093,11 @@ void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   }
 }
 
-static const StaticString s_args("args");
-static const StaticString s_namespace("namespace");
-static const StaticString s_class("class");
-static const StaticString s_function("function");
-static const StaticString s_line("line");
+static const StaticString
+  s_args("args"),
+  s_namespace("namespace"),
+  s_class("class"),
+  s_function("function");
 
 void DebuggerClient::printFrame(int index, CArrRef frame) {
   TRACE(2, "DebuggerClient::printFrame\n");

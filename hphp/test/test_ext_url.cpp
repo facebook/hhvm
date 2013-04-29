@@ -59,23 +59,29 @@ bool TestExtUrl::test_base64_encode() {
 }
 
 bool TestExtUrl::test_get_headers() {
+  static const StaticString s_Connection("Connection");
   String url = "http://www.example.com";
   Array ret = f_get_headers(url);
   //VS(ret[0], "HTTP/1.1 200 OK");
   VERIFY(ret.size() > 0);
   ret = f_get_headers(url, 1);
-  //VS(ret["Connection"], "close");
-  VERIFY(!ret["Connection"].toString().empty());
+  //VS(ret[s_Connection], "close");
+  VERIFY(!ret[s_Connection].toString().empty());
   return Count(true);
 }
 
 bool TestExtUrl::test_get_meta_tags() {
+  static const StaticString
+    s_author("author"),
+    s_keywords("keywords"),
+    s_description("description"),
+    s_geo_position("geo_position");
   Array ret = f_get_meta_tags("test/test_get_meta_tags.html");
   VS(ret.size(), 4);
-  VS(ret["author"], "name");
-  VS(ret["keywords"], "php documentation");
-  VS(ret["description"], "a php manual");
-  VS(ret["geo_position"], "49.33;-86.59");
+  VS(ret[s_author], "name");
+  VS(ret[s_keywords], "php documentation");
+  VS(ret[s_description], "a php manual");
+  VS(ret[s_geo_position], "49.33;-86.59");
   return Count(true);
 }
 

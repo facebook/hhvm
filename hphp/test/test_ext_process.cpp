@@ -362,6 +362,15 @@ bool TestExtProcess::test_proc_close() {
 }
 
 bool TestExtProcess::test_proc_get_status() {
+  static const StaticString
+    s_command("command"),
+    s_pid("pid"),
+    s_running("running"),
+    s_signaled("signaled"),
+    s_exitcode("exitcode"),
+    s_termsig("termsig"),
+    s_stopsig("stopsig");
+
   Array descriptorspec =
     CREATE_MAP3(0, CREATE_VECTOR2("pipe", "r"),
                 1, CREATE_VECTOR2("pipe", "w"),
@@ -370,13 +379,13 @@ bool TestExtProcess::test_proc_get_status() {
   Variant process = f_proc_open(php_path, descriptorspec, ref(pipes));
   VERIFY(!same(process, false));
   Array ret = f_proc_get_status(process.toObject());
-  VS(ret["command"], php_path);
-  VERIFY(ret["pid"].toInt32() > 0);
-  VERIFY(ret["running"]);
-  VERIFY(!ret["signaled"]);
-  VS(ret["exitcode"], -1);
-  VS(ret["termsig"], 0);
-  VS(ret["stopsig"], 0);
+  VS(ret[s_command], php_path);
+  VERIFY(ret[s_pid].toInt32() > 0);
+  VERIFY(ret[s_running]);
+  VERIFY(!ret[s_signaled]);
+  VS(ret[s_exitcode], -1);
+  VS(ret[s_termsig], 0);
+  VS(ret[s_stopsig], 0);
 
   {
     File *f = pipes[0].toObject().getTyped<File>();

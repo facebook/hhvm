@@ -121,6 +121,12 @@ bool CmdList::listFileRange(DebuggerClient *client, int line,
   return false;
 }
 
+static const StaticString
+  s_methods("methods"),
+  s_file("file"),
+  s_line1("line2"),
+  s_line2("line2");
+
 bool CmdList::listFunctionOrClass(DebuggerClient *client) {
   assert(client->argCount() == 1);
   CmdInfoPtr cmdInfo(new CmdInfo());
@@ -134,13 +140,13 @@ bool CmdList::listFunctionOrClass(DebuggerClient *client) {
   ArrayIter iter(info);
   Array funcInfo = iter.second();
   if (!subsymbol.empty()) {
-    String key = CmdInfo::FindSubSymbol(funcInfo["methods"], subsymbol);
+    String key = CmdInfo::FindSubSymbol(funcInfo[s_methods], subsymbol);
     if (key.isNull()) return false;
-    funcInfo = funcInfo["methods"][key].toArray();
+    funcInfo = funcInfo[s_methods][key].toArray();
   }
-  String file = funcInfo["file"].toString();
-  int line1 = funcInfo["line1"].toInt32();
-  int line2 = funcInfo["line2"].toInt32();
+  String file = funcInfo[s_file].toString();
+  int line1 = funcInfo[s_line1].toInt32();
+  int line2 = funcInfo[s_line2].toInt32();
   int line = line1 ? line1 : line2;
   if (file.empty() || !line) return false;
   client->setListLocation(file.data(), line - 1, false);

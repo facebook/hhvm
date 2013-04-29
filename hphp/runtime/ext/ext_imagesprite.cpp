@@ -30,14 +30,16 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static const StaticString s_padding_top("padding_top");
-static const StaticString s_padding_right("padding_right");
-static const StaticString s_padding_bottom("padding_bottom");
-static const StaticString s_padding_left("padding_left");
-static const StaticString s_width("width");
-static const StaticString s_height("height");
-static const StaticString s_flush_left("flush_left");
-static const StaticString s_flush_right("flush_right");
+static const StaticString
+  s_padding_top("padding_top"),
+  s_padding_right("padding_right"),
+  s_padding_bottom("padding_bottom"),
+  s_padding_left("padding_left"),
+  s_width("width"),
+  s_height("height"),
+  s_flush_left("flush_left"),
+  s_flush_right("flush_right"),
+  s_id("id");
 
 namespace ImageSprite {
 
@@ -611,11 +613,11 @@ Object c_ImageSprite::t_loadimages(bool block /* = false */) {
           std::vector<ImageSprite::Block*>, \
           ImageSprite::BlockAreaComparator>
 
-static const StaticString s_x("x");
-static const StaticString s_y("y");
-static const StaticString s_id("id");
-static const StaticString s_images("images");
-static const StaticString s_sprite("sprite");
+static const StaticString
+  s_x("x"),
+  s_y("y"),
+  s_images("images"),
+  s_sprite("sprite");
 
 void c_ImageSprite::map() {
   if (same(m_current, true)) {
@@ -1107,7 +1109,7 @@ String c_ImageSprite::t_css(CStrRef css_namespace,
       output += String("/* File: ") + path + " */\n";
     }
 
-    output += String(".") + css_namespace + "#i" + attr["id"] + "{";
+    output += String(".") + css_namespace + "#i" + attr[s_id] + "{";
     if (verbose) output += "\n  ";
 
     output += "background-position:";

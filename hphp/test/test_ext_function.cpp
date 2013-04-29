@@ -49,8 +49,9 @@ bool TestExtFunction::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtFunction::test_get_defined_functions() {
+  static const StaticString s_internal("internal");
   Array funcs = f_get_defined_functions();
-  VERIFY(!funcs["internal"][0].toString().empty());
+  VERIFY(!funcs[s_internal][0].toString().empty());
   return Count(true);
 }
 

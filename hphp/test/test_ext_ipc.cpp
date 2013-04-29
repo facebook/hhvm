@@ -52,6 +52,7 @@ bool TestExtIpc::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtIpc::test_message_queue() {
+  static const StaticString s_msg_qnum("msg_qnum");
   char filename[64];
   strcpy(filename, "/tmp/XXXXXX");
   close(mkstemp(filename));
@@ -82,7 +83,7 @@ bool TestExtIpc::test_message_queue() {
   VERIFY(same(msg, "ok"));
 
   Array ret = f_msg_stat_queue(queue);
-  VS(ret["msg_qnum"], 0);
+  VS(ret[s_msg_qnum], 0);
   f_msg_set_queue(queue, CREATE_MAP1("msg_perm.mode", 0666));
 
   f_msg_remove_queue(queue);

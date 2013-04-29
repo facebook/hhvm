@@ -23,28 +23,31 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-static const StaticString s_params("params");
-static const StaticString s_ref("ref");
-static const StaticString s_name("name");
-static const StaticString s_varg("varg");
-static const StaticString s_type("type");
-static const StaticString s_default("default");
-static const StaticString s_defaultext("defaultext");
-static const StaticString s_msg("msg");
-static const StaticString s_constants("constants");
-static const StaticString s_methods("methods");
-static const StaticString s_access("access");
-static const StaticString s_static("static");
-static const StaticString s_abstract("abstract");
-static const StaticString s_final("final");
-static const StaticString s_doc("doc");
-static const StaticString s_internal("internal");
-static const StaticString s_file("file");
-static const StaticString s_line1("line1");
-static const StaticString s_line2("line2");
-static const StaticString s_properties("properties");
-static const StaticString s_private_properties("private_properties");
-static const StaticString s_defaultText("defaultText");
+static const StaticString
+  s_params("params"),
+  s_ref("ref"),
+  s_name("name"),
+  s_varg("varg"),
+  s_type("type"),
+  s_default("default"),
+  s_msg("msg"),
+  s_constants("constants"),
+  s_methods("methods"),
+  s_access("access"),
+  s_static("static"),
+  s_abstract("abstract"),
+  s_final("final"),
+  s_doc("doc"),
+  s_internal("internal"),
+  s_file("file"),
+  s_line1("line1"),
+  s_line2("line2"),
+  s_properties("properties"),
+  s_private_properties("private_properties"),
+  s_defaultText("defaultText"),
+  s_parent("parent"),
+  s_interfaces("interfaces"),
+  s_interface("interface");
 
 void CmdInfo::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -423,19 +426,19 @@ bool CmdInfo::TryMethod(DebuggerClient *client, StringBuffer &sb, CArrRef info,
     subsymbol = subsymbol.substr(0, subsymbol.size() - 2);
   }
 
-  String key = FindSubSymbol(info["methods"], subsymbol);
+  String key = FindSubSymbol(info[s_methods], subsymbol);
   if (!key.isNull()) {
-    Array func = info["methods"][key].toArray();
+    Array func = info[s_methods][key].toArray();
     PrintHeader(client, sb, func);
     sb.printf("%s %s%s%sfunction %s::%s%s(%s);\n",
               func[s_access].toString().data(),
               GetModifier(func, s_static).data(),
               GetModifier(func, s_final).data(),
               GetModifier(func, s_abstract).data(),
-              info["name"].toString().data(),
-              func["ref"].toBoolean() ? "&" : "",
-              func["name"].toString().data(),
-              GetParams(func["params"], func["varg"], true).data());
+              info[s_name].toString().data(),
+              func[s_ref].toBoolean() ? "&" : "",
+              func[s_name].toString().data(),
+              GetParams(func[s_params], func[s_varg], true).data());
     return true;
   }
   return false;
@@ -464,16 +467,16 @@ void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
   PrintHeader(client, sb, info);
 
   StringBuffer parents;
-  String parent = info["parent"].toString();
+  String parent = info[s_parent].toString();
   if (!parent.empty()) {
     parents.append("extends ");
     parents.append(parent);
     parents.append(' ');
   }
-  if (!info["interfaces"].toArray().empty()) {
+  if (!info[s_interfaces].toArray().empty()) {
     parents.append("implements ");
     bool first = true;
-    for (ArrayIter iter(info["interfaces"]); iter; ++iter) {
+    for (ArrayIter iter(info[s_interfaces]); iter; ++iter) {
       if (first) {
         first = false;
       } else {
@@ -488,52 +491,52 @@ void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
   sb.printf("%s%s%s %s %s{\n",
             GetModifier(info, s_final).data(),
             GetModifier(info, s_abstract).data(),
-            info["interface"].toBoolean() ? "interface" : "class",
-            info["name"].toString().data(),
+            info[s_interface].toBoolean() ? "interface" : "class",
+            info[s_name].toString().data(),
             parent.data());
 
-  if (!info["constants"].toArray().empty()) {
+  if (!info[s_constants].toArray().empty()) {
     sb.printf("  // constants\n");
-    for (ArrayIter iter(info["constants"]); iter; ++iter) {
+    for (ArrayIter iter(info[s_constants]); iter; ++iter) {
       sb.printf("  const %s = %s;\n",
                 iter.first().toString().data(),
                 DebuggerClient::FormatVariable(iter.second()).data());
     }
   }
 
-  if (!info["properties"].toArray().empty() ||
-      !info["private_properties"].toArray().empty()) {
+  if (!info[s_properties].toArray().empty() ||
+      !info[s_private_properties].toArray().empty()) {
     sb.printf("  // properties\n");
-    for (ArrayIter iter(info["properties"]); iter; ++iter) {
+    for (ArrayIter iter(info[s_properties]); iter; ++iter) {
       Array prop = iter.second().toArray();
       sb.printf("  %s%s %s$%s;\n",
-                prop["doc"].toBoolean() ? "[doc] " : "",
-                prop["access"].toString().data(),
+                prop[s_doc].toBoolean() ? "[doc] " : "",
+                prop[s_access].toString().data(),
                 GetModifier(prop, s_static).data(),
-                prop["name"].toString().data());
+                prop[s_name].toString().data());
     }
-    for (ArrayIter iter(info["private_properties"]); iter; ++iter) {
+    for (ArrayIter iter(info[s_private_properties]); iter; ++iter) {
       Array prop = iter.second().toArray();
       sb.printf("  %sprivate %s$%s;\n",
-                prop["doc"].toBoolean() ? "[doc] " : "",
+                prop[s_doc].toBoolean() ? "[doc] " : "",
                 GetModifier(prop, s_static).data(),
-                prop["name"].toString().data());
+                prop[s_name].toString().data());
     }
   }
 
-  if (!info["methods"].toArray().empty()) {
+  if (!info[s_methods].toArray().empty()) {
     sb.printf("  // methods\n");
-    for (ArrayIter iter(info["methods"]); iter; ++iter) {
+    for (ArrayIter iter(info[s_methods]); iter; ++iter) {
       Array func = iter.second().toArray();
       sb.printf("  %s%s %s%s%sfunction %s%s(%s);\n",
-                func["doc"].toBoolean() ? "[doc] " : "",
-                func["access"].toString().data(),
+                func[s_doc].toBoolean() ? "[doc] " : "",
+                func[s_access].toString().data(),
                 GetModifier(func, s_static).data(),
                 GetModifier(func, s_final).data(),
                 GetModifier(func, s_abstract).data(),
-                func["ref"].toBoolean() ? "&" : "",
-                func["name"].toString().data(),
-                GetParams(func["params"], func["varg"]).data());
+                func[s_ref].toBoolean() ? "&" : "",
+                func[s_name].toString().data(),
+                GetParams(func[s_params], func[s_varg]).data());
     }
   }
 

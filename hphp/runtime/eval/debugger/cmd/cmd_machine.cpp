@@ -287,11 +287,11 @@ bool CmdMachine::onClient(DebuggerClient *client) {
 
 bool CmdMachine::onServer(DebuggerProxy *proxy) {
   if (m_body == "rpc") {
-    String host = m_rpcConfig["host"].toString();
+    String host = m_rpcConfig[s_host].toString();
     if (host.empty()) {
       register_intercept("", false, uninit_null());
     } else {
-      int port = m_rpcConfig["port"].toInt32();
+      int port = m_rpcConfig[s_port].toInt32();
       LibEventHttpClient::SetCache(host.data(), port, 1);
       register_intercept("", "fb_rpc_intercept_handler", m_rpcConfig);
     }

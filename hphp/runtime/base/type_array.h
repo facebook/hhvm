@@ -273,6 +273,7 @@ class Array : protected SmartPtr<ArrayData> {
   const Variant operator[](double  key) const;
   const Variant operator[](CStrRef key) const;
   const Variant operator[](CVarRef key) const;
+  const Variant operator[](const char*) const = delete; // use CStrRef
 
   Variant &lval(int64_t key) {
     if (!m_px) ArrayBase::operator=(ArrayData::Create());
@@ -472,9 +473,6 @@ class Array : protected SmartPtr<ArrayData> {
   }
 
   void setEvalScalar() const;
-
-  //litstr overloads
-  const Variant operator[](litstr key) const;
 
  private:
   // helpers

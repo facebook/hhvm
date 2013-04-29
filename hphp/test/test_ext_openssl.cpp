@@ -324,19 +324,20 @@ bool TestExtOpenssl::test_openssl_pkey_free() {
 }
 
 bool TestExtOpenssl::test_openssl_pkey_get_details() {
+  static const StaticString s_bits("bits");
   {
     Variant fkey = f_file_get_contents("test/test_public.pem");
     Variant k = f_openssl_pkey_get_public(fkey);
     VERIFY(!same(k, false));
     VERIFY(!k.isNull());
-    VS(f_openssl_pkey_get_details(k)["bits"], 1024);
+    VS(f_openssl_pkey_get_details(k)[s_bits], 1024);
   }
   {
     Variant fkey = f_file_get_contents("test/test_private.pem");
     Variant k = f_openssl_pkey_get_private(fkey);
     VERIFY(!same(k, false));
     VERIFY(!k.isNull());
-    VS(f_openssl_pkey_get_details(k)["bits"], 512);
+    VS(f_openssl_pkey_get_details(k)[s_bits], 512);
   }
   return Count(true);
 }

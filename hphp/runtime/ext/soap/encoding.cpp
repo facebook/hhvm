@@ -1354,10 +1354,12 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
   String clsname;
   if (pce) {
     ce = pce;
-  } else if (!SOAP_GLOBAL(classmap).empty() && !type->type_str.empty() &&
-             SOAP_GLOBAL(classmap).exists(String(type->type_str))) {
-    clsname = SOAP_GLOBAL(classmap)[type->type_str.c_str()].toString();
-    ce = clsname.data();
+  } else if (!SOAP_GLOBAL(classmap).empty() && !type->type_str.empty()) {
+    String type_str(type->type_str);
+    if (SOAP_GLOBAL(classmap).exists(type_str)) {
+      clsname = SOAP_GLOBAL(classmap)[type_str].toString();
+      ce = clsname.data();
+    }
   }
 
   Variant ret;

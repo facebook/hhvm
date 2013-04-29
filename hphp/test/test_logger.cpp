@@ -27,6 +27,9 @@
 using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
+static const StaticString
+  s_result("result"),
+  s_runId("runId");
 
 bool TestLogger::initializeRun() {
   if (!doLog())
@@ -51,12 +54,11 @@ bool TestLogger::initializeRun() {
 
   Array response = postData(CREATE_MAP1("runData", dataArr));
 
-  if (!response["result"]) {
+  if (!response[s_result]) {
     return false;
   }
 
-  run_id = response["result"]["runId"];
-
+  run_id = response[s_result][s_runId];
   return true;
 }
 
@@ -70,7 +72,7 @@ bool TestLogger::finishRun() {
                            "runData", CREATE_MAP1("stillRunning", false));
 
   Array response = postData(data);
-  if (response["result"])
+  if (response[s_result])
     return true;
   return false;
 }
@@ -86,7 +88,7 @@ bool TestLogger::logTest(Array test) {
                            "tests",   CREATE_VECTOR1(test));
 
   Array response = postData(data);
-  if (response["result"])
+  if (response[s_result])
     return true;
   return false;
 }

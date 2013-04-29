@@ -920,11 +920,14 @@ bool TestExtFile::test_chroot() {
 }
 
 bool TestExtFile::test_dir() {
+  static const StaticString s_handle("handle");
+  static const StaticString s_test_ext_file_txt("test_ext_file.txt");
+  static const StaticString s_path("path");
   Variant d = f_dir("test");
-  VS(d.toArray()["path"], "test");
+  VS(d.toArray()[s_path], "test");
   Variant entry;
   bool seen = false;
-  while (!same(entry = f_readdir(d.toArray()["handle"]), false)) {
+  while (!same(entry = f_readdir(d.toArray()[s_handle]), false)) {
     if (same(entry, "test_ext_file.txt")) {
       seen = true;
     }

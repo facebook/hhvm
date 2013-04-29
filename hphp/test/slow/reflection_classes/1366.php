@@ -4,7 +4,7 @@ function printFunc($rf) {
   foreach($rps as $rp) {
     var_dump($rp->getTypeText());
   }
-  var_dump($rf->getReturnTypehintText());
+  var_dump($rf->getReturnTypeText());
 }
 function printClass($rc) {
   $rms = $rc->getMethods();

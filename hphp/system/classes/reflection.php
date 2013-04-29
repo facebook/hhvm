@@ -542,7 +542,7 @@ class ReflectionFunctionAbstract {
     return $count;
   }
 
-  public function getReturnTypehintText() {
+  public function getReturnTypeText() {
     if (isset($this->info['return_type'])) {
       return $this->info['return_type'];
     }

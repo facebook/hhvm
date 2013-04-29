@@ -1095,20 +1095,22 @@ trait_declaration_statement:
     T_TRAIT
     trait_decl_name                    { $2.setText(_p->nsDecl($2.text()));
                                          _p->onClassStart(T_TRAIT, $2);}
+    implements_list
     '{' class_statement_list '}'       { Token t_ext, t_imp;
                                          t_ext.reset(); t_imp.reset();
                                          _p->onClass($$,T_TRAIT,$2,t_ext,t_imp,
-                                                     $5, 0);
+                                                     $6, 0);
                                          _p->popClass();
                                          _p->popTypeScope();}
   | non_empty_user_attributes
     T_TRAIT
     trait_decl_name                    { $3.setText(_p->nsDecl($3.text()));
                                          _p->onClassStart(T_TRAIT, $3);}
+    implements_list
     '{' class_statement_list '}'       { Token t_ext, t_imp;
                                          t_ext.reset(); t_imp.reset();
                                          _p->onClass($$,T_TRAIT,$3,t_ext,t_imp,
-                                                     $6, &$1);
+                                                     $7, &$1);
                                          _p->popClass();
                                          _p->popTypeScope();}
 ;

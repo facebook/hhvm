@@ -73,8 +73,8 @@ function idx_file($array, $key, $default = null) {
 }
 
 function bin_root() {
-  return idx($_ENV, 'FBMAKE_BIN_ROOT', 
-    is_dir(hphp_home().'/_bin') ? 
+  return idx($_ENV, 'FBMAKE_BIN_ROOT',
+    is_dir(hphp_home().'/_bin') ?
       hphp_home().'/_bin' : # fbmake
       hphp_home() # github
   );

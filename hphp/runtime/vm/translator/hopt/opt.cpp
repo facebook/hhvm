@@ -93,10 +93,13 @@ static void insertAsserts(Trace* trace, IRFactory* factory) {
 
 void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
   IRFactory* irFactory = traceBuilder->getIrFactory();
+
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, trace, msg);
     assert(JIT::checkCfg(trace, *irFactory));
+    if (debug) forEachTraceInst(trace, assertOperandTypes);
   };
+
   if (RuntimeOption::EvalHHIRMemOpt) {
     optimizeMemoryAccesses(trace, irFactory);
     finishPass("after MemeLim");

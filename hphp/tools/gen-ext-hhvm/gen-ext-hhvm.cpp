@@ -34,6 +34,12 @@ using folly::fbstring;
 std::unordered_map<fbstring, const PhpFunc*> g_mangleMap;
 std::unordered_map<fbstring, const PhpClass*> g_classMap;
 
+// Functions with return types that don't fit in registers are handled
+// differently on ARM. Instead of using a pointer-to-return-value-space hidden
+// first parameter like on x64, the pointer is passed in a register reserved for
+// this purpose, not part of the normal argument sequence.
+bool g_armMode = false;
+
 constexpr char* g_allIncludes = R"(
 #include "runtime/ext_hhvm/ext_hhvm.h"
 #include "runtime/base/builtin_functions.h"
@@ -83,7 +89,7 @@ void emitRemappedFuncDecl(const PhpFunc& func,
 
   bool isFirstParam = true;
 
-  if (isTypeCppIndirectPass(func.returnCppType)) {
+  if (!g_armMode && isTypeCppIndirectPass(func.returnCppType)) {
     if (func.returnCppType == "HPHP::Variant") {
       out << "TypedValue* _rv";
     } else {
@@ -266,7 +272,7 @@ void emitCallExpression(const PhpFunc& func, const fbstring& prefix,
   out << prefix << func.getUniqueName() << '(';
 
   bool isFirstParam = true;
-  if (isTypeCppIndirectPass(func.returnCppType)) {
+  if (!g_armMode && isTypeCppIndirectPass(func.returnCppType)) {
     isFirstParam = false;
     if (func.returnCppType == "HPHP::Variant") {
       out << "rv";
@@ -418,12 +424,23 @@ void emitExtCall(const PhpFunc& func, std::ostream& out, const char* ind) {
       }
       out << ind << type << " defVal" << k;
       if (type != "Variant" ||
-          (param.defVal != "null" && param.defVal != "null_varant")) {
+          (param.defVal != "null" && param.defVal != "null_variant")) {
         out << " = ";
         out << (param.defVal == "null" ? "uninit_null()" : param.defVal);
       }
       out << ";\n";
     }
+  }
+
+  // Put the return-value-space pointer into x8
+  if (g_armMode) {
+    out << ind << "asm volatile (\"mov x8, %0\\n\" : : \"r\"(";
+    if (func.returnCppType == "HPHP::Variant") {
+      out << "rv";
+    } else {
+      out << "&(rv->m_data)";
+    }
+    out << ") : \"x8\");\n";
   }
 
   out << ind << call_prefix;
@@ -667,17 +684,22 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
 }
 
 int main(int argc, const char* argv[]) {
-  if (argc < 4) {
+  if (argc < 5) {
     std::cout << "Usage: " << argv[0]
-              << " <output .h file> <output .cpp file> <*.idl.json>...\n"
+              << " <x64|arm> <output .h> <output .cpp> <*.idl.json>...\n"
               << "Pipe mangled C++ symbols to stdin.\n";
     return 0;
   }
 
+  g_armMode = (strcmp(argv[1], "arm") == 0);
+
+  std::ofstream header(argv[2]);
+  std::ofstream cpp(argv[3]);
+
   fbvector<PhpFunc> funcs;
   fbvector<PhpClass> classes;
 
-  for (auto i = 3; i < argc; ++i) {
+  for (auto i = 4; i < argc; ++i) {
     try {
       parseIDL(argv[i], funcs, classes);
     } catch (const std::exception& exc) {
@@ -695,9 +717,6 @@ int main(int argc, const char* argv[]) {
       g_mangleMap[func.getCppSig()] = &func;
     }
   }
-
-  std::ofstream header(argv[1]);
-  std::ofstream cpp(argv[2]);
 
   header << "namespace HPHP {\n\n";
   cpp << g_allIncludes << "\n";

@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "folly/Format.h"
 #include "folly/json.h"
 
 
@@ -99,8 +100,28 @@ bool PhpParam::defValNeedsVariable() const {
 
 PhpFunc PhpFunc::fromDynamic(const folly::dynamic& d,
                              const fbstring& className) {
-  auto refIt = d.find("ref");
-  bool ref = (refIt != d.items().end() && refIt->second.asString() == "true");
+  // Better at least have a name
+  auto name = d["name"].asString();
+  auto args = d.find("args");
+  auto flags = d.find("flags");
+  auto ret = d.find("return");
+  if (args == d.items().end() || !args->second.isArray()) {
+    throw std::logic_error(
+      folly::format("'{0}' must have an array field 'args'", name).str()
+    );
+  }
+  if (flags == d.items().end() || !flags->second.isArray()) {
+    throw std::logic_error(
+      folly::format("'{0}' must have an array field 'flags'", name).str()
+    );
+  }
+  if (ret == d.items().end() || !ret->second.isObject() ||
+      ret->second.find("type") == ret->second.items().end()) {
+    throw std::logic_error(
+      folly::format("'{0}' must have an array field 'return', which must have "
+                    "a string field 'type'", name).str()
+    );
+  }
 
   auto areVarargs = [](const fbstring& str) {
     return (str == "VariableArguments" ||
@@ -108,8 +129,15 @@ PhpFunc PhpFunc::fromDynamic(const folly::dynamic& d,
             str == "MixedVariableArguments");
   };
 
-  auto name = d["name"].asString();
-  auto params = folly::convertTo<fbvector<PhpParam>>(d["args"]);
+  fbvector<PhpParam> params;
+  try {
+    params = std::move(folly::convertTo<fbvector<PhpParam>>(args->second));
+  } catch (const std::exception& exc) {
+    throw std::logic_error(
+      folly::format("'{0}' has an arg with either 'name' or 'type' field "
+                    "missing", name).str()
+    );
+  }
   if (name == "__get" ||
       name == "__set" ||
       name == "__isset" ||
@@ -120,24 +148,27 @@ PhpFunc PhpFunc::fromDynamic(const folly::dynamic& d,
     }
   }
 
-  PhpFunc ret;
-  ret.name = name;
-  ret.className = className;
-  ret.returnCppType = typeString(d["return"]["type"], true);
-  ret.returnByRef = ref;
-  ret.params = params;
-  ret.isVarargs = anyFlags(areVarargs, d["flags"]);
-  ret.isStatic = false;
+  auto refIt = d.find("ref");
+  bool ref = (refIt != d.items().end() && refIt->second.asString() == "true");
+
+  PhpFunc retval;
+  retval.name = name;
+  retval.className = className;
+  retval.returnCppType = typeString(ret->second["type"], true);
+  retval.returnByRef = ref;
+  retval.params = params;
+  retval.isVarargs = anyFlags(areVarargs, flags->second);
+  retval.isStatic = false;
 
   if (!className.empty()) {
     auto areStatic = [](const fbstring& str) {
       return str == "IsStatic";
     };
 
-    ret.isStatic = anyFlags(areStatic, d["flags"]);
+    retval.isStatic = anyFlags(areStatic, flags->second);
   }
-  ret.initComputedProps();
-  return ret;
+  retval.initComputedProps();
+  return retval;
 }
 
 void PhpFunc::initComputedProps() {

@@ -32,6 +32,9 @@ static const StaticString
   s_runId("runId");
 
 bool TestLogger::initializeRun() {
+  static const StaticString
+    s_result("result"),
+    s_runId("runId");
   if (!doLog())
     return true;
 
@@ -59,6 +62,7 @@ bool TestLogger::initializeRun() {
   }
 
   run_id = response[s_result][s_runId];
+
   return true;
 }
 

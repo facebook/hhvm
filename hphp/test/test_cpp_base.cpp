@@ -673,7 +673,7 @@ bool TestCppBase::TestVariant() {
     VS(v[1], "test");
     VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
-    VS(v["1"], "test");
+    VS(v[s_1], "test");
     VS(v[Variant("1")], "test");
   }
   {
@@ -682,7 +682,7 @@ bool TestCppBase::TestVariant() {
     VS(v[1], "test");
     VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
-    VS(v["1"], "test");
+    VS(v[s_1], "test");
     VS(v[Variant("1")], "test");
   }
   {
@@ -691,7 +691,7 @@ bool TestCppBase::TestVariant() {
     VS(v[1], "test");
     VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
-    VS(v["1"], "test");
+    VS(v[s_1], "test");
     VS(v[Variant("1")], "test");
   }
   {
@@ -700,7 +700,7 @@ bool TestCppBase::TestVariant() {
     VS(v[1], "test");
     VS(v[1.5], "test");
     VS(v[Variant(1.5)], "test");
-    VS(v["1"], "test");
+    VS(v[s_1], "test");
     VS(v[Variant("1")], "test");
   }
 

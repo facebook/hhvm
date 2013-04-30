@@ -277,9 +277,11 @@ static void bin_to_readable(CStrRef in, StringBuffer &out, char nbits) {
   }
 }
 
+static const StaticString s_REMOTE_ADDR("REMOTE_ADDR");
+
 String SessionModule::create_sid() {
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  String remote_addr = g->GV(_SERVER)["REMOTE_ADDR"].toString();
+  String remote_addr = g->GV(_SERVER)[s_REMOTE_ADDR].toString();
 
   struct timeval tv;
   gettimeofday(&tv, NULL);
@@ -1187,9 +1189,11 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) {
   ubuf[n] = '\0';
 }
 
+static const StaticString s_PATH_TRANSLATED("PATH_TRANSLATED");
+
 static inline void last_modified() {
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  String path = g->GV(_SERVER)["PATH_TRANSLATED"].toString();
+  String path = g->GV(_SERVER)[s_PATH_TRANSLATED].toString();
   if (!path.empty()) {
     struct stat sb;
     if (stat(path.data(), &sb) == -1) {
@@ -1451,6 +1455,10 @@ bool f_session_decode(CStrRef data) {
   return false;
 }
 
+static const StaticString
+  s_REQUEST_URI("REQUEST_URI"),
+  s_HTTP_REFERER("HTTP_REFERER");
+
 bool f_session_start() {
   PS(apply_trans_sid) = PS(use_trans_sid);
 
@@ -1521,7 +1529,7 @@ bool f_session_start() {
      '<session-name>=<session-id>' to allow URLs of the form
      http://yoursite/<session-name>=<session-id>/script.php */
   if (!PS(use_only_cookies) && PS(id).empty()) {
-    value = g->GV(_SERVER)["REQUEST_URI"].toString();
+    value = g->GV(_SERVER)[s_REQUEST_URI].toString();
     const char *p = strstr(value.data(), PS(session_name).c_str());
     if (p && p[lensess] == '=') {
       p += lensess + 1;
@@ -1536,7 +1544,7 @@ bool f_session_start() {
   /* check whether the current request was referred to by
      an external site which invalidates the previously found id */
   if (!PS(id).empty() && PS(extern_referer_chk)[0] != '\0') {
-    value = g->GV(_SERVER)["HTTP_REFERER"].toString();
+    value = g->GV(_SERVER)[s_HTTP_REFERER].toString();
     if (strstr(value.data(), PS(extern_referer_chk).c_str()) == NULL) {
       PS(id).reset();
       PS(send_cookie) = 1;

@@ -841,11 +841,11 @@ class Variant : private TypedValue {
   const Variant operator[](int     key) const { return rvalAt(key);}
   const Variant operator[](int64_t   key) const { return rvalAt(key);}
   const Variant operator[](double  key) const { return rvalAt(key);}
-  const Variant operator[](litstr  key) const { return rvalAt(key);}
   const Variant operator[](CStrRef key) const { return rvalAt(key);}
   const Variant operator[](CArrRef key) const { return rvalAt(key);}
   const Variant operator[](CObjRef key) const { return rvalAt(key);}
   const Variant operator[](CVarRef key) const { return rvalAt(key);}
+  const Variant operator[](const char*) const = delete;
 
   template<typename T>
   Variant &lval(const T &key) {

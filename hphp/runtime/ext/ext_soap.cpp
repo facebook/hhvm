@@ -1751,12 +1751,14 @@ static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
 ///////////////////////////////////////////////////////////////////////////////
 // soap fault functions
 
+static const StaticString s_HTTP_USER_AGENT("HTTP_USER_AGENT");
+
 static void send_soap_server_fault(sdlFunctionPtr function, Variant fault,
                                    soapHeader *hdr) {
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  if (g->GV(_SERVER)["HTTP_USER_AGENT"].toString() == "Shockwave Flash") {
+  if (g->GV(_SERVER)[s_HTTP_USER_AGENT].toString() == "Shockwave Flash") {
     use_http_error_status = false;
   }
   if (use_http_error_status) {

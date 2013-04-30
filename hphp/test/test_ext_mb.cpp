@@ -91,14 +91,18 @@ bool TestExtMb::test_mb_list_encodings() {
   return Count(true);
 }
 
+static const StaticString
+  s_Quoted_Printable("Quoted-Printable"),
+  s_UUENCODE("UUENCODE");
+
 bool TestExtMb::test_mb_list_encodings_alias_names() {
-  VS(f_mb_list_encodings_alias_names()["Quoted-Printable"],
+  VS(f_mb_list_encodings_alias_names()[s_Quoted_Printable],
      CREATE_VECTOR1("qprint"));
   return Count(true);
 }
 
 bool TestExtMb::test_mb_list_mime_names() {
-  VS(f_mb_list_mime_names()["UUENCODE"], "x-uuencode");
+  VS(f_mb_list_mime_names()[s_UUENCODE], "x-uuencode");
   return Count(true);
 }
 
@@ -354,7 +358,8 @@ bool TestExtMb::test_mb_eregi() {
 }
 
 bool TestExtMb::test_mb_get_info() {
-  VERIFY(!f_mb_get_info()["detect_order"].toArray().empty());
+  static const StaticString s_detect_order("detect_order");
+  VERIFY(!f_mb_get_info()[s_detect_order].toArray().empty());
   return Count(true);
 }
 
@@ -390,10 +395,13 @@ bool TestExtMb::test_mb_output_handler() {
 }
 
 bool TestExtMb::test_mb_parse_str() {
+  static const StaticString
+    s_first("first"),
+    s_arr("arr[]");
   Variant output;
   f_mb_parse_str("first=value&arr[]=foo+bar&arr[]=baz", ref(output));
-  VS(output["first"], "value");
-  VS(output["arr[]"], "baz"); // bug in mb_parse_str not following PHP's
+  VS(output[s_first], "value");
+  VS(output[s_arr], "baz"); // bug in mb_parse_str not following PHP's
   return Count(true);
 }
 

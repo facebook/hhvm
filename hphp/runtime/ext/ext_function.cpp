@@ -155,11 +155,17 @@ Variant f_end_user_func_async(CObjRef handle,
   return uninit_null();
 }
 
+static const StaticString
+  s_func("func"),
+  s_args("args"),
+  s_exception("exception"),
+  s_ret("ret");
+
 String f_call_user_func_serialized(CStrRef input) {
   Variant out;
   try {
     Variant in = unserialize_from_string(input);
-    out.set("ret", vm_call_user_func(in["func"], in["args"]));
+    out.set("ret", vm_call_user_func(in[s_func], in[s_args]));
   } catch (Object &e) {
     out.set("exception", e);
   }
@@ -171,11 +177,6 @@ Variant f_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth,
                                    CArrRef params) {
   return f_call_user_func_rpc(0, host, port, auth, timeout, function, params);
 }
-
-static const StaticString s_func("func");
-static const StaticString s_args("args");
-static const StaticString s_exception("exception");
-static const StaticString s_ret("ret");
 
 Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
                              int timeout, CVarRef function,

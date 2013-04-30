@@ -64,18 +64,18 @@ private:
   class MimeHeader {
   public:
     MimeHeader();
-    MimeHeader(const char *value);
+    explicit MimeHeader(const char *value);
     MimeHeader(php_rfc822_tokenized_t *toks);
 
     bool empty() const { return m_empty;}
     void clear();
 
-    Variant get(const char *attrname);
+    Variant get(CStrRef attrname);
     void getAll(Array &ret, CStrRef valuelabel, CStrRef attrprefix);
 
     bool m_empty;
     String m_value;
-    Variant m_attributes;
+    Array m_attributes;
 
   private:
     void rfc2231_to_mime(StringBuffer &value_buf, char* value,

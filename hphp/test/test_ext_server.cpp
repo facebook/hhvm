@@ -129,10 +129,13 @@ bool TestExtServer::test_pagelet_server_task_result() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtServer::test_xbox_send_message() {
+  static const StaticString
+    s_code("code"),
+    s_response("response");
   Variant ret;
   VERIFY(f_xbox_send_message("hello", ref(ret), 5000));
-  VS(ret["code"], 200);
-  VS(ret["response"], "olleh");
+  VS(ret[s_code], 200);
+  VS(ret[s_response], "olleh");
   return Count(true);
 }
 

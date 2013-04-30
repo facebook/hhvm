@@ -268,6 +268,9 @@ bool TestExtStream::test_stream_get_line() {
 }
 
 bool TestExtStream::test_stream_get_meta_data() {
+  static const StaticString
+    s_timed_out("timed_out"),
+    s_blocked("blocked");
   int port = get_random_port();
   string address = string("127.0.0.1:") + boost::lexical_cast<string>(port);
 
@@ -277,8 +280,8 @@ bool TestExtStream::test_stream_get_meta_data() {
   f_stream_set_timeout(client, 0, 500 * 1000); // 500ms
   Variant line = f_fgets(client);
   Variant meta = f_stream_get_meta_data(client);
-  VS(meta["timed_out"], true);
-  VS(meta["blocked"], false);
+  VS(meta[s_timed_out], true);
+  VS(meta[s_blocked], false);
 
   return Count(true);
 }

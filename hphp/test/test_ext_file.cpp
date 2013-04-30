@@ -223,13 +223,15 @@ bool TestExtFile::test_fseek() {
   return Count(true);
 }
 
+static const StaticString s_size("size");
+
 bool TestExtFile::test_fstat() {
   Variant f = f_fopen("test/test_ext_file.tmp", "w");
   f_fputs(f, "testing fstat");
   f_fclose(f);
 
   f = f_fopen("test/test_ext_file.tmp", "r");
-  VS(f_fstat(f)["size"], 13);
+  VS(f_fstat(f)[s_size], 13);
   return Count(true);
 }
 
@@ -730,12 +732,12 @@ bool TestExtFile::test_clearstatcache() {
 }
 
 bool TestExtFile::test_stat() {
-  VS(f_stat("test/test_ext_file.txt")["size"], 17);
+  VS(f_stat("test/test_ext_file.txt")[s_size], 17);
   return Count(true);
 }
 
 bool TestExtFile::test_lstat() {
-  VS(f_lstat("test/test_ext_file.txt")["size"], 17);
+  VS(f_lstat("test/test_ext_file.txt")[s_size], 17);
   return Count(true);
 }
 

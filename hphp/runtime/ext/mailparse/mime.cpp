@@ -216,10 +216,10 @@ MimePart::MimeHeader::MimeHeader(php_rfc822_tokenized_t *toks)
 void MimePart::MimeHeader::clear() {
   m_empty = true;
   m_value.clear();
-  m_attributes.reset();
+  m_attributes = null_array;
 }
 
-Variant MimePart::MimeHeader::get(const char *attrname) {
+Variant MimePart::MimeHeader::get(CStrRef attrname) {
   return m_attributes[attrname];
 }
 
@@ -496,27 +496,29 @@ MimePart *MimePart::getParent() {
   return m_parent.getTyped<MimePart>();
 }
 
-static const StaticString s_headers("headers");
-static const StaticString s_starting_pos("starting-pos");
-static const StaticString s_starting_pos_body("starting-pos-body");
-static const StaticString s_ending_pos("ending-pos");
-static const StaticString s_ending_pos_body("ending-pos-body");
-static const StaticString s_line_count("line-count");
-static const StaticString s_body_line_count("body-line-count");
-static const StaticString s_charset("charset");
-static const StaticString s_transfer_encoding("transfer-encoding");
-static const StaticString s_content_type("content-type");
-static const StaticString s_content_("content-");
-static const StaticString s_text_plain_error("text/plain; (error)");
-static const StaticString s_content_disposition("content-disposition");
-static const StaticString s_disposition_("disposition-");
-static const StaticString s_content_location("content-location");
-static const StaticString s_content_base("content-base");
-static const StaticString s_content_boundary("content-boundary");
-static const StaticString s_content_id("content-id");
-static const StaticString s_content_description("content-description");
-static const StaticString s_content_language("content-language");
-static const StaticString s_content_md5("content-md5");
+static const StaticString
+  s_headers("headers"),
+  s_starting_pos("starting-pos"),
+  s_starting_pos_body("starting-pos-body"),
+  s_ending_pos("ending-pos"),
+  s_ending_pos_body("ending-pos-body"),
+  s_line_count("line-count"),
+  s_body_line_count("body-line-count"),
+  s_charset("charset"),
+  s_transfer_encoding("transfer-encoding"),
+  s_content_type("content-type"),
+  s_content_("content-"),
+  s_text_plain_error("text/plain, (error)"),
+  s_content_disposition("content-disposition"),
+  s_disposition_("disposition-"),
+  s_content_location("content-location"),
+  s_content_base("content-base"),
+  s_content_boundary("content-boundary"),
+  s_content_id("content-id"),
+  s_content_description("content-description"),
+  s_content_language("content-language"),
+  s_content_md5("content-md5"),
+  s_boundary("boundary");
 
 Variant MimePart::getPartData() {
   Array ret = Array::Create();
@@ -710,11 +712,11 @@ bool MimePart::processHeader() {
       m_content_transfer_encoding = header_val_stripped;
     } else if (header_key == "content-type") {
       m_content_type = MimeHeader(toks);
-      Variant boundary = m_content_type.get("boundary");
+      Variant boundary = m_content_type.get(s_boundary);
       if (!boundary.isNull()) {
         m_boundary = boundary.toString();
       }
-      Variant charset = m_content_type.get("charset");
+      Variant charset = m_content_type.get(s_charset);
       if (!charset.isNull()) {
         m_charset = charset.toString();
       }

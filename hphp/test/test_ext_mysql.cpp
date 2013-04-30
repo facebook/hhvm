@@ -376,10 +376,11 @@ bool TestExtMysql::test_mysql_db_query() {
 }
 
 bool TestExtMysql::test_mysql_list_dbs() {
+  static const StaticString s_Database("Database");
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
   Variant res = f_mysql_list_dbs();
   Variant db = f_mysql_fetch_assoc(res);
-  if (db["Database"].toString().empty()) {
+  if (db[s_Database].toString().empty()) {
     return CountSkip();
   }
   return Count(true);
@@ -405,10 +406,11 @@ bool TestExtMysql::test_mysql_list_fields() {
 }
 
 bool TestExtMysql::test_mysql_list_processes() {
+  static const StaticString s_Id("Id");
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
   Variant res = f_mysql_list_processes();
   Variant process = f_mysql_fetch_assoc(res);
-  VERIFY(!process["Id"].toString().empty());
+  VERIFY(!process[s_Id].toString().empty());
   return Count(true);
 }
 

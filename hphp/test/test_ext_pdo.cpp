@@ -102,6 +102,7 @@ bool TestExtPdo::test_pdo_mysql() {
 }
 
 bool TestExtPdo::test_pdo_sqlite() {
+  static const StaticString s_id("id");
   CreateSqliteTestTable();
 
   try {
@@ -155,7 +156,7 @@ bool TestExtPdo::test_pdo_sqlite() {
     Variant res = dbh->t_query("SELECT id FROM foobar LIMIT 1");
     c_PDOStatement *stmt = res.toObject().getTyped<c_PDOStatement>();
     Variant ret = stmt->t_fetch();
-    VS(ret["id"], "1");
+    VS(ret[s_id], "1");
 
   } catch (Object &e) {
     VS(e, uninit_null());

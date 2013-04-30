@@ -699,13 +699,19 @@ bool TestExtDatetime::test_timezone_open() {
   return Count(true);
 }
 
+static const StaticString
+  s_ts("ts"),
+  s_offset("offset"),
+  s_isdst("isdst"),
+  s_abbr("abbr");
+
 bool TestExtDatetime::test_timezone_transitions_get() {
   Object timezone = f_timezone_open("CET");
   Array transitions = f_timezone_transitions_get(timezone);
-  VS(transitions[0]["ts"], -1693706400);
-  VS(transitions[0]["offset"], 7200);
-  VS(transitions[0]["isdst"], true);
-  VS(transitions[0]["abbr"], "CEST");
+  VS(transitions[0][s_ts], -1693706400);
+  VS(transitions[0][s_offset], 7200);
+  VS(transitions[0][s_isdst], true);
+  VS(transitions[0][s_abbr], "CEST");
   return Count(true);
 }
 

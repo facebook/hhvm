@@ -1010,10 +1010,11 @@ Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const StaticString s_affected("affected");
-static const StaticString s_result("result");
-static const StaticString s_error("error");
-static const StaticString s_errno("errno");
+static const StaticString
+  s_affected("affected"),
+  s_result("result"),
+  s_error("error"),
+  s_errno("errno");
 
 static void output_dataset(Array &ret, int affected, DBDataSet &ds,
                            const DBConn::ErrorInfoMap &errors) {
@@ -1045,13 +1046,17 @@ static void output_dataset(Array &ret, int affected, DBDataSet &ds,
   }
 }
 
-static const StaticString s_session_variable("session_variable");
-static const StaticString s_ip("ip");
-static const StaticString s_db("db");
-static const StaticString s_port("port");
-static const StaticString s_username("username");
-static const StaticString s_password("password");
-static const StaticString s_sql("sql");
+static const StaticString
+  s_session_variable("session_variable"),
+  s_ip("ip"),
+  s_db("db"),
+  s_port("port"),
+  s_username("username"),
+  s_password("password"),
+  s_sql("sql"),
+  s_host("host"),
+  s_auth("auth"),
+  s_timeout("timeout");
 
 void f_fb_load_local_databases(CArrRef servers) {
   DBConn::ClearLocalDatabases();
@@ -1419,10 +1424,10 @@ Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj,
 
 Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params,
                                    CVarRef data, VRefParam done) {
-  String host = data["host"].toString();
-  int port = data["port"].toInt32();
-  String auth = data["auth"].toString();
-  int timeout = data["timeout"].toInt32();
+  String host = data[s_host].toString();
+  int port = data[s_port].toInt32();
+  String auth = data[s_auth].toString();
+  int timeout = data[s_timeout].toInt32();
 
   if (obj.isNull()) {
     return f_call_user_func_array_rpc(host, port, auth, timeout, name, params);

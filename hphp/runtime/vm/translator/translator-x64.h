@@ -999,11 +999,7 @@ private:
     bool m_local;
   };
   static void reqLitHelper(const ReqLitStaticArgs* args);
-  struct FCallArrayArgs {
-    Offset m_pcOff;
-    Offset m_pcNext;
-  };
-  static void fCallArrayHelper(const FCallArrayArgs* args);
+  static void fCallArrayHelper(const Offset pcOff, const Offset pcNext);
 
   TCA getNativeTrampoline(TCA helperAddress);
   TCA emitNativeTrampoline(TCA helperAddress);

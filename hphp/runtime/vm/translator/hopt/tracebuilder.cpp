@@ -496,6 +496,15 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       killLocals();
       break;
 
+    case CallArray:
+      m_spValue = inst->getDst();
+      // A CallArray pops the ActRec an array arg and pushes a return value.
+      m_spOffset -= kNumActRecCells;
+      assert(m_spOffset >= 0);
+      killCse();
+      killLocals();
+      break;
+
     case ContEnter:
       killCse();
       killLocals();

@@ -333,6 +333,7 @@ O(LdRaw,                        DParam, SUnk,                             NF) \
 O(FreeActRec,                D(FramePtr), S(FramePtr),                   Mem) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(Call,                      D(StkPtr), SUnk,                 E|Mem|CRc|Refs) \
+O(CallArray,                 D(StkPtr), S(StkPtr),          E|Mem|N|CRc|Refs) \
 O(CallBuiltin,                DBuiltin, SUnk,            E|Mem|Refs|Er|N|PRc) \
 O(NativeImpl,                       ND, C(Func) S(FramePtr),    E|Mem|N|Refs) \
   /* XXX: why does RetCtrl sometimes get PtrToGen */                          \
@@ -798,6 +799,19 @@ struct BCOffset : IRExtraData {
   Offset offset;
 };
 
+/*
+ * FCallArray offsets
+ */
+struct CallArrayData : IRExtraData {
+  explicit CallArrayData(Offset pcOffset, Offset aft)
+    : pc(pcOffset), after(aft) {}
+
+  std::string show() const { return folly::to<std::string>(pc, ", ", after); }
+
+  Offset pc, after;
+};
+
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -830,6 +844,7 @@ X(ReDefGeneratorSP,   StackOffset);
 X(DefSP,              StackOffset);
 X(DefInlineFP,        BCOffset);
 X(InlineCreateCont,   CreateContData);
+X(CallArray,          CallArrayData);
 
 #undef X
 

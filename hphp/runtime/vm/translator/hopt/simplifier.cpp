@@ -69,6 +69,18 @@ SSATmp* getStackValue(SSATmp* sp,
                          type);
   }
 
+  case CallArray:
+    // sp = CallArray(stack)
+    if (index == 0) {
+      // return value from call
+      return nullptr;
+    }
+    spansCall = true;
+    return getStackValue(inst->getSrc(0), // sp == ActRec + array arg
+                         index + kNumActRecCells,
+                         spansCall,
+                         type);
+
   case Call:
     // sp = call(actrec, bcoffset, func, args...)
     if (index == 0) {

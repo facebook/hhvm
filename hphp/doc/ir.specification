@@ -881,6 +881,14 @@ InlineReturn S0:FramePtr
 
   Unlinks a frame constructed by DefInlineFP.
 
+D:StkPtr = CallArray S0:StkPtr
+
+  Invoke function corresponding to the current FPI with array args.
+  S0 points to the stack resulting after the ActRec for the function
+  and the array of its arguments is pushed. CallArray pops the array
+  off the stack, pushes the elements of the array as arguments, and
+  invokes the function in the ActRec.
+
 D:StkPtr = Call S0:StkPtr S1:ConstInt S2:Func S3...
 
   Invoke the function S2 with ActRec S0 and variadic arguments S3...

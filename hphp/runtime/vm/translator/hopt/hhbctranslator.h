@@ -240,7 +240,7 @@ struct HhbcTranslator {
   void emitFPushCtorD(int32_t numParams, int32_t classNameStrId);
   void emitFPushCtor(int32_t numParams);
   void emitCreateCl(int32_t numParams, int32_t classNameStrId);
-  void emitFCallArray();
+  void emitFCallArray(const Offset pcOffset, const Offset after);
   void emitFCall(uint32_t numParams,
                   Offset returnBcOffset,
                   const Func* callee);

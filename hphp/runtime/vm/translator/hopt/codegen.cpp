@@ -3238,6 +3238,18 @@ void CodeGenerator::cgInlineCreateCont(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgCallArray(IRInstruction* inst) {
+  Offset pc             = inst->getExtra<CallArray>()->pc;
+  Offset after          = inst->getExtra<CallArray>()->after;
+
+  ArgGroup args;
+  args.imm(pc).imm(after);
+
+  // fCallArrayHelper makes the actual call by smashing its return address.
+  cgCallHelper(m_as, (TCA)TranslatorX64::fCallArrayHelper,
+               nullptr, kSyncPoint, args);
+}
+
 void CodeGenerator::cgCall(IRInstruction* inst) {
   SSATmp* actRec         = inst->getSrc(0);
   SSATmp* returnBcOffset = inst->getSrc(1);

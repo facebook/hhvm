@@ -1321,7 +1321,11 @@ TranslatorX64::irTranslateFCall(const Tracelet& t,
 void
 TranslatorX64::irTranslateFCallArray(const Tracelet& t,
                                      const NormalizedInstruction& i) {
-  HHIR_EMIT(FCallArray);
+  const Offset pcOffset = i.offset();
+  SrcKey next = i.next ? i.next->source : t.m_nextSk;
+  const Offset after = next.offset();
+
+  HHIR_EMIT(FCallArray, pcOffset, after);
 }
 
 void

@@ -233,15 +233,15 @@ TCA funcBodyHelper(ActRec* fp) {
   return tca;
 }
 
-void TranslatorX64::fCallArrayHelper(const FCallArrayArgs* args) {
+void TranslatorX64::fCallArrayHelper(const Offset pcOff, const Offset pcNext) {
   DECLARE_FRAME_POINTER(framePtr);
   ActRec* fp = (ActRec*)framePtr->m_savedRbp;
 
   VMExecutionContext *ec = g_vmContext;
   ec->m_fp = fp;
   ec->m_stack.top() = sp;
-  ec->m_pc = curUnit()->at(args->m_pcOff);
-  PC pc = curUnit()->at(args->m_pcNext);
+  ec->m_pc = curUnit()->at(pcOff);
+  PC pc = curUnit()->at(pcNext);
 
   tl_regState = REGSTATE_CLEAN;
   bool runFunc = ec->doFCallArray(pc);

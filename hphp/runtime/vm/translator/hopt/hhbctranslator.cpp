@@ -1776,8 +1776,10 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t           numParams,
   }
 }
 
-void HhbcTranslator::emitFCallArray() {
-  PUNT(FCallArray); // can't interpret one because of control flow
+void HhbcTranslator::emitFCallArray(const Offset pcOffset,
+                                    const Offset after) {
+  SSATmp* stack = spillStack();
+  gen(CallArray, CallArrayData(pcOffset, after), stack);
 }
 
 void HhbcTranslator::emitFCall(uint32_t numParams,

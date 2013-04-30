@@ -9844,12 +9844,9 @@ void TranslatorX64::translateFCallArray(const Tracelet& t,
 
   syncOutputs(i);
 
-  FCallArrayArgs* args = m_globalData.alloc<FCallArrayArgs>();
-  emitImmReg(a, (uint64_t)args, argNumToRegName[0]);
+  emitImmReg(a, (uint64_t)i.offset(), argNumToRegName[0]);
+  emitImmReg(a, (uint64_t)after, argNumToRegName[1]);
   emitCall(a, (TCA)fCallArrayHelper, true);
-
-  args->m_pcOff = i.offset();
-  args->m_pcNext = after;
 
   if (i.breaksTracelet) {
     SrcKey fallThru(curFunc(), after);

@@ -6510,6 +6510,10 @@
             "value": 366
         },
         {
+            "name": "T_COMPILER_HALT_OFFSET",
+            "value": 405
+        },
+        {
             "name": "T_CONCAT_EQUAL",
             "value": 273
         },

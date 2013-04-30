@@ -489,6 +489,8 @@ void Scanner::incLoc(const char *rawText, int rawLeng) {
   assert(rawText);
   assert(rawLeng > 0);
 
+  m_loc->cursor += rawLeng;
+
   switch (m_state) {
     case Start:
       break; // scanner set to (1, 1, 1, 1) already

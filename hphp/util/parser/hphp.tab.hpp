@@ -43,9 +43,6 @@
 #define YYTOKEN(num, name) name = num
 #endif
    YYTOKEN_MAP {
-#ifndef YYTOKEN_MIN
-#define YYTOKEN_MIN 258
-#endif
      YYTOKEN(258, T_REQUIRE_ONCE),
      YYTOKEN(259, T_REQUIRE),
      YYTOKEN(260, T_EVAL),
@@ -192,12 +189,9 @@
      YYTOKEN(401, T_COLLECTION),
      YYTOKEN(402, T_SHAPE),
      YYTOKEN(403, T_TYPE),
-     YYTOKEN(404, T_UNRESOLVED_TYPE)
+     YYTOKEN(404, T_UNRESOLVED_TYPE),
+     YYTOKEN(405, T_COMPILER_HALT_OFFSET)
    };
-#ifndef YYTOKEN_MAX
-#define YYTOKEN_MAX 404
-#endif
-
 #endif
 
 
@@ -226,3 +220,9 @@ typedef struct YYLTYPE
 
 
 
+#ifndef YYTOKEN_MIN
+#define YYTOKEN_MIN 258
+#endif
+#ifndef YYTOKEN_MAX
+#define YYTOKEN_MAX 405
+#endif

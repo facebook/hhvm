@@ -144,7 +144,8 @@ struct Parser : ParserBase {
 
   IMPLEMENT_XHP_ATTRIBUTES;
 
-  void saveParseTree(Token& tree) { X(); }
+  void initParseTree() { X(); }
+  void finiParseTree() { X(); }
 
   void onName(Token& out, Token& name, NameKind kind) {
     X(name, kind);
@@ -384,6 +385,9 @@ struct Parser : ParserBase {
   }
 
   void onStatementListStart(Token &out) { X(); }
+
+  void addTopStatement(Token &new_stmt) { X(new_stmt); }
+  void onHaltCompiler() { X(); }
 
   void addStatement(Token& out, Token& stmts, Token& new_stmt) {
     X(stmts, new_stmt);

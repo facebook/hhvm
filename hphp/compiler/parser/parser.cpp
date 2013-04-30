@@ -529,6 +529,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     case T_LNUMBER:
     case T_DNUMBER:
     case T_LINE:
+    case T_COMPILER_HALT_OFFSET:
     case T_FUNC_C:
     case T_CLASS_C:
       exp = NEW_EXP(ScalarExpression, type, scalar->text());
@@ -545,6 +546,12 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
       break;
     default:
       assert(false);
+  }
+  if (type == T_COMPILER_HALT_OFFSET) {
+    // Keep track of this expression for later backpatching
+    // If it doesn't get backpatched (because there was no HALT_COMPILER
+    // then the constant will return (int)"__COMPILER_HALT_OFFSET__" (zero)
+    m_compilerHaltOffsetVec.push_back(exp);
   }
   out->exp = exp;
 }
@@ -1190,13 +1197,11 @@ void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
 ///////////////////////////////////////////////////////////////////////////////
 // statements
 
-void Parser::saveParseTree(Token &tree) {
-  if (tree->stmt) {
-    m_tree = dynamic_pointer_cast<StatementList>(tree->stmt);
-  } else {
-    m_tree = NEW_STMT0(StatementList);
-  }
+void Parser::initParseTree() {
+  m_tree = NEW_STMT0(StatementList);
+}
 
+void Parser::finiParseTree() {
   if (m_staticVars.size()) fixStaticVars();
   FunctionScopePtr pseudoMain = m_file->setTree(m_ar, m_tree);
   completeScope(pseudoMain);
@@ -1208,8 +1213,23 @@ void Parser::saveParseTree(Token &tree) {
   pseudoMain->getStmt()->setLocation(loc);
 }
 
+void Parser::onHaltCompiler() {
+  if (m_nsState == InsideNamespace && !m_nsFileScope) {
+    error("__HALT_COMPILER() can only be used from the outermost scope");
+    return;
+  }
+  // Backpatch instances of __COMPILER_HALT_OFFSET__
+  for(auto &cho : m_compilerHaltOffsetVec) {
+     cho->setCompilerHaltOffset(m_scanner.getLocation()->cursor);
+  }
+}
+
 void Parser::onStatementListStart(Token &out) {
   out.reset();
+}
+
+void Parser::addTopStatement(Token &new_stmt) {
+  addStatement(m_tree, new_stmt->stmt);
 }
 
 void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
@@ -1218,18 +1238,21 @@ void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
   } else {
     out->stmt = stmts->stmt;
   }
+  addStatement(out->stmt, new_stmt->stmt);
+}
 
+void Parser::addStatement(StatementPtr stmt, StatementPtr new_stmt) {
   assert(!m_prependingStatements.empty());
   vector<StatementPtr> &prepending = m_prependingStatements.back();
   if (!prepending.empty()) {
     assert(prepending.size() == 1);
     for (unsigned i = 0; i < prepending.size(); i++) {
-      out->stmt->addElement(prepending[i]);
+      stmt->addElement(prepending[i]);
     }
     prepending.clear();
   }
-  if (new_stmt->stmt) {
-    out->stmt->addElement(new_stmt->stmt);
+  if (new_stmt) {
+    stmt->addElement(new_stmt);
   }
 }
 

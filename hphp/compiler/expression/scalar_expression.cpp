@@ -243,6 +243,7 @@ TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
     break;
 
   case T_LINE:
+  case T_COMPILER_HALT_OFFSET:
     actualType = Type::Int64;
     break;
 
@@ -393,6 +394,7 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_NUM_STRING:
   case T_LNUMBER:
   case T_DNUMBER:
+  case T_COMPILER_HALT_OFFSET:
     cg_printf("%s", m_originalValue.c_str());
     break;
   case T_NS_C:
@@ -450,6 +452,7 @@ Variant ScalarExpression::getVariant() const {
     case T_NUM_STRING:
       return String(m_value);
     case T_LNUMBER:
+    case T_COMPILER_HALT_OFFSET:
       return strtoll(m_value.c_str(), nullptr, 0);
     case T_LINE:
       return String(m_translated).toInt64();
@@ -488,14 +491,13 @@ bool ScalarExpression::getString(const std::string *&s) const {
 }
 
 bool ScalarExpression::getInt(int64_t &i) const {
-  if (m_type == T_LNUMBER) {
+  if (m_type == T_LNUMBER || m_type == T_COMPILER_HALT_OFFSET) {
     i = strtoll(m_value.c_str(), nullptr, 0);
     return true;
   } else if (m_type == T_LINE) {
     i = getLocation() ? getLocation()->line1 : 0;
     return true;
   }
-
   return false;
 }
 
@@ -507,4 +509,12 @@ bool ScalarExpression::getDouble(double &d) const {
     return true;
   }
   return false;
+}
+
+void ScalarExpression::setCompilerHaltOffset(int64_t ofs) {
+  assert(m_type == T_COMPILER_HALT_OFFSET);
+  std::ostringstream ss;
+  ss << ofs;
+  m_value = ss.str();
+  m_originalValue = ss.str();
 }

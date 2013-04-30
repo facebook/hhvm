@@ -114,6 +114,7 @@ LocationPtr ParserBase::getLocation() const {
   location->char0 = char0();
   location->line1 = line1();
   location->char1 = char1();
+  location->cursor = cursor();
   return location;
 }
 
@@ -297,13 +298,15 @@ void ParserBase::nns(bool declare /* = false */) {
   }
 }
 
-void ParserBase::onNamespaceStart(const std::string &ns) {
+void ParserBase::onNamespaceStart(const std::string &ns,
+                                  bool file_scope /* =false */) {
   if (m_nsState == SeenNonNamespaceStatement) {
     error("Namespace declaration statement has to be the very first "
           "statement in the script: %s", getMessage().c_str());
     return;
   }
   m_nsState = InsideNamespace;
+  m_nsFileScope = file_scope;
 
   m_namespace = ns;
 }

@@ -22,6 +22,7 @@
 #include "compiler/construct.h"
 #include "compiler/option.h"
 #include "compiler/type_annotation.h"
+#include "compiler/expression/scalar_expression.h"
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS
@@ -123,7 +124,9 @@ public:
   StatementListPtr getTree() const { return m_tree;}
 
   // parser handlers
-  void saveParseTree(Token &tree);
+  void initParseTree();
+  void finiParseTree();
+  void onHaltCompiler();
   void onName(Token &out, Token &name, NameKind kind);
   void onVariable(Token &out, Token *exprs, Token &var, Token *value,
                   bool constant = false,
@@ -202,6 +205,7 @@ public:
   void onMemberModifier(Token &out, Token *modifiers, Token &modifier);
   void onStatementListStart(Token &out);
   void addStatement(Token &out, Token &stmts, Token &new_stmt);
+  void addTopStatement(Token &new_stmt);
   void onClassStatement(Token &out, Token &stmts, Token &new_stmt) {
     addStatement(out, stmts, new_stmt);
   }
@@ -290,6 +294,7 @@ private:
   std::vector<BlockScopePtrVec> m_scopes;
   std::vector<FunctionContext> m_funcContexts;
   std::vector<std::vector<StatementPtr> > m_prependingStatements;
+  std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::string m_clsName; // for T_CLASS_C inside a closure
   std::string m_funcName;
   bool m_inTrait;
@@ -318,6 +323,8 @@ private:
   bool hasType(Token &type);
 
   void checkAssignThis(Token &var);
+
+  void addStatement(StatementPtr stmt, StatementPtr new_stmt);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

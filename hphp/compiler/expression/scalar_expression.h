@@ -76,6 +76,8 @@ public:
   bool getString(const std::string *&s) const;
   bool getInt(int64_t &i) const;
   bool getDouble(double &d) const;
+
+  void setCompilerHaltOffset(int64_t ofs);
 private:
   int m_type;
   std::string m_serializedValue;

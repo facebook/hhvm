@@ -814,17 +814,19 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_TYPE
 %token T_UNRESOLVED_TYPE
 
+%token T_COMPILER_HALT_OFFSET
+
 %%
 
 start:
-    top_statement_list                 { _p->popLabelInfo();
-                                         _p->saveParseTree($$);}
+    { _p->initParseTree(); } top_statement_list { _p->popLabelInfo();
+                                                  _p->finiParseTree();}
 ;
 
 top_statement_list:
     top_statement_list
-    top_statement                      { _p->addStatement($$,$1,$2);}
-  |                                    { _p->onStatementListStart($$);}
+    top_statement                      { _p->addTopStatement($2);}
+  |                                    { }
 ;
 top_statement:
     statement                          { _p->nns($1.num() == T_DECLARE);
@@ -833,8 +835,10 @@ top_statement:
   | class_declaration_statement        { _p->nns(); $$ = $1;}
   | trait_declaration_statement        { _p->nns(); $$ = $1;}
   | sm_typedef_statement               { $$ = $1; }
-  | T_HALT_COMPILER '(' ')' ';'        { $$.reset();}
-  | T_NAMESPACE namespace_name ';'     { _p->onNamespaceStart($2.text());
+  | T_HALT_COMPILER '(' ')' ';'        { _p->onHaltCompiler();
+                                         _p->finiParseTree();
+                                         YYACCEPT;}
+  | T_NAMESPACE namespace_name ';'     { _p->onNamespaceStart($2.text(), true);
                                          $$.reset();}
   | T_NAMESPACE namespace_name '{'     { _p->onNamespaceStart($2.text());}
     top_statement_list '}'             { _p->onNamespaceEnd(); $$ = $5;}
@@ -1859,6 +1863,7 @@ xhp_bareword:
   | T_FILE                             { $$ = $1;}
   | T_DIR                              { $$ = $1;}
   | T_NS_C                             { $$ = $1;}
+  | T_COMPILER_HALT_OFFSET             { $$ = $1;}
   | T_TRAIT                            { $$ = $1;}
   | T_TRAIT_C                          { $$ = $1;}
   | T_TYPE                             { $$ = $1;}
@@ -1915,6 +1920,7 @@ common_scalar:
   | T_METHOD_C                         { _p->onScalar($$, T_METHOD_C, $1);}
   | T_FUNC_C                           { _p->onScalar($$, T_FUNC_C,   $1);}
   | T_NS_C                             { _p->onScalar($$, T_NS_C,  $1);}
+  | T_COMPILER_HALT_OFFSET             { _p->onScalar($$, T_COMPILER_HALT_OFFSET, $1);}
   | T_START_HEREDOC
     T_ENCAPSED_AND_WHITESPACE
     T_END_HEREDOC                      { _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $2);}

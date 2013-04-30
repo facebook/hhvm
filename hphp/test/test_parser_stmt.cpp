@@ -220,8 +220,11 @@ bool TestParserStmt::TestStatementList() {
   V("<?php function test() {} ; class Test {} __halt_compiler();",
     "function test() {\n}\nclass Test {\n}\n");
 
+  V("<?php function test() {} ; __halt_compiler(); function test() {}",
+    "function test() {\n}\n");
+
   V("<?php ; __halt_compiler(); function test() {} class Test {}",
-    "function test() {\n}\nclass Test {\n}\n");
+    "");
 
   return true;
 }

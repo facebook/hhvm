@@ -363,6 +363,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"isset"              { SETTOKEN; return T_ISSET;}
 <ST_IN_SCRIPTING>"empty"              { SETTOKEN; return T_EMPTY;}
 <ST_IN_SCRIPTING>"__halt_compiler"    { SETTOKEN; return T_HALT_COMPILER;}
+<ST_IN_SCRIPTING>"__compiler_halt_offset__" {
+  SETTOKEN;
+  return T_COMPILER_HALT_OFFSET;
+}
 <ST_IN_SCRIPTING>"static"             { SETTOKEN; return T_STATIC;}
 <ST_IN_SCRIPTING>"abstract"           { SETTOKEN; return T_ABSTRACT;}
 <ST_IN_SCRIPTING>"final"              { SETTOKEN; return T_FINAL;}

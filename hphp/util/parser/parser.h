@@ -134,6 +134,7 @@ public:
   int char0() const { return m_loc.char0;}
   int line1() const { return m_loc.line1;}
   int char1() const { return m_loc.char1;}
+  int cursor() const { return m_loc.cursor;}
 
   // called by generated code
   int scan(ScannerToken *token, Location *loc) {
@@ -168,7 +169,7 @@ public:
   void popLabelInfo();
 
   // for namespace support
-  void onNamespaceStart(const std::string &ns);
+  void onNamespaceStart(const std::string &ns, bool file_scope = false);
   void onNamespaceEnd();
   void onUse(const std::string &ns, const std::string &as);
   void nns(bool declare = false);
@@ -235,6 +236,7 @@ protected:
     InsideNamespace,
   };
   NamespaceState m_nsState;
+  bool m_nsFileScope;
   std::string m_namespace; // current namespace
   hphp_string_imap<std::string> m_aliases;
 

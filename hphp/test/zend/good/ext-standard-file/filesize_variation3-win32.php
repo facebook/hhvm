@@ -8,7 +8,7 @@
 $file_path = dirname(__FILE__);
 
 echo "*** Testing filesize(): usage variations ***\n"; 
-$filename =  $file_path."/filesize_variation3.tmp";
+$filename =  $file_path."/filesize_variation3-win32.tmp";
 $file_handle = fopen($filename, "w");
 fwrite($file_handle, (binary)str_repeat("Hello,World ", 1000) ); // create file of size 12000 bytes
 fclose($file_handle);
@@ -28,5 +28,5 @@ for($size = filesize($filename); $size>=-1200; $size-=1200) {
 echo "*** Done ***\n";
 ?><?php
 $file_path = dirname(__FILE__);
-unlink($file_path."/filesize_variation3.tmp");
+unlink($file_path."/filesize_variation3-win32.tmp");
 ?>

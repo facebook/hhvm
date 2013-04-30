@@ -495,6 +495,8 @@ def walk(filename, source):
         test = test.replace('testdir', 'mkdir-002')
     if '/ext-standard-file/mkdir-003.php' in full_dest_filename:
         test = test.replace('testdir', 'mkdir-003')
+    if '/ext-standard-file/filesize_variation3-win32.php' in full_dest_filename:
+        test = test.replace('filesize_variation3', 'filesize_variation3-win32')
 
     file(full_dest_filename, 'w').write(test)
 

@@ -83,58 +83,6 @@ Array c_WaitableWaitHandle::t_getparents() {
   return result;
 }
 
-Array c_WaitableWaitHandle::t_getstacktrace() {
-  // no parent data available if finished
-  if (isFinished()) {
-    return Array::Create();
-  }
-
-  /**
-   * At this point, we have an unfinished wait handle and by definition, all
-   * recursive parents are unfinished as well. Let's walk thru them up the
-   * stack and populate the output array. One particularly tricky case is to
-   * correctly follow cross-context boundaries. Sometimes, a wait handle
-   * originally created in the parent context gets imported and following
-   * its original parents may skip one or more context boundaries. To avoid
-   * this, only parents from the same context are considered. A condition
-   * where no such parent exists indicates a wait handle that was join()-ed
-   * from the parent context.
-   */
-  AsioSession* session = AsioSession::Get();
-  Array result = Array::Create(this);
-  c_WaitableWaitHandle* curr = this;
-
-  while (true) {
-    // find parent in the same context (context may be null)
-    context_idx_t ctx_idx = curr->getContextIdx();
-    curr = curr->getParentInContext(ctx_idx);
-
-    // continue up the stack within the same context
-    if (curr) {
-      result.append(curr);
-      continue;
-    }
-
-    // the whole dependency chain is outside of context
-    if (!ctx_idx) {
-      return result;
-    }
-
-    // cross the boundary; keep crossing until non-empty context is found
-    do {
-      --ctx_idx;
-      result.append(null_variant);
-    } while (ctx_idx && !(curr = session->getContext(ctx_idx)->getCurrent()));
-
-    // all contexts processed
-    if (!ctx_idx) {
-      return result;
-    }
-
-    result.append(curr);
-  }
-}
-
 c_BlockableWaitHandle* c_WaitableWaitHandle::addParent(c_BlockableWaitHandle* parent) {
   c_BlockableWaitHandle* prev = m_firstParent;
   m_firstParent = parent;
@@ -177,16 +125,6 @@ void c_WaitableWaitHandle::setException(ObjectData* exception) {
   while (m_firstParent) {
     m_firstParent = m_firstParent->unblock();
   }
-}
-
-c_BlockableWaitHandle* c_WaitableWaitHandle::getParentInContext(context_idx_t ctx_idx) {
-  c_BlockableWaitHandle* parent = m_firstParent;
-
-  while (parent && parent->getContextIdx() != ctx_idx) {
-    parent = parent->getNextParent();
-  }
-
-  return parent;
 }
 
 // throws on context depth level overflows and cross-context cycles

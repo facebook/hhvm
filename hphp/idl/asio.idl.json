@@ -398,19 +398,6 @@
                     },
                     "args": [
                     ]
-                },
-                {
-                    "name": "getStackTrace",
-                    "desc": "Get stack trace of this wait handle",
-                    "flags": [
-                        "HasDocComment"
-                    ],
-                    "return": {
-                        "type": "VariantVec",
-                        "desc": "An array of WaitableWaitHandles representing full stack trace, starting with this wait handle"
-                    },
-                    "args": [
-                    ]
                 }
             ],
             "consts": [

@@ -192,7 +192,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   public: int t_getcontextidx();
   public: Object t_getcreator();
   public: Array t_getparents();
-  public: Array t_getstacktrace();
 
 
  public:
@@ -213,7 +212,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   bool isInContext() { return getContextIdx(); }
 
   c_BlockableWaitHandle* getFirstParent() { return m_firstParent; }
-  c_BlockableWaitHandle* getParentInContext(context_idx_t ctx_idx);
 
   virtual c_WaitableWaitHandle* getChild();
   bool hasCycle(c_WaitableWaitHandle* start);

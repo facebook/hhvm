@@ -1130,7 +1130,7 @@ Variant parse_php_serialized(AsmState& as) {
   // String wants a null, and dereferences one past the size we give
   // it.
   buffer.push_back('\0');
-  String data(&buffer[0], buffer.size() - 1, CopyString);
+  String data(&buffer[0], buffer.size() - 1, AttachLiteral);
   return unserialize_from_string(data);
 }
 

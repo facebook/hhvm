@@ -7778,7 +7778,7 @@ void TranslatorX64::emitStaticPropInlineLookup(const NormalizedInstruction& i,
   const StringData* clsName = cls->preClass()->name();
   string sds(Util::toLower(clsName->data()) + ":" +
              string(propName->data(), propName->size()));
-  StackStringData sd(sds.c_str(), sds.size(), CopyString);
+  StackStringData sd(sds.c_str(), sds.size(), AttachLiteral);
   ch = SPropCache::alloc(&sd);
   SKTRACE(1, i.source, "SPropInlineLookup %s %d\n", sd.data(), int(ch));
 
@@ -8677,9 +8677,12 @@ TranslatorX64::translateFPushFunc(const Tracelet& t,
   int startOfActRec = int(sizeof(Cell)) - int(sizeof(ActRec));
   size_t funcOff = AROFF(m_func) + startOfActRec;
   size_t thisOff = AROFF(m_this) + startOfActRec;
-  const Func* (*f)(CacheHandle, StringData*, const void*) = FuncCache::lookup;
+  if (false) { // typecheck
+    StackStringData sd("foo");
+    const UNUSED Func* f = FuncCache::lookup(ch, &sd);
+  }
   SKTRACE(1, i.source, "ch %d\n", ch);
-  EMIT_CALL(a, f, IMM(ch), V(inLoc), IMM(0));
+  EMIT_CALL(a, FuncCache::lookup, IMM(ch), V(inLoc));
   recordCall(i);
   emitVStackStore(a, i, rax, funcOff, sz::qword);
   emitVStackStoreImm(a, i, 0, thisOff, sz::qword, &m_regMap);
@@ -9458,8 +9461,14 @@ TranslatorX64::translateFPushFuncD(const Tracelet& t,
     a.test_reg64_reg64(r(scratch), r(scratch));
     {
       UnlikelyIfBlock ifNull(CC_Z, a, astubs);
-      const Func* (*func)(StringData*) = FixedFuncCache::lookupUnknownFunc;
-      EMIT_CALL(astubs, TCA(func), IMM(uintptr_t(name)));
+
+      if (false) { // typecheck
+        StackStringData sd("foo");
+        FixedFuncCache::lookupUnknownFunc(&sd);
+      }
+
+      EMIT_CALL(astubs, TCA(FixedFuncCache::lookupUnknownFunc),
+                        IMM(uintptr_t(name)));
       recordReentrantStubCall(i);
       emitMovRegReg(astubs, rax, r(scratch));
     }

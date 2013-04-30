@@ -54,12 +54,12 @@ Server::Server(const std::string &address, int port, int threadCount)
 }
 
 bool Server::shouldHandle(const std::string &cmd) {
-  String url(cmd.c_str(), cmd.size(), CopyString);
+  String url(cmd.c_str(), cmd.size(), AttachLiteral);
   for (std::set<string>::const_iterator iter =
          SatelliteServerInfo::InternalURLs.begin();
        iter != SatelliteServerInfo::InternalURLs.end(); ++iter) {
     Variant ret = preg_match
-      (String(iter->c_str(), iter->size(), CopyString), url);
+      (String(iter->c_str(), iter->size(), AttachLiteral), url);
     if (ret.toInt64() > 0) {
       return false;
     }

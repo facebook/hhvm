@@ -325,7 +325,7 @@ static int64_t get_int64_value(StoreValue* sval) {
     v = sval->var->toLocal();
   } else {
     assert(sval->inFile());
-    String s(sval->sAddr, sval->getSerializedSize(), CopyString);
+    String s(sval->sAddr, sval->getSerializedSize(), AttachLiteral);
     v = apc_unserialize(s);
   }
   return v.toInt64();
@@ -498,7 +498,7 @@ void ConcurrentTableSharedStore::prime
       continue;
     }
     if (RuntimeOption::APCSizeCountPrime) {
-      StackStringData sd(copy, CopyString);
+      StackStringData sd(copy);
       stats_on_add(&sd, &acc->second, 0, true, false);
     }
   }
@@ -601,7 +601,7 @@ void ConcurrentTableSharedStore::dump(std::ostream & out, bool keyOnly,
           assert(sval->inFile());
           // we need unserialize and serialize again because the format was
           // APCSerialize
-          String s(sval->sAddr, sval->getSerializedSize(), CopyString);
+          String s(sval->sAddr, sval->getSerializedSize(), AttachLiteral);
           value = apc_unserialize(s);
         }
         try {

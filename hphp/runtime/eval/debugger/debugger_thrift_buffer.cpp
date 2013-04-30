@@ -27,7 +27,7 @@ String DebuggerThriftBuffer::readImpl() {
   assert(m_size <= BUFFER_SIZE);
   int nread = m_socket->readImpl(m_buffer, m_size);
   m_buffer[nread] = '\0';
-  return String(m_buffer, nread, CopyString);
+  return String(m_buffer, nread, AttachLiteral);
 }
 
 void DebuggerThriftBuffer::flushImpl(CStrRef data) {

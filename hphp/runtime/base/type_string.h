@@ -151,6 +151,13 @@ public:
     m_px = NEW(StringData)(s.data(), s.size(), CopyString);
     m_px->setRefCount(1);
   }
+  // attach to null terminated string literal
+  String(const char *s, AttachLiteralMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, mode);
+      m_px->setRefCount(1);
+    }
+  }
   // attach to null terminated malloc'ed string, maybe free it now.
   String(const char *s, AttachStringMode mode) {
     if (s) {
@@ -162,6 +169,13 @@ public:
   String(const char *s, CopyStringMode mode) {
     if (s) {
       m_px = NEW(StringData)(s, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  // attach to binary string literal
+  String(const char *s, int length, AttachLiteralMode mode) {
+    if (s) {
+      m_px = NEW(StringData)(s, length, mode);
       m_px->setRefCount(1);
     }
   }
@@ -249,6 +263,9 @@ public:
 
   bool isValidVariableName() const {
     return m_px ? m_px->isValidVariableName() : false;
+  }
+  bool isLiteral() const {
+    return m_px ? m_px->isLiteral() : true;
   }
 
   /**

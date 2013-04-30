@@ -2414,7 +2414,7 @@ int pdo_parse_params(PDOStatement *stmt, CStrRef in, String &out) {
     if (query_type != PDO_PLACEHOLDER_POSITIONAL && bindno > params.size()) {
       int ok = 1;
       for (plc = placeholders; plc; plc = plc->next) {
-        if (!params.exists(String(plc->pos, plc->len, CopyString))) {
+        if (!params.exists(String(plc->pos, plc->len, AttachLiteral))) {
           ok = 0;
           break;
         }
@@ -2442,7 +2442,7 @@ safe:
       if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
         vparam = params[plc->bindno];
       } else {
-        vparam = params[String(plc->pos, plc->len, CopyString)];
+        vparam = params[String(plc->pos, plc->len, AttachLiteral)];
       }
       if (vparam.isNull()) {
         /* parameter was not defined */
@@ -2545,7 +2545,7 @@ rewrite:
 
     for (plc = placeholders; plc; plc = plc->next) {
       int skip_map = 0;
-      String name(plc->pos, plc->len, CopyString);
+      String name(plc->pos, plc->len, AttachLiteral);
 
       /* check if bound parameter is already available */
       if (!strcmp(name.c_str(), "?") ||
@@ -2577,7 +2577,7 @@ rewrite:
     newbuffer_len = in.size();
 
     for (plc = placeholders; plc; plc = plc->next) {
-      String name(plc->pos, plc->len, CopyString);
+      String name(plc->pos, plc->len, AttachLiteral);
       stmt->bound_param_map.set(plc->bindno, name);
       plc->quoted = "?";
     }

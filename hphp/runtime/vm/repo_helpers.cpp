@@ -14,9 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "runtime/vm/repo_helpers.h"
-
 #include "runtime/vm/repo.h"
+#include "runtime/vm/repo_helpers.h"
 #include "runtime/vm/blob_helper.h"
 #include "runtime/base/builtin_functions.h"
 
@@ -381,7 +380,7 @@ void RepoQuery::getStaticString(int iCol, StringData*& s) {
     const char* text;
     size_t size;
     getText(iCol, text, size);
-    StackStringData sd(text, size, CopyString);
+    StackStringData sd(text, size, AttachLiteral);
     s = StringData::GetStaticString(&sd);
   }
 }

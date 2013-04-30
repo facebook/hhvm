@@ -112,8 +112,8 @@ const Injection* InjectionCache::getInjectionImpl(const StringData* code,
 
 const Injection* InjectionCache::getInjectionImpl(const std::string& code,
                                                   const std::string& desc) {
-  StackStringData sdCode(code.c_str(), code.size(), CopyString);
-  StackStringData sdDesc(desc.c_str(), desc.size(), CopyString);
+  StackStringData sdCode(code.c_str(), code.size(), AttachLiteral);
+  StackStringData sdDesc(desc.c_str(), desc.size(), AttachLiteral);
   return getInjectionImpl(&sdCode, &sdDesc);
 }
 

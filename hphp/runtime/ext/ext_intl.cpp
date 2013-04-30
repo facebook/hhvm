@@ -47,11 +47,11 @@ String f_intl_get_error_message() {
   if (!s_intl_error->m_error.custom_error_message.empty()) {
     return s_intl_error->m_error.custom_error_message;
   }
-  return String(u_errorName(s_intl_error->m_error.code), CopyString);
+  return String(u_errorName(s_intl_error->m_error.code), AttachLiteral);
 }
 
 String f_intl_error_name(int64_t error_code) {
-  return String(u_errorName((UErrorCode)error_code), CopyString);
+  return String(u_errorName((UErrorCode)error_code), AttachLiteral);
 }
 
 bool f_intl_is_failure(int64_t error_code) {
@@ -222,7 +222,7 @@ int64_t c_Collator::t_geterrorcode() {
 }
 
 String c_Collator::t_geterrormessage() {
-  return String(u_errorName(m_errcode.code), CopyString);
+  return String(u_errorName(m_errcode.code), AttachLiteral);
 }
 
 String c_Collator::t_getlocale(int64_t type /* = 0 */) {
@@ -234,7 +234,7 @@ String c_Collator::t_getlocale(int64_t type /* = 0 */) {
   String ret(
     (char*)ucol_getLocaleByType(m_ucoll, (ULocDataLocaleType)type,
                                 &(m_errcode.code)),
-    CopyString);
+    AttachLiteral);
   if (U_FAILURE(m_errcode.code)) {
     m_errcode.custom_error_message = "Error getting locale by type";
     s_intl_error->m_error.code = m_errcode.code;

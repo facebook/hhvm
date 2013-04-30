@@ -48,7 +48,7 @@ static inline void instHookSD(int type, const StringData* sd) {
 }
 
 static inline void instHookStr(int type, const char* str) {
-  StackStringData sd(str, CopyString);
+  StackStringData sd(str, AttachLiteral);
   instHookSD(type, &sd);
 }
 

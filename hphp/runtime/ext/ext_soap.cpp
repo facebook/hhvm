@@ -476,9 +476,9 @@ static bool do_request(c_SoapClient *client, xmlDoc *request,
     client->m_last_request = String((char*)buf, buf_size, CopyString);
   }
   response = client->o_invoke_few_args(s___dorequest, -1, 5,
-      String(buf, buf_size, CopyString),
-      String(location, CopyString),
-      String(action, CopyString),
+      String(buf, buf_size, AttachLiteral),
+      String(location, AttachLiteral),
+      String(action, AttachLiteral),
       version, one_way);
   if (!response.isString()) {
     if (client->m_soap_fault.isNull()) {
@@ -1774,7 +1774,7 @@ static void send_soap_server_fault(sdlFunctionPtr function, Variant fault,
   xmlChar *buf; int size;
   xmlDocDumpMemory(doc_return, &buf, &size);
   if (buf) {
-    echo(String((const char *)buf, size, CopyString));
+    echo(String((const char *)buf, size, AttachLiteral));
     xmlFree(buf);
   }
   xmlFreeDoc(doc_return);
@@ -2087,16 +2087,16 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
     if (!data || !*data || !size) {
       return;
     }
-    req = String(data, size, CopyString);
+    req = String(data, size, AttachLiteral);
 
     SystemGlobals *g = (SystemGlobals*)get_global_variables();
     if (g->GV(_SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
       String encoding = g->GV(_SERVER)[s_HTTP_CONTENT_ENCODING];
       Variant ret;
       if (encoding == "gzip" || encoding == "x-gzip") {
-        ret = f_gzinflate(String(data, size, CopyString));
+        ret = f_gzinflate(String(data, size, AttachLiteral));
       } else if (encoding == "deflate") {
-        ret = f_gzuncompress(String(data, size, CopyString));
+        ret = f_gzuncompress(String(data, size, AttachLiteral));
       } else {
         raise_warning("Request is encoded with unknown compression '%s'",
                         encoding.data());
@@ -2252,7 +2252,7 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
   }
   output_xml_header(soap_version);
   if (buf) {
-    echo(String((char*)buf, size, CopyString));
+    echo(String((char*)buf, size, AttachLiteral));
     xmlFree(buf);
   }
 }

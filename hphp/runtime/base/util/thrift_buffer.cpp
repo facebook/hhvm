@@ -69,7 +69,7 @@ void ThriftBuffer::write(CStrRef data) {
 
 void ThriftBuffer::flush() {
   *m_p = '\0';
-  String data(m_buf, m_p - m_buf, CopyString);
+  String data(m_buf, m_p - m_buf, AttachLiteral);
   m_p = m_buf;
   flushImpl(data);
 }
@@ -210,7 +210,7 @@ void ThriftBuffer::read(std::string &data) {
 }
 
 void ThriftBuffer::write(const std::string &data) {
-  write(String(data.data(), data.size(), CopyString));
+  write(String(data.data(), data.size(), AttachLiteral));
 }
 
 void ThriftBuffer::read(std::vector<std::string> &data) {

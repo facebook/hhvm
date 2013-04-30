@@ -646,10 +646,10 @@ public:
 
     switch (t->method) {
     case PHP_CURL_STDOUT:
-      echo(String(data, length, CopyString));
+      echo(String(data, length, AttachLiteral));
       break;
     case PHP_CURL_FILE:
-      return t->fp->write(String(data, length, CopyString), length);
+      return t->fp->write(String(data, length, AttachLiteral), length);
     case PHP_CURL_RETURN:
       if (length > 0) {
         t->buf.append(data, (int)length);
@@ -680,11 +680,11 @@ public:
       if (ch->m_write.method == PHP_CURL_RETURN && length > 0) {
         ch->m_write.buf.append(data, (int)length);
       } else {
-        echo(String(data, length, CopyString));
+        echo(String(data, length, AttachLiteral));
       }
       break;
     case PHP_CURL_FILE:
-      return t->fp->write(String(data, length, CopyString), length);
+      return t->fp->write(String(data, length, AttachLiteral), length);
     case PHP_CURL_USER:
       {
         Variant ret = ch->do_callback(

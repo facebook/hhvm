@@ -21,7 +21,6 @@
 #include <sqlite3.h>
 
 #include "runtime/base/md5.h"
-#include "runtime/vm/core_types.h"
 
 namespace HPHP {
 namespace VM {
@@ -63,7 +62,7 @@ class RepoExc : public std::exception {
 
 class RepoStmt {
  public:
-  explicit RepoStmt(Repo& repo);
+  RepoStmt(Repo& repo);
   ~RepoStmt();
  private:
   void finalize();
@@ -85,7 +84,7 @@ class RepoStmt {
 // queries outside of transactions are fraught with peril.
 class RepoQuery {
  public:
-  explicit RepoQuery(RepoStmt& stmt)
+  RepoQuery(RepoStmt& stmt)
     : m_stmt(stmt), m_row(false), m_done(false) {
     assert(m_stmt.prepared());
   }
@@ -194,7 +193,7 @@ class RepoTxnQuery : public RepoQuery {
 
 class RepoProxy {
  public:
-  explicit RepoProxy(Repo& repo) : m_repo(repo) {}
+  RepoProxy(Repo& repo) : m_repo(repo) {}
   ~RepoProxy() {}
 
  protected:

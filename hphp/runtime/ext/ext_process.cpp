@@ -466,7 +466,7 @@ void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
     if (len == -1 && errno == EINTR) continue;
     if (len <= 0) break; // break on error or EOF
     buffer[len] = '\0';
-    echo(String(buffer, len, CopyString));
+    echo(String(buffer, len, AttachLiteral));
   }
   int ret = ctx.exit();
   if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);

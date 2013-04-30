@@ -213,7 +213,7 @@ bool TestExtFb::test_fb_utf8ize() {
     }
     {
       // We intentionally consider null bytes invalid sequences.
-      Variant s = String("abc\0def", 7, CopyString);
+      Variant s = String("abc\0def", 7, AttachLiteral);
       VERIFY(f_fb_utf8ize(ref(s)));
       if (RuntimeOption::Utf8izeReplace) {
         VS(s, "abc\uFFFD""def");
@@ -259,7 +259,7 @@ bool TestExtFb::test_fb_utf8_strlen() {
     // byte then continues parsing.
     RuntimeOption::Utf8izeReplace = (i == 0);
     {
-      Variant s = String("abc\0def", 7, CopyString);
+      Variant s = String("abc\0def", 7, AttachLiteral);
       VS(s.toString().size(), 7);
       VS(f_fb_utf8_strlen(s), 7);
 

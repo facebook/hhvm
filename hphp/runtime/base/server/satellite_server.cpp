@@ -81,11 +81,11 @@ public:
   }
 
   virtual bool shouldHandle(const std::string &cmd) {
-    String url(cmd.c_str(), cmd.size(), CopyString);
+    String url(cmd.c_str(), cmd.size(), AttachLiteral);
     for (set<string>::const_iterator iter = m_allowedURLs.begin();
          iter != m_allowedURLs.end(); ++iter) {
       Variant ret = preg_match
-        (String(iter->c_str(), iter->size(), CopyString), url);
+        (String(iter->c_str(), iter->size(), AttachLiteral), url);
       if (ret.toInt64() > 0) {
         return true;
       }

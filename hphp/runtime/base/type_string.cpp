@@ -137,7 +137,7 @@ String::String(double n) {
 }
 
 StringData* buildStringData(litstr s) {
-  return NEW(StringData)(s, CopyString);
+  return NEW(StringData)(s, AttachLiteral);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ char String::charAt(int pos) const {
 String &String::operator=(litstr s) {
   if (m_px) decRefStr(m_px);
   if (s) {
-    m_px = NEW(StringData)(s, CopyString);
+    m_px = NEW(StringData)(s, AttachLiteral);
     m_px->setRefCount(1);
   } else {
     m_px = nullptr;
@@ -320,7 +320,7 @@ String &String::operator=(CVarRef var) {
 String &String::operator+=(litstr s) {
   if (s && *s) {
     if (empty()) {
-      m_px = NEW(StringData)(s, CopyString);
+      m_px = NEW(StringData)(s, AttachLiteral);
       m_px->setRefCount(1);
     } else if (m_px->getCount() == 1) {
       m_px->append(s, strlen(s));
@@ -725,11 +725,12 @@ void String::dump() const {
 // StaticString
 
 StaticString::StaticString(litstr s) {
-  m_px = StringData::GetStaticString(s);
+  StackStringData sd(s);
+  m_px = StringData::GetStaticString(&sd);
 }
 
 StaticString::StaticString(litstr s, int length) {
-  StackStringData sd(s, length, CopyString);
+  StackStringData sd(s, length, AttachLiteral);
   m_px = StringData::GetStaticString(&sd);
 }
 

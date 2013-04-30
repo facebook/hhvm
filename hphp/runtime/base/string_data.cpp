@@ -106,12 +106,12 @@ StringData* StringData::FindStaticString(const StringData* str) {
 }
 
 StringData *StringData::GetStaticString(const std::string &str) {
-  StackStringData sd(str.c_str(), str.size(), CopyString);
+  StackStringData sd(str.c_str(), str.size(), AttachLiteral);
   return GetStaticString(&sd);
 }
 
 StringData *StringData::GetStaticString(const char *str) {
-  StackStringData sd(str, strlen(str), CopyString);
+  StackStringData sd(str, strlen(str), AttachLiteral);
   return GetStaticString(&sd);
 }
 
@@ -164,6 +164,25 @@ Array StringData::GetConstants() {
   }
 
   return a;
+}
+
+void StringData::initLiteral(const char* data) {
+  return initLiteral(data, strlen(data));
+}
+
+void StringData::initLiteral(const char* data, int len) {
+  if (uint32_t(len) > MaxSize) {
+    throw InvalidArgumentException("len > 2^31-2", len);
+  }
+  // Do not copy literals, this StringData can have a shorter lifetime than
+  // the literal, and the client can count on this->data() giving back
+  // the literal ptr with the longer lifetime. Sketchy!
+  m_hash = 0;
+  _count = 0;
+  m_len = len;
+  m_cdata = data;
+  m_big.cap = len | IsLiteral;
+  assert(checkSane());
 }
 
 void StringData::enlist() {
@@ -384,7 +403,7 @@ void StringData::append(const char *s, int len) {
   // TODO: t1122987: in any of the cases below where we need a bigger buffer,
   // we can probably assume we're in a concat-loop and pick a good buffer
   // size to avoid O(N^2) copying cost.
-  if (isShared()) {
+  if (isShared() || isLiteral()) {
     // buffer is immutable, don't modify it.
     StringSlice r = slice();
     char* newdata = smart_concat(r.ptr, r.len, s, len);
@@ -514,8 +533,12 @@ StringData *StringData::copy(bool sharedMemory /* = false */) const {
     // which will be freed at the end of the request, and so must be
     // copied.
     return new StringData(data(), size(), CopyMalloc);
+  } else {
+    if (isLiteral()) {
+      return NEW(StringData)(data(), size(), AttachLiteral);
+    }
+    return NEW(StringData)(data(), size(), CopyString);
   }
-  return NEW(StringData)(data(), size(), CopyString);
 }
 
 MutableSlice StringData::escalate(uint32_t cap) {
@@ -545,7 +568,8 @@ StringData *StringData::Escalate(StringData *in) {
 void StringData::dump() const {
   StringSlice s = slice();
 
-  printf("StringData(%d) (%s%s%d): [", _count,
+  printf("StringData(%d) (%s%s%s%d): [", _count,
+         isLiteral() ? "literal " : "",
          isShared() ? "shared " : "",
          isStatic() ? "static " : "",
          s.len);
@@ -565,7 +589,7 @@ static StringData** precompute_chars() {
   StringData** raw = new StringData*[256];
   for (int i = 0; i < 256; i++) {
     char s[2] = { (char)i, 0 };
-    StackStringData str(s, 1, CopyString);
+    StackStringData str(s, 1, AttachLiteral);
     raw[i] = StringData::GetStaticString(&str);
   }
   return raw;

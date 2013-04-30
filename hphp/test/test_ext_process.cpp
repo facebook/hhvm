@@ -299,7 +299,7 @@ bool TestExtProcess::test_proc_open() {
   {
     File *f = pipes[0].toObject().getTyped<File>();
     VERIFY(f->valid());
-    String s("<?php print(getenv('some_option')); ?>", CopyString);
+    String s("<?php print(getenv('some_option')); ?>", AttachLiteral);
     f->write(s);
     f->close();
   }

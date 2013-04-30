@@ -874,7 +874,7 @@ int64_t f_xml_get_error_code(CObjRef parser) {
 
 String f_xml_error_string(int code) {
   char * str = (char *)XML_ErrorString((XML_Error)/*(int)*/code);
-  return String(str, CopyString);
+  return String(str, AttachLiteral);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

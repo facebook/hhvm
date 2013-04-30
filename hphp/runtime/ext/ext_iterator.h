@@ -124,37 +124,6 @@ String f_hphp_recursivedirectoryiterator_getsubpath(CObjRef obj);
 String f_hphp_recursivedirectoryiterator_getsubpathname(CObjRef obj);
 
 ///////////////////////////////////////////////////////////////////////////////
-// class MutableArrayIterator
-
-FORWARD_DECLARE_CLASS_BUILTIN(MutableArrayIterator);
-class c_MutableArrayIterator : public ExtObjectData, public Sweepable {
- public:
-  DECLARE_CLASS(MutableArrayIterator, MutableArrayIterator, ObjectData)
-
-  // need to implement
-  public: c_MutableArrayIterator(VM::Class* cls = c_MutableArrayIterator::s_cls);
-  public: ~c_MutableArrayIterator();
-  public: void t___construct(VRefParam array);
-  public: Variant t_currentref();
-  public: Variant t_current();
-  public: Variant t_key();
-  public: void t_next();
-  public: bool t_valid();
-  public: Variant t___destruct();
-
-
-  public: union {
-    char m_u[sizeof(MArrayIter)];
-    TypedValue m_align;
-  };
-  public: bool m_valid;
-
-  private: MArrayIter& marr() {
-    return *(MArrayIter*)(m_u);
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_EXT_ITERATOR_H_

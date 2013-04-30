@@ -6941,7 +6941,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     BuiltinFunction nif = (BuiltinFunction)info->m_nativeFunc;
     const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
     assert(mi &&
-      "MethodInfo not found; probably need to rebuild hphp/system");
+      "MethodInfo not found; may be a problem with the .idl.json files");
     FuncEmitter* fe = ue->newFuncEmitter(name, /*top*/ true);
     Offset base = ue->bcPos();
     fe->setBuiltinFunc(mi, bif, nif, base);
@@ -7081,7 +7081,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       StringData* parentName
         = StringData::GetStaticString(e.ci->getParentClass().get());
       if (parentName->empty()) {
-        // If this class doesn't have a base class, it's classEntries to be
+        // If this class doesn't have a base class, it's eligible to be
         // loaded now
         classEntries.push_back(e);
       } else {
@@ -7092,7 +7092,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     }
     for (unsigned k = 0; k < classEntries.size(); ++k) {
       Entry& e = classEntries[k];
-      // Any classes that derive from this class are now classEntries to be
+      // Any classes that derive from this class are now eligible to be
       // loaded
       PendingMap::iterator pendingIt = pending.find(e.name);
       if (pendingIt != pending.end()) {
@@ -7111,7 +7111,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       StringData::GetStaticString(e.ci->getParentClass().get());
     PreClassEmitter* pce = ue->newPreClassEmitter(e.name,
                                                   PreClass::AlwaysHoistable);
-    pce->init(0, 0, ue->bcPos(), AttrUnique | AttrPersistent, parentName, nullptr);
+    pce->init(0, 0, ue->bcPos(), AttrUnique|AttrPersistent, parentName,
+              nullptr);
     pce->setBuiltinClassInfo(e.ci, e.info->m_InstanceCtor, e.info->m_sizeof);
     {
       ClassInfo::InterfaceVec intfVec = e.ci->getInterfacesVec();
@@ -7160,7 +7161,10 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           assert(false);
         }
         pce->addConstant(
-          cnsInfo->name.get(), nullptr, (TypedValue*)(&val), empty_string.get());
+          cnsInfo->name.get(),
+          nullptr,
+          (TypedValue*)(&val),
+          empty_string.get());
       }
     }
     {

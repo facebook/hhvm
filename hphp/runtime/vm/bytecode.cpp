@@ -2498,8 +2498,6 @@ const ClassInfo::MethodInfo* VMExecutionContext::findFunctionInfo(
   if (it == m_functionInfos.end()) {
     Func* func = Unit::loadFunc(name.get());
     if (func == nullptr || func->builtinFuncPtr()) {
-      // Fall back to the logic in ClassInfo::FindFunction() logic to deal
-      // with builtin functions
       return nullptr;
     }
     AtomicSmartPtr<MethodInfoVM> &m = m_functionInfos[name];

@@ -34,12 +34,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_Iterator("Iterator");
-static StaticString s_IteratorAggregate("IteratorAggregate");
-static StaticString s_ArrayIterator("ArrayIterator");
-static StaticString s_MutableArrayIterator("MutableArrayIterator");
-
-static StaticString s_getIterator("getIterator");
 static StaticString s_count("count");
 
 const int64_t k_UCOL_DEFAULT = UCOL_DEFAULT;
@@ -680,13 +674,6 @@ Variant f_each(VRefParam array) {
 Variant f_current(VRefParam array) {
   return array.array_iter_current();
 }
-Variant f_hphp_current_ref(VRefParam array) {
-  if (!array.isArray()) {
-    throw_bad_array_exception();
-    return false;
-  }
-  return strongBind(array.array_iter_current_ref());
-}
 Variant f_next(VRefParam array) {
   return array.array_iter_next();
 }
@@ -704,59 +691,6 @@ Variant f_end(VRefParam array) {
 }
 Variant f_key(VRefParam array) {
   return array.array_iter_key();
-}
-
-
-static Variant f_hphp_get_iterator(VRefParam iterable, bool isMutable) {
-  if (iterable.isArray()) {
-    if (isMutable) {
-      return create_object(s_MutableArrayIterator,
-                           CREATE_VECTOR1(ref(iterable)));
-    }
-    return create_object(s_ArrayIterator,
-                         CREATE_VECTOR1(iterable));
-  }
-  if (iterable.isObject()) {
-    ObjectData *obj = iterable.getObjectData();
-    Variant iterator;
-    while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
-      iterator = obj->o_invoke(s_getIterator, Array());
-      if (!iterator.isObject()) break;
-      obj = iterator.getObjectData();
-    }
-    VM::Class* ctx = g_vmContext->getContextClass();
-    CStrRef context = ctx ? ctx->nameRef() : empty_string;
-    if (isMutable) {
-      if (obj->instanceof(SystemLib::s_IteratorClass)) {
-        throw FatalErrorException("An iterator cannot be used for "
-                                  "iteration by reference");
-      }
-      Array properties = obj->o_toIterArray(context, true);
-      return create_object(s_MutableArrayIterator,
-                           CREATE_VECTOR1(ref(properties)));
-    } else {
-      if (obj->instanceof(SystemLib::s_IteratorClass)) {
-        return obj;
-      }
-      return create_object(s_ArrayIterator,
-                           CREATE_VECTOR1(obj->o_toIterArray(context)));
-    }
-  }
-  raise_warning("Invalid argument supplied for iteration");
-  if (isMutable) {
-    return create_object(s_MutableArrayIterator,
-                         CREATE_VECTOR1(Array::Create()));
-  }
-  return create_object(s_ArrayIterator,
-                       CREATE_VECTOR1(Array::Create()));
-}
-
-Variant f_hphp_get_iterator(CVarRef iterable) {
-  return f_hphp_get_iterator(directRef(iterable), false);
-}
-
-Variant f_hphp_get_mutable_iterator(VRefParam iterable) {
-  return f_hphp_get_iterator(iterable, true);
 }
 
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict /* = false */) {

@@ -1070,26 +1070,6 @@
             ]
         },
         {
-            "name": "hphp_current_ref",
-            "desc": "Similar to current(), but hphp_current_ref() returns a reference to the current value in the array.",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Reference to the current value in the array.",
-                "ref": true
-            },
-            "args": [
-                {
-                    "name": "array",
-                    "type": "Variant",
-                    "desc": "The array.",
-                    "ref": true
-                }
-            ]
-        },
-        {
             "name": "next",
             "desc": "next() behaves like current(), with one difference. It advances the internal array pointer one place forward before returning the element value. That means it returns the next array value and advances the internal array pointer by one.",
             "flags": [
@@ -1196,43 +1176,6 @@
                     "name": "array",
                     "type": "Variant",
                     "desc": "The array.",
-                    "ref": true
-                }
-            ]
-        },
-        {
-            "name": "hphp_get_iterator",
-            "desc": "hphp_get_iterator() returns an iterator object for an array or an object.",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "The hphp_get_iterator() function returns a non mutable iterator object for an array or an object."
-            },
-            "args": [
-                {
-                    "name": "iterable",
-                    "type": "Variant",
-                    "desc": "The array or object to iterate on."
-                }
-            ]
-        },
-        {
-            "name": "hphp_get_mutable_iterator",
-            "desc": "hphp_get_mutable_iterator() returns an iterator object for an array or an object.",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "The hphp_get_mutable_iterator() function returns an iterator object for an array or an object. It could be mutable, but only for arrays and objects that are not instances of Iterator or IteratorAggregate."
-            },
-            "args": [
-                {
-                    "name": "iterable",
-                    "type": "Variant",
-                    "desc": "The array or object to iterate on.",
                     "ref": true
                 }
             ]

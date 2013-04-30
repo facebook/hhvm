@@ -113,16 +113,12 @@ int64_t f_count(CVarRef var, bool recursive = false);
 int64_t f_sizeof(CVarRef var, bool recursive = false);
 Variant f_each(VRefParam array);
 Variant f_current(VRefParam array);
-Variant f_hphp_current_ref(VRefParam array);
 Variant f_next(VRefParam array);
 Variant f_pos(VRefParam array);
 Variant f_prev(VRefParam array);
 Variant f_reset(VRefParam array);
 Variant f_end(VRefParam array);
 Variant f_key(VRefParam array);
-
-Variant f_hphp_get_iterator(CVarRef iterable);
-Variant f_hphp_get_mutable_iterator(VRefParam iterable);
 
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict = false);
 Variant f_range(CVarRef low, CVarRef high, CVarRef step = 1);

@@ -645,18 +645,6 @@ public:
   Class(PreClass* preClass, Class* parent, unsigned classVecLen);
   void atomicRelease();
 
-  static bool alwaysLowMem() {
-    // jemalloc 3.2.0 and later support allocating objects in low memory
-    // (addresses that fit in 32 bits), and we take advantage of this in
-    // translated code.
-#if defined(JEMALLOC_VERSION) &&                                        \
-  ((JEMALLOC_VERSION_MAJOR == 3 && JEMALLOC_VERSION_MINOR >= 2) ||      \
-   JEMALLOC_VERSION_MAJOR > 3)
-    return use_jemalloc && RuntimeOption::RepoAuthoritative;
-#else
-    return false;
-#endif
-  }
   static size_t sizeForNClasses(unsigned nClasses) {
     return offsetof(Class, m_classVec) + (sizeof(Class*) * nClasses);
   }

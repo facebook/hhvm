@@ -1578,11 +1578,7 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   // Test if it is the exact same class.  TODO(#2044801): we should be
   // doing this control flow at the IR level.
   if (!(testClass->attrs() & AttrAbstract)) {
-    if (Class::alwaysLowMem()) {
-      a.  cmpl   (r32(rTestClass), r32(rObjClass));
-    } else {
-      a.  cmpq   (rTestClass, rObjClass);
-    }
+    a.    cmpq   (rTestClass, rObjClass);
     a.    jne8   (notExact);
     a.    movb   (1, rdst);
     a.    jmp8   (out);
@@ -1600,11 +1596,7 @@ asm_label(a, notExact);
   a.    jb8    (falseLabel);
 
   // If it's a subclass, rTestClass must be at the appropriate index.
-  if (Class::alwaysLowMem()) {
-    a.  cmpl   (r32(rTestClass), rObjClass[vecOffset]);
-  } else {
-    a.  cmpq   (rTestClass, rObjClass[vecOffset]);
-  }
+  a.    cmpq   (rTestClass, rObjClass[vecOffset]);
   a.    sete   (rdst);
   a.    jmp8   (out);
 

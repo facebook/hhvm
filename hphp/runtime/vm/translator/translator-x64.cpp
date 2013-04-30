@@ -10509,11 +10509,7 @@ TranslatorX64::emitInstanceCheck(const Tracelet& t,
       // (meaning the class isn't defined yet) but that's ok: if it is null
       // the cmp will always fail.
       int offset = Class::classVecOff() + sizeof(Class*) * (parentVecLen-1);
-      if (Class::alwaysLowMem()) {
-        a.cmp_reg32_disp_reg64(r(cls), offset, r(inCls));
-      } else {
-        a.cmp_reg64_disp_reg64(r(cls), offset, r(inCls));
-      }
+      a.cmp_reg64_disp_reg64(r(cls), offset, r(inCls));
       if (verifying) {
         parentFailJe = a.code.frontier;
         a.jne8(parentFailJe);

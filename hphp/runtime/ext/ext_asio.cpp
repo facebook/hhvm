@@ -24,14 +24,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_asio_enter_context() {
-  // TODO: remove from API
-}
-
-void f_asio_exit_context() {
-  // TODO: remove from API
-}
-
 int f_asio_get_current_context_idx() {
   return AsioSession::Get()->getCurrentContextIdx();
 }
@@ -56,10 +48,6 @@ Object f_asio_get_running_in_context(int ctx_idx) {
 }
 
 Object f_asio_get_running() {
-  return AsioSession::Get()->getCurrentWaitHandle();
-}
-
-Object f_asio_get_current() {
   return AsioSession::Get()->getCurrentWaitHandle();
 }
 

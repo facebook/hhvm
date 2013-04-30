@@ -23,9 +23,6 @@ IMPLEMENT_SEP_EXTENSION_TEST(Asio);
 bool TestExtAsio::RunTests(const std::string &which) {
   bool ret = true;
 
-  RUN_TEST(test_asio_enter_context);
-  RUN_TEST(test_asio_exit_context);
-  RUN_TEST(test_asio_get_current);
   RUN_TEST(test_asio_set_on_failed_callback);
   RUN_TEST(test_WaitHandle);
   RUN_TEST(test_StaticWaitHandle);
@@ -41,18 +38,6 @@ bool TestExtAsio::RunTests(const std::string &which) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-bool TestExtAsio::test_asio_enter_context() {
-  return Count(true);
-}
-
-bool TestExtAsio::test_asio_exit_context() {
-  return Count(true);
-}
-
-bool TestExtAsio::test_asio_get_current() {
-  return Count(true);
-}
 
 bool TestExtAsio::test_asio_set_on_failed_callback() {
   return Count(true);

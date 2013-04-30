@@ -24,12 +24,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_asio_enter_context();
-void f_asio_exit_context();
 int f_asio_get_current_context_idx();
 Object f_asio_get_running_in_context(int ctx_idx);
 Object f_asio_get_running();
-Object f_asio_get_current();
 void f_asio_set_on_failed_callback(CVarRef on_failed_cb);
 void f_asio_set_on_started_callback(CVarRef on_started_cb);
 

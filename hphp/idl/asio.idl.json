@@ -4,30 +4,6 @@
     ],
     "funcs": [
         {
-            "name": "asio_enter_context",
-            "desc": "DEPRECATED: does nothing",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": null
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "asio_exit_context",
-            "desc": "DEPRECATED: does nothing",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": null
-            },
-            "args": [
-            ]
-        },
-        {
             "name": "asio_get_current_context_idx",
             "desc": "Get index of the current scheduler context, or 0 if there is none",
             "flags": [
@@ -61,19 +37,6 @@
         {
             "name": "asio_get_running",
             "desc": "Get currently running wait handle, or null if there is none",
-            "flags": [
-                "HasDocComment"
-            ],
-            "return": {
-                "type": "Object",
-                "desc": "A ContinuationWaitHandle that is running in the current context"
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "asio_get_current",
-            "desc": "DEPRECATED: use asio_get_running",
             "flags": [
                 "HasDocComment"
             ],

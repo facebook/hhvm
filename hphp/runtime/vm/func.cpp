@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "runtime/vm/func.h"
 
 #include <iostream>
 #include <boost/scoped_ptr.hpp>
@@ -23,7 +24,6 @@
 #include "util/debug.h"
 #include "runtime/base/strings.h"
 #include "runtime/vm/core_types.h"
-#include "runtime/vm/func.h"
 #include "runtime/vm/runtime.h"
 #include "runtime/vm/repo.h"
 #include "runtime/vm/translator/targetcache.h"
@@ -459,6 +459,7 @@ void Func::prettyPrint(std::ostream& out) const {
     if (m_attrs & AttrPrivate) { out << "private "; }
     if (m_attrs & AttrAbstract) { out << "abstract "; }
     if (m_attrs & AttrFinal) { out << "final "; }
+    if (m_attrs & AttrPhpLeafFn) { out << "(leaf) "; }
     out << preClass()->name()->data() << "::" << m_name->data();
   } else {
     out << "Function " << m_name->data();
@@ -674,23 +675,50 @@ const Func* Func::getGeneratorBody(const StringData* name) const {
 // FuncEmitter.
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
-  : m_ue(ue), m_pce(nullptr), m_sn(sn), m_id(id), m_name(n), m_numLocals(0),
-    m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
-    m_nextFreeIterator(0), m_retTypeConstraint(nullptr),
-    m_returnType(KindOfInvalid), m_top(false), m_isClosureBody(false),
-    m_isGenerator(false), m_isGeneratorFromClosure(false),
-    m_hasGeneratorAsBody(false), m_info(nullptr), m_builtinFuncPtr(nullptr) {
-}
+  : m_ue(ue)
+  , m_pce(nullptr)
+  , m_sn(sn)
+  , m_id(id)
+  , m_name(n)
+  , m_numLocals(0)
+  , m_numUnnamedLocals(0)
+  , m_activeUnnamedLocals(0)
+  , m_numIterators(0)
+  , m_nextFreeIterator(0)
+  , m_retTypeConstraint(nullptr)
+  , m_returnType(KindOfInvalid)
+  , m_top(false)
+  , m_isClosureBody(false)
+  , m_isGenerator(false)
+  , m_isGeneratorFromClosure(false)
+  , m_hasGeneratorAsBody(false)
+  , m_containsCalls(false)
+  , m_info(nullptr)
+  , m_builtinFuncPtr(nullptr)
+{}
 
 FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
                          PreClassEmitter* pce)
-  : m_ue(ue), m_pce(pce), m_sn(sn), m_name(n), m_numLocals(0),
-    m_numUnnamedLocals(0), m_activeUnnamedLocals(0), m_numIterators(0),
-    m_nextFreeIterator(0), m_retTypeConstraint(nullptr),
-    m_returnType(KindOfInvalid), m_top(false), m_isClosureBody(false),
-    m_isGenerator(false), m_isGeneratorFromClosure(false),
-    m_hasGeneratorAsBody(false), m_info(nullptr), m_builtinFuncPtr(nullptr) {
-}
+  : m_ue(ue)
+  , m_pce(pce)
+  , m_sn(sn)
+  , m_name(n)
+  , m_numLocals(0)
+  , m_numUnnamedLocals(0)
+  , m_activeUnnamedLocals(0)
+  , m_numIterators(0)
+  , m_nextFreeIterator(0)
+  , m_retTypeConstraint(nullptr)
+  , m_returnType(KindOfInvalid)
+  , m_top(false)
+  , m_isClosureBody(false)
+  , m_isGenerator(false)
+  , m_isGeneratorFromClosure(false)
+  , m_hasGeneratorAsBody(false)
+  , m_containsCalls(false)
+  , m_info(nullptr)
+  , m_builtinFuncPtr(nullptr)
+{}
 
 FuncEmitter::~FuncEmitter() {
 }
@@ -880,6 +908,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     attrs = Attr(attrs & ~AttrPersistent);
   }
 
+  if (!m_containsCalls) attrs = Attr(attrs | AttrPhpLeafFn);
+
   Func* f = (m_pce == nullptr)
     ? m_ue.newFunc(this, unit, m_id, m_line1, m_line2, m_base,
                    m_past, m_name, attrs, m_top, m_docComment,
@@ -997,6 +1027,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_isGenerator)
     (m_isGeneratorFromClosure)
     (m_hasGeneratorAsBody)
+    (m_containsCalls)
 
     (m_params)
     (m_localNames)

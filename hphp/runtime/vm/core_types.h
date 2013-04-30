@@ -72,25 +72,32 @@ constexpr Offset kInvalidOffset = std::numeric_limits<Offset>::max();
 typedef uint32_t Slot;
 const Slot kInvalidSlot = Slot(-1);
 
-// Special types that are not relevant to the runtime as a whole.
-// The order for public/protected/private matters in numerous places.
-//
-// Attr unions are directly stored as integers in .hhbc repositories, so
-// incompatible changes here require a schema version bump.
-//
-// AttrTrait on a method means that the method is NOT a constructor,
-// even though it may look like one
-//
-// AttrNoOverride (WholeProgram only) on a class means its not extended
-// and on a method means that no extending class defines the method.
-//
-// AttrVariadicByRef indicates a function is a builtin that takes
-// variadic arguments, where the arguments are either by ref or
-// optionally by ref.  (It is equivalent to having ClassInfo's
-// (RefVariableArguments | MixedVariableArguments).)
-//
-// AttrMayUseVV indicates that a function may need to use a VarEnv or
-// varargs (aka extraArgs) at run time.
+/*
+ * Special types that are not relevant to the runtime as a whole.
+ * The order for public/protected/private matters in numerous places.
+ *
+ * Attr unions are directly stored as integers in .hhbc repositories, so
+ * incompatible changes here require a schema version bump.
+ *
+ * AttrTrait on a method means that the method is NOT a constructor,
+ * even though it may look like one
+ *
+ * AttrNoOverride (WholeProgram only) on a class means its not extended
+ * and on a method means that no extending class defines the method.
+ *
+ * AttrVariadicByRef indicates a function is a builtin that takes
+ * variadic arguments, where the arguments are either by ref or
+ * optionally by ref.  (It is equivalent to having ClassInfo's
+ * (RefVariableArguments | MixedVariableArguments).)
+ *
+ * AttrMayUseVV indicates that a function may need to use a VarEnv or
+ * varargs (aka extraArgs) at run time.
+ *
+ * AttrPhpLeafFn indicates a function does not make any explicit calls
+ * to other php functions.  It may still call other user-level
+ * functions via re-entry (e.g. for destructors or autoload), and it
+ * may make calls to builtins using FCallBuiltin.
+ */
 enum Attr {
   AttrNone      = 0,             // class  property  method  //
   AttrReference = (1 << 0),      //                     X    //
@@ -101,6 +108,7 @@ enum Attr {
   AttrAbstract  = (1 << 5),      //    X                X    //
   AttrFinal     = (1 << 6),      //    X                X    //
   AttrInterface = (1 << 7),      //    X                     //
+  AttrPhpLeafFn = (1 << 7),      //                     X    //
   AttrTrait     = (1 << 8),      //    X                X    //
   AttrNoInjection = (1 << 9),    //                     X    //
   AttrUnique    = (1 << 10),     //    X                X    //

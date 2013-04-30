@@ -1555,7 +1555,7 @@ void TranslatorX64::unprotectCode() {
 
 void
 TranslatorX64::emitStackCheck(int funcDepth, Offset pc) {
-  funcDepth += kMaxJITInlineStackCells * sizeof(Cell);
+  funcDepth += kStackCheckPadding * sizeof(Cell);
 
   uint64_t stackMask = cellsToBytes(RuntimeOption::EvalVMStackElms) - 1;
   a.    mov_reg64_reg64(rVmSp, rScratch); // copy to destroy
@@ -2127,8 +2127,18 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
     emitPopRetIntoActRec(a);
     // entry point for magic methods comes later
     emitRB(a, RBTypeFuncEntry, func->fullName()->data());
-    // Guard: we have stack enough stack space to complete this function.
-    emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
+
+    /*
+     * Guard: we have stack enough stack space to complete this
+     * function.  We omit overflow checks if it is a leaf function
+     * that can't use more than kStackCheckPadding cells.
+     */
+    auto const needStackCheck =
+      !(func->attrs() & AttrPhpLeafFn) ||
+      func->maxStackCells() >= kStackCheckPadding;
+    if (needStackCheck) {
+      emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
+    }
   }
 
   SrcKey skFuncBody = emitPrologue(func, nPassed);

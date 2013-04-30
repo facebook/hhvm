@@ -638,6 +638,8 @@ public:
   void setHasGeneratorAsBody(bool b) { m_hasGeneratorAsBody = b; }
   bool hasGeneratorAsBody() const { return m_hasGeneratorAsBody; }
 
+  void setContainsCalls() { m_containsCalls = true; }
+
   void addUserAttribute(const StringData* name, TypedValue tv);
 
   void commit(RepoTxn& txn) const;
@@ -683,6 +685,7 @@ private:
   bool m_isGenerator;
   bool m_isGeneratorFromClosure;
   bool m_hasGeneratorAsBody;
+  bool m_containsCalls;
 
   Func::UserAttributeMap m_userAttributes;
 
@@ -695,7 +698,7 @@ class FuncRepoProxy : public RepoProxy {
   friend class Func;
   friend class FuncEmitter;
 public:
-  FuncRepoProxy(Repo& repo);
+  explicit FuncRepoProxy(Repo& repo);
   ~FuncRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
 

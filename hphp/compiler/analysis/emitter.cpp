@@ -275,6 +275,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
     getUnitEmitter().recordSourceLocation(m_tempLoc ? m_tempLoc.get() : \
                                           m_node->getLocation().get(), curPos); \
     if (flags & TF) getEmitterVisitor().restoreJumpTargetEvalStack(); \
+    if (isFCallStar(opcode)) getEmitterVisitor().recordCall(); \
     getEmitterVisitor().setPrevOpcode(opcode); \
   }
 
@@ -1396,6 +1397,10 @@ void EmitterVisitor::restoreJumpTargetEvalStack() {
     return;
   }
   m_evalStack = it->second;
+}
+
+void EmitterVisitor::recordCall() {
+  m_curFunc->setContainsCalls();
 }
 
 bool EmitterVisitor::isJumpTarget(Offset target) {
@@ -6666,8 +6671,13 @@ void EmitterVisitor::copyOverFPIRegions(FuncEmitter* fe) {
 }
 
 void EmitterVisitor::saveMaxStackCells(FuncEmitter* fe) {
-  fe->setMaxStackCells(m_actualStackHighWater + kNumActRecCells
-                       + m_fdescHighWater);
+  // Max stack cells is used for stack overflow checks.  We need to
+  // count all the locals, and all cells due to ActRecs.  We don't
+  // need to count this function's own ActRec because whoever called
+  // it already included it in its "max stack cells".
+  fe->setMaxStackCells(m_actualStackHighWater +
+                       fe->numLocals() +
+                       m_fdescHighWater);
   m_actualStackHighWater = 0;
   m_fdescHighWater = 0;
 }

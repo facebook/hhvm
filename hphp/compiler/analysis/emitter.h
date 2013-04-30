@@ -359,6 +359,7 @@ public:
     recordJumpTarget(target, m_evalStack);
   }
   void restoreJumpTargetEvalStack();
+  void recordCall();
   bool isJumpTarget(Offset target);
   void setPrevOpcode(Opcode op) { m_prevOpcode = op; }
   Opcode getPrevOpcode() const { return m_prevOpcode; }

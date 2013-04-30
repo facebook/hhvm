@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "runtime/vm/class.h"
 
 #include "runtime/vm/class.h"
 #include "runtime/base/base_includes.h"
@@ -1305,7 +1306,7 @@ void Class::setSpecial() {
   // Use 86ctor(), since no program-supplied constructor exists
   m_ctor = findSpecialMethod(this, sd86ctor);
   assert(m_ctor && "class had no user-defined constructor or 86ctor");
-  assert(m_ctor->attrs() == (AttrPublic|AttrNoInjection));
+  assert(m_ctor->attrs() == (AttrPublic|AttrNoInjection|AttrPhpLeafFn));
 }
 
 void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule) {

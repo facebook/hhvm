@@ -419,11 +419,15 @@ constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
 constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
 
 /*
- * We pad all stack overflow checks by a small amount to allow for
- * inlining functions without having to either do another stack check
- * or chase down prologues to smash.
+ * We pad all stack overflow checks by a small amount to allow for two
+ * things:
+ *
+ *   - inlining functions without having to either do another stack
+ *     check (or chase down prologues to smash checks to be bigger).
+ *
+ *   - omitting stack overflow checks on leaf functions
  */
-constexpr int kMaxJITInlineStackCells = 4 + kNumActRecCells;
+constexpr int kStackCheckPadding = 20;
 
 struct Fault {
   enum Type : int16_t {

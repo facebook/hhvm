@@ -1132,10 +1132,8 @@ static bool shouldIRInline(const Func* curFunc,
   if (func->numIterators() != 0) {
     return refuse("iterators");
   }
-  if (func->maxStackCells() >= kMaxJITInlineStackCells) {
-    FTRACE(1, "{} >= {}\n",
-           func->maxStackCells(),
-           kMaxJITInlineStackCells);
+  if (func->maxStackCells() >= kStackCheckPadding) {
+    FTRACE(1, "{} >= {}\n", func->maxStackCells(), kStackCheckPadding);
     return refuse("too many stack cells");
   }
 

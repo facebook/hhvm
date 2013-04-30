@@ -30,6 +30,7 @@
 #include "runtime/base/types.h"
 #include "runtime/ext/ext_closure.h"
 #include "runtime/ext/ext_continuation.h"
+#include "runtime/ext/ext_collections.h"
 #include "runtime/vm/bytecode.h"
 #include "runtime/vm/runtime.h"
 #include "runtime/base/stats.h"
@@ -4547,6 +4548,9 @@ static int64_t ak_exist_int(int64_t key, ArrayData* arr) {
 
 HOT_FUNC_VM
 static int64_t ak_exist_string_obj(StringData* key, ObjectData* obj) {
+  if (obj->isCollection()) {
+    return collectionOffsetContains(obj, key);
+  }
   CArrRef arr = obj->o_toArray();
   int64_t res = ak_exist_string_helper(key, arr.get());
   return res;
@@ -4554,6 +4558,9 @@ static int64_t ak_exist_string_obj(StringData* key, ObjectData* obj) {
 
 HOT_FUNC_VM
 static int64_t ak_exist_int_obj(int64_t key, ObjectData* obj) {
+  if (obj->isCollection()) {
+    return collectionOffsetContains(obj, key);
+  }
   CArrRef arr = obj->o_toArray();
   bool res = arr.get()->exists(key);
   return res;

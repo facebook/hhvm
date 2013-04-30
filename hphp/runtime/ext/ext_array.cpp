@@ -194,10 +194,14 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
   if (LIKELY(saccType == KindOfArray)) {
     ad = Variant::GetArrayData(sacc);
   } else if (saccType == KindOfObject) {
+    ObjectData* obj = Variant::GetObjectData(sacc);
+    if (obj->isCollection()) {
+      return collectionOffsetContains(obj, key);
+    }
     return f_array_key_exists(key, toArray(search));
   } else {
     throw_bad_type_exception("array_key_exists expects an array or an object; "
-                           "false returned.");
+                             "false returned.");
     return false;
   }
   Variant::TypedValueAccessor kacc = key.getTypedAccessor();

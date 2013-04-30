@@ -405,6 +405,7 @@ void c_Vector::t_sort(CVarRef col /* = null */) {
 }
 
 void c_Vector::t_reverse() {
+  if (m_size <= 1) return;
   TypedValue* start = m_data;
   TypedValue* end = m_data + m_size - 1;
   for (; start < end; ++start, --end) {

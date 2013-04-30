@@ -450,25 +450,6 @@
                     ]
                 },
                 {
-                    "name": "start",
-                    "desc": "Start asynchronous execution of a given Continuation",
-                    "flags": [
-                        "IsStatic",
-                        "HasDocComment"
-                    ],
-                    "return": {
-                        "type": "Object",
-                        "desc": "A WaitHandle representing started Continuation"
-                    },
-                    "args": [
-                        {
-                            "name": "continuation",
-                            "type": "Object",
-                            "desc": "A Continuation to be started"
-                        }
-                    ]
-                },
-                {
                     "name": "getPrivData",
                     "desc": "Get user's private data",
                     "flags": [

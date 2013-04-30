@@ -77,7 +77,11 @@ void c_Continuation::t_update(int64_t label, CVarRef value) {
 }
 
 Object c_Continuation::t_getwaithandle() {
-  return m_waitHandle.isNull() ? c_ContinuationWaitHandle::t_start(this) : m_waitHandle;
+  if (m_waitHandle.isNull()) {
+    c_ContinuationWaitHandle::Create(this);
+    assert(!m_waitHandle.isNull());
+  }
+  return m_waitHandle;
 }
 
 int64_t c_Continuation::t_getlabel() {

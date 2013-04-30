@@ -43,18 +43,15 @@ c_ContinuationWaitHandle::~c_ContinuationWaitHandle() {
 
 void c_ContinuationWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Use ContinuationWaitHandle::start() instead of constructor"));
+        "Use $continuation->getWaitHandle() instead of constructor"));
   throw e;
 }
 
-Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation) {
-  AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(!continuation.instanceof(SystemLib::s_ContinuationClass))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected continuation to be an instance of Continuation"));
-    throw e;
-  }
+void c_ContinuationWaitHandle::Create(c_Continuation* continuation) {
+  assert(continuation);
+  assert(continuation->m_waitHandle.isNull());
 
+  AsioSession* session = AsioSession::Get();
   uint16_t depth = session->getCurrentWaitHandleDepth();
   if (UNLIKELY(depth >= MAX_DEPTH)) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
@@ -62,29 +59,21 @@ Object c_ContinuationWaitHandle::ti_start(const char* cls, CObjRef continuation)
     throw e;
   }
 
-  c_Continuation* cont = static_cast<c_Continuation*>(continuation.get());
-  if (!cont->m_waitHandle.isNull()) {
-    if (session->isInContext()) {
-      // throws if cross-context cycle found
-      cont->m_waitHandle->enterContext(session->getCurrentContextIdx());
-    }
-    return cont->m_waitHandle;
-  }
-
-  if (UNLIKELY(cont->m_index != -1)) {
+  if (UNLIKELY(continuation->m_index != -1)) {
     Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      cont->m_running
+      continuation->m_running
       ? "Encountered an attempt to start currently running continuation"
       : "Encountered an attempt to start tainted continuation"));
     throw e;
   }
 
-  p_ContinuationWaitHandle wh = NEWOBJ(c_ContinuationWaitHandle)();
-  wh->start(cont, depth + 1);
+  continuation->m_waitHandle = NEWOBJ(c_ContinuationWaitHandle)();
+  continuation->m_waitHandle->initialize(continuation, depth + 1);
+
+  // needs to be called after continuation->m_waitHandle is set
   if (UNLIKELY(session->hasOnStartedCallback())) {
-    session->onStarted(wh);
+    session->onStarted(continuation->m_waitHandle);
   }
-  return wh;
 }
 
 Object c_ContinuationWaitHandle::t_getprivdata() {
@@ -95,12 +84,11 @@ void c_ContinuationWaitHandle::t_setprivdata(CObjRef data) {
   m_privData = data;
 }
 
-void c_ContinuationWaitHandle::start(c_Continuation* continuation, uint16_t depth) {
+void c_ContinuationWaitHandle::initialize(c_Continuation* continuation, uint16_t depth) {
   m_continuation = continuation;
   m_child = nullptr;
   m_privData = nullptr;
   m_depth = depth;
-  continuation->m_waitHandle = this;
 
   setState(STATE_SCHEDULED);
   if (isInContext()) {

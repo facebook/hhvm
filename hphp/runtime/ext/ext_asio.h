@@ -280,15 +280,12 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   public: c_ContinuationWaitHandle(VM::Class* cls = c_ContinuationWaitHandle::s_cls);
   public: ~c_ContinuationWaitHandle();
   public: void t___construct();
-  public: static Object ti_start(const char* cls , CObjRef continuation);
-  public: static Object t_start(CObjRef continuation) {
-    return ti_start("continuationwaithandle", continuation);
-  }
   public: Object t_getprivdata();
   public: void t_setprivdata(CObjRef data);
 
 
  public:
+  static void Create(c_Continuation* continuation);
   void run();
   uint16_t getDepth() { return m_depth; }
   String getName();
@@ -300,7 +297,7 @@ class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
   c_WaitableWaitHandle* getChild();
 
  private:
-  void start(c_Continuation* continuation, uint16_t depth);
+  void initialize(c_Continuation* continuation, uint16_t depth);
   void markAsSucceeded(const TypedValue* result);
   void markAsFailed(CObjRef exception);
 

@@ -101,6 +101,12 @@ void ArrayIter::objInit(ObjectData *obj) {
       m_pos = smp->iter_begin();
       break;
     }
+    case Collection::SetType: {
+      c_Set* st = getSet();
+      m_version = st->getVersion();
+      m_pos = st->iter_begin();
+      break;
+    }
     case Collection::PairType: {
       m_pos = 0;
       break;
@@ -157,6 +163,9 @@ bool ArrayIter::endHelper() {
     case Collection::StableMapType: {
       return m_pos == 0;
     }
+    case Collection::SetType: {
+      return m_pos == 0;
+    }
     case Collection::PairType: {
       return m_pos >= getPair()->t_count();
     }
@@ -191,6 +200,15 @@ void ArrayIter::nextHelper() {
       m_pos = smp->iter_next(m_pos);
       return;
     }
+    case Collection::SetType: {
+      assert(m_pos != 0);
+      c_Set* st = getSet();
+      if (UNLIKELY(m_version != st->getVersion())) {
+        throw_collection_modified();
+      }
+      m_pos = st->iter_next(m_pos);
+      return;
+    }
     case Collection::PairType: {
       m_pos++;
       return;
@@ -221,6 +239,9 @@ Variant ArrayIter::firstHelper() {
         throw_collection_modified();
       }
       return smp->iter_key(m_pos);
+    }
+    case Collection::SetType: {
+      return uninit_null();
     }
     case Collection::PairType: {
       return m_pos;
@@ -262,6 +283,13 @@ Variant ArrayIter::second() {
       }
       return smp->iter_value(m_pos);
     }
+    case Collection::SetType: {
+      c_Set* st = getSet();
+      if (UNLIKELY(m_version != st->getVersion())) {
+        throw_collection_modified();
+      }
+      return st->iter_value(m_pos);
+    }
     case Collection::PairType: {
       return tvAsCVarRef(getPair()->at(m_pos));
     }
@@ -296,6 +324,14 @@ void ArrayIter::secondHelper(Variant& v) {
         throw_collection_modified();
       }
       v = smp->iter_value(m_pos);
+      break;
+    }
+    case Collection::SetType: {
+      c_Set* st = getSet();
+      if (UNLIKELY(m_version != st->getVersion())) {
+        throw_collection_modified();
+      }
+      v = st->iter_value(m_pos);
       break;
     }
     case Collection::PairType: {

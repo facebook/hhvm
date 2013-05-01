@@ -321,8 +321,9 @@ enum Type {
   VectorType = 1,
   MapType = 2,
   StableMapType = 3,
-  PairType = 4,
-  MaxNumTypes = 5
+  SetType = 4,
+  PairType = 5,
+  MaxNumTypes = 6
 };
 }
 

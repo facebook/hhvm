@@ -5274,6 +5274,7 @@ TranslatorX64::translateNewCol(const Tracelet& t,
     case Collection::VectorType: fptr = (void*)newVectorHelper; break;
     case Collection::MapType: fptr = (void*)newMapHelper; break;
     case Collection::StableMapType: fptr = (void*)newStableMapHelper; break;
+    case Collection::SetType: fptr = (void*)newSetHelper; break;
     case Collection::PairType: fptr = (void*)newPairHelper; break;
     default: assert(false); break;
   }
@@ -5281,7 +5282,8 @@ TranslatorX64::translateNewCol(const Tracelet& t,
     ObjectData* obj1 UNUSED = newVectorHelper(42);
     ObjectData* obj2 UNUSED = newMapHelper(42);
     ObjectData* obj3 UNUSED = newStableMapHelper(42);
-    ObjectData* obj4 UNUSED = newPairHelper();
+    ObjectData* obj4 UNUSED = newSetHelper(42);
+    ObjectData* obj5 UNUSED = newPairHelper();
   }
   if (cType == Collection::PairType) {
     // newPairHelper does not take any arguments, since Pairs always

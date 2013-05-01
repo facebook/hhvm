@@ -97,6 +97,7 @@ ArrayData* new_tuple(int n, const TypedValue* values) {
 NEW_COLLECTION_HELPER(Vector)
 NEW_COLLECTION_HELPER(Map)
 NEW_COLLECTION_HELPER(StableMap)
+NEW_COLLECTION_HELPER(Set)
   
 ObjectData* newPairHelper() {
   ObjectData *obj = NEWOBJ(c_Pair)();
@@ -428,6 +429,11 @@ void collection_setm_ik1_v0(ObjectData* obj, int64_t key, TypedValue* value) {
       smp->set(key, value);
       break;
     }
+    case Collection::SetType: {
+      Object e(SystemLib::AllocRuntimeExceptionObject(
+        "Set does not support $c[$k] syntax"));
+      throw e;
+    }
     case Collection::PairType: {
       Object e(SystemLib::AllocRuntimeExceptionObject(
         "Cannot assign to an element of a Pair"));
@@ -456,6 +462,11 @@ void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
       smp->set(key, value);
       break;
+    }
+    case Collection::SetType: {
+      Object e(SystemLib::AllocRuntimeExceptionObject(
+        "Set does not support $c[$k] syntax"));
+      throw e;
     }
     case Collection::PairType: {
       Object e(SystemLib::AllocRuntimeExceptionObject(

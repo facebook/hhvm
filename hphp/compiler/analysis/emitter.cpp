@@ -2894,6 +2894,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             cType = Collection::MapType;
           } else if (!strcasecmp(clsName->c_str(), "stablemap")) {
             cType = Collection::StableMapType;
+          } else if (!strcasecmp(clsName->c_str(), "set")) {
+            cType = Collection::SetType;
           } else if (!strcasecmp(clsName->c_str(), "pair")) {
             cType = Collection::PairType;
             if (nElms != 2) {
@@ -2930,7 +2932,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               ExpressionPtr key = ap->getName();
               if ((bool)key) {
                 throw IncludeTimeFatalException(ap,
-                  "Keys may not be specified for Vector initialization");
+                  "Keys may not be specified for Vector, Set, or Pair "
+                  "initialization");
               }
               visit(ap->getValue());
               emitConvertToCell(e);

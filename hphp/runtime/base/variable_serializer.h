@@ -53,7 +53,7 @@ public:
   /**
    * Constructor and destructor.
    */
-  VariableSerializer(Type type, int option = 0, int maxRecur = 3);
+  explicit VariableSerializer(Type type, int option = 0, int maxRecur = 3);
   ~VariableSerializer() {
     if (m_arrayIds) delete m_arrayIds;
   }
@@ -91,6 +91,7 @@ public:
   void writeArrayKey(Variant key);
   void writeArrayValue(CVarRef value);
   void writeCollectionKey(CVarRef key);
+  void writeCollectionKeylessPrefix();
   void writeArrayFooter();
   void writeSerializableObject(CStrRef clsname, CStrRef serialized);
 

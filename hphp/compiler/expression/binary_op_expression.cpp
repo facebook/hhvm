@@ -71,6 +71,8 @@ BinaryOpExpression::BinaryOpExpression
       cType = Collection::MapType;
     } else if (strcasecmp(s.c_str(), "stablemap") == 0) {
       cType = Collection::StableMapType;
+    } else if (strcasecmp(s.c_str(), "set") == 0) {
+      cType = Collection::SetType;
     } else if (strcasecmp(s.c_str(), "pair") == 0) {
       cType = Collection::PairType;
     }

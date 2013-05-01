@@ -68,6 +68,7 @@ class ObjectData : public CountableNF {
     VectorAttrInit = (Collection::VectorType << 13),
     MapAttrInit = (Collection::MapType << 13),
     StableMapAttrInit = (Collection::StableMapType << 13),
+    SetAttrInit = (Collection::SetType << 13),
     PairAttrInit = (Collection::PairType << 13),
   };
 

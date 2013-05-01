@@ -30,6 +30,7 @@ struct TypedValue;
 class c_Vector;
 class c_Map;
 class c_StableMap;
+class c_Set;
 class c_Pair;
 struct Iter;
 
@@ -191,6 +192,10 @@ class ArrayIter {
   c_StableMap* getStableMap() {
     assert(hasCollection() && getCollectionType() == Collection::StableMapType);
     return (c_StableMap*)((intptr_t)m_obj & ~1);
+  }
+  c_Set* getSet() {
+    assert(hasCollection() && getCollectionType() == Collection::SetType);
+    return (c_Set*)((intptr_t)m_obj & ~1);
   }
   c_Pair* getPair() {
     assert(hasCollection() && getCollectionType() == Collection::PairType);

@@ -708,7 +708,6 @@ void VariableSerializer::writeArrayKey(Variant key) {
     m_buf->append("]=>\n");
     break;
   case APCSerialize:
-    assert(!info.is_object);
   case Serialize:
   case DebuggerSerialize:
     write(key);
@@ -756,6 +755,36 @@ void VariableSerializer::writeCollectionKey(CVarRef key) {
     m_valueCount++;
   }
   writeArrayKey(key);
+}
+
+void VariableSerializer::writeCollectionKeylessPrefix() {
+  ArrayInfo &info = m_arrayInfos.back();
+  switch (m_type) {
+  case PrintR:
+  case VarExport:
+  case PHPOutput:
+    indent();
+    break;
+  case VarDump:
+  case DebugDump:
+  case APCSerialize:
+  case Serialize:
+  case DebuggerSerialize:
+    break;
+  case JSON:
+  case DebuggerDump:
+    if (!info.first_element) {
+      m_buf->append(',');
+    }
+    if (m_type == JSON && m_option & k_JSON_PRETTY_PRINT) {
+      m_buf->append("\n");
+      indent();
+    }
+    break;
+  default:
+    assert(false);
+    break;
+  }
 }
 
 void VariableSerializer::writeArrayValue(CVarRef value) {

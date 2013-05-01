@@ -18,8 +18,8 @@
 #ifndef incl_HPHP_EXT_COLLECTION_H_
 #define incl_HPHP_EXT_COLLECTION_H_
 
-#include <runtime/base/base_includes.h>
-#include <system/lib/systemlib.h>
+#include "runtime/base/base_includes.h"
+#include "system/lib/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,91 +35,83 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
                                            ObjectData::UseUnset> {
  public:
   DECLARE_CLASS(Vector, Vector, ObjectData)
-  friend class c_VectorIterator;
-  friend class c_Map;
-  friend class c_StableMap;
-  friend class c_Pair;
-  friend class ArrayIter;
 
-  enum SortFlavor { IntegerSort, StringSort, GenericSort };
-
-  public: c_Vector(VM::Class* cls = c_Vector::s_cls);
-  public: ~c_Vector();
-  public: void freeData();
-  public: void t___construct(CVarRef iterable = null_variant);
-  public: Object t_add(CVarRef val);
-  public: Object t_addall(CVarRef val);
-  public: Object t_append(CVarRef val); // deprecated
-  public: Variant t_pop();
-  public: void t_resize(CVarRef sz, CVarRef value);
-  public: Object t_clear();
-  public: bool t_isempty();
-  public: int64_t t_count();
-  public: Object t_items();
-  public: Object t_keys();
-  public: Object t_view();
-  public: Object t_kvzip();
-  public: Variant t_at(CVarRef key);
-  public: Variant t_get(CVarRef key);
-  public: Object t_set(CVarRef key, CVarRef value);
-  public: Object t_setall(CVarRef iterable);
-  public: Object t_put(CVarRef key, CVarRef value); // deprecated
-  public: bool t_contains(CVarRef key); // deprecated
-  public: bool t_containskey(CVarRef key);
-  public: Object t_removekey(CVarRef key);
-  public: Array t_toarray();
-  public: void t_sort(CVarRef col = uninit_null()); // deprecated
-  public: void t_reverse();
-  public: void t_splice(CVarRef offset, CVarRef len = uninit_null(),
-                        CVarRef replacement = uninit_null());
-  public: int64_t t_linearsearch(CVarRef search_value);
-  public: void t_shuffle();
-  public: Object t_getiterator();
-  public: Object t_map(CVarRef callback);
-  public: Object t_filter(CVarRef callback);
-  public: Object t_zip(CVarRef iterable);
-  public: String t___tostring();
-  public: Variant t___get(Variant name);
-  public: Variant t___set(Variant name, Variant value);
-  public: bool t___isset(Variant name);
-  public: Variant t___unset(Variant name);
-  public: static Object ti_fromitems(const char* cls, CVarRef iterable);
-  public: static Object t_fromitems(CVarRef iterable) {
+ public:
+  explicit c_Vector(VM::Class* cls = c_Vector::s_cls);
+  ~c_Vector();
+  void freeData();
+  void t___construct(CVarRef iterable = null_variant);
+  Object t_add(CVarRef val);
+  Object t_addall(CVarRef val);
+  Object t_append(CVarRef val); // deprecated
+  Variant t_pop();
+  void t_resize(CVarRef sz, CVarRef value);
+  Object t_clear();
+  bool t_isempty();
+  int64_t t_count();
+  Object t_items();
+  Object t_keys();
+  Object t_view();
+  Object t_kvzip();
+  Variant t_at(CVarRef key);
+  Variant t_get(CVarRef key);
+  Object t_set(CVarRef key, CVarRef value);
+  Object t_setall(CVarRef iterable);
+  Object t_put(CVarRef key, CVarRef value); // deprecated
+  bool t_contains(CVarRef key); // deprecated
+  bool t_containskey(CVarRef key);
+  Object t_removekey(CVarRef key);
+  Array t_toarray();
+  void t_sort(CVarRef col = uninit_null()); // deprecated
+  void t_reverse();
+  void t_splice(CVarRef offset, CVarRef len = uninit_null(),
+                CVarRef replacement = uninit_null());
+  int64_t t_linearsearch(CVarRef search_value);
+  void t_shuffle();
+  Object t_getiterator();
+  Object t_map(CVarRef callback);
+  Object t_filter(CVarRef callback);
+  Object t_zip(CVarRef iterable);
+  String t___tostring();
+  Variant t___get(Variant name);
+  Variant t___set(Variant name, Variant value);
+  bool t___isset(Variant name);
+  Variant t___unset(Variant name);
+  static Object ti_fromitems(const char* cls, CVarRef iterable);
+  static Object t_fromitems(CVarRef iterable) {
     return ti_fromitems("vector", iterable);
   }
-  public: static Object ti_fromarray(const char* cls,
-                                     CVarRef arr); // deprecated
-  public: static Object t_fromarray(CVarRef arr) {
+  static Object ti_fromarray(const char* cls, CVarRef arr); // deprecated
+  static Object t_fromarray(CVarRef arr) {
     return ti_fromarray("vector", arr);
   }
-  public: static Object ti_fromvector(const char* cls,
-                                      CVarRef vec); // deprecated
-  public: static Object t_fromvector(CVarRef vec) {
+  static Object ti_fromvector(const char* cls, CVarRef vec); // deprecated
+  static Object t_fromvector(CVarRef vec) {
     return ti_fromvector("vector", vec);
   }
-  public: static Variant ti_slice(const char* cls, CVarRef vec, CVarRef offset,
-                                  CVarRef len = uninit_null());
-  public: static Variant t_slice(CVarRef vec, CVarRef offset,
-                                 CVarRef len = uninit_null()) {
+  static Variant ti_slice(const char* cls, CVarRef vec, CVarRef offset,
+                          CVarRef len = uninit_null());
+  static Variant t_slice(CVarRef vec, CVarRef offset,
+                         CVarRef len = uninit_null()) {
     return ti_slice("vector", vec, offset, len);
   }
 
-  public: static void throwOOB(int64_t key) ATTRIBUTE_COLD;
+  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
-  public: TypedValue* at(int64_t key) {
+  TypedValue* at(int64_t key) {
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       throwOOB(key);
       return NULL;
     }
     return &m_data[key];
   }
-  public: TypedValue* get(int64_t key) {
+  TypedValue* get(int64_t key) {
     if ((uint64_t)key >= (uint64_t)m_size) {
       return NULL;
     }
     return &m_data[key];
   }
-  public: void set(int64_t key, TypedValue* val) {
+  void set(int64_t key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       throwOOB(key);
@@ -131,7 +123,7 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     tv->m_data.num = val->m_data.num;
     tv->m_type = val->m_type;
   }
-  public: void add(TypedValue* val) {
+  void add(TypedValue* val) {
     assert(val->m_type != KindOfRef);
     ++m_version;
     if (m_capacity <= m_size) {
@@ -143,50 +135,55 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     tv->m_type = val->m_type;
     ++m_size;
   }
-  public: void resize(int64_t sz, TypedValue* val);
-  public: bool contains(int64_t key) {
+  void resize(int64_t sz, TypedValue* val);
+  bool contains(int64_t key) {
     return ((uint64_t)key < (uint64_t)m_size);
   }
-  public: void reserve(int64_t sz);
-  public: int getVersion() {
+  void reserve(int64_t sz);
+  int getVersion() {
     return m_version;
   }
 
-  public: Array toArrayImpl() const;
+  Array toArrayImpl() const;
 
-  public: Array o_toArray() const;
-  public: ObjectData* clone();
+  Array o_toArray() const;
+  ObjectData* clone();
 
-  private:
+  enum SortFlavor { IntegerSort, StringSort, GenericSort };
+
+ private:
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc);
 
-  public: void sort(int sort_flags, bool ascending);
-  public: void usort(CVarRef cmp_function);
+ public:
+  void sort(int sort_flags, bool ascending);
+  void usort(CVarRef cmp_function);
 
-  public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
-  public: static void OffsetSet(ObjectData* obj, TypedValue* key,
-                                TypedValue* val);
-  public: static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  public: static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
-  public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
-  public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
-  public: static void Unserialize(ObjectData* obj,
-                                  VariableUnserializer* uns,
-                                  int64_t sz,
-                                  char type);
+  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
+  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  static bool OffsetContains(ObjectData* obj, TypedValue* key);
+  static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  static void OffsetAppend(ObjectData* obj, TypedValue* val);
+  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
+                          int64_t sz, char type);
 
  private:
   void grow();
-  static void throwBadKeyType();
+  static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
   TypedValue* m_data;
   uint m_size;
   uint m_capacity;
   int32_t m_version;
 
+  friend class c_VectorIterator;
+  friend class c_Map;
+  friend class c_StableMap;
+  friend class c_Pair;
+  friend class ArrayIter;
   friend ObjectData* collectionDeepCopyVector(c_Vector* vec);
 };
 
@@ -197,23 +194,23 @@ FORWARD_DECLARE_CLASS_BUILTIN(VectorIterator);
 class c_VectorIterator : public ExtObjectData {
  public:
   DECLARE_CLASS(VectorIterator, VectorIterator, ObjectData)
-  friend class c_Vector;
 
-  // need to implement
-  public: c_VectorIterator(VM::Class* cls = c_VectorIterator::s_cls);
-  public: ~c_VectorIterator();
-  public: void t___construct();
-  public: Variant t_current();
-  public: Variant t_key();
-  public: bool t_valid();
-  public: void t_next();
-  public: void t_rewind();
-
+ public:
+  explicit c_VectorIterator(VM::Class* cls = c_VectorIterator::s_cls);
+  ~c_VectorIterator();
+  void t___construct();
+  Variant t_current();
+  Variant t_key();
+  bool t_valid();
+  void t_next();
+  void t_rewind();
 
  private:
   SmartPtr<c_Vector> m_obj;
   ssize_t m_pos;
   int32_t m_version;
+
+  friend class c_Vector;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -227,146 +224,136 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
                                         ObjectData::UseUnset> {
  public:
   DECLARE_CLASS(Map, Map, ObjectData)
-  friend class c_MapIterator;
-  friend class c_Vector;
-  friend class c_StableMap;
-  friend class ArrayIter;
 
-  public: static const int32_t KindOfTombstone = -1;
-
-  public: c_Map(VM::Class* cls = c_Map::s_cls);
-  public: ~c_Map();
-  public: void freeData();
-  public: void t___construct(CVarRef iterable = null_variant);
-  public: Object t_add(CVarRef val);
-  public: Object t_addall(CVarRef val);
-  public: Object t_clear();
-  public: bool t_isempty();
-  public: int64_t t_count();
-  public: Object t_items();
-  public: Object t_keys();
-  public: Object t_view();
-  public: Object t_kvzip();
-  public: Variant t_at(CVarRef key);
-  public: Variant t_get(CVarRef key);
-  public: Object t_set(CVarRef key, CVarRef value);
-  public: Object t_setall(CVarRef iterable);
-  public: Object t_put(CVarRef key, CVarRef value); // deprecated
-  public: bool t_contains(CVarRef key);
-  public: bool t_containskey(CVarRef key);
-  public: Object t_remove(CVarRef key);
-  public: Object t_removekey(CVarRef key);
-  public: Object t_discard(CVarRef key); // deprecated
-  public: Array t_toarray();
-  public: Array t_copyasarray(); // deprecated
-  public: Array t_tokeysarray(); // deprecated
-  public: Object t_values(); // deprecated
-  public: Array t_tovaluesarray(); // deprecated
-  public: Object t_updatefromarray(CVarRef arr);
-  public: Object t_updatefromiterable(CVarRef it);
-  public: Object t_differencebykey(CVarRef it);
-  public: Object t_getiterator();
-  public: Object t_map(CVarRef callback);
-  public: Object t_filter(CVarRef callback);
-  public: Object t_zip(CVarRef iterable);
-  public: String t___tostring();
-  public: Variant t___get(Variant name);
-  public: Variant t___set(Variant name, Variant value);
-  public: bool t___isset(Variant name);
-  public: Variant t___unset(Variant name);
-  public: static Object ti_fromitems(const char* cls, CVarRef iterable);
-  public: static Object t_fromitems(CVarRef iterable) {
+ public:
+  explicit c_Map(VM::Class* cls = c_Map::s_cls);
+  ~c_Map();
+  void freeData();
+  void t___construct(CVarRef iterable = null_variant);
+  Object t_add(CVarRef val);
+  Object t_addall(CVarRef val);
+  Object t_clear();
+  bool t_isempty();
+  int64_t t_count();
+  Object t_items();
+  Object t_keys();
+  Object t_view();
+  Object t_kvzip();
+  Variant t_at(CVarRef key);
+  Variant t_get(CVarRef key);
+  Object t_set(CVarRef key, CVarRef value);
+  Object t_setall(CVarRef iterable);
+  Object t_put(CVarRef key, CVarRef value); // deprecated
+  bool t_contains(CVarRef key);
+  bool t_containskey(CVarRef key);
+  Object t_remove(CVarRef key);
+  Object t_removekey(CVarRef key);
+  Object t_discard(CVarRef key); // deprecated
+  Array t_toarray();
+  Array t_copyasarray(); // deprecated
+  Array t_tokeysarray(); // deprecated
+  Object t_values(); // deprecated
+  Array t_tovaluesarray(); // deprecated
+  Object t_updatefromarray(CVarRef arr);
+  Object t_updatefromiterable(CVarRef it);
+  Object t_differencebykey(CVarRef it);
+  Object t_getiterator();
+  Object t_map(CVarRef callback);
+  Object t_filter(CVarRef callback);
+  Object t_zip(CVarRef iterable);
+  String t___tostring();
+  Variant t___get(Variant name);
+  Variant t___set(Variant name, Variant value);
+  bool t___isset(Variant name);
+  Variant t___unset(Variant name);
+  static Object ti_fromitems(const char* cls, CVarRef iterable);
+  static Object t_fromitems(CVarRef iterable) {
     return ti_fromitems("map", iterable);
   }
-  public: static Object ti_fromarray(const char* cls, // deprecated
-                                     CVarRef arr);
-  public: static Object t_fromarray(CVarRef arr) {
+  static Object ti_fromarray(const char* cls, CVarRef arr); // deprecated
+  static Object t_fromarray(CVarRef arr) {
     return ti_fromarray("map", arr);
   }
-  public: static Object ti_fromiterable(const char* cls, // deprecated
-                                        CVarRef vec);
-  public: static Object t_fromiterable(CVarRef vec) {
+  static Object ti_fromiterable(const char* cls, CVarRef vec); // deprecated
+  static Object t_fromiterable(CVarRef vec) {
     return ti_fromiterable("map", vec);
   }
 
-  public: static void throwOOB(int64_t key) ATTRIBUTE_COLD;
-  public: static void throwOOB(StringData* key) ATTRIBUTE_COLD;
+  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
-  public: TypedValue* at(int64_t key) {
+  TypedValue* at(int64_t key) {
     Bucket* p = find(key);
     if (LIKELY(p != NULL)) return &p->data;
     throwOOB(key);
     return NULL;
   }
-  public: TypedValue* get(int64_t key) {
+  TypedValue* get(int64_t key) {
     Bucket* p = find(key);
     if (p) return &p->data;
     return NULL;
   }
-  public: TypedValue* at(StringData* key) {
+  TypedValue* at(StringData* key) {
     Bucket* p = find(key->data(), key->size(), key->hash());
     if (LIKELY(p != NULL)) return &p->data;
     throwOOB(key);
     return NULL;
   }
-  public: TypedValue* get(StringData* key) {
+  TypedValue* get(StringData* key) {
     Bucket* p = find(key->data(), key->size(), key->hash());
     if (p) return &p->data;
     return NULL;
   }
-  public: void set(int64_t key, TypedValue* val) {
+  void set(int64_t key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
     update(key, val);
   }
-  public: void set(StringData* key, TypedValue* val) {
+  void set(StringData* key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
     update(key, val);
   }
-  public: void add(TypedValue* val);
-  public: void remove(int64_t key) {
+  void add(TypedValue* val);
+  void remove(int64_t key) {
     ++m_version;
     erase(find(key));
   }
-  public: void remove(StringData* key) {
+  void remove(StringData* key) {
     ++m_version;
     erase(find(key->data(), key->size(), key->hash()));
   }
-  public: bool contains(int64_t key) {
+  bool contains(int64_t key) {
     return find(key);
   }
-  public: bool contains(StringData* key) {
+  bool contains(StringData* key) {
     return find(key->data(), key->size(), key->hash());
   }
-  public: void reserve(int64_t sz) {
+  void reserve(int64_t sz) {
     if (int64_t(m_load) + sz - int64_t(m_size) >= computeMaxLoad()) {
-      growImpl(sz);
+      adjustCapacityImpl(sz);
     }
   }
-  public: int getVersion() {
+  int getVersion() {
     return m_version;
   }
-  public: Array toArrayImpl() const;
+  Array toArrayImpl() const;
 
-  public: Array o_toArray() const;
-  public: ObjectData* clone();
+  Array o_toArray() const;
+  ObjectData* clone();
 
-  public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
-  public: static void OffsetSet(ObjectData* obj, TypedValue* key,
-                                TypedValue* val);
-  public: static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  public: static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
-  public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
-  public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
-  public: static void Unserialize(ObjectData* obj,
-                                  VariableUnserializer* uns,
-                                  int64_t sz,
-                                  char type);
+  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
+  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  static bool OffsetContains(ObjectData* obj, TypedValue* key);
+  static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  static void OffsetAppend(ObjectData* obj, TypedValue* val);
+  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
+                          int64_t sz, char type);
 
-public:
-  class Bucket {
-  public:
+  static const int32_t KindOfTombstone = -1;
+
+  struct Bucket {
     /**
      * Buckets are 24 bytes and we allocate Buckets continguously in memory
      * without any padding, so some Buckets span multiple cache lines. We
@@ -415,7 +402,7 @@ public:
     void dump();
   };
 
-private:
+ private:
   /**
    * Map uses a power of two for the table size and quadratic probing to
    * resolve hash collisions.
@@ -440,11 +427,11 @@ private:
    * 2 elements).
    */
 
-  Bucket*          m_data;
-  uint             m_size;
-  uint             m_load;
-  uint             m_nLastSlot;
-  int32_t          m_version;
+  Bucket* m_data;
+  uint m_size;
+  uint m_load;
+  uint m_nLastSlot;
+  int32_t m_version;
 
   size_t numSlots() const {
     return m_nLastSlot + 1;
@@ -484,21 +471,13 @@ private:
   Bucket* findForInsert(const char* k, int len, strhash_t prehash) const;
   Bucket* findForNewInsert(size_t h0) const;
 
-  template <bool throwIfExists=false>
-  bool updateImpl(int64_t h, TypedValue* data);
-  template <bool throwIfExists=false>
-  bool updateImpl(StringData* key, TypedValue* data);
-  bool update(int64_t h, TypedValue* data) {
-    return updateImpl<>(h, data);
-  }
-  bool update(StringData* key, TypedValue* data) {
-    return updateImpl<>(key, data);
-  }
+  bool update(int64_t h, TypedValue* data);
+  bool update(StringData* key, TypedValue* data);
   void erase(Bucket* prev);
 
-  void growImpl(int64_t sz);
-  void grow() {
-    growImpl(m_size);
+  void adjustCapacityImpl(int64_t sz);
+  void adjustCapacity() {
+    adjustCapacityImpl(m_size);
   }
 
   void deleteBuckets();
@@ -509,9 +488,13 @@ private:
   Variant iter_key(ssize_t pos) const;
   Variant iter_value(ssize_t pos) const;
 
-  static void throwBadKeyType();
+  static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
   friend ObjectData* collectionDeepCopyMap(c_Map* mp);
+  friend class c_MapIterator;
+  friend class c_Vector;
+  friend class c_StableMap;
+  friend class ArrayIter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -521,23 +504,23 @@ FORWARD_DECLARE_CLASS_BUILTIN(MapIterator);
 class c_MapIterator : public ExtObjectData {
  public:
   DECLARE_CLASS(MapIterator, MapIterator, ObjectData)
-  friend class c_Map;
 
-  // need to implement
-  public: c_MapIterator(VM::Class* cls = c_MapIterator::s_cls);
-  public: ~c_MapIterator();
-  public: void t___construct();
-  public: Variant t_current();
-  public: Variant t_key();
-  public: bool t_valid();
-  public: void t_next();
-  public: void t_rewind();
-
+ public:
+  explicit c_MapIterator(VM::Class* cls = c_MapIterator::s_cls);
+  ~c_MapIterator();
+  void t___construct();
+  Variant t_current();
+  Variant t_key();
+  bool t_valid();
+  void t_next();
+  void t_rewind();
 
  private:
   SmartPtr<c_Map> m_obj;
   ssize_t m_pos;
   int32_t m_version;
+
+  friend class c_Map;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -551,149 +534,137 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
                                               ObjectData::UseUnset> {
  public:
   DECLARE_CLASS(StableMap, StableMap, ObjectData)
-  friend class c_StableMapIterator;
-  friend class c_Vector;
-  friend class c_Map;
-  friend class ArrayIter;
 
-  enum SortFlavor { IntegerSort, StringSort, GenericSort };
-
-  public: c_StableMap(VM::Class* cls = c_StableMap::s_cls);
-  public: ~c_StableMap();
-  public: void freeData();
-  public: void t___construct(CVarRef iterable = null_variant);
-  public: Object t_add(CVarRef val);
-  public: Object t_addall(CVarRef val);
-  public: Object t_clear();
-  public: bool t_isempty();
-  public: int64_t t_count();
-  public: Object t_items();
-  public: Object t_keys();
-  public: Object t_view();
-  public: Object t_kvzip();
-  public: Variant t_at(CVarRef key);
-  public: Variant t_get(CVarRef key);
-  public: Object t_set(CVarRef key, CVarRef value);
-  public: Object t_setall(CVarRef iterable);
-  public: Object t_put(CVarRef key, CVarRef value); // deprecated
-  public: bool t_contains(CVarRef key);
-  public: bool t_containskey(CVarRef key);
-  public: Object t_remove(CVarRef key);
-  public: Object t_removekey(CVarRef key);
-  public: Object t_discard(CVarRef key); // deprecated
-  public: Array t_toarray();
-  public: Array t_copyasarray(); // deprecated
-  public: Array t_tokeysarray(); // deprecated
-  public: Object t_values(); // deprecated
-  public: Array t_tovaluesarray(); // deprecated
-  public: Object t_updatefromarray(CVarRef arr);
-  public: Object t_updatefromiterable(CVarRef it);
-  public: Object t_differencebykey(CVarRef it);
-  public: Object t_getiterator();
-  public: Object t_map(CVarRef callback);
-  public: Object t_filter(CVarRef callback);
-  public: Object t_zip(CVarRef iterable);
-  public: String t___tostring();
-  public: Variant t___get(Variant name);
-  public: Variant t___set(Variant name, Variant value);
-  public: bool t___isset(Variant name);
-  public: Variant t___unset(Variant name);
-  public: static Object ti_fromitems(const char* cls, CVarRef iterable);
-  public: static Object t_fromitems(CVarRef iterable) {
+ public:
+  explicit c_StableMap(VM::Class* cls = c_StableMap::s_cls);
+  ~c_StableMap();
+  void freeData();
+  void t___construct(CVarRef iterable = null_variant);
+  Object t_add(CVarRef val);
+  Object t_addall(CVarRef val);
+  Object t_clear();
+  bool t_isempty();
+  int64_t t_count();
+  Object t_items();
+  Object t_keys();
+  Object t_view();
+  Object t_kvzip();
+  Variant t_at(CVarRef key);
+  Variant t_get(CVarRef key);
+  Object t_set(CVarRef key, CVarRef value);
+  Object t_setall(CVarRef iterable);
+  Object t_put(CVarRef key, CVarRef value); // deprecated
+  bool t_contains(CVarRef key);
+  bool t_containskey(CVarRef key);
+  Object t_remove(CVarRef key);
+  Object t_removekey(CVarRef key);
+  Object t_discard(CVarRef key); // deprecated
+  Array t_toarray();
+  Array t_copyasarray(); // deprecated
+  Array t_tokeysarray(); // deprecated
+  Object t_values(); // deprecated
+  Array t_tovaluesarray(); // deprecated
+  Object t_updatefromarray(CVarRef arr);
+  Object t_updatefromiterable(CVarRef it);
+  Object t_differencebykey(CVarRef it);
+  Object t_getiterator();
+  Object t_map(CVarRef callback);
+  Object t_filter(CVarRef callback);
+  Object t_zip(CVarRef iterable);
+  String t___tostring();
+  Variant t___get(Variant name);
+  Variant t___set(Variant name, Variant value);
+  bool t___isset(Variant name);
+  Variant t___unset(Variant name);
+  static Object ti_fromitems(const char* cls, CVarRef iterable);
+  static Object t_fromitems(CVarRef iterable) {
     return ti_fromitems("stablemap", iterable);
   }
-  public: static Object ti_fromarray(const char* cls,
-                                     CVarRef arr); // deprecated
-  public: static Object t_fromarray(CVarRef arr) {
+  static Object ti_fromarray(const char* cls, CVarRef arr); // deprecated
+  static Object t_fromarray(CVarRef arr) {
     return ti_fromarray("stablemap", arr);
   }
-  public: static Object ti_fromiterable(const char* cls,
-                                        CVarRef vec); // deprecated
-  public: static Object t_fromiterable(CVarRef vec) {
+  static Object ti_fromiterable(const char* cls, CVarRef vec); // deprecated
+  static Object t_fromiterable(CVarRef vec) {
     return ti_fromiterable("stablemap", vec);
   }
 
-  public: static void throwOOB(int64_t key) ATTRIBUTE_COLD;
-  public: static void throwOOB(StringData* key) ATTRIBUTE_COLD;
+  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
-  public: TypedValue* at(int64_t key) {
+  TypedValue* at(int64_t key) {
     Bucket* p = find(key);
     if (LIKELY(p != NULL)) return &p->data;
     throwOOB(key);
     return NULL;
   }
-  public: TypedValue* at(StringData* key) {
+  TypedValue* at(StringData* key) {
     Bucket* p = find(key->data(), key->size(), key->hash());
     if (LIKELY(p != NULL)) return &p->data;
     throwOOB(key);
     return NULL;
   }
-  public: TypedValue* get(int64_t key) {
+  TypedValue* get(int64_t key) {
     Bucket* p = find(key);
     if (p != NULL) return &p->data;
     return NULL;
   }
-  public: TypedValue* get(StringData* key) {
+  TypedValue* get(StringData* key) {
     Bucket* p = find(key->data(), key->size(), key->hash());
     if (p != NULL) return &p->data;
     return NULL;
   }
-  public: void set(int64_t key, TypedValue* val) {
+  void set(int64_t key, TypedValue* val) {
     update(key, val);
   }
-  public: void set(StringData* key, TypedValue* val) {
+  void set(StringData* key, TypedValue* val) {
     update(key, val);
   }
-  public: void add(TypedValue* val);
-  public: void remove(int64_t key) {
+  void add(TypedValue* val);
+  void remove(int64_t key) {
     ++m_version;
     erase(findForErase(key));
   }
-  public: void remove(StringData* key) {
+  void remove(StringData* key) {
     ++m_version;
     erase(findForErase(key->data(), key->size(), key->hash()));
   }
-  public: bool contains(int64_t key) {
+  bool contains(int64_t key) {
     return find(key);
   }
-  public: bool contains(StringData* key) {
+  bool contains(StringData* key) {
     return find(key->data(), key->size(), key->hash());
   }
-  public: void reserve(int64_t sz) {
+  void reserve(int64_t sz) {
     if (sz > int64_t(m_nTableSize)) {
-      growImpl(sz);
+      adjustCapacityImpl(sz);
     }
   }
-  public: int getVersion() {
+  int getVersion() {
     return m_version;
   }
-  public: Array toArrayImpl() const;
+  Array toArrayImpl() const;
 
-  public: Array o_toArray() const;
-  public: ObjectData* clone();
+  Array o_toArray() const;
+  ObjectData* clone();
 
-  public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
-  public: static void OffsetSet(ObjectData* obj, TypedValue* key,
-                                TypedValue* val);
-  public: static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  public: static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
-  public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
-  public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
-  public: static void Unserialize(ObjectData* obj,
-                                  VariableUnserializer* uns,
-                                  int64_t sz,
-                                  char type);
+  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
+  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  static bool OffsetContains(ObjectData* obj, TypedValue* key);
+  static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  static void OffsetAppend(ObjectData* obj, TypedValue* val);
+  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
+                          int64_t sz, char type);
 
-public:
-  class Bucket {
-  public:
+  struct Bucket {
     Bucket() : ikey(0), pListNext(nullptr), pListLast(nullptr), pNext(nullptr) {
       data.hash() = 0;
     }
-    Bucket(TypedValue* tv) : ikey(0), pListNext(nullptr), pListLast(nullptr),
-        pNext(nullptr) {
+    explicit Bucket(TypedValue* tv) : ikey(0), pListNext(nullptr),
+        pListLast(nullptr), pNext(nullptr) {
       tvDup(tv, &data);
       data.hash() = 0;
     }
@@ -743,46 +714,41 @@ public:
     void dump();
   };
 
-  private:
+  enum SortFlavor { IntegerSort, StringSort, GenericSort };
+
+ private:
   template <typename AccessorT>
   SortFlavor preSort(Bucket** buffer, const AccessorT& acc, bool checkTypes);
 
-  private: void postSort(Bucket** buffer);
+  void postSort(Bucket** buffer);
 
-  public: void asort(int sort_flags, bool ascending);
-  public: void ksort(int sort_flags, bool ascending);
-  public: void uasort(CVarRef cmp_function);
-  public: void uksort(CVarRef cmp_function);
+ public:
+  void asort(int sort_flags, bool ascending);
+  void ksort(int sort_flags, bool ascending);
+  void uasort(CVarRef cmp_function);
+  void uksort(CVarRef cmp_function);
 
-private:
-  uint             m_size;
-  uint             m_nTableSize;
-  uint             m_nTableMask;
-  int32_t          m_version;
-  Bucket*          m_pListHead;
-  Bucket*          m_pListTail;
-  Bucket**         m_arBuckets;
+ private:
+  uint m_size;
+  uint m_nTableSize;
+  uint m_nTableMask;
+  int32_t m_version;
+  Bucket* m_pListHead;
+  Bucket* m_pListTail;
+  Bucket** m_arBuckets;
 
   Bucket* find(int64_t h) const;
   Bucket* find(const char* k, int len, strhash_t prehash) const;
   Bucket** findForErase(int64_t h) const;
   Bucket** findForErase(const char* k, int len, strhash_t prehash) const;
 
-  template <bool throwIfExists=false>
-  bool updateImpl(int64_t h, TypedValue* data);
-  template <bool throwIfExists=false>
-  bool updateImpl(StringData* key, TypedValue* data);
-  bool update(int64_t h, TypedValue* data) {
-    return updateImpl<>(h, data);
-  }
-  bool update(StringData* key, TypedValue* data) {
-    return updateImpl<>(key, data);
-  }
+  bool update(int64_t h, TypedValue* data);
+  bool update(StringData* key, TypedValue* data);
   void erase(Bucket** prev);
 
-  void growImpl(int64_t sz);
-  void grow() {
-    growImpl(m_size);
+  void adjustCapacityImpl(int64_t sz);
+  void adjustCapacity() {
+    adjustCapacityImpl(m_size);
   }
 
   void deleteBuckets();
@@ -793,9 +759,13 @@ private:
   Variant iter_key(ssize_t pos) const;
   Variant iter_value(ssize_t pos) const;
 
-  static void throwBadKeyType();
+  static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
   friend ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
+  friend class c_StableMapIterator;
+  friend class c_Vector;
+  friend class c_Map;
+  friend class ArrayIter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -805,23 +775,258 @@ FORWARD_DECLARE_CLASS_BUILTIN(StableMapIterator);
 class c_StableMapIterator : public ExtObjectData {
  public:
   DECLARE_CLASS(StableMapIterator, StableMapIterator, ObjectData)
-  friend class c_StableMap;
 
-  // need to implement
-  public: c_StableMapIterator(VM::Class* cls = c_StableMapIterator::s_cls);
-  public: ~c_StableMapIterator();
-  public: void t___construct();
-  public: Variant t_current();
-  public: Variant t_key();
-  public: bool t_valid();
-  public: void t_next();
-  public: void t_rewind();
-
+ public:
+  explicit c_StableMapIterator(VM::Class* cls = c_StableMapIterator::s_cls);
+  ~c_StableMapIterator();
+  void t___construct();
+  Variant t_current();
+  Variant t_key();
+  bool t_valid();
+  void t_next();
+  void t_rewind();
 
  private:
   SmartPtr<c_StableMap> m_obj;
   ssize_t m_pos;
   int32_t m_version;
+
+  friend class c_StableMap;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class Set
+
+FORWARD_DECLARE_CLASS_BUILTIN(Set);
+class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
+                                        ObjectData::UseGet|
+                                        ObjectData::UseSet|
+                                        ObjectData::UseIsset|
+                                        ObjectData::UseUnset> {
+ public:
+  DECLARE_CLASS(Set, Set, ObjectData)
+
+ public:
+  static const int32_t KindOfTombstone = -1;
+
+  explicit c_Set(VM::Class* cls = c_Set::s_cls);
+  ~c_Set();
+  void freeData();
+  void t___construct(CVarRef iterable = null_variant);
+  Object t_add(CVarRef val);
+  Object t_addall(CVarRef val);
+  Object t_clear();
+  bool t_isempty();
+  int64_t t_count();
+  Object t_items();
+  Object t_view();
+  bool t_contains(CVarRef key);
+  Object t_remove(CVarRef key);
+  Object t_discard(CVarRef key);
+  Array t_toarray();
+  Object t_getiterator();
+  Object t_map(CVarRef callback);
+  Object t_filter(CVarRef callback);
+  Object t_zip(CVarRef iterable);
+  Object t_difference(CVarRef iterable);
+  Object t_updatefromarrayvalues(CVarRef arr);
+  Object t_updatefromiterablevalues(CVarRef iterable);
+  String t___tostring();
+  Variant t___get(Variant name);
+  Variant t___set(Variant name, Variant value);
+  bool t___isset(Variant name);
+  Variant t___unset(Variant name);
+  static Object ti_fromitems(const char* cls, CVarRef iterable);
+  static Object t_fromitems(CVarRef iterable) {
+    return ti_fromitems("set", iterable);
+  }
+  static Object ti_fromarray(const char* cls, CVarRef arr);
+  static Object t_fromarray(CVarRef arr) {
+    return ti_fromarray("set", arr);
+  }
+  static Object ti_fromarrays(const char* cls, int _argc,
+                              CArrRef _argv = null_array);
+  static Object t_fromarrays(int _argc, CArrRef _argv = null_array) {
+    return ti_fromarrays("set", _argc, _argv);
+  }
+  static Object ti_fromiterablevalues(const char* cls, CVarRef iterable);
+  static Object t_fromiterablevalues(CVarRef iterable) {
+    return ti_fromiterablevalues("set", iterable);
+  }
+
+  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwNoIndexAccess() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+
+  void add(TypedValue* val);
+  void remove(int64_t key) {
+    ++m_version;
+    erase(find(key));
+  }
+  void remove(StringData* key) {
+    ++m_version;
+    erase(find(key->data(), key->size(), key->hash()));
+  }
+  bool contains(int64_t key) {
+    return find(key);
+  }
+  bool contains(StringData* key) {
+    return find(key->data(), key->size(), key->hash());
+  }
+  void reserve(int64_t sz) {
+    if (int64_t(m_load) + sz - int64_t(m_size) >= computeMaxLoad()) {
+      adjustCapacityImpl(sz);
+    }
+  }
+  int getVersion() {
+    return m_version;
+  }
+  Array toArrayImpl() const;
+
+  Array o_toArray() const;
+  ObjectData* clone();
+
+  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
+  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  static bool OffsetContains(ObjectData* obj, TypedValue* key);
+  static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  static void OffsetAppend(ObjectData* obj, TypedValue* val);
+  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
+                          int64_t sz, char type);
+
+  struct Bucket {
+    /**
+     * Buckets are 16 bytes. We use m_aux for our own nefarious purposes.
+     * It is critical that when we return &data to clients, that they not
+     * read or write the m_aux field.
+     */
+    TypedValueAux data;
+    inline bool hasStr() const { return IS_STRING_TYPE(data.m_type); }
+    inline bool hasInt() const { return data.m_type == KindOfInt64; }
+    inline void setStr(StringData* k, strhash_t h) {
+      k->incRefCount();
+      data.m_data.pstr = k;
+      data.m_type = KindOfString;
+      data.hash() = int32_t(h) | 0x80000000;
+    }
+    inline void setInt(int64_t k) {
+      data.m_data.num = k;
+      data.m_type = KindOfInt64;
+      data.hash() = int32_t(k) | 0x80000000;
+    }
+    inline int32_t hash() const {
+      return data.hash();
+    }
+    bool validValue() const {
+      return (intptr_t(data.m_type) > 0);
+    }
+    bool empty() const {
+      return data.m_type == KindOfUninit;
+    }
+    bool tombstone() const {
+      return data.m_type == KindOfTombstone;
+    }
+    void dump();
+  };
+
+ private:
+  /**
+   * Set uses a power of two for the table size and quadratic probing to
+   * resolve hash collisions, similar to the Map class. See the comments
+   * in the Map class for more details on how the hashtable works and how
+   * we decide when to grow or shrink the table.
+   */
+
+  Bucket* m_data;
+  uint m_size;
+  uint m_load;
+  uint m_nLastSlot;
+  int32_t m_version;
+
+  size_t numSlots() const {
+    return m_nLastSlot + 1;
+  }
+
+  // The maximum load factor is 75%.
+  size_t computeMaxLoad() const {
+    size_t n = numSlots();
+    return (n - (n >> 2));
+  }
+
+  // When the map is not empty, the minimum allowed ratio
+  // of # elements / # slots is 18.75%.
+  size_t computeMinElements() const {
+    size_t n = numSlots();
+    return ((n >> 3) + ((n+8) >> 4));
+  }
+
+  Bucket* fetchBucket(Bucket* data, intptr_t slot) const {
+    return &data[slot];
+  }
+
+  Bucket* fetchBucket(intptr_t slot) const {
+    return fetchBucket(m_data, slot);
+  }
+
+  Bucket* find(int64_t h) const;
+  Bucket* find(const char* k, int len, strhash_t prehash) const;
+  Bucket* findForInsert(int64_t h) const;
+  Bucket* findForInsert(const char* k, int len, strhash_t prehash) const;
+  Bucket* findForNewInsert(size_t h0) const;
+
+  void update(int64_t h);
+  void update(StringData* key);
+  void erase(Bucket* prev);
+
+  void adjustCapacityImpl(int64_t sz);
+  void adjustCapacity() {
+    adjustCapacityImpl(m_size);
+  }
+
+  void deleteBuckets();
+
+  ssize_t iter_begin() const;
+  ssize_t iter_next(ssize_t prev) const;
+  ssize_t iter_prev(ssize_t prev) const;
+  Variant iter_value(ssize_t pos) const;
+
+  static void throwBadValueType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+
+  friend ObjectData* collectionDeepCopySet(c_Set* st);
+  friend class c_SetIterator;
+  friend class c_Vector;
+  friend class c_Map;
+  friend class c_StableMap;
+  friend class ArrayIter;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class SetIterator
+
+FORWARD_DECLARE_CLASS_BUILTIN(SetIterator);
+class c_SetIterator : public ExtObjectData {
+ public:
+  DECLARE_CLASS(SetIterator, SetIterator, ObjectData)
+
+ public:
+  explicit c_SetIterator(VM::Class* cls = c_SetIterator::s_cls);
+  ~c_SetIterator();
+  void t___construct();
+  Variant t_current();
+  Variant t_key();
+  bool t_valid();
+  void t_next();
+  void t_rewind();
+
+ private:
+  SmartPtr<c_Set> m_obj;
+  ssize_t m_pos;
+  int32_t m_version;
+
+  friend class c_Set;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -836,51 +1041,46 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
  public:
   DECLARE_CLASS(Pair, Pair, ObjectData)
 
-  friend class c_PairIterator;
-  friend class c_Vector;
-  friend class c_Map;
-  friend class c_StableMap;
-  friend class ArrayIter;
+ public:
+  explicit c_Pair(VM::Class* cls = c_Pair::s_cls);
+  ~c_Pair();
+  void t___construct();
+  bool t_isempty();
+  int64_t t_count();
+  Object t_items();
+  Object t_keys();
+  Object t_view();
+  Object t_kvzip();
+  Variant t_at(CVarRef key);
+  Variant t_get(CVarRef key);
+  bool t_containskey(CVarRef key);
+  Array t_toarray();
+  Object t_getiterator();
+  Object t_map(CVarRef callback);
+  Object t_filter(CVarRef callback);
+  Object t_zip(CVarRef iterable);
+  String t___tostring();
+  Variant t___get(Variant name);
+  Variant t___set(Variant name, Variant value);
+  bool t___isset(Variant name);
+  Variant t___unset(Variant name);
 
-  public: c_Pair(VM::Class* cls = c_Pair::s_cls);
-  public: ~c_Pair();
-  public: void t___construct();
-  public: bool t_isempty();
-  public: int64_t t_count();
-  public: Object t_items();
-  public: Object t_keys();
-  public: Object t_view();
-  public: Object t_kvzip();
-  public: Variant t_at(CVarRef key);
-  public: Variant t_get(CVarRef key);
-  public: bool t_containskey(CVarRef key);
-  public: Array t_toarray();
-  public: Object t_getiterator();
-  public: Object t_map(CVarRef callback);
-  public: Object t_filter(CVarRef callback);
-  public: Object t_zip(CVarRef iterable);
-  public: String t___tostring();
-  public: Variant t___get(Variant name);
-  public: Variant t___set(Variant name, Variant value);
-  public: bool t___isset(Variant name);
-  public: Variant t___unset(Variant name);
+  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
-  public: static void throwOOB(int64_t key) ATTRIBUTE_COLD;
-
-  public: TypedValue* at(int64_t key) {
+  TypedValue* at(int64_t key) {
     if (UNLIKELY(uint64_t(key) >= uint64_t(2))) {
       throwOOB(key);
       return NULL;
     }
     return &getElms()[key];
   }
-  public: TypedValue* get(int64_t key) {
+  TypedValue* get(int64_t key) {
     if (uint64_t(key) >= uint64_t(2)) {
       return NULL;
     }
     return &getElms()[key];
   }
-  public: void add(TypedValue* val) {
+  void add(TypedValue* val) {
     assert(val->m_type != KindOfRef);
     if (m_size == 2) {
       Object e(SystemLib::AllocRuntimeExceptionObject(
@@ -893,7 +1093,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
     tv->m_type = val->m_type;
     ++m_size;
   }
-  public: void addInt(int64_t val) {
+  void addInt(int64_t val) {
     if (m_size == 2) {
       Object e(SystemLib::AllocRuntimeExceptionObject(
         "Cannot add a new element to a Pair"));
@@ -904,33 +1104,32 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
     tv->m_type = KindOfInt64;
     ++m_size;
   }
-  public: bool contains(int64_t key) {
+  bool contains(int64_t key) {
     return (uint64_t(key) < uint64_t(2));
   }
 
-  public: Array toArrayImpl() const;
+  Array toArrayImpl() const;
 
-  public: Array o_toArray() const;
-  public: ObjectData* clone();
+  Array o_toArray() const;
+  ObjectData* clone();
 
-  public: static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
-  public: static void OffsetSet(ObjectData* obj, TypedValue* key,
-                                TypedValue* val);
-  public: static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  public: static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
-  public: static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  public: static void OffsetUnset(ObjectData* obj, TypedValue* key);
-  public: static void OffsetAppend(ObjectData* obj, TypedValue* val);
-  public: static bool Equals(ObjectData* obj1, ObjectData* obj2);
-  public: static void Unserialize(ObjectData* obj,
-                                  VariableUnserializer* uns,
-                                  int64_t sz,
-                                  char type);
+  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
+  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  static bool OffsetContains(ObjectData* obj, TypedValue* key);
+  static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  static void OffsetAppend(ObjectData* obj, TypedValue* val);
+  static bool Equals(ObjectData* obj1, ObjectData* obj2);
+  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
+                          int64_t sz, char type);
 
  private:
-  static void throwBadKeyType();
+  static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
   uint m_size;
+
+  // TODO Can we add something here to make sure elm0 is 16-byte aligned?
   TypedValue elm0;
   TypedValue elm1;
 
@@ -939,7 +1138,12 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   }
 
   friend ObjectData* collectionDeepCopyPair(c_Pair* pair);
-} __attribute__((aligned(16)));
+  friend class c_PairIterator;
+  friend class c_Vector;
+  friend class c_Map;
+  friend class c_StableMap;
+  friend class ArrayIter;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // class PairIterator
@@ -948,21 +1152,22 @@ FORWARD_DECLARE_CLASS_BUILTIN(PairIterator);
 class c_PairIterator : public ExtObjectData {
  public:
   DECLARE_CLASS(PairIterator, PairIterator, ObjectData)
-  friend class c_Pair;
 
-  // need to implement
-  public: c_PairIterator(VM::Class* cls = c_PairIterator::s_cls);
-  public: ~c_PairIterator();
-  public: void t___construct();
-  public: Variant t_current();
-  public: Variant t_key();
-  public: bool t_valid();
-  public: void t_next();
-  public: void t_rewind();
+ public:
+  explicit c_PairIterator(VM::Class* cls = c_PairIterator::s_cls);
+  ~c_PairIterator();
+  void t___construct();
+  Variant t_current();
+  Variant t_key();
+  bool t_valid();
+  void t_next();
+  void t_rewind();
 
  private:
   SmartPtr<c_Pair> m_obj;
   ssize_t m_pos;
+
+  friend class c_Pair;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -980,6 +1185,8 @@ inline TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
       return c_Map::OffsetGet(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetGet(obj, key);
+    case Collection::SetType:
+      return c_Set::OffsetGet(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetGet(obj, key);
     default:
@@ -1002,6 +1209,9 @@ inline void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
     case Collection::StableMapType:
       c_StableMap::OffsetSet(obj, key, val);
       break;
+    case Collection::SetType:
+      c_Set::OffsetSet(obj, key, val);
+      break;
     case Collection::PairType:
       c_Pair::OffsetSet(obj, key, val);
       break;
@@ -1019,6 +1229,8 @@ inline bool collectionIsset(ObjectData* obj, TypedValue* key) {
       return c_Map::OffsetIsset(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetIsset(obj, key);
+    case Collection::SetType:
+      return c_Set::OffsetIsset(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetIsset(obj, key);
     default:
@@ -1036,6 +1248,8 @@ inline bool collectionEmpty(ObjectData* obj, TypedValue* key) {
       return c_Map::OffsetEmpty(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetEmpty(obj, key);
+    case Collection::SetType:
+      return c_Set::OffsetEmpty(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetEmpty(obj, key);
     default:
@@ -1055,6 +1269,9 @@ inline void collectionUnset(ObjectData* obj, TypedValue* key) {
       break;
     case Collection::StableMapType:
       c_StableMap::OffsetUnset(obj, key);
+      break;
+    case Collection::SetType:
+      c_Set::OffsetUnset(obj, key);
       break;
     case Collection::PairType:
       c_Pair::OffsetUnset(obj, key);
@@ -1077,6 +1294,9 @@ inline void collectionAppend(ObjectData* obj, TypedValue* val) {
     case Collection::StableMapType:
       c_StableMap::OffsetAppend(obj, val);
       break;
+    case Collection::SetType:
+      c_Set::OffsetAppend(obj, val);
+      break;
     case Collection::PairType:
       c_Pair::OffsetAppend(obj, val);
       break;
@@ -1098,6 +1318,9 @@ inline Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
     case Collection::StableMapType: {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
       return tvAsVariant(smp->at(offset));
+    }
+    case Collection::SetType: {
+      c_Set::throwNoIndexAccess();
     }
     case Collection::PairType: {
       c_Pair* pair = static_cast<c_Pair*>(obj);
@@ -1125,6 +1348,9 @@ inline Variant& collectionOffsetGet(ObjectData* obj, CStrRef offset) {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
       return tvAsVariant(smp->at(key));
     }
+    case Collection::SetType: {
+      c_Set::throwNoIndexAccess();
+    }
     case Collection::PairType: {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Only integer keys may be used with Pairs"));
@@ -1145,6 +1371,8 @@ inline Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
       return tvAsVariant(c_Map::OffsetGet(obj, key));
     case Collection::StableMapType:
       return tvAsVariant(c_StableMap::OffsetGet(obj, key));
+    case Collection::SetType:
+      return tvAsVariant(c_Set::OffsetGet(obj, key));
     case Collection::PairType:
       return tvAsVariant(c_Pair::OffsetGet(obj, key));
     default:
@@ -1186,6 +1414,9 @@ inline void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
       smp->set(offset, tv);
       break;
     }
+    case Collection::SetType: {
+      c_Set::throwNoIndexAccess();
+    }
     case Collection::PairType: {
       Object e(SystemLib::AllocRuntimeExceptionObject(
         "Cannot assign to an element of a Pair"));
@@ -1218,6 +1449,9 @@ inline void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val) {
       smp->set(key, tv);
       break;
     }
+    case Collection::SetType: {
+      c_Set::throwNoIndexAccess();
+    }
     case Collection::PairType: {
       Object e(SystemLib::AllocRuntimeExceptionObject(
         "Cannot assign to an element of a Pair"));
@@ -1245,6 +1479,10 @@ inline void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
     }
     case Collection::StableMapType: {
       c_StableMap::OffsetSet(obj, key, tv);
+      break;
+    }
+    case Collection::SetType: {
+      c_Set::OffsetSet(obj, key, tv);
       break;
     }
     case Collection::PairType: {
@@ -1277,6 +1515,8 @@ inline bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
       return c_Map::OffsetContains(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetContains(obj, key);
+    case Collection::SetType:
+      return c_Set::OffsetContains(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetContains(obj, key);
     default:
@@ -1294,6 +1534,8 @@ inline bool collectionOffsetIsset(ObjectData* obj, CVarRef offset) {
       return c_Map::OffsetIsset(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetIsset(obj, key);
+    case Collection::SetType:
+      return c_Set::OffsetIsset(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetIsset(obj, key);
     default:
@@ -1311,6 +1553,8 @@ inline bool collectionOffsetEmpty(ObjectData* obj, CVarRef offset) {
       return c_Map::OffsetEmpty(obj, key);
     case Collection::StableMapType:
       return c_StableMap::OffsetEmpty(obj, key);
+    case Collection::SetType:
+      return c_Set::OffsetEmpty(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetEmpty(obj, key);
     default:
@@ -1337,6 +1581,8 @@ inline int64_t collectionSize(ObjectData* obj) {
       return static_cast<c_Map*>(obj)->t_count();
     case Collection::StableMapType:
       return static_cast<c_StableMap*>(obj)->t_count();
+    case Collection::SetType:
+      return static_cast<c_Set*>(obj)->t_count();
     case Collection::PairType:
       return static_cast<c_Pair*>(obj)->t_count();
     default:
@@ -1355,6 +1601,9 @@ inline void collectionReserve(ObjectData* obj, int64_t sz) {
       break;
     case Collection::StableMapType:
       static_cast<c_StableMap*>(obj)->reserve(sz);
+      break;
+    case Collection::SetType:
+      static_cast<c_Set*>(obj)->reserve(sz);
       break;
     case Collection::PairType:
       // do nothing
@@ -1375,14 +1624,17 @@ inline void collectionUnserialize(ObjectData* obj,
     case Collection::VectorType:
       c_Vector::Unserialize(obj, uns, sz, type);
       break;
-    case Collection::PairType:
-      c_Pair::Unserialize(obj, uns, sz, type);
-      break;
     case Collection::MapType:
       c_Map::Unserialize(obj, uns, sz, type);
       break;
     case Collection::StableMapType:
       c_StableMap::Unserialize(obj, uns, sz, type);
+      break;
+    case Collection::SetType:
+      c_Set::Unserialize(obj, uns, sz, type);
+      break;
+    case Collection::PairType:
+      c_Pair::Unserialize(obj, uns, sz, type);
       break;
     default:
       assert(false);
@@ -1399,6 +1651,8 @@ inline bool collectionEquals(ObjectData* obj1, ObjectData* obj2) {
       return c_Map::Equals(obj1, obj2);
     case Collection::StableMapType:
       return c_StableMap::Equals(obj1, obj2);
+    case Collection::SetType:
+      return c_Set::Equals(obj1, obj2);
     case Collection::PairType:
       return c_Pair::Equals(obj1, obj2);
     default:
@@ -1412,6 +1666,7 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);
 ObjectData* collectionDeepCopyMap(c_Map* mp);
 ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
+ObjectData* collectionDeepCopySet(c_Set* st);
 ObjectData* collectionDeepCopyPair(c_Pair* pair);
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -110,10 +110,10 @@ void ProcessInit() {
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the
   // normal repo.
-  bool db = RuntimeOption::EvalDumpBytecode;
+  int db = RuntimeOption::EvalDumpBytecode;
   bool rp = RuntimeOption::AlwaysUseRelativePath;
   bool sf = RuntimeOption::SafeFileAccess;
-  RuntimeOption::EvalDumpBytecode = false;
+  RuntimeOption::EvalDumpBytecode &= ~1;
   RuntimeOption::AlwaysUseRelativePath = false;
   RuntimeOption::SafeFileAccess = false;
 
@@ -125,15 +125,26 @@ void ProcessInit() {
 
   String currentDir = g_vmContext->getCwd();
 
-  string slib = get_systemlib();
+  if (RuntimeOption::RepoAuthoritative) {
+    auto file = g_vmContext->lookupPhpFile(String("/:systemlib.php").get(),
+                                         currentDir.data(), nullptr);
+    if (!file) {
+      // Die a horrible death.
+      Logger::Error("Unable to find/load systemlib.php");
+      _exit(1);
+    }
+    file->incRef();
+    SystemLib::s_unit = file->unit();
+  } else {
+    string slib = get_systemlib();
 
-  if (slib.empty()) {
-    // Die a horrible death.
-    Logger::Error("Unable to find/load systemlib.php");
-    _exit(1);
+    if (slib.empty()) {
+      // Die a horrible death.
+      Logger::Error("Unable to find/load systemlib.php");
+      _exit(1);
+    }
+    SystemLib::s_unit = compile_string(slib.c_str(), slib.size());
   }
-
-  SystemLib::s_unit = compile_string(slib.c_str(), slib.size());
 
   // Restore most settings before merging anything,
   // because of optimizations that depend on them

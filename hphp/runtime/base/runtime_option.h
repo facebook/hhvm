@@ -433,7 +433,8 @@ public:
   F(bool, HHIRDisableTx64,             true)                            \
   F(uint64_t, MaxHHIRTrans,            -1)                              \
   F(bool, HHIRDeadCodeElim,            true)                            \
-  F(bool, DumpBytecode,                false)                           \
+  /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
+  F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTCHuge,                   true)                            \

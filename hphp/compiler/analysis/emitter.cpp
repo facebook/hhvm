@@ -7331,6 +7331,41 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
   ues.clear();
 }
 
+static void emitSystemLib() {
+  if (!Option::WholeProgram) return;
+
+  string slib = get_systemlib();
+  if (slib.empty()) return;
+
+  Option::WholeProgram = false;
+  SystemLib::s_inited = false;
+
+  SCOPE_EXIT {
+    SystemLib::s_inited = true;
+    Option::WholeProgram = true;
+  };
+
+  AnalysisResultPtr ar(new AnalysisResult());
+  Scanner scanner(slib.c_str(), slib.size(),
+                  RuntimeOption::ScannerType, "/:systemlib.php");
+  Parser parser(scanner, "/:systemlib.php", ar, slib.size());
+  parser.parse();
+  FileScopePtr fsp = parser.getFileScope();
+  fsp->setOuterScope(ar);
+
+  ar->loadBuiltins();
+  ar->setPhase(AnalysisResult::AnalyzeAll);
+  fsp->analyzeProgram(ar);
+
+  int md5len;
+  char* md5str = string_md5(slib.c_str(), slib.size(), false, md5len);
+  MD5 md5(md5str);
+  free(md5str);
+
+  UnitEmitter* ue = emitHHBCUnitEmitter(ar, fsp, md5);
+  Repo::get().commitUnit(ue, UnitOriginFile);
+}
+
 /**
  * This is the entry point for offline bytecode generation.
  */
@@ -7385,6 +7420,8 @@ void emitAllHHBC(AnalysisResultPtr ar) {
         break;
       }
     }
+
+    emitSystemLib();
   } else {
     dispatcher.waitEmpty();
   }

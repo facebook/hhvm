@@ -76,36 +76,37 @@ if [ "$1" = "parser" -o "$1" = "all" ]; then
     [ $VERBOSE -eq 1 ] && echo "Generating parser"
     $BISON -pCompiler --verbose --locations -d -onew_hphp.tab.cpp hphp.y
     rm -f new_hphp.output
+
+    # Header
     cat new_hphp.tab.hpp | \
-      $SED -E "s/(T_\w+) = ([0-9]+)/YYTOKEN(\\2, \\1)/" | \
-      $SED -E "{
-                N
-                s/\{([ \r\n\t]+YYTOKEN\(([0-9]+),)/{\n#ifndef YYTOKEN_MIN\n#define YYTOKEN_MIN \\2\n#endif\\1/
-               }" | \
-      $SED -E "{
-                N
-                s/(YYTOKEN\(([0-9]+), T_\w+\)[ \r\n\t]+\};)/\\1\n#ifndef YYTOKEN_MAX\n#define YYTOKEN_MAX \\2\n#endif\n/
-               }" | \
-      $SED -E "s/   enum yytokentype/#ifndef YYTOKEN_MAP\n#define YYTOKEN_MAP enum yytokentype\n#define YYTOKEN(num, name) name = num\n#endif\n   YYTOKEN_MAP/" \
-      > new_hphp.tab.hpp.tmp
-    rm new_hphp.tab.hpp
-    (diff -q hphp.tab.hpp new_hphp.tab.hpp.tmp >/dev/null ||
-      mv -f new_hphp.tab.hpp.tmp hphp.tab.hpp) &&
-      rm -f new_hphp.tab.hpp.tmp
+      $SED -r -e 's/(T_\w+) = ([0-9]+)/YYTOKEN(\2, \1)/' | \
+      $SED -e "s/^\s*enum yytokentype/#ifndef YYTOKEN_MAP\n#define YYTOKEN_MAP enum yytokentype\n#define YYTOKEN(num, name) name = num\n#endif\n   YYTOKEN_MAP/" > new_hphp.tab.hpp.tmp
+    mv new_hphp.tab.hpp.tmp new_hphp.tab.hpp
+    cat new_hphp.tab.hpp | grep "     YYTOKEN(" | head -n 1 | \
+      $SED -r -e 's/     YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MIN\n#define YYTOKEN_MIN \1\n#endif/' \
+      >> new_hphp.tab.hpp
+    cat new_hphp.tab.hpp | grep "     YYTOKEN(" | tail -n 1 | \
+      $SED -r -e 's/     YYTOKEN.([0-9]+).*/#ifndef YYTOKEN_MAX\n#define YYTOKEN_MAX \1\n#endif/' \
+      >> new_hphp.tab.hpp
+    (diff -q hphp.tab.hpp new_hphp.tab.hpp >/dev/null ||
+      mv -f new_hphp.tab.hpp hphp.tab.hpp) &&
+      rm -f new_hphp.tab.hpp
+
+    # Implementation
     cat new_hphp.tab.cpp | \
-      $SED -e "s/first_line/line0/" \
-           -e "s/last_line/line1/" \
-           -e "s/first_column/char0/" \
-           -e "s/last_column/char1/" \
-           -e "s/union/struct/" \
+      $SED -e "s/first_line/line0/g" \
+           -e "s/last_line/line1/g" \
+           -e "s/first_column/char0/g" \
+           -e "s/last_column/char1/g" \
+           -e "s/union/struct/g" \
            -e "s/YYSTACK_ALLOC \(YYSTACK_BYTES \(yystacksize\)\);\n/YYSTACK_ALLOC \(YYSTACK_BYTES \(yystacksize\)\);\n        memset(yyptr, 0, YYSTACK_BYTES (yystacksize));\n/" \
            -e "s/YYSTACK_RELOCATE \(yyvs_alloc, yyvs\)/YYSTACK_RELOCATE_RESET (yyvs_alloc, yyvs)/" \
            -e "s/YYSTACK_FREE \(yyss\)/YYSTACK_FREE (yyss);\n  YYSTACK_CLEANUP/" \
       > new_hphp.tab.cpp.tmp
-    rm new_hphp.tab.cpp
-    (diff -q new_hphp.tab.cpp.tmp ../../compiler/parser/hphp.tab.cpp >/dev/null ||
-      mv -f new_hphp.tab.cpp.tmp ../../compiler/parser/hphp.tab.cpp) &&
-      rm -f new_hphp.tab.cpp.tmp
+    mv new_hphp.tab.cpp.tmp new_hphp.tab.cpp
+    (diff -q new_hphp.tab.cpp ../../compiler/parser/hphp.tab.cpp >/dev/null ||
+      mv -f new_hphp.tab.cpp ../../compiler/parser/hphp.tab.cpp) &&
+      rm -f new_hphp.tab.cpp
   else
     [ $VERBOSE -eq 1 ] && echo "No bison/sed with which to generate parser"
   fi

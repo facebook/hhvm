@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include "runtime/vm/repo.h"
 #include "util/logger.h"
 #include "util/trace.h"
 #include "util/repo_schema.h"
-#include "runtime/vm/repo.h"
 
 namespace HPHP {
 namespace VM {
@@ -425,7 +425,7 @@ static int busyHandler(void* opaque, int nCalls) {
   Repo* repo UNUSED = static_cast<Repo*>(opaque);
   // yield to allow other threads access to the machine
   // spin-wait can starve other threads.
-  sched_yield();
+  usleep(1000 * nCalls);
   return 1; // Tell SQLite to retry.
 }
 

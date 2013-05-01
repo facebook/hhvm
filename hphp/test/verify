@@ -368,7 +368,7 @@ sub run_test
         }
     }
 
-    if (-e "$opt_objdir/$test.opts") {
+    if (!$opt_no_exp && -e "$opt_objdir/$test.opts") {
         open (FILE, "<$opt_objdir/$test.opts");
         @lines = <FILE>;
         close(FILE);

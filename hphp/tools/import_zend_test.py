@@ -497,6 +497,11 @@ def walk(filename, source):
         test = test.replace('testdir', 'mkdir-003')
     if '/ext-standard-file/filesize_variation3-win32.php' in full_dest_filename:
         test = test.replace('filesize_variation3', 'filesize_variation3-win32')
+    if '/ext-hash/hash_file_basic.php' in full_dest_filename:
+        test = test.replace('hash_file_example.txt', 'hash_file_basic_example.txt')
+    if '/ext-hash/hash_file_error.php' in full_dest_filename:
+        test = test.replace('hash_file_example.txt', 'hash_file_error_example.txt')
+
 
     file(full_dest_filename, 'w').write(test)
 

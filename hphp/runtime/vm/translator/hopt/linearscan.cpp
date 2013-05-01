@@ -1135,6 +1135,26 @@ void LinearScan::rematerialize() {
   removeUnusedSpills();
 }
 
+// Return true if it's safe to rematerialize inst at reload's position.
+bool srcsAreLive(IRInstruction* inst, IRInstruction* reload) {
+  // It's only ok to rematerialize an instruction if its sources are
+  // guaranteed to be in known registers at the point we would other wise
+  // reload its spilled result.
+  // Although we can inspect each SSAtmp's live range (linear id of its
+  // definition point and last use), we don't trust that live range given
+  // the state of the IR after register allocation has inserted spills
+  // and reloads.  So only rematerialize instructions whose sources are
+  // in registers we trust to be live: rVmSp and rVmFp.  Ignore DefConst
+  // sources because they're implicitly turned into immediates by every
+  // instruction that uses them.
+  for (SSATmp* src : inst->getSrcs()) {
+    if (!src->hasReg(0) && src->inst()->op() != DefConst) return false;
+    auto reg = src->getReg(0);
+    if (reg != rVmSp && reg != rVmFp) return false;
+  }
+  return true;
+};
+
 void LinearScan::rematerializeAux() {
   struct State {
     SSATmp *sp, *fp;
@@ -1210,12 +1230,14 @@ void LinearScan::rematerializeAux() {
           // XXX: could change <newInst> to the non-check version.
           // Rematerialize those rematerializable instructions (i.e.,
           // isRematerializable returns true) and LdStack.
-          newInst = spilledInst->clone(m_irFactory);
-          // The new instruction needn't have an exit label; it must always
-          // be dominated by the original instruction because reloads are
-          // inserted just before uses, which must be dominated by the
-          // original (spilled) def.
-          newInst->setTaken(nullptr);
+          if (srcsAreLive(spilledInst, &inst)) {
+            newInst = spilledInst->clone(m_irFactory);
+            // The new instruction needn't have an exit label; it must always
+            // be dominated by the original instruction because reloads are
+            // inserted just before uses, which must be dominated by the
+            // original (spilled) def.
+            newInst->setTaken(nullptr);
+          }
         } else if (curFp) {
           // Rematerialize LdLoc.
           int loc = findLocal(spilledTmp);

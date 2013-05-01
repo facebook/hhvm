@@ -479,9 +479,9 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
   string pattern = hdfPattern.getString();
   if (!pattern.empty()) {
     Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
-                                    AttachLiteral),
+                                    CopyString),
                              String(value.c_str(), value.size(),
-                                    AttachLiteral));
+                                    CopyString));
     if (ret.toInt64() <= 0) {
       return false;
     }

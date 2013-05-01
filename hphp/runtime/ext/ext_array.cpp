@@ -169,9 +169,7 @@ Variant f_array_fill(int start_index, int num, CVarRef value) {
 static bool filter_func(CVarRef value, const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func, CREATE_VECTOR1(value),
-                          ctx->this_, ctx->cls,
-                          NULL, ctx->invName);
+  g_vmContext->invokeFunc((TypedValue*)&ret, *ctx, CREATE_VECTOR1(value));
   return ret.toBoolean();
 }
 Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
@@ -182,8 +180,7 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
   }
   CallCtx ctx;
   CallerFrame cf;
-  ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
-                                ctx.invName);
+  vm_decode_function(callback, cf(), false, ctx);
   if (ctx.func == NULL) {
     return uninit_null();
   }
@@ -250,9 +247,7 @@ static Variant map_func(CArrRef params, const void *data) {
     return params;
   }
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func, params,
-                          ctx->this_, ctx->cls,
-                          NULL, ctx->invName);
+  g_vmContext->invokeFunc((TypedValue*)&ret, *ctx, params);
   return ret;
 }
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
@@ -269,8 +264,7 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
   ctx.func = NULL;
   if (!callback.isNull()) {
     CallerFrame cf;
-    ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
-                                  ctx.invName);
+    vm_decode_function(callback, cf(), false, ctx);
   }
   if (ctx.func == NULL) {
     return ArrayUtil::Map(inputs, map_func, NULL);
@@ -467,9 +461,8 @@ Variant f_array_rand(CVarRef input, int num_req /* = 1 */) {
 static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func,
-                          CREATE_VECTOR2(result, operand), ctx->this_,
-                          ctx->cls, NULL, ctx->invName);
+  g_vmContext->invokeFunc((TypedValue*)&ret, *ctx,
+                          CREATE_VECTOR2(result, operand));
   return ret;
 }
 Variant f_array_reduce(CVarRef input, CVarRef callback,
@@ -477,8 +470,7 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
   getCheckedArray(input);
   CallCtx ctx;
   CallerFrame cf;
-  ctx.func = vm_decode_function(callback, cf(), false, ctx.this_, ctx.cls,
-                                ctx.invName);
+  vm_decode_function(callback, cf(), false, ctx);
   if (ctx.func == NULL) {
     return uninit_null();
   }
@@ -575,10 +567,8 @@ static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
                       const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant sink;
-  g_vmContext->invokeFunc((TypedValue*)&sink, ctx->func,
-                          CREATE_VECTOR3(ref(value), key, userdata),
-                          ctx->this_, ctx->cls,
-                          NULL, ctx->invName);
+  g_vmContext->invokeFunc((TypedValue*)&sink, *ctx,
+                          CREATE_VECTOR3(ref(value), key, userdata));
 }
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
                             CVarRef userdata /* = null_variant */) {
@@ -588,8 +578,7 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
   }
   CallCtx ctx;
   CallerFrame cf;
-  ctx.func = vm_decode_function(funcname, cf(), false, ctx.this_, ctx.cls,
-                                ctx.invName);
+  vm_decode_function(funcname, cf(), false, ctx);
   if (ctx.func == NULL) {
     return uninit_null();
   }
@@ -605,8 +594,7 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
   }
   CallCtx ctx;
   CallerFrame cf;
-  ctx.func = vm_decode_function(funcname, cf(), false, ctx.this_, ctx.cls,
-                                ctx.invName);
+  vm_decode_function(funcname, cf(), false, ctx);
   if (ctx.func == NULL) {
     return uninit_null();
   }

@@ -72,7 +72,6 @@ struct CodegenState {
   CodegenState(const IRFactory* factory, AsmInfo* asmInfo)
     : patches(factory, nullptr)
     , lastMarker(nullptr)
-    , firstMarkerSeen(false)
     , asmInfo(asmInfo)
   {}
 
@@ -82,7 +81,6 @@ struct CodegenState {
   // Keep track of the most recent Marker instruction we've seen in the
   // current trace (even across blocks).
   const MarkerData* lastMarker;
-  bool firstMarkerSeen;
 
   // True if this block's terminal Jmp_ has a desination equal to the
   // next block in the same assmbler.

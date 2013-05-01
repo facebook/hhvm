@@ -199,7 +199,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       int size;
       const void *data = transport->getPostData(size);
       if (data && size) {
-        params.append(String((char*)data, size, AttachLiteral));
+        params.append(String((char*)data, size, CopyString));
       }
     }
   }

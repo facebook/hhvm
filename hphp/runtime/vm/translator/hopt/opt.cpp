@@ -37,7 +37,7 @@ static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
  */
 static void insertRefCountAsserts(IRInstruction& inst, IRFactory* factory) {
   for (SSATmp& dst : inst.getDsts()) {
-    Type t = dst.getType();
+    Type t = dst.type();
     if (t.subtypeOf(Type::Counted | Type::StaticStr | Type::StaticArr)) {
       insertAfter(&inst, factory->gen(DbgAssertRefCount, &dst));
     }
@@ -54,7 +54,7 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRFactory* factory) {
   auto* block = inst.getBlock();
   auto pos = block->iteratorTo(&inst); ++pos;
   for (unsigned i = 0, n = vals.size(); i < n; ++i) {
-    Type t = vals[i]->getType();
+    Type t = vals[i]->type();
     if (t.subtypeOf(Type::Gen)) {
       IRInstruction* addr = factory->gen(LdStackAddr, Type::PtrToGen,
                                          sp, factory->defConst(i));
@@ -74,11 +74,11 @@ static void insertAsserts(Trace* trace, IRFactory* factory) {
     for (auto it = block->begin(), end = block->end(); it != end; ) {
       IRInstruction& inst = *it;
       ++it;
-      if (inst.getOpcode() == SpillStack) {
+      if (inst.op() == SpillStack) {
         insertSpillStackAsserts(inst, factory);
         continue;
       }
-      if (inst.getOpcode() == Call) {
+      if (inst.op() == Call) {
         SSATmp* sp = inst.getDst();
         IRInstruction* addr = factory->gen(LdStackAddr, Type::PtrToGen,
                                            sp, factory->defConst(0));
@@ -93,10 +93,13 @@ static void insertAsserts(Trace* trace, IRFactory* factory) {
 
 void optimizeTrace(Trace* trace, TraceBuilder* traceBuilder) {
   IRFactory* irFactory = traceBuilder->getIrFactory();
+
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, trace, msg);
     assert(JIT::checkCfg(trace, *irFactory));
+    if (debug) forEachTraceInst(trace, assertOperandTypes);
   };
+
   if (RuntimeOption::EvalHHIRMemOpt) {
     optimizeMemoryAccesses(trace, irFactory);
     finishPass("after MemeLim");

@@ -20,6 +20,7 @@
 #include <runtime/base/array/sort_helpers.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/execution_context.h>
+#include <runtime/vm/translator/translator-inline.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -206,27 +207,30 @@ void HphpArray::asort(int sort_flags, bool ascending) {
 #undef SORT_CASE_BLOCK
 #undef CALL_SORT
 
-#define USER_SORT_BODY(acc_type, resetKeys) \
-  do { \
-    freeStrongIterators(); \
-    if (!m_size) { \
-      if (resetKeys) { \
-        m_nextKI = 0; \
-      } \
-      return; \
-    } \
-    preSort<acc_type>(acc_type(), false); \
-    m_pos = ssize_t(0); \
-    try { \
-      ElmUCompare<acc_type> comp; \
-      comp.callback = &cmp_function; \
-      HPHP::Sort::sort(m_data, m_data + m_size, comp); \
-    } catch (...) { \
-      /* Make sure we leave the array in a consistent state */ \
-      postSort(resetKeys); \
-      throw; \
-    } \
-    postSort(resetKeys); \
+#define USER_SORT_BODY(acc_type, resetKeys)                     \
+  do {                                                          \
+    freeStrongIterators();                                      \
+    if (!m_size) {                                              \
+      if (resetKeys) {                                          \
+        m_nextKI = 0;                                           \
+      }                                                         \
+      return;                                                   \
+    }                                                           \
+    preSort<acc_type>(acc_type(), false);                       \
+    m_pos = ssize_t(0);                                         \
+    try {                                                       \
+      ElmUCompare<acc_type> comp;                               \
+      VM::Transl::CallerFrame cf;                               \
+      CallCtx ctx;                                              \
+      vm_decode_function(cmp_function, cf(), false, ctx);       \
+      comp.ctx = &ctx;                                          \
+      HPHP::Sort::sort(m_data, m_data + m_size, comp);          \
+    } catch (...) {                                             \
+      /* Make sure we leave the array in a consistent state */  \
+      postSort(resetKeys);                                      \
+      throw;                                                    \
+    }                                                           \
+    postSort(resetKeys);                                        \
   } while (0)
 
 void HphpArray::uksort(CVarRef cmp_function) {

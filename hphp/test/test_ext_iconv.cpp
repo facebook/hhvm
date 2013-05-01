@@ -39,16 +39,18 @@ bool TestExtIconv::RunTests(const std::string &which) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static const StaticString s_scheme("scheme");
+
 bool TestExtIconv::test_iconv_mime_encode() {
   Array preferences = CREATE_MAP4("input-charset", "ISO-8859-1",
                                   "output-charset", "UTF-8",
                                   "line-length", 76,
                                   "line-break-chars", "\n");
-  preferences.set("scheme", "Q");
+  preferences.set(s_scheme, "Q");
   VS(f_iconv_mime_encode("Subject", "Pr\xDC""fung Pr\xDC""fung", preferences),
      "Subject: =?UTF-8?Q?Pr=C3=9Cfung=20Pr=C3=9Cfung?=");
 
-  preferences.set("scheme", "B");
+  preferences.set(s_scheme, "B");
   VS(f_iconv_mime_encode("Subject", "Pr\xDC""fung Pr\xDC""fung", preferences),
      "Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=");
 

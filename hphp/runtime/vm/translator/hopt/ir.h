@@ -50,7 +50,10 @@ class StringData;
 namespace VM {
 namespace JIT {
 
-using namespace HPHP::VM::Transl;
+using HPHP::VM::Transl::TCA;
+using HPHP::VM::Transl::RegSet;
+using HPHP::VM::Transl::PhysReg;
+using HPHP::VM::Transl::ConditionCode;
 
 struct IRInstruction;
 
@@ -582,6 +585,7 @@ O(EmptyElem,                   D(Bool), C(TCA)                                \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
 O(IncStatGrouped,                   ND, CStr CStr C(Int),            E|N|Mem) \
+O(IncTransCounter,                  ND, NA,                                E) \
 O(DbgAssertRefCount,                ND, SUnk,                            N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(Nop,                              ND, NA,                               NF) \
@@ -895,6 +899,8 @@ inline Opcode queryJmpToQueryOp(Opcode opc) {
 
 inline ConditionCode queryJmpToCC(Opcode opc) {
   assert(isQueryJmpOp(opc));
+
+  using namespace HPHP::VM::Transl;
 
   switch (opc) {
     case JmpGt:                 return CC_G;
@@ -1532,7 +1538,7 @@ class RawMemSlot {
 
   int64_t getOffset()   const { return m_offset; }
   int32_t getSize()     const { return m_size; }
-  Type getType() const { return m_type; }
+  Type type() const { return m_type; }
   bool allowExtra()   const { return m_allowExtra; }
 
  private:
@@ -1540,45 +1546,46 @@ class RawMemSlot {
     : m_offset(offset), m_size(size), m_type(type), m_allowExtra(allowExtra) { }
 
   static RawMemSlot& GetContLabel() {
-    static RawMemSlot m(CONTOFF(m_label), sz::qword, Type::Int);
+    static RawMemSlot m(CONTOFF(m_label), Transl::sz::qword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContDone() {
-    static RawMemSlot m(CONTOFF(m_done), sz::byte, Type::Bool);
+    static RawMemSlot m(CONTOFF(m_done), Transl::sz::byte, Type::Bool);
     return m;
   }
   static RawMemSlot& GetContShouldThrow() {
-    static RawMemSlot m(CONTOFF(m_should_throw), sz::byte, Type::Bool);
+    static RawMemSlot m(CONTOFF(m_should_throw), Transl::sz::byte, Type::Bool);
     return m;
   }
   static RawMemSlot& GetContRunning() {
-    static RawMemSlot m(CONTOFF(m_running), sz::byte, Type::Bool);
+    static RawMemSlot m(CONTOFF(m_running), Transl::sz::byte, Type::Bool);
     return m;
   }
   static RawMemSlot& GetContARPtr() {
-    static RawMemSlot m(CONTOFF(m_arPtr), sz::qword, Type::StkPtr);
+    static RawMemSlot m(CONTOFF(m_arPtr), Transl::sz::qword, Type::StkPtr);
     return m;
   }
   static RawMemSlot& GetStrLen() {
-    static RawMemSlot m(StringData::sizeOffset(), sz::dword, Type::Int);
+    static RawMemSlot m(StringData::sizeOffset(), Transl::sz::dword, Type::Int);
     return m;
   }
   static RawMemSlot& GetFuncNumParams() {
-    static RawMemSlot m(Func::numParamsOff(), sz::qword, Type::Int);
+    static RawMemSlot m(Func::numParamsOff(), Transl::sz::qword, Type::Int);
     return m;
   }
   static RawMemSlot& GetFuncRefBitVec() {
-    static RawMemSlot m(Func::refBitVecOff(), sz::qword, Type::Int);
+    static RawMemSlot m(Func::refBitVecOff(), Transl::sz::qword, Type::Int);
     return m;
   }
   static RawMemSlot& GetContEntry() {
     static RawMemSlot m(
       Func::prologueTableOff() + sizeof(HPHP::VM::Transl::TCA),
-      sz::qword, Type::TCA);
+      Transl::sz::qword, Type::TCA);
     return m;
   }
   static RawMemSlot& GetMisCtx() {
-    static RawMemSlot m(HHIR_MISOFF(ctx), sz::qword, Type::Cls);
+    using namespace HPHP::VM::Transl;
+    static RawMemSlot m(HHIR_MISOFF(ctx), Transl::sz::qword, Type::Cls);
     return m;
   }
 
@@ -1661,18 +1668,18 @@ struct IRInstruction {
    * Return access to extra-data on this instruction, for the
    * specified opcode type.
    *
-   * Pre: getOpcode() == opc
+   * Pre: op() == opc
    */
   template<Opcode opc>
   const typename IRExtraDataType<opc>::type* getExtra() const {
-    assert(opc == getOpcode() && "getExtra type error");
+    assert(opc == op() && "getExtra type error");
     assert(m_extra != nullptr);
     return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
   }
 
   template<Opcode opc>
   typename IRExtraDataType<opc>::type* getExtra() {
-    assert(opc == getOpcode() && "getExtra type error");
+    assert(opc == op() && "getExtra type error");
     return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
   }
 
@@ -1686,7 +1693,7 @@ struct IRInstruction {
    * share the same kind of extra data.
    */
   template<class T> const T* getExtra() const {
-    auto opcode = getOpcode();
+    auto opcode = op();
     if (debug) assert_opcode_extra<T>(opcode);
     return static_cast<const T*>(m_extra);
   }
@@ -1735,7 +1742,7 @@ struct IRInstruction {
    */
   IRInstruction* clone(IRFactory* factory) const;
 
-  Opcode     getOpcode()   const       { return m_op; }
+  Opcode     op()   const       { return m_op; }
   void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
   Type       getTypeParam() const      { return m_typeParam; }
   void       setTypeParam(Type t)      { m_typeParam = t; }
@@ -1930,9 +1937,9 @@ inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
 class SSATmp {
 public:
   uint32_t          getId() const { return m_id; }
-  IRInstruction*    getInstruction() const { return m_inst; }
+  IRInstruction*    inst() const { return m_inst; }
   void              setInstruction(IRInstruction* i) { m_inst = i; }
-  Type              getType() const { return m_type; }
+  Type              type() const { return m_type; }
   void              setType(Type t) { m_type = t; }
   uint32_t          getLastUseId() const { return m_lastUseId; }
   void              setLastUseId(uint32_t newId) { m_lastUseId = newId; }
@@ -1940,7 +1947,7 @@ public:
   void              setUseCount(uint32_t count) { m_useCount = count; }
   void              incUseCount() { m_useCount++; }
   uint32_t          decUseCount() { return --m_useCount; }
-  bool              isBoxed() const { return getType().isBoxed(); }
+  bool              isBoxed() const { return type().isBoxed(); }
   bool              isString() const { return isA(Type::Str); }
   bool              isArray() const { return isA(Type::Arr); }
   std::string       toString() const;
@@ -1951,17 +1958,17 @@ public:
   // XXX: false for Null, etc.  Would rather it returns whether we
   // have a compile-time constant value.
   bool isConst() const {
-    return m_inst->getOpcode() == DefConst ||
-      m_inst->getOpcode() == LdConst;
+    return m_inst->op() == DefConst ||
+      m_inst->op() == LdConst;
   }
 
   /*
    * For SSATmps with a compile-time constant value, the following
    * functions allow accessing it.
    *
-   * Pre: getInstruction() &&
-   *   (getInstruction()->getOpcode() == DefConst ||
-   *    getInstruction()->getOpcode() == LdConst)
+   * Pre: inst() &&
+   *   (inst()->op() == DefConst ||
+   *    inst()->op() == LdConst)
    */
   bool               getValBool() const;
   int64_t            getValInt() const;
@@ -1977,13 +1984,13 @@ public:
   TCA                getValTCA() const;
 
   /*
-   * Returns: Type::subtypeOf(getType(), tag).
+   * Returns: Type::subtypeOf(type(), tag).
    *
    * This should be used for most checks on the types of IRInstruction
    * sources.
    */
   bool isA(Type tag) const {
-    return getType().subtypeOf(tag);
+    return type().subtypeOf(tag);
   }
 
   /*
@@ -1994,7 +2001,7 @@ public:
    * Reload instructions need to deal with SSATmps that are spilled.
    */
   bool hasReg(uint32_t i = 0) const {
-    return !m_isSpilled && m_regs[i] != InvalidReg;
+    return !m_isSpilled && m_regs[i] != Transl::InvalidReg;
   }
 
   /*
@@ -2062,7 +2069,7 @@ private:
     , m_isSpilled(false)
     , m_spillSlot(-1)
   {
-    m_regs[0] = m_regs[1] = InvalidReg;
+    m_regs[0] = m_regs[1] = Transl::InvalidReg;
   }
   SSATmp(const SSATmp&);
   SSATmp& operator=(const SSATmp&);
@@ -2092,19 +2099,19 @@ int vectorBaseIdx(Opcode opc);
 int vectorKeyIdx(Opcode opc);
 int vectorValIdx(Opcode opc);
 inline int vectorBaseIdx(const IRInstruction* inst) {
-  return vectorBaseIdx(inst->getOpcode());
+  return vectorBaseIdx(inst->op());
 }
 inline int vectorKeyIdx(const IRInstruction* inst) {
-  return vectorKeyIdx(inst->getOpcode());
+  return vectorKeyIdx(inst->op());
 }
 inline int vectorValIdx(const IRInstruction* inst) {
-  return vectorValIdx(inst->getOpcode());
+  return vectorValIdx(inst->op());
 }
 
 struct VectorEffects {
   static bool supported(Opcode op);
   static bool supported(const IRInstruction* inst) {
-    return supported(inst->getOpcode());
+    return supported(inst->op());
   }
 
   /*
@@ -2136,10 +2143,10 @@ struct VectorEffects {
   explicit VectorEffects(const IRInstruction* inst) {
     int keyIdx = vectorKeyIdx(inst);
     int valIdx = vectorValIdx(inst);
-    init(inst->getOpcode(),
-         inst->getSrc(vectorBaseIdx(inst))->getType(),
-         keyIdx == -1 ? Type::None : inst->getSrc(keyIdx)->getType(),
-         valIdx == -1 ? Type::None : inst->getSrc(valIdx)->getType());
+    init(inst->op(),
+         inst->getSrc(vectorBaseIdx(inst))->type(),
+         keyIdx == -1 ? Type::None : inst->getSrc(keyIdx)->type(),
+         valIdx == -1 ? Type::None : inst->getSrc(valIdx)->type());
   }
 
   template<typename Container>
@@ -2147,9 +2154,9 @@ struct VectorEffects {
     int keyIdx = vectorKeyIdx(opc);
     int valIdx = vectorValIdx(opc);
     init(opc,
-         srcs[vectorBaseIdx(opc)]->getType(),
-         keyIdx == -1 ? Type::None : srcs[keyIdx]->getType(),
-         valIdx == -1 ? Type::None : srcs[valIdx]->getType());
+         srcs[vectorBaseIdx(opc)]->type(),
+         keyIdx == -1 ? Type::None : srcs[keyIdx]->type(),
+         valIdx == -1 ? Type::None : srcs[valIdx]->type());
   }
 
   VectorEffects(Opcode op, Type base, Type key, Type val) {
@@ -2158,7 +2165,7 @@ struct VectorEffects {
 
   VectorEffects(Opcode op, SSATmp* base, SSATmp* key, SSATmp* val) {
     auto typeOrNone =
-      [](SSATmp* val){ return val ? val->getType() : Type::None; };
+      [](SSATmp* val){ return val ? val->type() : Type::None; };
     init(op, typeOrNone(base), typeOrNone(key), typeOrNone(val));
   }
 
@@ -2198,7 +2205,7 @@ struct Block : boost::noncopyable {
   }
 
   IRInstruction* getLabel() const {
-    assert(front()->getOpcode() == DefLabel);
+    assert(front()->op() == DefLabel);
     return front();
   }
 
@@ -2210,6 +2217,8 @@ struct Block : boost::noncopyable {
 
   void        addEdge(IRInstruction* jmp);
   void        removeEdge(IRInstruction* jmp);
+
+  inline bool isMain() const;
 
   // return the last instruction in the block
   IRInstruction* back() const {
@@ -2244,7 +2253,7 @@ struct Block : boost::noncopyable {
   // insert inst after this block's label, return an iterator to the
   // newly inserted instruction.
   iterator prepend(IRInstruction* inst) {
-    assert(front()->getOpcode() == DefLabel);
+    assert(front()->op() == DefLabel);
     auto it = begin();
     return insert(++it, inst);
   }
@@ -2266,7 +2275,7 @@ struct Block : boost::noncopyable {
   template<typename L>
   void forEachSrc(unsigned i, L body) {
     for (const EdgeData* n = m_preds; n; n = n->next) {
-      assert(n->jmp->getOpcode() == Jmp_ && n->jmp->getTaken() == this);
+      assert(n->jmp->op() == Jmp_ && n->jmp->getTaken() == this);
       body(n->jmp, n->jmp->getSrc(i));
     }
   }
@@ -2358,6 +2367,14 @@ public:
     return b;
   }
 
+  // temporary data field for use by individual passes
+  //
+  // Used by LinearScan as a "fake" instruction id, that comes
+  // between the id of the last instruction that branches to
+  // this exit trace, and the next instruction on the main trace.
+  uint32_t getData() const { return m_data; }
+  void setData(uint32_t d) { m_data = d; }
+
   uint32_t getBcOff() const { return m_bcOff; }
   Trace* addExitTrace(Trace* exit) {
     m_exitTraces.push_back(exit);
@@ -2385,14 +2402,53 @@ private:
   // offset of the first bytecode in this trace; 0 if this trace doesn't
   // represent a bytecode boundary.
   uint32_t m_bcOff;
+  uint32_t m_data;
   std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
   ExitList m_exitTraces;      // traces to which this trace exits
   Trace* m_main;              // ptr to parent trace if this is an exit trace
 };
 
+inline bool Block::isMain() const { return m_trace->isMain(); }
+
 /*
  * Some utility micro-passes used from other major passes.
  */
+
+/**
+ * PostorderSort encapsulates a depth-first postorder walk
+ */
+template <class Visitor>
+struct PostorderSort {
+  PostorderSort(Visitor &visitor, unsigned num_blocks) :
+      m_visited(num_blocks), m_visitor(visitor) {
+  }
+
+  void walk(Block* block) {
+    assert(!block->empty());
+    if (m_visited.test(block->getId())) return;
+    m_visited.set(block->getId());
+    Block* taken = block->getTaken();
+    if (taken && taken->getTrace()->isMain() != block->getTrace()->isMain()) {
+      walk(taken);
+      taken = nullptr;
+    }
+    if (Block* next = block->getNext()) walk(next);
+    if (taken) walk(taken);
+    m_visitor(block);
+  }
+private:
+  boost::dynamic_bitset<> m_visited;
+  Visitor &m_visitor;
+};
+
+/**
+ * perform a depth-first postorder walk
+ */
+template <class Visitor>
+void postorderWalk(Visitor visitor, unsigned num_blocks, Block* head) {
+  PostorderSort<Visitor> ps(visitor, num_blocks);
+  ps.walk(head);
+}
 
 /*
  * Remove any instruction if live[iid] == false
@@ -2442,11 +2498,11 @@ void optimizeTrace(Trace*, IRFactory* irFactory);
 int32_t spillValueCells(IRInstruction* spillStack);
 
 inline bool isConvIntOrPtrToBool(IRInstruction* instr) {
-  switch (instr->getOpcode()) {
+  switch (instr->op()) {
     case ConvIntToBool:
       return true;
     case ConvCellToBool:
-      return instr->getSrc(0)->getType().subtypeOfAny(
+      return instr->getSrc(0)->type().subtypeOfAny(
         Type::Func, Type::Cls, Type::FuncCls, Type::VarEnv, Type::TCA);
     default:
       return false;

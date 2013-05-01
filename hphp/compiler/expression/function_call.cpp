@@ -35,7 +35,7 @@
 #include <compiler/expression/parameter_expression.h>
 #include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/unary_op_expression.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 
 using namespace HPHP;
 

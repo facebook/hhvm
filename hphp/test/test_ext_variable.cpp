@@ -289,7 +289,9 @@ bool TestExtVariable::test_var_export() {
     VS(f_var_export(s, true), cr);
   }
   {
-    Variant v = CREATE_MAP3(String("\0", 1, AttachLiteral),"null","","empty","0", "nul");
+    Variant v = CREATE_MAP3(String("\0", 1, CopyString), "null",
+                            "", "empty",
+                            "0", "nul");
     VS(f_var_export(v, true),
        "array (\n"
        "  '' . \"\\0\" . '' => 'null',\n"
@@ -374,7 +376,7 @@ bool TestExtVariable::test_unserialize() {
     VS(obj.o_get("name"), "value");
   }
   {
-    Variant v = unserialize_from_string(String("O:8:\"stdClass\":1:{s:7:\"\0*\0name\";s:5:\"value\";}", 45, AttachLiteral));
+    Variant v = unserialize_from_string(String("O:8:\"stdClass\":1:{s:7:\"\0*\0name\";s:5:\"value\";}", 45, CopyString));
     VERIFY(v.is(KindOfObject));
     Object obj = v.toObject();
     VS(obj->o_getClassName(), "stdClass");

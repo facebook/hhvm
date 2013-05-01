@@ -263,9 +263,9 @@ void VirtualHost::init(Hdf vh) {
 bool VirtualHost::match(const string &host) const {
   if (!m_pattern.empty()) {
     Variant ret = preg_match(String(m_pattern.c_str(), m_pattern.size(),
-                                    AttachLiteral),
+                                    CopyString),
                              String(host.c_str(), host.size(),
-                                    AttachLiteral));
+                                    CopyString));
     return ret.toInt64() > 0;
   } else if (!m_prefix.empty()) {
     return strncasecmp(host.c_str(), m_prefix.c_str(), m_prefix.size()) == 0;
@@ -304,7 +304,7 @@ bool VirtualHost::rewriteURL(CStrRef host, String &url, bool &qsa,
         subject = host;
       }
       Variant ret = preg_match(String(it->pattern.c_str(), it->pattern.size(),
-                                      AttachLiteral), subject);
+                                      CopyString), subject);
       if (!ret.same(it->negate ? 0 : 1)) {
         passed = false;
         break;
@@ -379,9 +379,9 @@ std::string VirtualHost::serverName(const std::string &host) const {
     if (!m_pattern.empty()) {
       Variant matches;
       Variant ret = preg_match(String(m_pattern.c_str(), m_pattern.size(),
-                                      AttachLiteral),
+                                      CopyString),
                                String(host.c_str(), host.size(),
-                                      AttachLiteral),
+                                      CopyString),
                                matches);
       if (ret.toInt64() > 0) {
         String prefix = matches[1].toString();
@@ -414,9 +414,9 @@ std::string VirtualHost::filterUrl(const std::string &url) const {
     if (!filter.urlPattern.empty()) {
       Variant ret = preg_match(String(filter.urlPattern.c_str(),
                                       filter.urlPattern.size(),
-                                      AttachLiteral),
+                                      CopyString),
                                String(url.c_str(), url.size(),
-                                      AttachLiteral));
+                                      CopyString));
       match = (ret.toInt64() > 0);
     }
 
@@ -429,9 +429,9 @@ std::string VirtualHost::filterUrl(const std::string &url) const {
       int count = preg_replace(ret, filter.namePattern.c_str(),
                                String(filter.replaceWith.c_str(),
                                       filter.replaceWith.size(),
-                                      AttachLiteral),
+                                      CopyString),
                                String(url.c_str(), url.size(),
-                                      AttachLiteral));
+                                      CopyString));
       if (!same(ret, false) && count > 0) {
         return ret.toString().data();
       }

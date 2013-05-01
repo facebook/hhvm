@@ -15,7 +15,7 @@
 */
 
 #include <compiler/expression/modifier_expression.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 
 using namespace HPHP;
 

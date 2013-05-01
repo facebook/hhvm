@@ -113,6 +113,7 @@ static const StaticString s_a("a");
 static const StaticString s_q("q");
 static const StaticString s_ts("ts");
 static const StaticString s_TestString("TestString");
+static const StaticString s_start_time("start_time");
 
 bool TestExtApc::test_apc_store() {
   Array complexMap = CREATE_MAP2("a",
@@ -135,7 +136,7 @@ bool TestExtApc::test_apc_store() {
   // Make sure it doesn't change the shared value.
   Array complexMapFetched = f_apc_fetch("complexMap");
   VERIFY(complexMapFetched.exists(s_a));
-  complexMapFetched.set("q",0);
+  complexMapFetched.set(s_q,0);
   VERIFY(complexMapFetched.exists(s_q));
   VS(f_apc_fetch("complexMap"), complexMap);
 
@@ -203,7 +204,7 @@ bool TestExtApc::test_apc_compile_file() {
 
 bool TestExtApc::test_apc_cache_info() {
   Array ci = f_apc_cache_info();
-  VS(ci.rvalAt("start_time"), start_time());
+  VS(ci.rvalAt(s_start_time), start_time());
   return Count(true);
 }
 

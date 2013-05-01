@@ -45,7 +45,7 @@ bool TestExtUrl::test_base64_decode() {
   VS(f_base64_decode("VGhpcyBpcyBhbiBlbmNvZGVkIHN0cmluZw=="),
      "This is an encoded string");
   VERIFY(same(f_base64_decode("BgAYdjk="),
-              String("\006\0\030v9", 5, AttachLiteral)));
+              String("\006\0\030v9", 5, CopyString)));
   VERIFY(!same(f_base64_decode("dGVzdA=="),
                f_base64_decode("dGVzdA==CORRUPT")));
   return Count(true);
@@ -54,7 +54,7 @@ bool TestExtUrl::test_base64_decode() {
 bool TestExtUrl::test_base64_encode() {
   VS(f_base64_encode("This is an encoded string"),
      "VGhpcyBpcyBhbiBlbmNvZGVkIHN0cmluZw==");
-  VS(f_base64_encode(String("\006\0\030v9", 5, AttachLiteral)), "BgAYdjk=");
+  VS(f_base64_encode(String("\006\0\030v9", 5, CopyString)), "BgAYdjk=");
   return Count(true);
 }
 

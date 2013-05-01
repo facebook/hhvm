@@ -66,7 +66,7 @@ public:
   static void ShutdownModules();
   static bool ModulesInitialised();
 public:
-  Extension(litstr name, const char *version = "");
+  explicit Extension(litstr name, const char *version = "");
   virtual ~Extension() {}
 
   const char *getVersion() const { return m_version.c_str();}
@@ -79,7 +79,7 @@ public:
   virtual void moduleShutdown() {}
 
 private:
-  const char *m_name;
+  const String m_name;
   std::string m_version;
 };
 

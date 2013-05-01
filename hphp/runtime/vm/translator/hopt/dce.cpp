@@ -129,14 +129,14 @@ void removeDeadInstructions(Trace* trace, const DceState& state) {
 
 bool isUnguardedLoad(IRInstruction* inst) {
   if (!inst->hasDst() || !inst->getDst()) return false;
-  Opcode opc = inst->getOpcode();
+  Opcode opc = inst->op();
   SSATmp* dst = inst->getDst();
-  Type type = dst->getType();
+  Type type = dst->type();
   return ((opc == LdStack && (type == Type::Gen || type == Type::Cell)) ||
           (opc == LdLoc && type == Type::Gen) ||
           (opc == LdRef && type == Type::Cell) ||
           (opc == LdMem && type == Type::Cell &&
-           inst->getSrc(0)->getType() == Type::PtrToCell) ||
+           inst->getSrc(0)->type() == Type::PtrToCell) ||
           (opc == Unbox && type == Type::Cell));
 }
 
@@ -193,11 +193,11 @@ initInstructions(const BlockList& blocks, DceState& state) {
         state[inst].setLive();
         wl.push_back(&inst);
       }
-      if (inst.getOpcode() == DecRefNZ) {
-        auto* srcInst = inst.getSrc(0)->getInstruction();
-        Opcode srcOpc = srcInst->getOpcode();
+      if (inst.op() == DecRefNZ) {
+        auto* srcInst = inst.getSrc(0)->inst();
+        Opcode srcOpc = srcInst->op();
         if (srcOpc != DefConst) {
-          assert(srcInst->getOpcode() == IncRef);
+          assert(srcInst->op() == IncRef);
           assert(state[srcInst].isDead()); // IncRef isn't essential so it should
                                            // be dead here
           state[srcInst].setDecRefNZed();
@@ -218,7 +218,7 @@ initInstructions(const BlockList& blocks, DceState& state) {
 void optimizeRefCount(Trace* trace, DceState& state) {
   WorkList decrefs;
   forEachInst(trace, [&](IRInstruction* inst) {
-    if (inst->getOpcode() == IncRef && !state[inst].countConsumedAny()) {
+    if (inst->op() == IncRef && !state[inst].countConsumedAny()) {
       // This assert is often hit when an instruction should have a
       // consumesReferences flag but doesn't.
       auto& s = state[inst];
@@ -231,19 +231,19 @@ void optimizeRefCount(Trace* trace, DceState& state) {
       inst->setOpcode(Mov);
       s.setDead();
     }
-    if (inst->getOpcode() == DecRefNZ) {
+    if (inst->op() == DecRefNZ) {
       SSATmp* src = inst->getSrc(0);
-      IRInstruction* srcInst = src->getInstruction();
+      IRInstruction* srcInst = src->inst();
       if (state[srcInst].countConsumedAny()) {
         state[inst].setLive();
         src->incUseCount();
       }
     }
-    if (inst->getOpcode() == DecRef) {
+    if (inst->op() == DecRef) {
       SSATmp* src = inst->getSrc(0);
-      if (src->getUseCount() == 1 && !src->getType().canRunDtor()) {
-        IRInstruction* srcInst = src->getInstruction();
-        if (srcInst->getOpcode() == IncRef) {
+      if (src->getUseCount() == 1 && !src->type().canRunDtor()) {
+        IRInstruction* srcInst = src->inst();
+        if (srcInst->op() == IncRef) {
           decrefs.push_back(inst);
         }
       }
@@ -253,13 +253,13 @@ void optimizeRefCount(Trace* trace, DceState& state) {
     copyProp(inst);
   });
   for (const IRInstruction* decref : decrefs) {
-    assert(decref->getOpcode() == DecRef);
+    assert(decref->op() == DecRef);
     SSATmp* src = decref->getSrc(0);
-    assert(src->getInstruction()->getOpcode() == IncRef);
-    assert(!src->getType().canRunDtor());
+    assert(src->inst()->op() == IncRef);
+    assert(!src->type().canRunDtor());
     if (src->getUseCount() == 1) {
       state[decref].setDead();
-      state[src->getInstruction()].setDead();
+      state[src->inst()].setDead();
     }
   }
 }
@@ -327,7 +327,7 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
   // them multiple times.
   boost::dynamic_bitset<> pushedTo(irFactory->numBlocks());
   forEachInst(trace, [&](IRInstruction* inst) {
-    if (inst->getOpcode() == IncRef) {
+    if (inst->op() == IncRef) {
       // Must be REFCOUNT_CONSUMED or REFCOUNT_CONSUMED_OFF_TRACE;
       // otherwise, it should be already removed in optimizeRefCount.
       if (state[inst].countConsumedOffTrace()) {
@@ -340,8 +340,8 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
         assert(state[inst].countConsumed());
       }
     }
-    if (inst->getOpcode() == DecRefNZ) {
-      IRInstruction* srcInst = inst->getSrc(0)->getInstruction();
+    if (inst->op() == DecRefNZ) {
+      IRInstruction* srcInst = inst->getSrc(0)->inst();
       if (state[srcInst].isDead()) {
         state[inst].setDead();
         // This may take O(I) time where I is the number of IncRefs
@@ -375,12 +375,12 @@ void optimizeActRecs(Trace* trace, DceState& state) {
   bool killedFrames = false;
 
   forEachInst(trace, [&](IRInstruction* inst) {
-    switch (inst->getOpcode()) {
+    switch (inst->op()) {
     case DecRefKillThis:
       {
         auto frame = inst->getSrc(1);
-        auto frameInst = frame->getInstruction();
-        if (frameInst->getOpcode() == DefInlineFP) {
+        auto frameInst = frame->inst();
+        if (frameInst->op() == DefInlineFP) {
           FTRACE(5, "DecRefKillThis ({}): weak use of frame {}\n",
                  inst->getIId(),
                  frameInst->getIId());
@@ -392,8 +392,8 @@ void optimizeActRecs(Trace* trace, DceState& state) {
     case InlineReturn:
       {
         auto frameUses = inst->getSrc(0)->getUseCount();
-        auto srcInst = inst->getSrc(0)->getInstruction();
-        if (srcInst->getOpcode() == DefInlineFP) {
+        auto srcInst = inst->getSrc(0)->inst();
+        if (srcInst->op() == DefInlineFP) {
           auto weakUses = state[srcInst].weakUseCount();
           // We haven't counted this InlineReturn as a weak use yet,
           // which is where this '1' comes from.
@@ -420,11 +420,11 @@ void optimizeActRecs(Trace* trace, DceState& state) {
    * is going away.
    */
   forEachInst(trace, [&](IRInstruction* inst) {
-    switch (inst->getOpcode()) {
+    switch (inst->op()) {
     case DecRefKillThis:
       {
         auto fp = inst->getSrc(1);
-        if (state[fp->getInstruction()].isDead()) {
+        if (state[fp->inst()].isDead()) {
           FTRACE(5, "DecRefKillThis ({}) -> DecRef\n", inst->getIId());
           inst->setOpcode(DecRef);
           inst->setSrc(1, nullptr);
@@ -436,7 +436,7 @@ void optimizeActRecs(Trace* trace, DceState& state) {
     case InlineReturn:
       {
         auto fp = inst->getSrc(0);
-        if (state[fp->getInstruction()].isDead()) {
+        if (state[fp->inst()].isDead()) {
           FTRACE(5, "InlineReturn ({}) setDead\n", inst->getIId());
           state[inst].setDead();
         }
@@ -471,15 +471,15 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
     return;
   }
 
-  const IRInstruction* srcInst = src->getInstruction();
+  const IRInstruction* srcInst = src->inst();
   visitedSrcs.insert(src);
-  if (srcInst->getOpcode() == GuardType &&
+  if (srcInst->op() == GuardType &&
       srcInst->getTypeParam().maybeCounted()) {
     // srcInst is a GuardType that guards to a refcounted type. We need to
     // trace through to its source. If the GuardType guards to a non-refcounted
     // type then the reference is consumed by GuardType itself.
     consumeIncRef(consumer, srcInst->getSrc(0), state, ssas, visitedSrcs);
-  } else if (srcInst->getOpcode() == DefLabel) {
+  } else if (srcInst->op() == DefLabel) {
     // srcInst is a DefLabel that may be a join node. We need to find
     // the dst index of src in srcInst and trace through to each jump
     // providing a value for it.
@@ -504,7 +504,7 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
       }
     }
 
-    if (srcInst->getOpcode() == IncRef) {
+    if (srcInst->op() == IncRef) {
       // <inst> consumes <srcInst> which is an IncRef, so we mark <srcInst> as
       // REFCOUNT_CONSUMED.
       if (consumer->getTrace()->isMain() || !srcInst->getTrace()->isMain()) {
@@ -563,8 +563,8 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
     wl.pop_front();
     for (uint32_t i = 0; i < inst->getNumSrcs(); i++) {
       SSATmp* src = inst->getSrc(i);
-      IRInstruction* srcInst = src->getInstruction();
-      if (srcInst->getOpcode() == DefConst) {
+      IRInstruction* srcInst = src->inst();
+      if (srcInst->op() == DefConst) {
         continue;
       }
       src->incUseCount();

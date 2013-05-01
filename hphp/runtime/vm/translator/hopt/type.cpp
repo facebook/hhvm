@@ -21,6 +21,8 @@
 #include "util/trace.h"
 #include "runtime/vm/translator/hopt/ir.h"
 
+using namespace HPHP::VM::Transl;
+
 namespace HPHP { namespace VM { namespace JIT {
 
 TRACE_SET_MOD(hhir);
@@ -34,7 +36,7 @@ Type vectorReturn(const IRInstruction* inst) {
 }
 
 Type builtinReturn(const IRInstruction* inst) {
-  assert(inst->getOpcode() == CallBuiltin);
+  assert(inst->op() == CallBuiltin);
 
   Type t = inst->getTypeParam();
   if (t.isSimpleType() || t.equals(Type::Cell)) {
@@ -47,7 +49,7 @@ Type builtinReturn(const IRInstruction* inst) {
 }
 
 Type boxReturn(const IRInstruction* inst, int srcId) {
-  auto t = inst->getSrc(srcId)->getType();
+  auto t = inst->getSrc(srcId)->type();
   // If t contains Uninit, replace it with InitNull.
   t = t.maybe(Type::Uninit) ? (t - Type::Uninit) | Type::InitNull : t;
   // We don't try to track when a BoxedStaticStr might be converted to
@@ -80,8 +82,8 @@ Type stkReturn(const IRInstruction* inst, int dstId,
 Type outputType(const IRInstruction* inst, int dstId) {
 
 #define D(type)   return Type::type;
-#define DofS(n)   return inst->getSrc(n)->getType();
-#define DUnbox(n) return inst->getSrc(n)->getType().unbox();
+#define DofS(n)   return inst->getSrc(n)->type();
+#define DUnbox(n) return inst->getSrc(n)->type().unbox();
 #define DBox(n)   return boxReturn(inst, n);
 #define DParam    return inst->getTypeParam();
 #define DMulti    return Type::None;
@@ -93,7 +95,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
-  switch (inst->getOpcode()) {
+  switch (inst->op()) {
   IR_OPCODES
   default: not_reached();
   }
@@ -178,7 +180,7 @@ void assertOperandTypes(const IRInstruction* inst) {
         curSrc,
         inst->toString(),
         expected,
-        inst->getSrc(curSrc)->getType().toString()
+        inst->getSrc(curSrc)->type().toString()
       ).str()
     );
   };
@@ -219,7 +221,7 @@ void assertOperandTypes(const IRInstruction* inst) {
     for (; curSrc < inst->getNumSrcs(); ++curSrc) {
       // SpillStack slots may be stack types or None, if the
       // simplifier removed some.
-      auto const valid = inst->getSrc(curSrc)->getType()
+      auto const valid = inst->getSrc(curSrc)->type()
         .subtypeOfAny(Type::Gen, Type::Cls, Type::None);
       check(valid, "Gen|Cls|None");
     }
@@ -257,13 +259,13 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DofS(src)   checkDst(src < inst->getNumSrcs(),  \
                              "invalid src num");
 #define DParam      checkDst(inst->getTypeParam() != Type::None ||      \
-                             inst->getOpcode() == DefConst /* for DefNone */, \
+                             inst->op() == DefConst /* for DefNone */, \
                              "DParam with paramType None");
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
   case opcode: dstinfo srcinfo countCheck(); return;
 
-  switch (inst->getOpcode()) {
+  switch (inst->op()) {
     IR_OPCODES
   default: assert(0);
   }

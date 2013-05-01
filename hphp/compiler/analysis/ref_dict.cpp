@@ -29,7 +29,7 @@
 #include <compiler/statement/method_statement.h>
 #include <compiler/statement/statement_list.h>
 
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 
 using namespace HPHP;
 using std::vector;

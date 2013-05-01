@@ -742,13 +742,13 @@ bool BreakPointInfo::MatchClass(const char *fcls, const std::string &bcls,
     return Match(fcls, 0, bcls, true, true);
   }
 
-  StackStringData sdBClsName(bcls.c_str());
+  StackStringData sdBClsName(bcls.c_str(), CopyString);
   VM::Class* clsB = VM::Unit::lookupClass(&sdBClsName);
-  StackStringData sdFClsName(fcls);
+  StackStringData sdFClsName(fcls, CopyString);
   VM::Class* clsF = VM::Unit::lookupClass(&sdFClsName);
   if (!clsB) return false;
   if (clsB == clsF) return true;
-  StackStringData sdFuncName(func);
+  StackStringData sdFuncName(func, CopyString);
   VM::Func* f = clsB->lookupMethod(&sdFuncName);
   if (!f) return false;
   return (f->baseCls() == clsF);
@@ -773,8 +773,8 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
 
   Variant matches;
   Variant r = preg_match(String(needle.c_str(), needle.size(),
-                                AttachLiteral),
-                         String(haystack, haystack_len, AttachLiteral),
+                                CopyString),
+                         String(haystack, haystack_len, CopyString),
                          matches);
   return r.same(1);
 }

@@ -72,6 +72,13 @@
 
 namespace HPHP {
 
+// TODO: #1746957, #1756122
+// we should skip the call in call_user_func_array, if
+// by reference params are passed by value, or if its
+// argument is not an array, but currently lots of tests
+// depend on actually making the call.
+const bool skipCufOnInvalidParams = false;
+
 // RepoAuthoritative has been raptured out of runtime_option.cpp. It needs
 // to be closer to other bytecode.cpp data.
 bool RuntimeOption::RepoAuthoritative = false;
@@ -2008,7 +2015,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
                                     Class* cls /* = NULL */,
                                     VarEnv* varEnv /* = NULL */,
                                     StringData* invName /* = NULL */,
-                                    Unit* toMerge /* = NULL */) {
+                                    InvokeFlags flags /* = InvokeNormal */) {
   assert(retval);
   assert(f);
   // If this is a regular function, this_ and cls must be NULL
@@ -2050,8 +2057,9 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
 
   checkStack(m_stack, f);
 
-  if (toMerge != nullptr) {
-    assert(f->unit() == toMerge && f->isPseudoMain());
+  if (flags & InvokePseudoMain) {
+    assert(f->isPseudoMain() && !params.get());
+    Unit* toMerge = f->unit();
     toMerge->merge();
     if (toMerge->isMergeOnly()) {
       *retval = *toMerge->getMainReturn();
@@ -2133,16 +2141,31 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
           // (i.e. the last extra arg has the lowest address)
           to = extraArgs->getExtraArg(paramId - numParams);
         }
+        tvDup(from, to);
         if (LIKELY(!f->byRef(paramId))) {
-          tvDup(from, to);
           if (to->m_type == KindOfRef) {
             tvUnbox(to);
           }
-        } else {
-          if (from->m_type != KindOfRef) {
-            tvBox(from);
+        } else if (!(flags & InvokeIgnoreByRefErrors) &&
+                   (from->m_type != KindOfRef ||
+                    from->m_data.pref->_count == 2)) {
+          raise_warning("Parameter %d to %s() expected to be "
+                        "a reference, value given",
+                        paramId + 1, f->fullName()->data());
+          if (skipCufOnInvalidParams) {
+            if (extraArgs) {
+              int n = paramId >= numParams ? paramId - numParams + 1 : 0;
+              ExtraArgs::deallocate(extraArgs, n);
+              paramId -= n;
+            }
+            while (paramId >= 0) {
+              m_stack.popTV();
+              paramId--;
+            }
+            m_stack.popAR();
+            tvWriteNull(retval);
+            return;
           }
-          tvDup(from, to);
         }
       }
     }
@@ -2189,8 +2212,8 @@ void VMExecutionContext::invokeContFunc(const Func* f,
 
 void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
   Func* func = unit->getMain();
-  invokeFunc(retval, func, Array::Create(), nullptr, nullptr,
-             m_globalVarEnv, nullptr, unit);
+  invokeFunc(retval, func, null_array, nullptr, nullptr,
+             m_globalVarEnv, nullptr, InvokePseudoMain);
 }
 
 void VMExecutionContext::unwindBuiltinFrame() {
@@ -2775,7 +2798,8 @@ CVarRef VMExecutionContext::getEvaledArg(const StringData* val) {
   Variant v;
   // Default arg values are not currently allowed to depend on class context.
   g_vmContext->invokeFunc((TypedValue*)&v, unit->getMain(),
-                          Array::Create());
+                          null_array, nullptr, nullptr, nullptr, nullptr,
+                          InvokePseudoMain);
   Variant &lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
   lv = v;
   return lv;
@@ -2860,7 +2884,9 @@ CStrRef VMExecutionContext::createFunction(CStrRef args, CStrRef code) {
   //
   // We have to eval now to emulate this behavior.
   TypedValue retval;
-  invokeFunc(&retval, unit->getMain(), Array::Create());
+  invokeFunc(&retval, unit->getMain(), null_array,
+             nullptr, nullptr, nullptr, nullptr,
+             InvokePseudoMain);
 
   // __lambda_func will be the only hoistable function.
   // Any functions or closures defined in it will not be hoistable.
@@ -2932,8 +2958,8 @@ void VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   const static StaticString s_exit("Hit exit");
   const static StaticString s_fatal("Hit fatal");
   try {
-    invokeFunc(retval, unit->getMain(fp->m_func->cls()), Array::Create(),
-               this_, cls, varEnv, nullptr, unit);
+    invokeFunc(retval, unit->getMain(fp->m_func->cls()), null_array,
+               this_, cls, varEnv, nullptr, InvokePseudoMain);
   } catch (FatalErrorException &e) {
     g_vmContext->write(s_fatal);
     g_vmContext->write(" : ");
@@ -6033,27 +6059,21 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
     for (int i = 0; i < nparams; ++i) {
       TypedValue* from = const_cast<TypedValue*>(
         args->getValueRef(pos).asTypedValue());
+      TypedValue* to = m_stack.allocTV();
       if (UNLIKELY(f->byRef(i))) {
         if (UNLIKELY(!tvAsVariant(from).isReferenced())) {
-          // TODO: #1746957
-          // we should raise a warning and bail out here. But there are
-          // lots of tests dependent on actually making the call.
-          // Hopefully the warnings will get the code base cleaned up
-          // and we'll be able to fix this painlessly
-          const bool skipCallOnInvalidParams = false;
-          int param = i + 1;
           raise_warning("Parameter %d to %s() expected to be a reference, "
-                        "value given", param, f->name()->data());
-          if (skipCallOnInvalidParams) {
+                        "value given", i + 1, f->fullName()->data());
+          if (skipCufOnInvalidParams) {
+            m_stack.discard();
             while (i--) m_stack.popTV();
             m_stack.popAR();
             m_stack.pushNull();
             return false;
           }
         }
-        tvDup(from, m_stack.allocTV());
+        tvDup(from, to);
       } else {
-        TypedValue* to = m_stack.allocTV();
         tvDup(from, to);
         if (UNLIKELY(to->m_type == KindOfRef)) {
           tvUnbox(to);
@@ -6100,7 +6120,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
   assert(ar->numArgs() == 1);
 
   Cell* c1 = m_stack.topC();
-  if (false && UNLIKELY(c1->m_type != KindOfArray)) {
+  if (skipCufOnInvalidParams && UNLIKELY(c1->m_type != KindOfArray)) {
     // task #1756122
     // this is what we /should/ do, but our code base depends
     // on the broken behavior of casting the second arg to an

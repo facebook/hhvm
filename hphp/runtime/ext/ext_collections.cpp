@@ -15,9 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include "runtime/ext/ext_collections.h"
 #include "runtime/base/variable_serializer.h"
 #include "runtime/base/array/sort_helpers.h"
-#include "runtime/ext/ext_collections.h"
 #include "runtime/ext/ext_array.h"
 #include "runtime/ext/ext_math.h"
 #include "runtime/ext/ext_intl.h"
@@ -817,7 +817,10 @@ void c_Vector::usort(CVarRef cmp_function) {
     return;
   }
   ElmUCompare<VectorValAccessor> comp;
-  comp.callback = &cmp_function;
+  CallCtx ctx;
+  VM::Transl::CallerFrame cf;
+  vm_decode_function(cmp_function, cf(), false, ctx);
+  comp.ctx = &ctx;
   HPHP::Sort::sort(m_data, m_data + m_size, comp);
 }
 
@@ -3163,24 +3166,27 @@ void c_StableMap::ksort(int sort_flags, bool ascending) {
 #undef CALL_SORT
 #undef SORT_BODY
 
-#define USER_SORT_BODY(acc_type) \
-  do { \
-    if (!m_size) { \
-      return; \
-    } \
+#define USER_SORT_BODY(acc_type)                                        \
+  do {                                                                  \
+    if (!m_size) {                                                      \
+      return;                                                           \
+    }                                                                   \
     Bucket** buffer = (Bucket**)smart_malloc(m_size * sizeof(Bucket*)); \
-    preSort<acc_type>(buffer, acc_type(), false); \
-    ElmUCompare<acc_type> comp; \
-    comp.callback = &cmp_function; \
-    try { \
-      HPHP::Sort::sort(buffer, buffer + m_size, comp); \
-    } catch (...) { \
-      postSort(buffer); \
-      smart_free(buffer); \
-      throw; \
-    } \
-    postSort(buffer); \
-    smart_free(buffer); \
+    preSort<acc_type>(buffer, acc_type(), false);                       \
+    ElmUCompare<acc_type> comp;                                         \
+    CallCtx ctx;                                                        \
+    VM::Transl::CallerFrame cf;                                         \
+    vm_decode_function(cmp_function, cf(), false, ctx);                 \
+    comp.ctx = &ctx;                                                    \
+    try {                                                               \
+      HPHP::Sort::sort(buffer, buffer + m_size, comp);                  \
+    } catch (...) {                                                     \
+      postSort(buffer);                                                 \
+      smart_free(buffer);                                               \
+      throw;                                                            \
+    }                                                                   \
+    postSort(buffer);                                                   \
+    smart_free(buffer);                                                 \
   } while (0)
 
 void c_StableMap::uasort(CVarRef cmp_function) {

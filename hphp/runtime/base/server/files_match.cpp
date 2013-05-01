@@ -31,9 +31,9 @@ FilesMatch::FilesMatch(Hdf vh) {
 bool FilesMatch::match(const std::string &filename) const {
   if (!m_pattern.empty()) {
     Variant ret = preg_match(String(m_pattern.c_str(), m_pattern.size(),
-                                    AttachLiteral),
+                                    CopyString),
                              String(filename.c_str(), filename.size(),
-                                    AttachLiteral));
+                                    CopyString));
     return ret.toInt64() > 0;
   }
   return false;

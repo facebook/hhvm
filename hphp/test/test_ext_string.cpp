@@ -133,7 +133,7 @@ bool TestExtString::test_stringdata() {
 
 bool TestExtString::test_addcslashes() {
   VS(f_addcslashes("ABCDEFGH\n", "A..D\n"), "\\A\\B\\C\\DEFGH\\n");
-  VS(f_addcslashes(String("\x00\x0D\n", 3, AttachLiteral), null_string),
+  VS(f_addcslashes(String("\x00\x0D\n", 3, CopyString), null_string),
      "\\000\\r\\n");
   return Count(true);
 }
@@ -441,8 +441,8 @@ bool TestExtString::test_str_pad() {
   VS(f_str_pad(input, 10, "-=", k_STR_PAD_LEFT), "-=-=-Alien");
   VS(f_str_pad(input, 10, "_", k_STR_PAD_BOTH), "__Alien___");
   VS(f_str_pad(input, 6 , "___"), "Alien_");
-  VS(f_str_pad(input, 6 , String("\0", 1, AttachLiteral)),
-     String("Alien\0", 6, AttachLiteral));
+  VS(f_str_pad(input, 6 , String("\0", 1, CopyString)),
+     String("Alien\0", 6, CopyString));
   return Count(true);
 }
 
@@ -517,7 +517,7 @@ bool TestExtString::test_htmlspecialchars() {
   VS(f_bin2hex(f_htmlspecialchars("\xA0", k_ENT_COMPAT)), "a0");
   VS(f_bin2hex(f_htmlspecialchars("\xc2\xA0", k_ENT_COMPAT, "")), "c2a0");
   VS(f_bin2hex(f_htmlspecialchars("\xc2\xA0", k_ENT_COMPAT, "UTF-8")), "c2a0");
-  String zfoo = String("\0foo", 4, AttachLiteral);
+  String zfoo = String("\0foo", 4, CopyString);
   VS(f_htmlspecialchars(zfoo, k_ENT_COMPAT), zfoo);
   VS(f_fb_htmlspecialchars(zfoo, k_ENT_COMPAT), zfoo);
 

@@ -29,7 +29,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/ext/ext_iconv.h>
 #include <unicode/coll.h> // icu
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 
 namespace HPHP {
 
@@ -703,7 +703,7 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
 Array Array::values() const {
   ArrayInit ai(size(), ArrayInit::vectorInit);
   for (ArrayIter iter(*this); iter; ++iter) {
-    ai.set(iter.secondRef());
+    ai.set(withRefBind(iter.secondRef()));
   }
   return ai.create();
 }

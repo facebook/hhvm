@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_VARIANT_H_
+#define incl_HPHP_VARIANT_H_
+
 #ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 #error Directly including 'type_variant.h' is prohibited. \
        Include 'complex_types.h' instead.
 #endif
-
-#ifndef incl_HPHP_VARIANT_H_
-#define incl_HPHP_VARIANT_H_
 
 #include <type_traits>
 
@@ -1498,24 +1498,6 @@ inline Variant uninit_null() {
 //litstr overloads
 inline const Variant Array::operator[](litstr key) const {
   return (*this)[String(key)];
-}
-inline Variant Array::rvalAt(litstr key, ACCESSPARAMS_IMPL) const {
-  return rvalAt(String(key), flags);
-}
-inline CVarRef Array::rvalAtRef(litstr key, ACCESSPARAMS_IMPL) const {
-  return rvalAtRef(String(key), flags);
-}
-inline Variant& Array::lval(litstr key) {
-  return lval(String(key));
-}
-inline Variant* Array::lvalPtr(litstr key, bool forWrite, bool create) {
-  return lvalPtr(String(key), forWrite, create);
-}
-inline Variant& Array::lvalAt(litstr key, ACCESSPARAMS_IMPL) {
-  return lvalAt(String(key), flags);
-}
-inline CVarRef Array::set(litstr key, CVarRef v, bool isKey) {
-  return set(String(key), v, isKey);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

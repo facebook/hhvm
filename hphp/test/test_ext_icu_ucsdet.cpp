@@ -373,7 +373,7 @@ bool TestExtIcu_ucsdet::test_utf16() {
     "d\x00!\x00";
 
   // Take off 1 byte for the NUL at the end of the char[].
-  String utf16Str(utf16, sizeof utf16 - 1, AttachLiteral);
+  String utf16Str(utf16, sizeof utf16 - 1, CopyString);
   VERIFY(detect_and_convert_to_utf8(
     utf16Str,
     "\ufeffHello, world!") == true);

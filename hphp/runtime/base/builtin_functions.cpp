@@ -1262,8 +1262,9 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
         if (u) {
           if (initial) {
             TypedValue retval;
-            ec->invokeFunc(&retval, u->getMain(), Array(),
-                           nullptr, nullptr, nullptr, nullptr, u);
+            ec->invokeFunc(&retval, u->getMain(), null_array,
+                           nullptr, nullptr, nullptr, nullptr,
+                           ExecutionContext::InvokePseudoMain);
             tvRefcountedDecRef(&retval);
           }
           ok = true;

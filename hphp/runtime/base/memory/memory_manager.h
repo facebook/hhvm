@@ -91,7 +91,7 @@ public:
 
   class Iterator {
   public:
-    Iterator(const GarbageList& l) : curptr(l.ptr) {}
+    explicit Iterator(const GarbageList& l) : curptr(l.ptr) {}
 
     Iterator(const Iterator &other) : curptr(other.curptr) {}
     Iterator() : curptr(nullptr) {}
@@ -307,7 +307,7 @@ public:
   class MaskAlloc {
     MemoryManager *m_mm;
   public:
-    MaskAlloc(MemoryManager *mm) : m_mm(mm) {
+    explicit MaskAlloc(MemoryManager *mm) : m_mm(mm) {
       // capture all mallocs prior to construction
       m_mm->refreshStats();
     }
@@ -456,6 +456,10 @@ class SmartStlAlloc {
     new ((void*)p) T(value);
   }
 
+  void construct (pointer p) {
+    new ((void*)p) T();
+  }
+
   void destroy (pointer p) {
     p->~T();
   }
@@ -494,7 +498,12 @@ template <class T>
 class deque : public std::deque<T, do_not_use_directly::SmartStlAlloc<T> > {};
 
 template <class T>
-class vector : public std::vector<T, do_not_use_directly::SmartStlAlloc<T> > {};
+class vector : public std::vector<T, do_not_use_directly::SmartStlAlloc<T> > {
+  typedef std::vector<T, do_not_use_directly::SmartStlAlloc<T> > Base_;
+ public:
+  template <typename... A>
+  explicit vector(A &&... args) : Base_(std::forward<A>(args)...) {}
+};
 
 template <class T>
 class list : public std::list<T, do_not_use_directly::SmartStlAlloc<T> > {};

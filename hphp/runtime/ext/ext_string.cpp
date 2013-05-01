@@ -1121,7 +1121,6 @@ static const StaticString s_ampsemi("&amp;");
 
 Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_ENT_COMPAT */) {
   static entity_charset charset = determine_charset(nullptr); // get default one
-  char ind[2]; ind[1] = 0;
 
   assert(charset != entity_charset_enum::cs_unknown);
 
@@ -1146,9 +1145,9 @@ Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_E
         if (em.table[i] == NULL)
           continue;
         /* what about wide chars here ?? */
-        ind[0] = i + em.basechar;
         snprintf(buffer, sizeof(buffer), "&%s;", em.table[i]);
-        ret.set(ind, String(buffer, CopyString));
+        ret.set(String::FromChar(i + em.basechar),
+                String(buffer, CopyString));
       }
     }
     /* fall thru */
@@ -1159,8 +1158,8 @@ Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_E
           (quote_style & basic_entities[j].flags) == 0)
         continue;
 
-      ind[0] = (unsigned char)basic_entities[j].charcode;
-      ret.set(String(ind, 2, CopyString), basic_entities[j].entity);
+      ret.set(String::FromChar(basic_entities[j].charcode),
+              basic_entities[j].entity);
     }
     ret.set(s_amp, s_ampsemi);
     break;

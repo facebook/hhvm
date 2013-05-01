@@ -131,7 +131,15 @@ static const StaticString s_tm_mon("tm_mon");
 static const StaticString s_tm_year("tm_year");
 static const StaticString s_tm_wday("tm_wday");
 static const StaticString s_tm_yday("tm_yday");
+static const StaticString s_tm_isdst("tm_isdst");
 static const StaticString s_unparsed("unparsed");
+static const StaticString s_seconds("seconds");
+static const StaticString s_minutes("minutes");
+static const StaticString s_hours("hours");
+static const StaticString s_mday("mday");
+static const StaticString s_wday("wday");
+static const StaticString s_mon("mon");
+static const StaticString s_yday("yday");
 
 #define PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(name, elem) \
   if ((int)parsed_time->elem == -99999) {                \
@@ -677,31 +685,31 @@ Array DateTime::toArray(ArrayFormat format) const {
   bool error;
   switch (format) {
   case TimeMap:
-    ret.set("seconds", second());
-    ret.set("minutes", minute());
-    ret.set("hours",   hour());
-    ret.set("mday",    day());
-    ret.set("wday",    dow());
-    ret.set("mon",     month());
-    ret.set("year",    year());
-    ret.set("yday",    doy());
-    ret.set("weekday", weekdayName());
-    ret.set("month",   monthName());
+    ret.set(s_seconds, second());
+    ret.set(s_minutes, minute());
+    ret.set(s_hours,   hour());
+    ret.set(s_mday,    day());
+    ret.set(s_wday,    dow());
+    ret.set(s_mon,     month());
+    ret.set(s_year,    year());
+    ret.set(s_yday,    doy());
+    ret.set(s_weekday, weekdayName());
+    ret.set(s_month,   monthName());
     ret.set(0,         toTimeStamp(error));
     break;
   case TmMap:
     {
       struct tm tm;
       toTm(tm);
-      ret.set("tm_sec",   tm.tm_sec);
-      ret.set("tm_min",   tm.tm_min);
-      ret.set("tm_hour",  tm.tm_hour);
-      ret.set("tm_mday",  tm.tm_mday);
-      ret.set("tm_mon",   tm.tm_mon);
-      ret.set("tm_year",  tm.tm_year);
-      ret.set("tm_wday",  tm.tm_wday);
-      ret.set("tm_yday",  tm.tm_yday);
-      ret.set("tm_isdst", tm.tm_isdst);
+      ret.set(s_tm_sec,   tm.tm_sec);
+      ret.set(s_tm_min,   tm.tm_min);
+      ret.set(s_tm_hour,  tm.tm_hour);
+      ret.set(s_tm_mday,  tm.tm_mday);
+      ret.set(s_tm_mon,   tm.tm_mon);
+      ret.set(s_tm_year,  tm.tm_year);
+      ret.set(s_tm_wday,  tm.tm_wday);
+      ret.set(s_tm_yday,  tm.tm_yday);
+      ret.set(s_tm_isdst, tm.tm_isdst);
     }
     break;
   case TmVector:

@@ -400,10 +400,10 @@ bool HttpRequestHandler::handleProxyRequest(Transport *transport, bool force) {
 
 bool HttpRequestHandler::MatchAnyPattern
 (const std::string &path, const std::vector<std::string> &patterns) {
-  String spath(path.c_str(), path.size(), AttachLiteral);
+  String spath(path.c_str(), path.size(), CopyString);
   for (unsigned int i = 0; i < patterns.size(); i++) {
     Variant ret = preg_match(String(patterns[i].c_str(), patterns[i].size(),
-                                    AttachLiteral),
+                                    CopyString),
                              spath);
     if (ret.toInt64() > 0) return true;
   }

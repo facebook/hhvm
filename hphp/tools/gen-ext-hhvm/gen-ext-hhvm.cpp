@@ -576,12 +576,9 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   cpp << in << "int32_t count = ar->numArgs();\n";
   cpp << in << "TypedValue* args UNUSED = ((TypedValue*)ar) - 1;\n";
 
-  if (func.isMethod()) {
+  if (func.isMethod() && !func.isStatic) {
     cpp << in
         << "ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);\n";
-  }
-
-  if (func.isMethod() && !func.isStatic) {
     cpp << in << "if (this_) {\n";
     in -= 2;
   }
@@ -685,6 +682,7 @@ int main(int argc, const char* argv[]) {
       parseIDL(argv[i], funcs, classes);
     } catch (const std::exception& exc) {
       std::cerr << argv[i] << ": " << exc.what() << "\n";
+      return 1;
     }
   }
 

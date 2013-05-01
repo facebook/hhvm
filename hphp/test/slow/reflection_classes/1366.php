@@ -2,9 +2,9 @@
 function printFunc($rf) {
   $rps = $rf->getParameters();
   foreach($rps as $rp) {
-    var_dump($rp->getTypehintText());
+    var_dump($rp->getTypeText());
   }
-  var_dump($rf->getReturnTypehintText());
+  var_dump($rf->getReturnTypeText());
 }
 function printClass($rc) {
   $rms = $rc->getMethods();
@@ -23,7 +23,7 @@ function printClass($rc) {
   }
   ksort($props);
   foreach($props as $prop) {
-    var_dump($prop->getTypehintText());
+    var_dump($prop->getTypeText());
   }
 }
 function f() {
@@ -137,4 +137,14 @@ class TC {
 }
 $rc = new ReflectionClass('TC');
 printClass($rc);
-
+function ff(Vector<int> $i, ?string $s, @C $c, array $a) {}
+$rf = new ReflectionFunction('ff');
+$rps = $rf->getParameters();
+foreach ($rps as $rp) {
+  var_dump($rp->getTypeText());
+  if ($rp->getClass() != null) {
+      var_dump($rp->getClass()->getName());
+    } else {
+      var_dump("");
+    }
+}

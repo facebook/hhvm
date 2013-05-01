@@ -63,7 +63,7 @@
 #include <compiler/analysis/live_dict.h>
 #include <compiler/analysis/ref_dict.h>
 
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 #include <util/parser/location.h>
 #include <util/util.h>
 

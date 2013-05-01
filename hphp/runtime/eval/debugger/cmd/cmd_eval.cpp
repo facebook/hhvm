@@ -54,12 +54,15 @@ void CmdEval::handleReply(DebuggerClient *client) {
   client->print(m_output);
 }
 
+static const StaticString s_body("body");
+static const StaticString s_value("value");
+
 void CmdEval::setClientOutput(DebuggerClient *client) {
   client->setOutputType(DebuggerClient::OTValues);
-  Array values;
+  ArrayInit values(2);
   values.set("body", m_body);
   values.set("value", m_output);
-  client->setOTValues(values);
+  client->setOTValues(values.create());
 }
 
 bool CmdEval::onServer(DebuggerProxy *proxy) {

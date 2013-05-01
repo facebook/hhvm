@@ -7766,7 +7766,7 @@ void TranslatorX64::emitStaticPropInlineLookup(const NormalizedInstruction& i,
   const StringData* clsName = cls->preClass()->name();
   string sds(Util::toLower(clsName->data()) + ":" +
              string(propName->data(), propName->size()));
-  StackStringData sd(sds.c_str(), sds.size(), AttachLiteral);
+  StackStringData sd(sds.c_str(), sds.size(), CopyString);
   ch = SPropCache::alloc(&sd);
   SKTRACE(1, i.source, "SPropInlineLookup %s %d\n", sd.data(), int(ch));
 
@@ -8665,12 +8665,9 @@ TranslatorX64::translateFPushFunc(const Tracelet& t,
   int startOfActRec = int(sizeof(Cell)) - int(sizeof(ActRec));
   size_t funcOff = AROFF(m_func) + startOfActRec;
   size_t thisOff = AROFF(m_this) + startOfActRec;
-  if (false) { // typecheck
-    StackStringData sd("foo");
-    const UNUSED Func* f = FuncCache::lookup(ch, &sd);
-  }
+  const Func* (*f)(CacheHandle, StringData*, const void*) = FuncCache::lookup;
   SKTRACE(1, i.source, "ch %d\n", ch);
-  EMIT_CALL(a, FuncCache::lookup, IMM(ch), V(inLoc));
+  EMIT_CALL(a, f, IMM(ch), V(inLoc), IMM(0));
   recordCall(i);
   emitVStackStore(a, i, rax, funcOff, sz::qword);
   emitVStackStoreImm(a, i, 0, thisOff, sz::qword, &m_regMap);
@@ -9449,14 +9446,8 @@ TranslatorX64::translateFPushFuncD(const Tracelet& t,
     a.test_reg64_reg64(r(scratch), r(scratch));
     {
       UnlikelyIfBlock ifNull(CC_Z, a, astubs);
-
-      if (false) { // typecheck
-        StackStringData sd("foo");
-        FixedFuncCache::lookupUnknownFunc(&sd);
-      }
-
-      EMIT_CALL(astubs, TCA(FixedFuncCache::lookupUnknownFunc),
-                        IMM(uintptr_t(name)));
+      const Func* (*func)(StringData*) = FixedFuncCache::lookupUnknownFunc;
+      EMIT_CALL(astubs, TCA(func), IMM(uintptr_t(name)));
       recordReentrantStubCall(i);
       emitMovRegReg(astubs, rax, r(scratch));
     }
@@ -11971,7 +11962,8 @@ TranslatorX64::getPerfCounters(Array& ret) {
     // Until Perflab can automatically scale the values we give it to
     // an appropriate range, we have to fudge these numbers so they
     // look more like reasonable hardware counter values.
-    ret.set(kPerfCounterNames[i], s_perfCounters[i] * 1000);
+    ret.set(String::FromCStr(kPerfCounterNames[i]),
+            s_perfCounters[i] * 1000);
   }
 
   if (RuntimeOption::EnableInstructionCounts) {
@@ -11981,7 +11973,7 @@ TranslatorX64::getPerfCounters(Array& ret) {
            begin += STATS_PER_OPCODE) {
         count += Stats::tl_counters[Stats::StatCounter(begin)];
       }
-      ret.set(name, count);
+      ret.set(String::FromCStr(name), count);
     };
 
     doCounts(Stats::Instr_TranslLowInvalid + STATS_PER_OPCODE,

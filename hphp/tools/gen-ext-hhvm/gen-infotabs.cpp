@@ -43,6 +43,7 @@ int main(int argc, const char* argv[]) {
       parseIDL(argv[i], funcs, classes);
     } catch (const std::exception& exc) {
       std::cerr << argv[i] << ": " << exc.what() << "\n";
+      return 1;
     }
   }
 

@@ -1,7 +1,11 @@
 %{
-#include "parser.h"
-#include <util/util.h>
-#include <util/logger.h>
+#ifdef TEST_PARSER
+#include "util/parser/test/parser.h"
+#else
+#include "compiler/parser/parser.h"
+#endif
+#include "util/util.h"
+#include "util/logger.h"
 
 // macros for bison
 #define YYSTYPE HPHP::HPHP_PARSER_NS::Token
@@ -1609,7 +1613,7 @@ expr_no_variable:
   | shape_literal                      { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
-  | function_loc 
+  | function_loc
     is_reference '('                   { Token t; _p->onClosureStart(t);
                                          _p->pushLabelInfo();}
     parameter_list ')'
@@ -1617,7 +1621,7 @@ expr_no_variable:
     '{' inner_statement_list '}'       { Token u; u.reset();
                                          _p->onClosure($$,u,$2,$5,$8,$10,0);
                                          _p->popLabelInfo();}
-  | T_STATIC function_loc 
+  | T_STATIC function_loc
     is_reference '('                   { Token t; _p->onClosureStart(t);
                                          _p->pushLabelInfo();}
     parameter_list ')'
@@ -2355,9 +2359,9 @@ sm_typeargs_opt:
 
 sm_type_list:
     sm_type                            { Token t; t.reset();
-                                         _p->onTypeList($1, t); 
+                                         _p->onTypeList($1, t);
                                          $$ = $1; }
-  | sm_type_list ',' sm_type           { _p->onTypeList($1, $3); 
+  | sm_type_list ',' sm_type           { _p->onTypeList($1, $3);
                                          $$ = $1; }
 ;
 
@@ -2412,7 +2416,7 @@ sm_shape_type:
 sm_type:
     /* double-optional types will be rejected by the typechecker; we
      * already allow plenty of nonsense types anyway */
-    '?' sm_type                        { only_in_strict_mode(_p); 
+    '?' sm_type                        { only_in_strict_mode(_p);
                                          _p->onTypeSpecialization($2, '?');
                                          $$ = $2; }
   | '@' sm_type                        { only_in_strict_mode(_p);
@@ -2438,7 +2442,7 @@ sm_type:
                                          _p->onTypeSpecialization($$, 'x'); }
   | '(' T_FUNCTION
     '(' sm_func_type_list ')'
-    ':' sm_type ')'                   { only_in_strict_mode(_p); 
+    ':' sm_type ')'                   { only_in_strict_mode(_p);
                                         _p->onTypeList($7, $4);
                                         _p->onTypeAnnotation($$, $2, $7);
                                         _p->onTypeSpecialization($$, 'f'); }

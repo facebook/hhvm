@@ -409,7 +409,7 @@ public:
   F(bool, ThreadingJit,                false)                           \
   F(bool, JitTransCounters,            false)                           \
   F(bool, JitMGeneric,                 true)                            \
-  F(bool, JitUseIR,                    false)                           \
+  F(bool, JitUseIR,                    true)                            \
   F(double, JitCompareHHIR,            0)                               \
   F(bool, IRPuntDontInterp,            false)                           \
   F(bool, HHIRGenericDtorHelper,       true)                            \
@@ -430,7 +430,7 @@ public:
   F(bool, HHIREnableSinking,           true)                            \
   F(bool, HHIRGenerateAsserts,         debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
-  F(bool, HHIRDisableTx64,             false)                           \
+  F(bool, HHIRDisableTx64,             true)                            \
   F(uint64_t, MaxHHIRTrans,            -1)                              \
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, DumpBytecode,                false)                           \

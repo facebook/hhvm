@@ -28,8 +28,7 @@ namespace HPHP { namespace VM { namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
-using Transl::MInstrState;
-using Transl::mInstrHasUnknownOffsets;
+using namespace HPHP::VM::Transl;
 
 static bool wantPropSpecializedWarnings() {
   return !RuntimeOption::RepoAuthoritative ||
@@ -46,10 +45,10 @@ void VectorEffects::get(const IRInstruction* inst,
   // If the base for this instruction is a local address, the
   // helper call might have side effects on the local's value
   SSATmp* base = inst->getSrc(vectorBaseIdx(inst));
-  IRInstruction* locInstr = base->getInstruction();
-  if (locInstr->getOpcode() == LdLocAddr) {
-    UNUSED Type baseType = locInstr->getDst()->getType();
-    assert(baseType.equals(base->getType()));
+  IRInstruction* locInstr = base->inst();
+  if (locInstr->op() == LdLocAddr) {
+    UNUSED Type baseType = locInstr->getDst()->type();
+    assert(baseType.equals(base->type()));
     assert(baseType.isPtr() || baseType.isKnownDataType());
     int loc = locInstr->getExtra<LdLocAddr>()->locId;
 
@@ -64,9 +63,9 @@ void VectorEffects::get(const IRInstruction* inst,
 bool VectorEffects::getStackValue(const IRInstruction* inst, uint32_t index,
                                   SSATmp*& value, Type& type) {
   SSATmp* base = inst->getSrc(vectorBaseIdx(inst));
-  assert(base->getInstruction()->getOpcode() == LdStackAddr);
-  if (base->getInstruction()->getSrc(1)->getValInt() != index) {
-    value = base->getInstruction()->getSrc(0);
+  assert(base->inst()->op() == LdStackAddr);
+  if (base->inst()->getSrc(1)->getValInt() != index) {
+    value = base->inst()->getSrc(0);
     assert(value->isA(Type::StkPtr));
     return false;
   }
@@ -281,7 +280,7 @@ SSATmp* HhbcTranslator::VectorTranslator::genStk(Opcode opc, Srcs... srcs) {
   /* If the base is a pointer to a stack cell and the operation might change
    * its type and/or value, use the version of the opcode that returns a new
    * StkPtr. */
-  if (base->getInstruction()->getOpcode() == LdStackAddr) {
+  if (base->inst()->op() == LdStackAddr) {
     VectorEffects ve(opc, srcVec);
     if (ve.baseTypeChanged || ve.baseValChanged) {
       opc = getStackModifyingOpcode(opc);
@@ -494,7 +493,7 @@ SSATmp* HhbcTranslator::VectorTranslator::getBase() {
 
 SSATmp* HhbcTranslator::VectorTranslator::getKey() {
   SSATmp* key = getInput(m_iInd);
-  auto keyType = key->getType();
+  auto keyType = key->type();
   assert(keyType.isBoxed() || keyType.notBoxed());
   if (keyType.isBoxed()) {
     key = m_tb.gen(LdRef, Type::Cell, key);
@@ -524,9 +523,9 @@ SSATmp* HhbcTranslator::VectorTranslator::getInput(unsigned i) {
       auto t = Type::fromRuntimeType(dl.rtt);
       if (!val->isA(t) && !(val->isBoxed() && t.isBoxed())) {
         FTRACE(1, "{}: hhir stack has a {} where Translator had a {}\n",
-               __func__, val->getType().toString(), t.toString());
+               __func__, val->type().toString(), t.toString());
         // They'd better not be completely unrelated types...
-        assert(t.subtypeOf(val->getType()));
+        assert(t.subtypeOf(val->type()));
         m_ht.refineType(val, t);
       }
       return val;
@@ -600,7 +599,7 @@ void HhbcTranslator::VectorTranslator::emitBaseLCR() {
       assert(m_stackInputs.count(m_iInd));
       m_base = m_tb.genLdStackAddr(m_stackInputs[m_iInd]);
     }
-    assert(m_base->getType().isPtr());
+    assert(m_base->type().isPtr());
   }
 }
 
@@ -613,7 +612,7 @@ bool HhbcTranslator::VectorTranslator::isSimpleArrayOp() {
       isSimpleBase() &&
       isSingleMember() &&
       mcodeMaybeArrayKey(m_ni.immVecM[0]) &&
-      base->getType().subtypeOfAny(Type::Arr, Type::BoxedArr)) {
+      base->type().subtypeOfAny(Type::Arr, Type::BoxedArr)) {
     SSATmp* key = getInput(m_mii.valCount() + 1);
     return key->isA(Type::Int) || key->isA(Type::Str);
   }
@@ -787,7 +786,7 @@ void HhbcTranslator::VectorTranslator::emitPropGeneric() {
   MemberCode mCode = m_ni.immVecM[m_mInd];
   MInstrAttr mia = MInstrAttr(m_mii.getAttr(mCode) & MIA_intermediate_prop);
 
-  if ((mia & Unset) && m_base->getType().strip().not(Type::Obj)) {
+  if ((mia & Unset) && m_base->type().strip().not(Type::Obj)) {
     m_base = m_tb.genPtrToInitNull();
     return;
   }
@@ -821,7 +820,7 @@ SSATmp* HhbcTranslator::VectorTranslator::checkInitProp(
   SSATmp* key = getKey();
   assert(key->isA(Type::StaticStr));
   assert(baseAsObj->isA(Type::Obj));
-  assert(propAddr->getType().isPtr());
+  assert(propAddr->type().isPtr());
 
   auto const needsCheck =
     propInfo.hphpcType == KindOfInvalid &&
@@ -939,7 +938,7 @@ void HhbcTranslator::VectorTranslator::emitPropSpecialized(const MInstrAttr mia,
 
   // At this point m_base is either a pointer to init_null_variant or
   // a property in the object that we've verified isn't uninit.
-  assert(m_base->getType().isPtr());
+  assert(m_base->type().isPtr());
 }
 
 template <KeyType keyType, bool warn, bool define, bool reffy,
@@ -1000,7 +999,7 @@ void HhbcTranslator::VectorTranslator::emitElem() {
   assert(!(define && unset));
   if (unset) {
     SSATmp* uninit = m_tb.genPtrToUninit();
-    Type baseType = m_base->getType().strip();
+    Type baseType = m_base->type().strip();
     if (baseType.subtypeOf(Type::Str)) {
       m_ht.exceptionBarrier();
       m_tb.gen(
@@ -1055,7 +1054,7 @@ void HhbcTranslator::VectorTranslator::emitRatchetRefs() {
       m_tb.genStMem(m_misBase, HHIR_MISOFF(tvRef), m_tb.genDefUninit(), true);
 
       // Adjust base pointer.
-      assert(m_base->getType().isPtr());
+      assert(m_base->type().isPtr());
       return m_tb.genLdAddr(m_misBase, HHIR_MISOFF(tvRef2));
     },
     [&] { // Taken: tvRef is Uninit. Do nothing.
@@ -1295,7 +1294,7 @@ void HhbcTranslator::VectorTranslator::emitSetProp() {
   m_ht.exceptionBarrier();
   SSATmp* result = genStk(SetProp, cns((TCA)opFunc), CTX(),
                           m_base, key, value);
-  VectorEffects ve(result->getInstruction());
+  VectorEffects ve(result->inst());
   m_result = ve.valTypeChanged ? result : value;
 }
 #undef HELPER_TABLE
@@ -1443,7 +1442,7 @@ HELPER_TABLE(PROP)
 void HhbcTranslator::VectorTranslator::emitUnsetProp() {
   SSATmp* key = getKey();
 
-  if (m_base->getType().strip().not(Type::Obj)) {
+  if (m_base->type().strip().not(Type::Obj)) {
     // Noop
     return;
   }
@@ -1764,8 +1763,8 @@ void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
                                                     SSATmp* value) {
   assert(m_iInd == m_mii.valCount() + 1);
   const int baseStkIdx = m_mii.valCount();
-  assert(key->getType().notBoxed());
-  assert(value->getType().notBoxed());
+  assert(key->type().notBoxed());
+  assert(value->type().notBoxed());
   KeyType keyType;
   bool checkForInt;
   checkStrictlyInteger(key, keyType, checkForInt);
@@ -1792,7 +1791,7 @@ void HhbcTranslator::VectorTranslator::emitArraySet(SSATmp* key,
     if (base.location.space == Location::Local) {
       m_tb.genStLoc(base.location.offset, newArr, false, false, nullptr);
     } else if (base.location.space == Location::Stack) {
-      VectorEffects ve(newArr->getInstruction());
+      VectorEffects ve(newArr->inst());
       assert(ve.baseValChanged);
       assert(ve.baseType.subtypeOf(Type::Arr));
       m_ht.extendStack(baseStkIdx, Type::Gen);
@@ -1844,7 +1843,7 @@ void HhbcTranslator::VectorTranslator::emitSetElem() {
   BUILD_OPTAB_HOT(getKeyTypeIS(key));
   m_ht.exceptionBarrier();
   SSATmp* result = genStk(SetElem, cns((TCA)opFunc), m_base, key, value);
-  VectorEffects ve(result->getInstruction());
+  VectorEffects ve(result->inst());
   m_result = ve.valTypeChanged ? result : value;
 }
 #undef HELPER_TABLE
@@ -1968,7 +1967,7 @@ HELPER_TABLE(ELEM)
 void HhbcTranslator::VectorTranslator::emitUnsetElem() {
   SSATmp* key = getKey();
 
-  Type baseType = m_base->getType().strip();
+  Type baseType = m_base->type().strip();
   if (baseType.subtypeOf(Type::Str)) {
     m_ht.exceptionBarrier();
     m_tb.gen(RaiseError,
@@ -1999,7 +1998,7 @@ void HhbcTranslator::VectorTranslator::emitSetNewElem() {
   SSATmp* value = getValue();
   m_ht.exceptionBarrier();
   SSATmp* result = m_tb.gen(SetNewElem, m_base, value);
-  VectorEffects ve(result->getInstruction());
+  VectorEffects ve(result->inst());
   m_result = ve.valTypeChanged ? result : value;
 }
 

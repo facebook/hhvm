@@ -688,6 +688,11 @@ public:
   void resetCoverageCounters();
   void shuffleMagicArgs(ActRec* ar);
   void syncGdbState();
+  enum InvokeFlags {
+    InvokeNormal = 0,
+    InvokeIgnoreByRefErrors = 1,
+    InvokePseudoMain = 2
+  };
   void invokeFunc(TypedValue* retval,
                   const HPHP::VM::Func* f,
                   CArrRef params,
@@ -695,14 +700,13 @@ public:
                   HPHP::VM::Class* class_ = nullptr,
                   VarEnv* varEnv = nullptr,
                   StringData* invName = nullptr,
-                  HPHP::VM::Unit* mergeUnit = nullptr);
+                  InvokeFlags flags = InvokeNormal);
   void invokeFunc(TypedValue* retval,
-                  CallCtx& ctx,
+                  const CallCtx& ctx,
                   CArrRef params,
-                  VarEnv* varEnv = nullptr,
-                  HPHP::VM::Unit* toMerge = nullptr) {
+                  VarEnv* varEnv = nullptr) {
     invokeFunc(retval, ctx.func, params, ctx.this_, ctx.cls, varEnv,
-               ctx.invName, toMerge);
+               ctx.invName, InvokeIgnoreByRefErrors);
   }
   void invokeContFunc(const HPHP::VM::Func* f,
                       ObjectData* this_,

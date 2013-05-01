@@ -23,7 +23,7 @@
 #include <compiler/expression/object_property_expression.h>
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/expression/binary_op_expression.h>
-#include <util/parser/hphp.tab.hpp>
+#include "hphp/util/parser/hphp.tab.hpp"
 
 using namespace HPHP;
 

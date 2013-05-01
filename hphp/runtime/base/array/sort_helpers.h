@@ -140,8 +140,8 @@ struct ElmCompare {
         if (LIKELY(acc.isStr(right))) {
           StringData* sLeft = acc.getStr(left);
           StringData* sRight = acc.getStr(right);
-          return ascending ? (sLeft->compare(sRight) < 0) : 
-                             (sLeft->compare(sRight) > 0); 
+          return ascending ? (sLeft->compare(sRight) < 0) :
+                             (sLeft->compare(sRight) > 0);
         }
       } else if (acc.isInt(left)) {
         if (LIKELY(acc.isInt(right))) {
@@ -238,13 +238,12 @@ template <typename AccessorT>
 struct ElmUCompare {
   typedef typename AccessorT::ElmT ElmT;
   AccessorT acc;
-  const Variant* callback;
+  const CallCtx* ctx;
   bool operator()(ElmT left, ElmT right) const {
-    Variant ret =
-      vm_call_user_func(
-        *callback,
-        CREATE_VECTOR2(acc.getValue(left), acc.getValue(right))
-      );
+    Variant ret;
+    g_vmContext->invokeFunc(ret.asTypedValue(), *ctx,
+                            CREATE_VECTOR2(acc.getValue(left),
+                                           acc.getValue(right)));
     if (ret.isInteger()) {
       return ret.toInt64() < 0;
     }
@@ -269,11 +268,10 @@ struct ElmUCompare {
       if (b) {
         return false;
       }
-      Variant ret2 =
-        vm_call_user_func(
-          *callback,
-          CREATE_VECTOR2(acc.getValue(right), acc.getValue(left))
-        );
+      Variant ret2;
+      g_vmContext->invokeFunc(ret.asTypedValue(), *ctx,
+                              CREATE_VECTOR2(acc.getValue(right),
+                                             acc.getValue(left)));
       if (ret2.isBoolean()) {
         return ret2.toBoolean();
       }

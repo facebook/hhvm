@@ -53,7 +53,7 @@ void Injection::execute() const {
   // Note: For now we don't merge analysis code's class and function.
   // Later we might decide to do so
   g_vmContext->invokeFunc(&retval, m_unit->getMain(curClass()),
-                          Array::Create(), this_, cls, varEnv, nullptr, nullptr);
+                          null_array, this_, cls, varEnv);
   if (varEnv) {
     varEnv->setCfp(cfpSave);
   }
@@ -112,8 +112,8 @@ const Injection* InjectionCache::getInjectionImpl(const StringData* code,
 
 const Injection* InjectionCache::getInjectionImpl(const std::string& code,
                                                   const std::string& desc) {
-  StackStringData sdCode(code.c_str(), code.size(), AttachLiteral);
-  StackStringData sdDesc(desc.c_str(), desc.size(), AttachLiteral);
+  StackStringData sdCode(code.c_str(), code.size(), CopyString);
+  StackStringData sdDesc(desc.c_str(), desc.size(), CopyString);
   return getInjectionImpl(&sdCode, &sdDesc);
 }
 

@@ -1738,6 +1738,11 @@ TranslatorX64::irTranslateTracelet(Tracelet&               t,
 
     dumpTranslationInfo(t, a.code.frontier);
 
+    // after guards, add a counter for the translation if requested
+    if (RuntimeOption::EvalJitTransCounters) {
+      m_hhbcTrans->emitIncTransCounter();
+    }
+
     emitRB(a, RBTypeTraceletBody, t.m_sk);
     Stats::emitInc(a, Stats::Instr_TC, t.m_numOpcodes);
     recordBCInstr(OpTraceletGuard, a, start);

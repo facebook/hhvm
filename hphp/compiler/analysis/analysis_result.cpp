@@ -663,7 +663,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
     for (StringToFunctionScopePtrMap::const_iterator iterMethod =
            methods.begin(); iterMethod != methods.end(); ++iterMethod) {
       FunctionScopePtr func = iterMethod->second;
-      if (!func->hasImpl() && needAbstractMethodImpl) {
+      if (Option::WholeProgram && !func->hasImpl() && needAbstractMethodImpl) {
         FunctionScopePtr tmpFunc =
           cls->findFunction(ar, func->getName(), true, true);
         always_assert(!tmpFunc || !tmpFunc->hasImpl());

@@ -5335,24 +5335,39 @@ typedef struct {
 #define FOUND_WINXP         (1<<SECTION_WINXP)
 #define FOUND_MAKERNOTE     (1<<SECTION_MAKERNOTE)
 
-static char *exif_get_sectionname(int section) {
+static const StaticString s_FILE("FILE");
+static const StaticString s_COMPUTED("COMPUTED");
+static const StaticString s_ANY_TAG("ANY_TAG");
+static const StaticString s_IFD0("IFD0");
+static const StaticString s_THUMBNAIL("THUMBNAIL");
+static const StaticString s_COMMENT("COMMENT");
+static const StaticString s_APP0("APP0");
+static const StaticString s_EXIF("EXIF");
+static const StaticString s_FPIX("FPIX");
+static const StaticString s_GPS("GPS");
+static const StaticString s_INTEROP("INTEROP");
+static const StaticString s_APP12("APP12");
+static const StaticString s_WINXP("WINXP");
+static const StaticString s_MAKERNOTE("MAKERNOTE");
+
+static String exif_get_sectionname(int section) {
   switch(section) {
-  case SECTION_FILE:      return "FILE";
-  case SECTION_COMPUTED:  return "COMPUTED";
-  case SECTION_ANY_TAG:   return "ANY_TAG";
-  case SECTION_IFD0:      return "IFD0";
-  case SECTION_THUMBNAIL: return "THUMBNAIL";
-  case SECTION_COMMENT:   return "COMMENT";
-  case SECTION_APP0:      return "APP0";
-  case SECTION_EXIF:      return "EXIF";
-  case SECTION_FPIX:      return "FPIX";
-  case SECTION_GPS:       return "GPS";
-  case SECTION_INTEROP:   return "INTEROP";
-  case SECTION_APP12:     return "APP12";
-  case SECTION_WINXP:     return "WINXP";
-  case SECTION_MAKERNOTE: return "MAKERNOTE";
+  case SECTION_FILE:      return s_FILE;
+  case SECTION_COMPUTED:  return s_COMPUTED;
+  case SECTION_ANY_TAG:   return s_ANY_TAG;
+  case SECTION_IFD0:      return s_IFD0;
+  case SECTION_THUMBNAIL: return s_THUMBNAIL;
+  case SECTION_COMMENT:   return s_COMMENT;
+  case SECTION_APP0:      return s_APP0;
+  case SECTION_EXIF:      return s_EXIF;
+  case SECTION_FPIX:      return s_FPIX;
+  case SECTION_GPS:       return s_GPS;
+  case SECTION_INTEROP:   return s_INTEROP;
+  case SECTION_APP12:     return s_APP12;
+  case SECTION_WINXP:     return s_WINXP;
+  case SECTION_MAKERNOTE: return s_MAKERNOTE;
   }
-  return "";
+  return empty_string;
 }
 
 static tag_table_type exif_get_tag_table(int section) {
@@ -5381,7 +5396,7 @@ static char *exif_get_sectionlist(int sectionlist) {
   char *sections;
 
   for(i=0; i<SECTION_COUNT; i++) {
-    ml += strlen(exif_get_sectionname(i))+2;
+    ml += exif_get_sectionname(i).size() + 2;
   }
   sections = (char *)IM_MALLOC(ml + 1);
   CHECK_ALLOC_R(sections, ml + 1, NULL);
@@ -5389,7 +5404,7 @@ static char *exif_get_sectionlist(int sectionlist) {
   len = 0;
   for(i=0; i<SECTION_COUNT; i++) {
     if (sectionlist&(1<<i)) {
-      snprintf(sections+len, ml-len, "%s, ", exif_get_sectionname(i));
+      snprintf(sections+len, ml-len, "%s, ", exif_get_sectionname(i).c_str());
       len = strlen(sections);
     }
   }
@@ -7799,7 +7814,7 @@ Variant f_exif_read_data(CStrRef filename,
       }
     }
     for (i=0; i<SECTION_COUNT; i++) {
-      snprintf(tmp, sizeof(tmp), ",%s,", exif_get_sectionname(i));
+      snprintf(tmp, sizeof(tmp), ",%s,", exif_get_sectionname(i).c_str());
       if (strstr(sections_str, tmp)) {
         sections_needed |= 1<<i;
       }

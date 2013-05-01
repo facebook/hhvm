@@ -316,7 +316,7 @@ String SessionModule::create_sid() {
                               to_read : (int)sizeof(buf)));
         if (n <= 0) break;
         if (!f_hash_update(context,
-                           String((const char *)rbuf, n, AttachLiteral))) {
+                           String((const char *)rbuf, n, CopyString))) {
           Logger::Error("hash_update() failed");
           ::close(fd);
           return String();

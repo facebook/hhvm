@@ -16,6 +16,8 @@
 
 #include "util/embedded_data.h"
 
+#include "folly/ScopeGuard.h"
+
 #include <libelf.h>
 #include <gelf.h>
 #include <stdio.h>
@@ -23,6 +25,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <unistd.h>
 
 namespace HPHP { namespace Util {
 
@@ -36,6 +39,8 @@ bool get_embedded_data(const char *section, embedded_data* desc) {
 
   int fd = open("/proc/self/exe", O_RDONLY, 0);
   if (fd < 0) return false;
+  SCOPE_EXIT { close(fd); };
+
   Elf* e = elf_begin(fd, ELF_C_READ, nullptr);
 
   if (!e ||

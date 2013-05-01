@@ -106,11 +106,6 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
     DataType t = loc->m_type;
     if (IS_REFCOUNTED_TYPE(t)) {
       uint64_t datum = loc->m_data.num;
-      // When destroying an array or object we can reenter the VM
-      // to call a __destruct method. Null out the local before
-      // calling the destructor so that stacktrace logic doesn't
-      // choke.
-      tvWriteUninit(loc);
       tvDecRefHelper(t, datum);
     }
   }
@@ -120,10 +115,6 @@ inline void ALWAYS_INLINE
 frame_free_locals_inl(ActRec* fp, int numLocals) {
   if (fp->hasThis()) {
     ObjectData* this_ = fp->getThis();
-    // If a destructor for a local calls debug_backtrace, it can read
-    // the m_this field from the ActRec, so we need to zero it to
-    // ensure they can't access a free'd object.
-    fp->setThis(nullptr);
     decRefObj(this_);
   }
   frame_free_locals_helper_inl(fp, numLocals);
@@ -143,11 +134,6 @@ frame_free_args(TypedValue* args, int count) {
     DataType t = loc->m_type;
     if (IS_REFCOUNTED_TYPE(t)) {
       uint64_t datum = loc->m_data.num;
-      // When destroying an array or object we can reenter the VM
-      // to call a __destruct method. Null out the local before
-      // calling the destructor so that stacktrace logic doesn't
-      // choke.
-      tvWriteUninit(loc);
       tvDecRefHelper(t, datum);
     }
   }

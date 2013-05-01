@@ -479,8 +479,6 @@ bool IRInstruction::killsSource(int idx) const {
     case ArraySet:
     case ArraySetRef:
       return idx == 1;
-    case DecRefKillThis:
-      return idx == 0;
     default:
       not_reached();
       break;

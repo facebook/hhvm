@@ -920,7 +920,10 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
   FTRACE(1, "unwindFrag: func {} ({})\n",
          func->fullName()->data(), func->unit()->filepath()->data());
 
-  bool unwindingGeneratorFrame = func->isGenerator();
+  const bool unwindingGeneratorFrame = func->isGenerator();
+  auto const curOp = *reinterpret_cast<const Opcode*>(pc);
+  using namespace VM;
+  const bool unwindingReturningFrame = curOp == OpRetC || curOp == OpRetV;
   TypedValue* evalTop;
   if (UNLIKELY(unwindingGeneratorFrame)) {
     assert(!isValidAddress((uintptr_t)fp));
@@ -998,12 +1001,34 @@ UnwindStatus Stack::unwindFrag(ActRec* fp, int offset,
     fp->getThis()->setNoDestruct();
   }
 
+  // A generator's locals don't live on this stack.
   if (LIKELY(!unwindingGeneratorFrame)) {
-    // A generator's locals don't live on this stack.
-    // onFunctionExit might throw
-    try {
-      frame_free_locals_inl(fp, func->numLocals());
-    } catch (...) {}
+    /*
+     * If we're unwinding through a frame that's returning, it's only
+     * possible that its locals have already been decref'd.
+     *
+     * Here's why:
+     *
+     *   - If a destructor for any of these things throws a php
+     *     exception, it's swallowed at the dtor boundary and we keep
+     *     running php.
+     *
+     *   - If the destructor for any of these things throws a fatal,
+     *     it's swallowed, and we set surprise flags to throw a fatal
+     *     from now on.
+     *
+     *   - If the second case happened and we have to run another
+     *     destructor, its enter hook will throw, but it will be
+     *     swallowed again.
+     *
+     *   - Finally, the exit hook for the returning function can
+     *     throw, but this happens last so everything is destructed.
+     */
+    if (!unwindingReturningFrame) {
+      try {
+        frame_free_locals_inl(fp, func->numLocals());
+      } catch (...) {}
+    }
     ndiscard(func->numSlotsInFrame());
   }
   FTRACE(1, "unwindFrag: propagate\n");
@@ -2307,62 +2332,75 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     frame.set(String(s_line), parserFrame->lineNumber, true);
     bt.append(frame);
   }
+
   Transl::VMRegAnchor _;
   if (!getFP()) {
     // If there are no VM frames, we're done
     return bt;
   }
-  // Get the fp and pc of the top frame (possibly skipping one frame)
-  ActRec* fp;
-  Offset pc = 0;
-  if (skip) {
-    fp = getPrevVMState(getFP(), &pc);
-    if (!fp) {
-      // We skipped over the only VM frame, we're done
-      return bt;
-    }
-  } else {
-    fp = getFP();
-    Unit *unit = getFP()->m_func->unit();
-    assert(unit);
-    pc = unit->offsetOf(m_pc);
-  }
+
   int depth = 0;
-  // Handle the top frame
-  if (withSelf) {
-    // Builtins don't have a file and line number
-    if (!fp->m_func->isBuiltin()) {
-      Unit *unit = fp->m_func->unit();
-      assert(unit);
-      const char* filename = unit->filepath()->data();
-      assert(filename);
-      Offset off = pc;
-      Array frame = Array::Create();
-      frame.set(String(s_file), filename, true);
-      frame.set(String(s_line), unit->getLineNumber(off), true);
-      if (parserFrame) {
-        frame.set(String(s_function), String(s_include), true);
-        frame.set(String(s_args), Array::Create(parserFrame->filename), true);
+  ActRec* fp = nullptr;
+  Offset pc = 0;
+
+  // Get the fp and pc of the top frame (possibly skipping one frame)
+  {
+    if (skip) {
+      fp = getPrevVMState(getFP(), &pc);
+      if (!fp) {
+        // We skipped over the only VM frame, we're done
+        return bt;
       }
-      bt.append(frame);
-      depth++;
+    } else {
+      fp = getFP();
+      Unit *unit = getFP()->m_func->unit();
+      assert(unit);
+      pc = unit->offsetOf(m_pc);
+    }
+
+    // Handle the top frame
+    if (withSelf) {
+      // Builtins don't have a file and line number
+      if (!fp->m_func->isBuiltin()) {
+        Unit *unit = fp->m_func->unit();
+        assert(unit);
+        const char* filename = unit->filepath()->data();
+        assert(filename);
+        Offset off = pc;
+        Array frame = Array::Create();
+        frame.set(String(s_file), filename, true);
+        frame.set(String(s_line), unit->getLineNumber(off), true);
+        if (parserFrame) {
+          frame.set(String(s_function), String(s_include), true);
+          frame.set(String(s_args), Array::Create(parserFrame->filename), true);
+        }
+        bt.append(frame);
+        depth++;
+      }
     }
   }
+
   // Handle the subsequent VM frames
-  for (ActRec* prevFp = getPrevVMState(fp, &pc); fp != nullptr;
-       fp = prevFp, prevFp = getPrevVMState(fp, &pc)) {
+  Offset prevPc = 0;
+  for (ActRec* prevFp = getPrevVMState(fp, &prevPc); fp != nullptr;
+       fp = prevFp, pc = prevPc, prevFp = getPrevVMState(fp, &prevPc)) {
     Array frame = Array::Create();
+
     // do not capture frame for HPHP only functions
     if (fp->m_func->isNoInjection()) {
       continue;
     }
+
+    auto const curUnit = fp->m_func->unit();
+    auto const curOp = *reinterpret_cast<const Opcode*>(curUnit->at(pc));
+    auto const isReturning = curOp == OpRetC || curOp == OpRetV;
+
     // Builtins don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin()) {
-      Unit* unit = prevFp->m_func->unit();
-      assert(unit);
-      const char *filename = unit->filepath()->data();
-      assert(filename);
-      frame.set(String(s_file), filename, true);
+      auto const prevUnit = prevFp->m_func->unit();
+      frame.set(String(s_file),
+                const_cast<StringData*>(prevUnit->filepath()),
+                true);
 
       // In the normal method case, the "saved pc" for line number printing is
       // pointing at the cell conversion (Unbox/Pop) instruction, not the call
@@ -2372,15 +2410,17 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       // instruction. Exception handling and the other opcodes (ex. BoxR)
       // already do the right thing. The emitter associates object access with
       // the subsequent expression and this would be difficult to modify.
-      Opcode* opAtSavedPc = (Opcode*)unit->at(pc);
-      assert(opAtSavedPc);
+      auto const opAtPrevPc =
+        *reinterpret_cast<const Opcode*>(prevUnit->at(prevPc));
       Offset pcAdjust = 0;
-      if (*opAtSavedPc == Op::OpPopR || *opAtSavedPc == Op::OpUnboxR) {
+      if (opAtPrevPc == OpPopR || opAtPrevPc == OpUnboxR) {
         pcAdjust = 1;
       }
       frame.set(String(s_line),
-                prevFp->m_func->unit()->getLineNumber(pc - pcAdjust), true);
+                prevFp->m_func->unit()->getLineNumber(prevPc - pcAdjust),
+                true);
     }
+
     // check for include
     String funcname = const_cast<StringData*>(fp->m_func->name());
     if (fp->m_func->isGenerator()) {
@@ -2390,23 +2430,27 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       funcname = static_cast<c_Continuation*>(
                        tv->m_data.pobj)->t_getorigfuncname();
     }
+
     if (fp->m_func->isClosureBody()) {
       static StringData* s_closure_label =
           StringData::GetStaticString("{closure}");
       funcname = s_closure_label;
     }
+
     // check for pseudomain
     if (funcname->empty()) {
       if (!prevFp) continue;
       funcname = s_include;
     }
+
     frame.set(String(s_function), funcname, true);
+
     if (!funcname.same(s_include)) {
       // Closures have an m_this but they aren't in object context
       Class* ctx = arGetContextClass(fp);
       if (ctx != nullptr && !fp->m_func->isClosureBody()) {
         frame.set(String(s_class), ctx->name()->data(), true);
-        if (fp->hasThis()) {
+        if (fp->hasThis() && !isReturning) {
           if (withThis) {
             frame.set(String(s_object), Object(fp->getThis()), true);
           }
@@ -2416,14 +2460,14 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
         }
       }
     }
+
     Array args = Array::Create();
     if (funcname.same(s_include)) {
       if (depth) {
-        args.append(String(const_cast<StringData*>(
-                             fp->m_func->unit()->filepath())));
+        args.append(String(const_cast<StringData*>(curUnit->filepath())));
         frame.set(String(s_args), args, true);
       }
-    } else if (!RuntimeOption::EnableArgsInBacktraces) {
+    } else if (!RuntimeOption::EnableArgsInBacktraces || isReturning) {
       // Provide an empty 'args' array to be consistent with hphpc
       frame.set(String(s_args), args, true);
     } else {
@@ -2448,6 +2492,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       }
       frame.set(String(s_args), args, true);
     }
+
     bt.append(frame);
     depth++;
   }

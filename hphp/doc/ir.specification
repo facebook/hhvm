@@ -1077,21 +1077,8 @@ DecRefStack<T,offset> S0:StkPtr
 
 DecRefThis S0:FramePtr
 
-  DecRef the $this pointer in the ActRec S0, checking to see if there
-  is one.  If it needs to be destroyed, zero the this slot before
-  calling the destructor.
-
-  This is done to prevent backtraces from seeing stale this pointers.
-
-DecRefKillThis S0:Obj S1:FramePtr
-
-  Similar to DecRefThis, except for use when we have the $this pointer
-  in S0.  This instruction does the same thing as DecRef, except that
-  in the case it needs to destroy its argument, it first zeros the
-  this pointer on the frame S1.  It is expected that the argument will
-  be the $this pointer.
-
-  This is done to prevent backtraces from seeing stale $this pointers.
+  DecRef the $this pointer in the ActRec S0, if it had one.  Does
+  nothing if there was a class context or null $this on the ActRec.
 
 DecRef S0:Gen
 

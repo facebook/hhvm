@@ -2659,16 +2659,11 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
     // Check if this is available and we're not in a static context instead
     m_as.testb(1, rbyte(scratchReg));
     ifThen(m_as, CC_Z, [&] {
-      // In the case where the refCount hits zero, we need to store zero
-      // back to m_this in case a local destructor does debug_backtrace.
       cgDecRefStaticType(
         Type::Obj,
         scratchReg,
         exit,
-        true /* genZeroCheck */,
-        [&] (Asm& a) {
-          a.    storeq  (0, fpReg[AROFF(m_this)]);
-        }
+        true /* genZeroCheck */
       );
     });
   };
@@ -2680,23 +2675,6 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
   } else {
     decrefIfAvailable();
   }
-}
-
-void CodeGenerator::cgDecRefKillThis(IRInstruction* inst) {
-  auto const src = inst->getSrc(0);
-  auto const fpReg = inst->getSrc(1)->getReg();
-
-  assert(!inst->getTaken());
-
-  cgDecRefStaticType(
-    src->type(),
-    src->getReg(),
-    nullptr,
-    true /* genZeroCheck */,
-    [&] (Asm& a) {
-      a.    storeq  (0, fpReg[AROFF(m_this)]);
-    }
-  );
 }
 
 void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
@@ -2963,9 +2941,7 @@ Address CodeGenerator::cgCheckRefCountedType(PhysReg baseReg, int64_t offset) {
 void CodeGenerator::cgDecRefStaticType(Type type,
                                        PhysReg dataReg,
                                        Block* exit,
-                                       bool genZeroCheck,
-                                       std::function<void(Asm&)>
-                                         slowPathWork) {
+                                       bool genZeroCheck) {
   assert(type != Type::Cell && type != Type::Gen);
   assert(type.isKnownDataType());
 
@@ -2987,7 +2963,6 @@ void CodeGenerator::cgDecRefStaticType(Type type,
   if (genZeroCheck && exit == nullptr) {
     // Emit jump to m_astubs (to call release) if count got down to zero
     unlikelyIfBlock(CC_Z, [&] (Asm& a) {
-      if (slowPathWork) slowPathWork(a);
       // Emit the call to release in m_astubs
       cgCallHelper(a, m_tx64->getDtorCall(type.toDataType()),
                    InvalidReg, InvalidReg, kSyncPoint,

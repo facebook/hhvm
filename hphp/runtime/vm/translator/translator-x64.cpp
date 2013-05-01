@@ -11503,9 +11503,9 @@ asm_label(a, release);
   });
   a.    ret    ();
 asm_label(a, doRelease);
-  emitStoreTVType(a, KindOfUninit, rIter[TVOFF(m_type)]);
   jumpDestructor(a, PhysReg(rType), rax);
 
+  moveToAlign(a, kJmpTargetAlign);
   m_freeManyLocalsHelper = a.code.frontier;
   a.    lea    (rVmFp[-cellsToBytes(kNumFreeLocalsHelpers)], rFinished);
 

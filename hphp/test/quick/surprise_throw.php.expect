@@ -1,7 +1,6 @@
 hi exit fb_setprofile
 hi enter foo
 yep
-yep
 hi enter Exception::getMessage
 hi exit Exception::getMessage
 yo

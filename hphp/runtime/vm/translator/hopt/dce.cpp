@@ -377,19 +377,6 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
 
   forEachInst(trace, [&](IRInstruction* inst) {
     switch (inst->op()) {
-    case DecRefKillThis:
-      {
-        auto frame = inst->getSrc(1);
-        auto frameInst = frame->inst();
-        if (frameInst->op() == DefInlineFP) {
-          FTRACE(5, "DecRefKillThis ({}): weak use of frame {}\n",
-                 inst->getIId(),
-                 frameInst->getIId());
-          state[frameInst].incWeakUse();
-        }
-      }
-      break;
-
     case CreateCont:
       {
         auto const frameInst = inst->getSrc(1)->inst();
@@ -438,18 +425,6 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
    */
   forEachInst(trace, [&](IRInstruction* inst) {
     switch (inst->op()) {
-    case DecRefKillThis:
-      {
-        auto const fp = inst->getSrc(1);
-        if (state[fp->inst()].isDead()) {
-          FTRACE(5, "DecRefKillThis ({}) -> DecRef\n", inst->getIId());
-          inst->setOpcode(DecRef);
-          inst->setSrc(1, nullptr);
-          inst->setNumSrcs(1);
-        }
-      }
-      break;
-
     case CreateCont:
       {
         auto const fp = inst->getSrc(1);

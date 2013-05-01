@@ -730,11 +730,8 @@ SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
       return nullptr;
     }
 
-    // If we're in an inlined callee, it's a shame to keep a reference
-    // to the frame just to kill the $this pointer.  But this is
-    // handled in optimizeActRecs.
     assert(inst->getSrc(0) == m_fpValue);
-    gen(DecRefKillThis, thiss, m_fpValue);
+    gen(DecRef, thiss);
     inst->convertToNop();
     return nullptr;
   }

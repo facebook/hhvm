@@ -265,9 +265,7 @@ private:
   void cgDecRefStaticType(Type type,
                           PhysReg dataReg,
                           Block* exit,
-                          bool genZeroCheck,
-                          std::function<void(Asm&)> slowPathWork =
-                            std::function<void(Asm&)>());
+                          bool genZeroCheck);
   void cgDecRefDynamicType(PhysReg typeReg,
                            PhysReg dataReg,
                            Block* exit,

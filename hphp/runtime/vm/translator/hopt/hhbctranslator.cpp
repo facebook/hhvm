@@ -1933,11 +1933,6 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
 
   if (mayHaveThis(getCurFunc())) {
     if (retValSrcLoc && retValSrcOpc == LdThis) {
-      // Note that this doesn't need to be DecRefThis or
-      // DecRefKillThis because we're carefully setting things up to
-      // get turned to DecRefNZ.  This means even if a
-      // debug_backtrace() occurs it can't see a stale $this on the
-      // ActRec.
       gen(DecRef, retVal);
     } else {
       gen(DecRefThis, m_tb->getFp());
@@ -1957,20 +1952,7 @@ SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
       gen(DecRef, retVal);
       continue;
     }
-
-    // When a parameter goes out of scope during return, we need to
-    // null it out so that debug_backtrace can't capture stale values.
-    // TODO(#2332775): we shouldn't have to do this.
-    const bool needSetNull = id < getCurFunc()->numParams();
-    if (needSetNull) {
-      auto const loc = ldLoc(id);
-      if (needSetNull) {
-        gen(StLoc, LocalId(id), m_tb->getFp(), m_tb->genDefUninit());
-      }
-      gen(DecRef, loc);
-    } else {
-      gen(DecRefLoc, Type::Gen, LocalId(id), m_tb->getFp());
-    }
+    gen(DecRefLoc, Type::Gen, LocalId(id), m_tb->getFp());
   }
 
   return retValSrcLoc ? retValSrcLoc : retVal;

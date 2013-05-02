@@ -1621,6 +1621,7 @@ struct AsmInfo;
 class IRFactory;
 class Simplifier;
 struct Block;
+struct LifetimeInfo;
 
 bool isRefCounted(SSATmp* opnd);
 
@@ -1649,7 +1650,6 @@ struct IRInstruction {
     , m_numSrcs(numSrcs)
     , m_numDsts(0)
     , m_iid(kTransient)
-    , m_id(0)
     , m_srcs(srcs)
     , m_dst(nullptr)
     , m_taken(nullptr)
@@ -1665,8 +1665,7 @@ struct IRInstruction {
    * Construct an IRInstruction as a deep copy of `inst', using
    * arena to allocate memory for its srcs/dests.
    */
-  explicit IRInstruction(Arena& arena, const IRInstruction* inst,
-                         IId iid);
+  explicit IRInstruction(Arena& arena, const IRInstruction* inst, IId iid);
 
   /*
    * Initialize the source list for this IRInstruction.  We must not
@@ -1824,20 +1823,13 @@ struct IRInstruction {
     m_dst = newDsts;
   }
 
-  TCA        getTCA()      const       { return m_tca; }
-  void       setTCA(TCA    newTCA)     { m_tca = newTCA; }
-
-  /*
-   * An instruction's 'id' has different meanings depending on the
-   * compilation phase.
-   */
-  uint32_t     getId()       const       { return m_id; }
-  void       setId(uint32_t newId)       { m_id = newId; }
+  TCA getTCA() const { return m_tca; }
+  void setTCA(TCA newTCA) { m_tca = newTCA; }
 
   /*
    * Instruction id (iid) is stable and useful as an array index.
    */
-  uint32_t     getIId()      const       {
+  uint32_t getIId() const {
     assert(m_iid != kTransient);
     return m_iid;
   }
@@ -1909,7 +1901,6 @@ private:
   uint16_t          m_numSrcs;
   uint16_t          m_numDsts;
   const IId         m_iid;
-  uint32_t          m_id;
   SSATmp**          m_srcs;
   SSATmp*           m_dst;     // if HasDest or NaryDest
   Block*            m_taken;   // for branches, guards, and jmp
@@ -1971,12 +1962,6 @@ public:
   void              setInstruction(IRInstruction* i) { m_inst = i; }
   Type              type() const { return m_type; }
   void              setType(Type t) { m_type = t; }
-  uint32_t          getLastUseId() const { return m_lastUseId; }
-  void              setLastUseId(uint32_t newId) { m_lastUseId = newId; }
-  uint32_t          getUseCount() const { return m_useCount; }
-  void              setUseCount(uint32_t count) { m_useCount = count; }
-  void              incUseCount() { m_useCount++; }
-  uint32_t          decUseCount() { return --m_useCount; }
   bool              isSpilled() const { return m_isSpilled; }
   bool              isBoxed() const { return type().isBoxed(); }
   bool              isString() const { return isA(Type::Str); }
@@ -2079,8 +2064,6 @@ private:
     : m_inst(i)
     , m_type(outputType(i, dstId))
     , m_id(opndId)
-    , m_lastUseId(0)
-    , m_useCount(0)
     , m_isSpilled(false)
   {
     m_regs[0] = m_regs[1] = Transl::InvalidReg;
@@ -2090,9 +2073,7 @@ private:
 
   IRInstruction*  m_inst;
   Type            m_type; // type when defined
-  const uint32_t  m_id;
-  uint32_t        m_lastUseId;
-  uint16_t        m_useCount;
+  uint32_t        m_id;
   bool            m_isSpilled;
 
   /*

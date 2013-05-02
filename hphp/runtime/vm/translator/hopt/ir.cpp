@@ -35,7 +35,6 @@
 #include "runtime/vm/translator/hopt/cse.h"
 #include "runtime/vm/translator/hopt/simplifier.h"
 #include "runtime/vm/translator/hopt/print.h"
-#include "runtime/vm/translator/hopt/codegen.h"
 
 // Include last to localize effects to this file
 #include "util/assert_throw.h"
@@ -296,7 +295,6 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, IId iid)
   , m_numSrcs(inst->m_numSrcs)
   , m_numDsts(inst->m_numDsts)
   , m_iid(iid)
-  , m_id(0)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dst(nullptr)
   , m_taken(nullptr)
@@ -595,7 +593,6 @@ void IRInstruction::convertToNop() {
   m_op = nop.m_op;
   m_typeParam = nop.m_typeParam;
   m_numSrcs = nop.m_numSrcs;
-  m_id = nop.m_id;
   m_srcs = nop.m_srcs;
   m_numDsts = nop.m_numDsts;
   m_dst = nop.m_dst;
@@ -633,7 +630,6 @@ void IRInstruction::become(IRFactory* factory, IRInstruction* other) {
   // dests---the whole point of become() is things still point to us.
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;
-  m_id = other->m_id;
   m_taken = other->m_taken;
   m_tca = other->m_tca;
   m_numSrcs = other->m_numSrcs;

@@ -17,16 +17,44 @@
 #ifndef incl_HPHP_VM_LINEAR_SCAN_H_
 #define incl_HPHP_VM_LINEAR_SCAN_H_
 
+#include "runtime/vm/translator/hopt/state_vector.h"
+
 namespace HPHP { namespace VM { namespace JIT {
 
 class Trace;
 class IRFactory;
 
+struct UseInfo {
+  UseInfo() : lastUse(0), count(0) {}
+  uint32_t lastUse; // linear id of last use
+  uint32_t count;   // number of uses
+};
+
+typedef StateVector<IRInstruction, uint32_t> LinearIdVector;
+typedef StateVector<SSATmp, UseInfo> UsesVector;
+
+struct LifetimeInfo {
+  explicit LifetimeInfo(const IRFactory* factory)
+    : linear(factory, 0), uses(factory, UseInfo()) {
+  }
+  explicit LifetimeInfo(const LinearIdVector& linear,
+                        const UsesVector& uses)
+    : linear(linear), uses(uses) {
+  }
+  explicit LifetimeInfo(LinearIdVector&& linear,
+                        UsesVector&& uses)
+    : linear(linear), uses(uses) {
+  }
+
+  LinearIdVector linear; // linear id of each instruction
+  UsesVector uses;       // last use id and use count of each tmp
+};
+
 /*
  * The main entry point for register allocation.  Called prior to code
  * generation.
  */
-void allocRegsForTrace(Trace*, IRFactory*);
+void allocRegsForTrace(Trace*, IRFactory*, LifetimeInfo* lifetime = nullptr);
 
 }}}
 

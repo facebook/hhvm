@@ -73,10 +73,12 @@ typedef StateVector<IRInstruction, RegSet> LiveRegs;
 // and address information produced during codegen.
 struct CodegenState {
   CodegenState(const IRFactory* factory, const LiveRegs& liveRegs,
+               const LifetimeInfo* lifetime,
                AsmInfo* asmInfo)
     : patches(factory, nullptr)
     , lastMarker(nullptr)
     , liveRegs(liveRegs)
+    , lifetime(lifetime)
     , asmInfo(asmInfo)
   {}
 
@@ -95,6 +97,10 @@ struct CodegenState {
   // preserved across that instruction.  This is for push/pop of caller-saved
   // registers.
   const LiveRegs& liveRegs;
+
+  // Optional information used when pretty-printing code after codegen.
+  // when not available, these are nullptrs.
+  const LifetimeInfo* lifetime;
 
   // Output: start/end ranges of machine code addresses of each instruction.
   AsmInfo* asmInfo;
@@ -535,7 +541,8 @@ void genCodeForTrace(Trace*                  trace,
                      IRFactory*              irFactory,
                      vector<TransBCMapping>* bcMap,
                      TranslatorX64*          tx64,
-                     AsmInfo                 *asmInfo = nullptr);
+                     const LifetimeInfo*     lifetime = nullptr,
+                     AsmInfo*                asmInfo = nullptr);
 
 }}}
 

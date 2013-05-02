@@ -61,8 +61,9 @@ struct StateVector {
 
   const_reference operator[](const Key& k) const { return (*this)[&k]; }
   const_reference operator[](const Key* k) const {
-    assert(factoryId(k) < m_info.size());
-    return m_info[factoryId(k)];
+    assert(factoryId(k) < count(m_factory, (Key*)nullptr));
+    auto id = factoryId(k);
+    return id < m_info.size() ? m_info[id] : m_init;
   }
 
   iterator begin()              { return m_info.begin(); }

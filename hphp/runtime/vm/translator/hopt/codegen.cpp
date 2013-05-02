@@ -5113,7 +5113,7 @@ void cgTrace(Trace* trace, Asm& amain, Asm& astubs, Transl::TranslatorX64* tx64,
 }
 
 void CodeGenerator::print() const {
-  JIT::print(std::cout, m_curTrace, m_state.asmInfo);
+  JIT::print(std::cout, m_curTrace, m_state.lifetime, m_state.asmInfo);
 }
 
 /*
@@ -5152,10 +5152,11 @@ void genCodeForTrace(Trace* trace,
                      IRFactory* irFactory,
                      vector<TransBCMapping>* bcMap,
                      Transl::TranslatorX64* tx64,
+                     const LifetimeInfo* lifetime,
                      AsmInfo* asmInfo) {
   assert(trace->isMain());
   LiveRegs live_regs = computeLiveRegs(irFactory, trace->front());
-  CodegenState state(irFactory, live_regs, asmInfo);
+  CodegenState state(irFactory, live_regs, lifetime, asmInfo);
   cgTrace(trace, as, astubs, tx64, bcMap, state);
   for (Trace* exit : trace->getExitTraces()) {
     cgTrace(exit, astubs, astubs, tx64, nullptr, state);

@@ -24,6 +24,7 @@
 #include "util/arena.h"
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/cse.h"
+#include "runtime/base/memory/memory_manager.h"
 
 namespace HPHP { namespace VM { namespace JIT {
 

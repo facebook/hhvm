@@ -1907,29 +1907,34 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   assert(m_useHHIR);
 
   JIT::Trace* trace = m_hhbcTrans->getTrace();
-  auto finishPass = [&](const char* msg) {
-    dumpTrace(1, trace, msg);
+  auto finishPass = [&](const char* msg,
+                        const JIT::LifetimeInfo* lifetime = nullptr) {
+    dumpTrace(1, trace, msg, lifetime);
     assert(JIT::checkCfg(trace, *m_irFactory));
   };
 
   finishPass(" after initial translation ");
   JIT::optimizeTrace(trace, m_hhbcTrans->getTraceBuilder());
   finishPass(" after optimizing ");
-  JIT::allocRegsForTrace(trace, m_irFactory.get());
-  finishPass(" after reg alloc ");
 
   auto* factory = m_irFactory.get();
   if (JIT::dumpIREnabled() || RuntimeOption::EvalJitCompareHHIR) {
+    JIT::LifetimeInfo lifetime(m_irFactory.get());
+    JIT::allocRegsForTrace(trace, m_irFactory.get(), &lifetime);
+    finishPass(" after reg alloc ", &lifetime);
     JIT::AsmInfo ai(factory);
-    JIT::genCodeForTrace(trace, a, astubs, factory, bcMap, this, &ai);
+    JIT::genCodeForTrace(trace, a, astubs, factory, bcMap, this,
+                         &lifetime, &ai);
     if (RuntimeOption::EvalJitCompareHHIR) {
       std::ostringstream out;
-      dumpTraceImpl(trace, out, &ai);
+      dumpTraceImpl(trace, out, &lifetime, &ai);
       m_lastHHIRDump = out.str();
     } else {
-      dumpTrace(1, trace, " after code gen ", &ai);
+      dumpTrace(1, trace, " after code gen ", &lifetime, &ai);
     }
   } else {
+    JIT::allocRegsForTrace(trace, m_irFactory.get());
+    finishPass(" after reg alloc ");
     JIT::genCodeForTrace(trace, a, astubs, factory, bcMap, this);
   }
 

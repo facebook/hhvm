@@ -199,24 +199,24 @@ function is_server($options) {
 
 function file_arg($options) {
   if (is_server($options)) {
-    return '-m server -v Server.SourceRoot=%s -p %s';
+    return '-m server -vServer.SourceRoot=%s -p %s';
   } else {
     return '--file %3\$s';
   }
 }
 
 function mode_arg($options) {
-  $repo_args = "-v Repo.Local.Mode=-- -v Repo.Central.Path=".verify_hhbc();
-  $jit_args = "$repo_args -v Eval.Jit=true -v Eval.JitEnableRenameFunction=true";
+  $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
+  $jit_args = "$repo_args -vEval.Jit=1 -vEval.JitEnableRenameFunction=1";
   $mode = idx($options, 'mode');
   switch ($mode) {
     case '':
     case 'jit':
-      return "$jit_args -v Eval.JitUseIR=false";
+      return "$jit_args -vEval.JitUseIR=0 -vEval.HHIRDisableTx64=0";
     case 'hhir':
-      return "$jit_args -v Eval.JitUseIR=true -v Eval.HHIRDisableTx64=true";
+      return "$jit_args -vEval.JitUseIR=1 -vEval.HHIRDisableTx64=1";
     case 'interp':
-      return "$repo_args -v Eval.Jit=false";
+      return "$repo_args -vEval.Jit=0";
     default:
       error("-m must be one of hhir | jit | interp. Got: '$mode'");
   }
@@ -229,7 +229,7 @@ function command_arg($options, $tests) {
     find_config($tests, 'config.hdf'),
     file_arg($options),
     mode_arg($options),
-    '-v Eval.EnableArgsInBacktraces=true',
+    '-vEval.EnableArgsInBacktraces=true',
   );
 }
 
@@ -301,7 +301,7 @@ if ($return_value) {
   $command = str_replace('%3\\$s', $filename, $command);
 
   if (isset($options['repo'])) {
-    $command .= " -v Repo.Authoritative=true ";
+    $command .= " -vRepo.Authoritative=true ";
     $command = str_replace(verify_hhbc(), "$filename.repo/hhvm.hhbc", $command);
     $command = implode(' ', hphp_arg($options, $tests)).
       " -thhbc -l0 -k1 -o $filename.repo $filename\n".

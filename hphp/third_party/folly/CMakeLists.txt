@@ -15,4 +15,10 @@ find_package(Boost 1.48.0 COMPONENTS system program_options filesystem regex REQ
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
-target_link_libraries(folly ${Boost_LIBRARIES})
+find_package(Glog REQUIRED)
+include_directories(${LIBGLOG_INCLUDE_DIR})
+
+find_package(PThread REQUIRED)
+include_directories(${LIBPTHREAD_INCLUDE_DIRS})
+
+target_link_libraries(folly ${Boost_LIBRARIES} ${LIBGLOG_LIBRARY} ${LIBPTHREAD_LIBRARIES})

@@ -1444,7 +1444,6 @@ void dumpTrace(int level, const Trace* trace, const char* caption,
         << color(ANSI_COLOR_END)
         ;
     dumpTraceImpl(trace, str, ai);
-    trace->print(str);
     str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
         << folly::format(bannerFmt, "")
         << color(ANSI_COLOR_END)

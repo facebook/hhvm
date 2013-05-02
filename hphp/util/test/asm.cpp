@@ -333,6 +333,7 @@ typedef void (Asm::*OpRR64)(Reg64, Reg64);
 typedef void (Asm::*OpRR32)(Reg32, Reg32);
 typedef void (Asm::*OpRR8)(Reg8, Reg8);
 typedef void (Asm::*OpR8R32)(Reg8, Reg32);
+typedef void (Asm::*OpR8R64)(Reg8, Reg64);
 typedef void (Asm::*OpMR64)(MemoryRef, Reg64);
 typedef void (Asm::*OpMR32)(MemoryRef, Reg32);
 typedef void (Asm::*OpMR8)(MemoryRef, Reg8);
@@ -432,6 +433,10 @@ TEST(Asm, General) {
   dotest("movzbl", a, OpSMR32(&Asm::loadzbl));
   dotest("movzbl", a, OpR8R32(&Asm::movzbl));
 
+  dotest("movsbq", a, OpMR64(&Asm::loadsbq));
+  dotest("movsbq", a, OpSMR64(&Asm::loadsbq));
+  dotest("movsbq", a, OpR8R64(&Asm::movsbq));
+
   FULL_OP(add);
   FULL_OP(xor);
   FULL_OP(sub);
@@ -490,6 +495,8 @@ TEST(Asm, RandomJunk) {
   a.    pop    (rbp);
   a.    ret    ();
 
+// NB: There is a piece of trailing whitespace after retq that is needed for the
+// test to pass
   expect_asm(a, R"(
 push %rbp
 mov %rsp,%rbp

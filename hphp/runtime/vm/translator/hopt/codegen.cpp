@@ -527,6 +527,14 @@ void shuffle2(CodeGenerator::Asm& a,
   }
 }
 
+static void signExtendBool(X64Assembler& as, const SSATmp* src) {
+  auto reg = src->getReg();
+  if (reg != InvalidReg) {
+    // sign-extend the bool from a byte to a quad
+    as.movsbq(rbyte(reg), r64(reg));
+  }
+}
+
 static void zeroExtendIfBool(X64Assembler& as, const SSATmp* src) {
   if (src->isA(Type::Bool)) {
     auto reg = src->getReg();
@@ -911,11 +919,17 @@ void CodeGenerator::cgNegate(IRInstruction* inst) {
   cgNegateWork(inst->getDst(), inst->getSrc(0));
 }
 
-template<class Oper>
+inline static Reg8 convertToReg8(PhysReg reg) { return rbyte(reg); }
+inline static Reg64 convertToReg64(PhysReg reg) { return reg; }
+
+template<class Oper, class RegType>
 void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
-                                  void (Asm::*instrIR)(Immed, Reg64),
-                                  void (Asm::*instrRR)(Reg64, Reg64),
+                                  void (Asm::*instrIR)(Immed, RegType),
+                                  void (Asm::*instrRR)(RegType, RegType),
+                                  void (Asm::*movInstr)(RegType, RegType),
+                                  void (*extendInstr)(Asm&, const SSATmp*),
                                   Oper oper,
+                                  RegType (*convertReg)(PhysReg),
                                   Commutativity commuteFlag) {
   const SSATmp* dst   = inst->getDst();
   const SSATmp* src1  = inst->getSrc(0);
@@ -930,78 +944,106 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   auto const src1Reg     = src1->getReg();
   auto const src2Reg     = src2->getReg();
   auto& a                = m_as;
+  bool const useBoolOps  = src1->isA(Type::Bool) && src2->isA(Type::Bool);
 
-  // Extend booleans: integer operations require 64-bit
-  // representations.
-  zeroExtendIfBool(m_as, src1);
-  zeroExtendIfBool(m_as, src2);
+  auto const dstOpReg    = convertReg(dstReg);
+  auto const src1OpReg   = convertReg(src1Reg);
+  auto const src2OpReg   = convertReg(src2Reg);
+  auto const rOpScratch  = convertReg(rScratch);
+
+  // We can only use byte operations if both operands are boolean. If so, we'll
+  // sign extend *after* the operation is complete to save a movzbl.
+  if (!useBoolOps) {
+    // Extend booleans: integer operations require 64-bit
+    // representations.
+    zeroExtendIfBool(m_as, src1);
+    zeroExtendIfBool(m_as, src2);
+  }
+
+  auto signExtendIfNecessary = [&] {
+    if (useBoolOps) {
+      extendInstr(m_as, dst);
+    }
+  };
 
   // Two registers.
   if (src1Reg != InvalidReg && src2Reg != InvalidReg) {
     if (dstReg == src1Reg) {
-      (a.*instrRR)  (src2Reg, dstReg);
+      (a.*instrRR)  (src2OpReg, dstOpReg);
     } else if (dstReg == src2Reg) {
       if (commutative) {
-        (a.*instrRR)(src1Reg, dstReg);
+        (a.*instrRR) (src1OpReg, dstOpReg);
       } else {
-        a.  movq    (src1Reg, rScratch);
-        (a.*instrRR)(src2Reg, rScratch);
-        a.  movq    (rScratch, dstReg);
+        (a.*movInstr)(src1OpReg, rOpScratch);
+        (a.*instrRR) (src2OpReg, rOpScratch);
+        (a.*movInstr)(rOpScratch, dstOpReg);
       }
     } else {
       emitMovRegReg(a, src1Reg, dstReg);
-      (a.*instrRR) (src2Reg, dstReg);
+      (a.*instrRR) (src2OpReg, dstOpReg);
     }
+    signExtendIfNecessary();
     return;
   }
 
   // Two immediates.
   if (src1Reg == InvalidReg && src2Reg == InvalidReg) {
     assert(src1->isConst() && src2->isConst());
-    int64_t value = oper(src1->getValRawInt(),
-                         src2->getValRawInt());
+    int64_t value = useBoolOps ?
+      (int64_t)oper(src1->getValBool(), src2->getValBool()) :
+      oper(src1->getValRawInt(), src2->getValRawInt());
     emitLoadImm(a, value, dstReg);
     return;
   }
 
   // One register, and one immediate.
   if (commutative) {
-    int64_t immed = (src2Reg == InvalidReg
-                     ? src2 : src1)->getValRawInt();
-    auto srcReg = src2Reg == InvalidReg ? src1Reg : src2Reg;
+    auto immedSrc = (src2Reg == InvalidReg ? src2 : src1);
+    auto immed = useBoolOps ?
+      (int64_t)immedSrc->getValBool() : immedSrc->getValRawInt();
+    auto srcReg = (src2Reg == InvalidReg ? src1 : src2)->getReg();
     if (srcReg == dstReg) {
-      (a.*instrIR) (immed, dstReg);
+      (a.*instrIR) (immed, dstOpReg);
     } else {
       emitLoadImm(a, immed, dstReg);
-      (a.*instrRR) (srcReg, dstReg);
+      (a.*instrRR) (convertReg(srcReg), dstOpReg);
     }
+    signExtendIfNecessary();
     return;
   }
 
   // NonCommutative:
   if (src1Reg == InvalidReg) {
     if (dstReg == src2Reg) {
-      emitLoadImm(a, src1->getValRawInt(), rScratch);
-      (a.*instrRR) (src2Reg, rScratch);
-      a.    movq   (rScratch, dstReg);
+      emitLoadImm(a, useBoolOps ?
+          (int64_t)src1->getValBool() : src1->getValRawInt(), rScratch);
+      (a.*instrRR) (src2OpReg, rOpScratch);
+      (a.*movInstr)(rOpScratch, dstOpReg);
     } else {
-      emitLoadImm(a, src1->getValRawInt(), dstReg);
-      (a.*instrRR) (src2Reg, dstReg);
+      emitLoadImm(a, useBoolOps ?
+          (int64_t)src1->getValBool() : src1->getValRawInt(), dstReg);
+      (a.*instrRR) (src2OpReg, dstOpReg);
     }
+    signExtendIfNecessary();
     return;
   }
 
   assert(src2Reg == InvalidReg);
   emitMovRegReg(a, src1Reg, dstReg);
-  (a.*instrIR) (src2->getValRawInt(), dstReg);
+  (a.*instrIR) (
+      useBoolOps ? src2->getValBool() : src2->getValRawInt(), dstOpReg);
+  signExtendIfNecessary();
 }
 
-template<class Oper>
+template<class Oper, class RegType>
 void CodeGenerator::cgBinaryOp(IRInstruction* inst,
-                               void (Asm::*instrIR)(Immed, Reg64),
-                               void (Asm::*instrRR)(Reg64, Reg64),
+                               void (Asm::*instrIR)(Immed, RegType),
+                               void (Asm::*instrRR)(RegType, RegType),
+                               void (Asm::*movInstr)(RegType, RegType),
                                void (Asm::*fpInstr)(RegXMM, RegXMM),
+                               void (*extendInstr)(Asm&, const SSATmp*),
                                Oper oper,
+                               RegType (*convertReg)(PhysReg),
                                Commutativity commuteFlag) {
   const SSATmp* dst   = inst->getDst();
   const SSATmp* src1  = inst->getSrc(0);
@@ -1018,7 +1060,8 @@ void CodeGenerator::cgBinaryOp(IRInstruction* inst,
     m_as.    mov_xmm_reg64(xmm0, dst->getReg());
     return;
   }
-  cgBinaryIntOp(inst, instrIR, instrRR, oper, commuteFlag);
+  cgBinaryIntOp(inst, instrIR, instrRR, movInstr, extendInstr,
+                oper, convertReg, commuteFlag);
 }
 
 bool CodeGenerator::emitIncDecHelper(SSATmp* dst, SSATmp* src1, SSATmp* src2,
@@ -1059,12 +1102,27 @@ void CodeGenerator::cgOpAdd(IRInstruction* inst) {
   // Special cases: x = y + 1
   if (emitInc(dst, src1, src2) || emitInc(dst, src2, src1)) return;
 
-  cgBinaryOp(inst,
-             &Asm::addq,
-             &Asm::addq,
-             &Asm::addsd_xmm_xmm,
-             std::plus<int64_t>(),
-             Commutative);
+  if (src1->isA(Type::Bool) & src2->isA(Type::Bool))
+  {
+    cgBinaryIntOp(inst,
+               &Asm::addb,
+               &Asm::addb,
+               &Asm::movb,
+               &zeroExtendIfBool,
+               std::plus<bool>(),
+               &convertToReg8,
+               Commutative);
+  } else {
+    cgBinaryOp(inst,
+               &Asm::addq,
+               &Asm::addq,
+               &Asm::movq,
+               &Asm::addsd_xmm_xmm,
+               nullptr, // not used
+               std::plus<int64_t>(),
+               &convertToReg64,
+               Commutative);
+  }
 }
 
 void CodeGenerator::cgOpSub(IRInstruction* inst) {
@@ -1079,28 +1137,76 @@ void CodeGenerator::cgOpSub(IRInstruction* inst) {
     return cgNegateWork(dst, src2);
   }
 
-  cgBinaryOp(inst,
-             &Asm::subq,
-             &Asm::subq,
-             &Asm::subsd_xmm_xmm,
-             std::minus<int64_t>(),
-             NonCommutative);
+  if (src1->isA(Type::Bool) & src2->isA(Type::Bool)) {
+    cgBinaryIntOp(inst,
+               &Asm::subb,
+               &Asm::subb,
+               &Asm::movb,
+               &signExtendBool, // bool "-1" needs to be sign extended as int
+               std::minus<bool>(),
+               &convertToReg8,
+               NonCommutative);
+  } else {
+    cgBinaryOp(inst,
+               &Asm::subq,
+               &Asm::subq,
+               &Asm::movq,
+               &Asm::subsd_xmm_xmm,
+               nullptr, // not used
+               std::minus<int64_t>(),
+               &convertToReg64,
+               NonCommutative);
+  }
 }
 
 void CodeGenerator::cgOpAnd(IRInstruction* inst) {
-  cgBinaryIntOp(inst,
-                &Asm::andq,
-                &Asm::andq,
-                [] (int64_t a, int64_t b) { return a & b; },
-                Commutative);
+  SSATmp* src1  = inst->getSrc(0);
+  SSATmp* src2  = inst->getSrc(1);
+
+  if (src1->isA(Type::Bool) & src2->isA(Type::Bool)) {
+    cgBinaryIntOp(inst,
+               &Asm::andb,
+               &Asm::andb,
+               &Asm::movb,
+               &zeroExtendIfBool,
+               [] (bool a, bool b) { return a & b; },
+               &convertToReg8,
+               Commutative);
+  } else {
+    cgBinaryIntOp(inst,
+               &Asm::andq,
+               &Asm::andq,
+               &Asm::movq,
+               nullptr, // not used
+               [] (int64_t a, int64_t b) { return a & b; },
+               &convertToReg64,
+               Commutative);
+  }
 }
 
 void CodeGenerator::cgOpOr(IRInstruction* inst) {
-  cgBinaryIntOp(inst,
-                &Asm::orq,
-                &Asm::orq,
-                [] (int64_t a, int64_t b) { return a | b; },
-                Commutative);
+  SSATmp* src1  = inst->getSrc(0);
+  SSATmp* src2  = inst->getSrc(1);
+
+  if (src1->isA(Type::Bool) & src2->isA(Type::Bool)) {
+    cgBinaryIntOp(inst,
+               &Asm::orb,
+               &Asm::orb,
+               &Asm::movb,
+               &zeroExtendIfBool,
+               [] (bool a, bool b) { return a | b; },
+               &convertToReg8,
+               Commutative);
+  } else {
+    cgBinaryIntOp(inst,
+               &Asm::orq,
+               &Asm::orq,
+               &Asm::movq,
+               nullptr, // not used
+               [] (int64_t a, int64_t b) { return a | b; },
+               &convertToReg64,
+               Commutative);
+  }
 }
 
 void CodeGenerator::cgOpDiv(IRInstruction* inst) {
@@ -1116,20 +1222,52 @@ void CodeGenerator::cgOpXor(IRInstruction* inst) {
     return cgNotWork(dst, src1);
   }
 
-  cgBinaryIntOp(inst,
-                &Asm::xorq,
-                &Asm::xorq,
-                [] (int64_t a, int64_t b) { return a ^ b; },
-                Commutative);
+  if (src1->isA(Type::Bool) & src2->isA(Type::Bool)) {
+    cgBinaryIntOp(inst,
+               &Asm::xorb,
+               &Asm::xorb,
+               &Asm::movb,
+               &zeroExtendIfBool,
+               [] (bool a, bool b) { return a ^ b; },
+               &convertToReg8,
+               Commutative);
+  } else {
+    cgBinaryIntOp(inst,
+               &Asm::xorq,
+               &Asm::xorq,
+               &Asm::movq,
+               nullptr, // not used
+               [] (int64_t a, int64_t b) { return a ^ b; },
+               &convertToReg64,
+               Commutative);
+  }
 }
 
 void CodeGenerator::cgOpMul(IRInstruction* inst) {
-  cgBinaryOp(inst,
-             &Asm::imul,
-             &Asm::imul,
-             &Asm::mulsd_xmm_xmm,
-             std::multiplies<int64_t>(),
-             Commutative);
+  SSATmp* src1 = inst->getSrc(0);
+  SSATmp* src2 = inst->getSrc(1);
+
+  if (src1->isA(Type::Bool) & src2->isA(Type::Bool)) {
+    cgBinaryIntOp(inst,
+               &Asm::andb,
+               &Asm::andb,
+               &Asm::movb,
+               &zeroExtendIfBool,
+               [] (bool a, bool b) { return a & b; },
+               &convertToReg8,
+               Commutative);
+  } else {
+    // Boolean multiplication is the same as &
+    cgBinaryOp(inst,
+               &Asm::imul,
+               &Asm::imul,
+               &Asm::movq,
+               &Asm::mulsd_xmm_xmm,
+               nullptr, // not used
+               std::multiplies<int64_t>(),
+               &convertToReg64,
+               Commutative);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

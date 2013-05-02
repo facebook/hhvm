@@ -1019,6 +1019,13 @@ struct X64Assembler {
   void movzbl(Reg8 src, Reg32 dest)         { emitRR32(instr_movzbx,
                                                        rn(src), rn(dest)); }
 
+  void loadsbq(MemoryRef m, Reg64 r)        { instrMR(instr_movsbx,
+                                                      m, r); }
+  void loadsbq(IndexedMemoryRef m, Reg64 r) { instrMR(instr_movsbx,
+                                                      m, r); }
+  void movsbq(Reg8 src, Reg64 dest)         { emitRR(instr_movsbx,
+                                                       rn(src), rn(dest)); }
+
   void lea(IndexedMemoryRef p, Reg64 reg) { instrMR(instr_lea, p, reg); }
   void lea(MemoryRef p, Reg64 reg)        { instrMR(instr_lea, p, reg); }
   void lea(RIPRelativeRef p, Reg64 reg)   { instrMR(instr_lea, p, reg); }

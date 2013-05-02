@@ -173,18 +173,24 @@ private:
 
   enum Commutativity { Commutative, NonCommutative };
 
-  template<class Oper>
+  template<class Oper, class RegType>
   void cgBinaryOp(IRInstruction*,
-                  void (Asm::*intImm)(Immed, Reg64),
-                  void (Asm::*intRR)(Reg64, Reg64),
+                  void (Asm::*intImm)(Immed, RegType),
+                  void (Asm::*intRR)(RegType, RegType),
+                  void (Asm::*mov)(RegType, RegType),
                   void (Asm::*fpRR)(RegXMM, RegXMM),
+                  void (*extend)(Asm&, const SSATmp*),
                   Oper,
+                  RegType (*conv)(PhysReg),
                   Commutativity);
-  template<class Oper>
+  template<class Oper, class RegType>
   void cgBinaryIntOp(IRInstruction*,
-                     void (Asm::*intImm)(Immed, Reg64),
-                     void (Asm::*intRR)(Reg64, Reg64),
+                     void (Asm::*intImm)(Immed, RegType),
+                     void (Asm::*intRR)(RegType, RegType),
+                     void (Asm::*mov)(RegType, RegType),
+                     void (*extend)(Asm&, const SSATmp*),
                      Oper,
+                     RegType (*conv)(PhysReg),
                      Commutativity);
 
   void cgNegateWork(SSATmp* dst, SSATmp* src);

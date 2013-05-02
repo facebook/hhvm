@@ -113,6 +113,7 @@ static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 typedef StateVector<IRInstruction, DceFlags> DceState;
 typedef hphp_hash_set<const SSATmp*, pointer_hash<SSATmp>> SSASet;
 typedef StateVector<SSATmp, SSASet> SSACache;
+typedef StateVector<SSATmp, uint32_t> UseCounts;
 typedef std::list<const IRInstruction*> WorkList;
 
 void removeDeadInstructions(Trace* trace, const DceState& state) {
@@ -181,9 +182,6 @@ initInstructions(const BlockList& blocks, DceState& state) {
   WorkList wl;
   for (Block* block : blocks) {
     for (IRInstruction& inst : *block) {
-      for (SSATmp& dst : inst.getDsts()) {
-        dst.setUseCount(0);
-      }
       if (inst.isControlFlowInstruction()) {
         // mark the destination label so that the destination trace
         // is marked reachable
@@ -215,7 +213,7 @@ initInstructions(const BlockList& blocks, DceState& state) {
 //    cannot be eliminated.
 // 3) Eliminates IncRef-DecRef pairs who value is used only by the DecRef and
 //    whose type does not run a destructor with side effects.
-void optimizeRefCount(Trace* trace, DceState& state) {
+void optimizeRefCount(Trace* trace, DceState& state, UseCounts& uses) {
   WorkList decrefs;
   forEachInst(trace, [&](IRInstruction* inst) {
     if (inst->op() == IncRef && !state[inst].countConsumedAny()) {
@@ -236,12 +234,12 @@ void optimizeRefCount(Trace* trace, DceState& state) {
       IRInstruction* srcInst = src->inst();
       if (state[srcInst].countConsumedAny()) {
         state[inst].setLive();
-        src->incUseCount();
+        uses[src]++;
       }
     }
     if (inst->op() == DecRef) {
       SSATmp* src = inst->getSrc(0);
-      if (src->getUseCount() == 1 && !src->type().canRunDtor()) {
+      if (uses[src] == 1 && !src->type().canRunDtor()) {
         IRInstruction* srcInst = src->inst();
         if (srcInst->op() == IncRef) {
           decrefs.push_back(inst);
@@ -257,7 +255,7 @@ void optimizeRefCount(Trace* trace, DceState& state) {
     SSATmp* src = decref->getSrc(0);
     assert(src->inst()->op() == IncRef);
     assert(!src->type().canRunDtor());
-    if (src->getUseCount() == 1) {
+    if (uses[src] == 1) {
       state[decref].setDead();
       state[src->inst()].setDead();
     }
@@ -368,7 +366,8 @@ void sinkIncRefs(Trace* trace, IRFactory* irFactory, DceState& state) {
  * of a DefInlineFP.  In this case we can kill both, which may allow
  * removing a SpillFrame as well.
  */
-void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory) {
+void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory,
+                     UseCounts& uses) {
   FTRACE(5, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -407,7 +406,7 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory) {
 
     case InlineReturn:
       {
-        auto frameUses = inst->getSrc(0)->getUseCount();
+        auto frameUses = uses[inst->getSrc(0)];
         auto srcInst = inst->getSrc(0)->inst();
         if (srcInst->op() == DefInlineFP) {
           auto weakUses = state[srcInst].weakUseCount();
@@ -485,7 +484,7 @@ void optimizeActRecs(Trace* trace, DceState& state, IRFactory* factory) {
       FTRACE(5, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
              inst->getIId(),
              state[inst].weakUseCount(),
-             inst->getDst()->getUseCount());
+             uses[inst->getDst()]);
       break;
 
     default:
@@ -593,6 +592,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   // other instructions marked dead.
   DceState state(irFactory, DceFlags());
   SSACache ssaOriginals(irFactory, SSASet());
+  UseCounts uses(irFactory, 0);
   WorkList wl = initInstructions(blocks, state);
 
   // process the worklist
@@ -605,7 +605,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
       if (srcInst->op() == DefConst) {
         continue;
       }
-      src->incUseCount();
+      uses[src]++;
       if (state[srcInst].isDead()) {
         state[srcInst].setLive();
         wl.push_back(srcInst);
@@ -620,7 +620,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
   }
 
   // Optimize IncRefs and DecRefs.
-  forEachTrace(trace, [&](Trace* t) { optimizeRefCount(t, state); });
+  forEachTrace(trace, [&](Trace* t) { optimizeRefCount(t, state, uses); });
 
   if (RuntimeOption::EvalHHIREnableSinking) {
     // Sink IncRefs consumed off trace.
@@ -629,7 +629,7 @@ void eliminateDeadCode(Trace* trace, IRFactory* irFactory) {
 
   // Optimize unused inlined activation records.  It's not necessary
   // to look at non-main traces for this.
-  optimizeActRecs(trace, state, irFactory);
+  optimizeActRecs(trace, state, irFactory, uses);
 
   // now remove instructions whose id == DEAD
   removeDeadInstructions(trace, state);

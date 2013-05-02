@@ -270,11 +270,11 @@ const Func* Func::cloneAndSetClass(Class* cls) const {
   clonedFunc->setCls(cls);
 
   // Save it so we don't have to keep cloning it and retranslating
-  Func*& nextFunc = this->nextClonedClosure();
-  while (nextFunc) {
-    nextFunc = nextFunc->nextClonedClosure();
+  Func** nextFunc = &this->nextClonedClosure();
+  while (*nextFunc) {
+    nextFunc = &nextFunc[0]->nextClonedClosure();
   }
-  nextFunc = clonedFunc;
+  *nextFunc = clonedFunc;
 
   return clonedFunc;
 }

@@ -1,11 +1,11 @@
 <?php   
 	/* Bind and connect sockets to localhost */
-	$localhost = '127.0.0.1';
+	$localhost = '::1';
 
         /* Setup socket server */
-        $server = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+        $server = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
         if (!$server) {
-                die('Unable to create AF_INET socket [server]');
+                die('Unable to create AF_INET6 socket [server]');
         }
 
 	$minport = 31337;
@@ -25,9 +25,9 @@
         }
 
         /* Connect to it */
-        $client = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+        $client = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
         if (!$client) {
-                die('Unable to create AF_INET socket [client]');
+                die('Unable to create AF_INET6 socket [client]');
         }
         if (!socket_connect($client, $localhost, $port)) {
                 die('Unable to connect to server socket');
@@ -36,7 +36,7 @@
         /* Accept that connection */
         $socket = socket_accept($server);
         if (!$socket) {
-                die('Unable to accept connection');
+	        die('Unable to accept connection');
         }
 
 	if (!socket_getpeername($client, $address, $peerport)) {

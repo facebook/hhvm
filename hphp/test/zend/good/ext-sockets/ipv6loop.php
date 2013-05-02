@@ -1,29 +1,29 @@
 <?php
 	/* Setup socket server */
-	$server = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+	$server = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
 	if (!$server) {
-		die('Unable to create AF_INET socket [server]');
+		die('Unable to create AF_INET6 socket [server]');
 	}
 	$bound = false;
 	for($port = 31337; $port < 31357; ++$port) {
-		if (socket_bind($server, '127.0.0.1', $port)) {
+		if (socket_bind($server, '::1', $port)) {
 			$bound = true;
 			break;
 		}
 	}
 	if (!$bound) {
-		die("Unable to bind to 127.0.0.1");
+		die("Unable to bind to [::1]:$port");
 	}
 	if (!socket_listen($server, 2)) {
 		die('Unable to listen on socket');
 	}
 	
 	/* Connect to it */
-	$client = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+	$client = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
 	if (!$client) {
-		die('Unable to create AF_INET socket [client]');
+		die('Unable to create AF_INET6 socket [client]');
 	}
-	if (!socket_connect($client, '127.0.0.1', $port)) {
+	if (!socket_connect($client, '::1', $port)) {
 		die('Unable to connect to server socket');
 	}
 

@@ -280,11 +280,12 @@ function idl_infer_type($v) {
 
 function DefineConstant($const) {
   global $constants, $classes, $current_class;
+
   if (!isset($const['type']) && array_key_exists('value', $const)) {
     $const['type'] = idl_infer_type($const['value']);
+  } else {
+    $const['type'] = idl_parse_type($const['type']);
   }
-
-  $const['type'] = idl_parse_type($const['type']);
 
   if (empty($current_class)) {
     $constants[] = $const;
@@ -370,17 +371,21 @@ function DefineFunction($func) {
 function ReadIDLFile($path) {
   $entries = json_decode(file_get_contents($path), /* use arrays */ true);
 
-  foreach ($entries['funcs'] as $func) {
-    DefineFunction($func);
+  if (!empty($entries['funcs'])) {
+    foreach ($entries['funcs'] as $func) {
+      DefineFunction($func);
+    }
   }
 
-  foreach ($entries['consts'] as $const) {
-    DefineConstant($const);
+  if (!empty($entries['consts'])) {
+    foreach ($entries['consts'] as $const) {
+      DefineConstant($const);
+    }
   }
 
   foreach ($entries['classes'] as $class) {
-    $methods = $class['funcs'];
-    $consts = $class['consts'];
+    $methods = isset($class['funcs']) ? $class['funcs'] : array();
+    $consts = isset($class['consts']) ? $class['consts'] : array();
     unset($class['funcs']);
     unset($class['consts']);
 

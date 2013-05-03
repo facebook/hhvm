@@ -12,10 +12,10 @@ Vector Object
     [1] => foo
 )
 [7,"foo"]
-Vector::__set_state(array(
-  0 => 7,
-  1 => 'foo',
-))
+Vector {
+  7,
+  'foo',
+}
 object(Vector)#2 (2) {
   [0]=>
   int(7)
@@ -28,7 +28,7 @@ Vector Object
     [1] => foo
 )
 [7,"foo"]
-Vector::__set_state(array(
-  0 => 7,
-  1 => 'foo',
-))
+Vector {
+  7,
+  'foo',
+}

@@ -4578,10 +4578,13 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
     serializer->writeArrayHeader(sz, true);
     if (serializer->getType() == VariableSerializer::Serialize ||
         serializer->getType() == VariableSerializer::APCSerialize ||
-        serializer->getType() == VariableSerializer::DebuggerSerialize) {
+        serializer->getType() == VariableSerializer::DebuggerSerialize ||
+        serializer->getType() == VariableSerializer::VarExport ||
+        serializer->getType() == VariableSerializer::PHPOutput) {
       // For the 'V' serialization format, we don't print out keys
       // for Serialize, APCSerialize, DebuggerSerialize
       for (ArrayIter iter(obj); iter; ++iter) {
+        serializer->writeCollectionKeylessPrefix();
         serializer->writeArrayValue(iter.second());
       }
     } else {

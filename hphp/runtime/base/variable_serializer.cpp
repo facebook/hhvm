@@ -545,7 +545,12 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     }
     if (!m_objClass.empty()) {
       m_buf->append(m_objClass);
-      m_buf->append("::__set_state(array(\n");
+      if (m_objCode == 'O') {
+        m_buf->append("::__set_state(array(\n");
+      } else {
+        assert(m_objCode == 'V' || m_objCode == 'K');
+        m_buf->append(" {\n");
+      }
     } else {
       m_buf->append("array (\n");
     }
@@ -758,7 +763,6 @@ void VariableSerializer::writeCollectionKey(CVarRef key) {
 }
 
 void VariableSerializer::writeCollectionKeylessPrefix() {
-  ArrayInfo &info = m_arrayInfos.back();
   switch (m_type) {
   case PrintR:
   case VarExport:
@@ -772,7 +776,8 @@ void VariableSerializer::writeCollectionKeylessPrefix() {
   case DebuggerSerialize:
     break;
   case JSON:
-  case DebuggerDump:
+  case DebuggerDump: {
+    ArrayInfo &info = m_arrayInfos.back();
     if (!info.first_element) {
       m_buf->append(',');
     }
@@ -781,6 +786,7 @@ void VariableSerializer::writeCollectionKeylessPrefix() {
       indent();
     }
     break;
+  }
   default:
     assert(false);
     break;
@@ -831,7 +837,12 @@ void VariableSerializer::writeArrayFooter() {
   case PHPOutput:
     indent();
     if (info.is_object) {
-      m_buf->append("))");
+      if (m_objCode == 'O') {
+        m_buf->append("))");
+      } else {
+        assert(m_objCode == 'V' || m_objCode == 'K');
+        m_buf->append("}");
+      }
     } else {
       m_buf->append(')');
     }

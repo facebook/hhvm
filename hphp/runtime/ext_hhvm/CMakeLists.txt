@@ -13,7 +13,7 @@ macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_ARCH)
 	set(f_SRC "${HPHP_HOME}/hphp/${REL}")
 	set(f_OBJ "${HPHP_HOME}/hphp/CMakeFiles/hphp_runtime_static.dir/${REL}.o")
 	list(APPEND ${SOURCES} "${f_SRC}.ext_hhvm.cpp")
-	list(APPEND ${HEADERS} "../../${REL}.ext_hhvm.h")
+	list(APPEND ${HEADERS} "${f_SRC}.ext_hhvm.h")
 	add_custom_command(OUTPUT "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
 	                   DEPENDS ${f_SRC} gen-ext-hhvm
 	                   COMMAND "${HPHP_HOME}/hphp/tools/gen-ext-hhvm/gen-ext-hhvm.sh"

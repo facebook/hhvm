@@ -134,10 +134,7 @@ class c_PDO : public ExtObjectData, public Sweepable {
   public: Variant t_quote(CStrRef str, int64_t paramtype = q_PDO$$PARAM_STR);
   public: Variant t___wakeup();
   public: Variant t___sleep();
-  public: static Array ti_getavailabledrivers(const char* cls );
-  public: static Array t_getavailabledrivers() {
-    return ti_getavailabledrivers("pdo");
-  }
+  public: static Array ti_getavailabledrivers();
 
   public: sp_PDOConnection m_dbh;
 };

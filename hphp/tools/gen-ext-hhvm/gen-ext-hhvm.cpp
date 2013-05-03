@@ -98,15 +98,11 @@ void emitRemappedFuncDecl(const PhpFunc& func,
     isFirstParam = false;
   }
 
-  if (!func.className.empty()) {
+  if (!func.className.empty() && !func.isStatic) {
     if (!isFirstParam) {
       out << ", ";
     }
-    if (func.isStatic) {
-      out << "char const* cls_";
-    } else {
-      out << "ObjectData* this_";
-    }
+    out << "ObjectData* this_";
     isFirstParam = false;
   }
 
@@ -281,17 +277,12 @@ void emitCallExpression(const PhpFunc& func, const fbstring& prefix,
     }
   }
 
-  if (!func.className.empty()) {
+  if (!func.className.empty() && !func.isStatic) {
     if (!isFirstParam) {
       out << ", ";
     }
     isFirstParam = false;
-
-    if (func.isStatic) {
-      out << '"' << func.className << '"';
-    } else {
-      out << "(this_)";
-    }
+    out << "(this_)";
   }
 
   if (func.isVarargs) {

@@ -169,9 +169,9 @@ bool TestExtIntl::test_Locale() {
 }
 
 bool TestExtIntl::test_Normalizer() {
-  VERIFY(c_Normalizer::ti_isnormalized(nullptr, "\xC3\x85"));
-  VERIFY(!c_Normalizer::ti_isnormalized(nullptr, "A\xCC\x8A"));
-  VS(c_Normalizer::ti_normalize(nullptr, "A\xCC\x8A", q_Normalizer$$FORM_C),
+  VERIFY(c_Normalizer::ti_isnormalized("\xC3\x85"));
+  VERIFY(!c_Normalizer::ti_isnormalized("A\xCC\x8A"));
+  VS(c_Normalizer::ti_normalize("A\xCC\x8A", q_Normalizer$$FORM_C),
      "\xC3\x85");
   return Count(true);
 }

@@ -1482,7 +1482,7 @@ Variant c_PDO::t___sleep() {
   return uninit_null();
 }
 
-Array c_PDO::ti_getavailabledrivers(const char* cls) {
+Array c_PDO::ti_getavailabledrivers() {
   return f_pdo_drivers();
 }
 

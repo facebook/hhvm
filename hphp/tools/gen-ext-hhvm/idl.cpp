@@ -203,10 +203,6 @@ fbstring PhpFunc::getCppSig() const {
   }
 
   bool firstParam = true;
-  if (isMethod() && isStatic) {
-    out << "char const*";
-    firstParam = false;
-  }
   if (isVarargs) {
     if (!firstParam) {
       out << ", ";

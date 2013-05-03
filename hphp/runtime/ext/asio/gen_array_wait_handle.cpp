@@ -49,7 +49,7 @@ void c_GenArrayWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_GenArrayWaitHandle::ti_create(const char* cls, CArrRef dependencies) {
+Object c_GenArrayWaitHandle::ti_create(CArrRef dependencies) {
   Array deps = dependencies->copy();
   for (ssize_t iter_pos = deps->iter_begin();
        iter_pos != ArrayData::invalid_index;

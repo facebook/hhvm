@@ -193,7 +193,7 @@ Variant c_Collator::t_compare(CStrRef str1, CStrRef str2) {
   return ret;
 }
 
-Variant c_Collator::ti_create(const char* cls, CStrRef locale) {
+Variant c_Collator::ti_create(CStrRef locale) {
   p_Collator c(NEWOBJ(c_Collator)());
   c.get()->t___construct(locale);
   return c;
@@ -484,7 +484,7 @@ Variant f_collator_compare(CVarRef obj, CStrRef str1, CStrRef str2) {
 }
 
 Variant f_collator_create(CStrRef locale) {
-  return c_Collator::ti_create(nullptr, locale);
+  return c_Collator::ti_create(locale);
 }
 
 Variant f_collator_get_attribute(CVarRef obj, int64_t attr) {
@@ -574,7 +574,7 @@ void c_Normalizer::t___construct() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant c_Normalizer::ti_isnormalized(const char* cls , CStrRef input,
+Variant c_Normalizer::ti_isnormalized(CStrRef input,
                                       int64_t form /* = q_Normalizer$$FORM_C */) {
   s_intl_error->m_error.clear();
 
@@ -621,7 +621,7 @@ Variant c_Normalizer::ti_isnormalized(const char* cls , CStrRef input,
   return uret;
 }
 
-Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
+Variant c_Normalizer::ti_normalize(CStrRef input,
                                    int64_t form /* = q_Normalizer$$FORM_C */) {
   s_intl_error->m_error.clear();
 

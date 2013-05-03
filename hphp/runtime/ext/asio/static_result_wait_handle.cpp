@@ -40,7 +40,7 @@ void c_StaticResultWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_StaticResultWaitHandle::ti_create(const char* cls, CVarRef result) {
+Object c_StaticResultWaitHandle::ti_create(CVarRef result) {
   return Create(result.asTypedValue());
 }
 

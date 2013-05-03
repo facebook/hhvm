@@ -51,16 +51,10 @@ class c_DateTime : public ExtObjectData {
   public: Object t_add(CObjRef interval);
   public: void t___construct(CStrRef time = "now",
                              CObjRef timezone = null_object);
-  public: static Object ti_createfromformat(const char* cls , CStrRef format, CStrRef time, CObjRef timezone = null_object);
-  public: static Object t_createfromformat(CStrRef format, CStrRef time, CObjRef timezone = null_object) {
-    return ti_createfromformat("datetime", format, time, timezone);
-  }
+  public: static Object ti_createfromformat(CStrRef format, CStrRef time, CObjRef timezone = null_object);
   public: Object t_diff(CObjRef datetime2, bool absolute = false);
   public: String t_format(CStrRef format);
-  public: static Array ti_getlasterrors(const char* cls );
-  public: static Array t_getlasterrors() {
-    return ti_getlasterrors("datetime");
-  }
+  public: static Array ti_getlasterrors();
   public: int64_t t_getoffset();
   public: int64_t t_gettimestamp();
   public: Variant t_gettimezone();
@@ -125,14 +119,8 @@ class c_DateTimeZone : public ExtObjectData {
   public: String t_getname();
   public: int64_t t_getoffset(CObjRef datetime);
   public: Array t_gettransitions();
-  public: static Array ti_listabbreviations(const char* cls );
-  public: static Array t_listabbreviations() {
-    return ti_listabbreviations("datetimezone");
-  }
-  public: static Array ti_listidentifiers(const char* cls );
-  public: static Array t_listidentifiers() {
-    return ti_listidentifiers("datetimezone");
-  }
+  public: static Array ti_listabbreviations();
+  public: static Array ti_listidentifiers();
 
   // Helper for TimeZone -> c_DateTimeZone conversion
   public: static Object wrap(SmartObject<TimeZone> tz) {
@@ -170,10 +158,7 @@ class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::
   public: void t___construct(CStrRef interval_spec);
   public: Variant t___get(Variant member);
   public: Variant t___set(Variant member, Variant value);
-  public: static Object ti_createfromdatestring(const char* cls , CStrRef time);
-  public: static Object t_createfromdatestring(CStrRef time) {
-    return ti_createfromdatestring("dateinterval", time);
-  }
+  public: static Object ti_createfromdatestring(CStrRef time);
   public: String t_format(CStrRef format);
 
 

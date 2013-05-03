@@ -103,42 +103,18 @@ class c_UConverter : public ExtObjectData {
   public: Variant t_toucallback(int64_t reason, CStrRef source,
                                 CStrRef codeunits, VRefParam error);
   public: Variant t_convert(CStrRef str, bool reverse = false);
-  public: static Variant ti_transcode(const char* cls , CStrRef str,
+  public: static Variant ti_transcode(CStrRef str,
                                       CStrRef toEncoding, CStrRef fromEncoding,
                                       CArrRef options = null_variant);
-  public: static Variant t_transcode(CStrRef str,
-                                     CStrRef toEncoding, CStrRef fromEncoding,
-                                     CArrRef options = null_variant) {
-    return ti_transcode("uconverter", str, toEncoding, fromEncoding, options);
-  }
   public: int64_t t_geterrorcode();
   public: String t_geterrormessage();
-  public: static String ti_reasontext(const char* cls , int64_t reason);
-  public: static String t_reasontext(int64_t reason) {
-    return ti_reasontext("uconverter", reason);
-  }
-  public: static Array ti_getavailable(const char* cls );
-  public: static Array t_getavailable() {
-    return ti_getavailable("uconverter");
-  }
-  public: static Array ti_getaliases(const char* cls , CStrRef encoding);
-  public: static Array t_getaliases(CStrRef encoding) {
-    return ti_getaliases("uconverter", encoding);
-  }
-  public: static Array ti_getstandards(const char* cls );
-  public: static Array t_getstandards() {
-    return ti_getstandards("uconverter");
-  }
-  public: static String ti_getstandardname(const char* cls,
-                                           CStrRef name,
+  public: static String ti_reasontext(int64_t reason);
+  public: static Array ti_getavailable();
+  public: static Array ti_getaliases(CStrRef encoding);
+  public: static Array ti_getstandards();
+  public: static String ti_getstandardname(CStrRef name,
                                            CStrRef standard);
-  public: static String t_getstandardname(CStrRef name, CStrRef standard) {
-    return ti_getstandardname("uconverter", name, standard);
-  }
-  public: static String ti_getmimename(const char* cls, CStrRef name);
-  public: static String t_getmimename(CStrRef name) {
-    return ti_getmimename("uconverter", name);
-  }
+  public: static String ti_getmimename(CStrRef name);
 
   private:
     static void throwFailure(UErrorCode error, const char *fname,

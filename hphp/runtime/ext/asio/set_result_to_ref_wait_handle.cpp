@@ -43,7 +43,7 @@ void c_SetResultToRefWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_SetResultToRefWaitHandle::ti_create(const char* cls, CObjRef wait_handle, VRefParam ref) {
+Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref) {
   TypedValue* var_or_cell = ref->asTypedValue();
   if (wait_handle.isNull()) {
     tvSetNull(var_or_cell);

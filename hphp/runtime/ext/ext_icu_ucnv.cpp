@@ -470,9 +470,8 @@ String c_UConverter::doConvert(CStrRef str,
 static const StaticString s_from_subst("from_subst");
 static const StaticString s_to_subst("to_subst");
 
-Variant c_UConverter::ti_transcode(const char* cls , CStrRef str,
-                                   CStrRef toEncoding, CStrRef fromEncoding,
-                                   CArrRef options) {
+Variant c_UConverter::ti_transcode(CStrRef str, CStrRef toEncoding,
+                                   CStrRef fromEncoding, CArrRef options) {
   UConverter *fromCnv = NULL, *toCnv = NULL;
   if (!setEncoding(fromEncoding, &fromCnv, s_intl_error->m_error)) {
     return uninit_null();
@@ -509,7 +508,7 @@ String c_UConverter::t_geterrormessage() {
 /* Ennumerators and lookups */
 
 #define UCNV_REASON_CASE(v) case UCNV_ ## v : return String("REASON_" #v );
-String c_UConverter::ti_reasontext(const char* cls , int64_t reason) {
+String c_UConverter::ti_reasontext(int64_t reason) {
   switch (reason) {
     UCNV_REASON_CASE(UNASSIGNED)
     UCNV_REASON_CASE(ILLEGAL)
@@ -523,7 +522,7 @@ String c_UConverter::ti_reasontext(const char* cls , int64_t reason) {
   }
 }
 
-Array c_UConverter::ti_getavailable(const char* cls ) {
+Array c_UConverter::ti_getavailable() {
   int32_t i, count = ucnv_countAvailable();
   Array ret = Array::Create();
 
@@ -534,7 +533,7 @@ Array c_UConverter::ti_getavailable(const char* cls ) {
   return ret;
 }
 
-Array c_UConverter::ti_getaliases(const char* cls , CStrRef encoding) {
+Array c_UConverter::ti_getaliases(CStrRef encoding) {
   UErrorCode error = U_ZERO_ERROR;
   int16_t i, count = ucnv_countAliases(encoding.data(), &error);
 
@@ -556,7 +555,7 @@ Array c_UConverter::ti_getaliases(const char* cls , CStrRef encoding) {
   return ret;
 }
 
-Array c_UConverter::ti_getstandards(const char* cls ) {
+Array c_UConverter::ti_getstandards() {
   int16_t i, count = ucnv_countStandards();
   Array ret = Array::Create();
 
@@ -572,9 +571,7 @@ Array c_UConverter::ti_getstandards(const char* cls ) {
   return ret;
 }
 
-String c_UConverter::ti_getstandardname(const char* cls,
-                                        CStrRef name,
-                                        CStrRef standard) {
+String c_UConverter::ti_getstandardname(CStrRef name, CStrRef standard) {
   UErrorCode error = U_ZERO_ERROR;
   const char *standard_name = ucnv_getStandardName(name.data(),
                                                    standard.data(),
@@ -588,8 +585,8 @@ String c_UConverter::ti_getstandardname(const char* cls,
   return String(standard_name, CopyString);
 }
 
-String c_UConverter::ti_getmimename(const char* cls, CStrRef name) {
-  return ti_getstandardname(cls, name, "MIME");
+String c_UConverter::ti_getmimename(CStrRef name) {
+  return ti_getstandardname(name, "MIME");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

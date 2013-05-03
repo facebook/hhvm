@@ -73,7 +73,7 @@ void c_DateTime::t___construct(CStrRef time /*= "now"*/,
   }
 }
 
-Object c_DateTime::ti_createfromformat(const char* cls , CStrRef format, CStrRef time,
+Object c_DateTime::ti_createfromformat(CStrRef format, CStrRef time,
                                        CObjRef timezone /*= null_object */) {
   c_DateTime *datetime = NEWOBJ(c_DateTime);
   datetime->m_dt = NEWOBJ(DateTime);
@@ -94,7 +94,7 @@ static const StaticString s_warnings("warnings");
 static const StaticString s_error_count("error_count");
 static const StaticString s_errors("errors");
 
-Array c_DateTime::ti_getlasterrors(const char* cls ) {
+Array c_DateTime::ti_getlasterrors() {
   Array errors = DateTime::getLastErrors();
   Array warnings = DateTime::getLastWarnings();
   Array ret = Array::Create();
@@ -201,11 +201,11 @@ Array c_DateTimeZone::t_gettransitions() {
   return m_tz->transitions();
 }
 
-Array c_DateTimeZone::ti_listabbreviations(const char* cls) {
+Array c_DateTimeZone::ti_listabbreviations() {
   return TimeZone::GetAbbreviations();
 }
 
-Array c_DateTimeZone::ti_listidentifiers(const char* cls) {
+Array c_DateTimeZone::ti_listidentifiers() {
   return TimeZone::GetNames();
 }
 
@@ -307,7 +307,7 @@ Variant c_DateInterval::t___set(Variant member, Variant value) {
   throw Object(SystemLib::AllocExceptionObject(msg));
 }
 
-Object c_DateInterval::ti_createfromdatestring(const char* cls , CStrRef time) {
+Object c_DateInterval::ti_createfromdatestring(CStrRef time) {
   SmartObject<DateInterval> di(NEWOBJ(DateInterval)(time, true));
   return c_DateInterval::wrap(di);
 }
@@ -448,11 +448,11 @@ bool f_date_default_timezone_set(CStrRef name) {
 }
 
 Array f_timezone_identifiers_list() {
-  return c_DateTimeZone::t_listidentifiers();
+  return c_DateTimeZone::ti_listidentifiers();
 }
 
 Array f_timezone_abbreviations_list() {
-  return c_DateTimeZone::t_listabbreviations();
+  return c_DateTimeZone::ti_listabbreviations();
 }
 
 Variant f_timezone_name_from_abbr(CStrRef abbr, int gmtoffset /* = -1 */,
@@ -506,7 +506,7 @@ Object f_date_add(CObjRef datetime, CObjRef interval) {
 Object f_date_create_from_format(CStrRef format,
                                  CStrRef time,
                                  CObjRef timezone /* = null_object */) {
-  return c_DateTime::t_createfromformat(format, time, timezone);
+  return c_DateTime::ti_createfromformat(format, time, timezone);
 }
 
 Object f_date_create(CStrRef time /* = null_string */,
@@ -538,11 +538,11 @@ String f_date_format(CObjRef object, CStrRef format) {
 }
 
 Array f_date_get_last_errors() {
-  return c_DateTime::t_getlasterrors();
+  return c_DateTime::ti_getlasterrors();
 }
 
 Object f_date_interval_create_from_date_string(CStrRef time) {
-  return c_DateInterval::t_createfromdatestring(time);
+  return c_DateInterval::ti_createfromdatestring(time);
 }
 
 String f_date_interval_format(CObjRef interval, CStrRef format_spec) {

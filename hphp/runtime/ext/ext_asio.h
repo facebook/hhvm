@@ -133,11 +133,7 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
   public: c_StaticResultWaitHandle(VM::Class* cls = c_StaticResultWaitHandle::s_cls);
   public: ~c_StaticResultWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(const char* cls , CVarRef result);
-  public: static Object t_create(CVarRef result) {
-    return ti_create("staticresultwaithandle", result);
-  }
-
+  public: static Object ti_create(CVarRef result);
 
  public:
   static p_StaticResultWaitHandle Create(const TypedValue* result);
@@ -159,11 +155,7 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
   public: c_StaticExceptionWaitHandle(VM::Class* cls = c_StaticExceptionWaitHandle::s_cls);
   public: ~c_StaticExceptionWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(const char* cls , CObjRef exception);
-  public: static Object t_create(CObjRef exception) {
-    return ti_create("staticexceptionwaithandle", exception);
-  }
-
+  public: static Object ti_create(CObjRef exception);
 
  public:
   static p_StaticExceptionWaitHandle Create(ObjectData* exception);
@@ -328,11 +320,7 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   public: c_GenArrayWaitHandle(VM::Class* cls = c_GenArrayWaitHandle::s_cls);
   public: ~c_GenArrayWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(const char* cls , CArrRef dependencies);
-  public: static Object t_create(CArrRef dependencies) {
-    return ti_create("genarraywaithandle", dependencies);
-  }
-
+  public: static Object ti_create(CArrRef dependencies);
 
  public:
   String getName();
@@ -366,11 +354,7 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
   public: c_SetResultToRefWaitHandle(VM::Class* cls = c_SetResultToRefWaitHandle::s_cls);
   public: ~c_SetResultToRefWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(const char* cls , CObjRef wait_handle, VRefParam ref);
-  public: static Object t_create(CObjRef wait_handle, VRefParam ref) {
-    return ti_create("setresulttorefwaithandle", wait_handle, ref);
-  }
-
+  public: static Object ti_create(CObjRef wait_handle, VRefParam ref);
 
  public:
   String getName();
@@ -410,10 +394,7 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
   public: c_RescheduleWaitHandle(VM::Class* cls = c_RescheduleWaitHandle::s_cls);
   public: ~c_RescheduleWaitHandle();
   public: void t___construct();
-  public: static Object ti_create(const char* cls , int queue, int priority);
-  public: static Object t_create(int queue, int priority) {
-    return ti_create("reschedulewaithandle", queue, priority);
-  }
+  public: static Object ti_create(int queue, int priority);
 
  public:
   void run();

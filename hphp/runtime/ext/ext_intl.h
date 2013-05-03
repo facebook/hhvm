@@ -87,10 +87,7 @@ class c_Collator : public ExtObjectData, public Sweepable {
   public: void t___construct(CStrRef locale);
   public: bool t_asort(VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
   public: Variant t_compare(CStrRef str1, CStrRef str2);
-  public: static Variant ti_create(const char* cls , CStrRef locale);
-  public: static Variant t_create(CStrRef locale) {
-    return ti_create("collator", locale);
-  }
+  public: static Variant ti_create(CStrRef locale);
   public: int64_t t_getattribute(int64_t attr);
   public: int64_t t_geterrorcode();
   public: String t_geterrormessage();
@@ -144,14 +141,8 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
   public: c_Normalizer(VM::Class* cls = c_Normalizer::s_cls);
   public: ~c_Normalizer();
   public: void t___construct();
-  public: static Variant ti_isnormalized(const char* cls , CStrRef input, int64_t form = q_Normalizer$$FORM_C);
-  public: static Variant t_isnormalized(CStrRef input, int64_t form = q_Normalizer$$FORM_C) {
-    return ti_isnormalized("normalizer", input, form);
-  }
-  public: static Variant ti_normalize(const char* cls , CStrRef input, int64_t form = q_Normalizer$$FORM_C);
-  public: static Variant t_normalize(CStrRef input, int64_t form = q_Normalizer$$FORM_C) {
-    return ti_normalize("normalizer", input, form);
-  }
+  public: static Variant ti_isnormalized(CStrRef input, int64_t form = q_Normalizer$$FORM_C);
+  public: static Variant ti_normalize(CStrRef input, int64_t form = q_Normalizer$$FORM_C);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

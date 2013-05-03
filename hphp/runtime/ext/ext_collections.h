@@ -77,23 +77,14 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   Variant t___set(Variant name, Variant value);
   bool t___isset(Variant name);
   Variant t___unset(Variant name);
-  static Object ti_fromitems(const char* cls, CVarRef iterable);
-  static Object t_fromitems(CVarRef iterable) {
-    return ti_fromitems("vector", iterable);
-  }
-  static Object ti_fromarray(const char* cls, CVarRef arr); // deprecated
-  static Object t_fromarray(CVarRef arr) {
-    return ti_fromarray("vector", arr);
-  }
-  static Object ti_fromvector(const char* cls, CVarRef vec); // deprecated
-  static Object t_fromvector(CVarRef vec) {
-    return ti_fromvector("vector", vec);
-  }
-  static Variant ti_slice(const char* cls, CVarRef vec, CVarRef offset,
+  static Object ti_fromitems(CVarRef iterable);
+  static Object ti_fromarray(CVarRef arr); // deprecated
+  static Object ti_fromvector(CVarRef vec); // deprecated
+  static Variant ti_slice(CVarRef vec, CVarRef offset,
                           CVarRef len = uninit_null());
   static Variant t_slice(CVarRef vec, CVarRef offset,
                          CVarRef len = uninit_null()) {
-    return ti_slice("vector", vec, offset, len);
+    return ti_slice(vec, offset, len);
   }
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
@@ -266,18 +257,9 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   Variant t___set(Variant name, Variant value);
   bool t___isset(Variant name);
   Variant t___unset(Variant name);
-  static Object ti_fromitems(const char* cls, CVarRef iterable);
-  static Object t_fromitems(CVarRef iterable) {
-    return ti_fromitems("map", iterable);
-  }
-  static Object ti_fromarray(const char* cls, CVarRef arr); // deprecated
-  static Object t_fromarray(CVarRef arr) {
-    return ti_fromarray("map", arr);
-  }
-  static Object ti_fromiterable(const char* cls, CVarRef vec); // deprecated
-  static Object t_fromiterable(CVarRef vec) {
-    return ti_fromiterable("map", vec);
-  }
+  static Object ti_fromitems(CVarRef iterable);
+  static Object ti_fromarray(CVarRef arr); // deprecated
+  static Object ti_fromiterable(CVarRef vec); // deprecated
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
@@ -576,18 +558,9 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   Variant t___set(Variant name, Variant value);
   bool t___isset(Variant name);
   Variant t___unset(Variant name);
-  static Object ti_fromitems(const char* cls, CVarRef iterable);
-  static Object t_fromitems(CVarRef iterable) {
-    return ti_fromitems("stablemap", iterable);
-  }
-  static Object ti_fromarray(const char* cls, CVarRef arr); // deprecated
-  static Object t_fromarray(CVarRef arr) {
-    return ti_fromarray("stablemap", arr);
-  }
-  static Object ti_fromiterable(const char* cls, CVarRef vec); // deprecated
-  static Object t_fromiterable(CVarRef vec) {
-    return ti_fromiterable("stablemap", vec);
-  }
+  static Object ti_fromitems(CVarRef iterable);
+  static Object ti_fromarray(CVarRef arr); // deprecated
+  static Object ti_fromiterable(CVarRef vec); // deprecated
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
@@ -836,23 +809,11 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   Variant t___set(Variant name, Variant value);
   bool t___isset(Variant name);
   Variant t___unset(Variant name);
-  static Object ti_fromitems(const char* cls, CVarRef iterable);
-  static Object t_fromitems(CVarRef iterable) {
-    return ti_fromitems("set", iterable);
-  }
-  static Object ti_fromarray(const char* cls, CVarRef arr);
-  static Object t_fromarray(CVarRef arr) {
-    return ti_fromarray("set", arr);
-  }
-  static Object ti_fromarrays(const char* cls, int _argc,
+  static Object ti_fromitems(CVarRef iterable);
+  static Object ti_fromarray(CVarRef arr);
+  static Object ti_fromarrays(int _argc,
                               CArrRef _argv = null_array);
-  static Object t_fromarrays(int _argc, CArrRef _argv = null_array) {
-    return ti_fromarrays("set", _argc, _argv);
-  }
-  static Object ti_fromiterablevalues(const char* cls, CVarRef iterable);
-  static Object t_fromiterablevalues(CVarRef iterable) {
-    return ti_fromiterablevalues("set", iterable);
-  }
+  static Object ti_fromiterablevalues(CVarRef iterable);
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;

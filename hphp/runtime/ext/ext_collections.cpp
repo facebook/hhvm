@@ -609,7 +609,7 @@ Object c_Vector::t_put(CVarRef key, CVarRef value) {
   return t_set(key, value);
 }
 
-Object c_Vector::ti_fromitems(const char* cls, CVarRef iterable) {
+Object c_Vector::ti_fromitems(CVarRef iterable) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_Vector* target;
@@ -622,7 +622,7 @@ Object c_Vector::ti_fromitems(const char* cls, CVarRef iterable) {
   return ret;
 }
 
-Object c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
+Object c_Vector::ti_fromarray(CVarRef arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -646,7 +646,7 @@ Object c_Vector::ti_fromarray(const char* cls, CVarRef arr) {
   return ret;
 }
 
-Object c_Vector::ti_fromvector(const char* cls, CVarRef vec) {
+Object c_Vector::ti_fromvector(CVarRef vec) {
   if (!vec.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "vec must be an instance of Vector"));
@@ -671,7 +671,7 @@ Object c_Vector::ti_fromvector(const char* cls, CVarRef vec) {
   return ret;
 }
 
-Variant c_Vector::ti_slice(const char* cls, CVarRef vec, CVarRef offset,
+Variant c_Vector::ti_slice(CVarRef vec, CVarRef offset,
                            CVarRef len /* = null */) {
   if (!vec.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -1535,7 +1535,7 @@ Object c_Map::t_zip(CVarRef iterable) {
   return obj;
 }
 
-Object c_Map::ti_fromitems(const char* cls, CVarRef iterable) {
+Object c_Map::ti_fromitems(CVarRef iterable) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_Map* target;
@@ -1568,7 +1568,7 @@ Object c_Map::ti_fromitems(const char* cls, CVarRef iterable) {
   return ret;
 }
 
-Object c_Map::ti_fromarray(const char* cls, CVarRef arr) {
+Object c_Map::ti_fromarray(CVarRef arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -1591,7 +1591,7 @@ Object c_Map::ti_fromarray(const char* cls, CVarRef arr) {
   return ret;
 }
 
-Object c_Map::ti_fromiterable(const char* cls, CVarRef it) {
+Object c_Map::ti_fromiterable(CVarRef it) {
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter it must be an instance of Iterable"));
@@ -2710,7 +2710,7 @@ Object c_StableMap::t_zip(CVarRef iterable) {
   return obj;
 }
 
-Object c_StableMap::ti_fromitems(const char* cls, CVarRef iterable) {
+Object c_StableMap::ti_fromitems(CVarRef iterable) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_StableMap* target;
@@ -2743,7 +2743,7 @@ Object c_StableMap::ti_fromitems(const char* cls, CVarRef iterable) {
   return ret;
 }
 
-Object c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
+Object c_StableMap::ti_fromarray(CVarRef arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -2767,7 +2767,7 @@ Object c_StableMap::ti_fromarray(const char* cls, CVarRef arr) {
   return ret;
 }
 
-Object c_StableMap::ti_fromiterable(const char* cls, CVarRef it) {
+Object c_StableMap::ti_fromiterable(CVarRef it) {
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter it must be an instance of Iterable"));
@@ -3671,7 +3671,7 @@ Object c_Set::t_zip(CVarRef iterable) {
   return obj;
 }
 
-Object c_Set::ti_fromitems(const char* cls, CVarRef iterable) {
+Object c_Set::ti_fromitems(CVarRef iterable) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_Set* target;
@@ -3689,7 +3689,7 @@ Object c_Set::ti_fromitems(const char* cls, CVarRef iterable) {
   return ret;
 }
 
-Object c_Set::ti_fromarray(const char* cls, CVarRef arr) {
+Object c_Set::ti_fromarray(CVarRef arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -3758,7 +3758,7 @@ Object c_Set::t_updatefromiterablevalues(CVarRef iterable) {
   return this;
 }
 
-Object c_Set::ti_fromarrays(const char* cls, int _argc,
+Object c_Set::ti_fromarrays(int _argc,
                             CArrRef _argv /* = null_array */) {
   c_Set* st;
   Object ret = st = NEWOBJ(c_Set)();
@@ -3778,7 +3778,7 @@ Object c_Set::ti_fromarrays(const char* cls, int _argc,
   return ret;
 }
 
-Object c_Set::ti_fromiterablevalues(const char* cls, CVarRef iterable) {
+Object c_Set::ti_fromiterablevalues(CVarRef iterable) {
   if (!iterable.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter iterable must be an instance of Iterable"));

@@ -43,7 +43,7 @@ void c_RescheduleWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_RescheduleWaitHandle::ti_create(const char* cls, int queue, int priority) {
+Object c_RescheduleWaitHandle::ti_create(int queue, int priority) {
   if (UNLIKELY(
       queue != q_RescheduleWaitHandle$$QUEUE_DEFAULT &&
       queue != q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO)) {

@@ -1,5 +1,5 @@
 <?php
-$filename = "temp.txt.gz";
+$filename = "gzwrite_error.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 $length = 10;

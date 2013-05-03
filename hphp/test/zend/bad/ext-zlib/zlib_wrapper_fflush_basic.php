@@ -1,6 +1,6 @@
 <?php
 
-$filename = "temp.txt.gz";
+$filename = "zlib_wrapper_fflush_basic.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written.";
 $length = 10;

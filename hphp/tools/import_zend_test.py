@@ -501,7 +501,24 @@ def walk(filename, source):
         test = test.replace('hash_file_example.txt', 'hash_file_basic_example.txt')
     if '/ext-hash/hash_file_error.php' in full_dest_filename:
         test = test.replace('hash_file_example.txt', 'hash_file_error_example.txt')
-
+    if '/ext-zlib/gzopen_basic2.php' in full_dest_filename:
+        test = test.replace('temp.txt.gz', 'gzopen_basic2.gz')
+    if '/ext-zlib/gzwrite_error.php' in full_dest_filename:
+        test = test.replace('temp.txt.gz', 'gzwrite_error.gz')
+    if '/ext-zlib/gzwrite_error2.php' in full_dest_filename:
+        test = test.replace('temp.txt.gz', 'gzwrite_error2.gz')
+    if '/ext-zlib/zlib_wrapper_fflush_basic.php' in full_dest_filename:
+        test = test.replace('temp.txt.gz', 'zlib_wrapper_fflush_basic.gz')
+    if '/ext-zlib/zlib_wrapper_ftruncate_basic.php' in full_dest_filename:
+        test = test.replace('temp.txt.gz', 'zlib_wrapper_ftruncate_basic.gz')
+    if '/ext-zlib/gzeof_variation1.php' in full_dest_filename:
+        test = test.replace('temp.txt.gz', 'gzeof_variation1.gz')
+    if '/ext-zlib/gzputs_basic.php' in full_dest_filename:
+        test = test.replace('temp.txt.gz', 'gzputs_basic.gz')
+    if '/ext-zlib/gzread_variation1.php' in full_dest_filename:
+        test = test.replace('temp.txt.gz', 'gzread_variation1.gz')
+    if '/ext-zlib/gzwrite_basic.php' in full_dest_filename:
+        test = test.replace('temp.txt.gz', 'gzwrite_basic.gz')
 
     file(full_dest_filename, 'w').write(test)
 

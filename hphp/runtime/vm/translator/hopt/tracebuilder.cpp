@@ -478,15 +478,9 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
       break;
 
     case NewObj:
-    case NewObjCached:
       m_spValue = inst->getDst();
       // new obj leaves the new object and an actrec on the stack
       m_spOffset += kNumActRecCells + 1;
-      break;
-
-    case NewObjNoCtorCached:
-      m_spValue = inst->getDst();
-      m_spOffset += 1;
       break;
 
     case InterpOne: {

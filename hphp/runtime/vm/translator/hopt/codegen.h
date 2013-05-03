@@ -487,6 +487,8 @@ private:
   std::vector<ArgDesc> m_args;
 };
 
+const Func* loadClassCtor(Class* cls);
+
 ActRec* irNewInstanceHelper(Class* cls,
                             int numArgs,
                             Cell* sp,

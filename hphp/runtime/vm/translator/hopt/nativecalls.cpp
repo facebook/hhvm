@@ -135,6 +135,8 @@ static CallMap s_callMap({
                            {{SSA, 0}, {SSA, 1}}},
     {NewObj,             (TCA)irNewInstanceHelper, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
+    {LdClsCtor,          (TCA)loadClassCtor, DSSA, SSync,
+                           {{SSA, 0}}},
     {PrintStr,           (TCA)print_string, DNone, SNone, {{SSA, 0}}},
     {PrintInt,           (TCA)print_int, DNone, SNone, {{SSA, 0}}},
     {PrintBool,          (TCA)print_boolean, DNone, SNone, {{SSA, 0}}},

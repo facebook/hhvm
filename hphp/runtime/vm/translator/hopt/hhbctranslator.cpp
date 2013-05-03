@@ -1499,27 +1499,43 @@ void HhbcTranslator::emitFPushCtor(int32_t numParams) {
 void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   const StringData* className = lookupStringId(classNameStrId);
   exceptionBarrier();
-  m_fpiStack.emplace(nullptr, 0);
 
-  // If constructor is the generated 86ctor, no need to call it.
-  if (RuntimeOption::RepoAuthoritative &&
-      numParams == 0) {
-    const Class* cls = Unit::lookupUniqueClass(className);
-    if (cls &&
-        (cls->attrs() & AttrUnique) &&
-        Func::isSpecial(cls->getCtor()->name())) {
-      // This optimization is only safe if the FCall is in the same
-      // tracelet.  Luckily that is always the case: since this
-      // optimization only applies when numParams==0, there will be
-      // nothing between the FPushCtorD and the FCall.
-      gen(NewObjNoCtorCached, cns(className), m_tb->getSp());
-      push(m_tb->genDefNull());
-      return;
+  const Class* cls = Unit::lookupUniqueClass(className);
+  bool uniqueCls = classIsUnique(cls);
+  bool persistentCls = classIsPersistent(cls);
+
+  const Func* func = uniqueCls ? cls->getCtor() : nullptr;
+  if (func && !(func->attrs() & AttrPublic)) {
+    Class* ctx = arGetContextClass(curFrame());
+    if (!ctx) {
+      func = nullptr;
+    } else if (ctx != cls) {
+      if ((func->attrs() & AttrPrivate) ||
+        !(ctx->classof(cls) || cls->classof(ctx))) {
+        func = nullptr;
+      }
     }
   }
-  gen(
-    NewObjCached, cns(numParams), cns(className), m_tb->getSp(), m_tb->getFp()
-  );
+
+  SSATmp* clss = nullptr;
+  if (persistentCls) {
+    clss = cns(cls);
+  } else {
+    clss = gen(LdClsCached, cns(className));
+  }
+  SSATmp* obj = gen(IncRef, gen(AllocObj, clss));
+  push(obj);
+
+  SSATmp* fn = nullptr;
+  if (func) {
+    fn = cns(func);
+  } else {
+    fn = gen(LdClsCtor, clss);
+  }
+
+  SSATmp* obj2 = gen(IncRef, obj);
+  int32_t numArgsAndCtorFlag = numParams | (1 << 31);
+  emitFPushActRec(fn, obj2, numArgsAndCtorFlag, nullptr);
 }
 
 /*
@@ -1885,6 +1901,10 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
    * value so stack offsets are properly tracked.
    */
   m_tb->endInlining();
+  // after end of inlining, m_stackDeficit should be set to
+  // 0, and eval stack should be empty
+  assert(m_evalStack.numCells() == 0);
+  m_stackDeficit = 0;
   FTRACE(1, "]]] end inlining: {}\n", getCurFunc()->fullName()->data());
   m_bcStateStack.pop_back();
   m_fpiStack.pop();

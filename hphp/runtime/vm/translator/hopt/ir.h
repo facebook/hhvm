@@ -315,12 +315,8 @@ O(NewObj,                    D(StkPtr), S(Cls)                                \
                                           C(Int)                              \
                                           S(StkPtr)                           \
                                           S(FramePtr),   E|Mem|N|Refs|PRc|Er) \
-O(NewObjCached,              D(StkPtr), C(Int)                                \
-                                          S(Str)                              \
-                                          S(StkPtr)                           \
-                                          S(FramePtr),   E|Mem|N|Refs|PRc|Er) \
-O(NewObjNoCtorCached,        D(StkPtr), S(Str)                                \
-                                          S(StkPtr),     E|Mem|N|Refs|PRc|Er) \
+O(AllocObj,                     D(Obj), S(Cls),                            N) \
+O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
 O(CreateCl,                     D(Obj), C(Cls)                                \
                                           C(Int)                              \
                                           S(FramePtr)                         \

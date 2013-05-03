@@ -143,13 +143,14 @@ void annotate(NormalizedInstruction* i) {
     case OpFPushObjMethodD:
     case OpFPushClsMethodD:
     case OpFPushClsMethodF:
+    case OpFPushCtorD:
     case OpFPushFuncD: {
       // When we push predictable action records, we can use a simpler
       // translation for their corresponding FCall.
       const StringData* className = nullptr;
       const StringData* funcName = nullptr;
       if (i->op() == OpFPushFuncD) {
-      	funcName = curUnit()->lookupLitstrId(i->imm[1].u_SA);
+        funcName = curUnit()->lookupLitstrId(i->imm[1].u_SA);
       } else if (i->op() == OpFPushObjMethodD) {
         if (i->inputs[0]->valueType() != KindOfObject) break;
         const Class* cls = i->inputs[0]->rtt.valueClass();
@@ -166,10 +167,15 @@ void annotate(NormalizedInstruction* i) {
         if (!cls) break;
         funcName = i->inputs[1]->rtt.valueString();
         className = cls->name();
-      } else {
-        assert(i->op() == OpFPushClsMethodD);
+      } else if (i->op() == OpFPushClsMethodD) {
         funcName = curUnit()->lookupLitstrId(i->imm[1].u_SA);
         className = curUnit()->lookupLitstrId(i->imm[2].u_SA);
+      } else {
+        assert(i->op() == OpFPushCtorD);
+        className = curUnit()->lookupLitstrId(i->imm[1].u_SA);
+        const Class* cls = Unit::lookupUniqueClass(className);
+        if (!cls) break;
+        funcName = cls->getCtor()->name();
       }
       assert(funcName->isStatic());
       recordActRecPush(*i, curUnit(), funcName, className,

@@ -258,7 +258,7 @@ struct IfCountNotStatic {
   }
 };
 
-inline static bool
+bool
 classIsPersistent(const Class* cls) {
   return RuntimeOption::RepoAuthoritative &&
     cls &&

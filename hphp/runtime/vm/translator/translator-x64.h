@@ -1199,6 +1199,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards);
 bool classIsUnique(const Class* cls);
 bool classIsUniqueOrCtxParent(const Class* cls);
 bool classIsUniqueNormalClass(const Class* cls);
+bool classIsPersistent(const Class* cls);
 
 // SpaceRecorder is used in translator-x64.cpp and in hopt/irtranslator.cpp
 // RAII logger for TC space consumption.

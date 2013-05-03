@@ -131,7 +131,6 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
                          index - kNumActRecCells);
 
   case NewObj:
-  case NewObjCached:
     if (index == kNumActRecCells) {
       // newly allocated object, which we unfortunately don't have any
       // kind of handle to :-(
@@ -141,12 +140,6 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     return getStackValue(sp->inst()->getSrc(2),
                          // NewObj pushes an object and an ActRec
                          index - (1 + kNumActRecCells));
-
-  case NewObjNoCtorCached:
-    if (index == 0) {
-      return StackValueInfo { Type::Obj };
-    }
-    return getStackValue(sp->inst()->getSrc(1), index - 1);
 
   default:
     {
@@ -396,9 +389,6 @@ SSATmp* Simplifier::simplifyCall(IRInstruction* inst) {
   }
 
   SSATmp* sp = spillStack->getSrc(0);
-  if (sp->inst()->op() == NewObjNoCtorCached) {
-    inst->convertToNop();
-  }
   int baseOffset = spillStack->getSrc(1)->getValInt() -
                    spillValueCells(spillStack);
   auto const numSpillSrcs = spillVals.size();

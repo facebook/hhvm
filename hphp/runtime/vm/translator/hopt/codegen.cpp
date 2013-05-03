@@ -351,6 +351,7 @@ CALL_OPCODE(FillContLocals)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewTuple)
 CALL_OPCODE(NewObj)
+CALL_OPCODE(LdClsCtor);
 CALL_OPCODE(CreateCl)
 CALL_OPCODE(PrintStr)
 CALL_OPCODE(PrintInt)
@@ -3228,6 +3229,17 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
                spOffset);
 }
 
+const Func* loadClassCtor(Class* cls) {
+  const Func* f = cls->getCtor();
+  if (UNLIKELY(!(f->attrs() & AttrPublic))) {
+    VMRegAnchor _;
+    UNUSED MethodLookup::LookupResult res =
+      g_vmContext->lookupCtorMethod(f, cls, true /*raise*/);
+    assert(res == MethodLookup::MethodFoundWithThis);
+  }
+  return f;
+}
+
 HOT_FUNC_VM ActRec*
 irNewInstanceHelper(Class* cls,
                     int numArgs,
@@ -3237,28 +3249,6 @@ irNewInstanceHelper(Class* cls,
   ActRec* ar = (ActRec*)(uintptr_t(obj) - sizeof(ActRec));
 
   Instance* newObj = newInstanceHelper(cls, numArgs, ar, prevAr);
-  // store obj into the stack
-  obj->m_data.pobj = newObj;
-  obj->m_type = KindOfObject;
-  return ar;
-}
-
-HOT_FUNC_VM static ActRec*
-irNewInstanceHelperCached(CacheHandle cacheHandle,
-                          const StringData* clsName,
-                          int numArgs,
-                          Cell* sp,
-                          ActRec* prevAr) {
-  Cell* obj = sp - 1; // this is where the newly allocated object will go
-  ActRec* ar = (ActRec*)(uintptr_t(obj) - sizeof(ActRec));
-
-  Instance* newObj = newInstanceHelperCached(
-    static_cast<Class**>(handleToPtr(cacheHandle)),
-    clsName,
-    numArgs,
-    ar,
-    prevAr
-  );
   // store obj into the stack
   obj->m_data.pobj = newObj;
   obj->m_type = KindOfObject;
@@ -3283,59 +3273,13 @@ Instance* createClHelper(Class* cls, int numArgs, ActRec* ar, TypedValue* sp) {
   return static_cast<c_Closure*>(newObj)->init(numArgs, ar, sp);
 }
 
-static Cell*
-newInstanceHelperNoCtorCached(CacheHandle cacheHandle,
-                                const StringData* clsName,
-                                Cell* sp) {
-  Cell* obj = sp - 1; // this is where the newly allocated object will go
+void CodeGenerator::cgAllocObj(IRInstruction* inst) {
+  SSATmp* dst = inst->getDst();
+  SSATmp* cls = inst->getSrc(0);
 
-  Class* cls = getKnownClass((Class**)handleToPtr(cacheHandle), clsName);
-  Instance* newObj = newInstance(cls);
-  newObj->incRefCount();
-
-  // store obj into the stack
-  obj->m_data.pobj = newObj;
-  obj->m_type = KindOfObject;
-  return obj;
-}
-
-void CodeGenerator::cgNewObjCached(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* numParams = inst->getSrc(0);
-  SSATmp* clsName = inst->getSrc(1);
-  SSATmp* sp    = inst->getSrc(2);
-  SSATmp* fp    = inst->getSrc(3);
-
-  assert(clsName->isString());
-  const StringData* classNameString = clsName->getValStr();
-  CacheHandle ch = allocKnownClass(classNameString);
-
-  ActRec* (*helper)(CacheHandle, const StringData*, int, Cell*, ActRec*)
-    = irNewInstanceHelperCached;
+  Instance* (*helper)(Class*) = newInstance;
   ArgGroup args;
-  args.imm(ch)
-    .ssa(clsName)
-    .ssa(numParams)
-    .ssa(sp)
-    .ssa(fp);
-  cgCallHelper(m_as, (TCA)helper, dst, kSyncPoint, args);
-}
-
-void CodeGenerator::cgNewObjNoCtorCached(IRInstruction* inst) {
-  SSATmp* dst   = inst->getDst();
-  SSATmp* clsName = inst->getSrc(0);
-  SSATmp* sp    = inst->getSrc(1);
-
-  assert(clsName->isString());
-  const StringData* classNameString = clsName->getValStr();
-  CacheHandle ch = allocKnownClass(classNameString);
-
-  Cell* (*helper)(CacheHandle, const StringData*, Cell*) =
-    newInstanceHelperNoCtorCached;
-  ArgGroup args;
-  args.imm(ch)
-    .ssa(clsName)
-    .ssa(sp);
+  args.ssa(cls);
   cgCallHelper(m_as,
                (TCA)helper,
                dst,

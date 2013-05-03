@@ -725,11 +725,11 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
   }
 }
 
-/* This is called from strict-mode productions (sm_*) to throw an
- * error if we're not in strict mode */
-static void only_in_strict_mode(Parser *_p) {
-  if (!_p->scanner().isStrictMode()) {
-    HPHP_PARSER_ERROR("Syntax only allowed in strict mode", _p);
+/* This is called from hack productions (hh_*) to throw an
+ * error if we're not in hack mode */
+static void only_in_hack_mode(Parser *_p) {
+  if (!_p->scanner().isHackMode()) {
+    HPHP_PARSER_ERROR("Syntax only allowed in hack mode", _p);
   }
 }
 
@@ -922,7 +922,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
      T_INSTEADOF = 391,
      T_TRAIT_C = 392,
      T_VARARG = 393,
-     T_STRICT_ERROR = 394,
+     T_HACK_ERROR = 394,
      T_FINALLY = 395,
      T_XHP_TAG_LT = 396,
      T_XHP_TAG_GT = 397,
@@ -1677,7 +1677,7 @@ static const char *const yytname[] =
   "T_NAMESPACE", "T_NS_C", "T_DIR", "T_NS_SEPARATOR", "T_YIELD",
   "T_XHP_LABEL", "T_XHP_TEXT", "T_XHP_ATTRIBUTE", "T_XHP_CATEGORY",
   "T_XHP_CATEGORY_LABEL", "T_XHP_CHILDREN", "T_XHP_ENUM", "T_XHP_REQUIRED",
-  "T_TRAIT", "T_INSTEADOF", "T_TRAIT_C", "T_VARARG", "T_STRICT_ERROR",
+  "T_TRAIT", "T_INSTEADOF", "T_TRAIT_C", "T_VARARG", "T_HACK_ERROR",
   "T_FINALLY", "T_XHP_TAG_LT", "T_XHP_TAG_GT", "T_TYPELIST_LT",
   "T_TYPELIST_GT", "T_UNRESOLVED_LT", "T_COLLECTION", "T_SHAPE", "T_TYPE",
   "T_UNRESOLVED_TYPE", "T_COMPILER_HALT_OFFSET", "'('", "')'", "';'",
@@ -1744,11 +1744,11 @@ static const char *const yytname[] =
   "non_empty_collection_init", "static_collection_init",
   "non_empty_static_collection_init", "encaps_list", "encaps_var",
   "encaps_var_offset", "internal_functions", "variable_list",
-  "class_constant", "sm_typedef_statement", "sm_name_with_type",
-  "sm_name_with_typevar", "sm_typeargs_opt", "sm_type_list",
-  "sm_func_type_list", "sm_opt_return_type", "sm_typevar_list",
-  "sm_shape_member_type", "sm_non_empty_shape_member_list",
-  "sm_shape_member_list", "sm_shape_type", "sm_type", "sm_type_opt", 0
+  "class_constant", "hh_typedef_statement", "hh_name_with_type",
+  "hh_name_with_typevar", "hh_typeargs_opt", "hh_type_list",
+  "hh_func_type_list", "hh_opt_return_type", "hh_typevar_list",
+  "hh_shape_member_type", "hh_non_empty_shape_member_list",
+  "hh_shape_member_list", "hh_shape_type", "hh_type", "hh_type_opt", 0
 };
 #endif
 
@@ -6623,7 +6623,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1241 "hphp.y"
-    { only_in_strict_mode(_p); (yyval) = (yyvsp[(1) - (3)]); ;}
+    { only_in_hack_mode(_p); (yyval) = (yyvsp[(1) - (3)]); ;}
     break;
 
   case 157:
@@ -6637,7 +6637,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1244 "hphp.y"
-    { only_in_strict_mode(_p); (yyval).reset(); ;}
+    { only_in_hack_mode(_p); (yyval).reset(); ;}
     break;
 
   case 159:
@@ -8062,7 +8062,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1683 "hphp.y"
-    { only_in_strict_mode(_p);
+    { only_in_hack_mode(_p);
                                         _p->onArray((yyval), (yyvsp[(3) - (4)]), T_ARRAY); ;}
     break;
 
@@ -9101,7 +9101,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1942 "hphp.y"
-    { only_in_strict_mode(_p);
+    { only_in_hack_mode(_p);
                                          _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY); ;}
     break;
 
@@ -9357,7 +9357,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2019 "hphp.y"
-    { only_in_strict_mode(_p);
+    { only_in_hack_mode(_p);
                                          _p->onArray((yyval),(yyvsp[(3) - (4)]),T_ARRAY); ;}
     break;
 
@@ -10307,7 +10307,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2345 "hphp.y"
-    { only_in_strict_mode(_p);
+    { only_in_hack_mode(_p);
                                          _p->onTypedef((yyval), (yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]));
                                          _p->popTypeScope(); ;}
     break;
@@ -10323,7 +10323,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2352 "hphp.y"
-    { only_in_strict_mode(_p); (yyval) = (yyvsp[(2) - (2)]); ;}
+    { only_in_hack_mode(_p); (yyval) = (yyvsp[(2) - (2)]); ;}
     break;
 
   case 676:
@@ -10338,14 +10338,14 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 2362 "hphp.y"
     { _p->pushTypeScope(); (yyval) = (yyvsp[(1) - (4)]);
-                                         only_in_strict_mode(_p); ;}
+                                         only_in_hack_mode(_p); ;}
     break;
 
   case 678:
 
 /* Line 1455 of yacc.c  */
 #line 2369 "hphp.y"
-    { only_in_strict_mode(_p); (yyval) = (yyvsp[(2) - (3)]); ;}
+    { only_in_hack_mode(_p); (yyval) = (yyvsp[(2) - (3)]); ;}
     break;
 
   case 679:
@@ -10411,7 +10411,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2390 "hphp.y"
-    { only_in_strict_mode(_p); (yyval) = (yyvsp[(2) - (2)]); ;}
+    { only_in_hack_mode(_p); (yyval) = (yyvsp[(2) - (2)]); ;}
     break;
 
   case 688:
@@ -10467,7 +10467,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2428 "hphp.y"
-    { only_in_strict_mode(_p);
+    { only_in_hack_mode(_p);
                                          (yyval).setText("array"); ;}
     break;
 
@@ -10475,7 +10475,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2436 "hphp.y"
-    { only_in_strict_mode(_p);
+    { only_in_hack_mode(_p);
                                          _p->onTypeSpecialization((yyvsp[(2) - (2)]), '?');
                                          (yyval) = (yyvsp[(2) - (2)]); ;}
     break;
@@ -10484,7 +10484,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2439 "hphp.y"
-    { only_in_strict_mode(_p);
+    { only_in_hack_mode(_p);
                                          _p->onTypeSpecialization((yyvsp[(2) - (2)]), '@');
                                          (yyval) = (yyvsp[(2) - (2)]); ;}
     break;
@@ -10516,7 +10516,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2448 "hphp.y"
-    { only_in_strict_mode(_p);
+    { only_in_hack_mode(_p);
                                          (yyvsp[(1) - (4)]).setText("array");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)])); ;}
     break;
@@ -10525,7 +10525,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2452 "hphp.y"
-    { only_in_strict_mode(_p);
+    { only_in_hack_mode(_p);
                                          _p->onTypeList((yyvsp[(3) - (6)]), (yyvsp[(5) - (6)]));
                                          (yyvsp[(1) - (6)]).setText("array");
                                          _p->onTypeAnnotation((yyval), (yyvsp[(1) - (6)]), (yyvsp[(3) - (6)])); ;}
@@ -10545,7 +10545,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2462 "hphp.y"
-    { only_in_strict_mode(_p);
+    { only_in_hack_mode(_p);
                                         _p->onTypeList((yyvsp[(7) - (8)]), (yyvsp[(4) - (8)]));
                                         _p->onTypeAnnotation((yyval), (yyvsp[(2) - (8)]), (yyvsp[(7) - (8)]));
                                         _p->onTypeSpecialization((yyval), 'f'); ;}
@@ -10555,7 +10555,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2466 "hphp.y"
-    { only_in_strict_mode(_p);
+    { only_in_hack_mode(_p);
                                         _p->onTypeList((yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]));
                                         Token t; t.reset(); t.setText("array");
                                         _p->onTypeAnnotation((yyval), t, (yyvsp[(2) - (5)]));

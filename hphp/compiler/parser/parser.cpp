@@ -1778,7 +1778,7 @@ TStatementPtr Parser::extractStatement(ScannerToken *stmt) {
 
 bool Parser::hasType(Token &type) {
   if (!type.text().empty()) {
-    if (!Option::EnableHipHopSyntax && !m_scanner.isStrictMode()) {
+    if (!Option::EnableHipHopSyntax && !m_scanner.isHackMode()) {
       PARSE_ERROR("Type hint is not enabled");
       return false;
     }

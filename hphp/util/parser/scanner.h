@@ -274,12 +274,15 @@ public:
     m_heredocLabel.clear();
   }
 
-  void setStrictMode() {
-    m_isStrictMode = 1;
+  /**
+   * Enables Hack for HipHop mode (types and other goodies).
+   */
+  void setHackMode() {
+    m_isHackMode = 1;
   }
 
-  bool isStrictMode() const {
-    return m_isStrictMode;
+  bool isHackMode() const {
+    return m_isHackMode;
   }
 
   /*
@@ -333,7 +336,7 @@ private:
   // fields for XHP parsing
   int m_lastToken;
   void incLoc(const char *rawText, int rawLeng);
-  bool m_isStrictMode;
+  bool m_isHackMode;
 
   TokenStore m_lookahead;
   int m_lookaheadLtDepth;

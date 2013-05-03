@@ -85,7 +85,7 @@ void ScannerToken::xhpDecode() {
 Scanner::Scanner(const char *filename, int type, bool md5 /* = false */)
     : m_filename(filename), m_stream(nullptr), m_source(nullptr), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
-      m_loc(nullptr), m_lastToken(-1), m_isStrictMode(0), m_lookaheadLtDepth(0) {
+      m_loc(nullptr), m_lastToken(-1), m_isHackMode(0), m_lookaheadLtDepth(0) {
   m_stream = new std::ifstream(filename);
   m_streamOwner = true;
   if (m_stream->fail()) {
@@ -101,7 +101,7 @@ Scanner::Scanner(std::istream &stream, int type,
                  bool md5 /* = false */)
     : m_filename(fileName), m_source(nullptr), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
-      m_loc(nullptr), m_lastToken(-1), m_isStrictMode(0), m_lookaheadLtDepth(0) {
+      m_loc(nullptr), m_lastToken(-1), m_isHackMode(0), m_lookaheadLtDepth(0) {
   m_stream = &stream;
   m_streamOwner = false;
   if (md5) computeMd5();
@@ -112,7 +112,7 @@ Scanner::Scanner(const char *source, int len, int type,
                  const char *fileName /* = "" */, bool md5 /* = false */)
     : m_filename(fileName), m_stream(nullptr), m_source(source), m_len(len),
       m_pos(0), m_state(Start), m_type(type), m_yyscanner(nullptr),
-      m_token(nullptr), m_loc(nullptr), m_lastToken(-1), m_isStrictMode(0),
+      m_token(nullptr), m_loc(nullptr), m_lastToken(-1), m_isHackMode(0),
       m_lookaheadLtDepth(0) {
   assert(m_source);
   m_streamOwner = false;

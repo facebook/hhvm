@@ -435,7 +435,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   }
   yyless(1);
   STEPPOS;
-  if (_scanner->isStrictMode() && (ntt & NextTokenType::TypeListMaybe)) {
+  if (_scanner->isHackMode() && (ntt & NextTokenType::TypeListMaybe)) {
     // Return T_UNRESOLVED_LT; the scanner will inspect subseqent tokens
     // to resolve this.
     return T_UNRESOLVED_LT;
@@ -445,7 +445,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_IN_SCRIPTING>"<" {
   STEPPOS;
-  if (_scanner->isStrictMode()) {
+  if (_scanner->isHackMode()) {
     int ntt = getNextTokenType(_scanner->lastToken());
     if (ntt & NextTokenType::TypeListMaybe) {
       // Return T_UNRESOLVED_LT; the scanner will inspect subseqent tokens
@@ -538,8 +538,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         long ret = strtoll(yytext, NULL, 0);
         if (errno == ERANGE || ret < 0) {
                 _scanner->error("Dec number is too big: %s", yytext);
-                if (_scanner->isStrictMode()) {
-                        return T_STRICT_ERROR;
+                if (_scanner->isHackMode()) {
+                        return T_HACK_ERROR;
                 }
         }
         return T_LNUMBER;
@@ -551,8 +551,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         long ret = strtoull(yytext, NULL, 16);
         if (errno == ERANGE || ret < 0) {
                 _scanner->error("Hex number is too big: %s", yytext);
-                if (_scanner->isStrictMode()) {
-                        return T_STRICT_ERROR;
+                if (_scanner->isHackMode()) {
+                        return T_HACK_ERROR;
                 }
         }
         return T_LNUMBER;
@@ -564,8 +564,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         long ret = strtoll(yytext, NULL, 0);
         if (ret == LLONG_MAX && errno == ERANGE) {
                 _scanner->error("Offset number is too big: %s", yytext);
-                if (_scanner->isStrictMode()) {
-                        return T_STRICT_ERROR;
+                if (_scanner->isHackMode()) {
+                        return T_HACK_ERROR;
                 }
         }
         return T_NUM_STRING;
@@ -666,12 +666,12 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <INITIAL,ST_IN_HTML>"<?hh"([ \t]|{NEWLINE}) {
         if (YY_START != INITIAL) {
-                _scanner->error("Strict mode: content before <?hh");
-                return T_STRICT_ERROR;
+                _scanner->error("Hack mode: content before <?hh");
+                return T_HACK_ERROR;
         }
         STEPPOS;
         BEGIN(ST_IN_SCRIPTING);
-        _scanner->setStrictMode();
+        _scanner->setHackMode();
         return T_OPEN_TAG;
 }
 
@@ -755,9 +755,9 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_ONE_LINE_COMMENT>"?>"|"%>" {
-        if (_scanner->isStrictMode()) {
-          _scanner->error("Strict mode: ?> not allowed");
-          return T_STRICT_ERROR;
+        if (_scanner->isHackMode()) {
+          _scanner->error("Hack mode: ?> not allowed");
+          return T_HACK_ERROR;
         }
         if (_scanner->aspTags() || yytext[yyleng-2] != '%') {
                 _scanner->setToken(yytext, yyleng-2, yytext, yyleng-2);
@@ -800,9 +800,9 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
-        if (_scanner->isStrictMode()) {
-          _scanner->error("Strict mode: ?> not allowed");
-          return T_STRICT_ERROR;
+        if (_scanner->isHackMode()) {
+          _scanner->error("Hack mode: ?> not allowed");
+          return T_HACK_ERROR;
         }
         STEPPOS;
         yy_push_state(ST_IN_HTML, yyscanner);

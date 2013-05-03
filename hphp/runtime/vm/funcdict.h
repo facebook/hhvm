@@ -45,8 +45,6 @@ private:
   bool rename(const StringData* old, const StringData* n3w);
   bool isFunctionRenameable(const StringData* name);
   void addRenameableFunctions(ArrayData* arr);
-
-  //Array getUserFunctions();
 };
 
 }

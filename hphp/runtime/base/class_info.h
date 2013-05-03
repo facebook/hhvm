@@ -84,13 +84,6 @@ public:
     NeedsActRec            = (1u << 31),//                  x      x
   };
 
-  enum GetArrayKind {
-    GetArrayNone = 0,
-    GetArrayPrivate = 1,
-    GetArrayPublic = 2,
-    GetArrayAll = GetArrayPrivate|GetArrayPublic
-  };
-
   class ConstantInfo {
   public:
     ConstantInfo();
@@ -170,7 +163,6 @@ public:
     DataType type;
     const char *docComment;
     const ClassInfo *owner;
-    bool isVisible(const ClassInfo *context) const;
   };
 
   typedef StringIMap<ClassInfo *>                 ClassMap;
@@ -214,10 +206,6 @@ public:
    * Return a list of declared classes.
    */
   static Array GetClasses() { return GetClassLike(IsInterface|IsTrait, 0); }
-
-  static bool HasClassInterfaceOrTrait(CStrRef name) {
-    return FindClassInterfaceOrTrait(name);
-  }
 
   /**
    * Locate one class.
@@ -270,11 +258,6 @@ public:
   static const ClassInfo *FindSystemClassInterfaceOrTrait(CStrRef name);
 
   /**
-   * Locate one constant (excluding dynamic and redeclared constants)
-   */
-  static const ConstantInfo *FindConstant(CStrRef name);
-
-  /**
    * Get all statically known constants
    */
   static Array GetConstants();
@@ -292,13 +275,6 @@ public:
    */
   static bool GetClassMethods(MethodVec &ret, CStrRef classname, int type = 0);
   static bool GetClassMethods(MethodVec &ret, const ClassInfo *classInfo);
-
-  /**
-   * Return all properties a class has, including the ones on base classes and
-   * the ones that were implicitly defined.
-   */
-  static void GetClassProperties(PropertyMap &props, CStrRef classname);
-  static void GetClassProperties(PropertyVec &props, CStrRef classname);
 
   /**
    * Read user attributes in from the class map.
@@ -321,13 +297,6 @@ public:
                              std::vector<String> *clsProperties,
                              std::vector<String> *clsConstants);
 
-  static void GetArray(const ObjectData *obj,
-                       Array &props, GetArrayKind kind);
-  static void GetArray(const ObjectData *obj,
-                       Array &props, bool pubOnly) {
-    GetArray(obj, props, pubOnly ? GetArrayPublic : GetArrayAll);
-  }
-  static void SetArray(ObjectData *obj, CArrRef props);
   static void SetHook(ClassInfoHook *hook) { s_hook = hook; }
 
   static Variant GetVariant(DataType type, const void *addr) {
@@ -379,10 +348,6 @@ public:
   virtual const TraitSet &getTraits() const = 0;
   virtual const TraitVec &getTraitsVec() const = 0;
   virtual const TraitAliasVec &getTraitAliasesVec() const = 0;
-  bool derivesFrom(CStrRef name, bool considerInterface) const;
-
-  void getAllParentsVec(ClassVec &parents) const; // recursive
-  void getAllInterfacesVec(InterfaceVec &interfaces) const; // recursive
 
   /**
    * Method functions.
@@ -393,30 +358,18 @@ public:
   MethodInfo *hasMethod(CStrRef name,
                         ClassInfo *&classInfo,
                         bool interfaces = false) const;
-  static bool HasAccess(CStrRef className, CStrRef methodName,
-                        bool staticCall, bool hasCallObject);
-  static bool IsSubClass(CStrRef className1, CStrRef className2,
-                         bool considerInterface);
 
   /**
    * Property functions.
    */
   virtual const PropertyMap &getProperties() const = 0;    // non-recursively
   virtual const PropertyVec &getPropertiesVec() const = 0; // non-recursively
-  void getAllProperties(PropertyMap &props) const;         // recursively
-  void getAllProperties(PropertyVec &props) const;         // recursively
-  // Remove properties with the given attribute from the array, recursively.
-  void filterProperties(Array &props, Attribute toRemove) const;
-  PropertyInfo *getPropertyInfo(CStrRef name) const;
-  bool hasProperty(CStrRef name) const;
 
   /**
    * Constant functions.
    */
   virtual const ConstantMap &getConstants() const = 0;
   virtual const ConstantVec &getConstantsVec() const = 0;
-  ConstantInfo *getConstantInfo(CStrRef name) const;
-  bool hasConstant(CStrRef name) const;
 
   virtual const UserAttributeVec &getUserAttributeVec() const = 0;
 
@@ -436,10 +389,6 @@ protected:
   int m_line1;
   int m_line2;
   const char *m_docComment;
-
-  bool derivesFromImpl(CStrRef name, bool considerInterface) const;
-  bool checkAccess(ClassInfo *defClass, MethodInfo *methodInfo,
-                   bool staticCall, bool hasObject) const;
 
 private:
   static ClassMap s_class_like;       // all classes, interfaces and traits

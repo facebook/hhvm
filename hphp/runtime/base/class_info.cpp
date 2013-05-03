@@ -193,19 +193,6 @@ Array ClassInfo::GetClassLike(unsigned mask, unsigned value) {
   return ret;
 }
 
-const ClassInfo::ConstantInfo *ClassInfo::FindConstant(CStrRef name) {
-  assert(!name.isNull());
-  assert(s_loaded);
-  const ConstantInfo *info;
-  info = s_systemFuncs->getConstantInfo(name);
-  if (info) return info;
-  if (s_hook) {
-    info = s_hook->findConstant(name);
-    if (info) return info;
-  }
-  return nullptr;
-}
-
 ClassInfo::ConstantInfo::ConstantInfo() :
     valueLen(0), callback(nullptr), deferred(true) {
 }
@@ -354,24 +341,6 @@ bool ClassInfo::GetClassMethods(MethodVec &ret, const ClassInfo *classInfo) {
   return true;
 }
 
-void ClassInfo::GetClassProperties(PropertyMap &props, CStrRef classname) {
-  if (!classname.empty()) {
-    const ClassInfo *classInfo = FindClass(classname);
-    if (classInfo) {
-      classInfo->getAllProperties(props);
-    }
-  }
-}
-
-void ClassInfo::GetClassProperties(PropertyVec &props, CStrRef classname) {
-  if (!classname.empty()) {
-    const ClassInfo *classInfo = FindClass(classname);
-    if (classInfo) {
-      classInfo->getAllProperties(props);
-    }
-  }
-}
-
 void ClassInfo::GetClassSymbolNames(CArrRef names, bool interface, bool trait,
                                     std::vector<String> &classes,
                                     std::vector<String> *clsMethods,
@@ -497,70 +466,6 @@ const ClassInfo *ClassInfo::getParentClassInfo() const {
   return FindClass(parentName);
 }
 
-void ClassInfo::getAllParentsVec(ClassVec &parents) const {
-  CStrRef parent = getParentClass();
-  if (!parent.empty()) {
-    parents.push_back(parent);
-    const ClassInfo *info = FindClass(parent);
-    if (info) info->getAllParentsVec(parents);
-  }
-}
-
-void ClassInfo::getAllInterfacesVec(InterfaceVec &interfaces) const {
-  CStrRef parent = getParentClass();
-  if (!parent.empty()) {
-    const ClassInfo *info = FindClass(parent);
-    if (info) info->getAllInterfacesVec(interfaces);
-  }
-
-  const InterfaceVec &ifs = getInterfacesVec();
-  for (unsigned int i = 0; i < ifs.size(); i++) {
-    CStrRef intf = ifs[i];
-    interfaces.push_back(intf);
-    const ClassInfo *info = FindInterface(intf);
-    if (info) info->getAllInterfacesVec(interfaces);
-  }
-}
-
-bool ClassInfo::derivesFrom(CStrRef name, bool considerInterface) const {
-  assert(!name.isNull());
-  return derivesFromImpl(name, considerInterface);
-}
-
-bool ClassInfo::derivesFromImpl(CStrRef name, bool considerInterface) const {
-  if (name->isame(getParentClass().get())) {
-    return true;
-  }
-
-  const ClassInfo *parent = getParentClassInfo();
-  if (parent && parent->derivesFromImpl(name, considerInterface)) {
-    return true;
-  }
-
-  if (considerInterface) {
-    const InterfaceSet &interfaces = getInterfaces();
-    for (InterfaceSet::const_iterator iter = interfaces.begin();
-         iter != interfaces.end(); ++iter) {
-      if (name->isame(iter->get())) {
-        return true;
-      }
-      const ClassInfo *parent = FindInterface(*iter);
-      if (parent && parent->derivesFromImpl(name, considerInterface)) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-bool ClassInfo::IsSubClass(CStrRef className1, CStrRef className2,
-                           bool considerInterface) {
-  const ClassInfo *clsInfo1 = ClassInfo::FindClass(className1);
-  if (!clsInfo1) return false;
-
-  return clsInfo1->derivesFrom(className2, considerInterface);
-}
-
 ClassInfo::MethodInfo *ClassInfo::getMethodInfo(CStrRef name) const {
   assert(!name.isNull());
 
@@ -601,133 +506,6 @@ const {
     if (result) return result;
   }
   return nullptr;
-}
-
-// internal function  className::methodName or callObject->methodName
-bool ClassInfo::HasAccess(CStrRef className, CStrRef methodName,
-                          bool staticCall, bool hasCallObject) {
-  // It has to be either a static call or a call with an object.
-  assert(staticCall || hasCallObject);
-  const ClassInfo *clsInfo = ClassInfo::FindClass(className);
-  if (!clsInfo) return false;
-  ClassInfo *defClass;
-  ClassInfo::MethodInfo *methodInfo =
-    clsInfo->hasMethod(methodName, defClass);
-  if (!methodInfo) return false;
-  if (methodInfo->attribute & ClassInfo::IsPublic) return true;
-  VM::Class* ctx = g_vmContext->getContextClass();
-  if (!ctx) {
-    return false;
-  }
-  const ClassInfo *ctxClass = ClassInfo::FindClass(ctx->nameRef());
-  bool hasObject = hasCallObject || g_vmContext->getThis();
-  if (ctxClass) {
-    return ctxClass->checkAccess(defClass, methodInfo, staticCall, hasObject);
-  }
-  return false;
-}
-
-bool ClassInfo::checkAccess(ClassInfo *defClass,
-                            MethodInfo *methodInfo,
-                            bool staticCall,
-                            bool hasObject) const {
-  assert(defClass && methodInfo);
-  if ((m_name->isame(defClass->m_name.get()))) {
-    if (methodInfo->attribute & ClassInfo::IsStatic) return true;
-    return hasObject;
-  }
-
-  if (methodInfo->attribute & ClassInfo::IsStatic) {
-    if (methodInfo->attribute & ClassInfo::IsPublic) return true;
-    if (methodInfo->attribute & ClassInfo::IsProtected) {
-      return derivesFrom(defClass->m_name, false) ||
-             defClass->derivesFrom(m_name, false);
-    }
-    return false;
-  }
-  if (!hasObject && !staticCall) return false;
-  if (methodInfo->attribute & ClassInfo::IsPublic) return true;
-  if (methodInfo->attribute & ClassInfo::IsProtected) {
-    return derivesFrom(defClass->m_name, false) ||
-           defClass->derivesFrom(m_name, false);
-  }
-  return false;
-}
-
-void ClassInfo::getAllProperties(PropertyMap &props) const {
-  const PropertyMap &properties = getProperties();
-  props.insert(properties.begin(), properties.end());
-
-  CStrRef parentClass = getParentClass();
-  if (!parentClass.empty()) {
-    GetClassProperties(props, parentClass);
-  }
-}
-
-void ClassInfo::getAllProperties(PropertyVec &props) const {
-  const PropertyVec &properties = getPropertiesVec();
-  props.insert(props.end(), properties.begin(), properties.end());
-
-  CStrRef parentClass = getParentClass();
-  if (!parentClass.empty()) {
-    GetClassProperties(props, parentClass);
-  }
-}
-
-void ClassInfo::filterProperties(Array &props, Attribute toRemove) const {
-  const PropertyVec &properties = getPropertiesVec();
-  for (unsigned i = 0; i < properties.size(); i++) {
-    if (properties[i]->attribute & toRemove) {
-      props.remove(properties[i]->name, true);
-    }
-  }
-  const ClassInfo *parent = getParentClassInfo();
-  if (parent) {
-    parent->filterProperties(props, toRemove);
-  }
-}
-
-ClassInfo::PropertyInfo *ClassInfo::getPropertyInfo(CStrRef name) const {
-  assert(!name.isNull());
-  const PropertyMap &properties = getProperties();
-  PropertyMap::const_iterator iter = properties.find(name);
-  if (iter != properties.end()) {
-    return iter->second;
-  }
-  return nullptr;
-}
-
-bool ClassInfo::hasProperty(CStrRef name) const {
-  assert(!name.isNull());
-  const PropertyMap &properties = getProperties();
-  return properties.find(name) != properties.end();
-}
-
-ClassInfo::ConstantInfo *ClassInfo::getConstantInfo(CStrRef name) const {
-  assert(!name.isNull());
-  const ConstantMap &constants = getConstants();
-  ConstantMap::const_iterator iter = constants.find(name);
-  if (iter != constants.end()) {
-    return iter->second;
-  }
-  return nullptr;
-}
-
-bool ClassInfo::hasConstant(CStrRef name) const {
-  assert(!name.isNull());
-  const ConstantMap &constants = getConstants();
-  return constants.find(name) != constants.end();
-}
-
-bool ClassInfo::PropertyInfo::isVisible(const ClassInfo *context) const {
-  if ((attribute & ClassInfo::IsPublic) || context == owner) return true;
-  if (!context) return false;
-  if (attribute & ClassInfo::IsProtected) {
-    return owner->derivesFrom(context->getName(), false) ||
-           context->derivesFrom(owner->getName(), false);
-  }
-  assert(attribute & ClassInfo::IsPrivate);
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1040,15 +818,6 @@ ClassInfo::MethodInfo::~MethodInfo() {
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
     delete *it;
   }
-}
-
-void ClassInfo::GetArray(const ObjectData *obj,
-                         Array &props, GetArrayKind kind) {
-  obj->o_getArray(props, !(kind & GetArrayPrivate));
-}
-
-void ClassInfo::SetArray(ObjectData *obj, CArrRef props) {
-  obj->o_setArray(props);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

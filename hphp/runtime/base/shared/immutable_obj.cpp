@@ -34,7 +34,7 @@ ImmutableObj::ImmutableObj(ObjectData *obj) {
   assert(!obj->instanceof(SystemLib::s_SerializableClass));
   m_cls = obj->o_getClassName()->copy(true);
   Array props;
-  ClassInfo::GetArray(obj, props, ClassInfo::GetArrayAll);
+  obj->o_getArray(props, false);
   m_propCount = 0;
   if (props.empty()) {
     m_props = nullptr;
@@ -73,7 +73,7 @@ Object ImmutableObj::getObject() {
            true);
   }
   Array v = ai.create();
-  ClassInfo::SetArray(obj.get(), v);
+  obj->o_setArray(v);
   obj->t___wakeup();
   return obj;
 }

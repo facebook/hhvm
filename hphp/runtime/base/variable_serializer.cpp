@@ -392,7 +392,7 @@ void VariableSerializer::write(CObjRef v) {
         collectionSerialize(v.get(), this);
       } else {
         Array props(ArrayData::Create());
-        ClassInfo::GetArray(v.get(), props, ClassInfo::GetArrayPublic);
+        v->o_getArray(props, true);
         setObjectInfo(v->o_getClassName(), v->o_getId(), 'O');
         props.serialize(this);
       }

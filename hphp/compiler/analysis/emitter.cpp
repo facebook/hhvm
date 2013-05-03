@@ -7076,7 +7076,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       Entry e;
       e.name = const_cast<StringData*>(it->first);
       e.info = it->second;
-      e.ci = ClassInfo::FindClassInterfaceOrTrait(e.name);
+      e.ci = ClassInfo::FindSystemClassInterfaceOrTrait(e.name);
       assert(e.ci);
       StringData* parentName
         = StringData::GetStaticString(e.ci->getParentClass().get());

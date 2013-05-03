@@ -1589,7 +1589,7 @@ Variant f_mysql_fetch_object(CVarRef result,
   Variant properties = php_mysql_fetch_hash(result, MYSQL_ASSOC);
   if (!same(properties, false)) {
     Object obj = create_object(class_name, params);
-    ClassInfo::SetArray(obj.get(), properties);
+    obj->o_setArray(properties);
 
     return obj;
   }

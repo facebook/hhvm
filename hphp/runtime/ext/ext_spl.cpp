@@ -140,82 +140,64 @@ Variant f_hphp_get_this() {
 }
 
 Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
-  String clsname;
+  VM::Class* cls;
   if (obj.isString()) {
-    clsname = obj.toString();
+    cls = VM::Unit::getClass(obj.getStringData(), autoload);
+    if (!cls) {
+      return false;
+    }
   } else if (obj.isObject()) {
-    clsname = obj.toObject()->o_getClassName();
+    cls = obj.getObjectData()->getVMClass();
   } else {
     return false;
   }
-
-  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(clsname);
-  if (info == NULL) {
-    if (!autoload) return false;
-    AutoloadHandler::s_instance->invokeHandler(clsname);
-    return f_class_implements(clsname, false);
-  }
-
   Array ret(Array::Create());
-  ClassInfo::InterfaceVec ifs;
-  info->getAllInterfacesVec(ifs);
-  for (unsigned int i = 0; i < ifs.size(); i++) {
-    ret.set(ifs[i], ifs[i]);
+  for (auto& elem : cls->allInterfaces()) {
+    // For the case where cls is an interface, we don't want to
+    // include cls in the array we return
+    if (elem == cls) continue;
+    ret.set(elem->nameRef(), elem->nameRef());
   }
-
   return ret;
 }
 
 Variant f_class_parents(CVarRef obj, bool autoload /* = true */) {
-  String clsname;
+  VM::Class* cls;
   if (obj.isString()) {
-    clsname = obj.toString();
+    cls = VM::Unit::getClass(obj.getStringData(), autoload);
+    if (!cls) {
+      return false;
+    }
   } else if (obj.isObject()) {
-    clsname = obj.toObject()->o_getClassName();
+    cls = obj.getObjectData()->getVMClass();
   } else {
     return false;
   }
-
-  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(clsname);
-  if (info == NULL) {
-    if (!autoload) return false;
-    AutoloadHandler::s_instance->invokeHandler(clsname);
-    return f_class_parents(clsname, false);
-  }
-
   Array ret(Array::Create());
-  ClassInfo::ClassVec parents;
-  info->getAllParentsVec(parents);
-  for (unsigned int i = 0; i < parents.size(); i++) {
-    ret.set(parents[i], parents[i]);
+  for (cls = cls->parent(); cls; cls = cls->parent()) {
+    auto& clsName = cls->nameRef();
+    ret.set(clsName, clsName);
   }
-
   return ret;
 }
 
 Variant f_class_uses(CVarRef obj, bool autoload /* = true */) {
-  String clsname;
+  VM::Class* cls;
   if (obj.isString()) {
-    clsname = obj.toString();
+    cls = VM::Unit::getClass(obj.getStringData(), autoload);
+    if (!cls) {
+      return false;
+    }
   } else if (obj.isObject()) {
-    clsname = obj.toObject()->o_getClassName();
+    cls = obj.getObjectData()->getVMClass();
   } else {
     return false;
   }
-
-  const ClassInfo *info = ClassInfo::FindClassInterfaceOrTrait(clsname);
-  if (!info) {
-    if (!autoload) return false;
-    AutoloadHandler::s_instance->invokeHandler(clsname);
-    return f_class_uses(clsname, false);
-  }
-
   Array ret(Array::Create());
-  const ClassInfo::TraitVec &traits = info->getTraitsVec();
-  for (unsigned int i = 0; i < traits.size(); i++) {
-    ret.set(traits[i], traits[i]);
+  for (auto& elem : cls->usedTraits()) {
+    auto& traitName = elem.get()->nameRef();
+    ret.set(traitName, traitName);
   }
-
   return ret;
 }
 

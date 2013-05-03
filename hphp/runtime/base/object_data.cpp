@@ -386,7 +386,7 @@ Object ObjectData::FromArray(ArrayData *properties) {
 
 Array ObjectData::o_toArray() const {
   Array ret(ArrayData::Create());
-  ClassInfo::GetArray(this, ret, ClassInfo::GetArrayAll);
+  o_getArray(ret, false);
   return ret;
 }
 

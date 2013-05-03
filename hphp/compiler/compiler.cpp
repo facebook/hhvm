@@ -943,7 +943,7 @@ int runTarget(const CompilerOptions &po) {
   }
   cmd += po.outputDir + '/' + po.program;
   cmd += string(" --file ") +
-    (po.inputs.size() == 1 ? po.inputs[0] : "") + po.programArgs;
+    (po.inputs.size() == 1 ? po.inputs[0] : "") + ' ' + po.programArgs;
   Logger::Info("running executable: %s", cmd.c_str());
   ret = Util::ssystem(cmd.c_str());
   if (ret && ret != -1) ret = 1;

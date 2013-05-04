@@ -2444,13 +2444,13 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
         uint64_t  notTaken = notTakenPC->getValInt();
 
         m_astubs.setcc(cc, rbyte(serviceReqArgRegs[4]));
-        m_tx64-> emitServiceReq(TranslatorX64::SRFlags::SRInline,
-                                REQ_BIND_JMPCC_FIRST,
-                                4ull,
-                                smashAddr,
-                                taken,
-                                notTaken,
-                                uint64_t(cc));
+        m_tx64->emitServiceReq(TranslatorX64::SRFlags::SRInline,
+                               REQ_BIND_JMPCC_FIRST,
+                               4ull,
+                               smashAddr,
+                               taken,
+                               notTaken,
+                               uint64_t(cc));
       } else {
         // NormalCc exit but not optimized to jcc directly to destination
         m_tx64->emitBindJmp(a, destSK, REQ_BIND_JMP);
@@ -2496,10 +2496,18 @@ void CodeGenerator::cgExitTrace(IRInstruction* inst) {
           VM::opcodeToName(op)).str();
         m_tx64->emitRecordPunt(a, name);
       }
-      if (exitType == TraceExitType::Slow) {
-        m_tx64->emitBindJmp(a, destSK, REQ_BIND_JMP_NO_IR);
+      if (RuntimeOption::EvalHHIRDisableTx64) {
+        // Emit a service request to interpret a single instruction before
+        // creating a new translation
+        m_tx64->emitServiceReq(TranslatorX64::SRFlags::SRInline,
+                               REQ_INTERPRET,
+                               2ull, uint64_t(destSK.offset()), 1);
       } else {
-        m_tx64->emitReqRetransNoIR(a, destSK);
+        if (exitType == TraceExitType::Slow) {
+          m_tx64->emitBindJmp(a, destSK, REQ_BIND_JMP_NO_IR);
+        } else { // SlowNoProgress
+          m_tx64->emitReqRetransNoIR(a, destSK);
+        }
       }
       break;
     case TraceExitType::GuardFailure:

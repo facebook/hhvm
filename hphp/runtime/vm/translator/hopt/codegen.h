@@ -20,6 +20,7 @@
 #include <vector>
 #include "runtime/vm/translator/hopt/ir.h"
 #include "runtime/vm/translator/hopt/irfactory.h"
+#include "runtime/vm/translator/hopt/linearscan.h"
 #include "runtime/vm/translator/targetcache.h"
 #include "runtime/vm/translator/translator-x64.h"
 #include "runtime/vm/translator/hopt/state_vector.h"
@@ -72,11 +73,12 @@ typedef StateVector<IRInstruction, RegSet> LiveRegs;
 // Stuff we need to preserve between blocks while generating code,
 // and address information produced during codegen.
 struct CodegenState {
-  CodegenState(const IRFactory* factory, const LiveRegs& liveRegs,
-               const LifetimeInfo* lifetime,
+  CodegenState(const IRFactory* factory, const RegAllocInfo& regs,
+               const LiveRegs& liveRegs, const LifetimeInfo* lifetime,
                AsmInfo* asmInfo)
     : patches(factory, nullptr)
     , lastMarker(nullptr)
+    , regs(regs)
     , liveRegs(liveRegs)
     , lifetime(lifetime)
     , asmInfo(asmInfo)
@@ -92,6 +94,9 @@ struct CodegenState {
   // True if this block's terminal Jmp_ has a desination equal to the
   // next block in the same assmbler.
   bool noTerminalJmp_;
+
+  // output from register allocator
+  const RegAllocInfo& regs;
 
   // for each instruction, holds the RegSet of registers that must be
   // preserved across that instruction.  This is for push/pop of caller-saved
@@ -111,8 +116,8 @@ struct CodeGenerator {
 
   CodeGenerator(Trace* trace, Asm& as, Asm& astubs, Transl::TranslatorX64* tx64,
                 CodegenState& state)
-    : m_as(as), m_astubs(astubs), m_tx64(tx64), m_state(state)
-    , m_curInst(nullptr), m_curTrace(trace) {
+    : m_as(as), m_astubs(astubs), m_tx64(tx64), m_state(state),
+      m_regs(state.regs), m_curInst(nullptr), m_curTrace(trace) {
   }
 
   void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
@@ -205,7 +210,7 @@ private:
                   void (Asm::*intRR)(RegType, RegType),
                   void (Asm::*mov)(RegType, RegType),
                   void (Asm::*fpRR)(RegXMM, RegXMM),
-                  void (*extend)(Asm&, const SSATmp*),
+                  void (*extend)(Asm&, const SSATmp*, const RegisterInfo&),
                   Oper,
                   RegType (*conv)(PhysReg),
                   Commutativity);
@@ -214,7 +219,7 @@ private:
                      void (Asm::*intImm)(Immed, RegType),
                      void (Asm::*intRR)(RegType, RegType),
                      void (Asm::*mov)(RegType, RegType),
-                     void (*extend)(Asm&, const SSATmp*),
+                     void (*extend)(Asm&, const SSATmp*, const RegisterInfo&),
                      Oper,
                      RegType (*conv)(PhysReg),
                      Commutativity);
@@ -353,6 +358,7 @@ private:
   Asm& m_astubs;            // assembler for stubs and other cold code.
   TranslatorX64* m_tx64;
   CodegenState& m_state;
+  const RegAllocInfo& m_regs;
   IRInstruction* m_curInst; // current instruction being generated
   Trace* m_curTrace;
 };
@@ -389,7 +395,7 @@ private: // These should be created using ArgGroup.
     , m_done(false)
   {}
 
-  explicit ArgDesc(SSATmp* tmp, bool val = true);
+  explicit ArgDesc(SSATmp* tmp, const RegisterInfo& info, bool val = true);
 
 private:
   Kind m_kind;
@@ -415,8 +421,8 @@ private:
 struct ArgGroup {
   typedef std::vector<ArgDesc> ArgVec;
 
-  ArgGroup()
-      : m_override(nullptr)
+  explicit ArgGroup(const RegAllocInfo& regs)
+      : m_regs(regs), m_override(nullptr)
     {}
 
   size_t numRegArgs() const { return m_regArgs.size(); }
@@ -456,13 +462,13 @@ struct ArgGroup {
   }
 
   ArgGroup& ssa(SSATmp* tmp) {
-    push_arg(ArgDesc(tmp));
+    push_arg(ArgDesc(tmp, m_regs[tmp]));
     return *this;
   }
 
   ArgGroup& ssas(IRInstruction* inst, unsigned begin, unsigned count = 1) {
     for (SSATmp* s : inst->getSrcs().subpiece(begin, count)) {
-      push_arg(ArgDesc(s));
+      push_arg(ArgDesc(s, m_regs[s]));
     }
     return *this;
   }
@@ -505,7 +511,7 @@ private:
    * For passing the m_type field of a TypedValue.
    */
   ArgGroup& type(SSATmp* tmp) {
-    push_arg(ArgDesc(tmp, false));
+    push_arg(ArgDesc(tmp, m_regs[tmp], false));
     return *this;
   }
 
@@ -521,6 +527,7 @@ private:
     return typedValue(key);
   }
 
+  const RegAllocInfo& m_regs;
   ArgVec* m_override; // used to force args to go into a specific ArgVec
   ArgVec m_regArgs;
   ArgVec m_stkArgs;
@@ -536,6 +543,7 @@ void genCodeForTrace(Trace*                  trace,
                      IRFactory*              irFactory,
                      vector<TransBCMapping>* bcMap,
                      TranslatorX64*          tx64,
+                     const RegAllocInfo&     regs,
                      const LifetimeInfo*     lifetime = nullptr,
                      AsmInfo*                asmInfo = nullptr);
 

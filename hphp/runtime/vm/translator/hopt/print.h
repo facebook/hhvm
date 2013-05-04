@@ -34,18 +34,22 @@ struct LifetimeInfo;
 
 // IRInstruction
 void print(std::ostream& ostream, const IRInstruction*,
+           const RegAllocInfo* regs = nullptr,
            const LifetimeInfo* lifetime = nullptr);
 void print(const IRInstruction*);
 void printSrc(std::ostream& ostream, const IRInstruction*, uint32_t srcIndex,
-              const LifetimeInfo* lifetime);
+              const RegAllocInfo* regs, const LifetimeInfo* lifetime);
 
 // SSATmp
 void print(std::ostream& ostream, const SSATmp*,
-           const LifetimeInfo* lifetime = nullptr, bool printLastUse = false);
+           const RegAllocInfo* regs = nullptr,
+           const LifetimeInfo* lifetime = nullptr,
+           bool printLastUse = false);
 void print(const SSATmp*);
 
 // Trace
 void print(std::ostream& ostream, const Trace*,
+           const RegAllocInfo* regs = nullptr,
            const LifetimeInfo* lifetime = nullptr,
            const AsmInfo* asmInfo = nullptr);
 void print(const Trace*);
@@ -65,8 +69,9 @@ static const int kOptLevel = 4;
 static const int kExtraLevel = 6;
 
 void dumpTraceImpl(const Trace* trace, std::ostream& out,
-                   const LifetimeInfo*, const AsmInfo*);
+                   const RegAllocInfo*, const LifetimeInfo*, const AsmInfo*);
 void dumpTrace(int level, const Trace* trace, const char* caption,
+               const RegAllocInfo* regs = nullptr,
                const LifetimeInfo* lifetime = nullptr,
                AsmInfo* ai = nullptr);
 

@@ -1618,6 +1618,7 @@ class IRFactory;
 class Simplifier;
 struct Block;
 struct LifetimeInfo;
+struct RegAllocInfo;
 
 bool isRefCounted(SSATmp* opnd);
 
@@ -1927,30 +1928,6 @@ Type outputType(const IRInstruction*, int dstId = 0);
  */
 void assertOperandTypes(const IRInstruction*);
 
-struct SpillInfo {
-  enum Type { Memory }; // Currently only one type of spill supported.
-
-  explicit SpillInfo(uint32_t v)  : m_type(Memory), m_val(v) {}
-
-  Type      type() const { return m_type; }
-
-  // return offset in 8-byte-words from stack pointer
-  uint32_t  mem()  const { assert(m_type == Memory); return m_val; }
-
-private:
-  Type     m_type : 1;
-  uint32_t m_val : 31;
-};
-
-inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {
-  switch (si.type()) {
-  case SpillInfo::Memory:
-    os << "spill[" << si.mem() << "]";
-    break;
-  }
-  return os;
-}
-
 class SSATmp {
 public:
   uint32_t          getId() const { return m_id; }
@@ -1958,7 +1935,6 @@ public:
   void              setInstruction(IRInstruction* i) { m_inst = i; }
   Type              type() const { return m_type; }
   void              setType(Type t) { m_type = t; }
-  bool              isSpilled() const { return m_isSpilled; }
   bool              isBoxed() const { return type().isBoxed(); }
   bool              isString() const { return isA(Type::Str); }
   bool              isArray() const { return isA(Type::Arr); }
@@ -2003,52 +1979,11 @@ public:
   }
 
   /*
-   * Returns whether or not a given register index is allocated to a
-   * register, or returns false if it is spilled.
-   *
-   * Right now, we only spill both at the same time and only Spill and
-   * Reload instructions need to deal with SSATmps that are spilled.
-   */
-  bool hasReg(uint32_t i = 0) const {
-    return !m_isSpilled && m_regs[i] != Transl::InvalidReg;
-  }
-
-  /*
    * The maximum number of registers this SSATmp may need allocated.
    * This is based on the type of the temporary (some types never have
    * regs, some have two, etc).
    */
   int               numNeededRegs() const;
-
-  /*
-   * The number of regs actually allocated to this SSATmp.  This might
-   * end up fewer than numNeededRegs if the SSATmp isn't really
-   * being used.
-   */
-  int               numAllocatedRegs() const;
-
-  /*
-   * Access to allocated registers.
-   *
-   * Returns InvalidReg for slots that aren't allocated.
-   */
-  PhysReg getReg() const { assert(!m_isSpilled); return m_regs[0]; }
-  PhysReg getReg(uint32_t i) const { assert(!m_isSpilled); return m_regs[i]; }
-  void    setReg(PhysReg reg, uint32_t i) { m_regs[i] = reg; }
-  RegSet  getRegs() const;
-
-  /*
-   * Returns information about how to spill/fill a SSATmp.
-   *
-   * These functions are only valid if this SSATmp is being spilled or
-   * filled.  In all normal instructions (i.e. other than Spill and
-   * Reload), SSATmps are assigned registers instead of spill
-   * locations.
-   */
-  void        setSpillInfo(int idx, SpillInfo si) { m_spillInfo[idx] = si;
-                                                    m_isSpilled = true; }
-  SpillInfo   getSpillInfo(int idx) const { assert(m_isSpilled);
-                                            return m_spillInfo[idx]; }
 
 private:
   friend class IRFactory;
@@ -2060,29 +1995,13 @@ private:
     : m_inst(i)
     , m_type(outputType(i, dstId))
     , m_id(opndId)
-    , m_isSpilled(false)
-  {
-    m_regs[0] = m_regs[1] = Transl::InvalidReg;
-  }
+  {}
   SSATmp(const SSATmp&);
   SSATmp& operator=(const SSATmp&);
 
   IRInstruction*  m_inst;
   Type            m_type; // type when defined
-  uint32_t        m_id;
-  bool            m_isSpilled;
-
-  /*
-   * m_regs[0] is always the value of this SSATmp.
-   *
-   * Cell or Gen types use two registers: m_regs[1] is the runtime
-   * type.
-   */
-  static const int kMaxNumRegs = 2;
-  union {
-    PhysReg m_regs[kMaxNumRegs];
-    SpillInfo m_spillInfo[kMaxNumRegs];
-  };
+  const uint32_t  m_id;
 };
 
 int vectorBaseIdx(Opcode opc);

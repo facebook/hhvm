@@ -66,27 +66,27 @@ void printOpcode(std::ostream& os, const IRInstruction* inst) {
 }
 
 void printDst(std::ostream& os, const IRInstruction* inst,
-              const LifetimeInfo* lifetime) {
+              const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
   if (inst->getNumDsts() == 0) return;
 
   const char* sep = "";
   for (const SSATmp& dst : inst->getDsts()) {
     os << punc(sep);
-    print(os, &dst, lifetime, true);
+    print(os, &dst, regs, lifetime, true);
     sep = ", ";
   }
   os << punc(" = ");
 }
 
 void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
-              const LifetimeInfo* lifetime) {
+              const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
   SSATmp* src = inst->getSrc(i);
   if (src != nullptr) {
     if (lifetime && lifetime->linear[inst] != 0 && !src->isConst() &&
         lifetime->uses[src].lastUse == lifetime->linear[inst]) {
       ostream << "~";
     }
-    print(ostream, src, lifetime);
+    print(ostream, src, regs, lifetime);
   } else {
     ostream << color(ANSI_COLOR_RED)
             << "!!!NULL @ " << i
@@ -96,6 +96,7 @@ void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
 }
 
 void printSrcs(std::ostream& os, const IRInstruction* inst,
+               const RegAllocInfo* regs,
                const LifetimeInfo* lifetime) {
   bool first = true;
   if (inst->op() == IncStat) {
@@ -110,7 +111,7 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
       os << " ";
       first = false;
     }
-    printSrc(os, inst, i, lifetime);
+    printSrc(os, inst, i, regs, lifetime);
   }
 }
 
@@ -122,7 +123,7 @@ void printLabel(std::ostream& os, const Block* block) {
 }
 
 void print(std::ostream& ostream, const IRInstruction* inst,
-           const LifetimeInfo* lifetime) {
+           const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
   if (inst->op() == Marker) {
     auto* marker = inst->getExtra<Marker>();
     ostream << color(ANSI_COLOR_BLUE)
@@ -144,9 +145,9 @@ void print(std::ostream& ostream, const IRInstruction* inst,
     }
     ostream << color(ANSI_COLOR_END);
   }
-  printDst(ostream, inst, lifetime);
+  printDst(ostream, inst, regs, lifetime);
   printOpcode(ostream, inst);
-  printSrcs(ostream, inst, lifetime);
+  printSrcs(ostream, inst, regs, lifetime);
 
   if (Block* taken = inst->getTaken()) {
     ostream << punc(" -> ");
@@ -227,8 +228,8 @@ static void printConst(std::ostream& os, IRInstruction* inst) {
   }
 }
 
-void print(std::ostream& os, const SSATmp* tmp, const LifetimeInfo* lifetime,
-           bool printLastUse) {
+void print(std::ostream& os, const SSATmp* tmp, const RegAllocInfo* regs,
+           const LifetimeInfo* lifetime, bool printLastUse) {
   if (tmp->inst()->op() == DefConst) {
     printConst(os, tmp->inst());
     return;
@@ -241,20 +242,23 @@ void print(std::ostream& os, const SSATmp* tmp, const LifetimeInfo* lifetime,
        << "@" << lifetime->uses[tmp].lastUse << "#" << lifetime->uses[tmp].count
        << color(ANSI_COLOR_END);
   }
-  if (tmp->isSpilled() || tmp->numAllocatedRegs() > 0) {
-    os << color(ANSI_COLOR_BROWN) << '(';
-    if (!tmp->isSpilled()) {
-      for (int i = 0, sz = tmp->numAllocatedRegs(); i < sz; ++i) {
-        if (i != 0) os << ",";
-        os << reg::regname(Reg64(tmp->getReg(i)));
+  if (regs) {
+    const RegisterInfo& info = (*regs)[tmp];
+    if (info.spilled() || info.numAllocatedRegs() > 0) {
+      os << color(ANSI_COLOR_BROWN) << '(';
+      if (!info.spilled()) {
+        for (int i = 0, sz = info.numAllocatedRegs(); i < sz; ++i) {
+          if (i != 0) os << ",";
+          os << reg::regname(Reg64(info.getReg(i)));
+        }
+      } else {
+        for (int i = 0, sz = tmp->numNeededRegs(); i < sz; ++i) {
+          if (i != 0) os << ",";
+          os << info.getSpillInfo(i);
+        }
       }
-    } else {
-      for (int i = 0, sz = tmp->numNeededRegs(); i < sz; ++i) {
-        if (i != 0) os << ",";
-        os << tmp->getSpillInfo(i);
-      }
+      os << ')' << color(ANSI_COLOR_END);
     }
-    os << ')' << color(ANSI_COLOR_END);
   }
   os << punc(":")
      << color(ANSI_COLOR_GREEN)
@@ -272,8 +276,8 @@ void print(const Trace* trace) {
   print(std::cout, trace);
 }
 
-void print(std::ostream& os, const Trace* trace, const LifetimeInfo* lifetime,
-           const AsmInfo* asmInfo) {
+void print(std::ostream& os, const Trace* trace, const RegAllocInfo* regs,
+           const LifetimeInfo* lifetime, const AsmInfo* asmInfo) {
   static const int kIndent = 4;
   Disasm disasm(Disasm::Options().indent(kIndent + 4)
                                  .printEncoding(dumpIREnabled(kExtraLevel))
@@ -298,7 +302,7 @@ void print(std::ostream& os, const Trace* trace, const LifetimeInfo* lifetime,
 
       if (inst.op() == Marker) {
         os << std::string(kIndent, ' ');
-        JIT::print(os, &inst, lifetime);
+        JIT::print(os, &inst, regs, lifetime);
         os << '\n';
 
         // Don't print bytecode in a non-main trace.
@@ -331,14 +335,14 @@ void print(std::ostream& os, const Trace* trace, const LifetimeInfo* lifetime,
           os << std::string(kIndent +
                             folly::format("({}) ", inst.getIId()).str().size(),
                             ' ');
-          JIT::print(os, inst.getDst(i), lifetime, false);
+          JIT::print(os, inst.getDst(i), regs, lifetime, false);
           os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
              << color(ANSI_COLOR_END);
           bool first = true;
           inst.getBlock()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
             if (!first) os << punc(", ");
             first = false;
-            printSrc(os, jmp, i, lifetime);
+            printSrc(os, jmp, i, regs, lifetime);
             os << punc("@");
             printLabel(os, jmp->getBlock());
           });
@@ -347,7 +351,7 @@ void print(std::ostream& os, const Trace* trace, const LifetimeInfo* lifetime,
       }
 
       os << std::string(kIndent, ' ');
-      JIT::print(os, &inst, lifetime);
+      JIT::print(os, &inst, regs, lifetime);
       os << '\n';
 
       if (asmInfo) {
@@ -385,20 +389,22 @@ void print(std::ostream& os, const Trace* trace, const LifetimeInfo* lifetime,
     os << "\n" << color(ANSI_COLOR_GREEN)
        << "    -------  Exit Trace  -------"
        << color(ANSI_COLOR_END) << '\n';
-    print(os, exitTrace, lifetime, asmInfo);
+    print(os, exitTrace, regs, lifetime, asmInfo);
   }
 }
 
 void dumpTraceImpl(const Trace* trace, std::ostream& out,
+                   const RegAllocInfo* regs,
                    const LifetimeInfo* lifetime,
                    const AsmInfo* asmInfo) {
-  print(out, trace, lifetime, asmInfo);
+  print(out, trace, regs, lifetime, asmInfo);
 }
 
 // Suggested captions: "before jiffy removal", "after goat saturation",
 // etc.
 void dumpTrace(int level, const Trace* trace, const char* caption,
-               const LifetimeInfo* lifetime, AsmInfo* ai) {
+               const RegAllocInfo* regs, const LifetimeInfo* lifetime,
+               AsmInfo* ai) {
   if (dumpIREnabled(level)) {
     std::ostringstream str;
     auto bannerFmt = "{:-^80}\n";
@@ -406,7 +412,7 @@ void dumpTrace(int level, const Trace* trace, const char* caption,
         << folly::format(bannerFmt, caption)
         << color(ANSI_COLOR_END)
         ;
-    dumpTraceImpl(trace, str, lifetime, ai);
+    dumpTraceImpl(trace, str, regs, lifetime, ai);
     str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
         << folly::format(bannerFmt, "")
         << color(ANSI_COLOR_END)

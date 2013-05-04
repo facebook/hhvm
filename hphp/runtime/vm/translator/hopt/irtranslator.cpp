@@ -1911,11 +1911,11 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
   assert(m_useHHIR);
 
   Trace* trace = m_hhbcTrans->getTrace();
-  auto finishPass = [&](const char* msg,
-                        int level,
+  auto finishPass = [&](const char* msg, int level,
+                        const RegAllocInfo* regs = nullptr,
                         const LifetimeInfo* lifetime = nullptr) {
     assert(checkCfg(trace, *m_irFactory));
-    dumpTrace(level, trace, msg, lifetime);
+    dumpTrace(level, trace, msg, regs, lifetime);
   };
 
   finishPass(" after initial translation ", kIRLevel);
@@ -1924,22 +1924,23 @@ void TranslatorX64::hhirTraceCodeGen(vector<TransBCMapping>* bcMap) {
 
   auto* factory = m_irFactory.get();
   if (dumpIREnabled() || RuntimeOption::EvalJitCompareHHIR) {
-    LifetimeInfo lifetime(m_irFactory.get());
-    allocRegsForTrace(trace, m_irFactory.get(), &lifetime);
+    LifetimeInfo lifetime(factory);
+    RegAllocInfo regs = allocRegsForTrace(trace, factory, &lifetime);
     AsmInfo ai(factory);
-    genCodeForTrace(trace, a, astubs, factory, bcMap, this,
-                         &lifetime, &ai);
-    finishPass(" after reg alloc ", kRegAllocLevel, &lifetime);
+    genCodeForTrace(trace, a, astubs, factory, bcMap, this, regs,
+                    &lifetime, &ai);
+    finishPass(" after reg alloc ", kRegAllocLevel, &regs, &lifetime);
     if (RuntimeOption::EvalJitCompareHHIR) {
       std::ostringstream out;
-      dumpTraceImpl(trace, out, &lifetime, &ai);
+      dumpTraceImpl(trace, out, &regs, &lifetime, &ai);
       m_lastHHIRDump = out.str();
     } else {
-      dumpTrace(kCodeGenLevel, trace, " after code gen ", &lifetime, &ai);
+      dumpTrace(kCodeGenLevel, trace, " after code gen ", &regs,
+                &lifetime, &ai);
     }
   } else {
-    allocRegsForTrace(trace, m_irFactory.get());
-    genCodeForTrace(trace, a, astubs, factory, bcMap, this);
+    RegAllocInfo regs = allocRegsForTrace(trace, factory);
+    genCodeForTrace(trace, a, astubs, factory, bcMap, this, regs);
     finishPass(" after reg alloc ", kRegAllocLevel);
   }
 

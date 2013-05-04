@@ -753,30 +753,6 @@ int SSATmp::numNeededRegs() const {
   return t.needsReg() ? 2 : 1;
 }
 
-int SSATmp::numAllocatedRegs() const {
-  // If an SSATmp is spilled, it must've actually had a full set of
-  // registers allocated to it.
-  if (m_isSpilled) return numNeededRegs();
-
-  // Return the number of register slots that actually have an
-  // allocated register.  We may not have allocated a full
-  // numNeededRegs() worth of registers in some cases (if the value
-  // of this tmp wasn't used, etc).
-  int i = 0;
-  while (i < kMaxNumRegs && m_regs[i] != InvalidReg) {
-    ++i;
-  }
-  return i;
-}
-
-RegSet SSATmp::getRegs() const {
-  RegSet regs;
-  for (int i = 0, n = numAllocatedRegs(); i < n; ++i) {
-    if (hasReg(i)) regs.add(getReg(i));
-  }
-  return regs;
-}
-
 bool SSATmp::getValBool() const {
   assert(isConst());
   assert(m_inst->getTypeParam().equals(Type::Bool));

@@ -660,7 +660,7 @@ void HhbcTranslator::emitSetL(int32_t id) {
 
 void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
   // Handle only integer inc/dec for now
-  Trace* exitTrace = getExitSlowTrace();
+  Trace* exitTrace = getExitTrace();
   SSATmp* src = m_tb->genLdLocAsCell(id, exitTrace);
   if (src->isA(Type::Bool)) {
     // inc/dec of a bool is a no-op

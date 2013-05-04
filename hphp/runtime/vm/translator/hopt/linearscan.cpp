@@ -79,10 +79,10 @@ private:
 
   struct SlotInfo {
     // the SSATmp that represents this spill location
-    SSATmp* m_spillTmp;
+    SSATmp* spillTmp;
     // The latest SSATmp that has the most recent reloaded spilled value
     // If it's NULL, we have to reload this slot before using it.
-    SSATmp* m_latestReload;
+    SSATmp* latestReload;
   };
 
   class PreColoringHint {
@@ -113,6 +113,7 @@ private:
   void allocRegToTmp(SSATmp* ssaTmp, uint32_t index);
   void freeRegsAtId(uint32_t id);
   void spill(SSATmp* tmp);
+  void numberInstructions(const BlockList& blocks);
 
   template<typename T> SSATmp* cns(T val) {
     return m_irFactory->cns(val);
@@ -157,6 +158,11 @@ private:
   smart::vector<SlotInfo> m_slots;  // Spill info indexed by slot id
   BlockList m_blocks;             // all basic blocks in reverse postorder
   IdomVector m_idoms;             // immediate dominator vector
+
+  // any tmp that has been spilled has an entry in this array with
+  // the spill-slot number, which is an index into m_slots[]. tmps that
+  // have not spilled have -1.
+  StateVector<SSATmp, int32_t> m_spillSlots;
 
   // the list of native instructions in the trace sorted by instruction ID;
   // i.e. a filtered list in the same order as visited by m_blocks.
@@ -226,6 +232,7 @@ void LinearScan::StateSave::restore(LinearScan* ls) {
 
 LinearScan::LinearScan(IRFactory* irFactory)
   : m_irFactory(irFactory)
+  , m_spillSlots(irFactory, -1)
   , m_jmps(irFactory, JmpList())
 {
   for (int i = 0; i < kNumX64Regs; i++) {
@@ -276,10 +283,10 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   smart::vector<bool> needsReloading(inst->getNumSrcs(), true);
   for (uint32_t i = 0; i < inst->getNumSrcs(); ++i) {
     SSATmp* tmp = inst->getSrc(i);
-    int32_t slotId = tmp->getSpillSlot();
+    int32_t slotId = m_spillSlots[tmp];
     if (slotId == -1) {
       needsReloading[i] = false;
-    } else if ((tmp = m_slots[slotId].m_latestReload)) {
+    } else if ((tmp = m_slots[slotId].latestReload)) {
       needsReloading[i] = false;
       inst->setSrc(i, tmp);
     }
@@ -292,12 +299,12 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   for (uint32_t i = 0; i < inst->getNumSrcs(); ++i) {
     if (needsReloading[i]) {
       SSATmp* tmp = inst->getSrc(i);
-      int32_t slotId = tmp->getSpillSlot();
+      int32_t slotId = m_spillSlots[tmp];
       // <tmp> is spilled, and not reloaded.
       // Therefore, We need to reload the value into a new SSATmp.
 
       // Insert the Reload instruction.
-      SSATmp* spillTmp = m_slots[slotId].m_spillTmp;
+      SSATmp* spillTmp = m_slots[slotId].spillTmp;
       IRInstruction* reload = m_irFactory->gen(Reload, spillTmp);
       inst->getBlock()->insert(it, reload);
 
@@ -306,7 +313,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
       // Replace <tmp> with <reloadTmp> in <inst>.
       SSATmp* reloadTmp = reload->getDst();
       reloadTmp->setLastUseId(spillTmp->getLastUseId());
-      reloadTmp->setSpillSlot(slotId);
+      m_spillSlots[reloadTmp] = slotId;
       inst->setSrc(i, reloadTmp);
       // reloadTmp and tmp share the same type.  Since it was spilled, it
       // must be using its entire needed-count of registers.
@@ -316,7 +323,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
         allocRegToTmp(reloadTmp, locIndex);
       }
       // Remember this reload tmp in case we can reuse it in later blocks.
-      m_slots[slotId].m_latestReload = reloadTmp;
+      m_slots[slotId].latestReload = reloadTmp;
       dumpIR<IRInstruction, 5>(reload, "created reload");
     }
   }
@@ -457,7 +464,7 @@ void LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
     // Setting the last use ID to the next native is conservative.
     // Setting it to the last use before the next native would be more precise,
     // but that would be more expensive to compute.
-    if (ssaTmp->getSpillSlot() == -1) {
+    if (m_spillSlots[ssaTmp] == -1) {
       createSpillSlot(ssaTmp);
     }
     ssaTmp->setLastUseId(getNextNativeId());
@@ -879,14 +886,14 @@ void LinearScan::preAllocSpillLoc(uint32_t numSpillLocs) {
 }
 
 // Assign ids to each instruction in linear order.
-void numberInstructions(const BlockList& blocks) {
+void LinearScan::numberInstructions(const BlockList& blocks) {
+  m_spillSlots.reset();
   forEachInst(
     blocks,
     [](IRInstruction* inst) {
       for (SSATmp& dst : inst->getDsts()) {
         dst.setLastUseId(0);
         dst.setUseCount(0);
-        dst.setSpillSlot(-1);
       }
     }
   );
@@ -1035,9 +1042,9 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
 
     // clear remembered reloads that don't dominate this block
     for (SlotInfo& slot : m_slots) {
-      if (SSATmp* reload = slot.m_latestReload) {
+      if (SSATmp* reload = slot.latestReload) {
         if (!dominates(reload->inst()->getBlock(), block, m_idoms)) {
-          slot.m_latestReload = nullptr;
+          slot.latestReload = nullptr;
         }
       }
     }
@@ -1068,7 +1075,7 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
 
   while (begin < end) {
     SlotInfo& slot = m_slots[begin++];
-    IRInstruction* spill = slot.m_spillTmp->inst();
+    IRInstruction* spill = slot.spillTmp->inst();
     IRInstruction* inst = spill->getSrc(0)->inst();
     Block* block = inst->getBlock();
     if (!isMain && block->getTrace()->isMain()) {
@@ -1269,8 +1276,7 @@ void LinearScan::rematerializeAux() {
 
 void LinearScan::removeUnusedSpills() {
   for (SlotInfo& slot : m_slots) {
-    SSATmp* spillTmp = slot.m_spillTmp;
-    IRInstruction* spill = spillTmp->inst();
+    IRInstruction* spill = slot.spillTmp->inst();
     if (spill->getDst()->getUseCount() == 0) {
       Block* block = spill->getBlock();
       block->erase(block->iteratorTo(spill));
@@ -1366,9 +1372,9 @@ void LinearScan::freeReg(RegState* reg) {
   pushFreeReg(reg);
   // The <tmp> shouldn't be reused any more.
   SSATmp* tmp = reg->m_ssaTmp;
-  int32_t slotId = tmp->getSpillSlot();
+  int32_t slotId = m_spillSlots[tmp];
   if (slotId != -1) {
-    m_slots[slotId].m_latestReload = nullptr;
+    m_slots[slotId].latestReload = nullptr;
   }
   reg->m_ssaTmp = nullptr;
 }
@@ -1415,29 +1421,29 @@ void LinearScan::spill(SSATmp* tmp) {
     it = next;
   }
 
-  if (tmp->getSpillSlot() == -1) {
+  if (m_spillSlots[tmp] == -1) {
     // <tmp> hasn't been spilled before.
     // We need to create a new spill slot for it.
     uint32_t slotId = createSpillSlot(tmp);
     // createSpillSlot sets the latest reloaded value of slotId to tmp.
     // Here, we need reset this value because tmp is spilled and no longer
     // synced with memory.
-    m_slots[slotId].m_latestReload = nullptr;
+    m_slots[slotId].latestReload = nullptr;
   }
 }
 
 // Create a spill slot for <tmp>.
 uint32_t LinearScan::createSpillSlot(SSATmp* tmp) {
   uint32_t slotId = m_slots.size();
-  tmp->setSpillSlot(slotId);
+  m_spillSlots[tmp] = slotId;
   IRInstruction* spillInst = m_irFactory->gen(Spill, tmp);
   SSATmp* spillTmp = spillInst->getDst();
   SlotInfo si;
-  si.m_spillTmp = spillTmp;
-  si.m_latestReload = tmp;
+  si.spillTmp = spillTmp;
+  si.latestReload = tmp;
   m_slots.push_back(si);
   // The spill slot inherits the last use ID of the spilled tmp.
-  si.m_spillTmp->setLastUseId(tmp->getLastUseId());
+  si.spillTmp->setLastUseId(tmp->getLastUseId());
   return slotId;
 }
 

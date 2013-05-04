@@ -2072,19 +2072,6 @@ public:
   SpillInfo   getSpillInfo(int idx) const { assert(m_isSpilled);
                                             return m_spillInfo[idx]; }
 
-  /*
-   * During register allocation, this is used to track spill locations
-   * that are assigned to specific SSATmps.  A value of -1 is used to
-   * indicate no spill slot has been assigned.
-   *
-   * After register allocation, use getSpillInfo to access information
-   * about where we've decided to spill/fill a given SSATmp from.
-   * This value doesn't have any meaning outside of the linearscan
-   * pass.
-   */
-  int32_t           getSpillSlot() const { return m_spillSlot; }
-  void              setSpillSlot(int32_t val) { m_spillSlot = val; }
-
 private:
   friend class IRFactory;
   friend class TraceBuilder;
@@ -2093,12 +2080,11 @@ private:
   // destructed, so don't add complex members.
   SSATmp(uint32_t opndId, IRInstruction* i, int dstId = 0)
     : m_inst(i)
-    , m_id(opndId)
     , m_type(outputType(i, dstId))
+    , m_id(opndId)
     , m_lastUseId(0)
     , m_useCount(0)
     , m_isSpilled(false)
-    , m_spillSlot(-1)
   {
     m_regs[0] = m_regs[1] = Transl::InvalidReg;
   }
@@ -2106,12 +2092,11 @@ private:
   SSATmp& operator=(const SSATmp&);
 
   IRInstruction*  m_inst;
-  const uint32_t    m_id;
   Type            m_type; // type when defined
-  uint32_t          m_lastUseId;
-  uint16_t          m_useCount;
-  bool            m_isSpilled : 1;
-  int32_t         m_spillSlot : 31;
+  const uint32_t  m_id;
+  uint32_t        m_lastUseId;
+  uint16_t        m_useCount;
+  bool            m_isSpilled;
 
   /*
    * m_regs[0] is always the value of this SSATmp.

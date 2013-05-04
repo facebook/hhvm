@@ -141,16 +141,21 @@ Class* arGetContextClassImpl<true>(const ActRec* ar) {
   return ar->m_func->cls();
 }
 
-static StaticString s_call_user_func(LITSTR_INIT("call_user_func"));
-static StaticString s_call_user_func_array(LITSTR_INIT("call_user_func_array"));
-static StaticString s_hphpd_break(LITSTR_INIT("hphpd_break"));
-static StaticString s_fb_enable_code_coverage(
-  LITSTR_INIT("fb_enable_code_coverage"));
-static StaticString s_file(LITSTR_INIT("file"));
-static StaticString s_line(LITSTR_INIT("line"));
-static StaticString s_stdclass(LITSTR_INIT("stdclass"));
-static StaticString s___call(LITSTR_INIT("__call"));
-static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
+const StaticString s_call_user_func("call_user_func");
+const StaticString s_call_user_func_array("call_user_func_array");
+const StaticString s_hphpd_break("hphpd_break");
+const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
+const StaticString s_stdclass("stdclass");
+const StaticString s___call("__call");
+const StaticString s___callStatic("__callStatic");
+const StaticString s_file("file");
+const StaticString s_line("line");
+const StaticString s_function("function");
+const StaticString s_args("args");
+const StaticString s_class("class");
+const StaticString s_object("object");
+const StaticString s_type("type");
+const StaticString s_include("include");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -2313,15 +2318,6 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
                                          bool withThis /* = false */,
                                          VMParserFrame*
                                          parserFrame /* = NULL */) {
-  static StringData* s_file = StringData::GetStaticString("file");
-  static StringData* s_line = StringData::GetStaticString("line");
-  static StringData* s_function = StringData::GetStaticString("function");
-  static StringData* s_args = StringData::GetStaticString("args");
-  static StringData* s_class = StringData::GetStaticString("class");
-  static StringData* s_object = StringData::GetStaticString("object");
-  static StringData* s_type = StringData::GetStaticString("type");
-  static StringData* s_include = StringData::GetStaticString("include");
-
   Array bt = Array::Create();
 
   // If there is a parser frame, put it at the beginning of
@@ -2368,11 +2364,11 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
         assert(filename);
         Offset off = pc;
         Array frame = Array::Create();
-        frame.set(String(s_file), filename, true);
-        frame.set(String(s_line), unit->getLineNumber(off), true);
+        frame.set(s_file, filename, true);
+        frame.set(s_line, unit->getLineNumber(off), true);
         if (parserFrame) {
-          frame.set(String(s_function), String(s_include), true);
-          frame.set(String(s_args), Array::Create(parserFrame->filename), true);
+          frame.set(s_function, s_include, true);
+          frame.set(s_args, Array::Create(parserFrame->filename), true);
         }
         bt.append(frame);
         depth++;
@@ -2398,7 +2394,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     // Builtins don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin()) {
       auto const prevUnit = prevFp->m_func->unit();
-      frame.set(String(s_file),
+      frame.set(s_file,
                 const_cast<StringData*>(prevUnit->filepath()),
                 true);
 
@@ -2416,7 +2412,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       if (opAtPrevPc == OpPopR || opAtPrevPc == OpUnboxR) {
         pcAdjust = 1;
       }
-      frame.set(String(s_line),
+      frame.set(s_line,
                 prevFp->m_func->unit()->getLineNumber(prevPc - pcAdjust),
                 true);
     }
@@ -2443,20 +2439,20 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
       funcname = s_include;
     }
 
-    frame.set(String(s_function), funcname, true);
+    frame.set(s_function, funcname, true);
 
     if (!funcname.same(s_include)) {
       // Closures have an m_this but they aren't in object context
       Class* ctx = arGetContextClass(fp);
       if (ctx != nullptr && !fp->m_func->isClosureBody()) {
-        frame.set(String(s_class), ctx->name()->data(), true);
+        frame.set(s_class, ctx->name()->data(), true);
         if (fp->hasThis() && !isReturning) {
           if (withThis) {
-            frame.set(String(s_object), Object(fp->getThis()), true);
+            frame.set(s_object, Object(fp->getThis()), true);
           }
-          frame.set(String(s_type), "->", true);
+          frame.set(s_type, "->", true);
         } else {
-          frame.set(String(s_type), "::", true);
+          frame.set(s_type, "::", true);
         }
       }
     }
@@ -2464,12 +2460,12 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     Array args = Array::Create();
     if (funcname.same(s_include)) {
       if (depth) {
-        args.append(String(const_cast<StringData*>(curUnit->filepath())));
-        frame.set(String(s_args), args, true);
+        args.append(const_cast<StringData*>(curUnit->filepath()));
+        frame.set(s_args, args, true);
       }
     } else if (!RuntimeOption::EnableArgsInBacktraces || isReturning) {
       // Provide an empty 'args' array to be consistent with hphpc
-      frame.set(String(s_args), args, true);
+      frame.set(s_args, args, true);
     } else {
       int nparams = fp->m_func->numParams();
       int nargs = fp->numArgs();
@@ -2490,7 +2486,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
           args.append(tvAsVariant(arg));
         }
       }
-      frame.set(String(s_args), args, true);
+      frame.set(s_args, args, true);
     }
 
     bt.append(frame);

@@ -668,14 +668,6 @@ void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
   m_srcs[i] = newSrc;
 }
 
-void IRInstruction::appendSrc(Arena& arena, SSATmp* newSrc) {
-  auto newSrcs = new (arena) SSATmp*[getNumSrcs() + 1];
-  std::copy(m_srcs, m_srcs + getNumSrcs(), newSrcs);
-  newSrcs[getNumSrcs()] = newSrc;
-  ++m_numSrcs;
-  m_srcs = newSrcs;
-}
-
 void IRInstruction::setTaken(Block* target) {
   if (m_op == Jmp_ && m_extra) {
     if (m_taken) m_taken->removeEdge(this);

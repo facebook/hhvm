@@ -268,7 +268,6 @@ private:
   Address emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
   Address emitFwdJmp(Asm& as, Block* target);
   Address emitFwdJmp(Block* target);
-  Address emitSmashableFwdJmp(Block* target, IRInstruction* toSmash);
   Address emitSmashableFwdJccAtEnd(ConditionCode cc, Block* target,
                                    IRInstruction* toSmash);
   void emitJccDirectExit(IRInstruction*, ConditionCode);

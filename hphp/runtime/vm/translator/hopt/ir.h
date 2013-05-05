@@ -1795,7 +1795,6 @@ struct IRInstruction {
   }
   SSATmp*    getSrc(uint32_t i) const;
   void       setSrc(uint32_t i, SSATmp* newSrc);
-  void       appendSrc(Arena&, SSATmp*);
   SrcRange   getSrcs() const {
     return SrcRange(m_srcs, m_numSrcs);
   }

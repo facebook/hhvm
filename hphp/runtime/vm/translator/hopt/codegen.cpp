@@ -444,20 +444,6 @@ Address CodeGenerator::emitFwdJmp(Block* target) {
   return emitFwdJmp(m_as, target);
 }
 
-// Patch with service request EMIT_BIND_JMP
-Address CodeGenerator::emitSmashableFwdJmp(Block* target, IRInstruction* toSmash) {
-  Address start = m_as.code.frontier;
-  if (toSmash) {
-    m_tx64->prepareForSmash(m_as, TranslatorX64::kJmpLen);
-    Address tca = emitFwdJmp(target);
-    toSmash->setTCA(tca);
-    //assert(false);  // TODO(#2012072): this path is supposed to be unused
-  } else {
-    emitFwdJmp(target);
-  }
-  return start;
-}
-
 // Patch with service request REQ_BIND_JMPCC_FIRST/SECOND
 Address CodeGenerator::emitSmashableFwdJccAtEnd(ConditionCode cc, Block* target,
                                                 IRInstruction* toSmash) {

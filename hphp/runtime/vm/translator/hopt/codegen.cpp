@@ -810,13 +810,25 @@ void CodeGenerator::cgCallHelper(Asm& a,
                                  SyncOptions sync,
                                  ArgGroup& args,
                                  DestType destType) {
+  cgCallHelper(a, call, dstReg0, dstReg1, sync, args,
+               m_state.liveRegs[m_curInst], destType);
+}
+
+void CodeGenerator::cgCallHelper(Asm& a,
+                                 const Transl::Call& call,
+                                 PhysReg dstReg0,
+                                 PhysReg dstReg1,
+                                 SyncOptions sync,
+                                 ArgGroup& args,
+                                 RegSet toSave,
+                                 DestType destType) {
   assert(int(args.size()) <= kNumRegisterArgs);
   assert(m_curInst->isNative());
 
   // Save the register that are live at the point after this IR instruction.
   // However, don't save the destination registers that will be overwritten
   // by this call.
-  RegSet toSave = m_curInst->getLiveRegs() & kCallerSaved;
+  toSave = toSave & kCallerSaved;
   assert((toSave & RegSet().add(dstReg0).add(dstReg1)).empty());
   PhysRegSaverParity<1> regSaver(a, toSave);
 
@@ -2684,7 +2696,7 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
    * are still allocated to registers at this time.
    */
   const auto UNUSED expectedLiveRegs = RegSet(rFp).add(rDest) | retvalRegs;
-  assert((m_curInst->getLiveRegs() - expectedLiveRegs).empty());
+  assert((m_state.liveRegs[m_curInst] - expectedLiveRegs).empty());
   assert(rFp == rVmFp &&
          "free locals helper assumes the frame pointer is rVmFp");
   assert(rDest == rVmSp &&
@@ -2999,7 +3011,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
   if (exit == nullptr && RuntimeOption::EvalHHIRGenericDtorHelper) {
     {
       // This PhysRegSaverParity saves rdi redundantly if
-      // !m_curInst->getLiveRegs().contains(rdi), but its
+      // !liveRegs[m_curInst].contains(rdi), but its
       // necessary to maintain stack alignment. We can do better
       // by making the helpers adjust the stack for us in the cold
       // path, which calls the destructor.
@@ -4256,18 +4268,17 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
 
   // Handle case where method is not entered in the cache
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
-    if (false) { // typecheck
-      const UNUSED Func* f = StaticMethodFCache::lookupIR(ch, cls, methName);
-    }
+    const Func* (*lookup)(CacheHandle, const Class*, const StringData*) =
+      StaticMethodFCache::lookupIR;
     // preserve destCtxReg across the call since it wouldn't be otherwise
-    inst->setLiveRegs(inst->getLiveRegs().add(destCtxReg));
-    cgCallHelper(a,
-                 (TCA)StaticMethodFCache::lookupIR,
-                 funcDestReg,
+    RegSet toSave = m_state.liveRegs[inst] | RegSet(destCtxReg);
+    cgCallHelper(a, Transl::Call((TCA)lookup),
+                 funcDestReg, InvalidReg,
                  kSyncPoint,
                  ArgGroup().imm(ch)
                            .immPtr(cls)
-                           .immPtr(methName));
+                           .immPtr(methName),
+                 toSave);
     // If entry found in target cache, jump back to m_as.
     // Otherwise, bail to exit label
     a.testq(funcDestReg, funcDestReg);
@@ -5146,6 +5157,35 @@ void CodeGenerator::print() const {
   JIT::print(std::cout, m_curTrace, m_state.asmInfo);
 }
 
+/*
+ * Compute and save registers that are live *across* each inst, not including
+ * registers whose lifetimes end at inst, nor registers defined by inst.
+ */
+LiveRegs computeLiveRegs(const IRFactory* factory, Block* start_block) {
+  StateVector<Block, RegSet> liveMap(factory, RegSet());
+  LiveRegs live_regs(factory, RegSet());
+  postorderWalk(
+    [&](Block* block) {
+      RegSet& live = liveMap[block];
+      if (Block* taken = block->getTaken()) live = liveMap[taken];
+      if (Block* next = block->getNext()) live |= liveMap[next];
+      for (auto it = block->end(); it != block->begin(); ) {
+        IRInstruction& inst = *--it;
+        for (const SSATmp& dst : inst.getDsts()) {
+          live -= dst.getRegs();
+        }
+        live_regs[inst] = live;
+        for (SSATmp* src : inst.getSrcs()) {
+          live |= src->getRegs();
+        }
+      }
+    },
+    factory->numBlocks(),
+    start_block
+  );
+  return live_regs;
+}
+
 // select instructions for the trace and its exits
 void genCodeForTrace(Trace* trace,
                      CodeGenerator::Asm& as,
@@ -5155,7 +5195,8 @@ void genCodeForTrace(Trace* trace,
                      Transl::TranslatorX64* tx64,
                      AsmInfo* asmInfo) {
   assert(trace->isMain());
-  CodegenState state(irFactory, asmInfo);
+  LiveRegs live_regs = computeLiveRegs(irFactory, trace->front());
+  CodegenState state(irFactory, live_regs, asmInfo);
   cgTrace(trace, as, astubs, tx64, bcMap, state);
   for (Trace* exit : trace->getExitTraces()) {
     cgTrace(exit, astubs, astubs, tx64, nullptr, state);

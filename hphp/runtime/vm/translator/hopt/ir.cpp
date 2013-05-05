@@ -599,7 +599,6 @@ void IRInstruction::convertToNop() {
   m_numSrcs = nop.m_numSrcs;
   m_id = nop.m_id;
   m_srcs = nop.m_srcs;
-  m_liveRegs = nop.m_liveRegs;
   m_numDsts = nop.m_numDsts;
   m_dst = nop.m_dst;
   m_taken = nullptr;
@@ -637,7 +636,6 @@ void IRInstruction::become(IRFactory* factory, IRInstruction* other) {
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;
   m_id = other->m_id;
-  m_liveRegs = other->m_liveRegs;
   m_taken = other->m_taken;
   m_tca = other->m_tca;
   m_numSrcs = other->m_numSrcs;

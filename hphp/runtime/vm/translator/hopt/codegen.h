@@ -67,12 +67,16 @@ struct AsmInfo {
   StateVector<Block,TcaRange> astubRanges;
 };
 
+typedef StateVector<IRInstruction, RegSet> LiveRegs;
+
 // Stuff we need to preserve between blocks while generating code,
 // and address information produced during codegen.
 struct CodegenState {
-  CodegenState(const IRFactory* factory, AsmInfo* asmInfo)
+  CodegenState(const IRFactory* factory, const LiveRegs& liveRegs,
+               AsmInfo* asmInfo)
     : patches(factory, nullptr)
     , lastMarker(nullptr)
+    , liveRegs(liveRegs)
     , asmInfo(asmInfo)
   {}
 
@@ -87,6 +91,12 @@ struct CodegenState {
   // next block in the same assmbler.
   bool noTerminalJmp_;
 
+  // for each instruction, holds the RegSet of registers that must be
+  // preserved across that instruction.  This is for push/pop of caller-saved
+  // registers.
+  const LiveRegs& liveRegs;
+
+  // Output: start/end ranges of machine code addresses of each instruction.
   AsmInfo* asmInfo;
 };
 
@@ -142,6 +152,14 @@ private:
                     PhysReg dstReg1,
                     SyncOptions sync,
                     ArgGroup& args,
+                    DestType destType = DestType::SSA);
+  void cgCallHelper(Asm& a,
+                    const Transl::Call& call,
+                    PhysReg dstReg0,
+                    PhysReg dstReg1,
+                    SyncOptions sync,
+                    ArgGroup& args,
+                    RegSet toSave,
                     DestType destType = DestType::SSA);
 
   void cgStore(PhysReg base,

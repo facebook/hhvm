@@ -1852,11 +1852,6 @@ struct IRInstruction {
    */
   bool       isTransient() const       { return m_iid == kTransient; }
 
-  // LiveRegs is the set of registers that are live across this instruction.
-  // Doesn't include dest registers, or src registers whose lifetime ends here.
-  RegSet     getLiveRegs() const       { return m_liveRegs; }
-  void       setLiveRegs(RegSet s)     { m_liveRegs = s; }
-
   Block*     getBlock() const          { return m_block; }
   void       setBlock(Block* b)        { m_block = b; }
   Trace*     getTrace() const;
@@ -1919,7 +1914,6 @@ private:
   const IId         m_iid;
   uint32_t          m_id;
   SSATmp**          m_srcs;
-  RegSet            m_liveRegs;
   SSATmp*           m_dst;     // if HasDest or NaryDest
   Block*            m_taken;   // for branches, guards, and jmp
   Block*            m_block;   // block that owns this instruction
@@ -2319,7 +2313,7 @@ struct Block : boost::noncopyable {
   // list-compatible interface; these delegate to m_instrs but also update
   // inst.m_block
   InstructionList& getInstrs()   { return m_instrs; }
-  bool             empty()       { return m_instrs.empty(); }
+  bool             empty() const { return m_instrs.empty(); }
   iterator         begin()       { return m_instrs.begin(); }
   iterator         end()         { return m_instrs.end(); }
   const_iterator   begin() const { return m_instrs.begin(); }

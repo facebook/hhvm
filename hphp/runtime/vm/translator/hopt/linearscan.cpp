@@ -113,7 +113,6 @@ private:
   void allocRegToTmp(SSATmp* ssaTmp, uint32_t index);
   void freeRegsAtId(uint32_t id);
   void spill(SSATmp* tmp);
-  void computeLiveRegs();
 
   template<typename T> SSATmp* cns(T val) {
     return m_irFactory->cns(val);
@@ -254,32 +253,6 @@ LinearScan::LinearScan(IRFactory* irFactory)
       }
     }
   }
-}
-
-/*
- * Compute and save registers that are live *across* each inst, not including
- * registers whose lifetimes end at inst, nor registers defined by inst.
- */
-void LinearScan::computeLiveRegs() {
-  StateVector<Block, RegSet> liveMap(m_irFactory, RegSet());
-  postorderWalk(
-    [&](Block* block) {
-      RegSet& live = liveMap[block];
-      if (Block* taken = block->getTaken()) live = liveMap[taken];
-      if (Block* next = block->getNext()) live |= liveMap[next];
-      for (auto it = block->end(); it != block->begin(); ) {
-        IRInstruction& inst = *--it;
-        for (const SSATmp& dst : inst.getDsts()) {
-          RegSet d = dst.getRegs();
-          live -= d;
-        }
-        inst.setLiveRegs(live);
-        for (SSATmp* src : inst.getSrcs()) {
-          live |= src->getRegs();
-        }
-      }
-    },
-    m_irFactory->numBlocks(), m_blocks.front());
 }
 
 template<typename Inner, int DumpVal=4>
@@ -1033,9 +1006,6 @@ void LinearScan::allocRegs(Trace* trace) {
   }
 
   if (m_slots.size()) genSpillStats(trace, numSpillLocs);
-
-  // record the live register set at each instruction
-  computeLiveRegs();
 }
 
 void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,

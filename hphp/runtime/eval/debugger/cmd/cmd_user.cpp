@@ -81,7 +81,7 @@ void CmdUser::invokeList(DebuggerClient *client, const std::string &cls) {
   pclient->m_client = client;
   try {
     Object cmd = create_object(cls.c_str(), null_array);
-    cmd->o_invoke(s_onAutoComplete, CREATE_VECTOR1(pclient), -1);
+    cmd->o_invoke_few_args(s_onAutoComplete, 1, pclient);
   } catch (...) {}
 }
 
@@ -90,7 +90,7 @@ bool CmdUser::invokeHelp(DebuggerClient *client, const std::string &cls) {
   pclient->m_client = client;
   try {
     Object cmd = create_object(cls.c_str(), null_array);
-    Variant ret = cmd->o_invoke(s_help, CREATE_VECTOR1(pclient), -1);
+    Variant ret = cmd->o_invoke_few_args(s_help, 1, pclient);
     return !same(ret, false);
   } catch (...) {}
   return false;
@@ -101,7 +101,7 @@ bool CmdUser::invokeClient(DebuggerClient *client, const std::string &cls) {
   pclient->m_client = client;
   try {
     Object cmd = create_object(cls.c_str(), null_array);
-    Variant ret = cmd->o_invoke(s_onClient, CREATE_VECTOR1(pclient), -1);
+    Variant ret = cmd->o_invoke_few_args(s_onClient, 1, pclient);
     return !same(ret, false);
   } catch (...) {}
   return false;
@@ -112,7 +112,7 @@ bool CmdUser::onServer(DebuggerProxy *proxy) {
   p_DebuggerProxyCmdUser pproxy(NEWOBJ(c_DebuggerProxyCmdUser)());
   pproxy->m_proxy = proxy;
   try {
-    Variant ret = m_cmd->o_invoke(s_onServer, CREATE_VECTOR1(pproxy), -1);
+    Variant ret = m_cmd->o_invoke_few_args(s_onServer, 1, pproxy);
     return !same(ret, false);
   } catch (...) {}
   return false;

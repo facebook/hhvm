@@ -1200,12 +1200,12 @@ TypedValue* Class::clsCnsGet(const StringData* clsCnsName) const {
     static StringData* sd86cinit = StringData::GetStaticString("86cinit");
     const Func* meth86cinit =
       m_constants[clsCnsInd].m_class->lookupMethod(sd86cinit);
-    TypedValue tv;
-    tv.m_data.pstr = (StringData*)clsCnsName;
-    tv.m_type = KindOfString;
-    g_vmContext->invokeFunc(clsCns, meth86cinit,
-                            CREATE_VECTOR1(tvAsCVarRef(&tv)), nullptr,
-                            const_cast<Class*>(this));
+    TypedValue tv[1];
+    tv->m_data.pstr = (StringData*)clsCnsName;
+    tv->m_type = KindOfString;
+    clsCnsName->incRefCount();
+    g_vmContext->invokeFuncFew(clsCns, meth86cinit, ActRec::encodeClass(this),
+                               nullptr, 1, tv);
   }
   return clsCns;
 }

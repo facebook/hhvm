@@ -170,10 +170,10 @@ void c_UConverter::ucnvToUCallback(c_UConverter *objval,
                                    UConverterCallbackReason reason,
                                    UErrorCode *pErrorCode) {
   String source(args->source, args->sourceLimit - args->source, CopyString);
-  VRefParam errRef((long)*pErrorCode);
-  Variant ret = objval->o_invoke(s_toUCallback, CREATE_VECTOR4(
-    reason, source, String(codeUnits, length, CopyString), ref(errRef)
-  ), -1);
+  Variant errRef((int64_t)*pErrorCode);
+  Variant ret = objval->o_invoke_few_args(
+    s_toUCallback, 4,
+    reason, source, String(codeUnits, length, CopyString), strongBind(errRef));
   if (errRef.is(KindOfInt64)) {
     *pErrorCode = (UErrorCode)errRef.toInt64();
   } else {
@@ -229,10 +229,11 @@ void c_UConverter::ucnvFromUCallback(c_UConverter *objval,
     U16_NEXT(codeUnits, i, length, c);
     source.append((int64_t)c);
   }
-  VRefParam errRef((int64_t)*pErrorCode);
-  Variant ret = objval->o_invoke(s_fromUCallback, CREATE_VECTOR4(
-    reason, source, (int64_t)codePoint, ref(errRef)
-  ), -1);
+  Variant errRef((int64_t)*pErrorCode);
+  Variant ret =
+    objval->o_invoke_few_args(
+      s_fromUCallback, 4,
+      reason, source, (int64_t)codePoint, strongBind(errRef));
   if (errRef.is(KindOfInt64)) {
     *pErrorCode = (UErrorCode)errRef.toInt64();
   } else {

@@ -522,7 +522,9 @@ Object c_Vector::t_map(CVarRef callback) {
   for (uint i = 0; i < m_size; ++i) {
     TypedValue* tv = &vec->m_data[i];
     int32_t version = m_version;
-    g_vmContext->invokeFunc(tv, ctx, CREATE_VECTOR1(tvAsCVarRef(&m_data[i])));
+    TypedValue args[1];
+    tvDup(&m_data[i], args + 0);
+    g_vmContext->invokeFuncFew(tv, ctx, 1, args);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -545,8 +547,9 @@ Object c_Vector::t_filter(CVarRef callback) {
   for (uint i = 0; i < m_size; ++i) {
     Variant ret;
     int32_t version = m_version;
-    g_vmContext->invokeFunc(ret.asTypedValue(), ctx,
-                            CREATE_VECTOR1(tvAsCVarRef(&m_data[i])));
+    TypedValue args[1];
+    tvDup(&m_data[i], args + 0);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -1463,7 +1466,9 @@ Object c_Map::t_map(CVarRef callback) {
     }
     TypedValue* tv = &np.data;
     int32_t version = m_version;
-    g_vmContext->invokeFunc(tv, ctx, CREATE_VECTOR1(tvAsCVarRef(&p.data)));
+    TypedValue args[1];
+    tvDup(&p.data, args + 0);
+    g_vmContext->invokeFuncFew(tv, ctx, 1, args);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -1493,8 +1498,9 @@ Object c_Map::t_filter(CVarRef callback) {
     if (!p.validValue()) continue;
     Variant ret;
     int32_t version = m_version;
-    g_vmContext->invokeFunc(ret.asTypedValue(), ctx,
-                            CREATE_VECTOR1(tvAsCVarRef(&p.data)));
+    TypedValue args[1];
+    tvDup(&p.data, args + 0);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -2629,8 +2635,9 @@ Object c_StableMap::t_map(CVarRef callback) {
   for (Bucket* p = m_pListHead; p; p = p->pListNext) {
     Variant ret;
     int32_t version = m_version;
-    g_vmContext->invokeFunc(ret.asTypedValue(), ctx,
-                            CREATE_VECTOR1(tvAsCVarRef(&p->data)));
+    TypedValue args[1];
+    tvDup(&p->data, args + 0);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -2671,8 +2678,9 @@ Object c_StableMap::t_filter(CVarRef callback) {
   for (Bucket* p = m_pListHead; p; p = p->pListNext) {
     Variant ret;
     int32_t version = m_version;
-    g_vmContext->invokeFunc(ret.asTypedValue(), ctx,
-                            CREATE_VECTOR1(tvAsCVarRef(&p->data)));
+    TypedValue args[1];
+    tvDup(&p->data, args + 0);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -3616,7 +3624,9 @@ Object c_Set::t_map(CVarRef callback) {
     }
     TypedValue* tv = &np.data;
     int32_t version = m_version;
-    g_vmContext->invokeFunc(tv, ctx, CREATE_VECTOR1(tvAsCVarRef(&p.data)));
+    TypedValue args[1];
+    tvDup(&p.data, args + 0);
+    g_vmContext->invokeFuncFew(tv, ctx, 1, args);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -3642,8 +3652,9 @@ Object c_Set::t_filter(CVarRef callback) {
     if (!p.validValue()) continue;
     Variant ret;
     int32_t version = m_version;
-    g_vmContext->invokeFunc(ret.asTypedValue(), ctx,
-                            CREATE_VECTOR1(tvAsCVarRef(&p.data)));
+    TypedValue args[1];
+    tvDup(&p.data, args + 0);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -4352,8 +4363,9 @@ Object c_Pair::t_map(CVarRef callback) {
   Object obj = vec = NEWOBJ(c_Vector)();
   vec->reserve(2);
   for (uint64_t i = 0; i < 2; ++i) {
-    g_vmContext->invokeFunc(&vec->m_data[i], ctx,
-                            CREATE_VECTOR1(tvAsCVarRef(&getElms()[i])));
+    TypedValue args[1];
+    tvDup(&getElms()[i], args + 0);
+    g_vmContext->invokeFuncFew(&vec->m_data[i], ctx, 1, args);
     ++vec->m_size;
   }
   return obj;
@@ -4371,8 +4383,9 @@ Object c_Pair::t_filter(CVarRef callback) {
   Object obj = vec = NEWOBJ(c_Vector)();
   for (uint64_t i = 0; i < 2; ++i) {
     Variant ret;
-    g_vmContext->invokeFunc(ret.asTypedValue(), ctx,
-                            CREATE_VECTOR1(tvAsCVarRef(&getElms()[i])));
+    TypedValue args[1];
+    tvDup(&getElms()[i], args + 0);
+    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, args);
     if (ret.toBoolean()) {
       vec->add(&getElms()[i]);
     }

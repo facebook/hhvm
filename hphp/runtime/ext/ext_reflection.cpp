@@ -875,7 +875,7 @@ Variant f_hphp_invoke_method(CVarRef obj, CStrRef cls, CStrRef name,
     return invoke_static_method(cls, name, params);
   }
   ObjectData *o = obj.toCObjRef().get();
-  return o->o_invoke(name, params, -1);
+  return o->o_invoke(name, params);
 }
 
 bool f_hphp_instanceof(CObjRef obj, CStrRef name) {

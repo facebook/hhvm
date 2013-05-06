@@ -207,14 +207,14 @@ Variant f_iterator_apply(CVarRef obj, CVarRef func,
     return false;
   }
   Object pobj = obj.toObject();
-  pobj->o_invoke(s_rewind, null_array, -1);
+  pobj->o_invoke_few_args(s_rewind, 0);
   int64_t count = 0;
-  while (same(pobj->o_invoke(s_valid, null_array, -1), true)) {
+  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
     if (!same(vm_call_user_func(func, params), true)) {
       break;
     }
     ++count;
-    pobj->o_invoke(s_next, null_array, -1);
+    pobj->o_invoke_few_args(s_next, 0);
   }
   return count;
 }
@@ -224,11 +224,11 @@ Variant f_iterator_count(CVarRef obj) {
     return false;
   }
   Object pobj = obj.toObject();
-  pobj->o_invoke(s_rewind, null_array, -1);
+  pobj->o_invoke_few_args(s_rewind, 0);
   int64_t count = 0;
-  while (same(pobj->o_invoke(s_valid, null_array, -1), true)) {
+  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
     ++count;
-    pobj->o_invoke(s_next, null_array, -1);
+    pobj->o_invoke_few_args(s_next, 0);
   }
   return count;
 }
@@ -239,16 +239,16 @@ Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
   }
   Array ret(Array::Create());
   Object pobj = obj.toObject();
-  pobj->o_invoke(s_rewind, null_array, -1);
-  while (same(pobj->o_invoke(s_valid, null_array, -1), true)) {
-    Variant val = pobj->o_invoke(s_current, null_array, -1);
+  pobj->o_invoke_few_args(s_rewind, 0);
+  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
+    Variant val = pobj->o_invoke_few_args(s_current, 0);
     if (use_keys) {
-      Variant key = pobj->o_invoke(s_key, null_array, -1);
+      Variant key = pobj->o_invoke_few_args(s_key, 0);
       ret.set(key, val);
     } else {
       ret.append(val);
     }
-    pobj->o_invoke(s_next, null_array, -1);
+    pobj->o_invoke_few_args(s_next, 0);
   }
   return ret;
 }

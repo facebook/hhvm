@@ -740,10 +740,10 @@ int DebuggerProxy::getStackDepth() {
   VMExecutionContext* context = g_vmContext;
   ActRec *fp = context->getFP();
   if (!fp) return 0;
-  ActRec *prev = context->arGetSfp(fp);
+  ActRec *prev = fp->arGetSfp();
   while (fp != prev) {
     fp = prev;
-    prev = context->arGetSfp(fp);
+    prev = fp->arGetSfp();
     depth++;
   }
   return depth;

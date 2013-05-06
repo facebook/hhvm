@@ -1652,13 +1652,12 @@ TranslatorX64::shuffleArgsForMagicCall(ActRec* ar) {
  */
 static void sync_regstate_to_caller(ActRec* preLive) {
   assert(tl_regState == REGSTATE_DIRTY);
-  vmfp() = (TypedValue*)preLive->m_savedRbp;
-  vmsp() = (TypedValue*)preLive - preLive->numArgs();
-  if (ActRec* fp = g_vmContext->m_fp) {
-    if (fp->m_func && fp->m_func->unit()) {
-      vmpc() = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);
-    }
-  }
+  VMExecutionContext* ec = g_vmContext;
+  ec->m_stack.top() = (TypedValue*)preLive - preLive->numArgs();
+  ActRec* fp = preLive == ec->m_firstAR ?
+    ec->m_nestedVMs.back().m_savedState.fp : (ActRec*)preLive->m_savedRbp;
+  ec->m_fp = fp;
+  ec->m_pc = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);
   tl_regState = REGSTATE_CLEAN;
 }
 
@@ -2032,11 +2031,11 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
     /*
      * Guard: we have stack enough stack space to complete this
      * function.  We omit overflow checks if it is a leaf function
-     * that can't use more than kStackCheckPadding cells.
+     * that can't use more than kStackCheckLeafPadding cells.
      */
     auto const needStackCheck =
       !(func->attrs() & AttrPhpLeafFn) ||
-      func->maxStackCells() >= kStackCheckPadding;
+      func->maxStackCells() >= kStackCheckLeafPadding;
     if (needStackCheck) {
       emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
     }
@@ -2238,7 +2237,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
         a.xorl (eax, eax);
       }
       for (k = numLocals; k < func->numLocals(); ++k) {
-        locToRegDisp(Location(Location::Local, k), &base, &disp);
+        locToRegDisp(Location(Location::Local, k), &base, &disp, func);
         emitStoreTVType(a, eax, base[disp + TVOFF(m_type)]);
       }
     }
@@ -2944,7 +2943,7 @@ struct TReqInfo {
 
 
 void
-TranslatorX64::enterTC(SrcKey sk, TCA start) {
+TranslatorX64::enterTC(TCA start, void* data) {
   using namespace TargetCache;
 
   if (debug) {
@@ -2953,9 +2952,17 @@ TranslatorX64::enterTC(SrcKey sk, TCA start) {
   }
   DepthGuard d;
   TReqInfo info;
-  info.requestNum = -1;
-  info.saved_rStashedAr = 0;
-  if (UNLIKELY(!start)) start = getTranslation(sk, true);
+  SrcKey sk;
+
+  if (LIKELY(start != nullptr)) {
+    info.requestNum = data ? REQ_BIND_CALL : -1;
+    info.saved_rStashedAr = (uintptr_t)data;
+  } else {
+    info.requestNum = -1;
+    info.saved_rStashedAr = 0;
+    sk = *(SrcKey*)data;
+    start = getTranslation(sk, true);
+  }
   for (;;) {
     assert(sizeof(Cell) == 16);
     assert(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
@@ -2975,13 +2982,16 @@ TranslatorX64::enterTC(SrcKey sk, TCA start) {
       start = getTranslation(sk, true);
     }
     assert(start == (TCA)HPHP::VM::Transl::funcBodyHelperThunk ||
-           isValidCodeAddress(start));
+           isValidCodeAddress(start) ||
+           (start == (TCA)HPHP::VM::Transl::fcallHelperThunk &&
+            info.saved_rStashedAr == (uintptr_t)data));
     assert(!s_writeLease.amOwner());
-    curFunc()->validate();
+    const Func* func = (vmfp() ? (ActRec*)vmfp() : (ActRec*)data)->m_func;
+    func->validate();
     INC_TPC(enter_tc);
 
     TRACE(1, "enterTC: %p fp%p(%s) sp%p enter {\n", start,
-          vmfp(), ((ActRec*)vmfp())->m_func->name()->data(), vmsp());
+          vmfp(), func->name()->data(), vmsp());
     tl_regState = REGSTATE_DIRTY;
 
     // We have to force C++ to spill anything that might be in a callee-saved

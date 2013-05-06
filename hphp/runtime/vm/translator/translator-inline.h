@@ -98,7 +98,7 @@ struct VMRegAnchor : private boost::noncopyable {
     m_old = REGSTATE_DIRTY;
     tl_regState = REGSTATE_CLEAN;
 
-    auto prevAr = (ActRec*)ar->m_savedRbp;
+    auto prevAr = g_vmContext->getOuterVMFrame(ar);
     const Func* prevF = prevAr->m_func;
     vmsp() = ar->m_func->isGenerator() ?
       Stack::generatorStackBase(ar) :

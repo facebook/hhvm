@@ -1003,8 +1003,24 @@ public:
    * bytecode interpreter (see enterVMWork).  It operates on behalf of
    * a given nested invocation of the intepreter (calling back into it
    * as necessary for blocks that need to be interpreted).
+   *
+   * If start is not null, data will be used to initialize rStashedAr,
+   * to enable us to run a jitted prolog;
+   * otherwise, data should be a pointer to the SrcKey to start
+   * translating from.
+   *
+   * But don't call this directly, use one of the helpers below
    */
-  void enterTC(SrcKey sk, TCA start);
+  void enterTC(TCA start, void* data);
+  void enterTCAtSrcKey(SrcKey& sk) {
+    enterTC(nullptr, &sk);
+  }
+  void enterTCAtProlog(ActRec *ar, TCA start) {
+    enterTC(start, ar);
+  }
+  void enterTCAfterProlog(TCA start) {
+    enterTC(start, nullptr);
+  }
 
   TranslatorX64();
   virtual ~TranslatorX64();

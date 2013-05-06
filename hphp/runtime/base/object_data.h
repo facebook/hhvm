@@ -180,9 +180,8 @@ class ObjectData : public CountableNF {
   static Object FromArray(ArrayData *properties);
 
   // method invocation with CStrRef
-  Variant o_invoke(CStrRef s, CArrRef params, strhash_t hash = -1,
-                   bool fatal = true);
-  Variant o_invoke_few_args(CStrRef s, strhash_t hash, int count,
+  Variant o_invoke(CStrRef s, CArrRef params, bool fatal = true);
+  Variant o_invoke_few_args(CStrRef s, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
 
   // misc

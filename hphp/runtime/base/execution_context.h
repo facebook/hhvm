@@ -572,7 +572,6 @@ public:
   TypedValue* lookupClsCns(const StringData* cls,
                            const StringData* cns);
 
-  ActRec* arGetSfp(const ActRec* ar);
   // Get the next outermost VM frame, even accross re-entry
   ActRec* getOuterVMFrame(const ActRec* ar);
 
@@ -676,24 +675,16 @@ public:
   CVarRef getEvaledArg(const StringData* val);
 private:
   void enterVMWork(ActRec* enterFnAr);
-  void enterVM(TypedValue* retval,
-               ActRec* ar,
-               ExtraArgs* extraArgs);
-  void reenterVM(TypedValue* retval,
-                 ActRec* ar,
-                 ExtraArgs* extraArgs,
-                 TypedValue* savedSP);
+  void enterVMPrologue(ActRec* enterFnAr);
+  void enterVM(TypedValue* retval, ActRec* ar);
+  void reenterVM(TypedValue* retval, ActRec* ar, TypedValue* savedSP);
   void doFPushCuf(PC& pc, bool forward, bool safe);
   void unwindBuiltinFrame();
   template <bool forwarding>
   void pushClsMethodImpl(VM::Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
-  template <bool reenter>
-  bool prepareFuncEntry(ActRec* ar,
-                        PC& pc,
-                        ExtraArgs* extraArgs);
-  bool prepareArrayArgs(ActRec* ar, ArrayData* args,
-                        ExtraArgs*& extraArgs);
+  bool prepareFuncEntry(ActRec* ar, PC& pc);
+  bool prepareArrayArgs(ActRec* ar, ArrayData* args);
   void recordCodeCoverage(PC pc);
   bool isReturnHelper(uintptr_t address);
   int m_coverPrevLine;
@@ -722,6 +713,25 @@ public:
                   VarEnv* varEnv = nullptr) {
     invokeFunc(retval, ctx.func, params, ctx.this_, ctx.cls, varEnv,
                ctx.invName, InvokeIgnoreByRefErrors);
+  }
+  void invokeFuncFew(TypedValue* retval,
+                     const HPHP::VM::Func* f,
+                     void* thisOrCls,
+                     StringData* invName,
+                     int argc, TypedValue* argv);
+  void invokeFuncFew(TypedValue* retval,
+                     const HPHP::VM::Func* f,
+                     void* thisOrCls,
+                     StringData* invName = nullptr) {
+    invokeFuncFew(retval, f, thisOrCls, invName, 0, nullptr);
+  }
+  void invokeFuncFew(TypedValue* retval,
+                     const CallCtx& ctx,
+                     int argc, TypedValue* argv) {
+    invokeFuncFew(retval, ctx.func,
+                  ctx.this_ ? (void*)ctx.this_ :
+                  ctx.cls ? (char*)ctx.cls + 1 : nullptr,
+                  ctx.invName, argc, argv);
   }
   void invokeContFunc(const HPHP::VM::Func* f,
                       ObjectData* this_,

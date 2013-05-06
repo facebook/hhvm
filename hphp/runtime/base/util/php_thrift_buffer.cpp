@@ -28,12 +28,11 @@ static StaticString s_write("write");
 ///////////////////////////////////////////////////////////////////////////////
 
 String PhpThriftBuffer::readImpl() {
-  Array args(CREATE_VECTOR1(m_size));
-  return m_xin->o_invoke(s_read, args, -1);
+  return m_xin->o_invoke_few_args(s_read, 1, m_size);
 }
 
 void PhpThriftBuffer::flushImpl(CStrRef data) {
-  m_xout->o_invoke(s_write, CREATE_VECTOR1(data), -1);
+  m_xout->o_invoke_few_args(s_write, 1, data);
 }
 
 void PhpThriftBuffer::throwError(const char *msg, int code) {

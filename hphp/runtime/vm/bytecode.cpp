@@ -107,6 +107,16 @@ struct VMPrepareUnwind : std::exception {
 
 }
 
+ActRec* ActRec::arGetSfp() const {
+  ActRec* prevFrame = (ActRec*)m_savedRbp;
+  if (LIKELY(((uintptr_t)prevFrame - Util::s_stackLimit) >=
+             Util::s_stackSize)) {
+    if (LIKELY(prevFrame != nullptr)) return prevFrame;
+  }
+
+  return const_cast<ActRec*>(this);
+}
+
 bool
 ActRec::skipFrame() const {
   return m_func && m_func->isBuiltin();
@@ -327,8 +337,8 @@ void VarEnv::attach(ActRec* fp) {
            this,
            isGlobalScope() ? "global scope" : "local scope",
            int(fp->m_func->numNamedLocals()), fp);
-  assert(m_depth == 0 || g_vmContext->arGetSfp(fp) == m_cfp ||
-         (g_vmContext->arGetSfp(fp) == fp && g_vmContext->isNested()));
+  assert(m_depth == 0 || fp->arGetSfp() == m_cfp ||
+         (fp->arGetSfp() == fp && g_vmContext->isNested()));
   m_cfp = fp;
   m_depth++;
 
@@ -1105,7 +1115,7 @@ UnwindStatus Stack::unwindFrame(ActRec*& fp, int offset, PC& pc, Fault fault) {
       return UnwindResumeVM;
     }
 
-    ActRec *prevFp = context->arGetSfp(fp);
+    ActRec *prevFp = fp->arGetSfp();
     SKTRACE(1, sk, "unwindFrame: fp %p prevFp %p\n",
             fp, prevFp);
     if (LIKELY(!fp->m_func->isGenerator())) {
@@ -1156,7 +1166,7 @@ TypedValue* Stack::frameStackBase(const ActRec* fp) {
 TypedValue* Stack::generatorStackBase(const ActRec* fp) {
   assert(fp->m_func->isGenerator());
   VMExecutionContext* context = g_vmContext;
-  ActRec* sfp = context->arGetSfp(fp);
+  ActRec* sfp = fp->arGetSfp();
   if (sfp == fp) {
     // In the reentrant case, we can consult the savedVM state. We simply
     // use the top of stack of the previous VM frame (since the ActRec,
@@ -1179,16 +1189,6 @@ __thread VarEnvArenaStorage s_varEnvArenaStorage;
 
 using namespace HPHP::VM;
 using namespace HPHP::MethodLookup;
-
-ActRec* VMExecutionContext::arGetSfp(const ActRec* ar) {
-  ActRec* prevFrame = (ActRec*)ar->m_savedRbp;
-  if (LIKELY(((uintptr_t)prevFrame - Util::s_stackLimit) >=
-             Util::s_stackSize)) {
-    if (LIKELY(prevFrame != nullptr)) return prevFrame;
-  }
-
-  return const_cast<ActRec*>(ar);
-}
 
 ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
   ActRec* prevFrame = (ActRec*)ar->m_savedRbp;
@@ -1698,65 +1698,62 @@ static inline void checkStack(Stack& stk, const Func* f) {
   }
 }
 
-template <bool reenter>
-bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
-                                          PC& pc,
-                                          ExtraArgs* extraArgs) {
+bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
   const Func* func = ar->m_func;
-  if (!reenter) {
-    // For the reenter case, magic shuffling are handled
-    // in invokeFunc() before calling prepareFuncEntry().
-    if (UNLIKELY(ar->hasInvName())) {
-      shuffleMagicArgs(ar);
-    }
-  }
-  // It is now safe to access m_varEnv directly
-  assert(!ar->hasInvName());
-  int nargs = ar->numArgs();
-  // Set pc below, once we know that DV dispatch is unnecessary.
-  m_fp = ar;
+  Offset firstDVInitializer = InvalidAbsoluteOffset;
   bool raiseMissingArgumentWarnings = false;
   int nparams = func->numParams();
-  Offset firstDVInitializer = InvalidAbsoluteOffset;
-  if (nargs != nparams) {
-    if (nargs < nparams) {
-      // Push uninitialized nulls for missing arguments. Some of them may end
-      // up getting default-initialized, but regardless, we need to make space
-      // for them on the stack.
-      const Func::ParamInfoVec& paramInfo = func->params();
-      for (int i = nargs; i < nparams; ++i) {
-        m_stack.pushUninit();
-        Offset dvInitializer = paramInfo[i].funcletOff();
-        if (dvInitializer == InvalidAbsoluteOffset) {
-          // We wait to raise warnings until after all the locals have been
-          // initialized. This is important because things need to be in a
-          // consistent state in case the user error handler throws.
-          raiseMissingArgumentWarnings = true;
-        } else if (firstDVInitializer == InvalidAbsoluteOffset) {
-          // This is the first unpassed arg with a default value, so
-          // this is where we'll need to jump to.
-          firstDVInitializer = dvInitializer;
-        }
+  if (UNLIKELY(ar->m_varEnv != nullptr)) {
+    /*
+     * m_varEnv != nullptr => we have a varEnv, extraArgs, or an invName.
+     */
+    if (ar->hasInvName()) {
+      // shuffleMagicArgs deals with everything. no need for
+      // further argument munging
+      shuffleMagicArgs(ar);
+    } else if (ar->hasVarEnv()) {
+      m_fp = ar;
+      if (!func->isGenerator()) {
+        assert(func->isPseudoMain());
+        pushLocalsAndIterators(func);
+        ar->m_varEnv->attach(ar);
       }
-      assert(m_fp->m_func == func);
+      pc = func->getEntry();
+      // Nothing more to do; get out
+      return true;
     } else {
-      // For the reenter case, extra arguments are handled below (with
-      // the extraArgs vector passed to this function).  The below
-      // handles pulling extra args from the execution stack in a
-      // non-reentry case.
-      if (!reenter) {
+      assert(ar->hasExtraArgs());
+      assert(func->numParams() < ar->numArgs());
+    }
+  } else {
+    int nargs = ar->numArgs();
+    if (nargs != nparams) {
+      if (nargs < nparams) {
+        // Push uninitialized nulls for missing arguments. Some of them may end
+        // up getting default-initialized, but regardless, we need to make space
+        // for them on the stack.
+        const Func::ParamInfoVec& paramInfo = func->params();
+        for (int i = nargs; i < nparams; ++i) {
+          m_stack.pushUninit();
+          Offset dvInitializer = paramInfo[i].funcletOff();
+          if (dvInitializer == InvalidAbsoluteOffset) {
+            // We wait to raise warnings until after all the locals have been
+            // initialized. This is important because things need to be in a
+            // consistent state in case the user error handler throws.
+            raiseMissingArgumentWarnings = true;
+          } else if (firstDVInitializer == InvalidAbsoluteOffset) {
+            // This is the first unpassed arg with a default value, so
+            // this is where we'll need to jump to.
+            firstDVInitializer = dvInitializer;
+          }
+        }
+      } else {
         if (func->attrs() & AttrMayUseVV) {
-          // If there are extra parameters then we cannot be a pseudomain
-          // inheriting a VarEnv
-          assert(!m_fp->m_varEnv);
           // Extra parameters must be moved off the stack.
           const int numExtras = nargs - nparams;
-          m_fp->setExtraArgs(ExtraArgs::allocateCopy(
-            (TypedValue*)(uintptr_t(m_fp) - nargs * sizeof(TypedValue)),
-            numExtras));
-          for (int i = 0; i < numExtras; i++) {
-            m_stack.discard();
-          }
+          ar->setExtraArgs(ExtraArgs::allocateCopy((TypedValue*)ar - nargs,
+                                                   numExtras));
+          m_stack.ndiscard(numExtras);
         } else {
           // The function we're calling is not marked as "MayUseVV",
           // so just discard the extra arguments
@@ -1788,37 +1785,20 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
     pushLocalsAndIterators(func, nlocals);
   }
 
-  /*
-   * If we're reentering, make sure to finalize the ActRec before
-   * possibly raising any exceptions, so unwinding won't get confused.
-   */
-  if (reenter) {
-    if (ar->hasVarEnv()) {
-      // If this is a pseudomain inheriting a VarEnv from our caller,
-      // there cannot be extra arguments
-      assert(!extraArgs);
-      // Now that locals have been initialized, it is safe to attach
-      // the VarEnv inherited from our caller to the current frame
-      ar->m_varEnv->attach(ar);
-    } else if (extraArgs) {
-      // Create an ExtraArgs structure and stash the extra args in
-      // there.
-      ar->setExtraArgs(extraArgs);
-    }
+  m_fp = ar;
+  if (firstDVInitializer != InvalidAbsoluteOffset) {
+    pc = func->unit()->entry() + firstDVInitializer;
+  } else {
+    pc = func->getEntry();
   }
-
   // cppext functions/methods have their own logic for raising
   // warnings for missing arguments, so we only need to do this work
   // for non-cppext functions/methods
   if (raiseMissingArgumentWarnings && !func->isBuiltin()) {
-    pc = func->getEntry();
-    // m_pc is not set to callee. if the callee is in a different unit,
-    // debugBacktrace() can barf in unit->offsetOf(m_pc) where it
-    // asserts that m_pc >= m_bc && m_pc < m_bc + m_bclen. Sync m_fp
-    // to function entry point in called unit.
+    // need to sync m_pc to pc for backtraces/re-entry
     SYNC();
     const Func::ParamInfoVec& paramInfo = func->params();
-    for (int i = nargs; i < nparams; ++i) {
+    for (int i = ar->numArgs(); i < nparams; ++i) {
       Offset dvInitializer = paramInfo[i].funcletOff();
       if (dvInitializer == InvalidAbsoluteOffset) {
         const char* name = func->name()->data();
@@ -1830,12 +1810,6 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar,
       }
     }
   }
-
-  if (firstDVInitializer != InvalidAbsoluteOffset) {
-    pc = func->unit()->entry() + firstDVInitializer;
-  } else {
-    pc = func->getEntry();
-  }
   return true;
 }
 
@@ -1845,17 +1819,39 @@ void VMExecutionContext::syncGdbState() {
   }
 }
 
+void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
+  assert(enterFnAr);
+  Stats::inc(Stats::VMEnter);
+  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
+    int np = enterFnAr->m_func->numParams();
+    int na = enterFnAr->numArgs();
+    if (na > np) na = np + 1;
+    TCA start = enterFnAr->m_func->getPrologue(na);
+    tx64->enterTCAtProlog(enterFnAr, start);
+  } else {
+    if (prepareFuncEntry(enterFnAr, m_pc)) {
+      enterVMWork(enterFnAr);
+    }
+  }
+}
+
 void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
   TCA start = nullptr;
   if (enterFnAr) {
     if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
+    checkStack(m_stack, enterFnAr->m_func);
     start = enterFnAr->m_func->getFuncBody();
   }
   Stats::inc(Stats::VMEnter);
-  if (LIKELY(ThreadInfo::s_threadInfo->m_reqInjectionData.getJit())) {
-    Transl::SrcKey sk(curFunc(), m_pc);
+  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
     (void) curUnit()->offsetOf(m_pc); /* assert */
-    tx64->enterTC(sk, start);
+    if (enterFnAr) {
+      assert(start);
+      tx64->enterTCAfterProlog(start);
+    } else {
+      Transl::SrcKey sk(curFunc(), m_pc);
+      tx64->enterTCAtSrcKey(sk);
+    }
   } else {
     dispatch();
   }
@@ -1912,9 +1908,7 @@ static int exception_handler() {
   return longJmpType;
 }
 
-void VMExecutionContext::enterVM(TypedValue* retval,
-                                 ActRec* ar,
-                                 ExtraArgs* extraArgs) {
+void VMExecutionContext::enterVM(TypedValue* retval, ActRec* ar) {
   m_firstAR = ar;
   ar->m_savedRip = (uintptr_t)tx64->getCallToExit();
   assert(isReturnHelper(ar->m_savedRip));
@@ -1945,8 +1939,12 @@ short_jump:
   try {
     switch (jumpCode) {
     case EXCEPTION_START:
-      if (prepareFuncEntry<true>(ar, m_pc, extraArgs)) {
-        enterVMWork(ar);
+      if (m_fp && !ar->m_varEnv) {
+        enterVMPrologue(ar);
+      } else {
+        if (prepareFuncEntry(ar, m_pc)) {
+          enterVMWork(ar);
+        }
       }
       break;
     case EXCEPTION_PROPAGATE:
@@ -2007,7 +2005,6 @@ propagate:
 
 void VMExecutionContext::reenterVM(TypedValue* retval,
                                    ActRec* ar,
-                                   ExtraArgs* extraArgs,
                                    TypedValue* savedSP) {
   ar->m_soff = 0;
   ar->m_savedRbp = 0;
@@ -2016,7 +2013,7 @@ void VMExecutionContext::reenterVM(TypedValue* retval,
   pushVMState(savedVM, ar);
   assert(m_nestedVMs.size() >= 1);
   try {
-    enterVM(retval, ar, extraArgs);
+    enterVM(retval, ar);
     popVMState();
   } catch (...) {
     popVMState();
@@ -2069,7 +2066,9 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   }
   Cell* savedSP = m_stack.top();
 
-  checkStack(m_stack, f);
+  if (f->numParams() > kStackCheckReenterPadding - kNumActRecCells) {
+    checkStack(m_stack, f);
+  }
 
   if (flags & InvokePseudoMain) {
     assert(f->isPseudoMain() && !params.get());
@@ -2111,7 +2110,6 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
 #endif
 
   ArrayData *arr = params.get();
-  ExtraArgs* extraArgs = nullptr;
   if (isMagicCall) {
     // Put the method name into the location of the first parameter. We
     // are transferring ownership, so no need to incRef/decRef here.
@@ -2121,8 +2119,10 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   } else if (arr) {
     const int numParams = f->numParams();
     const int numExtraArgs = arr->size() - numParams;
+    ExtraArgs* extraArgs = nullptr;
     if (numExtraArgs > 0 && (f->attrs() & AttrMayUseVV)) {
       extraArgs = ExtraArgs::allocateUninit(numExtraArgs);
+      ar->setExtraArgs(extraArgs);
     }
     int paramId = 0;
     for (ssize_t i = arr->iter_begin();
@@ -2160,6 +2160,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
           if (extraArgs) {
             int n = paramId >= numParams ? paramId - numParams + 1 : 0;
             ExtraArgs::deallocate(extraArgs, n);
+            ar->m_varEnv = nullptr;
             paramId -= n;
           }
           while (paramId >= 0) {
@@ -2175,10 +2176,73 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   }
 
   if (m_fp) {
-    reenterVM(retval, ar, extraArgs, savedSP);
+    reenterVM(retval, ar, savedSP);
   } else {
     assert(m_nestedVMs.size() == 0);
-    enterVM(retval, ar, extraArgs);
+    enterVM(retval, ar);
+  }
+}
+
+void VMExecutionContext::invokeFuncFew(TypedValue* retval,
+                                       const Func* f,
+                                       void* thisOrCls,
+                                       StringData* invName,
+                                       int argc, TypedValue* argv) {
+  assert(retval);
+  assert(f);
+  // If this is a regular function, this_ and cls must be NULL
+  assert(f->preClass() || !thisOrCls);
+  // If this is a method, either this_ or cls must be non-NULL
+  assert(!f->preClass() || thisOrCls);
+  // If this is a static method, this_ must be NULL
+  assert(!(f->attrs() & AttrStatic && !f->isClosureBody()) ||
+         !ActRec::decodeThis(thisOrCls));
+  // invName should only be non-NULL if we are calling __call or
+  // __callStatic
+  assert(!invName || f->name()->isame(s___call.get()) ||
+         f->name()->isame(s___callStatic.get()));
+
+  VMRegAnchor _;
+
+  if (ObjectData* thiz = ActRec::decodeThis(thisOrCls)) {
+    thiz->incRefCount();
+  }
+  Cell* savedSP = m_stack.top();
+  if (argc > kStackCheckReenterPadding - kNumActRecCells) {
+    checkStack(m_stack, f);
+  }
+  ActRec* ar = m_stack.allocA();
+  ar->m_soff = 0;
+  ar->m_savedRbp = 0;
+  ar->m_func = f;
+  ar->m_this = (ObjectData*)thisOrCls;
+  ar->initNumArgs(argc);
+  if (UNLIKELY(invName != nullptr)) {
+    ar->setInvName(invName);
+  } else {
+    ar->m_varEnv = nullptr;
+  }
+
+#ifdef HPHP_TRACE
+  if (m_fp == nullptr) {
+    TRACE(1, "Reentry: enter %s(%p) from top-level\n",
+          f->name()->data(), ar);
+  } else {
+    TRACE(1, "Reentry: enter %s(pc %p ar %p) from %s(%p)\n",
+          f->name()->data(), m_pc, ar,
+          m_fp->m_func ? m_fp->m_func->name()->data() : "unknownBuiltin", m_fp);
+  }
+#endif
+
+  for (int i = 0; i < argc; i++) {
+    *m_stack.allocTV() = *argv++;
+  }
+
+  if (m_fp) {
+    reenterVM(retval, ar, savedSP);
+  } else {
+    assert(m_nestedVMs.size() == 0);
+    enterVM(retval, ar);
   }
 }
 
@@ -2193,7 +2257,9 @@ void VMExecutionContext::invokeContFunc(const Func* f,
   this_->incRefCount();
 
   Cell* savedSP = m_stack.top();
-  checkStack(m_stack, f);
+
+  // no need to check stack due to ReenterPadding
+  assert(kStackCheckReenterPadding - kNumActRecCells >= 1);
 
   ActRec* ar = m_stack.allocA();
   ar->m_savedRbp = 0;
@@ -2208,7 +2274,7 @@ void VMExecutionContext::invokeContFunc(const Func* f,
   }
 
   TypedValue retval;
-  reenterVM(&retval, ar, nullptr, savedSP);
+  reenterVM(&retval, ar, savedSP);
   // Codegen for generator functions guarantees that they will return null
   assert(IS_NULL_TYPE(retval.m_type));
 }
@@ -2266,7 +2332,7 @@ ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
   if (fp == nullptr) {
     return nullptr;
   }
-  ActRec* prevFp = arGetSfp(fp);
+  ActRec* prevFp = fp->arGetSfp();
   if (prevFp != fp) {
     if (prevSp) {
       if (UNLIKELY(fp->m_func->isGenerator())) {
@@ -4532,7 +4598,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopRetC(PC& pc) {
 
   // Call the runtime helpers to free the local variables and iterators
   frame_free_locals_inl(m_fp, m_fp->m_func->numLocals());
-  ActRec* sfp = arGetSfp(m_fp);
+  ActRec* sfp = m_fp->arGetSfp();
   // Memcpy the the return value on top of the activation record. This works
   // the same regardless of whether the return value is boxed or not.
   TypedValue* retval_ptr = &m_fp->m_r;
@@ -5982,7 +6048,7 @@ void VMExecutionContext::iopFPassM(PC& pc) {
 }
 
 void VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
-  assert(ar->m_savedRbp == (uint64_t)m_fp);
+  assert(getOuterVMFrame(ar) == m_fp);
   ar->m_savedRip = (uintptr_t)tx64->getRetFromInterpretedFrame();
   assert(isReturnHelper(ar->m_savedRip));
   TRACE(3, "FCall: pc %p func %p base %d\n", m_pc,
@@ -5990,8 +6056,8 @@ void VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
         int(m_fp->m_func->base()));
   ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
-  assert(pcOff() > m_fp->m_func->base());
-  prepareFuncEntry<false>(ar, pc, 0);
+  assert(pcOff() >= m_fp->m_func->base());
+  prepareFuncEntry(ar, pc);
   SYNC();
   if (!EventHook::FunctionEnter(ar, EventHook::NormalFunc)) {
     pc = m_pc;
@@ -6146,81 +6212,82 @@ inline void OPTBLD_INLINE VMExecutionContext::iopFCallBuiltin(PC& pc) {
 }
 
 bool VMExecutionContext::prepareArrayArgs(ActRec* ar,
-                                          ArrayData* args,
-                                          ExtraArgs*& extraArgs) {
-  extraArgs = nullptr;
+                                          ArrayData* args) {
   if (UNLIKELY(ar->hasInvName())) {
     m_stack.pushStringNoRc(ar->getInvName());
     m_stack.pushArray(args);
     ar->setVarEnv(0);
     ar->initNumArgs(2);
-  } else {
-    int nargs = args->size();
-    const Func* f = ar->m_func;
-    int nparams = f->numParams();
-    int extra = nargs - nparams;
-    if (extra < 0) {
-      extra = 0;
-      nparams = nargs;
+    return true;
+  }
+
+  int nargs = args->size();
+  const Func* f = ar->m_func;
+  int nparams = f->numParams();
+  int extra = nargs - nparams;
+  if (extra < 0) {
+    extra = 0;
+    nparams = nargs;
+  }
+  ssize_t pos = args->iter_begin();
+  for (int i = 0; i < nparams; ++i) {
+    TypedValue* from = const_cast<TypedValue*>(
+      args->getValueRef(pos).asTypedValue());
+    TypedValue* to = m_stack.allocTV();
+    if (UNLIKELY(f->byRef(i))) {
+      if (UNLIKELY(!tvAsVariant(from).isReferenced())) {
+        raise_warning("Parameter %d to %s() expected to be a reference, "
+                      "value given", i + 1, f->fullName()->data());
+        if (skipCufOnInvalidParams) {
+          m_stack.discard();
+          while (i--) m_stack.popTV();
+          m_stack.popAR();
+          m_stack.pushNull();
+          return false;
+        }
+      }
+      tvDup(from, to);
+    } else {
+      tvDup(from, to);
+      if (UNLIKELY(to->m_type == KindOfRef)) {
+        tvUnbox(to);
+      }
     }
-    ssize_t pos = args->iter_begin();
-    for (int i = 0; i < nparams; ++i) {
-      TypedValue* from = const_cast<TypedValue*>(
-        args->getValueRef(pos).asTypedValue());
-      TypedValue* to = m_stack.allocTV();
-      if (UNLIKELY(f->byRef(i))) {
-        if (UNLIKELY(!tvAsVariant(from).isReferenced())) {
-          raise_warning("Parameter %d to %s() expected to be a reference, "
-                        "value given", i + 1, f->fullName()->data());
-          if (skipCufOnInvalidParams) {
-            m_stack.discard();
-            while (i--) m_stack.popTV();
-            m_stack.popAR();
-            m_stack.pushNull();
-            return false;
-          }
-        }
-        tvDup(from, to);
-      } else {
-        tvDup(from, to);
-        if (UNLIKELY(to->m_type == KindOfRef)) {
-          tvUnbox(to);
-        }
+    pos = args->iter_advance(pos);
+  }
+  if (extra && (ar->m_func->attrs() & AttrMayUseVV)) {
+    ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
+    for (int i = 0; i < extra; ++i) {
+      TypedValue* to = extraArgs->getExtraArg(i);
+      tvDup(args->getValueRef(pos).asTypedValue(), to);
+      if (to->m_type == KindOfRef && to->m_data.pref->_count == 2) {
+        tvUnbox(to);
       }
       pos = args->iter_advance(pos);
     }
-    if (extra && (ar->m_func->attrs() & AttrMayUseVV)) {
-      extraArgs = ExtraArgs::allocateUninit(extra);
-      for (int i = 0; i < extra; ++i) {
-        TypedValue* to = extraArgs->getExtraArg(i);
-        tvDup(args->getValueRef(pos).asTypedValue(), to);
-        if (to->m_type == KindOfRef && to->m_data.pref->_count == 2) {
-          tvUnbox(to);
-        }
-        pos = args->iter_advance(pos);
-      }
-      ar->initNumArgs(nargs);
-    } else {
-      ar->initNumArgs(nparams);
-    }
+    ar->setExtraArgs(extraArgs);
+    ar->initNumArgs(nargs);
+  } else {
+    ar->initNumArgs(nparams);
   }
+
   return true;
 }
 
 static void cleanupParamsAndActRec(Stack& stack,
-                                   ActRec* ar,
-                                   ExtraArgs* extraArgs) {
+                            ActRec* ar,
+                            ExtraArgs* extraArgs) {
   assert(stack.top() + (extraArgs ?
                         ar->m_func->numParams() :
                         ar->numArgs()) == (void*)ar);
-  while (stack.top() != (void*)ar) {
-    stack.popTV();
-  }
-  stack.popAR();
   if (extraArgs) {
     const int numExtra = ar->numArgs() - ar->m_func->numParams();
     ExtraArgs::deallocate(extraArgs, numExtra);
   }
+  while (stack.top() != (void*)ar) {
+    stack.popTV();
+  }
+  stack.popAR();
 }
 
 bool VMExecutionContext::doFCallArray(PC& pc) {
@@ -6240,7 +6307,6 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
   }
 
   const Func* func = ar->m_func;
-  ExtraArgs* extraArgs = nullptr;
   {
     Array args(LIKELY(c1->m_type == KindOfArray) ? c1->m_data.parr :
                tvAsVariant(c1).toArray().get());
@@ -6258,10 +6324,10 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
       - (uintptr_t)m_fp->m_func->base();
     assert(pcOff() > m_fp->m_func->base());
 
-    if (UNLIKELY(!prepareArrayArgs(ar, args.get(), extraArgs))) return false;
+    if (UNLIKELY(!prepareArrayArgs(ar, args.get()))) return false;
   }
 
-  if (UNLIKELY(!(prepareFuncEntry<true>(ar, pc, extraArgs)))) {
+  if (UNLIKELY(!(prepareFuncEntry(ar, pc)))) {
     return false;
   }
   SYNC();
@@ -6694,7 +6760,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopNativeImpl(PC& pc) {
   // Adjust the stack; the native implementation put the return value in the
   // right place for us already
   m_stack.ndiscard(m_fp->m_func->numSlotsInFrame());
-  ActRec* sfp = arGetSfp(m_fp);
+  ActRec* sfp = m_fp->arGetSfp();
   if (LIKELY(sfp != m_fp)) {
     // Restore caller's execution state.
     m_fp = sfp;
@@ -6969,7 +7035,7 @@ void VMExecutionContext::iopContExit(PC& pc) {
   NEXT();
 
   EventHook::FunctionExit(m_fp);
-  ActRec* prevFp = arGetSfp(m_fp);
+  ActRec* prevFp = m_fp->arGetSfp();
   pc = prevFp->m_func->getEntry() + m_fp->m_soff;
   m_fp = prevFp;
 }
@@ -7029,7 +7095,7 @@ inline void OPTBLD_INLINE VMExecutionContext::iopContRetC(PC& pc) {
   m_stack.popC();
 
   EventHook::FunctionExit(m_fp);
-  ActRec* prevFp = arGetSfp(m_fp);
+  ActRec* prevFp = m_fp->arGetSfp();
   pc = prevFp->m_func->getEntry() + m_fp->m_soff;
   m_fp = prevFp;
 }
@@ -7428,16 +7494,13 @@ void VMExecutionContext::pushVMState(VMState &savedVM,
 void VMExecutionContext::popVMState() {
   assert(m_nestedVMs.size() >= 1);
 
-  VMState savedVM;
-  memcpy(&savedVM, &m_nestedVMs.back(), sizeof(savedVM));
+  VMState &savedVM = m_nestedVMs.back().m_savedState;
   m_pc = savedVM.pc;
   m_fp = savedVM.fp;
   m_firstAR = savedVM.firstAR;
   assert(m_stack.top() == savedVM.sp);
 
   if (debug) {
-    const ReentryRecord& rr = m_nestedVMs.back();
-    const VMState& savedVM = rr.m_savedState;
     if (savedVM.fp &&
         savedVM.fp->m_func &&
         savedVM.fp->m_func->unit()) {

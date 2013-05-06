@@ -87,7 +87,7 @@ void ObjectData::destruct() {
       tvWriteNull(&retval);
       try {
         // Call the destructor method
-        g_vmContext->invokeFunc(&retval, meth, null_array, this);
+        g_vmContext->invokeFuncFew(&retval, meth, this);
       } catch (...) {
         // Swallow any exceptions that escape the __destruct method
         handle_destructor_exception();
@@ -142,7 +142,7 @@ Object ObjectData::iterableObject(bool& isIterable,
   }
   Object obj(this);
   while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
-    Variant iterator = obj->o_invoke(s_getIterator, Array());
+    Variant iterator = obj->o_invoke_few_args(s_getIterator, 0);
     if (!iterator.isObject()) break;
     ObjectData* o = iterator.getObjectData();
     if (o->instanceof(SystemLib::s_IteratorClass)) {
@@ -469,86 +469,79 @@ Array ObjectData::o_toIterArray(CStrRef context,
   return Array(retval);
 }
 
-Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
-                             strhash_t hash /* = -1 */,
-                             bool fatal /* = true */) {
+static bool decode_invoke(CStrRef s, ObjectData* obj, bool fatal,
+                          CallCtx& ctx) {
   // TODO This duplicates some logic from vm_decode_function and
   // vm_call_user_func, we should refactor this in the near future
-  ObjectData* this_ = this;
-  HPHP::VM::Class* cls = getVMClass();
-  StringData* invName = nullptr;
+  ctx.this_ = obj;
+  ctx.cls = obj->getVMClass();
+  ctx.invName = nullptr;
+
   // XXX The lookup below doesn't take context into account, so it will lead
   // to incorrect behavior in some corner cases. o_invoke is gradually being
   // removed from the HPHP runtime this should be ok for the short term.
-  const HPHP::VM::Func* f = cls->lookupMethod(s.get());
-  if (f && (f->attrs() & AttrStatic)) {
-    // If we found a method and its static, null out this_
-    this_ = nullptr;
-  } else if (!f) {
-    if (this_) {
-      // If this_ is non-null AND we could not find a method, try
-      // looking up __call in cls's method table
-      f = cls->lookupMethod(s___call.get());
+  ctx.func = ctx.cls->lookupMethod(s.get());
+  if (ctx.func) {
+    if (ctx.func->attrs() & AttrStatic) {
+      // If we found a method and its static, null out this_
+      ctx.this_ = nullptr;
     }
-    if (!f) {
+  } else {
+    // If this_ is non-null AND we could not find a method, try
+    // looking up __call in cls's method table
+    ctx.func = ctx.cls->lookupMethod(s___call.get());
+
+    if (!ctx.func) {
       // Bail if we couldn't find the method or __call
-      o_invoke_failed(o_getClassName().data(), s.data(), fatal);
-      return uninit_null();
+      o_invoke_failed(ctx.cls->name()->data(), s.data(), fatal);
+      return false;
     }
     // We found __call! Stash the original name into invName.
-    assert(!(f->attrs() & AttrStatic));
-    invName = s.get();
-    invName->incRefCount();
+    assert(!(ctx.func->attrs() & AttrStatic));
+    ctx.invName = s.get();
+    ctx.invName->incRefCount();
   }
-  assert(f);
+  return true;
+}
+
+Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
+                             bool fatal /* = true */) {
+  CallCtx ctx;
+  if (!decode_invoke(s, this, fatal, ctx)) return Variant(Variant::nullInit);
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, this_, cls,
-                          nullptr, invName);
+  g_vmContext->invokeFunc((TypedValue*)&ret, ctx, params);
   return ret;
 }
 
-#define APPEND_1_ARGS(params) params.append(a0);
-#define APPEND_2_ARGS(params) APPEND_1_ARGS(params); params.append(a1)
-#define APPEND_3_ARGS(params) APPEND_2_ARGS(params); params.append(a2)
-#define APPEND_4_ARGS(params) APPEND_3_ARGS(params); params.append(a3)
-#define APPEND_5_ARGS(params) APPEND_4_ARGS(params); params.append(a4)
-#define APPEND_6_ARGS(params) APPEND_5_ARGS(params); params.append(a5)
-#define APPEND_7_ARGS(params) APPEND_6_ARGS(params); params.append(a6)
-#define APPEND_8_ARGS(params) APPEND_7_ARGS(params); params.append(a7)
-#define APPEND_9_ARGS(params) APPEND_8_ARGS(params); params.append(a8)
-#define APPEND_10_ARGS(params)  APPEND_9_ARGS(params); params.append(a9)
-
-Variant ObjectData::o_invoke_few_args(CStrRef s, strhash_t hash, int count,
+Variant ObjectData::o_invoke_few_args(CStrRef s, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
-  Array params = Array::Create();
+
+  CallCtx ctx;
+  if (!decode_invoke(s, this, true, ctx)) return Variant(Variant::nullInit);
+
+  TypedValue args[INVOKE_FEW_ARGS_COUNT];
   switch(count) {
-    case 1: APPEND_1_ARGS(params);
-            break;
-    case 2: APPEND_2_ARGS(params);
-            break;
-    case 3: APPEND_3_ARGS(params);
-            break;
-#if INVOKE_FEW_ARGS_COUNT > 3
-    case 4: APPEND_4_ARGS(params);
-            break;
-    case 5: APPEND_5_ARGS(params);
-            break;
-    case 6: APPEND_6_ARGS(params);
-            break;
-#if INVOKE_FEW_ARGS_COUNT > 6
-    case 7: APPEND_7_ARGS(params);
-            break;
-    case 8: APPEND_8_ARGS(params);
-            break;
-    case 9: APPEND_9_ARGS(params);
-            break;
-    case 10: APPEND_10_ARGS(params);
-            break;
-#endif
-#endif
     default: not_implemented();
+#if INVOKE_FEW_ARGS_COUNT > 6
+    case 10: tvDup(a9.asTypedValue(), args + 9);
+    case  9: tvDup(a8.asTypedValue(), args + 8);
+    case  8: tvDup(a7.asTypedValue(), args + 7);
+    case  7: tvDup(a6.asTypedValue(), args + 6);
+#endif
+#if INVOKE_FEW_ARGS_COUNT > 3
+    case  6: tvDup(a5.asTypedValue(), args + 5);
+    case  5: tvDup(a4.asTypedValue(), args + 4);
+    case  4: tvDup(a3.asTypedValue(), args + 3);
+#endif
+    case  3: tvDup(a2.asTypedValue(), args + 2);
+    case  2: tvDup(a1.asTypedValue(), args + 1);
+    case  1: tvDup(a0.asTypedValue(), args + 0);
+    case  0: break;
   }
-  return o_invoke(s, params, hash);
+
+  Variant ret;
+  g_vmContext->invokeFuncFew((TypedValue*)&ret, ctx, count, args);
+  return ret;
 }
 
 bool ObjectData::php_sleep(Variant &ret) {
@@ -576,7 +569,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
     if (instanceof(SystemLib::s_SerializableClass)) {
       assert(!isCollection());
       Variant ret =
-        const_cast<ObjectData*>(this)->o_invoke(s_serialize, Array(), -1);
+        const_cast<ObjectData*>(this)->o_invoke_few_args(s_serialize, 0);
       if (ret.isString()) {
         serializer->writeSerializableObject(o_getClassName(), ret.toString());
       } else if (ret.isNull()) {
@@ -594,7 +587,7 @@ void ObjectData::serializeImpl(VariableSerializer *serializer) const {
       assert(!isCollection());
       try {
         Variant ret =
-          const_cast<ObjectData*>(this)->o_invoke(s_serialize, Array(), -1);
+          const_cast<ObjectData*>(this)->o_invoke_few_args(s_serialize, 0);
         if (ret.isString()) {
           serializer->writeSerializableObject(o_getClassName(), ret.toString());
         } else if (ret.isNull()) {
@@ -735,8 +728,10 @@ Variant ObjectData::offsetGet(Variant key) {
     return uninit_null();
   }
   Variant v;
-  g_vmContext->invokeFunc((TypedValue*)(&v), method,
-                          CREATE_VECTOR1(key), this);
+  TypedValue args[1];
+  tvDup(key.asTypedValue(), args + 0);
+  g_vmContext->invokeFuncFew((TypedValue*)(&v), method,
+                             this, nullptr, 1, args);
   return v;
 }
 

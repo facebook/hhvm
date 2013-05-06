@@ -892,8 +892,8 @@ class Variant : private TypedValue {
   }
   Variant o_setRef(CStrRef s, CVarRef v, CStrRef context = null_string);
 
-  Variant o_invoke(CStrRef s, CArrRef params, int64_t hash = -1);
-  Variant o_invoke_few_args(CStrRef s, int64_t hash, int count,
+  Variant o_invoke(CStrRef s, CArrRef params);
+  Variant o_invoke_few_args(CStrRef s, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
 
   template <typename T>

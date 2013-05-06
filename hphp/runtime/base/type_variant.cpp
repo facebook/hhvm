@@ -1840,7 +1840,7 @@ void Variant::callOffsetUnset(CVarRef key) {
   if (LIKELY(obj->isCollection())) {
     collectionOffsetUnset(obj, key);
   } else {
-    getArrayAccess()->o_invoke(s_offsetUnset, Array::Create(key));
+    getArrayAccess()->o_invoke_few_args(s_offsetUnset, 1, key);
   }
 }
 
@@ -1863,8 +1863,8 @@ static void raise_bad_offset_notice() {
       if (obj->isCollection()) {                                        \
         return collectionOffsetGet(obj, offset);                        \
       } else {                                                          \
-        return getArrayAccess()->o_invoke(s_offsetGet,                  \
-                                          Array::Create(offset));       \
+        return getArrayAccess()->o_invoke_few_args(s_offsetGet,         \
+                                                   1, offset);          \
       }                                                                 \
       break;                                                            \
     }                                                                   \
@@ -1896,7 +1896,7 @@ Variant Variant::rvalAtHelper(int64_t offset, ACCESSPARAMS_IMPL) const {
     if (LIKELY(obj->isCollection())) {
       return collectionOffsetGet(obj, offset);
     } else {
-      return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+      return getArrayAccess()->o_invoke_few_args(s_offsetGet, 1, offset);
     }
     break;
   }
@@ -1942,7 +1942,7 @@ Variant Variant::rvalAt(CStrRef offset, ACCESSPARAMS_IMPL) const {
     if (LIKELY(obj->isCollection())) {
       return collectionOffsetGet(obj, offset);
     } else {
-      return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+      return getArrayAccess()->o_invoke_few_args(s_offsetGet, 1, offset);
     }
     break;
   }
@@ -2008,7 +2008,7 @@ Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
     if (LIKELY(obj->isCollection())) {
       return collectionOffsetGet(obj, offset);
     } else {
-      return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+      return getArrayAccess()->o_invoke_few_args(s_offsetGet, 1, offset);
     }
     break;
   }
@@ -2039,7 +2039,7 @@ CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
       return collectionOffsetGet(obj, offset);
     } else {
       const_cast<Variant&>(tmp) =
-        getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+        getArrayAccess()->o_invoke_few_args(s_offsetGet, 1, offset);
       return tmp;
     }
     break;
@@ -2315,9 +2315,8 @@ Variant &Variant::lvalAt() {
       if (obj->isCollection()) {
         raise_error("Cannot use [] for reading");
       }
-      Array params = CREATE_VECTOR1(uninit_null());
       Variant& ret = lvalBlackHole();
-      ret = m_data.pobj->o_invoke(s_offsetGet, params);
+      ret = m_data.pobj->o_invoke_few_args(s_offsetGet, 1, init_null_variant);
       raise_warning("Indirect modification of overloaded element of %s has "
                     "no effect", m_data.pobj->o_getClassName().data());
       return ret;
@@ -2398,23 +2397,23 @@ Variant Variant::o_setRef(CStrRef propName, CVarRef val,
   return m_data.pobj->o_setRef(propName, val, context);
 }
 
-Variant Variant::o_invoke(CStrRef s, CArrRef params, int64_t hash /* = -1 */) {
+Variant Variant::o_invoke(CStrRef s, CArrRef params) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke(s, params, hash);
+    return m_data.pobj->o_invoke(s, params);
   } else if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_invoke(s, params, hash);
+    return m_data.pref->var()->o_invoke(s, params);
   } else {
     throw_call_non_object(s.c_str());
   }
 }
 
-Variant Variant::o_invoke_few_args(CStrRef s, int64_t hash, int count,
+Variant Variant::o_invoke_few_args(CStrRef s, int count,
                                    INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke_few_args(s, hash, count,
+    return m_data.pobj->o_invoke_few_args(s, count,
                                           INVOKE_FEW_ARGS_PASS_ARGS);
   } else if (m_type == KindOfRef) {
-    return m_data.pref->var()->o_invoke_few_args(s, hash, count,
+    return m_data.pref->var()->o_invoke_few_args(s, count,
                                                  INVOKE_FEW_ARGS_PASS_ARGS);
   } else {
     throw_call_non_object(s.c_str());
@@ -2476,7 +2475,7 @@ inline ALWAYS_INLINE CVarRef Variant::SetImpl(Variant *self, T key,
     if (obj->isCollection()) {
       collectionOffsetSet(obj, key, v);
     } else {
-      self->getArrayAccess()->o_invoke_few_args(s_offsetSet, -1, 2, key, v);
+      self->getArrayAccess()->o_invoke_few_args(s_offsetSet, 2, key, v);
     }
     break;
   }
@@ -2533,8 +2532,7 @@ CVarRef Variant::append(CVarRef v) {
       if (LIKELY(obj->isCollection())) {
         collectionOffsetAppend(obj, v);
       } else {
-        Array params = CREATE_VECTOR2(uninit_null(), v);
-        obj->o_invoke(s_offsetSet, params);
+        obj->o_invoke_few_args(s_offsetSet, 2, init_null_variant, v);
       }
       break;
     }
@@ -2602,7 +2600,7 @@ inline ALWAYS_INLINE CVarRef Variant::SetRefImpl(Variant *self, T key,
     if (self->m_data.pobj->isCollection()) {
       raise_error("An element of a collection cannot be taken by reference");
     }
-    self->getArrayAccess()->o_invoke_few_args(s_offsetSet, -1, 2, key, v);
+    self->getArrayAccess()->o_invoke_few_args(s_offsetSet, 2, key, v);
     break;
   }
   default:
@@ -2658,7 +2656,7 @@ CVarRef Variant::appendRef(CVarRef v) {
       if (LIKELY(obj->isCollection())) {
         raise_error("Collection elements cannot be taken by reference");
       } else {
-        obj->o_invoke_few_args(s_offsetSet, -1, 2, uninit_null(), v);
+        obj->o_invoke_few_args(s_offsetSet, 2, uninit_null(), v);
       }
     }
   case KindOfStaticString:
@@ -3147,7 +3145,7 @@ void Variant::unserialize(VariableUnserializer *uns,
         if (!obj->instanceof(SystemLib::s_SerializableClass)) {
           raise_error("%s didn't implement Serializable", clsName.data());
         }
-        obj->o_invoke(s_unserialize, CREATE_VECTOR1(serialized), -1);
+        obj->o_invoke_few_args(s_unserialize, 1, serialized);
         obj.get()->clearNoDestruct();
       } catch (ClassNotFoundException &e) {
         if (!uns->allowUnknownSerializableClass()) {

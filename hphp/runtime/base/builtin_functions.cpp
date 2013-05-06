@@ -884,7 +884,7 @@ bool empty(CVarRef v, CVarRef offset) {
       return collectionOffsetEmpty(obj, offset);
     } else {
       if (!Variant::GetArrayAccess(tva)->
-          o_invoke(s_offsetExists, Array::Create(offset))) {
+          o_invoke_few_args(s_offsetExists, 1, offset)) {
         return true;
       }
       return empty(v.rvalAt(offset));
@@ -928,7 +928,7 @@ bool isset(CVarRef v, int64_t   offset) {
       return collectionOffsetIsset(obj, offset);
     } else {
       return Variant::GetArrayAccess(tva)->
-        o_invoke(s_offsetExists, Array::Create(offset), -1);
+        o_invoke_few_args(s_offsetExists, 1, offset);
     }
   }
   if (Variant::IsString(tva)) {
@@ -956,7 +956,7 @@ bool isset(CVarRef v, CVarRef offset) {
       return collectionOffsetIsset(obj, offset);
     } else {
       return Variant::GetArrayAccess(tva)->
-        o_invoke(s_offsetExists, Array::Create(offset), -1);
+        o_invoke_few_args(s_offsetExists, 1, offset);
     }
   }
   if (Variant::IsString(tva)) {

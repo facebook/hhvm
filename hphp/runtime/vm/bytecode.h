@@ -256,6 +256,10 @@ struct ActRec {
     };
   };
 
+  // Get the next outermost VM frame, but if this is
+  // a re-entry frame, return ar
+  ActRec* arGetSfp() const;
+
   // skip this frame if it is for a builtin function
   bool skipFrame() const;
 
@@ -286,6 +290,22 @@ struct ActRec {
 
   void setNumArgs(uint32_t numArgs) {
     initNumArgs(numArgs, isFromFPushCtor());
+  }
+
+  static void* encodeThis(ObjectData* obj, VM::Class* cls) {
+    if (obj) return obj;
+    if (cls) return (char*)cls + 1;
+  }
+
+  static void* encodeThis(ObjectData* obj) { return obj; }
+  static void* encodeClass(const VM::Class* cls) {
+    return cls ? (char*)cls + 1 : nullptr;
+  }
+  static ObjectData* decodeThis(void* p) {
+    return uintptr_t(p) & 1 ? nullptr : (ObjectData*)p;
+  }
+  static VM::Class* decodeClass(void* p) {
+    return uintptr_t(p) & 1 ? (VM::Class*)(uintptr_t(p)&~1LL) : nullptr;
   }
 
   /**
@@ -419,15 +439,20 @@ constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
 constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
 
 /*
- * We pad all stack overflow checks by a small amount to allow for two
+ * We pad all stack overflow checks by a small amount to allow for three
  * things:
  *
  *   - inlining functions without having to either do another stack
  *     check (or chase down prologues to smash checks to be bigger).
  *
  *   - omitting stack overflow checks on leaf functions
+ *
+ *   - delaying stack overflow checks on reentry
  */
-constexpr int kStackCheckPadding = 20;
+constexpr int kStackCheckLeafPadding = 20;
+constexpr int kStackCheckReenterPadding = 9;
+constexpr int kStackCheckPadding = kStackCheckLeafPadding +
+  kStackCheckReenterPadding;
 
 struct Fault {
   enum Type : int16_t {

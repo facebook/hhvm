@@ -163,7 +163,9 @@ Variant f_array_fill(int start_index, int num, CVarRef value) {
 static bool filter_func(CVarRef value, const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, *ctx, CREATE_VECTOR1(value));
+  TypedValue args[1];
+  tvDup(value.asTypedValue(), args + 0);
+  g_vmContext->invokeFuncFew((TypedValue*)&ret, *ctx, 1, args);
   return ret.toBoolean();
 }
 Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
@@ -459,8 +461,10 @@ Variant f_array_rand(CVarRef input, int num_req /* = 1 */) {
 static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, *ctx,
-                          CREATE_VECTOR2(result, operand));
+  TypedValue args[2];
+  tvDup(result.asTypedValue(), args + 0);
+  tvDup(operand.asTypedValue(), args + 1);
+  g_vmContext->invokeFuncFew((TypedValue*)&ret, *ctx, 2, args);
   return ret;
 }
 Variant f_array_reduce(CVarRef input, CVarRef callback,
@@ -565,8 +569,11 @@ static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
                       const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant sink;
-  g_vmContext->invokeFunc((TypedValue*)&sink, *ctx,
-                          CREATE_VECTOR3(ref(value), key, userdata));
+  TypedValue args[3];
+  tvDup(value->asTypedValue(), args + 0);
+  tvDup(key.asTypedValue(), args + 1);
+  tvDup(userdata.asTypedValue(), args + 2);
+  g_vmContext->invokeFuncFew((TypedValue*)&sink, *ctx, 3, args);
 }
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
                             CVarRef userdata /* = null_variant */) {
@@ -653,7 +660,7 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
     {
       Object obj = var.toObject();
       if (obj.instanceof(SystemLib::s_CountableClass)) {
-        return obj->o_invoke(s_count, null_array, -1);
+        return obj->o_invoke_few_args(s_count, 0);
       }
     }
     break;

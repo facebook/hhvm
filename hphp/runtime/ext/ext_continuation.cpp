@@ -122,7 +122,7 @@ void c_Continuation::t_next() {
 
 static StaticString s_next("next");
 void c_Continuation::t_rewind() {
-  this->o_invoke(s_next, Array());
+  this->o_invoke_few_args(s_next, 0);
 }
 
 bool c_Continuation::t_valid() {

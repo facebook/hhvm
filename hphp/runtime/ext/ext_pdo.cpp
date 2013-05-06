@@ -1833,7 +1833,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
       if (!stmt->fetch.constructor.empty() &&
           (flags & PDO_FETCH_PROPS_LATE)) {
         ret.asCObjRef().get()->o_invoke(stmt->fetch.constructor,
-                                        stmt->fetch.ctor_args, -1);
+                                        stmt->fetch.ctor_args);
         ret.asCObjRef().get()->clearNoDestruct();
       }
     }
@@ -1969,8 +1969,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
   case PDO_FETCH_CLASS:
     if (!stmt->fetch.constructor.empty() &&
         !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
-      ret.toObject()->o_invoke(stmt->fetch.constructor, stmt->fetch.ctor_args,
-                               -1);
+      ret.toObject()->o_invoke(stmt->fetch.constructor, stmt->fetch.ctor_args);
       ret.toObject()->clearNoDestruct();
     }
     if (flags & PDO_FETCH_CLASSTYPE) {

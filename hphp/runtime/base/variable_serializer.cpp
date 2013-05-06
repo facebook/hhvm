@@ -378,7 +378,7 @@ void VariableSerializer::write(CObjRef v) {
 
     if (v.instanceof(SystemLib::s_JsonSerializableClass)) {
       assert(!v->isCollection());
-      Variant ret = v->o_invoke(s_jsonSerialize, null_array, -1);
+      Variant ret = v->o_invoke_few_args(s_jsonSerialize, 0);
       // for non objects or when $this is returned
       if (!ret.isObject() || (ret.isObject() && !ret.same(v))) {
         write(ret);

@@ -113,7 +113,7 @@ void ArrayIter::objInit(ObjectData *obj) {
     }
     default: {
       assert(obj->instanceof(SystemLib::s_IteratorClass));
-      obj->o_invoke(s_rewind, Array());
+      obj->o_invoke_few_args(s_rewind, 0);
       break;
     }
   }
@@ -171,7 +171,7 @@ bool ArrayIter::endHelper() {
     }
     default: {
       ObjectData* obj = getIteratorObj();
-      return !obj->o_invoke(s_valid, Array());
+      return !obj->o_invoke_few_args(s_valid, 0);
     }
   }
 }
@@ -215,7 +215,7 @@ void ArrayIter::nextHelper() {
     }
     default:
       ObjectData* obj = getIteratorObj();
-      obj->o_invoke(s_next, Array());
+      obj->o_invoke_few_args(s_next, 0);
   }
 }
 
@@ -248,7 +248,7 @@ Variant ArrayIter::firstHelper() {
     }
     default: {
       ObjectData* obj = getIteratorObj();
-      return obj->o_invoke(s_key, Array());
+      return obj->o_invoke_few_args(s_key, 0);
     }
   }
 }
@@ -295,7 +295,7 @@ Variant ArrayIter::second() {
     }
     default: {
       ObjectData* obj = getIteratorObj();
-      return obj->o_invoke(s_current, Array());
+      return obj->o_invoke_few_args(s_current, 0);
     }
   }
 }
@@ -340,7 +340,7 @@ void ArrayIter::secondHelper(Variant& v) {
     }
     default: {
       ObjectData* obj = getIteratorObj();
-      v = obj->o_invoke(s_current, Array());
+      v = obj->o_invoke_few_args(s_current, 0);
       break;
     }
   }

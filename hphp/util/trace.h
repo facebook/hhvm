@@ -164,9 +164,10 @@ std::string prettyNode(const char* name, const P1& p1, const P2& p2) {
     string(")");
 }
 
-extern void traceRelease(const char*, ...);
+void traceRelease(const char*, ...);
+void traceRelease(const std::string& s);
 extern int levels[NumModules];
-extern const char* moduleName(Module mod);
+const char* moduleName(Module mod);
 static inline bool moduleEnabledRelease(Module tm, int level = 1) {
   return levels[tm] >= level;
 }
@@ -204,15 +205,15 @@ static const bool enabled = true;
 #define TRACE_SET_MOD(name)  \
   static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
-extern void trace(const char *, ...)
+void trace(const char *, ...)
   __attribute__((format(printf,1,2)));
-extern void trace(const std::string&);
+void trace(const std::string&);
 
 template<typename Pretty>
 static inline void trace(Pretty p) { trace(p.pretty() + std::string("\n")); }
 
-extern void vtrace(const char *fmt, va_list args);
-extern void dumpRingbuffer();
+void vtrace(const char *fmt, va_list args);
+void dumpRingbuffer();
 #else /* } (defined(DEBUG) || defined(USE_TRACE)) { */
 /*
  * Compile everything out of release builds. gcc is smart enough to

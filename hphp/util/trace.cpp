@@ -13,11 +13,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string>
 
 /*
  * Forcibly define USE_TRACE, so we get the debug trace.h interface included
@@ -28,6 +23,13 @@
 #  define USE_TRACE 1
 #endif
 #include "util/trace.h"
+
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <string>
+
 #include "util/ringbuffer.h"
 
 namespace HPHP {
@@ -139,6 +141,10 @@ void traceRelease(const char* fmt, ...) {
 
 void trace(const std::string& s) {
   trace("%s", s.c_str());
+}
+
+void traceRelease(const std::string& s) {
+  traceRelease("%s", s.c_str());
 }
 
 template<>

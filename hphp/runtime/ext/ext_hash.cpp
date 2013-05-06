@@ -51,6 +51,7 @@ public:
     HashEngines["md4"]        = HashEnginePtr(new hash_md4());
     HashEngines["md5"]        = HashEnginePtr(new hash_md5());
     HashEngines["sha1"]       = HashEnginePtr(new hash_sha1());
+    HashEngines["sha224"]     = HashEnginePtr(new hash_sha224());
     HashEngines["sha256"]     = HashEnginePtr(new hash_sha256());
     HashEngines["sha384"]     = HashEnginePtr(new hash_sha384());
     HashEngines["sha512"]     = HashEnginePtr(new hash_sha512());

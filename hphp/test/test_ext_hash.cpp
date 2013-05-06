@@ -55,12 +55,13 @@ bool TestExtHash::test_hash() {
     "50c51844b845b31323765ae334349dd6a94db3e5b9624540bcbfa940f6857c3f",
     "67b248ca0b750028e76f09f5f9b9b746f04c228ce659f75393c83ee46b82dea011f15f465a7e4f71",
     "802dc377bf6dc4f905b90cf2f1ddb39d4958526c3772bce41c03488701630eeede851f5ddc195714ea9e35311a513e31c3b616ffce5756bd963e0fdc092b2f87",
-    "9370512795923aaeeb76fe3d8ea7433e",
-    "9370512795923aaeeb76fe3d8ea7433e0697d65d",
-    "9370512795923aaeeb76fe3d8ea7433e0697d65d1d6b3975",
-    "623163ed5f7b8e35ca1c2c1beb083289",
-    "623163ed5f7b8e35ca1c2c1beb0832891ab00cc6",
-    "623163ed5f7b8e35ca1c2c1beb0832891ab00cc615ef6e6b",
+    "9370512795923aaeeb76fe3d8ea7433e", // tiger128,3-fb
+    "9370512795923aaeeb76fe3d8ea7433e", // tiger128,3
+    "ae3a9295275170933e43a78e3dfe76eb75396b1d", // tiger160,3
+    "ae3a9295275170933e43a78e3dfe76eb75396b1d5dd69706", // tiger192,3
+    "358e7b5fed633162893208eb1b2c1cca", // tiger128,4
+    "358e7b5fed633162893208eb1b2c1cca6b6eef15", // tiger160,4
+    "358e7b5fed633162893208eb1b2c1cca6b6eef15c60cb01a", // tiger192,4
     "1d4ca34cc860789a2a63fab87cd6a2c3ae5ecb1df8bd3cce605ffa2de1fbd73b",
     "c10eb0cb71a04377a0452a4aa64853996f73cac95f6ae434df8083d473fac944",
     "5e10f17b",
@@ -97,6 +98,7 @@ bool TestExtHash::test_hash() {
   VS(f_hash("ripemd256",  data), expected[i++]);
   VS(f_hash("ripemd320",  data), expected[i++]);
   VS(f_hash("whirlpool",  data), expected[i++]);
+  VS(f_hash("tiger128,3-fb", data), expected[i++]);
   VS(f_hash("tiger128,3", data), expected[i++]);
   VS(f_hash("tiger160,3", data), expected[i++]);
   VS(f_hash("tiger192,3", data), expected[i++]);

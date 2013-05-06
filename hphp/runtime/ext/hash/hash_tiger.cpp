@@ -39,9 +39,9 @@ typedef struct {
   unsigned char buffer[64];
 } PHP_TIGER_CTX;
 
-hash_tiger::hash_tiger(bool tiger3, int digest)
+hash_tiger::hash_tiger(bool tiger3, int digest, bool invert /*= false */)
   : HashEngine(digest / 8, 64, sizeof(PHP_TIGER_CTX)),
-    m_tiger3(tiger3), m_digest(digest) {
+    m_tiger3(tiger3), m_digest(digest), m_invert(invert) {
 }
 
 #define save_abc \
@@ -112,7 +112,7 @@ hash_tiger::hash_tiger(bool tiger3, int digest)
   x0=str[0]; x1=str[1]; x2=str[2]; x3=str[3];       \
   x4=str[4]; x5=str[5]; x6=str[6]; x7=str[7];
 #ifdef WORDS_BIGENDIAN
-#	define split(str)                       \
+# define split(str)                       \
   {                                             \
     int i;                                      \
     uint64_t tmp[8];                       \
@@ -123,7 +123,7 @@ hash_tiger::hash_tiger(bool tiger3, int digest)
     split_ex(tmp);                                                      \
   }
 #else
-#	define split split_ex
+# define split split_ex
 #endif
 
 #define tiger_compress(passes, str, state)                              \
@@ -228,34 +228,10 @@ void hash_tiger::hash_final(unsigned char *digest, void *context_) {
 
   TigerFinalize(context);
 
-  switch (m_digest) {
-  case 192:
-    digest[20] = (unsigned char) ((context->state[2] >> 24) & 0xff);
-    digest[21] = (unsigned char) ((context->state[2] >> 16) & 0xff);
-    digest[22] = (unsigned char) ((context->state[2] >> 8) & 0xff);
-    digest[23] = (unsigned char) (context->state[2] & 0xff);
-  case 160:
-    digest[16] = (unsigned char) ((context->state[2] >> 56) & 0xff);
-    digest[17] = (unsigned char) ((context->state[2] >> 48) & 0xff);
-    digest[18] = (unsigned char) ((context->state[2] >> 40) & 0xff);
-    digest[19] = (unsigned char) ((context->state[2] >> 32) & 0xff);
-  case 128:
-    digest[0] = (unsigned char) ((context->state[0] >> 56) & 0xff);
-    digest[1] = (unsigned char) ((context->state[0] >> 48) & 0xff);
-    digest[2] = (unsigned char) ((context->state[0] >> 40) & 0xff);
-    digest[3] = (unsigned char) ((context->state[0] >> 32) & 0xff);
-    digest[4] = (unsigned char) ((context->state[0] >> 24) & 0xff);
-    digest[5] = (unsigned char) ((context->state[0] >> 16) & 0xff);
-    digest[6] = (unsigned char) ((context->state[0] >> 8) & 0xff);
-    digest[7] = (unsigned char) (context->state[0] & 0xff);
-    digest[8] = (unsigned char) ((context->state[1] >> 56) & 0xff);
-    digest[9] = (unsigned char) ((context->state[1] >> 48) & 0xff);
-    digest[10] = (unsigned char) ((context->state[1] >> 40) & 0xff);
-    digest[11] = (unsigned char) ((context->state[1] >> 32) & 0xff);
-    digest[12] = (unsigned char) ((context->state[1] >> 24) & 0xff);
-    digest[13] = (unsigned char) ((context->state[1] >> 16) & 0xff);
-    digest[14] = (unsigned char) ((context->state[1] >> 8) & 0xff);
-    digest[15] = (unsigned char) (context->state[1] & 0xff);
+  for(int i = 0; i < (m_digest >> 3); ++i) {
+    digest[i] = (unsigned char) ((context->state[i >> 3] >>
+                                    ((m_invert ? (7 - i) : i) << 3))
+                                    & 0xff);
   }
 
   memset(context, 0, sizeof(*context));

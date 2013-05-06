@@ -25,7 +25,7 @@ namespace HPHP {
 
 class hash_tiger : public HashEngine {
 public:
-  hash_tiger(bool tiger3, int digest);
+  hash_tiger(bool tiger3, int digest, bool invert = false);
 
   virtual void hash_init(void *context);
   virtual void hash_update(void *context, const unsigned char *buf,
@@ -35,6 +35,10 @@ public:
 private:
   bool m_tiger3;
   int m_digest;
+
+  // Initial implementations of tiger had inverted byte ordering
+  // Allow for explicit use of this ordering for BC
+  bool m_invert;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
